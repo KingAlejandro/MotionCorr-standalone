@@ -1,39 +1,46 @@
-# MotionCorr test movies
+# RELION SPA tutorial data
 
-These are **synthetic** movies with known frame shifts. Download both `.mrcs`
-files from the [test-data-v1 release](https://github.com/KingAlejandro/MotionCorr-standalone/releases/tag/test-data-v1)
-into this directory, or generate them locally. The STAR files are kept here so
-each movie can be used with the standalone program or full RELION 5.1.
+The repository's test dataset is the **experimental beta-galactosidase movie
+subset used by the [RELION SPA tutorial](https://relion.readthedocs.io/en/latest/SPA_tutorial/Introduction.html)**.
+It contains 24 compressed TIFF movies and a gain reference. Download the
+movies from the [spa-tutorial-data-v1 release](https://github.com/KingAlejandro/MotionCorr-standalone/releases/tag/spa-tutorial-data-v1),
+or from the RELION team's original archive. The full acquisition is
+[EMPIAR-10204](https://www.ebi.ac.uk/empiar/EMPIAR-10204/). EMPIAR's public
+data are [CC0](https://www.ebi.ac.uk/empiar/policies/).
 
-| Movie | Frames and size | File size | SHA-256 |
-| --- | --- | ---: | --- |
-| `synthetic_movie.mrcs` | 16 × 512 × 512 | 16,778,240 bytes | `fcfe8ec3131dff92bd0f62b63499fcd5d4c2413d73ccc44b60f1effa91daab22` |
-| `large_movie.mrcs` | 32 × 1536 × 1536 | 301,990,912 bytes | `819837da89cd6655c2cd36e22f325ac6d55ceeb323e1ce092ab4609a8e3db429` |
-
-Download with GitHub CLI:
+Download the movies from this repository's release:
 
 ```sh
-gh release download test-data-v1 --repo KingAlejandro/MotionCorr-standalone \
-  --dir test-data --pattern '*.mrcs'
-shasum -a 256 test-data/*.mrcs
+mkdir -p relion30_tutorial/Movies
+gh release download spa-tutorial-data-v1 \
+  --repo KingAlejandro/MotionCorr-standalone \
+  --dir relion30_tutorial/Movies
+python3 test-data/prepare_movies_star.py relion30_tutorial
 ```
 
-Alternatively, run `python3 test-data/generate_small.py` and
-`python3 test-data/generate_large.py` with NumPy and SciPy installed. The
-published assets were generated with NumPy 2.4.2 and SciPy 1.17.1; verify the
-checksums when recreating them with another version.
-
-Run the large comparison case from this directory:
+Alternatively, fetch the original tutorial archive:
 
 ```sh
-../build/motioncorr --i large_movie.star --o large_output --use_own --j 4 \
-  --patch_x 3 --patch_y 3 --dose_weighting --dose_per_frame 1.2
+curl --fail --location --output relion30_tutorial_data.tar \
+  ftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion30_tutorial_data.tar
+tar -xf relion30_tutorial_data.tar
+python3 test-data/prepare_movies_star.py relion30_tutorial
 ```
 
-For a full RELION 5.1 comparison, use the same options with its
-`relion_run_motioncorr` executable and a different output directory. In the
-September 2026 macOS run, both implementations produced identical corrected
-image pixels and motion STAR files. The measured shifts were within 0.0133
-pixels of the known integer shifts (coordinate RMS 0.0046 pixels). MRC headers
-record their separate run times, so whole-file hashes differ. The data do not
-establish performance on experimental cryo-EM movies.
+The archive is about 3.25 GB, so keep several GB of free disk space. The
+preparation script writes `relion30_tutorial/movies.star` with the tutorial's
+optics settings. Use `--limit 1` to prepare a single-movie comparison first.
+
+From the extracted `relion30_tutorial` directory, run:
+
+```sh
+../build/motioncorr --i movies.star --o MotionCorr --use_own --j 4 \
+  --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 \
+  --bfactor 150 --gainref Movies/gain.mrc
+```
+
+Adjust the executable path for your checkout. For parity, run RELION 5.1's
+`relion_run_motioncorr` with the same input and options, using another output
+directory. Compare the corrected image pixels and motion STAR files. The
+published synthetic comparisons are described in the main README; this
+experimental dataset is the next validation case.

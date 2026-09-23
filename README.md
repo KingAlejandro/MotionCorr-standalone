@@ -33,9 +33,9 @@ You can also supply a movie file or quoted file wildcard directly when `--angpix
 
 ## Status
 
-Two synthetic test movies, their STAR files, generation scripts, and checksums
-are described in [test-data/README.md](test-data/README.md). The movie files
-are attached to the `test-data-v1` GitHub release.
+The experimental [RELION SPA tutorial movie dataset](test-data/README.md) is
+the project's shared test dataset. Its source and preparation instructions are
+kept in `test-data/`.
 
 The standalone and a CPU-only build of full RELION from the exact upstream commit were run on the same inputs on macOS:
 

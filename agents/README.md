@@ -49,7 +49,12 @@ flowchart LR
    - **Function**: Discovers pull requests on the GitHub repository, performs deep audits on specific PR diffs, and synthesizes multi-agent quality gates into actionable merge recommendations.
    - **Output**: Generates PR analysis reports (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
 
-7. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+7. **Cleanup & Repository Hygiene Agent (`agents/cleanup_agent/`)**:
+   - **Role**: Repository cleanliness and ephemeral artifact purger.
+   - **Function**: Scans for obsolete PR reviews, intermediate dialectic drafts, stale logs, temporary patches, and Python caches, offering dry-run previews and safe deletion while preserving core source and test baselines.
+   - **Output**: Generates repository hygiene reports (`CLEANUP_COMPLETED`, `PENDING_CONFIRMATION`, `NOTHING_TO_CLEAN`).
+
+8. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Role**: Meta-reviewer for agent ecosystem integrity.
    - **Rule**: Inspects all peer agents in `agents/` while strictly excluding its own files.
    - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
@@ -95,6 +100,12 @@ agents/
 │   │   └── PR_ANALYSIS_REPORT_TEMPLATE.md # Standardized PR audit report template
 │   └── scripts/
 │       └── analyze_pr.py          # PR discovery and deep quality analysis CLI
+├── cleanup_agent/                 # Cleanup & Repository Hygiene Agent
+│   ├── SYSTEM_PROMPT.md           # Safe artifact removal and protection rules
+│   ├── templates/
+│   │   └── CLEANUP_REPORT_TEMPLATE.md # Standardized cleanup report template
+│   └── scripts/
+│       └── cleanup_repo.py        # Safe scanning and artifact deletion CLI
 └── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
     ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/
@@ -138,7 +149,16 @@ python agents/pr_analysis_agent/scripts/analyze_pr.py --list
 python agents/pr_analysis_agent/scripts/analyze_pr.py --pr 1
 ```
 
-### 5. Auditing the Multi-Agent Ecosystem
+### 5. Cleaning Up Ephemeral Reviews, Drafts & Artifacts
+```bash
+# Preview cleanable files in safe dry-run mode
+python agents/cleanup_agent/scripts/cleanup_repo.py
+
+# Execute cleanup (remove ephemeral reviews, drafts, and caches)
+python agents/cleanup_agent/scripts/cleanup_repo.py --apply
+```
+
+### 6. Auditing the Multi-Agent Ecosystem
 ```bash
 # Audit all peer agents (excluding agent_auditor) for script, prompt, and template integrity
 python agents/agent_auditor/scripts/audit_agents.py

@@ -100,7 +100,7 @@ def run_pr_diff_audit(diff_text: str, changed_files: List[Dict[str, Any]]) -> Li
             })
 
         # 4. Hardcoded local paths
-        if re.search(r"(?:[A-Za-z]:\\[\w\\]+|/(?:home|Users)/\w+)", added_code):
+        if re.search(r"(?:(?<!\w)[A-Za-z]:[\\/](?:[a-zA-Z0-9_.-]+[\\/])+|/(?:home|Users)/\w+)", added_code):
             findings.append({
                 "severity": "CRITICAL",
                 "category": "PORTABILITY",

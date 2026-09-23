@@ -39,7 +39,12 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Deliverable**: Actionable PR reports with quality gate matrices and merge readiness verdicts (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
    - **System Prompt**: [`agents/pr_analysis_agent/SYSTEM_PROMPT.md`](agents/pr_analysis_agent/SYSTEM_PROMPT.md)
 
-7. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+7. **Cleanup & Repository Hygiene Agent (`agents/cleanup_agent/`)**:
+   - **Mandate**: Safely scans and purges ephemeral review dumps, intermediate dialectic drafts, stale logs, and cache files while strictly protecting core source code and baselines.
+   - **Deliverable**: Structured hygiene reports with dry-run previews and execution confirmations (`DRY_RUN` / `APPLIED`).
+   - **System Prompt**: [`agents/cleanup_agent/SYSTEM_PROMPT.md`](agents/cleanup_agent/SYSTEM_PROMPT.md)
+
+8. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
    - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
    - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
@@ -74,6 +79,7 @@ flowchart TD
 
 ## 3. Tooling & Skills Reference
 
+- **Repository Hygiene & Artifact Cleanup**: `python agents/cleanup_agent/scripts/cleanup_repo.py [--apply]`
 - **Pull Request Quality & Defect Audit**: `python agents/pr_analysis_agent/scripts/analyze_pr.py --pr <NUM>`
 - **GitHub PR Discovery & Fetching**: `python skills/github-pr-query/scripts/query_prs.py --state open`
 - **Open Source License & Compliance Audit**: `python agents/license_compliance_agent/scripts/audit_licenses.py`

@@ -84,15 +84,34 @@ def refine_draft_with_feedback(
             "- No unwhitelisted modifications to global headers, build macros, or public CLI signatures are permitted.\n\n"
         )
 
-    # 2. Patch numerical measurability if requested
+    # 2. Patch numerical measurability if requested, adapting to issue track
     if has_measurability_sug and "acceptance gates & numerical tolerances" not in prev_content.lower():
-        additions.append(
-            "### Acceptance Gates & Numerical Tolerances\n"
-            "Quantitative pass/fail thresholds enforced before merge:\n"
-            "- **Tier 0 Parity Gate**: Exact bitwise parity (delta = 0) against single-thread CPU reference.\n"
-            "- **Trajectory RMSE Gate**: Trajectory root-mean-square error < 1e-5 pixels across all movie frames.\n"
-            "- **Pixel Intensity Gate**: Relative L2 norm < 1e-6 between corrected sums.\n\n"
-        )
+        track_match = re.search(r"-\s*\*\*Track\*\*:\s*`?([^`\n]+)`?", prev_content, re.IGNORECASE)
+        track_str = track_match.group(1).lower() if track_match else ""
+        if "gpu" in track_str or "cuda" in track_str or "jax" in track_str:
+            additions.append(
+                "### Acceptance Gates & Numerical Tolerances (Tier 2 GPU/Accelerator)\n"
+                "Quantitative pass/fail thresholds enforced before merge:\n"
+                "- **Tier 2 Parity Gate**: Accelerated float32/device implementation vs single-thread reference.\n"
+                "- **Trajectory RMSE Gate**: Trajectory root-mean-square error < 0.05 px across all movie frames.\n"
+                "- **Pixel Intensity Gate**: Max pixel difference < 1e-4 and relative L2 norm < 1e-5 between corrected sums.\n\n"
+            )
+        elif "thread" in track_str or "openmp" in track_str or "concurrency" in track_str:
+            additions.append(
+                "### Acceptance Gates & Numerical Tolerances (Tier 1 Multi-Threaded Concurrency)\n"
+                "Quantitative pass/fail thresholds enforced before merge:\n"
+                "- **Tier 1 Parity Gate**: Multi-threaded execution variance vs 1-thread reference.\n"
+                "- **Trajectory RMSE Gate**: Trajectory root-mean-square error < 1e-4 px across 4-thread runs.\n"
+                "- **Pixel Intensity Gate**: Max pixel difference < 1e-5 between runs.\n\n"
+            )
+        else:
+            additions.append(
+                "### Acceptance Gates & Numerical Tolerances (Tier 0 Bit-Exact Single-Thread)\n"
+                "Quantitative pass/fail thresholds enforced before merge:\n"
+                "- **Tier 0 Parity Gate**: Exact bitwise parity (delta = 0) against single-thread CPU reference.\n"
+                "- **Trajectory RMSE Gate**: Trajectory root-mean-square error < 1e-5 pixels across all movie frames.\n"
+                "- **Pixel Intensity Gate**: Relative L2 norm < 1e-6 between corrected sums.\n\n"
+            )
 
     # 3. Patch edge cases if requested
     if has_edge_case_sug and "edge cases & failure mode specifications" not in prev_content.lower():

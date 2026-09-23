@@ -96,7 +96,7 @@ def parse_time_v_output(output: str) -> Dict[str, Any]:
 def parse_stage_times(output: str) -> Dict[str, Dict[str, float]]:
     """Parse MotionCorr Timer::printTimes() output."""
     stage_times: Dict[str, Dict[str, float]] = {}
-    pattern = re.compile(r"^([A-Za-z0-9_ -()]+?)\s*:\s*([0-9.]+)\s*sec\s*\(([0-9.]+)\s*microsec/operation\)", re.MULTILINE)
+    pattern = re.compile(r"^([A-Za-z0-9_\s\-()]+?)\s*:\s*([0-9.]+)\s*sec\s*\(([0-9.]+)\s*microsec/operation\)", re.MULTILINE)
     for match in pattern.finditer(output):
         tag = match.group(1).strip()
         sec = float(match.group(2))
@@ -165,7 +165,7 @@ def calc_stats(values: List[float]) -> Dict[str, float]:
         return {"mean": 0.0, "std": 0.0, "min": 0.0, "max": 0.0, "cv_pct": 0.0}
     n = len(values)
     mean_val = sum(values) / n
-    variance = sum((x - mean_val) ** 2 for x in values) / n if n > 1 else 0.0
+    variance = sum((x - mean_val) ** 2 for x in values) / (n - 1) if n > 1 else 0.0
     std_val = math.sqrt(variance)
     cv_pct = (std_val / mean_val * 100.0) if mean_val > 1e-9 else 0.0
     return {
@@ -385,6 +385,8 @@ def main():
                 # If no baseline reference dir exists for this case (e.g. global-only),
                 # compare rep 2+ against rep 1 to verify determinism!
                 if ref_target and ref_target.exists():
+                    gate_eval["reference_type"] = "independent_reference"
+                    gate_eval["gate_profile"] = cfg["gate"]
                     comp_cmd = [
                         python_for_compare, str(compare_script),
                         "--ref", str(ref_target),
@@ -392,21 +394,28 @@ def main():
                         "--gate", cfg["gate"],
                     ]
                 elif rep > 1 and first_rep_dir and first_rep_dir.exists():
+                    gate_profile = "exact" if cfg["threads"] == 1 else "relaxed"
+                    gate_eval["reference_type"] = "self_consistency_rep1"
+                    gate_eval["gate_profile"] = gate_profile
                     comp_cmd = [
                         python_for_compare, str(compare_script),
                         "--ref", str(first_rep_dir),
                         "--test", str(out_dir),
-                        "--gate", "exact" if cfg["threads"] == 1 else "relaxed",
+                        "--gate", gate_profile,
                     ]
                 else:
                     comp_cmd = []
+                    gate_eval["reference_type"] = "self_consistency_baseline"
+                    gate_eval["gate_profile"] = None
+                    gate_eval["status"] = "unverified_baseline"
+                    gate_eval["note"] = "Repetition 1 established as baseline for multi-run self-consistency; no independent external reference specified."
 
                 if comp_cmd:
                     cproc = subprocess.run(comp_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                     gate_eval["passed"] = (cproc.returncode == 0)
                     gate_eval["stdout_snippet"] = cproc.stdout[-500:] if cproc.stdout else cproc.stderr[-500:]
                 else:
-                    gate_eval["passed"] = (proc.returncode == 0 and out_mrc.exists())
+                    gate_eval["passed"] = None  # Not verified against independent reference
 
             if rep == 1:
                 first_rep_dir = out_dir

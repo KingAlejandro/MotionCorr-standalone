@@ -63,14 +63,17 @@ Each case was executed for 3 full repetitions under GNU `/usr/bin/time -v`. Metr
 
 | Case ID | Configuration Description | Threads | Wall Clock (s) | User CPU (s) | System CPU (s) | Peak RSS (GiB) | Acceptance Gate |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `global_j1` | Global-only (`-px 1 -py 1`) | 1 | **$54.28 \pm 0.66$** | $48.78 \pm 0.56$ | $5.50 \pm 0.11$ | **$2.73 \pm 0.00$** | **PASS** (exact) |
-| `global_j4` | Global-only (`-px 1 -py 1`) | 4 | **$24.23 \pm 0.19$** | $79.10 \pm 8.30$ | $6.97 \pm 0.56$ | **$2.89 \pm 0.00$** | **PASS** (relaxed) |
-| `patch5x5_j1`| $5 \times 5$ Patch (`-px 5 -py 5`)| 1 | **$66.36 \pm 0.15$** | $60.44 \pm 0.11$ | $5.90 \pm 0.05$ | **$2.73 \pm 0.00$** | **PASS** (exact) |
-| `patch5x5_j4`| $5 \times 5$ Patch (`-px 5 -py 5`)| 4 | **$29.71 \pm 0.19$** | $98.89 \pm 9.52$ | $8.05 \pm 0.54$ | **$2.95 \pm 0.00$** | **PASS** (relaxed) |
+| `global_j1` | Global-only (`-px 1 -py 1`) | 1 | **$54.28 \pm 0.81$** | $48.78 \pm 0.69$ | $5.49 \pm 0.12$ | **$2.73 \pm 0.00$** | **PASS** (exact; self-consistent) |
+| `global_j4` | Global-only (`-px 1 -py 1`) | 4 | **$24.23 \pm 0.23$** | $79.10 \pm 10.16$ | $7.88 \pm 0.71$ | **$2.89 \pm 0.00$** | **FAIL** (image rel RMSE $0.38\% > 0.1\%$; trajectory PASS) |
+| `patch5x5_j1`| $5 \times 5$ Patch (`-px 5 -py 5`)| 1 | **$66.36 \pm 0.19$** | $60.44 \pm 0.13$ | $5.90 \pm 0.08$ | **$2.73 \pm 0.00$** | **PASS** (exact vs RELION reference) |
+| `patch5x5_j4`| $5 \times 5$ Patch (`-px 5 -py 5`)| 4 | **$29.71 \pm 0.24$** | $98.89 \pm 11.65$ | $8.63 \pm 0.71$ | **$2.95 \pm 0.00$** | **FAIL** (image rel RMSE $0.47\% > 0.1\%$; trajectory PASS) |
 
 ### Key Observations:
-- **Measurement Stability**: Run-to-run wall clock variation was exceptionally low: standard deviation was $\le 0.19\text{ s}$ for multi-threaded runs and $\le 0.66\text{ s}$ for single-threaded runs ($\text{CV} < 1.2\%$).
+- **Measurement Stability**: Run-to-run wall clock variation was exceptionally low: sample standard deviation was $\le 0.24\text{ s}$ for multi-threaded runs and $\le 0.81\text{ s}$ for single-threaded runs ($\text{CV} < 1.5\%$).
 - **Bitwise Determinism**: Single-threaded runs (`global_j1` and `patch5x5_j1`) achieved **100% bit-identical STAR trajectories** across all repetitions (`3db4a9c2...` for patch, `507c50c8...` for global) and passed the exact numerical gate (`Coordinate RMS = 0.000000 px`, `Pixel RMSE = 0.000000e+00`).
+- **Acceptance Gate Audit & Numerical Tolerances**:
+  - In multi-threaded runs (`-j 4`), motion trajectories pass comfortably: coordinate RMS shift error is $\le 0.001\text{ px}$ (well below the relaxed $\le 0.02\text{ px}$ gate) and STAR loop rows match identically.
+  - However, multi-threaded pixel payloads exhibit a relative image RMSE of $\sim 0.38\%\text{--}0.47\%$ against the single-threaded baseline, exceeding the strict $0.1\%$ ($1.0 \times 10^{-3}$) threshold configured in `compare_motioncorr.py`. Consequently, `compare_motioncorr.py` reports `FAIL` for these runs. This variation stems from non-associative OpenMP reductions and unconstrained FFTW threading.
 - **Peak RSS**: Remained invariant across repetitions for each case ($2864700\text{ KB} = 2.73\text{ GiB}$ for single-thread, $3089420\text{ KB} = 2.95\text{ GiB}$ for 4-thread).
 
 ---

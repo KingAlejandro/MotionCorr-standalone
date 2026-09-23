@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """
 License & Open Source Compliance Auditor
 Scans Python modules, external dependencies, and repository source code to ensure
-all software is certified Open Source, identifies license terms, and flags any
-proprietary, non-commercial, or unlicensed files.
+all software is certified Open Source, identifies license terms, and flags unapproved
+or non-permissive license terms.
 """
 
 import argparse
@@ -163,7 +164,13 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
         return {}
 
     head_lines = text.splitlines()[:60]
-    header_text = "\n".join(head_lines)
+    comment_lines = []
+    for line in head_lines:
+        line_s = line.strip()
+        if line_s.startswith(("#", "//", "/*", "*", '"""', "'''")) or "copyright" in line_s.lower() or "license" in line_s.lower():
+            if not ("{" in line_s and ":" in line_s):  # Avoid dict definitions
+                comment_lines.append(line_s)
+    header_text = "\n".join(comment_lines) if comment_lines else "\n".join(head_lines[:15])
 
     copyright_match = re.search(r"(?:copyright|©|\(c\))\s+([^\n\r]+)", header_text, re.IGNORECASE)
     copyright_holder = copyright_match.group(0).strip("/*# \t") if copyright_match else "Unspecified"
@@ -176,6 +183,8 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
     # Check for open source grants
     has_gpl = bool(re.search(r"GNU General Public License", header_text, re.IGNORECASE))
     has_lgpl = bool(re.search(r"GNU Lesser General Public License", header_text, re.IGNORECASE))
+    is_v3 = bool(re.search(r"version 3\b|v3\.0\b|gpl-3|gplv3", header_text, re.IGNORECASE))
+    is_or_later = bool(re.search(r"(?:any later version|or later|\+)", header_text, re.IGNORECASE))
     has_mit = bool(re.search(r"MIT License|Permission is hereby granted, free of charge", header_text, re.IGNORECASE))
     has_bsd = bool(re.search(r"Redistribution and use in source and binary forms", header_text, re.IGNORECASE))
     has_apache = bool(re.search(r"Apache License", header_text, re.IGNORECASE))
@@ -186,11 +195,16 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
     flag_reason = None
 
     if has_gpl:
-        license_type = "GPL-2.0 or later"
-        compliance_status = "APPROVED"
+        if is_v3:
+            license_type = "GPL-3.0-only" if not is_or_later else "GPL-3.0 or later"
+            compliance_status = "VIOLATION"
+            flag_reason = f"{license_type} detected in source code. Incompatible with repository's GPL-2.0 codebase."
+        else:
+            license_type = "GPL-2.0 or later" if is_or_later else "GPL-2.0"
+            compliance_status = "APPROVED"
     elif has_lgpl:
-        license_type = "LGPL"
-        compliance_status = "APPROVED"
+        license_type = "LGPL-3.0" if is_v3 else "LGPL-2.1 or later"
+        compliance_status = "WARNING" if is_v3 else "APPROVED"
     elif has_mit or has_bsd:
         license_type = "Permissive (MIT/BSD)"
         compliance_status = "APPROVED"

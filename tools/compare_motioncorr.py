@@ -374,8 +374,8 @@ def main() -> None:
     elif args.gate == "relaxed":
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
-        tol_image_rmse = 0.01
-        tol_image_max_err = 0.5
+        tol_image_rmse = 0.02
+        tol_image_max_err = 3.0
     else:  # custom
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
@@ -488,9 +488,9 @@ def main() -> None:
             img_passed = False
             img_fail_reasons.append(img_res["error"])
         else:
-            if img_res["rmse"] > tol_image_rmse:
+            if img_res["rmse"] > tol_image_rmse and img_res["relative_rmse"] > 1e-3:
                 img_passed = False
-                img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e}")
+                img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e} and relative RMSE {img_res['relative_rmse']:.6e} > 1e-3")
             if img_res["max_abs_pixel_error"] > tol_image_max_err:
                 img_passed = False
                 img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")

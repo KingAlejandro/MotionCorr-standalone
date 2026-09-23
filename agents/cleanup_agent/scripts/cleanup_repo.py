@@ -64,11 +64,42 @@ def is_protected(path: Path, repo_root: Path) -> bool:
     if "templates" in rel.parts:
         return True
 
-    # Protect finalized designs
-    if "designs" in rel.parts and rel.parent.name == "designs" and path.name.endswith("_design.md"):
+    # Protect finalized designs in agents/designs/ (excluding drafts/ and logs/)
+    if "designs" in rel.parts and rel.parent.name == "designs" and path.suffix == ".md":
         return True
 
     return False
+
+
+def is_cleanable_artifact(path: Path, repo_root: Path) -> Tuple[bool, str]:
+    """Check if a file belongs to a declared cleanable ephemeral category."""
+    if is_protected(path, repo_root):
+        return False, ""
+    try:
+        rel = path.relative_to(repo_root)
+    except ValueError:
+        return False, ""
+
+    # 1. Python bytecode cache
+    if "__pycache__" in rel.parts or path.suffix in (".pyc", ".pyo"):
+        return True, "Python Bytecode Cache"
+    # 2. Ephemeral reviews
+    if len(rel.parts) >= 3 and rel.parts[0] == "agents" and rel.parts[1] == "reviews":
+        return True, "Ephemeral Reviews"
+    # 3. Intermediate drafts
+    if len(rel.parts) >= 4 and rel.parts[0] == "agents" and rel.parts[1] == "designs" and rel.parts[2] == "drafts":
+        return True, "Intermediate Dialectic Draft"
+    # 4. Refinement logs
+    if len(rel.parts) >= 4 and rel.parts[0] == "agents" and rel.parts[1] == "designs" and rel.parts[2] == "logs":
+        return True, "Refinement Log"
+    # 5. Temporary patches & diffs & dumps
+    if path.suffix in (".patch", ".diff", ".tmp", ".bak") or path.name.startswith("temp_"):
+        return True, "Temporary Patch / Dump"
+    # 6. Ephemeral scratch / report dumps
+    if "scratch" in rel.parts or path.name in ("pr_comments.md", "issues_dump.json"):
+        return True, "Ephemeral Report / Scratch File"
+
+    return False, ""
 
 
 def scan_cleanable_files(
@@ -84,21 +115,31 @@ def scan_cleanable_files(
 
     if target_path:
         t = Path(target_path).resolve()
-        if t.exists() and not is_protected(t, repo_root):
+        if t.exists():
             if t.is_file():
-                cleanable.append({
-                    "category": "Targeted File",
-                    "path": t,
-                    "size": t.stat().st_size
-                })
+                is_clean, cat = is_cleanable_artifact(t, repo_root)
+                if is_clean:
+                    cleanable.append({
+                        "category": f"Targeted File ({cat})",
+                        "path": t,
+                        "size": t.stat().st_size
+                    })
+                elif not is_protected(t, repo_root) and t.suffix in (".tmp", ".bak", ".log", ".pyc"):
+                    cleanable.append({
+                        "category": "Targeted Ephemeral File",
+                        "path": t,
+                        "size": t.stat().st_size
+                    })
             elif t.is_dir():
                 for f in t.rglob("*"):
-                    if f.is_file() and not is_protected(f, repo_root):
-                        cleanable.append({
-                            "category": "Targeted Directory",
-                            "path": f,
-                            "size": f.stat().st_size
-                        })
+                    if f.is_file():
+                        is_clean, cat = is_cleanable_artifact(f, repo_root)
+                        if is_clean:
+                            cleanable.append({
+                                "category": f"Targeted Directory ({cat})",
+                                "path": f,
+                                "size": f.stat().st_size
+                            })
         return cleanable
 
     # 1. Ephemeral reviews

@@ -34,6 +34,12 @@ flowchart LR
    - **Checks**: Numerical parity risks, OpenMP non-determinism, heap allocation in hot loops, and portability.
    - **Output**: Reports explicit verdict (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`) with itemized findings and remediation guidance.
 
+4. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+   - **Role**: Meta-reviewer for agent ecosystem integrity.
+   - **Rule**: Inspects all peer agents in `agents/` while strictly excluding its own files.
+   - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
+   - **Output**: Generates ecosystem health reports (`HEALTHY`, `NEEDS_ATTENTION`, `DEGRADED`).
+
 ---
 
 ## Directory Structure
@@ -49,12 +55,18 @@ agents/
 │   └── scripts/
 │       ├── design_issue.py        # CLI helper to scaffold designs
 │       └── generate_architecture.py # Autonomous architecture generator (LLM / synthesis)
-└── review_agent/                  # Memoryless Review & Verification Agent
-    ├── SYSTEM_PROMPT.md           # Read-only review persona and verification rules
+├── review_agent/                  # Memoryless Review & Verification Agent
+│   ├── SYSTEM_PROMPT.md           # Read-only review persona and verification rules
+│   ├── templates/
+│   │   └── REVIEW_REPORT_TEMPLATE.md # Standardized review report template
+│   └── scripts/
+│       └── review_code.py         # Stateless CLI review engine
+└── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
+    ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/
-    │   └── REVIEW_REPORT_TEMPLATE.md # Standardized review report template
+    │   └── AUDIT_REPORT_TEMPLATE.md  # Standardized audit report template
     └── scripts/
-        └── review_code.py         # Stateless CLI review engine
+        └── audit_agents.py        # Automated peer agent audit engine
 ```
 
 ---
@@ -77,4 +89,10 @@ python agents/review_agent/scripts/review_code.py --staged
 
 # Review a specific commit range or PR branch
 python agents/review_agent/scripts/review_code.py --target origin/main...HEAD
+```
+
+### 3. Auditing the Multi-Agent Ecosystem
+```bash
+# Audit all peer agents (excluding agent_auditor) for script, prompt, and template integrity
+python agents/agent_auditor/scripts/audit_agents.py
 ```

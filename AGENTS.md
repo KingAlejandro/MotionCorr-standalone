@@ -23,6 +23,11 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Key Focus**: Detects numerical parity regressions, OpenMP non-determinism, heap allocations in hot loops, and portability faults.
    - **System Prompt**: [`agents/review_agent/SYSTEM_PROMPT.md`](agents/review_agent/SYSTEM_PROMPT.md)
 
+4. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+   - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
+   - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
+   - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
+
 ---
 
 ## 2. Standard Issue Lifecycle
@@ -44,6 +49,7 @@ flowchart LR
 
 ## 3. Tooling & Skills Reference
 
+- **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
 - **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
 - **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`
 - **Automated AI Commits**: `python skills/ai-git-commit/scripts/ai_commit.py`

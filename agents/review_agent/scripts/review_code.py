@@ -233,16 +233,16 @@ def generate_heuristic_report(diff_stat: str, target_desc: str, findings: List[D
         parity_status = "PASS WITH WARNINGS"
         parity_notes = "Verify against single-thread baseline tests."
     else:
-        verdict = "READY_TO_MERGE"
-        exec_summary = "The proposed changes are clean, modular, and adhere to all memory discipline, concurrency, and portability guidelines. Code is ready to merge."
-        parity_status = "PASSED"
-        parity_notes = "No scientific drift or numerical regressions detected."
+        verdict = "HEURISTIC_PASS"
+        exec_summary = "Static heuristic analysis detected no anti-patterns. Dynamic test execution, compilation, and numerical parity comparator must be run to complete verification."
+        parity_status = "NOT_EVALUATED"
+        parity_notes = "Static heuristics clean. Numerical test suite must be executed separately for parity verification."
 
-    thread_status = "NEEDS ATTENTION" if any("OpenMP" in f["title"] for f in findings) else "PASSED"
-    thread_notes = "Floating-point reduction ordering must be verified" if thread_status != "PASSED" else "No concurrency race conditions detected"
+    thread_status = "NEEDS ATTENTION" if any("OpenMP" in f["title"] for f in findings) else "HEURISTIC_PASS"
+    thread_notes = "Floating-point reduction ordering must be verified" if thread_status != "HEURISTIC_PASS" else "No static OpenMP anti-patterns detected; runtime concurrency test required"
 
-    memory_status = "NEEDS ATTENTION" if any("allocation" in f["title"].lower() for f in findings) else "PASSED"
-    memory_notes = "Review dynamic allocations in processing loops" if memory_status != "PASSED" else "Zero hot-loop allocations preserved"
+    memory_status = "NEEDS ATTENTION" if any("allocation" in f["title"].lower() for f in findings) else "HEURISTIC_PASS"
+    memory_notes = "Review dynamic allocations in processing loops" if memory_status != "HEURISTIC_PASS" else "No static heap allocations detected in hot loops"
 
     findings_text = ""
     if findings:
@@ -253,7 +253,7 @@ def generate_heuristic_report(diff_stat: str, target_desc: str, findings: List[D
             findings_text += f"- **Scientific / Systemic Impact**: {f['impact']}\n"
             findings_text += f"- **Recommended Remediation**: {f['remediation']}\n\n"
     else:
-        findings_text = "> **No faults or blockers detected.** The inspected diff complies with all numerical parity, concurrency, and memory budget constraints.\n"
+        findings_text = "> **No static pattern faults detected.** Only static regex heuristics were evaluated; automated test execution is required for numerical parity certification.\n"
 
     report = f"""# Code Review Report: {target_desc}
 
@@ -302,6 +302,8 @@ def generate_heuristic_report(diff_stat: str, target_desc: str, findings: List[D
 """
     if verdict == "READY_TO_MERGE":
         report += "All acceptance gates have passed. The changes may be safely merged into the target branch.\n"
+    elif verdict == "HEURISTIC_PASS":
+        report += "Static heuristics clean. Run test suite and numerical parity comparator before final merge.\n"
     elif verdict == "CHANGES_REQUESTED":
         report += "Please address the warnings listed in Section 4 before proceeding with the final merge.\n"
     else:

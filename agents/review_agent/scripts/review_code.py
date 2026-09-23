@@ -325,6 +325,7 @@ def main():
     parser.add_argument("--target", help="Git revision or range to review (e.g., HEAD~1, origin/main...HEAD)")
     parser.add_argument("--staged", action="store_true", help="Review staged changes only")
     parser.add_argument("--output", help="Optional markdown file path to save the review report")
+    parser.add_argument("--fail-on-changes", "--strict", action="store_true", help="Exit with non-zero code if changes are requested or faults are detected")
 
     args = parser.parse_args()
     repo_root = find_repo_root()
@@ -370,6 +371,14 @@ def main():
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(report_text, encoding="utf-8")
         print(f"[Review Agent] Report saved to: {out_path}")
+
+    # Determine exit code
+    if "BLOCKED_BY_FAULT" in report_text:
+        sys.stderr.write("\n[Review Agent] Review failed: BLOCKED_BY_FAULT detected.\n")
+        sys.exit(2)
+    elif args.fail_on_changes and "CHANGES_REQUESTED" in report_text:
+        sys.stderr.write("\n[Review Agent] Review failed: CHANGES_REQUESTED under --fail-on-changes.\n")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

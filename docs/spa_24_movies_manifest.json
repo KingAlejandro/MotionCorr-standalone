@@ -1,0 +1,789 @@
+{
+  "metadata": {
+    "title": "RELION SPA Tutorial 24-Movie Parity & Scaling Benchmark",
+    "issue": "https://github.com/KingAlejandro/MotionCorr-standalone/issues/6",
+    "created_at": "2026-09-23T15:58:49.321123+00:00",
+    "system_info": {
+      "hostname": "4-gpu-vm",
+      "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python_version": "3.12.3",
+      "date": "2026-09-23T15:58:49.321123+00:00",
+      "standalone_commit": "78b546ca36661870a04211441efcbe7c20fba280",
+      "relion_comparator_commit": "ad0b230ca22095700f6392479326836efb1c911d",
+      "compiler": "GCC 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04)",
+      "hardware": "AMD EPYC 7452 32-Core Processor (124 vCPUs allocated), 432 GiB RAM"
+    },
+    "commands": {
+      "relion51_j1": "/home/alex/relion-ad0b230c/build/bin/relion_run_motioncorr --i movies.star --o MotionCorr_full24_relion51_j1 --use_own --j 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc",
+      "standalone_j1": "/home/alex/MotionCorr-standalone/build/motioncorr --i movies.star --o MotionCorr_full24_standalone_j1 --use_own --j 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc",
+      "standalone_j4": "/home/alex/MotionCorr-standalone/build/motioncorr --i movies.star --o MotionCorr_full24_standalone_j4 --use_own --j 4 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc",
+      "relion51_j4": "/home/alex/relion-ad0b230c/build/bin/relion_run_motioncorr --i movies.star --o MotionCorr_full24_relion51_j4 --use_own --j 4 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc"
+    },
+    "input_files_sha256": {
+      "20170629_00021_frameImage.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+      "20170629_00022_frameImage.tiff": "cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47",
+      "20170629_00023_frameImage.tiff": "87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f",
+      "20170629_00024_frameImage.tiff": "70e075416ee6b682600277b21bf626c51f2c0b98f0f23dafe6a3478ea1766595",
+      "20170629_00025_frameImage.tiff": "798cf7b0cd24aef070d69525543214bdd60a3900667d7d3a32dfe3bffe9fce1a",
+      "20170629_00026_frameImage.tiff": "f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3",
+      "20170629_00027_frameImage.tiff": "adb4fbf597ca78387b22c4a2452c7351499f7b78fb2da67bc5fdd52e4bc58a39",
+      "20170629_00028_frameImage.tiff": "b990365a74752daecbf437aab4b6b235197bf9932f18541246ed1e72ea629e2c",
+      "20170629_00029_frameImage.tiff": "91a985fddf18a7388740d601d6909c6de3a28c7df98d2d263126c8dd90e9f234",
+      "20170629_00030_frameImage.tiff": "878ad41ae6ff95d902fe1c996ad2703285d538b610d3f108433a272d627c8e59",
+      "20170629_00031_frameImage.tiff": "fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d",
+      "20170629_00035_frameImage.tiff": "407f435a5dec04e5425feb7ef34d014b047765a9fa07d25093035245fa56253c",
+      "20170629_00036_frameImage.tiff": "ed1dbbbf81cb83d232f442e6f00c0391780022d2231800f595248fa97bf677b0",
+      "20170629_00037_frameImage.tiff": "b90176a79afed2857c180bf272637b7b6e187e52202d8e132beff68a683a01b6",
+      "20170629_00039_frameImage.tiff": "c3e474564505dfe3095b08f0e1ae70b331387cdb66c3251637d879a461cc317c",
+      "20170629_00040_frameImage.tiff": "08d2b7f3d4375f73deb67e2131d92cb2d707fee7866f9dffba133f570fd4771a",
+      "20170629_00042_frameImage.tiff": "5acc8ae812df2cd5925f15db8dd6dd2db65b88df96402eb1eb04182970135083",
+      "20170629_00043_frameImage.tiff": "5e89d7afe604533ac1b264de77b1a7cefcc91ecaf1ba8175a08ffd7651abdc61",
+      "20170629_00044_frameImage.tiff": "e5476b46c5de02caddd446f20e6ddd81311dff3264ad173439da0200eb6271dc",
+      "20170629_00045_frameImage.tiff": "c0cab09118639dd3d38e39442df465fa7a352029a217184738747afb2cd4bc7a",
+      "20170629_00046_frameImage.tiff": "61094383ce6750976275b13227033dcdb154c8214ef3db402aa6440a505ad377",
+      "20170629_00047_frameImage.tiff": "4ebadc647bf112242e17d975e65a67aaaeaf8296f71cb99d10ca790a92a06192",
+      "20170629_00048_frameImage.tiff": "05348afd74991a20e09d10667268ab496b3a614a891a8f9954fce212f418d955",
+      "20170629_00049_frameImage.tiff": "78d0d2c96c03d13a97d12da7e7ae5e8878abea057a728b4fea239d0642090faf",
+      "NOTES": "6ed4c3984f437545fc22da9f0c82f9637ad2ec53a1916d9fcfdc4ec1a76811e7",
+      "gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+    },
+    "parameters": {
+      "optics": {
+        "pixel_size": 0.885,
+        "voltage_kv": 200,
+        "cs_mm": 1.4,
+        "amplitude_contrast": 0.1
+      },
+      "run_options": {
+        "dose_weighting": true,
+        "dose_per_frame": 1.277,
+        "patch_x": 5,
+        "patch_y": 5,
+        "bfactor": 150,
+        "gain_reference": "Movies/gain.mrc"
+      }
+    }
+  },
+  "process_metrics": {
+    "relion51_j1": {
+      "user_time_sec": 1523.89,
+      "system_time_sec": 133.5,
+      "cpu_percent": 99,
+      "elapsed_str": "27:37.64",
+      "elapsed_sec": 1657.64,
+      "max_rss_kb": 2865280,
+      "exit_status": 0,
+      "max_rss_mb": 2798.12
+    },
+    "standalone_j1": {
+      "user_time_sec": 1461.11,
+      "system_time_sec": 129.78,
+      "cpu_percent": 99,
+      "elapsed_str": "26:31.16",
+      "elapsed_sec": 1591.16,
+      "max_rss_kb": 2866468,
+      "exit_status": 0,
+      "max_rss_mb": 2799.29
+    },
+    "standalone_j4": {
+      "user_time_sec": 1540.54,
+      "system_time_sec": 146.01,
+      "cpu_percent": 366,
+      "elapsed_str": "7:40.23",
+      "elapsed_sec": 460.23,
+      "max_rss_kb": 3090228,
+      "exit_status": 0,
+      "max_rss_mb": 3017.8
+    },
+    "relion51_j4": {
+      "user_time_sec": 1638.25,
+      "system_time_sec": 149.84,
+      "cpu_percent": 348,
+      "elapsed_str": "8:32.42",
+      "elapsed_sec": 512.42,
+      "max_rss_kb": 3092160,
+      "exit_status": 0,
+      "max_rss_mb": 3019.69
+    }
+  },
+  "dataset_star_parity": {
+    "num_movies": 24,
+    "discrepancies": [],
+    "passed": true
+  },
+  "movies": [
+    {
+      "movie_index": 1,
+      "movie_name": "20170629_00021_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002798911790023805,
+        "max_shift_error": 0.00697300000000034,
+        "pixel_identical": false,
+        "image_rmse": 0.005176594491938037,
+        "relative_rmse": 0.006421660523375727,
+        "max_abs_pixel_error": 2.5824594497680664
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.00290774759622168,
+        "image_rmse": 0.0047373897559604815
+      }
+    },
+    {
+      "movie_index": 2,
+      "movie_name": "20170629_00022_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.00251457972797315,
+        "max_shift_error": 0.004512999999999323,
+        "pixel_identical": false,
+        "image_rmse": 0.004873066080193885,
+        "relative_rmse": 0.005868768004163412,
+        "max_abs_pixel_error": 3.003757953643799
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0025898226773275776,
+        "image_rmse": 0.004732757189042427
+      }
+    },
+    {
+      "movie_index": 3,
+      "movie_name": "20170629_00023_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.005483697475244313,
+        "max_shift_error": 0.009301999999999921,
+        "pixel_identical": false,
+        "image_rmse": 0.007688854536844606,
+        "relative_rmse": 0.008986759629816446,
+        "max_abs_pixel_error": 1.6028246879577637
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.005118843008923024,
+        "image_rmse": 0.0067683486255041125
+      }
+    },
+    {
+      "movie_index": 4,
+      "movie_name": "20170629_00024_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0035210386902633345,
+        "max_shift_error": 0.007620999999999989,
+        "pixel_identical": false,
+        "image_rmse": 0.006727543082916344,
+        "relative_rmse": 0.00784698658728687,
+        "max_abs_pixel_error": 1.3965339660644531
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.00597890718136128,
+        "image_rmse": 0.004734142928019643
+      }
+    },
+    {
+      "movie_index": 5,
+      "movie_name": "20170629_00025_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.003265477026153539,
+        "max_shift_error": 0.005682000000000187,
+        "pixel_identical": false,
+        "image_rmse": 0.006030138586706068,
+        "relative_rmse": 0.007138614091679352,
+        "max_abs_pixel_error": 1.8283004760742188
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028644008463086443,
+        "image_rmse": 0.0071510663840565775
+      }
+    },
+    {
+      "movie_index": 6,
+      "movie_name": "20170629_00026_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0026905265051657846,
+        "max_shift_error": 0.005359999999999587,
+        "pixel_identical": false,
+        "image_rmse": 0.0054925900387679215,
+        "relative_rmse": 0.006345393916519517,
+        "max_abs_pixel_error": 2.91654634475708
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.003719216270488359,
+        "image_rmse": 0.006034118367945847
+      }
+    },
+    {
+      "movie_index": 7,
+      "movie_name": "20170629_00027_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.003238881667849574,
+        "max_shift_error": 0.008600999999998749,
+        "pixel_identical": false,
+        "image_rmse": 0.006306229373465992,
+        "relative_rmse": 0.007234112558924946,
+        "max_abs_pixel_error": 5.173336982727051
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0034403622507908176,
+        "image_rmse": 0.0055073862194569565
+      }
+    },
+    {
+      "movie_index": 8,
+      "movie_name": "20170629_00028_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004706191188211551,
+        "max_shift_error": 0.005640999999999785,
+        "pixel_identical": false,
+        "image_rmse": 0.006732906223572043,
+        "relative_rmse": 0.007607065661715892,
+        "max_abs_pixel_error": 2.167989492416382
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0036360435228418655,
+        "image_rmse": 0.005493795860665804
+      }
+    },
+    {
+      "movie_index": 9,
+      "movie_name": "20170629_00029_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004325316789939672,
+        "max_shift_error": 0.00539799999999957,
+        "pixel_identical": false,
+        "image_rmse": 0.005209903141849409,
+        "relative_rmse": 0.006013966953076786,
+        "max_abs_pixel_error": 3.200556993484497
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004495356367964561,
+        "image_rmse": 0.0061653420741221545
+      }
+    },
+    {
+      "movie_index": 10,
+      "movie_name": "20170629_00030_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.003141496047533253,
+        "max_shift_error": 0.005259000000000569,
+        "pixel_identical": false,
+        "image_rmse": 0.004722288591563192,
+        "relative_rmse": 0.0055072236317003824,
+        "max_abs_pixel_error": 3.0495352745056152
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002646833965640373,
+        "image_rmse": 0.004999999030758725
+      }
+    },
+    {
+      "movie_index": 11,
+      "movie_name": "20170629_00031_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.001964972752143693,
+        "max_shift_error": 0.0037240000000000606,
+        "pixel_identical": false,
+        "image_rmse": 0.004739800988642388,
+        "relative_rmse": 0.005469021419388727,
+        "max_abs_pixel_error": 2.666015625
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0025927939643686244,
+        "image_rmse": 0.005419288716162453
+      }
+    },
+    {
+      "movie_index": 12,
+      "movie_name": "20170629_00035_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.007079142376846683,
+        "max_shift_error": 0.015763000000000194,
+        "pixel_identical": false,
+        "image_rmse": 0.009180913550552157,
+        "relative_rmse": 0.010257484899076137,
+        "max_abs_pixel_error": 5.97493314743042
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.005436665790414766,
+        "image_rmse": 0.00802319173013669
+      }
+    },
+    {
+      "movie_index": 13,
+      "movie_name": "20170629_00036_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.003833070782675381,
+        "max_shift_error": 0.008947999999999734,
+        "pixel_identical": false,
+        "image_rmse": 0.0042306426249214815,
+        "relative_rmse": 0.004761075854362924,
+        "max_abs_pixel_error": 2.345358371734619
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002603084668555172,
+        "image_rmse": 0.0053191663188372415
+      }
+    },
+    {
+      "movie_index": 14,
+      "movie_name": "20170629_00037_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028157370186743485,
+        "max_shift_error": 0.00586899999999968,
+        "pixel_identical": false,
+        "image_rmse": 0.005385083662472435,
+        "relative_rmse": 0.00576007168762043,
+        "max_abs_pixel_error": 2.4209065437316895
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004392474326428615,
+        "image_rmse": 0.007469269993512889
+      }
+    },
+    {
+      "movie_index": 15,
+      "movie_name": "20170629_00039_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0045639892272732905,
+        "max_shift_error": 0.008710999999999913,
+        "pixel_identical": false,
+        "image_rmse": 0.007570232940389245,
+        "relative_rmse": 0.008506050240200526,
+        "max_abs_pixel_error": 1.8740453720092773
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0030209456921633814,
+        "image_rmse": 0.005080304785301542
+      }
+    },
+    {
+      "movie_index": 16,
+      "movie_name": "20170629_00040_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002369178461689353,
+        "max_shift_error": 0.005357999999999752,
+        "pixel_identical": false,
+        "image_rmse": 0.0046659792947674325,
+        "relative_rmse": 0.005217525871610319,
+        "max_abs_pixel_error": 5.050176620483398
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0024721124991256855,
+        "image_rmse": 0.005468744986225289
+      }
+    },
+    {
+      "movie_index": 17,
+      "movie_name": "20170629_00042_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0026517057953324443,
+        "max_shift_error": 0.005124999999999602,
+        "pixel_identical": false,
+        "image_rmse": 0.0040142299833016495,
+        "relative_rmse": 0.004527098359372444,
+        "max_abs_pixel_error": 2.1666388511657715
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0029949079632489673,
+        "image_rmse": 0.005396461272040708
+      }
+    },
+    {
+      "movie_index": 18,
+      "movie_name": "20170629_00043_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0019772747975433766,
+        "max_shift_error": 0.003535000000000288,
+        "pixel_identical": false,
+        "image_rmse": 0.003804453897323926,
+        "relative_rmse": 0.00433444361740731,
+        "max_abs_pixel_error": 3.124556541442871
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0022642477963626434,
+        "image_rmse": 0.003897423828103732
+      }
+    },
+    {
+      "movie_index": 19,
+      "movie_name": "20170629_00044_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028160359920166517,
+        "max_shift_error": 0.007341999999999516,
+        "pixel_identical": false,
+        "image_rmse": 0.006522382254167478,
+        "relative_rmse": 0.007112136222289695,
+        "max_abs_pixel_error": 2.119568347930908
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028706098872889347,
+        "image_rmse": 0.006671683533315119
+      }
+    },
+    {
+      "movie_index": 20,
+      "movie_name": "20170629_00045_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0026127424608382234,
+        "max_shift_error": 0.005330999999999975,
+        "pixel_identical": false,
+        "image_rmse": 0.0042025243225861176,
+        "relative_rmse": 0.004687904610898826,
+        "max_abs_pixel_error": 2.273189067840576
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004335196184526505,
+        "image_rmse": 0.00557665575301423
+      }
+    },
+    {
+      "movie_index": 21,
+      "movie_name": "20170629_00046_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002500162294732199,
+        "max_shift_error": 0.004230000000000178,
+        "pixel_identical": false,
+        "image_rmse": 0.0058547125338800675,
+        "relative_rmse": 0.006500249542410346,
+        "max_abs_pixel_error": 3.279845714569092
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0033755510784661,
+        "image_rmse": 0.006143270453962136
+      }
+    },
+    {
+      "movie_index": 22,
+      "movie_name": "20170629_00047_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028596574168363504,
+        "max_shift_error": 0.006747000000000725,
+        "pixel_identical": false,
+        "image_rmse": 0.0050181377405721025,
+        "relative_rmse": 0.005583970178289904,
+        "max_abs_pixel_error": 2.0555663108825684
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.0028947997196122283,
+        "image_rmse": 0.005067729750339828
+      }
+    },
+    {
+      "movie_index": 23,
+      "movie_name": "20170629_00048_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004112859082600948,
+        "max_shift_error": 0.006369999999999543,
+        "pixel_identical": false,
+        "image_rmse": 0.006261609693348858,
+        "relative_rmse": 0.006949012249280935,
+        "max_abs_pixel_error": 2.057772159576416
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004667153700775917,
+        "image_rmse": 0.005917635715660901
+      }
+    },
+    {
+      "movie_index": 24,
+      "movie_name": "20170629_00049_frameImage",
+      "single_thread_exact": {
+        "overall_status": "PASS",
+        "coord_rms_error": 0.0,
+        "max_shift_error": 0.0,
+        "pixel_identical": true,
+        "image_rmse": 0.0,
+        "max_abs_pixel_error": 0.0,
+        "star_diff_count": 0,
+        "fail_reasons": []
+      },
+      "four_thread_variation": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.004228631264960267,
+        "max_shift_error": 0.007151999999999603,
+        "pixel_identical": false,
+        "image_rmse": 0.005504334777241491,
+        "relative_rmse": 0.006084479346140343,
+        "max_abs_pixel_error": 5.58277702331543
+      },
+      "four_thread_vs_relion_j4": {
+        "overall_status": "FAIL",
+        "coord_rms_error": 0.002241356109218935,
+        "image_rmse": 0.005816772401296152
+      }
+    }
+  ]
+}

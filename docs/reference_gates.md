@@ -71,8 +71,9 @@ When comparing standalone `motioncorr` against full RELION 5.1 on the same syste
 
 ## 4. 4GPU VM Execution Metrics (`4-gpu-vm`)
 
-Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0) on the default experimental dataset (`20170629_00021_frameImage.tiff`):
+Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0, 124 vCPUs, 432 GiB RAM):
 
+### Single-Movie Baseline (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838)
 | Metric | Single-Thread (`--j 1`) | Multi-Thread (`--j 4`) | Parity / Scaling |
 |:---|:---:|:---:|:---|
 | **Command** | `./build/motioncorr --i movies.star --o MotionCorr_j1 --use_own --j 1 ...` | `./build/motioncorr --i movies.star --o MotionCorr_j4 --use_own --j 4 ...` | — |
@@ -85,6 +86,21 @@ Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0) on t
 | **_rlnAccumMotionTotal** | `16.419638 Å` | `16.421206 Å` | **Δ = 0.0016 Å (< 0.01%)** |
 | **_rlnAccumMotionEarly** | `2.504833 Å` | `2.503605 Å` | **Δ = 0.0012 Å** |
 | **_rlnAccumMotionLate** | `13.914805 Å` | `13.917601 Å` | **Δ = 0.0028 Å** |
+
+### Full 24-Movie Dataset Baseline (All 24 RELION SPA Tutorial Movies)
+| Metric | RELION 5.1 (`--j 1`) | Standalone (`--j 1`) | Standalone (`--j 4`) | RELION 5.1 (`--j 4`) |
+|:---|:---:|:---:|:---:|:---:|
+| **Exit Status** | `0` (Success) | `0` (Success) | `0` (Success) | `0` (Success) |
+| **Elapsed (Wall Clock)** | `27:37.64` | `26:31.16` | **`7:40.23` (3.46x speedup)** | `8:32.42` |
+| **User CPU Time** | `1523.9 s` | `1461.1 s` | `1540.5 s` | `1638.2 s` |
+| **System CPU Time** | `133.5 s` | `129.8 s` | `146.0 s` | `149.8 s` |
+| **CPU Utilization** | `99%` | `99%` | `366%` | `348%` |
+| **Peak Memory (RSS)** | `2798.1 MB` | `2799.3 MB` | `3017.8 MB` | `3019.7 MB` |
+| **Pixel Parity vs RELION** | Reference | **100% Byte-Identical (24/24)** | OpenMP variation | OpenMP variation |
+| **Shift RMS Error** | Reference | **`0.000000 px` (24/24)** | Mean `0.0033 px` (max `0.0071 px`) | Mean `0.0031 px` |
+| **STAR Discrepancies** | Reference | **0 diffs across all 24 movies** | 0 static diffs | 0 static diffs |
+
+See full report: [`docs/spa_24_movies_validation.md`](spa_24_movies_validation.md).
 
 ---
 
@@ -190,3 +206,5 @@ python3 tools/compare_motioncorr.py \
 | **Tutorial Movie (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~2.8 GB | `0` |
 | **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.73 GiB | `0` |
 | **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |
+| **Full 24-Movie Dataset (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | `0.000000 px` (24/24 exact) | `0.000000` (24/24 byte-identical) | 2.73 GiB | `0` |
+| **Full 24-Movie Dataset (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.015763 px` (mean 0.0033) | `0.00612` (mean) | 2.95 GiB | `0` |

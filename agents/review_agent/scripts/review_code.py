@@ -177,16 +177,27 @@ def call_gemini_review(api_key: str, system_prompt: str, diff_text: str, stat_te
     """Invoke Gemini REST API for an intelligent, memoryless review."""
     if not requests or not api_key:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+    is_truncated = len(diff_text) > 60000
+    if is_truncated:
+        diff_content = diff_text[:60000] + f"\n\n... [DIFF TRUNCATED: Showing 60,000 of {len(diff_text)} characters] ..."
+        truncation_clause = (
+            "WARNING: The diff exceeds token limits and has been TRUNCATED. You MUST NOT issue a READY_TO_MERGE verdict. "
+            "Because the tail of the diff cannot be inspected, conclude with CHANGES_REQUESTED and require modular, chunked reviews."
+        )
+    else:
+        diff_content = diff_text
+        truncation_clause = "The diff is complete. Conclude with an unambiguous verdict: READY_TO_MERGE, CHANGES_REQUESTED, or BLOCKED_BY_FAULT."
+
     user_prompt = f"""Perform a rigorous, stateless code review of the following Git diff:
 
 DIFF STATISTICS:
 {stat_text}
 
-FULL DIFF:
-{diff_text[:60000]}
+DIFF CONTENT:
+{diff_content}
 
-Follow the Review Report Schema defined in your instructions. Conclude with an unambiguous verdict: READY_TO_MERGE, CHANGES_REQUESTED, or BLOCKED_BY_FAULT.
+{truncation_clause}
+Follow the Review Report Schema defined in your instructions.
 """
     payload = {
         "system_instruction": {"parts": [{"text": system_prompt}]},
@@ -196,7 +207,11 @@ Follow the Review Report Schema defined in your instructions. Conclude with an u
     try:
         resp = requests.post(url, json=payload, timeout=60)
         if resp.status_code == 200:
-            return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+            text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+            if is_truncated and "READY_TO_MERGE" in text:
+                text = text.replace("READY_TO_MERGE", "CHANGES_REQUESTED (TRUNCATED_DIFF)")
+                text += "\n\n> [!WARNING]\n> **Diff Truncated**: Final merge approval refused because the diff exceeded 60,000 characters. Review remaining changes incrementally."
+            return text
     except Exception as e:
         sys.stderr.write(f"Warning: Gemini review call failed: {e}\n")
     return None

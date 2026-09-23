@@ -7,6 +7,7 @@ difficulty ratings, and implementation dependencies.
 
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -16,23 +17,42 @@ from typing import Any, Dict, List, Optional
 
 
 def fetch_issues_from_api(repo: str, state: str = "all") -> List[Dict[str, Any]]:
-    """Fetch all issues for a repo using GitHub REST API."""
-    url = f"https://api.github.com/repos/{repo}/issues?state={state}&per_page=100"
+    """Fetch all issues for a repo using GitHub REST API with pagination."""
+    all_issues = []
+    page = 1
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "MotionCorr-IssueParser/1.0",
     }
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            data = resp.read().decode("utf-8")
-            return json.loads(data)
-    except urllib.error.HTTPError as e:
-        sys.stderr.write(f"HTTP Error {e.code}: {e.reason}\n")
-        sys.exit(1)
-    except Exception as e:
-        sys.stderr.write(f"Failed to fetch issues: {e}\n")
-        sys.exit(1)
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    while True:
+        url = f"https://api.github.com/repos/{repo}/issues?state={state}&per_page=100&page={page}"
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                data = resp.read().decode("utf-8")
+                batch = json.loads(data)
+                if not batch:
+                    break
+                all_issues.extend(batch)
+                if len(batch) < 100:
+                    break
+                page += 1
+        except urllib.error.HTTPError as e:
+            if page > 1:
+                break
+            sys.stderr.write(f"HTTP Error {e.code}: {e.reason}\n")
+            sys.exit(1)
+        except Exception as e:
+            if page > 1:
+                break
+            sys.stderr.write(f"Failed to fetch issues: {e}\n")
+            sys.exit(1)
+
+    return all_issues
 
 
 def load_issues_from_file(file_path: str) -> List[Dict[str, Any]]:

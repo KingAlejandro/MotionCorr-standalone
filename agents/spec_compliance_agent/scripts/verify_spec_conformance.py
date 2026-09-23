@@ -76,6 +76,27 @@ def get_diff(repo_root: Path, target: Optional[str] = None, staged_only: bool = 
     _, name_out, _ = run_git(name_args, repo_root)
 
     modified_files = [f.strip() for f in name_out.splitlines() if f.strip()]
+
+    # Ingest untracked files when reviewing full working tree
+    if not target and not staged_only:
+        code_st, status_out, _ = run_git(["status", "--porcelain"], repo_root)
+        if status_out:
+            for line in status_out.splitlines():
+                if line.startswith("?? "):
+                    u_rel = line[3:].strip()
+                    u_path = repo_root / u_rel
+                    if u_path.is_file() and u_path.suffix in (".cpp", ".h", ".cu", ".cuh", ".c", ".hpp", ".py", ".md", ".cmake", ".txt"):
+                        try:
+                            file_lines = u_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+                            diff_out += f"\ndiff --git a/{u_rel} b/{u_rel}\nnew file mode 100644\n--- /dev/null\n+++ b/{u_rel}\n@@ -0,0 +1,{len(file_lines)} @@\n"
+                            for fl in file_lines:
+                                diff_out += f"+{fl}\n"
+                            stat_out += f" {u_rel} (untracked) | {len(file_lines)} +\n"
+                            if u_rel not in modified_files:
+                                modified_files.append(u_rel)
+                        except Exception:
+                            pass
+
     return diff_out, stat_out, modified_files, desc
 
 

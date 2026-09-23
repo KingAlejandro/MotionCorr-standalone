@@ -75,7 +75,8 @@ Comparing candidate corrected image $\hat{I}(x,y)$ against reference image $I^{\
 ### 3.4 Normalization Rules
 Before comparing files, the harness must eliminate superficial discrepancies:
 - **MRC Header Volatiles**:
-  - Bytes 196–219 (creation timestamp, machine stamp) are ignored.
+  - Bytes 196–207 contain the coordinate space origin (`origin[0..2]`), which must be preserved and compared.
+  - Bytes 208–211 (`machst` / machine stamp) and bytes 212–219 are ignored as architecture volatiles.
   - Bytes 224–1024 (extended user text labels) are ignored.
   - Pixel data bytes (from byte 1024 onward) are compared directly as IEEE 754 float32 arrays.
 - **STAR Metadata Volatiles**:

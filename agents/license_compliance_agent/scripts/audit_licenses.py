@@ -78,12 +78,13 @@ def get_installed_package_license(pkg_name: str) -> Dict[str, Any]:
             if license_val:
                 is_osi = any(k in license_val.lower() for k in ("mit", "apache", "bsd", "gpl", "lgpl", "mpl", "isc", "python"))
                 compat = "Compatible" if not any(k in license_val.lower() for k in ("gpl-3.0", "proprietary")) else "Check Terms"
+                status = "APPROVED" if (is_osi and compat == "Compatible") else ("WARNING" if is_osi else "VIOLATION")
                 return {
                     "package": clean_name,
                     "license": license_val,
                     "osi": is_osi,
                     "compat": compat,
-                    "status": "APPROVED" if is_osi else "REVIEW_REQUIRED"
+                    "status": status
                 }
         except Exception:
             pass
@@ -96,7 +97,7 @@ def get_installed_package_license(pkg_name: str) -> Dict[str, Any]:
             "license": entry["license"],
             "osi": entry["osi"],
             "compat": entry["compat"],
-            "status": "APPROVED"
+            "status": "APPROVED" if (entry["osi"] and entry["compat"] == "Compatible") else "WARNING"
         }
 
     return {
@@ -131,6 +132,25 @@ def scan_python_dependencies(repo_root: Path) -> List[Dict[str, Any]]:
                         dependencies.append(info)
         except Exception:
             pass
+
+    # 2. Inspect pyproject.toml, setup.py, setup.cfg if present
+    for conf_name in ("pyproject.toml", "setup.py", "setup.cfg"):
+        for conf_file in repo_root.glob(f"**/{conf_name}"):
+            if ".git" in conf_file.parts or ".venv" in conf_file.parts:
+                continue
+            try:
+                content = conf_file.read_text(encoding="utf-8")
+                matches = re.findall(r"['\"]([a-zA-Z0-9_\-\.]+)(?:[<>=!~].*)?['\"]", content)
+                for pkg in matches:
+                    pkg_clean = pkg.strip()
+                    if pkg_clean.lower() not in seen and len(pkg_clean) > 2 and not pkg_clean.startswith("."):
+                        seen.add(pkg_clean.lower())
+                        info = get_installed_package_license(pkg_clean)
+                        info["spec"] = pkg_clean
+                        info["source"] = str(conf_file.relative_to(repo_root))
+                        dependencies.append(info)
+            except Exception:
+                pass
 
     return dependencies
 
@@ -201,10 +221,10 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
 
 
 def scan_source_files(repo_root: Path) -> List[Dict[str, Any]]:
-    """Scan all source code and header files across the repository."""
+    """Scan all source code, headers, and tool scripts across the repository."""
     findings = []
-    extensions = {".cpp", ".h", ".cu", ".cuh", ".c", ".hpp"}
-    scan_dirs = ["src", "include"]
+    extensions = {".cpp", ".h", ".cu", ".cuh", ".c", ".hpp", ".py", ".sh", ".cmake"}
+    scan_dirs = ["src", "include", "scripts", "agents", "skills", "automation"]
 
     for d in scan_dirs:
         target_dir = repo_root / d

@@ -13,6 +13,7 @@ import py_compile
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -31,9 +32,11 @@ def audit_python_script(script_path: Path) -> List[Dict[str, str]]:
     """Verify compilation and CLI responsiveness of a Python script."""
     findings = []
 
-    # 1. Compilation check
+    # 1. Compilation check (isolated to temp directory to avoid .pyc pollution)
     try:
-        py_compile.compile(str(script_path), doraise=True)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_cfile = os.path.join(tmpdir, "compiled.pyc")
+            py_compile.compile(str(script_path), cfile=temp_cfile, doraise=True)
     except py_compile.PyCompileError as e:
         findings.append({
             "severity": "CRITICAL",
@@ -53,22 +56,25 @@ def audit_python_script(script_path: Path) -> List[Dict[str, str]]:
         })
         return findings
 
-    # 2. Syntax warning check (e.g. invalid escape sequence)
+    # 2. Syntax warning check (e.g. invalid escape sequence) without writing .pyc
     try:
-        res = subprocess.run(
-            [sys.executable, "-Werror::SyntaxWarning", "-m", "py_compile", str(script_path)],
-            capture_output=True,
-            text=True,
-            encoding="utf-8"
-        )
-        if res.returncode != 0:
-            findings.append({
-                "severity": "WARNING",
-                "file": str(script_path),
-                "title": f"SyntaxWarning detected in {script_path.name}",
-                "description": res.stderr.strip() or res.stdout.strip(),
-                "remediation": "Clean up unescaped characters or use raw string r'...' syntax."
-            })
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_cfile = os.path.join(tmpdir, "syntax_check.pyc")
+            check_code = f"import py_compile; py_compile.compile({repr(str(script_path))}, cfile={repr(temp_cfile)}, doraise=True)"
+            res = subprocess.run(
+                [sys.executable, "-Werror::SyntaxWarning", "-c", check_code],
+                capture_output=True,
+                text=True,
+                encoding="utf-8"
+            )
+            if res.returncode != 0:
+                findings.append({
+                    "severity": "WARNING",
+                    "file": str(script_path),
+                    "title": f"SyntaxWarning detected in {script_path.name}",
+                    "description": res.stderr.strip() or res.stdout.strip(),
+                    "remediation": "Clean up unescaped characters or use raw string r'...' syntax."
+                })
     except Exception:
         pass
 

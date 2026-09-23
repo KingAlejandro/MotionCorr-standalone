@@ -56,12 +56,11 @@ def get_diff(repo_root: Path, target: Optional[str] = None, staged_only: bool = 
         diff_args = ["diff", "--cached"]
         desc = "Staged working tree changes"
     else:
-        # Check if there are unstaged/staged working tree changes
         code, out, _ = run_git(["status", "--porcelain"], repo_root)
         if out.strip():
             stat_args = ["diff", "HEAD", "--stat"]
             diff_args = ["diff", "HEAD"]
-            desc = "Working tree modifications (staged + unstaged)"
+            desc = "Working tree modifications (staged + unstaged + untracked)"
         else:
             # Fall back to diff against origin/main or parent commit
             stat_args = ["diff", "HEAD~1", "--stat"]
@@ -70,6 +69,25 @@ def get_diff(repo_root: Path, target: Optional[str] = None, staged_only: bool = 
 
     _, stat_out, _ = run_git(stat_args, repo_root)
     code, diff_out, err = run_git(diff_args, repo_root)
+
+    # Ingest untracked files when reviewing full working tree
+    if not target and not staged_only:
+        code_st, status_out, _ = run_git(["status", "--porcelain"], repo_root)
+        if status_out:
+            for line in status_out.splitlines():
+                if line.startswith("?? "):
+                    u_rel = line[3:].strip()
+                    u_path = repo_root / u_rel
+                    if u_path.is_file() and u_path.suffix in (".cpp", ".h", ".cu", ".cuh", ".c", ".hpp", ".py", ".md", ".cmake", ".txt"):
+                        try:
+                            file_lines = u_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+                            diff_out += f"\ndiff --git a/{u_rel} b/{u_rel}\nnew file mode 100644\n--- /dev/null\n+++ b/{u_rel}\n@@ -0,0 +1,{len(file_lines)} @@\n"
+                            for fl in file_lines:
+                                diff_out += f"+{fl}\n"
+                            stat_out += f" {u_rel} (untracked) | {len(file_lines)} +\n"
+                        except Exception:
+                            pass
+
     return diff_out, stat_out, desc
 
 
@@ -92,17 +110,18 @@ def analyze_diff_heuristics(diff_text: str) -> List[Dict[str, str]]:
             line_num += 1
             code_line = line[1:].strip()
 
-            # 1. Hot loop allocation checks
-            if any(alloc in code_line for alloc in ("malloc(", "calloc(", "new ", "realloc(")):
-                findings.append({
-                    "severity": "WARNING",
-                    "file": current_file,
-                    "line": str(line_num),
-                    "title": "Dynamic memory allocation detected in patch",
-                    "problem": f"Detected raw dynamic allocation: `{code_line[:60]}`.",
-                    "impact": "Heap allocation in processing pipelines risks memory fragmentation, leakage, and performance slowdowns.",
-                    "remediation": "Pre-allocate scratch buffers during initialization or use RAII containers outside inner loops."
-                })
+            # 1. Hot loop allocation checks (restricted to C/C++ and CUDA sources)
+            if current_file.endswith((".cpp", ".cu", ".h", ".cuh", ".c", ".hpp")) and not code_line.startswith(("//", "/*")):
+                if re.search(r"\b(malloc|calloc|realloc)\s*\(|\bnew\s+[A-Za-z0-9_:]+", code_line):
+                    findings.append({
+                        "severity": "WARNING",
+                        "file": current_file,
+                        "line": str(line_num),
+                        "title": "Dynamic memory allocation detected in patch",
+                        "problem": f"Detected raw dynamic allocation: `{code_line[:60]}`.",
+                        "impact": "Heap allocation in processing pipelines risks memory fragmentation, leakage, and performance slowdowns.",
+                        "remediation": "Pre-allocate scratch buffers during initialization or use RAII containers outside inner loops."
+                    })
 
             # 2. Vector resizing or push_back in hot loops
             if re.search(r"\b(push_back|resize|reserve)\b", code_line) and "test" not in current_file.lower():
@@ -236,8 +255,8 @@ def generate_heuristic_report(diff_stat: str, target_desc: str, findings: List[D
 | **Numerical Parity Gate** | `{parity_status}` | {parity_notes} |
 | **Concurrency & Thread Determinism** | `{thread_status}` | {thread_notes} |
 | **Memory Discipline & Hot-Loop Footprint** | `{memory_status}` | {memory_notes} |
-| **Cross-Platform Portability** | `PASSED` | Compatible with C++17 on Linux (GCC/Clang) and macOS |
-| **Automated Verification Coverage** | `PASS` | Pre-commit validation and test fixtures verified |
+| **Cross-Platform Portability** | `HEURISTIC_PASS` | Static path and syntax scan clean; compile test recommended |
+| **Automated Verification Coverage** | `NOT_RUN` | Static diff inspection only; execution of test fixtures not triggered |
 
 ---
 

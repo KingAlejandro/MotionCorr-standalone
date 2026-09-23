@@ -33,17 +33,17 @@ The Python script is located at:
 
 1. **Parse from cached JSON / markdown file**:
    ```bash
-   python .agents/skills/github-issues-parser/scripts/parse_issues.py --file path/to/issues.json --format markdown
+   python skills/github-issues-parser/scripts/parse_issues.py --file path/to/issues.json --format markdown
    ```
 
 2. **Fetch and parse directly from a GitHub repository**:
    ```bash
-   python .agents/skills/github-issues-parser/scripts/parse_issues.py --repo KingAlejandro/MotionCorr-standalone --state all --format markdown
+   python skills/github-issues-parser/scripts/parse_issues.py --repo KingAlejandro/MotionCorr-standalone --state all --format markdown
    ```
 
 3. **Export structured JSON for automated pipelines**:
    ```bash
-   python .agents/skills/github-issues-parser/scripts/parse_issues.py --repo KingAlejandro/MotionCorr-standalone --format json --output issues_summary.json
+   python skills/github-issues-parser/scripts/parse_issues.py --repo KingAlejandro/MotionCorr-standalone --format json --output issues_summary.json
    ```
 
 ## Workflow for Implementation Planning

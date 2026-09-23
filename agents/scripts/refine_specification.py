@@ -181,15 +181,21 @@ def run_dialectic_refinement_loop(
             print(f"\n[Warning] Reached max rounds ({max_rounds}) without full convergence.")
             log_entries.append(f"> **Halted at max rounds ({max_rounds}).** Remaining items require engineer disambiguation.\n")
 
-    # Promote to final design file
-    if final_output:
-        dest_spec = final_output
-    else:
-        dest_spec = repo_root / "agents" / "designs" / f"issue_{issue_num}_design.md"
+    # Promote to final design file only if converged
+    dest_spec = None
+    if converged:
+        if final_output:
+            dest_spec = final_output
+        else:
+            dest_spec = repo_root / "agents" / "designs" / f"issue_{issue_num}_design.md"
 
-    dest_spec.parent.mkdir(parents=True, exist_ok=True)
-    dest_spec.write_text(current_draft.read_text(encoding="utf-8"), encoding="utf-8")
-    print(f"\n[Orchestrator] Promoted refined specification to: {dest_spec}")
+        dest_spec.parent.mkdir(parents=True, exist_ok=True)
+        dest_spec.write_text(current_draft.read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"\n[Orchestrator] Promoted refined specification to: {dest_spec}")
+    else:
+        dest_spec = current_draft
+        print(f"\n[Orchestrator] Skipped promotion: loop halted before reaching SPEC_APPROVED.")
+        print(f"[Orchestrator] Unapproved working draft preserved at: {current_draft}")
 
     # Write audit log
     log_file = logs_dir / f"issue_{issue_num}_refinement_log.md"

@@ -332,7 +332,7 @@ def main():
     if args.files:
         files_to_stage = args.files
     elif args.all:
-        files_to_stage = [f for status, f in status_list if status[0] in (" M", "M ", "MM", " D", "D ") and is_relevant_file(f)]
+        files_to_stage = [f for status, f in status_list if any(c in "MDA" for c in status) and is_relevant_file(f)]
     else:
         files_to_stage = [f for _, f in status_list if is_relevant_file(f)]
 

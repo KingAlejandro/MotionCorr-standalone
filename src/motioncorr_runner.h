@@ -133,6 +133,9 @@ public:
 	// Skip hot pixel detection in own motioncorr
 	bool skip_defect;
 
+	// Random seed for hot pixel replacement (deterministic across threads)
+	int random_seed = 1;
+
 	// Archive directory
 	FileName fn_archive;
 

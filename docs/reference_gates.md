@@ -190,3 +190,4 @@ python3 tools/compare_motioncorr.py \
 | **Tutorial Movie (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~2.8 GB | `0` |
 | **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.73 GiB | `0` |
 | **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |
+| **Tutorial Movie (CUDA PoC)** | Linux x86_64 (`4GPUs`, A100) | `--use_own --gpu 0 --j 4` | `0.005547 px` | `0.003970` | 1.53 GiB VRAM | `0` |

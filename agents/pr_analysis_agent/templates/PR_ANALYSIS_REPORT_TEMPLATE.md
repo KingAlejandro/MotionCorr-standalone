@@ -45,6 +45,12 @@
 
 ---
 
-## 5. Remediation Plan & Merge Recommendations
+## 5. Reviewer Feedback & Discussion
+
+{{REVIEWER_FEEDBACK_BLOCK}}
+
+---
+
+## 6. Remediation Plan & Merge Recommendations
 
 {{REMEDIATION_BLOCK}}

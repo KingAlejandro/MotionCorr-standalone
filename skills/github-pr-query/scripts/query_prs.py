@@ -36,7 +36,7 @@ def find_repo_slug_from_git() -> Optional[str]:
     return "KingAlejandro/MotionCorr-standalone"
 
 
-def make_github_request(url: str, accept_header: str = "application/vnd.github.v3+json") -> Tuple[int, bytes]:
+def make_github_request(url: str, accept_header: str = "application/vnd.github.v3+json", allow_empty: bool = False) -> Tuple[int, bytes]:
     """Make HTTP request to GitHub API using urllib with optional token."""
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     headers = {
@@ -51,11 +51,17 @@ def make_github_request(url: str, accept_header: str = "application/vnd.github.v
         with urllib.request.urlopen(req) as resp:
             return resp.status, resp.read()
     except urllib.error.HTTPError as e:
+        if allow_empty and e.code in (404, 422):
+            return e.code, b"[]"
         sys.stderr.write(f"GitHub API Error [{e.code}]: {e.reason} ({url})\n")
         if e.code == 403 and "rate limit" in str(e.read() or "").lower():
             sys.stderr.write("API rate limit exceeded. Set GITHUB_TOKEN environment variable.\n")
+        if allow_empty:
+            return e.code, b"[]"
         sys.exit(1)
     except Exception as e:
+        if allow_empty:
+            return 500, b"[]"
         sys.stderr.write(f"Network request error: {e}\n")
         sys.exit(1)
 
@@ -82,6 +88,21 @@ def get_pull_request_details(repo: str, pr_number: int) -> Dict[str, Any]:
     commits_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/commits?per_page=50"
     _, commits_raw = make_github_request(commits_url)
     pr_data["commits"] = json.loads(commits_raw.decode("utf-8"))
+
+    # Fetch official PR reviews (e.g. APPROVED, CHANGES_REQUESTED, COMMENTED)
+    reviews_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews?per_page=100"
+    _, reviews_raw = make_github_request(reviews_url, allow_empty=True)
+    pr_data["reviews"] = json.loads(reviews_raw.decode("utf-8"))
+
+    # Fetch inline code review comments
+    review_comments_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/comments?per_page=100"
+    _, review_comments_raw = make_github_request(review_comments_url, allow_empty=True)
+    pr_data["review_comments"] = json.loads(review_comments_raw.decode("utf-8"))
+
+    # Fetch general PR discussion comments
+    issue_comments_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments?per_page=100"
+    _, issue_comments_raw = make_github_request(issue_comments_url, allow_empty=True)
+    pr_data["issue_comments"] = json.loads(issue_comments_raw.decode("utf-8"))
 
     return pr_data
 
@@ -182,6 +203,64 @@ def format_pr_detail_markdown(pr: Dict[str, Any], repo: str) -> str:
         c_author = c.get("commit", {}).get("author", {}).get("name", "unknown")
         msg = c.get("commit", {}).get("message", "").split("\n")[0].replace("|", "\\|")
         doc.append(f"| `{sha}` | {c_author} | {msg} |")
+
+    # Reviewer Feedback Section
+    reviews = pr.get("reviews", [])
+    review_comments = pr.get("review_comments", [])
+    issue_comments = pr.get("issue_comments", [])
+
+    doc.extend([
+        "",
+        "## Reviewer Feedback & Discussions",
+        "",
+    ])
+
+    if not reviews and not review_comments and not issue_comments:
+        doc.append("*No reviews or comments posted yet on this pull request.*")
+    else:
+        if reviews:
+            doc.extend([
+                "### Official PR Reviews",
+                "",
+                "| Reviewer | State | Submitted At | Summary / Body |",
+                "| :--- | :--- | :--- | :--- |",
+            ])
+            for r in reviews:
+                r_user = r.get("user", {}).get("login", "unknown")
+                r_state = r.get("state", "COMMENTED")
+                r_time = (r.get("submitted_at") or "")[:10]
+                r_body = (r.get("body") or "*No body text*").replace("\n", " ").replace("|", "\\|")[:120]
+                doc.append(f"| `@{r_user}` | `{r_state}` | {r_time} | {r_body} |")
+            doc.append("")
+
+        if review_comments:
+            doc.extend([
+                "### Inline Code Review Comments",
+                "",
+                "| Commenter | File & Line | Comment Snippet |",
+                "| :--- | :--- | :--- |",
+            ])
+            for rc in review_comments:
+                rc_user = rc.get("user", {}).get("login", "unknown")
+                rc_path = rc.get("path", "unknown")
+                rc_line = rc.get("line") or rc.get("original_line") or "diff"
+                rc_body = (rc.get("body") or "").replace("\n", " ").replace("|", "\\|")[:120]
+                doc.append(f"| `@{rc_user}` | `{rc_path}:{rc_line}` | {rc_body} |")
+            doc.append("")
+
+        if issue_comments:
+            doc.extend([
+                "### Conversation & Thread Comments",
+                "",
+                "| Commenter | Date | Comment Snippet |",
+                "| :--- | :--- | :--- |",
+            ])
+            for ic in issue_comments:
+                ic_user = ic.get("user", {}).get("login", "unknown")
+                ic_time = (ic.get("created_at") or "")[:10]
+                ic_body = (ic.get("body") or "").replace("\n", " ").replace("|", "\\|")[:120]
+                doc.append(f"| `@{ic_user}` | {ic_time} | {ic_body} |")
+            doc.append("")
 
     return "\n".join(doc)
 

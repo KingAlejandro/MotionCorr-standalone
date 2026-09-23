@@ -49,6 +49,12 @@ Every Pull Request must be evaluated across multiple dimensions before merging i
 - Compare modified files against linked issue criteria.
 - Flag changes to unrelated headers or build configurations.
 
+### 4. Reviewer Feedback & Community Discussion
+- Ingest and evaluate all official PR reviews (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`).
+- Read inline code review comments on diff lines to identify specific technical questions or issues raised by peers.
+- Read general conversation thread comments on the pull request.
+- Check whether earlier reviewer change requests or open questions have been addressed in recent commits.
+
 ---
 
 ## Standardized Output Report Format

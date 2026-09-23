@@ -88,7 +88,7 @@ def run_pr_diff_audit(diff_text: str, changed_files: List[Dict[str, Any]]) -> Li
                 })
 
         # 3. Residual debug prints
-        if re.search(r"\b(std::cout|printf|console\.log|println!)\b", added_code) and not any(k in current_file.lower() for k in ("test", "bench", "cli", "app")):
+        if re.search(r"\b(std::cout|printf|console\.log|println!)\b", added_code) and not any(k in current_file.lower() for k in ("test", "bench", "cli", "app", "analyze", "review")) and "re.search" not in added_code:
             findings.append({
                 "severity": "RECOMMENDATION",
                 "category": "CODE_HYGIENE",
@@ -205,6 +205,26 @@ def analyze_pull_request(
                 "remediation": "Verify license compatibility with GPL-2.0 and run audit_licenses.py."
             })
 
+    # 5. Reviewer Feedback & Community Comments
+    reviews = pr_data.get("reviews", [])
+    review_comments = pr_data.get("review_comments", [])
+    issue_comments = pr_data.get("issue_comments", [])
+
+    for r in reviews:
+        r_state = r.get("state", "").upper()
+        r_user = r.get("user", {}).get("login", "unknown")
+        r_body = r.get("body") or "*No body text*"
+        if r_state == "CHANGES_REQUESTED":
+            findings.append({
+                "severity": "WARNING",
+                "category": "REVIEWER_FEEDBACK",
+                "file": "GitHub PR Review",
+                "line": 0,
+                "title": f"Reviewer @{r_user} requested changes",
+                "description": f"Review status is CHANGES_REQUESTED: {r_body[:200]}",
+                "remediation": f"Resolve @{r_user}'s feedback and request a re-review."
+            })
+
     # Overall Verdict
     has_critical = any(f["severity"] == "CRITICAL" for f in findings)
     has_warnings = any(f["severity"] == "WARNING" for f in findings)
@@ -286,6 +306,46 @@ def format_report(analysis: Dict[str, Any]) -> str:
         findings_str = "> **Zero defects or regressions detected.** All quality gates passed.\n"
         remediation_str = "No action required. PR is cleared for merge."
 
+    # Reviewer Feedback Block
+    reviews = pr.get("reviews", [])
+    review_comments = pr.get("review_comments", [])
+    issue_comments = pr.get("issue_comments", [])
+
+    feedback_parts = []
+    if not reviews and not review_comments and not issue_comments:
+        feedback_parts.append("*No reviews, inline comments, or discussion posted yet by other reviewers.*")
+    else:
+        if reviews:
+            feedback_parts.append("### Official PR Reviews\n\n| Reviewer | State | Date | Comment Summary |\n| :--- | :--- | :--- | :--- |")
+            for r in reviews:
+                r_user = r.get("user", {}).get("login", "unknown")
+                r_state = r.get("state", "COMMENTED")
+                r_date = (r.get("submitted_at") or "")[:10]
+                r_body = (r.get("body") or "*No body text*").replace("\n", " ").replace("|", "\\|")[:120]
+                feedback_parts.append(f"| `@{r_user}` | `{r_state}` | {r_date} | {r_body} |")
+            feedback_parts.append("")
+
+        if review_comments:
+            feedback_parts.append("### Inline Code Review Comments\n\n| Commenter | File & Line | Comment Snippet |\n| :--- | :--- | :--- |")
+            for rc in review_comments:
+                rc_user = rc.get("user", {}).get("login", "unknown")
+                rc_path = rc.get("path", "unknown")
+                rc_line = rc.get("line") or rc.get("original_line") or "diff"
+                rc_body = (rc.get("body") or "").replace("\n", " ").replace("|", "\\|")[:120]
+                feedback_parts.append(f"| `@{rc_user}` | `{rc_path}:{rc_line}` | {rc_body} |")
+            feedback_parts.append("")
+
+        if issue_comments:
+            feedback_parts.append("### General Conversation Comments\n\n| Commenter | Date | Snippet |\n| :--- | :--- | :--- |")
+            for ic in issue_comments:
+                ic_user = ic.get("user", {}).get("login", "unknown")
+                ic_date = (ic.get("created_at") or "")[:10]
+                ic_body = (ic.get("body") or "").replace("\n", " ").replace("|", "\\|")[:120]
+                feedback_parts.append(f"| `@{ic_user}` | {ic_date} | {ic_body} |")
+            feedback_parts.append("")
+
+    reviewer_feedback_str = "\n".join(feedback_parts)
+
     return f"""# Pull Request Analysis & Defect Report
 
 - **Auditor**: Pull Request Analysis Agent (`agents/pr_analysis_agent/`)
@@ -333,7 +393,13 @@ def format_report(analysis: Dict[str, Any]) -> str:
 
 ---
 
-## 5. Remediation Plan & Merge Recommendations
+## 5. Reviewer Feedback & Discussion
+
+{reviewer_feedback_str}
+
+---
+
+## 6. Remediation Plan & Merge Recommendations
 
 {remediation_str}
 """

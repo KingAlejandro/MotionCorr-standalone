@@ -39,7 +39,12 @@ flowchart LR
    - **Function**: Audits forward completeness (acceptance criteria) and reverse scope isolation (flags unrequested side effects).
    - **Rule**: A feature passes (`SPEC_CONFORMANCE_PASSED`) if and only if it matches the specification and *only* the specification.
 
-5. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+5. **License & Open Source Compliance Agent (`agents/license_compliance_agent/`)**:
+   - **Role**: Open source licensing and intellectual property compliance auditor.
+   - **Function**: Scans all Python dependencies, external manifests, and repository source files for OSI open source licensing, GPL-2.0 compatibility, and flags any proprietary or unlicensed code.
+   - **Output**: Generates compliance audit reports (`LICENSE_COMPLIANCE_PASSED`, `LICENSE_WARNING`, `LICENSE_VIOLATION`).
+
+6. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Role**: Meta-reviewer for agent ecosystem integrity.
    - **Rule**: Inspects all peer agents in `agents/` while strictly excluding its own files.
    - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
@@ -69,9 +74,16 @@ agents/
 ├── spec_compliance_agent/         # Specification & Scope Conformance Agent
 │   ├── SYSTEM_PROMPT.md           # Conformance philosophy and strict 1:1 audit rules
 │   ├── templates/
-│   │   └── SPEC_CONFORMANCE_REPORT_TEMPLATE.md # Standardized conformance report template
+│   │   ├── SPEC_REVIEW_TEMPLATE.md            # Pre-implementation review template
+│   │   └── SPEC_CONFORMANCE_REPORT_TEMPLATE.md# Post-implementation diff report template
 │   └── scripts/
 │       └── verify_spec_conformance.py # Scope and side-effect verification engine
+├── license_compliance_agent/      # License & Open Source Compliance Agent
+│   ├── SYSTEM_PROMPT.md           # Open source mandates and GPL-2.0 terms
+│   ├── templates/
+│   │   └── LICENSE_AUDIT_REPORT_TEMPLATE.md # Standardized license audit template
+│   └── scripts/
+│       └── audit_licenses.py      # Dependency & source file compliance auditor
 └── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
     ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/
@@ -100,7 +112,13 @@ python agents/review_agent/scripts/review_code.py
 python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue 10
 ```
 
-### 3. Auditing the Multi-Agent Ecosystem
+### 3. Auditing Open Source Licenses & IP Compliance
+```bash
+# Scan Python modules, dependencies, and source files for open source licenses and GPL-2.0 compliance
+python agents/license_compliance_agent/scripts/audit_licenses.py
+```
+
+### 4. Auditing the Multi-Agent Ecosystem
 ```bash
 # Audit all peer agents (excluding agent_auditor) for script, prompt, and template integrity
 python agents/agent_auditor/scripts/audit_agents.py

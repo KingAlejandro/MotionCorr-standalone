@@ -29,7 +29,12 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Pass Criterion**: Passes (`SPEC_CONFORMANCE_PASSED`) if and only if all specification requirements are met and zero out-of-scope side effects are detected.
    - **System Prompt**: [`agents/spec_compliance_agent/SYSTEM_PROMPT.md`](agents/spec_compliance_agent/SYSTEM_PROMPT.md)
 
-5. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+5. **License & Open Source Compliance Agent (`agents/license_compliance_agent/`)**:
+   - **Mandate**: Ensures all software and Python dependencies are certified Open Source (OSI-approved) and comply with project licensing terms (GPL-2.0).
+   - **Deliverable**: Compliance audit reports flagging proprietary code, "All rights reserved" declarations lacking license grants, and non-commercial restrictions.
+   - **System Prompt**: [`agents/license_compliance_agent/SYSTEM_PROMPT.md`](agents/license_compliance_agent/SYSTEM_PROMPT.md)
+
+6. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
    - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
    - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
@@ -54,7 +59,8 @@ flowchart TD
     DualAudit --> SpecAgent["Spec Conformance Agent<br/>(Scope, Side Effects, Completeness)"]
     Rev -->|READY_TO_MERGE| GateCheck{"Both Agents Pass?"}
     SpecAgent -->|SPEC_CONFORMANCE_PASSED| GateCheck
-    GateCheck -->|Yes| Commit["ai-git-commit Skill"]
+    GateCheck -->|Yes| LicenseAudit["License Compliance Agent<br/>(audit_licenses.py)"]
+    LicenseAudit -->|PASSED / Approved| Commit["ai-git-commit Skill"]
     GateCheck -->|No / Warnings| Impl
     Commit --> Merged["Merged to Branch"]
 ```
@@ -63,6 +69,7 @@ flowchart TD
 
 ## 3. Tooling & Skills Reference
 
+- **Open Source License & Compliance Audit**: `python agents/license_compliance_agent/scripts/audit_licenses.py`
 - **Dialectic Specification Refinement Loop**: `python agents/scripts/refine_specification.py --issue <NUM> --max-rounds 3`
 - **Spec Conformance Audit & Spec Review**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`
 - **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`

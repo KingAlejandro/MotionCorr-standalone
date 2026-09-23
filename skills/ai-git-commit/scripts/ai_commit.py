@@ -2,7 +2,8 @@
 """
 AI Git Commit Helper Script
 Automatically selects relevant modified files, generates appropriate conventional commit
-messages from diffs/status, and commits with explicit AI authorship metadata for git blame.
+messages from diffs/status, prints changes made (diff stat and diff preview), and requests
+approval before committing with explicit AI authorship metadata for git blame.
 """
 
 import argparse
@@ -110,10 +111,50 @@ def stage_files(repo_root: Path, files_to_stage: List[str]) -> bool:
     return True
 
 
+def unstage_files(repo_root: Path, files: Optional[List[str]] = None) -> bool:
+    """Unstage specified files or all staged files."""
+    args = ["reset", "HEAD"]
+    if files:
+        args += ["--"] + files
+    code, _, err = run_git_command(args, cwd=repo_root)
+    if code != 0:
+        sys.stderr.write(f"Failed to unstage files: {err}\n")
+        return False
+    return True
+
+
+def get_diff_stat(repo_root: Path, cached: bool = True) -> str:
+    """Return diff statistics."""
+    args = ["diff", "--stat"]
+    if cached:
+        args.append("--cached")
+    code, out, _ = run_git_command(args, cwd=repo_root)
+    return out if code == 0 else ""
+
+
+def get_diff_preview(repo_root: Path, max_lines: int = 80, cached: bool = True) -> str:
+    """Return a unified diff preview truncated to max_lines."""
+    if max_lines <= 0:
+        return ""
+    args = ["diff"]
+    if cached:
+        args.append("--cached")
+    code, out, _ = run_git_command(args, cwd=repo_root)
+    if code != 0 or not out:
+        return ""
+    lines = out.splitlines()
+    if len(lines) > max_lines:
+        preview = "\n".join(lines[:max_lines])
+        preview += f"\n... [diff truncated; {len(lines) - max_lines} more lines]"
+        return preview
+    return out
+
+
 def categorize_files(files: List[str]) -> Dict[str, List[str]]:
     """Group files by architectural domain."""
     categories: Dict[str, List[str]] = {
         "skills": [],
+        "agents": [],
         "src": [],
         "tests": [],
         "build": [],
@@ -127,7 +168,6 @@ def categorize_files(files: List[str]) -> Dict[str, List[str]]:
         if norm.startswith("skills/"):
             categories["skills"].append(norm)
         elif norm.startswith("agents/"):
-            categories["agents"] = categories.get("agents", [])
             categories["agents"].append(norm)
         elif norm.startswith("src/") or norm.startswith("include/"):
             categories["src"].append(norm)
@@ -165,7 +205,7 @@ def auto_generate_commit_message(repo_root: Path, files_to_stage: List[str], sta
         subject = f"feat(skills): {action} {names_str} skill{'s' if len(skill_names) > 1 else ''}"
 
     # 1b. Agent changes
-    elif categories.get("agents") and not categories["src"]:
+    elif categories["agents"] and not categories["src"]:
         all_new = all(status_dict.get(f, "").startswith("??") or status_dict.get(f, "").startswith("A") for f in categories["agents"])
         action = "add" if all_new else "update"
         subject = f"feat(agents): {action} architecture agent and design tooling"
@@ -180,7 +220,6 @@ def auto_generate_commit_message(repo_root: Path, files_to_stage: List[str], sta
         if len(modules) > 2:
             mod_str += f" (+{len(modules)-2} files)"
             
-        # Determine intent (feat, fix, refactor)
         has_new = any(status_dict.get(f, "").startswith("??") or status_dict.get(f, "").startswith("A") for f in categories["src"])
         has_mod = any("M" in status_dict.get(f, "") for f in categories["src"])
         
@@ -257,16 +296,19 @@ def main():
             pass
 
     parser = argparse.ArgumentParser(
-        description="Automatically select modified files, generate commit messages, and commit with AI attribution."
+        description="Select modified files, display changes, ask for approval, and commit with AI attribution."
     )
     parser.add_argument("-m", "--message", help="Explicit commit message (auto-generated if omitted)")
     parser.add_argument("-f", "--files", nargs="+", help="Specific files to stage (auto-detected if omitted)")
     parser.add_argument("-a", "--all", action="store_true", help="Stage all tracked modified files")
+    parser.add_argument("-y", "--yes", action="store_true", help="Bypass interactive approval and commit directly")
+    parser.add_argument("--diff", "--show-diff", action="store_true", help="Display full unified diff preview in addition to summary")
+    parser.add_argument("--diff-limit", type=int, default=80, help="Maximum lines of diff preview to display when --diff is enabled (default: 80)")
     parser.add_argument("--author-name", default=DEFAULT_AI_NAME, help=f"AI Author name (default: {DEFAULT_AI_NAME})")
     parser.add_argument("--author-email", default=DEFAULT_AI_EMAIL, help=f"AI Author email (default: {DEFAULT_AI_EMAIL})")
     parser.add_argument("--co-author", help="Optional human co-author in 'Name <email>' format")
     parser.add_argument("--no-trailer", action="store_true", help="Omit 'AI-Generated: true' commit trailer")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate staging and commit without applying changes")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate staging and diff display without committing")
     parser.add_argument("--setup-alias", action="store_true", help="Register 'git ai-commit' alias in git config")
     parser.add_argument("--repo", help="Path to git repository root (auto-detected if omitted)")
 
@@ -286,17 +328,16 @@ def main():
         print("Working tree is clean. Nothing to commit.")
         sys.exit(0)
 
-    # 1. Determine files to stage intelligently
+    # 1. Determine files to stage
     if args.files:
         files_to_stage = args.files
     elif args.all:
         files_to_stage = [f for status, f in status_list if status[0] in (" M", "M ", "MM", " D", "D ") and is_relevant_file(f)]
     else:
-        # Default smart selection: include all modified, added, and untracked relevant project files
         files_to_stage = [f for _, f in status_list if is_relevant_file(f)]
 
     if not files_to_stage:
-        print("No relevant modified files found to stage (all changes matched ignore rules).")
+        print("No relevant modified files found to stage.")
         sys.exit(0)
 
     # 2. Determine or generate commit message
@@ -317,9 +358,17 @@ def main():
         "GIT_AUTHOR_EMAIL": args.author_email,
     }
 
-    print("\n========================================")
+    # Stage files to examine exact diff
+    if not stage_files(target_repo, files_to_stage):
+        sys.exit(1)
+
+    diff_stat = get_diff_stat(target_repo, cached=True)
+    diff_preview = get_diff_preview(target_repo, max_lines=args.diff_limit, cached=True)
+
+    # Display Commit Plan & Changes
+    print("\n==================================================")
     print(" AI Git Commit Plan")
-    print("========================================")
+    print("==================================================")
     print(f"Repository: {target_repo}")
     print(f"Author:     {args.author_name} <{args.author_email}>")
     print(f"Files to Stage ({len(files_to_stage)}):")
@@ -328,16 +377,48 @@ def main():
     print("\nCommit Message:")
     for line in commit_msg.splitlines():
         print(f"  {line}")
-    print("========================================\n")
 
+    if diff_stat:
+        print("\n==================================================")
+        print(" Changes Summary (git diff --stat)")
+        print("==================================================")
+        print(diff_stat)
+
+    if args.diff and diff_preview:
+        print("==================================================")
+        print(f" Diff Preview (first {args.diff_limit} lines)")
+        print("==================================================")
+        print(diff_preview)
+
+    print("==================================================\n")
+
+    # If dry-run, unstage and exit
     if args.dry_run:
-        print("[Dry Run] Preview complete. No files staged or committed.")
+        unstage_files(target_repo, files_to_stage)
+        print("[Dry Run] Preview complete. Files unstaged and no commit made.")
         sys.exit(0)
 
-    # Stage files
-    print("Staging files...")
-    if not stage_files(target_repo, files_to_stage):
-        sys.exit(1)
+    # Interactive approval check
+    if not args.yes:
+        approved = False
+        try:
+            prompt_text = "Do you approve these changes and want to proceed with the commit? [y/N]: "
+            # If standard input is available, prompt user
+            if sys.stdin.isatty():
+                ans = input(prompt_text).strip().lower()
+                approved = ans in ("y", "yes")
+            else:
+                # Read from piped stdin if provided
+                ans = sys.stdin.readline().strip().lower()
+                approved = ans in ("y", "yes")
+        except (KeyboardInterrupt, EOFError):
+            approved = False
+
+        if not approved:
+            print("\nCommit not approved. Unstaging files...")
+            unstage_files(target_repo, files_to_stage)
+            print("Commit aborted. Working tree preserved.")
+            sys.exit(0)
 
     # Commit with AI author attribution
     print("Committing changes...")

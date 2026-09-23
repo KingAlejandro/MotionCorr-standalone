@@ -1,12 +1,48 @@
-# RELION SPA tutorial data
+# Test Datasets, Reference Gates, and Fixtures
 
-The repository's test dataset is the **experimental beta-galactosidase movie
-subset used by the [RELION SPA tutorial](https://relion.readthedocs.io/en/latest/SPA_tutorial/Introduction.html)**.
-It contains 24 compressed TIFF movies and a gain reference. Download the
-movies from the [spa-tutorial-data-v1 release](https://github.com/KingAlejandro/MotionCorr-standalone/releases/tag/spa-tutorial-data-v1),
-or from the RELION team's original archive. The full acquisition is
-[EMPIAR-10204](https://www.ebi.ac.uk/empiar/EMPIAR-10204/). EMPIAR's public
-data are [CC0](https://www.ebi.ac.uk/empiar/policies/).
+This directory contains test datasets, synthetic fixture recipes, and verification tooling for MotionCorr Standalone. Detailed numerical acceptance gates and baseline benchmarks are documented in [docs/reference_gates.md](../docs/reference_gates.md).
+
+---
+
+## 1. Quick Verification with Synthetic Fixture (< 1s)
+
+A small synthetic movie fixture is versioned directly in `test-data/fixtures/` along with exact reference outputs and ground truth shifts. This allows immediate smoke testing and parity verification without downloading multi-gigabyte files.
+
+```sh
+# Generate test output
+cd test-data/fixtures
+../../build/motioncorr \
+  --i synthetic_128x128_8frames.star \
+  --o test_run \
+  --use_own --j 1
+
+# Check parity against reference output
+python3 ../../tools/compare_motioncorr.py \
+  --ref reference_output \
+  --test test_run \
+  --ground-truth synthetic_128x128_8frames_ground_truth.json \
+  --gate exact
+```
+
+To regenerate or scale the synthetic fixtures, use `generate_synthetic_fixture.py`:
+
+```sh
+# Generate small fixture (128x128, 8 frames)
+python3 test-data/generate_synthetic_fixture.py --profile small
+
+# Generate standard benchmark movie (512x512, 16 frames)
+python3 test-data/generate_synthetic_fixture.py --profile standard
+
+# Generate large stress-test movie (1536x1536, 32 frames)
+python3 test-data/generate_synthetic_fixture.py --profile large
+```
+
+---
+
+## 2. Experimental RELION SPA Tutorial Dataset
+
+The experimental benchmark dataset is the **beta-galactosidase movie subset used by the [RELION SPA tutorial](https://relion.readthedocs.io/en/latest/SPA_tutorial/Introduction.html)**.
+It contains 24 compressed TIFF movies and a gain reference. The full acquisition is [EMPIAR-10204](https://www.ebi.ac.uk/empiar/EMPIAR-10204/) (CC0 license).
 
 Download the movies from this repository's release:
 
@@ -15,35 +51,55 @@ mkdir -p relion30_tutorial/Movies
 gh release download spa-tutorial-data-v1 \
   --repo KingAlejandro/MotionCorr-standalone \
   --dir relion30_tutorial/Movies
-(cd relion30_tutorial/Movies && shasum -a 256 -c SHA256SUMS.txt)
-python3 test-data/prepare_movies_star.py relion30_tutorial
+(cd relion30_tutorial/Movies && sha256sum -c SHA256SUMS.txt --ignore-missing)
+python3 test-data/prepare_movies_star.py relion30_tutorial --limit 1
 ```
 
-Alternatively, fetch the original tutorial archive:
+Alternatively, fetch individual assets directly via curl:
 
 ```sh
-curl --fail --location --output relion30_tutorial_data.tar \
-  ftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion30_tutorial_data.tar
-tar -xf relion30_tutorial_data.tar
-python3 test-data/prepare_movies_star.py relion30_tutorial
+URL="https://github.com/KingAlejandro/MotionCorr-standalone/releases/download/spa-tutorial-data-v1"
+mkdir -p relion30_tutorial/Movies && cd relion30_tutorial/Movies
+curl -fLO "${URL}/20170629_00021_frameImage.tiff"
+curl -fLO "${URL}/gain.mrc"
+curl -fLO "${URL}/SHA256SUMS.txt"
+sha256sum -c SHA256SUMS.txt --ignore-missing
+cd ../..
+python3 test-data/prepare_movies_star.py relion30_tutorial --limit 1
 ```
 
-The archive is about 3.25 GB, so keep several GB of free disk space. The
-preparation script writes `relion30_tutorial/movies.star` with the tutorial's
-optics settings. Use `--limit 1` to prepare a single-movie comparison first.
-
-From the extracted `relion30_tutorial` directory, run:
+From `relion30_tutorial`, execute MotionCorr in CPU mode:
 
 ```sh
-../build/motioncorr --i movies.star --o MotionCorr --use_own --j 4 \
+# Single-thread reproducible baseline
+../build/motioncorr --i movies.star --o MotionCorr_j1 --use_own --j 1 \
+  --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 \
+  --bfactor 150 --gainref Movies/gain.mrc
+
+# Multi-threaded run
+../build/motioncorr --i movies.star --o MotionCorr_j4 --use_own --j 4 \
   --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 \
   --bfactor 150 --gainref Movies/gain.mrc
 ```
 
-Adjust the executable path for your checkout. For parity, run RELION 5.1's
-`relion_run_motioncorr` with the same input and options, using another output
-directory. Compare the corrected image pixels and motion STAR files. The first
-movie (`20170629_00021_frameImage.tiff`) gave exact pixel and motion STAR parity
-with `--j 1` on macOS. Four-thread runs varied slightly even when the
-standalone executable was repeated, so use one thread for the reproducible
-baseline. The remaining 23 movies have not been compared yet.
+---
+
+## 3. Comparing Outputs and Acceptance Gates
+
+Use `tools/compare_motioncorr.py` to compare any output against a reference:
+
+```sh
+# Verify exact CPU parity
+python3 tools/compare_motioncorr.py \
+  --ref path/to/reference_output \
+  --test relion30_tutorial/MotionCorr_j1 \
+  --gate exact
+
+# Verify multi-threaded or GPU accelerated run against relaxed gate
+python3 tools/compare_motioncorr.py \
+  --ref relion30_tutorial/MotionCorr_j1 \
+  --test relion30_tutorial/MotionCorr_j4 \
+  --gate relaxed
+```
+
+See [docs/reference_gates.md](../docs/reference_gates.md) for full gate specifications, error thresholds, and benchmark data.

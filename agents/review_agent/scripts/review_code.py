@@ -56,7 +56,9 @@ def get_diff(repo_root: Path, target: Optional[str] = None, staged_only: bool = 
         diff_args = ["diff", "--cached"]
         desc = "Staged working tree changes"
     else:
-        code, out, _ = run_git(["status", "--porcelain"], repo_root)
+        code_st, out, err_st = run_git(["status", "--porcelain"], repo_root)
+        if code_st != 0:
+            raise RuntimeError(f"Git status failed: {err_st}")
         if out.strip():
             stat_args = ["diff", "HEAD", "--stat"]
             diff_args = ["diff", "HEAD"]
@@ -67,8 +69,13 @@ def get_diff(repo_root: Path, target: Optional[str] = None, staged_only: bool = 
             diff_args = ["diff", "HEAD~1"]
             desc = "Latest commit (HEAD vs HEAD~1)"
 
-    _, stat_out, _ = run_git(stat_args, repo_root)
-    code, diff_out, err = run_git(diff_args, repo_root)
+    code_stat, stat_out, err_stat = run_git(stat_args, repo_root)
+    if code_stat != 0:
+        raise RuntimeError(f"Git diff stat failed ({' '.join(stat_args)}): {err_stat}")
+
+    code_diff, diff_out, err_diff = run_git(diff_args, repo_root)
+    if code_diff != 0:
+        raise RuntimeError(f"Git diff failed ({' '.join(diff_args)}): {err_diff}")
 
     # Ingest untracked files when reviewing full working tree
     if not target and not staged_only:
@@ -305,7 +312,12 @@ def main():
     args = parser.parse_args()
     repo_root = find_repo_root()
 
-    diff_text, diff_stat, desc = get_diff(repo_root, target=args.target, staged_only=args.staged)
+    try:
+        diff_text, diff_stat, desc = get_diff(repo_root, target=args.target, staged_only=args.staged)
+    except RuntimeError as err:
+        sys.stderr.write(f"\n[Review Agent] Git error: {err}\n")
+        sys.exit(1)
+
     if not diff_text.strip():
         print(f"[Review Agent] No diff found for target: {desc}. Working tree is clean.")
         sys.exit(0)

@@ -123,6 +123,157 @@ def synthesize_specification(repo_root: Path, issue_data: Dict[str, Any]) -> str
 
     crit_md = "\n".join([f"- [ ] {c}" for c in crit]) if crit else "- [ ] Verify bit-exact numerical parity against RELION 5.1 baseline\n- [ ] Clean build and test execution"
 
+    # Differentiate domain formulation based on issue track and keywords
+    track_lower = labels.lower()
+    title_lower = title.lower()
+
+    if "ci" in track_lower or "ci" in title_lower or "pipeline" in title_lower:
+        sec3 = """### 3.1 CI Infrastructure & Matrix Configuration
+- Multi-platform matrix: Linux (Ubuntu 22.04 LTS with GCC 11+ and Clang 14+) and macOS (macOS 13+ with AppleClang).
+- Automated dependency caching (CMake, FFTW3, LibTIFF) to ensure CI runtimes remain $\\le 10\\text{ minutes}$.
+- Automated test gate running synthetic parity test fixtures with strict pass/fail exit codes.
+
+### 3.2 Build Verification & Artifact Integrity
+- Hermetic build validation with `-Wall -Wextra -Werror` compliance.
+- Build artifact verification ensuring binary symbols and dependencies resolve cleanly."""
+        sec4 = f"""```mermaid
+flowchart TD
+    PR["Pull Request / Push Event"] --> CI["GitHub Actions Runner Matrix"]
+    CI --> Build["Compile: GCC / Clang / AppleClang"]
+    Build --> Test["Execute Synthetic Parity Test Suite"]
+    Test --> Gate["Automated Parity Gate (Issue #4)"]
+    Gate --> Status["Report CI Check Status"]
+```"""
+        sec5 = f"""```yaml
+# CI Pipeline Configuration for #{num}
+jobs:
+  test_matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13]
+        compiler: [gcc, clang]
+```"""
+        sec6 = """- Optimize CI runner concurrency and container memory limits (4 GB RSS ceiling per test worker).
+- Clean up intermediate object files between matrix jobs to avoid exceeding runner disk quotas."""
+
+    elif "gpu" in track_lower or "cuda" in title_lower or "jax" in title_lower:
+        sec3 = f"""### 3.1 Device Execution & Memory Architecture
+- Asynchronous GPU compute stream scheduling with overlapping host-to-device (H2D) and device-to-host (D2H) copies.
+- Kernel launch grid configured dynamically for movie frame dimensions and patch tile sizes.
+- Unified memory management minimizing device allocation thrashing during batch frame alignment.
+
+### 3.2 Numerical Parity & Floating-Point Precision
+- Adhere to Tier 2 numerical parity tolerance against CPU reference outputs (max pixel diff $< 1e-4$, trajectory delta $< 0.05$ px).
+- Enforce deterministic reduction intrinsics to ensure reproducible cross-correlation peaks across GPU architectures."""
+        sec4 = f"""```mermaid
+flowchart TD
+    InputData["Input Movie / Metadata"] --> HostStaging["Pinned Host Memory Staging"]
+    HostStaging --> StreamCopy["Asynchronous H2D Transfer"]
+    StreamCopy --> GPUKernel["Component #{num}: GPU Kernel Dispatch"]
+    GPUKernel --> D2HCopy["Asynchronous D2H Transfer"]
+    D2HCopy --> ParityGate["Numerical Parity Gate (Tier 2)"]
+    ParityGate --> Output["MRC / STAR Outputs"]
+```"""
+        sec5 = f"""```cpp
+// Target interfaces for GPU component #{num}
+namespace MotionCorr::GPU {{
+    struct StreamConfig {{
+        int device_id = 0;
+        size_t scratch_bytes = 0;
+        bool async_transfers = true;
+    }};
+    void execute_alignment(const float* d_in, float* d_out, StreamConfig cfg);
+}}
+```"""
+        sec6 = """- Pre-allocate device scratch memory pools during pipeline initialization.
+- Maximum GPU VRAM overhead ceiling: $\\le 10\\%$ delta relative to frame buffer footprint.
+- Zero device memory allocations inside the per-frame alignment loop."""
+
+    elif "io" in track_lower or "format" in title_lower or "mrc" in title_lower or "star" in title_lower:
+        sec3 = f"""### 3.1 File Formats & Metadata Normalization
+- MRC 2014 file format compliance including extended header handling and floating-point endianness.
+- STAR tabular metadata serialization compliant with RELION 5.0+ loop and table grammar.
+- Metadata normalization rules: strip volatile absolute paths and creation timestamps during parity audits.
+
+### 3.2 Buffer Management & Streaming
+- Stream-based or memory-mapped I/O for large movie stacks (up to multi-gigabyte raw datasets).
+- Zero-copy header parsing and validation before allocating full frame buffers."""
+        sec4 = f"""```mermaid
+flowchart TD
+    FileIn["Input MRC / TIFF Movie"] --> HeaderParse["Header Validation & Metadata Extraction"]
+    HeaderParse --> StreamBuffer["Chunked / Memory-Mapped Frame Streaming"]
+    StreamBuffer --> Processor["Component #{num}: {title}"]
+    Processor --> Serializer["STAR / MRC Output Serializer"]
+    Serializer --> FileOut["Normalized Reference Output"]
+```"""
+        sec5 = f"""```cpp
+// Target interfaces for I/O component #{num}
+namespace MotionCorr::IO {{
+    struct HeaderInfo {{
+        int nx, ny, nz;
+        int mode;
+        float pixel_size;
+    }};
+    bool parse_header(const std::string& path, HeaderInfo& info);
+}}
+```"""
+        sec6 = """- Implement chunked or sliding window memory streaming for movie frames.
+- Maximum resident memory ceiling: $\\le 2\\times$ single-frame footprint during streaming I/O."""
+
+    elif "doc" in track_lower or "documentation" in title_lower:
+        sec3 = f"""### 3.1 Documentation Rigor & Architecture Mapping
+- Comprehensive architectural documentation mapping components to RELION 5.1 upstream origins.
+- Specification of verification requirements, build instructions, and benchmark reproduction protocols.
+
+### 3.2 Maintenance & Versioning Protocols
+- Semantic documentation versioning aligned with repo milestone releases.
+- Synchronized API reference and CLI flag usage documentation."""
+        sec4 = f"""```mermaid
+flowchart TD
+    Spec["Issue Requirements #{num}"] --> Architect["Architecture Agent"]
+    Architect --> Docs["Technical Documentation"]
+    Docs --> Validation["Peer Review & Compliance Gate"]
+    Validation --> RepoDocs["Repository Documentation Tree"]
+```"""
+        sec5 = """```markdown
+<!-- Document Schema for #{num} -->
+## Overview
+## Usage Examples
+## Technical Specifications
+```"""
+        sec6 = """- Zero runtime memory footprint (documentation only)."""
+
+    else:
+        # Algorithmic / CPU Motion Correction Component
+        sec3 = f"""### 3.1 Domain Physics & Coordinates
+- Motion correction models sample drift over exposure frames t in [0, N-1] on coordinates (x, y).
+- Cross-correlation surfaces CCF(dx, dy) are computed in Fourier space using cross-spectral density.
+- Trajectory regularization minimizes frame-to-frame acceleration spikes.
+
+### 3.2 Convergence & Precision Constraints
+- Interpolation and shift application must adhere to double-precision accumulation where floating-point drift is prone to cancelation.
+- Threshold for convergence: displacement change < 1e-3 px."""
+        sec4 = f"""```mermaid
+flowchart TD
+    InputData["Input Movie / Metadata"] --> Runner["motioncorr_runner.cpp"]
+    Runner --> Module["Component #{num}: {title}"]
+    Module --> ParityGate["Numerical Parity Gate (Issue #4)"]
+    ParityGate --> Output["MRC / STAR Outputs"]
+```"""
+        sec5 = f"""```cpp
+// Target interfaces for #{num}
+namespace MotionCorr {{
+    struct ModuleConfig {{
+        bool enable_verification = true;
+        double tolerance = 1e-6;
+    }};
+}}
+```"""
+        sec6 = """- Enforce zero-allocation loops during iterative Fourier search.
+- Pre-allocate scratch workspace buffers during pipeline initialization.
+- Maximum memory overhead ceiling: $\\le 10\\%$ RSS delta (aligned with Issue #10 acceptance criteria)."""
+
     spec = f"""# Architectural Design Specification: #{num} - {title}
 
 - **Issue Reference**: #{num} - {title}
@@ -161,49 +312,25 @@ This architectural specification details the algorithmic formulation, component 
 
 ## 3. Mathematical & Algorithmic Formulation
 
-### 3.1 Domain Physics & Coordinates
-- Motion correction models sample drift over exposure frames t in [0, N-1] on coordinates (x, y).
-- Cross-correlation surfaces CCF(dx, dy) are computed in Fourier space using cross-spectral density.
-- Trajectory regularization minimizes frame-to-frame acceleration spikes.
-
-### 3.2 Convergence & Precision Constraints
-- Interpolation and shift application must adhere to double-precision accumulation where floating-point drift is prone to cancelation.
-- Threshold for convergence: displacement change < 1e-3 px.
+{sec3}
 
 ---
 
 ## 4. Component Architecture & Data Flow
 
-```mermaid
-flowchart TD
-    InputData["Input Movie / Metadata"] --> Runner["motioncorr_runner.cpp"]
-    Runner --> Module["Component #{num}: {title}"]
-    Module --> ParityGate["Numerical Parity Gate (Issue #4)"]
-    ParityGate --> Output["MRC / STAR Outputs"]
-```
+{sec4}
 
 ---
 
 ## 5. Interface Contracts & Data Structures
 
-### 5.1 Modified / Introduced Interfaces
-```cpp
-// Target interfaces for #{num}
-namespace MotionCorr {{
-    struct ModuleConfig {{
-        bool enable_verification = true;
-        double tolerance = 1e-6;
-    }};
-}}
-```
+{sec5}
 
 ---
 
 ## 6. Memory Staging & Allocation Strategy
 
-- Enforce zero-allocation loops during iterative Fourier search.
-- Pre-allocate scratch workspace buffers during pipeline initialization.
-- Maximum memory overhead ceiling: $\\le 5\\%$ RSS delta.
+{sec6}
 
 ---
 

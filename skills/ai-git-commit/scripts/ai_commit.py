@@ -14,9 +14,21 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-DEFAULT_AI_NAME = "MotionCorr AI Assistant"
-DEFAULT_AI_EMAIL = "ai-assistant@users.noreply.github.com"
+DEFAULT_AI_COAUTHOR_NAME = "MotionCorr AI Assistant"
+DEFAULT_AI_COAUTHOR_EMAIL = "noreply@github.com"
 DEFAULT_TRAILER = "AI-Generated: true"
+
+
+def get_git_author_ident(target_repo: Optional[Path] = None) -> Tuple[str, str]:
+    """Retrieve the exact author name and email Git resolves in the current environment."""
+    code, out, _ = run_git_command(["var", "GIT_AUTHOR_IDENT"], cwd=target_repo)
+    if code == 0 and out.strip():
+        m = re.match(r"^([^<]+)<([^>]+)>", out.strip())
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
+    code_n, name, _ = run_git_command(["config", "user.name"], cwd=target_repo)
+    code_e, email, _ = run_git_command(["config", "user.email"], cwd=target_repo)
+    return (name.strip() or "MotionCorr Developer", email.strip() or "developer@noreply.github.com")
 
 IGNORED_PATTERNS = [
     r"^\.agents/?",
@@ -262,26 +274,34 @@ def auto_generate_commit_message(repo_root: Path, files_to_stage: List[str], sta
     return subject + "\n" + "\n".join(body_lines)
 
 
-def format_commit_message(base_message: str, add_trailer: bool = True, co_author: Optional[str] = None) -> str:
-    """Format commit message with AI trailer and optional co-authorship metadata."""
+def format_commit_message(
+    base_message: str,
+    add_trailer: bool = True,
+    add_ai_coauthor: bool = True,
+    co_author: Optional[str] = None
+) -> str:
+    """Format commit message with AI trailer and co-authorship metadata."""
     lines = [base_message.strip(), ""]
     if add_trailer:
         lines.append(DEFAULT_TRAILER)
+    if add_ai_coauthor:
+        lines.append(f"Co-authored-by: {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>")
     if co_author:
         lines.append(f"Co-authored-by: {co_author}")
     return "\n".join(lines).strip()
 
 
-def setup_git_alias(ai_name: str, ai_email: str) -> bool:
+def setup_git_alias() -> bool:
     """Configure git alias 'ai-commit' in local git configuration."""
     alias_cmd = (
-        f'!f() {{ git -c user.name="{ai_name}" -c user.email="{ai_email}" '
-        f'commit --trailer "{DEFAULT_TRAILER}" "$@"; }}; f'
+        f'!f() {{ git commit --trailer "{DEFAULT_TRAILER}" '
+        f'--trailer "Co-authored-by: {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>" "$@"; }}; f'
     )
     code, _, err = run_git_command(["config", "alias.ai-commit", alias_cmd])
     if code == 0:
-        print(f"Git alias 'git ai-commit' successfully created.")
-        print(f"Author identity set to: {ai_name} <{ai_email}>")
+        print("Git alias 'git ai-commit' successfully created.")
+        print(f"Trailer: {DEFAULT_TRAILER}")
+        print(f"Co-author: {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>")
         return True
     else:
         sys.stderr.write(f"Failed to configure git alias: {err}\n")
@@ -304,9 +324,10 @@ def main():
     parser.add_argument("-y", "--yes", action="store_true", help="Bypass interactive approval and commit directly")
     parser.add_argument("--diff", "--show-diff", action="store_true", help="Display full unified diff preview in addition to summary")
     parser.add_argument("--diff-limit", type=int, default=80, help="Maximum lines of diff preview to display when --diff is enabled (default: 80)")
-    parser.add_argument("--author-name", default=DEFAULT_AI_NAME, help=f"AI Author name (default: {DEFAULT_AI_NAME})")
-    parser.add_argument("--author-email", default=DEFAULT_AI_EMAIL, help=f"AI Author email (default: {DEFAULT_AI_EMAIL})")
-    parser.add_argument("--co-author", help="Optional human co-author in 'Name <email>' format")
+    parser.add_argument("--author-name", help="Explicit author name override (defaults to current Git user)")
+    parser.add_argument("--author-email", help="Explicit author email override (defaults to current Git user)")
+    parser.add_argument("--no-ai-coauthor", action="store_true", help="Omit 'Co-authored-by: MotionCorr AI Assistant' trailer")
+    parser.add_argument("--co-author", help="Optional additional human co-author in 'Name <email>' format")
     parser.add_argument("--no-trailer", action="store_true", help="Omit 'AI-Generated: true' commit trailer")
     parser.add_argument("--dry-run", action="store_true", help="Simulate staging and diff display without committing")
     parser.add_argument("--setup-alias", action="store_true", help="Register 'git ai-commit' alias in git config")
@@ -315,7 +336,7 @@ def main():
     args = parser.parse_args()
 
     if args.setup_alias:
-        success = setup_git_alias(args.author_name, args.author_email)
+        success = setup_git_alias()
         sys.exit(0 if success else 1)
 
     target_repo = Path(args.repo).resolve() if args.repo else find_git_root()
@@ -340,6 +361,11 @@ def main():
         print("No relevant modified files found to stage.")
         sys.exit(0)
 
+    # Resolve author identity (respecting the current developer/collaborator running the tool)
+    current_name, current_email = get_git_author_ident(target_repo)
+    author_name = args.author_name if args.author_name else current_name
+    author_email = args.author_email if args.author_email else current_email
+
     # 2. Determine or generate commit message
     if args.message:
         raw_message = args.message
@@ -350,13 +376,15 @@ def main():
     commit_msg = format_commit_message(
         raw_message,
         add_trailer=not args.no_trailer,
+        add_ai_coauthor=not args.no_ai_coauthor,
         co_author=args.co_author
     )
 
-    git_env = {
-        "GIT_AUTHOR_NAME": args.author_name,
-        "GIT_AUTHOR_EMAIL": args.author_email,
-    }
+    git_env = {}
+    if args.author_name:
+        git_env["GIT_AUTHOR_NAME"] = args.author_name
+    if args.author_email:
+        git_env["GIT_AUTHOR_EMAIL"] = args.author_email
 
     # Stage files to examine exact diff
     if not stage_files(target_repo, files_to_stage):
@@ -370,7 +398,9 @@ def main():
     print(" AI Git Commit Plan")
     print("==================================================")
     print(f"Repository: {target_repo}")
-    print(f"Author:     {args.author_name} <{args.author_email}>")
+    print(f"Author:     {author_name} <{author_email}>")
+    if not args.no_ai_coauthor:
+        print(f"Co-Author:  {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>")
     print(f"Files to Stage ({len(files_to_stage)}):")
     for f in files_to_stage:
         print(f"  - {f}")

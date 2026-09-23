@@ -27,10 +27,10 @@ This skill allows the agent or developer to inspect working tree modifications, 
 4. **Context-Aware Conventional Commit Message Generation**:
    - Classifies changes (`feat`, `fix`, `docs`, `test`, `build`, `refactor`, `chore`).
    - Formulates a concise subject line and itemized file inventory.
-5. **AI Attribution in `git blame` & Git Logs**:
-   - Sets `Author: MotionCorr AI Assistant <ai-assistant@users.noreply.github.com>`.
-   - Appends `AI-Generated: true` trailer.
-   - Preserves local developer as `Committer`.
+5. **Collaborator Authorship & AI Attribution**:
+   - Preserves the local developer/collaborator as the primary `Author` (from `git config` or `git var GIT_AUTHOR_IDENT`).
+   - Appends standard `AI-Generated: true` trailer.
+   - Appends `Co-authored-by: MotionCorr AI Assistant <noreply@github.com>` trailer to maintain transparent provenance without polluting profile links.
 
 ---
 

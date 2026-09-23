@@ -29,6 +29,9 @@ def parse_mrc(filepath: Path) -> Tuple[Dict[str, Any], np.ndarray, bytes]:
 
     header_bytes = raw[:1024]
     nx, ny, nz, mode = struct.unpack_from("<4i", header_bytes, 0)
+    nsymbt = struct.unpack_from("<i", header_bytes, 92)[0]
+    if min(nx, ny, nz) <= 0 or nsymbt < 0:
+        raise ValueError(f"Invalid MRC dimensions or extended-header size in {filepath}")
     dmin, dmax, dmean = struct.unpack_from("<3f", header_bytes, 76)
     rms = struct.unpack_from("<f", header_bytes, 216)[0]
 
@@ -45,22 +48,23 @@ def parse_mrc(filepath: Path) -> Tuple[Dict[str, Any], np.ndarray, bytes]:
     }
 
     dtype_map = {
-        0: np.int8,
-        1: np.int16,
-        2: np.float32,
-        6: np.uint16,
-        12: np.float16,
+        0: np.dtype("i1"),
+        1: np.dtype("<i2"),
+        2: np.dtype("<f4"),
+        6: np.dtype("<u2"),
+        12: np.dtype("<f2"),
     }
     if mode not in dtype_map:
         raise ValueError(f"Unsupported MRC mode {mode} in {filepath}")
 
     expected_pixels = nx * ny * nz
-    pixel_data = np.frombuffer(raw[1024:], dtype=dtype_map[mode])
-    if pixel_data.size != expected_pixels:
-        # Some formats have extended header; handle offset if needed
-        data_offset = len(raw) - expected_pixels * pixel_data.itemsize
-        if data_offset >= 1024:
-            pixel_data = np.frombuffer(raw[data_offset:], dtype=dtype_map[mode])
+    data_offset = 1024 + nsymbt
+    expected_size = data_offset + expected_pixels * dtype_map[mode].itemsize
+    if len(raw) != expected_size:
+        raise ValueError(
+            f"MRC payload size mismatch in {filepath}: expected {expected_size} bytes, got {len(raw)}"
+        )
+    pixel_data = np.frombuffer(raw, dtype=dtype_map[mode], count=expected_pixels, offset=data_offset)
 
     return header_info, pixel_data, header_bytes
 
@@ -140,20 +144,26 @@ def extract_global_shifts(star_dict: Dict[str, Any]) -> List[Tuple[int, float, f
         return shifts
 
     for row in block["rows"]:
-        if len(row) > max(frame_idx, x_idx, y_idx):
-            f_num = int(row[frame_idx])
-            sx = float(row[x_idx])
-            sy = float(row[y_idx])
-            shifts.append((f_num, sx, sy))
+        if len(row) != len(labels):
+            raise ValueError("Malformed global_shift row: column count differs from labels")
+        f_num = int(row[frame_idx])
+        sx = float(row[x_idx])
+        sy = float(row[y_idx])
+        shifts.append((f_num, sx, sy))
     return shifts
 
 
 def normalize_path(p: str) -> str:
-    """Normalize file path to basename or last 2 segments for fair comparison."""
-    parts = Path(p).parts
-    if len(parts) >= 2:
-        return f"{parts[-2]}/{parts[-1]}"
+    """Ignore differing output roots while preserving the named movie or artifact."""
     return Path(p).name
+
+
+def normalized_mrc_labels(header: bytes) -> bytes:
+    """Ignore only RELION's clock stamp in the first 80-byte MRC label."""
+    labels = bytearray(header[224:1024])
+    timestamp = rb"\b\d{2}-[A-Za-z]{3}-\d{2}\s+\d{2}:\d{2}:\d{2}\b"
+    labels[:80] = re.sub(timestamp, lambda match: b"0" * len(match.group()), bytes(labels[:80]))
+    return bytes(labels)
 
 
 def compare_trajectories(
@@ -163,6 +173,13 @@ def compare_trajectories(
     """Compare two motion trajectories and compute error metrics."""
     if not ref_shifts or not test_shifts:
         return {"error": "Missing shifts in reference or test STAR file"}
+
+    for name, shifts in (("reference", ref_shifts), ("test", test_shifts)):
+        frames = [frame for frame, _, _ in shifts]
+        if any(frame < 1 for frame in frames) or len(set(frames)) != len(frames):
+            return {"error": f"Invalid or duplicate frame numbers in {name} trajectory"}
+        if any(not (math.isfinite(x) and math.isfinite(y)) for _, x, y in shifts):
+            return {"error": f"Non-finite shift in {name} trajectory"}
 
     ref_map = {f: (x, y) for f, x, y in ref_shifts}
     test_map = {f: (x, y) for f, x, y in test_shifts}
@@ -228,29 +245,36 @@ def compare_images(
     test_raw_header: bytes,
 ) -> Dict[str, Any]:
     """Compare pixel arrays and header metadata, normalizing run timestamps."""
+    if any(ref_header[key] != test_header[key] for key in ("nx", "ny", "nz", "mode")):
+        return {"error": "MRC dimensions or mode differ", "passed": False}
     if ref_pixels.shape != test_pixels.shape:
         return {
             "error": f"Image shape mismatch: {ref_pixels.shape} vs {test_pixels.shape}",
             "passed": False,
         }
 
+    if not np.isfinite(ref_pixels).all() or not np.isfinite(test_pixels).all():
+        return {"error": "Non-finite pixel in reference or test MRC", "passed": False}
+
     diff = test_pixels.astype(np.float64) - ref_pixels.astype(np.float64)
     abs_diff = np.abs(diff)
     max_abs_err = float(np.max(abs_diff))
     rmse = float(np.sqrt(np.mean(diff ** 2)))
-    ref_std = float(ref_header.get("rms", np.std(ref_pixels)))
-    rel_rmse = (rmse / ref_std) if ref_std > 1e-12 else 0.0
+    ref_std = float(np.std(ref_pixels.astype(np.float64)))
+    rel_rmse = rmse / max(ref_std, 1e-12)
 
-    # Header comparison excluding timestamp labels (offset 224 to 1024)
-    # Binary header metadata check (0..224)
+    # Compare every header byte except RELION's run timestamp in the first label.
     core_header_diff = sum(b1 != b2 for b1, b2 in zip(ref_raw_header[:224], test_raw_header[:224]))
-
-    # Label diff check
     label_diff = sum(b1 != b2 for b1, b2 in zip(ref_raw_header[224:1024], test_raw_header[224:1024]))
+    normalized_label_diff = sum(
+        b1 != b2 for b1, b2 in zip(
+            normalized_mrc_labels(ref_raw_header), normalized_mrc_labels(test_raw_header)
+        )
+    )
 
     return {
         "num_pixels": int(ref_pixels.size),
-        "pixel_identical": (max_abs_err == 0.0),
+        "pixel_identical": ref_pixels.tobytes() == test_pixels.tobytes(),
         "max_abs_pixel_error": max_abs_err,
         "rmse": rmse,
         "relative_rmse": rel_rmse,
@@ -264,6 +288,7 @@ def compare_images(
         "test_pixel_std": float(np.std(test_pixels)),
         "core_header_diff_bytes": core_header_diff,
         "label_header_diff_bytes": label_diff,
+        "normalized_label_diff_bytes": normalized_label_diff,
     }
 
 
@@ -271,10 +296,33 @@ def compare_star_fields(
     ref_star: Dict[str, Any],
     test_star: Dict[str, Any],
     float_tol: float = 1e-4,
+    compare_motion_values: bool = True,
 ) -> Dict[str, Any]:
-    """Compare STAR file fields with path and float normalization."""
+    """Compare STAR schema and metadata; exact mode also compares motion values."""
     diffs = []
     all_blocks = set(ref_star.keys()) | set(test_star.keys())
+    path_labels = {
+        "_rlnMicrographMovieName", "_rlnMicrographName", "_rlnMicrographMetadata",
+        "_rlnMicrographGainName", "_rlnMicrographDefectFile",
+    }
+    derived_motion_labels = {
+        "_rlnMicrographShiftX", "_rlnMicrographShiftY",
+        "_rlnMotionModelCoeff", "_rlnAccumMotionTotal",
+        "_rlnAccumMotionEarly", "_rlnAccumMotionLate",
+    }
+
+    def values_match(label: str, ref_value: str, test_value: str) -> bool:
+        if label in path_labels:
+            return normalize_path(ref_value) == normalize_path(test_value)
+        try:
+            ref_number, test_number = float(ref_value), float(test_value)
+        except ValueError:
+            return ref_value == test_value
+        return (
+            math.isfinite(ref_number)
+            and math.isfinite(test_number)
+            and abs(ref_number - test_number) <= float_tol
+        )
 
     for block_name in sorted(all_blocks):
         if block_name not in ref_star:
@@ -300,29 +348,33 @@ def compare_star_fields(
                 if rv is None or tv is None:
                     diffs.append(f"Field '{k}' presence mismatch in block '{block_name}'")
                     continue
-                # Normalize paths
-                if "MovieName" in k or "MicrographName" in k or "Metadata" in k:
-                    if normalize_path(rv) != normalize_path(tv):
-                        diffs.append(f"Path mismatch in {block_name}.{k}: {rv} vs {tv}")
+                if not compare_motion_values and k in derived_motion_labels:
                     continue
-                # Try float comparison
-                try:
-                    rf_val = float(rv)
-                    tf_val = float(tv)
-                    if abs(rf_val - tf_val) > float_tol:
-                        diffs.append(f"Value diff in {block_name}.{k}: {rv} vs {tv}")
-                except ValueError:
-                    if rv != tv:
-                        diffs.append(f"String diff in {block_name}.{k}: {rv} vs {tv}")
+                if not values_match(k, rv, tv):
+                    diffs.append(f"Value diff in {block_name}.{k}: {rv} vs {tv}")
         elif rb["type"] == "loop":
-            rc = rb.get("columns", [])
-            tc = tb.get("columns", [])
+            rc = rb.get("labels", [])
+            tc = tb.get("labels", [])
             if rc != tc:
                 diffs.append(f"Loop '{block_name}' column mismatch: {rc} vs {tc}")
             rr = rb.get("rows", [])
             tr = tb.get("rows", [])
             if len(rr) != len(tr):
                 diffs.append(f"Loop '{block_name}' row count mismatch: {len(rr)} vs {len(tr)}")
+            if rc != tc:
+                continue
+            for row_number, (ref_row, test_row) in enumerate(zip(rr, tr), start=1):
+                if len(ref_row) != len(rc) or len(test_row) != len(tc):
+                    diffs.append(f"Loop '{block_name}' row {row_number} has malformed column count")
+                    continue
+                for label, ref_value, test_value in zip(rc, ref_row, test_row):
+                    if not compare_motion_values and label in derived_motion_labels:
+                        continue
+                    if not values_match(label, ref_value, test_value):
+                        diffs.append(
+                            f"Value diff in {block_name} row {row_number} {label}: "
+                            f"{ref_value} vs {test_value}"
+                        )
 
     return {
         "num_differences": len(diffs),
@@ -364,6 +416,25 @@ def parse_time_v_log(text: str) -> Dict[str, Any]:
     return res
 
 
+def discover_output_files(directory: Path) -> Tuple[Optional[Path], Optional[Path], List[str]]:
+    """Discover one movie's outputs; never silently select one of several movies."""
+    mrcs = sorted(
+        p for p in directory.glob("**/*.mrc")
+        if not p.name.endswith(("_noDW.mrc", "_PS.mrc", "_ODD.mrc", "_EVN.mrc"))
+    )
+    stars = sorted(
+        p for p in directory.glob("**/*.star")
+        if not p.name.startswith("corrected_micrographs")
+    )
+    errors = []
+    if len(mrcs) > 1:
+        errors.append(f"Multiple corrected MRCs in {directory}; specify --ref-mrc or --test-mrc")
+    if len(stars) > 1:
+        errors.append(f"Multiple movie STAR files in {directory}; specify --ref-star or --test-star")
+    return (mrcs[0] if len(mrcs) == 1 else None,
+            stars[0] if len(stars) == 1 else None, errors)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--ref", type=Path, help="Reference file (.mrc or .star) or output directory")
@@ -387,6 +458,7 @@ def main() -> None:
     parser.add_argument("--shift-rmse", type=float, help="Override coordinate RMS shift error tolerance in pixels")
     parser.add_argument("--image-rmse", type=float, help="Override image RMSE tolerance")
     parser.add_argument("--image-max-err", type=float, help="Override image max pixel error tolerance")
+    parser.add_argument("--image-relative-rmse", type=float, help="Override relative image RMSE tolerance (relaxed/custom gates)")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON to stdout")
     parser.add_argument("--json-out", type=Path, help="Write machine-readable JSON report to file")
     args = parser.parse_args()
@@ -417,58 +489,55 @@ def main() -> None:
         tol_image_rmse = args.image_rmse
     if args.image_max_err is not None:
         tol_image_max_err = args.image_max_err
+    tol_image_relative_rmse = 1e-3 if args.image_relative_rmse is None else args.image_relative_rmse
+    for name, value in (("max shift", tol_max_shift), ("shift RMS", tol_shift_rmse),
+                        ("image RMS", tol_image_rmse), ("image maximum", tol_image_max_err),
+                        ("relative image RMS", tol_image_relative_rmse)):
+        if not math.isfinite(value) or value < 0:
+            parser.error(f"{name} tolerance must be finite and nonnegative")
 
     # Locate files
     ref_mrc = args.ref_mrc
     test_mrc = args.test_mrc
     ref_star = args.ref_star
     test_star = args.test_star
-
-    if args.ref:
-        if args.ref.is_file():
-            suffix = args.ref.suffix.lower()
-            if suffix in (".mrc", ".mrcs", ".tif", ".tiff") and not ref_mrc:
-                ref_mrc = args.ref
-            elif suffix == ".star" and not ref_star:
-                ref_star = args.ref
-        elif args.ref.is_dir():
-            # Look for movie mrc and star inside ref directory
-            mrcs = sorted(args.ref.glob("**/*.mrc"))
-            # Exclude noDW if main exists, or pick main
-            main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
-            if main_mrcs and not ref_mrc:
-                ref_mrc = main_mrcs[0]
-            elif mrcs and not ref_mrc:
-                ref_mrc = mrcs[0]
-
-            stars = sorted(args.ref.glob("**/*.star"))
-            movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
-            if movie_stars and not ref_star:
-                ref_star = movie_stars[0]
-            elif stars and not ref_star:
-                ref_star = stars[0]
-
-    if args.test:
-        if args.test.is_file():
-            suffix = args.test.suffix.lower()
-            if suffix in (".mrc", ".mrcs", ".tif", ".tiff") and not test_mrc:
-                test_mrc = args.test
-            elif suffix == ".star" and not test_star:
-                test_star = args.test
-        elif args.test.is_dir():
-            mrcs = sorted(args.test.glob("**/*.mrc"))
-            main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
-            if main_mrcs and not test_mrc:
-                test_mrc = main_mrcs[0]
-            elif mrcs and not test_mrc:
-                test_mrc = mrcs[0]
-
-            stars = sorted(args.test.glob("**/*.star"))
-            movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
-            if movie_stars and not test_star:
-                test_star = movie_stars[0]
-            elif stars and not test_star:
-                test_star = stars[0]
+    input_errors = []
+    for name, path in (("reference", args.ref), ("test", args.test)):
+        if path is None:
+            continue
+        if not path.exists():
+            input_errors.append(f"{name.capitalize()} input does not exist: {path}")
+            continue
+        if path.is_file():
+            suffix = path.suffix.lower()
+            if suffix not in (".mrc", ".star"):
+                input_errors.append(f"Unsupported {name} input file type: {path}")
+            elif name == "reference":
+                if suffix == ".mrc" and not ref_mrc:
+                    ref_mrc = path
+                elif suffix == ".star" and not ref_star:
+                    ref_star = path
+            else:
+                if suffix == ".mrc" and not test_mrc:
+                    test_mrc = path
+                elif suffix == ".star" and not test_star:
+                    test_star = path
+        elif path.is_dir():
+            found_mrc, found_star, discovery_errors = discover_output_files(path)
+            if name == "reference":
+                if not ref_mrc:
+                    ref_mrc = found_mrc
+                if not ref_star:
+                    ref_star = found_star
+            else:
+                if not test_mrc:
+                    test_mrc = found_mrc
+                if not test_star:
+                    test_star = found_star
+            if not (ref_mrc if name == "reference" else test_mrc):
+                input_errors.extend(e for e in discovery_errors if "MRC" in e)
+            if not (ref_star if name == "reference" else test_star):
+                input_errors.extend(e for e in discovery_errors if "STAR" in e)
 
     report: Dict[str, Any] = {
         "gate_profile": args.gate,
@@ -477,6 +546,7 @@ def main() -> None:
             "shift_rmse": tol_shift_rmse,
             "image_rmse": tol_image_rmse,
             "image_max_err": tol_image_max_err,
+            "image_relative_rmse": tol_image_relative_rmse,
         },
         "checks": {},
         "overall_status": "PASS",
@@ -484,7 +554,7 @@ def main() -> None:
 
     gate_passed = True
     num_comparisons_run = 0
-    errors = []
+    errors = input_errors
 
     # 1. Compare motion trajectories from STAR files
     if ref_star or test_star:
@@ -503,7 +573,10 @@ def main() -> None:
 
             traj_res = compare_trajectories(ref_shifts, test_shifts)
             star_tol = 1e-4 if args.gate == "exact" else 1e-3
-            star_diff_res = compare_star_fields(ref_parsed, test_parsed, float_tol=star_tol)
+            star_diff_res = compare_star_fields(
+                ref_parsed, test_parsed, float_tol=star_tol,
+                compare_motion_values=(args.gate == "exact"),
+            )
 
             check_passed = True
             fail_reasons = []
@@ -561,10 +634,16 @@ def main() -> None:
                     if img_res.get("core_header_diff_bytes", 0) > 0:
                         img_passed = False
                         img_fail_reasons.append(f"Core MRC header mismatch in exact gate: {img_res['core_header_diff_bytes']} diff bytes (expected 0)")
-                else:
-                    if img_res["rmse"] > tol_image_rmse and img_res["relative_rmse"] > 1e-3:
+                    if img_res.get("normalized_label_diff_bytes", 0) > 0:
                         img_passed = False
-                        img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e} and relative RMSE {img_res['relative_rmse']:.6e} > 1e-3")
+                        img_fail_reasons.append(f"Non-timestamp MRC label mismatch in exact gate: {img_res['normalized_label_diff_bytes']} diff bytes")
+                else:
+                    if img_res["rmse"] > tol_image_rmse:
+                        img_passed = False
+                        img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e}")
+                    if img_res["relative_rmse"] > tol_image_relative_rmse:
+                        img_passed = False
+                        img_fail_reasons.append(f"Relative image RMSE {img_res['relative_rmse']:.6e} > {tol_image_relative_rmse:.6e}")
                     if img_res["max_abs_pixel_error"] > tol_image_max_err:
                         img_passed = False
                         img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")
@@ -591,6 +670,12 @@ def main() -> None:
                 gt_tuples = [(i + 1, float(sx), float(sy)) for i, (sx, sy) in enumerate(expected_shifts)]
                 gt_comp = compare_trajectories(gt_tuples, test_shifts)
                 report["checks"]["ground_truth_recovery"] = gt_comp
+                if "error" in gt_comp:
+                    gate_passed = False
+                    errors.append(f"Ground truth could not be evaluated: {gt_comp['error']}")
+            else:
+                gate_passed = False
+                errors.append("Ground truth requested but no test movie STAR was resolved")
 
     # 4. Performance & metrics from log files
     if args.test_log:
@@ -600,12 +685,22 @@ def main() -> None:
         else:
             log_metrics = parse_time_v_log(args.test_log.read_text())
             report["metrics"] = log_metrics
-            if log_metrics.get("exit_status") is not None and log_metrics["exit_status"] != 0:
+            for required in ("elapsed_sec", "max_rss_kb", "exit_status"):
+                if required not in log_metrics:
+                    gate_passed = False
+                    errors.append(f"Test process log has no parseable {required}")
+            if log_metrics.get("exit_status") is None:
+                gate_passed = False
+            elif log_metrics["exit_status"] != 0:
                 gate_passed = False
                 errors.append(f"Test process log indicates failure: Exit status {log_metrics['exit_status']} != 0")
 
-    if args.ref_log and args.ref_log.exists():
-        report["ref_metrics"] = parse_time_v_log(args.ref_log.read_text())
+    if args.ref_log:
+        if not args.ref_log.exists():
+            gate_passed = False
+            errors.append(f"Reference log file not found: {args.ref_log}")
+        else:
+            report["ref_metrics"] = parse_time_v_log(args.ref_log.read_text())
 
     # Require at least one complete comparison check to run
     if num_comparisons_run == 0:
@@ -613,6 +708,12 @@ def main() -> None:
         errors.append(
             "No comparison inputs were resolved or found. Specify valid reference and test files/directories with --ref and --test, or explicit --ref-star / --test-star / --ref-mrc / --test-mrc."
         )
+
+    report["coverage"] = {
+        "motion_and_star": "motion_trajectory" in report["checks"] and "star_fields" in report["checks"],
+        "corrected_image": "corrected_image" in report["checks"],
+    }
+    report["coverage"]["complete"] = all(report["coverage"].values())
 
     if errors:
         report["errors"] = errors
@@ -633,6 +734,8 @@ def main() -> None:
         print("=" * 72)
         print(f"Gate Profile:      {args.gate.upper()}")
         print(f"Overall Status:    {report['overall_status']}")
+        if not report["coverage"]["complete"]:
+            print("Coverage:          PARTIAL (PASS/FAIL applies only to supplied comparison pairs)")
         print("-" * 72)
 
         if errors:
@@ -664,8 +767,8 @@ def main() -> None:
                 print(f"   Pixel-identical:      {im['pixel_identical']}")
                 print(f"   Image RMSE:           {im['rmse']:.6e} (threshold: {tol_image_rmse:.6e})")
                 print(f"   Max absolute diff:    {im['max_abs_pixel_error']:.6e} (threshold: {tol_image_max_err:.6e})")
-                print(f"   Relative RMSE:        {im['relative_rmse']:.6e}")
-                print(f"   Normalized headers:   Core metadata: {im['core_header_diff_bytes']} diff bytes, Label/timestamp: {im['label_header_diff_bytes']} diff bytes")
+                print(f"   Relative RMSE:        {im['relative_rmse']:.6e} (threshold: {tol_image_relative_rmse:.6e} in relaxed/custom gate)")
+                print(f"   Normalized headers:   Core metadata: {im['core_header_diff_bytes']} diff bytes, Non-timestamp labels: {im['normalized_label_diff_bytes']} diff bytes")
                 print(f"   Status:               {'PASS' if im['passed'] else 'FAIL'}")
                 if not im["passed"]:
                     for r in im["fail_reasons"]:
@@ -683,8 +786,11 @@ def main() -> None:
         if "ground_truth_recovery" in report["checks"]:
             gt = report["checks"]["ground_truth_recovery"]
             print("\n4. GROUND TRUTH RECOVERY ACCURACY:")
-            print(f"   Coordinate RMS error against known shifts: {gt['coord_rms_error']:.6f} px")
-            print(f"   Max absolute shift error against known shifts: {gt['max_shift_error']:.6f} px")
+            if "error" in gt:
+                print(f"   ERROR: {gt['error']}")
+            else:
+                print(f"   Coordinate RMS error against known shifts: {gt['coord_rms_error']:.6f} px")
+                print(f"   Max absolute shift error against known shifts: {gt['max_shift_error']:.6f} px")
 
         if "metrics" in report:
             m = report["metrics"]

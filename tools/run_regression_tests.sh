@@ -34,18 +34,21 @@ echo "Binary: ${MC_BIN}"
 echo "Python: ${PYTHON_CMD}"
 echo "Run directory: ${TMP_RUN_DIR}"
 
-(
+if ! (
   cd "${REPO_ROOT}/test-data/fixtures"
   "${MC_BIN}" \
     --i synthetic_128x128_8frames.star \
     --o "${TMP_RUN_DIR}" \
-    --use_own --j 1 > /dev/null 2>&1
-)
+    --use_own --j 1 > "${TMP_RUN_DIR}/run.log" 2>&1
+); then
+    cat "${TMP_RUN_DIR}/run.log" >&2
+    exit 1
+fi
 
 "${PYTHON_CMD}" "${REPO_ROOT}/tools/compare_motioncorr.py" \
   --ref "${REPO_ROOT}/test-data/fixtures/reference_output" \
   --test "${TMP_RUN_DIR}" \
   --ground-truth "${REPO_ROOT}/test-data/fixtures/synthetic_128x128_8frames_ground_truth.json" \
-  --gate relaxed
+  --gate exact
 
 echo "=== Regression Test Passed Successfully! ==="

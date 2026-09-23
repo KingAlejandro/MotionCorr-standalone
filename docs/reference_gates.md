@@ -41,13 +41,13 @@ Reference baselines were established across two distinct hardware and platform c
 - **Generation Recipe**: `python3 test-data/generate_synthetic_fixture.py --profile standard`
 - **Properties**: 512 × 512 pixels, 16 frames, 150 particles, seed `20260923`.
 - **Shifts**: `[(round(0.6 * i), round(-0.4 * i)) for i in range(16)]`.
-- **Alignment Recovery**: Recovered shifts differ from ground truth by at most 0.0711 pixel (coordinate RMS 0.0301 pixel).
+- **Alignment Recovery for this recipe**: On macOS with `--use_own --j 1`, recovered shifts differ from the generated ground truth by at most 0.06419 pixel (coordinate RMS 0.04978 pixel). This is a different synthetic movie from the historical 512 × 512 result in the repository README.
 
 ### C. Experimental Tutorial Dataset (RELION SPA Tutorial)
 - **Source**: EMPIAR-10204 (CC0 license), official RELION 3.0 tutorial data.
 - **Release Reference**: GitHub Release [`spa-tutorial-data-v1`](https://github.com/KingAlejandro/MotionCorr-standalone/releases/tag/spa-tutorial-data-v1).
-- **Primary Movie**: `20170629_00021_frameImage.tiff` (SHA256 `df298b1b7741b1e5c9ec3b3e459ce7435f992383c5bbaf5bb7a97ea94c442cf3`)
-- **Gain Reference**: `gain.mrc` (SHA256 `8919cdc7bf0f481cdb3dd5bcb2e71822c67fe99709a3977dc110d7e63b6550fb`)
+- **Primary Movie**: `20170629_00021_frameImage.tiff` (SHA256 `df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0`)
+- **Gain Reference**: `gain.mrc` (SHA256 `8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1`)
 - **Preparation**: `python3 test-data/prepare_movies_star.py relion30_tutorial --limit 1`
 
 ---
@@ -63,9 +63,9 @@ When comparing standalone `motioncorr` against full RELION 5.1 on the same syste
 
 ### Normalization Rules
 1. **MRC Header Timestamps**:
-   The MRC 2014 file format standard stores up to ten 80-byte ASCII label lines in bytes 224–1024. RELION writes a timestamp string at offset 249–252 (e.g. `23-Sep-26 12:04:42`). These timestamp bytes are intentionally excluded from the binary parity check. The remaining core metadata (dimensions, cell sizes, mode, min/max/mean/rms) must match.
+   The MRC 2014 file format stores up to ten 80-byte ASCII label lines in bytes 224–1024. The comparison tool normalizes only RELION's date/time string in the first label (for example, `23-Sep-26 12:04:42`). All other header and label bytes must match in the exact gate.
 2. **STAR Output Paths**:
-   Output directory names (e.g. `standalone_spa_j1/Movies/...` vs `relion_spa_j1/Movies/...`) are normalized to basenames or directory-relative paths prior to comparing `_rlnMicrographMovieName`, `_rlnMicrographName`, and `_rlnMicrographMetadata`.
+   Output directory names (e.g. `standalone_spa_j1/Movies/...` vs `relion_spa_j1/Movies/...`) are normalized to file basenames prior to comparing `_rlnMicrographMovieName`, `_rlnMicrographName`, and `_rlnMicrographMetadata`.
 
 ---
 
@@ -81,7 +81,7 @@ Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0) on t
 | **User CPU Time** | `57.88 s` | `80.37 s` | Parallel execution |
 | **System CPU Time** | `5.64 s` | `8.08 s` | Efficient I/O |
 | **CPU Utilization** | `99%` | `320%` | ~3.2 cores active |
-| **Peak Memory (RSS)** | `2,864,600 KB` (~2.86 GB) | `3,087,856 KB` (~3.09 GB) | +7.8% memory overhead |
+| **Peak Memory (RSS)** | `2,864,600 KB` (~2.73 GiB) | `3,087,856 KB` (~2.95 GiB) | +7.8% memory overhead |
 | **_rlnAccumMotionTotal** | `16.419638 Å` | `16.421206 Å` | **Δ = 0.0016 Å (< 0.01%)** |
 | **_rlnAccumMotionEarly** | `2.504833 Å` | `2.503605 Å` | **Δ = 0.0012 Å** |
 | **_rlnAccumMotionLate** | `13.914805 Å` | `13.917601 Å` | **Δ = 0.0028 Å** |
@@ -100,15 +100,16 @@ graph TD
     
     C --> C1[Coordinate RMS Error <= 1e-4 px]
     C --> C2[Max Shift Error <= 1e-4 px]
-    C --> C3[Pixel RMSE == 0.000000]
-    C --> C4[Max Pixel Error == 0.000000]
+    C --> C3[Pixel payload byte-identical]
+    C --> C4[Non-timestamp MRC header identical]
     C --> C5[Exit Code == 0]
     
     D --> D1[Coordinate RMS Error <= 0.02 px]
     D --> D2[Max Shift Error <= 0.05 px]
     D --> D3[Pixel RMSE <= 0.020]
     D --> D4[Max Pixel Error <= 5.000]
-    D --> D5[Exit Code == 0]
+    D --> D5[Relative RMSE <= 0.1 percent]
+    D --> D6[Exit Code == 0]
 ```
 
 ### Gate 1: Strict Parity Gate (`--gate exact`)
@@ -121,7 +122,7 @@ Used for single-threaded CPU regression testing against reference outputs on the
 | **Image RMSE** | `<= 1.0e-7` | Root-mean-square pixel error |
 | **Image Max Absolute Error** | `<= 1.0e-7` | Peak individual pixel error |
 | **Pixel-Identical Flag** | `True` | Direct byte equivalence of pixel payload |
-| **Normalized STAR Schema** | `0 differences` | Discrepancies in metadata fields |
+| **Normalized STAR Schema and Values** | `0 differences` | Static metadata, loop columns/rows, and motion values must match after path normalization |
 | **Process Exit Status** | `0` | Successful execution |
 
 ### Gate 2: Numerical Equivalence Gate (`--gate relaxed`)
@@ -129,15 +130,16 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 
 > [!NOTE]
 > **Why numerical tolerances are necessary for parallel backends:**
-> Floating-point summation is non-associative: $(a + b) + c \neq a + (b + c)$. Multi-threaded OpenMP reductions, GPU block reductions, and differing FFT implementations (e.g., cuFFT vs FFTW) alter the summation order across image patches and frequency bins. This produces negligible trajectory drifts (~0.001–0.007 px) while maintaining scientific fidelity.
+> Floating-point summation is non-associative: $(a + b) + c \neq a + (b + c)$. Parallel reductions and different FFT implementations can alter results. Measure those differences against the same input and reference before judging equivalence; the thresholds below are provisional for future backends.
 
 | Parameter | Acceptance Threshold | Justification |
 |:---|:---:|:---|
 | **Max Frame Shift Error** | `<= 0.05 px` | Trajectory shifts remain within 1/20th of a detector pixel |
 | **Coordinate RMS Shift Error** | `<= 0.02 px` | Global motion drift across all frames is bounded |
 | **Image RMSE** | `<= 0.020` | Relative RMSE $< 0.1\%$ of micrograph standard deviation |
+| **Image Relative RMSE** | `<= 0.001` | Evaluated independently of absolute RMSE; a constant reference with changed pixels fails |
 | **Image Max Absolute Error** | `<= 5.0` | Accommodates isolated edge and hot-pixel interpolation artifacts |
-| **Normalized STAR Schema** | `0 structural diffs` | All required STAR data blocks and headers present |
+| **Normalized STAR Schema and Static Metadata** | `0 differences` | Blocks, loop labels/row counts, and static values match; global shifts are checked separately. Local motion coefficients and shifts are not yet an independent numerical gate. |
 | **Process Exit Status** | `0` | Clean process termination |
 
 ---
@@ -145,6 +147,8 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 ## 6. Verification Tooling (`tools/compare_motioncorr.py`)
 
 The standalone comparison tool supports both human-readable diagnostics and automated JSON reporting:
+
+Each directory comparison is for one movie. If a directory contains multiple corrected MRC or per-movie STAR files, the tool fails and asks for explicit file paths; run a separate comparison for every movie in a dataset. A file-only comparison is marked as partial coverage, and its PASS/FAIL applies only to the supplied pair. Ground-truth recovery is reported when supplied, but no ground-truth tolerance is applied. A supplied `--test-log` must contain parseable `/usr/bin/time -v` time, memory, and exit status. The regression wrapper also checks the MotionCorr process exit status directly.
 
 ### Example Usage
 
@@ -184,5 +188,5 @@ python3 tools/compare_motioncorr.py \
 | **Synthetic 128 (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~85 MB | `0` |
 | **Synthetic 512 (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~310 MB | `0` |
 | **Tutorial Movie (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~2.8 GB | `0` |
-| **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.86 GB | `0` |
-| **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 3.09 GB | `0` |
+| **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.73 GiB | `0` |
+| **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |

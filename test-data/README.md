@@ -2,6 +2,8 @@
 
 This directory contains test datasets, synthetic fixture recipes, and verification tooling for MotionCorr Standalone. Detailed numerical acceptance gates and baseline benchmarks are documented in [docs/reference_gates.md](../docs/reference_gates.md).
 
+The Python fixture generator and comparison tool require Python 3 and NumPy. Set `PYTHON=/path/to/python3` for `tools/run_regression_tests.sh` when NumPy is installed in a different environment.
+
 ---
 
 ## 1. Quick Verification with Synthetic Fixture (< 1s)
@@ -51,7 +53,7 @@ mkdir -p relion30_tutorial/Movies
 gh release download spa-tutorial-data-v1 \
   --repo KingAlejandro/MotionCorr-standalone \
   --dir relion30_tutorial/Movies
-(cd relion30_tutorial/Movies && sha256sum -c SHA256SUMS.txt --ignore-missing)
+(cd relion30_tutorial/Movies && shasum -a 256 -c SHA256SUMS.txt)
 python3 test-data/prepare_movies_star.py relion30_tutorial --limit 1
 ```
 
@@ -63,7 +65,7 @@ mkdir -p relion30_tutorial/Movies && cd relion30_tutorial/Movies
 curl -fLO "${URL}/20170629_00021_frameImage.tiff"
 curl -fLO "${URL}/gain.mrc"
 curl -fLO "${URL}/SHA256SUMS.txt"
-sha256sum -c SHA256SUMS.txt --ignore-missing
+awk '$2 == "20170629_00021_frameImage.tiff" || $2 == "gain.mrc" { print }' SHA256SUMS.txt | shasum -a 256 -c -
 cd ../..
 python3 test-data/prepare_movies_star.py relion30_tutorial --limit 1
 ```

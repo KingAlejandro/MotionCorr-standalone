@@ -40,8 +40,12 @@ This project employs a multi-agent engineering workflow to safely extract, optim
 
 ```mermaid
 flowchart TD
-    Issue["Issue #N"] --> Arch["Architecture Agent"]
-    Arch --> Spec["agents/designs/issue_N_*.md"]
+    Issue["Issue #N"] --> Loop{"Dialectic Refinement Loop<br/>(refine_specification.py)"}
+    Loop --> Arch["Architecture Agent (Generator)"]
+    Arch --> Draft["Design Draft (Round R)"]
+    Draft --> Conf["Conformance Agent (Critic)"]
+    Conf -->|SPEC_REVISION_REQUESTED| Loop
+    Conf -->|SPEC_APPROVED| Spec["Certified Specification<br/>(agents/designs/issue_N_design.md)"]
     Spec --> User{"Maintainer Approval"}
     User -->|Approved| Impl["Implementation Agent"]
     Impl --> Code["Source Code & Tests"]
@@ -59,7 +63,8 @@ flowchart TD
 
 ## 3. Tooling & Skills Reference
 
-- **Spec Conformance Audit**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`
+- **Dialectic Specification Refinement Loop**: `python agents/scripts/refine_specification.py --issue <NUM> --max-rounds 3`
+- **Spec Conformance Audit & Spec Review**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`
 - **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
 - **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
 - **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`

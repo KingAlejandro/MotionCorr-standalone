@@ -240,9 +240,10 @@ def main():
     print(f"\n[Agent Meta-Auditor] Scanning 'agents/' directory...")
     print(f"[Agent Meta-Auditor] Self-Exclusion Active: Skipping '{self_dir_name}'\n")
 
+    excluded_dirs = {self_dir_name, "designs", "scripts", "logs", "reviews", "drafts"}
     peer_agent_dirs = [
         d for d in agents_root.iterdir()
-        if d.is_dir() and d.name != self_dir_name and not d.name.startswith((".", "_")) and d.name != "designs"
+        if d.is_dir() and d.name not in excluded_dirs and not d.name.startswith((".", "_"))
     ]
 
     if not peer_agent_dirs:

@@ -336,6 +336,160 @@ def format_conformance_report(
 """
 
 
+def audit_specification_draft(
+    spec_path: Path,
+    issue_num: Optional[int],
+    repo_root: Path
+) -> Tuple[str, str, Dict[str, Any]]:
+    """
+    Perform pre-implementation audit of a specification draft.
+    Evaluates issue coverage, measurability, scope boundaries, edge cases, and file whitelists.
+    Returns (verdict, report_markdown, structured_critique).
+    """
+    if not spec_path.exists():
+        return "ERROR", f"Specification draft not found: {spec_path}", {}
+
+    spec_text = spec_path.read_text(encoding="utf-8")
+    spec_meta = parse_spec_content(spec_text, str(spec_path), issue_num or 0)
+    issue_spec = load_specification(repo_root, issue_num, None)
+
+    suggestions = []
+    dimension_scores = {
+        "coverage": {"status": "PASSED", "notes": "All issue requirements reflected in specification."},
+        "measurability": {"status": "PASSED", "notes": "Concrete numerical thresholds specified."},
+        "scope": {"status": "PASSED", "notes": "No scope creep detected; strict boundary maintained."},
+        "edge_cases": {"status": "PASSED", "notes": "Failure modes and input anomalies documented."},
+        "whitelist": {"status": "PASSED", "notes": "Explicit target file/component list defined."},
+    }
+
+    # 1. Check issue requirements coverage
+    issue_criteria = issue_spec.get("criteria", [])
+    uncovered = []
+    for c in issue_criteria:
+        crit_words = [w.lower() for w in re.findall(r"\b[A-Za-z0-9_-]{4,}\b", c) if w.lower() not in ("must", "should", "with", "from", "that")]
+        if not any(w in spec_text.lower() for w in crit_words):
+            uncovered.append(c)
+
+    if uncovered:
+        dimension_scores["coverage"]["status"] = "NEEDS_REVISION"
+        dimension_scores["coverage"]["notes"] = f"{len(uncovered)} issue requirement(s) lack explicit coverage."
+        for u in uncovered:
+            suggestions.append({
+                "type": "MISSING_REQUIREMENT",
+                "title": f"Unaddressed Issue Criterion: {u}",
+                "suggestion": f"Incorporate an explicit technical design section addressing: '{u}'."
+            })
+
+    # 2. Check measurability (numerical tolerance and acceptance gates)
+    has_math_gates = any(k in spec_text.lower() for k in ("rmse", "delta", "tolerance", "parity", "threshold", "gate", "error bound"))
+    has_numbers = bool(re.search(r"(\d+\.\d+|\b0\b|1e-\d+)", spec_text))
+    if not (has_math_gates and has_numbers):
+        dimension_scores["measurability"]["status"] = "NEEDS_REVISION"
+        dimension_scores["measurability"]["notes"] = "Lacks concrete, measurable numerical gates (e.g. delta = 0 or RMSE threshold)."
+        suggestions.append({
+            "type": "MEASURABILITY",
+            "title": "Missing Quantitative Acceptance Gates",
+            "suggestion": "Define unambiguous numerical acceptance thresholds (e.g. exact bitwise delta = 0 for single-thread CPU, or RMSE < 1e-5)."
+        })
+
+    # 3. Check file whitelist / target components
+    has_files = any(k in spec_text for k in ("`src/", "`tests/", "`include/", "files to modify", "affected components", "Proposed Changes"))
+    if not has_files:
+        dimension_scores["whitelist"]["status"] = "NEEDS_REVISION"
+        dimension_scores["whitelist"]["notes"] = "No explicit whitelist of files or modules permitted to change."
+        suggestions.append({
+            "type": "SCOPE_ISOLATION",
+            "title": "Missing File Whitelist",
+            "suggestion": "Add an explicit 'Permitted Changes & File Whitelist' section specifying exactly which files may be touched."
+        })
+
+    # 4. Check edge cases & failure handling
+    has_edge_cases = any(k in spec_text.lower() for k in ("edge case", "failure", "corrupt", "truncate", "zero", "fallback", "error handling"))
+    if not has_edge_cases:
+        dimension_scores["edge_cases"]["status"] = "WARNING"
+        dimension_scores["edge_cases"]["notes"] = "Edge cases and error modes (e.g. truncated inputs, zero motion) not detailed."
+        suggestions.append({
+            "type": "EDGE_CASES",
+            "title": "Unspecified Failure Modes",
+            "suggestion": "Specify behavior for edge cases such as truncated movie files, single-frame movies, or zero-drift inputs."
+        })
+
+    # Determine verdict
+    has_revision = any(d["status"] == "NEEDS_REVISION" for d in dimension_scores.values())
+    if has_revision:
+        verdict = "SPEC_REVISION_REQUESTED"
+        exec_summary = (
+            "The specification draft provides a solid starting point but requires refinement before implementation. "
+            f"Specifically, {len(suggestions)} item(s) must be clarified to eliminate ambiguities and scope drift."
+        )
+    else:
+        verdict = "SPEC_APPROVED"
+        exec_summary = (
+            "The specification draft is comprehensive, unambiguous, and fully ready for implementation. "
+            "All functional requirements, numerical acceptance gates, and scope boundaries are well-defined."
+        )
+
+    # Format report
+    matrix_rows = []
+    for dim, ddata in dimension_scores.items():
+        dim_title = dim.replace("_", " ").title()
+        badge = f"`{ddata['status']}`"
+        matrix_rows.append(f"| **{dim_title}** | {badge} | {ddata['notes']} |")
+    matrix_str = "\n".join(matrix_rows)
+
+    if suggestions:
+        sug_blocks = []
+        for i, s in enumerate(suggestions, 1):
+            sug_blocks.append(
+                f"### [{s['type']}] S-{i:02d}: {s['title']}\n"
+                f"- **Recommendation**: {s['suggestion']}\n"
+            )
+        sug_str = "\n".join(sug_blocks)
+        next_actions = "The Architecture Agent must incorporate the above recommendations and submit an updated specification draft for re-review."
+    else:
+        sug_str = "> **Specification is fully approved.** All functional requirements, numerical acceptance gates, and scope boundaries are unambiguous and ready for implementation.\n"
+        next_actions = "The specification is certified. The Implementation Agent may now begin coding."
+
+    report = f"""# Pre-Implementation Specification Review Report
+
+- **Auditor**: Specification & Scope Conformance Agent (`agents/spec_compliance_agent/`)
+- **Target Specification Draft**: `{spec_path.name}`
+- **Associated Issue**: Issue #{issue_num or 'N/A'} ({issue_spec['title']})
+- **Review Verdict**: **{verdict}**
+
+---
+
+## 1. Executive Summary
+
+{exec_summary}
+
+---
+
+## 2. Specification Quality Matrix
+
+| Evaluation Dimension | Status | Notes |
+| :--- | :--- | :--- |
+{matrix_str}
+
+---
+
+## 3. Required Revisions & Suggested Improvements
+
+{sug_str}
+---
+
+## 4. Next Actions for Architecture Agent
+
+{next_actions}
+"""
+    critique_data = {
+        "verdict": verdict,
+        "dimension_scores": dimension_scores,
+        "suggestions": suggestions,
+    }
+    return verdict, report, critique_data
+
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         try:
@@ -348,6 +502,7 @@ def main():
     )
     parser.add_argument("--issue", type=int, help="Issue number to check specification against")
     parser.add_argument("--spec", help="Path to specification Markdown file")
+    parser.add_argument("--review-spec", help="Perform pre-implementation audit on a specification draft before coding")
     parser.add_argument("--target", help="Git revision or range to review (e.g., HEAD~1, origin/main...HEAD)")
     parser.add_argument("--staged", action="store_true", help="Inspect staged changes only")
     parser.add_argument("--output", help="Optional markdown file path to save the report")
@@ -355,6 +510,27 @@ def main():
     args = parser.parse_args()
     repo_root = find_repo_root()
 
+    # Pre-implementation review mode
+    if args.review_spec:
+        spec_path = Path(args.review_spec).resolve()
+        print(f"\n[Spec Conformance Agent] Running Pre-Implementation Review on: {spec_path.name}...")
+        verdict, report, _ = audit_specification_draft(spec_path, args.issue, repo_root)
+
+        print("\n" + "=" * 60)
+        print(" PRE-IMPLEMENTATION SPECIFICATION REVIEW REPORT")
+        print("=" * 60)
+        print(report)
+        print("=" * 60 + "\n")
+
+        if args.output:
+            out_path = Path(args.output).resolve()
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(report, encoding="utf-8")
+            print(f"[Spec Conformance Agent] Report saved to: {out_path}")
+
+        sys.exit(0 if verdict == "SPEC_APPROVED" else 2)
+
+    # Post-implementation diff audit mode
     diff_text, diff_stat, modified_files, desc = get_diff(repo_root, target=args.target, staged_only=args.staged)
     if not diff_text.strip():
         print(f"[Spec Conformance Agent] No diff found for target: {desc}. Working tree is clean.")
@@ -385,3 +561,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -263,7 +263,7 @@ def main():
         description="Architecture Agent: Generate an Architectural Design Specification for an issue."
     )
     parser.add_argument("--issue", type=int, required=True, help="Issue number to design architecture for")
-    parser.add_argument("--out", help="Custom output path for the specification file")
+    parser.add_argument("--out", "--output", dest="out", help="Custom output path for the specification file")
     parser.add_argument("--force", action="store_true", help="Overwrite existing specification if present")
 
     args = parser.parse_args()

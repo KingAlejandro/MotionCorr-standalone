@@ -84,10 +84,11 @@ agents/
 
 ## Quick Start: Running the Agents
 
-### 1. Designing an Architecture for an Issue
+### 1. Designing & Refining an Architecture (Generator-Critic Loop)
 ```bash
-# Formulate complete architectural specification for an issue
-python agents/architecture_agent/scripts/generate_architecture.py --issue 7
+# Run the automated dialectic loop between Architect and Conformance agents
+# Refines the spec until certified SPEC_APPROVED before coding begins
+python agents/scripts/refine_specification.py --issue 10 --max-rounds 3
 ```
 
 ### 2. Reviewing & Verifying Code (Dual Verification Gate)
@@ -96,7 +97,7 @@ python agents/architecture_agent/scripts/generate_architecture.py --issue 7
 python agents/review_agent/scripts/review_code.py
 
 # Specification & Scope Conformance Audit (Spec Conformance Agent)
-python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue 7
+python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue 10
 ```
 
 ### 3. Auditing the Multi-Agent Ecosystem

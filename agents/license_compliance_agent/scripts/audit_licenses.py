@@ -386,9 +386,11 @@ def main():
     source_findings = scan_source_files(repo_root)
 
     # Determine verdict
-    has_violations = any(s["status"] == "VIOLATION" for s in source_findings)
+    has_violations = any(s["status"] == "VIOLATION" for s in source_findings) or any(
+        d.get("status") == "VIOLATION" for d in python_deps
+    )
     has_warnings = any(s["status"] == "WARNING" for s in source_findings) or any(
-        d.get("status") in ("FLAGGED", "REVIEW_REQUIRED") for d in python_deps
+        d.get("status") in ("WARNING", "FLAGGED", "REVIEW_REQUIRED") for d in python_deps
     )
 
     if has_violations:

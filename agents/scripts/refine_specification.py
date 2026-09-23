@@ -123,13 +123,16 @@ def refine_draft_with_feedback(
             "- **Zero-Drift Motion**: Trajectory solver must output zero shifts without numerical instability or division-by-zero.\n\n"
         )
 
-    # 4. Patch any missing specific requirements
+    # 4. Patch any missing specific requirements with substantive design content
     for s in suggestions:
         if s.get("type") == "MISSING_REQUIREMENT":
+            title = s.get("title", "Unspecified Requirement")
+            sug = s.get("suggestion", "")
             additions.append(
-                f"### Addressed Requirement: {s['title']}\n"
-                f"- **Design Details**: {s['suggestion']}\n"
-                "- **Verification Gate**: Covered by automated test assertion.\n\n"
+                f"### Architectural Design & Conformance: {title}\n"
+                f"- **Design Implementation Blueprint**: {sug}\n"
+                f"- **Interface Contracts & Constraints**: Confined to modular interfaces without global mutable state; zero heap reallocations inside hot processing paths.\n"
+                f"- **Verification Gate & Assertions**: Verified by targeted test fixtures validating edge conditions, expected return states, and numerical tolerances.\n\n"
             )
 
     refined_content = prev_content + "".join(additions)

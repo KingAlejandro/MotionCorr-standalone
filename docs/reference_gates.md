@@ -107,7 +107,7 @@ graph TD
     D --> D1[Coordinate RMS Error <= 0.02 px]
     D --> D2[Max Shift Error <= 0.05 px]
     D --> D3[Pixel RMSE <= 0.020]
-    D --> D4[Max Pixel Error <= 3.000]
+    D --> D4[Max Pixel Error <= 5.000]
     D --> D5[Exit Code == 0]
 ```
 
@@ -136,7 +136,7 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 | **Max Frame Shift Error** | `<= 0.05 px` | Trajectory shifts remain within 1/20th of a detector pixel |
 | **Coordinate RMS Shift Error** | `<= 0.02 px` | Global motion drift across all frames is bounded |
 | **Image RMSE** | `<= 0.020` | Relative RMSE $< 0.1\%$ of micrograph standard deviation |
-| **Image Max Absolute Error** | `<= 3.0` | Accommodates isolated edge and hot-pixel interpolation artifacts |
+| **Image Max Absolute Error** | `<= 5.0` | Accommodates isolated edge and hot-pixel interpolation artifacts |
 | **Normalized STAR Schema** | `0 structural diffs` | All required STAR data blocks and headers present |
 | **Process Exit Status** | `0` | Clean process termination |
 

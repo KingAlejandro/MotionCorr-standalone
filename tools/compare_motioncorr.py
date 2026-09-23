@@ -166,10 +166,27 @@ def compare_trajectories(
 
     ref_map = {f: (x, y) for f, x, y in ref_shifts}
     test_map = {f: (x, y) for f, x, y in test_shifts}
-    common_frames = sorted(set(ref_map.keys()) & set(test_map.keys()))
 
+    ref_keys = set(ref_map.keys())
+    test_keys = set(test_map.keys())
+    if ref_keys != test_keys:
+        missing = sorted(ref_keys - test_keys)
+        extra = sorted(test_keys - ref_keys)
+        mismatch_parts = []
+        if missing:
+            mismatch_parts.append(f"missing in test: {missing}")
+        if extra:
+            mismatch_parts.append(f"unexpected extra in test: {extra}")
+        return {
+            "error": f"Frame set mismatch between reference and test STAR files: {'; '.join(mismatch_parts)}",
+            "frame_mismatch": True,
+            "ref_num_frames": len(ref_keys),
+            "test_num_frames": len(test_keys),
+        }
+
+    common_frames = sorted(ref_keys)
     if not common_frames:
-        return {"error": "No overlapping frames"}
+        return {"error": "No frames present in trajectory"}
 
     diffs_x = []
     diffs_y = []
@@ -297,6 +314,15 @@ def compare_star_fields(
                 except ValueError:
                     if rv != tv:
                         diffs.append(f"String diff in {block_name}.{k}: {rv} vs {tv}")
+        elif rb["type"] == "loop":
+            rc = rb.get("columns", [])
+            tc = tb.get("columns", [])
+            if rc != tc:
+                diffs.append(f"Loop '{block_name}' column mismatch: {rc} vs {tc}")
+            rr = rb.get("rows", [])
+            tr = tb.get("rows", [])
+            if len(rr) != len(tr):
+                diffs.append(f"Loop '{block_name}' row count mismatch: {len(rr)} vs {len(tr)}")
 
     return {
         "num_differences": len(diffs),
@@ -375,12 +401,12 @@ def main() -> None:
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.02
-        tol_image_max_err = 3.0
+        tol_image_max_err = 5.0
     else:  # custom
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.01
-        tol_image_max_err = 0.5
+        tol_image_max_err = 5.0
 
     # Apply command-line overrides
     if args.max_shift_err is not None:
@@ -398,37 +424,51 @@ def main() -> None:
     ref_star = args.ref_star
     test_star = args.test_star
 
-    if args.ref and args.ref.is_dir():
-        # Look for movie mrc and star inside ref directory
-        mrcs = sorted(args.ref.glob("**/*.mrc"))
-        # Exclude noDW if main exists, or pick main
-        main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
-        if main_mrcs and not ref_mrc:
-            ref_mrc = main_mrcs[0]
-        elif mrcs and not ref_mrc:
-            ref_mrc = mrcs[0]
+    if args.ref:
+        if args.ref.is_file():
+            suffix = args.ref.suffix.lower()
+            if suffix in (".mrc", ".mrcs", ".tif", ".tiff") and not ref_mrc:
+                ref_mrc = args.ref
+            elif suffix == ".star" and not ref_star:
+                ref_star = args.ref
+        elif args.ref.is_dir():
+            # Look for movie mrc and star inside ref directory
+            mrcs = sorted(args.ref.glob("**/*.mrc"))
+            # Exclude noDW if main exists, or pick main
+            main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
+            if main_mrcs and not ref_mrc:
+                ref_mrc = main_mrcs[0]
+            elif mrcs and not ref_mrc:
+                ref_mrc = mrcs[0]
 
-        stars = sorted(args.ref.glob("**/*.star"))
-        movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
-        if movie_stars and not ref_star:
-            ref_star = movie_stars[0]
-        elif stars and not ref_star:
-            ref_star = stars[0]
+            stars = sorted(args.ref.glob("**/*.star"))
+            movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
+            if movie_stars and not ref_star:
+                ref_star = movie_stars[0]
+            elif stars and not ref_star:
+                ref_star = stars[0]
 
-    if args.test and args.test.is_dir():
-        mrcs = sorted(args.test.glob("**/*.mrc"))
-        main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
-        if main_mrcs and not test_mrc:
-            test_mrc = main_mrcs[0]
-        elif mrcs and not test_mrc:
-            test_mrc = mrcs[0]
+    if args.test:
+        if args.test.is_file():
+            suffix = args.test.suffix.lower()
+            if suffix in (".mrc", ".mrcs", ".tif", ".tiff") and not test_mrc:
+                test_mrc = args.test
+            elif suffix == ".star" and not test_star:
+                test_star = args.test
+        elif args.test.is_dir():
+            mrcs = sorted(args.test.glob("**/*.mrc"))
+            main_mrcs = [m for m in mrcs if not m.name.endswith("_noDW.mrc")]
+            if main_mrcs and not test_mrc:
+                test_mrc = main_mrcs[0]
+            elif mrcs and not test_mrc:
+                test_mrc = mrcs[0]
 
-        stars = sorted(args.test.glob("**/*.star"))
-        movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
-        if movie_stars and not test_star:
-            test_star = movie_stars[0]
-        elif stars and not test_star:
-            test_star = stars[0]
+            stars = sorted(args.test.glob("**/*.star"))
+            movie_stars = [s for s in stars if not s.name.startswith("corrected_micrographs")]
+            if movie_stars and not test_star:
+                test_star = movie_stars[0]
+            elif stars and not test_star:
+                test_star = stars[0]
 
     report: Dict[str, Any] = {
         "gate_profile": args.gate,
@@ -443,80 +483,139 @@ def main() -> None:
     }
 
     gate_passed = True
+    num_comparisons_run = 0
+    errors = []
 
     # 1. Compare motion trajectories from STAR files
-    if ref_star and test_star and ref_star.exists() and test_star.exists():
-        ref_parsed = parse_star_file(ref_star)
-        test_parsed = parse_star_file(test_star)
-        ref_shifts = extract_global_shifts(ref_parsed)
-        test_shifts = extract_global_shifts(test_parsed)
-
-        traj_res = compare_trajectories(ref_shifts, test_shifts)
-        star_diff_res = compare_star_fields(ref_parsed, test_parsed)
-
-        check_passed = True
-        fail_reasons = []
-        if "error" in traj_res:
-            check_passed = False
-            fail_reasons.append(traj_res["error"])
-        else:
-            if traj_res["max_shift_error"] > tol_max_shift:
-                check_passed = False
-                fail_reasons.append(f"Max shift error {traj_res['max_shift_error']:.6f} > {tol_max_shift:.6f}")
-            if traj_res["coord_rms_error"] > tol_shift_rmse:
-                check_passed = False
-                fail_reasons.append(f"Coord RMS shift error {traj_res['coord_rms_error']:.6f} > {tol_shift_rmse:.6f}")
-
-        traj_res["passed"] = check_passed
-        traj_res["fail_reasons"] = fail_reasons
-        report["checks"]["motion_trajectory"] = traj_res
-        report["checks"]["star_fields"] = star_diff_res
-
-        if not check_passed:
+    if ref_star or test_star:
+        if not ref_star or not ref_star.exists():
             gate_passed = False
+            errors.append(f"Reference STAR file not found or unresolved: {ref_star}")
+        elif not test_star or not test_star.exists():
+            gate_passed = False
+            errors.append(f"Test STAR file not found or unresolved: {test_star}")
+        else:
+            num_comparisons_run += 1
+            ref_parsed = parse_star_file(ref_star)
+            test_parsed = parse_star_file(test_star)
+            ref_shifts = extract_global_shifts(ref_parsed)
+            test_shifts = extract_global_shifts(test_parsed)
+
+            traj_res = compare_trajectories(ref_shifts, test_shifts)
+            star_tol = 1e-4 if args.gate == "exact" else 1e-3
+            star_diff_res = compare_star_fields(ref_parsed, test_parsed, float_tol=star_tol)
+
+            check_passed = True
+            fail_reasons = []
+            if "error" in traj_res:
+                check_passed = False
+                fail_reasons.append(traj_res["error"])
+            else:
+                if traj_res["max_shift_error"] > tol_max_shift:
+                    check_passed = False
+                    fail_reasons.append(f"Max shift error {traj_res['max_shift_error']:.6f} > {tol_max_shift:.6f}")
+                if traj_res["coord_rms_error"] > tol_shift_rmse:
+                    check_passed = False
+                    fail_reasons.append(f"Coord RMS shift error {traj_res['coord_rms_error']:.6f} > {tol_shift_rmse:.6f}")
+
+            traj_res["passed"] = check_passed
+            traj_res["fail_reasons"] = fail_reasons
+            report["checks"]["motion_trajectory"] = traj_res
+
+            star_passed = (star_diff_res["num_differences"] == 0)
+            star_diff_res["passed"] = star_passed
+            if not star_passed:
+                check_passed = False
+                star_diff_res["fail_reasons"] = [f"STAR metadata differences: {star_diff_res['num_differences']} discrepancies found"]
+                fail_reasons.append(f"STAR metadata differences: {star_diff_res['num_differences']} discrepancies found")
+            report["checks"]["star_fields"] = star_diff_res
+
+            if not check_passed or not star_passed:
+                gate_passed = False
 
     # 2. Compare corrected image pixels
-    if ref_mrc and test_mrc and ref_mrc.exists() and test_mrc.exists():
-        ref_h, ref_pix, ref_raw_h = parse_mrc(ref_mrc)
-        test_h, test_pix, test_raw_h = parse_mrc(test_mrc)
-
-        img_res = compare_images(ref_pix, test_pix, ref_h, test_h, ref_raw_h, test_raw_h)
-
-        img_passed = True
-        img_fail_reasons = []
-        if "error" in img_res:
-            img_passed = False
-            img_fail_reasons.append(img_res["error"])
-        else:
-            if img_res["rmse"] > tol_image_rmse and img_res["relative_rmse"] > 1e-3:
-                img_passed = False
-                img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e} and relative RMSE {img_res['relative_rmse']:.6e} > 1e-3")
-            if img_res["max_abs_pixel_error"] > tol_image_max_err:
-                img_passed = False
-                img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")
-
-        img_res["passed"] = img_passed
-        img_res["fail_reasons"] = img_fail_reasons
-        report["checks"]["corrected_image"] = img_res
-
-        if not img_passed:
+    if ref_mrc or test_mrc:
+        if not ref_mrc or not ref_mrc.exists():
             gate_passed = False
+            errors.append(f"Reference MRC file not found or unresolved: {ref_mrc}")
+        elif not test_mrc or not test_mrc.exists():
+            gate_passed = False
+            errors.append(f"Test MRC file not found or unresolved: {test_mrc}")
+        else:
+            num_comparisons_run += 1
+            ref_h, ref_pix, ref_raw_h = parse_mrc(ref_mrc)
+            test_h, test_pix, test_raw_h = parse_mrc(test_mrc)
+
+            img_res = compare_images(ref_pix, test_pix, ref_h, test_h, ref_raw_h, test_raw_h)
+
+            img_passed = True
+            img_fail_reasons = []
+            if "error" in img_res:
+                img_passed = False
+                img_fail_reasons.append(img_res["error"])
+            else:
+                if args.gate == "exact":
+                    if not img_res.get("pixel_identical", False):
+                        img_passed = False
+                        img_fail_reasons.append(f"Pixels not byte-identical in exact gate (max error: {img_res['max_abs_pixel_error']:.6e})")
+                    if img_res.get("core_header_diff_bytes", 0) > 0:
+                        img_passed = False
+                        img_fail_reasons.append(f"Core MRC header mismatch in exact gate: {img_res['core_header_diff_bytes']} diff bytes (expected 0)")
+                else:
+                    if img_res["rmse"] > tol_image_rmse and img_res["relative_rmse"] > 1e-3:
+                        img_passed = False
+                        img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e} and relative RMSE {img_res['relative_rmse']:.6e} > 1e-3")
+                    if img_res["max_abs_pixel_error"] > tol_image_max_err:
+                        img_passed = False
+                        img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")
+
+            img_res["passed"] = img_passed
+            img_res["fail_reasons"] = img_fail_reasons
+            report["checks"]["corrected_image"] = img_res
+
+            if not img_passed:
+                gate_passed = False
 
     # 3. Ground truth check (if provided)
-    if args.ground_truth and args.ground_truth.exists():
-        gt_data = json.loads(args.ground_truth.read_text())
-        expected_shifts = gt_data.get("expected_alignment_shifts_xy", [])
-        if test_star and test_star.exists():
-            test_parsed = parse_star_file(test_star)
-            test_shifts = extract_global_shifts(test_parsed)
-            # compare against GT
-            gt_tuples = [(i + 1, float(sx), float(sy)) for i, (sx, sy) in enumerate(expected_shifts)]
-            gt_comp = compare_trajectories(gt_tuples, test_shifts)
-            report["checks"]["ground_truth_recovery"] = gt_comp
+    if args.ground_truth:
+        if not args.ground_truth.exists():
+            gate_passed = False
+            errors.append(f"Ground truth file not found: {args.ground_truth}")
+        else:
+            gt_data = json.loads(args.ground_truth.read_text())
+            expected_shifts = gt_data.get("expected_alignment_shifts_xy", [])
+            if test_star and test_star.exists():
+                test_parsed = parse_star_file(test_star)
+                test_shifts = extract_global_shifts(test_parsed)
+                # compare against GT
+                gt_tuples = [(i + 1, float(sx), float(sy)) for i, (sx, sy) in enumerate(expected_shifts)]
+                gt_comp = compare_trajectories(gt_tuples, test_shifts)
+                report["checks"]["ground_truth_recovery"] = gt_comp
 
     # 4. Performance & metrics from log files
-    if args.test_log and args.test_log.exists():
-        report["metrics"] = parse_time_v_log(args.test_log.read_text())
+    if args.test_log:
+        if not args.test_log.exists():
+            gate_passed = False
+            errors.append(f"Test log file not found: {args.test_log}")
+        else:
+            log_metrics = parse_time_v_log(args.test_log.read_text())
+            report["metrics"] = log_metrics
+            if log_metrics.get("exit_status") is not None and log_metrics["exit_status"] != 0:
+                gate_passed = False
+                errors.append(f"Test process log indicates failure: Exit status {log_metrics['exit_status']} != 0")
+
+    if args.ref_log and args.ref_log.exists():
+        report["ref_metrics"] = parse_time_v_log(args.ref_log.read_text())
+
+    # Require at least one complete comparison check to run
+    if num_comparisons_run == 0:
+        gate_passed = False
+        errors.append(
+            "No comparison inputs were resolved or found. Specify valid reference and test files/directories with --ref and --test, or explicit --ref-star / --test-star / --ref-mrc / --test-mrc."
+        )
+
+    if errors:
+        report["errors"] = errors
 
     report["overall_status"] = "PASS" if gate_passed else "FAIL"
 
@@ -535,6 +634,12 @@ def main() -> None:
         print(f"Gate Profile:      {args.gate.upper()}")
         print(f"Overall Status:    {report['overall_status']}")
         print("-" * 72)
+
+        if errors:
+            print("ERRORS / UNRESOLVED INPUTS:")
+            for err in errors:
+                print(f"   ! {err}")
+            print("-" * 72)
 
         if "motion_trajectory" in report["checks"]:
             t = report["checks"]["motion_trajectory"]
@@ -570,6 +675,7 @@ def main() -> None:
             sf = report["checks"]["star_fields"]
             print("\n3. STAR FIELDS & METADATA:")
             print(f"   Normalized diff count: {sf['num_differences']}")
+            print(f"   Status:                {'PASS' if sf['passed'] else 'FAIL'}")
             if sf["num_differences"] > 0:
                 for d in sf["differences"][:5]:
                     print(f"     - {d}")

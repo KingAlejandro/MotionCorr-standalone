@@ -91,7 +91,7 @@ def get_status(repo_root: Path) -> List[Tuple[str, str]]:
         if not line.strip():
             continue
         status_code = line[:2]
-        file_path = line[3:].strip()
+        file_path = line[2:].strip()
         # Handle rename format: "R  old -> new"
         if " -> " in file_path:
             file_path = file_path.split(" -> ")[1].strip()
@@ -126,6 +126,9 @@ def categorize_files(files: List[str]) -> Dict[str, List[str]]:
         norm = f.replace("\\", "/")
         if norm.startswith("skills/"):
             categories["skills"].append(norm)
+        elif norm.startswith("agents/"):
+            categories["agents"] = categories.get("agents", [])
+            categories["agents"].append(norm)
         elif norm.startswith("src/") or norm.startswith("include/"):
             categories["src"].append(norm)
         elif norm.startswith("test-data/") or norm.startswith("test/") or norm.startswith("tests/"):
@@ -157,10 +160,15 @@ def auto_generate_commit_message(repo_root: Path, files_to_stage: List[str], sta
             else:
                 skill_names.add("skill")
         names_str = ", ".join(sorted(skill_names))
-        
         all_new = all(status_dict.get(f, "").startswith("??") or status_dict.get(f, "").startswith("A") for f in categories["skills"])
         action = "add" if all_new else "update"
         subject = f"feat(skills): {action} {names_str} skill{'s' if len(skill_names) > 1 else ''}"
+
+    # 1b. Agent changes
+    elif categories.get("agents") and not categories["src"]:
+        all_new = all(status_dict.get(f, "").startswith("??") or status_dict.get(f, "").startswith("A") for f in categories["agents"])
+        action = "add" if all_new else "update"
+        subject = f"feat(agents): {action} architecture agent and design tooling"
 
     # 2. Source code changes
     elif categories["src"]:

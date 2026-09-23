@@ -23,7 +23,13 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Key Focus**: Detects numerical parity regressions, OpenMP non-determinism, heap allocations in hot loops, and portability faults.
    - **System Prompt**: [`agents/review_agent/SYSTEM_PROMPT.md`](agents/review_agent/SYSTEM_PROMPT.md)
 
-4. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+4. **Specification & Scope Conformance Agent (`agents/spec_compliance_agent/`)**:
+   - **Mandate**: Works alongside the Review Agent to verify that an implementation matches the specification, and *only* the specification.
+   - **Deliverable**: Conformance reports auditing forward completeness (acceptance criteria) and reverse scope isolation (detecting unintended side effects or collateral modifications).
+   - **Pass Criterion**: Passes (`SPEC_CONFORMANCE_PASSED`) if and only if all specification requirements are met and zero out-of-scope side effects are detected.
+   - **System Prompt**: [`agents/spec_compliance_agent/SYSTEM_PROMPT.md`](agents/spec_compliance_agent/SYSTEM_PROMPT.md)
+
+5. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
    - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
    - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
@@ -33,15 +39,19 @@ This project employs a multi-agent engineering workflow to safely extract, optim
 ## 2. Standard Issue Lifecycle
 
 ```mermaid
-flowchart LR
+flowchart TD
     Issue["Issue #N"] --> Arch["Architecture Agent"]
     Arch --> Spec["agents/designs/issue_N_*.md"]
     Spec --> User{"Maintainer Approval"}
     User -->|Approved| Impl["Implementation Agent"]
     Impl --> Code["Source Code & Tests"]
-    Code --> Rev["Review Agent (Stateless)"]
-    Rev -->|READY_TO_MERGE| Commit["ai-git-commit Skill"]
-    Rev -->|CHANGES_REQUESTED| Impl
+    Code --> DualAudit{"Dual Verification Gate"}
+    DualAudit --> Rev["Review Agent<br/>(Parity, Thread Safety, Memory)"]
+    DualAudit --> SpecAgent["Spec Conformance Agent<br/>(Scope, Side Effects, Completeness)"]
+    Rev -->|READY_TO_MERGE| GateCheck{"Both Agents Pass?"}
+    SpecAgent -->|SPEC_CONFORMANCE_PASSED| GateCheck
+    GateCheck -->|Yes| Commit["ai-git-commit Skill"]
+    GateCheck -->|No / Warnings| Impl
     Commit --> Merged["Merged to Branch"]
 ```
 
@@ -49,8 +59,9 @@ flowchart LR
 
 ## 3. Tooling & Skills Reference
 
-- **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
+- **Spec Conformance Audit**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`
 - **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
+- **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
 - **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`
 - **Automated AI Commits**: `python skills/ai-git-commit/scripts/ai_commit.py`
 - **Issue Parser**: `python skills/github-issues-parser/scripts/parse_issues.py`

@@ -34,7 +34,12 @@ flowchart LR
    - **Checks**: Numerical parity risks, OpenMP non-determinism, heap allocation in hot loops, and portability.
    - **Output**: Reports explicit verdict (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`) with itemized findings and remediation guidance.
 
-4. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+4. **Specification & Scope Conformance Agent (`agents/spec_compliance_agent/`)**:
+   - **Role**: Works alongside the Review Agent to verify 1:1 specification alignment.
+   - **Function**: Audits forward completeness (acceptance criteria) and reverse scope isolation (flags unrequested side effects).
+   - **Rule**: A feature passes (`SPEC_CONFORMANCE_PASSED`) if and only if it matches the specification and *only* the specification.
+
+5. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Role**: Meta-reviewer for agent ecosystem integrity.
    - **Rule**: Inspects all peer agents in `agents/` while strictly excluding its own files.
    - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
@@ -61,6 +66,12 @@ agents/
 │   │   └── REVIEW_REPORT_TEMPLATE.md # Standardized review report template
 │   └── scripts/
 │       └── review_code.py         # Stateless CLI review engine
+├── spec_compliance_agent/         # Specification & Scope Conformance Agent
+│   ├── SYSTEM_PROMPT.md           # Conformance philosophy and strict 1:1 audit rules
+│   ├── templates/
+│   │   └── SPEC_CONFORMANCE_REPORT_TEMPLATE.md # Standardized conformance report template
+│   └── scripts/
+│       └── verify_spec_conformance.py # Scope and side-effect verification engine
 └── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
     ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/
@@ -79,16 +90,13 @@ agents/
 python agents/architecture_agent/scripts/generate_architecture.py --issue 7
 ```
 
-### 2. Reviewing & Verifying Code (Stateless)
+### 2. Reviewing & Verifying Code (Dual Verification Gate)
 ```bash
-# Review uncommitted working tree changes
+# Code Hygiene, Parity & Concurrency Review (Review Agent)
 python agents/review_agent/scripts/review_code.py
 
-# Review staged changes only
-python agents/review_agent/scripts/review_code.py --staged
-
-# Review a specific commit range or PR branch
-python agents/review_agent/scripts/review_code.py --target origin/main...HEAD
+# Specification & Scope Conformance Audit (Spec Conformance Agent)
+python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue 7
 ```
 
 ### 3. Auditing the Multi-Agent Ecosystem
@@ -96,3 +104,4 @@ python agents/review_agent/scripts/review_code.py --target origin/main...HEAD
 # Audit all peer agents (excluding agent_auditor) for script, prompt, and template integrity
 python agents/agent_auditor/scripts/audit_agents.py
 ```
+

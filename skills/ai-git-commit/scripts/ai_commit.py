@@ -9,6 +9,7 @@ approval before committing with explicit AI authorship metadata for git blame.
 import argparse
 import os
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -293,9 +294,12 @@ def format_commit_message(
 
 def setup_git_alias() -> bool:
     """Configure git alias 'ai-commit' in local git configuration."""
+    co_author_str = f"Co-authored-by: {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>"
+    trailer_quoted = shlex.quote(DEFAULT_TRAILER)
+    co_author_quoted = shlex.quote(co_author_str)
     alias_cmd = (
-        f'!f() {{ git commit --trailer "{DEFAULT_TRAILER}" '
-        f'--trailer "Co-authored-by: {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>" "$@"; }}; f'
+        f"!f() {{ git commit --trailer {trailer_quoted} "
+        f"--trailer {co_author_quoted} \"$@\"; }}; f"
     )
     code, _, err = run_git_command(["config", "alias.ai-commit", alias_cmd])
     if code == 0:

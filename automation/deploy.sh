@@ -39,10 +39,12 @@ if ! gcloud iam service-accounts describe "$SCHEDULER_ACCOUNT@$PROJECT_ID.iam.gs
     --display-name="MotionCorr agent scheduler"
 fi
 
-WORKER_EMAIL="$WORKER_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com"
+WORKER_EMAIL="${WORKER_EMAIL_OVERRIDE:-$WORKER_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com}"
 SCHEDULER_EMAIL="$SCHEDULER_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com"
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-  --member="serviceAccount:$WORKER_EMAIL" --role=roles/aiplatform.user --quiet >/dev/null
+if [[ -z "${WORKER_EMAIL_OVERRIDE:-}" ]]; then
+  gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$WORKER_EMAIL" --role=roles/aiplatform.user --quiet >/dev/null
+fi
 gcloud secrets add-iam-policy-binding "$SECRET" --project="$PROJECT_ID" \
   --member="serviceAccount:$WORKER_EMAIL" --role=roles/secretmanager.secretAccessor \
   --quiet >/dev/null

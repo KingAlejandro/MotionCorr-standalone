@@ -239,23 +239,33 @@ void progress_bar(long act_time);
 /* Class to do some profiling
  *
  */
+struct ThreadTimerData
+{
+	std::vector<timeval> start_times;
+	std::vector<int> counts;
+	std::vector<long int> times;
+};
+
 class Timer
 {
 public:
-	///Start times for all individual timers
+	///Start times for all individual timers (legacy master thread)
 	std::vector<timeval> start_times;
 
 	// General end time
 	timeval end_time;
 
-	// How many times has each tic/toc been called.
+	// How many times has each tic/toc been called (aggregated)
 	std::vector<int> counts;
 
-	// Total number of microseconds
-	std::vector< long int> times;
+	// Total number of microseconds (aggregated)
+	std::vector<long int> times;
 
 	// Labels
 	std::vector<std::string> tags;
+
+	// Per-thread timing data for OpenMP thread safety
+	std::vector<ThreadTimerData> thread_data;
 
 	Timer()
 	{
@@ -270,6 +280,8 @@ public:
 	void clear();
 
 	void initZero();
+
+	void ensureAllocated();
 
 	int setNew(const std::string tag);
 

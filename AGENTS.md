@@ -17,9 +17,11 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Deliverable**: Modular C++17, CUDA, Python, or CMake code changes with unit test fixtures.
    - **Tooling**: Uses [`skills/ai-git-commit/`](skills/ai-git-commit/SKILL.md) for clean, traceable commits.
 
-3. **Validation & Parity Agent**:
-   - **Mandate**: Executes verification against the reference outputs defined in Issue #4.
-   - **Deliverable**: Parity reports certifying compliance with Tier 0 (exact CPU), Tier 1 (multithreaded CPU), or Tier 2 (accelerated backend).
+3. **Review & Verification Agent (`agents/review_agent/`)**:
+   - **Mandate**: Memoryless, isolated, strictly read-only auditor. Does NOT modify code.
+   - **Deliverable**: Objective review reports concluding with an explicit verdict (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
+   - **Key Focus**: Detects numerical parity regressions, OpenMP non-determinism, heap allocations in hot loops, and portability faults.
+   - **System Prompt**: [`agents/review_agent/SYSTEM_PROMPT.md`](agents/review_agent/SYSTEM_PROMPT.md)
 
 ---
 
@@ -29,18 +31,20 @@ This project employs a multi-agent engineering workflow to safely extract, optim
 flowchart LR
     Issue["Issue #N"] --> Arch["Architecture Agent"]
     Arch --> Spec["agents/designs/issue_N_*.md"]
-    Spec --> Review{"User / Maintainer Approval"}
-    Review -->|Approved| Impl["Implementation Agent"]
+    Spec --> User{"Maintainer Approval"}
+    User -->|Approved| Impl["Implementation Agent"]
     Impl --> Code["Source Code & Tests"]
-    Code --> Commit["ai-git-commit Skill"]
-    Commit --> Val["Validation Agent"]
-    Val --> Done["Parity Certified & Merged"]
+    Code --> Rev["Review Agent (Stateless)"]
+    Rev -->|READY_TO_MERGE| Commit["ai-git-commit Skill"]
+    Rev -->|CHANGES_REQUESTED| Impl
+    Commit --> Merged["Merged to Branch"]
 ```
 
 ---
 
 ## 3. Tooling & Skills Reference
 
-- **Design Scaffolding**: `python agents/architecture_agent/scripts/design_issue.py --issue <NUM>`
+- **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
+- **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`
 - **Automated AI Commits**: `python skills/ai-git-commit/scripts/ai_commit.py`
 - **Issue Parser**: `python skills/github-issues-parser/scripts/parse_issues.py`

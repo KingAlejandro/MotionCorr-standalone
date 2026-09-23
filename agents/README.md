@@ -28,9 +28,11 @@ flowchart LR
    - Adheres to modularity, thread safety, and memory budgets.
    - Uses the `ai-git-commit` skill for clean, traceable commits.
 
-3. **Validation & Parity Agent**:
-   - Executes numerical parity comparisons against RELION 5.1 reference baselines.
-   - Verifies trajectory error, image RMSE, and STAR metadata compliance.
+3. **Review & Verification Agent (`agents/review_agent/`)**:
+   - **Role**: Memoryless, isolated, strictly read-only auditor.
+   - **Function**: Inspects diffs and source code without retaining past conversational bias.
+   - **Checks**: Numerical parity risks, OpenMP non-determinism, heap allocation in hot loops, and portability.
+   - **Output**: Reports explicit verdict (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`) with itemized findings and remediation guidance.
 
 ---
 
@@ -40,25 +42,39 @@ flowchart LR
 agents/
 ├── README.md                      # Overview of the agent framework
 ├── designs/                       # Generated architectural design specifications
-└── architecture_agent/            # Architecture Agent tooling and specifications
-    ├── SYSTEM_PROMPT.md           # Role definition and instructions for the agent
+├── architecture_agent/            # Architecture Agent tooling and specifications
+│   ├── SYSTEM_PROMPT.md           # Role definition and instructions for the architect
+│   ├── templates/
+│   │   └── DESIGN_SPEC_TEMPLATE.md# Standardized design specification template
+│   └── scripts/
+│       ├── design_issue.py        # CLI helper to scaffold designs
+│       └── generate_architecture.py # Autonomous architecture generator (LLM / synthesis)
+└── review_agent/                  # Memoryless Review & Verification Agent
+    ├── SYSTEM_PROMPT.md           # Read-only review persona and verification rules
     ├── templates/
-    │   └── DESIGN_SPEC_TEMPLATE.md# Standardized design specification template
+    │   └── REVIEW_REPORT_TEMPLATE.md # Standardized review report template
     └── scripts/
-        └── design_issue.py        # CLI helper to scaffold and prepare designs for issues
+        └── review_code.py         # Stateless CLI review engine
 ```
 
 ---
 
-## Quick Start: Designing an Architecture for an Issue
+## Quick Start: Running the Agents
 
-To scaffold an architectural design document for a specific issue (e.g. Issue #4, #7, #14, #16):
-
+### 1. Designing an Architecture for an Issue
 ```bash
-python agents/architecture_agent/scripts/design_issue.py --issue 4
+# Formulate complete architectural specification for an issue
+python agents/architecture_agent/scripts/generate_architecture.py --issue 7
 ```
 
-This will:
-1. Extract the issue details, dependencies, and acceptance criteria.
-2. Identify affected source modules and architectural constraints.
-3. Scaffold a comprehensive design specification in `agents/designs/issue_4_design.md` ready for agent or engineer review.
+### 2. Reviewing & Verifying Code (Stateless)
+```bash
+# Review uncommitted working tree changes
+python agents/review_agent/scripts/review_code.py
+
+# Review staged changes only
+python agents/review_agent/scripts/review_code.py --staged
+
+# Review a specific commit range or PR branch
+python agents/review_agent/scripts/review_code.py --target origin/main...HEAD
+```

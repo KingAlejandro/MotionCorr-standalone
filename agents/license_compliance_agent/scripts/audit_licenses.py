@@ -212,6 +212,10 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
         license_type = "Apache-2.0"
         compliance_status = "REVIEW_REQUIRED"
         flag_reason = "Apache-2.0 detected in source code. Incompatible if linked into GPL-2.0 binary."
+    elif has_commercial_prohib or has_proprietary:
+        license_type = "Restricted / Proprietary"
+        compliance_status = "VIOLATION"
+        flag_reason = "File contains proprietary or non-commercial restriction clause."
     elif has_amz_informal:
         license_type = "Informal / Non-Standard Grant"
         compliance_status = "WARNING"
@@ -220,10 +224,6 @@ def inspect_file_headers(file_path: Path) -> Dict[str, Any]:
         license_type = "All Rights Reserved (No License Grant)"
         compliance_status = "WARNING"
         flag_reason = "Explicit 'All rights reserved' notice without accompanying open source license grant."
-    elif has_commercial_prohib or has_proprietary:
-        license_type = "Restricted / Proprietary"
-        compliance_status = "VIOLATION"
-        flag_reason = "File contains proprietary or non-commercial restriction clause."
 
     return {
         "file": file_path,

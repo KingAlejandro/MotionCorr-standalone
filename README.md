@@ -15,7 +15,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked.
+The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
 
 For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
 
@@ -25,6 +25,18 @@ For a RELION-compatible movie STAR file, the command line follows RELION's CPU m
 
 The `--use_own` flag selects the CPU implementation. The extracted runner still accepts RELION's external `--use_motioncor2` option, but this repository does not include that GPU program. This project does not include RELION's GUI or MPI executable.
 
+You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
+
+```sh
+./build/motioncorr --i 'Movies/*.mrcs' --o MotionCorr --use_own --angpix 1.0 --voltage 300 --j 4
+```
+
 ## Status
 
-This is an initial source extraction. Compilation succeeded on macOS. Processing of real movie data and numerical agreement with RELION's integrated motion correction have not yet been checked.
+The standalone and a CPU-only build of full RELION from the exact upstream commit were run on the same inputs on macOS:
+
+- A 16-frame, 512 × 512 synthetic MRC movie with known integer frame shifts. Both the default global alignment and a 3 × 3 patch run with dose weighting produced pixel-identical corrected images (maximum absolute difference 0), including the non-dose-weighted image. Motion STAR files and logs matched after normalizing output paths.
+- A 24-frame, 78 × 78 TIFF fixture. Corrected images, motion STAR files, and logs matched exactly after normalizing output paths. This tiny fixture is useful for I/O comparison, not for judging scientific alignment quality.
+- Direct input of the synthetic movie now runs successfully in this standalone build and produces the same corrected image and motion metadata as STAR-file input. Full RELION 5.1 crashes on direct input before processing; the fix is in `src/motioncorr_runner.cpp`.
+
+This establishes parity for the cases above. Processing of a full-size experimental cryo-EM movie, Linux operation, and broader numerical/scientific validation have not yet been checked.

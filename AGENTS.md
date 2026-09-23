@@ -34,7 +34,12 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Deliverable**: Compliance audit reports flagging proprietary code, "All rights reserved" declarations lacking license grants, and non-commercial restrictions.
    - **System Prompt**: [`agents/license_compliance_agent/SYSTEM_PROMPT.md`](agents/license_compliance_agent/SYSTEM_PROMPT.md)
 
-6. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+6. **Pull Request Analysis Agent (`agents/pr_analysis_agent/`)**:
+   - **Mandate**: Discovers pull requests and conducts deep architectural, parity, concurrency, scope, and defect audits on specific PRs.
+   - **Deliverable**: Actionable PR reports with quality gate matrices and merge readiness verdicts (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
+   - **System Prompt**: [`agents/pr_analysis_agent/SYSTEM_PROMPT.md`](agents/pr_analysis_agent/SYSTEM_PROMPT.md)
+
+7. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
    - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
    - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
@@ -69,6 +74,8 @@ flowchart TD
 
 ## 3. Tooling & Skills Reference
 
+- **Pull Request Quality & Defect Audit**: `python agents/pr_analysis_agent/scripts/analyze_pr.py --pr <NUM>`
+- **GitHub PR Discovery & Fetching**: `python skills/github-pr-query/scripts/query_prs.py --state open`
 - **Open Source License & Compliance Audit**: `python agents/license_compliance_agent/scripts/audit_licenses.py`
 - **Dialectic Specification Refinement Loop**: `python agents/scripts/refine_specification.py --issue <NUM> --max-rounds 3`
 - **Spec Conformance Audit & Spec Review**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`

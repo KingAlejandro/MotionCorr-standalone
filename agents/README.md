@@ -44,7 +44,12 @@ flowchart LR
    - **Function**: Scans all Python dependencies, external manifests, and repository source files for OSI open source licensing, GPL-2.0 compatibility, and flags any proprietary or unlicensed code.
    - **Output**: Generates compliance audit reports (`LICENSE_COMPLIANCE_PASSED`, `LICENSE_WARNING`, `LICENSE_VIOLATION`).
 
-6. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
+6. **Pull Request Analysis Agent (`agents/pr_analysis_agent/`)**:
+   - **Role**: Pull Request quality, parity, concurrency, scope, and defect analyzer.
+   - **Function**: Discovers pull requests on the GitHub repository, performs deep audits on specific PR diffs, and synthesizes multi-agent quality gates into actionable merge recommendations.
+   - **Output**: Generates PR analysis reports (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
+
+7. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
    - **Role**: Meta-reviewer for agent ecosystem integrity.
    - **Rule**: Inspects all peer agents in `agents/` while strictly excluding its own files.
    - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
@@ -84,6 +89,12 @@ agents/
 │   │   └── LICENSE_AUDIT_REPORT_TEMPLATE.md # Standardized license audit template
 │   └── scripts/
 │       └── audit_licenses.py      # Dependency & source file compliance auditor
+├── pr_analysis_agent/             # Pull Request Analysis Agent
+│   ├── SYSTEM_PROMPT.md           # PR defect detection and mergeability rules
+│   ├── templates/
+│   │   └── PR_ANALYSIS_REPORT_TEMPLATE.md # Standardized PR audit report template
+│   └── scripts/
+│       └── analyze_pr.py          # PR discovery and deep quality analysis CLI
 └── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
     ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/
@@ -118,7 +129,16 @@ python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue 1
 python agents/license_compliance_agent/scripts/audit_licenses.py
 ```
 
-### 4. Auditing the Multi-Agent Ecosystem
+### 4. Discovering and Analyzing Pull Requests
+```bash
+# List all open pull requests on the repository
+python agents/pr_analysis_agent/scripts/analyze_pr.py --list
+
+# Perform deep defect and quality audit on a specific PR
+python agents/pr_analysis_agent/scripts/analyze_pr.py --pr 1
+```
+
+### 5. Auditing the Multi-Agent Ecosystem
 ```bash
 # Audit all peer agents (excluding agent_auditor) for script, prompt, and template integrity
 python agents/agent_auditor/scripts/audit_agents.py

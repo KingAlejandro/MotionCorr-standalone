@@ -110,7 +110,8 @@ __global__ void findPeakAndInterpolateKernel(
     int ccf_nx, int ccf_ny,
     int search_range,
     float ccf_scale_x, float ccf_scale_y,
-    int n_frames)
+    int n_frames,
+    GlobalPeakProbeRecord *d_probe)
 {
     int iframe = blockIdx.x;
     if (iframe >= n_frames) return;
@@ -179,6 +180,25 @@ __global__ void findPeakAndInterpolateKernel(
         float denom_y = vp_y + vn_y - 2.0f * maxval;
         float cur_y = (fabsf(denom_y) > EPS) ? (posy - 0.5f * (vp_y - vn_y) / denom_y) : posy;
 
+        if (d_probe && iframe == d_probe->frame_index) {
+            d_probe->peak_x = posx;
+            d_probe->peak_y = posy;
+            d_probe->peak_value = maxval;
+            d_probe->center = maxval;
+            d_probe->x_minus = vn_x;
+            d_probe->x_plus = vp_x;
+            d_probe->y_minus = vn_y;
+            d_probe->y_plus = vp_y;
+            d_probe->denominator_x = denom_x;
+            d_probe->denominator_y = denom_y;
+            d_probe->shift_x_unscaled = cur_x;
+            d_probe->shift_y_unscaled = cur_y;
+            d_probe->shift_x_scaled = cur_x * ccf_scale_x;
+            d_probe->shift_y_scaled = cur_y * ccf_scale_y;
+            d_probe->x_interpolated = fabsf(denom_x) > EPS;
+            d_probe->y_interpolated = fabsf(denom_y) > EPS;
+        }
+
         d_cur_xshifts[iframe] = cur_x * ccf_scale_x;
         d_cur_yshifts[iframe] = cur_y * ccf_scale_y;
     }
@@ -221,8 +241,19 @@ bool cudaAlignPatch(
     const int max_iter,
     const RFLOAT ccf_downsample,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    const std::string &movie_identity)
 {
+    GlobalPeakProbeConfig peak_probe;
+    readGlobalPeakProbeConfig(peak_probe);
+    if (peak_probe.enabled) {
+        if (device_id < 0)
+            REPORT_ERROR("Global peak CUDA trace requires an explicitly requested GPU ordinal");
+        if (peak_probe.frame_index >= (int)xshifts.size() || peak_probe.iteration > max_iter)
+            REPORT_ERROR("Global peak trace frame/iteration is outside this alignment pass");
+        requireFreshGlobalPeakProbeOutput(peak_probe, "cuda");
+    }
+
     if (device_id >= 0) {
         HANDLE_ERROR(cudaSetDevice(device_id));
     }
@@ -292,6 +323,7 @@ bool cudaAlignPatch(
     float *d_cur_yshifts = nullptr;
     float *d_shiftx = nullptr;
     float *d_shifty = nullptr;
+    GlobalPeakProbeRecord *d_peak_probe = nullptr;
 
     HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
@@ -302,6 +334,13 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaMalloc(&d_cur_yshifts, sz_shifts));
     HANDLE_ERROR(cudaMalloc(&d_shiftx, sz_shifts));
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
+    GlobalPeakProbeRecord h_peak_probe = {};
+    if (peak_probe.enabled) {
+        h_peak_probe.frame_index = peak_probe.frame_index;
+        h_peak_probe.iteration = peak_probe.iteration;
+        HANDLE_ERROR(cudaMalloc(&d_peak_probe, sizeof(GlobalPeakProbeRecord)));
+        HANDLE_ERROR(cudaMemcpy(d_peak_probe, &h_peak_probe, sizeof(GlobalPeakProbeRecord), cudaMemcpyHostToDevice));
+    }
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
 
@@ -351,6 +390,7 @@ bool cudaAlignPatch(
     float accumulated_kernel_ms = 0.0f;
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
+    bool peak_trace_written = false;
 
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
@@ -381,7 +421,8 @@ bool cudaAlignPatch(
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
-            (float)ccf_scale_x, (float)ccf_scale_y, n_frames
+            (float)ccf_scale_x, (float)ccf_scale_y, n_frames,
+            (peak_probe.enabled && iter == peak_probe.iteration) ? d_peak_probe : nullptr
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
@@ -394,6 +435,23 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
         HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
         HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
+        if (peak_probe.enabled && iter == peak_probe.iteration) {
+            HANDLE_ERROR(cudaMemcpy(&h_peak_probe, d_peak_probe, sizeof(GlobalPeakProbeRecord), cudaMemcpyDeviceToHost));
+            h_peak_probe.frame0_shift_x_scaled = h_cur_xshifts[0];
+            h_peak_probe.frame0_shift_y_scaled = h_cur_yshifts[0];
+            h_peak_probe.frame0_recentered_shift_x = 0.0;
+            h_peak_probe.frame0_recentered_shift_y = 0.0;
+            h_peak_probe.recentered_shift_x = h_cur_xshifts[peak_probe.frame_index] - h_cur_xshifts[0];
+            h_peak_probe.recentered_shift_y = h_cur_yshifts[peak_probe.frame_index] - h_cur_yshifts[0];
+            cudaDeviceProp properties;
+            int actual_device = -1;
+            HANDLE_ERROR(cudaGetDevice(&actual_device));
+            HANDLE_ERROR(cudaGetDeviceProperties(&properties, actual_device));
+            std::ostringstream device;
+            device << "requested ordinal " << device_id << ", resolved CUDA ordinal " << actual_device << ": " << properties.name;
+            writeGlobalPeakProbeRecord(peak_probe, "cuda", device.str(), movie_identity, h_peak_probe);
+            peak_trace_written = true;
+        }
         HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
         HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
         float iter_d2h_ms = 0.0f;
@@ -441,6 +499,9 @@ bool cudaAlignPatch(
         }
     }
 
+    if (peak_probe.enabled && !peak_trace_written)
+        REPORT_ERROR("Global peak trace iteration was not reached before alignment converged");
+
     // Final transfer: copy shifted Fframes back to host
     HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
     for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -484,6 +545,7 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaFree(d_cur_yshifts));
     HANDLE_ERROR(cudaFree(d_shiftx));
     HANDLE_ERROR(cudaFree(d_shifty));
+    if (d_peak_probe) HANDLE_ERROR(cudaFree(d_peak_probe));
 
     HANDLE_ERROR(cudaEventDestroy(ev_start_total));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_total));

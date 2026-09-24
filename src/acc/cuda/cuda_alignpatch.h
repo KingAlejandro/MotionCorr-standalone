@@ -5,6 +5,7 @@
 #include <ostream>
 #include "src/multidim_array.h"
 #include "src/complex.h"
+#include "src/acc/cuda/global_peak_probe.h"
 
 #ifdef _CUDA_ENABLED
 /**
@@ -21,7 +22,8 @@ bool cudaAlignPatch(
     const int max_iter,
     const RFLOAT ccf_downsample,
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    const std::string &movie_identity
 );
 #endif
 

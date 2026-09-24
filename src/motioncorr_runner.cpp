@@ -33,6 +33,7 @@
 #include <src/jaz/single_particle/new_ft.h>
 #include "src/funcs.h"
 #include "src/renderEER.h"
+#include "src/acc/cuda/global_peak_probe.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -1539,7 +1540,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
-	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, fn_mic);
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -2306,12 +2307,20 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	}
 }
 
-bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global, const std::string &movie_identity) {
 #ifdef _CUDA_ENABLED
 	if (use_gpu && is_global) {
-		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, movie_identity);
 	}
 #endif
+	GlobalPeakProbeConfig peak_probe;
+	if (is_global)
+		readGlobalPeakProbeConfig(peak_probe);
+	if (peak_probe.enabled) {
+		if (peak_probe.frame_index >= (int)xshifts.size() || peak_probe.iteration > max_iter)
+			REPORT_ERROR("Global peak trace frame/iteration is outside this alignment pass");
+		requireFreshGlobalPeakProbeOutput(peak_probe, "cpu");
+	}
 	std::vector<Image<float> > Iccs(n_threads);
 	MultidimArray<fComplex> Fref;
 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
@@ -2384,7 +2393,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	bool peak_trace_written = false;
 	for (int iter = 1; iter	<= max_iter; iter++) {
+		GlobalPeakProbeRecord peak_record = {};
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
 
@@ -2446,6 +2457,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RFLOAT vp, vn;
 			vp = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_p);
 			vn = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_n);
+			RFLOAT x_plus = vp, x_minus = vn;
  			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
 				cur_xshifts[iframe] = posx - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval);
 			} else {
@@ -2459,12 +2471,41 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			} else {
 				cur_yshifts[iframe] = posy;
 			}
+			if (peak_probe.enabled && iter == peak_probe.iteration && iframe == peak_probe.frame_index) {
+				peak_record.frame_index = iframe;
+				peak_record.iteration = iter;
+				peak_record.peak_x = posx;
+				peak_record.peak_y = posy;
+				peak_record.peak_value = peak_record.center = maxval;
+				peak_record.x_minus = x_minus;
+				peak_record.x_plus = x_plus;
+				peak_record.y_minus = vn;
+				peak_record.y_plus = vp;
+				peak_record.denominator_x = x_plus + x_minus - 2.0 * maxval;
+				peak_record.denominator_y = vp + vn - 2.0 * maxval;
+				peak_record.shift_x_unscaled = cur_xshifts[iframe];
+				peak_record.shift_y_unscaled = cur_yshifts[iframe];
+				peak_record.shift_x_scaled = cur_xshifts[iframe] * ccf_scale_x;
+				peak_record.shift_y_scaled = cur_yshifts[iframe] * ccf_scale_y;
+				peak_record.x_interpolated = std::abs(peak_record.denominator_x) > EPS;
+				peak_record.y_interpolated = std::abs(peak_record.denominator_y) > EPS;
+			}
 			cur_xshifts[iframe] *= ccf_scale_x;
 			cur_yshifts[iframe] *= ccf_scale_y;
 #ifdef DEBUG_OWN
 			std::cout << "tid " << tid << " Frame " << 1 + iframe << ": raw shift x = " << posx << " y = " << posy << " cc = " << maxval << " interpolated x = " << cur_xshifts[iframe] << " y = " << cur_yshifts[iframe] << std::endl;
 #endif
 			RCTOC(TIMING_CCF_FIND_MAX);
+		}
+		if (peak_probe.enabled && iter == peak_probe.iteration) {
+			peak_record.frame0_shift_x_scaled = cur_xshifts[0];
+			peak_record.frame0_shift_y_scaled = cur_yshifts[0];
+			peak_record.frame0_recentered_shift_x = 0.0;
+			peak_record.frame0_recentered_shift_y = 0.0;
+			peak_record.recentered_shift_x = cur_xshifts[peak_probe.frame_index] - cur_xshifts[0];
+			peak_record.recentered_shift_y = cur_yshifts[peak_probe.frame_index] - cur_yshifts[0];
+			writeGlobalPeakProbeRecord(peak_probe, "cpu", "CPU host", movie_identity, peak_record);
+			peak_trace_written = true;
 		}
 
 		// Set origin
@@ -2501,6 +2542,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			break;
 		}
 	}
+	if (peak_probe.enabled && !peak_trace_written)
+		REPORT_ERROR("Global peak trace iteration was not reached before alignment converged");
 
 #ifdef DEBUG_OWN
 	for (int iframe = 0; iframe < n_frames; iframe++) {

@@ -15,13 +15,25 @@ Executes:
 """
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
 import sys
 import time
+import socket
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
+
+RUN_RECORDS: List[Dict[str, Any]] = []
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
@@ -30,6 +42,9 @@ def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cw
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout, cwd=str(cwd) if cwd else None)
     elapsed = time.time() - t0
     print(f"      Exit {res.returncode} ({elapsed:.2f}s)")
+    RUN_RECORDS.append({"command": [str(part) for part in cmd], "cwd": str(cwd) if cwd else None,
+                        "exit_code": res.returncode, "wall_seconds": elapsed,
+                        "stdout": res.stdout, "stderr": res.stderr})
     if check and res.returncode != 0:
         print(f"STDOUT:\n{res.stdout}")
         print(f"STDERR:\n{res.stderr}")
@@ -187,6 +202,15 @@ def main():
 
     summary: Dict[str, Any] = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "host": socket.gethostname(),
+        "source_commit": subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                                         capture_output=True, text=True, check=True).stdout.strip(),
+        "gpu_id": args.gpu_id,
+        "sha256": {name: sha256_file(path) for name, path in (
+            ("cpu_binary", cpu_bin), ("cuda_binary", cuda_bin),
+            ("experimental_movie", args.exp_movie), ("gain_reference", args.exp_gain),
+            ("synthetic_local_movie", repo / "test-data/synthetic/synthetic_local_motion.mrc"),
+            ("synthetic_fallback_movie", repo / "test-data/synthetic/synthetic_fallback.mrc"))},
         "stages": {},
         "steady_state": [],
         "verdict": "UNKNOWN"
@@ -383,6 +407,7 @@ _rlnOpticsGroup #2
         and all(result["passed"] for result in summary["stage_results"].values())
         and len(summary["steady_state"]) == 3
     ) else "FAIL"
+    summary["runs"] = RUN_RECORDS
 
     # Write summary JSON
     summary_path = out / "cuda_patch_validation_summary.json"

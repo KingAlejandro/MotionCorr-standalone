@@ -8,14 +8,37 @@ Extracted from [`3dem/relion` `ver5.1`](https://github.com/3dem/relion/tree/ver5
 
 ## Build
 
-Requires a C++17 compiler, CMake 3.21+, FFTW (double and float), OpenMP, libtiff, libpng, libjpeg, and zlib. On macOS, a compiler with OpenMP support is required.
+Requires a C++17 compiler, CMake 3.21+, FFTW (double and float), OpenMP, libtiff, libpng, libjpeg, and zlib. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
 
+### Prerequisites
+
+#### Linux (Ubuntu / Debian)
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+sudo apt-get update
+sudo apt-get install -y cmake build-essential pkg-config libfftw3-dev libtiff-dev libpng-dev libjpeg-dev zlib1g-dev ghostscript python3
+```
+*Note: GCC includes OpenMP (`libgomp`) by default. If building with Clang on Linux, install `libomp-dev`.*
+
+#### Linux (Fedora / RHEL)
+```sh
+sudo dnf install -y cmake gcc-c++ pkgconf fftw-devel libtiff-devel libpng-devel libjpeg-turbo-devel zlib-devel ghostscript python3
 ```
 
-The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
+#### macOS
+Requires Homebrew and an OpenMP-capable compiler (such as `libomp` with AppleClang).
+```sh
+brew install cmake fftw libomp libtiff libpng jpeg ghostscript
+```
+
+### Compiling and Testing
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+The output binary is `build/motioncorr`. Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.
 
 For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
 
@@ -45,4 +68,4 @@ The standalone and a CPU-only build of full RELION from the exact upstream commi
 - A 32-frame, 1536 × 1536 synthetic movie (302 MB) with 3 × 3 patches and dose weighting. Corrected pixels and motion STAR files matched full RELION 5.1 exactly. Recovered shifts had 0.0046-pixel coordinate RMS error against the known integer shifts (maximum absolute error 0.0133 pixel). The only corrected MRC header difference was the run timestamp.
 - One experimental movie from the RELION SPA tutorial (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838 pixels), with gain correction, 5 × 5 patches, and dose weighting. Standalone and full RELION 5.1 produced pixel-identical corrected images and identical motion STAR files with one thread. Multi-threaded runs now also achieve complete determinism and bit-for-bit parity with the single-thread baseline, using deterministic defect replacement PRNG seeding (`--seed`, default: 1).
 
-This establishes parity for the cases above. The remaining 23 tutorial movies, Linux operation, and broader numerical/scientific validation have not yet been checked.
+This establishes parity for the cases above on both macOS and Linux. The remaining 23 tutorial movies and broader numerical/scientific validation across the full dataset are tracked in open project milestones.

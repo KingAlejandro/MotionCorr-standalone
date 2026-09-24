@@ -174,7 +174,9 @@ bool CudaMovieSession::initialize() {
     // cuFFT's automatic allocation must be disabled before either plan is made.
     // Two transforms share one work area because all executions use the default stream
     // and each batch is synchronized before the next execution.
-    fft_batch_size = std::min(n_frames, 2);
+    // A single-frame batch keeps the inverse preservation tile to one frame.
+    // The A100 batch-two sample exceeded the whole-process VRAM target.
+    fft_batch_size = 1;
     const int tail_size = n_frames % fft_batch_size;
     int n[2] = {ny, nx};
     auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,

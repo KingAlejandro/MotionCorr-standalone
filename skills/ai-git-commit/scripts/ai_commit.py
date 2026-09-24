@@ -477,7 +477,7 @@ def main():
 
     # Commit with AI author attribution
     print("Committing changes...")
-    commit_args = ["commit", "-m", commit_msg]
+    commit_args = ["commit", "-m", commit_msg, "--"] + files_to_stage
     code, out, err = run_git_command(commit_args, cwd=target_repo, env=git_env)
 
     if code == 0:

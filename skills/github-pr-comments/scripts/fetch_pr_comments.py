@@ -52,15 +52,12 @@ def make_github_request(url: str, accept_header: str = "application/vnd.github.v
     except urllib.error.HTTPError as e:
         if allow_empty and e.code in (404, 422):
             return e.code, b"[]"
+        err_body = str(e.read() or "").lower()
         sys.stderr.write(f"GitHub API Error [{e.code}]: {e.reason} ({url})\n")
-        if e.code == 403 and "rate limit" in str(e.read() or "").lower():
+        if e.code == 403 and "rate limit" in err_body:
             sys.stderr.write("API rate limit exceeded. Set GITHUB_TOKEN environment variable.\n")
-        if allow_empty:
-            return e.code, b"[]"
         sys.exit(1)
     except Exception as e:
-        if allow_empty:
-            return 500, b"[]"
         sys.stderr.write(f"Network request error: {e}\n")
         sys.exit(1)
 
@@ -201,6 +198,28 @@ def format_markdown(data: Dict[str, Any], repo: str, pr_number: int) -> str:
     return "\n".join(lines)
 
 
+def format_summary_table(comments: List[Dict[str, Any]], file_filter: Optional[str] = None) -> str:
+    lines = [
+        "| # | File:Line | Reviewer | Date | Summary / Excerpt |",
+        "|---|---|---|---|---|"
+    ]
+    count = 0
+    for idx, c in enumerate(comments, 1):
+        path = c.get("path") or ""
+        if file_filter and file_filter not in path:
+            continue
+        count += 1
+        line_num = c.get("line") or c.get("original_line") or "-"
+        user = c.get("user", {}).get("login", "unknown")
+        created = (c.get("created_at") or "")[:19]
+        body = c.get("body", "").replace("\n", " ").replace("|", "\\|")
+        first_sentence = body.split(". ")[0].strip()
+        if len(first_sentence) > 90:
+            first_sentence = first_sentence[:87] + "..."
+        lines.append(f"| {idx} | `{path}:{line_num}` | `@{user}` | `{created}` | {first_sentence} |")
+    return f"Total matching comments: {count}\n\n" + "\n".join(lines)
+
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         try:
@@ -214,6 +233,8 @@ def main():
     parser.add_argument("--repo", default=None, help="GitHub repository slug (e.g. KingAlejandro/MotionCorr-standalone)")
     parser.add_argument("--pr", type=int, required=True, help="Pull Request number to inspect")
     parser.add_argument("--output", help="Optional markdown file path to save report")
+    parser.add_argument("--summary", action="store_true", help="Print a concise summary table of inline comments")
+    parser.add_argument("--file", help="Filter comments to a specific file substring")
     parser.add_argument("--json", action="store_true", help="Output raw JSON data")
 
     args = parser.parse_args()
@@ -223,6 +244,9 @@ def main():
 
     if args.json:
         out_text = json.dumps(data, indent=2)
+        print(out_text)
+    elif args.summary:
+        out_text = format_summary_table(data.get("review_comments", []), file_filter=args.file)
         print(out_text)
     else:
         out_text = format_markdown(data, repo, args.pr)

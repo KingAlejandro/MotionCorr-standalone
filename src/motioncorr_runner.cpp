@@ -1307,8 +1307,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			}
 		} else {
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
-			delete movie_session;
-			movie_session = nullptr;
+			movie_session.reset();
 		}
 	}
 	if (!cuda_gain_sum_done)
@@ -2000,7 +1999,7 @@ skip_fitting:
 				Iref_odd().initZeros();
 			}
 #ifdef _CUDA_ENABLED
-			if (movie_session && (Iframes.empty() || Iframes[0]().empty())) {
+			if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
 				movie_session->downloadRealFrames(Iframes);
 			}
 #endif
@@ -2116,7 +2115,7 @@ skip_fitting:
 			// Discard any partial CUDA result before running the CPU reconstruction.
 			Iref().initZeros();
 #ifdef _CUDA_ENABLED
-			if (movie_session && (Fframes.empty() || Fframes[0].empty())) {
+			if (movie_session && (Fframes.empty() || Fframes[0].nzyxdim == 0)) {
 				movie_session->downloadFourierFrames(Fframes);
 			}
 #endif

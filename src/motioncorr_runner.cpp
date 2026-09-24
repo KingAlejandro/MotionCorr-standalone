@@ -124,6 +124,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	do_own = parser.checkOption("--use_own", "Use our own implementation of motion correction");
 	write_float16  = parser.checkOption("--float16", "Write in half-precision 16 bit floating point numbers (MRC mode 12), instead of 32 bit (MRC mode 0).");
 	skip_defect = parser.checkOption("--skip_defect", "Skip hot pixel detection");
+	random_seed = textToInteger(parser.getOption("--seed", "Random seed for defect correction (default: 1 for reproducible runs)", "1"));
 	save_noDW = parser.checkOption("--save_noDW", "Save aligned but non dose weighted micrograph");
 	max_iter = textToInteger(parser.getOption("--max_iter", "Maximum number of iterations for alignment. Only valid with --use_own", "5"));
 	if (max_iter != 5 && !do_own)
@@ -1329,6 +1330,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const RFLOAT frame_mean = mean / n_frames;
 		const RFLOAT frame_std = std / n_frames;
 
+		init_random_generator(random_seed);
+
 		const int NUM_MIN_OK = 6;
 		const int D_MAX = isEER ? 4 : 2;
 		const int PBUF_SIZE = 100;
@@ -1336,7 +1339,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
-			#pragma omp parallel for num_threads(n_threads)
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
 				RFLOAT pbuf[PBUF_SIZE];

@@ -1390,6 +1390,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						// between any two summation orders of the same addend multiset:
 						//   |d_mean| <= 2*gamma_N*(sum|x|/N)   |d_std| <= gamma_N*std
 						//   |d_threshold| <= |d_mean| + sigma*|d_std|
+						// The std term is deliberately ~4x the derived value
+						// (true error is about (gamma_N/2)*std). That margin is NOT
+						// slack to be reclaimed: d = x - mean has its own cancellation
+						// whose error scales with |x| + |mean| rather than with std, and
+						// this term is what covers it. Do not "tighten" it to
+						// sigma*gamma_N*std/2 without deriving that case explicitly.
+						// Over-estimating only widens the band and makes fallback more
+						// likely, which is the safe direction.
 						// sum|x|/N is used rather than mean because the two coincide only for
 						// same-sign data; sigma is read from hotpixel_sigma rather than
 						// hard-coded, so raising it cannot silently shrink the guard.

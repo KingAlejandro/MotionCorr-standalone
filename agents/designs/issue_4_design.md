@@ -6,7 +6,7 @@
 - **Architect**: MotionCorr Architecture Agent
 - **Estimated Difficulty**: Medium (2.5/5)
 - **Dependencies**: `None; can start immediately.`
-- **Status**: Proposed
+- **Status**: Implemented & Verified
 - **Target Release / Milestone**: v1.0.0
 
 ---
@@ -24,10 +24,10 @@ This architectural specification details the algorithmic formulation, component 
 ### 2.1 Functional Objectives
 - Fulfill all deliverables associated with Issue #4.
 - Satisfy the core acceptance criteria:
-- [ ] A small synthetic fixture and its generation recipe are versioned; the experimental dataset is referenced by the existing release and checksums.
-- [ ] A comparison command reports motion trajectory error, corrected-image RMSE/max error, STAR-field differences, runtime, peak memory, and exit status.
-- [ ] The existing exact one-thread CPU parity cases pass; header timestamps and paths are explicitly normalized.
-- [ ] Proposed numerical tolerances for new backends are written down and approved before claiming their parity; exact CPU reference values remain visible.
+- [x] A small synthetic fixture and its generation recipe are versioned; the experimental dataset is referenced by the existing release and checksums.
+- [x] A comparison command reports motion trajectory error, corrected-image RMSE/max error, STAR-field differences, runtime, peak memory, and exit status.
+- [x] The existing exact one-thread CPU parity cases pass; header timestamps and paths are explicitly normalized.
+- [x] Proposed numerical tolerances for new backends are written down and approved before claiming their parity; exact CPU reference values remain visible.
 
 ### 2.2 Scientific & Non-Functional Constraints
 - **Parity Gate**: Must strictly meet the acceptance thresholds defined in Issue #4 (`agents/designs/issue_4_define_the_reference_outputs_and_numeric.md`).

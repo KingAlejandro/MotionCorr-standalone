@@ -190,4 +190,6 @@ python3 tools/compare_motioncorr.py \
 | **Tutorial Movie (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~2.8 GB | `0` |
 | **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.73 GiB | `0` |
 | **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |
-| **Tutorial Movie (CUDA PoC)** | Linux x86_64 (`4GPUs`, A100) | `--use_own --gpu 0 --j 4` | `0.005547 px` | `0.003970` | 1.53 GiB VRAM | `0` |
+| **Tutorial Movie (CUDA PoC, 2026-09-24 rerun)** | Linux x86_64 (`4GPUs`, A100) | `--use_own --gpu 0 --j 4 --seed 1` | `0.006203 px` | `0.003795` | Not remeasured | `0` |
+
+The CUDA row is the first movie of the deterministic rerun. Its relative image RMSE was `0.004708`, above the `0.001` Gate 2 limit; all 24 experimental movies failed that check despite clean exits. See the [full CUDA validation report](cuda_global_alignment_validation.md). Earlier j=4 and CUDA figures in this table came from runs before the CPU determinism fix and are not current parity evidence.

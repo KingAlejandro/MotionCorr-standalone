@@ -23,6 +23,7 @@
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_realspace_dw.h"
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -1802,49 +1803,71 @@ skip_fitting:
 		Iref_odd().initZeros(Iframes[0]());
 		Iref_even().initZeros(Iframes[0]());
 
-		for (int iframe = 0; iframe < n_frames; iframe++){
-			Irefframes[iframe]().initZeros(Iframes[iframe]());	
+#ifdef _CUDA_ENABLED
+		bool cuda_unweighted_done = false;
+		if (use_gpu) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			Image<float> *p_even = even_odd_split ? &Iref_even : nullptr;
+			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting (CUDA)..." << std::endl;
+			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile);
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
 		}
+		if (!cuda_unweighted_done)
+#endif
+		{
+			for (int iframe = 0; iframe < n_frames; iframe++){
+				Irefframes[iframe]().initZeros(Iframes[iframe]());	
+			}
 
-		RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
-		logfile << "Summing frames before dose weighting: ";
-		realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
-		logfile << " done" << std::endl;
-		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting: ";
+			realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
+			logfile << " done" << std::endl;
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			
+			// Sum frames and save aligned stack
+			for (int iframe = 0; iframe < n_frames; iframe++)
+			{
+			#pragma omp parallel for num_threads(n_threads)
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
+				DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
+				}
+
+			// save odd even aligned stack
+			if (even_odd_split)
+			{
+			if ( iframe % 2 == 0)
+			{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
+				DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+			}
+			}
+			else
+			{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
+				DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+
+			}
+			}
+			}
+			}
+		}
 
 		// Apply binning
 		RCTIC(TIMING_BINNING);
 		if (!early_binning && bin_factor != 1) {
 			binNonSquareImage(Iref, bin_factor);
+			if (even_odd_split) {
+				binNonSquareImage(Iref_odd, bin_factor);
+				binNonSquareImage(Iref_even, bin_factor);
+			}
 		}
 		RCTOC(TIMING_BINNING);
-		
-		// Sum frames and save aligned stack
-		for (int iframe = 0; iframe < n_frames; iframe++)
-		{
-		#pragma omp parallel for num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
-			DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
-			}
-
-		// save odd even aligned stack
-		if (even_odd_split)
-		{
-		if ( iframe % 2 == 0)
-		{
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
-			DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-		}
-		}
-		else
-		{
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
-			DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-
-		}
-		}
-		}
-		}
 
 		// Final output
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
@@ -1883,25 +1906,40 @@ skip_fitting:
 			}
 		}
 
-		RCTIC(TIMING_DW_WEIGHT);
-		doseWeighting(Fframes, doses, angpix * prescaling);
-		RCTOC(TIMING_DW_WEIGHT);
-
-		// Update real space images
-		RCTIC(TIMING_DW_IFFT);
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
-		}
-		RCTOC(TIMING_DW_IFFT);
-		RCTOC(TIMING_DOSE_WEIGHTING);
-
 		Iref().initZeros(Iframes[0]());
-		RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
-		logfile << "Summing frames after dose weighting: ";
-		realSpaceInterpolation(Iref, Iframes, mic.model, logfile);
-		logfile << " done" << std::endl;
-		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+
+#ifdef _CUDA_ENABLED
+		bool cuda_dw_done = false;
+		if (use_gpu) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			logfile << "Dose weighting and summing frames (CUDA)..." << std::endl;
+			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile);
+		}
+		if (!cuda_dw_done)
+#endif
+		{
+			RCTIC(TIMING_DW_WEIGHT);
+			doseWeighting(Fframes, doses, angpix * prescaling);
+			RCTOC(TIMING_DW_WEIGHT);
+
+			// Update real space images
+			RCTIC(TIMING_DW_IFFT);
+			#pragma omp parallel for num_threads(n_threads)
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+			}
+			RCTOC(TIMING_DW_IFFT);
+
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames after dose weighting: ";
+			realSpaceInterpolation(Iref, Iframes, mic.model, logfile);
+			logfile << " done" << std::endl;
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+		}
+		RCTOC(TIMING_DOSE_WEIGHTING);
 
 		// Apply binning
 		RCTIC(TIMING_BINNING);

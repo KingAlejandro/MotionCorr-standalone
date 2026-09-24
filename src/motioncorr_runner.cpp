@@ -18,6 +18,8 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <omp.h>
+#include <cfloat>
+#include <cmath>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -1319,7 +1321,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	bool cuda_gain_sum_done = false;
 	if (movie_session) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
-		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
+		// Keep the sum resident: hot-pixel statistics are computed on the device and
+		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
+		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
+		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false)) {
 			cuda_gain_sum_done = true;
 			host_frames_are_raw = true;
 		} else {
@@ -1351,54 +1356,195 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	if (!skip_defect)
 	{
 		RCTIC(TIMING_DETECT_HOT);
-		RFLOAT mean = 0, std = 0;
-		#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			mean += DIRECT_MULTIDIM_ELEM(Isum, n);
-		}
-		mean /=  YXSIZE(Isum);
-		#pragma omp parallel for reduction(+:std) num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			RFLOAT d = (DIRECT_MULTIDIM_ELEM(Isum, n) - mean);
-			std += d * d;
-		}
-		std = std::sqrt(std / YXSIZE(Isum));
-		const RFLOAT threshold = mean + hotpixel_sigma * std;
-		logfile << "In unaligned sum, Mean = " << mean << " Std = " << std << " Hotpixel threshold = " << threshold << std::endl;
-
+		RFLOAT mean = 0, std = 0, threshold = 0;
 		MultidimArray<bool> bBad(ny, nx);
-		bBad.initZeros();
-		if (fn_defect != "")
-		{
-			fillDefectMask(bBad, fn_defect, n_threads);
-#ifdef DEBUG_HOTPIXELS
-			Image<RFLOAT> tmp(nx, ny);
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
-				DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
-			tmp.write("defect.mrc");
+		int n_bad = 0;
+		const int NUM_MIN_OK = 6;
+		const int D_MAX = isEER ? 4 : 2;
+		bool host_sum_available = true;
+#ifdef _CUDA_ENABLED
+		// On the resident path the sum was deliberately left on the device.
+		host_sum_available = !(movie_session && cuda_gain_sum_done);
 #endif
-		}
-
-		if (fn_gain_reference != "")
+		// Attempt 0 uses GPU statistics; attempt 1 is the original host scan, run
+		// verbatim. Any exactness guard failure falls through to attempt 1.
+		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+			bool used_gpu_stats = false;
+			std::vector<int> gpu_hits;
+#ifdef _CUDA_ENABLED
+			if (stats_attempt == 0 && movie_session && cuda_gain_sum_done)
 			{
-				if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+				double sum1 = 0.0, sum2 = 0.0;
+				size_t band = 0;
+				if (movie_session->reduceUnalignedSum(sum1))
 				{
-					DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+					// Same source expressions as the host path, so host rounding is unchanged.
+					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
+					if (std::isfinite(gpu_mean) && movie_session->reduceUnalignedSumSqDev(gpu_mean, sum2))
+					{
+						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
+						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
+						// Twice the rigorous forward-error bound on the threshold difference
+						// between any two summation orders of the same addend multiset.
+						const double n_pix = (double)YXSIZE(Isum);
+						const double u = DBL_EPSILON / 2.0;
+						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
+						const double guard = 4.0 * gamma_n * (gpu_mean + 3.0 * gpu_std);
+						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
+						    movie_session->collectAboveThreshold(gpu_threshold, guard, gpu_hits, band))
+						{
+							if (band == 0)
+							{
+								mean = gpu_mean; std = gpu_std; used_gpu_stats = true;
+							}
+							else
+							{
+								logfile << "WARNING: " << band << " pixel(s) lie within the "
+								        << "hot-pixel threshold guard band; using host statistics."
+								        << std::endl;
+							}
+						}
+					}
+				}
+				if (!used_gpu_stats && !host_sum_available)
+				{
+					if (!movie_session->downloadUnalignedSum(Isum))
+					{
+						logfile << "WARNING: Could not download unaligned sum for host "
+						        << "hot-pixel fallback; discarding resident session." << std::endl;
+						movie_session.reset();
+						REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
+					}
+					host_sum_available = true;
 				}
 			}
-		}
-
-		int n_bad = 0;
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			if (DIRECT_MULTIDIM_ELEM(Isum, n) > threshold && !DIRECT_MULTIDIM_ELEM(bBad, n)) {
-				DIRECT_MULTIDIM_ELEM(bBad, n) = true;
-				n_bad++;
-				mic.hotpixelX.push_back(n % nx);
-				mic.hotpixelY.push_back(n / nx);
+#endif
+			if (!used_gpu_stats)
+			{
+				mean = 0; std = 0;
+				#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					mean += DIRECT_MULTIDIM_ELEM(Isum, n);
+				}
+				mean /=  YXSIZE(Isum);
+				#pragma omp parallel for reduction(+:std) num_threads(n_threads)
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					RFLOAT d = (DIRECT_MULTIDIM_ELEM(Isum, n) - mean);
+					std += d * d;
+				}
+				std = std::sqrt(std / YXSIZE(Isum));
 			}
+			threshold = mean + hotpixel_sigma * std;
+
+			n_bad = 0;
+			mic.hotpixelX.clear();
+			mic.hotpixelY.clear();
+			bBad.initZeros();
+			if (fn_defect != "")
+			{
+				fillDefectMask(bBad, fn_defect, n_threads);
+#ifdef DEBUG_HOTPIXELS
+				Image<RFLOAT> tmp(nx, ny);
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
+					DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
+				tmp.write("defect.mrc");
+#endif
+			}
+
+			if (fn_gain_reference != "")
+			{
+				// Idempotent `= true` writes with no cross-index reads, so this is
+				// order-independent and bitwise identical when parallelised.
+				#pragma omp parallel for num_threads(n_threads)
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+				{
+					if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+					{
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+					}
+				}
+			}
+
+			if (used_gpu_stats)
+			{
+				// The host scan has no cross-index dependence, so filtering the ascending
+				// device list against the pre-mask reproduces bBad, n_bad and the
+				// hotpixelX/Y push order exactly.
+				for (size_t h = 0; h < gpu_hits.size(); h++) {
+					const long int n = (long int)gpu_hits[h];
+					if (!DIRECT_MULTIDIM_ELEM(bBad, n)) {
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+						n_bad++;
+						mic.hotpixelX.push_back(n % nx);
+						mic.hotpixelY.push_back(n / nx);
+					}
+				}
+			}
+			else
+			{
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					if (DIRECT_MULTIDIM_ELEM(Isum, n) > threshold && !DIRECT_MULTIDIM_ELEM(bBad, n)) {
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+						n_bad++;
+						mic.hotpixelX.push_back(n % nx);
+						mic.hotpixelY.push_back(n / nx);
+					}
+				}
+			}
+
+			// Guard 2: mean/std are also consumed as rnd_gaus(frame_mean, frame_std),
+			// but only where some bad pixel has n_ok <= NUM_MIN_OK. n_ok is a pure
+			// function of bBad geometry, so this is decidable before any RNG draw.
+			if (used_gpu_stats)
+			{
+				bool gaus_reachable = false;
+				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				{
+					if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+					int n_ok = 0;
+					for (int dy = -D_MAX; dy <= D_MAX && n_ok <= NUM_MIN_OK; dy++) {
+						int y = i + dy;
+						if (y < 0 || y >= ny) continue;
+						for (int dx = -D_MAX; dx <= D_MAX; dx++) {
+							int x = j + dx;
+							if (x < 0 || x >= nx) continue;
+							if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
+							n_ok++;
+						}
+					}
+					if (n_ok <= NUM_MIN_OK) { gaus_reachable = true; break; }
+				}
+				if (gaus_reachable)
+				{
+					// Require both float narrowings to be insensitive to the reduction
+					// order, i.e. stable against the bound above.
+					const double n_pix = (double)YXSIZE(Isum);
+					const double u = DBL_EPSILON / 2.0;
+					const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
+					const double fm = (double)(mean / n_frames), fs = (double)(std / n_frames);
+					const double em = 2.0 * gamma_n * fabs(fm), es = 2.0 * gamma_n * fabs(fs);
+					const bool stable =
+						((float)(fm - em) == (float)fm) && ((float)(fm + em) == (float)fm) &&
+						((float)(fs - es) == (float)fs) && ((float)(fs + es) == (float)fs);
+					if (!stable)
+					{
+						logfile << "WARNING: frame_mean/frame_std narrowing is not provably "
+						        << "order-independent; using host statistics." << std::endl;
+#ifdef _CUDA_ENABLED
+						if (!host_sum_available && movie_session) {
+							if (!movie_session->downloadUnalignedSum(Isum))
+								REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
+							host_sum_available = true;
+						}
+#endif
+						continue; // redo detection with host statistics
+					}
+				}
+			}
+			break;
 		}
+		logfile << "In unaligned sum, Mean = " << mean << " Std = " << std << " Hotpixel threshold = " << threshold << std::endl;
 		logfile << "Detected " << n_bad << " hot pixels to be corrected." << std::endl;
 		Isum.clear();
 		RCTOC(TIMING_DETECT_HOT);
@@ -1409,8 +1555,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 		init_random_generator(random_seed);
 
-		const int NUM_MIN_OK = 6;
-		const int D_MAX = isEER ? 4 : 2;
 		const int PBUF_SIZE = 100;
 		std::vector<int> bad_xs, bad_ys;
 		bad_xs.reserve(1024);

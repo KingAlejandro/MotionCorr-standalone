@@ -192,10 +192,18 @@ and for closing the inverse error-reporting gap — not as a speedup.
 All exact against the `a11f2f1` baseline binary on the same host:
 
 - **Movie 00021, all 12 runs:** MRC pixel data identical — 0 differing bytes of
-  56,955,920 (14,238,980 float pixels), single shared data-block digest
-  `09680a6a4b3914f97c5befbf87c53c2425ab0658` — this is the **first 40 hex characters of
-  the SHA-256** of the data block, not a SHA-1; `sha1sum` on the same bytes gives
-  `41f04eb66b61d6e5aa3fb87f9fb474df4a5b2b77`.
+  56,955,920 (14,238,980 float pixels), single shared data-block digest. Full SHA-256
+  of the data block, identical on both arms:
+
+      09680a6a4b3914f97c5befbf87c53c2425ab06587801257c27d210c596eb7742
+
+  Reproduce with `tail -c +1025 <mrc> | sha256sum` (valid here because `nsymbt = 0`; in
+  general skip `1024 + nsymbt`). Note `sha1sum` on the same bytes gives
+  `41f04eb66b61d6e5aa3fb87f9fb474df4a5b2b77` — earlier revisions quoted only the first
+  40 hex characters of the SHA-256, which reads like a SHA-1 and would make a reviewer
+  checking with the wrong tool conclude the evidence was fabricated. An independent
+  session reproduced the same full SHA-256 from its own artifacts using the byte-offset
+  method, against the parsed-header method used here.
 - **Per-movie STAR bit-identical** across all 12 runs, covering all five blocks:
   `data_general`, the 24 `data_global_shift` rows, `data_local_motion_model`,
   `data_hot_pixels`, `data_local_shift`.

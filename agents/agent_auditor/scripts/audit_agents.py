@@ -177,6 +177,38 @@ def audit_templates(templates_dir: Path) -> List[Dict[str, str]]:
                 "description": "Template appears unpopulated or incomplete.",
                 "remediation": "Add standard schema headers and guidance blocks."
             })
+            continue
+
+        # Check for mandatory header structure
+        has_title = bool(re.search(r"^#\s+[^\n]+", text, re.MULTILINE))
+        section_headers = re.findall(r"^##\s+[^\n]+", text, re.MULTILINE)
+        if not has_title:
+            findings.append({
+                "severity": "WARNING",
+                "file": str(t_file),
+                "title": f"Missing title header in template: {t_file.name}",
+                "description": "Template does not contain a top-level '# <Title>' header.",
+                "remediation": "Add a standard top-level Markdown title header."
+            })
+        if len(section_headers) < 2:
+            findings.append({
+                "severity": "WARNING",
+                "file": str(t_file),
+                "title": f"Insufficient section headers in template: {t_file.name}",
+                "description": f"Template contains only {len(section_headers)} '##' section header(s); expected structured schema sections.",
+                "remediation": "Define structured '##' section headers matching the report schema."
+            })
+
+        # Check for unaddressed TODO or FIXME markers
+        todo_matches = re.findall(r"\b(TODO|FIXME|XXX)\b", text, re.IGNORECASE)
+        if todo_matches:
+            findings.append({
+                "severity": "WARNING",
+                "file": str(t_file),
+                "title": f"Unresolved placeholder tokens in template: {t_file.name}",
+                "description": f"Found {len(todo_matches)} unaddressed placeholder token(s): {', '.join(set(todo_matches))}.",
+                "remediation": "Replace temporary TODO/FIXME markers with finalized schema definitions."
+            })
 
     return findings
 

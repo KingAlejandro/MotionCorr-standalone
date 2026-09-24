@@ -15,6 +15,10 @@ def main():
     ap.add_argument("--ref", required=True); ap.add_argument("--test", required=True)
     ap.add_argument("--tool", required=True); ap.add_argument("--python", default=sys.executable)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--reuse", action="store_true",
+                    help="Re-aggregate existing per-movie reports instead of re-running the "
+                         "comparator. The comparisons are unchanged; only this script's verdict "
+                         "logic is recomputed. Fails if a report is missing.")
     a = ap.parse_args()
     ref, test, out = Path(a.ref), Path(a.test), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -34,11 +38,18 @@ def main():
             nfail += 1; results.append({"movie": rel.name, "status": "FAIL",
                                         "reason": "missing: " + ", ".join(missing)}); continue
         j = out / (rel.name.replace(".mrc", "") + "_exact.json")
-        cp = subprocess.run([a.python, a.tool, "--ref-mrc", str(rm), "--test-mrc", str(tm),
-                             "--ref-star", str(rs), "--test-star", str(ts),
-                             "--gate", "exact", "--json-out", str(j)],
-                            capture_output=True, text=True)
-        rec = {"movie": rel.name, "returncode": cp.returncode}
+        if a.reuse:
+            if not j.exists():
+                nfail += 1; results.append({"movie": rel.name, "status": "FAIL",
+                                            "reason": f"--reuse but no report at {j}"}); continue
+            rc = 0
+        else:
+            cp = subprocess.run([a.python, a.tool, "--ref-mrc", str(rm), "--test-mrc", str(tm),
+                                 "--ref-star", str(rs), "--test-star", str(ts),
+                                 "--gate", "exact", "--json-out", str(j)],
+                                capture_output=True, text=True)
+            rc = cp.returncode
+        rec = {"movie": rel.name, "returncode": rc}
         try:
             d = json.loads(j.read_text())
             ci = d.get("checks", {}).get("corrected_image", {}) or {}
@@ -54,8 +65,7 @@ def main():
                 "max_shift_error": (d.get("checks", {}).get("motion_trajectory", {}) or {}).get("max_shift_error"),
             })
         except Exception as e:
-            rec.update({"status": "ERROR", "reason": f"unreadable report: {e}",
-                        "stderr": cp.stderr[-400:]})
+            rec.update({"status": "ERROR", "reason": f"unreadable report: {e}"})
         # fail closed: exact parity requires all four, not merely status==PASS
         checks = d.get("checks", {}) if isinstance(locals().get("d"), dict) else {}
         ok = (rec.get("status") == "PASS" and rec.get("returncode") == 0

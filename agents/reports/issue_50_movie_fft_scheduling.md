@@ -134,15 +134,32 @@ not depend on them. Whether the change also *reduces variance* is a more interes
 possibility but is **not** claimed here: n=6 with two outliers cannot support it, and
 the two outlier runs had the two **fastest** process walls (3.34 s and 3.28 s), which
 points at stage-timer attribution rather than a real stall. It is worth a dedicated
-measurement, not an inference from this data. A standalone cuFFT microbenchmark at the exact
-production shape **brackets it on the high side**: −2.15 ms at `-O0` and −2.76 ms at
-`-O2`, against the 1.88 ms observed in the full pipeline — an overprediction of 14–47%.
-That direction is expected, since the microbenchmark runs the loops back to back with
-no interleaved host work, but it means the microbenchmark corroborates the *magnitude*
-and does not predict the value. Note also that it runs the `sync` variant before the
-`nosync` variant in fixed order without randomisation, which biases mildly in favour of
-`nosync`; the fixed order is disclosed rather than corrected because the effect is
-reproduced independently by the in-pipeline stage timers, which are order-balanced.
+measurement, not an inference from this data. A standalone cuFFT microbenchmark at the exact production shape **corroborates the
+magnitude only**. Run in two independent sessions it gave:
+
+| Session | `-O2` total delta | `-O0` total delta |
+|---|---:|---:|
+| first | 2.757 ms | 2.150 ms |
+| retained artifact (`microbench-retained.txt`) | 1.334 ms | 1.213 ms |
+
+That is a 1.213–2.757 ms range across runs of the *same* binary — a spread comparable to
+the effect being measured. The in-pipeline 1.880 ms falls inside it, but the
+microbenchmark is too noisy at this scale to predict the value, and it does **not**
+bracket the in-pipeline figure consistently from one side: the first session
+overpredicted, the second underpredicted. The defensible statement is that both
+instruments agree the effect is of order 1–3 ms, and the **in-pipeline stage timers are
+the measurement of record** — they are order-balanced, n=6 per arm, and have
+non-overlapping ranges, none of which is true of the microbenchmark.
+
+Two further weaknesses, disclosed rather than corrected: the microbenchmark runs the
+`sync` variant before the `nosync` variant in fixed order without randomisation, which
+biases mildly toward `nosync`; and the earlier session's figures were quoted in previous
+revisions of this report with no retained artifact on disk. The artifact now exists.
+
+What the microbenchmark *does* establish stably, across all three runs, is the
+allocation shape — R2C plan construction 5.1–5.5 ms, C2R 1.9–2.1 ms, and a work area of
+exactly 56,986,624 bytes (54.35 MiB) every time. Those are the numbers the VRAM argument
+and the rejected-batch-increase analysis rest on, and they are reproducible.
 
 **The process-level number is noise and is not claimed as a win.** −0.020 s against a
 standard deviation of 0.150 s is unresolvable; `apply gain and initial sum` alone

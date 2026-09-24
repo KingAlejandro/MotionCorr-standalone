@@ -134,32 +134,40 @@ not depend on them. Whether the change also *reduces variance* is a more interes
 possibility but is **not** claimed here: n=6 with two outliers cannot support it, and
 the two outlier runs had the two **fastest** process walls (3.34 s and 3.28 s), which
 points at stage-timer attribution rather than a real stall. It is worth a dedicated
-measurement, not an inference from this data. A standalone cuFFT microbenchmark at the exact production shape **corroborates the
-magnitude only**. Run in two independent sessions it gave:
+measurement, not an inference from this data.
 
-| Session | `-O2` total delta | `-O0` total delta |
-|---|---:|---:|
-| first | 2.757 ms | 2.150 ms |
-| retained artifact (`microbench-retained.txt`) | 1.334 ms | 1.213 ms |
+A standalone cuFFT microbenchmark at the exact production shape **consistently
+underpredicts** the in-pipeline effect. Ten measurements across three sessions:
 
-That is a 1.213–2.757 ms range across runs of the *same* binary — a spread comparable to
-the effect being measured. The in-pipeline 1.880 ms falls inside it, but the
-microbenchmark is too noisy at this scale to predict the value, and it does **not**
-bracket the in-pipeline figure consistently from one side: the first session
-overpredicted, the second underpredicted. The defensible statement is that both
-instruments agree the effect is of order 1–3 ms, and the **in-pipeline stage timers are
-the measurement of record** — they are order-balanced, n=6 per arm, and have
-non-overlapping ranges, none of which is true of the microbenchmark.
+| Session | measurements | median |
+|---|---|---:|
+| first (early, box freshly loaded) | 2.757 (`-O2`), 2.150 (`-O0`) | 2.454 ms |
+| retained artifact | 1.334 (`-O2`), 1.213 (`-O0`) | 1.274 ms |
+| variance reps (n=6) | 1.421, 1.427, 1.325, 1.179, 1.308, 1.371 | 1.348 ms |
 
-Two further weaknesses, disclosed rather than corrected: the microbenchmark runs the
-`sync` variant before the `nosync` variant in fixed order without randomisation, which
-biases mildly toward `nosync`; and the earlier session's figures were quoted in previous
-revisions of this report with no retained artifact on disk. The artifact now exists.
+The later **eight** measurements are tight — range 1.179–1.427 ms, median 1.329,
+sd 0.089 — so the instrument is *stable*, not noisy. The two anomalous values are the
+first session's, and **those are the numbers earlier revisions of this report published**.
+I cannot attribute them confidently; the most likely cause is unsettled GPU clocks or
+residual box load early in the session, but that is a hypothesis, not a finding.
 
-What the microbenchmark *does* establish stably, across all three runs, is the
-allocation shape — R2C plan construction 5.1–5.5 ms, C2R 1.9–2.1 ms, and a work area of
-exactly 56,986,624 bytes (54.35 MiB) every time. Those are the numbers the VRAM argument
-and the rejected-batch-increase analysis rest on, and they are reproducible.
+Taking the stable cluster, the microbenchmark reads **1.329 ms against the 1.880 ms
+measured in the pipeline — a 29% underprediction, consistently in one direction.** That
+direction is plausible: the microbenchmark runs the transform loops back to back with no
+interleaved host work, so a barrier there interrupts less than one sitting between real
+pipeline stages. But a 29% systematic offset means the microbenchmark corroborates that
+the effect is real and of order 1–2 ms; it does not measure it.
+
+**The in-pipeline stage timers are the measurement of record** — order-balanced, n=6 per
+arm, non-overlapping ranges, rank-sum p = 0.00216. None of that is true of the
+microbenchmark. One further weakness, disclosed rather than corrected: it runs the `sync`
+variant before `nosync` in fixed order without randomisation, which biases mildly toward
+`nosync` and is a candidate explanation for part of the offset's sign.
+
+What the microbenchmark *does* establish stably, across all ten runs, is the allocation
+shape — R2C plan construction 5.1–5.5 ms, C2R 1.9–2.1 ms, and a work area of exactly
+56,986,624 bytes (54.35 MiB) every time. Those are the numbers the VRAM argument and the
+rejected-batch-increase analysis rest on, and they are reproducible.
 
 **The process-level number is noise and is not claimed as a win.** −0.020 s against a
 standard deviation of 0.150 s is unresolvable; `apply gain and initial sum` alone

@@ -356,9 +356,20 @@ Measured under the cap (`/usr/bin/time -v`, 5 repeats each after a warm-up, medi
 | Max RSS | 1,634,100 KiB | 1,633,692 KiB | -408 KiB | -55,603 KiB |
 
 No fault saving, and no RSS saving either — consistent with `initZeros` dirtying the pages
-regardless, and with the host `Isum` allocation being retained. (A parallel task's change *does*
-show a ~47 MB RSS drop, because theirs removes a staging buffer outright; mine does not, and the
-two should not be cited as the same kind of result.)
+regardless, and with the host `Isum` allocation being retained.
+
+**The distinction from a parallel task's ~47 MB RSS drop is structural, not a discrepancy between
+measurements.** `askMemory` is `calloc` (`src/memory.cpp:30`), and at 54.3 MiB the allocation is
+well above any mmap threshold, so it returns **lazily-faulted** zero pages. Whether a saving exists
+therefore depends on *whether the pages are ever touched at all*:
+
+- Their change removes a staging buffer outright — allocation and write both disappear, so the
+  faults genuinely never occur: −18,345 faults, −47 MB RSS.
+- This change removes only a *write* to pages that `initZeros()` has already faulted in. No fault
+  saving is possible, by construction.
+
+A reader comparing −47 MB against −408 KiB should read that as two different mechanisms, not two
+disagreeing measurements.
 
 **So my unexplained residual stays open, with one candidate eliminated rather than confirmed.**
 Avoided memory bandwidth for the 54.32 MiB write is still plausible and still unmeasured.

@@ -329,6 +329,47 @@ those *eliminated* by it. This one is neither — it is **attenuated**: still re
 positive, still favoured under both orderings, but a third of the size. The binary needs a third
 bucket, and any summary should quote the constrained figure when the deployment is constrained.
 
+### The page-fault explanation for the residual is wrong, by inspection and by measurement
+
+I had offered the avoided 54.32 MiB host write as the likely cause of the gap between the measured
+~46 ms and the ~19 ms the stage decomposition accounts for. **That explanation is wrong, and it is
+wrong for a reason visible in the source.**
+
+`motioncorr_runner.cpp:1288-1289` is unchanged by this work:
+
+```cpp
+MultidimArray<float> Isum(ny, nx);
+Isum.initZeros();
+```
+
+`initZeros()` writes the whole array, so **all 13,900 pages are faulted in on both arms** before
+the preprocessing stage is reached. The baseline's D2H then rewrites pages that are already
+resident. This change removes the *write*, not the *faulting*. There was never a page-fault saving
+to find.
+
+Measured under the cap (`/usr/bin/time -v`, 5 repeats each after a warm-up, medians):
+
+| Counter | Base | Candidate | Delta | Expected if the buffer were avoided |
+|---|---|---|---|---|
+| Minor page faults | 450,446 | 459,682 | +9,236 (base spread 58,474) | **-13,900** |
+| Involuntary context switches | 41 | 40 | -1 | — |
+| Max RSS | 1,634,100 KiB | 1,633,692 KiB | -408 KiB | -55,603 KiB |
+
+No fault saving, and no RSS saving either — consistent with `initZeros` dirtying the pages
+regardless, and with the host `Isum` allocation being retained. (A parallel task's change *does*
+show a ~47 MB RSS drop, because theirs removes a staging buffer outright; mine does not, and the
+two should not be cited as the same kind of result.)
+
+**So my unexplained residual stays open, with one candidate eliminated rather than confirmed.**
+Avoided memory bandwidth for the 54.32 MiB write is still plausible and still unmeasured.
+
+On the locality hypothesis for the 142 ms baseline shift under the cap: involuntary context
+switches are **~40 per run**, far too few to account for tens of milliseconds, matching a parallel
+task's independent finding (75 uncapped vs 70 capped on their workload). That weakens the migration
+explanation substantially. I cannot test my own *uncapped* counters directly, because doing so now
+requires an uncapped run and the shared-VM policy forbids one. Recorded as unresolved rather than
+quietly retained.
+
 ## 10b. VRAM
 
 | Metric | Base | Candidate |
@@ -439,10 +480,8 @@ What is established beyond reasonable doubt:
 
 What is **not** established:
 - That the ~46 ms is fully explained by the stage decomposition, which accounts for roughly 19 ms.
-  The remainder is plausibly the avoided 54.32 MiB host-memory write, but that is unmeasured. A
-  parallel task independently reports a residual of the same shape and similar cause (202 ms
-  measured against 147 ms decomposed, around an avoided 54.3 MiB host buffer), which makes the
-  explanation more plausible without making it measured.
+  The remainder is **not** explained by avoided page faults -- see below, that hypothesis is dead.
+  Avoided memory-bandwidth for the 54.32 MiB write remains possible but is unmeasured.
 
 The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved
 end-to-end gain of ~46 ms (2.1%) unconstrained or ~18 ms (0.85%) under an 8-CPU cap**. It is still not the "~0.19 s host scan" the original framing implied --

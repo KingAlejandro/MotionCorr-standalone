@@ -68,7 +68,8 @@ values are at least 1.0 ulp apart.
 
 **Guard 1 (threshold band).** Rather than rely on that bound, verify it per movie. The collect
 kernel counts `band = #{n : |(double)Isum[n] - threshold| <= guard}` with
-`guard = 2 * 2*gamma_N * (mean + 3*std)`, i.e. twice the rigorous bound. Since the CPU and GPU
+`guard = 4*gamma_N*mean(|Isum|) + 2*hotpixel_sigma*gamma_N*std`. The absolute mean
+accounts for signed values whose sum nearly cancels. Since the CPU and GPU
 thresholds each lie within one bound of the exact value, they lie within `guard` of each other; if
 no pixel lies within `guard` of the computed threshold, no pixel can lie between the two
 thresholds, so the emitted set is provably identical to the CPU's. `band != 0` falls back.
@@ -76,9 +77,9 @@ thresholds, so the emitted set is provably identical to the CPU's. `band != 0` f
 **Guard 2 (`rnd_gaus` reachability).** `frame_mean`/`frame_std` are observable only if some bad
 pixel has `n_ok <= NUM_MIN_OK`. Compute `n_ok` for every entry of `bad_xs`/`bad_ys` after `bBad`
 is final and **before** `init_random_generator`. If all `n_ok > 6`, `rnd_gaus` is unreachable and
-these values cannot affect output. If any `n_ok <= 6`, require that `(float)frame_mean` and
-`(float)frame_std` round stably — that each `double` is further than its own error bound from the
-nearest float-rounding midpoint — and fall back otherwise.
+these values cannot affect output. If any `n_ok <= 6`, download the sum and run the
+original host statistics and scan. This keeps the Gaussian RNG parameters exact
+without a second floating-point proof.
 
 Also fall back on non-finite `mean`/`std`, on any CUDA error, and on hit-buffer overflow.
 
@@ -86,7 +87,7 @@ Also fall back on non-finite `mean`/`std`, on any CUDA error, and on hit-buffer 
 
 ```cpp
 bool applyGainDefectsAndSum(raw_frames, gain_ref, unaligned_sum, bool download_sum);
-bool reduceUnalignedSum(double &sum1);
+bool reduceUnalignedSum(double &sum1, double &sum_abs);
 bool reduceUnalignedSumSqDev(double mean, double &sum2);
 bool collectAboveThreshold(double threshold, double guard,
                            std::vector<int> &indices_ascending,

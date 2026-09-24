@@ -1371,7 +1371,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
 			bool used_gpu_stats = false;
-			double gpu_mean_abs = 0.0;
 			std::vector<int> gpu_hits;
 #ifdef _CUDA_ENABLED
 			if (stats_attempt == 0 && movie_session && cuda_gain_sum_done)
@@ -1405,7 +1404,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
-						gpu_mean_abs = mean_abs;
 						const double guard = 4.0 * gamma_n * mean_abs
 						                   + 2.0 * (double)hotpixel_sigma * gamma_n * gpu_std;
 						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
@@ -1508,9 +1506,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				}
 			}
 
-			// Guard 2: mean/std are also consumed as rnd_gaus(frame_mean, frame_std),
-			// but only where some bad pixel has n_ok <= NUM_MIN_OK. n_ok is a pure
-			// function of bBad geometry, so this is decidable before any RNG draw.
+			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
+			// If it is reachable, use the original host statistics rather than
+			// depending on a second floating-point error bound for RNG parameters.
+			// Reachability depends only on bBad geometry, before any RNG draw.
 			if (used_gpu_stats)
 			{
 				bool gaus_reachable = false;
@@ -1532,36 +1531,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				}
 				if (gaus_reachable)
 				{
-					// Require both float narrowings to be insensitive to the reduction
-					// order, i.e. stable against the bound above.
-					const double n_pix = (double)YXSIZE(Isum);
-					const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
-					const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
-					const double fm = (double)(mean / n_frames), fs = (double)(std / n_frames);
-					// A signed sum can make |mean| much smaller than mean(|x|).
-					// Bound the mean error with the absolute sum as in Guard 1.
-					const double em = 2.0 * gamma_n * (gpu_mean_abs / n_frames);
-					const double es = 2.0 * gamma_n * fabs(fs);
-					const bool stable =
-						((float)(fm - em) == (float)fm) && ((float)(fm + em) == (float)fm) &&
-						((float)(fs - es) == (float)fs) && ((float)(fs + es) == (float)fs);
-					if (!stable)
-					{
-						logfile << "WARNING: frame_mean/frame_std narrowing is not provably "
-						        << "order-independent; using host statistics." << std::endl;
+					logfile << "WARNING: Gaussian hot-pixel replacement needs host "
+					        << "statistics; using the original host scan." << std::endl;
 #ifdef _CUDA_ENABLED
-						if (!host_sum_available && movie_session) {
-							if (!movie_session->downloadUnalignedSum(Isum)) {
-								logfile << "WARNING: Could not download unaligned sum for host "
-								        << "hot-pixel fallback; discarding resident session." << std::endl;
-								movie_session.reset();
-								REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
-							}
-							host_sum_available = true;
+					if (!host_sum_available && movie_session) {
+						if (!movie_session->downloadUnalignedSum(Isum)) {
+							logfile << "WARNING: Could not download unaligned sum for host "
+							        << "hot-pixel fallback; discarding resident session." << std::endl;
+							movie_session.reset();
+							REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
 						}
-#endif
-						continue; // redo detection with host statistics
+						host_sum_available = true;
 					}
+#endif
+					continue; // redo detection with host statistics
 				}
 			}
 			break;

@@ -1385,27 +1385,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					{
 						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
 						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
-						// Twice the rigorous forward-error bound on the threshold difference
-						// between any two summation orders of the same addend multiset:
-						//   |d_mean| <= 2*gamma_N*(sum|x|/N)   |d_std| <= gamma_N*std
-						//   |d_threshold| <= |d_mean| + sigma*|d_std|
-						// The std term is deliberately ~4x the derived value
-						// (true error is about (gamma_N/2)*std). That margin is NOT
-						// slack to be reclaimed: d = x - mean has its own cancellation
-						// whose error scales with |x| + |mean| rather than with std, and
-						// this term is what covers it. Do not "tighten" it to
-						// sigma*gamma_N*std/2 without deriving that case explicitly.
-						// Over-estimating only widens the band and makes fallback more
-						// likely, which is the safe direction.
-						// sum|x|/N is used rather than mean because the two coincide only for
-						// same-sign data; sigma is read from hotpixel_sigma rather than
-						// hard-coded, so raising it cannot silently shrink the guard.
+						// Bound the difference between reduction orders, including signed
+						// cancellation in the mean and its second-order contribution to std.
+						// For nearly constant data the latter scales as mean_abs^2/std;
+						// a zero/non-finite std makes the guard fail and uses the host scan.
+						// Widening the band only increases conservative host fallback.
 						const double n_pix = (double)YXSIZE(Isum);
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
+						const double sigma_abs = std::fabs((double)hotpixel_sigma);
 						const double guard = 4.0 * gamma_n * mean_abs
-						                   + 2.0 * (double)hotpixel_sigma * gamma_n * gpu_std;
+						                   + 2.0 * sigma_abs * gamma_n * gpu_std
+						                   + 2.0 * sigma_abs * gamma_n * gamma_n
+						                     * mean_abs * mean_abs / gpu_std;
 						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
 						    std::isfinite(guard) && guard > 0.0 &&
 						    movie_session->collectAboveThreshold(gpu_threshold, guard, gpu_hits, band))

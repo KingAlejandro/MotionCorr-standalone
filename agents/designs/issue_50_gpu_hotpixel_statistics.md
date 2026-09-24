@@ -54,22 +54,20 @@ The CPU reduction order is not fixed: it varies with `--j` (measured: at N = 371
 bit-reproducible run-to-run at a fixed thread count (measured: 10/10 identical at `--j 8`).
 So "match the CPU bitwise" is ill-posed, and the design does not attempt it.
 
-Instead, for a fixed multiset of addends, any two summation orders satisfy the forward bound
-`|dS| <= gamma_N * S` with `gamma_N = N*u/(1 - N*u)`, `u = 2^-53`. Both `S1` (sum) and `S2`
-(sum of squared deviations) have non-negative addends here, giving
-
-```
-|d_threshold| <= 2*gamma_N*mean + 6*gamma_N*std = 2*gamma_N*(mean + 3*std)
-```
-
-Expressed in units of the `float` quantum at the threshold this is `<= 4*N*2^-30` float ulps,
-which for N = 14,238,980 is **0.053 ulps** — and is independent of the data. Distinct `float`
-values are at least 1.0 ulp apart.
+For a fixed set of inputs, the summation-order bound uses
+`gamma_N = N*u/(1 - N*u)`, `u = 2^-53`. The mean can have signed addends,
+so its bound uses `sum|x|/N`, not `|sum x|/N`. The squared deviations are
+non-negative. Error in the mean also contributes to their variance at second
+order; near-constant input makes that contribution material. There is no
+data-independent float-ULP argument for accepting GPU statistics.
 
 **Guard 1 (threshold band).** Rather than rely on that bound, verify it per movie. The collect
 kernel counts `band = #{n : |(double)Isum[n] - threshold| <= guard}` with
-`guard = 4*gamma_N*mean(|Isum|) + 2*hotpixel_sigma*gamma_N*std`. The absolute mean
-accounts for signed values whose sum nearly cancels. Since the CPU and GPU
+`guard = 4*gamma_N*mean(|Isum|) + 2*|hotpixel_sigma|*gamma_N*std +
+2*|hotpixel_sigma|*gamma_N^2*mean(|Isum|)^2/std`. The absolute mean
+accounts for signed values whose sum nearly cancels; the last term covers the
+mean error's second-order contribution to std. A zero or non-finite std
+falls back. Since the CPU and GPU
 thresholds each lie within one bound of the exact value, they lie within `guard` of each other; if
 no pixel lies within `guard` of the computed threshold, no pixel can lie between the two
 thresholds, so the emitted set is provably identical to the CPU's. `band != 0` falls back.

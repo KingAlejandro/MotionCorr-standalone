@@ -108,42 +108,46 @@ _rlnOpticsGroup #2
 
     # 2. Repeated CUDA Runs with background VRAM monitor
     vram_log = out / "vram_monitor.log"
-    if vram_log.exists():
-        vram_log.unlink()
+    # Keep the sampler as our direct child so cleanup cannot affect other users.
+    with vram_log.open("w") as vram_stream:
+        mon_proc = subprocess.Popen([
+            "nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits",
+            "-i", str(args.gpu_id), "--loop-ms=50"
+        ], stdout=vram_stream, stderr=subprocess.PIPE, text=True)
 
-    # Start VRAM monitor sampler (every 50ms)
-    mon_cmd = f"while true; do nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i {args.gpu_id} >> {vram_log}; sleep 0.05; done"
-    mon_proc = subprocess.Popen(mon_cmd, shell=True)
-
-    try:
-        print(f"\n--- Running {args.num_repeats} isolated CUDA runs (GPU={args.gpu_id}, threads={args.threads}) ---")
-        for i in range(args.num_repeats):
-            run_d = out / f"cuda_{i+1}"
-            run_d.mkdir(parents=True, exist_ok=True)
-            cmd = [
-                str(cuda_bin), "--use_own",
-                "--i", str(exp_star),
-                "--o", str(run_d / "corrected.mrc"),
-                "--patch_x", "5", "--patch_y", "5",
-                "--dose_weighting",
-                "--voltage", "300.0",
-                "--angpix", "1.06",
-                "--dose_per_frame", "1.277",
-                "--gpu", str(args.gpu_id),
-                "--j", str(args.threads),
-                "--gainref", str(exp_gain)
-            ]
-            t0 = time.time()
-            res = run_cmd(cmd)
-            elapsed = time.time() - t0
-            if res.returncode != 0:
-                sys.exit(f"CUDA run {i+1} failed: {res.stderr}")
-            print(f"  CUDA run {i+1}: {elapsed:.2f} s")
-            results["cuda_runs_sec"].append(elapsed)
-    finally:
-        mon_proc.terminate()
-        mon_proc.kill()
-        subprocess.run(["pkill", "-f", "nvidia-smi"], check=False)
+        try:
+            print(f"\n--- Running {args.num_repeats} isolated CUDA runs (GPU={args.gpu_id}, threads={args.threads}) ---")
+            for i in range(args.num_repeats):
+                run_d = out / f"cuda_{i+1}"
+                run_d.mkdir(parents=True, exist_ok=True)
+                cmd = [
+                    str(cuda_bin), "--use_own",
+                    "--i", str(exp_star),
+                    "--o", str(run_d / "corrected.mrc"),
+                    "--patch_x", "5", "--patch_y", "5",
+                    "--dose_weighting",
+                    "--voltage", "300.0",
+                    "--angpix", "1.06",
+                    "--dose_per_frame", "1.277",
+                    "--gpu", str(args.gpu_id),
+                    "--j", str(args.threads),
+                    "--gainref", str(exp_gain)
+                ]
+                t0 = time.time()
+                res = run_cmd(cmd)
+                elapsed = time.time() - t0
+                if res.returncode != 0:
+                    sys.exit(f"CUDA run {i+1} failed: {res.stderr}")
+                print(f"  CUDA run {i+1}: {elapsed:.2f} s")
+                results["cuda_runs_sec"].append(elapsed)
+        finally:
+            if mon_proc.poll() is None:
+                mon_proc.terminate()
+            try:
+                mon_proc.communicate(timeout=5)
+            except subprocess.TimeoutExpired:
+                mon_proc.kill()
+                mon_proc.communicate()
 
     # Parse Peak VRAM
     if vram_log.exists():

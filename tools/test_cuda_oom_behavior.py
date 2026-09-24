@@ -4,18 +4,15 @@
 Verifies:
 1. When GPU memory is exhausted, MotionCorr cleanly reports an allocation error to stderr.
 2. MotionCorr exits with non-zero status (exit code 1).
-3. Pre-existing CPU reference outputs in the target folder are left completely intact (SHA-256 unchanged).
+3. An existing CPU reference MRC remains intact (SHA-256 unchanged).
 4. No partial or corrupted output MRC/STAR files are generated in the destination.
 """
 
 import argparse
 import hashlib
-import os
 import shutil
-import signal
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 
@@ -34,11 +31,14 @@ def main():
     parser.add_argument("--gpu-id", type=int, default=1)
     parser.add_argument("--nvcc", type=str, default="/usr/local/cuda/bin/nvcc")
     parser.add_argument("--output-dir", type=Path, default=Path("test_oom_results"))
+    parser.add_argument("--cpu-reference", type=Path, required=True,
+                        help="Existing CPU-produced corrected MRC to preserve and checksum")
     args = parser.parse_args()
 
     repo = args.repo_dir.resolve()
     cuda_bin = (repo / args.cuda_bin).resolve()
     out = args.output_dir.resolve()
+    cpu_ref = args.cpu_reference.resolve()
     synth_dir = repo / "test-data" / "synthetic"
     input_star = synth_dir / "synthetic_local_motion.star"
 
@@ -46,20 +46,24 @@ def main():
         sys.exit(f"CUDA binary not found: {cuda_bin}")
     if not input_star.is_file():
         sys.exit(f"Input STAR fixture not found: {input_star}")
+    if not cpu_ref.is_file():
+        parser.error(f"CPU reference MRC not found: {cpu_ref}")
+    with cpu_ref.open("rb") as f:
+        header = f.read(212)
+    if len(header) < 212 or header[208:212] != b"MAP ":
+        parser.error(f"CPU reference is not an MRC file: {cpu_ref}")
+    if out.exists() and (not out.is_dir() or any(out.iterdir())):
+        parser.error(f"Output directory must be empty; refusing to remove existing files: {out}")
 
     nvcc_path = shutil.which("nvcc") or shutil.which(args.nvcc) or "/usr/local/cuda-12.8/bin/nvcc"
     if not Path(nvcc_path).is_file():
         sys.exit(f"nvcc compiler not found at: {nvcc_path}")
 
-    if out.exists():
-        shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
-    # 1. Create dummy pre-existing CPU reference output file
-    cpu_ref = out / "preexisting_cpu_reference.mrc"
-    cpu_ref.write_text("BIT-EXACT CPU REFERENCE DATA SENTINEL -- MUST REMAIN UNTOUCHED\n")
+    # Preserve an actual CPU result supplied before this test starts.
     orig_sha = sha256_file(cpu_ref)
-    print(f"[OOM Test] Created pre-existing CPU reference: {cpu_ref}")
+    print(f"[OOM Test] Existing CPU reference: {cpu_ref}")
     print(f"           Original SHA-256: {orig_sha}")
 
     # 2. Compile standalone vram_eater helper
@@ -118,16 +122,15 @@ int main(int argc, char** argv) {
         # 5. Verification checks
         exit_code_failed = (mc_res.returncode != 0)
         has_oom_msg = ("out of memory" in mc_res.stderr or "A GPU-function failed to execute" in mc_res.stderr or "out of memory" in mc_res.stdout)
-        after_sha = sha256_file(cpu_ref)
-        cpu_intact = (orig_sha == after_sha)
-        # MotionCorr creates output directory target_out, check if any .mrc file was generated
-        partial_mrc = [p for p in out.rglob("*.mrc") if p.is_file() and p.name != "preexisting_cpu_reference.mrc"]
-        no_corrupt_output = (len(partial_mrc) == 0)
+        cpu_intact = cpu_ref.is_file() and sha256_file(cpu_ref) == orig_sha
+        # No partial corrected image or STAR metadata should be left behind.
+        partial_outputs = [p for p in out.rglob("*") if p.is_file() and p.suffix in {".mrc", ".star"}]
+        no_corrupt_output = not partial_outputs
 
         print(f"  Check 1: Non-zero exit code: {exit_code_failed} (exit {mc_res.returncode})")
         print(f"  Check 2: OOM diagnostic reported: {has_oom_msg}")
         print(f"  Check 3: CPU reference output file intact: {cpu_intact}")
-        print(f"  Check 4: No corrupt/partial MRC outputs written: {no_corrupt_output}")
+        print(f"  Check 4: No corrupt/partial MRC or STAR outputs written: {no_corrupt_output}")
 
         passed = exit_code_failed and has_oom_msg and cpu_intact and no_corrupt_output
         print(f"\n[OOM Test] Overall Verdict: {'PASS' if passed else 'FAIL'}")

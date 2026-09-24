@@ -6,7 +6,7 @@
 - **Architect**: MotionCorr Architecture Agent
 - **Estimated Difficulty**: Medium (3/5)
 - **Dependencies**: `#9 (profile), #4 (reference)`
-- **Status**: Proposed
+- **Status**: Approved
 - **Target Release / Milestone**: v1.0.0
 
 ---

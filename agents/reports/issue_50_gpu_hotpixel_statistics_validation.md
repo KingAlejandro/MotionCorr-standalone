@@ -106,6 +106,22 @@ assumed.
 ## 5. Provenance (final series, 2026-09-24T19:37:54Z-19:44:13Z, one flock acquisition)
 
 Host `4GPUs` / 4-gpu-vm, A100 80GB PCIe, driver 570.86.10, GPU 0.
+
+> **Provenance caveat — these measurements predate the shared-VM CPU cap.** Every run in this
+> report was taken with the full host CPU pool available (~124 logical CPUs), before `4GPUs` was
+> capped to 8 logical CPUs (`taskset -c 96-103`, build parallelism <= 8, one job at a time).
+> **Absolute wall times here are therefore not comparable to anything measured under the cap**, and
+> should not be diffed against post-cap numbers.
+>
+> Two things are unaffected. The **exactness results are invariant**: `--j` fixes the OpenMP team
+> size via `num_threads(n_threads)` regardless of how many cores exist, so the reduction order, the
+> hot-pixel set and every corrected pixel are unchanged by the cap. The **paired wall-clock
+> comparison also stands**, because both arms ran interleaved under identical conditions — the cap
+> shifts both arms together and cannot manufacture a 34/40 sign split. Only the absolute figures
+> (2.2292 s / 2.1876 s) are tied to the pre-cap configuration.
+>
+> Transfer volumes, stage timings relative to each other, and VRAM peaks are likewise comparisons
+> internal to a matched pair and are not invalidated.
 Box settled before any measured run: compilers 0, GPU processes 0, load1 1.97, waited 70 s.
 
 | Tree | Binary | sha256 |

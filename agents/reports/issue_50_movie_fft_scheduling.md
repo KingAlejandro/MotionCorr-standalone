@@ -265,6 +265,12 @@ Comparison is against the **data block only**: `rwMRC.h` writes a
 `"Relion <date> <time>"` label at header offset 224, so whole-file MRC hashes differ
 between two runs of the *same* binary. Any gate hashing whole MRC files is unsound.
 
+A gate must exclude the **whole label field, bytes 224–1023**, not a narrower observed
+range. Two runs seconds apart differ only in the seconds digits (bytes 251–252); runs
+spanning minutes also move the minutes digits (bytes 249–252); runs spanning a date
+boundary would move more. Fitting the exclusion window to whatever was observed in one
+sample produces a gate that passes today and fails at midnight.
+
 **CPU Gate 2 is not addressed and is not relaxed.** The inherited relative-image-RMSE
 failure (0.007130747 against the 0.001 limit) is untouched by this change and remains
 open. Nothing here supports any claim of cuFFT/FFTW parity.

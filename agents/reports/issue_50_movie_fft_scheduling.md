@@ -186,6 +186,31 @@ All exact against the `a11f2f1` baseline binary on the same host:
 and this change modifies no kernel code at all, so it probes nothing relevant while
 monopolising a shared benchmark host. That is a deliberate omission, not a pass.
 
+### Timing-perturbation exactness (the sharpest available ordering test)
+
+Bit-exactness at a single timing profile is weak evidence for stream ordering: a latent
+missing barrier is invisible whenever the removed sync was redundant *at observed
+speeds*. The candidate was therefore run at four deliberately different timing profiles
+and the corrected pixels compared against the canonical digest from the matched batch.
+
+| Profile | `global FFT` | `global iFFT` | patch align | pixels | STAR |
+|---|---:|---:|---:|---|---|
+| quiet (control) | 21.9 ms | 22.0 ms | 2.0 ms | **EXACT** | identical |
+| `CUDA_LAUNCH_BLOCKING=1` | 25.6 ms | 26.8 ms | 2.2 ms | **EXACT** | identical |
+| contended (competing GPU load, same device) | **83.9 ms** | **85.4 ms** | **48.1 ms** | **EXACT** | identical |
+| under Nsight (`--cuda-memory-usage`) | 22.0 ms | 22.3 ms | 6.1 ms | **EXACT** | identical |
+
+The profiles genuinely differ: the contended run is **3.8× slower** on both FFT stages
+and 24× slower on patch alignment, which confirms the competing load actually delayed
+device completion relative to the host rather than the test being vacuous.
+`CUDA_LAUNCH_BLOCKING=1` independently collapses launch queue depth to serial. Across a
+3.8× spread in device completion timing, all four produce the same pixel digest and a
+single STAR digest (`15d425ac…`, 1 distinct value across 4 profiles).
+
+This is the strongest evidence available here that the removed barriers were redundant
+rather than load-bearing. It is still not a proof: it samples four timing profiles, not
+all of them.
+
 ### On the VRAM claim specifically
 
 The whole-device figure above is a **5 ms NVML sample peak, which is a lower bound on
@@ -307,4 +332,12 @@ flock -w 1800 /tmp/motioncorr-bench.lock -c ./run_evidence2.sh 3
 
 # full 24-movie exactness
 ./full24.sh
+
+# timing-perturbation exactness across four profiles
+./perturb.sh
 ```
+
+All GPU work on the shared host is serialised with
+`flock -w <n> /tmp/motioncorr-bench.lock`, with `/tmp/motioncorr-gpu-timing.lock`
+carrying holder identity written only *after* the flock is acquired. The identity file
+is advisory display only — it has no atomic acquire and must not be used as the mutex.

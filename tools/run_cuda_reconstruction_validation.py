@@ -75,6 +75,8 @@ def main():
     parser.add_argument("--gpu", type=int, default=1, help="GPU device ID")
     parser.add_argument("--workdir", default="build-reconstruction-val", help="Working output directory")
     parser.add_argument("--out-json", default="docs/cuda_reconstruction_validation_summary.json", help="Summary JSON output")
+    parser.add_argument("--exp-star", type=Path, default=None, help="Path to experimental STAR input")
+    parser.add_argument("--exp-gain", type=Path, default=None, help="Path to experimental gain reference")
     args = parser.parse_args()
 
     workdir = Path(args.workdir).resolve()
@@ -183,9 +185,9 @@ def main():
         print(f"Stage {name} Comparison Verdict: {comp_data.get('verdict')}")
 
     # Experimental Tutorial Movie Test
-    exp_star = Path("/home/alex/MotionCorr-issue-17/benchmark_series_results/benchmark_input.star")
-    exp_gain = Path("/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc")
-    if exp_star.exists() and exp_gain.exists():
+    exp_star = args.exp_star
+    exp_gain = args.exp_gain
+    if exp_star is not None and exp_gain is not None and exp_star.exists() and exp_gain.exists():
         print("\n=== Stage: Experimental Tutorial Movie (Dose-Weighted) ===")
         exp_dir = workdir / "exp_movie"
         exp_dir.mkdir(parents=True, exist_ok=True)

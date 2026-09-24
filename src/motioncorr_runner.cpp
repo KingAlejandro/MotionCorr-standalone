@@ -18,7 +18,6 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <omp.h>
-#include <cfloat>
 #include <cmath>
 #include <limits>
 
@@ -1372,6 +1371,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
 			bool used_gpu_stats = false;
+			double gpu_mean_abs = 0.0;
 			std::vector<int> gpu_hits;
 #ifdef _CUDA_ENABLED
 			if (stats_attempt == 0 && movie_session && cuda_gain_sum_done)
@@ -1405,6 +1405,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
+						gpu_mean_abs = mean_abs;
 						const double guard = 4.0 * gamma_n * mean_abs
 						                   + 2.0 * (double)hotpixel_sigma * gamma_n * gpu_std;
 						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
@@ -1471,9 +1472,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 			if (fn_gain_reference != "")
 			{
-				// Idempotent `= true` writes with no cross-index reads, so this is
-				// order-independent and bitwise identical when parallelised.
-				#pragma omp parallel for num_threads(n_threads)
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
 				{
 					if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
@@ -1540,7 +1538,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 					const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 					const double fm = (double)(mean / n_frames), fs = (double)(std / n_frames);
-					const double em = 2.0 * gamma_n * fabs(fm), es = 2.0 * gamma_n * fabs(fs);
+					// A signed sum can make |mean| much smaller than mean(|x|).
+					// Bound the mean error with the absolute sum as in Guard 1.
+					const double em = 2.0 * gamma_n * (gpu_mean_abs / n_frames);
+					const double es = 2.0 * gamma_n * fabs(fs);
 					const bool stable =
 						((float)(fm - em) == (float)fm) && ((float)(fm + em) == (float)fm) &&
 						((float)(fs - es) == (float)fs) && ((float)(fs + es) == (float)fs);
@@ -1550,8 +1551,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						        << "order-independent; using host statistics." << std::endl;
 #ifdef _CUDA_ENABLED
 						if (!host_sum_available && movie_session) {
-							if (!movie_session->downloadUnalignedSum(Isum))
+							if (!movie_session->downloadUnalignedSum(Isum)) {
+								logfile << "WARNING: Could not download unaligned sum for host "
+								        << "hot-pixel fallback; discarding resident session." << std::endl;
+								movie_session.reset();
 								REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
+							}
 							host_sum_available = true;
 						}
 #endif

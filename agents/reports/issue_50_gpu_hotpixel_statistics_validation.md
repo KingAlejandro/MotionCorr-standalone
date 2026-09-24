@@ -2,7 +2,7 @@
 
 **Measured branch**: `t3code/gpu-hot-pixel-optimization` at `d5c3deb` (production changes from `a5a4816` and `dd59245`)
 **Measured baseline**: `a11f2f1` (earlier PR #51 head)
-**Integration**: the two production commits were cherry-picked onto PR #51 head `306bc67`; this report records the original matched measurements and does not claim a fresh integrated-branch benchmark.
+**Integration**: the two production commits were cherry-picked onto PR #51 head `306bc67`. Review then tightened Guard 2 for signed, cancelling sums, restored the original serial gain-zero mask, and made both failed-download paths consistent. The original matched measurements below predate these final changes; a targeted signed-data test and fresh integrated-branch benchmark are still required before attributing the reported speed to the final head.
 **Design**: `agents/designs/issue_50_gpu_hotpixel_statistics.md`
 **Host**: `4GPUs` (4-gpu-vm), A100 80GB PCIe, GPU 0
 **Builds**: both arms `cmake -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DCMAKE_BUILD_TYPE=Release`,
@@ -465,7 +465,7 @@ not to call `movie_session.reset()` on a statistics failure.
   keyed on (filename, nx, ny, EER-or-not) rather than an unconditional hoist, because the
   per-movie size check at `:1260-1262` exists for non-uniform STAR files and the EER path takes a
   different branch (`renderer.loadEERGain`, `:1256`). Credited to the non-kernel wall-time task.
-- The measurements predate integration into PR #51; compare the integrated production files to `d5c3deb` before attributing these results to a later head.
+- The measurements predate the final Guard 2 correction. The final branch must be checked with signed summed pixels and clustered defects, and timed afresh under the 8-core cap before quoting a final speedup.
 
 ## 14. Verdict
 

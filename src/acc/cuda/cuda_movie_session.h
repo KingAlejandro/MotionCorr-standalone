@@ -73,6 +73,12 @@ public:
         const ThirdOrderPolynomialModel *model
     );
 
+    // Download Fourier frames to host (used e.g. when grouping_for_ps > 0 or CPU fallback)
+    bool downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes);
+
+    // Download real frames to host (used e.g. for fallback)
+    bool downloadRealFrames(std::vector<Image<float> > &Iframes);
+
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
     cufftComplex* getDeviceFourierFrames() { return d_Fframes; }

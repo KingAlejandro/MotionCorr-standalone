@@ -149,9 +149,9 @@ __global__ void findPeakAndInterpolateKernel(
     for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
         if (threadIdx.x < stride) {
             if (s_max[threadIdx.x + stride] > s_max[threadIdx.x]) {
-                s_max[threadIdx.x + stride] = s_max[threadIdx.x];
-                s_posx[threadIdx.x + stride] = s_posx[threadIdx.x];
-                s_posy[threadIdx.x + stride] = s_posy[threadIdx.x];
+                s_max[threadIdx.x] = s_max[threadIdx.x + stride];
+                s_posx[threadIdx.x] = s_posx[threadIdx.x + stride];
+                s_posy[threadIdx.x] = s_posy[threadIdx.x + stride];
             }
         }
         __syncthreads();

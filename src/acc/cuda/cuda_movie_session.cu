@@ -386,4 +386,30 @@ bool CudaMovieSession::reconstructUnweighted(
     return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile);
 }
 
+bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {
+    if (!is_initialized || !d_Fframes) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    const size_t sz_comp_frame = (size_t)ny * nfx * sizeof(cufftComplex);
+    Fframes.resize(n_frames);
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        Fframes[iframe].reshape(ny, nfx);
+        const cufftComplex *src = d_Fframes + (size_t)iframe * ny * nfx;
+        HANDLE_ERROR(cudaMemcpy(Fframes[iframe].data, src, sz_comp_frame, cudaMemcpyDeviceToHost));
+    }
+    return true;
+}
+
+bool CudaMovieSession::downloadRealFrames(std::vector<Image<float> > &Iframes) {
+    if (!is_initialized || !d_Iframes) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    const size_t sz_real_frame = (size_t)ny * nx * sizeof(float);
+    Iframes.resize(n_frames);
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        Iframes[iframe]().reshape(ny, nx);
+        const float *src = d_Iframes + (size_t)iframe * ny * nx;
+        HANDLE_ERROR(cudaMemcpy(Iframes[iframe]().data, src, sz_real_frame, cudaMemcpyDeviceToHost));
+    }
+    return true;
+}
+
 #endif // _CUDA_ENABLED

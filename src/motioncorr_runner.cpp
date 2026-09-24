@@ -1296,6 +1296,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		if (!movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
 			REPORT_ERROR("CUDA fused gain and sum failed");
 		}
+		if (fn_gain_reference != "") {
+			#pragma omp parallel for num_threads(n_threads)
+			for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
+				const float gain_val = DIRECT_MULTIDIM_ELEM(Igain(), pixel);
+				for (int iframe = 0; iframe < n_frames; iframe++) {
+					DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
+				}
+			}
+		}
 	} else
 #endif
 	{
@@ -1489,6 +1498,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// Write power spectrum for CTF estimation
 	if (grouping_for_ps > 0)
 	{
+#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			if (!movie_session->downloadFourierFrames(Fframes)) {
+				REPORT_ERROR("Failed to download Fourier frames for power spectrum estimation");
+			}
+		}
+#endif
 		const RFLOAT target_pixel_size = 1.4; // value from CTFFIND 4.1
 
 		// NOTE: Image(X, Y) has MultidimArray(Y, X)!! X is the fast axis.
@@ -1677,15 +1693,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					RCTIC(TIMING_PREP_PATCH);
 					cufftComplex *d_out_fpatches = nullptr;
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
-					cudaMalloc((void**)&d_out_fpatches, sz_fpatches);
-					movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_out_fpatches);
+					cudaError_t err = cudaMalloc((void**)&d_out_fpatches, sz_fpatches);
+					bool prep_ok = false;
+					if (err == cudaSuccess) {
+						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_out_fpatches);
+					}
 					RCTOC(TIMING_PREP_PATCH);
 
-					RCTIC(TIMING_PATCH_ALIGN);
-					converged = alignPatchDevice(d_out_fpatches, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
-					RCTOC(TIMING_PATCH_ALIGN);
-					cudaFree(d_out_fpatches);
-				} else
+					if (prep_ok) {
+						RCTIC(TIMING_PATCH_ALIGN);
+						converged = alignPatchDevice(d_out_fpatches, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+						RCTOC(TIMING_PATCH_ALIGN);
+					}
+					if (d_out_fpatches) {
+						cudaFree(d_out_fpatches);
+					}
+				}
+				if (!converged)
 #endif
 				{
 					RCTIC(TIMING_PREP_PATCH);
@@ -1949,6 +1973,11 @@ skip_fitting:
 				Iref_even().initZeros();
 				Iref_odd().initZeros();
 			}
+#ifdef _CUDA_ENABLED
+			if (movie_session && (Iframes.empty() || Iframes[0]().empty())) {
+				movie_session->downloadRealFrames(Iframes);
+			}
+#endif
 			for (int iframe = 0; iframe < n_frames; iframe++){
 				Irefframes[iframe]().initZeros(Iframes[iframe]());	
 			}
@@ -2060,6 +2089,11 @@ skip_fitting:
 		{
 			// Discard any partial CUDA result before running the CPU reconstruction.
 			Iref().initZeros();
+#ifdef _CUDA_ENABLED
+			if (movie_session && (Fframes.empty() || Fframes[0].empty())) {
+				movie_session->downloadFourierFrames(Fframes);
+			}
+#endif
 			RCTIC(TIMING_DW_WEIGHT);
 			doseWeighting(Fframes, doses, angpix * prescaling);
 			RCTOC(TIMING_DW_WEIGHT);

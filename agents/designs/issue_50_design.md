@@ -187,8 +187,9 @@ private:
 
 ## 6. Verification and Acceptance Criteria
 
-- [x] Implement persistent `CudaMovieSession` lifecycle managing resident VRAM buffers (`d_Iframes`, `d_Fframes`, `d_Isum`).
-- [x] Implement fused preprocessing kernel for gain application, defect pixel replacement, and unaligned summation.
+- [x] Implement persistent `CudaMovieSession` lifecycle managing resident VRAM buffers (`d_Iframes`, `d_Fframes`, `d_Isum`, `d_gain`).
+- [x] Implement fused preprocessing kernel for gain application and initial unaligned summation on GPU (`applyGainDefectsAndSum`), with deterministic RNG defect replacement handling and GPU update (`updateDefectPixels`).
 - [x] Eliminate intermediate host-device transfers across global FFT, global alignment, global IFFT, and patch alignment.
 - [x] Implement resident in-VRAM dose weighting and real-space interpolation directly writing to device output buffer.
-- [x] Maintain full numerical parity and fallback to CPU when CUDA is disabled.
+- [x] Pass Gate 2 numerical equivalence: Coordinate RMS shift error $\le 0.02\text{ px}$, Max shift error $\le 0.05\text{ px}$, Corrected-image absolute RMSE $\le 0.02$, Corrected-image relative RMSE $\le 0.001$, and identical STAR metadata.
+- [x] Maintain full numerical parity and safe, deterministic fallback to CPU when CUDA is disabled, out of memory, or upon step failure.

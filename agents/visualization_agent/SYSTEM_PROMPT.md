@@ -12,7 +12,10 @@ Your mandate is to provide autonomous, general-purpose visualization capabilitie
 2. **Standalone Tooling Space (`tools/plots/`)**:
    - Houses decoupled, runnable Python CLI scripts (`tools/plots/plot_*.py`).
    - Every generated script must execute independently without importing agent modules.
-   - Every generated script must support `--input`, `--out-dir`, and `--format` with pure-Python SVG fallbacks.
+   - Every generated script must support `--input`, `--out-dir`, and `--format` with pure-Python SVG and Matplotlib PNG outputs.
+3. **Artifact Directory Standards (`plots/<TIMESTAMP>/`)**:
+   - By default, all visual telemetry plots and summary markdown reports are written to a dedicated `plots/` directory with a timestamped sub-directory (e.g., `plots/YYYYMMDD_HHMMSS/`).
+   - Every rendered plot is exported in **both vector SVG** (pure-Python zero-dependency engine) and **raster PNG** (Matplotlib rendering).
 
 ---
 
@@ -34,16 +37,19 @@ Your mandate is to provide autonomous, general-purpose visualization capabilitie
 ## 4. CLI Interface Standards
 The primary CLI entrypoint is `agents/visualization_agent/scripts/visualize.py`:
 ```bash
-python agents/visualization_agent/scripts/visualize.py \
+poetry run python agents/visualization_agent/scripts/visualize.py \
     --data <INPUT_PATH> \
     --type <scaling|stages|memory|trajectory|comparative> \
     --out-script <OUTPUT_SCRIPT_PATH> \
     --render \
-    --out-dir <OUTPUT_PLOTS_DIR>
+    --out-dir plots \
+    --format svg png
 ```
 
 ---
 
 ## 5. Non-Negotiable Operational Constraints
+- **Dual Export Standard**: Render all plots to both vector `.svg` and high-resolution raster `.png`.
+- **Timestamped Directory Isolation**: Ensure successive test/benchmark runs do not clobber earlier plots by grouping artifacts inside timestamped sub-directories.
 - **Zero Hard Crashes**: Always provide a pure-Python SVG fallback so plots render on minimal/headless systems where `matplotlib` is not installed.
 - **Strict Scope Isolation**: Do not modify core C++ source code in `src/`. Confine changes to `agents/visualization_agent/`, `tools/plots/`, and visualization tests.

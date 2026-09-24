@@ -25,6 +25,7 @@ from agents.visualization_agent.scripts.visualize import (
     scaffold_standalone_script,
     execute_standalone_script,
     build_markdown_report,
+    resolve_output_directory,
 )
 
 
@@ -85,6 +86,18 @@ class TestVisualizationAgent(unittest.TestCase):
         finally:
             tf_path.unlink()
 
+    def test_resolve_output_directory(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base_dir = Path(tmpdir) / "plots"
+            # 1. With timestamp
+            target_dir = resolve_output_directory(base_dir, use_timestamp_subdir=True)
+            self.assertTrue(target_dir.exists())
+            self.assertEqual(target_dir.parent, base_dir)
+            
+            # 2. Without timestamp
+            direct_dir = resolve_output_directory(base_dir, use_timestamp_subdir=False)
+            self.assertEqual(direct_dir, base_dir)
+
     def test_scaffold_and_execute_standalone_script(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_root = Path(tmpdir)
@@ -106,10 +119,10 @@ class TestVisualizationAgent(unittest.TestCase):
             with open(json_file, "w") as f:
                 json.dump(sample_data, f)
                 
-            # 3. Execute standalone script
+            # 3. Execute standalone script requesting both SVG and PNG
             code, stdout, stderr = execute_standalone_script(
                 out_script,
-                ["--input", str(json_file), "--out-dir", str(out_plot_dir), "--format", "svg"]
+                ["--input", str(json_file), "--out-dir", str(out_plot_dir), "--format", "svg", "png"]
             )
             self.assertEqual(code, 0, f"Script failed with stderr:\n{stderr}")
             self.assertIn("Generated SVG", stdout)
@@ -124,14 +137,17 @@ class TestVisualizationAgent(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_root = Path(tmpdir)
             report_path = tmp_root / "test_report.md"
-            plot_file = tmp_root / "sample_plot.svg"
-            plot_file.write_text("<svg></svg>")
+            plot_file_svg = tmp_root / "sample_plot.svg"
+            plot_file_png = tmp_root / "sample_plot.png"
+            plot_file_svg.write_text("<svg></svg>")
+            plot_file_png.write_text("PNG")
             
-            build_markdown_report("Test Suite Report", "test_dataset.mrc", [plot_file], report_path, "All stages nominal.")
+            build_markdown_report("Test Suite Report", "test_dataset.mrc", [plot_file_svg, plot_file_png], report_path, "All stages nominal.")
             self.assertTrue(report_path.exists())
             content = report_path.read_text()
             self.assertIn("Visualization Report: Test Suite Report", content)
             self.assertIn("sample_plot.svg", content)
+            self.assertIn("sample_plot.png", content)
             self.assertIn("All stages nominal.", content)
 
 

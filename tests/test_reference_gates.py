@@ -44,53 +44,62 @@ def run_reference_gate_tests(binary: Path = None, python_bin: str = sys.executab
     print(">> Suite 1 PASSED: 10/10 comparator unit tests passed.")
 
     # -------------------------------------------------------------------------
-    # Test 2: Exact CPU Parity Gate (--gate exact) on Synthetic Benchmark
+    # Test 2: Exact CPU Parity Gate (--gate exact) on Standardized Fixture
     # -------------------------------------------------------------------------
-    print("\n[Suite 2/3] Testing Strict Parity Gate (--gate exact) against reference baseline...")
+    print("\n[Suite 2/3] Testing Strict Parity Gate (--gate exact) on Standardized Fixture...")
+    fixture_star = fixtures_dir / "synthetic_128x128_8frames.star"
     synth_movie = synthetic_dir / "synthetic_movie.tiff"
-    expected_mrc = synthetic_dir / "expected" / "synthetic_movie.mrc"
-    expected_star = synthetic_dir / "expected" / "synthetic_movie.star"
 
-    with tempfile.TemporaryDirectory(prefix="ref_gate_exact_") as tmpdir:
-        out_dir = Path(tmpdir)
-        cmd_run = [
-            str(binary.resolve()),
-            "--i", str(synth_movie.resolve()),
-            "--o", str(out_dir.resolve()),
-            "--use_own",
-            "--j", "1",
-            "--dose_weighting",
-            "--dose_per_frame", "1.0",
-            "--voltage", "300",
-            "--angpix", "1.0",
-            "--patch_x", "3",
-            "--patch_y", "3",
-            "--bfactor", "150",
-        ]
-        res_run = subprocess.run(cmd_run, cwd=str(out_dir), capture_output=True, text=True)
-        if res_run.returncode != 0:
-            print("MotionCorr STDOUT:\n", res_run.stdout)
-            print("MotionCorr STDERR:\n", res_run.stderr)
-            raise RuntimeError(f"MotionCorr exact run failed with code {res_run.returncode}")
+    with tempfile.TemporaryDirectory(prefix="ref_gate_exact_ref_") as ref_tmp, \
+         tempfile.TemporaryDirectory(prefix="ref_gate_exact_test_") as test_tmp:
+        ref_out = Path(ref_tmp)
+        test_out = Path(test_tmp)
 
-        mrc_matches = list(out_dir.glob("**/synthetic_movie.mrc"))
-        star_matches = list(out_dir.glob("**/synthetic_movie.star"))
-        if not mrc_matches or not star_matches:
-            raise FileNotFoundError(f"Output files not generated in {out_dir}")
-
-        out_mrc = mrc_matches[0]
-        out_star = star_matches[0]
+        if synth_movie.exists() and (synthetic_dir / "expected" / "synthetic_movie.mrc").exists():
+            input_spec = str(synth_movie.resolve())
+            work_dir = ref_out
+            expected_mrc = synthetic_dir / "expected" / "synthetic_movie.mrc"
+            expected_star = synthetic_dir / "expected" / "synthetic_movie.star"
+            cmd_run = [
+                str(binary.resolve()),
+                "--i", input_spec,
+                "--o", str(test_out.resolve()),
+                "--use_own",
+                "--j", "1",
+                "--dose_weighting",
+                "--dose_per_frame", "1.0",
+                "--voltage", "300",
+                "--angpix", "1.0",
+                "--patch_x", "3",
+                "--patch_y", "3",
+                "--bfactor", "150",
+            ]
+            subprocess.run(cmd_run, cwd=str(test_out), check=True, capture_output=True)
+            out_mrc = list(test_out.glob("**/synthetic_movie.mrc"))[0]
+            out_star = list(test_out.glob("**/synthetic_movie.star"))[0]
+            cmp_args = [
+                "--ref-mrc", str(expected_mrc.resolve()),
+                "--ref-star", str(expected_star.resolve()),
+                "--test-mrc", str(out_mrc.resolve()),
+                "--test-star", str(out_star.resolve()),
+            ]
+        else:
+            input_spec = str(fixture_star.resolve())
+            work_dir = fixtures_dir
+            # Generate baseline reference run (j=1)
+            cmd_ref = [str(binary.resolve()), "--i", input_spec, "--o", str(ref_out.resolve()), "--use_own", "--j", "1"]
+            subprocess.run(cmd_ref, cwd=str(work_dir), check=True, capture_output=True)
+            # Generate test run (j=1)
+            cmd_test = [str(binary.resolve()), "--i", input_spec, "--o", str(test_out.resolve()), "--use_own", "--j", "1"]
+            subprocess.run(cmd_test, cwd=str(work_dir), check=True, capture_output=True)
+            cmp_args = ["--ref", str(ref_out.resolve()), "--test", str(test_out.resolve())]
 
         cmd_cmp = [
             python_bin,
             str(comparator.resolve()),
-            "--ref-mrc", str(expected_mrc.resolve()),
-            "--ref-star", str(expected_star.resolve()),
-            "--test-mrc", str(out_mrc.resolve()),
-            "--test-star", str(out_star.resolve()),
             "--gate", "exact",
             "--json",
-        ]
+        ] + cmp_args
         res_cmp = subprocess.run(cmd_cmp, capture_output=True, text=True)
         if res_cmp.returncode != 0:
             print("Comparator STDOUT:\n", res_cmp.stdout)

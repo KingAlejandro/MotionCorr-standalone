@@ -181,13 +181,16 @@ def run_synthetic_test(
     binary_path: Path,
     threads: int = 1,
 ) -> Dict[str, Any]:
-    """Execute synthetic regression test in a sandboxed scratch environment."""
+    """Execute synthetic regression or reference gate test in a sandboxed scratch environment."""
     test_script = repo_root / "tests" / "test_synthetic_regression.py"
+    if not test_script.exists():
+        test_script = repo_root / "tests" / "test_reference_gates.py"
+
     if not test_script.exists():
         return {
             "passed": False,
             "status": "SKIPPED",
-            "error": f"Test script not found: {test_script}",
+            "error": f"No test script found in {repo_root / 'tests'}",
             "shift_delta": "N/A",
             "rmse": "N/A",
             "max_delta": "N/A",

@@ -11,6 +11,29 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
+CANONICAL_STAGES = [
+    ("dose weighting", "Dose Weighting & Filtering"),
+    ("global iFFT", "Global Inverse FFT"),
+    ("global FFT", "Global Forward FFT"),
+    ("real space interpolation", "Real Space Interpolation"),
+    ("power spectrum", "Power Spectrum Calculation"),
+    ("movie_io", "Movie & Gain I/O"),
+    ("global alignment", "Global Frame Alignment"),
+    ("patch alignment", "Patch Local Alignment"),
+]
+
+COLOR_PALETTE = [
+    "#2563eb",  # Blue
+    "#0d9488",  # Teal
+    "#0284c7",  # Sky Blue
+    "#10b981",  # Emerald Green
+    "#f59e0b",  # Amber
+    "#8b5cf6",  # Violet
+    "#ec4899",  # Pink
+    "#64748b",  # Slate
+]
+
+
 def parse_benchmark_json(json_path: Path) -> List[Dict]:
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -18,27 +41,46 @@ def parse_benchmark_json(json_path: Path) -> List[Dict]:
 
 
 def extract_stage_matrix(cases: List[Dict]) -> Tuple[List[str], List[str], List[List[float]]]:
-    sorted_cases = sorted(cases, key=lambda c: c.get("threads", 1))
-    categories = [f"{c.get('threads', 1)} Thread(s)" for c in sorted_cases]
-    
-    # Collect all unique stage names preserving order
-    all_stages = []
-    for c in sorted_cases:
-        for st in c.get("stage_breakdowns", []):
-            tag = st.get("tag", "")
-            if tag and tag not in all_stages:
-                all_stages.append(tag)
-                
-    if not all_stages:
-        all_stages = ["Total Alignment", "Dose Weighting", "I/O Overhead"]
+    sorted_cases = sorted(cases, key=lambda c: (c.get("threads", 1), c.get("name", "")))
+    categories = [
+        f"{c.get('name', '')} ({c.get('threads', 1)} Th)" if "Tutorial" in c.get("name", "")
+        else f"{c.get('threads', 1)} Thread(s)"
+        for c in sorted_cases
+    ]
 
-    matrix = []
+    categories = [
+        cat.replace("Tutorial_5x5_", "Tutorial ").replace("Synthetic_", "Synth ")
+        for cat in categories
+    ]
+
+    processed_case_maps = []
     for c in sorted_cases:
-        stage_map = {st.get("tag", ""): st.get("mean_sec", 0.0) for st in c.get("stage_breakdowns", [])}
-        row = [stage_map.get(name, 0.0) for name in all_stages]
+        st_map = {st.get("tag", ""): st.get("mean_sec", 0.0) for st in c.get("stage_breakdowns", [])}
+        io_time = st_map.get("read movie", 0.0) + st_map.get("read gain", 0.0) + st_map.get("apply gain", 0.0)
+        st_map["movie_io"] = io_time
+        processed_case_maps.append(st_map)
+
+    active_stages = []
+    for tag, display_name in CANONICAL_STAGES:
+        tot = sum(st_map.get(tag, 0.0) for st_map in processed_case_maps)
+        if tot > 0.0001:
+            active_stages.append((tag, display_name))
+
+    if not active_stages:
+        all_unique = []
+        for st_map in processed_case_maps:
+            for k in st_map:
+                if k not in all_unique and not k.startswith("dw -") and not k.startswith("power -") and not k.startswith("align -"):
+                    all_unique.append(k)
+        active_stages = [(k, k.title()) for k in all_unique[:6]]
+
+    stage_names = [name for _, name in active_stages]
+    matrix = []
+    for st_map in processed_case_maps:
+        row = [st_map.get(tag, 0.0) for tag, _ in active_stages]
         matrix.append(row)
 
-    return categories, all_stages, matrix
+    return categories, stage_names, matrix
 
 
 def plot_with_matplotlib(
@@ -56,24 +98,38 @@ def plot_with_matplotlib(
     except ImportError:
         return False
 
-    fig, ax = plt.subplots(figsize=(10, 5), dpi=150)
+    fig, ax = plt.subplots(figsize=(12, 5.5), dpi=150)
     y_pos = np.arange(len(categories))
     
-    colors = ["#2563eb", "#38bdf8", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#64748b"]
     lefts = np.zeros(len(categories))
     
     for s_idx, s_name in enumerate(stage_names):
         vals = [row[s_idx] for row in stage_matrix]
-        c = colors[s_idx % len(colors)]
-        ax.barh(y_pos, vals, left=lefts, height=0.55, label=s_name, color=c, edgecolor="white")
+        c = COLOR_PALETTE[s_idx % len(COLOR_PALETTE)]
+        ax.barh(y_pos, vals, left=lefts, height=0.55, label=s_name, color=c, edgecolor="white", linewidth=0.8)
         lefts += np.array(vals)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(categories, fontsize=10, fontweight="bold")
-    ax.set_xlabel("Cumulative Execution Time (seconds)", fontsize=11, fontweight="bold")
-    ax.set_title(title, fontsize=13, fontweight="bold", pad=15)
-    ax.legend(loc="upper right", framealpha=0.9)
-    ax.grid(True, axis="x", linestyle="--", alpha=0.5)
+    ax.set_yticklabels(categories, fontsize=10, fontweight="bold", color="#1e293b")
+    ax.set_xlabel("Cumulative Execution Time (seconds)", fontsize=11, fontweight="bold", color="#1e293b")
+    ax.set_title(title, fontsize=13, fontweight="bold", pad=15, color="#0f172a")
+    
+    ax.legend(
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1.0),
+        borderaxespad=0.0,
+        frameon=True,
+        fancybox=True,
+        shadow=False,
+        framealpha=0.95,
+        edgecolor="#cbd5e1",
+        fontsize=9,
+        title="Pipeline Stages",
+        title_fontsize=10
+    )
+    
+    ax.grid(True, axis="x", linestyle="--", alpha=0.5, color="#94a3b8")
+    ax.set_axisbelow(True)
 
     plt.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -89,55 +145,57 @@ def plot_with_svg(
     stage_matrix: List[List[float]],
     out_svg: Path
 ) -> None:
-    width, height = 850, 450
-    margin_l, margin_r, margin_t, margin_b = 130, 40, 60, 90
+    width, height = 980, 480
+    margin_l, margin_r, margin_t, margin_b = 200, 240, 60, 60
     plot_w = width - margin_l - margin_r
     plot_h = height - margin_t - margin_b
 
-    colors = ["#2563eb", "#38bdf8", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#64748b"]
     totals = [sum(row) for row in stage_matrix]
     max_tot = max(totals) * 1.1 if totals else 100.0
 
     lines = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">',
         f'  <rect width="{width}" height="{height}" fill="#ffffff" rx="8"/>',
-        f'  <text x="{width / 2}" y="32" font-family="sans-serif" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="middle">{title}</text>',
-        f'  <rect x="{margin_l}" y="{margin_t}" width="{plot_w}" height="{plot_h}" fill="#f8fafc" stroke="#e2e8f0"/>',
+        f'  <text x="{width / 2}" y="34" font-family="sans-serif" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="middle">{title}</text>',
+        f'  <rect x="{margin_l}" y="{margin_t}" width="{plot_w}" height="{plot_h}" fill="#f8fafc" stroke="#e2e8f0" rx="4"/>',
     ]
 
     for i in range(6):
         val = (max_tot / 5) * i
         x = margin_l + (val / max_tot) * plot_w
-        lines.append(f'  <line x1="{x:.1f}" y1="{margin_t}" x2="{x:.1f}" y2="{margin_t + plot_h}" stroke="#e2e8f0"/>')
+        lines.append(f'  <line x1="{x:.1f}" y1="{margin_t}" x2="{x:.1f}" y2="{margin_t + plot_h}" stroke="#e2e8f0" stroke-dasharray="3 3"/>')
         lines.append(f'  <text x="{x:.1f}" y="{margin_t + plot_h + 18}" font-family="sans-serif" font-size="10" fill="#64748b" text-anchor="middle">{val:.1f}s</text>')
 
     n_cats = len(categories)
-    bar_h = min(40.0, (plot_h / (n_cats or 1)) * 0.6)
+    bar_h = min(36.0, (plot_h / (n_cats or 1)) * 0.6)
     gap = (plot_h - n_cats * bar_h) / (n_cats + 1)
 
     for c_idx, cat in enumerate(categories):
         y = margin_t + gap * (c_idx + 1) + bar_h * c_idx
-        lines.append(f'  <text x="{margin_l - 10}" y="{y + bar_h / 2 + 4:.1f}" font-family="sans-serif" font-size="11" font-weight="bold" fill="#334155" text-anchor="end">{cat}</text>')
+        lines.append(f'  <text x="{margin_l - 12}" y="{y + bar_h / 2 + 4:.1f}" font-family="sans-serif" font-size="10" font-weight="bold" fill="#334155" text-anchor="end">{cat}</text>')
         curr_x = margin_l
         for s_idx, s_val in enumerate(stage_matrix[c_idx]):
-            if s_val <= 0:
+            if s_val <= 0.001:
                 continue
             seg_w = (s_val / max_tot) * plot_w
-            c = colors[s_idx % len(colors)]
-            lines.append(f'  <rect x="{curr_x:.1f}" y="{y:.1f}" width="{seg_w:.1f}" height="{bar_h:.1f}" fill="{c}" stroke="#ffffff" stroke-width="0.5"/>')
-            if seg_w > 40:
+            c = COLOR_PALETTE[s_idx % len(COLOR_PALETTE)]
+            lines.append(f'  <rect x="{curr_x:.1f}" y="{y:.1f}" width="{seg_w:.1f}" height="{bar_h:.1f}" fill="{c}" stroke="#ffffff" stroke-width="0.8"/>')
+            if seg_w > 38:
                 lines.append(f'  <text x="{curr_x + seg_w / 2:.1f}" y="{y + bar_h / 2 + 4:.1f}" font-family="sans-serif" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">{s_val:.1f}s</text>')
             curr_x += seg_w
 
-    leg_x = margin_l
-    leg_y = height - 35
+    leg_x = width - margin_r + 20
+    leg_y = margin_t
+    lines.append(f'  <rect x="{leg_x - 10}" y="{leg_y}" width="{margin_r - 30}" height="{len(stage_names) * 24 + 32}" fill="#f8fafc" stroke="#cbd5e1" rx="6"/>')
+    lines.append(f'  <text x="{leg_x}" y="{leg_y + 18}" font-family="sans-serif" font-size="11" font-weight="bold" fill="#0f172a">Pipeline Stages</text>')
+    
     for s_idx, name in enumerate(stage_names):
-        c = colors[s_idx % len(colors)]
-        lines.append(f'  <rect x="{leg_x}" y="{leg_y}" width="14" height="14" fill="{c}" rx="2"/>')
-        lines.append(f'  <text x="{leg_x + 18}" y="{leg_y + 11}" font-family="sans-serif" font-size="10" fill="#334155">{name}</text>')
-        leg_x += len(name) * 7 + 45
+        c = COLOR_PALETTE[s_idx % len(COLOR_PALETTE)]
+        item_y = leg_y + 36 + s_idx * 24
+        lines.append(f'  <rect x="{leg_x}" y="{item_y}" width="12" height="12" fill="{c}" rx="2"/>')
+        lines.append(f'  <text x="{leg_x + 18}" y="{item_y + 10}" font-family="sans-serif" font-size="10" fill="#334155">{name}</text>')
 
-    lines.append(f'  <text x="{margin_l + plot_w / 2}" y="{margin_t + plot_h + 35}" font-family="sans-serif" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">Cumulative Stage Time (seconds)</text>')
+    lines.append(f'  <text x="{margin_l + plot_w / 2}" y="{margin_t + plot_h + 38}" font-family="sans-serif" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">Cumulative Stage Time (seconds)</text>')
     lines.append('</svg>')
 
     out_svg.parent.mkdir(parents=True, exist_ok=True)
@@ -163,7 +221,7 @@ def main():
         sys.exit(1)
 
     categories, stage_names, stage_matrix = extract_stage_matrix(cases)
-    print(f"[Stage Breakdown] Processed {len(categories)} categories across {len(stage_names)} stages")
+    print(f"[Stage Breakdown] Cleaned up {len(categories)} categories across {len(stage_names)} major stages")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     stem = args.input.stem

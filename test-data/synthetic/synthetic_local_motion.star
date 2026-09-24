@@ -16,4 +16,4 @@ data_movies
 loop_
 _rlnMicrographMovieName #1
 _rlnOpticsGroup #2
-/Users/alex.konstantinov/Documents/MotionCorr-issue-17/test-data/synthetic/synthetic_local_motion.mrc 1
+synthetic_local_motion.mrc 1

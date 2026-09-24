@@ -1287,6 +1287,31 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
+	// The resident CUDA preprocessing path keeps decoded frames raw on the host.
+	// Its device copy is gain-corrected; host frames are materialized only if a
+	// later CPU/streaming path actually needs them.
+	bool host_frames_are_raw = false;
+	std::vector<int> resident_bad_xs, resident_bad_ys;
+	std::vector<float> resident_bad_replacements;
+	auto materialize_host_frames = [&]() {
+		if (!host_frames_are_raw) return;
+		const bool apply_gain = (fn_gain_reference != "");
+		#pragma omp parallel for num_threads(n_threads)
+		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
+			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain(), pixel) : 1.0f;
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
+		}
+		// Sparse values were computed from the gain-corrected neighborhood in
+		// the original raster/frame/RNG order, so they replace the corresponding
+		// products after the one host gain pass.
+		const size_t n_bad = resident_bad_xs.size();
+		for (int iframe = 0; iframe < n_frames; iframe++)
+			for (size_t idx = 0; idx < n_bad; idx++)
+				DIRECT_A2D_ELEM(Iframes[iframe](), resident_bad_ys[idx], resident_bad_xs[idx]) =
+					resident_bad_replacements[(size_t)iframe * n_bad + idx];
+		host_frames_are_raw = false;
+	};
 	// Apply gain and build the initial sum in one pixel pass. This avoids a
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
 	RCTIC(TIMING_GAIN_AND_SUM);
@@ -1296,18 +1321,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
 		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
 			cuda_gain_sum_done = true;
-			if (fn_gain_reference != "") {
-				#pragma omp parallel for num_threads(n_threads)
-				for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
-					const float gain_val = DIRECT_MULTIDIM_ELEM(Igain(), pixel);
-					for (int iframe = 0; iframe < n_frames; iframe++) {
-						DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
-					}
-				}
-			}
+			host_frames_are_raw = true;
 		} else {
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
 			movie_session.reset();
+			// The failed CUDA call may have partially written the sum. Start the
+			// original CPU pass from raw frames and a known-zero accumulator.
+			Isum.initZeros();
 		}
 	}
 	if (!cuda_gain_sum_done)
@@ -1396,10 +1416,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		bad_xs.reserve(1024);
 		bad_ys.reserve(1024);
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+			if (DIRECT_A2D_ELEM(bBad, i, j)) {
+				bad_xs.push_back(j);
+				bad_ys.push_back(i);
+			}
+#ifdef _CUDA_ENABLED
+		if (host_frames_are_raw)
+			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
+#endif
+		size_t bad_idx = 0;
+		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
-			bad_xs.push_back(j);
-			bad_ys.push_back(i);
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
@@ -1417,28 +1445,43 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 //						std::cout << " " << DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
-						pbuf[n_ok] = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+						float neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+#ifdef _CUDA_ENABLED
+						if (host_frames_are_raw && fn_gain_reference != "")
+							neighbor *= DIRECT_A2D_ELEM(Igain(), y, x);
+#endif
+						pbuf[n_ok] = neighbor;
 						n_ok++;
 					}
 //					std::cout << std::endl;
 				}
 //				std::cout << "n_ok = " << n_ok;
+				float replacement;
 				if (n_ok > NUM_MIN_OK)
-					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = pbuf[rand() % n_ok];
+					replacement = pbuf[rand() % n_ok];
 				else
-					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = rnd_gaus(frame_mean, frame_std);
+					replacement = rnd_gaus(frame_mean, frame_std);
+#ifdef _CUDA_ENABLED
+				if (host_frames_are_raw) {
+					resident_bad_replacements[(size_t)iframe * bad_xs.size() + bad_idx] = replacement;
+				} else
+#endif
+					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = replacement;
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
+			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
 		if (movie_session && !bad_xs.empty()) {
-			std::vector<float> bad_replacements(bad_xs.size() * n_frames);
-			for (size_t idx = 0; idx < bad_xs.size(); idx++) {
-				for (int iframe = 0; iframe < n_frames; iframe++) {
-					bad_replacements[(size_t)iframe * bad_xs.size() + idx] = DIRECT_A2D_ELEM(Iframes[iframe](), bad_ys[idx], bad_xs[idx]);
-				}
+			resident_bad_xs = bad_xs;
+			resident_bad_ys = bad_ys;
+			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
+				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
+				movie_session.reset();
+			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
+				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
+				movie_session.reset();
 			}
-			movie_session->updateDefectPixels(bad_xs, bad_ys, bad_replacements);
 		}
 #endif
 		RCTOC(TIMING_FIX_DEFECT);
@@ -1469,6 +1512,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	RCTIC(TIMING_GLOBAL_FFT);
 	bool cuda_global_fft_done = false;
 #ifdef _CUDA_ENABLED
+	// A discarded session (for example after a checked sparse-update failure)
+	// sends the corrected host movie through the legacy CUDA or CPU FFT path.
+	if (!movie_session && host_frames_are_raw)
+		materialize_host_frames();
 	// The early-binning path crops a full-size Fourier transform, so keep that
 	// path on the CPU until the CUDA implementation supports the same operation.
 	if (movie_session) {
@@ -1489,6 +1536,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			}
 		}
 	} else {
+	#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
+			movie_session.reset();
+			materialize_host_frames();
+		}
+	#endif
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		if (!early_binning) {
@@ -1647,6 +1701,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 #endif
 	if (!cuda_global_ifft_done) {
+#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			// The resident inverse consumes device Fourier frames. Preserve their
+			// globally aligned values for the CPU inverse fallback.
+			if (!movie_session->downloadFourierFrames(Fframes))
+				REPORT_ERROR("Failed to download Fourier frames after resident inverse FFT failure");
+			movie_session.reset();
+		}
+#endif
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
@@ -1731,6 +1794,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				if (!converged)
 #endif
 				{
+					// Host frames are deliberately raw on the resident path. If a
+					// device patch attempt falls back, download the aligned real frames
+					// before either CUDA staging or CPU patch preparation reads them.
+#ifdef _CUDA_ENABLED
+					if (movie_session && host_frames_are_raw) {
+						if (!movie_session->downloadRealFrames(Iframes))
+							REPORT_ERROR("Failed to download resident real frames for patch fallback");
+						host_frames_are_raw = false;
+					}
+#endif
 					RCTIC(TIMING_PREP_PATCH);
 					bool cuda_patch_prep_done = false;
 #ifdef _CUDA_ENABLED
@@ -1999,8 +2072,13 @@ skip_fitting:
 				Iref_odd().initZeros();
 			}
 #ifdef _CUDA_ENABLED
-			if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
-				movie_session->downloadRealFrames(Iframes);
+			if (movie_session && host_frames_are_raw) {
+				if (!movie_session->downloadRealFrames(Iframes))
+					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
+				host_frames_are_raw = false;
+			} else if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
+				if (!movie_session->downloadRealFrames(Iframes))
+					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
 			}
 #endif
 			for (int iframe = 0; iframe < n_frames; iframe++){

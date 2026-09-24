@@ -92,11 +92,15 @@ robust to the measurement problems in §5.
 
 ## 5. Wall time and VRAM
 
-**First batch discarded.** My `TIMING=ON` per-stage runs at ~19:05-19:07Z executed inside another
-session's measurement window: the advisory lockfile `/tmp/motioncorr-gpu-timing.lock` was
-overwritten (plain `>` has no test-and-set, so last writer wins), and at sample time `nvidia-smi`
-showed a foreign process holding 3,364 MiB with load average 22.78. The contamination is visible
-in the data — candidate `apply gain and initial sum` came out 0.394 / 0.508 / 0.719 s against a
+**First batch discarded, and the cause was mine.** My `TIMING=ON` per-stage runs at ~19:05-19:07Z
+executed inside another session's measurement window. That session was correctly holding the real
+mutex — `flock -w 3000 /tmp/motioncorr-bench.lock` — and writing `/tmp/motioncorr-gpu-timing.lock`
+only as a human-readable identity marker inside it. **My runs never acquired the flock**, so the
+mutex never excluded them; this was not a case of two sessions overwriting a lockfile. At sample
+time `nvidia-smi` showed a foreign process holding 3,364 MiB with load average 22.78. Note that acquiring the flock would not by itself have been
+enough: compiles do not take it, so the mutex can be held at load 20. A post-acquire guard
+(wait for `cc1plus`/`nvcc`/`cicc`/`ptxas` to clear and load1 < 2.0) is also required. The
+contamination is visible in the data — candidate `apply gain and initial sum` came out 0.394 / 0.508 / 0.719 s against a
 tight baseline 0.364 / 0.390 / 0.392 s. Removing a 54 MiB copy cannot make a stage slower, so that
 spread is contention. Those numbers are not reported.
 

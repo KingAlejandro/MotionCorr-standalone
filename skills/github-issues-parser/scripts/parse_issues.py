@@ -42,14 +42,10 @@ def fetch_issues_from_api(repo: str, state: str = "all") -> List[Dict[str, Any]]
                     break
                 page += 1
         except urllib.error.HTTPError as e:
-            if page > 1:
-                break
-            sys.stderr.write(f"HTTP Error {e.code}: {e.reason}\n")
+            sys.stderr.write(f"HTTP Error {e.code} while fetching page {page} for {repo}: {e.reason}\n")
             sys.exit(1)
         except Exception as e:
-            if page > 1:
-                break
-            sys.stderr.write(f"Failed to fetch issues: {e}\n")
+            sys.stderr.write(f"Failed to fetch page {page} of issues for {repo}: {e}\n")
             sys.exit(1)
 
     return all_issues

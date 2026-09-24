@@ -24,6 +24,7 @@
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_fft_prep.h"
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -43,8 +44,7 @@
 	Timer MCtimer;
 	int TIMING_READ_GAIN = MCtimer.setNew("read gain");
 	int TIMING_READ_MOVIE = MCtimer.setNew("read movie");
-	int TIMING_APPLY_GAIN = MCtimer.setNew("apply gain");
-	int TIMING_INITIAL_SUM = MCtimer.setNew("initial sum");
+	int TIMING_GAIN_AND_SUM = MCtimer.setNew("apply gain and initial sum");
 	int TIMING_DETECT_HOT = MCtimer.setNew("detect hot pixels");
 	int TIMING_FIX_DEFECT = MCtimer.setNew("fix defects");
 	int TIMING_GLOBAL_FFT = MCtimer.setNew("global FFT");
@@ -1274,29 +1274,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 	RCTOC(TIMING_READ_MOVIE);
 
-	// Apply gain
-	RCTIC(TIMING_APPLY_GAIN);
-	if (fn_gain_reference != "") {
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain()) {
-				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), n) *= DIRECT_MULTIDIM_ELEM(Igain(), n);
-			}
-		}
-	}
-	RCTOC(TIMING_APPLY_GAIN);
-
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
-	// First sum unaligned frames
-	RCTIC(TIMING_INITIAL_SUM);
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		#pragma omp parallel for num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			DIRECT_MULTIDIM_ELEM(Isum, n) += DIRECT_MULTIDIM_ELEM(Iframes[iframe](), n);
+	// Apply gain and build the initial sum in one pixel pass. This avoids a
+	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
+	RCTIC(TIMING_GAIN_AND_SUM);
+	const bool apply_gain = (fn_gain_reference != "");
+	#pragma omp parallel for num_threads(n_threads)
+	for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
+		float sum = 0.0f;
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
+			if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
+			sum += value;
 		}
+		DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
 	}
-	RCTOC(TIMING_INITIAL_SUM);
+	RCTOC(TIMING_GAIN_AND_SUM);
 
 	// Hot pixel
 	if (!skip_defect)
@@ -1422,6 +1416,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// FFT
 	RCTIC(TIMING_GLOBAL_FFT);
+	bool cuda_global_fft_done = false;
+#ifdef _CUDA_ENABLED
+	// The early-binning path crops a full-size Fourier transform, so keep that
+	// path on the CPU until the CUDA implementation supports the same operation.
+	if (use_gpu && !early_binning) {
+		logfile << "Computing full-frame Fourier transforms (CUDA)..." << std::endl;
+		cuda_global_fft_done = cudaForwardFFT2D(Iframes, Fframes, nx, ny, gpu_id, logfile);
+	}
+#endif
+	if (cuda_global_fft_done) {
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
+		}
+	} else {
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		if (!early_binning) {
@@ -1433,6 +1441,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			cropInFourierSpace(Fframe, Fframes[iframe]);
 		}
 		Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
+	}
 	}
 	RCTOC(TIMING_GLOBAL_FFT);
 
@@ -1552,11 +1561,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
 	RCTIC(TIMING_GLOBAL_IFFT);
+	bool cuda_global_ifft_done = false;
+#ifdef _CUDA_ENABLED
+	if (use_gpu) {
+		logfile << "Reconstructing globally aligned frames (CUDA)..." << std::endl;
+		// Retain the real frames on device for local patch extraction when memory
+		// permits. cudaPreparePatch falls back to the host images otherwise.
+		cuda_global_ifft_done = cudaInverseFFT2D(Fframes, Iframes, nx, ny, gpu_id, logfile, true);
+	}
+#endif
+	if (!cuda_global_ifft_done) {
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
 		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
+	}
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
 
@@ -1598,6 +1618,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
 				RCTIC(TIMING_PREP_PATCH);
+				bool cuda_patch_prep_done = false;
+#ifdef _CUDA_ENABLED
+				if (use_gpu) {
+					cuda_patch_prep_done = cudaPreparePatch(
+						Iframes, x_start, x_end, y_start, y_end,
+						n_groups, group_start, group_size, Fpatches,
+						gpu_id, logfile
+					);
+				}
+#endif
+				if (!cuda_patch_prep_done) {
 				std::vector<MultidimArray<float> >Ipatches(n_threads);
 				#pragma omp parallel for num_threads(n_threads)
 				for (int igroup = 0; igroup < n_groups; igroup++) {
@@ -1617,6 +1648,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					RCTIC(TIMING_PATCH_FFT);
 					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
 					RCTOC(TIMING_PATCH_FFT);
+				}
 				}
 				RCTOC(TIMING_PREP_PATCH);
 
@@ -1798,6 +1830,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 
 skip_fitting:
+#ifdef _CUDA_ENABLED
+	// The retained full-frame cache is only needed while preparing local patches.
+	if (use_gpu) cudaReleaseCachedFrames();
+#endif
 	if (!do_dose_weighting || save_noDW) {
 		Iref().initZeros(Iframes[0]());
 		Iref_odd().initZeros(Iframes[0]());
@@ -1820,6 +1856,13 @@ skip_fitting:
 		if (!cuda_unweighted_done)
 #endif
 		{
+			// A failed CUDA download can leave partial pixels in the output images.
+			// Reset before accumulating the CPU fallback to avoid mixing both paths.
+			Iref().initZeros();
+			if (even_odd_split) {
+				Iref_even().initZeros();
+				Iref_odd().initZeros();
+			}
 			for (int iframe = 0; iframe < n_frames; iframe++){
 				Irefframes[iframe]().initZeros(Iframes[iframe]());	
 			}
@@ -1921,6 +1964,8 @@ skip_fitting:
 		if (!cuda_dw_done)
 #endif
 		{
+			// Discard any partial CUDA result before running the CPU reconstruction.
+			Iref().initZeros();
 			RCTIC(TIMING_DW_WEIGHT);
 			doseWeighting(Fframes, doses, angpix * prescaling);
 			RCTOC(TIMING_DW_WEIGHT);

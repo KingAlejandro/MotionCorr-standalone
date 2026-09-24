@@ -35,6 +35,7 @@
 #include <src/jaz/single_particle/new_ft.h>
 #include "src/funcs.h"
 #include "src/renderEER.h"
+#include <src/stage_trace.h>
 
 //#define TIMING
 #ifdef TIMING
@@ -248,7 +249,10 @@ void MotioncorrRunner::initialise()
 			gpu_id = textToInteger(allThreadIDs[0][0]);
 		else
 			gpu_id = 0;
+		// First CUDA API call of the process: forces runtime/driver init.
+		MC_STAGE("initialise_first_cuda_call_start");
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
+		MC_STAGE("initialise_first_cuda_call_done");
 		if (gpu_id >= devCount || gpu_id < 0) {
 			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
 		}
@@ -515,7 +519,9 @@ FileName MotioncorrRunner::getOutputFileNames(FileName fn_mic, bool continue_eve
 
 void MotioncorrRunner::run()
 {
+	MC_STAGE("run_start");
 	prepareGainReference(true);
+	MC_STAGE("prepare_gain_reference_done");
 
 	int barstep;
 	if (verb > 0)
@@ -557,9 +563,12 @@ void MotioncorrRunner::run()
 		else
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 
+		MC_STAGE("movie_executeOwnMotionCorrection_done");
 		if (result) {
 			saveModel(mic);
+			MC_STAGE("movie_saveModel_star_done");
 			plotShifts(fn_micrographs[imic], mic);
+			MC_STAGE("movie_plotShifts_eps_done");
 		}
 	}
 
@@ -567,7 +576,9 @@ void MotioncorrRunner::run()
 		progress_bar(fn_micrographs.size());
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
+	MC_STAGE("movie_loop_done");
 	generateLogFilePDFAndWriteStarFiles();
+	MC_STAGE("generateLogFilePDFAndWriteStarFiles_done");
 
 #ifdef TIMING
         MCtimer.printTimes(false);
@@ -934,6 +945,7 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 {
+	MC_STAGE("genlog_start");
 
 	long int barstep = XMIPP_MAX(1, fn_ori_micrographs.size() / 60);
 	if (verb > 0)
@@ -1019,6 +1031,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 
     if (verb > 0) progress_bar(fn_ori_micrographs.size());
+	MC_STAGE("genlog_MDavg_built");
 
 	// Write out STAR files at the end
 	// In the opticsMdt, set EMDL_MICROGRAPH_PIXEL_SIZE (i.e. possibly binned pixel size) for SPA and EMDL_TOMO_TILT_SERIES_PIXEL_SIZE for STA
@@ -1051,6 +1064,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
         if (verb > 0) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
     }
 
+	MC_STAGE("genlog_joint_star_written");
 	if (verb > 0) std::cout << " Now generating logfile.pdf ... " << std::endl;
 
 	// Now generate EPS plot with histograms and combine all EPS into a logfile.pdf
@@ -1086,11 +1100,13 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 	}
+	MC_STAGE("genlog_summary_eps_written");
 	if (do_skip_logfile)
 	{
 
 		// Just have the overall headers only in the output PDF file
 		joinMultipleEPSIntoSinglePDF(fn_out + "logfile.pdf", all_fn_eps);
+		MC_STAGE("genlog_gs1_logfile_pdf_done");
 
 	}
 	else
@@ -1098,6 +1114,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 		// Always calculate the new overall headers at the top of the PDF file
 		joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", all_fn_eps);
+		MC_STAGE("genlog_gs1_header_pdf_done");
 
 		// Combine all EPS into a single logfile.pdf
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
@@ -1113,15 +1130,18 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		}
 
 		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
+		MC_STAGE("genlog_gs2_batch_pdf_done");
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
 		if (exists(fn_out + "all_batches.pdf")) fn_pdfs.push_back(fn_out + "all_batches.pdf");
 		fn_pdfs.push_back(fn_out + "batch.pdf");
 		concatenatePDFfiles(fn_out + "all_batches.pdf", fn_pdfs);
+		MC_STAGE("genlog_gs3_all_batches_pdf_done");
 
 		// Put header in front of comabined batches
 		concatenatePDFfiles(fn_out + "logfile.pdf", fn_out + "header.pdf", fn_out + "all_batches.pdf");
+		MC_STAGE("genlog_gs4_logfile_pdf_done");
 
 	}
 
@@ -1262,6 +1282,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	RCTOC(TIMING_READ_GAIN);
 
 	// Read images
+	MC_STAGE("movie_read_frames_start");
 	RCTIC(TIMING_READ_MOVIE);
 	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -1273,6 +1294,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
 	}
 	RCTOC(TIMING_READ_MOVIE);
+	MC_STAGE("movie_read_frames_done");
 
 #ifdef _CUDA_ENABLED
 	std::unique_ptr<CudaMovieSession> movie_session;
@@ -2230,7 +2252,9 @@ skip_fitting:
 
 		// Final output
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
+		MC_STAGE("movie_final_mrc_write_start");
 		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+		MC_STAGE("movie_final_mrc_write_done");
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
 	}
 

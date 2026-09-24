@@ -62,6 +62,7 @@
 #include "src/multidim_array.h"
 #include "src/transformations.h"
 #include "src/metadata_table.h"
+#include <src/stage_trace.h>
 #include "src/fftw.h"
 #include "src/float16.h"
 
@@ -569,10 +570,16 @@ public:
 	{
 
 		const FileName &fname = (name == "") ? filename : name;
-		fImageHandler hFile;
-		hFile.openFile(name, mode);
-		_write(fname, hFile, select_img, isStack, mode, datatype);
-		// the destructor of fImageHandler will close the file
+		{
+			MC_STAGE("img_write_enter");
+			fImageHandler hFile;
+			hFile.openFile(name, mode);
+			MC_STAGE("img_write_file_opened");
+			_write(fname, hFile, select_img, isStack, mode, datatype);
+			MC_STAGE("img_write_writeData_returned");
+			// the destructor of fImageHandler will close the file
+		}
+		MC_STAGE("img_write_file_closed");
 
 	}
 

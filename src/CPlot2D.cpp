@@ -25,6 +25,7 @@
 #include <iomanip>
 
 #include "CPlot2D.h"
+#include <src/stage_trace.h>
 
 void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps)
 {
@@ -55,11 +56,13 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps)
     {
 		command += " > /dev/null";
 
+		MC_STAGE("gs_spawn_join_start");
 		if (system(command.c_str()))
 		{
 			std::cerr << " ERROR in executing: " << command << "\n";
 			have_error_in_gs = true;
 		}
+		MC_STAGE("gs_spawn_join_done");
     }
     else
     {
@@ -103,11 +106,13 @@ bool concatenatePDFfiles(FileName fn_pdf_out, std::vector<FileName> fn_pdfs)
 
 	command += " > /dev/null";
 
+	MC_STAGE("gs_spawn_concat_start");
 	if (system(command.c_str()))
 	{
 		std::cerr << " ERROR in executing: " << command << "\n";
 		return false;
 	}
+	MC_STAGE("gs_spawn_concat_done");
 
 	if (fn_comb != fn_pdf_out)
 	{

@@ -18,17 +18,22 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <src/motioncorr_runner.h>
+#include <src/stage_trace.h>
 
 
 int main(int argc, char *argv[])
 {
+	MC_STAGE_BEGIN("main_entry");
 	MotioncorrRunner prm;
 
 	try
 	{
 		prm.read(argc, argv);
+		MC_STAGE("args_read");
 		prm.initialise();
+		MC_STAGE("initialise_done");
 		prm.run();
+		MC_STAGE("run_done");
 	}
 	catch (RelionError XE)
 	{

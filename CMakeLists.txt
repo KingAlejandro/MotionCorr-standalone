@@ -53,6 +53,11 @@ if(TIMING)
     add_compile_definitions(TIMING)
 endif()
 
+option(STAGE_TRACE "Enable low-overhead host stage-boundary tracing (investigation builds only)" OFF)
+if(STAGE_TRACE)
+    add_compile_definitions(MC_STAGE_TRACE)
+endif()
+
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
     enable_language(CUDA)

@@ -28,6 +28,8 @@
 #ifndef RWMRC_H
 #define RWMRC_H
 
+#include <src/stage_trace.h>
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -502,14 +504,18 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 		fwrite(header, MRCSIZE, 1, fimg);
 	freeMemory(header, sizeof(MRChead));
 
+	MC_STAGE("mrc_header_written");
 	//write only once, ignore select_img
 	char* fdata = (char*)askMemory(datasize);
+	MC_STAGE("mrc_scratch_allocated");
 	//think about writing in several chunks
 
 	if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
 	{
 		castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
+		MC_STAGE("mrc_cast_done");
 		fwrite(fdata, datasize, 1, fimg);
+		MC_STAGE("mrc_fwrite_done");
 	}
 	else
 	{
@@ -532,6 +538,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
 
 	freeMemory(fdata, datasize);
+	MC_STAGE("mrc_scratch_freed");
 
 	return(0);
 }

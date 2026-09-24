@@ -164,3 +164,13 @@ bool cudaRealSpaceInterpolation(
 3. **Execution Speed**: Minimum $5\times$ overall process speedup (reducing the 10.5 s CPU interpolation stage to $<0.2$ s).
 4. **VRAM Footprint**: Continuous `nvidia-smi` 50 ms sampling confirming whole-process peak VRAM $< 500\text{ MiB}$.
 5. **Fault Tolerance**: Verification of out-of-memory handling and device range validation.
+
+---
+
+## 7. Affected Files & Artifacts
+
+- `src/acc/cuda/cuda_realspace_dw.h`: CUDA header defining reconstruction interfaces.
+- `src/acc/cuda/cuda_realspace_dw.cu`: CUDA implementation with kernels for analytical dose weighting, cuFFT inverse transform, and polynomial bilinear interpolation.
+- `src/motioncorr_runner.cpp`: Runner integration dispatching CUDA reconstruction with CPU fallback.
+- `CMakeLists.txt`: Build target configuration for CUDA sources.
+- `tools/run_cuda_reconstruction_validation.py`: Verification harness for reconstruction validation.

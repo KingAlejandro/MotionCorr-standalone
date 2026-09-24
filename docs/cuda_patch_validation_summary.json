@@ -1,0 +1,1885 @@
+{
+  "timestamp": "2026-09-24T11:13:08Z",
+  "stages": {
+    "fallback_3x3": {
+      "gate_profile": "relaxed",
+      "tolerances": {
+        "max_shift_error": 0.05,
+        "shift_rmse": 0.02,
+        "image_rmse": 0.02,
+        "image_max_err": 5.0,
+        "image_relative_rmse": 0.001
+      },
+      "checks": {
+        "motion_trajectory": {
+          "num_frames": 8,
+          "max_abs_diff_x": 4.833333,
+          "max_abs_diff_y": 1.1895699999999998,
+          "max_shift_error": 4.833333,
+          "coord_rms_error": 3.0769370524804986,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -1.916667000000004,
+              "dy": 1.1895699999999998
+            },
+            {
+              "frame": 3,
+              "dx": -3.833332999999996,
+              "dy": 0.8078280000000007
+            },
+            {
+              "frame": 4,
+              "dx": -0.9166670000000039,
+              "dy": 1.143939
+            },
+            {
+              "frame": 5,
+              "dx": -4.833333,
+              "dy": 0.8235060000000018
+            },
+            {
+              "frame": 6,
+              "dx": -1.541667000000004,
+              "dy": -0.8640000000000008
+            },
+            {
+              "frame": 7,
+              "dx": -2.0,
+              "dy": -0.39316200000000023
+            },
+            {
+              "frame": 8,
+              "dx": -4.666667000000004,
+              "dy": -0.24674000000000262
+            }
+          ],
+          "passed": false,
+          "fail_reasons": [
+            "Max shift error 4.833333 > 0.050000",
+            "Coord RMS shift error 3.076937 > 0.020000"
+          ]
+        },
+        "star_fields": {
+          "num_differences": 0,
+          "differences": [],
+          "passed": true
+        },
+        "corrected_image": {
+          "num_pixels": 16384,
+          "pixel_identical": false,
+          "max_abs_pixel_error": 254.2049560546875,
+          "rmse": 55.77249932573771,
+          "relative_rmse": 1.307036766509982,
+          "ref_pixel_min": 630.6454467773438,
+          "ref_pixel_max": 973.0773315429688,
+          "ref_pixel_mean": 799.8489990234375,
+          "ref_pixel_std": 42.67094909247281,
+          "test_pixel_min": 628.1615600585938,
+          "test_pixel_max": 966.7326049804688,
+          "test_pixel_mean": 799.8489990234375,
+          "test_pixel_std": 42.09419250488281,
+          "core_header_diff_bytes": 8,
+          "label_header_diff_bytes": 1,
+          "normalized_label_diff_bytes": 0,
+          "passed": false,
+          "fail_reasons": [
+            "Image RMSE 5.577250e+01 > 2.000000e-02",
+            "Relative image RMSE 1.307037e+00 > 1.000000e-03",
+            "Image max pixel error 2.542050e+02 > 5.000000e+00"
+          ]
+        }
+      },
+      "overall_status": "FAIL",
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true
+      },
+      "comparator_exit_code": 1
+    },
+    "synth_1x1": {
+      "gate_profile": "relaxed",
+      "tolerances": {
+        "max_shift_error": 0.05,
+        "shift_rmse": 0.02,
+        "image_rmse": 0.02,
+        "image_max_err": 5.0,
+        "image_relative_rmse": 0.001
+      },
+      "checks": {
+        "motion_trajectory": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.000270000000000048,
+          "max_abs_diff_y": 0.0007030000000000092,
+          "max_shift_error": 0.0007030000000000092,
+          "coord_rms_error": 0.0004672980847382368,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -4.999999999999449e-05,
+              "dy": -0.0004330000000000167
+            },
+            {
+              "frame": 3,
+              "dx": -0.000270000000000048,
+              "dy": -0.0005339999999999789
+            },
+            {
+              "frame": 4,
+              "dx": 1.0000000000065512e-05,
+              "dy": -0.00010599999999999499
+            },
+            {
+              "frame": 5,
+              "dx": -8.999999999992347e-05,
+              "dy": -0.0007030000000000092
+            },
+            {
+              "frame": 6,
+              "dx": -0.0002500000000000835,
+              "dy": -0.0003170000000000117
+            },
+            {
+              "frame": 7,
+              "dx": -0.0001500000000000945,
+              "dy": -0.0005560000000000009
+            },
+            {
+              "frame": 8,
+              "dx": 9.999999999998899e-05,
+              "dy": -0.0004250000000001197
+            }
+          ],
+          "passed": true,
+          "fail_reasons": []
+        },
+        "star_fields": {
+          "num_differences": 0,
+          "differences": [],
+          "passed": true
+        },
+        "corrected_image": {
+          "num_pixels": 16384,
+          "pixel_identical": false,
+          "max_abs_pixel_error": 0.0494384765625,
+          "rmse": 0.007911795862602603,
+          "relative_rmse": 5.795138290115629e-05,
+          "ref_pixel_min": 793.291259765625,
+          "ref_pixel_max": 1721.5703125,
+          "ref_pixel_mean": 898.9114990234375,
+          "ref_pixel_std": 136.5247120348657,
+          "test_pixel_min": 793.2899169921875,
+          "test_pixel_max": 1721.5709228515625,
+          "test_pixel_mean": 898.9114990234375,
+          "test_pixel_std": 136.5247039794922,
+          "core_header_diff_bytes": 3,
+          "label_header_diff_bytes": 0,
+          "normalized_label_diff_bytes": 0,
+          "passed": true,
+          "fail_reasons": []
+        }
+      },
+      "overall_status": "PASS",
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true
+      },
+      "comparator_exit_code": 0,
+      "telemetry": {
+        "global_profile": {
+          "stage": "Global Alignment",
+          "h2d": 0.34,
+          "kernel": 0.16,
+          "cufft": 0.04,
+          "d2h": 0.35,
+          "total_gpu": 6.0,
+          "buf_vram": 1.61,
+          "cufft_vram": 0.51,
+          "peak_vram": 2.12
+        },
+        "patch_profiles": [],
+        "num_patch_profiles": 0,
+        "total_patch_gpu_ms": 0.0
+      }
+    },
+    "synth_3x3": {
+      "gate_profile": "relaxed",
+      "tolerances": {
+        "max_shift_error": 0.05,
+        "shift_rmse": 0.02,
+        "image_rmse": 0.02,
+        "image_max_err": 5.0,
+        "image_relative_rmse": 0.001
+      },
+      "checks": {
+        "motion_trajectory": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.000270000000000048,
+          "max_abs_diff_y": 0.0007030000000000092,
+          "max_shift_error": 0.0007030000000000092,
+          "coord_rms_error": 0.0004672980847382368,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -4.999999999999449e-05,
+              "dy": -0.0004330000000000167
+            },
+            {
+              "frame": 3,
+              "dx": -0.000270000000000048,
+              "dy": -0.0005339999999999789
+            },
+            {
+              "frame": 4,
+              "dx": 1.0000000000065512e-05,
+              "dy": -0.00010599999999999499
+            },
+            {
+              "frame": 5,
+              "dx": -8.999999999992347e-05,
+              "dy": -0.0007030000000000092
+            },
+            {
+              "frame": 6,
+              "dx": -0.0002500000000000835,
+              "dy": -0.0003170000000000117
+            },
+            {
+              "frame": 7,
+              "dx": -0.0001500000000000945,
+              "dy": -0.0005560000000000009
+            },
+            {
+              "frame": 8,
+              "dx": 9.999999999998899e-05,
+              "dy": -0.0004250000000001197
+            }
+          ],
+          "passed": true,
+          "fail_reasons": []
+        },
+        "star_fields": {
+          "num_differences": 0,
+          "differences": [],
+          "passed": true
+        },
+        "corrected_image": {
+          "num_pixels": 16384,
+          "pixel_identical": false,
+          "max_abs_pixel_error": 1.32861328125,
+          "rmse": 0.0318410341653477,
+          "relative_rmse": 0.00023424206858214732,
+          "ref_pixel_min": 795.96826171875,
+          "ref_pixel_max": 1715.7547607421875,
+          "ref_pixel_mean": 898.0108032226562,
+          "ref_pixel_std": 135.93217630837833,
+          "test_pixel_min": 795.9595336914062,
+          "test_pixel_max": 1715.738525390625,
+          "test_pixel_mean": 898.0086669921875,
+          "test_pixel_std": 135.93064880371094,
+          "core_header_diff_bytes": 5,
+          "label_header_diff_bytes": 1,
+          "normalized_label_diff_bytes": 0,
+          "passed": false,
+          "fail_reasons": [
+            "Image RMSE 3.184103e-02 > 2.000000e-02"
+          ]
+        }
+      },
+      "overall_status": "FAIL",
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true
+      },
+      "comparator_exit_code": 1,
+      "telemetry": {
+        "global_profile": {
+          "stage": "Global Alignment",
+          "h2d": 0.33,
+          "kernel": 0.16,
+          "cufft": 0.04,
+          "d2h": 0.35,
+          "total_gpu": 5.5,
+          "buf_vram": 1.61,
+          "cufft_vram": 0.51,
+          "peak_vram": 2.12
+        },
+        "patch_profiles": [
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.12,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.33,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.12,
+            "kernel": 0.12,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.32,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.12,
+            "total_gpu": 1.28,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.3,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.19,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.23,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.07,
+            "cufft": 0.03,
+            "d2h": 0.16,
+            "total_gpu": 1.53,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.12,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.28,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.18,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.18,
+            "cufft_vram": 0.06,
+            "peak_vram": 0.23
+          }
+        ],
+        "num_patch_profiles": 9,
+        "total_patch_gpu_ms": 11.69
+      }
+    },
+    "synth_5x5": {
+      "gate_profile": "relaxed",
+      "tolerances": {
+        "max_shift_error": 0.05,
+        "shift_rmse": 0.02,
+        "image_rmse": 0.02,
+        "image_max_err": 5.0,
+        "image_relative_rmse": 0.001
+      },
+      "checks": {
+        "motion_trajectory": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.000270000000000048,
+          "max_abs_diff_y": 0.0007030000000000092,
+          "max_shift_error": 0.0007030000000000092,
+          "coord_rms_error": 0.0004672980847382368,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -4.999999999999449e-05,
+              "dy": -0.0004330000000000167
+            },
+            {
+              "frame": 3,
+              "dx": -0.000270000000000048,
+              "dy": -0.0005339999999999789
+            },
+            {
+              "frame": 4,
+              "dx": 1.0000000000065512e-05,
+              "dy": -0.00010599999999999499
+            },
+            {
+              "frame": 5,
+              "dx": -8.999999999992347e-05,
+              "dy": -0.0007030000000000092
+            },
+            {
+              "frame": 6,
+              "dx": -0.0002500000000000835,
+              "dy": -0.0003170000000000117
+            },
+            {
+              "frame": 7,
+              "dx": -0.0001500000000000945,
+              "dy": -0.0005560000000000009
+            },
+            {
+              "frame": 8,
+              "dx": 9.999999999998899e-05,
+              "dy": -0.0004250000000001197
+            }
+          ],
+          "passed": true,
+          "fail_reasons": []
+        },
+        "star_fields": {
+          "num_differences": 0,
+          "differences": [],
+          "passed": true
+        },
+        "corrected_image": {
+          "num_pixels": 16384,
+          "pixel_identical": false,
+          "max_abs_pixel_error": 1.3948974609375,
+          "rmse": 0.04017351304741542,
+          "relative_rmse": 0.00029551401427605135,
+          "ref_pixel_min": 794.6566772460938,
+          "ref_pixel_max": 1715.39404296875,
+          "ref_pixel_mean": 898.14453125,
+          "ref_pixel_std": 135.94452752378692,
+          "test_pixel_min": 794.6561279296875,
+          "test_pixel_max": 1715.402099609375,
+          "test_pixel_mean": 898.1476440429688,
+          "test_pixel_std": 135.94570922851562,
+          "core_header_diff_bytes": 6,
+          "label_header_diff_bytes": 0,
+          "normalized_label_diff_bytes": 0,
+          "passed": false,
+          "fail_reasons": [
+            "Image RMSE 4.017351e-02 > 2.000000e-02"
+          ]
+        }
+      },
+      "overall_status": "FAIL",
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true
+      },
+      "comparator_exit_code": 1,
+      "telemetry": {
+        "global_profile": {
+          "stage": "Global Alignment",
+          "h2d": 0.25,
+          "kernel": 0.17,
+          "cufft": 0.04,
+          "d2h": 0.44,
+          "total_gpu": 5.48,
+          "buf_vram": 1.61,
+          "cufft_vram": 0.51,
+          "peak_vram": 2.12
+        },
+        "patch_profiles": [
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.04,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.33,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.29,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.07,
+            "d2h": 0.05,
+            "total_gpu": 1.28,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.29,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.06,
+            "total_gpu": 1.28,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.04,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.2,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.23,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.33,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.1,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.22,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.22,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.04,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.26,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.12,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.25,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.1,
+            "kernel": 0.05,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.23,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.3,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.18,
+            "kernel": 0.04,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.22,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.21,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.2,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.03,
+            "d2h": 0.05,
+            "total_gpu": 1.24,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.13,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.24,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.17,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.28,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          },
+          {
+            "stage": "Patch Alignment",
+            "h2d": 0.11,
+            "kernel": 0.03,
+            "cufft": 0.02,
+            "d2h": 0.05,
+            "total_gpu": 1.2,
+            "buf_vram": 0.06,
+            "cufft_vram": 0.02,
+            "peak_vram": 0.08
+          }
+        ],
+        "num_patch_profiles": 25,
+        "total_patch_gpu_ms": 31.14
+      }
+    },
+    "exp_5x5": {
+      "gate_profile": "relaxed",
+      "tolerances": {
+        "max_shift_error": 0.05,
+        "shift_rmse": 0.02,
+        "image_rmse": 0.02,
+        "image_max_err": 5.0,
+        "image_relative_rmse": 0.001
+      },
+      "checks": {
+        "motion_trajectory": {
+          "num_frames": 24,
+          "max_abs_diff_x": 0.006203000000000181,
+          "max_abs_diff_y": 0.004190000000001248,
+          "max_shift_error": 0.006203000000000181,
+          "coord_rms_error": 0.0034874509255808915,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -0.0045199999999999685,
+              "dy": 0.0017399999999999638
+            },
+            {
+              "frame": 3,
+              "dx": -0.0025900000000000922,
+              "dy": 0.003089999999999815
+            },
+            {
+              "frame": 4,
+              "dx": 0.0007760000000001099,
+              "dy": 0.0011899999999998023
+            },
+            {
+              "frame": 5,
+              "dx": -0.006203000000000181,
+              "dy": 0.0015600000000000058
+            },
+            {
+              "frame": 6,
+              "dx": 0.0019569999999999865,
+              "dy": 0.0013600000000000279
+            },
+            {
+              "frame": 7,
+              "dx": 0.001475000000000115,
+              "dy": 0.0024199999999998667
+            },
+            {
+              "frame": 8,
+              "dx": 0.0008060000000007506,
+              "dy": 0.0028700000000005943
+            },
+            {
+              "frame": 9,
+              "dx": 0.00019299999999944362,
+              "dy": 0.00021000000000004349
+            },
+            {
+              "frame": 10,
+              "dx": -0.004057999999999673,
+              "dy": -0.0014699999999994162
+            },
+            {
+              "frame": 11,
+              "dx": 0.005730999999999931,
+              "dy": 0.002029999999999532
+            },
+            {
+              "frame": 12,
+              "dx": 0.00026499999999973767,
+              "dy": 0.001140000000000363
+            },
+            {
+              "frame": 13,
+              "dx": 0.0018210000000005166,
+              "dy": 0.0007900000000002905
+            },
+            {
+              "frame": 14,
+              "dx": -0.0008330000000000837,
+              "dy": 0.00034000000000045105
+            },
+            {
+              "frame": 15,
+              "dx": 0.0009350000000001302,
+              "dy": 0.0025900000000005363
+            },
+            {
+              "frame": 16,
+              "dx": -0.005890000000000839,
+              "dy": 0.0020100000000002893
+            },
+            {
+              "frame": 17,
+              "dx": -0.0019849999999994594,
+              "dy": 0.0023900000000001143
+            },
+            {
+              "frame": 18,
+              "dx": 0.00044899999999969964,
+              "dy": 0.0022300000000008424
+            },
+            {
+              "frame": 19,
+              "dx": 0.0030570000000000874,
+              "dy": 0.0027399999999992986
+            },
+            {
+              "frame": 20,
+              "dx": 0.00044899999999969964,
+              "dy": -0.0007200000000011642
+            },
+            {
+              "frame": 21,
+              "dx": 0.002240000000000464,
+              "dy": 0.0027900000000009584
+            },
+            {
+              "frame": 22,
+              "dx": -0.0017529999999990054,
+              "dy": 0.004190000000001248
+            },
+            {
+              "frame": 23,
+              "dx": 0.000449000000001476,
+              "dy": 0.002920000000001366
+            },
+            {
+              "frame": 24,
+              "dx": -0.000700000000000145,
+              "dy": 0.0018700000000002603
+            }
+          ],
+          "passed": true,
+          "fail_reasons": []
+        },
+        "star_fields": {
+          "num_differences": 0,
+          "differences": [],
+          "passed": true
+        },
+        "corrected_image": {
+          "num_pixels": 14238980,
+          "pixel_identical": false,
+          "max_abs_pixel_error": 1.5138630867004395,
+          "rmse": 0.005427310480293247,
+          "relative_rmse": 0.006949970297885045,
+          "ref_pixel_min": -0.3147484064102173,
+          "ref_pixel_max": 10.87573528289795,
+          "ref_pixel_mean": 4.681949615478516,
+          "ref_pixel_std": 0.7809113201454745,
+          "test_pixel_min": -0.3154955804347992,
+          "test_pixel_max": 10.868124008178711,
+          "test_pixel_mean": 4.681949615478516,
+          "test_pixel_std": 0.7809203863143921,
+          "core_header_diff_bytes": 7,
+          "label_header_diff_bytes": 2,
+          "normalized_label_diff_bytes": 0,
+          "passed": false,
+          "fail_reasons": [
+            "Relative image RMSE 6.949970e-03 > 1.000000e-03"
+          ]
+        }
+      },
+      "overall_status": "FAIL",
+      "coverage": {
+        "motion_and_star": true,
+        "corrected_image": true,
+        "complete": true
+      },
+      "comparator_exit_code": 1
+    }
+  },
+  "steady_state": [
+    {
+      "global_profile": {
+        "stage": "Global Alignment",
+        "h2d": 167.97,
+        "kernel": 4.01,
+        "cufft": 0.83,
+        "d2h": 151.11,
+        "total_gpu": 330.24,
+        "buf_vram": 1482.91,
+        "cufft_vram": 86.68,
+        "peak_vram": 1569.59
+      },
+      "patch_profiles": [
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.03,
+          "kernel": 0.3,
+          "cufft": 0.06,
+          "d2h": 0.11,
+          "total_gpu": 13.66,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 20.49,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 23.82,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.56,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.21,
+          "total_gpu": 12.12,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.05,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.49,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.74,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.16,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.0,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.19,
+          "total_gpu": 11.43,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.83,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.28,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.9,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.32,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.39,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.83,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.9,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.32,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.14,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.2,
+          "total_gpu": 11.65,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.78,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.37,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.82,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.23,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.42,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.79,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.77,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.3,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.8,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.4,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.53,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.14,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.04,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.43,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.87,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.16,
+          "total_gpu": 12.42,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.46,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.98,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.41,
+          "kernel": 0.4,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.99,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.19,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.6,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.38,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.92,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.4,
+          "kernel": 0.33,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.07,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.4,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.86,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        }
+      ],
+      "num_patch_profiles": 25,
+      "total_patch_gpu_ms": 316.58,
+      "wall_time_sec": 14.161666870117188
+    },
+    {
+      "global_profile": {
+        "stage": "Global Alignment",
+        "h2d": 155.0,
+        "kernel": 4.01,
+        "cufft": 0.84,
+        "d2h": 151.17,
+        "total_gpu": 317.87,
+        "buf_vram": 1482.91,
+        "cufft_vram": 86.68,
+        "peak_vram": 1569.59
+      },
+      "patch_profiles": [
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.73,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 13.08,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 14.4,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 17.78,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.16,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.73,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.42,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.2,
+          "total_gpu": 12.06,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.44,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.11,
+          "total_gpu": 13.0,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.14,
+          "kernel": 0.23,
+          "cufft": 0.07,
+          "d2h": 0.1,
+          "total_gpu": 11.6,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.21,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.7,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.19,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.19,
+          "total_gpu": 11.77,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.14,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.63,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.24,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.18,
+          "total_gpu": 11.73,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.14,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.79,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.24,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.63,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.54,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 13.1,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.33,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.14,
+          "total_gpu": 11.91,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.36,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.11,
+          "total_gpu": 12.93,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.29,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.2,
+          "total_gpu": 11.83,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.51,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 13.1,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.21,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.68,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.44,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 13.0,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.3,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.94,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.57,
+          "kernel": 0.23,
+          "cufft": 0.18,
+          "d2h": 0.1,
+          "total_gpu": 13.22,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 10.87,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 14.8,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.81,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.12,
+          "total_gpu": 12.56,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.52,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.04,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.68,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 13.42,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        }
+      ],
+      "num_patch_profiles": 25,
+      "total_patch_gpu_ms": 319.03,
+      "wall_time_sec": 16.36305046081543
+    },
+    {
+      "global_profile": {
+        "stage": "Global Alignment",
+        "h2d": 354.38,
+        "kernel": 4.02,
+        "cufft": 0.83,
+        "d2h": 293.44,
+        "total_gpu": 659.43,
+        "buf_vram": 1482.91,
+        "cufft_vram": 86.68,
+        "peak_vram": 1569.59
+      },
+      "patch_profiles": [
+        {
+          "stage": "Patch Alignment",
+          "h2d": 26.06,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 30.32,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.32,
+          "kernel": 0.32,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.83,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.35,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.19,
+          "total_gpu": 11.9,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.35,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.08,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.39,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.91,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.98,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.52,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.05,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.11,
+          "total_gpu": 11.44,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.03,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.62,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.18,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.21,
+          "total_gpu": 11.71,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.4,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.19,
+          "total_gpu": 12.92,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.05,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.55,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.04,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.59,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 7.97,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.41,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 9.22,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.81,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.91,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.64,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.83,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.44,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 7.96,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.43,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.74,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.17,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.2,
+          "kernel": 0.25,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.69,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.11,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.64,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.44,
+          "kernel": 0.33,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 12.33,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.64,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.2,
+          "total_gpu": 12.12,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.08,
+          "kernel": 0.23,
+          "cufft": 0.07,
+          "d2h": 0.1,
+          "total_gpu": 11.5,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.55,
+          "kernel": 0.23,
+          "cufft": 0.06,
+          "d2h": 0.19,
+          "total_gpu": 12.1,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        },
+        {
+          "stage": "Patch Alignment",
+          "h2d": 8.12,
+          "kernel": 0.24,
+          "cufft": 0.06,
+          "d2h": 0.1,
+          "total_gpu": 11.6,
+          "buf_vram": 59.17,
+          "cufft_vram": 3.41,
+          "peak_vram": 62.59
+        }
+      ],
+      "num_patch_profiles": 25,
+      "total_patch_gpu_ms": 319.27,
+      "wall_time_sec": 16.579065799713135
+    }
+  ],
+  "verdict": "UNKNOWN",
+  "negative_test": {
+    "passed": true,
+    "exit_code": 1,
+    "stderr_contains_error": true
+  },
+  "exp_cpu_wall_sec": 16.12020492553711
+}

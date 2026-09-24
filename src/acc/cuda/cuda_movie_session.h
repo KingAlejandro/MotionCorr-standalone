@@ -22,7 +22,7 @@ public:
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
 
-    // Allocate persistent buffers and create batched cuFFT plans
+    // Allocate persistent buffers and bounded-batch cuFFT plans
     bool initialize();
 
     // Release all persistent GPU allocations and plans
@@ -105,8 +105,20 @@ private:
 
     cufftHandle plan_r2c = 0;
     cufftHandle plan_c2r = 0;
+    cufftHandle plan_r2c_tail = 0;
+    cufftHandle plan_c2r_tail = 0;
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
+    bool has_plan_r2c_tail = false;
+    bool has_plan_c2r_tail = false;
+    int fft_batch_size = 0;
+    size_t fft_r2c_work_bytes = 0;
+    size_t fft_c2r_work_bytes = 0;
+    size_t fft_r2c_tail_work_bytes = 0;
+    size_t fft_c2r_tail_work_bytes = 0;
+    size_t fft_work_bytes = 0;
+    void *d_fft_work = nullptr;
+    cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
 
     // Cached patch resources to avoid allocations and plan recreation in patch loop

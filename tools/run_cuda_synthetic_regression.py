@@ -595,8 +595,11 @@ def main() -> None:
         print("Please build motioncorr with -DCUDA=ON or specify --cuda-bin PATH", file=sys.stderr)
         sys.exit(2)
 
+    cpu_bin = cpu_bin.resolve()
+    cuda_bin = cuda_bin.resolve()
+
     # Locate fixture directory
-    fixture_dir = args.fixture_dir or (repo_root / "test-data" / "fixtures")
+    fixture_dir = (args.fixture_dir or (repo_root / "test-data" / "fixtures")).resolve()
     if not fixture_dir.is_dir():
         print(f"ERROR: Fixture directory not found: {fixture_dir}", file=sys.stderr)
         sys.exit(2)

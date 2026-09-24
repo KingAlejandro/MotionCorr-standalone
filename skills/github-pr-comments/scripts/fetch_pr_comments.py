@@ -62,6 +62,24 @@ def make_github_request(url: str, accept_header: str = "application/vnd.github.v
         sys.exit(1)
 
 
+def fetch_paginated_list(base_url: str) -> List[Dict[str, Any]]:
+    """Fetch all pages from a GitHub API endpoint."""
+    items: List[Dict[str, Any]] = []
+    page = 1
+    sep = "&" if "?" in base_url else "?"
+    while True:
+        url = f"{base_url}{sep}per_page=100&page={page}"
+        _, raw = make_github_request(url)
+        batch = json.loads(raw.decode("utf-8"))
+        if not batch or not isinstance(batch, list):
+            break
+        items.extend(batch)
+        if len(batch) < 100:
+            break
+        page += 1
+    return items
+
+
 def fetch_all_comments(repo: str, pr_number: int) -> Dict[str, Any]:
     """Retrieve PR details, official reviews, inline code comments, and discussion comments."""
     # 1. PR overview
@@ -69,20 +87,14 @@ def fetch_all_comments(repo: str, pr_number: int) -> Dict[str, Any]:
     _, pr_raw = make_github_request(pr_url, allow_empty=False)
     pr_meta = json.loads(pr_raw.decode("utf-8"))
 
-    # 2. Top-level reviews
-    reviews_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews?per_page=100"
-    _, reviews_raw = make_github_request(reviews_url)
-    reviews = json.loads(reviews_raw.decode("utf-8"))
+    # 2. Top-level reviews with pagination
+    reviews = fetch_paginated_list(f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews")
 
-    # 3. Inline code review comments
-    comments_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/comments?per_page=100"
-    _, comments_raw = make_github_request(comments_url)
-    review_comments = json.loads(comments_raw.decode("utf-8"))
+    # 3. Inline code review comments with pagination
+    review_comments = fetch_paginated_list(f"https://api.github.com/repos/{repo}/pulls/{pr_number}/comments")
 
-    # 4. General conversation comments
-    issue_comments_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments?per_page=100"
-    _, issue_comments_raw = make_github_request(issue_comments_url)
-    issue_comments = json.loads(issue_comments_raw.decode("utf-8"))
+    # 4. General conversation comments with pagination
+    issue_comments = fetch_paginated_list(f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments")
 
     return {
         "pr_meta": pr_meta,

@@ -3,7 +3,7 @@
 
 Example (arguments after -- are passed verbatim to MotionCorr):
   python3 tools/profile_cuda_movie.py --binary build-cuda/motioncorr \
-    --input movies.star --input gain.mrc --gpu 0 --repeat 5 \
+    --input movies.star --input movie-00021.tiff --input gain.mrc --gpu 0 --repeat 5 \
     --source-sha SOURCE_COMMIT --output-dir profile-out \
     --expect-output corrected.mrc --movie-log corrected.log -- \
     --i movies.star --o corrected --gainref gain.mrc --gpu 0 --use_own
@@ -11,6 +11,8 @@ Example (arguments after -- are passed verbatim to MotionCorr):
 The runner never uses a shell. Device-wide nvidia-smi samples are supplementary
 and are labelled as such; use --nsys for a separate CUDA allocation/transfer
 trace. Sampled and Nsight timings are stored separately from each other.
+List every movie referenced by a STAR input with --input: STAR references are not
+recursively discovered, and only explicitly listed files are hashed.
 """
 from __future__ import annotations
 
@@ -57,6 +59,14 @@ def git_source_sha(source_dir: pathlib.Path) -> str | None:
     return out if code == 0 else None
 
 
+def file_signature(path: pathlib.Path) -> tuple[int, int, str] | None:
+    try:
+        st = path.stat()
+        return (st.st_mtime_ns, st.st_size, sha256_file(path)) if path.is_file() else None
+    except OSError:
+        return None
+
+
 def nsys_allocation_peaks(nsys: str, report: pathlib.Path) -> dict[str, Any]:
     """Export CUDA allocation events and calculate the live high-water per device."""
     db = report.with_suffix(".sqlite")
@@ -65,26 +75,52 @@ def nsys_allocation_peaks(nsys: str, report: pathlib.Path) -> dict[str, Any]:
     if code != 0 or not db.is_file():
         raise RuntimeError(f"Nsight SQLite export failed: {out}")
     peaks: dict[int, int] = {}
-    live: dict[int, dict[int, int]] = {}
+    totals: dict[int, int] = {}
+    live: dict[tuple[int, int, int, int], int] = {}
+    duplicate_static_events = 0
     with sqlite3.connect(db) as conn:
         tables = {name for (name,) in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         if "CUDA_GPU_MEMORY_USAGE_EVENTS" not in tables:
             raise RuntimeError("Nsight report has no CUDA allocation-event table")
+        if "ENUM_CUDA_DEV_MEM_EVENT_OPER" not in tables:
+            raise RuntimeError("Nsight report has no CUDA memory-operation enum table")
+        if "ENUM_CUDA_MEM_KIND" not in tables:
+            raise RuntimeError("Nsight report has no CUDA memory-kind enum table")
+        operations = {int(ident): label for ident, label in conn.execute(
+            "SELECT id, label FROM ENUM_CUDA_DEV_MEM_EVENT_OPER")}
+        memory_kinds = {int(ident): label for ident, label in conn.execute(
+            "SELECT id, label FROM ENUM_CUDA_MEM_KIND")}
+        if sorted(operations.values()) != ["Allocation", "Deallocation"]:
+            raise RuntimeError(f"Unexpected Nsight CUDA memory-operation enums: {operations}")
         events = conn.execute(
-            "SELECT deviceId, address, bytes, memoryOperationType "
+            "SELECT globalPid, contextId, deviceId, address, bytes, memoryOperationType, memKind "
             "FROM CUDA_GPU_MEMORY_USAGE_EVENTS ORDER BY start"
         )
-        for device, address, size, operation in events:
-            allocations = live.setdefault(device, {})
-            if operation == 0:
-                allocations[address] = size
-            elif operation == 1:
-                allocations.pop(address, None)
-            peaks[device] = max(peaks.get(device, 0), sum(allocations.values()))
+        for pid, context, device, address, size, operation, mem_kind in events:
+            key = (pid, context, device, address)
+            label = operations.get(operation)
+            if label == "Allocation":
+                if key in live:
+                    # Nsight repeats some tiny Device Static symbols without a
+                    # corresponding free. Count the resident symbol once.
+                    if memory_kinds.get(mem_kind) == "Device Static" and live[key] == size:
+                        duplicate_static_events += 1
+                        continue
+                    raise RuntimeError(f"Duplicate live CUDA allocation key in Nsight trace: {key}")
+                live[key] = size
+                totals[device] = totals.get(device, 0) + size
+            elif label == "Deallocation":
+                if key not in live:
+                    raise RuntimeError(f"Unmatched CUDA deallocation in Nsight trace: {key}")
+                totals[device] -= live.pop(key)
+            else:
+                raise RuntimeError(f"Unknown Nsight CUDA memory operation: {operation}")
+            peaks[device] = max(peaks.get(device, 0), totals.get(device, 0))
     if not peaks:
         raise RuntimeError("Nsight report contains no CUDA allocation events")
     return {"scope": "traced CUDA allocations per device; excludes CUDA context and untraced driver memory",
             "peak_active_allocation_bytes_by_device": {str(k): v for k, v in peaks.items()},
+            "duplicate_device_static_events_counted_once": duplicate_static_events,
             "sqlite_report": str(db)}
 
 
@@ -146,7 +182,7 @@ class Sampler:
         self.pid: int | None = None
         self.smi = shutil.which("nvidia-smi")
 
-    def start(self, pid: int) -> None:
+    def start(self, pid: int | None) -> None:
         self.pid = pid
         self.thread = threading.Thread(target=self._sample, daemon=True)
         self.thread.start()
@@ -218,11 +254,8 @@ def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pa
     started_ns = time.time_ns()
     before: dict[str, tuple[int, int, str] | None] = {}
     for path in expected:
-        try:
-            st = path.stat()
-            before[str(path.resolve())] = (st.st_mtime_ns, st.st_size, sha256_file(path)) if path.is_file() else None
-        except OSError:
-            before[str(path.resolve())] = None
+        before[str(path.resolve())] = file_signature(path)
+    before_movie_log = file_signature(movie_log) if movie_log is not None else None
     sampler = Sampler(gpu, idle_mib)
     start = time.perf_counter()
     with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
@@ -230,7 +263,9 @@ def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pa
             proc = subprocess.Popen(argv, stdout=stdout, stderr=stderr, shell=False)
         except OSError as e:
             raise RuntimeError(f"Could not start process: {e}") from e
-        sampler.start(proc.pid)
+        # nsys is a wrapper that starts MotionCorr as a child; its RSS is not
+        # MotionCorr RSS. Keep device-wide GPU sampling but suppress that field.
+        sampler.start(None if profiled else proc.pid)
         try:
             returncode = proc.wait(timeout=timeout if timeout > 0 else None)
         except subprocess.TimeoutExpired:
@@ -247,17 +282,19 @@ def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pa
     outputs = check_outputs(expected, started_ns, before)
     movie_wall_seconds = None
     if movie_log is not None:
-        if not movie_log.is_file() or movie_log.stat().st_mtime_ns < started_ns - 1_000_000_000:
+        current_movie_log = file_signature(movie_log)
+        if current_movie_log is None or current_movie_log == before_movie_log or current_movie_log[0] < started_ns - 1_000_000_000:
             raise RuntimeError(f"Movie log missing or stale: {movie_log}")
-        match = MOVIE_WALL_RE.search(movie_log.read_text(errors="replace"))
-        if match is None:
-            raise RuntimeError(f"Full movie wall time missing from movie log: {movie_log}")
-        movie_wall_seconds = float(match.group(1))
+        matches = MOVIE_WALL_RE.findall(movie_log.read_text(errors="replace"))
+        if len(matches) != 1:
+            raise RuntimeError(f"Expected exactly one full movie wall-time record in {movie_log}; found {len(matches)}")
+        movie_wall_seconds = float(matches[0])
     vrams = [x["device_total_used_mib"] for x in sampler.samples if x["device_total_used_mib"] is not None]
     return {"label": label, "profiled_with_nsys": profiled,
             "timing_class": "nsys_profiled" if profiled else "sampled_unprofiled",
             "argv": argv, "returncode": returncode, "wall_seconds": elapsed,
             "peak_sampled_process_rss_bytes": sampler.peak_rss,
+            "rss_scope": "direct MotionCorr process" if not profiled else "unavailable: nsys wrapper owns the launched PID",
             "rss_sampling_interval_ms": 50,
             "gpu_vram_sampling": {"scope": "whole_device; idle-subtracted value is a rough delta, not process attribution",
                                   "sample_interval_ms": 50, "sample_count": len(sampler.samples),
@@ -274,7 +311,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--binary", required=True, type=pathlib.Path)
     p.add_argument("--input", required=True, type=pathlib.Path, action="append",
-                   help="input file to hash; repeat for gain/defect/metadata inputs")
+                   help="input file to hash; repeat for every STAR-referenced movie, gain, defect, and metadata file")
     p.add_argument("--expect-output", required=True, type=pathlib.Path, action="append",
                    help="non-empty output file that must be produced; repeat as needed")
     p.add_argument("--gpu", required=True, help="nvidia-smi GPU index or UUID")
@@ -304,8 +341,17 @@ def main() -> int:
         p.error("source SHA unavailable; pass --source-sha for a copied or packaged build")
     input_hashes = sha_inputs(a.input)
     binary_hash = sha256_file(binary)
+    source_dir = binary.parent.parent
+    source_status = None
+    if git_source_sha(source_dir) is not None:
+        status_code, source_status = run_capture(["git", "-C", str(source_dir), "status", "--porcelain"])
+        if status_code != 0:
+            source_status = None
     artifact = {"schema_version": 1, "started_utc": datetime.now(timezone.utc).isoformat(),
-                "source_git_sha": source_sha, "binary": {"path": str(binary), "sha256": binary_hash},
+                "source_git_sha": source_sha, "source_tree_status_porcelain": source_status,
+                "binary": {"path": str(binary), "sha256": binary_hash},
+                "provenance_limits": ["A Git SHA does not prove the binary came from that checkout; retain build logs and the binary hash.",
+                                      "Only explicit --input files are hashed; list STAR-referenced movie payloads separately."],
                 "inputs": input_hashes, "gpu": gpu,
                 "host": {"hostname": os.uname().nodename, "platform": sys.platform,
                          "python": sys.version.split()[0],

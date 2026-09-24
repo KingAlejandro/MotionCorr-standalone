@@ -94,7 +94,17 @@ unprofiled runs are never compared.
 
 Both FFT stages separate cleanly — baseline FFT min 22.277 > candidate max 21.913;
 baseline iFFT min 22.834 > candidate max 22.261 — so the ~1.88 ms combined gain is a
-real effect, not sampling noise. A standalone cuFFT microbenchmark at the exact
+real effect, not sampling noise.
+
+The baseline iFFT arm also carries two large outliers (32.938 and 29.898 ms) that the
+candidate arm has no counterpart for (candidate range 22.050-22.261, sd 0.084 against
+baseline sd 4.025). **Excluding both outliers the separation still holds** — baseline
+n=4 median 23.113, min 22.834, against candidate max 22.261 — so the median claim does
+not depend on them. Whether the change also *reduces variance* is a more interesting
+possibility but is **not** claimed here: n=6 with two outliers cannot support it, and
+the two outlier runs had the two **fastest** process walls (3.34 s and 3.28 s), which
+points at stage-timer attribution rather than a real stall. It is worth a dedicated
+measurement, not an inference from this data. A standalone cuFFT microbenchmark at the exact
 production shape independently predicts it: −2.15 ms at `-O0`, −2.76 ms at `-O2`.
 
 **The process-level number is noise and is not claimed as a win.** −0.020 s against a
@@ -130,6 +140,11 @@ All exact against the `a11f2f1` baseline binary on the same host:
   identical to the byte — 2,735.358 MB device-to-device, 1,434.797 MB host-to-device,
   113.915 MB device-to-host, 57.011 MB memset.
 - **`compute-sanitizer --tool memcheck`: 0 errors.**
+- **`compute-sanitizer --tool synccheck`: 0 errors.**
+
+`racecheck` was started and abandoned: it targets shared-memory races *within kernels*,
+and this change modifies no kernel code at all, so it probes nothing relevant while
+monopolising a shared benchmark host. That is a deliberate omission, not a pass.
 
 ### On the VRAM claim specifically
 
@@ -146,9 +161,23 @@ transfer volumes to the byte. Barriers were removed; no buffer, plan, workspace 
 was added, resized or reordered. The sampled 3537 MiB agreeing exactly across both arms
 (sd 0 over ~740 samples per run, 12 runs) is corroboration of that, not the basis for it.
 
+Two structural properties underwrite that. Allocation here is plain `cudaMalloc` /
+`cudaFree`, which are synchronous — there is no `cudaMallocAsync`, `cudaFreeAsync` or
+memory pool anywhere in `src/`, so reclamation cannot defer behind removed barriers the
+way stream-ordered pool frees would. And cuFFT auto-allocation is off with an explicit
+work area, so plan workspaces cannot silently resize.
+
+One term remains genuinely unmeasured. Whole-device VRAM is traced allocations + CUDA
+context + **driver working set**, and the last of those scales with in-flight work —
+which is exactly what removing 46 of 48 barriers increases. Nsight allocation tracing is
+blind to it by construction. The bound available is that 5 ms sampling over ~740 samples
+per run reports 3537 MiB with sd 0.000 on *both* arms at NVML's 1 MiB granularity, so
+any **sustained** driver-side increase is below 1 MiB. A transient shorter than 5 ms is
+not excluded.
+
 What this does **not** establish is that 3,537 MiB is the true whole-device peak, or
 that the 3,584 MiB ceiling is met with certainty. It establishes that this change does
-not move whichever peak is real.
+not move whichever peak is real, up to sub-5 ms driver-side transients.
 
 Comparison is against the **data block only**: `rwMRC.h` writes a
 `"Relion <date> <time>"` label at header offset 224, so whole-file MRC hashes differ
@@ -195,6 +224,23 @@ reason, and would be worth at most ~1.8 ms.
    but that is an argument, not evidence.
 5. **One-shot 24-movie walls** were 54.14 s baseline and 55.05 s candidate. **n=1 each
    — no timing conclusion should be drawn from these**; they were correctness runs.
+6. **This path is numerically load-bearing far out of proportion to its size, so future
+   changes here must be held to bit-exactness rather than a tolerance.** Independent
+   Issue #50 analysis of the Gate 2 relative-RMSE failure found that a ~1.2e-07
+   perturbation introduced by the inverse C2R transform is amplified roughly 7,700× by
+   the flat five-point sub-pixel peak stencil (CCF curvature 1.25e-03 against a peak of
+   20.83), producing a ~0.004 px trajectory shift that accounts for ~99.5% of the
+   squared image error. This change is safe against that because it is bit-exact — it
+   alters when the host waits, not what the device computes, and introduces no
+   perturbation to amplify. But it means "the difference is only round-off" is never a
+   safe argument in this function. A successor change that passed Gate 2 thresholds
+   while shifting pixels sub-ULP could still move trajectories measurably.
+
+   Relatedly: the 54.35 MiB work area for a 3710 × 3838 transform implies cuFFT is on a
+   **Bluestein** path — 3710 = 2·5·7·53 and 3838 = 2·19·101, both with large prime
+   factors. Any future parity or round-off characterisation must use this shape; a
+   power-of-two test case would exercise a different algorithm with a different rounding
+   profile and would understate the seed perturbation.
 
 ## 8. Reproduction
 

@@ -48,6 +48,11 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+option(TIMING "Enable internal timing" OFF)
+if(TIMING)
+    add_compile_definitions(TIMING)
+endif()
+
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
     enable_language(CUDA)

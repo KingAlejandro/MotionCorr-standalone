@@ -16,9 +16,7 @@ Executes:
 
 import argparse
 import json
-import os
 import re
-import shutil
 import subprocess
 import sys
 import time
@@ -91,30 +89,18 @@ def parse_shifts(star_file: Path) -> List[Tuple[float, float]]:
 
 
 def find_mrc_and_star(dir_path: Path) -> Tuple[Optional[Path], Optional[Path]]:
-    mrcs = [p for p in dir_path.rglob("*.mrc") if p.is_file()]
-    mrc = None
-    for p in mrcs:
-        if "frameImage.mrc" in p.name:
-            mrc = p
-            break
-        elif "synthetic_" in p.name:
-            mrc = p
-            break
-    if mrc is None and mrcs:
-        mrc = mrcs[0]
+    """Require one complete movie pair; never select a stale or arbitrary output."""
+    mrcs = sorted(p for p in dir_path.rglob("*.mrc") if p.is_file() and not p.name.endswith(("_noDW.mrc", "_PS.mrc", "_ODD.mrc", "_EVN.mrc")))
+    stars = sorted(p for p in dir_path.rglob("*.star") if p.is_file() and not p.name.startswith("corrected_micrographs"))
+    return (mrcs[0] if len(mrcs) == 1 else None,
+            stars[0] if len(stars) == 1 else None)
 
-    stars = [p for p in dir_path.rglob("*.star") if p.is_file() and not p.name.startswith("corrected_micrographs")]
-    star = None
-    for p in stars:
-        if "frameImage.star" in p.name:
-            star = p
-            break
-        elif "synthetic_" in p.name:
-            star = p
-            break
-    if star is None and stars:
-        star = stars[0]
-    return mrc, star
+
+def motion_model_version(star_file: Optional[Path]) -> Optional[int]:
+    if star_file is None:
+        return None
+    match = re.search(r"(?m)^_rlnMotionModelVersion[ \t]+(\d+)[ \t]*$", star_file.read_text())
+    return int(match.group(1)) if match else None
 
 
 def get_telemetry_for_dir(cand_dir: Path, fallback_stdout: str = "") -> Dict[str, Any]:
@@ -134,7 +120,7 @@ def run_comparator(comparator: Path, ref_dir: Path, cand_dir: Path, label: str) 
     cand_mrc, cand_star = find_mrc_and_star(cand_dir)
     if not ref_mrc or not cand_mrc or not ref_star or not cand_star:
         return {
-            "error": f"Missing mrc/star: ref=({ref_mrc}, {ref_star}), cand=({cand_mrc}, {cand_star})",
+            "error": f"Expected exactly one MRC/STAR pair for {label}: ref=({ref_mrc}, {ref_star}), cand=({cand_mrc}, {cand_star})",
             "comparator_exit_code": 3
         }
 
@@ -157,19 +143,42 @@ def run_comparator(comparator: Path, ref_dir: Path, cand_dir: Path, label: str) 
     return report
 
 
+def stage_result(report: Dict[str, Any], expected_patches: int, selected_gpu: int) -> Dict[str, Any]:
+    """Keep scientific, coverage, and GPU-execution evidence as independent gates."""
+    telemetry = report.get("telemetry") or {}
+    checks = report.get("checks") or {}
+    scientific_pass = (report.get("overall_status") == "PASS"
+                       and report.get("comparator_exit_code") == 0
+                       and all(checks.get(name, {}).get("passed") is True
+                               for name in ("motion_trajectory", "corrected_image", "star_fields")))
+    coverage_pass = report.get("coverage", {}).get("complete") is True
+    gpu_pass = (report.get("gpu_startup") == selected_gpu
+                and telemetry.get("global_profile") is not None
+                and telemetry.get("num_patch_profiles") == expected_patches)
+    return {"scientific_pass": scientific_pass, "coverage_pass": coverage_pass,
+            "gpu_execution_pass": gpu_pass,
+            "passed": scientific_pass and coverage_pass and gpu_pass}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run CUDA patch alignment verification suite")
     parser.add_argument("--repo-dir", type=Path, default=Path("."), help="Path to MotionCorr repo")
     parser.add_argument("--cpu-bin", type=Path, default=Path("build-cpu/motioncorr"))
     parser.add_argument("--cuda-bin", type=Path, default=Path("build-cuda/motioncorr"))
     parser.add_argument("--gpu-id", type=int, default=0)
-    parser.add_argument("--exp-movie", type=Path, default=None, help="Path to experimental TIFF/MRC movie")
-    parser.add_argument("--exp-gain", type=Path, default=None, help="Path to experimental gain reference")
+    parser.add_argument("--exp-movie", type=Path, required=True, help="Path to experimental TIFF/MRC movie")
+    parser.add_argument("--exp-gain", type=Path, required=True, help="Path to experimental gain reference")
     parser.add_argument("--output-dir", type=Path, default=Path("validation_results"))
     args = parser.parse_args()
 
     repo = args.repo_dir.resolve()
     out = args.output_dir.resolve()
+    for label, path in (("CPU binary", repo / args.cpu_bin), ("CUDA binary", repo / args.cuda_bin),
+                        ("experimental movie", args.exp_movie), ("gain reference", args.exp_gain)):
+        if not path.is_file():
+            parser.error(f"{label} does not exist: {path}")
+    if out.exists() and any(out.iterdir()):
+        parser.error(f"Output directory must be empty to prevent stale results: {out}")
     out.mkdir(parents=True, exist_ok=True)
     comparator = repo / "tools" / "compare_motioncorr.py"
 
@@ -182,6 +191,7 @@ def main():
         "steady_state": [],
         "verdict": "UNKNOWN"
     }
+    gpu_startup_line = f"Using CUDA acceleration on GPU device {args.gpu_id}"
 
     synth_dir = repo / "test-data" / "synthetic"
 
@@ -197,11 +207,15 @@ def main():
         "--o", str(neg_dir / "neg.mrc"),
         "--gpu", "99"
     ], check=False, cwd=synth_dir)
-    neg_passed = (neg_res.returncode != 0) and ("Invalid GPU device ID" in neg_res.stderr or "Invalid GPU device ID" in neg_res.stdout or "Invalid CUDA device ID" in neg_res.stderr or "Invalid CUDA device ID" in neg_res.stdout)
+    device_error = any(message in neg_res.stderr or message in neg_res.stdout
+                       for message in ("Invalid GPU device ID", "Invalid CUDA device ID"))
+    no_partial_output = not any(p.is_file() for p in neg_dir.rglob("*.mrc"))
+    neg_passed = neg_res.returncode != 0 and device_error and no_partial_output
     summary["negative_test"] = {
         "passed": neg_passed,
         "exit_code": neg_res.returncode,
-        "stderr_contains_error": neg_passed
+        "device_error": device_error,
+        "no_partial_output": no_partial_output,
     }
     print(f"Negative test passed: {neg_passed} (exit {neg_res.returncode})")
 
@@ -221,7 +235,7 @@ def main():
         "--patch_x", "3", "--patch_y", "3",
         "--j", "1"
     ], cwd=synth_dir)
-    run_cmd([
+    fb_gpu_res = run_cmd([
         str(cuda_bin), "--use_own",
         "--i", str(synth_dir / "synthetic_fallback.star"),
         "--o", str(fb_cuda_dir / "fb_cuda.mrc"),
@@ -229,7 +243,16 @@ def main():
         "--gpu", str(args.gpu_id)
     ], cwd=synth_dir)
     fb_cmp = run_comparator(comparator, fb_cpu_dir, fb_cuda_dir, "fallback_3x3")
+    fb_cmp["telemetry"] = get_telemetry_for_dir(fb_cuda_dir, fb_gpu_res.stdout)
+    fb_cmp["gpu_startup"] = args.gpu_id if gpu_startup_line in fb_gpu_res.stdout else None
     summary["stages"]["fallback_3x3"] = fb_cmp
+    fb_cpu_star = find_mrc_and_star(fb_cpu_dir)[1]
+    fb_gpu_star = find_mrc_and_star(fb_cuda_dir)[1]
+    cpu_model_version = motion_model_version(fb_cpu_star)
+    gpu_model_version = motion_model_version(fb_gpu_star)
+    summary["fallback_check"] = {"cpu_model_version": cpu_model_version,
+                                 "gpu_model_version": gpu_model_version,
+                                 "passed": cpu_model_version == 0 and gpu_model_version == 0}
 
     # ---------------------------------------------------------
     # Staged Synthetic Tests: 1x1, 3x3, 5x5
@@ -264,12 +287,13 @@ def main():
         
         cmp_res = run_comparator(comparator, ref_d, cand_d, stage_name)
         cmp_res["telemetry"] = telemetry
+        cmp_res["gpu_startup"] = args.gpu_id if gpu_startup_line in c_res.stdout else None
         summary["stages"][stage_name] = cmp_res
 
     # ---------------------------------------------------------
     # Full Experimental Movie Test & Steady-state Profiling
     # ---------------------------------------------------------
-    if args.exp_movie and args.exp_movie.exists():
+    if args.exp_movie.exists():
         print(f"\n=== EXPERIMENTAL MOVIE TEST: {args.exp_movie.name} ===")
         exp_star = out / "exp_input.star"
         with exp_star.open("w") as f:
@@ -303,8 +327,7 @@ _rlnOpticsGroup #2
             "--dose_per_frame", "1.277",
             "--j", "8"
         ]
-        if args.exp_gain and args.exp_gain.exists():
-            cpu_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
+        cpu_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
 
         print("Running CPU reference for experimental movie...")
         t_cpu_0 = time.time()
@@ -329,8 +352,7 @@ _rlnOpticsGroup #2
                 "--gpu", str(args.gpu_id),
                 "--j", "8"
             ]
-            if args.exp_gain and args.exp_gain.exists():
-                cuda_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
+            cuda_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
 
             print(f"Running CUDA steady-state run {irun+1}/3...")
             t_gpu_0 = time.time()
@@ -343,16 +365,33 @@ _rlnOpticsGroup #2
 
             if irun == 0:
                 exp_cmp = run_comparator(comparator, exp_ref_d, exp_cand_d, "exp_5x5")
+                exp_cmp["telemetry"] = telem
+                exp_cmp["gpu_startup"] = args.gpu_id if gpu_startup_line in c_res.stdout else None
                 summary["stages"]["exp_5x5"] = exp_cmp
 
         summary["steady_state"] = gpu_timings
+
+    expected_patches = {"fallback_3x3": 9, "synth_1x1": 0,
+                        "synth_3x3": 9, "synth_5x5": 25, "exp_5x5": 25}
+    summary["stage_results"] = {
+        name: stage_result(summary["stages"].get(name, {}), patch_count, args.gpu_id)
+        for name, patch_count in expected_patches.items()
+    }
+    summary["verdict"] = "PASS" if (
+        summary["negative_test"]["passed"]
+        and summary["fallback_check"]["passed"]
+        and all(result["passed"] for result in summary["stage_results"].values())
+        and len(summary["steady_state"]) == 3
+    ) else "FAIL"
 
     # Write summary JSON
     summary_path = out / "cuda_patch_validation_summary.json"
     with summary_path.open("w") as f:
         json.dump(summary, f, indent=2)
     print(f"\nSaved validation summary to {summary_path}")
+    print(f"Overall verdict: {summary['verdict']}")
+    return 0 if summary["verdict"] == "PASS" else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -2362,6 +2362,14 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
 	const int nfy_half = nfy / 2;
+	if (peak_probe.capture_arrays) {
+		static_assert(sizeof(fComplex) == 2 * sizeof(float), "Array trace requires interleaved complex float");
+		requireGlobalPeakProbeArrayBudget(peak_probe, "cpu",
+			(size_t)nfy * nfx * sizeof(fComplex),
+			(size_t)ccf_nfy * ccf_nfx * sizeof(float),
+			(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex),
+			(size_t)ccf_ny * ccf_nx * sizeof(float));
+	}
 
 	Fref.reshape(ccf_nfy, ccf_nfx);
 	for (int i = 0; i < n_threads; i++) {
@@ -2392,10 +2400,18 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 		}
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
+	if (peak_probe.capture_arrays)
+		writeGlobalPeakProbeArray(peak_probe, "cpu", "weight", weight.data,
+			(size_t)ccf_nfy * ccf_nfx * sizeof(float));
 
 	bool peak_trace_written = false;
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		GlobalPeakProbeRecord peak_record = {};
+		std::vector<fComplex> trace_fccs;
+		std::vector<float> trace_iccs;
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration)
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "input", Fframes[peak_probe.frame_index].data,
+				(size_t)nfy * nfx * sizeof(fComplex));
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
 
@@ -2409,6 +2425,9 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			}
 		}
 		RCTOC(TIMING_MAKE_REF);
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration)
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "fref", Fref.data,
+				(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex));
 
 		#pragma omp parallel for num_threads(n_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -2423,10 +2442,14 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+			if (peak_probe.capture_arrays && iter == peak_probe.iteration && iframe == peak_probe.frame_index)
+				trace_fccs.assign(Fccs[tid].data, Fccs[tid].data + (size_t)ccf_nfy * ccf_nfx);
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
 			RCTOC(TIMING_CCF_IFFT);
+			if (peak_probe.capture_arrays && iter == peak_probe.iteration && iframe == peak_probe.frame_index)
+				trace_iccs.assign(Iccs[tid]().data, Iccs[tid]().data + (size_t)ccf_ny * ccf_nx);
 
 			RCTIC(TIMING_CCF_FIND_MAX);
 			RFLOAT maxval = -1E30;
@@ -2496,6 +2519,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			std::cout << "tid " << tid << " Frame " << 1 + iframe << ": raw shift x = " << posx << " y = " << posy << " cc = " << maxval << " interpolated x = " << cur_xshifts[iframe] << " y = " << cur_yshifts[iframe] << std::endl;
 #endif
 			RCTOC(TIMING_CCF_FIND_MAX);
+		}
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration) {
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "fccs", trace_fccs.data(),
+				trace_fccs.size() * sizeof(fComplex));
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "iccs", trace_iccs.data(),
+				trace_iccs.size() * sizeof(float));
 		}
 		if (peak_probe.enabled && iter == peak_probe.iteration) {
 			peak_record.frame0_shift_x_scaled = cur_xshifts[0];

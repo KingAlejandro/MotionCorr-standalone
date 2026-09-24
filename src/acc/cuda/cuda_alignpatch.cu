@@ -313,6 +313,11 @@ bool cudaAlignPatch(
     const size_t sz_fccs    = (size_t)n_frames * ccf_nfy * ccf_nfx * sizeof(float2);
     const size_t sz_iccs    = (size_t)n_frames * ccf_ny * ccf_nx * sizeof(float);
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
+    const size_t sz_input_frame = (size_t)nfy * nfx * sizeof(float2);
+    const size_t sz_iccs_frame = (size_t)ccf_ny * ccf_nx * sizeof(float);
+    if (peak_probe.capture_arrays)
+        requireGlobalPeakProbeArrayBudget(peak_probe, "cuda", sz_input_frame,
+                                          sz_weight, sz_fref, sz_iccs_frame);
 
     float2 *d_Fframes = nullptr;
     float2 *d_Fref = nullptr;
@@ -373,6 +378,11 @@ bool cudaAlignPatch(
     dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
     computeWeightsKernel<<<gridWeights, blockWeights>>>(d_weight, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
     LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    if (peak_probe.capture_arrays) {
+        std::vector<float> array(sz_weight / sizeof(float));
+        HANDLE_ERROR(cudaMemcpy(array.data(), d_weight, sz_weight, cudaMemcpyDeviceToHost));
+        writeGlobalPeakProbeArray(peak_probe, "cuda", "weight", array.data(), sz_weight);
+    }
 
     dim3 blockRef(16, 16);
     dim3 gridRef((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
@@ -393,6 +403,13 @@ bool cudaAlignPatch(
     bool peak_trace_written = false;
 
     for (int iter = 1; iter <= max_iter; iter++) {
+        const bool capture_arrays = peak_probe.capture_arrays && iter == peak_probe.iteration;
+        if (capture_arrays) {
+            std::vector<float2> array(sz_input_frame / sizeof(float2));
+            HANDLE_ERROR(cudaMemcpy(array.data(), d_Fframes + (size_t)peak_probe.frame_index * nfy * nfx,
+                                    sz_input_frame, cudaMemcpyDeviceToHost));
+            writeGlobalPeakProbeArray(peak_probe, "cuda", "input", array.data(), sz_input_frame);
+        }
         // 1. Reference computation
         HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
@@ -406,6 +423,15 @@ bool cudaAlignPatch(
         float k1_ms = 0.0f;
         HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k1_ms;
+        if (capture_arrays) {
+            std::vector<float2> reference(sz_fref / sizeof(float2));
+            std::vector<float2> spectrum(sz_fref / sizeof(float2));
+            HANDLE_ERROR(cudaMemcpy(reference.data(), d_Fref, sz_fref, cudaMemcpyDeviceToHost));
+            HANDLE_ERROR(cudaMemcpy(spectrum.data(), d_Fccs + (size_t)peak_probe.frame_index * ccf_nfy * ccf_nfx,
+                                    sz_fref, cudaMemcpyDeviceToHost));
+            writeGlobalPeakProbeArray(peak_probe, "cuda", "fref", reference.data(), sz_fref);
+            writeGlobalPeakProbeArray(peak_probe, "cuda", "fccs", spectrum.data(), sz_fref);
+        }
 
         // 3. Batched cuFFT C2R (timed separately from custom kernels)
         HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
@@ -415,6 +441,12 @@ bool cudaAlignPatch(
         float iter_cufft_ms = 0.0f;
         HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
         accumulated_cufft_ms += iter_cufft_ms;
+        if (capture_arrays) {
+            std::vector<float> image(sz_iccs_frame / sizeof(float));
+            HANDLE_ERROR(cudaMemcpy(image.data(), d_Iccs + (size_t)peak_probe.frame_index * ccf_ny * ccf_nx,
+                                    sz_iccs_frame, cudaMemcpyDeviceToHost));
+            writeGlobalPeakProbeArray(peak_probe, "cuda", "iccs", image.data(), sz_iccs_frame);
+        }
 
         // 4. Peak finding + subpixel quadratic interpolation
         HANDLE_ERROR(cudaEventRecord(ev_start_kernel));

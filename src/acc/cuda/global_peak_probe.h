@@ -5,6 +5,9 @@
 //   MOTIONCORR_PEAK_TRACE_DIR=/existing/output/directory
 //   MOTIONCORR_PEAK_TRACE_FRAME=<zero-based post-grouping alignPatch ordinal>
 //   MOTIONCORR_PEAK_TRACE_ITER=<1-based global-alignment iteration>
+// Set MOTIONCORR_PEAK_TRACE_ARRAYS=1 as well to capture the selected frame's
+// input, weights, reference, weighted spectrum, and real CCF as native-endian
+// float binary chunks. This is a bounded Phase-2 extension, not the full ADR.
 // The trace intentionally does not claim source-frame mapping or input hashing;
 // it is a compact peak-stage probe, not the full raw-array ADR trace.
 // The directory may already contain the other backend's trace; this backend's
@@ -26,11 +29,12 @@
 
 struct GlobalPeakProbeConfig {
     bool enabled;
+    bool capture_arrays;
     std::string directory;
     int frame_index;
     int iteration;
 
-    GlobalPeakProbeConfig() : enabled(false), frame_index(0), iteration(0) {}
+    GlobalPeakProbeConfig() : enabled(false), capture_arrays(false), frame_index(0), iteration(0) {}
 };
 
 struct GlobalPeakProbeRecord {
@@ -65,7 +69,10 @@ inline bool readGlobalPeakProbeConfig(GlobalPeakProbeConfig &config)
     const char *directory = std::getenv("MOTIONCORR_PEAK_TRACE_DIR");
     const char *frame = std::getenv("MOTIONCORR_PEAK_TRACE_FRAME");
     const char *iteration = std::getenv("MOTIONCORR_PEAK_TRACE_ITER");
+    const char *arrays = std::getenv("MOTIONCORR_PEAK_TRACE_ARRAYS");
     if (!directory && !frame && !iteration) {
+        if (arrays)
+            REPORT_ERROR("MOTIONCORR_PEAK_TRACE_ARRAYS requires the peak trace directory, frame, and iteration");
         config.enabled = false;
         return false;
     }
@@ -83,6 +90,9 @@ inline bool readGlobalPeakProbeConfig(GlobalPeakProbeConfig &config)
         REPORT_ERROR("MOTIONCORR_PEAK_TRACE_ITER must be a positive integer");
 
     config.enabled = true;
+    if (arrays && std::string(arrays) != "1")
+        REPORT_ERROR("MOTIONCORR_PEAK_TRACE_ARRAYS must be 1 when set");
+    config.capture_arrays = arrays != nullptr;
     config.directory = directory;
     config.frame_index = (int)frame_value;
     config.iteration = (int)iteration_value;
@@ -97,6 +107,73 @@ inline std::string globalPeakProbeFilename(const GlobalPeakProbeConfig &config, 
     path += backend;
     path += ".json";
     return path;
+}
+
+inline std::string globalPeakProbeArrayFilename(const GlobalPeakProbeConfig &config,
+                                                 const char *backend, const char *stage)
+{
+    std::string path = config.directory;
+    if (!path.empty() && path[path.size() - 1] != '/') path += '/';
+    path += "motioncorr-global-array-";
+    path += backend;
+    path += "-";
+    path += stage;
+    path += ".bin";
+    return path;
+}
+
+inline void requireFreshGlobalPeakProbeArray(const GlobalPeakProbeConfig &config,
+                                              const char *backend, const char *stage)
+{
+    struct stat info;
+    const std::string path = globalPeakProbeArrayFilename(config, backend, stage);
+    if (lstat(path.c_str(), &info) == 0)
+        REPORT_ERROR("Refusing stale global peak array output: " + path);
+    if (errno != ENOENT)
+        REPORT_ERROR("Cannot inspect global peak array output: " + path);
+}
+
+inline void requireGlobalPeakProbeArrayBudget(const GlobalPeakProbeConfig &config,
+                                              const char *backend, size_t input_bytes,
+                                              size_t weight_bytes, size_t spectrum_bytes,
+                                              size_t image_bytes)
+{
+    // Input, reference, and selected-frame CCF all use complex float storage.
+    const size_t budget = (size_t)256 * 1024 * 1024;
+    if (input_bytes > budget || weight_bytes > budget - input_bytes ||
+        spectrum_bytes > budget - input_bytes - weight_bytes ||
+        spectrum_bytes > budget - input_bytes - weight_bytes - spectrum_bytes ||
+        image_bytes > budget - input_bytes - weight_bytes - 2 * spectrum_bytes)
+        REPORT_ERROR("Global peak array trace exceeds 256 MiB/backend; select a smaller movie");
+    const char *stages[] = {"input", "weight", "fref", "fccs", "iccs"};
+    for (size_t i = 0; i < sizeof(stages) / sizeof(stages[0]); ++i)
+        requireFreshGlobalPeakProbeArray(config, backend, stages[i]);
+}
+
+inline void writeGlobalPeakProbeArray(const GlobalPeakProbeConfig &config,
+                                      const char *backend, const char *stage,
+                                      const void *data, size_t bytes)
+{
+    const std::string path = globalPeakProbeArrayFilename(config, backend, stage);
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (fd < 0)
+        REPORT_ERROR("Cannot exclusively create global peak array output: " + path);
+    const char *source = static_cast<const char *>(data);
+    size_t written = 0;
+    while (written < bytes) {
+        ssize_t result = write(fd, source + written, bytes - written);
+        if (result < 0 && errno == EINTR) continue;
+        if (result <= 0) {
+            close(fd);
+            unlink(path.c_str());
+            REPORT_ERROR("Failed while writing global peak array output: " + path);
+        }
+        written += (size_t)result;
+    }
+    if (close(fd) != 0) {
+        unlink(path.c_str());
+        REPORT_ERROR("Failed while closing global peak array output: " + path);
+    }
 }
 
 inline std::string globalPeakProbeJsonString(const std::string &value)

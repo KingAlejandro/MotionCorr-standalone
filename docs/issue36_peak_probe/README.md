@@ -41,4 +41,34 @@ The newly generated corrected-pixel payloads match the earlier fixed-CPU and CUD
 
 ## Interpretation and next boundary
 
-These four traces narrow the leading X-shift difference to **at or before the real-space CCF samples**, not the integer peak choice or double-versus-float quadratic division alone. They do not identify whether the first difference comes from reference summation, B-factor weights, weighted CCF formation, or FFTW-versus-cuFFT inverse results. Trace matched `Fref`, weighted `Fccs`, and `Iccs` for the selected frame/iteration next. The peak probe does not yet record those arrays, input hash internally, source-frame mapping, or local-model checkpoints. This is one movie and two selected frames, not a new 24-movie Gate 2 result. The `0.001` threshold was not changed.
+These four initial traces narrow the leading X-shift difference to **at or before the real-space CCF samples**, not the integer peak choice or double-versus-float quadratic division alone. The matched-array follow-up below identifies the first non-identical stage and separates the inverse-FFT contribution for these two frames. This is one movie and two selected frames, not a new 24-movie Gate 2 result. The `0.001` threshold was not changed.
+
+## Phase 2: matched array checkpoints and FFT replay
+
+The follow-up source adds an **optional** `MOTIONCORR_PEAK_TRACE_ARRAYS=1` to the same one-movie peak probe. It saves five native-endian binary chunks for the selected iteration and post-grouping frame: `input` (complex float `[3838,1856]`), `weight` (float `[972,487]`), `fref` and `fccs` (complex float `[972,487]`), and `iccs` (float `[972,972]`). The on-disk order is row-major; complex values are interleaved real/imaginary `float32`. The five chunks total 70,233,040 bytes per backend, below the explicit 256 MiB limit. Their paths are `motioncorr-global-array-{cpu,cuda}-{stage}.bin` in the trace directory. Raw chunks remain on the VM in `validation/phase2_frame{0,4}_trace/`; they are derived movie data and are not committed. The diagnostic source and FFTW replay helper are included in this draft PR.
+
+The same CUDA-enabled binary (SHA256 `c2419c8684de18301871441c95aabea3fafc226711503a85073f600c90942273`) ran CPU and GPU-0 variants of the exact Phase-1 command above, changing only `MOTIONCORR_PEAK_TRACE_FRAME` between `0` and `4` and adding `MOTIONCORR_PEAK_TRACE_ARRAYS=1`. Source was copied into the isolated VM worktree for this diagnostic build; the main VM checkout was untouched. All four runs completed. Input TIFF, gain, and STAR hashes were unchanged from Phase 1. The corrected-pixel payload SHA256s remained exactly `bf738254...` (CPU) and `0e04d076...` (CUDA) in **both** frame selections, matching the previous untraced runs. Thus this opt-in capture did not change the observed movie output.
+
+| Stage, selected iteration 1 | Frame 0 CPU/CUDA | Frame 4 CPU/CUDA |
+| --- | ---: | ---: |
+| Input Fourier frame | bit-identical | bit-identical |
+| B-factor weight | 389,040 / 473,364 float coefficients differ; RMSE `1.0694e-8`, max `1.1921e-7` | same |
+| Reference sum `Fref` | bit-identical | bit-identical |
+| Weighted spectrum `Fccs` | 778,586 / 946,728 float components differ; RMSE `1.0026e-14`, max `3.6380e-12` | 778,215 differ; RMSE `7.8273e-15`, max `1.8190e-12` |
+| Real CCF `Iccs` | 602,002 / 944,784 pixels differ; RMSE `2.3177e-6`, max `1.1444e-5` | 597,906 differ; RMSE `2.1928e-6`, max `1.1444e-5` |
+
+The **first non-identical stage** is weight generation. The CPU uses its host expression and `exp`, while CUDA uses float arithmetic and `expf`; this is a plausible source of the one-step weight differences, although the trace by itself does not isolate each arithmetic operation. The selected input and `Fref` are exactly equal.
+
+To separate spectrum differences from inverse-FFT differences, `tools/replay_global_ccf_fftw.cpp` ran both saved `Fccs` arrays through the same `fftwf_plan_dft_c2r_2d(972,972,...,FFTW_ESTIMATE)` path, with no inverse scaling, on the same VM. Replaying the CPU spectrum reproduced the CPU `Iccs` **bit for bit** for frames 0 and 4. Replaying the CUDA spectrum through FFTW differed from the CPU `Iccs` at only 27 pixels (frame 0, RMSE `1.0196e-8`) and 15 pixels (frame 4, RMSE `7.5999e-9`). The five values around each selected peak were bit-identical to the CPU values in both replays. In contrast, the native CUDA cuFFT results differed at 602,002 and 597,906 pixels respectively, with ~`2.2–2.3e-6` RMSE. The FFTW replay of the CUDA spectrum gave frame 0's CPU X curvature denominator `-0.0012321472` and unscaled shift `-1.7105263158`, while native CUDA gave `-0.0012359619` and `-1.7129629630` when its captured stencil is evaluated in double precision. Frame 4 likewise recovered the CPU peak stencil from the CUDA spectrum.
+
+**Interpretation:** For these two selected frames in movie `00021`, tiny pre-FFT spectrum differences exist, but FFTW-versus-cuFFT inverse output is the dominant contributor to the measured real-CCF difference and the observed peak-stencil/shift discrepancy. This is a controlled same-input FFT replay, not proof that the two FFT libraries alone explain the full corrected-image Gate 2 failure across 24 movies. Local-patch alignment, later iterations, and output generation may amplify or add differences. Issue #36 remains open; the Gate 2 relative image-RMSE limit remains `0.001`.
+
+To reproduce the replay on the VM, build the helper and use fresh output paths (it refuses existing output files):
+
+```sh
+g++ -O2 tools/replay_global_ccf_fftw.cpp -lfftw3f -o /tmp/replay_global_ccf_fftw
+/tmp/replay_global_ccf_fftw <trace-dir>/motioncorr-global-array-cuda-fccs.bin \
+  <trace-dir>/replay-fftw-cuda.bin 972 972
+```
+
+The replay helper source was checked against the original diagnostic replay: both produced byte-identical outputs for the frame-0 CPU and CUDA spectra. The CPU-spectrum replay SHA256 is `1bbc27913c10efd3b8f46ab7ced45e9ec8752c4d9cfa98b132bba8739c761455`; the CUDA-spectrum FFTW replay SHA256 is `c20c618827d68322bddd6c6513b6f0ea8e931f9a326bfaadb014cabbe931de91`. The raw input array SHA256 for frame 0 is `b604183a30802041b8c670a8af4a63ec0ed254cbac7bf4902c4a2e1d9d851167` in both backends. The reference SHA256 is `38d37610238987c985df4b4fc4eb2a603d7019177665b5c4bebc2` in both.

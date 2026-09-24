@@ -348,6 +348,29 @@ addendum. The figure to quote is **47 MiB of headroom (1.31%)** against the 3,58
 even that is an *upper* bound, since every sampled peak is a lower bound on the true peak. The
 ceiling should not be described as comfortably met.
 
+## 10c. CPU-only reference on `cpu64` (off the GPU host)
+
+Per the revised host allocation, CPU-only reference work was moved off `4GPUs` entirely. Source was
+staged by `git archive <sha> | ssh cpu64 tar -x` for both arms — `a11f2f1` and the candidate — so
+the trees are exact, and the synthetic fixtures travel with the branch. (`cpu64`'s existing
+`relion-doppio-browser-project/MotionCorr` is a RELION job output directory, **not** a git
+checkout, and must not be used as one.)
+
+Host: `small-refmac-machine`, 64 cores, 226 GB, gcc 13.3.0. Built `-DCUDA=OFF
+-DCMAKE_BUILD_TYPE=Release` with the user-local venv cmake (`~/.mc-venv/bin/cmake`; the host has no
+system cmake), `nice`, `-j16` of 64 on a shared machine. Both arms built clean.
+
+| Fixture | `--j` | Pixels | Header 0-223 | STAR | Digest |
+|---|---|---|---|---|---|
+| `synthetic_128x128_8frames` | 1 | identical | identical | identical | `8affd8ecb171af22` |
+| `synthetic_128x128_8frames` | 8 | identical | identical | identical | `8affd8ecb171af22` |
+| `synthetic_128x128_8frames_subpixel` | 1 | identical | identical | identical | `a8b6cb95bb9b8e2d` |
+| `synthetic_128x128_8frames_subpixel` | 8 | identical | identical | identical | `a8b6cb95bb9b8e2d` |
+
+This is a genuinely independent check: different host, different CPU vendor, different gcc, no CUDA
+in the binary at all. It confirms the change is inert on the pure-CPU path — which it must be,
+since every new code path is behind `#ifdef _CUDA_ENABLED` and a live `movie_session`.
+
 ## 11. Gate 2
 
 **Unchanged.** This change is output-neutral — corrected pixels, shifts and metadata are

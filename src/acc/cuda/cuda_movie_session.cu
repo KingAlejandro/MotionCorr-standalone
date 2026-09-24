@@ -413,8 +413,11 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
         if (count != fft_batch_size && !has_plan_r2c_tail) return false;
         CUFFT_CHECK(cufftExecR2C(plan, (cufftReal*)(d_Iframes + (size_t)first * real_stride),
                                  d_Fframes + (size_t)first * complex_stride));
-        // The next plan reuses the same work area; execution failures surface here.
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        // Every batch is issued on the same default stream, so the shared work area
+        // is reused in issue order without a host barrier. Check for a launch
+        // failure at the batch that caused it; asynchronous execution failures
+        // surface at the synchronization after the scaling kernel below.
+        HANDLE_ERROR(cudaGetLastError());
     }
 
     const float inv_size = 1.0f / ((float)nx * ny);
@@ -445,8 +448,14 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
                                 cudaMemcpyDeviceToDevice));
         CUFFT_CHECK(cufftExecC2R(plan, d_inverse_tile,
                                  (cufftReal*)(d_Iframes + (size_t)first * real_stride)));
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        // Default-stream ordering makes the next tile copy wait for this transform
+        // to finish reading the tile, so no host barrier is needed between batches.
+        HANDLE_ERROR(cudaGetLastError());
     }
+    // One completion barrier for the whole loop: the caller may read the real
+    // frames immediately, and asynchronous execution failures must be reported
+    // before this returns true.
+    HANDLE_ERROR(cudaDeviceSynchronize());
     return true;
 }
 

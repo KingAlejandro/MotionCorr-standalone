@@ -22,6 +22,7 @@
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
+#include "src/acc/cuda/cuda_alignpatch.h"
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -226,6 +227,8 @@ void MotioncorrRunner::initialise()
 		REPORT_ERROR("ERROR: when not providing an input STAR file, it is mandatory to provide the voltage in kV through --voltage.");
 	}
 
+	use_gpu = false;
+	gpu_id = 0;
 #if defined _CUDA_ENABLED || defined _HIP_ENABLED
 	if (do_motioncor2)
 	{
@@ -234,6 +237,28 @@ void MotioncorrRunner::initialise()
 		else if (verb>0)
 			std::cout << "gpu-ids not specified, threads will automatically be mapped to devices (incrementally)."<< std::endl;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
+	}
+#endif
+#if defined _CUDA_ENABLED
+	if (do_own && gpu_ids.length() > 0)
+	{
+		untangleDeviceIDs(gpu_ids, allThreadIDs);
+		if (allThreadIDs.size() > 0 && allThreadIDs[0].size() > 0)
+			gpu_id = textToInteger(allThreadIDs[0][0]);
+		else
+			gpu_id = 0;
+		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
+		if (gpu_id >= devCount || gpu_id < 0) {
+			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
+		}
+		use_gpu = true;
+		if (verb > 0)
+			std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
+	}
+#else
+	if (do_own && gpu_ids.length() > 0)
+	{
+		REPORT_ERROR("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).");
 	}
 #endif
 
@@ -1107,6 +1132,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 }
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+	timeval movie_start_time;
+	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
 	FileName fn_avg = getOutputFileNames(fn_mic);
 	FileName fn_avg_noDW = fn_avg.withoutExtension() + "_noDW.mrc";
@@ -1512,7 +1539,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
-	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile);
+	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -1891,6 +1918,12 @@ skip_fitting:
 
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
+
+	timeval movie_end_time;
+	gettimeofday(&movie_end_time, NULL);
+	double movie_wall_sec = (movie_end_time.tv_sec - movie_start_time.tv_sec) +
+	                        (movie_end_time.tv_usec - movie_start_time.tv_usec) / 1000000.0;
+	logfile << "Full movie wall time: " << std::fixed << std::setprecision(3) << movie_wall_sec << " s" << std::endl;
 
 	return true;
 }
@@ -2273,7 +2306,12 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	}
 }
 
-bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile) {
+bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+#ifdef _CUDA_ENABLED
+	if (use_gpu && is_global) {
+		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+	}
+#endif
 	std::vector<Image<float> > Iccs(n_threads);
 	MultidimArray<fComplex> Fref;
 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);

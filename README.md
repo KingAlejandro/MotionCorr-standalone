@@ -38,7 +38,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-The output binary is `build/motioncorr`. Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.
+The output binary is `build/motioncorr`. It has been compiled on macOS with AppleClang and Homebrew libraries, and on Ubuntu with GCC. Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.
 
 For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
 
@@ -46,7 +46,18 @@ For a RELION-compatible movie STAR file, the command line follows RELION's CPU m
 ./build/motioncorr --i movies.star --o MotionCorr --use_own --j 4
 ```
 
-The `--use_own` flag selects the CPU implementation. The extracted runner still accepts RELION's external `--use_motioncor2` option, but this repository does not include that GPU program. This project does not include RELION's GUI or MPI executable.
+The `--use_own` flag selects the native implementation. When built with CUDA support (`-DCUDA=ON`), passing `--gpu <id>` enables GPU acceleration for global alignment:
+
+```sh
+# Build with CUDA support
+cmake -B build-cuda -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80
+cmake --build build-cuda --parallel
+
+# Run with GPU acceleration for global alignment
+./build-cuda/motioncorr --i movies.star --o MotionCorr --use_own --gpu 0 --j 4
+```
+
+**Experimental CUDA status:** The 24-movie RELION SPA tutorial rerun completed, but 0/24 movies passed Gate 2: corrected-image relative RMSE was 0.002899–0.010082 against the 0.001 limit. Use `--gpu` for investigation until this discrepancy is resolved; see the [CUDA validation report](docs/cuda_global_alignment_validation.md). The CPU path remains the default.
 
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 
@@ -67,5 +78,6 @@ The standalone and a CPU-only build of full RELION from the exact upstream commi
 - Direct input of the synthetic movie now runs successfully in this standalone build and produces the same corrected image and motion metadata as STAR-file input. Full RELION 5.1 crashes on direct input before processing; the fix is in `src/motioncorr_runner.cpp`.
 - A 32-frame, 1536 × 1536 synthetic movie (302 MB) with 3 × 3 patches and dose weighting. Corrected pixels and motion STAR files matched full RELION 5.1 exactly. Recovered shifts had 0.0046-pixel coordinate RMS error against the known integer shifts (maximum absolute error 0.0133 pixel). The only corrected MRC header difference was the run timestamp.
 - One experimental movie from the RELION SPA tutorial (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838 pixels), with gain correction, 5 × 5 patches, and dose weighting. Standalone and full RELION 5.1 produced pixel-identical corrected images and identical motion STAR files with one thread. Multi-threaded runs now also achieve complete determinism and bit-for-bit parity with the single-thread baseline, using deterministic defect replacement PRNG seeding (`--seed`, default: 1).
+- A fixed-code comparison of all 24 RELION SPA tutorial movies with full RELION 5.1 is documented in [`docs/spa_24_movies_validation.md`](docs/spa_24_movies_validation.md). It reports the single-thread and four-thread numerical gates separately, with a machine-readable [run manifest](docs/spa_24_movies_manifest.json).
 
-This establishes parity for the cases above on both macOS and Linux. The remaining 23 tutorial movies and broader numerical/scientific validation across the full dataset are tracked in open project milestones.
+The full dataset comparison was run on Linux x86_64. The macOS ARM64 checks above cover smaller fixtures. Linux builds and synthetic regression parity tests are continuously validated via GitHub Actions CI.

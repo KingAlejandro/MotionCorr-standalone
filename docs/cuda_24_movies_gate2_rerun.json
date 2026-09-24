@@ -1,0 +1,476 @@
+{
+  "controls": {
+    "cpu_j1_vs_j4_movie_1_exact": true,
+    "cpu_j4_repeat_movie_1_exact": true,
+    "small_synthetic_cuda_relaxed_gate": "PASS",
+    "split_vs_sequential_cpu_exact_movies": 8
+  },
+  "dataset": "24 RELION SPA tutorial TIFF movies with gain reference; each movie has 24 frames of 3710 x 3838 pixels",
+  "environment": {
+    "cuda_toolkit": "12.8",
+    "driver": "570.86.10",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "host": "4-gpu-vm"
+  },
+  "execution": {
+    "cpu_reference_batch_exit_statuses": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "cpu_reference_batches": 6,
+    "cpu_reference_movies_per_batch": 4,
+    "cuda_batch_exit_status": 0
+  },
+  "gate": {
+    "metrics": {
+      "image_rmse": {
+        "limit": 0.02,
+        "passed": 24,
+        "range": [
+          0.002658074685762837,
+          0.009081704195736564
+        ]
+      },
+      "max_pixel_error": {
+        "limit": 5.0,
+        "passed": 24,
+        "range": [
+          1.1400647163391113,
+          3.3226418495178223
+        ]
+      },
+      "max_shift_error_px": {
+        "limit": 0.05,
+        "passed": 24,
+        "range": [
+          0.005243000000000109,
+          0.01237099999999991
+        ]
+      },
+      "relative_rmse": {
+        "limit": 0.001,
+        "passed": 0,
+        "range": [
+          0.0028991682332795282,
+          0.010081785456390324
+        ]
+      },
+      "trajectory_rms_px": {
+        "limit": 0.02,
+        "passed": 24,
+        "range": [
+          0.002880308786976382,
+          0.007699367349551023
+        ]
+      }
+    },
+    "name": "relaxed",
+    "overall_failed": 24,
+    "overall_passed": 0,
+    "required_complete_coverage": true,
+    "static_star_differences": 0
+  },
+  "movies": [
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.707864e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0037950778106162313,
+      "max_pixel_error": 1.1400647163391113,
+      "max_shift_error_px": 0.006203000000000181,
+      "movie": "20170629_00021_frameImage",
+      "relative_rmse": 0.004707863711853046,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0034874509255808915
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 8.130732e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.006750997616505568,
+      "max_pixel_error": 2.280057430267334,
+      "max_shift_error_px": 0.008897000000000155,
+      "movie": "20170629_00022_frameImage",
+      "relative_rmse": 0.008130731778550717,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0046476081841451645
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 3.395492e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0029055392835283414,
+      "max_pixel_error": 1.602224349975586,
+      "max_shift_error_px": 0.0074179999999994806,
+      "movie": "20170629_00023_frameImage",
+      "relative_rmse": 0.0033954919021469986,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0033138015870496727
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.579242e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.003926677377672911,
+      "max_pixel_error": 1.3180346488952637,
+      "max_shift_error_px": 0.009029999999999205,
+      "movie": "20170629_00024_frameImage",
+      "relative_rmse": 0.004579241546667338,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.004310877651360584
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 6.508359e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.005497103000740113,
+      "max_pixel_error": 1.4727044105529785,
+      "max_shift_error_px": 0.01237099999999991,
+      "movie": "20170629_00025_frameImage",
+      "relative_rmse": 0.006508359119026404,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.005343451494586469
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 7.869690e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.006810608860176061,
+      "max_pixel_error": 3.009641170501709,
+      "max_shift_error_px": 0.007496000000000613,
+      "movie": "20170629_00026_frameImage",
+      "relative_rmse": 0.007869689854069653,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0051234706823923585
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.097955e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0035720422311590976,
+      "max_pixel_error": 1.2167387008666992,
+      "max_shift_error_px": 0.007397000000000098,
+      "movie": "20170629_00027_frameImage",
+      "relative_rmse": 0.004097955257139465,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.003850959323121025
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.395084e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0038907245232589955,
+      "max_pixel_error": 1.5147128105163574,
+      "max_shift_error_px": 0.005243000000000109,
+      "movie": "20170629_00028_frameImage",
+      "relative_rmse": 0.004395084142680166,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.002880308786976382
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 6.647025e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.005757368774445359,
+      "max_pixel_error": 1.2621159553527832,
+      "max_shift_error_px": 0.01237099999999991,
+      "movie": "20170629_00029_frameImage",
+      "relative_rmse": 0.006647024572116178,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.007699367349551023
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.827486e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.004139444436197751,
+      "max_pixel_error": 1.2857389450073242,
+      "max_shift_error_px": 0.00852000000000075,
+      "movie": "20170629_00030_frameImage",
+      "relative_rmse": 0.004827486036494958,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0045373176639215045
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.511236e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.00390970067733967,
+      "max_pixel_error": 1.5474553108215332,
+      "max_shift_error_px": 0.006822999999998913,
+      "movie": "20170629_00031_frameImage",
+      "relative_rmse": 0.004511235809999732,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.004410923684445284
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 7.642272e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0068413147800542974,
+      "max_pixel_error": 3.3226418495178223,
+      "max_shift_error_px": 0.010120000000000573,
+      "movie": "20170629_00035_frameImage",
+      "relative_rmse": 0.007642271602296009,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.007018329071676211
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 7.458893e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0066281392233203005,
+      "max_pixel_error": 2.1880574226379395,
+      "max_shift_error_px": 0.007782999999999873,
+      "movie": "20170629_00036_frameImage",
+      "relative_rmse": 0.007458892571498063,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.004874364202129238
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 8.339223e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.007799201083559969,
+      "max_pixel_error": 1.5283865928649902,
+      "max_shift_error_px": 0.007449999999999957,
+      "movie": "20170629_00037_frameImage",
+      "relative_rmse": 0.008339223467260615,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0049585929035697454
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 5.932002e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.005279859710529827,
+      "max_pixel_error": 2.0709614753723145,
+      "max_shift_error_px": 0.00664299999999951,
+      "movie": "20170629_00039_frameImage",
+      "relative_rmse": 0.005932001830830798,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0038711044451163515
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 7.116067e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.006367300715031577,
+      "max_pixel_error": 2.213791847229004,
+      "max_shift_error_px": 0.00714200000000087,
+      "movie": "20170629_00040_frameImage",
+      "relative_rmse": 0.007116067023436917,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.003976801237594649
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 7.865799e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.006974339794959434,
+      "max_pixel_error": 1.2818655967712402,
+      "max_shift_error_px": 0.008640999999999899,
+      "movie": "20170629_00042_frameImage",
+      "relative_rmse": 0.007865799375294856,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0052472253223331536
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 4.634904e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.004067525521331508,
+      "max_pixel_error": 1.1806139945983887,
+      "max_shift_error_px": 0.0070149999999999935,
+      "movie": "20170629_00043_frameImage",
+      "relative_rmse": 0.004634904170952634,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.004432076436803261
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 2.899168e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.002658074685762837,
+      "max_pixel_error": 1.5461950302124023,
+      "max_shift_error_px": 0.007650999999999186,
+      "movie": "20170629_00044_frameImage",
+      "relative_rmse": 0.0028991682332795282,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.003549550458626183
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 8.035353e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.0072083511765320425,
+      "max_pixel_error": 1.6056041717529297,
+      "max_shift_error_px": 0.008045999999999998,
+      "movie": "20170629_00045_frameImage",
+      "relative_rmse": 0.008035353315878584,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.0048248424283424815
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 1.008179e-02 > 1.000000e-03"
+      ],
+      "image_rmse": 0.009081704195736564,
+      "max_pixel_error": 1.7151994705200195,
+      "max_shift_error_px": 0.00869000000000053,
+      "movie": "20170629_00046_frameImage",
+      "relative_rmse": 0.010081785456390324,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.005807693040987389
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 5.075858e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.004562454215413183,
+      "max_pixel_error": 1.2286396026611328,
+      "max_shift_error_px": 0.00847099999999923,
+      "movie": "20170629_00047_frameImage",
+      "relative_rmse": 0.005075858126256036,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.00490339404137594
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 6.582792e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.005930923936818195,
+      "max_pixel_error": 1.7105307579040527,
+      "max_shift_error_px": 0.010879000000000083,
+      "movie": "20170629_00048_frameImage",
+      "relative_rmse": 0.006582791740865191,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.005444033396756582
+    },
+    {
+      "coverage_complete": true,
+      "exit_code": 1,
+      "image_fail_reasons": [
+        "Relative image RMSE 6.072194e-03 > 1.000000e-03"
+      ],
+      "image_rmse": 0.005492210365318727,
+      "max_pixel_error": 2.2452683448791504,
+      "max_shift_error_px": 0.007874000000000159,
+      "movie": "20170629_00049_frameImage",
+      "relative_rmse": 0.006072193768275564,
+      "static_star_diffs": 0,
+      "status": "FAIL",
+      "trajectory_pass": true,
+      "trajectory_rms_px": 0.004414622997304882
+    }
+  ],
+  "run_date_utc": "2026-09-24",
+  "run_options": {
+    "common": "--use_own --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc",
+    "cpu_reference": "--j 1",
+    "cuda": "--gpu 0 --j 4"
+  },
+  "schema_version": 1,
+  "source": {
+    "cuda_pr_head": "4c987a674d7c31296317e0b4d1c5ad967bb49e04",
+    "main": "13ce0d2365ce6db5696d1e701f3043a803ac3d8e",
+    "validation_merge": "4a00f0ba2c0f5ad45b3b9cd9c9321dc2300e875d",
+    "validation_source_tree": "b5ce2339f366f9d88d8918cceffc086c58dc43e0"
+  }
+}

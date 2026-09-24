@@ -373,7 +373,22 @@ each iteration opens its own `TIFF*` and writes its own frame.
 **It is not shipped here.** `n_io_threads` is derived from `n_threads`, so taking it
 requires decoupling decode parallelism from `--j`, which changes what that flag means for
 every user and raises transient memory (one strip buffer per thread). That is a maintainer
-policy decision, not an I/O cleanup. Raising `--j` itself is **not** an option: `n_threads`
+policy decision, not an I/O cleanup.
+
+**And it does not survive an 8-CPU cap.** Repeating the endpoints inside the
+`taskset -c 96-103` pool the GPU host now runs under:
+
+| threads | `read movie`, 124 CPUs available | `read movie`, capped to 8 CPUs |
+|---:|---:|---:|
+| 8 | 0.730 s | 0.754 s |
+| 24 | **0.291 s** | **0.751 s** |
+
+The entire 0.439 s disappears, which is what the round-count model predicts: 24 decode
+threads on 8 cores still take three rounds, they are just time-sliced instead of queued.
+Corrected pixels identical throughout. So this recommendation is worth ~0.44 s on an
+unconstrained host and **nothing** on a core-constrained one — it is a function of the
+deployment, not of the code, and should be evaluated against whatever core budget the
+production pipeline actually gets. Raising `--j` itself is **not** an option: `n_threads`
 drives floating-point reductions elsewhere (e.g. the hot-pixel `reduction(+:mean)`), so
 changing it can change the hot-pixel set and therefore the output.
 
@@ -436,7 +451,9 @@ the work it removes, not as the answer to Issue #50's timing target.
 2. **Decouple the movie-read thread count from `--j`.** ~0.439 s, bit-exact, but a
    user-visible policy change: more threads than `--j` requests, and one strip buffer per
    thread. Needs maintainer sign-off, and must *not* be done by raising `n_threads`, which
-   feeds floating-point reductions that determine the hot-pixel set.
+   feeds floating-point reductions that determine the hot-pixel set. **Conditional on
+   cores being available**: measured worth nothing under an 8-CPU cap, so decide it against
+   the production core budget rather than against this host.
 3. **Reduce the ghostscript chain.** 0.419 s across four spawns, most of it process
    startup. `header.pdf` and `batch.pdf` are independent and could be produced
    concurrently; `all_batches.pdf` is a single-input re-encode of `batch.pdf`. Not done
@@ -480,6 +497,23 @@ the work it removes, not as the answer to Issue #50's timing target.
   CUDA) and on the synthetic fixture (`cpu64`, CPU-only, GCC 13.3, all four arm/config
   combinations). Neither is a substitute for running the full parity suite across the
   24-movie set before changing the default.
+
+## Effect of the 8-CPU cap on these results
+
+The GPU host was subsequently capped to 8 logical CPUs. What that does and does not change:
+
+- **Parity is unaffected.** `--j` fixes the OpenMP team size via `num_threads(n_threads)`
+  regardless of how many cores exist, so reduction order, the hot-pixel set and every
+  corrected pixel are unchanged. All exactness results carry over.
+- **The paired wall-time result stands in direction and magnitude-class, not in absolute
+  value.** Both arms ran interleaved under identical conditions, so a cap shifts both
+  together and cannot manufacture a 29/30 sign split. The absolute 3.360 / 3.150 s figures
+  are tied to the uncapped box.
+- **The TIFF decode recommendation does not survive**, measured, not inferred: 0.291 s at 24
+  threads uncapped becomes 0.751 s capped, indistinguishable from 8 threads.
+- **The build-flag finding should largely survive**, because the `-O0` penalty falls mainly
+  on single-threaded host code (the four statistics passes, the MRC write) rather than on
+  parallelism — but that is reasoning, not a measurement, and is labelled as such.
 
 ## Compute hosts and resource caps
 

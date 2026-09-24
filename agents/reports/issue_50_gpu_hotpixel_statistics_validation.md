@@ -142,13 +142,28 @@ pre-existing relative-RMSE failure, and no tolerance was altered, overridden or 
 separate session has since traced that failure to sub-pixel peak interpolation in the
 global-alignment CCF, which is outside this change's scope.
 
-## 8. Known gaps
+## 8. Fault-injection: the fallback is exercised and exact
 
-- Wall/VRAM numbers are provisional pending a verified-quiet re-run.
-- The fault-injection test (forcing `collectAboveThreshold` to fail and confirming the host-scan
-  fallback reproduces the reference bit-for-bit with the session still alive) is prepared but not
-  yet run.
+A throwaway build (`~/MotionCorr-hotpixel-fault`, separate binary, never merged) forces
+`collectAboveThreshold` to return false on every call. Matched T1 configuration:
+
+```
+FAULTINJ: forcing collectAboveThreshold failure
+In unaligned sum, Mean = 22.9369 Std = 4.88806 Hotpixel threshold = 52.2653
+Detected 67 hot pixels to be corrected.
+```
+
+Exit status 0, corrected pixels **bit-identical to the `a11f2f1` baseline**, per-movie STAR
+identical. So the guard path downloads the resident sum, re-runs the original host scan verbatim,
+and produces the reference result with the session still alive — confirming the design decision
+not to call `movie_session.reset()` on a statistics failure.
+
+## 9. Known gaps
+
+- Wall/VRAM numbers are provisional pending a verified-quiet re-run. The box has been continuously
+  contended by four other sessions; the contention-immune evidence (§4) is unaffected.
 - The full 24-movie dataset run required by the addendum before calling this release-ready has not
   been performed.
+- Not pushed to PR #51, per instruction.
 - EER was not exercised; no `.eer` fixture exists in the repo. The only EER coupling is
   `D_MAX = 4` in the replacement loop, which this change does not touch.

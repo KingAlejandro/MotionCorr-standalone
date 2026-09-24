@@ -307,6 +307,16 @@ So the mechanism is real but too small, and the gap stays open. The traced and u
 binaries also differ, which limits how hard the two numbers can be compared. I am not going
 to invent a mechanism for the rest.
 
+**Why this change does show a memory saving when a superficially similar one does not.**
+`askMemory` is `calloc` (`src/memory.cpp:30`), and 54.3 MiB is far above any mmap threshold,
+so the allocation itself hands back lazily-faulted zero pages — it is the `memcpy` that
+touches them. Removing the buffer removes both the allocation and the write, so the faults
+genuinely never happen, which is why RSS drops by ~47 MB and faults by ~18.3k. A sibling
+task removing a *write* to a buffer that `initZeros()` has already faulted in
+(`motioncorr_runner.cpp:1311`) correctly measured no fault saving and −408 KiB of RSS.
+Same apparent shape, different mechanism: what matters is whether the pages are ever
+touched, not how many bytes stop being written.
+
 ### `-O2 -ffp-contract=off`
 
 | Metric | base median | candidate median | paired median | sign-flip p |

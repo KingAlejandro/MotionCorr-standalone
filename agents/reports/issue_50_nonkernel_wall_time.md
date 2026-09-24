@@ -237,11 +237,33 @@ quiescence gate satisfied (waited 110 s, load 1.46, zero compilers).
 
 | Metric | base median | candidate median | paired mean | paired median | sign-flip p |
 |---|---:|---:|---:|---:|---|
-| process wall | 3.360 s (sd 0.079) | 3.150 s (sd 0.063) | −0.221 s | **−0.220 s** | **0.0001 — RESOLVED** |
+| process wall | 3.360 s (sd 0.079) | 3.150 s (sd 0.063) | −0.221 s | −0.220 s | **0.0001 — RESOLVED** |
 | per-movie timer | 2.218 s | 2.005 s | −0.222 s | −0.217 s | **0.0001 — RESOLVED** |
 | peak host RSS | 1,633,912 KiB | 1,586,340 KiB | −47,438 KiB | **−47,288 KiB** | **0.0001 — RESOLVED** |
 
-14 of 15 pairs are negative for wall time. **−0.220 s on a 3.360 s baseline is −6.5%.**
+14 of 15 pairs are negative for wall time.
+
+**Order-reversed replication.** The series above runs base then candidate in every pair,
+which confounds the arm with its position: if running second is systematically faster
+(warm page cache, ramped GPU clocks) the bias is credited to the candidate. The whole
+series was therefore repeated with the within-pair order flipped:
+
+| Ordering | paired mean | paired median | negative pairs | p |
+|---|---:|---:|---:|---|
+| base first (candidate runs 2nd) | −0.2213 s | −0.220 s | 14/15 | 0.0001 |
+| candidate first (base runs 2nd) | −0.1820 s | −0.190 s | **15/15** | 0.0001 |
+| pooled | **−0.2017 s** | −0.210 s | 29/30 | — |
+
+The effect survives the reversal, so it is not positional. Better, running both orderings
+separates the two terms. With `observed = −E − P` when the candidate runs second and
+`observed = −E + P` when it runs first:
+
+- **true candidate advantage E = 0.202 s**, i.e. **−6.0% of a 3.356 s baseline**
+- **positional bias P = 20 ms** in favour of whichever arm runs second
+
+So the headline is **−0.202 s (−6.0%)**, and the single-ordering figure of −0.220 s was
+about 20 ms optimistic. A fixed arm order is worth avoiding; running both directions costs
+one extra series and yields the bias as a measured quantity rather than a worry.
 
 An earlier n = 6 series on the same binaries did **not** resolve the wall gain
 (paired median −0.175 s, p = 0.19) because two candidate runs were outliers. It resolved
@@ -354,9 +376,10 @@ the converting path is untouched.
 
 ## Verdict
 
-**The wall gain is resolved.** −0.220 s median, −6.5%, p = 0.0001 at n = 15, on the
+**The wall gain is resolved.** **−0.202 s, −6.0%**, from 30 paired runs across both arm
+orderings (29/30 pairs negative; p = 0.0001 in each ordering separately), on the
 unoptimized build that the PR #51 evidence was produced with. The RSS reduction of
-−47,288 KiB is resolved in every series run.
+about −47,500 KiB is resolved in every series run, including at `-O2`.
 
 Three qualifications, all material:
 

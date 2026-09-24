@@ -2,7 +2,7 @@
 
 **Measured branch**: `t3code/gpu-hot-pixel-optimization` at `d5c3deb` (production changes from `a5a4816` and `dd59245`)
 **Measured baseline**: `a11f2f1` (earlier PR #51 head)
-**Integration**: the two production commits were cherry-picked onto PR #51 head `306bc67`. Review then tightened Guard 2 for signed, cancelling sums, restored the original serial gain-zero mask, and made both failed-download paths consistent. The original matched measurements below predate these final changes; a targeted signed-data test and fresh integrated-branch benchmark are still required before attributing the reported speed to the final head.
+**Integration**: the two production commits were cherry-picked onto PR #51 head `306bc67`. Review restored the original serial gain-zero mask and made both failed-download paths consistent. Final review replaced the float-narrowing Guard 2 with unconditional host fallback whenever Gaussian replacement is reachable. The original matched measurements below predate these final changes; see the final-head validation near the end of this report.
 **Design**: `agents/designs/issue_50_gpu_hotpixel_statistics.md`
 **Host**: `4GPUs` (4-gpu-vm), A100 80GB PCIe, GPU 0
 **Builds**: both arms `cmake -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DCMAKE_BUILD_TYPE=Release`,
@@ -158,7 +158,8 @@ Reachability is **asserted, not inferred from geometry**, with both controls:
 
 The negative control matters as much as the positive: had `plain` also reported 1, the probe
 itself would be wrong. With Guard 2 genuinely exercised, the clustered-defect run is
-**bit-identical** (pixels and STAR) to `a11f2f1`, with no guard warnings.
+**bit-identical** (pixels and STAR) to `a11f2f1`. The final integrated source uses
+the original host scan for this case.
 
 ## 7. Cross-movie RNG parity — 24-movie sweep
 

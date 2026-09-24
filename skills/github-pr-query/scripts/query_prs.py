@@ -70,36 +70,46 @@ def list_pull_requests(repo: str, state: str = "all", limit: int = 30) -> List[D
     return json.loads(data.decode("utf-8"))
 
 
+def fetch_paginated_list(base_url: str, allow_empty: bool = True) -> List[Dict[str, Any]]:
+    """Fetch all pages from a GitHub API endpoint."""
+    items: List[Dict[str, Any]] = []
+    page = 1
+    sep = "&" if "?" in base_url else "?"
+    while True:
+        url = f"{base_url}{sep}per_page=100&page={page}"
+        _, raw = make_github_request(url, allow_empty=allow_empty)
+        batch = json.loads(raw.decode("utf-8"))
+        if not batch or not isinstance(batch, list):
+            break
+        items.extend(batch)
+        if len(batch) < 100:
+            break
+        page += 1
+    return items
+
+
 def get_pull_request_details(repo: str, pr_number: int) -> Dict[str, Any]:
     """Fetch full details, files, and commits for a specific PR."""
     pr_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     _, pr_raw = make_github_request(pr_url)
     pr_data = json.loads(pr_raw.decode("utf-8"))
 
-    # Fetch changed files
-    files_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files?per_page=100"
-    _, files_raw = make_github_request(files_url)
-    pr_data["files"] = json.loads(files_raw.decode("utf-8"))
+    # Fetch changed files with pagination
+    pr_data["files"] = fetch_paginated_list(f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files", allow_empty=False)
 
     # Fetch commits
     commits_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/commits?per_page=50"
     _, commits_raw = make_github_request(commits_url)
     pr_data["commits"] = json.loads(commits_raw.decode("utf-8"))
 
-    # Fetch official PR reviews (e.g. APPROVED, CHANGES_REQUESTED, COMMENTED)
-    reviews_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews?per_page=100"
-    _, reviews_raw = make_github_request(reviews_url, allow_empty=True)
-    pr_data["reviews"] = json.loads(reviews_raw.decode("utf-8"))
+    # Fetch official PR reviews with pagination
+    pr_data["reviews"] = fetch_paginated_list(f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews", allow_empty=True)
 
-    # Fetch inline code review comments
-    review_comments_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/comments?per_page=100"
-    _, review_comments_raw = make_github_request(review_comments_url, allow_empty=True)
-    pr_data["review_comments"] = json.loads(review_comments_raw.decode("utf-8"))
+    # Fetch inline code review comments with pagination
+    pr_data["review_comments"] = fetch_paginated_list(f"https://api.github.com/repos/{repo}/pulls/{pr_number}/comments", allow_empty=True)
 
-    # Fetch general PR discussion comments
-    issue_comments_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments?per_page=100"
-    _, issue_comments_raw = make_github_request(issue_comments_url, allow_empty=True)
-    pr_data["issue_comments"] = json.loads(issue_comments_raw.decode("utf-8"))
+    # Fetch general PR discussion comments with pagination
+    pr_data["issue_comments"] = fetch_paginated_list(f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments", allow_empty=True)
 
     return pr_data
 

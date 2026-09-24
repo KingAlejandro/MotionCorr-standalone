@@ -15,7 +15,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
+The output is `build/motioncorr`. It has been compiled on macOS with AppleClang and Homebrew libraries, and on Ubuntu 24.04 with GCC 13.3.0. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
 
 ```sh
 ./build/motioncorr --i movies.star --o MotionCorr --use_own --j 4
@@ -53,5 +53,6 @@ The standalone and a CPU-only build of full RELION from the exact upstream commi
 - Direct input of the synthetic movie now runs successfully in this standalone build and produces the same corrected image and motion metadata as STAR-file input. Full RELION 5.1 crashes on direct input before processing; the fix is in `src/motioncorr_runner.cpp`.
 - A 32-frame, 1536 × 1536 synthetic movie (302 MB) with 3 × 3 patches and dose weighting. Corrected pixels and motion STAR files matched full RELION 5.1 exactly. Recovered shifts had 0.0046-pixel coordinate RMS error against the known integer shifts (maximum absolute error 0.0133 pixel). The only corrected MRC header difference was the run timestamp.
 - One experimental movie from the RELION SPA tutorial (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838 pixels), with gain correction, 5 × 5 patches, and dose weighting. Standalone and full RELION 5.1 produced pixel-identical corrected images and identical motion STAR files with one thread. Multi-threaded runs now also achieve complete determinism and bit-for-bit parity with the single-thread baseline, using deterministic defect replacement PRNG seeding (`--seed`, default: 1).
+- A fixed-code comparison of all 24 RELION SPA tutorial movies with full RELION 5.1 is documented in [`docs/spa_24_movies_validation.md`](docs/spa_24_movies_validation.md). It reports the single-thread and four-thread numerical gates separately, with a machine-readable [run manifest](docs/spa_24_movies_manifest.json).
 
-This establishes parity for the cases above. The remaining 23 tutorial movies, Linux operation, and broader numerical/scientific validation have not yet been checked.
+The full dataset comparison was run on Linux x86_64. The macOS ARM64 checks above cover smaller fixtures.

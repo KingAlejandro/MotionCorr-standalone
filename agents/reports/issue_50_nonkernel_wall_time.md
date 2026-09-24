@@ -326,9 +326,22 @@ base-01   header[0:224] 23648ea59f4a76fb...   pixels 09680a6a4b3914f9...
 cand-01   same, identical
 ```
 
-One movie and one comparison per arm, so this is a strong data point rather than a parity
-gate — but it is direct evidence that the 0.805 s is available without a numerical
-tradeoff, provided contraction stays off.
+One movie and one comparison per arm on the GPU host. It was then **independently
+confirmed on a second machine and CPU-only toolchain** (`cpu64` / small-refmac-machine,
+64-core, GCC 13.3, `CUDA=OFF`), building both arms in both configurations and running the
+repo's synthetic fixture through all four:
+
+```
+arm/cfg   hdr[0:224]         pixels             per-movie STAR
+base_o0   44794b65e49e7999   04c2a1d9349b3c09   6254fd456f07154b
+base_o2   44794b65e49e7999   04c2a1d9349b3c09   6254fd456f07154b
+cand_o0   44794b65e49e7999   04c2a1d9349b3c09   6254fd456f07154b
+cand_o2   44794b65e49e7999   04c2a1d9349b3c09   6254fd456f07154b
+```
+
+One distinct hash in every column. All five cross-comparisons (including the
+`base -O0` vs `cand -O2` diagonal) show zero non-`.log` mismatches. So the 0.805 s is
+available without a numerical tradeoff on two toolchains, provided contraction stays off.
 
 ## The largest single I/O cost: TIFF read
 
@@ -463,6 +476,28 @@ the work it removes, not as the answer to Issue #50's timing target.
 - Wall-time conclusions are build-specific: resolved unoptimized, not resolved at `-O2`.
 - Stage-trace intervals are host wall intervals and may overlap asynchronous CUDA work.
 - ~0.06 s of the measured process-level gain is not attributable to a traced interval.
-- `-O2 -ffp-contract=off` was checked as output-identical on **one movie, one comparison
-  per arm** (pixels, MRC header bytes 0-223, per-movie STAR). That is not a substitute for
-  running the full parity suite across the 24-movie set before changing the default.
+- `-O2 -ffp-contract=off` was checked as output-identical on the matched movie (GPU host,
+  CUDA) and on the synthetic fixture (`cpu64`, CPU-only, GCC 13.3, all four arm/config
+  combinations). Neither is a substitute for running the full parity suite across the
+  24-movie set before changing the default.
+
+## Compute hosts and resource caps
+
+Two hosts, deliberately split, after the shared GPU VM was found to be overloaded:
+
+| Host | Use | Cap |
+|---|---|---|
+| `4GPUs` (`4-gpu-vm`, 4x A100, 124 cores) | anything GPU-dependent: CUDA builds, benchmarks, traces | **`taskset -c 96-103`** (8 logical CPUs) on the top-level shell, build parallelism <= 8, **one** build or benchmark at a time via `flock /tmp/motioncorr-bench.lock` |
+| `cpu64` (`small-refmac-machine`, 64 cores) | CPU-only builds, reference runs, numerical validation | check load first; modest parallelism (`-j 16`, `nice`) |
+
+`taskset` on the top-level shell is the real cap, not an advisory: children inherit the
+affinity mask, so OpenMP, `make -j` and `nvcc` are all confined, and `nproc` reports 8 so
+CMake's own auto-parallelism also sees the smaller pool. Verified under load — 16 spinning
+threads launched inside the wrapper all ran on CPUs 96-103 and consumed 8 cores box-wide.
+`/home/alex/MotionCorr-nonkernel-wall/capped.sh` wraps `flock` + `taskset` + the thread
+limits together.
+
+Two setup notes for `cpu64`: it has **no `cmake`** (only `make`), installed here into a
+user-local venv rather than changing a shared machine system-wide; and its existing
+`MotionCorr` directory is a RELION *job output* directory, **not** a Git checkout, so the
+branch and fixtures must be staged explicitly.

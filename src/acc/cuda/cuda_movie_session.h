@@ -30,10 +30,38 @@ public:
 
     // Upload raw frames and gain reference (if present), execute fused gain multiplication
     // and unaligned sum accumulation on GPU, and copy unaligned sum back to host for hot pixel detection.
+    // download_sum=false keeps the sum resident; the caller must then obtain the
+    // statistics through reduceUnalignedSum/reduceUnalignedSumSqDev/collectAboveThreshold,
+    // or copy it later via downloadUnalignedSum() when falling back.
     bool applyGainDefectsAndSum(
         const std::vector<Image<float> > &raw_frames,
         const MultidimArray<float> *gain_ref,
-        MultidimArray<float> &unaligned_sum
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
+    // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
+    // path, which re-runs the original host scan verbatim.
+    bool downloadUnalignedSum(MultidimArray<float> &unaligned_sum);
+
+    // Sum_n (double)d_Isum[n] and Sum_n |(double)d_Isum[n]|, fixed-shape deterministic
+    // tree (no FP atomics). sum_abs is required because the forward error bound is
+    // gamma_N * sum|x|, which exceeds gamma_N * |sum x| whenever the data changes sign.
+    bool reduceUnalignedSum(double &sum1, double &sum_abs);
+
+    // Sum_n ((double)d_Isum[n] - mean)^2. Addends are formed with __dsub_rn/__dmul_rn so
+    // they are bit-identical to the host's `d = x - mean; d * d`.
+    bool reduceUnalignedSumSqDev(double mean, double &sum2);
+
+    // Emit every n with (double)d_Isum[n] > threshold, ascending, and count the pixels
+    // lying within `guard` of the threshold. A non-zero count means the threshold
+    // decision is not provably order-independent and the caller must fall back.
+    // Returns false on CUDA error or hit-buffer overflow.
+    bool collectAboveThreshold(
+        double threshold,
+        double guard,
+        std::vector<int> &indices_ascending,
+        size_t &guard_band_count
     );
 
     // Apply hot pixel defect replacements directly to resident d_Iframes

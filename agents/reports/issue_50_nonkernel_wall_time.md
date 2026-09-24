@@ -262,8 +262,21 @@ separates the two terms. With `observed = −E − P` when the candidate runs se
 - **positional bias P = 20 ms** in favour of whichever arm runs second
 
 So the headline is **−0.202 s (−6.0%)**, and the single-ordering figure of −0.220 s was
-about 20 ms optimistic. A fixed arm order is worth avoiding; running both directions costs
-one extra series and yields the bias as a measured quantity rather than a worry.
+about 20 ms optimistic.
+
+Two notes on method, both from comparing this with a sibling task that used
+alternating-within-pair ordering over 40 pairs:
+
+- **Alternation is not merely a cancellation.** If the ordering label is kept per pair and
+  the series split afterwards, alternation recovers `P` from the same data at no extra
+  cost, with each direction at half n. A separate reversed series gives cleaner separation
+  and full n per direction. Either beats a single fixed order; there is no real trade-off
+  between them, only a choice of where the n goes.
+- **`P` is workload-specific and should not be assumed negligible.** On this same host the
+  sibling task measured `P = 2.5 ms` for a GPU-side arithmetic change, against 20 ms here.
+  That is consistent with the mechanism: this change is dominated by TIFF read and MRC
+  write, where page-cache carryover between consecutive runs is exactly what `P` captures.
+  At 20 ms, `P` would have been a material fraction of a 46 ms effect.
 
 An earlier n = 6 series on the same binaries did **not** resolve the wall gain
 (paired median −0.175 s, p = 0.19) because two candidate runs were outliers. It resolved

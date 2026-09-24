@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <algorithm>
+#include <climits>
 
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
@@ -152,34 +154,101 @@ bool CudaMovieSession::initialize() {
     const size_t total_real_bytes = sz_real * n_frames;
     const size_t total_comp_bytes = sz_comp * n_frames;
 
+    if (nx <= 0 || ny <= 0 || n_frames <= 0 ||
+        (size_t)nx * ny > INT_MAX || (size_t)ny * nfx > INT_MAX) {
+        logfile << "ERROR: Invalid movie dimensions for cuFFT: "
+                << nx << "x" << ny << "x" << n_frames << std::endl;
+        return false;
+    }
+
     // Allocate persistent movie buffers
-    HANDLE_ERROR(cudaMalloc((void**)&d_Iframes, total_real_bytes));
-    HANDLE_ERROR(cudaMalloc((void**)&d_Fframes, total_comp_bytes));
-    HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_real));
+    cudaError_t cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    if (cuda_result != cudaSuccess) {
+        logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
+        release();
+        return false;
+    }
 
-    // Create batched cuFFT plans
+    // cuFFT's automatic allocation must be disabled before either plan is made.
+    // Two transforms share one work area because all executions use the default stream
+    // and each batch is synchronized before the next execution.
+    fft_batch_size = std::min(n_frames, 2);
+    const int tail_size = n_frames % fft_batch_size;
     int n[2] = {ny, nx};
-    cufftResult res_r2c = cufftPlanMany(&plan_r2c, 2, n, NULL, 1, nx * ny, NULL, 1, ny * nfx, CUFFT_R2C, n_frames);
-    if (res_r2c != CUFFT_SUCCESS) {
-        logfile << "ERROR: cufftPlanMany batched R2C failed with code " << res_r2c << std::endl;
+    auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,
+                         cufftType type, int batch) -> bool {
+        cufftResult result = cufftCreate(&plan);
+        if (result == CUFFT_SUCCESS) has_plan = true;
+        if (result == CUFFT_SUCCESS) result = cufftSetAutoAllocation(plan, 0);
+        if (result == CUFFT_SUCCESS) {
+            const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
+            const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
+            result = cufftMakePlanMany(plan, 2, n, NULL, 1, input_distance,
+                                       NULL, 1, output_distance, type, batch, &work_bytes);
+        }
+        if (result != CUFFT_SUCCESS) {
+            logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+                    << " batch=" << batch << " type=" << type
+                    << " code=" << result << std::endl;
+            return false;
+        }
+        return true;
+    };
+    if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C, fft_batch_size) ||
+        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R, fft_batch_size) ||
+        (tail_size &&
+         (!make_plan(plan_r2c_tail, has_plan_r2c_tail, fft_r2c_tail_work_bytes, CUFFT_R2C, tail_size) ||
+          !make_plan(plan_c2r_tail, has_plan_c2r_tail, fft_c2r_tail_work_bytes, CUFFT_C2R, tail_size)))) {
         release();
         return false;
     }
-    has_plan_r2c = true;
 
-    cufftResult res_c2r = cufftPlanMany(&plan_c2r, 2, n, NULL, 1, ny * nfx, NULL, 1, nx * ny, CUFFT_C2R, n_frames);
-    if (res_c2r != CUFFT_SUCCESS) {
-        logfile << "ERROR: cufftPlanMany batched C2R failed with code " << res_c2r << std::endl;
+    fft_work_bytes = std::max(std::max(fft_r2c_work_bytes, fft_c2r_work_bytes),
+                              std::max(fft_r2c_tail_work_bytes, fft_c2r_tail_work_bytes));
+    // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
+    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
+    if (cuda_result == cudaSuccess)
+        cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp * fft_batch_size);
+    if (cuda_result != cudaSuccess) {
+        logfile << "ERROR: Movie FFT scratch allocation failed for batch=" << fft_batch_size
+                << " workspace=" << fft_work_bytes << " tile=" << sz_comp * fft_batch_size
+                << ": " << cudaGetErrorString(cuda_result) << std::endl;
         release();
         return false;
     }
-    has_plan_c2r = true;
+    auto attach_work = [&](cufftHandle plan, bool has_plan) -> bool {
+        if (!has_plan) return true;
+        cufftResult result = cufftSetWorkArea(plan, d_fft_work);
+        if (result == CUFFT_SUCCESS) return true;
+        logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
+        return false;
+    };
+    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r) ||
+        !attach_work(plan_r2c_tail, has_plan_r2c_tail) ||
+        !attach_work(plan_c2r_tail, has_plan_c2r_tail)) {
+        release();
+        return false;
+    }
+    logfile << "Movie FFT: batch=" << fft_batch_size << " tail=" << tail_size
+            << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
+            << " tail R2C work=" << fft_r2c_tail_work_bytes
+            << " tail C2R work=" << fft_c2r_tail_work_bytes
+            << " shared work=" << fft_work_bytes
+            << " inverse tile=" << sz_comp * fft_batch_size << " bytes" << std::endl;
 
     is_initialized = true;
     return true;
 }
 
 void CudaMovieSession::release() {
+    if (has_plan_r2c || has_plan_c2r || has_plan_r2c_tail || has_plan_c2r_tail) {
+        cudaError_t result = cudaDeviceSynchronize();
+        if (result != cudaSuccess)
+            logfile << "ERROR: CUDA synchronization before movie FFT release: "
+                    << cudaGetErrorString(result) << std::endl;
+    }
     if (has_plan_r2c) {
         cufftDestroy(plan_r2c);
         plan_r2c = 0;
@@ -190,6 +259,27 @@ void CudaMovieSession::release() {
         plan_c2r = 0;
         has_plan_c2r = false;
     }
+    if (has_plan_r2c_tail) {
+        cufftDestroy(plan_r2c_tail);
+        plan_r2c_tail = 0;
+        has_plan_r2c_tail = false;
+    }
+    if (has_plan_c2r_tail) {
+        cufftDestroy(plan_c2r_tail);
+        plan_c2r_tail = 0;
+        has_plan_c2r_tail = false;
+    }
+    if (d_fft_work) {
+        cudaFree(d_fft_work);
+        d_fft_work = nullptr;
+    }
+    if (d_inverse_tile) {
+        cudaFree(d_inverse_tile);
+        d_inverse_tile = nullptr;
+    }
+    fft_batch_size = 0;
+    fft_r2c_work_bytes = fft_c2r_work_bytes = 0;
+    fft_r2c_tail_work_bytes = fft_c2r_tail_work_bytes = fft_work_bytes = 0;
     if (d_Iframes) {
         cudaFree(d_Iframes);
         d_Iframes = nullptr;
@@ -306,10 +396,20 @@ bool CudaMovieSession::updateDefectPixels(
 }
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
-    if (!is_initialized || !has_plan_r2c) return false;
+    if (!is_initialized || !has_plan_r2c || fft_batch_size == 0) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    CUFFT_CHECK(cufftExecR2C(plan_r2c, (cufftReal*)d_Iframes, d_Fframes));
+    const size_t real_stride = (size_t)nx * ny;
+    const size_t complex_stride = (size_t)ny * nfx;
+    for (int first = 0; first < n_frames; first += fft_batch_size) {
+        const int count = std::min(fft_batch_size, n_frames - first);
+        cufftHandle plan = count == fft_batch_size ? plan_r2c : plan_r2c_tail;
+        if (count != fft_batch_size && !has_plan_r2c_tail) return false;
+        CUFFT_CHECK(cufftExecR2C(plan, (cufftReal*)(d_Iframes + (size_t)first * real_stride),
+                                 d_Fframes + (size_t)first * complex_stride));
+        // The next plan reuses the same work area; execution failures surface here.
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
 
     const float inv_size = 1.0f / ((float)nx * ny);
     const size_t total_comp_elems = (size_t)n_frames * ny * nfx;
@@ -317,22 +417,30 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     const int grid = (int)((total_comp_elems + block - 1) / block);
     scaleComplexKernel<<<grid, block>>>(d_Fframes, total_comp_elems, inv_size);
     HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaDeviceSynchronize());
 
     return true;
 }
 
 bool CudaMovieSession::computeGlobalInverseFFT() {
-    if (!is_initialized || !has_plan_c2r) return false;
+    if (!is_initialized || !has_plan_c2r || !d_inverse_tile || fft_batch_size == 0) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // Note: cuFFT C2R transforms overwrite their complex input buffer.
-    // We copy d_Fframes into a temporary buffer to preserve d_Fframes for dose weighting.
-    const size_t sz_comp = (size_t)n_frames * ny * nfx * sizeof(cufftComplex);
-    cufftComplex *d_temp_Fframes = nullptr;
-    HANDLE_ERROR(cudaMalloc((void**)&d_temp_Fframes, sz_comp));
-    HANDLE_ERROR(cudaMemcpy(d_temp_Fframes, d_Fframes, sz_comp, cudaMemcpyDeviceToDevice));
-    CUFFT_CHECK(cufftExecC2R(plan_c2r, d_temp_Fframes, (cufftReal*)d_Iframes));
-    cudaFree(d_temp_Fframes);
+    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
+    // and only reuse the tile after that transform has completed.
+    const size_t real_stride = (size_t)nx * ny;
+    const size_t complex_stride = (size_t)ny * nfx;
+    for (int first = 0; first < n_frames; first += fft_batch_size) {
+        const int count = std::min(fft_batch_size, n_frames - first);
+        cufftHandle plan = count == fft_batch_size ? plan_c2r : plan_c2r_tail;
+        if (count != fft_batch_size && !has_plan_c2r_tail) return false;
+        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)first * complex_stride,
+                                (size_t)count * complex_stride * sizeof(cufftComplex),
+                                cudaMemcpyDeviceToDevice));
+        CUFFT_CHECK(cufftExecC2R(plan, d_inverse_tile,
+                                 (cufftReal*)(d_Iframes + (size_t)first * real_stride)));
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
     return true;
 }
 

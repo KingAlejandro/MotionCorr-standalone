@@ -84,6 +84,12 @@ From `relion30_tutorial`, execute MotionCorr in CPU mode:
   --bfactor 150 --gainref Movies/gain.mrc
 ```
 
+Adjust the executable path for your checkout. For parity, run RELION 5.1's
+`relion_run_motioncorr` with the same input and options, using another output
+The first movie (`20170629_00021_frameImage.tiff`) gave exact pixel and motion STAR parity
+with `--j 1` on macOS. Four-thread runs are also fully deterministic and produce
+bit-for-bit identical outputs to the single-thread baseline with the `--seed` option
+(default: 1). The remaining 23 movies have not been compared yet.
 ---
 
 ## 3. Comparing Outputs and Acceptance Gates

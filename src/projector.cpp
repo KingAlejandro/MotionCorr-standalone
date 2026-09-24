@@ -17,6 +17,10 @@
  * source code. Additional authorship citations may be added, but existing
  * author citations must be preserved.
  ***************************************************************************/
+// MotionCorr-standalone does not compile or use 3D projector CUDA kernels
+#undef _CUDA_ENABLED
+#undef _HIP_ENABLED
+
 #include "src/projector.h"
 #include <src/jaz/gravis/t3Vector.h>
 #include <src/time.h>

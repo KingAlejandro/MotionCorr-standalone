@@ -17,13 +17,22 @@ cmake --build build --parallel
 
 The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
 
-For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
-
 ```sh
 ./build/motioncorr --i movies.star --o MotionCorr --use_own --j 4
 ```
 
-The `--use_own` flag selects the CPU implementation. The extracted runner still accepts RELION's external `--use_motioncor2` option, but this repository does not include that GPU program. This project does not include RELION's GUI or MPI executable.
+The `--use_own` flag selects the native implementation. When built with CUDA support (`-DCUDA=ON`), passing `--gpu <id>` enables GPU acceleration for global alignment:
+
+```sh
+# Build with CUDA support
+cmake -B build-cuda -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80
+cmake --build build-cuda --parallel
+
+# Run with GPU acceleration for global alignment
+./build-cuda/motioncorr --i movies.star --o MotionCorr --use_own --gpu 0 --j 4
+```
+
+**Experimental CUDA status:** The 24-movie RELION SPA tutorial rerun completed, but 0/24 movies passed Gate 2: corrected-image relative RMSE was 0.002899–0.010082 against the 0.001 limit. Use `--gpu` for investigation until this discrepancy is resolved; see the [CUDA validation report](docs/cuda_global_alignment_validation.md). The CPU path remains the default.
 
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 

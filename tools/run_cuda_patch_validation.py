@@ -146,11 +146,11 @@ def main():
         "--o", str(neg_dir / "neg.mrc"),
         "--gpu", "99"
     ], check=False)
-    neg_passed = (neg_res.returncode != 0) and ("Invalid CUDA device ID" in neg_res.stderr or "Invalid CUDA device ID" in neg_res.stdout)
+    neg_passed = (neg_res.returncode != 0) and ("Invalid GPU device ID" in neg_res.stderr or "Invalid GPU device ID" in neg_res.stdout or "Invalid CUDA device ID" in neg_res.stderr or "Invalid CUDA device ID" in neg_res.stdout)
     summary["negative_test"] = {
         "passed": neg_passed,
         "exit_code": neg_res.returncode,
-        "stderr_contains_error": "Invalid CUDA device ID" in neg_res.stderr or "Invalid CUDA device ID" in neg_res.stdout
+        "stderr_contains_error": neg_passed
     }
     print(f"Negative test passed: {neg_passed} (exit {neg_res.returncode})")
 
@@ -168,7 +168,7 @@ def main():
         "--i", str(repo / "test-data/synthetic/synthetic_fallback.star"),
         "--o", str(fb_cpu_dir / "fb_cpu.mrc"),
         "--patch_x", "3", "--patch_y", "3",
-        "-j", "1"
+        "--j", "1"
     ])
     run_cmd([
         str(cuda_bin), "--use_own",
@@ -196,7 +196,7 @@ def main():
             "--i", str(repo / "test-data/synthetic/synthetic_local_motion.star"),
             "--o", str(ref_d / f"{stage_name}.mrc"),
             "--patch_x", str(px), "--patch_y", str(py),
-            "-j", "1"
+            "--j", "1"
         ]
         cand_cmd = [
             str(cuda_bin), "--use_own",
@@ -251,7 +251,7 @@ _rlnOpticsGroup #2
             "--voltage", "300.0",
             "--angpix", "1.06",
             "--dose_per_frame", "1.277",
-            "-j", "8"
+            "--j", "8"
         ]
         if args.exp_gain and args.exp_gain.exists():
             cpu_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
@@ -277,7 +277,7 @@ _rlnOpticsGroup #2
                 "--angpix", "1.06",
                 "--dose_per_frame", "1.277",
                 "--gpu", str(args.gpu_id),
-                "-j", "8"
+                "--j", "8"
             ]
             if args.exp_gain and args.exp_gain.exists():
                 cuda_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])

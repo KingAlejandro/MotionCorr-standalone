@@ -115,14 +115,14 @@ def generate_local_motion_fixture(output_dir: Path) -> Dict[str, Any]:
     stack_local = np.stack(frames, axis=0)
     mrc_local = output_dir / "synthetic_local_motion.mrc"
     write_mrc(mrc_local, stack_local)
-    write_star(output_dir / "synthetic_local_motion.star", mrc_local.name)
+    write_star(output_dir / "synthetic_local_motion.star", str(mrc_local.resolve()))
 
     # 2. Fallback fixture: pure noise movie with no discernible feature correlation
     noise_frames = [rng.normal(100.0, 15.0, (ny, nx)).astype(np.float32) for _ in range(nframes)]
     stack_fallback = np.stack(noise_frames, axis=0)
     mrc_fallback = output_dir / "synthetic_fallback.mrc"
     write_mrc(mrc_fallback, stack_fallback)
-    write_star(output_dir / "synthetic_fallback.star", mrc_fallback.name)
+    write_star(output_dir / "synthetic_fallback.star", str(mrc_fallback.resolve()))
 
     metadata = {
         "dimensions": [nx, ny, nframes],

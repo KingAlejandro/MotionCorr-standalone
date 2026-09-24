@@ -200,6 +200,10 @@ may overlap asynchronous device work.
 
 Traced span 3.179 s; the portion outside the per-movie work is 0.834 s.
 
+(The 0.734 s here and the 0.730 s in the thread sweep below are the same stage measured
+with different binaries — the traced baseline build and the thread-sweep experiment build.
+The 4 ms is build-to-build, not drift.)
+
 Three things this settles:
 
 1. **Ghostscript is spawned four times, not once** — `header.pdf`, `batch.pdf`,
@@ -433,8 +437,9 @@ Three qualifications, all material:
    `-O2 -ffp-contract=off` is worth −0.805 s (−24%) on the same source and host — more than
    three times the change. If the Issue #50 target is process wall time, that is the first
    thing to fix, and it is a configure flag rather than a patch.
-3. **The largest single I/O cost, the 0.734 s TIFF read, is untouched** and ~0.439 s of it
-   is available bit-exactly, but only by decoupling decode threads from `--j`.
+3. **The largest single I/O cost, the ~0.73 s TIFF read, is untouched.** ~0.439 s of it is
+   available bit-exactly, but only by decoupling decode threads from `--j`, and only on a
+   host with spare cores — measured worth nothing under the 8-CPU cap.
 
 So: a real, reproducible, bit-exact improvement that removes genuinely redundant work and
 one whole-image allocation — but not the largest lever available, and its wall-time

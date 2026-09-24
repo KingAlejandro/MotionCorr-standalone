@@ -194,5 +194,5 @@ private:
 - [x] Implement fused preprocessing kernel for gain application and initial unaligned summation on GPU (`applyGainDefectsAndSum`), with deterministic RNG defect replacement handling and GPU update (`updateDefectPixels`).
 - [x] Eliminate intermediate host-device transfers across global FFT, global alignment, global IFFT, and patch alignment.
 - [x] Implement resident in-VRAM dose weighting and real-space interpolation directly writing to device output buffer.
-- [x] Pass Gate 2 numerical equivalence: Coordinate RMS shift error $\le 0.02\text{ px}$, Max shift error $\le 0.05\text{ px}$, Corrected-image absolute RMSE $\le 0.02$, Corrected-image relative RMSE $\le 0.001$, and identical STAR metadata.
-- [x] Maintain full numerical parity and safe, deterministic fallback to CPU when CUDA is disabled, out of memory, or upon step failure.
+- [ ] Pass Gate 2 numerical equivalence: Coordinate RMS shift error $\le 0.02\text{ px}$, Max shift error $\le 0.05\text{ px}$, Corrected-image absolute RMSE $\le 0.02$, Corrected-image relative RMSE $\le 0.001$, and identical STAR metadata. The relative-image-RMSE gate remains failed.
+- [ ] Maintain full numerical parity and safe, deterministic fallback to CPU when CUDA is disabled, out of memory, or upon step failure. Some resident-stage failures can still abort instead of falling back; this remains unverified as an end-to-end acceptance criterion.

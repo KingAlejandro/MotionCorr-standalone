@@ -466,36 +466,43 @@ not to call `movie_session.reset()` on a statistics failure.
   keyed on (filename, nx, ny, EER-or-not) rather than an unconditional hoist, because the
   per-movie size check at `:1260-1262` exists for non-uniform STAR files and the EER path takes a
   different branch (`renderer.loadEERGain`, `:1256`). Credited to the non-kernel wall-time task.
-- The measurements predate the final Guard 2 correction. The final branch must be checked with signed summed pixels and clustered defects, and timed afresh under the 8-core cap before quoting a final speedup.
+- The timings above belong to the original measured branch. The integrated final-head
+  comparison, including signed summed pixels and clustered defects, is below.
 
-## 14. Verdict
+## 14. Final integrated head (`bb53e04`)
 
-**Functionally correct and safe to merge on the evidence gathered; the performance case is
-stage-level only.**
+The exact PR #54 head was built clean on `4GPUs` as Release, CUDA `sm_80`, with
+`CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp`. The production binary SHA-256 is
+`5f5651d37d6ce8d8425dd034082767acd92c5b4f2475654889ea62165450f5c9`; the
+`a11f2f1` reference binary SHA-256 is
+`fdee080dd1314854c9c93f12c9ddd4f09f85bf34e020718f6547215c325497d9`.
+The validation ran under `flock /tmp/motioncorr-bench.lock` and top-level
+`taskset -c 96-103`, with build parallelism 8. The unedited console record,
+including flags, hashes, GPU identity, and raw results, is committed as
+`agents/reports/issue_50_hotpixel_final_head_validation.txt`. The command script
+and separate provenance file remain at `/tmp/hp54c/validate54c.sh` and
+`/tmp/hp54c/PROVENANCE.txt` on that host.
 
-What is established beyond reasonable doubt:
-- Output is bit-identical to `a11f2f1` across ten single-movie configurations, a clustered-defect
-  configuration that provably exercises Guard 2, all 24 tutorial movies in one process, and three
-  deliberately perturbed timing profiles including one 1.66x slower.
-- The fallback is real: forcing `collectAboveThreshold` to fail reproduces the reference
-  bit-for-bit with the session still alive.
-- Device-to-host transfer volume halves, 113.915 MB to 56.960 MB, confirmed on the exact binary
-  used for all other measurements.
-- `TIMING_DETECT_HOT` drops 21.6%, 48.2 to 37.8 ms, at 6.25 sigma.
-- Peak VRAM unchanged at 3533 MiB, under the 3,584 MiB ceiling.
+The instrumented reachability controls reported Gaussian fallback **unreachable**
+for normal and signed plain gain, and **reachable** for normal and signed clustered
+defects. The latter two used the original host statistics. All five single-movie
+controls (`gain_plain`, `gain_clustered`, `signed_plain`, `signed_clustered`,
+`nogain_plain`) matched the reference in corrected pixels, the first 224 header
+bytes, STAR files, and ordered hot-pixel lists. The full tutorial run produced
+24/24 corrected movies with identical pixel digests, 0 ordered hot-pixel-list
+differences, identical per-movie hot-pixel counts, and an identical dataset STAR.
 
-- **End-to-end wall-clock improvement, resolved in both CPU configurations.** Uncapped (~124 CPUs,
-  n=40 paired): +45.9 ms (2.06%), 34/40 pairs, p = 1e-5. Under the 8-CPU cap (n=30 paired):
-  **+17.8 ms (0.85%)**, 22/30 pairs, p = 0.008 on movie wall. The gain is real but **attenuates by
-  ~63% on a constrained host** — quote the constrained figure for a constrained deployment. This
-  also reverses an earlier underpowered n=6 result that had suggested no gain at all.
+In 12 alternating paired process-wall runs under the 8-core cap, the reference
+median was **2.331 s** and this head's median **2.343 s**; the median paired
+advantage was only **8.3 ms**, with this head faster in 6/12 pairs. This does
+**not** resolve an end-to-end speedup. The earlier 17.8 ms/0.85% result and
+21.6% detection-stage improvement are measurements of the earlier branch, not
+claims for `bb53e04`. The structural device-to-host transfer reduction on that
+branch was 113.915 to 56.960 MB. The final-head run did not remeasure transfer
+bytes. A 50 ms NVML sampler saw up to **3537 MiB** in each arm, leaving at most
+47 MiB below the 3584 MiB ceiling; sampling can miss the true peak.
 
-What is **not** established:
-- That the ~46 ms is fully explained by the stage decomposition, which accounts for roughly 19 ms.
-  The remainder is **not** explained by avoided page faults -- see below, that hypothesis is dead.
-  Avoided memory-bandwidth for the 54.32 MiB write remains possible but is unmeasured.
-
-The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved
-end-to-end gain of ~46 ms (2.1%) unconstrained or ~18 ms (0.85%) under an 8-CPU cap**. It is still not the "~0.19 s host scan" the original framing implied --
-that figure covered a whole stage of which this change removes only part, and appears to derive
-from an unoptimized build.
+**Verdict:** The exact final head passes the tested output-equivalence gates and
+is suitable for the stacked PR #54 merge into #51. Its end-to-end performance
+gain is unresolved under the shared-host cap. EER, CPU/RELION Gate 2, the
+low-memory fallback, and the tight memory-headroom decision remain open on #51.

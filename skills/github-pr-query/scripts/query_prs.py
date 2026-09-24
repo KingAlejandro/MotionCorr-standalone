@@ -53,15 +53,12 @@ def make_github_request(url: str, accept_header: str = "application/vnd.github.v
     except urllib.error.HTTPError as e:
         if allow_empty and e.code in (404, 422):
             return e.code, b"[]"
+        err_body = str(e.read() or "").lower()
         sys.stderr.write(f"GitHub API Error [{e.code}]: {e.reason} ({url})\n")
-        if e.code == 403 and "rate limit" in str(e.read() or "").lower():
+        if e.code == 403 and "rate limit" in err_body:
             sys.stderr.write("API rate limit exceeded. Set GITHUB_TOKEN environment variable.\n")
-        if allow_empty:
-            return e.code, b"[]"
         sys.exit(1)
     except Exception as e:
-        if allow_empty:
-            return 500, b"[]"
         sys.stderr.write(f"Network request error: {e}\n")
         sys.exit(1)
 

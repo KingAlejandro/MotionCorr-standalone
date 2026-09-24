@@ -58,6 +58,79 @@ __global__ void fusedGainAndSumKernel(
     d_Isum[pixel] = sum;
 }
 
+// ---------------------------------------------------------------------------
+// GPU hot-pixel statistics (Issue #50 addendum: issue_50_gpu_hotpixel_statistics.md)
+//
+// Fixed-shape two-stage reductions. No floating-point atomics anywhere, so the
+// result is deterministic run to run. Addends are formed with __dsub_rn/__dmul_rn
+// so nvcc's default -fmad=true cannot contract `acc += d*d` into an FMA and change
+// the addend multiset relative to the host expression at motioncorr_runner.cpp:1362.
+// ---------------------------------------------------------------------------
+#define MC_STATS_BLOCKS  1024
+#define MC_STATS_THREADS 256
+
+__global__ void sumUnalignedKernel(const float *d_Isum, const size_t num_pixels, double *d_partials)
+{
+    __shared__ double sdata[MC_STATS_THREADS];
+    const size_t stride = (size_t)gridDim.x * blockDim.x;
+    double acc = 0.0;
+    for (size_t n = (size_t)blockIdx.x * blockDim.x + threadIdx.x; n < num_pixels; n += stride)
+        acc = __dadd_rn(acc, (double)d_Isum[n]);
+    sdata[threadIdx.x] = acc;
+    __syncthreads();
+    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (threadIdx.x < s) sdata[threadIdx.x] = __dadd_rn(sdata[threadIdx.x], sdata[threadIdx.x + s]);
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) d_partials[blockIdx.x] = sdata[0];
+}
+
+__global__ void sumSqDevUnalignedKernel(const float *d_Isum, const size_t num_pixels,
+                                        const double mean, double *d_partials)
+{
+    __shared__ double sdata[MC_STATS_THREADS];
+    const size_t stride = (size_t)gridDim.x * blockDim.x;
+    double acc = 0.0;
+    for (size_t n = (size_t)blockIdx.x * blockDim.x + threadIdx.x; n < num_pixels; n += stride) {
+        const double d = __dsub_rn((double)d_Isum[n], mean);
+        acc = __dadd_rn(acc, __dmul_rn(d, d));
+    }
+    sdata[threadIdx.x] = acc;
+    __syncthreads();
+    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (threadIdx.x < s) sdata[threadIdx.x] = __dadd_rn(sdata[threadIdx.x], sdata[threadIdx.x + s]);
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) d_partials[blockIdx.x] = sdata[0];
+}
+
+// Sequential final combine in fixed block order, single thread: deterministic.
+__global__ void combinePartialsKernel(const double *d_partials, const int n_partials, double *d_out)
+{
+    double acc = 0.0;
+    for (int i = 0; i < n_partials; i++) acc = __dadd_rn(acc, d_partials[i]);
+    *d_out = acc;
+}
+
+// Emission order is arbitrary (integer atomicAdd); the host sorts ascending.
+__global__ void collectAboveThresholdKernel(const float *d_Isum, const size_t num_pixels,
+                                            const double threshold, const double guard,
+                                            int *d_hits, const unsigned int capacity,
+                                            unsigned int *d_count, unsigned int *d_band,
+                                            unsigned int *d_overflow)
+{
+    const size_t stride = (size_t)gridDim.x * blockDim.x;
+    for (size_t n = (size_t)blockIdx.x * blockDim.x + threadIdx.x; n < num_pixels; n += stride) {
+        const double xv = (double)d_Isum[n];
+        if (xv > threshold) {
+            const unsigned int slot = atomicAdd(d_count, 1u);
+            if (slot < capacity) d_hits[slot] = (int)n;
+            else atomicExch(d_overflow, 1u);
+        }
+        if (fabs(xv - threshold) <= guard) atomicAdd(d_band, 1u);
+    }
+}
+
 __global__ void updateDefectKernel(
     float *d_Iframes,
     const int *d_bad_xs,
@@ -326,7 +399,8 @@ void CudaMovieSession::release() {
 bool CudaMovieSession::applyGainDefectsAndSum(
     const std::vector<Image<float> > &raw_frames,
     const MultidimArray<float> *gain_ref,
-    MultidimArray<float> &unaligned_sum
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
 ) {
     if (!is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
@@ -355,10 +429,124 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     fusedGainAndSumKernel<<<grid, block>>>(d_Iframes, d_Isum, d_gain, num_pixels, n_frames, apply_gain);
     HANDLE_ERROR(cudaGetLastError());
 
-    // Copy unaligned sum back to host for hot pixel detection
-    unaligned_sum.reshape(ny, nx);
-    HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum, sz_real, cudaMemcpyDeviceToHost));
+    if (download_sum) {
+        // Copy unaligned sum back to host for hot pixel detection. The blocking copy
+        // also synchronises the kernel above.
+        unaligned_sum.reshape(ny, nx);
+        HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum, sz_real, cudaMemcpyDeviceToHost));
+    } else {
+        // Without the D2H there is no other synchronisation point for the kernel, so a
+        // fault would otherwise surface at an unrelated later call and bypass the
+        // caller's reset-and-fall-back recovery.
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
 
+    return true;
+}
+
+bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {
+    if (!is_initialized) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    unaligned_sum.reshape(ny, nx);
+    HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum,
+                            (size_t)ny * nx * sizeof(float), cudaMemcpyDeviceToHost));
+    return true;
+}
+
+namespace {
+// RAII scratch so the bare `return false` inside HANDLE_ERROR still frees.
+struct StatsScratch {
+    double *partials = nullptr;
+    double *result = nullptr;
+    ~StatsScratch() {
+        if (partials) cudaFree(partials);
+        if (result) cudaFree(result);
+    }
+};
+} // namespace
+
+bool CudaMovieSession::reduceUnalignedSum(double &sum1) {
+    if (!is_initialized) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    const size_t num_pixels = (size_t)ny * nx;
+    StatsScratch scratch;
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, MC_STATS_BLOCKS * sizeof(double)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.result, sizeof(double)));
+    sumUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(d_Isum, num_pixels, scratch.partials);
+    HANDLE_ERROR(cudaGetLastError());
+    combinePartialsKernel<<<1, 1>>>(scratch.partials, MC_STATS_BLOCKS, scratch.result);
+    HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaMemcpy(&sum1, scratch.result, sizeof(double), cudaMemcpyDeviceToHost));
+    return true;
+}
+
+bool CudaMovieSession::reduceUnalignedSumSqDev(double mean, double &sum2) {
+    if (!is_initialized) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    const size_t num_pixels = (size_t)ny * nx;
+    StatsScratch scratch;
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, MC_STATS_BLOCKS * sizeof(double)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.result, sizeof(double)));
+    sumSqDevUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(d_Isum, num_pixels, mean, scratch.partials);
+    HANDLE_ERROR(cudaGetLastError());
+    combinePartialsKernel<<<1, 1>>>(scratch.partials, MC_STATS_BLOCKS, scratch.result);
+    HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaMemcpy(&sum2, scratch.result, sizeof(double), cudaMemcpyDeviceToHost));
+    return true;
+}
+
+bool CudaMovieSession::collectAboveThreshold(
+    double threshold,
+    double guard,
+    std::vector<int> &indices_ascending,
+    size_t &guard_band_count
+) {
+    if (!is_initialized) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    const size_t num_pixels = (size_t)ny * nx;
+
+    // Chebyshev: sum (x-m)^2 = N*std^2 and every pixel above m + 6*std contributes
+    // more than 36*std^2, so fewer than N/36 pixels can exceed the threshold.
+    // Derived from N, never hard-coded, so EER super-resolution grids scale.
+    const unsigned int capacity = (unsigned int)(num_pixels / 36 + 1);
+
+    struct CollectScratch {
+        int *hits = nullptr;
+        unsigned int *counters = nullptr;   // [count, band, overflow]
+        ~CollectScratch() {
+            if (hits) cudaFree(hits);
+            if (counters) cudaFree(counters);
+        }
+    } scratch;
+
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.hits, (size_t)capacity * sizeof(int)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.counters, 3 * sizeof(unsigned int)));
+    HANDLE_ERROR(cudaMemset(scratch.counters, 0, 3 * sizeof(unsigned int)));
+
+    collectAboveThresholdKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(
+        d_Isum, num_pixels, threshold, guard,
+        scratch.hits, capacity,
+        scratch.counters, scratch.counters + 1, scratch.counters + 2);
+    HANDLE_ERROR(cudaGetLastError());
+
+    unsigned int host_counters[3] = {0, 0, 0};
+    HANDLE_ERROR(cudaMemcpy(host_counters, scratch.counters, 3 * sizeof(unsigned int),
+                            cudaMemcpyDeviceToHost));
+
+    if (host_counters[2] != 0 || host_counters[0] > capacity) {
+        logfile << "WARNING: CUDA hot-pixel hit buffer overflowed (" << host_counters[0]
+                << " > " << capacity << "); falling back to host scan." << std::endl;
+        return false;
+    }
+
+    guard_band_count = (size_t)host_counters[1];
+    indices_ascending.resize(host_counters[0]);
+    if (host_counters[0] > 0) {
+        HANDLE_ERROR(cudaMemcpy(indices_ascending.data(), scratch.hits,
+                                (size_t)host_counters[0] * sizeof(int), cudaMemcpyDeviceToHost));
+        // Emission order is arbitrary; ascending order is what the host scan produced.
+        std::sort(indices_ascending.begin(), indices_ascending.end());
+    }
     return true;
 }
 

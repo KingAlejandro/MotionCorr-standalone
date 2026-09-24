@@ -244,6 +244,15 @@ hypothetical on this dataset: on the pre-optimization baseline a 50 ms sampler m
 the real peak by more than 1 GiB (6,033 MiB sampled against 6,636 MiB traced), because
 the peak was a ~22 ms transient. 5 ms sampling reduces but does not eliminate that risk.
 
+A concrete cross-session instance of that under-read appeared on this very workload. An
+independent session measuring the **same `a11f2f1` baseline** with a 50 ms sampler
+(~67 samples/run) recorded **3533 MiB**, against **3537 MiB** from the 5 ms sampler here
+(~740 samples/run, sd 0.000 over 6 runs). The coarser sampler reads 4 MiB *lower*, the
+direction expected when samples fall between allocation events. The practical
+consequence is that headroom against the 3,584 MiB cap should be taken as **47 MiB
+(1.31%)**, not the 51 MiB a 50 ms sampler implies — and both figures are upper bounds on
+the real headroom, since both peaks are lower bounds on the real peak.
+
 The VRAM-neutrality claim here therefore does **not** rest on sampling. It rests on the
 change performing no allocation at all: the Nsight allocation-event traces for baseline
 and candidate are identical — same peak active traced allocation (3,097.0 MiB), same

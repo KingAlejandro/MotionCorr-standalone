@@ -230,6 +230,30 @@ arm runs second. Warm-up discarded. Settled box (load 0.86, waited 10 s), sole o
 
 Mean paired delta +46.1 ms (sd 44.1, SE 7.0) and +47.9 ms (sd 41.7, SE 6.6). **Both resolved.**
 
+### Positional bias, measured rather than assumed
+
+Because the arm order alternates, the 40 pairs split into two balanced sub-series that can be
+solved for the true effect `E` and the positional bias `P` (the advantage accruing to whichever arm
+runs second, e.g. from input page-cache warming):
+
+| Sub-series | n | Mean delta | Pairs favouring candidate |
+|---|---|---|---|
+| base first (candidate runs 2nd) | 20 | +48.7 ms | 18/20 |
+| candidate first (base runs 2nd) | 20 | +43.6 ms | 16/20 |
+
+Solving `observed = E +/- P`: **E = +46.1 ms, P = +2.5 ms** to whichever arm runs second (full movie
+wall: E = +47.9 ms, P = +3.1 ms). Two things follow.
+
+First, **the effect reproduces independently under both orderings** — it is not a positional
+artefact, because reversing the order does not reverse the sign or materially change the
+magnitude. That is an internal replication, not just a cancellation.
+
+Second, positional bias in *this* measurement is small (~2.5 ms). A parallel task measuring host
+I/O stages found a much larger P of ~20 ms on the same host, which is consistent: their change
+concerns TIFF read and MRC write, where page-cache warming between paired runs matters far more
+than it does here. The lesson is that P is workload-specific and should be measured, not assumed
+negligible — at 20 ms it would have been a material fraction of a 46 ms effect.
+
 **One honest caveat on magnitude.** The measured ~46 ms exceeds the sum of the stage deltas in §9
 (detect -10.4, fix defects -4.7, gain+sum -3.6, about -19 ms). The stage figures come from
 `TIMING=ON` builds and the wall figures from Release builds, so they are not the same binary, and
@@ -324,7 +348,10 @@ What is established beyond reasonable doubt:
 
 What is **not** established:
 - That the ~46 ms is fully explained by the stage decomposition, which accounts for roughly 19 ms.
-  The remainder is plausibly the avoided 54.32 MiB host-memory write, but that is unmeasured.
+  The remainder is plausibly the avoided 54.32 MiB host-memory write, but that is unmeasured. A
+  parallel task independently reports a residual of the same shape and similar cause (202 ms
+  measured against 147 ms decomposed, around an avoided 54.3 MiB host buffer), which makes the
+  explanation more plausible without making it measured.
 
 The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved ~46 ms
 (2.1%) end-to-end gain**. It is still not the "~0.19 s host scan" the original framing implied --

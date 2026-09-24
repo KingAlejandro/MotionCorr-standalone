@@ -58,6 +58,24 @@ python skills/ai-git-commit/scripts/ai_commit.py --dry-run
 python skills/ai-git-commit/scripts/ai_commit.py -m "fix(runner): isolate per-thread FFTW plan state"
 ```
 
+### 5. GitHub Issue Linking & Branch Tagging
+- **Link Commit to an Issue**:
+  ```bash
+  python skills/ai-git-commit/scripts/ai_commit.py -y -i 4 -m "feat(validation): implement reference acceptance gates"
+  ```
+- **Auto-Close Issue on GitHub Merge**:
+  ```bash
+  python skills/ai-git-commit/scripts/ai_commit.py -y --closes 4
+  ```
+- **Tag the Issue with Git Tag (`issue-4`)**:
+  ```bash
+  python skills/ai-git-commit/scripts/ai_commit.py -y -i 4 --tag-issue
+  ```
+- **Create & Switch to Standardized Issue Branch (`feat/issue-4-reference-gates`)**:
+  ```bash
+  python skills/ai-git-commit/scripts/ai_commit.py --branch-issue 4 reference-gates
+  ```
+
 ---
 
 ## Verification

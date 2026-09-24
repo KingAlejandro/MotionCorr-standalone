@@ -284,14 +284,37 @@ def auto_generate_commit_message(repo_root: Path, files_to_stage: List[str], sta
     return subject + "\n" + "\n".join(body_lines)
 
 
+def get_current_branch(repo_root: Path) -> str:
+    """Get the name of the currently checked out Git branch."""
+    code, out, _ = run_git_command(["rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_root)
+    return out.strip() if code == 0 else ""
+
+
+def extract_issue_from_branch(branch_name: str) -> Optional[int]:
+    """Auto-detect issue number from branch name (e.g., feat/issue-4-reference-gates -> 4)."""
+    m = re.search(r"(?:issue[-_/]|#)(\d+)", branch_name, re.IGNORECASE)
+    if m:
+        try:
+            return int(m.group(1))
+        except ValueError:
+            pass
+    return None
+
+
 def format_commit_message(
     base_message: str,
     add_trailer: bool = True,
     add_ai_coauthor: bool = True,
-    co_author: Optional[str] = None
+    co_author: Optional[str] = None,
+    issue_num: Optional[int] = None,
+    closes_issue: Optional[int] = None,
 ) -> str:
-    """Format commit message with AI trailer and co-authorship metadata."""
+    """Format commit message with GitHub issue links, AI trailer, and co-authorship metadata."""
     lines = [base_message.strip(), ""]
+    if closes_issue:
+        lines.append(f"Closes: #{closes_issue}")
+    elif issue_num:
+        lines.append(f"Issue: #{issue_num}")
     if add_trailer:
         lines.append(DEFAULT_TRAILER)
     if add_ai_coauthor:
@@ -335,6 +358,11 @@ def main():
     parser.add_argument("-f", "--files", nargs="+", help="Specific files to stage (auto-detected if omitted)")
     parser.add_argument("-a", "--all", action="store_true", help="Stage all tracked modified files")
     parser.add_argument("-y", "--yes", action="store_true", help="Bypass interactive approval and commit directly")
+    parser.add_argument("-i", "--issue", type=int, help="Link commit to GitHub Issue number (e.g. --issue 4)")
+    parser.add_argument("--closes", "--fixes", "--resolves", type=int, dest="closes", help="Mark GitHub Issue as closed on merge (e.g. --closes 4)")
+    parser.add_argument("--tag", help="Create an annotated Git tag on successful commit")
+    parser.add_argument("--tag-issue", action="store_true", help="Automatically tag commit as 'issue-<NUM>'")
+    parser.add_argument("--branch-issue", nargs="+", metavar=("ISSUE_NUM", "SLUG"), help="Create or switch to issue branch (e.g. --branch-issue 4 reference-gates)")
     parser.add_argument("--diff", "--show-diff", action="store_true", help="Display full unified diff preview in addition to summary")
     parser.add_argument("--diff-limit", type=int, default=80, help="Maximum lines of diff preview to display when --diff is enabled (default: 80)")
     parser.add_argument("--author-name", help="Explicit author name override (defaults to current Git user)")
@@ -356,6 +384,28 @@ def main():
     if not target_repo or not (target_repo / ".git").exists():
         sys.stderr.write("Error: Not inside a git repository or repository root not found.\n")
         sys.exit(1)
+
+    # Optional: Branch creation / switching for issue
+    if args.branch_issue:
+        issue_val = args.branch_issue[0]
+        slug_val = "-".join(args.branch_issue[1:]) if len(args.branch_issue) > 1 else "work"
+        branch_name = f"feat/issue-{issue_val}-{slug_val}"
+        print(f"Ensuring issue branch: {branch_name}...")
+        # Check if branch exists
+        code, _, _ = run_git_command(["checkout", branch_name], cwd=target_repo)
+        if code != 0:
+            code, _, err = run_git_command(["checkout", "-b", branch_name], cwd=target_repo)
+            if code != 0:
+                sys.stderr.write(f"Failed to create branch {branch_name}: {err}\n")
+                sys.exit(1)
+            print(f"Created and switched to new branch: {branch_name}")
+        else:
+            print(f"Switched to existing branch: {branch_name}")
+
+    current_branch = get_current_branch(target_repo)
+    detected_issue = extract_issue_from_branch(current_branch)
+    effective_issue = args.issue or detected_issue
+    effective_closes = args.closes
 
     status_list = get_status(target_repo)
     if not status_list:
@@ -390,7 +440,9 @@ def main():
         raw_message,
         add_trailer=not args.no_trailer,
         add_ai_coauthor=not args.no_ai_coauthor,
-        co_author=args.co_author
+        co_author=args.co_author,
+        issue_num=effective_issue,
+        closes_issue=effective_closes,
     )
 
     git_env = {}
@@ -423,6 +475,11 @@ def main():
     print(" AI Git Commit Plan")
     print("==================================================")
     print(f"Repository: {target_repo}")
+    print(f"Branch:     {current_branch or '(detached)'}")
+    if effective_closes:
+        print(f"Closes:     #{effective_closes}")
+    elif effective_issue:
+        print(f"Issue:      #{effective_issue}")
     print(f"Author:     {author_name} <{author_email}>")
     if not args.no_ai_coauthor:
         print(f"Co-Author:  {DEFAULT_AI_COAUTHOR_NAME} <{DEFAULT_AI_COAUTHOR_EMAIL}>")
@@ -483,6 +540,16 @@ def main():
     if code == 0:
         print("\nCommit successful!")
         print(out)
+
+        # Optional tagging for Issue
+        tag_target = args.tag or (f"issue-{effective_issue}" if (args.tag_issue and effective_issue) else None)
+        if tag_target:
+            tag_args = ["tag", "-a", tag_target, "-m", f"Release / Reference tag for Issue #{effective_issue or tag_target}"]
+            tcode, tout, terr = run_git_command(tag_args, cwd=target_repo)
+            if tcode == 0:
+                print(f"Created Git tag: {tag_target}")
+            else:
+                sys.stderr.write(f"Warning: Failed to create tag '{tag_target}': {terr}\n")
     else:
         sys.stderr.write(f"\nCommit failed (exit code {code}):\n{err}\n")
         sys.exit(code)

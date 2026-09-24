@@ -431,8 +431,11 @@ def main():
     print(" Architecture Agent: Specification Generated")
     print("==================================================")
     print(f"Issue:    #{args.issue} - {issue_data['title']}")
-    print(f"Priority: {issue_data.get('priority')}")
-    print(f"Path:     {out_path.relative_to(repo_root)}")
+    try:
+        display_path = str(out_path.relative_to(repo_root))
+    except ValueError:
+        display_path = str(out_path)
+    print(f"Path:     {display_path}")
     print("==================================================\n")
 
 

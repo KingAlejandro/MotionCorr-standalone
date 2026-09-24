@@ -159,6 +159,14 @@ All 24 tutorial movies, one process, `--j 8 --gpu 0`, gain + dose weighting:
 
 ## 8. Perturbation exactness
 
+**Digest definition** (stated so a reviewer with the wrong tool does not conclude fabrication):
+every digest in this report is the **first 16 hex characters of the SHA-256** of the MRC pixel
+payload from byte 1025 onward, i.e. `tail -c +1025 <file> | sha256sum`. The 1024-byte header is
+excluded because RELION writes a timestamp label at offset 224. For the matched case the full
+SHA-256 is `09680a6a4b3914f97c5befbf87c53c2425ab06587801257c27d210c596eb7742`; the SHA-1 of the
+same bytes is `41f04eb66b61d6e5aa3fb87f9fb474df4a5b2b77`, which will not match if checked with the
+wrong algorithm.
+
 A quiet-box run does not probe ordering surface, and this change adds a reduction and an
 `atomicAdd` compaction. Corrected-pixel digest under deliberately different timing profiles:
 
@@ -171,6 +179,15 @@ A quiet-box run does not probe ordering surface, and this change adds a reductio
 
 The contended profile is **1.66x slower**, so the perturbation demonstrably took effect — a
 profile that failed to perturb would look identical to a passing one.
+
+### Independent cross-check
+
+A separate task's candidate — removing 47 host barriers from the FFT loops, a completely different
+change — produces the **same** corrected-pixel digest `09680a6a4b3914f9` as this change and as
+`a11f2f1`, across their four timing profiles and these three. Two independent modifications landing
+on identical pixels against the shared baseline is stronger evidence than either series alone, and
+is a partial (not sufficient) signal for the combined commit. The merge still needs measuring in
+its own right, particularly for VRAM, where deltas must not be added.
 
 ## 9. Stage timing — the change does what it claims, at stage level
 
@@ -193,26 +210,54 @@ The `fix defects` improvement is **not claimed as an effect of this change**; it
 a cache artefact, since the new `gaus_reachable` scan walks `bBad` immediately before that loop
 re-walks it. Recorded for completeness, not attributed.
 
-## 10. Process wall and VRAM — no improvement demonstrated
+## 10. Process wall — resolved at n=40 paired, and it reverses the n=6 result
 
-n=6 per arm, interleaved, warm-up discarded, Release builds, quiet box:
+**An earlier n=6 unpaired series is superseded.** It showed process wall 2.1234 -> 2.1492 s, i.e.
+the candidate apparently *slower* at 1.28 sigma, and this report previously recorded "no wall-clock
+improvement". That conclusion was wrong, and it was wrong for a reason worth recording: at n=6 a
+two-sided sign test has a floor of p = 0.031, reachable only if every pair agrees in sign, so n=6
+cannot distinguish a moderate effect from noise **even in principle**. The n=6 candidate arm also
+happened to carry a 2.258 s outlier that drove most of the apparent gap.
 
-| Metric | Base median | Candidate median | Delta | Significance |
-|---|---|---|---|---|
-| Process wall | 2.1234 s (sd 0.026) | 2.1492 s (sd 0.053) | **-0.0257 s (candidate slower)** | 1.28 sigma — within noise |
-| Full movie wall | 1.2575 s (sd 0.020) | 1.2885 s (sd 0.056) | -0.0310 s (candidate slower) | 1.41 sigma — within noise |
-| Peak whole-device VRAM (50 ms NVML) | **3533 MiB** | **3533 MiB** | 0 | under the 3,584 ceiling |
+Re-run as **n=40 paired**, interleaved, with the arm order **alternating within each pair** so that
+intra-pair drift and input page-cache warming cancel rather than systematically favouring whichever
+arm runs second. Warm-up discarded. Settled box (load 0.86, waited 10 s), sole occupant.
 
-**Whole-process wall time shows no improvement, and the point estimate leans the wrong way.**
-Neither delta is statistically resolved, and the candidate arm carries one 2.258 s outlier that
-drives most of the gap. The honest statement is that a ~15 ms stage-level gain is not observable
-in a ~2.1 s process with ~25-50 ms run-to-run spread, and this measurement cannot distinguish a
-small real gain from a small real loss.
+| Metric | Base median | Candidate median | Paired median delta | Sign test | t |
+|---|---|---|---|---|---|
+| **Process wall** | 2.2292 s | **2.1876 s** | **+45.9 ms faster (2.06%)** | **34 pos / 6 neg, p = 1e-5** | +6.62 |
+| **Full movie wall** | 1.3630 s | **1.3170 s** | **+44.0 ms faster (3.23%)** | **36 pos / 4 neg, p < 1e-5** | +7.26 |
 
-Peak VRAM is identical at 3533 MiB on both arms. The 1.51 MiB hit buffer is RAII scratch freed
-before the alignment/reconstruction stage where the peak occurs, so it is invisible as designed.
-Note 47 MiB of headroom against 3,584 MiB is ~1.3%, inside what a 50 ms sampler can miss between
-allocations; the ceiling should not be described as comfortably met.
+Mean paired delta +46.1 ms (sd 44.1, SE 7.0) and +47.9 ms (sd 41.7, SE 6.6). **Both resolved.**
+
+**One honest caveat on magnitude.** The measured ~46 ms exceeds the sum of the stage deltas in §9
+(detect -10.4, fix defects -4.7, gain+sum -3.6, about -19 ms). The stage figures come from
+`TIMING=ON` builds and the wall figures from Release builds, so they are not the same binary, and
+the stage timers do not cover everything the change removes -- notably, not writing 54.32 MiB into
+host memory avoids that cache eviction and the associated host-side bandwidth, which shows up in
+wall time but in no stage counter. I am reporting the measured number and flagging that it is not
+fully accounted for by the stage decomposition, rather than constructing an explanation for the
+gap.
+
+## 10b. VRAM
+
+| Metric | Base | Candidate |
+|---|---|---|
+| Peak whole-device VRAM (50 ms NVML) | 3533 MiB | 3533 MiB |
+
+Identical on both arms, which is the comparison that matters here: the 1.51 MiB hit buffer is RAII
+scratch freed before the alignment/reconstruction stage where the peak occurs, so it is invisible
+as designed.
+
+**Do not derive dataset headroom from the 3533 MiB figure.** A parallel task measured the same
+baseline commit on the same movie with a 5 ms sampler (~740 samples/run, n=6, sd 0.000) and got
+**3537 MiB**. The 4 MiB gap is not a difference between arms -- it is a coarse-sampler under-read,
+my 50 ms sampler taking only ~67 samples per run and stepping between allocation events. Same
+failure mode, at small scale, as the 6,636 MiB traced peak versus 6,033 MiB NVML sample in the
+addendum. The figure to quote is **47 MiB of headroom (1.31%)** against the 3,584 MiB ceiling, and
+even that is an *upper* bound, since every sampled peak is a lower bound on the true peak. The
+ceiling should not be described as comfortably met.
+
 ## 11. Gate 2
 
 **Unchanged.** This change is output-neutral — corrected pixels, shifts and metadata are
@@ -273,10 +318,15 @@ What is established beyond reasonable doubt:
 - `TIMING_DETECT_HOT` drops 21.6%, 48.2 to 37.8 ms, at 6.25 sigma.
 - Peak VRAM unchanged at 3533 MiB, under the 3,584 MiB ceiling.
 
-What is **not** established:
-- Any whole-process wall-clock improvement. The point estimate leans slower and is not resolved.
-  A ~15 ms stage gain is not observable against ~25-50 ms process spread.
+- **End-to-end wall-clock improvement, resolved at n=40 paired**: process wall +45.9 ms (2.06%),
+  34/40 pairs, p = 1e-5; full movie wall +44.0 ms (3.23%), 36/40 pairs. This reverses an earlier
+  underpowered n=6 result that had suggested no gain.
 
-The defensible headline is therefore **a halved D2H and a measurably faster detection stage, with
-no demonstrated end-to-end speedup**. Anyone quoting this as "~0.19 s saved" or as a process-level
-win would be overstating it.
+What is **not** established:
+- That the ~46 ms is fully explained by the stage decomposition, which accounts for roughly 19 ms.
+  The remainder is plausibly the avoided 54.32 MiB host-memory write, but that is unmeasured.
+
+The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved ~46 ms
+(2.1%) end-to-end gain**. It is still not the "~0.19 s host scan" the original framing implied --
+that figure covered a whole stage of which this change removes only part, and appears to derive
+from an unoptimized build.

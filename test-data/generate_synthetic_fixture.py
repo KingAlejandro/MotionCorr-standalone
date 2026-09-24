@@ -14,6 +14,18 @@ from typing import List, Tuple
 import numpy as np
 
 
+def shift_image(img: np.ndarray, dx: float, dy: float, subpixel: bool = False) -> np.ndarray:
+    """Shift an image by (dx, dy). Uses integer roll if not subpixel, else Fourier phase ramp."""
+    if not subpixel:
+        return np.roll(img, (int(round(dy)), int(round(dx))), axis=(0, 1))
+    ny, nx = img.shape
+    ky = np.fft.fftfreq(ny)[:, None]
+    kx = np.fft.fftfreq(nx)[None, :]
+    phase_ramp = np.exp(-2j * np.pi * (kx * dx + ky * dy))
+    shifted = np.real(np.fft.ifft2(np.fft.fft2(img) * phase_ramp))
+    return shifted.astype(np.float32)
+
+
 def generate_movie(
     output_path: Path,
     nx: int = 128,
@@ -26,8 +38,9 @@ def generate_movie(
     shift_scale_x: float = 0.4,
     shift_scale_y: float = -0.3,
     noise_sigma: float = 1.0,
-) -> Tuple[Path, List[Tuple[int, int]], Path]:
-    """Generate a synthetic MRC movie stack with known integer shifts."""
+    subpixel: bool = False,
+) -> Tuple[Path, List[Tuple[float, float]], Path]:
+    """Generate a synthetic MRC movie stack with known integer or subpixel shifts."""
     rng = np.random.default_rng(seed)
     y, x = np.mgrid[:ny, :nx]
     image = np.full((ny, nx), 100.0, dtype=np.float32)
@@ -42,14 +55,20 @@ def generate_movie(
         dy = (y - cy + ny / 2) % ny - ny / 2
         image += amplitude * np.exp(-(dx * dx + dy * dy) / (2.0 * width * width))
 
-    # Ground truth integer shifts applied to frames
-    known_shifts = [
-        (int(round(shift_scale_x * i)), int(round(shift_scale_y * i)))
-        for i in range(nframes)
-    ]
+    # Ground truth shifts applied to frames
+    if subpixel:
+        known_shifts = [
+            (float(shift_scale_x * i), float(shift_scale_y * i))
+            for i in range(nframes)
+        ]
+    else:
+        known_shifts = [
+            (int(round(shift_scale_x * i)), int(round(shift_scale_y * i)))
+            for i in range(nframes)
+        ]
 
     stack = np.stack([
-        np.roll(image, (dy, dx), axis=(0, 1)) + rng.normal(0, noise_sigma, image.shape)
+        shift_image(image, dx, dy, subpixel=subpixel) + rng.normal(0, noise_sigma, image.shape)
         for dx, dy in known_shifts
     ]).astype("<f4")
 
@@ -139,19 +158,25 @@ def main() -> None:
     parser.add_argument("--outdir", type=Path, default=Path("test-data/fixtures"), help="Directory for generated files")
     parser.add_argument("--prefix", type=str, default="", help="Optional filename prefix")
     parser.add_argument("--seed", type=int, default=20260923, help="Random seed for reproducibility")
+    parser.add_argument(
+        "--subpixel",
+        action="store_true",
+        help="Generate subpixel (non-integer) shifts via Fourier phase shift interpolation",
+    )
     args = parser.parse_args()
 
+    subpixel_suffix = "_subpixel" if args.subpixel else ""
     if args.profile == "small":
         nx, ny, nframes, num_particles = 128, 128, 8, 20
-        fname = f"{args.prefix}synthetic_128x128_8frames.mrcs"
+        fname = f"{args.prefix}synthetic_128x128_8frames{subpixel_suffix}.mrcs"
         sx, sy = 0.4, -0.3
     elif args.profile == "standard":
         nx, ny, nframes, num_particles = 512, 512, 16, 150
-        fname = f"{args.prefix}synthetic_512x512_16frames.mrcs"
+        fname = f"{args.prefix}synthetic_512x512_16frames{subpixel_suffix}.mrcs"
         sx, sy = 0.6, -0.4
     else:
         nx, ny, nframes, num_particles = 1536, 1536, 32, 450
-        fname = f"{args.prefix}synthetic_1536x1536_32frames.mrcs"
+        fname = f"{args.prefix}synthetic_1536x1536_32frames{subpixel_suffix}.mrcs"
         sx, sy = 0.5, -0.35
 
     out_file = args.outdir / fname
@@ -164,6 +189,7 @@ def main() -> None:
         num_particles=num_particles,
         shift_scale_x=sx,
         shift_scale_y=sy,
+        subpixel=args.subpixel,
     )
     print(f"Successfully generated {mrcs_path} ({mrcs_path.stat().st_size} bytes)")
     print(f"STAR file: {star_path}")

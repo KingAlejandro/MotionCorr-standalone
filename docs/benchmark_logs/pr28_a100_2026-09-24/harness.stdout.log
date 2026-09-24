@@ -1,0 +1,59 @@
+==============================================================================
+ MOTIONCORR SYNTHETIC CPU-VERSUS-CUDA REGRESSION HARNESS
+==============================================================================
+Commit:          5e218d181a51e54fc0c20dbaa7442aef8a21e94f
+Host / OS:       4-gpu-vm (Linux 6.8.0-136-generic)
+CPU Binary:      /home/alex/MotionCorr-pr28-verified/build-cpu/motioncorr
+CUDA Binary:     /home/alex/MotionCorr-pr28-verified/build-cuda/motioncorr
+GPU ID:          2 (NVIDIA A100 80GB PCIe)
+Driver Version:  570.86.10
+Gate Profile:    RELAXED
+Declared GT Tol: Coordinate RMS <= 0.15 px, Max Shift <= 0.25 px
+Seed:            20260923
+Output Root:     /home/alex/MotionCorr-pr28-verified/evidence/pr28-a100-final
+==============================================================================
+------------------------------------------------------------------------------
+ CASE: integer_shift_128x128          STATUS: PASS
+------------------------------------------------------------------------------
+ CPU Run:   status=0 wall=0.3528s
+ CUDA Run:  status=0 wall=0.6946s
+
+ [Ground Truth Recovery Against Known Shifts]
+   CPU  RMS error: 0.070699 px | Max error: 0.100020 px
+   CUDA RMS error: 0.070905 px | Max error: 0.098050 px
+
+ [CUDA vs CPU Parity Checks (RELAXED Gate)]
+   Coverage:              COMPLETE
+   Comparator Status:     PASS
+   Coord RMS Shift Error: 0.002280 px (Gate 2: <= 0.020 px)
+   Max Frame Shift Error: 0.004220 px (Gate 2: <= 0.050 px)
+   Image Absolute RMSE:   1.915822e-02 (Gate 2: <= 0.020)
+   Image Relative RMSE:   2.980367e-04 (Gate 2: <= 0.001)
+   Image Max Pixel Error: 1.217651e-01 (Gate 2: <= 5.0)
+   STAR Discrepancies:    0 (Gate 2: == 0)
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+ CASE: subpixel_shift_128x128         STATUS: PASS
+------------------------------------------------------------------------------
+ CPU Run:   status=0 wall=0.3465s
+ CUDA Run:  status=0 wall=0.705s
+
+ [Ground Truth Recovery Against Known Shifts]
+   CPU  RMS error: 0.069950 px | Max error: 0.093690 px
+   CUDA RMS error: 0.070552 px | Max error: 0.092140 px
+
+ [CUDA vs CPU Parity Checks (RELAXED Gate)]
+   Coverage:              COMPLETE
+   Comparator Status:     PASS
+   Coord RMS Shift Error: 0.002115 px (Gate 2: <= 0.020 px)
+   Max Frame Shift Error: 0.003689 px (Gate 2: <= 0.050 px)
+   Image Absolute RMSE:   1.861240e-02 (Gate 2: <= 0.020)
+   Image Relative RMSE:   2.895433e-04 (Gate 2: <= 0.001)
+   Image Max Pixel Error: 1.156006e-01 (Gate 2: <= 5.0)
+   STAR Discrepancies:    0 (Gate 2: == 0)
+------------------------------------------------------------------------------
+
+==============================================================================
+ OVERALL HARNESS RESULT: PASS (Total Elapsed: 3.8715s)
+==============================================================================
+Report JSON written to: evidence/pr28-a100-final/report.json

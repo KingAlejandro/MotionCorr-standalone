@@ -1,0 +1,141 @@
+name: Linux CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build & Smoke Check (Ubuntu Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            build-essential \
+            pkg-config \
+            libfftw3-dev \
+            libtiff-dev \
+            libpng-dev \
+            libjpeg-dev \
+            zlib1g-dev \
+            ghostscript
+
+      - name: Log toolchain & dependency telemetry
+        run: |
+          echo "=== Compilers & Build Tools ==="
+          cmake --version
+          gcc --version
+          python3 --version
+          echo "=== Library Versions via pkg-config ==="
+          for pkg in fftw3 fftw3f libtiff-4 libpng libjpeg zlib; do
+            echo -n "$pkg: "
+            pkg-config --modversion "$pkg" 2>/dev/null || echo "not reported by pkg-config"
+          done
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+
+      - name: Build standalone MotionCorr
+        run: |
+          cmake --build build --parallel $(nproc)
+
+      - name: "Smoke Test 1: CLI Help & Version"
+        run: |
+          echo "Checking CLI help via --use_own --help..."
+          ./build/motioncorr --use_own --help
+          echo "Checking CLI version via --use_own --version..."
+          ./build/motioncorr --use_own --version
+
+      - name: "Smoke Test 2: Automated CTest Suite"
+        run: |
+          ctest --test-dir build --output-on-failure --verbose
+
+      - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"
+        run: |
+          mkdir -p ci_smoke_out
+          ./build/motioncorr \
+            --i test-data/synthetic/synthetic_movie.tiff \
+            --o ci_smoke_out \
+            --use_own \
+            --j 2 \
+            --dose_weighting \
+            --dose_per_frame 1.0 \
+            --voltage 300 \
+            --angpix 1.0 \
+            --patch_x 3 \
+            --patch_y 3 \
+            --bfactor 150
+
+          python3 - << 'EOF'
+          import struct, sys
+          from pathlib import Path
+
+          out_dir = Path("ci_smoke_out")
+          mrc_files = list(out_dir.glob("**/synthetic_movie.mrc"))
+          star_files = list(out_dir.glob("**/synthetic_movie.star"))
+
+          if not mrc_files:
+              sys.exit("ERROR: Output MRC file not found in ci_smoke_out")
+          if not star_files:
+              sys.exit("ERROR: Output STAR file not found in ci_smoke_out")
+
+          mrc_path = mrc_files[0]
+          star_path = star_files[0]
+          print(f"Discovered MRC output: {mrc_path}")
+          print(f"Discovered STAR output: {star_path}")
+
+          with open(mrc_path, "rb") as f:
+              header = f.read(1024)
+              nx, ny, nz, mode = struct.unpack("<4i", header[:16])
+              print(f"MRC Header: nx={nx}, ny={ny}, nz={nz}, mode={mode}")
+              assert (nx, ny, nz) == (512, 512, 1), f"Unexpected dimensions: {(nx, ny, nz)}"
+              assert mode == 2, f"Expected float32 mode (2), got {mode}"
+
+          with open(star_path, "r") as f:
+              star_content = f.read()
+              assert "data_global_shift" in star_content, "Missing data_global_shift in STAR"
+              assert "_rlnMicrographShiftX" in star_content, "Missing _rlnMicrographShiftX in STAR"
+              assert "_rlnMicrographShiftY" in star_content, "Missing _rlnMicrographShiftY in STAR"
+              print("STAR file verification passed.")
+
+          print("Smoke Test 3 output validation PASSED successfully.")
+          EOF
+
+          rm -rf ci_smoke_out
+
+      - name: "Smoke Test 4: Negative Failure Handling"
+        run: |
+          echo "Testing missing required input (--i)..."
+          if err=$(./build/motioncorr --use_own 2>&1); then
+            echo "ERROR: motioncorr should have failed without --i"
+            echo "Output was: $err"
+            exit 1
+          else
+            echo "Expected failure confirmed (missing --i)."
+          fi
+
+          echo "Testing conflicting engines (--use_own and --use_motioncor2)..."
+          if err=$(./build/motioncorr --i test-data/synthetic/synthetic_movie.tiff --use_own --use_motioncor2 2>&1); then
+            echo "ERROR: motioncorr should have failed with conflicting engines"
+            echo "Output was: $err"
+            exit 1
+          else
+            echo "Expected failure confirmed (engine conflict)."
+          fi

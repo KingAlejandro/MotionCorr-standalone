@@ -44,6 +44,7 @@ python agents/visualization_agent/scripts/visualize.py \
 
 ---
 
-## 5. Non-Negotiable Operational Constraints
+## 5. Operational Mandates & Constraints
 - **Zero Hard Crashes**: Always provide a pure-Python SVG fallback so plots render on minimal/headless systems where `matplotlib` is not installed.
 - **Strict Scope Isolation**: Do not modify core C++ source code in `src/`. Confine changes to `agents/visualization_agent/`, `tools/plots/`, and visualization tests.
+- **Standalone Integrity**: Generated scripts in `tools/plots/` must have zero runtime dependencies on `agents/` modules.

@@ -60,11 +60,6 @@ flowchart LR
    - **Checks**: Verifies Python script compilation (`py_compile`), CLI `--help` responsiveness, system prompt constraints, template schemas, and cross-agent consistency.
    - **Output**: Generates ecosystem health reports (`HEALTHY`, `NEEDS_ATTENTION`, `DEGRADED`).
 
-9. **Visualization Agent (`agents/visualization_agent/`)**:
-   - **Role**: General-purpose telemetry visualizer and decoupled plot script generator.
-   - **Function**: Ingests benchmark metrics, STAR trajectory tables, and profiling data to scaffold and maintain standalone Python plotting tools under `tools/plots/`.
-   - **Output**: High-resolution SVG/PNG charts (scaling curves, stage breakdowns, memory profiles, 2D motion drift paths) and markdown reports.
-
 ---
 
 ## Directory Structure
@@ -105,23 +100,12 @@ agents/
 │   │   └── PR_ANALYSIS_REPORT_TEMPLATE.md # Standardized PR audit report template
 │   └── scripts/
 │       └── analyze_pr.py          # PR discovery and deep quality analysis CLI
-├── testing_agent/                 # Testing & Build Agent
-│   ├── SYSTEM_PROMPT.md           # Out-of-source CMake build & regression rules
+├── cleanup_agent/                 # Cleanup & Repository Hygiene Agent
+│   ├── SYSTEM_PROMPT.md           # Safe artifact removal and protection rules
 │   ├── templates/
-│   │   └── BUILD_TEST_REPORT_TEMPLATE.md # Standardized build & test report template
+│   │   └── CLEANUP_REPORT_TEMPLATE.md # Standardized cleanup report template
 │   └── scripts/
-│       └── run_build_and_test.py  # Autonomous CMake build & regression orchestrator
-├── visualization_agent/           # Visualization Agent
-│   ├── SYSTEM_PROMPT.md           # Role definition and standalone tool generation rules
-│   ├── templates/
-│   │   ├── speedup_scaling_template.py.jinja
-│   │   ├── stage_breakdown_template.py.jinja
-│   │   ├── trajectory_vector_template.py.jinja
-│   │   ├── comparative_delta_template.py.jinja
-│   │   └── VISUALIZATION_REPORT_TEMPLATE.md
-│   └── scripts/
-│       ├── visualize.py           # General-purpose visualization orchestrator & generator
-│       └── svg_engine.py          # Pure-Python SVG vector graphics rendering library
+│       └── cleanup_repo.py        # Safe scanning and artifact deletion CLI
 └── agent_auditor/                 # Agent Meta-Auditor (audits all peer agents)
     ├── SYSTEM_PROMPT.md           # Meta-auditor instructions and exclusion rules
     ├── templates/

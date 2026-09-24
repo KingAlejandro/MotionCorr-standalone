@@ -54,11 +54,6 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Deliverable**: Structured build and test verification reports concluding with an explicit verdict (`BUILD_TEST_PASSED`, `TESTS_FAILED`, `BUILD_FAILED`, `ENVIRONMENT_FAULT`).
    - **System Prompt**: [`agents/testing_agent/SYSTEM_PROMPT.md`](agents/testing_agent/SYSTEM_PROMPT.md)
 
-10. **Visualization Agent (`agents/visualization_agent/`)**:
-    - **Mandate**: General-purpose visualization engine that ingests benchmark metrics, STAR trajectory files, and timing telemetry to scaffold and maintain decoupled, standalone plotting scripts under `tools/plots/`.
-    - **Deliverable**: High-resolution vector (SVG) and raster (PNG) charts (speedup scaling, stage breakdown, memory RSS, 2D motion trajectory) and markdown visual summaries.
-    - **System Prompt**: [`agents/visualization_agent/SYSTEM_PROMPT.md`](agents/visualization_agent/SYSTEM_PROMPT.md)
-
 ---
 
 ## 2. Standard Issue Lifecycle
@@ -88,11 +83,6 @@ flowchart TD
 ---
 
 ## 3. Tooling & Skills Reference
-
-- **Visualization Agent & Plot Tool Generator**: `python agents/visualization_agent/scripts/visualize.py [--data <JSON/STAR>] [--type <scaling|stages|trajectory|comparative>]`
-- **Standalone Benchmark Scaling Plotter**: `python tools/plots/plot_benchmark_scaling.py --input <JSON> --out-dir <DIR>`
-- **Standalone Sub-Stage Timing Breakdown**: `python tools/plots/plot_stage_breakdown.py --input <JSON> --out-dir <DIR>`
-- **Standalone 2D Trajectory Plotter**: `python tools/plots/plot_trajectory_drift.py --input <STAR> --out-dir <DIR>`
 
 - **Repository Hygiene & Artifact Cleanup**: `python agents/cleanup_agent/scripts/cleanup_repo.py [--apply]`
 - **Pull Request Quality & Defect Audit**: `python agents/pr_analysis_agent/scripts/analyze_pr.py --pr <NUM>`

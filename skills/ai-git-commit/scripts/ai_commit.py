@@ -13,7 +13,16 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
+
+
+def get_staged_files(repo_root: Path) -> Set[str]:
+    """Return the set of files currently staged in the git index."""
+    code, out, _ = run_git_command(["diff", "--name-only", "--cached"], cwd=repo_root)
+    if code == 0 and out.strip():
+        return {line.strip().replace("\\", "/") for line in out.strip().splitlines() if line.strip()}
+    return set()
+
 
 DEFAULT_AI_COAUTHOR_NAME = "MotionCorr AI Assistant"
 DEFAULT_AI_COAUTHOR_EMAIL = "noreply@github.com"
@@ -390,8 +399,20 @@ def main():
     if args.author_email:
         git_env["GIT_AUTHOR_EMAIL"] = args.author_email
 
+    # Record previously staged files before mutating index
+    prior_staged = get_staged_files(target_repo)
+
+    def restore_prior_index():
+        newly_staged = [
+            f for f in files_to_stage
+            if f.replace("\\", "/") not in prior_staged
+        ]
+        if newly_staged:
+            unstage_files(target_repo, newly_staged)
+
     # Stage files to examine exact diff
     if not stage_files(target_repo, files_to_stage):
+        restore_prior_index()
         sys.exit(1)
 
     diff_stat = get_diff_stat(target_repo, cached=True)
@@ -428,8 +449,8 @@ def main():
 
     # If dry-run, unstage and exit
     if args.dry_run:
-        unstage_files(target_repo, files_to_stage)
-        print("[Dry Run] Preview complete. Files unstaged and no commit made.")
+        restore_prior_index()
+        print("[Dry Run] Preview complete. Files restored to prior index state and no commit made.")
         sys.exit(0)
 
     # Interactive approval check
@@ -449,9 +470,9 @@ def main():
             approved = False
 
         if not approved:
-            print("\nCommit not approved. Unstaging files...")
-            unstage_files(target_repo, files_to_stage)
-            print("Commit aborted. Working tree preserved.")
+            print("\nCommit not approved. Restoring prior index...")
+            restore_prior_index()
+            print("Commit aborted. Prior index and working tree preserved.")
             sys.exit(0)
 
     # Commit with AI author attribution

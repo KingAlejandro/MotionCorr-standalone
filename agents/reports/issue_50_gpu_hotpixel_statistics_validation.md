@@ -279,6 +279,42 @@ wall time but in no stage counter. I am reporting the measured number and flaggi
 fully accounted for by the stage decomposition, rather than constructing an explanation for the
 gap.
 
+### Re-measured under the 8-CPU cap — the effect attenuates by ~63%
+
+After `4GPUs` was capped to 8 logical CPUs (`taskset -c 96-103`, one job at a time), the paired
+series was re-run inside the shared `capped.sh` wrapper. The cap was verified from *inside* the
+run rather than assumed: the artifact records `nproc=8`, affinity `96-103`.
+
+| | Uncapped (~124 CPUs), n=40 | Capped (8 CPUs), n=30 |
+|---|---|---|
+| base median | 2.2292 s | 2.0872 s |
+| candidate median | 2.1876 s | 2.0710 s |
+| **paired median delta** | **+45.9 ms (2.06%)** | **+17.8 ms (0.85%)** |
+| mean delta | +46.1 ms (SE 7.0) | +17.1 ms (SE 7.9) |
+| sign test | 34/40 pos, p = 1e-5, t = 6.62 | 21/30 pos, p = 0.043, t = 2.15 |
+| full movie wall delta | +44.0 ms, 36/40, t = 7.26 | +15.0 ms, 22/30, p = 0.008, t = 2.42 |
+| positional bias P | +2.5 ms | +4.4 ms |
+
+Corrected-pixel digest under the cap is `09680a6a4b3914f9` on **both** arms — identical to the
+uncapped baseline, so bit-exactness is confirmed in the new configuration rather than inherited.
+
+**The effect survives but is roughly a third of its uncapped size, and I predicted the wrong
+direction.** My prior reasoning was that this change *offloads* host work to the GPU, so scarcer
+CPUs should make it matter more. That was wrong: it matters less. The measurement was run because
+a parallel task demonstrated that a cap-sensitivity argument one has not actually run is worth
+little, and that judgement was correct.
+
+An observation worth flagging rather than explaining: **the baseline itself got 142 ms faster under
+the cap** (2.2292 -> 2.0872 s). Pinning to 8 adjacent logical CPUs plausibly improves locality and
+removes thread migration and NUMA-crossing cost that an unpinned 124-core box incurs, and some of
+the uncapped 46 ms may have been the candidate recovering overhead that the cap removes for both
+arms. That is a hypothesis consistent with the numbers, not a measured mechanism.
+
+**Classification.** A parallel task proposed separating results that are *shifted* by the cap from
+those *eliminated* by it. This one is neither — it is **attenuated**: still resolved, still
+positive, still favoured under both orderings, but a third of the size. The binary needs a third
+bucket, and any summary should quote the constrained figure when the deployment is constrained.
+
 ## 10b. VRAM
 
 | Metric | Base | Candidate |
@@ -358,9 +394,11 @@ What is established beyond reasonable doubt:
 - `TIMING_DETECT_HOT` drops 21.6%, 48.2 to 37.8 ms, at 6.25 sigma.
 - Peak VRAM unchanged at 3533 MiB, under the 3,584 MiB ceiling.
 
-- **End-to-end wall-clock improvement, resolved at n=40 paired**: process wall +45.9 ms (2.06%),
-  34/40 pairs, p = 1e-5; full movie wall +44.0 ms (3.23%), 36/40 pairs. This reverses an earlier
-  underpowered n=6 result that had suggested no gain.
+- **End-to-end wall-clock improvement, resolved in both CPU configurations.** Uncapped (~124 CPUs,
+  n=40 paired): +45.9 ms (2.06%), 34/40 pairs, p = 1e-5. Under the 8-CPU cap (n=30 paired):
+  **+17.8 ms (0.85%)**, 22/30 pairs, p = 0.008 on movie wall. The gain is real but **attenuates by
+  ~63% on a constrained host** — quote the constrained figure for a constrained deployment. This
+  also reverses an earlier underpowered n=6 result that had suggested no gain at all.
 
 What is **not** established:
 - That the ~46 ms is fully explained by the stage decomposition, which accounts for roughly 19 ms.
@@ -369,7 +407,7 @@ What is **not** established:
   measured against 147 ms decomposed, around an avoided 54.3 MiB host buffer), which makes the
   explanation more plausible without making it measured.
 
-The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved ~46 ms
-(2.1%) end-to-end gain**. It is still not the "~0.19 s host scan" the original framing implied --
+The defensible headline is **a halved D2H, a 21.6% faster detection stage, and a resolved
+end-to-end gain of ~46 ms (2.1%) unconstrained or ~18 ms (0.85%) under an 8-CPU cap**. It is still not the "~0.19 s host scan" the original framing implied --
 that figure covered a whole stage of which this change removes only part, and appears to derive
 from an unoptimized build.

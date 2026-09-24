@@ -39,22 +39,7 @@ and with mathematical precision."
 
 ### Slide 1: The Multi-Agent Engineering Architecture (0:00 – 0:15)
 
-```mermaid
-flowchart LR
-    subgraph DialecticLoop["1. Dialectic Specification (Pre-Code)"]
-        Arch["Architecture Agent<br/>(Generator)"] <-->|Rounds 1-3| Conf["Conformance Agent<br/>(Critic)"]
-    end
-    DialecticLoop --> Spec["Certified ADR & Scope Whitelist"]
-    Spec --> Impl["Implementation Agent"]
-    Impl --> DualGate{"2. Dual Verification Gate"}
-    subgraph Verification["Independent Audits"]
-        DualGate --> Rev["Review Agent<br/>(Thread Safety & Allocations)"]
-        DualGate --> SpecAudit["Spec Compliance Agent<br/>(Zero Side Effects)"]
-        DualGate --> TestAgent["Testing Agent<br/>(Exact Bit Parity Gates)"]
-    end
-    Verification --> License["License & Hygiene Agent"]
-    License --> Commit["ai-git-commit Skill"]
-```
+![Agentic Workflow Diagram](plots/agentic_workflow_diagram.png)
 
 - **Core Problem**: Standalone extraction of RELION 5.1 motion correction engine (`commit ad0b230`).
 - **Safety Mechanism**: No code is modified without a certified Architectural Decision Record (ADR) approved through the dialectic refinement loop.
@@ -102,6 +87,8 @@ flowchart LR
 
 All visual assets and scripts are organized in [`presentation/`](file:///home/dxp41838/MotionCorr-standalone/presentation/):
 - **Spoken Script & Slides**: [`presentation/PRESENTATION_SCRIPT.md`](file:///home/dxp41838/MotionCorr-standalone/presentation/PRESENTATION_SCRIPT.md)
+- **16:9 PowerPoint Workflow Diagram (PNG)**: [`presentation/plots/agentic_workflow_diagram.png`](file:///home/dxp41838/MotionCorr-standalone/presentation/plots/agentic_workflow_diagram.png)
+- **16:9 PowerPoint Workflow Diagram (SVG)**: [`presentation/plots/agentic_workflow_diagram.svg`](file:///home/dxp41838/MotionCorr-standalone/presentation/plots/agentic_workflow_diagram.svg)
 - **Scaling Plot (PNG)**: [`presentation/plots/issue_10_benchmark_data_scaling.png`](file:///home/dxp41838/MotionCorr-standalone/presentation/plots/issue_10_benchmark_data_scaling.png)
 - **Scaling Plot (SVG)**: [`presentation/plots/issue_10_benchmark_data_scaling.svg`](file:///home/dxp41838/MotionCorr-standalone/presentation/plots/issue_10_benchmark_data_scaling.svg)
 - **Stage Breakdown (PNG)**: [`presentation/plots/issue_10_benchmark_data_stages.png`](file:///home/dxp41838/MotionCorr-standalone/presentation/plots/issue_10_benchmark_data_stages.png)

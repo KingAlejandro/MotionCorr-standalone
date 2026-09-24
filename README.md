@@ -15,7 +15,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-The output is `build/motioncorr`. It was compiled on macOS with AppleClang and Homebrew libraries. Linux and other platforms have not yet been checked. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
+The output is `build/motioncorr`. It has been compiled on macOS with AppleClang and Homebrew libraries, and on Ubuntu 24.04 with GCC 13.3.0. Ghostscript (`gs`) is needed for the optional summary PDF; without it, image and STAR outputs are written but `logfile.pdf` is empty.
 
 For a RELION-compatible movie STAR file, the command line follows RELION's CPU motion correction program:
 

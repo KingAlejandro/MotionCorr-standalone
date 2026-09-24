@@ -167,8 +167,8 @@ rank-sum two-sided **p = 0.00216 on both stages** — the floor attainable at n=
 standard deviations (ddof=1).
 
 The baseline iFFT arm also carries two large outliers (32.938 and 29.898 ms) that the
-candidate arm has no counterpart for (candidate range 22.050-22.261, sd 0.084 against
-baseline sd 4.025). **Excluding both outliers the separation still holds** — baseline
+candidate arm has no counterpart for (candidate range 22.050-22.261, sd 0.092 against
+baseline sd 4.410; sample sds, matching the table above). **Excluding both outliers the separation still holds** — baseline
 n=4 median 23.113, min 22.834, against candidate max 22.261 — so the median claim does
 not depend on them. Whether the change also *reduces variance* is a more interesting
 possibility but is **not** claimed here: n=6 with two outliers cannot support it, and

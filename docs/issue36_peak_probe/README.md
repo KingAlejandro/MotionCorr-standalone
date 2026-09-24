@@ -1,5 +1,7 @@
 # Issue 36: first global peak probe on movie 00021
 
+Follow-up: [iteration-2 feedback, global-only image comparison, and shift/FFT replays](iteration2_and_global_only.md).
+
 Date: 2026-09-24. Host: `4-gpu-vm` (Ubuntu 24.04, GCC 13.3, CUDA toolkit 12.8.61, driver 570.86.10, NVIDIA A100 80 GB PCIe GPU 0). Diagnostic source: `dd29b59` (`codex/issue36-diagnostics`); CPU and CUDA runs used the **same** CUDA-enabled binary, SHA256 `68307b3ea2c1dac0d4d85f4d16041d400135837e2b53ac2a596863c659d96908`.
 
 Input TIFF SHA256: `df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0`. Gain SHA256: `8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1`. `movies.star` SHA256: `fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041`; `--do_at_most 1` selected its first movie, `Movies/20170629_00021_frameImage.tiff`.

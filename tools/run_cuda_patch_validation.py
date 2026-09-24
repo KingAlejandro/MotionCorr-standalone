@@ -90,11 +90,60 @@ def parse_shifts(star_file: Path) -> List[Tuple[float, float]]:
     return shifts
 
 
+def find_mrc_and_star(dir_path: Path) -> Tuple[Optional[Path], Optional[Path]]:
+    mrcs = [p for p in dir_path.rglob("*.mrc") if p.is_file()]
+    mrc = None
+    for p in mrcs:
+        if "frameImage.mrc" in p.name:
+            mrc = p
+            break
+        elif "synthetic_" in p.name:
+            mrc = p
+            break
+    if mrc is None and mrcs:
+        mrc = mrcs[0]
+
+    stars = [p for p in dir_path.rglob("*.star") if p.is_file() and not p.name.startswith("corrected_micrographs")]
+    star = None
+    for p in stars:
+        if "frameImage.star" in p.name:
+            star = p
+            break
+        elif "synthetic_" in p.name:
+            star = p
+            break
+    if star is None and stars:
+        star = stars[0]
+    return mrc, star
+
+
+def get_telemetry_for_dir(cand_dir: Path, fallback_stdout: str = "") -> Dict[str, Any]:
+    logs = list(cand_dir.rglob("*.log"))
+    for p in logs:
+        if "frameImage" in p.name:
+            return parse_telemetry(p.read_text())
+        elif "synthetic_" in p.name:
+            return parse_telemetry(p.read_text())
+    if logs:
+        return parse_telemetry(logs[0].read_text())
+    return parse_telemetry(fallback_stdout)
+
+
 def run_comparator(comparator: Path, ref_dir: Path, cand_dir: Path, label: str) -> Dict[str, Any]:
+    ref_mrc, ref_star = find_mrc_and_star(ref_dir)
+    cand_mrc, cand_star = find_mrc_and_star(cand_dir)
+    if not ref_mrc or not cand_mrc or not ref_star or not cand_star:
+        return {
+            "error": f"Missing mrc/star: ref=({ref_mrc}, {ref_star}), cand=({cand_mrc}, {cand_star})",
+            "comparator_exit_code": 3
+        }
+
     cmd = [
         sys.executable, str(comparator),
-        "--reference-dir", str(ref_dir),
-        "--candidate-dir", str(cand_dir),
+        "--ref-mrc", str(ref_mrc),
+        "--test-mrc", str(cand_mrc),
+        "--ref-star", str(ref_star),
+        "--test-star", str(cand_star),
         "--gate", "relaxed",
         "--json"
     ]
@@ -209,8 +258,7 @@ def main():
         c_res = run_cmd(cand_cmd)
         
         # Telemetry
-        log_f = cand_d / f"{stage_name}.log"
-        telemetry = parse_telemetry(log_f.read_text()) if log_f.exists() else parse_telemetry(c_res.stdout)
+        telemetry = get_telemetry_for_dir(cand_d, c_res.stdout)
         
         cmp_res = run_comparator(comparator, ref_d, cand_d, stage_name)
         cmp_res["telemetry"] = telemetry
@@ -287,8 +335,7 @@ _rlnOpticsGroup #2
             c_res = run_cmd(cuda_exp_cmd, timeout=1200)
             gpu_wall_sec = time.time() - t_gpu_0
 
-            log_f = exp_cand_d / "corrected.log"
-            telem = parse_telemetry(log_f.read_text()) if log_f.exists() else parse_telemetry(c_res.stdout)
+            telem = get_telemetry_for_dir(exp_cand_d, c_res.stdout)
             telem["wall_time_sec"] = gpu_wall_sec
             gpu_timings.append(telem)
 

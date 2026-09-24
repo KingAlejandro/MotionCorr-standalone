@@ -321,8 +321,8 @@ def main() -> None:
     parser.add_argument("--gpu", type=int, default=0)
     args = parser.parse_args()
 
-    cpu_bin = args.cpu_bin or find_cpu_binary()
-    cuda_bin = args.cuda_bin or find_cuda_binary()
+    cpu_bin = (args.cpu_bin or find_cpu_binary()).resolve()
+    cuda_bin = (args.cuda_bin or find_cuda_binary()).resolve()
     print("=" * 78)
     print(" MOTIONCORR SYNTHETIC HARNESS ACCEPTANCE AND NEGATIVE TEST SUITE")
     print("=" * 78)

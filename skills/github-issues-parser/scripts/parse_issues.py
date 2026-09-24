@@ -51,22 +51,74 @@ def fetch_issues_from_api(repo: str, state: str = "all") -> List[Dict[str, Any]]
     return all_issues
 
 
+def parse_markdown_issues(content: str) -> List[Dict[str, Any]]:
+    """Parse Markdown text structured into issue sections into issue dicts."""
+    sections = re.split(r"(?m)^#{1,3}\s+", content)
+    issues = []
+    for sec in sections:
+        sec = sec.strip()
+        if not sec:
+            continue
+        lines = sec.splitlines()
+        header = lines[0].strip()
+        body = "\n".join(lines[1:]).strip()
+        
+        num_match = re.search(r"(?:#|Issue\s+)?(\d+)\s*[:\-]\s*(.*)", header, re.IGNORECASE)
+        if num_match:
+            issue_num = int(num_match.group(1))
+            title = num_match.group(2).strip() or header
+        else:
+            issue_num = len(issues) + 1
+            title = header
+
+        issues.append({
+            "number": issue_num,
+            "title": title,
+            "body": body,
+            "state": "open",
+            "html_url": "",
+            "labels": []
+        })
+    return issues
+
+
 def load_issues_from_file(file_path: str) -> List[Dict[str, Any]]:
     """Load issues from a local JSON or raw markdown cache file."""
     path = Path(file_path)
     if not path.exists():
         sys.stderr.write(f"File not found: {file_path}\n")
         sys.exit(1)
-    content = path.read_text(encoding="utf-8")
+    content = path.read_text(encoding="utf-8").strip()
     
-    # Handle files that might have HTTP / frontmatter header (e.g. content.md with --- separator)
-    if "---" in content and not content.strip().startswith("["):
-        parts = content.split("---", 1)
-        raw_json = parts[1].strip()
-    else:
-        raw_json = content.strip()
+    # Try parsing directly as JSON
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
 
-    return json.loads(raw_json)
+    # Try parsing embedded JSON code block
+    json_block = re.search(r"```(?:json)?\s*(\[.*?\])\s*```", content, re.DOTALL)
+    if json_block:
+        try:
+            return json.loads(json_block.group(1))
+        except json.JSONDecodeError:
+            pass
+
+    # Try parsing frontmatter / raw JSON after '---'
+    if "---" in content:
+        parts = content.split("---", 1)
+        try:
+            return json.loads(parts[1].strip())
+        except json.JSONDecodeError:
+            pass
+
+    # Fallback: Parse structured markdown headers as issues
+    md_issues = parse_markdown_issues(content)
+    if md_issues:
+        return md_issues
+
+    sys.stderr.write(f"Error: Unable to parse issues from {file_path}. Expected JSON or structured markdown issues file.\n")
+    sys.exit(1)
 
 
 def parse_issue_body(body: Optional[str]) -> Dict[str, Any]:

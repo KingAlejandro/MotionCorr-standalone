@@ -49,6 +49,11 @@ This project employs a multi-agent engineering workflow to safely extract, optim
    - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
    - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
 
+9. **Testing & Build Agent (`agents/testing_agent/`)**:
+   - **Mandate**: Autonomously manages out-of-source CMake builds, compiler verification, sanitizer instrumentation, and executes regression/parity test suites in isolated sandboxes.
+   - **Deliverable**: Structured build and test verification reports concluding with an explicit verdict (`BUILD_TEST_PASSED`, `TESTS_FAILED`, `BUILD_FAILED`, `ENVIRONMENT_FAULT`).
+   - **System Prompt**: [`agents/testing_agent/SYSTEM_PROMPT.md`](agents/testing_agent/SYSTEM_PROMPT.md)
+
 ---
 
 ## 2. Standard Issue Lifecycle
@@ -88,5 +93,6 @@ flowchart TD
 - **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
 - **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
 - **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`
+- **Build & Regression Test Orchestration**: `python agents/testing_agent/scripts/run_build_and_test.py [--clean] [--build-type Release]`
 - **Automated AI Commits**: `python skills/ai-git-commit/scripts/ai_commit.py`
 - **Issue Parser**: `python skills/github-issues-parser/scripts/parse_issues.py`

@@ -32,6 +32,17 @@ Inputs: STAR `afc1445e…`, movie TIFF `df298b1b…`, gain `8919cdc7…`, 24-mov
 Raw artifacts on the host under `/home/alex/MotionCorr-issue50-fftsched/`
 (`evidence2/`, `evidence-nsys/`, `evidence-full24/`, `evidence-sanitizer/`).
 
+**Shared-host disclosure.** This box was in concurrent use by other agent sessions
+working on adjacent Issue #50 tasks. Timed runs were serialised with
+`flock /tmp/motioncorr-bench.lock`, and `run_evidence2.sh` additionally waits for GPU 1
+to fall below 50 MiB before each run. The 12-run timing batch ran 18:51:13–18:52:02Z and
+the Nsight traces at ~18:54Z; a known collision by another session occurred at
+19:05–19:07Z, which is after all timing evidence here was collected and overlaps only
+correctness runs, which contention cannot invalidate. Whole-device VRAM was exactly
+3537 MiB in all 12 runs with no foreign process resident on GPU 1, which corroborates
+that the device itself was quiet. Host-side contention cannot be excluded as rigorously
+as device-side, which is one more reason the process-wall figure is not relied on.
+
 ---
 
 ## 2. The change
@@ -42,8 +53,9 @@ In `computeGlobalForwardFFT` and `computeGlobalInverseFFT`, the per-frame
 inverse loop. The forward loop needed no new barrier: one already exists after
 `scaleComplexKernel`.
 
-With `fft_batch_size = 1` and 24 frames this reduces **48 whole-device barriers per
-movie to 2**. Nothing else changes — no plan shape, no batch size, no allocation, no
+With `fft_batch_size = 1` and 24 frames this takes the movie FFT path from **49
+whole-device barriers to 2** (forward: 24 in-loop + 1 after the scaling kernel → 1;
+inverse: 24 in-loop → 1), a net removal of 47. Nothing else changes — no plan shape, no batch size, no allocation, no
 transfer, no arithmetic.
 
 ## 3. Why this is ordering-safe
@@ -63,20 +75,34 @@ the removed barriers appeared to guard are already resolved by stream ordering:
 
 Verified on the build host, not merely in source: `flags.make` contains no
 `--default-stream=per-thread`, `CMAKE_CUDA_FLAGS` is empty and `CUDAFLAGS` is unset.
-No `cufftSetStream`, `cudaMemcpyAsync` or explicit stream appears anywhere in
-`src/acc/cuda/`. The micrograph loop is serial; none of the `movie_session->` call
+No `cufftSetStream` call exists anywhere in the tree, and **no non-default stream is
+used on any movie-session buffer**. Note that `cudaMemcpyAsync`, `cudaMemsetAsync` and
+`cudaStream_t` *do* appear under `src/acc/cuda/` — in `shortcuts.cuh`,
+`cuda_mem_utils.h` and `custom_allocator.cuh`, and `motioncorr_runner.cpp:24` includes
+`cuda_mem_utils.h`. They are inherited RELION classification/refinement helpers: the
+templates are not instantiated on this path, and `custom_allocator.cuh` declares
+`cudaStream_t stream = 0`, which *is* the legacy default stream. So they create no
+second stream over `d_fft_work`, `d_inverse_tile`, `d_Fframes` or `d_Iframes` — but a
+blanket "no async copies in `src/acc/cuda/`" claim would be false. The micrograph loop is serial; none of the `movie_session->` call
 sites sit inside an OpenMP region (`--j 8` binds only to `parallel for` loops that
 contain no session calls).
 
 **Error reporting is preserved, and one gap was closed.** Asynchronously detected CUDA
 faults are sticky, so a later synchronization still returns them — nothing is missed.
 Per-batch `cudaGetLastError()` keeps launch-failure attribution at the batch that
-caused it. The added post-loop barrier in the inverse is **required**, not cosmetic:
-without it `computeGlobalInverseFFT` would return `true` after an asynchronous fault,
-and the error would surface later in `alignPatchDevice` — which does not override
-`HANDLE_ERROR` and therefore aborts the process instead of taking the designed CPU
-fallback. The change as committed converts that latent hard-abort path into the
-intended graceful fallback.
+caused it. The added post-loop barrier in the inverse is **required**, not cosmetic: without it
+`computeGlobalInverseFFT` could return `true` after an asynchronous fault, reporting
+success for work that failed and pushing detection into an unrelated later stage.
+
+The stronger claim — that the fault would reach `alignPatchDevice`, which does not
+override `HANDLE_ERROR` (`cuda_settings.h:48` → `CRITICAL(ERRGPUKERN)`) and therefore
+aborts — **does not survive checking, and is not claimed here.** The `alignPatchDevice`
+call at `motioncorr_runner.cpp:1674` runs *before* the inverse at `:1695`, and the next
+one at `:1790` is gated on `prep_ok` from `preparePatchInVram` at `:1784`, which lives
+in `cuda_movie_session.cu` and *does* override `HANDLE_ERROR` — so it would intercept a
+sticky error and return `false` first. The justification for the barrier is therefore
+the narrow one: it guarantees the function cannot return `true` after an asynchronous
+fault, and keeps error attribution local to the transform that failed.
 
 ## 4. Performance evidence
 
@@ -86,15 +112,19 @@ unprofiled runs are never compared.
 
 | Metric | baseline (n=6) | candidate (n=6) | delta |
 |---|---:|---:|---:|
-| Process wall, median | 3.505 s (sd 0.150) | 3.485 s (sd 0.067) | −0.020 s — **not resolvable** |
-| `global FFT`, median | 22.471 ms (sd 0.140) | 21.741 ms (sd 0.066) | **−0.729 ms** |
-| `global iFFT`, median | 23.286 ms (sd 4.025) | 22.135 ms (sd 0.084) | **−1.151 ms** |
+| Process wall, median | 3.505 s (sd 0.164) | 3.485 s (sd 0.073) | −0.020 s — **not resolvable** |
+| `global FFT`, median | 22.471 ms (sd 0.153) | 21.741 ms (sd 0.073) | **−0.729 ms** |
+| `global iFFT`, median | 23.286 ms (sd 4.410) | 22.135 ms (sd 0.092) | **−1.151 ms** |
 | Whole-device VRAM peak | 3537 MiB (sd 0) | 3537 MiB (sd 0) | **0** |
 | Host peak RSS, median | 1,633,726 KiB | 1,633,782 KiB | unchanged |
 
 Both FFT stages separate cleanly — baseline FFT min 22.277 > candidate max 21.913;
 baseline iFFT min 22.834 > candidate max 22.261 — so the ~1.88 ms combined gain is a
-real effect, not sampling noise.
+real effect, not sampling noise. Independent recomputation gives an exact Wilcoxon
+rank-sum two-sided **p = 0.00216 on both stages** — the floor attainable at n=6/6 — and
+**p = 0.623** (exact permutation) on process wall, which is the quantitative form of
+"stage effect real, process effect absent". Standard deviations above are **sample**
+standard deviations (ddof=1).
 
 The baseline iFFT arm also carries two large outliers (32.938 and 29.898 ms) that the
 candidate arm has no counterpart for (candidate range 22.050-22.261, sd 0.084 against
@@ -105,11 +135,19 @@ possibility but is **not** claimed here: n=6 with two outliers cannot support it
 the two outlier runs had the two **fastest** process walls (3.34 s and 3.28 s), which
 points at stage-timer attribution rather than a real stall. It is worth a dedicated
 measurement, not an inference from this data. A standalone cuFFT microbenchmark at the exact
-production shape independently predicts it: −2.15 ms at `-O0`, −2.76 ms at `-O2`.
+production shape **brackets it on the high side**: −2.15 ms at `-O0` and −2.76 ms at
+`-O2`, against the 1.88 ms observed in the full pipeline — an overprediction of 14–47%.
+That direction is expected, since the microbenchmark runs the loops back to back with
+no interleaved host work, but it means the microbenchmark corroborates the *magnitude*
+and does not predict the value. Note also that it runs the `sync` variant before the
+`nosync` variant in fixed order without randomisation, which biases mildly in favour of
+`nosync`; the fixed order is disclosed rather than corrected because the effect is
+reproduced independently by the in-pipeline stage timers, which are order-balanced.
 
 **The process-level number is noise and is not claimed as a win.** −0.020 s against a
 standard deviation of 0.150 s is unresolvable; `apply gain and initial sum` alone
-swings 373 → 461 ms between baseline runs, roughly 50× the size of this effect. The
+spans **275 → 517 ms across the six baseline runs in this same batch**, a 242 ms range
+roughly 130× the size of the effect being sought. The
 honest summary is: **measurable at the stage timer, invisible at process level,
 exactly VRAM-neutral.**
 
@@ -129,8 +167,10 @@ and for closing the inverse error-reporting gap — not as a speedup.
 All exact against the `a11f2f1` baseline binary on the same host:
 
 - **Movie 00021, all 12 runs:** MRC pixel data identical — 0 differing bytes of
-  56,955,920 (14,238,980 float pixels), single shared data-block hash
-  `09680a6a4b3914f97c5befbf87c53c2425ab0658`.
+  56,955,920 (14,238,980 float pixels), single shared data-block digest
+  `09680a6a4b3914f97c5befbf87c53c2425ab0658` — this is the **first 40 hex characters of
+  the SHA-256** of the data block, not a SHA-1; `sha1sum` on the same bytes gives
+  `41f04eb66b61d6e5aa3fb87f9fb474df4a5b2b77`.
 - **Per-movie STAR bit-identical** across all 12 runs, covering all five blocks:
   `data_general`, the 24 `data_global_shift` rows, `data_local_motion_model`,
   `data_hot_pixels`, `data_local_shift`.
@@ -236,11 +276,22 @@ reason, and would be worth at most ~1.8 ms.
    safe argument in this function. A successor change that passed Gate 2 thresholds
    while shifting pixels sub-ULP could still move trajectories measurably.
 
-   Relatedly: the 54.35 MiB work area for a 3710 × 3838 transform implies cuFFT is on a
-   **Bluestein** path — 3710 = 2·5·7·53 and 3838 = 2·19·101, both with large prime
-   factors. Any future parity or round-off characterisation must use this shape; a
-   power-of-two test case would exercise a different algorithm with a different rounding
-   profile and would understate the seed perturbation.
+   Relatedly, **this pipeline runs two transform shapes of opposite radix character, and
+   round-off characterisation must match the shape to the stage:**
+
+   | Stage | Shape | Factorisation | cuFFT path |
+   |---|---|---|---|
+   | CCF map (global/patch alignment) | 972 × 972 | 2²·3⁵ | native mixed-radix |
+   | micrograph image | 3710 × 3838 | 2·5·7·53 and 2·19·101 | Bluestein (chirp convolution) |
+
+   The 54.35 MiB work area and 5.5 / 2.1 ms plan construction at 3710 × 3838 are
+   consistent with Bluestein. The ~1.2e-07 seed above was measured on the **972 × 972**
+   CCF inverse, which is friendly-radix and *not* Bluestein; the separate 2.9e-06
+   FFTW-vs-cuFFT bound was measured at 3710 × 3838. Both were measured at the correct
+   shape for their claim. The hazard is for anyone reproducing this: a benchmark at
+   972 × 972 understates image-path round-off, and one at 3710 × 3838 overstates the CCF
+   seed. The two differ in algorithm class, not merely size, so a power-of-two stand-in
+   is wrong for both.
 
 ## 8. Reproduction
 

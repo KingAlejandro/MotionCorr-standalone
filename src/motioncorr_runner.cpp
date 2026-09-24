@@ -35,6 +35,7 @@
 #include "src/renderEER.h"
 #include "src/acc/cuda/global_peak_probe.h"
 #include "src/acc/cuda/full_alignment_trace.h"
+#include "src/motioncorr_alignment_weight.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -2513,13 +2514,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
-		const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy) : y;
-		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
-
-		for (int x = 0; x < ccf_nfx; x++) {
-			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
-			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
-		}
+		fillMotioncorrAlignmentWeightRow(weight.data + (size_t)y * ccf_nfx,
+			y, ccf_nfx, ccf_nfy, nfx, nfy, scaled_B);
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 	if (full_trace)

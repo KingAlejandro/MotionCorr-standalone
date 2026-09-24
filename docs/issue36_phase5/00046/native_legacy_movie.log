@@ -1,0 +1,109 @@
+Working on Movies/20170629_00046_frameImage.tiff with 1 thread(s).
+
+Movie size: X = 3710 Y = 3838 N = 24
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Frame grouping: n_frames = 24, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 
+interpolate_shifts = 0
+
+In unaligned sum, Mean = 27.4106 Std = 5.32366 Hotpixel threshold = 59.3526
+Detected 70 hot pixels to be corrected.
+Fixed hot pixels.
+
+Global alignment:
+ [Issue36 counterfactual: legacy CUDA expf weight]
+ Iteration 1: RMSD = 5.7581 px
+ Iteration 2: RMSD = 0.375441 px
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 355.45 ms
+   Custom kernel execution time: 4.01 ms
+   cuFFT execution time:         0.84 ms
+   Device-to-Host transfer time: 152.37 ms
+   Total GPU alignment time:     519.46 ms
+   Buffer VRAM:                  1482.91 MiB
+   cuFFT workspace VRAM:         86.68 MiB
+   Peak GPU memory allocated:    1569.59 MiB
+
+Local alignments:
+Patches: X = 5 Y = 5
+Patch (1, 1): 1 / 25, X range = [0, 742), Y range = [0, 766), Center = (370, 382)
+ Iteration 1: RMSD = 2.58 px
+ Iteration 2: RMSD = 0.22 px
+Patch (1, 2): 2 / 25, X range = [742, 1484), Y range = [0, 766), Center = (1112, 382)
+ Iteration 1: RMSD = 1.71 px
+ Iteration 2: RMSD = 0.18 px
+Patch (1, 3): 3 / 25, X range = [1484, 2226), Y range = [0, 766), Center = (1854, 382)
+ Iteration 1: RMSD = 1.75 px
+ Iteration 2: RMSD = 0.14 px
+Patch (1, 4): 4 / 25, X range = [2226, 2968), Y range = [0, 766), Center = (2596, 382)
+ Iteration 1: RMSD = 1.40 px
+ Iteration 2: RMSD = 0.11 px
+Patch (1, 5): 5 / 25, X range = [2968, 3710), Y range = [0, 766), Center = (3338, 382)
+ Iteration 1: RMSD = 3.86 px
+ Iteration 2: RMSD = 0.41 px
+Patch (2, 1): 6 / 25, X range = [0, 742), Y range = [767, 1533), Center = (370, 1149)
+ Iteration 1: RMSD = 1.94 px
+ Iteration 2: RMSD = 0.22 px
+Patch (2, 2): 7 / 25, X range = [742, 1484), Y range = [767, 1533), Center = (1112, 1149)
+ Iteration 1: RMSD = 1.32 px
+ Iteration 2: RMSD = 0.23 px
+Patch (2, 3): 8 / 25, X range = [1484, 2226), Y range = [767, 1533), Center = (1854, 1149)
+ Iteration 1: RMSD = 0.71 px
+ Iteration 2: RMSD = 0.11 px
+Patch (2, 4): 9 / 25, X range = [2226, 2968), Y range = [767, 1533), Center = (2596, 1149)
+ Iteration 1: RMSD = 0.81 px
+ Iteration 2: RMSD = 0.10 px
+Patch (2, 5): 10 / 25, X range = [2968, 3710), Y range = [767, 1533), Center = (3338, 1149)
+ Iteration 1: RMSD = 0.71 px
+ Iteration 2: RMSD = 0.07 px
+Patch (3, 1): 11 / 25, X range = [0, 742), Y range = [1534, 2300), Center = (370, 1916)
+ Iteration 1: RMSD = 2.23 px
+ Iteration 2: RMSD = 0.10 px
+Patch (3, 2): 12 / 25, X range = [742, 1484), Y range = [1534, 2300), Center = (1112, 1916)
+ Iteration 1: RMSD = 0.83 px
+ Iteration 2: RMSD = 0.07 px
+Patch (3, 3): 13 / 25, X range = [1484, 2226), Y range = [1534, 2300), Center = (1854, 1916)
+ Iteration 1: RMSD = 1.00 px
+ Iteration 2: RMSD = 0.12 px
+Patch (3, 4): 14 / 25, X range = [2226, 2968), Y range = [1534, 2300), Center = (2596, 1916)
+ Iteration 1: RMSD = 1.22 px
+ Iteration 2: RMSD = 0.15 px
+Patch (3, 5): 15 / 25, X range = [2968, 3710), Y range = [1534, 2300), Center = (3338, 1916)
+ Iteration 1: RMSD = 2.10 px
+ Iteration 2: RMSD = 0.16 px
+Patch (4, 1): 16 / 25, X range = [0, 742), Y range = [2301, 3067), Center = (370, 2683)
+ Iteration 1: RMSD = 1.12 px
+ Iteration 2: RMSD = 0.10 px
+Patch (4, 2): 17 / 25, X range = [742, 1484), Y range = [2301, 3067), Center = (1112, 2683)
+ Iteration 1: RMSD = 1.33 px
+ Iteration 2: RMSD = 0.10 px
+Patch (4, 3): 18 / 25, X range = [1484, 2226), Y range = [2301, 3067), Center = (1854, 2683)
+ Iteration 1: RMSD = 0.79 px
+ Iteration 2: RMSD = 0.16 px
+Patch (4, 4): 19 / 25, X range = [2226, 2968), Y range = [2301, 3067), Center = (2596, 2683)
+ Iteration 1: RMSD = 1.23 px
+ Iteration 2: RMSD = 0.12 px
+Patch (4, 5): 20 / 25, X range = [2968, 3710), Y range = [2301, 3067), Center = (3338, 2683)
+ Iteration 1: RMSD = 1.69 px
+ Iteration 2: RMSD = 0.14 px
+Patch (5, 1): 21 / 25, X range = [0, 742), Y range = [3068, 3834), Center = (370, 3450)
+ Iteration 1: RMSD = 0.83 px
+ Iteration 2: RMSD = 0.12 px
+Patch (5, 2): 22 / 25, X range = [742, 1484), Y range = [3068, 3834), Center = (1112, 3450)
+ Iteration 1: RMSD = 1.01 px
+ Iteration 2: RMSD = 0.24 px
+Patch (5, 3): 23 / 25, X range = [1484, 2226), Y range = [3068, 3834), Center = (1854, 3450)
+ Iteration 1: RMSD = 0.93 px
+ Iteration 2: RMSD = 0.12 px
+Patch (5, 4): 24 / 25, X range = [2226, 2968), Y range = [3068, 3834), Center = (2596, 3450)
+ Iteration 1: RMSD = 1.43 px
+ Iteration 2: RMSD = 0.17 px
+Patch (5, 5): 25 / 25, X range = [2968, 3710), Y range = [3068, 3834), Center = (3338, 3450)
+ Iteration 1: RMSD = 2.04 px
+ Iteration 2: RMSD = 0.29 px
+
+Polynomial fit RMSD: X = 1.33 px Y = 0.84 px
+Pre-exposure: = 0.00
+Summing frames after dose weighting: ........................ done
+Written aligned and dose-weighted sum to /home/alex/MotionCorr-issue36-diagnostics-build/validation/issue36_phase5/native_legacy_00046/output/Movies/20170629_00046_frameImage.mrc
+Full movie wall time: 61.476 s

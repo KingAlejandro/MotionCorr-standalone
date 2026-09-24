@@ -3,13 +3,18 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
+#include "src/motioncorr_alignment_weight.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define CUFFT_CHECK(cmd) do { \
     cufftResult err = (cmd); \
@@ -247,6 +252,119 @@ __global__ void fourierShiftKernel(
     }
 }
 
+// This reader is deliberately narrow: it consumes only complete CPU full-trace
+// deltas from the same movie, never an arbitrary user supplied trajectory.
+struct Issue36CpuTrajectory {
+    bool enabled = false;
+    std::string directory;
+    std::vector<RFLOAT> dx[2], dy[2], total_x, total_y;
+};
+
+static std::string readIssue36File(const std::string &path, size_t expected_bytes)
+{
+    const int fd = open(path.c_str(), O_RDONLY | O_NOFOLLOW);
+    struct stat info;
+    if (fd < 0 || fstat(fd, &info) != 0 || !S_ISREG(info.st_mode) ||
+        info.st_size != (off_t)expected_bytes) {
+        if (fd >= 0) close(fd);
+        REPORT_ERROR("Invalid or incomplete Issue 36 CPU trajectory file: " + path);
+    }
+    std::string data(expected_bytes, '\0');
+    size_t offset = 0;
+    while (offset < expected_bytes) {
+        const ssize_t count = read(fd, &data[0] + offset, expected_bytes - offset);
+        if (count < 0 && errno == EINTR) continue;
+        if (count <= 0) {
+            close(fd);
+            REPORT_ERROR("Cannot read Issue 36 CPU trajectory file: " + path);
+        }
+        offset += (size_t)count;
+    }
+    if (close(fd) != 0) REPORT_ERROR("Cannot close Issue 36 CPU trajectory file: " + path);
+    return data;
+}
+
+static Issue36CpuTrajectory readIssue36CpuTrajectory(const std::string &movie,
+                                                     int n_frames, int max_iter)
+{
+    Issue36CpuTrajectory result;
+    const char *value = std::getenv("MOTIONCORR_ISSUE36_CPU_GLOBAL_TRACE_DIR");
+    if (!value) return result;
+    if (!fullTraceEnabled() || !*value || sizeof(RFLOAT) != sizeof(double) ||
+        max_iter < 2 || n_frames != 24)
+        REPORT_ERROR("Issue 36 trajectory replay requires a nonempty path, double RFLOAT, two iterations and 24 frames");
+    struct stat directory_info;
+    if (lstat(value, &directory_info) != 0 || !S_ISDIR(directory_info.st_mode))
+        REPORT_ERROR("Issue 36 CPU trajectory path must be a real directory");
+    const std::string dir(value);
+    result.directory = dir;
+    const std::string start = "backend=cpu\nmovie=" + movie +
+                              "\nformat=motioncorr-full-trace-v1\n";
+    if (readIssue36File(dir + "/trace_start", start.size()) != start ||
+        readIssue36File(dir + "/trace_complete", 9) != "complete\n")
+        REPORT_ERROR("Issue 36 CPU trajectory source is incomplete or belongs to another movie");
+    auto read_array = [&](const std::string &key) {
+        const size_t bytes = (size_t)n_frames * sizeof(double);
+        const std::string meta = "{\"key\":\"" + key + "\",\"dtype\":\"f8\",\"shape\":[" +
+                                 integerToString(n_frames) + "],\"bytes\":" +
+                                 integerToString(bytes) + ",\"endian\":\"native\"}\n";
+        if (readIssue36File(dir + "/" + key + ".json", meta.size()) != meta)
+            REPORT_ERROR("Issue 36 CPU trajectory metadata mismatch: " + key);
+        const std::string raw = readIssue36File(dir + "/" + key + ".bin", bytes);
+        std::vector<RFLOAT> array(n_frames);
+        std::memcpy(array.data(), raw.data(), bytes);
+        if (array[0] != 0)
+            REPORT_ERROR("Issue 36 CPU trajectory frame 0 must be zero: " + key);
+        for (RFLOAT v : array)
+            if (!std::isfinite(v)) REPORT_ERROR("Nonfinite Issue 36 CPU trajectory: " + key);
+        return array;
+    };
+    for (int i = 0; i < 2; ++i) {
+        const std::string prefix = fullTraceKey("g", i + 1, "deltax");
+        result.dx[i] = read_array(prefix);
+        result.dy[i] = read_array(fullTraceKey("g", i + 1, "deltay"));
+    }
+    result.total_x = read_array(fullTraceKey("g", 2, "totalx"));
+    result.total_y = read_array(fullTraceKey("g", 2, "totaly"));
+    for (int f = 0; f < n_frames; ++f) {
+        if (result.dx[0][f] + result.dx[1][f] != result.total_x[f] ||
+            result.dy[0][f] + result.dy[1][f] != result.total_y[f])
+            REPORT_ERROR("Issue 36 CPU trajectory totals disagree with per-iteration deltas");
+    }
+    for (int i = 0; i < 2; ++i) {
+        RFLOAT sumsq = 0;
+        for (int f = 0; f < n_frames; ++f)
+            sumsq += result.dx[i][f] * result.dx[i][f] +
+                     result.dy[i][f] * result.dy[i][f];
+        const RFLOAT rmsd = std::sqrt(sumsq / n_frames);
+        if ((i == 0 && rmsd < 0.5) || (i == 1 && rmsd >= 0.5))
+            REPORT_ERROR("Issue 36 CPU trajectory does not have the expected two-iteration convergence");
+    }
+    result.enabled = true;
+    return result;
+}
+
+static void validateIssue36CpuTraceGeometry(const Issue36CpuTrajectory &trajectory,
+                                            int nfx, int nfy, int ccf_nfx,
+                                            int ccf_nfy, int pnx, int pny)
+{
+    if (!trajectory.enabled) return;
+    if (pnx != 2 * (nfx - 1) || pny != nfy)
+        REPORT_ERROR("Issue 36 CPU trajectory geometry differs from current global movie");
+    auto check = [&](const std::string &key, int rows, int columns) {
+        const int bytes = rows * columns * sizeof(float2);
+        const std::string meta = "{\"key\":\"" + key + "\",\"dtype\":\"c8\",\"shape\":[" +
+                                 integerToString(rows) + "," + integerToString(columns) +
+                                 "],\"bytes\":" + integerToString(bytes) +
+                                 ",\"endian\":\"native\"}\n";
+        if (readIssue36File(trajectory.directory + "/" + key + ".json", meta.size()) != meta)
+            REPORT_ERROR("Issue 36 CPU trajectory source geometry mismatch: " + key);
+    };
+    check(fullTraceKey("g", 1, "input", 0), nfy, nfx);
+    check(fullTraceKey("g", 1, "fref"), ccf_nfy, ccf_nfx);
+    check(fullTraceKey("g", 2, "fref"), ccf_nfy, ccf_nfx);
+}
+
 bool cudaAlignPatch(
     std::vector<MultidimArray<fComplex> > &Fframes,
     const int pnx, const int pny,
@@ -261,6 +379,9 @@ bool cudaAlignPatch(
 {
     GlobalPeakProbeConfig peak_probe;
     const bool full_trace = fullTraceEnabled();
+    const int n_frames = xshifts.size();
+    const Issue36CpuTrajectory cpu_trajectory =
+        readIssue36CpuTrajectory(movie_identity, n_frames, max_iter);
     if (full_trace && device_id < 0)
         REPORT_ERROR("Full CUDA trace requires an explicit --gpu ordinal");
     readGlobalPeakProbeConfig(peak_probe);
@@ -295,7 +416,9 @@ bool cudaAlignPatch(
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
-    const int n_frames = xshifts.size();
+    if (cpu_trajectory.enabled)
+        logfile << " [Issue36 counterfactual: CPU global deltas from "
+                << std::getenv("MOTIONCORR_ISSUE36_CPU_GLOBAL_TRACE_DIR") << "]" << std::endl;
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
     }
@@ -323,6 +446,8 @@ bool cudaAlignPatch(
 
     const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
     const int nfy_half = nfy / 2;
+    validateIssue36CpuTraceGeometry(cpu_trajectory, nfx, nfy, ccf_nfx, ccf_nfy,
+                                    pnx, pny);
 
     // Buffer allocations
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
@@ -393,11 +518,24 @@ bool cudaAlignPatch(
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
 
-    // Weights computation
-    dim3 blockWeights(16, 16);
-    dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
-    computeWeightsKernel<<<gridWeights, blockWeights>>>(d_weight, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
-    LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    // Upload the exact host expression used by the CPU alignment path.
+    // The original device expf path remains an opt-in counterfactual control.
+    const bool legacy_gpu_weight = std::getenv("MOTIONCORR_ISSUE36_LEGACY_GPU_WEIGHT") != nullptr;
+    if (legacy_gpu_weight) {
+        dim3 blockWeights(16, 16);
+        dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+        computeWeightsKernel<<<gridWeights, blockWeights>>>(d_weight, ccf_nfx, ccf_nfy,
+                                                              ccf_nfy_half, nfx, nfy,
+                                                              (float)scaled_B);
+        LAUNCH_HANDLE_ERROR(cudaGetLastError());
+        logfile << " [Issue36 counterfactual: legacy CUDA expf weight]" << std::endl;
+    } else {
+        std::vector<float> host_weight(sz_weight / sizeof(float));
+        for (int y = 0; y < ccf_nfy; ++y)
+            fillMotioncorrAlignmentWeightRow(host_weight.data() + (size_t)y * ccf_nfx,
+                                             y, ccf_nfx, ccf_nfy, nfx, nfy, scaled_B);
+        HANDLE_ERROR(cudaMemcpy(d_weight, host_weight.data(), sz_weight, cudaMemcpyHostToDevice));
+    }
     if (full_trace) {
         std::vector<float> array(sz_weight / sizeof(float));
         HANDLE_ERROR(cudaMemcpy(array.data(), d_weight, sz_weight, cudaMemcpyDeviceToHost));
@@ -555,26 +693,71 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
         accumulated_d2h_ms += iter_d2h_ms;
 
-        // Update relative to frame 0
+        // Keep measured CUDA peaks/raw shifts above, then optionally intervene
+        // on the complete per-frame trajectory before shifting Fourier frames.
         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
-        for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
-            h_cur_xshifts[iframe] -= h_cur_xshifts[0];
-            h_cur_yshifts[iframe] -= h_cur_yshifts[0];
-            x_sumsq += (RFLOAT)h_cur_xshifts[iframe] * h_cur_xshifts[iframe];
-            y_sumsq += (RFLOAT)h_cur_yshifts[iframe] * h_cur_yshifts[iframe];
-        }
-        h_cur_xshifts[0] = 0.0f;
-        h_cur_yshifts[0] = 0.0f;
-        if (full_trace) {
-            fullTraceArray(fullTraceKey("g", iter, "deltax"), h_cur_xshifts.data(), sz_shifts, "f4", integerToString(n_frames));
-            fullTraceArray(fullTraceKey("g", iter, "deltay"), h_cur_yshifts.data(), sz_shifts, "f4", integerToString(n_frames));
-        }
-
-        for (int iframe = 0; iframe < n_frames; iframe++) {
-            xshifts[iframe] += h_cur_xshifts[iframe];
-            yshifts[iframe] += h_cur_yshifts[iframe];
-            h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
-            h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
+        if (cpu_trajectory.enabled) {
+            if (iter > 2) REPORT_ERROR("Issue 36 CPU trajectory source has only two iterations");
+            const std::vector<RFLOAT> &dx = cpu_trajectory.dx[iter - 1];
+            const std::vector<RFLOAT> &dy = cpu_trajectory.dy[iter - 1];
+            std::vector<float> measured_dx = h_cur_xshifts;
+            std::vector<float> measured_dy = h_cur_yshifts;
+            for (int iframe = n_frames - 1; iframe >= 0; --iframe) {
+                measured_dx[iframe] -= measured_dx[0];
+                measured_dy[iframe] -= measured_dy[0];
+            }
+            measured_dx[0] = 0;
+            measured_dy[0] = 0;
+            fullTraceArray(fullTraceKey("g", iter, "replay_measured_deltax"),
+                           measured_dx.data(), sz_shifts, "f4", integerToString(n_frames));
+            fullTraceArray(fullTraceKey("g", iter, "replay_measured_deltay"),
+                           measured_dy.data(), sz_shifts, "f4", integerToString(n_frames));
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                x_sumsq += dx[iframe] * dx[iframe];
+                y_sumsq += dy[iframe] * dy[iframe];
+                xshifts[iframe] += dx[iframe];
+                yshifts[iframe] += dy[iframe];
+                h_shiftx[iframe] = (float)(-dx[iframe] / pnx);
+                h_shifty[iframe] = (float)(-dy[iframe] / pny);
+            }
+            if (iter == 2) {
+                for (int iframe = 0; iframe < n_frames; ++iframe) {
+                    if (xshifts[iframe] != cpu_trajectory.total_x[iframe] ||
+                        yshifts[iframe] != cpu_trajectory.total_y[iframe])
+                        REPORT_ERROR("Issue 36 replayed global totals differ from CPU trace");
+                    xshifts[iframe] = cpu_trajectory.total_x[iframe];
+                    yshifts[iframe] = cpu_trajectory.total_y[iframe];
+                }
+            }
+            if (full_trace) {
+                fullTraceArray(fullTraceKey("g", iter, "deltax"), dx.data(),
+                               (size_t)n_frames * sizeof(RFLOAT), "f8", integerToString(n_frames));
+                fullTraceArray(fullTraceKey("g", iter, "deltay"), dy.data(),
+                               (size_t)n_frames * sizeof(RFLOAT), "f8", integerToString(n_frames));
+                fullTraceArray(fullTraceKey("g", iter, "replay_phase_shiftx"),
+                               h_shiftx.data(), sz_shifts, "f4", integerToString(n_frames));
+                fullTraceArray(fullTraceKey("g", iter, "replay_phase_shifty"),
+                               h_shifty.data(), sz_shifts, "f4", integerToString(n_frames));
+            }
+        } else {
+            for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
+                h_cur_xshifts[iframe] -= h_cur_xshifts[0];
+                h_cur_yshifts[iframe] -= h_cur_yshifts[0];
+                x_sumsq += (RFLOAT)h_cur_xshifts[iframe] * h_cur_xshifts[iframe];
+                y_sumsq += (RFLOAT)h_cur_yshifts[iframe] * h_cur_yshifts[iframe];
+            }
+            h_cur_xshifts[0] = 0.0f;
+            h_cur_yshifts[0] = 0.0f;
+            if (full_trace) {
+                fullTraceArray(fullTraceKey("g", iter, "deltax"), h_cur_xshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+                fullTraceArray(fullTraceKey("g", iter, "deltay"), h_cur_yshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+            }
+            for (int iframe = 0; iframe < n_frames; iframe++) {
+                xshifts[iframe] += h_cur_xshifts[iframe];
+                yshifts[iframe] += h_cur_yshifts[iframe];
+                h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
+                h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
+            }
         }
         if (full_trace) {
             fullTraceArray(fullTraceKey("g", iter, "totalx"), xshifts.data(),
@@ -607,6 +790,9 @@ bool cudaAlignPatch(
 
         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
         logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
+        if (cpu_trajectory.enabled && ((iter == 1 && rmsd < tolerance) ||
+                                       (iter == 2 && rmsd >= tolerance)))
+            REPORT_ERROR("Issue 36 CPU trajectory changed the expected two-iteration convergence");
 
         if (rmsd < tolerance) {
             converged = true;

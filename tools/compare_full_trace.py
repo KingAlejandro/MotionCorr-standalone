@@ -5,8 +5,11 @@ Keep raw traces on the analysis host. This writes only small, per-stage metrics.
 """
 
 import argparse
+import hashlib
 import json
+import math
 import pathlib
+import struct
 import subprocess
 import sys
 
@@ -46,6 +49,29 @@ def tutorial_24x5_keys():
     return keys
 
 
+def replay_audit_keys():
+    return {f"g_i{iteration:02d}_replay_{stage}"
+            for iteration in (1, 2)
+            for stage in ("measured_deltax", "measured_deltay",
+                          "phase_shiftx", "phase_shifty")}
+
+
+def check_replay_audit(directory, metadata):
+    result = {}
+    for key in sorted(replay_audit_keys()):
+        expected = {"key": key, "dtype": "f4", "shape": [24],
+                    "bytes": 96, "endian": "native"}
+        if metadata[key] != expected:
+            raise ValueError(f"Invalid replay audit sidecar: {key}")
+        payload = (directory / f"{key}.bin").read_bytes()
+        values = struct.unpack("=24f", payload)
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError(f"Nonfinite replay audit array: {key}")
+        result[key] = {"sha256": hashlib.sha256(payload).hexdigest(),
+                       "max_abs": max(map(abs, values))}
+    return result
+
+
 def read_manifest(directory, expected_backend):
     if not (directory / "trace_complete").is_file():
         raise ValueError(f"Incomplete trace: {directory}")
@@ -73,11 +99,19 @@ def main():
     parser.add_argument("--comparator", type=pathlib.Path, required=True)
     parser.add_argument("--require-tutorial-24x5", action="store_true",
                         help="Fail unless both traces contain exactly 6385 expected checkpoints")
+    parser.add_argument("--allow-cuda-replay-audit", action="store_true",
+                        help="Require and validate the eight counterfactual-only CUDA audit arrays")
     arguments = parser.parse_args()
     cpu, cpu_start = read_manifest(arguments.cpu, "cpu")
     cuda, cuda_start = read_manifest(arguments.cuda, "cuda")
     if cpu_start.get("movie") != cuda_start.get("movie"):
         raise ValueError("CPU/CUDA traces refer to different movie paths")
+    audit = {}
+    if arguments.allow_cuda_replay_audit:
+        if set(cuda) - set(cpu) != replay_audit_keys():
+            raise ValueError("Missing or unexpected CUDA replay audit keys")
+        audit = check_replay_audit(arguments.cuda, cuda)
+        cuda = {key: value for key, value in cuda.items() if key not in replay_audit_keys()}
     cpu_only, cuda_only = sorted(cpu.keys() - cuda.keys()), sorted(cuda.keys() - cpu.keys())
     schema_errors = {}
     if arguments.require_tutorial_24x5:
@@ -112,6 +146,7 @@ def main():
                 print(f"Compared {count}/{len(cpu)} chunks", flush=True)
     print(json.dumps({"paired_checkpoints": count, "cpu_only": len(cpu_only), "cuda_only": len(cuda_only),
                       "raw_input_differences": raw_input_differences,
+                      "replay_audit": audit,
                       "tutorial_schema_checked": arguments.require_tutorial_24x5,
                       "tutorial_schema_pass": (not any(value["missing"] or value["extra"] for value in schema_errors.values())
                                                if arguments.require_tutorial_24x5 else None),

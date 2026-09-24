@@ -3,9 +3,10 @@
 
 Example (arguments after -- are passed verbatim to MotionCorr):
   python3 tools/profile_cuda_movie.py --binary build-cuda/motioncorr \
-    --input movie.tiff --gpu 0 --repeat 5 --output-dir profile-out \
-    --expect-output corrected.mrc --expect-output shifts.star -- \
-    --i movie.tiff --o corrected --gpu 0 -DTIMING
+    --input movies.star --input gain.mrc --gpu 0 --repeat 5 \
+    --source-sha SOURCE_COMMIT --output-dir profile-out \
+    --expect-output corrected.mrc --movie-log corrected.log -- \
+    --i movies.star --o corrected --gainref gain.mrc --gpu 0 --use_own
 
 The runner never uses a shell. Device-wide nvidia-smi samples are supplementary
 and are labelled as such; use --nsys for a separate CUDA allocation/transfer
@@ -20,6 +21,7 @@ import os
 import pathlib
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -29,6 +31,7 @@ from typing import Any
 
 
 STAGE_RE = re.compile(r"^\s*(?P<name>[^\n:]{1,120}):\s*(?P<seconds>[0-9]+(?:\.[0-9]+)?)\s+sec\s*(?:\((?P<detail>[^\n]*)\))?", re.M)
+MOVIE_WALL_RE = re.compile(r"(?m)^Full movie wall time:\s*([0-9]+(?:\.[0-9]+)?)\s+s\s*$")
 MIB_RE = re.compile(r"^\s*(?P<value>[0-9]+)\s*MiB\s*$")
 
 
@@ -49,9 +52,40 @@ def run_capture(argv: list[str], timeout: float = 10) -> tuple[int, str]:
         return 127, str(e)
 
 
-def git_source_sha() -> str | None:
-    code, out = run_capture(["git", "rev-parse", "HEAD"])
+def git_source_sha(source_dir: pathlib.Path) -> str | None:
+    code, out = run_capture(["git", "-C", str(source_dir), "rev-parse", "HEAD"])
     return out if code == 0 else None
+
+
+def nsys_allocation_peaks(nsys: str, report: pathlib.Path) -> dict[str, Any]:
+    """Export CUDA allocation events and calculate the live high-water per device."""
+    db = report.with_suffix(".sqlite")
+    code, out = run_capture([nsys, "export", "--type=sqlite", f"--output={db}",
+                             "--force-overwrite=true", str(report)], timeout=120)
+    if code != 0 or not db.is_file():
+        raise RuntimeError(f"Nsight SQLite export failed: {out}")
+    peaks: dict[int, int] = {}
+    live: dict[int, dict[int, int]] = {}
+    with sqlite3.connect(db) as conn:
+        tables = {name for (name,) in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if "CUDA_GPU_MEMORY_USAGE_EVENTS" not in tables:
+            raise RuntimeError("Nsight report has no CUDA allocation-event table")
+        events = conn.execute(
+            "SELECT deviceId, address, bytes, memoryOperationType "
+            "FROM CUDA_GPU_MEMORY_USAGE_EVENTS ORDER BY start"
+        )
+        for device, address, size, operation in events:
+            allocations = live.setdefault(device, {})
+            if operation == 0:
+                allocations[address] = size
+            elif operation == 1:
+                allocations.pop(address, None)
+            peaks[device] = max(peaks.get(device, 0), sum(allocations.values()))
+    if not peaks:
+        raise RuntimeError("Nsight report contains no CUDA allocation events")
+    return {"scope": "traced CUDA allocations per device; excludes CUDA context and untraced driver memory",
+            "peak_active_allocation_bytes_by_device": {str(k): v for k, v in peaks.items()},
+            "sqlite_report": str(db)}
 
 
 def parse_stages(text: str) -> dict[str, Any]:
@@ -178,7 +212,8 @@ def check_outputs(paths: list[pathlib.Path], started_ns: int,
 
 
 def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pathlib.Path],
-            gpu: str, idle_mib: int, timeout: float = 0, profiled: bool = False) -> dict[str, Any]:
+            gpu: str, idle_mib: int, timeout: float = 0, profiled: bool = False,
+            movie_log: pathlib.Path | None = None) -> dict[str, Any]:
     stdout_path, stderr_path = outdir / f"{label}.stdout.log", outdir / f"{label}.stderr.log"
     started_ns = time.time_ns()
     before: dict[str, tuple[int, int, str] | None] = {}
@@ -210,6 +245,14 @@ def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pa
     if returncode != 0:
         raise RuntimeError(f"{label} exited {returncode}; see {stdout_path} and {stderr_path}")
     outputs = check_outputs(expected, started_ns, before)
+    movie_wall_seconds = None
+    if movie_log is not None:
+        if not movie_log.is_file() or movie_log.stat().st_mtime_ns < started_ns - 1_000_000_000:
+            raise RuntimeError(f"Movie log missing or stale: {movie_log}")
+        match = MOVIE_WALL_RE.search(movie_log.read_text(errors="replace"))
+        if match is None:
+            raise RuntimeError(f"Full movie wall time missing from movie log: {movie_log}")
+        movie_wall_seconds = float(match.group(1))
     vrams = [x["device_total_used_mib"] for x in sampler.samples if x["device_total_used_mib"] is not None]
     return {"label": label, "profiled_with_nsys": profiled,
             "timing_class": "nsys_profiled" if profiled else "sampled_unprofiled",
@@ -223,6 +266,7 @@ def execute(label: str, argv: list[str], outdir: pathlib.Path, expected: list[pa
                                   "peak_device_delta_from_idle_mib": max((max(0, x-idle_mib) for x in vrams), default=None),
                                   "samples": sampler.samples},
             "timing_stages_seconds": parse_stages(out_text + "\n" + err_text),
+            "full_movie_wall_seconds": movie_wall_seconds,
             "outputs": outputs, "stdout_log": str(stdout_path), "stderr_log": str(stderr_path)}
 
 
@@ -239,6 +283,9 @@ def main() -> int:
     p.add_argument("--nsys", help="optional path/name of Nsight Systems executable; adds one separate profiled run")
     p.add_argument("--build-info", default="unspecified",
                    help="build flags/configuration label to retain with measurements")
+    p.add_argument("--source-sha", help="exact source commit, required when the binary source has no Git checkout")
+    p.add_argument("--movie-log", type=pathlib.Path,
+                   help="per-movie log containing 'Full movie wall time'; read after every run")
     p.add_argument("--timeout", type=float, default=0, help="per-run timeout in seconds; 0 means no timeout")
     p.add_argument("args", nargs=argparse.REMAINDER, help="MotionCorr argv after --")
     a = p.parse_args()
@@ -252,7 +299,9 @@ def main() -> int:
         p.error(f"--binary must name an executable file: {binary}")
     a.output_dir.mkdir(parents=True, exist_ok=True)
     gpu = nvidia_info(a.gpu)
-    source_sha = git_source_sha()
+    source_sha = a.source_sha or git_source_sha(binary.parent.parent)
+    if source_sha is None:
+        p.error("source SHA unavailable; pass --source-sha for a copied or packaged build")
     input_hashes = sha_inputs(a.input)
     binary_hash = sha256_file(binary)
     artifact = {"schema_version": 1, "started_utc": datetime.now(timezone.utc).isoformat(),
@@ -271,7 +320,8 @@ def main() -> int:
     try:
         for i in range(1, a.repeat + 1):
             artifact["runs"].append(execute(f"run-{i:02d}", [str(binary), *forwarded], a.output_dir,
-                                           a.expect_output, a.gpu, gpu["idle_memory_used_mib"], a.timeout))
+                                           a.expect_output, a.gpu, gpu["idle_memory_used_mib"],
+                                           a.timeout, movie_log=a.movie_log))
         if a.nsys:
             nsys = shutil.which(a.nsys) or (str(pathlib.Path(a.nsys).resolve()) if pathlib.Path(a.nsys).is_file() else None)
             if not nsys:
@@ -280,7 +330,8 @@ def main() -> int:
             nsys_argv = [nsys, "profile", "--trace=cuda,osrt", "--cuda-memory-usage=true",
                          "--force-overwrite=true", f"--output={profile_prefix}", str(binary), *forwarded]
             profiled = execute("nsys-run", nsys_argv, a.output_dir, a.expect_output,
-                               a.gpu, gpu["idle_memory_used_mib"], a.timeout, profiled=True)
+                               a.gpu, gpu["idle_memory_used_mib"], a.timeout,
+                               profiled=True, movie_log=a.movie_log)
             profiled["nsys_report_prefix"] = profile_prefix
             reports = [pathlib.Path(profile_prefix + suffix) for suffix in (".nsys-rep", ".qdrep")]
             report = next((x for x in reports if x.is_file() and x.stat().st_size > 0), None)
@@ -288,6 +339,7 @@ def main() -> int:
                 raise RuntimeError(f"Nsight run exited successfully but produced no report at {profile_prefix}.*")
             profiled["nsys_report"] = {"path": str(report), "size_bytes": report.stat().st_size,
                                        "sha256": sha256_file(report)}
+            profiled["nsys_allocation_events"] = nsys_allocation_peaks(nsys, report)
             artifact["runs"].append(profiled)
     except Exception as e:
         artifact["status"] = "FAILED"

@@ -97,14 +97,17 @@ jobs:
 ## 8. Implementation Roadmap for Coding Agents
 
 ### Phase 1: Test Fixtures & Baseline Recording
-- Formulate regression test fixture verifying pre-condition state.
+- Formulate regression test fixture verifying pre-condition state in `tests/test_issue_10_cpu_parity.py`.
+- Benchmark before and after performance across 1, 4, and 8 threads with multiple repetitions.
 
 ### Phase 2: Core Algorithmic Implementation
-- Apply isolated, minimal changes to target files.
-- Verify zero regression in existing test cases.
+- Cache and reuse persistent FFTW plans in `src/motioncorr_runner.cpp` across global FFT, global iFFT, patch alignment CCF, and dose-weighting stages.
+- Optimize FFTW plan construction in `src/jaz/single_particle/new_ft.cpp` to use aligned SIMD kernels without critical lock contention in hot loops.
+- Verify zero regression in existing test cases and ensure peak RSS does not regress by more than 10 percent.
 
 ### Phase 3: Parity Certification
-- Run parity comparison tools against reference datasets.
+- Run parity comparison tools against reference datasets to ensure one-thread reference corrected pixels and motion STAR remain identical.
+- Record measured improvement and report speedup with variability.
 
 ---
 
@@ -114,10 +117,14 @@ jobs:
 ```bash
 # Automated validation command
 ctest --output-on-failure
+poetry run python tests/test_reference_gates.py
+poetry run python -m unittest tests/test_issue_10_cpu_parity.py
 ```
 
 ### 9.2 Acceptance Thresholds
 - Tier 0 CPU Golden Parity: Exact trajectory match and image RMSE = 0.0.
+- Peak RSS: Delta $\le 10\%$.
+- Thread Determinism: Bit-exact identical output between single and multi-threaded runs.
 - Exit status: `0`.
 
 ---
@@ -125,7 +132,12 @@ ctest --output-on-failure
 ## Refinement Patches (Incorporating Conformance Agent Feedback)
 ### Permitted Changes & File Whitelist
 To preserve strict scope isolation and prevent collateral side effects, modifications for this issue are strictly confined to:
-- `src/` (Core algorithmic implementation for Issue #10)
-- `tests/` (Automated verification fixtures and numerical regression tests for Issue #10)
+- `src/motioncorr_runner.cpp` (Plan caching across alignment and dose-weighting loops)
+- `src/jaz/single_particle/new_ft.cpp` (Plan constructor alignment for reusable plans)
+- `tests/test_issue_10_cpu_parity.py` (Automated verification fixtures and numerical regression tests for Issue #10)
+- `agents/designs/issue_10_design.md` (Architectural specification)
+- `agents/designs/drafts/issue_10_round_1.md`
+- `agents/designs/drafts/issue_10_round_2.md`
+- `agents/designs/logs/issue_10_refinement_log.md`
 - No unwhitelisted modifications to global headers, build macros, or public CLI signatures are permitted.
 

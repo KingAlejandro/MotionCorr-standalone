@@ -129,7 +129,7 @@ To preserve strict scope isolation and prevent collateral side effects, modifica
 - `tests/` (Automated verification fixtures and numerical regression tests for Issue #4)
 - `tools/` (Comparison and verification tooling: `tools/compare_motioncorr.py`, `tools/test_compare_motioncorr.py`)
 - `CMakeLists.txt` (CTest test registration for regression suites)
-- `pyproject.toml`, `environment.yml`, `requirements.txt` (Python environment configuration and dependencies for testing tools)
+- `pyproject.toml`, `poetry.lock`, `environment.yml`, `requirements.txt` (Python environment configuration and dependencies for testing tools)
 - `docs/reference_gates.md` (Numerical acceptance gate specifications and baseline reference metrics)
 - No unwhitelisted modifications to global headers, build macros, or public CLI signatures are permitted.
 

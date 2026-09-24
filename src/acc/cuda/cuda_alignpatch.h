@@ -6,6 +6,7 @@
 #include "src/multidim_array.h"
 #include "src/complex.h"
 #include "src/acc/cuda/global_peak_probe.h"
+#include "src/acc/cuda/full_alignment_trace.h"
 
 #ifdef _CUDA_ENABLED
 /**

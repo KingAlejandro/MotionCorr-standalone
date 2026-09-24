@@ -111,7 +111,8 @@ __global__ void findPeakAndInterpolateKernel(
     int search_range,
     float ccf_scale_x, float ccf_scale_y,
     int n_frames,
-    GlobalPeakProbeRecord *d_probe)
+    GlobalPeakProbeRecord *d_probe,
+    FullPeakRecord *d_full_peaks)
 {
     int iframe = blockIdx.x;
     if (iframe >= n_frames) return;
@@ -199,6 +200,20 @@ __global__ void findPeakAndInterpolateKernel(
             d_probe->y_interpolated = fabsf(denom_y) > EPS;
         }
 
+        if (d_full_peaks) {
+            FullPeakRecord &r = d_full_peaks[iframe];
+            r.value[0] = posx; r.value[1] = posy; r.value[2] = maxval;
+            r.value[3] = vn_x; r.value[4] = vp_x;
+            r.value[5] = vn_y; r.value[6] = vp_y;
+            r.value[7] = denom_x; r.value[8] = denom_y;
+            r.value[9] = cur_x; r.value[10] = cur_y;
+            r.value[11] = cur_x * ccf_scale_x;
+            r.value[12] = cur_y * ccf_scale_y;
+            r.value[13] = fabsf(denom_x) > EPS;
+            r.value[14] = fabsf(denom_y) > EPS;
+            r.value[15] = 0;
+        }
+
         d_cur_xshifts[iframe] = cur_x * ccf_scale_x;
         d_cur_yshifts[iframe] = cur_y * ccf_scale_y;
     }
@@ -245,6 +260,9 @@ bool cudaAlignPatch(
     const std::string &movie_identity)
 {
     GlobalPeakProbeConfig peak_probe;
+    const bool full_trace = fullTraceEnabled();
+    if (full_trace && device_id < 0)
+        REPORT_ERROR("Full CUDA trace requires an explicit --gpu ordinal");
     readGlobalPeakProbeConfig(peak_probe);
     if (peak_probe.enabled) {
         if (device_id < 0)
@@ -329,6 +347,7 @@ bool cudaAlignPatch(
     float *d_shiftx = nullptr;
     float *d_shifty = nullptr;
     GlobalPeakProbeRecord *d_peak_probe = nullptr;
+    FullPeakRecord *d_full_peaks = nullptr;
 
     HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
@@ -346,6 +365,7 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaMalloc(&d_peak_probe, sizeof(GlobalPeakProbeRecord)));
         HANDLE_ERROR(cudaMemcpy(d_peak_probe, &h_peak_probe, sizeof(GlobalPeakProbeRecord), cudaMemcpyHostToDevice));
     }
+    if (full_trace) HANDLE_ERROR(cudaMalloc(&d_full_peaks, (size_t)n_frames * sizeof(FullPeakRecord)));
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
 
@@ -378,6 +398,12 @@ bool cudaAlignPatch(
     dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
     computeWeightsKernel<<<gridWeights, blockWeights>>>(d_weight, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
     LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    if (full_trace) {
+        std::vector<float> array(sz_weight / sizeof(float));
+        HANDLE_ERROR(cudaMemcpy(array.data(), d_weight, sz_weight, cudaMemcpyDeviceToHost));
+        fullTraceArray(fullTraceKey("g", 0, "weight"), array.data(), sz_weight, "f4",
+                       integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+    }
     if (peak_probe.capture_arrays) {
         std::vector<float> array(sz_weight / sizeof(float));
         HANDLE_ERROR(cudaMemcpy(array.data(), d_weight, sz_weight, cudaMemcpyDeviceToHost));
@@ -395,6 +421,9 @@ bool cudaAlignPatch(
     std::vector<float> h_cur_yshifts(n_frames, 0.0f);
     std::vector<float> h_shiftx(n_frames, 0.0f);
     std::vector<float> h_shifty(n_frames, 0.0f);
+    std::vector<float2> full_complex_frame(full_trace ? (size_t)nfy * nfx : 0);
+    std::vector<float> full_real_frame(full_trace ? (size_t)ccf_ny * ccf_nx : 0);
+    std::vector<FullPeakRecord> full_peaks(full_trace ? n_frames : 0);
 
     bool converged = false;
     float accumulated_kernel_ms = 0.0f;
@@ -403,6 +432,14 @@ bool cudaAlignPatch(
     bool peak_trace_written = false;
 
     for (int iter = 1; iter <= max_iter; iter++) {
+        if (full_trace) {
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                HANDLE_ERROR(cudaMemcpy(full_complex_frame.data(), d_Fframes + (size_t)iframe * nfy * nfx,
+                                        sz_input_frame, cudaMemcpyDeviceToHost));
+                fullTraceArray(fullTraceKey("g", iter, "input", iframe), full_complex_frame.data(),
+                               sz_input_frame, "c8", integerToString(nfy) + "," + integerToString(nfx));
+            }
+        }
         const bool capture_arrays = peak_probe.capture_arrays && iter == peak_probe.iteration;
         if (capture_arrays) {
             std::vector<float2> array(sz_input_frame / sizeof(float2));
@@ -423,6 +460,17 @@ bool cudaAlignPatch(
         float k1_ms = 0.0f;
         HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k1_ms;
+        if (full_trace) {
+            HANDLE_ERROR(cudaMemcpy(full_complex_frame.data(), d_Fref, sz_fref, cudaMemcpyDeviceToHost));
+            fullTraceArray(fullTraceKey("g", iter, "fref"), full_complex_frame.data(), sz_fref,
+                           "c8", integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                HANDLE_ERROR(cudaMemcpy(full_complex_frame.data(), d_Fccs + (size_t)iframe * ccf_nfy * ccf_nfx,
+                                        sz_fref, cudaMemcpyDeviceToHost));
+                fullTraceArray(fullTraceKey("g", iter, "fccs", iframe), full_complex_frame.data(), sz_fref,
+                               "c8", integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+            }
+        }
         if (capture_arrays) {
             std::vector<float2> reference(sz_fref / sizeof(float2));
             std::vector<float2> spectrum(sz_fref / sizeof(float2));
@@ -441,6 +489,14 @@ bool cudaAlignPatch(
         float iter_cufft_ms = 0.0f;
         HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
         accumulated_cufft_ms += iter_cufft_ms;
+        if (full_trace) {
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                HANDLE_ERROR(cudaMemcpy(full_real_frame.data(), d_Iccs + (size_t)iframe * ccf_ny * ccf_nx,
+                                        sz_iccs_frame, cudaMemcpyDeviceToHost));
+                fullTraceArray(fullTraceKey("g", iter, "iccs", iframe), full_real_frame.data(), sz_iccs_frame,
+                               "f4", integerToString(ccf_ny) + "," + integerToString(ccf_nx));
+            }
+        }
         if (capture_arrays) {
             std::vector<float> image(sz_iccs_frame / sizeof(float));
             HANDLE_ERROR(cudaMemcpy(image.data(), d_Iccs + (size_t)peak_probe.frame_index * ccf_ny * ccf_nx,
@@ -454,7 +510,8 @@ bool cudaAlignPatch(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
             (float)ccf_scale_x, (float)ccf_scale_y, n_frames,
-            (peak_probe.enabled && iter == peak_probe.iteration) ? d_peak_probe : nullptr
+            (peak_probe.enabled && iter == peak_probe.iteration) ? d_peak_probe : nullptr,
+            full_trace ? d_full_peaks : nullptr
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
@@ -467,6 +524,14 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
         HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
         HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
+        if (full_trace) {
+            HANDLE_ERROR(cudaMemcpy(full_peaks.data(), d_full_peaks,
+                                    (size_t)n_frames * sizeof(FullPeakRecord), cudaMemcpyDeviceToHost));
+            fullTraceArray(fullTraceKey("g", iter, "peaks"), full_peaks.data(),
+                           (size_t)n_frames * sizeof(FullPeakRecord), "f8", integerToString(n_frames) + ",16");
+            fullTraceArray(fullTraceKey("g", iter, "rawshiftx"), h_cur_xshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+            fullTraceArray(fullTraceKey("g", iter, "rawshifty"), h_cur_yshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+        }
         if (peak_probe.enabled && iter == peak_probe.iteration) {
             HANDLE_ERROR(cudaMemcpy(&h_peak_probe, d_peak_probe, sizeof(GlobalPeakProbeRecord), cudaMemcpyDeviceToHost));
             h_peak_probe.frame0_shift_x_scaled = h_cur_xshifts[0];
@@ -500,12 +565,22 @@ bool cudaAlignPatch(
         }
         h_cur_xshifts[0] = 0.0f;
         h_cur_yshifts[0] = 0.0f;
+        if (full_trace) {
+            fullTraceArray(fullTraceKey("g", iter, "deltax"), h_cur_xshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+            fullTraceArray(fullTraceKey("g", iter, "deltay"), h_cur_yshifts.data(), sz_shifts, "f4", integerToString(n_frames));
+        }
 
         for (int iframe = 0; iframe < n_frames; iframe++) {
             xshifts[iframe] += h_cur_xshifts[iframe];
             yshifts[iframe] += h_cur_yshifts[iframe];
             h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
             h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
+        }
+        if (full_trace) {
+            fullTraceArray(fullTraceKey("g", iter, "totalx"), xshifts.data(),
+                           (size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+            fullTraceArray(fullTraceKey("g", iter, "totaly"), yshifts.data(),
+                           (size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
         }
 
         // Apply Fourier phase shifts on GPU (matches CPU motioncorr_runner.cpp line 2476)
@@ -520,6 +595,14 @@ bool cudaAlignPatch(
             float shift_kernel_ms = 0.0f;
             HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
             accumulated_kernel_ms += shift_kernel_ms;
+        }
+        if (full_trace) {
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                HANDLE_ERROR(cudaMemcpy(full_complex_frame.data(), d_Fframes + (size_t)iframe * nfy * nfx,
+                                        sz_input_frame, cudaMemcpyDeviceToHost));
+                fullTraceArray(fullTraceKey("g", iter, "postshift", iframe), full_complex_frame.data(),
+                               sz_input_frame, "c8", integerToString(nfy) + "," + integerToString(nfx));
+            }
         }
 
         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
@@ -578,6 +661,7 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaFree(d_shiftx));
     HANDLE_ERROR(cudaFree(d_shifty));
     if (d_peak_probe) HANDLE_ERROR(cudaFree(d_peak_probe));
+    if (d_full_peaks) HANDLE_ERROR(cudaFree(d_full_peaks));
 
     HANDLE_ERROR(cudaEventDestroy(ev_start_total));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_total));

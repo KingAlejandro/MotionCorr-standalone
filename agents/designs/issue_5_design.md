@@ -6,7 +6,7 @@
 - **Architect**: MotionCorr Architecture Agent
 - **Estimated Difficulty**: Low-Medium (2/5)
 - **Dependencies**: `#4 (reference)`
-- **Status**: Proposed
+- **Status**: Implemented & Verified
 - **Target Release / Milestone**: v1.0.0
 
 ---
@@ -24,9 +24,9 @@ This architectural specification details the algorithmic formulation, component 
 ### 2.1 Functional Objectives
 - Fulfill all deliverables associated with Issue #5.
 - Satisfy the core acceptance criteria:
-- [ ] Clean Linux build completes in CI from main with dependency versions captured in the job log.
-- [ ] CLI help and a compact deterministic MRC or TIFF fixture run through the binary and produce a readable corrected MRC plus motion STAR.
-- [ ] The workflow fails on a nonzero process exit or missing/invalid outputs, and README includes Linux build instructions.
+- [x] Clean Linux build completes in CI from main with dependency versions captured in the job log.
+- [x] CLI help and a compact deterministic MRC or TIFF fixture run through the binary and produce a readable corrected MRC plus motion STAR.
+- [x] The workflow fails on a nonzero process exit or missing/invalid outputs, and README includes Linux build instructions.
 
 ### 2.2 Scientific & Non-Functional Constraints
 - **Parity Gate**: Must strictly meet the acceptance thresholds defined in Issue #4 (`agents/designs/issue_4_define_the_reference_outputs_and_numeric.md`).
@@ -39,13 +39,23 @@ This architectural specification details the algorithmic formulation, component 
 ## 3. Mathematical & Algorithmic Formulation
 
 ### 3.1 CI Infrastructure & Matrix Configuration
-- Multi-platform matrix: Linux (Ubuntu 22.04 LTS with GCC 11+ and Clang 14+) and macOS (macOS 13+ with AppleClang).
-- Automated dependency caching (CMake, FFTW3, LibTIFF) to ensure CI runtimes remain $\le 10\text{ minutes}$.
-- Automated test gate running synthetic parity test fixtures with strict pass/fail exit codes.
+- **Host Environments**: Ubuntu 22.04 LTS (Primary Linux Runner), Ubuntu 24.04 LTS.
+- **Compilers**: GCC 11 / GCC 12 (`g++`), Clang 14 / Clang 15 (`clang++`).
+- **Dependencies**:
+  - Build & Tools: `build-essential`, `cmake (>= 3.21)`, `pkg-config`, `git`
+  - Numerical & Acceleration: `libfftw3-dev`, `libfftw3-single3`, `libomp-dev` (OpenMP)
+  - Image & Compression: `libtiff-dev`, `libpng-dev`, `libjpeg-dev`, `zlib1g-dev`
+  - Python Environment: `python3 (>= 3.10)`, `python3-pip`, `python3-numpy`
+- **Execution Budget**: Total CI execution $\le 5\text{ minutes}$ on standard GitHub Actions runners.
 
-### 3.2 Build Verification & Artifact Integrity
-- Hermetic build validation with `-Wall -Wextra -Werror` compliance.
-- Build artifact verification ensuring binary symbols and dependencies resolve cleanly.
+### 3.2 Build Verification & Smoke Checks
+1. **Pre-flight Toolchain Audit**: Capture and log compiler versions, CMake version, and pkg-config library paths.
+2. **Out-of-Source Build**: Configure via `cmake -B build -DCMAKE_BUILD_TYPE=Release` and build via `cmake --build build -j$(nproc)`.
+3. **CLI Smoke Check**: Execute `./build/motioncorr` and verify parameter error handling and `--help` CLI responsiveness.
+4. **Automated Regression & Parity Validation**:
+   - Run `python agents/testing_agent/scripts/run_build_and_test.py` verifying multi-thread determinism and synthetic movie parity.
+   - Run `python tests/test_reference_gates.py` executing all 3 comparator suites (`--gate exact` and `--gate relaxed`).
+5. **Hermetic Isolation**: Keep multi-gigabyte experimental movie downloads out of standard CI; rely strictly on compact deterministic synthetic fixtures (`tests/test_reference_gates.py`).
 
 ---
 
@@ -53,11 +63,14 @@ This architectural specification details the algorithmic formulation, component 
 
 ```mermaid
 flowchart TD
-    PR["Pull Request / Push Event"] --> CI["GitHub Actions Runner Matrix"]
-    CI --> Build["Compile: GCC / Clang / AppleClang"]
-    Build --> Test["Execute Synthetic Parity Test Suite"]
-    Test --> Gate["Automated Parity Gate (Issue #4)"]
-    Gate --> Status["Report CI Check Status"]
+    PR["Push / Pull Request Event"] --> Setup["1. Setup Environment & Apt Dependencies"]
+    Setup --> LogEnv["2. Log Toolchain & Dependency Versions"]
+    LogEnv --> CMakeConfig["3. CMake Out-of-Source Configure (-DCMAKE_BUILD_TYPE=Release)"]
+    CMakeConfig --> Build["4. Build motioncorr & libmotioncorr_core (-j)"]
+    Build --> Smoke["5. CLI Smoke Check & Help Validation"]
+    Smoke --> TestGates["6. Execute Reference Acceptance Gates (test_reference_gates.py)"]
+    TestGates --> TestAgent["7. Execute Testing Agent Orchestrator (run_build_and_test.py)"]
+    TestAgent --> Success["8. CI Status: PASS"]
 ```
 
 ---
@@ -65,22 +78,32 @@ flowchart TD
 ## 5. Interface Contracts & Data Structures
 
 ```yaml
-# CI Pipeline Configuration for #5
+# .github/workflows/linux_ci.yml
+name: Linux CI & Smoke Checks
+
+on:
+  push:
+    branches: [ main, dev_milan, 'feat/**' ]
+  pull_request:
+    branches: [ main, dev_milan ]
+
 jobs:
-  test_matrix:
-    runs-on: ${ matrix.os }
+  build-and-test:
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13]
-        compiler: [gcc, clang]
+        compiler: [ { c: gcc, cxx: g++ }, { c: clang, cxx: clang++ } ]
+        build_type: [ Release, Debug ]
 ```
 
 ---
 
 ## 6. Memory Staging & Allocation Strategy
 
-- Optimize CI runner concurrency and container memory limits (4 GB RSS ceiling per test worker).
-- Clean up intermediate object files between matrix jobs to avoid exceeding runner disk quotas.
+- Enforce isolated scratch test directories during test execution.
+- Maintain $\le 4\text{ GB}$ peak memory footprint per CI runner job.
+- Purge intermediate build objects if runner disk caching is activated.
 
 ---
 
@@ -88,36 +111,23 @@ jobs:
 
 | Condition / Trigger | Detection Mechanism | Fallback / Recovery Action | User Diagnostic Visibility |
 | :--- | :--- | :--- | :--- |
-| Non-convergence / NaN | Numerical sanity check | Revert to global rigid shift | Log warning to stderr and STAR metadata |
-| Out of bounds memory | Pre-condition size check | Graceful exit with code 1 | Meaningful error message in log |
+| Missing apt dependency | CMake configuration error | CI job terminates immediately with failure code | Error log points to missing package name |
+| Compiler failure / warning | `-Wall -Wextra` flags | Fail build on compilation errors | Exact file and line compiler error log |
+| CLI / Smoke test failure | Nonzero exit code | Fail CI step | Captured stdout/stderr in GitHub step log |
+| Numerical parity drift | Tolerance threshold breach ($\text{RMSE} > 10^{-6}$) | Acceptance gate failure | Structured comparator diff report |
 
 ---
 
 ## 8. Implementation Roadmap for Coding Agents
 
-### Phase 1: Test Fixtures & Baseline Recording
-- Formulate regression test fixture verifying pre-condition state.
+### Phase 1: CI Workflow Definition
+- Formulate `.github/workflows/linux_ci.yml` defining the matrix build, dependency installation, toolchain logging, compilation, and smoke/parity testing steps.
 
-### Phase 2: Core Algorithmic Implementation
-- Apply isolated, minimal changes to target files.
-- Verify zero regression in existing test cases.
+### Phase 2: Documentation & Build Instructions
+- Update `README.md` with complete, reproducible Linux build prerequisites (apt commands, CMake configure, parallel build, and test invocation).
 
-### Phase 3: Parity Certification
-- Run parity comparison tools against reference datasets.
-
----
-
-## 9. Verification & Acceptance Criteria
-
-### 9.1 Automated Tests
-```bash
-# Automated validation command
-ctest --output-on-failure
-```
-
-### 9.2 Acceptance Thresholds
-- Tier 0 CPU Golden Parity: Exact trajectory match and image RMSE = 0.0.
-- Exit status: `0`.
+### Phase 3: Automated Verification
+- Validate workflow schema and run local build and test harness against all defined smoke criteria.
 
 ---
 

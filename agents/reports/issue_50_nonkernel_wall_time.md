@@ -510,12 +510,44 @@ The GPU host was subsequently capped to 8 logical CPUs. What that does and does 
 - **Parity is unaffected.** `--j` fixes the OpenMP team size via `num_threads(n_threads)`
   regardless of how many cores exist, so reduction order, the hot-pixel set and every
   corrected pixel are unchanged. All exactness results carry over.
-- **The paired wall-time result stands in direction and magnitude-class, not in absolute
-  value.** Both arms ran interleaved under identical conditions, so a cap shifts both
-  together and cannot manufacture a 29/30 sign split. The absolute 3.360 / 3.150 s figures
-  are tied to the uncapped box.
+- **The paired wall-time result survives the cap — measured, not argued.** The n = 15
+  series was repeated inside the `taskset -c 96-103` pool, same binaries, same base-first
+  ordering, cap the only difference:
+
+  | regime | n | mean delta | median | negative | p |
+  |---|---:|---:|---:|---:|---|
+  | uncapped, 124 CPUs | 15 | −0.2213 s | −0.220 s | 14/15 | 0.00012 |
+  | capped, 8 CPUs | 15 | **−0.1547 s** | −0.160 s | 14/15 | **0.00012** |
+
+  The capped regime is **independently resolved**, which is what makes the comparison
+  meaningful rather than a contest between two noise distributions.
+
+  **But the point estimate is 70% of the uncapped effect, and that difference is not
+  established**: permutation p = 0.080 on the two delta sets. So this sits between
+  *shifted* (baseline moves, effect constant) and *attenuated* (effect itself shrinks), and
+  n = 15 per regime is too small to say which. Absence of evidence of a difference is not
+  evidence of its absence. **A constrained host should assume the smaller figure**,
+  −0.155 s, until someone runs enough pairs to separate the two.
+
+  Also worth noting: the *baseline* was slightly faster under the cap (3.360 → 3.310 s), the
+  same direction a sibling task saw much more strongly (2.229 → 2.087 s). Pinning to 8
+  adjacent logical CPUs plausibly removes thread-migration and NUMA-crossing cost that an
+  unpinned 124-core box pays. Consistent with the numbers, not measured.
 - **The TIFF decode recommendation does not survive**, measured, not inferred: 0.291 s at 24
   threads uncapped becomes 0.751 s capped, indistinguishable from 8 threads.
+
+Three distinct ways a result can respond to a resource cap, which are worth separating
+because they imply different actions (taxonomy developed jointly with the sibling
+hot-pixel task, whose own result landed in the middle bucket):
+
+| class | what changes | what to report |
+|---|---|---|
+| **shifted** | baseline moves, effect size constant | re-baseline the absolutes, recommendation unchanged |
+| **attenuated** | effect itself shrinks but stays resolved | **quote the constrained figure** when the deployment is constrained |
+| **eliminated** | effect disappears entirely | reclassify as deployment-dependent, not a code-level win |
+
+The MRC change is shifted-or-attenuated (undetermined at n = 15). The TIFF decode-thread
+finding is eliminated. Parity results are invariant in all three senses.
 - **The build-flag finding should largely survive**, because the `-O0` penalty falls mainly
   on single-threaded host code (the four statistics passes, the MRC write) rather than on
   parallelism — but that is reasoning, not a measurement, and is labelled as such.

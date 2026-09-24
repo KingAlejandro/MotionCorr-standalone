@@ -17,10 +17,22 @@ This skill provides a standardized tool and workflow for querying Pull Requests 
    - Fetches full PR description, linked issue references (e.g. `Fixes #4`, `Resolves #10`).
    - Retrieves file change statistics (additions, deletions, modified files).
    - Fetches unified diff/patch directly (`--diff`) for code review and verification agents.
-3. **Flexible Authentication & Offline Fallback**:
+3. **Flexible Authentication & Auto-Discovery**:
    - Uses `GITHUB_TOKEN` or `GH_TOKEN` environment variable if present.
    - Works without authentication for public repositories.
-   - Supports local branch / git ref inspection (`--target <branch>`).
+   - Auto-discovers repository from git remote origin if `--repo` is omitted.
+
+## CLI Options Reference
+
+| Option | Type / Choices | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `--repo` | `str` | *Auto-discovered* | GitHub repository slug (e.g. `KingAlejandro/MotionCorr-standalone`). |
+| `--pr` | `int` | *None* | Specific Pull Request number to inspect. |
+| `--state` | `open`, `closed`, `all` | `all` | Filter PRs by state when listing. |
+| `--limit` | `int` | `30` | Maximum number of PRs to return when listing. |
+| `--diff` | `flag` | `False` | Fetch and return the raw unified patch diff for the PR. |
+| `--format` | `markdown`, `json`, `summary` | `markdown` | Output formatting mode. |
+| `--output` | `path` | `stdout` | Optional output file path to write results. |
 
 ## Directory Structure
 

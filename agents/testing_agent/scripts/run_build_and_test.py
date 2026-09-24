@@ -202,7 +202,19 @@ def run_synthetic_test(
     with tempfile.TemporaryDirectory(prefix="motioncorr_test_") as tmpdir:
         code, out, err, elapsed = run_command(cmd, cwd=Path(tmpdir), env=env)
 
-    passed = code == 0
+    error_patterns = [
+        "ERROR:",
+        "Cannot read file",
+        "too few frames",
+        "Skipped ",
+        "Segmentation fault",
+        "Fatal error",
+        "Core dumped",
+        "=== Backtrace ===",
+    ]
+    combined = f"{out}\n{err}"
+    has_error_pattern = any(p in combined for p in error_patterns)
+    passed = (code == 0) and (not has_error_pattern)
     shift_match = re.search(r"Max shift delta vs reference:\s*([\d\.e\+\-]+)", out)
     rmse_match = re.search(r"Image RMSE vs reference:\s*([\d\.e\+\-]+)", out)
     max_d_match = re.search(r"Max pixel delta:\s*([\d\.e\+\-]+)", out)

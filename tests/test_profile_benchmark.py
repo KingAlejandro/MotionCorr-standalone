@@ -91,6 +91,18 @@ class TestProfileCpuBenchmark(unittest.TestCase):
         self.assertIn("patch alignment", report)
         self.assertIn("Ranked Optimization Recommendations", report)
 
+    def test_error_pattern_detection(self):
+        from tests.test_reference_gates import ERROR_PATTERNS, assert_clean_execution
+        
+        # Clean output passes
+        clean_out = "Using our own implementation based on MOTIONCOR2\nDone! Written: logfile.pdf"
+        assert_clean_execution(clean_out, "", "test_clean")
+        
+        # Error output raises RuntimeError
+        for err_sample in ["ERROR: Cannot read file test.mrcs", "too few frames (1 < 3)", "Skipped file: bad header"]:
+            with self.assertRaises(RuntimeError):
+                assert_clean_execution("", err_sample, "test_error")
+
 
 if __name__ == "__main__":
     unittest.main()

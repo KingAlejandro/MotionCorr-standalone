@@ -224,6 +224,26 @@ def run_benchmark_case(
             binary_path, cmd_args, exec_cwd
         )
         
+        # Check for internal runtime errors in stdout/stderr
+        error_patterns = [
+            "ERROR:",
+            "Cannot read file",
+            "too few frames",
+            "Skipped ",
+            "Segmentation fault",
+            "Fatal error",
+            "Core dumped",
+            "=== Backtrace ===",
+        ]
+        combined_output = f"{stdout}\n{stderr}"
+        has_error = any(p in combined_output for p in error_patterns)
+        if has_error:
+            exit_code = 1 if exit_code == 0 else exit_code
+            print(f"[Benchmark] [WARNING] Runtime error detected in run {name} rep {rep}:")
+            for line in combined_output.splitlines():
+                if any(p in line for p in error_patterns):
+                    print(f"  -> {line.strip()}")
+        
         stage_times = parse_stage_times_from_output(stdout)
         
         # Collect output checksums

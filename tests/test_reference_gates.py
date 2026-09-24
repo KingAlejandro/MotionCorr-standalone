@@ -15,6 +15,31 @@ import tempfile
 from pathlib import Path
 
 
+ERROR_PATTERNS = [
+    "ERROR:",
+    "Cannot read file",
+    "too few frames",
+    "Skipped ",
+    "Segmentation fault",
+    "Fatal error",
+    "Core dumped",
+    "=== Backtrace ===",
+]
+
+
+def assert_clean_execution(stdout: str, stderr: str, context: str = ""):
+    """Verify stdout and stderr are free from internal motioncorr errors and warnings."""
+    combined = f"{stdout}\n{stderr}"
+    for pattern in ERROR_PATTERNS:
+        if pattern in combined:
+            raise RuntimeError(
+                f"MotionCorr runtime error detected in {context}:\n"
+                f"Found pattern: '{pattern}'\n"
+                f"STDOUT:\n{stdout}\n"
+                f"STDERR:\n{stderr}\n"
+            )
+
+
 def run_reference_gate_tests(binary: Path = None, python_bin: str = sys.executable) -> bool:
     repo_root = Path(__file__).resolve().parent.parent
 
@@ -74,7 +99,8 @@ def run_reference_gate_tests(binary: Path = None, python_bin: str = sys.executab
                 "--patch_y", "3",
                 "--bfactor", "150",
             ]
-            subprocess.run(cmd_run, cwd=str(test_out), check=True, capture_output=True)
+            res_syn = subprocess.run(cmd_run, cwd=str(test_out), check=True, capture_output=True, text=True)
+            assert_clean_execution(res_syn.stdout, res_syn.stderr, "Suite 2 synthetic movie run")
             out_mrc = list(test_out.glob("**/synthetic_movie.mrc"))[0]
             out_star = list(test_out.glob("**/synthetic_movie.star"))[0]
             cmp_args = [
@@ -88,10 +114,12 @@ def run_reference_gate_tests(binary: Path = None, python_bin: str = sys.executab
             work_dir = fixtures_dir
             # Generate baseline reference run (j=1)
             cmd_ref = [str(binary.resolve()), "--i", input_spec, "--o", str(ref_out.resolve()), "--use_own", "--j", "1"]
-            subprocess.run(cmd_ref, cwd=str(work_dir), check=True, capture_output=True)
+            res_ref = subprocess.run(cmd_ref, cwd=str(work_dir), check=True, capture_output=True, text=True)
+            assert_clean_execution(res_ref.stdout, res_ref.stderr, "Suite 2 baseline reference run")
             # Generate test run (j=1)
             cmd_test = [str(binary.resolve()), "--i", input_spec, "--o", str(test_out.resolve()), "--use_own", "--j", "1"]
-            subprocess.run(cmd_test, cwd=str(work_dir), check=True, capture_output=True)
+            res_test = subprocess.run(cmd_test, cwd=str(work_dir), check=True, capture_output=True, text=True)
+            assert_clean_execution(res_test.stdout, res_test.stderr, "Suite 2 test run")
             cmp_args = ["--ref", str(ref_out.resolve()), "--test", str(test_out.resolve())]
 
         cmd_cmp = [
@@ -134,6 +162,7 @@ def run_reference_gate_tests(binary: Path = None, python_bin: str = sys.executab
             print("MotionCorr STDOUT:\n", res_run.stdout)
             print("MotionCorr STDERR:\n", res_run.stderr)
             raise RuntimeError(f"MotionCorr relaxed run failed with code {res_run.returncode}")
+        assert_clean_execution(res_run.stdout, res_run.stderr, "Suite 3 relaxed multi-frame run")
 
         cmd_cmp = [
             python_bin,

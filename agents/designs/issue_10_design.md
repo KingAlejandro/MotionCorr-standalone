@@ -81,7 +81,7 @@ namespace MotionCorr {
 
 - Enforce zero-allocation loops during iterative Fourier search.
 - Pre-allocate scratch workspace buffers during pipeline initialization.
-- Maximum memory overhead ceiling: $\le 5\%$ RSS delta.
+- Maximum memory overhead ceiling: $\le 10\%$ RSS delta.
 
 ---
 

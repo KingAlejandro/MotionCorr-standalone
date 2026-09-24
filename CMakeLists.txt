@@ -43,7 +43,12 @@ list(REMOVE_ITEM MOTIONCORR_SOURCES
 add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
 target_include_directories(motioncorr_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+option(ENABLE_TIMING "Enable internal stage timers in MotionCorr" ON)
+if(ENABLE_TIMING)
+    target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG TIMING)
+else()
+    target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+endif()
 target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)

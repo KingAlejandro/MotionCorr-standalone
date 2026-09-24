@@ -2193,8 +2193,12 @@ skip_fitting:
 			// Discard any partial CUDA result before running the CPU reconstruction.
 			Iref().initZeros();
 #ifdef _CUDA_ENABLED
-			if (movie_session && (Fframes.empty() || Fframes[0].nzyxdim == 0)) {
-				movie_session->downloadFourierFrames(Fframes);
+			// A power-spectrum request may have populated Fframes before global
+			// alignment. Always refresh it from the resident, aligned Fourier
+			// frames before taking the CPU dose-weighting fallback.
+			if (movie_session) {
+				if (!movie_session->downloadFourierFrames(Fframes))
+					REPORT_ERROR("Failed to download aligned Fourier frames for dose-weighting fallback");
 			}
 #endif
 			RCTIC(TIMING_DW_WEIGHT);

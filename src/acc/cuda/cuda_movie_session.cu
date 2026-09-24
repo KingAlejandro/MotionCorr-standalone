@@ -373,26 +373,30 @@ bool CudaMovieSession::updateDefectPixels(
 
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    int *d_bad_xs = nullptr;
-    int *d_bad_ys = nullptr;
-    float *d_replacements = nullptr;
+    struct DefectScratch {
+        int *xs = nullptr;
+        int *ys = nullptr;
+        float *values = nullptr;
+        ~DefectScratch() {
+            if (xs) cudaFree(xs);
+            if (ys) cudaFree(ys);
+            if (values) cudaFree(values);
+        }
+    } scratch;
 
-    HANDLE_ERROR(cudaMalloc((void**)&d_bad_xs, n_bad * sizeof(int)));
-    HANDLE_ERROR(cudaMalloc((void**)&d_bad_ys, n_bad * sizeof(int)));
-    HANDLE_ERROR(cudaMalloc((void**)&d_replacements, (size_t)n_bad * n_frames * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.xs, n_bad * sizeof(int)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.ys, n_bad * sizeof(int)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.values, (size_t)n_bad * n_frames * sizeof(float)));
 
-    HANDLE_ERROR(cudaMemcpy(d_bad_xs, bad_xs.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_bad_ys, bad_ys.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_replacements, replacements.data(), (size_t)n_bad * n_frames * sizeof(float), cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(scratch.xs, bad_xs.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(scratch.ys, bad_ys.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(scratch.values, replacements.data(), (size_t)n_bad * n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
     const int block = 256;
     const int grid = (n_bad + block - 1) / block;
-    updateDefectKernel<<<grid, block>>>(d_Iframes, d_bad_xs, d_bad_ys, d_replacements, n_bad, nx, ny, n_frames);
+    updateDefectKernel<<<grid, block>>>(d_Iframes, scratch.xs, scratch.ys, scratch.values, n_bad, nx, ny, n_frames);
     HANDLE_ERROR(cudaGetLastError());
-
-    cudaFree(d_bad_xs);
-    cudaFree(d_bad_ys);
-    cudaFree(d_replacements);
+    HANDLE_ERROR(cudaDeviceSynchronize());
 
     return true;
 }

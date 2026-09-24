@@ -187,10 +187,12 @@ reason, and would be worth at most ~1.8 ms.
    none. Concurrent Issue #50 work (GPU hot-pixel statistics, which adds reduction and
    compaction scratch) must be re-measured on the combined commit; deltas must not be
    added.
-4. **Unexercised paths.** Not covered here: CPU fallback under injected allocation
-   failure, `CUDA=OFF` build, EER, early binning, explicit defect maps, gain
-   rotation/flip, no-dose-weighting. The change is inside two transform loops and is
-   mode-independent, but that is an argument, not evidence.
+4. **Unexercised paths.** `CUDA=OFF` builds clean from this commit on the same host
+   (the change sits inside `#ifdef _CUDA_ENABLED`, so this is expected rather than
+   informative). Still **not** covered: CPU fallback under injected allocation failure,
+   EER, early binning, explicit defect maps, gain rotation/flip, no-dose-weighting, and
+   power-spectrum mode. The change is inside two transform loops and is mode-independent,
+   but that is an argument, not evidence.
 5. **One-shot 24-movie walls** were 54.14 s baseline and 55.05 s candidate. **n=1 each
    — no timing conclusion should be drawn from these**; they were correctness runs.
 

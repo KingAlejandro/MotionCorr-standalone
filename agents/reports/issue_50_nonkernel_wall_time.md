@@ -468,6 +468,13 @@ the work it removes, not as the answer to Issue #50's timing target.
 
 ## Recommendations, in descending value
 
+The ordering below is for an **unconstrained** host. On a core-constrained one it changes:
+item 2 is worth nothing (measured), while items 3 and 4 are serial or I/O-bound and are
+largely unaffected by a CPU cap. So a constrained deployment should read the order as
+**1, 3, 4, 2**. That inversion is the practical consequence of the shifted / attenuated /
+eliminated distinction above, and it is easy to miss if only the unconstrained figures are
+quoted.
+
 1. **Set a default `CMAKE_BUILD_TYPE`** (and record the configure line in benchmark
    evidence). Worth ~0.8 s here, and measured bit-identical on this movie with
    `-ffp-contract=off` pinned. That pin is not optional: without it GCC fuses `a*b+c` into
@@ -480,7 +487,8 @@ the work it removes, not as the answer to Issue #50's timing target.
    cores being available**: measured worth nothing under an 8-CPU cap, so decide it against
    the production core budget rather than against this host.
 3. **Reduce the ghostscript chain.** 0.419 s across four spawns, most of it process
-   startup. `header.pdf` and `batch.pdf` are independent and could be produced
+   startup — and serial process startup, so a CPU cap does not erode it the way it erodes
+   item 2. On a constrained host this is the second-largest lever, not the third. `header.pdf` and `batch.pdf` are independent and could be produced
    concurrently; `all_batches.pdf` is a single-input re-encode of `batch.pdf`. Not done
    here because the equivalence argument rests on PDFs that are already non-deterministic,
    and the repo has no page-content gate to back it — that gate should be built first.

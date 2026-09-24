@@ -133,6 +133,9 @@ public:
 	// Skip hot pixel detection in own motioncorr
 	bool skip_defect;
 
+	// Random seed for hot pixel replacement (deterministic across threads)
+	int random_seed = 1;
+
 	// Archive directory
 	FileName fn_archive;
 
@@ -164,6 +167,8 @@ public:
 	int devCount;
 	std::string gpu_ids;
 	std::vector < std::vector < std::string > > allThreadIDs;
+	bool use_gpu;
+	int gpu_id;
 
 	// Read command line arguments
 	void read(int argc, char **argv, int rank = 0);
@@ -213,7 +218,7 @@ private:
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
-	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile);
+	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);
 

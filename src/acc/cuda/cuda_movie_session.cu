@@ -206,6 +206,28 @@ void CudaMovieSession::release() {
         cudaFree(d_gain);
         d_gain = nullptr;
     }
+    if (has_plan_patch_r2c) {
+        cufftDestroy(plan_patch_r2c);
+        plan_patch_r2c = 0;
+        has_plan_patch_r2c = false;
+    }
+    if (d_Ipatches) {
+        cudaFree(d_Ipatches);
+        d_Ipatches = nullptr;
+    }
+    if (d_group_start) {
+        cudaFree(d_group_start);
+        d_group_start = nullptr;
+    }
+    if (d_group_size) {
+        cudaFree(d_group_size);
+        d_group_size = nullptr;
+    }
+    cached_patch_w = 0;
+    cached_patch_h = 0;
+    cached_patch_ngroups = 0;
+    sz_cached_Ipatches = 0;
+    cached_ngroups_alloc = 0;
     is_initialized = false;
 }
 
@@ -303,7 +325,14 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (!is_initialized || !has_plan_c2r) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    CUFFT_CHECK(cufftExecC2R(plan_c2r, d_Fframes, (cufftReal*)d_Iframes));
+    // Note: cuFFT C2R transforms overwrite their complex input buffer.
+    // We copy d_Fframes into a temporary buffer to preserve d_Fframes for dose weighting.
+    const size_t sz_comp = (size_t)n_frames * ny * nfx * sizeof(cufftComplex);
+    cufftComplex *d_temp_Fframes = nullptr;
+    HANDLE_ERROR(cudaMalloc((void**)&d_temp_Fframes, sz_comp));
+    HANDLE_ERROR(cudaMemcpy(d_temp_Fframes, d_Fframes, sz_comp, cudaMemcpyDeviceToDevice));
+    CUFFT_CHECK(cufftExecC2R(plan_c2r, d_temp_Fframes, (cufftReal*)d_Iframes));
+    cudaFree(d_temp_Fframes);
     return true;
 }
 
@@ -313,19 +342,25 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (!is_initialized || n_groups == 0) return false;
+    if (!is_initialized || n_groups == 0 || !d_out_fpatches) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    float *d_Ipatches = nullptr;
-    int *d_group_start = nullptr;
-    int *d_group_size = nullptr;
-
-    HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
-    HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
-    HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
+    // Reuse or allocate cached scratch buffers
+    if (!d_Ipatches || sz_cached_Ipatches < sz_all_patch_real) {
+        if (d_Ipatches) cudaFree(d_Ipatches);
+        HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
+        sz_cached_Ipatches = sz_all_patch_real;
+    }
+    if (!d_group_start || cached_ngroups_alloc < n_groups) {
+        if (d_group_start) cudaFree(d_group_start);
+        if (d_group_size) cudaFree(d_group_size);
+        HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
+        HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
+        cached_ngroups_alloc = n_groups;
+    }
 
     HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
     HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
@@ -343,14 +378,22 @@ bool CudaMovieSession::preparePatchInVram(
     );
     HANDLE_ERROR(cudaGetLastError());
 
-    // Batched cuFFT 2D R2C for n_groups
-    cufftHandle plan_batched;
-    int n[2] = {patch_h, patch_w};
-    CUFFT_CHECK(cufftPlanMany(&plan_batched, 2, n, NULL, 1, patch_h * patch_w,
-                              NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups));
+    // Reuse cached batched cuFFT plan for patch transforms
+    if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
+        if (has_plan_patch_r2c) {
+            cufftDestroy(plan_patch_r2c);
+            has_plan_patch_r2c = false;
+        }
+        int n[2] = {patch_h, patch_w};
+        CUFFT_CHECK(cufftPlanMany(&plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
+                                  NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups));
+        has_plan_patch_r2c = true;
+        cached_patch_w = patch_w;
+        cached_patch_h = patch_h;
+        cached_patch_ngroups = n_groups;
+    }
 
-    CUFFT_CHECK(cufftExecR2C(plan_batched, (cufftReal*)d_Ipatches, d_out_fpatches));
-    cufftDestroy(plan_batched);
+    CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, d_out_fpatches));
 
     const float inv_patch_size = 1.0f / ((float)patch_w * patch_h);
     const size_t total_comp_elems = (size_t)n_groups * patch_h * patch_nfx;
@@ -358,10 +401,6 @@ bool CudaMovieSession::preparePatchInVram(
     const int grid_scale = (int)((total_comp_elems + block_scale - 1) / block_scale);
     scaleComplexKernel<<<grid_scale, block_scale>>>(d_out_fpatches, total_comp_elems, inv_patch_size);
     HANDLE_ERROR(cudaGetLastError());
-
-    cudaFree(d_Ipatches);
-    cudaFree(d_group_start);
-    cudaFree(d_group_size);
 
     return true;
 }

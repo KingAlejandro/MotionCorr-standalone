@@ -61,9 +61,12 @@ This specification defines **End-to-End GPU Residency** and a **GPU Fused Prepro
 
 ### 2.2 Scientific & Non-Functional Constraints
 - **Numerical Parity**: Must satisfy Gate 2 reference tolerances:
-  - Trajectory shift error $\le 0.05$ px.
+  - Coordinate RMS shift error $\le 0.02\text{ px}$.
+  - Max shift error $\le 0.05\text{ px}$.
   - Image absolute RMSE $\le 0.02$.
+  - Image relative RMSE $\le 0.001$.
   - Image maximum pixel error $\le 5.0$.
+  - STAR metadata field identity for local and global motion trajectories.
 - **VRAM Memory Ceiling**:
   - Peak VRAM footprint $\le 3.5\text{ GiB}$ for a 24-frame 4K movie, fitting comfortably on 8 GB consumer GPUs and enterprise GPUs alike.
 - **Portability**:

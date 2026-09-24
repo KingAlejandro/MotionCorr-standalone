@@ -108,6 +108,18 @@ private:
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
     bool is_initialized = false;
+
+    // Cached patch resources to avoid allocations and plan recreation in patch loop
+    cufftHandle plan_patch_r2c = 0;
+    bool has_plan_patch_r2c = false;
+    int cached_patch_w = 0;
+    int cached_patch_h = 0;
+    int cached_patch_ngroups = 0;
+    float *d_Ipatches = nullptr;
+    int *d_group_start = nullptr;
+    int *d_group_size = nullptr;
+    size_t sz_cached_Ipatches = 0;
+    int cached_ngroups_alloc = 0;
 };
 
 #endif // _CUDA_ENABLED

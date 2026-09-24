@@ -1291,21 +1291,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
 	RCTIC(TIMING_GAIN_AND_SUM);
 #ifdef _CUDA_ENABLED
+	bool cuda_gain_sum_done = false;
 	if (movie_session) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
-		if (!movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
-			REPORT_ERROR("CUDA fused gain and sum failed");
-		}
-		if (fn_gain_reference != "") {
-			#pragma omp parallel for num_threads(n_threads)
-			for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
-				const float gain_val = DIRECT_MULTIDIM_ELEM(Igain(), pixel);
-				for (int iframe = 0; iframe < n_frames; iframe++) {
-					DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
+		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
+			cuda_gain_sum_done = true;
+			if (fn_gain_reference != "") {
+				#pragma omp parallel for num_threads(n_threads)
+				for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
+					const float gain_val = DIRECT_MULTIDIM_ELEM(Igain(), pixel);
+					for (int iframe = 0; iframe < n_frames; iframe++) {
+						DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
+					}
 				}
 			}
+		} else {
+			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
+			delete movie_session;
+			movie_session = nullptr;
 		}
-	} else
+	}
+	if (!cuda_gain_sum_done)
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
@@ -1475,8 +1481,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 #endif
 	if (cuda_global_fft_done) {
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
+#ifdef _CUDA_ENABLED
+		if (!movie_session)
+#endif
+		{
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
+			}
 		}
 	} else {
 	#pragma omp parallel for num_threads(n_threads)
@@ -1659,6 +1670,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		std::vector<RFLOAT> patch_xshifts, patch_yshifts, patch_frames, patch_xs, patch_ys;
 		std::vector<MultidimArray<fComplex> > Fpatches(n_groups);
 
+#ifdef _CUDA_ENABLED
+		cufftComplex *d_patch_fcomplex_buffer = nullptr;
+		size_t sz_cached_patch_fcomplex = 0;
+#endif
+
 		int ipatch = 1;
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
@@ -1691,22 +1707,26 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 				if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
-					cufftComplex *d_out_fpatches = nullptr;
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
-					cudaError_t err = cudaMalloc((void**)&d_out_fpatches, sz_fpatches);
+					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
+						if (d_patch_fcomplex_buffer) cudaFree(d_patch_fcomplex_buffer);
+						if (cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches) != cudaSuccess) {
+							d_patch_fcomplex_buffer = nullptr;
+							sz_cached_patch_fcomplex = 0;
+						} else {
+							sz_cached_patch_fcomplex = sz_fpatches;
+						}
+					}
 					bool prep_ok = false;
-					if (err == cudaSuccess) {
-						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_out_fpatches);
+					if (d_patch_fcomplex_buffer) {
+						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
 					if (prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
-						converged = alignPatchDevice(d_out_fpatches, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+						converged = alignPatchDevice(d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
 						RCTOC(TIMING_PATCH_ALIGN);
-					}
-					if (d_out_fpatches) {
-						cudaFree(d_out_fpatches);
 					}
 				}
 				if (!converged)
@@ -1782,6 +1802,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			}
 		}
 		Fpatches.clear();
+#ifdef _CUDA_ENABLED
+		if (d_patch_fcomplex_buffer) {
+			cudaFree(d_patch_fcomplex_buffer);
+			d_patch_fcomplex_buffer = nullptr;
+		}
+#endif
 
 		// Fit polynomial model
 

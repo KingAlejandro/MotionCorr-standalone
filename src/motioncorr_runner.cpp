@@ -1274,21 +1274,42 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 	RCTOC(TIMING_READ_MOVIE);
 
+#ifdef _CUDA_ENABLED
+	std::unique_ptr<CudaMovieSession> movie_session;
+	if (use_gpu && !early_binning) {
+		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		if (!movie_session->initialize()) {
+			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
+			movie_session.reset();
+		}
+	}
+#endif
+
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
 	// Apply gain and build the initial sum in one pixel pass. This avoids a
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
 	RCTIC(TIMING_GAIN_AND_SUM);
-	const bool apply_gain = (fn_gain_reference != "");
-	#pragma omp parallel for num_threads(n_threads)
-	for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
-		float sum = 0.0f;
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
-			if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
-			sum += value;
+#ifdef _CUDA_ENABLED
+	if (movie_session) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
+		if (!movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum)) {
+			REPORT_ERROR("CUDA fused gain and sum failed");
 		}
-		DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
+	} else
+#endif
+	{
+		const bool apply_gain = (fn_gain_reference != "");
+		#pragma omp parallel for num_threads(n_threads)
+		for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
+			float sum = 0.0f;
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
+				if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
+				sum += value;
+			}
+			DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
+		}
 	}
 	RCTOC(TIMING_GAIN_AND_SUM);
 
@@ -1357,9 +1378,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const int NUM_MIN_OK = 6;
 		const int D_MAX = isEER ? 4 : 2;
 		const int PBUF_SIZE = 100;
+		std::vector<int> bad_xs, bad_ys;
+		bad_xs.reserve(1024);
+		bad_ys.reserve(1024);
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+			bad_xs.push_back(j);
+			bad_ys.push_back(i);
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
@@ -1390,6 +1416,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
 		}
+#ifdef _CUDA_ENABLED
+		if (movie_session && !bad_xs.empty()) {
+			std::vector<float> bad_replacements(bad_xs.size() * n_frames);
+			for (size_t idx = 0; idx < bad_xs.size(); idx++) {
+				for (int iframe = 0; iframe < n_frames; iframe++) {
+					bad_replacements[(size_t)iframe * bad_xs.size() + idx] = DIRECT_A2D_ELEM(Iframes[iframe](), bad_ys[idx], bad_xs[idx]);
+				}
+			}
+			movie_session->updateDefectPixels(bad_xs, bad_ys, bad_replacements);
+		}
+#endif
 		RCTOC(TIMING_FIX_DEFECT);
 		logfile << "Fixed hot pixels." << std::endl;
 	} // !skip_defect
@@ -1420,7 +1457,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 	// The early-binning path crops a full-size Fourier transform, so keep that
 	// path on the CPU until the CUDA implementation supports the same operation.
-	if (use_gpu && !early_binning) {
+	if (movie_session) {
+		logfile << "Computing full-frame Fourier transforms (CUDA in-VRAM)..." << std::endl;
+		cuda_global_fft_done = movie_session->computeGlobalForwardFFT();
+	} else if (use_gpu && !early_binning) {
 		logfile << "Computing full-frame Fourier transforms (CUDA)..." << std::endl;
 		cuda_global_fft_done = cudaForwardFFT2D(Iframes, Fframes, nx, ny, gpu_id, logfile);
 	}
@@ -1549,7 +1589,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
-	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+#ifdef _CUDA_ENABLED
+	if (movie_session) {
+		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	} else
+#endif
+	{
+		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -1563,7 +1610,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	RCTIC(TIMING_GLOBAL_IFFT);
 	bool cuda_global_ifft_done = false;
 #ifdef _CUDA_ENABLED
-	if (use_gpu) {
+	if (movie_session) {
+		logfile << "Reconstructing globally aligned frames (CUDA in-VRAM)..." << std::endl;
+		cuda_global_ifft_done = movie_session->computeGlobalInverseFFT();
+	} else if (use_gpu) {
 		logfile << "Reconstructing globally aligned frames (CUDA)..." << std::endl;
 		// Retain the real frames on device for local patch extraction when memory
 		// permits. cudaPreparePatch falls back to the host images otherwise.
@@ -1617,44 +1667,66 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				ipatch++;
 
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
-				RCTIC(TIMING_PREP_PATCH);
-				bool cuda_patch_prep_done = false;
+				const int patch_w = x_end - x_start;
+				const int patch_h = y_end - y_start;
+				const int patch_nfx = patch_w / 2 + 1;
+				bool converged = false;
+
 #ifdef _CUDA_ENABLED
-				if (use_gpu) {
-					cuda_patch_prep_done = cudaPreparePatch(
-						Iframes, x_start, x_end, y_start, y_end,
-						n_groups, group_start, group_size, Fpatches,
-						gpu_id, logfile
-					);
-				}
+				if (movie_session) {
+					RCTIC(TIMING_PREP_PATCH);
+					cufftComplex *d_out_fpatches = nullptr;
+					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
+					cudaMalloc((void**)&d_out_fpatches, sz_fpatches);
+					movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_out_fpatches);
+					RCTOC(TIMING_PREP_PATCH);
+
+					RCTIC(TIMING_PATCH_ALIGN);
+					converged = alignPatchDevice(d_out_fpatches, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+					RCTOC(TIMING_PATCH_ALIGN);
+					cudaFree(d_out_fpatches);
+				} else
 #endif
-				if (!cuda_patch_prep_done) {
-				std::vector<MultidimArray<float> >Ipatches(n_threads);
-				#pragma omp parallel for num_threads(n_threads)
-				for (int igroup = 0; igroup < n_groups; igroup++) {
-					const int tid = omp_get_thread_num();
-					Ipatches[tid].reshape(y_end - y_start, x_end - x_start); // end is not included
-					Ipatches[tid].initZeros();
-					RCTIC(TIMING_CLIP_PATCH);
-					for (int iframe = group_start[igroup]; iframe < group_start[igroup] + group_size[igroup]; iframe++) {
-						for (int ipy = y_start; ipy < y_end; ipy++) {
-							for (int ipx = x_start; ipx < x_end; ipx++) {
-								DIRECT_A2D_ELEM(Ipatches[tid], ipy - y_start, ipx - x_start) += DIRECT_A2D_ELEM(Iframes[iframe](), ipy, ipx);
+				{
+					RCTIC(TIMING_PREP_PATCH);
+					bool cuda_patch_prep_done = false;
+#ifdef _CUDA_ENABLED
+					if (use_gpu) {
+						cuda_patch_prep_done = cudaPreparePatch(
+							Iframes, x_start, x_end, y_start, y_end,
+							n_groups, group_start, group_size, Fpatches,
+							gpu_id, logfile
+						);
+					}
+#endif
+					if (!cuda_patch_prep_done) {
+					std::vector<MultidimArray<float> >Ipatches(n_threads);
+					#pragma omp parallel for num_threads(n_threads)
+					for (int igroup = 0; igroup < n_groups; igroup++) {
+						const int tid = omp_get_thread_num();
+						Ipatches[tid].reshape(y_end - y_start, x_end - x_start); // end is not included
+						Ipatches[tid].initZeros();
+						RCTIC(TIMING_CLIP_PATCH);
+						for (int iframe = group_start[igroup]; iframe < group_start[igroup] + group_size[igroup]; iframe++) {
+							for (int ipy = y_start; ipy < y_end; ipy++) {
+								for (int ipx = x_start; ipx < x_end; ipx++) {
+									DIRECT_A2D_ELEM(Ipatches[tid], ipy - y_start, ipx - x_start) += DIRECT_A2D_ELEM(Iframes[iframe](), ipy, ipx);
+								}
 							}
 						}
+						RCTOC(TIMING_CLIP_PATCH);
+
+						RCTIC(TIMING_PATCH_FFT);
+						NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
+						RCTOC(TIMING_PATCH_FFT);
 					}
-					RCTOC(TIMING_CLIP_PATCH);
+					}
+					RCTOC(TIMING_PREP_PATCH);
 
-					RCTIC(TIMING_PATCH_FFT);
-					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
-					RCTOC(TIMING_PATCH_FFT);
+					RCTIC(TIMING_PATCH_ALIGN);
+					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+					RCTOC(TIMING_PATCH_ALIGN);
 				}
-				}
-				RCTOC(TIMING_PREP_PATCH);
-
-				RCTIC(TIMING_PATCH_ALIGN);
-				bool converged = alignPatch(Fpatches, x_end - x_start, y_end - y_start, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
-				RCTOC(TIMING_PATCH_ALIGN);
 				if (!converged) continue;
 
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
@@ -1835,13 +1907,27 @@ skip_fitting:
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif
 	if (!do_dose_weighting || save_noDW) {
-		Iref().initZeros(Iframes[0]());
-		Iref_odd().initZeros(Iframes[0]());
-		Iref_even().initZeros(Iframes[0]());
+		Iref().reshape(ny, nx);
+		Iref().initZeros();
+		Iref_odd().reshape(ny, nx);
+		Iref_odd().initZeros();
+		Iref_even().reshape(ny, nx);
+		Iref_even().initZeros();
 
 #ifdef _CUDA_ENABLED
 		bool cuda_unweighted_done = false;
-		if (use_gpu) {
+		if (movie_session) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			Image<float> *p_even = even_odd_split ? &Iref_even : nullptr;
+			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting (CUDA in-VRAM)..." << std::endl;
+			cuda_unweighted_done = movie_session->reconstructUnweighted(Iref, p_even, p_odd, poly_model);
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
@@ -1949,11 +2035,19 @@ skip_fitting:
 			}
 		}
 
-		Iref().initZeros(Iframes[0]());
+		Iref().reshape(ny, nx);
+		Iref().initZeros();
 
 #ifdef _CUDA_ENABLED
 		bool cuda_dw_done = false;
-		if (use_gpu) {
+		if (movie_session) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
+			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
@@ -2388,6 +2482,12 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 		}
 	}
 }
+
+#ifdef _CUDA_ENABLED
+bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+	return cudaAlignPatchDevice(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
+}
+#endif
 
 bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
 #ifdef _CUDA_ENABLED

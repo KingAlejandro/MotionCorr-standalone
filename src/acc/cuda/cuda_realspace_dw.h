@@ -9,6 +9,7 @@
 #include "src/micrograph_model.h"
 
 #ifdef _CUDA_ENABLED
+#include <cufft.h>
 
 /**
  * CUDA implementation of analytical dose weighting, cuFFT inverse transform,
@@ -27,6 +28,21 @@ bool cudaDoseWeightAndInterpolate(
 );
 
 /**
+ * In-VRAM CUDA implementation of analytical dose weighting, cuFFT inverse transform,
+ * and real-space polynomial bilinear interpolation directly from resident d_Fframes (Issue #50).
+ */
+bool cudaDoseWeightAndInterpolateDevice(
+    const cufftComplex *d_Fframes,
+    Image<float> &Isum,
+    const int nx, const int ny, const int n_frames,
+    const std::vector<RFLOAT> &doses,
+    const RFLOAT apix,
+    const ThirdOrderPolynomialModel *model, // nullptr if global motion only
+    const int device_id,
+    std::ostream &logfile
+);
+
+/**
  * CUDA implementation of real-space polynomial bilinear interpolation and accumulation
  * for non-dose-weighted frames (e.g. !do_dose_weighting or save_noDW).
  *
@@ -37,6 +53,21 @@ bool cudaRealSpaceInterpolation(
     Image<float> *Isum_even,
     Image<float> *Isum_odd,
     const std::vector<Image<float> > &Iframes,
+    const ThirdOrderPolynomialModel *model, // nullptr if global motion only
+    const int device_id,
+    std::ostream &logfile
+);
+
+/**
+ * In-VRAM CUDA implementation of real-space polynomial bilinear interpolation and accumulation
+ * directly from resident d_Iframes (Issue #50).
+ */
+bool cudaRealSpaceInterpolationDevice(
+    const float *d_Iframes,
+    Image<float> &Isum,
+    Image<float> *Isum_even,
+    Image<float> *Isum_odd,
+    const int nx, const int ny, const int n_frames,
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
     std::ostream &logfile

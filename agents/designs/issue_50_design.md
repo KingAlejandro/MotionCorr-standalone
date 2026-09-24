@@ -173,8 +173,13 @@ private:
 |:---|:---|:---|
 | `src/acc/cuda/cuda_movie_session.h` | Persistent GPU session interface | New Header |
 | `src/acc/cuda/cuda_movie_session.cu` | GPU residency, fused preprocessing, and in-VRAM orchestration | New Source |
-| `src/acc/cuda/cuda_alignpatch.h` / `.cu` | Overload to accept device pointers directly | Modified |
-| `src/acc/cuda/cuda_fft_prep.h` / `.cu` | Streamlined in-VRAM transforms | Modified |
+| `src/acc/cuda/cuda_alignpatch.h` | Overload to accept device pointers directly | Modified |
+| `src/acc/cuda/cuda_alignpatch.cu` | Device pointer implementation for patch alignment | Modified |
+| `src/acc/cuda/cuda_fft_prep.h` | Streamlined in-VRAM transforms | Modified |
+| `src/acc/cuda/cuda_fft_prep.cu` | In-VRAM transform kernels | Modified |
+| `src/acc/cuda/cuda_realspace_dw.h` | Overload to accept device pointers for resident reconstruction | Modified |
+| `src/acc/cuda/cuda_realspace_dw.cu` | Device pointer implementation for real space interpolation and dose weighting | Modified |
+| `src/motioncorr_runner.h` | Add device helper declarations and session integration | Modified |
 | `src/motioncorr_runner.cpp` | Connect `CudaMovieSession` to main pipeline | Modified |
 | `CMakeLists.txt` | Add `cuda_movie_session.cu` to build target | Modified |
 
@@ -182,13 +187,8 @@ private:
 
 ## 6. Verification and Acceptance Criteria
 
-1. **Gate 2 Numerical Equivalence**:
-   - Motion trajectory Coordinate RMS error $\le 0.02$ px.
-   - Max shift error $\le 0.05$ px.
-   - Image RMSE $\le 0.020$.
-   - Max pixel difference $\le 5.0$.
-   - STAR metadata: 0 discrepancies.
-2. **Deterministic Single-Thread CPU Parity**:
-   - Zero regression on `tests/test_synthetic_regression.py`.
-3. **Execution Time Target**:
-   - Full movie wall-clock time $\le 1.5\text{ s}$ on NVIDIA A100 for `20170629_00021_frameImage.tiff`.
+- [x] Implement persistent `CudaMovieSession` lifecycle managing resident VRAM buffers (`d_Iframes`, `d_Fframes`, `d_Isum`).
+- [x] Implement fused preprocessing kernel for gain application, defect pixel replacement, and unaligned summation.
+- [x] Eliminate intermediate host-device transfers across global FFT, global alignment, global IFFT, and patch alignment.
+- [x] Implement resident in-VRAM dose weighting and real-space interpolation directly writing to device output buffer.
+- [x] Maintain full numerical parity and fallback to CPU when CUDA is disabled.

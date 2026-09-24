@@ -54,7 +54,7 @@ Reference baselines were established across two distinct hardware and platform c
 
 ## 3. Exact One-Thread CPU Parity Baseline
 
-When comparing standalone `motioncorr` against full RELION 5.1 on the same system with a single thread (`--j 1`):
+The first tutorial movie matched full RELION 5.1 exactly on the earlier CPU build with one thread (`--j 1`). On the current deterministic CPU build, the 24-movie rerun matched RELION exactly for **1/24** movies. The current standalone one-thread outputs matched the fixed CPU reference used for PR #25 exactly for **24/24** movies. See [the fixed-code report](spa_24_movies_validation.md) for the distinct comparisons.
 
 ### Results
 - **Image Pixel Parity**: Exact byte-for-byte match (Image RMSE = `0.000000e+00`, Max pixel difference = `0.000000e+00`).
@@ -73,7 +73,7 @@ When comparing standalone `motioncorr` against full RELION 5.1 on the same syste
 
 Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0, 124 vCPUs, 432 GiB RAM):
 
-### Single-Movie Baseline (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838)
+### Historical single-movie baseline (`20170629_00021_frameImage.tiff`, 24 frames, 3710 × 3838)
 | Metric | Single-Thread (`--j 1`) | Multi-Thread (`--j 4`) | Parity / Scaling |
 |:---|:---:|:---:|:---|
 | **Command** | `./build/motioncorr --i movies.star --o MotionCorr_j1 --use_own --j 1 ...` | `./build/motioncorr --i movies.star --o MotionCorr_j4 --use_own --j 4 ...` | — |
@@ -87,20 +87,15 @@ Benchmarks executed on `4-gpu-vm` (Ubuntu 24.04, AMD EPYC 7452, GCC 13.3.0, 124 
 | **_rlnAccumMotionEarly** | `2.504833 Å` | `2.503605 Å` | **Δ = 0.0012 Å** |
 | **_rlnAccumMotionLate** | `13.914805 Å` | `13.917601 Å` | **Δ = 0.0028 Å** |
 
-### Full 24-Movie Dataset Baseline (All 24 RELION SPA Tutorial Movies)
-| Metric | RELION 5.1 (`--j 1`) | Standalone (`--j 1`) | Standalone (`--j 4`) | RELION 5.1 (`--j 4`) |
-|:---|:---:|:---:|:---:|:---:|
-| **Exit Status** | `0` (Success) | `0` (Success) | `0` (Success) | `0` (Success) |
-| **Elapsed (Wall Clock)** | `27:37.64` | `26:31.16` | **`7:40.23` (3.46x speedup)** | `8:32.42` |
-| **User CPU Time** | `1523.9 s` | `1461.1 s` | `1540.5 s` | `1638.2 s` |
-| **System CPU Time** | `133.5 s` | `129.8 s` | `146.0 s` | `149.8 s` |
-| **CPU Utilization** | `99%` | `99%` | `366%` | `348%` |
-| **Peak Memory (RSS)** | `2798.1 MB` | `2799.3 MB` | `3017.8 MB` | `3019.7 MB` |
-| **Pixel Parity vs RELION** | Reference | **100% Byte-Identical (24/24)** | OpenMP variation | OpenMP variation |
-| **Shift RMS Error** | Reference | **`0.000000 px` (24/24)** | Mean `0.0033 px` (max `0.0071 px`) | Mean `0.0031 px` |
-| **STAR Discrepancies** | Reference | **0 diffs across all 24 movies** | 0 static diffs | 0 static diffs |
+### Current fixed-code 24-movie dataset result
 
-See full report: [`docs/spa_24_movies_validation.md`](spa_24_movies_validation.md).
+| Comparison | Exact gate | Relaxed Gate 2 |
+|:---|:---:|:---:|
+| Standalone `j=1` versus saved RELION 5.1 `j=1` | **1/24 pass** | **1/24 pass** |
+| Standalone `j=4` versus standalone `j=1` | **24/24 pass** | **24/24 pass** |
+| Standalone `j=1` versus PR #25 fixed CPU reference | **24/24 pass** | — |
+
+Six sequential four-movie batches took 1782.04 s at `j=1` and 723.30 s at `j=4`, a **2.46x** ratio. They include six process startups per setting and ran in fixed order. Alternating-order, single-movie repeats gave a **2.26x** median ratio. These measurements replace the earlier concurrent-run 3.46x claim. Exact upstream parity remains open in [Issue #20](https://github.com/KingAlejandro/MotionCorr-standalone/issues/20). Full provenance and per-movie failures: [fixed-code report](spa_24_movies_validation.md).
 
 ---
 
@@ -206,5 +201,6 @@ python3 tools/compare_motioncorr.py \
 | **Tutorial Movie (Exact)** | macOS ARM64 | `--use_own --j 1` | `0.000000 px` | `0.000000` | ~2.8 GB | `0` |
 | **Tutorial Movie (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | Baseline | Baseline | 2.73 GiB | `0` |
 | **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |
-| **Full 24-Movie Dataset (j=1)** | Linux x86_64 (`4GPUs`) | `--use_own --j 1` | `0.000000 px` (24/24 exact) | `0.000000` (24/24 byte-identical) | 2.73 GiB | `0` |
-| **Full 24-Movie Dataset (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.015763 px` (mean 0.0033) | `0.00612` (mean) | 2.95 GiB | `0` |
+| **Tutorial Movie (CUDA PoC, 2026-09-24 rerun)** | Linux x86_64 (`4GPUs`, A100) | `--use_own --gpu 0 --j 4 --seed 1` | `0.006203 px` | `0.003795` | Not remeasured | `0` |
+
+The CUDA row is the first movie of the deterministic rerun. Its relative image RMSE was `0.004708`, above the `0.001` Gate 2 limit; all 24 experimental movies failed that check despite clean exits. See the [full CUDA validation report](cuda_global_alignment_validation.md). The two older single-movie CPU rows above predate the CPU determinism fix and are historical measurements. Current full-dataset CPU results are summarized in Section 4.

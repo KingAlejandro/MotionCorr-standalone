@@ -32,6 +32,8 @@ cmake --build build-cuda --parallel
 ./build-cuda/motioncorr --i movies.star --o MotionCorr --use_own --gpu 0 --j 4
 ```
 
+**Experimental CUDA status:** The 24-movie RELION SPA tutorial rerun completed, but 0/24 movies passed Gate 2: corrected-image relative RMSE was 0.002899–0.010082 against the 0.001 limit. Use `--gpu` for investigation until this discrepancy is resolved; see the [CUDA validation report](docs/cuda_global_alignment_validation.md). The CPU path remains the default.
+
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 
 ```sh

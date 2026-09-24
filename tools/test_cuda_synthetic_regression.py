@@ -8,13 +8,15 @@ Validates the harness acceptance logic through:
 4. Negative test: Altered image pixels (pixel corruption exceeding tolerance)
 5. Negative test: Incomplete comparison coverage (missing STAR / MRC pair)
 6. Negative test: CPU wrapper masquerading as CUDA
-7. Negative test: Non-existent binary path
+7. Negative test: Reused output directory
+8. Negative test: Non-existent binary path
 
 Ensures every negative scenario reliably causes the harness to exit non-zero,
 report intelligible diagnostic error messages, and preserve failure artifacts.
 """
 
 import argparse
+import json
 import os
 import shutil
 import stat
@@ -84,6 +86,29 @@ exit $ret
     create_executable_script(path, content)
 
 
+def create_cuda_wrapper(path: Path, cuda_bin: Path, post_hook_sh: str) -> None:
+    """Run the real CUDA executable, then alter selected outputs for a negative case."""
+    content = f'''#!/bin/bash
+out_dir=""
+expect_out=0
+for arg in "$@"; do
+    if [ "$expect_out" -eq 1 ]; then
+        out_dir="$arg"
+        expect_out=0
+    elif [ "$arg" = "--o" ]; then
+        expect_out=1
+    fi
+done
+"{cuda_bin}" "$@"
+ret=$?
+if [ "$ret" -eq 0 ] && [ -n "$out_dir" ] && [ -d "$out_dir" ]; then
+{post_hook_sh}
+fi
+exit $ret
+'''
+    create_executable_script(path, content)
+
+
 def run_harness(args: List[str]) -> Tuple[int, str, str]:
     """Execute the harness script with given arguments."""
     cmd = [sys.executable, str(HARNESS_SCRIPT)] + args
@@ -139,16 +164,17 @@ def test_negative_cpu_masquerade(cpu_bin: Path, temp_dir: Path) -> bool:
     return True
 
 
-def test_negative_missing_output(cpu_bin: Path, temp_dir: Path) -> bool:
+def test_negative_missing_output(cpu_bin: Path, cuda_bin: Path, gpu_id: int, temp_dir: Path) -> bool:
     """Verify that missing output file triggers harness failure (non-zero exit)."""
     print("-> Running Test 2: Negative test - Missing output file...")
     wrapper = temp_dir / "wrap_missing_output.sh"
-    create_wrapped_binary(wrapper, cpu_bin, '    rm -f "$out_dir"/*.mrc')
+    create_cuda_wrapper(wrapper, cuda_bin, '    rm -f "$out_dir"/*.mrc')
 
     out_dir = temp_dir / "neg_missing_out"
     code, stdout, stderr = run_harness([
         "--cpu-bin", str(cpu_bin),
         "--cuda-bin", str(wrapper),
+        "--gpu", str(gpu_id),
         "--output-dir", str(out_dir),
     ])
     if code == 0:
@@ -191,7 +217,7 @@ exit 139
     return True
 
 
-def test_negative_altered_pixels(cpu_bin: Path, temp_dir: Path) -> bool:
+def test_negative_altered_pixels(cpu_bin: Path, cuda_bin: Path, gpu_id: int, temp_dir: Path) -> bool:
     """Verify that altered/corrupted pixels fail the image RMSE gate and exit non-zero."""
     print("-> Running Test 4: Negative test - Altered image pixels (corruption)...")
     wrapper = temp_dir / "wrap_corrupt_pixels.sh"
@@ -202,42 +228,56 @@ def test_negative_altered_pixels(cpu_bin: Path, temp_dir: Path) -> bool:
         "        fi\n"
         "    done"
     )
-    create_wrapped_binary(wrapper, cpu_bin, corrupt_cmd)
+    create_cuda_wrapper(wrapper, cuda_bin, corrupt_cmd)
 
     out_dir = temp_dir / "neg_corrupt_pixels"
+    json_report = temp_dir / "neg_corrupt_pixels.json"
     code, stdout, stderr = run_harness([
         "--cpu-bin", str(cpu_bin),
         "--cuda-bin", str(wrapper),
+        "--gpu", str(gpu_id),
         "--output-dir", str(out_dir),
+        "--json-out", str(json_report),
         "--gate", "relaxed",
     ])
     if code == 0:
         print("FAILED: Harness exited 0 despite corrupted pixel data!")
         return False
-    if "Check 'corrected_image' failed" not in stdout and "OVERALL HARNESS RESULT: FAIL" not in stdout:
+    if "Check 'corrected_image' failed" not in stdout:
         print(f"FAILED: Expected corrected_image failure in stdout:\n{stdout}")
+        return False
+    case = json.loads(json_report.read_text())["cases"][0]
+    if not case["cuda_execution"]["complete"] or case["cuda_vs_cpu"]["checks"]["corrected_image"]["passed"]:
+        print(f"FAILED: Pixel test did not isolate image-gate failure: {case['fail_reasons']}")
         return False
     print("   PASSED: Altered pixels correctly failed numerical acceptance gate.")
     return True
 
 
-def test_negative_incomplete_coverage(cpu_bin: Path, temp_dir: Path) -> bool:
+def test_negative_incomplete_coverage(cpu_bin: Path, cuda_bin: Path, gpu_id: int, temp_dir: Path) -> bool:
     """Verify that incomplete comparison coverage causes non-zero exit."""
     print("-> Running Test 5: Negative test - Incomplete comparison coverage...")
     wrapper = temp_dir / "wrap_delete_star.sh"
-    create_wrapped_binary(wrapper, cpu_bin, '    rm -f "$out_dir"/synthetic_*.star')
+    create_cuda_wrapper(wrapper, cuda_bin, '    rm -f "$out_dir"/*.star')
 
     out_dir = temp_dir / "neg_incomplete_cov"
+    json_report = temp_dir / "neg_incomplete_cov.json"
     code, stdout, stderr = run_harness([
         "--cpu-bin", str(cpu_bin),
         "--cuda-bin", str(wrapper),
+        "--gpu", str(gpu_id),
         "--output-dir", str(out_dir),
+        "--json-out", str(json_report),
     ])
     if code == 0:
         print("FAILED: Harness exited 0 despite incomplete coverage!")
         return False
-    if "Missing expected output file" not in stdout and "incomplete" not in stdout:
-        print(f"FAILED: Expected incomplete coverage or missing output error:\n{stdout}")
+    if "CUDA vs CPU comparison coverage incomplete" not in stdout:
+        print(f"FAILED: Expected comparator coverage failure:\n{stdout}")
+        return False
+    case = json.loads(json_report.read_text())["cases"][0]
+    if not case["cuda_execution"]["complete"] or case["cuda_vs_cpu"]["coverage_complete"]:
+        print(f"FAILED: Coverage test did not isolate incomplete comparison: {case['fail_reasons']}")
         return False
     print("   PASSED: Incomplete comparison coverage correctly triggered non-zero exit.")
     return True
@@ -245,7 +285,7 @@ def test_negative_incomplete_coverage(cpu_bin: Path, temp_dir: Path) -> bool:
 
 def test_negative_missing_binary() -> bool:
     """Verify that specifying a non-existent binary causes immediate error exit code 2."""
-    print("-> Running Test 6: Negative test - Non-existent binary path...")
+    print("-> Running Test 8: Negative test - Non-existent binary path...")
     code, stdout, stderr = run_harness([
         "--cpu-bin", "/non/existent/path/to/binary",
     ])
@@ -256,6 +296,21 @@ def test_negative_missing_binary() -> bool:
         print(f"FAILED: Expected error message in stderr:\n{stderr}")
         return False
     print("   PASSED: Missing binary correctly rejected with exit code 2.")
+    return True
+
+
+def test_negative_reused_output(cpu_bin: Path, cuda_bin: Path, temp_dir: Path) -> bool:
+    """Existing case artifacts must never be accepted as a fresh run."""
+    print("-> Running Test 7: Negative test - Reused output directory...")
+    code, stdout, stderr = run_harness([
+        "--cpu-bin", str(cpu_bin),
+        "--cuda-bin", str(cuda_bin),
+        "--output-dir", str(temp_dir / "positive_run"),
+    ])
+    if code != 2 or "already contains artifacts" not in stderr:
+        print(f"FAILED: Reused artifacts were not rejected; exit={code}\nStdout:\n{stdout}\nStderr:\n{stderr}")
+        return False
+    print("   PASSED: Reused output directory rejected before execution.")
     return True
 
 
@@ -277,23 +332,21 @@ def main() -> None:
     print("=" * 78)
 
     temp_dir = Path(tempfile.mkdtemp(prefix="mc_harness_test_"))
-    tests = [
-        test_negative_missing_output,
-        test_negative_process_crash,
-        test_negative_altered_pixels,
-        test_negative_incomplete_coverage,
-    ]
-
     all_passed = True
     try:
         if not test_positive(cpu_bin, cuda_bin, args.gpu, temp_dir):
             all_passed = False
-        for t in tests if all_passed else []:
-            if not t(cpu_bin, temp_dir):
-                all_passed = False
-                print(f"FAILED: {t.__name__}")
-                break
+        if all_passed and not test_negative_missing_output(cpu_bin, cuda_bin, args.gpu, temp_dir):
+            all_passed = False
+        if all_passed and not test_negative_process_crash(cpu_bin, temp_dir):
+            all_passed = False
+        if all_passed and not test_negative_altered_pixels(cpu_bin, cuda_bin, args.gpu, temp_dir):
+            all_passed = False
+        if all_passed and not test_negative_incomplete_coverage(cpu_bin, cuda_bin, args.gpu, temp_dir):
+            all_passed = False
         if all_passed and not test_negative_cpu_masquerade(cpu_bin, temp_dir):
+            all_passed = False
+        if all_passed and not test_negative_reused_output(cpu_bin, cuda_bin, temp_dir):
             all_passed = False
         if all_passed and not test_negative_missing_binary():
             all_passed = False

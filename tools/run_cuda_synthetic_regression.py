@@ -689,6 +689,11 @@ def main() -> None:
         run_output_base = Path(tempfile.mkdtemp(prefix="mc_cuda_syn_"))
         created_temp = True
 
+    for case_name, _, _ in cases:
+        case_dir = run_output_base / case_name
+        if case_dir.exists() and (not case_dir.is_dir() or any(case_dir.iterdir())):
+            parser.error(f"Output directory already contains artifacts for {case_name}: {case_dir}")
+
     harness_t0 = time.perf_counter()
     gpu_info = get_gpu_info(args.gpu)
     git_commit = get_git_commit(repo_root)

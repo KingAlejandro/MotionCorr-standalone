@@ -380,7 +380,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	header->mapc = 1;
 	header->mapr = 2;
 	header->maps = 3;
-	RFLOAT aux,aux2;
+	RFLOAT aux2;
 
 	// TODO: fix this!
 	header->a = header->nx; // ua;
@@ -398,25 +398,73 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 
 	if (!MDMainHeader.isEmpty())
 	{
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, aux))
-			header->amin = (float)aux;
-		else
-			header->amin = (float)data.computeMin();
+		// Whichever of amin/amax/amean/arms MDMainHeader does not supply have to be
+		// derived from the pixels. computeMin(), computeMax(), computeAvg() and
+		// computeStddev() each walk the whole image, so filling four header fields
+		// costs four passes over every pixel of the micrograph.
+		//
+		// Collect the missing ones in a single pass instead. Each accumulator below
+		// visits the pixels in the same raster order, in the same type, with the
+		// same sequence of operations as the MultidimArray routine it replaces, so
+		// every header value stays bit-identical. Only the number of passes changes.
+		RFLOAT stat_min = 0, stat_max = 0, stat_avg = 0, stat_rms = 0;
+		const bool have_min = MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, stat_min);
+		const bool have_max = MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX, stat_max);
+		const bool have_avg = MDMainHeader.getValue(EMDL_IMAGE_STATS_AVG, stat_avg);
+		const bool have_rms = MDMainHeader.getValue(EMDL_IMAGE_STATS_STDDEV, stat_rms);
 
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX, aux))
-			header->amax = (float)aux;
-		else
-			header->amax = (float)data.computeMax();
+		const long int scan_n = NZYXSIZE(data);
+		T scan_min = 0, scan_max = 0;
+		RFLOAT scan_sum = 0, scan_sumsq = 0;
+		if ((!have_min || !have_max || !have_avg || !have_rms) && scan_n > 0)
+		{
+			const T *scan_ptr = MULTIDIM_ARRAY(data);
+			scan_min = scan_ptr[0];
+			scan_max = scan_ptr[0];
+			for (long int scan_i = 0; scan_i < scan_n; ++scan_i)
+			{
+				const T raw = scan_ptr[scan_i];
+				if (raw < scan_min) scan_min = raw;
+				if (raw > scan_max) scan_max = raw;
+				const RFLOAT val = static_cast<RFLOAT>(raw);
+				scan_sum += val;
+				scan_sumsq += val * val;
+			}
+		}
+		MC_STAGE("mrc_header_stats_done");
 
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_AVG, aux))
-			header->amean = (float)aux;
-		else
-			header->amean = (float)data.computeAvg();
+		// computeMin()/computeMax() return T(0) for an empty array.
+		header->amin = have_min ? (float)stat_min : (float)(scan_n > 0 ? scan_min : (T)0);
+		header->amax = have_max ? (float)stat_max : (float)(scan_n > 0 ? scan_max : (T)0);
+		// computeAvg() returns 0 for an empty array.
+		header->amean = have_avg ? (float)stat_avg
+		                         : (float)(scan_n > 0 ? scan_sum / scan_n : (RFLOAT)0);
 
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_STDDEV, aux))
-			header->arms = (float)aux;
+		if (have_rms)
+			header->arms = (float)stat_rms;
 		else
+		{
+#ifdef RELION_SINGLE_PRECISION
+			// The single-precision computeStddev() is a median-centred two-pass
+			// algorithm that this single pass does not reproduce. Keep calling it.
 			header->arms = (float)data.computeStddev();
+#else
+			// Mirrors MultidimArray<T>::computeStddev() for the double-RFLOAT build,
+			// including its integer division by (scan_n - 1), which evaluates to 1
+			// for every scan_n > 2. Reproduced deliberately: making that division
+			// floating point would change the value written to the header.
+			RFLOAT scan_stddev = 0;
+			if (scan_n > 1)
+			{
+				const RFLOAT scan_mean = scan_sum / scan_n;
+				scan_stddev = scan_sumsq / scan_n - scan_mean * scan_mean;
+				scan_stddev *= scan_n / (scan_n - 1);
+				// Foreseeing numerical instabilities
+				scan_stddev = sqrt(static_cast<RFLOAT>(ABS(scan_stddev)));
+			}
+			header->arms = (float)scan_stddev;
+#endif
+		}
 
 		//if(MDMainHeader.getValue(EMDL_ORIENT_ORIGIN_X, aux))
 		//	SAFESET(header->nxStart,(int)(aux-0.5));
@@ -505,12 +553,40 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	freeMemory(header, sizeof(MRChead));
 
 	MC_STAGE("mrc_header_written");
+
+	// When the in-memory element type already matches the on-disk type,
+	// castPage2Datatype() is a plain memcpy into a scratch buffer whose contents
+	// are then written out verbatim. For a single-image overwrite the array can go
+	// straight to fwrite instead, skipping a whole-image calloc, its first-touch
+	// page faults and the copy. The bytes reaching the file are unchanged.
+	// Exactly the three cases that writeMRC() can emit AND castPage2Datatype()
+	// implements as a memcpy. Deliberately narrow:
+	//   - SChar is reachable here but castPage2Datatype() has no case for it and
+	//     reports an error; listing it would turn that loud failure into a silent
+	//     write.
+	//   - Double and UChar are memcpy cases in castPage2Datatype() but writeMRC()
+	//     never selects them, so listing them would only widen the predicate past
+	//     what the reasoning covers.
+	//   - The typeid test is load-bearing, not redundant with the size test:
+	//     Image<int> maps to output_type == Float with a matching size, and must
+	//     still go through the converting path.
+	const bool direct_write = (NSIZE(data) == 1 && mode == WRITE_OVERWRITE &&
+	                           gettypesize(output_type) == sizeof(T) &&
+	                           ((output_type == Float  && typeid(T) == typeid(float)) ||
+	                            (output_type == SShort && typeid(T) == typeid(short)) ||
+	                            (output_type == UShort && typeid(T) == typeid(unsigned short))));
+
 	//write only once, ignore select_img
-	char* fdata = (char*)askMemory(datasize);
+	char* fdata = direct_write ? NULL : (char*)askMemory(datasize);
 	MC_STAGE("mrc_scratch_allocated");
 	//think about writing in several chunks
 
-	if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
+	if (direct_write)
+	{
+		fwrite(MULTIDIM_ARRAY(data), datasize, 1, fimg);
+		MC_STAGE("mrc_fwrite_done");
+	}
+	else if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
 	{
 		castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
 		MC_STAGE("mrc_cast_done");
@@ -537,7 +613,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	fl.l_type = F_UNLCK;
 	fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
 
-	freeMemory(fdata, datasize);
+	if (fdata != NULL) freeMemory(fdata, datasize);
 	MC_STAGE("mrc_scratch_freed");
 
 	return(0);

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 #define CUFFT_CHECK(cmd) do { \
@@ -221,11 +222,18 @@ bool cudaAlignPatch(
     const int max_iter,
     const RFLOAT ccf_downsample,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    bool is_global)
 {
-    if (device_id >= 0) {
-        HANDLE_ERROR(cudaSetDevice(device_id));
+    int dev_count = 0;
+    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    if (count_err != cudaSuccess || dev_count == 0) {
+        REPORT_ERROR("No CUDA capable devices found");
     }
+    if (device_id < 0 || device_id >= dev_count) {
+        REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
+    }
+    HANDLE_ERROR(cudaSetDevice(device_id));
 
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_h2d, ev_stop_h2d;
@@ -442,20 +450,22 @@ bool cudaAlignPatch(
     }
 
     // Final transfer: copy shifted Fframes back to host
-    HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(
-            Fframes[iframe].data,
-            d_Fframes + (size_t)iframe * nfy * nfx,
-            (size_t)nfy * nfx * sizeof(float2),
-            cudaMemcpyDeviceToHost
-        ));
+    if (is_global) {
+        HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
+        for (int iframe = 0; iframe < n_frames; iframe++) {
+            HANDLE_ERROR(cudaMemcpy(
+                Fframes[iframe].data,
+                d_Fframes + (size_t)iframe * nfy * nfx,
+                (size_t)nfy * nfx * sizeof(float2),
+                cudaMemcpyDeviceToHost
+            ));
+        }
+        HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
+        float final_d2h_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&final_d2h_ms, ev_start_d2h, ev_stop_d2h));
+        accumulated_d2h_ms += final_d2h_ms;
     }
-    HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
-    HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
-    float final_d2h_ms = 0.0f;
-    HANDLE_ERROR(cudaEventElapsedTime(&final_d2h_ms, ev_start_d2h, ev_stop_d2h));
-    accumulated_d2h_ms += final_d2h_ms;
 
     HANDLE_ERROR(cudaEventRecord(ev_stop_total));
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
@@ -463,7 +473,8 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
     // Profile logging per pass criteria in Issue #16
-    logfile << " [CUDA Global Alignment Profile]" << std::endl;
+    const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
+    logfile << " [CUDA " << stage_name << " Profile]" << std::endl;
     logfile << "   Host-to-Device transfer time: " << std::fixed << std::setprecision(2) << h2d_ms << " ms" << std::endl;
     logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
     logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;

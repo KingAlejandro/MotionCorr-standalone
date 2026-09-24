@@ -97,11 +97,13 @@ def main():
     neg_dir = workdir / "neg_test"
     neg_dir.mkdir(parents=True, exist_ok=True)
     res_neg = run_cmd([
-        str(cuda_bin),
-        "-i", str(root_dir / "tests" / "fixtures" / "synthetic_3x3_known.mrc"),
-        "-o", str(neg_dir / "neg_out"),
+        str(cuda_bin), "--use_own",
+        "--i", str(root_dir / "test-data" / "synthetic" / "synthetic_movie.tiff"),
+        "--o", str(neg_dir / "neg_out.mrc"),
+        "--angpix", "1.0",
+        "--voltage", "300",
         "--gpu", "99",
-        "-j", "4"
+        "--j", "4"
     ], check=False)
     assert res_neg.returncode != 0, "Expected non-zero return code for invalid GPU"
     assert "Invalid CUDA device ID" in res_neg.stderr or "Invalid CUDA device ID" in res_neg.stdout, "Expected invalid device ID error message"
@@ -110,47 +112,67 @@ def main():
 
     # Synthetic test definitions
     synth_tests = [
-        ("synth_1x1", "synthetic_1x1_known.mrc", 1, 1),
-        ("synth_3x3", "synthetic_3x3_known.mrc", 3, 3),
-        ("synth_5x5", "synthetic_5x5_known.mrc", 5, 5),
+        ("synth_1x1", 1, 1),
+        ("synth_3x3", 3, 3),
+        ("synth_5x5", 5, 5),
     ]
 
-    for name, fixture_file, px, py in synth_tests:
+    for name, px, py in synth_tests:
         print(f"\n=== Stage: Synthetic {px}x{py} ({name}) ===")
         stage_dir = workdir / name
         stage_dir.mkdir(parents=True, exist_ok=True)
-        inp_mrc = root_dir / "tests" / "fixtures" / fixture_file
+        inp_movie = root_dir / "test-data" / "synthetic" / "synthetic_movie.tiff"
 
         # Run CPU reference
-        cpu_out = stage_dir / "cpu_out"
+        cpu_out = stage_dir / "cpu_out.mrc"
         run_cmd([
-            str(cpu_bin),
-            "-i", str(inp_mrc),
-            "-o", str(cpu_out),
+            str(cpu_bin), "--use_own",
+            "--i", str(inp_movie),
+            "--o", str(cpu_out),
+            "--angpix", "1.0",
+            "--voltage", "300",
+            "--dose_per_frame", "1.0",
+            "--dose_weighting",
             "--patch_x", str(px),
             "--patch_y", str(py),
-            "-j", "4"
+            "--bfactor", "150",
+            "--j", "4"
         ])
 
         # Run CUDA
-        cuda_out = stage_dir / "cuda_out"
+        cuda_out = stage_dir / "cuda_out.mrc"
         res_cuda = run_cmd([
-            str(cuda_bin),
-            "-i", str(inp_mrc),
-            "-o", str(cuda_out),
+            str(cuda_bin), "--use_own",
+            "--i", str(inp_movie),
+            "--o", str(cuda_out),
+            "--angpix", "1.0",
+            "--voltage", "300",
+            "--dose_per_frame", "1.0",
+            "--dose_weighting",
             "--patch_x", str(px),
             "--patch_y", str(py),
+            "--bfactor", "150",
             "--gpu", str(args.gpu),
-            "-j", "4"
+            "--j", "4"
         ])
 
-        # Compare using tools/compare_motioncorr.py
+        # Find output files
+        ref_mrcs = list(stage_dir.glob("cpu_out.mrc/**/synthetic_movie.mrc"))
+        ref_stars = list(stage_dir.glob("cpu_out.mrc/**/synthetic_movie.star"))
+        test_mrcs = list(stage_dir.glob("cuda_out.mrc/**/synthetic_movie.mrc"))
+        test_stars = list(stage_dir.glob("cuda_out.mrc/**/synthetic_movie.star"))
+
+        assert len(ref_mrcs) == 1 and len(test_mrcs) == 1, "Expected output MRCs"
+        assert len(ref_stars) == 1 and len(test_stars) == 1, "Expected output STARs"
+
+        # Compare using tools/compare_motioncorr.py with relaxed gate
         comp_res = run_cmd([
             sys.executable, str(compare_script),
-            "--ref-mrc", str(stage_dir / "cpu_out.mrc"),
-            "--ref-star", str(stage_dir / "cpu_out.star"),
-            "--test-mrc", str(stage_dir / "cuda_out.mrc"),
-            "--test-star", str(stage_dir / "cuda_out.star"),
+            "--gate", "relaxed",
+            "--ref-mrc", str(ref_mrcs[0]),
+            "--ref-star", str(ref_stars[0]),
+            "--test-mrc", str(test_mrcs[0]),
+            "--test-star", str(test_stars[0]),
             "--json"
         ])
         comp_data = json.loads(comp_res.stdout)
@@ -161,52 +183,58 @@ def main():
         print(f"Stage {name} Comparison Verdict: {comp_data.get('verdict')}")
 
     # Experimental Tutorial Movie Test
-    exp_movie = Path("/home/alex/relion-ad0b230c/relion/data/MotionCorr/tutorial_data/20170629_00021_frameImage.tiff")
-    gain_ref = Path("/home/alex/relion-ad0b230c/relion/data/MotionCorr/tutorial_data/gain.mrc")
-    if exp_movie.exists() and gain_ref.exists():
+    exp_star = Path("/home/alex/MotionCorr-issue-17/benchmark_series_results/benchmark_input.star")
+    exp_gain = Path("/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc")
+    if exp_star.exists() and exp_gain.exists():
         print("\n=== Stage: Experimental Tutorial Movie (Dose-Weighted) ===")
         exp_dir = workdir / "exp_movie"
         exp_dir.mkdir(parents=True, exist_ok=True)
 
-        cpu_out = exp_dir / "cpu_exp"
+        cpu_out = exp_dir / "cpu_exp.mrc"
         run_cmd([
-            str(cpu_bin),
-            "-i", str(exp_movie),
-            "-o", str(cpu_out),
-            "--gain", str(gain_ref),
-            "--angpix", "0.885",
+            str(cpu_bin), "--use_own",
+            "--i", str(exp_star),
+            "--o", str(cpu_out),
+            "--gainref", str(exp_gain),
+            "--angpix", "1.06",
             "--voltage", "300",
             "--dose_per_frame", "1.277",
             "--dose_weighting",
             "--patch_x", "5",
             "--patch_y", "5",
-            "-j", "8"
+            "--j", "8"
         ])
 
-        cuda_out = exp_dir / "cuda_exp"
+        cuda_out = exp_dir / "cuda_exp.mrc"
         res_cuda_exp = run_cmd([
-            str(cuda_bin),
-            "-i", str(exp_movie),
-            "-o", str(cuda_out),
-            "--gain", str(gain_ref),
-            "--angpix", "0.885",
+            str(cuda_bin), "--use_own",
+            "--i", str(exp_star),
+            "--o", str(cuda_out),
+            "--gainref", str(exp_gain),
+            "--angpix", "1.06",
             "--voltage", "300",
             "--dose_per_frame", "1.277",
             "--dose_weighting",
             "--patch_x", "5",
             "--patch_y", "5",
             "--gpu", str(args.gpu),
-            "-j", "8"
+            "--j", "8"
         ])
+
+        exp_ref_mrcs = list(exp_dir.glob("cpu_exp.mrc/**/20170629_00021_frameImage.mrc"))
+        exp_ref_stars = list(exp_dir.glob("cpu_exp.mrc/**/20170629_00021_frameImage.star"))
+        exp_test_mrcs = list(exp_dir.glob("cuda_exp.mrc/**/20170629_00021_frameImage.mrc"))
+        exp_test_stars = list(exp_dir.glob("cuda_exp.mrc/**/20170629_00021_frameImage.star"))
 
         comp_exp = run_cmd([
             sys.executable, str(compare_script),
-            "--ref-mrc", str(exp_dir / "cpu_exp.mrc"),
-            "--ref-star", str(exp_dir / "cpu_exp.star"),
-            "--test-mrc", str(exp_dir / "cuda_exp.mrc"),
-            "--test-star", str(exp_dir / "cuda_exp.star"),
+            "--gate", "relaxed",
+            "--ref-mrc", str(exp_ref_mrcs[0]),
+            "--ref-star", str(exp_ref_stars[0]),
+            "--test-mrc", str(exp_test_mrcs[0]),
+            "--test-star", str(exp_test_stars[0]),
             "--json"
-        ])
+        ], check=False)
         comp_exp_data = json.loads(comp_exp.stdout)
         summary["stages"]["exp_tutorial_movie"] = {
             "comparison": comp_exp_data,

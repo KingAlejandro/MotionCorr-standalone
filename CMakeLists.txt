@@ -72,8 +72,13 @@ if(METAL)
     find_library(MPS_FRAMEWORK MetalPerformanceShaders REQUIRED)
     find_library(MPSGRAPH_FRAMEWORK MetalPerformanceShadersGraph REQUIRED)
     target_compile_definitions(motioncorr_core PUBLIC _METAL_ENABLED)
-    target_sources(motioncorr_core PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm")
-    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm" PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    target_sources(motioncorr_core PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_resample.mm")
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_resample.mm"
+        PROPERTIES COMPILE_FLAGS "-fobjc-arc")
     target_link_libraries(motioncorr_core PUBLIC "${METAL_FRAMEWORK}" "${FOUNDATION_FRAMEWORK}" "${MPS_FRAMEWORK}" "${MPSGRAPH_FRAMEWORK}")
 endif()
 

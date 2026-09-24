@@ -1,0 +1,2088 @@
+{
+  "hardware": {
+    "os": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "python_version": "3.10.12",
+    "cpu_arch": "x86_64",
+    "cpu_count_logical": "124",
+    "cpu_model": "AMD EPYC 7452 32-Core Processor",
+    "total_ram_gb": "432.97 GB"
+  },
+  "cases": [
+    {
+      "name": "Synthetic_Global_1Thread",
+      "dataset_path": "/home/dxp41838/MotionCorr-standalone/test-data/fixtures/synthetic_128x128_8frames.star",
+      "dataset_sha256": "61dde751f61f8ba82296b43bfcf831858a8c25cc71a650f3fe08b6ebcf19b28f",
+      "threads": 1,
+      "patch_x": 1,
+      "patch_y": 1,
+      "repetitions": 3,
+      "mean_wall_time_sec": 0.30766059799740714,
+      "std_wall_time_sec": 7.430594897570099e-05,
+      "mean_peak_rss_mb": 25.809895833333332,
+      "max_peak_rss_mb": 26.0234375,
+      "stage_breakdowns": [
+        {
+          "tag": "global alignment",
+          "mean_sec": 0.0035359999999999996,
+          "std_sec": 0.00015159815302304974,
+          "min_sec": 0.003387,
+          "max_sec": 0.003744,
+          "pct_total": 1.1493184447459859
+        },
+        {
+          "tag": "dose weighting",
+          "mean_sec": 0.002166,
+          "std_sec": 2.2627416997969458e-05,
+          "min_sec": 0.002134,
+          "max_sec": 0.002182,
+          "pct_total": 0.7040225541062799
+        },
+        {
+          "tag": "global FFT",
+          "mean_sec": 0.0015526666666666666,
+          "std_sec": 0.00018670713846973168,
+          "min_sec": 0.00138,
+          "max_sec": 0.001812,
+          "pct_total": 0.5046686760583335
+        },
+        {
+          "tag": "dw - calc weight",
+          "mean_sec": 0.0014800000000000002,
+          "std_sec": 4.66976087896015e-05,
+          "min_sec": 0.001445,
+          "max_sec": 0.001546,
+          "pct_total": 0.48104957528960957
+        },
+        {
+          "tag": "global iFFT",
+          "mean_sec": 0.0009416666666666666,
+          "std_sec": 2.8075295585660743e-05,
+          "min_sec": 0.000902,
+          "max_sec": 0.000963,
+          "pct_total": 0.306073209502961
+        },
+        {
+          "tag": "read movie",
+          "mean_sec": 0.000731,
+          "std_sec": 7.074366873909402e-05,
+          "min_sec": 0.000669,
+          "max_sec": 0.00083,
+          "pct_total": 0.23759948617344903
+        },
+        {
+          "tag": "dw - iFFT",
+          "mean_sec": 0.0006469999999999999,
+          "std_sec": 3.96568615332412e-05,
+          "min_sec": 0.000597,
+          "max_sec": 0.000694,
+          "pct_total": 0.2102966724407955
+        },
+        {
+          "tag": "align - shift in Fourier space",
+          "mean_sec": 0.00014533333333333333,
+          "std_sec": 1.8080068829760823e-05,
+          "min_sec": 0.00012,
+          "max_sec": 0.000161,
+          "pct_total": 0.04723820153744814
+        },
+        {
+          "tag": "detect hot pixels",
+          "mean_sec": 0.00011533333333333334,
+          "std_sec": 2.4944382578492936e-06,
+          "min_sec": 0.000112,
+          "max_sec": 0.000118,
+          "pct_total": 0.037487196632929036
+        },
+        {
+          "tag": "align - prep weight",
+          "mean_sec": 0.00010633333333333333,
+          "std_sec": 7.845734863959879e-06,
+          "min_sec": 9.6e-05,
+          "max_sec": 0.000115,
+          "pct_total": 0.0345618951615733
+        },
+        {
+          "tag": "align - make reference",
+          "mean_sec": 8.333333333333333e-05,
+          "std_sec": 1.9293061504650378e-05,
+          "min_sec": 6.5e-05,
+          "max_sec": 0.00011,
+          "pct_total": 0.027086124734775313
+        },
+        {
+          "tag": "fix defects",
+          "mean_sec": 8.033333333333334e-05,
+          "std_sec": 3.441253001774531e-05,
+          "min_sec": 5.6e-05,
+          "max_sec": 0.000129,
+          "pct_total": 0.026111024244323405
+        },
+        {
+          "tag": "align - iFFT CCF (in thread)",
+          "mean_sec": 7.566666666666666e-05,
+          "std_sec": 1.6996731711975965e-06,
+          "min_sec": 7.4e-05,
+          "max_sec": 7.8e-05,
+          "pct_total": 0.02459420125917598
+        },
+        {
+          "tag": "real space interpolation",
+          "mean_sec": 5.066666666666667e-05,
+          "std_sec": 4.714045207910304e-07,
+          "min_sec": 5e-05,
+          "max_sec": 5.1e-05,
+          "pct_total": 0.01646836383874339
+        },
+        {
+          "tag": "initial sum",
+          "mean_sec": 3.633333333333333e-05,
+          "std_sec": 5.436502143433363e-06,
+          "min_sec": 3.2e-05,
+          "max_sec": 4.4e-05,
+          "pct_total": 0.011809550384362036
+        },
+        {
+          "tag": "align - calc CCF (in thread)",
+          "mean_sec": 2.9666666666666665e-05,
+          "std_sec": 1.155662388223981e-05,
+          "min_sec": 2.1e-05,
+          "max_sec": 4.6e-05,
+          "pct_total": 0.009642660405580011
+        },
+        {
+          "tag": "align - argmax CCF (in thread)",
+          "mean_sec": 2.0666666666666666e-05,
+          "std_sec": 2.3570226039551584e-06,
+          "min_sec": 1.9e-05,
+          "max_sec": 2.4e-05,
+          "pct_total": 0.0067173589342242775
+        },
+        {
+          "tag": "read gain",
+          "mean_sec": 1.1666666666666666e-05,
+          "std_sec": 9.428090415820631e-07,
+          "min_sec": 1.1e-05,
+          "max_sec": 1.3e-05,
+          "pct_total": 0.0037920574628685436
+        },
+        {
+          "tag": "binning",
+          "mean_sec": 9.333333333333334e-06,
+          "std_sec": 4.71404520791032e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1e-05,
+          "pct_total": 0.003033645970294835
+        },
+        {
+          "tag": "power spectrum",
+          "mean_sec": 9.333333333333334e-06,
+          "std_sec": 4.71404520791032e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1e-05,
+          "pct_total": 0.003033645970294835
+        },
+        {
+          "tag": "apply gain",
+          "mean_sec": 9e-06,
+          "std_sec": 0.0,
+          "min_sec": 9e-06,
+          "max_sec": 9e-06,
+          "pct_total": 0.002925301471355734
+        }
+      ],
+      "top_time_stages": [
+        [
+          "global alignment",
+          0.0035359999999999996,
+          1.1493184447459859
+        ],
+        [
+          "dose weighting",
+          0.002166,
+          0.7040225541062799
+        ],
+        [
+          "global FFT",
+          0.0015526666666666666,
+          0.5046686760583335
+        ]
+      ],
+      "all_runs": [
+        {
+          "repetition": 1,
+          "threads": 1,
+          "patch_x": 1,
+          "patch_y": 1,
+          "wall_time_sec": 0.30765640642493963,
+          "peak_rss_mb": 25.703125,
+          "stage_times": {
+            "read gain": 1.3e-05,
+            "read movie": 0.00083,
+            "apply gain": 9e-06,
+            "initial sum": 3.3e-05,
+            "detect hot pixels": 0.000116,
+            "fix defects": 5.6e-05,
+            "global FFT": 0.001812,
+            "power spectrum": 9e-06,
+            "global alignment": 0.003387,
+            "global iFFT": 0.00096,
+            "align - prep weight": 0.000108,
+            "align - make reference": 7.5e-05,
+            "align - calc CCF (in thread)": 2.1e-05,
+            "align - iFFT CCF (in thread)": 7.4e-05,
+            "align - argmax CCF (in thread)": 1.9e-05,
+            "align - shift in Fourier space": 0.000155,
+            "dose weighting": 0.002182,
+            "dw - calc weight": 0.001546,
+            "dw - iFFT": 0.000597,
+            "real space interpolation": 5e-05,
+            "binning": 1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "583aa21e83168f1d6e553103e4b27a71959e767351788341c2aefd7f906bccc7",
+            "synthetic_128x128_8frames.star": "84e49d09274dcb4eb3c08ddfc284aeacd3e2686bd4a5057c8da29f436f68597a",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "9659f447e1ec162ee2316eb253c2372856cd4c9c58e707118026329a002b5519",
+            "synthetic_128x128_8frames.mrc": "e07538af7f57a76e27d47fcec25fa860b8e1adfd04ae791cab3e52d6b09e6680",
+            "logfile.pdf": "53ff0c151dc9a525509481ca992e04644601e10aef2a69a7a4d5de597b29d4d8",
+            "header.pdf": "2018329a043f58a2a89b8e9c6c675c3e034005cf73a93fcfb8d4f439b6f77797",
+            "corrected_micrographs.star": "de84beb5a6d13a5528881101a25170e22ac191f440488e630af38efc82102287",
+            "header.pdf.lst": "23b7aac8d2d20695c8dc93f8b6a92d893cd9fec1e013ba1946366d7429af868c",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "4e17b3532988c9bc8d61ead58f7fddcc52deef817b7f84962883df0d32efcc28",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep1/logfile.pdf\nread gain                          : 0 sec (13 microsec/operation)\nread movie                         : 0 sec (830 microsec/operation)\napply gain                         : 0 sec (9 microsec/operation)\ninitial sum                        : 0 sec (33 microsec/operation)\ndetect hot pixels                  : 0 sec (116 microsec/operation)\nfix defects                        : 0 sec (56 microsec/operation)\nglobal FFT                         : 0.001 sec (1812 microsec/operation)\npower spectrum                     : 0 sec (9 microsec/operation)\nglobal alignment                   : 0.003 sec (3387 microsec/operation)\nglobal iFFT                        : 0 sec (960 microsec/operation)\nalign - prep weight                : 0 sec (108 microsec/operation)\nalign - make reference             : 0 sec (75 microsec/operation)\nalign - calc CCF (in thread)       : 0 sec (21 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.001 sec (74 microsec/operation)\nalign - argmax CCF (in thread)     : 0 sec (19 microsec/operation)\nalign - shift in Fourier space     : 0 sec (155 microsec/operation)\ndose weighting                     : 0.002 sec (2182 microsec/operation)\ndw - calc weight                   : 0.001 sec (1546 microsec/operation)\ndw - iFFT                          : 0 sec (597 microsec/operation)\nreal space interpolation           : 0 sec (50 microsec/operation)\nbinning                            : 0 sec (10 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep1/batch.pdf\n"
+        },
+        {
+          "repetition": 2,
+          "threads": 1,
+          "patch_x": 1,
+          "patch_y": 1,
+          "wall_time_sec": 0.30775362718850374,
+          "peak_rss_mb": 26.0234375,
+          "stage_times": {
+            "read gain": 1.1e-05,
+            "read movie": 0.000694,
+            "apply gain": 9e-06,
+            "initial sum": 3.2e-05,
+            "detect hot pixels": 0.000118,
+            "fix defects": 0.000129,
+            "global FFT": 0.001466,
+            "power spectrum": 9e-06,
+            "global alignment": 0.003744,
+            "global iFFT": 0.000902,
+            "align - prep weight": 0.000115,
+            "align - make reference": 0.00011,
+            "align - calc CCF (in thread)": 4.6e-05,
+            "align - iFFT CCF (in thread)": 7.8e-05,
+            "align - argmax CCF (in thread)": 2.4e-05,
+            "align - shift in Fourier space": 0.00012,
+            "dose weighting": 0.002134,
+            "dw - calc weight": 0.001445,
+            "dw - iFFT": 0.00065,
+            "real space interpolation": 5.1e-05,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "2f96029d8b9d3497228290904c464d62282e9b9ffe88cccd4776d15d5e45acbd",
+            "synthetic_128x128_8frames.star": "84e49d09274dcb4eb3c08ddfc284aeacd3e2686bd4a5057c8da29f436f68597a",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "b26bf1cc38bea87e5146df2d1df48f1101ff0fd674fba64222e48461004334a4",
+            "synthetic_128x128_8frames.mrc": "5c11aaeb23712f914940e5e36c14384bfb8c313e6047b08db843ca088096bf1e",
+            "logfile.pdf": "c917551f204f3800679638077acdffc1ddef0ca02bd47fda98e914d0433a407b",
+            "header.pdf": "a37ead84284b7026b17511045354471f831567c6c2c24f8a2437ff3282280406",
+            "corrected_micrographs.star": "f57328cb65c43ac43943c99d4e500927d2d1ecc4aca4c4d76a17ac0531f12124",
+            "header.pdf.lst": "1668974997e659228711efd660dcc60ce7ddfebf34541f9fd5db10feb055db68",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "f2f3fab9cd2dc9fc6945d90e53d3514af317ac336f5c2a2ba77636ae45ededd5",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep2/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep2/logfile.pdf\nread gain                          : 0 sec (11 microsec/operation)\nread movie                         : 0 sec (694 microsec/operation)\napply gain                         : 0 sec (9 microsec/operation)\ninitial sum                        : 0 sec (32 microsec/operation)\ndetect hot pixels                  : 0 sec (118 microsec/operation)\nfix defects                        : 0 sec (129 microsec/operation)\nglobal FFT                         : 0.001 sec (1466 microsec/operation)\npower spectrum                     : 0 sec (9 microsec/operation)\nglobal alignment                   : 0.003 sec (3744 microsec/operation)\nglobal iFFT                        : 0 sec (902 microsec/operation)\nalign - prep weight                : 0 sec (115 microsec/operation)\nalign - make reference             : 0 sec (110 microsec/operation)\nalign - calc CCF (in thread)       : 0 sec (46 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.001 sec (78 microsec/operation)\nalign - argmax CCF (in thread)     : 0 sec (24 microsec/operation)\nalign - shift in Fourier space     : 0 sec (120 microsec/operation)\ndose weighting                     : 0.002 sec (2134 microsec/operation)\ndw - calc weight                   : 0.001 sec (1445 microsec/operation)\ndw - iFFT                          : 0 sec (650 microsec/operation)\nreal space interpolation           : 0 sec (51 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep2/batch.pdf\n"
+        },
+        {
+          "repetition": 3,
+          "threads": 1,
+          "patch_x": 1,
+          "patch_y": 1,
+          "wall_time_sec": 0.307571760378778,
+          "peak_rss_mb": 25.703125,
+          "stage_times": {
+            "read gain": 1.1e-05,
+            "read movie": 0.000669,
+            "apply gain": 9e-06,
+            "initial sum": 4.4e-05,
+            "detect hot pixels": 0.000112,
+            "fix defects": 5.6e-05,
+            "global FFT": 0.00138,
+            "power spectrum": 1e-05,
+            "global alignment": 0.003477,
+            "global iFFT": 0.000963,
+            "align - prep weight": 9.6e-05,
+            "align - make reference": 6.5e-05,
+            "align - calc CCF (in thread)": 2.2e-05,
+            "align - iFFT CCF (in thread)": 7.5e-05,
+            "align - argmax CCF (in thread)": 1.9e-05,
+            "align - shift in Fourier space": 0.000161,
+            "dose weighting": 0.002182,
+            "dw - calc weight": 0.001449,
+            "dw - iFFT": 0.000694,
+            "real space interpolation": 5.1e-05,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "605d71c0b95d7b1a125d4c3f3422d6fb92ed521c6c0971ab4ed57d85825f7f02",
+            "synthetic_128x128_8frames.star": "84e49d09274dcb4eb3c08ddfc284aeacd3e2686bd4a5057c8da29f436f68597a",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "34b666265ca75af2f0bfbd4657de43244560e9426f60afdb129d3842574d883d",
+            "synthetic_128x128_8frames.mrc": "5c11aaeb23712f914940e5e36c14384bfb8c313e6047b08db843ca088096bf1e",
+            "logfile.pdf": "a826c6117d4b0bfefd5d19cafeb5e94d197210ade4db2f8d699f1c657c57a595",
+            "header.pdf": "ea724d52e251451e093e99491666078b12a92eaea0c885702fe2723be3a0242d",
+            "corrected_micrographs.star": "81d016c03414c5c1125663ed9f1f05c325d3e0fdbf5ae16ba27165d1a5c0aa6a",
+            "header.pdf.lst": "5e272cc7253f430cfb5c10c5ea3ef09201aa264a8ff39d931c7bcf9cae6b2e4c",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "370c34e636ceb93762e6b18eaf703f0b83d376c837c62fd5596bf50d09a62b48",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep3/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep3/logfile.pdf\nread gain                          : 0 sec (11 microsec/operation)\nread movie                         : 0 sec (669 microsec/operation)\napply gain                         : 0 sec (9 microsec/operation)\ninitial sum                        : 0 sec (44 microsec/operation)\ndetect hot pixels                  : 0 sec (112 microsec/operation)\nfix defects                        : 0 sec (56 microsec/operation)\nglobal FFT                         : 0.001 sec (1380 microsec/operation)\npower spectrum                     : 0 sec (10 microsec/operation)\nglobal alignment                   : 0.003 sec (3477 microsec/operation)\nglobal iFFT                        : 0 sec (963 microsec/operation)\nalign - prep weight                : 0 sec (96 microsec/operation)\nalign - make reference             : 0 sec (65 microsec/operation)\nalign - calc CCF (in thread)       : 0 sec (22 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.001 sec (75 microsec/operation)\nalign - argmax CCF (in thread)     : 0 sec (19 microsec/operation)\nalign - shift in Fourier space     : 0 sec (161 microsec/operation)\ndose weighting                     : 0.002 sec (2182 microsec/operation)\ndw - calc weight                   : 0.001 sec (1449 microsec/operation)\ndw - iFFT                          : 0 sec (694 microsec/operation)\nreal space interpolation           : 0 sec (51 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Global_1Thread_th1_p1x1_rep3/batch.pdf\n"
+        }
+      ]
+    },
+    {
+      "name": "Synthetic_Patch3x3_4Threads",
+      "dataset_path": "/home/dxp41838/MotionCorr-standalone/test-data/fixtures/synthetic_128x128_8frames.star",
+      "dataset_sha256": "61dde751f61f8ba82296b43bfcf831858a8c25cc71a650f3fe08b6ebcf19b28f",
+      "threads": 4,
+      "patch_x": 3,
+      "patch_y": 3,
+      "repetitions": 3,
+      "mean_wall_time_sec": 0.32173837659259635,
+      "std_wall_time_sec": 0.002274734826793987,
+      "mean_peak_rss_mb": 25.916666666666668,
+      "max_peak_rss_mb": 26.01953125,
+      "stage_breakdowns": [
+        {
+          "tag": "global alignment",
+          "mean_sec": 0.002077666666666667,
+          "std_sec": 0.00014699281917457364,
+          "min_sec": 0.001879,
+          "max_sec": 0.00223,
+          "pct_total": 0.6457627742983014
+        },
+        {
+          "tag": "read movie",
+          "mean_sec": 0.001627,
+          "std_sec": 0.00016181676880554344,
+          "min_sec": 0.001496,
+          "max_sec": 0.001855,
+          "pct_total": 0.5056903740333721
+        },
+        {
+          "tag": "dose weighting",
+          "mean_sec": 0.0010523333333333333,
+          "std_sec": 0.0001051390613531537,
+          "min_sec": 0.000911,
+          "max_sec": 0.001163,
+          "pct_total": 0.3270773429263175
+        },
+        {
+          "tag": "global FFT",
+          "mean_sec": 0.0010190000000000002,
+          "std_sec": 6.480740698407862e-05,
+          "min_sec": 0.000929,
+          "max_sec": 0.001079,
+          "pct_total": 0.3167169582913376
+        },
+        {
+          "tag": "real space interpolation",
+          "mean_sec": 0.0007019999999999999,
+          "std_sec": 0.0001484789547377001,
+          "min_sec": 0.000499,
+          "max_sec": 0.00085,
+          "pct_total": 0.2181897004126781
+        },
+        {
+          "tag": "dw - calc weight",
+          "mean_sec": 0.0006483333333333333,
+          "std_sec": 7.090055633694905e-05,
+          "min_sec": 0.000589,
+          "max_sec": 0.000748,
+          "pct_total": 0.20150948115036033
+        },
+        {
+          "tag": "patch alignment",
+          "mean_sec": 0.000584,
+          "std_sec": 3.674234614174768e-05,
+          "min_sec": 0.000539,
+          "max_sec": 0.000629,
+          "pct_total": 0.181513938804849
+        },
+        {
+          "tag": "global iFFT",
+          "mean_sec": 0.000453,
+          "std_sec": 6.42028036770981e-05,
+          "min_sec": 0.000366,
+          "max_sec": 0.000519,
+          "pct_total": 0.14079762718937774
+        },
+        {
+          "tag": "prepare patch",
+          "mean_sec": 0.0004203333333333333,
+          "std_sec": 4.1354833118055525e-05,
+          "min_sec": 0.000375,
+          "max_sec": 0.000475,
+          "pct_total": 0.1306444502470974
+        },
+        {
+          "tag": "dw - iFFT",
+          "mean_sec": 0.0003643333333333333,
+          "std_sec": 7.564977785088922e-05,
+          "min_sec": 0.000266,
+          "max_sec": 0.00045,
+          "pct_total": 0.11323900406033102
+        },
+        {
+          "tag": "fit polynomial",
+          "mean_sec": 0.00024300000000000002,
+          "std_sec": 3.163331577098212e-05,
+          "min_sec": 0.000199,
+          "max_sec": 0.000272,
+          "pct_total": 0.07552720398900396
+        },
+        {
+          "tag": "detect hot pixels",
+          "mean_sec": 9.933333333333333e-05,
+          "std_sec": 2.3570226039551584e-06,
+          "min_sec": 9.6e-05,
+          "max_sec": 0.000101,
+          "pct_total": 0.0308739462122403
+        },
+        {
+          "tag": "initial sum",
+          "mean_sec": 9.900000000000001e-05,
+          "std_sec": 8.831760866327846e-06,
+          "min_sec": 8.7e-05,
+          "max_sec": 0.000108,
+          "pct_total": 0.030770342365890505
+        },
+        {
+          "tag": "fix defects",
+          "mean_sec": 6.366666666666666e-05,
+          "std_sec": 5.436502143433364e-06,
+          "min_sec": 5.6e-05,
+          "max_sec": 6.8e-05,
+          "pct_total": 0.019788334652811736
+        },
+        {
+          "tag": "align - shift in Fourier space",
+          "mean_sec": 4.433333333333334e-05,
+          "std_sec": 4.7140452079103357e-07,
+          "min_sec": 4.4e-05,
+          "max_sec": 4.5e-05,
+          "pct_total": 0.013779311564523356
+        },
+        {
+          "tag": "power spectrum",
+          "mean_sec": 4.333333333333334e-05,
+          "std_sec": 4.7140452079103176e-05,
+          "min_sec": 1e-05,
+          "max_sec": 0.00011,
+          "pct_total": 0.01346850002547396
+        },
+        {
+          "tag": "align - iFFT CCF (in thread)",
+          "mean_sec": 4.1666666666666665e-05,
+          "std_sec": 5.249338582674541e-06,
+          "min_sec": 3.7e-05,
+          "max_sec": 4.9e-05,
+          "pct_total": 0.01295048079372496
+        },
+        {
+          "tag": "align - make reference",
+          "mean_sec": 3.466666666666667e-05,
+          "std_sec": 4.496912521077348e-06,
+          "min_sec": 3.1e-05,
+          "max_sec": 4.1e-05,
+          "pct_total": 0.010774800020379166
+        },
+        {
+          "tag": "align - prep weight",
+          "mean_sec": 2.9666666666666665e-05,
+          "std_sec": 2.4944382578492958e-06,
+          "min_sec": 2.7e-05,
+          "max_sec": 3.3e-05,
+          "pct_total": 0.00922074232513217
+        },
+        {
+          "tag": "prep patch - FFT (in thread)",
+          "mean_sec": 1.9e-05,
+          "std_sec": 2.943920288775949e-06,
+          "min_sec": 1.6e-05,
+          "max_sec": 2.3e-05,
+          "pct_total": 0.0059054192419385814
+        },
+        {
+          "tag": "align - calc CCF (in thread)",
+          "mean_sec": 1.6333333333333335e-05,
+          "std_sec": 2.6246692913372713e-06,
+          "min_sec": 1.4e-05,
+          "max_sec": 2e-05,
+          "pct_total": 0.005076588471140184
+        },
+        {
+          "tag": "align - argmax CCF (in thread)",
+          "mean_sec": 1.3333333333333332e-05,
+          "std_sec": 3.2998316455372222e-06,
+          "min_sec": 1.1e-05,
+          "max_sec": 1.8e-05,
+          "pct_total": 0.004144153853991986
+        },
+        {
+          "tag": "prep patch - clip (in thread)",
+          "mean_sec": 1.0666666666666666e-05,
+          "std_sec": 3.2998316455372222e-06,
+          "min_sec": 7e-06,
+          "max_sec": 1.5e-05,
+          "pct_total": 0.003315323083193589
+        },
+        {
+          "tag": "read gain",
+          "mean_sec": 1.0333333333333333e-05,
+          "std_sec": 4.714045207910312e-07,
+          "min_sec": 1e-05,
+          "max_sec": 1.1e-05,
+          "pct_total": 0.0032117192368437894
+        },
+        {
+          "tag": "apply gain",
+          "mean_sec": 1e-05,
+          "std_sec": 0.0,
+          "min_sec": 1e-05,
+          "max_sec": 1e-05,
+          "pct_total": 0.0031081153904939903
+        },
+        {
+          "tag": "binning",
+          "mean_sec": 9.666666666666667e-06,
+          "std_sec": 4.71404520791032e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1e-05,
+          "pct_total": 0.0030045115441441903
+        }
+      ],
+      "top_time_stages": [
+        [
+          "global alignment",
+          0.002077666666666667,
+          0.6457627742983014
+        ],
+        [
+          "read movie",
+          0.001627,
+          0.5056903740333721
+        ],
+        [
+          "dose weighting",
+          0.0010523333333333333,
+          0.3270773429263175
+        ]
+      ],
+      "all_runs": [
+        {
+          "repetition": 1,
+          "threads": 4,
+          "patch_x": 3,
+          "patch_y": 3,
+          "wall_time_sec": 0.3214087262749672,
+          "peak_rss_mb": 25.7109375,
+          "stage_times": {
+            "read gain": 1e-05,
+            "read movie": 0.001855,
+            "apply gain": 1e-05,
+            "initial sum": 0.000108,
+            "detect hot pixels": 0.000101,
+            "fix defects": 6.7e-05,
+            "global FFT": 0.001049,
+            "power spectrum": 0.00011,
+            "global alignment": 0.002124,
+            "global iFFT": 0.000474,
+            "prepare patch": 0.000475,
+            "prep patch - clip (in thread)": 1.5e-05,
+            "prep patch - FFT (in thread)": 2.3e-05,
+            "patch alignment": 0.000584,
+            "align - prep weight": 3.3e-05,
+            "align - make reference": 3.2e-05,
+            "align - calc CCF (in thread)": 1.5e-05,
+            "align - iFFT CCF (in thread)": 3.7e-05,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 4.4e-05,
+            "fit polynomial": 0.000272,
+            "dose weighting": 0.001083,
+            "dw - calc weight": 0.000589,
+            "dw - iFFT": 0.00045,
+            "real space interpolation": 0.000757,
+            "binning": 1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "78312e9f5474290334ce0500b0b3687beed82279acd7e7c3b0705c61cb58b2f6",
+            "synthetic_128x128_8frames.star": "e036d52525e661f9ed3b9bb77d09a5bbbfe497a3ba3796f4528cd5040459e5b0",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "7bafc6ffcedb3bfe7d48d3f6ade277195faa9838507ae701e138c1805801997f",
+            "synthetic_128x128_8frames.mrc": "3a8255c23a54217eadc0e3a25feff3f7ef29ce25de56b6f1542eaf70df3b5b20",
+            "logfile.pdf": "ffe111da23e63bca406ed4a8ceb2971ae8639ebe307a8587ab7743a9db1e7de8",
+            "header.pdf": "063c6c3401f75cf58b902cd412ac671414b2572ff56c6fa550a39ca171274d7f",
+            "corrected_micrographs.star": "f53ea07c3593967deac55f2df4165b4823e7bef3f430b7e2bbed094f8e7bc9dd",
+            "header.pdf.lst": "ac0cde0e08f01add8a0de9315afd5eaf8a02a3dc03d27a34e864d9e8f042a6ab",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "c1ba2e836e02206ae53011cc46a32989fb6354fa595e00bc675dc417b1d18897",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep1/logfile.pdf\nread gain                          : 0 sec (10 microsec/operation)\nread movie                         : 0.001 sec (1855 microsec/operation)\napply gain                         : 0 sec (10 microsec/operation)\ninitial sum                        : 0 sec (108 microsec/operation)\ndetect hot pixels                  : 0 sec (101 microsec/operation)\nfix defects                        : 0 sec (67 microsec/operation)\nglobal FFT                         : 0.001 sec (1049 microsec/operation)\npower spectrum                     : 0 sec (110 microsec/operation)\nglobal alignment                   : 0.002 sec (2124 microsec/operation)\nglobal iFFT                        : 0 sec (474 microsec/operation)\nprepare patch                      : 0.004 sec (475 microsec/operation)\nprep patch - clip (in thread)      : 0.001 sec (15 microsec/operation)\nprep patch - FFT (in thread)       : 0.001 sec (23 microsec/operation)\npatch alignment                    : 0.005 sec (584 microsec/operation)\nalign - prep weight                : 0 sec (33 microsec/operation)\nalign - make reference             : 0 sec (32 microsec/operation)\nalign - calc CCF (in thread)       : 0.001 sec (15 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.003 sec (37 microsec/operation)\nalign - argmax CCF (in thread)     : 0.001 sec (11 microsec/operation)\nalign - shift in Fourier space     : 0 sec (44 microsec/operation)\nfit polynomial                     : 0 sec (272 microsec/operation)\ndose weighting                     : 0.001 sec (1083 microsec/operation)\ndw - calc weight                   : 0 sec (589 microsec/operation)\ndw - iFFT                          : 0 sec (450 microsec/operation)\nreal space interpolation           : 0 sec (757 microsec/operation)\nbinning                            : 0 sec (10 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep1/batch.pdf\n"
+        },
+        {
+          "repetition": 2,
+          "threads": 4,
+          "patch_x": 3,
+          "patch_y": 3,
+          "wall_time_sec": 0.32467450574040413,
+          "peak_rss_mb": 26.01953125,
+          "stage_times": {
+            "read gain": 1.1e-05,
+            "read movie": 0.00153,
+            "apply gain": 1e-05,
+            "initial sum": 8.7e-05,
+            "detect hot pixels": 0.000101,
+            "fix defects": 6.8e-05,
+            "global FFT": 0.001079,
+            "power spectrum": 1e-05,
+            "global alignment": 0.00223,
+            "global iFFT": 0.000519,
+            "prepare patch": 0.000411,
+            "prep patch - clip (in thread)": 1e-05,
+            "prep patch - FFT (in thread)": 1.8e-05,
+            "patch alignment": 0.000629,
+            "align - prep weight": 2.9e-05,
+            "align - make reference": 4.1e-05,
+            "align - calc CCF (in thread)": 2e-05,
+            "align - iFFT CCF (in thread)": 4.9e-05,
+            "align - argmax CCF (in thread)": 1.8e-05,
+            "align - shift in Fourier space": 4.4e-05,
+            "fit polynomial": 0.000258,
+            "dose weighting": 0.001163,
+            "dw - calc weight": 0.000748,
+            "dw - iFFT": 0.000377,
+            "real space interpolation": 0.00085,
+            "binning": 1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "08a6503d38af44b09f5f86567aad3142de58a8c58cc60484a6ed157950e13f31",
+            "synthetic_128x128_8frames.star": "e036d52525e661f9ed3b9bb77d09a5bbbfe497a3ba3796f4528cd5040459e5b0",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "6e0b72f4dc22495b6e0a712ff9ff70d35248e3d8d47577dc84810d8d4d3413cd",
+            "synthetic_128x128_8frames.mrc": "d2981b20c8f515a77f40248f25926f21707569ecf4285f30d266bc31b51fdbc2",
+            "logfile.pdf": "c903324cfab7a3e30cbfd320d1d85de3550a4d054c4d26d219c6dbf7e3e16258",
+            "header.pdf": "e8f144f3033fb2c6940816aed340f142329433aed9151f525c4c9938a032ae92",
+            "corrected_micrographs.star": "5c356b1c081f5ebe4e1a13a68eed30565daf3369487318903a9458f1a379a1b1",
+            "header.pdf.lst": "2ae4c0178ad1eb007b3d50da61bd44c986eb37aba4b5e3b22b2ef4d36c12fec6",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "c5b813cf7ab5f5f886dffd14ad2ddb2aedd890ec71338ac8b8851cbbfa0fbb94",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep2/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep2/logfile.pdf\nread gain                          : 0 sec (11 microsec/operation)\nread movie                         : 0.001 sec (1530 microsec/operation)\napply gain                         : 0 sec (10 microsec/operation)\ninitial sum                        : 0 sec (87 microsec/operation)\ndetect hot pixels                  : 0 sec (101 microsec/operation)\nfix defects                        : 0 sec (68 microsec/operation)\nglobal FFT                         : 0.001 sec (1079 microsec/operation)\npower spectrum                     : 0 sec (10 microsec/operation)\nglobal alignment                   : 0.002 sec (2230 microsec/operation)\nglobal iFFT                        : 0 sec (519 microsec/operation)\nprepare patch                      : 0.003 sec (411 microsec/operation)\nprep patch - clip (in thread)      : 0 sec (10 microsec/operation)\nprep patch - FFT (in thread)       : 0.001 sec (18 microsec/operation)\npatch alignment                    : 0.005 sec (629 microsec/operation)\nalign - prep weight                : 0 sec (29 microsec/operation)\nalign - make reference             : 0 sec (41 microsec/operation)\nalign - calc CCF (in thread)       : 0.001 sec (20 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.004 sec (49 microsec/operation)\nalign - argmax CCF (in thread)     : 0.001 sec (18 microsec/operation)\nalign - shift in Fourier space     : 0 sec (44 microsec/operation)\nfit polynomial                     : 0 sec (258 microsec/operation)\ndose weighting                     : 0.001 sec (1163 microsec/operation)\ndw - calc weight                   : 0 sec (748 microsec/operation)\ndw - iFFT                          : 0 sec (377 microsec/operation)\nreal space interpolation           : 0 sec (850 microsec/operation)\nbinning                            : 0 sec (10 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep2/batch.pdf\n"
+        },
+        {
+          "repetition": 3,
+          "threads": 4,
+          "patch_x": 3,
+          "patch_y": 3,
+          "wall_time_sec": 0.3191318977624178,
+          "peak_rss_mb": 26.01953125,
+          "stage_times": {
+            "read gain": 1e-05,
+            "read movie": 0.001496,
+            "apply gain": 1e-05,
+            "initial sum": 0.000102,
+            "detect hot pixels": 9.6e-05,
+            "fix defects": 5.6e-05,
+            "global FFT": 0.000929,
+            "power spectrum": 1e-05,
+            "global alignment": 0.001879,
+            "global iFFT": 0.000366,
+            "prepare patch": 0.000375,
+            "prep patch - clip (in thread)": 7e-06,
+            "prep patch - FFT (in thread)": 1.6e-05,
+            "patch alignment": 0.000539,
+            "align - prep weight": 2.7e-05,
+            "align - make reference": 3.1e-05,
+            "align - calc CCF (in thread)": 1.4e-05,
+            "align - iFFT CCF (in thread)": 3.9e-05,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 4.5e-05,
+            "fit polynomial": 0.000199,
+            "dose weighting": 0.000911,
+            "dw - calc weight": 0.000608,
+            "dw - iFFT": 0.000266,
+            "real space interpolation": 0.000499,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "703098605c597a29b1dacdd48bfabd6bda91322d6d2ea049222d8da6487c5455",
+            "synthetic_128x128_8frames.log": "e87a61b3bb1b843d4138dd4d3849150a0a87bda61e9104f603ef9f701938b5c8",
+            "synthetic_128x128_8frames.star": "e036d52525e661f9ed3b9bb77d09a5bbbfe497a3ba3796f4528cd5040459e5b0",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "38278bb634dccc59e11e58f5729add861d3b872a3e7c61417de75345b07c8725",
+            "synthetic_128x128_8frames_shifts.eps": "8fa883b9b38ad8408d87184ce0b685c4160e9be109d9e232b2f900432106f877",
+            "synthetic_128x128_8frames.mrc": "d2981b20c8f515a77f40248f25926f21707569ecf4285f30d266bc31b51fdbc2",
+            "logfile.pdf": "855b2085ce9e460f1daee720048bdeca7244df9d9e18b78a674033815d0a9e96",
+            "header.pdf": "e7433db54e33cd8582573bff4bc79b75a81c88197edf3eb0a68048f125be3d0b",
+            "corrected_micrographs.star": "fdc1c5aed005f2d3677e21dea09b92cee87490cba0bfabcee30a6fb703ded5cc",
+            "header.pdf.lst": "50d649473b240671fb8913892b456983c5792a0009ef852faebdddb02220a012",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "c3599b9191c83f08e3356430e87fd220c0342c53e42b17a4e1f16349cd44eba1",
+            "batch.pdf.lst": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "all_batches.pdf": "fb8ad07e112432663df62b23079e54307346e743073cd1383a2b5dadd0192076",
+            "batch.pdf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * synthetic_128x128_8frames.mrcs\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep3/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep3/logfile.pdf\nread gain                          : 0 sec (10 microsec/operation)\nread movie                         : 0.001 sec (1496 microsec/operation)\napply gain                         : 0 sec (10 microsec/operation)\ninitial sum                        : 0 sec (102 microsec/operation)\ndetect hot pixels                  : 0 sec (96 microsec/operation)\nfix defects                        : 0 sec (56 microsec/operation)\nglobal FFT                         : 0 sec (929 microsec/operation)\npower spectrum                     : 0 sec (10 microsec/operation)\nglobal alignment                   : 0.001 sec (1879 microsec/operation)\nglobal iFFT                        : 0 sec (366 microsec/operation)\nprepare patch                      : 0.003 sec (375 microsec/operation)\nprep patch - clip (in thread)      : 0 sec (7 microsec/operation)\nprep patch - FFT (in thread)       : 0.001 sec (16 microsec/operation)\npatch alignment                    : 0.004 sec (539 microsec/operation)\nalign - prep weight                : 0 sec (27 microsec/operation)\nalign - make reference             : 0 sec (31 microsec/operation)\nalign - calc CCF (in thread)       : 0.001 sec (14 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.003 sec (39 microsec/operation)\nalign - argmax CCF (in thread)     : 0.001 sec (11 microsec/operation)\nalign - shift in Fourier space     : 0 sec (45 microsec/operation)\nfit polynomial                     : 0 sec (199 microsec/operation)\ndose weighting                     : 0 sec (911 microsec/operation)\ndw - calc weight                   : 0 sec (608 microsec/operation)\ndw - iFFT                          : 0 sec (266 microsec/operation)\nreal space interpolation           : 0 sec (499 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": " Did not find any of the expected EPS files to generate a PDF file\n + Will make an empty PDF-file in /tmp/mc_benchmarks/Synthetic_Patch3x3_4Threads_th4_p3x3_rep3/batch.pdf\n"
+        }
+      ]
+    },
+    {
+      "name": "Tutorial_5x5_1Thread",
+      "dataset_path": "/home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff",
+      "dataset_sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+      "threads": 1,
+      "patch_x": 5,
+      "patch_y": 5,
+      "repetitions": 3,
+      "mean_wall_time_sec": 60.13947392689685,
+      "std_wall_time_sec": 0.45971999308202444,
+      "mean_peak_rss_mb": 2835.98828125,
+      "max_peak_rss_mb": 2836.32421875,
+      "stage_breakdowns": [
+        {
+          "tag": "dose weighting",
+          "mean_sec": 17.214008333333332,
+          "std_sec": 0.9476043721502255,
+          "min_sec": 16.154973,
+          "max_sec": 18.454697,
+          "pct_total": 28.623476743840488
+        },
+        {
+          "tag": "global iFFT",
+          "mean_sec": 12.995134,
+          "std_sec": 0.7580065479893083,
+          "min_sec": 12.025018,
+          "max_sec": 13.875182,
+          "pct_total": 21.608326697031586
+        },
+        {
+          "tag": "dw - iFFT",
+          "mean_sec": 12.983388,
+          "std_sec": 0.9502705046820447,
+          "min_sec": 11.913882,
+          "max_sec": 14.222867,
+          "pct_total": 21.58879543206861
+        },
+        {
+          "tag": "global FFT",
+          "mean_sec": 11.835705666666668,
+          "std_sec": 1.2749053111927782,
+          "min_sec": 10.583237,
+          "max_sec": 13.585135,
+          "pct_total": 19.680427668944496
+        },
+        {
+          "tag": "real space interpolation",
+          "mean_sec": 4.783116666666667,
+          "std_sec": 0.06568371506105763,
+          "min_sec": 4.728877,
+          "max_sec": 4.875544,
+          "pct_total": 7.953372975095914
+        },
+        {
+          "tag": "dw - calc weight",
+          "mean_sec": 4.230581,
+          "std_sec": 0.00908539237824461,
+          "min_sec": 4.218899,
+          "max_sec": 4.241055,
+          "pct_total": 7.034615908251086
+        },
+        {
+          "tag": "power spectrum",
+          "mean_sec": 2.0311150000000002,
+          "std_sec": 0.12559453217663044,
+          "min_sec": 1.856243,
+          "max_sec": 2.145492,
+          "pct_total": 3.377340816896641
+        },
+        {
+          "tag": "read movie",
+          "mean_sec": 1.8630533333333332,
+          "std_sec": 0.16172818704302055,
+          "min_sec": 1.734719,
+          "max_sec": 2.091177,
+          "pct_total": 3.0978876463036356
+        },
+        {
+          "tag": "power - square",
+          "mean_sec": 1.0216406666666666,
+          "std_sec": 0.07427982619497407,
+          "min_sec": 0.966118,
+          "max_sec": 1.12663,
+          "pct_total": 1.6987855063523378
+        },
+        {
+          "tag": "global alignment",
+          "mean_sec": 0.9677159999999999,
+          "std_sec": 0.08711727127269306,
+          "min_sec": 0.864195,
+          "max_sec": 1.077327,
+          "pct_total": 1.6091194964164752
+        },
+        {
+          "tag": "power - sum",
+          "mean_sec": 0.7589083333333333,
+          "std_sec": 0.11679019702107803,
+          "min_sec": 0.667564,
+          "max_sec": 0.923753,
+          "pct_total": 1.2619138209553213
+        },
+        {
+          "tag": "prepare patch",
+          "mean_sec": 0.2373436666666667,
+          "std_sec": 0.001115844174704611,
+          "min_sec": 0.236245,
+          "max_sec": 0.238874,
+          "pct_total": 0.3946553755278475
+        },
+        {
+          "tag": "power - resize",
+          "mean_sec": 0.22548800000000002,
+          "std_sec": 0.05887864327580928,
+          "min_sec": 0.176303,
+          "max_sec": 0.308267,
+          "pct_total": 0.37494175668063584
+        },
+        {
+          "tag": "apply gain",
+          "mean_sec": 0.1865456666666667,
+          "std_sec": 0.03258650405033074,
+          "min_sec": 0.144245,
+          "max_sec": 0.223533,
+          "pct_total": 0.31018839122773867
+        },
+        {
+          "tag": "initial sum",
+          "mean_sec": 0.17957866666666666,
+          "std_sec": 0.04577550710684579,
+          "min_sec": 0.143698,
+          "max_sec": 0.244183,
+          "pct_total": 0.298603654040864
+        },
+        {
+          "tag": "read gain",
+          "mean_sec": 0.10375933333333333,
+          "std_sec": 0.007413561327429316,
+          "min_sec": 0.094186,
+          "max_sec": 0.112248,
+          "pct_total": 0.17253116224371873
+        },
+        {
+          "tag": "detect hot pixels",
+          "mean_sec": 0.10229433333333333,
+          "std_sec": 0.00768215951988039,
+          "min_sec": 0.091501,
+          "max_sec": 0.108764,
+          "pct_total": 0.17009515822781932
+        },
+        {
+          "tag": "fix defects",
+          "mean_sec": 0.04500266666666667,
+          "std_sec": 0.0034337707488350994,
+          "min_sec": 0.042501,
+          "max_sec": 0.049858,
+          "pct_total": 0.07483049605882838
+        },
+        {
+          "tag": "patch alignment",
+          "mean_sec": 0.035158666666666664,
+          "std_sec": 0.00046425950597579307,
+          "min_sec": 0.03474,
+          "max_sec": 0.035806,
+          "pct_total": 0.05846187931308501
+        },
+        {
+          "tag": "align - shift in Fourier space",
+          "mean_sec": 0.02096066666666667,
+          "std_sec": 0.0002670846723835388,
+          "min_sec": 0.020676,
+          "max_sec": 0.021318,
+          "pct_total": 0.03485342537606102
+        },
+        {
+          "tag": "power - crop",
+          "mean_sec": 0.018508999999999998,
+          "std_sec": 0.0002957915932995164,
+          "min_sec": 0.018256,
+          "max_sec": 0.018924,
+          "pct_total": 0.030776790669134888
+        },
+        {
+          "tag": "prep patch - FFT (in thread)",
+          "mean_sec": 0.009435333333333334,
+          "std_sec": 4.716872787015671e-05,
+          "min_sec": 0.0094,
+          "max_sec": 0.009502,
+          "pct_total": 0.015689085250068114
+        },
+        {
+          "tag": "align - make reference",
+          "mean_sec": 0.002944,
+          "std_sec": 0.001050887561381648,
+          "min_sec": 0.002181,
+          "max_sec": 0.00443,
+          "pct_total": 0.004895287251063435
+        },
+        {
+          "tag": "fit polynomial",
+          "mean_sec": 0.0015633333333333332,
+          "std_sec": 6.100455356410339e-05,
+          "min_sec": 0.001478,
+          "max_sec": 0.001617,
+          "pct_total": 0.0025995128178767563
+        },
+        {
+          "tag": "align - prep weight",
+          "mean_sec": 0.0003973333333333333,
+          "std_sec": 1.3424687043734837e-05,
+          "min_sec": 0.000385,
+          "max_sec": 0.000416,
+          "pct_total": 0.0006606864134134527
+        },
+        {
+          "tag": "prep patch - clip (in thread)",
+          "mean_sec": 0.0003476666666666667,
+          "std_sec": 1.1897712198383177e-05,
+          "min_sec": 0.000336,
+          "max_sec": 0.000364,
+          "pct_total": 0.0005781006117367712
+        },
+        {
+          "tag": "align - iFFT CCF (in thread)",
+          "mean_sec": 0.00033400000000000004,
+          "std_sec": 1.4899664425751332e-05,
+          "min_sec": 0.000313,
+          "max_sec": 0.000346,
+          "pct_total": 0.0005553756595975501
+        },
+        {
+          "tag": "align - calc CCF (in thread)",
+          "mean_sec": 7.333333333333333e-05,
+          "std_sec": 3.858612300930075e-06,
+          "min_sec": 6.8e-05,
+          "max_sec": 7.7e-05,
+          "pct_total": 0.00012193876757630839
+        },
+        {
+          "tag": "align - argmax CCF (in thread)",
+          "mean_sec": 1.1000000000000001e-05,
+          "std_sec": 1.6940658945086007e-21,
+          "min_sec": 1.1e-05,
+          "max_sec": 1.1e-05,
+          "pct_total": 1.829081513644626e-05
+        },
+        {
+          "tag": "binning",
+          "mean_sec": 9.333333333333334e-06,
+          "std_sec": 4.71404520791032e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1e-05,
+          "pct_total": 1.5519479509711978e-05
+        }
+      ],
+      "top_time_stages": [
+        [
+          "dose weighting",
+          17.214008333333332,
+          28.623476743840488
+        ],
+        [
+          "global iFFT",
+          12.995134,
+          21.608326697031586
+        ],
+        [
+          "dw - iFFT",
+          12.983388,
+          21.58879543206861
+        ]
+      ],
+      "all_runs": [
+        {
+          "repetition": 1,
+          "threads": 1,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 60.66252131666988,
+          "peak_rss_mb": 2835.6484375,
+          "stage_times": {
+            "read gain": 0.112248,
+            "read movie": 1.734719,
+            "apply gain": 0.144245,
+            "initial sum": 0.143698,
+            "detect hot pixels": 0.091501,
+            "fix defects": 0.042649,
+            "global FFT": 10.583237,
+            "power spectrum": 1.856243,
+            "power - sum": 0.667564,
+            "power - square": 0.972174,
+            "power - crop": 0.018256,
+            "power - resize": 0.191894,
+            "global alignment": 0.864195,
+            "global iFFT": 13.875182,
+            "prepare patch": 0.236912,
+            "prep patch - clip (in thread)": 0.000364,
+            "prep patch - FFT (in thread)": 0.0094,
+            "patch alignment": 0.035806,
+            "align - prep weight": 0.000385,
+            "align - make reference": 0.002221,
+            "align - calc CCF (in thread)": 6.8e-05,
+            "align - iFFT CCF (in thread)": 0.000313,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.020676,
+            "fit polynomial": 0.001595,
+            "dose weighting": 18.454697,
+            "dw - calc weight": 4.231789,
+            "dw - iFFT": 14.222867,
+            "real space interpolation": 4.875544,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "dd7854d908e8dac99485d5028f685d42f49f3560d03e001fd404c752d64adca4",
+            "header.pdf": "f6d2dfde11c70d816e4dc782e4998d4a1253ae6f912f39253a731224e802ab15",
+            "corrected_micrographs.star": "2131fd8c024702e71a9971b738b7a467e2e1a577235abd92671cb83dfa271ae0",
+            "header.pdf.lst": "303e9769e38cfa4b1398786384b87e8e52337bda22e854468ed408e309386833",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "9d51c74e8aefda11965922872cebade05f60a5d57c49f5495f358b1cdf7cdce5",
+            "all_batches.pdf": "768ff9262825767878690ff87e0375553cdbd5b23c11c93a48d93ade7923299d",
+            "batch.pdf": "de6df560fa17ccb8ef5e591ecb1c990eb126ad13d486b82bb4cbd29cf0e0c607"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  60/  60 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep1/logfile.pdf\nread gain                          : 0.112 sec (112248 microsec/operation)\nread movie                         : 1.734 sec (1734719 microsec/operation)\napply gain                         : 0.144 sec (144245 microsec/operation)\ninitial sum                        : 0.143 sec (143698 microsec/operation)\ndetect hot pixels                  : 0.091 sec (91501 microsec/operation)\nfix defects                        : 0.042 sec (42649 microsec/operation)\nglobal FFT                         : 10.583 sec (10583237 microsec/operation)\npower spectrum                     : 1.856 sec (1856243 microsec/operation)\npower - sum                        : 0.667 sec (667564 microsec/operation)\npower - square                     : 0.972 sec (972174 microsec/operation)\npower - crop                       : 0.018 sec (18256 microsec/operation)\npower - resize                     : 0.191 sec (191894 microsec/operation)\nglobal alignment                   : 0.864 sec (864195 microsec/operation)\nglobal iFFT                        : 13.875 sec (13875182 microsec/operation)\nprepare patch                      : 5.922 sec (236912 microsec/operation)\nprep patch - clip (in thread)      : 0.218 sec (364 microsec/operation)\nprep patch - FFT (in thread)       : 5.64 sec (9400 microsec/operation)\npatch alignment                    : 0.895 sec (35806 microsec/operation)\nalign - prep weight                : 0.01 sec (385 microsec/operation)\nalign - make reference             : 0.115 sec (2221 microsec/operation)\nalign - calc CCF (in thread)       : 0.085 sec (68 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.391 sec (313 microsec/operation)\nalign - argmax CCF (in thread)     : 0.014 sec (11 microsec/operation)\nalign - shift in Fourier space     : 1.075 sec (20676 microsec/operation)\nfit polynomial                     : 0.001 sec (1595 microsec/operation)\ndose weighting                     : 18.454 sec (18454697 microsec/operation)\ndw - calc weight                   : 4.231 sec (4231789 microsec/operation)\ndw - iFFT                          : 14.222 sec (14222867 microsec/operation)\nreal space interpolation           : 4.875 sec (4875544 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 2,
+          "threads": 1,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 59.54354063421488,
+          "peak_rss_mb": 2836.32421875,
+          "stage_times": {
+            "read gain": 0.094186,
+            "read movie": 1.763264,
+            "apply gain": 0.191859,
+            "initial sum": 0.150855,
+            "detect hot pixels": 0.106618,
+            "fix defects": 0.042501,
+            "global FFT": 11.338745,
+            "power spectrum": 2.145492,
+            "power - sum": 0.685408,
+            "power - square": 1.12663,
+            "power - crop": 0.018347,
+            "power - resize": 0.308267,
+            "global alignment": 1.077327,
+            "global iFFT": 13.085202,
+            "prepare patch": 0.236245,
+            "prep patch - clip (in thread)": 0.000336,
+            "prep patch - FFT (in thread)": 0.009404,
+            "patch alignment": 0.03474,
+            "align - prep weight": 0.000416,
+            "align - make reference": 0.00443,
+            "align - calc CCF (in thread)": 7.5e-05,
+            "align - iFFT CCF (in thread)": 0.000346,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.020888,
+            "fit polynomial": 0.001478,
+            "dose weighting": 17.032355,
+            "dw - calc weight": 4.218899,
+            "dw - iFFT": 12.813415,
+            "real space interpolation": 4.744929,
+            "binning": 1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "b5c7eb2de273377fff4df6ea512c809ee5f824efce8a91b8620ab941df099570",
+            "header.pdf": "300d81ab334f39a6ce9fd61dd9b1e2e11367407f6c8ace951a4510b27b501f4b",
+            "corrected_micrographs.star": "b3a441eceef99b4a53c715f99a9e3681b33167d8f2e21843778a88dfb5968008",
+            "header.pdf.lst": "911df8f6ad957695ecd4a3db2b11b11e550c40061086f38fb15b826196a1ba55",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "6851906548a17649f444343c07c51db3895052b1cc8efd9407da247bcd943634",
+            "all_batches.pdf": "72211bb27277a085dbd60d92c71ad829aa6aac65592908b4278a0c1911504d2f",
+            "batch.pdf": "2ddf05df4f1b034db62a5bc3c06559fa6ab20c2a6cfcf840a169cb1bbee53290"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  59/  59 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep2/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep2/logfile.pdf\nread gain                          : 0.094 sec (94186 microsec/operation)\nread movie                         : 1.763 sec (1763264 microsec/operation)\napply gain                         : 0.191 sec (191859 microsec/operation)\ninitial sum                        : 0.15 sec (150855 microsec/operation)\ndetect hot pixels                  : 0.106 sec (106618 microsec/operation)\nfix defects                        : 0.042 sec (42501 microsec/operation)\nglobal FFT                         : 11.338 sec (11338745 microsec/operation)\npower spectrum                     : 2.145 sec (2145492 microsec/operation)\npower - sum                        : 0.685 sec (685408 microsec/operation)\npower - square                     : 1.126 sec (1126630 microsec/operation)\npower - crop                       : 0.018 sec (18347 microsec/operation)\npower - resize                     : 0.308 sec (308267 microsec/operation)\nglobal alignment                   : 1.077 sec (1077327 microsec/operation)\nglobal iFFT                        : 13.085 sec (13085202 microsec/operation)\nprepare patch                      : 5.906 sec (236245 microsec/operation)\nprep patch - clip (in thread)      : 0.201 sec (336 microsec/operation)\nprep patch - FFT (in thread)       : 5.642 sec (9404 microsec/operation)\npatch alignment                    : 0.868 sec (34740 microsec/operation)\nalign - prep weight                : 0.01 sec (416 microsec/operation)\nalign - make reference             : 0.23 sec (4430 microsec/operation)\nalign - calc CCF (in thread)       : 0.094 sec (75 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.432 sec (346 microsec/operation)\nalign - argmax CCF (in thread)     : 0.014 sec (11 microsec/operation)\nalign - shift in Fourier space     : 1.086 sec (20888 microsec/operation)\nfit polynomial                     : 0.001 sec (1478 microsec/operation)\ndose weighting                     : 17.032 sec (17032355 microsec/operation)\ndw - calc weight                   : 4.218 sec (4218899 microsec/operation)\ndw - iFFT                          : 12.813 sec (12813415 microsec/operation)\nreal space interpolation           : 4.744 sec (4744929 microsec/operation)\nbinning                            : 0 sec (10 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 3,
+          "threads": 1,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 60.21235982980579,
+          "peak_rss_mb": 2835.9921875,
+          "stage_times": {
+            "read gain": 0.104844,
+            "read movie": 2.091177,
+            "apply gain": 0.223533,
+            "initial sum": 0.244183,
+            "detect hot pixels": 0.108764,
+            "fix defects": 0.049858,
+            "global FFT": 13.585135,
+            "power spectrum": 2.09161,
+            "power - sum": 0.923753,
+            "power - square": 0.966118,
+            "power - crop": 0.018924,
+            "power - resize": 0.176303,
+            "global alignment": 0.961626,
+            "global iFFT": 12.025018,
+            "prepare patch": 0.238874,
+            "prep patch - clip (in thread)": 0.000343,
+            "prep patch - FFT (in thread)": 0.009502,
+            "patch alignment": 0.03493,
+            "align - prep weight": 0.000391,
+            "align - make reference": 0.002181,
+            "align - calc CCF (in thread)": 7.7e-05,
+            "align - iFFT CCF (in thread)": 0.000343,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.021318,
+            "fit polynomial": 0.001617,
+            "dose weighting": 16.154973,
+            "dw - calc weight": 4.241055,
+            "dw - iFFT": 11.913882,
+            "real space interpolation": 4.728877,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "c5ceda90ca0cbc4f84df72a22febe2d65a414cb809ca24744f13303a28f70dba",
+            "header.pdf": "ecd2e05db47212693a42faec65a1dbeac0893f5db678728f953149675ef8f85a",
+            "corrected_micrographs.star": "596e8dd3b7acfc0b7fcec3f858597b9bd6b057be5b7a05dd88c8370a5ce3e0af",
+            "header.pdf.lst": "5ab33408e6053e1a3e94c49e55d12fd0099507b66e4651c610dd84ec51948a76",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "3d96b604fb36c364eb58e3acc529c00a9d2d2288602cae72111456a828465f44",
+            "all_batches.pdf": "363c0f6535e6b17476157f2e068b8614d447438aee7c8af1d668e8cac7ef9520",
+            "batch.pdf": "56005b1c6c4079da1310306ef5c2164995da2c33c54dc3aa8adc5937068232c2"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  60/  60 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep3/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_1Thread_th1_p5x5_rep3/logfile.pdf\nread gain                          : 0.104 sec (104844 microsec/operation)\nread movie                         : 2.091 sec (2091177 microsec/operation)\napply gain                         : 0.223 sec (223533 microsec/operation)\ninitial sum                        : 0.244 sec (244183 microsec/operation)\ndetect hot pixels                  : 0.108 sec (108764 microsec/operation)\nfix defects                        : 0.049 sec (49858 microsec/operation)\nglobal FFT                         : 13.585 sec (13585135 microsec/operation)\npower spectrum                     : 2.091 sec (2091610 microsec/operation)\npower - sum                        : 0.923 sec (923753 microsec/operation)\npower - square                     : 0.966 sec (966118 microsec/operation)\npower - crop                       : 0.018 sec (18924 microsec/operation)\npower - resize                     : 0.176 sec (176303 microsec/operation)\nglobal alignment                   : 0.961 sec (961626 microsec/operation)\nglobal iFFT                        : 12.025 sec (12025018 microsec/operation)\nprepare patch                      : 5.971 sec (238874 microsec/operation)\nprep patch - clip (in thread)      : 0.205 sec (343 microsec/operation)\nprep patch - FFT (in thread)       : 5.701 sec (9502 microsec/operation)\npatch alignment                    : 0.873 sec (34930 microsec/operation)\nalign - prep weight                : 0.01 sec (391 microsec/operation)\nalign - make reference             : 0.113 sec (2181 microsec/operation)\nalign - calc CCF (in thread)       : 0.096 sec (77 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.428 sec (343 microsec/operation)\nalign - argmax CCF (in thread)     : 0.013 sec (11 microsec/operation)\nalign - shift in Fourier space     : 1.108 sec (21318 microsec/operation)\nfit polynomial                     : 0.001 sec (1617 microsec/operation)\ndose weighting                     : 16.154 sec (16154973 microsec/operation)\ndw - calc weight                   : 4.241 sec (4241055 microsec/operation)\ndw - iFFT                          : 11.913 sec (11913882 microsec/operation)\nreal space interpolation           : 4.728 sec (4728877 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "Tutorial_5x5_4Threads",
+      "dataset_path": "/home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff",
+      "dataset_sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+      "threads": 4,
+      "patch_x": 5,
+      "patch_y": 5,
+      "repetitions": 3,
+      "mean_wall_time_sec": 26.132707349335153,
+      "std_wall_time_sec": 0.5296439138436426,
+      "mean_peak_rss_mb": 3031.4869791666665,
+      "max_peak_rss_mb": 3039.734375,
+      "stage_breakdowns": [
+        {
+          "tag": "dose weighting",
+          "mean_sec": 6.340916666666668,
+          "std_sec": 0.42803827179691384,
+          "min_sec": 5.999945,
+          "max_sec": 6.944564,
+          "pct_total": 24.264292948690557
+        },
+        {
+          "tag": "global FFT",
+          "mean_sec": 5.286431666666666,
+          "std_sec": 0.29924151582106534,
+          "min_sec": 4.950638,
+          "max_sec": 5.677376,
+          "pct_total": 20.229177161015272
+        },
+        {
+          "tag": "global iFFT",
+          "mean_sec": 5.177864333333333,
+          "std_sec": 0.10414011598589475,
+          "min_sec": 5.097833,
+          "max_sec": 5.32495,
+          "pct_total": 19.81373098514825
+        },
+        {
+          "tag": "dw - iFFT",
+          "mean_sec": 5.1073786666666665,
+          "std_sec": 0.4595697015443422,
+          "min_sec": 4.747781,
+          "max_sec": 5.756031,
+          "pct_total": 19.544008963145583
+        },
+        {
+          "tag": "real space interpolation",
+          "mean_sec": 1.9720683333333333,
+          "std_sec": 0.01726794549318354,
+          "min_sec": 1.95881,
+          "max_sec": 1.996458,
+          "pct_total": 7.546360608456074
+        },
+        {
+          "tag": "power spectrum",
+          "mean_sec": 1.8619643333333336,
+          "std_sec": 0.07727598680199578,
+          "min_sec": 1.765086,
+          "max_sec": 1.954202,
+          "pct_total": 7.125034189696018
+        },
+        {
+          "tag": "dw - calc weight",
+          "mean_sec": 1.2334686666666668,
+          "std_sec": 0.03201600720820066,
+          "min_sec": 1.188413,
+          "max_sec": 1.259873,
+          "pct_total": 4.720018673067364
+        },
+        {
+          "tag": "power - square",
+          "mean_sec": 0.9481069999999999,
+          "std_sec": 0.014097345778549956,
+          "min_sec": 0.930603,
+          "max_sec": 0.965124,
+          "pct_total": 3.62804736350488
+        },
+        {
+          "tag": "read movie",
+          "mean_sec": 0.703536,
+          "std_sec": 0.18452663128665195,
+          "min_sec": 0.572897,
+          "max_sec": 0.964496,
+          "pct_total": 2.692166527544644
+        },
+        {
+          "tag": "power - sum",
+          "mean_sec": 0.6942286666666666,
+          "std_sec": 0.09198630584434235,
+          "min_sec": 0.578731,
+          "max_sec": 0.803818,
+          "pct_total": 2.6565508785079195
+        },
+        {
+          "tag": "global alignment",
+          "mean_sec": 0.47342966666666664,
+          "std_sec": 0.006237722732607551,
+          "min_sec": 0.467573,
+          "max_sec": 0.482071,
+          "pct_total": 1.8116365072243894
+        },
+        {
+          "tag": "power - resize",
+          "mean_sec": 0.19491999999999998,
+          "std_sec": 0.0014122332196442094,
+          "min_sec": 0.193138,
+          "max_sec": 0.196592,
+          "pct_total": 0.7458852134773513
+        },
+        {
+          "tag": "prepare patch",
+          "mean_sec": 0.102228,
+          "std_sec": 0.0004363400814349603,
+          "min_sec": 0.101911,
+          "max_sec": 0.102845,
+          "pct_total": 0.39118794173693144
+        },
+        {
+          "tag": "read gain",
+          "mean_sec": 0.09181033333333333,
+          "std_sec": 0.005553949365591619,
+          "min_sec": 0.083994,
+          "max_sec": 0.096388,
+          "pct_total": 0.35132346643628215
+        },
+        {
+          "tag": "apply gain",
+          "mean_sec": 0.08047966666666667,
+          "std_sec": 0.024789243747148797,
+          "min_sec": 0.058308,
+          "max_sec": 0.115083,
+          "pct_total": 0.30796528500027065
+        },
+        {
+          "tag": "detect hot pixels",
+          "mean_sec": 0.07374333333333333,
+          "std_sec": 0.001511275252523142,
+          "min_sec": 0.07213,
+          "max_sec": 0.075764,
+          "pct_total": 0.28218788182774884
+        },
+        {
+          "tag": "initial sum",
+          "mean_sec": 0.069418,
+          "std_sec": 0.005184697933984839,
+          "min_sec": 0.065595,
+          "max_sec": 0.076748,
+          "pct_total": 0.2656364649557294
+        },
+        {
+          "tag": "fix defects",
+          "mean_sec": 0.043699666666666664,
+          "std_sec": 0.0014046627906923275,
+          "min_sec": 0.042246,
+          "max_sec": 0.045599,
+          "pct_total": 0.16722211779476587
+        },
+        {
+          "tag": "power - crop",
+          "mean_sec": 0.01838333333333333,
+          "std_sec": 9.659652627754727e-05,
+          "min_sec": 0.018247,
+          "max_sec": 0.018459,
+          "pct_total": 0.07034607278759819
+        },
+        {
+          "tag": "patch alignment",
+          "mean_sec": 0.016125666666666667,
+          "std_sec": 0.0006757861265880571,
+          "min_sec": 0.015456,
+          "max_sec": 0.017051,
+          "pct_total": 0.061706835235641674
+        },
+        {
+          "tag": "align - shift in Fourier space",
+          "mean_sec": 0.010532,
+          "std_sec": 0.00028439878105692855,
+          "min_sec": 0.01015,
+          "max_sec": 0.010832,
+          "pct_total": 0.04030198578054312
+        },
+        {
+          "tag": "prep patch - FFT (in thread)",
+          "mean_sec": 0.007352333333333333,
+          "std_sec": 0.0003215061775801861,
+          "min_sec": 0.007035,
+          "max_sec": 0.007793,
+          "pct_total": 0.02813460249276616
+        },
+        {
+          "tag": "fit polynomial",
+          "mean_sec": 0.0014936666666666668,
+          "std_sec": 3.390509630653708e-05,
+          "min_sec": 0.001453,
+          "max_sec": 0.001536,
+          "pct_total": 0.005715698135289712
+        },
+        {
+          "tag": "align - make reference",
+          "mean_sec": 0.001042,
+          "std_sec": 0.00011806213053586095,
+          "min_sec": 0.000926,
+          "max_sec": 0.001204,
+          "pct_total": 0.0039873404085953214
+        },
+        {
+          "tag": "prep patch - clip (in thread)",
+          "mean_sec": 0.00038833333333333336,
+          "std_sec": 1.053037933262088e-05,
+          "min_sec": 0.000374,
+          "max_sec": 0.000399,
+          "pct_total": 0.0014860049827298625
+        },
+        {
+          "tag": "align - iFFT CCF (in thread)",
+          "mean_sec": 0.0002606666666666667,
+          "std_sec": 1.6779617264870968e-05,
+          "min_sec": 0.000241,
+          "max_sec": 0.000282,
+          "pct_total": 0.0009974728725276846
+        },
+        {
+          "tag": "align - prep weight",
+          "mean_sec": 0.00020533333333333333,
+          "std_sec": 4.027681991198192e-06,
+          "min_sec": 0.000202,
+          "max_sec": 0.000211,
+          "pct_total": 0.0007857331067481504
+        },
+        {
+          "tag": "align - calc CCF (in thread)",
+          "mean_sec": 0.00011733333333333333,
+          "std_sec": 7.039570693980962e-06,
+          "min_sec": 0.000108,
+          "max_sec": 0.000125,
+          "pct_total": 0.0004489903467132288
+        },
+        {
+          "tag": "align - argmax CCF (in thread)",
+          "mean_sec": 1.1666666666666666e-05,
+          "std_sec": 9.428090415820631e-07,
+          "min_sec": 1.1e-05,
+          "max_sec": 1.3e-05,
+          "pct_total": 4.464392651978127e-05
+        },
+        {
+          "tag": "binning",
+          "mean_sec": 1.0333333333333333e-05,
+          "std_sec": 9.428090415820631e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1.1e-05,
+          "pct_total": 3.954176348894913e-05
+        }
+      ],
+      "top_time_stages": [
+        [
+          "dose weighting",
+          6.340916666666668,
+          24.264292948690557
+        ],
+        [
+          "global FFT",
+          5.286431666666666,
+          20.229177161015272
+        ],
+        [
+          "global iFFT",
+          5.177864333333333,
+          19.81373098514825
+        ]
+      ],
+      "all_runs": [
+        {
+          "repetition": 1,
+          "threads": 4,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 26.78404407761991,
+          "peak_rss_mb": 3039.734375,
+          "stage_times": {
+            "read gain": 0.095049,
+            "read movie": 0.964496,
+            "apply gain": 0.115083,
+            "initial sum": 0.076748,
+            "detect hot pixels": 0.073336,
+            "fix defects": 0.045599,
+            "global FFT": 5.677376,
+            "power spectrum": 1.954202,
+            "power - sum": 0.803818,
+            "power - square": 0.930603,
+            "power - crop": 0.018444,
+            "power - resize": 0.19503,
+            "global alignment": 0.470645,
+            "global iFFT": 5.32495,
+            "prepare patch": 0.101928,
+            "prep patch - clip (in thread)": 0.000392,
+            "prep patch - FFT (in thread)": 0.007229,
+            "patch alignment": 0.017051,
+            "align - prep weight": 0.000211,
+            "align - make reference": 0.001204,
+            "align - calc CCF (in thread)": 0.000125,
+            "align - iFFT CCF (in thread)": 0.000259,
+            "align - argmax CCF (in thread)": 1.3e-05,
+            "align - shift in Fourier space": 0.010614,
+            "fit polynomial": 0.001536,
+            "dose weighting": 5.999945,
+            "dw - calc weight": 1.25212,
+            "dw - iFFT": 4.747781,
+            "real space interpolation": 1.996458,
+            "binning": 1.1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "e43a7dbafdc0c42f2f74ea02bfd45bf9f33cfb7d6e989d4d015a698c19a0338b",
+            "header.pdf": "9134affd0f13331afe348adc86726263e02c88a49d5cf6a383805fee7ab8d8ba",
+            "corrected_micrographs.star": "ca5e6466282ae16a26d23aff75609e8124836da192505126028071d9ddbaf393",
+            "header.pdf.lst": "89b2117451c69ae08ae1ba523b679e88e9f7f2ffe12c9b4d0e41876f91e872af",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "f6be325d9ff43b63a5b339f5af9780897ab47b1d4223070115a97b20775ee28b",
+            "all_batches.pdf": "2124c8d68a49b0a7f3efaf643a115ce4eb2aa6848cf721455eb69e0d1a6b0338",
+            "batch.pdf": "f422bcbf0c47f0672cf2fbb213a7c08a01a3d01ddfa6debade2da99558bc48fa"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  26/  26 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep1/logfile.pdf\nread gain                          : 0.095 sec (95049 microsec/operation)\nread movie                         : 0.964 sec (964496 microsec/operation)\napply gain                         : 0.115 sec (115083 microsec/operation)\ninitial sum                        : 0.076 sec (76748 microsec/operation)\ndetect hot pixels                  : 0.073 sec (73336 microsec/operation)\nfix defects                        : 0.045 sec (45599 microsec/operation)\nglobal FFT                         : 5.677 sec (5677376 microsec/operation)\npower spectrum                     : 1.954 sec (1954202 microsec/operation)\npower - sum                        : 0.803 sec (803818 microsec/operation)\npower - square                     : 0.93 sec (930603 microsec/operation)\npower - crop                       : 0.018 sec (18444 microsec/operation)\npower - resize                     : 0.195 sec (195030 microsec/operation)\nglobal alignment                   : 0.47 sec (470645 microsec/operation)\nglobal iFFT                        : 5.324 sec (5324950 microsec/operation)\nprepare patch                      : 2.548 sec (101928 microsec/operation)\nprep patch - clip (in thread)      : 0.235 sec (392 microsec/operation)\nprep patch - FFT (in thread)       : 4.337 sec (7229 microsec/operation)\npatch alignment                    : 0.426 sec (17051 microsec/operation)\nalign - prep weight                : 0.005 sec (211 microsec/operation)\nalign - make reference             : 0.062 sec (1204 microsec/operation)\nalign - calc CCF (in thread)       : 0.156 sec (125 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.324 sec (259 microsec/operation)\nalign - argmax CCF (in thread)     : 0.016 sec (13 microsec/operation)\nalign - shift in Fourier space     : 0.551 sec (10614 microsec/operation)\nfit polynomial                     : 0.001 sec (1536 microsec/operation)\ndose weighting                     : 5.999 sec (5999945 microsec/operation)\ndw - calc weight                   : 1.252 sec (1252120 microsec/operation)\ndw - iFFT                          : 4.747 sec (4747781 microsec/operation)\nreal space interpolation           : 1.996 sec (1996458 microsec/operation)\nbinning                            : 0 sec (11 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 2,
+          "threads": 4,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 26.12735814321786,
+          "peak_rss_mb": 3015.87890625,
+          "stage_times": {
+            "read gain": 0.083994,
+            "read movie": 0.573215,
+            "apply gain": 0.058308,
+            "initial sum": 0.065911,
+            "detect hot pixels": 0.07213,
+            "fix defects": 0.043254,
+            "global FFT": 4.950638,
+            "power spectrum": 1.866605,
+            "power - sum": 0.700137,
+            "power - square": 0.948594,
+            "power - crop": 0.018459,
+            "power - resize": 0.193138,
+            "global alignment": 0.482071,
+            "global iFFT": 5.097833,
+            "prepare patch": 0.101911,
+            "prep patch - clip (in thread)": 0.000374,
+            "prep patch - FFT (in thread)": 0.007793,
+            "patch alignment": 0.01587,
+            "align - prep weight": 0.000202,
+            "align - make reference": 0.000926,
+            "align - calc CCF (in thread)": 0.000108,
+            "align - iFFT CCF (in thread)": 0.000241,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.010832,
+            "fit polynomial": 0.001453,
+            "dose weighting": 6.944564,
+            "dw - calc weight": 1.188413,
+            "dw - iFFT": 5.756031,
+            "real space interpolation": 1.960937,
+            "binning": 1.1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "8567654d1d2733212991a98f9f268b448a8ab2aa5ae0b95f52d2a01328d60f93",
+            "header.pdf": "66202b749ae1c139a4df42ceeacc409ee4db311231e790bbbd56413e21c6401b",
+            "corrected_micrographs.star": "cc2bd70aba07f4a06bd82ade97f0a69777a02f25de6ac072cfb9156933541b88",
+            "header.pdf.lst": "380ee4bdd22f9fb90b354d8ca48be5967102e2da18ab12f06b53dd76f6cdda56",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "ec1f6a8a09c25fc4a2d09bd51bc8b17dccc2b340a51c0b9f4fc926d5a8b8fc7a",
+            "all_batches.pdf": "ed42be3cdc808ee3982c27afe7b3a715136414fb86385d326390f2636fc71ea2",
+            "batch.pdf": "a22ef9a09665672d85a10e290fb2194707a14998af9adbc2a17fc75a95876c2e"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  26/  26 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep2/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep2/logfile.pdf\nread gain                          : 0.083 sec (83994 microsec/operation)\nread movie                         : 0.573 sec (573215 microsec/operation)\napply gain                         : 0.058 sec (58308 microsec/operation)\ninitial sum                        : 0.065 sec (65911 microsec/operation)\ndetect hot pixels                  : 0.072 sec (72130 microsec/operation)\nfix defects                        : 0.043 sec (43254 microsec/operation)\nglobal FFT                         : 4.95 sec (4950638 microsec/operation)\npower spectrum                     : 1.866 sec (1866605 microsec/operation)\npower - sum                        : 0.7 sec (700137 microsec/operation)\npower - square                     : 0.948 sec (948594 microsec/operation)\npower - crop                       : 0.018 sec (18459 microsec/operation)\npower - resize                     : 0.193 sec (193138 microsec/operation)\nglobal alignment                   : 0.482 sec (482071 microsec/operation)\nglobal iFFT                        : 5.097 sec (5097833 microsec/operation)\nprepare patch                      : 2.547 sec (101911 microsec/operation)\nprep patch - clip (in thread)      : 0.224 sec (374 microsec/operation)\nprep patch - FFT (in thread)       : 4.675 sec (7793 microsec/operation)\npatch alignment                    : 0.396 sec (15870 microsec/operation)\nalign - prep weight                : 0.005 sec (202 microsec/operation)\nalign - make reference             : 0.048 sec (926 microsec/operation)\nalign - calc CCF (in thread)       : 0.135 sec (108 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.3 sec (241 microsec/operation)\nalign - argmax CCF (in thread)     : 0.014 sec (11 microsec/operation)\nalign - shift in Fourier space     : 0.563 sec (10832 microsec/operation)\nfit polynomial                     : 0.001 sec (1453 microsec/operation)\ndose weighting                     : 6.944 sec (6944564 microsec/operation)\ndw - calc weight                   : 1.188 sec (1188413 microsec/operation)\ndw - iFFT                          : 5.756 sec (5756031 microsec/operation)\nreal space interpolation           : 1.96 sec (1960937 microsec/operation)\nbinning                            : 0 sec (11 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 3,
+          "threads": 4,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 25.48671982716769,
+          "peak_rss_mb": 3038.84765625,
+          "stage_times": {
+            "read gain": 0.096388,
+            "read movie": 0.572897,
+            "apply gain": 0.068048,
+            "initial sum": 0.065595,
+            "detect hot pixels": 0.075764,
+            "fix defects": 0.042246,
+            "global FFT": 5.231281,
+            "power spectrum": 1.765086,
+            "power - sum": 0.578731,
+            "power - square": 0.965124,
+            "power - crop": 0.018247,
+            "power - resize": 0.196592,
+            "global alignment": 0.467573,
+            "global iFFT": 5.11081,
+            "prepare patch": 0.102845,
+            "prep patch - clip (in thread)": 0.000399,
+            "prep patch - FFT (in thread)": 0.007035,
+            "patch alignment": 0.015456,
+            "align - prep weight": 0.000203,
+            "align - make reference": 0.000996,
+            "align - calc CCF (in thread)": 0.000119,
+            "align - iFFT CCF (in thread)": 0.000282,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.01015,
+            "fit polynomial": 0.001492,
+            "dose weighting": 6.078241,
+            "dw - calc weight": 1.259873,
+            "dw - iFFT": 4.818324,
+            "real space interpolation": 1.95881,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "fecb726c4bee19bc35c1c12e30066db9d0828932d373f7d8832e9973f02f265f",
+            "header.pdf": "db8b39fc33d546004adfebf94350dcd55d8ef494bf235548aa7705dd9d284bc8",
+            "corrected_micrographs.star": "9c1bc7f936a7fbfe02185d6b967d04ecf7e3c6b7a104d5c8a3e43f1546d1e0b8",
+            "header.pdf.lst": "d8e77cb61a3bad1ce7696fd30742fa7b28b6b3313434f73a6d9a329a355526ba",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "d163d3769a9931eb48ea257643c06c09d5f258bc33add2a63406c9ac4fc662bb",
+            "all_batches.pdf": "383a772d3882324d3605eba1b6c478b15b232654b97c29590ee5ef815f6b0e64",
+            "batch.pdf": "89c24329c8e93bd2fd02ae6285e07749d1684f1b951223db0836a68a80c8897c"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  25/  25 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep3/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_4Threads_th4_p5x5_rep3/logfile.pdf\nread gain                          : 0.096 sec (96388 microsec/operation)\nread movie                         : 0.572 sec (572897 microsec/operation)\napply gain                         : 0.068 sec (68048 microsec/operation)\ninitial sum                        : 0.065 sec (65595 microsec/operation)\ndetect hot pixels                  : 0.075 sec (75764 microsec/operation)\nfix defects                        : 0.042 sec (42246 microsec/operation)\nglobal FFT                         : 5.231 sec (5231281 microsec/operation)\npower spectrum                     : 1.765 sec (1765086 microsec/operation)\npower - sum                        : 0.578 sec (578731 microsec/operation)\npower - square                     : 0.965 sec (965124 microsec/operation)\npower - crop                       : 0.018 sec (18247 microsec/operation)\npower - resize                     : 0.196 sec (196592 microsec/operation)\nglobal alignment                   : 0.467 sec (467573 microsec/operation)\nglobal iFFT                        : 5.11 sec (5110810 microsec/operation)\nprepare patch                      : 2.571 sec (102845 microsec/operation)\nprep patch - clip (in thread)      : 0.239 sec (399 microsec/operation)\nprep patch - FFT (in thread)       : 4.221 sec (7035 microsec/operation)\npatch alignment                    : 0.386 sec (15456 microsec/operation)\nalign - prep weight                : 0.005 sec (203 microsec/operation)\nalign - make reference             : 0.051 sec (996 microsec/operation)\nalign - calc CCF (in thread)       : 0.149 sec (119 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.351 sec (282 microsec/operation)\nalign - argmax CCF (in thread)     : 0.014 sec (11 microsec/operation)\nalign - shift in Fourier space     : 0.527 sec (10150 microsec/operation)\nfit polynomial                     : 0.001 sec (1492 microsec/operation)\ndose weighting                     : 6.078 sec (6078241 microsec/operation)\ndw - calc weight                   : 1.259 sec (1259873 microsec/operation)\ndw - iFFT                          : 4.818 sec (4818324 microsec/operation)\nreal space interpolation           : 1.958 sec (1958810 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "Tutorial_5x5_10Threads",
+      "dataset_path": "/home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff",
+      "dataset_sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+      "threads": 10,
+      "patch_x": 5,
+      "patch_y": 5,
+      "repetitions": 3,
+      "mean_wall_time_sec": 14.79030486010015,
+      "std_wall_time_sec": 0.8414509434616328,
+      "mean_peak_rss_mb": 3371.9375,
+      "max_peak_rss_mb": 3372.33203125,
+      "stage_breakdowns": [
+        {
+          "tag": "dose weighting",
+          "mean_sec": 3.027702,
+          "std_sec": 0.4169855776338873,
+          "min_sec": 2.487604,
+          "max_sec": 3.502778,
+          "pct_total": 20.470855933252878
+        },
+        {
+          "tag": "global FFT",
+          "mean_sec": 2.8312403333333336,
+          "std_sec": 0.16680705038323623,
+          "min_sec": 2.642218,
+          "max_sec": 3.04798,
+          "pct_total": 19.14254209168588
+        },
+        {
+          "tag": "global iFFT",
+          "mean_sec": 2.6561216666666665,
+          "std_sec": 0.14980138179677188,
+          "min_sec": 2.44482,
+          "max_sec": 2.774978,
+          "pct_total": 17.958532239805912
+        },
+        {
+          "tag": "dw - iFFT",
+          "mean_sec": 2.500341,
+          "std_sec": 0.4413880225221341,
+          "min_sec": 1.940839,
+          "max_sec": 3.019786,
+          "pct_total": 16.905270199975238
+        },
+        {
+          "tag": "power spectrum",
+          "mean_sec": 2.015568,
+          "std_sec": 0.02526603729647096,
+          "min_sec": 1.997112,
+          "max_sec": 2.051293,
+          "pct_total": 13.627629849857955
+        },
+        {
+          "tag": "power - square",
+          "mean_sec": 1.0393816666666666,
+          "std_sec": 0.09031010891121519,
+          "min_sec": 0.943755,
+          "max_sec": 1.160513,
+          "pct_total": 7.027452621822622
+        },
+        {
+          "tag": "real space interpolation",
+          "mean_sec": 0.8430589999999999,
+          "std_sec": 0.022334735159984943,
+          "min_sec": 0.816267,
+          "max_sec": 0.870943,
+          "pct_total": 5.700078585089362
+        },
+        {
+          "tag": "power - sum",
+          "mean_sec": 0.715866,
+          "std_sec": 0.09479124684273334,
+          "min_sec": 0.585903,
+          "max_sec": 0.809313,
+          "pct_total": 4.840103072731069
+        },
+        {
+          "tag": "dw - calc weight",
+          "mean_sec": 0.5273193333333333,
+          "std_sec": 0.031457152873216106,
+          "min_sec": 0.482948,
+          "max_sec": 0.552283,
+          "pct_total": 3.565304017200377
+        },
+        {
+          "tag": "global alignment",
+          "mean_sec": 0.32686299999999996,
+          "std_sec": 0.024106404847398274,
+          "min_sec": 0.294937,
+          "max_sec": 0.353181,
+          "pct_total": 2.2099814918743106
+        },
+        {
+          "tag": "read movie",
+          "mean_sec": 0.32315900000000003,
+          "std_sec": 0.017952665001794772,
+          "min_sec": 0.301318,
+          "max_sec": 0.34529,
+          "pct_total": 2.1849380594702077
+        },
+        {
+          "tag": "power - resize",
+          "mean_sec": 0.23445633333333335,
+          "std_sec": 0.027634526729357154,
+          "min_sec": 0.206969,
+          "max_sec": 0.272259,
+          "pct_total": 1.5852028443702124
+        },
+        {
+          "tag": "read gain",
+          "mean_sec": 0.098686,
+          "std_sec": 0.0017638822712036841,
+          "min_sec": 0.096647,
+          "max_sec": 0.10095,
+          "pct_total": 0.6672343872114869
+        },
+        {
+          "tag": "detect hot pixels",
+          "mean_sec": 0.070124,
+          "std_sec": 0.0016710818850872247,
+          "min_sec": 0.067822,
+          "max_sec": 0.071738,
+          "pct_total": 0.4741213968426961
+        },
+        {
+          "tag": "prepare patch",
+          "mean_sec": 0.047705,
+          "std_sec": 0.007815910226369457,
+          "min_sec": 0.036663,
+          "max_sec": 0.05366,
+          "pct_total": 0.32254237117649903
+        },
+        {
+          "tag": "initial sum",
+          "mean_sec": 0.04541666666666667,
+          "std_sec": 0.001853568150591956,
+          "min_sec": 0.042833,
+          "max_sec": 0.047092,
+          "pct_total": 0.30707052421338077
+        },
+        {
+          "tag": "apply gain",
+          "mean_sec": 0.043939666666666675,
+          "std_sec": 0.005678481037116255,
+          "min_sec": 0.035911,
+          "max_sec": 0.048106,
+          "pct_total": 0.297084252706669
+        },
+        {
+          "tag": "fix defects",
+          "mean_sec": 0.04351733333333333,
+          "std_sec": 0.00030714744920893493,
+          "min_sec": 0.04312,
+          "max_sec": 0.043868,
+          "pct_total": 0.29422877854756174
+        },
+        {
+          "tag": "power - crop",
+          "mean_sec": 0.018644333333333332,
+          "std_sec": 0.00012454271913238792,
+          "min_sec": 0.01849,
+          "max_sec": 0.018795,
+          "pct_total": 0.12605780279506074
+        },
+        {
+          "tag": "patch alignment",
+          "mean_sec": 0.008796666666666666,
+          "std_sec": 0.0010098977946087198,
+          "min_sec": 0.007427,
+          "max_sec": 0.009832,
+          "pct_total": 0.05947589823112748
+        },
+        {
+          "tag": "prep patch - FFT (in thread)",
+          "mean_sec": 0.0060936666666666665,
+          "std_sec": 0.0007130144146898825,
+          "min_sec": 0.005393,
+          "max_sec": 0.007072,
+          "pct_total": 0.041200412867117904
+        },
+        {
+          "tag": "align - shift in Fourier space",
+          "mean_sec": 0.006065333333333333,
+          "std_sec": 0.00021235243242203664,
+          "min_sec": 0.005809,
+          "max_sec": 0.006329,
+          "pct_total": 0.041008845934581116
+        },
+        {
+          "tag": "fit polynomial",
+          "mean_sec": 0.001778666666666667,
+          "std_sec": 0.0002350352219467447,
+          "min_sec": 0.001557,
+          "max_sec": 0.002104,
+          "pct_total": 0.012025895906074129
+        },
+        {
+          "tag": "align - make reference",
+          "mean_sec": 0.0007673333333333333,
+          "std_sec": 7.11867653117878e-05,
+          "min_sec": 0.000716,
+          "max_sec": 0.000868,
+          "pct_total": 0.005188083278819835
+        },
+        {
+          "tag": "prep patch - clip (in thread)",
+          "mean_sec": 0.0003646666666666666,
+          "std_sec": 7.074052743811161e-05,
+          "min_sec": 0.000281,
+          "max_sec": 0.000454,
+          "pct_total": 0.002465579108179365
+        },
+        {
+          "tag": "align - iFFT CCF (in thread)",
+          "mean_sec": 0.00025066666666666667,
+          "std_sec": 4.112041936664664e-05,
+          "min_sec": 0.00021,
+          "max_sec": 0.000307,
+          "pct_total": 0.001694803920796054
+        },
+        {
+          "tag": "align - calc CCF (in thread)",
+          "mean_sec": 0.00021733333333333335,
+          "std_sec": 8.118428966794554e-05,
+          "min_sec": 0.000155,
+          "max_sec": 0.000332,
+          "pct_total": 0.0014694310589880681
+        },
+        {
+          "tag": "align - prep weight",
+          "mean_sec": 0.00016733333333333335,
+          "std_sec": 7.4087035902976275e-06,
+          "min_sec": 0.000157,
+          "max_sec": 0.000174,
+          "pct_total": 0.0011313717662760894
+        },
+        {
+          "tag": "align - argmax CCF (in thread)",
+          "mean_sec": 1.0333333333333333e-05,
+          "std_sec": 4.7140452079103114e-07,
+          "min_sec": 1e-05,
+          "max_sec": 1.1e-05,
+          "pct_total": 6.986558716047563e-05
+        },
+        {
+          "tag": "binning",
+          "mean_sec": 1e-05,
+          "std_sec": 8.164965809277258e-07,
+          "min_sec": 9e-06,
+          "max_sec": 1.1e-05,
+          "pct_total": 6.761185854239577e-05
+        }
+      ],
+      "top_time_stages": [
+        [
+          "dose weighting",
+          3.027702,
+          20.470855933252878
+        ],
+        [
+          "global FFT",
+          2.8312403333333336,
+          19.14254209168588
+        ],
+        [
+          "global iFFT",
+          2.6561216666666665,
+          17.958532239805912
+        ]
+      ],
+      "all_runs": [
+        {
+          "repetition": 1,
+          "threads": 10,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 14.84443271625787,
+          "peak_rss_mb": 3371.4140625,
+          "stage_times": {
+            "read gain": 0.096647,
+            "read movie": 0.301318,
+            "apply gain": 0.035911,
+            "initial sum": 0.047092,
+            "detect hot pixels": 0.067822,
+            "fix defects": 0.043868,
+            "global FFT": 2.642218,
+            "power spectrum": 2.051293,
+            "power - sum": 0.809313,
+            "power - square": 0.943755,
+            "power - crop": 0.018795,
+            "power - resize": 0.272259,
+            "global alignment": 0.294937,
+            "global iFFT": 2.748567,
+            "prepare patch": 0.052792,
+            "prep patch - clip (in thread)": 0.000454,
+            "prep patch - FFT (in thread)": 0.005393,
+            "patch alignment": 0.009832,
+            "align - prep weight": 0.000157,
+            "align - make reference": 0.000868,
+            "align - calc CCF (in thread)": 0.000165,
+            "align - iFFT CCF (in thread)": 0.00021,
+            "align - argmax CCF (in thread)": 1e-05,
+            "align - shift in Fourier space": 0.006058,
+            "fit polynomial": 0.002104,
+            "dose weighting": 3.092724,
+            "dw - calc weight": 0.552283,
+            "dw - iFFT": 2.540398,
+            "real space interpolation": 0.841967,
+            "binning": 1.1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "a8dd8fcf22edf710bc35f56f81374fc447498fc1fd0f95f4a74b18e83c3e0c1d",
+            "header.pdf": "e66650a9dc1f921b8c864e218c8ba8d16a31ff869cae35904406bf1347dceb5f",
+            "corrected_micrographs.star": "2080c6a081baf3bf899b5239f1e3132b0a272d82116d0d5ec4b7831d939f876d",
+            "header.pdf.lst": "25468b8407b36bb4f68e806e3da065831a4fcd934a9676f0b068a0bf5f7b335a",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "623d84a6044132515bc0d9fe9c5eed15b66a28c82da71f75c2038ae0002cd355",
+            "all_batches.pdf": "2aff46262f38e1bcbbaa4c5d91e68fbee9e17e52aa64b9c60d527a4c4eaa38f3",
+            "batch.pdf": "b9e2a4d78357d0b9c63fb7fc398facd6234efd4cd67cbb3e7add0fc291e99c4a"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  14/  14 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep1/logfile.pdf\nread gain                          : 0.096 sec (96647 microsec/operation)\nread movie                         : 0.301 sec (301318 microsec/operation)\napply gain                         : 0.035 sec (35911 microsec/operation)\ninitial sum                        : 0.047 sec (47092 microsec/operation)\ndetect hot pixels                  : 0.067 sec (67822 microsec/operation)\nfix defects                        : 0.043 sec (43868 microsec/operation)\nglobal FFT                         : 2.642 sec (2642218 microsec/operation)\npower spectrum                     : 2.051 sec (2051293 microsec/operation)\npower - sum                        : 0.809 sec (809313 microsec/operation)\npower - square                     : 0.943 sec (943755 microsec/operation)\npower - crop                       : 0.018 sec (18795 microsec/operation)\npower - resize                     : 0.272 sec (272259 microsec/operation)\nglobal alignment                   : 0.294 sec (294937 microsec/operation)\nglobal iFFT                        : 2.748 sec (2748567 microsec/operation)\nprepare patch                      : 1.319 sec (52792 microsec/operation)\nprep patch - clip (in thread)      : 0.272 sec (454 microsec/operation)\nprep patch - FFT (in thread)       : 3.236 sec (5393 microsec/operation)\npatch alignment                    : 0.245 sec (9832 microsec/operation)\nalign - prep weight                : 0.004 sec (157 microsec/operation)\nalign - make reference             : 0.045 sec (868 microsec/operation)\nalign - calc CCF (in thread)       : 0.206 sec (165 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.262 sec (210 microsec/operation)\nalign - argmax CCF (in thread)     : 0.013 sec (10 microsec/operation)\nalign - shift in Fourier space     : 0.315 sec (6058 microsec/operation)\nfit polynomial                     : 0.002 sec (2104 microsec/operation)\ndose weighting                     : 3.092 sec (3092724 microsec/operation)\ndw - calc weight                   : 0.552 sec (552283 microsec/operation)\ndw - iFFT                          : 2.54 sec (2540398 microsec/operation)\nreal space interpolation           : 0.841 sec (841967 microsec/operation)\nbinning                            : 0 sec (11 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 2,
+          "threads": 10,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 13.73374485783279,
+          "peak_rss_mb": 3372.06640625,
+          "stage_times": {
+            "read gain": 0.10095,
+            "read movie": 0.322869,
+            "apply gain": 0.048106,
+            "initial sum": 0.042833,
+            "detect hot pixels": 0.071738,
+            "fix defects": 0.04312,
+            "global FFT": 2.803523,
+            "power spectrum": 1.998299,
+            "power - sum": 0.752382,
+            "power - square": 1.013877,
+            "power - crop": 0.01849,
+            "power - resize": 0.206969,
+            "global alignment": 0.353181,
+            "global iFFT": 2.44482,
+            "prepare patch": 0.036663,
+            "prep patch - clip (in thread)": 0.000281,
+            "prep patch - FFT (in thread)": 0.005816,
+            "patch alignment": 0.007427,
+            "align - prep weight": 0.000174,
+            "align - make reference": 0.000718,
+            "align - calc CCF (in thread)": 0.000155,
+            "align - iFFT CCF (in thread)": 0.000235,
+            "align - argmax CCF (in thread)": 1e-05,
+            "align - shift in Fourier space": 0.006329,
+            "fit polynomial": 0.001675,
+            "dose weighting": 2.487604,
+            "dw - calc weight": 0.546727,
+            "dw - iFFT": 1.940839,
+            "real space interpolation": 0.816267,
+            "binning": 1e-05
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "b2b3ba87b6ff9ddff3e09abe0c76cf5b652a75507be3359fa8a5c25a14af5de8",
+            "header.pdf": "eab5d8279f18b9cde6bd9664c1491413c523df50839ba20dbdff92b01b929a4e",
+            "corrected_micrographs.star": "98a5d0e50308ec94a50b11fc0a51bc1b662d93c7707f048ea7978b768843d670",
+            "header.pdf.lst": "d7d38861793c383b4c03d5d1005b6b884e80d7b2829ef6c6c473e254c79e0177",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "33af554776621c117ab6fd563bb45d079e3a590a499015b21e5d40b59820da64",
+            "all_batches.pdf": "ce44020071073a6b940bf9ad159a75d3839d6292f730864a474e9777491408b4",
+            "batch.pdf": "186e6b5eeabc78c874fd7fc56555c4618cf7f00fb59e963bbd5589a7609f894f"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  13/  13 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep2/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep2/logfile.pdf\nread gain                          : 0.1 sec (100950 microsec/operation)\nread movie                         : 0.322 sec (322869 microsec/operation)\napply gain                         : 0.048 sec (48106 microsec/operation)\ninitial sum                        : 0.042 sec (42833 microsec/operation)\ndetect hot pixels                  : 0.071 sec (71738 microsec/operation)\nfix defects                        : 0.043 sec (43120 microsec/operation)\nglobal FFT                         : 2.803 sec (2803523 microsec/operation)\npower spectrum                     : 1.998 sec (1998299 microsec/operation)\npower - sum                        : 0.752 sec (752382 microsec/operation)\npower - square                     : 1.013 sec (1013877 microsec/operation)\npower - crop                       : 0.018 sec (18490 microsec/operation)\npower - resize                     : 0.206 sec (206969 microsec/operation)\nglobal alignment                   : 0.353 sec (353181 microsec/operation)\nglobal iFFT                        : 2.444 sec (2444820 microsec/operation)\nprepare patch                      : 0.916 sec (36663 microsec/operation)\nprep patch - clip (in thread)      : 0.168 sec (281 microsec/operation)\nprep patch - FFT (in thread)       : 3.489 sec (5816 microsec/operation)\npatch alignment                    : 0.185 sec (7427 microsec/operation)\nalign - prep weight                : 0.004 sec (174 microsec/operation)\nalign - make reference             : 0.037 sec (718 microsec/operation)\nalign - calc CCF (in thread)       : 0.194 sec (155 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.293 sec (235 microsec/operation)\nalign - argmax CCF (in thread)     : 0.012 sec (10 microsec/operation)\nalign - shift in Fourier space     : 0.329 sec (6329 microsec/operation)\nfit polynomial                     : 0.001 sec (1675 microsec/operation)\ndose weighting                     : 2.487 sec (2487604 microsec/operation)\ndw - calc weight                   : 0.546 sec (546727 microsec/operation)\ndw - iFFT                          : 1.94 sec (1940839 microsec/operation)\nreal space interpolation           : 0.816 sec (816267 microsec/operation)\nbinning                            : 0 sec (10 microsec/operation)\n",
+          "stderr": ""
+        },
+        {
+          "repetition": 3,
+          "threads": 10,
+          "patch_x": 5,
+          "patch_y": 5,
+          "wall_time_sec": 15.79273700620979,
+          "peak_rss_mb": 3372.33203125,
+          "stage_times": {
+            "read gain": 0.098461,
+            "read movie": 0.34529,
+            "apply gain": 0.047802,
+            "initial sum": 0.046325,
+            "detect hot pixels": 0.070812,
+            "fix defects": 0.043564,
+            "global FFT": 3.04798,
+            "power spectrum": 1.997112,
+            "power - sum": 0.585903,
+            "power - square": 1.160513,
+            "power - crop": 0.018648,
+            "power - resize": 0.224141,
+            "global alignment": 0.332471,
+            "global iFFT": 2.774978,
+            "prepare patch": 0.05366,
+            "prep patch - clip (in thread)": 0.000359,
+            "prep patch - FFT (in thread)": 0.007072,
+            "patch alignment": 0.009131,
+            "align - prep weight": 0.000171,
+            "align - make reference": 0.000716,
+            "align - calc CCF (in thread)": 0.000332,
+            "align - iFFT CCF (in thread)": 0.000307,
+            "align - argmax CCF (in thread)": 1.1e-05,
+            "align - shift in Fourier space": 0.005809,
+            "fit polynomial": 0.001557,
+            "dose weighting": 3.502778,
+            "dw - calc weight": 0.482948,
+            "dw - iFFT": 3.019786,
+            "real space interpolation": 0.870943,
+            "binning": 9e-06
+          },
+          "output_checksums": {
+            "corrected_micrographs_all_rlnAccumMotionEarly.eps": "73a2c31b4401c0cde3da4ce4d5996aaef0f38a11449a898b1df37893b1cf91cd",
+            "corrected_micrographs_all_rlnAccumMotionLate.eps": "2fa6be73f518edbb5c12d3304291a2bda5b9ae0275a2f53d8ffe2796404dfe16",
+            "logfile.pdf": "77db4fc2b981aebed46e35187c6e8a670fa383b83092d288a23b68bd7dcb43d8",
+            "header.pdf": "e99beeb008ee3d57795b73e855fbb777cc7be67ac309011c57582a2a0947d0fb",
+            "corrected_micrographs.star": "8da24624d2dc1225c9d8baa23c66504dfc1ff67869fb3d697a3d5db962752975",
+            "header.pdf.lst": "b8252f870ccbc76e7780ff61c29609fd51a0886bff63f072ab3b4921bebebadb",
+            "corrected_micrographs_all_rlnAccumMotionTotal.eps": "77db4a72aa3a245c9edd70a906a8e04dc91b63beba7d323fc6b85c6afd6622b3",
+            "batch.pdf.lst": "ba145471fef880c60d1c461ab3e00282bf503e0dc5fab8c6dd4992a3a1bcece9",
+            "all_batches.pdf": "fc2f79dcb73d1da57a51c3b84b836fd2b3638c19e15f009bd11c9ec5cbc42744",
+            "batch.pdf": "348a92ca6a9979d50ad21ee250e0668468b00df3c10eb81c1ab7ac7016a925ae"
+          },
+          "exit_code": 0,
+          "stdout": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * /home/dxp41838/relion30_tutorial/Movies/20170629_00021_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  16/  16 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep3/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /tmp/mc_benchmarks/Tutorial_5x5_10Threads_th10_p5x5_rep3/logfile.pdf\nread gain                          : 0.098 sec (98461 microsec/operation)\nread movie                         : 0.345 sec (345290 microsec/operation)\napply gain                         : 0.047 sec (47802 microsec/operation)\ninitial sum                        : 0.046 sec (46325 microsec/operation)\ndetect hot pixels                  : 0.07 sec (70812 microsec/operation)\nfix defects                        : 0.043 sec (43564 microsec/operation)\nglobal FFT                         : 3.047 sec (3047980 microsec/operation)\npower spectrum                     : 1.997 sec (1997112 microsec/operation)\npower - sum                        : 0.585 sec (585903 microsec/operation)\npower - square                     : 1.16 sec (1160513 microsec/operation)\npower - crop                       : 0.018 sec (18648 microsec/operation)\npower - resize                     : 0.224 sec (224141 microsec/operation)\nglobal alignment                   : 0.332 sec (332471 microsec/operation)\nglobal iFFT                        : 2.774 sec (2774978 microsec/operation)\nprepare patch                      : 1.341 sec (53660 microsec/operation)\nprep patch - clip (in thread)      : 0.215 sec (359 microsec/operation)\nprep patch - FFT (in thread)       : 4.243 sec (7072 microsec/operation)\npatch alignment                    : 0.228 sec (9131 microsec/operation)\nalign - prep weight                : 0.004 sec (171 microsec/operation)\nalign - make reference             : 0.037 sec (716 microsec/operation)\nalign - calc CCF (in thread)       : 0.414 sec (332 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.383 sec (307 microsec/operation)\nalign - argmax CCF (in thread)     : 0.014 sec (11 microsec/operation)\nalign - shift in Fourier space     : 0.302 sec (5809 microsec/operation)\nfit polynomial                     : 0.001 sec (1557 microsec/operation)\ndose weighting                     : 3.502 sec (3502778 microsec/operation)\ndw - calc weight                   : 0.482 sec (482948 microsec/operation)\ndw - iFFT                          : 3.019 sec (3019786 microsec/operation)\nreal space interpolation           : 0.87 sec (870943 microsec/operation)\nbinning                            : 0 sec (9 microsec/operation)\n",
+          "stderr": ""
+        }
+      ]
+    }
+  ]
+}

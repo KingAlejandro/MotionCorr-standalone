@@ -26,10 +26,10 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 
 
-def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600) -> subprocess.CompletedProcess:
+def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
     print(f"[RUN] {' '.join(str(c) for c in cmd)}")
     t0 = time.time()
-    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout)
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout, cwd=str(cwd) if cwd else None)
     elapsed = time.time() - t0
     print(f"      Exit {res.returncode} ({elapsed:.2f}s)")
     if check and res.returncode != 0:
@@ -183,6 +183,8 @@ def main():
         "verdict": "UNKNOWN"
     }
 
+    synth_dir = repo / "test-data" / "synthetic"
+
     # ---------------------------------------------------------
     # Negative Test: Unsupported device / invalid ID
     # ---------------------------------------------------------
@@ -191,10 +193,10 @@ def main():
     neg_dir.mkdir(parents=True, exist_ok=True)
     neg_res = run_cmd([
         str(cuda_bin), "--use_own",
-        "--i", str(repo / "test-data/synthetic/synthetic_local_motion.star"),
+        "--i", str(synth_dir / "synthetic_local_motion.star"),
         "--o", str(neg_dir / "neg.mrc"),
         "--gpu", "99"
-    ], check=False)
+    ], check=False, cwd=synth_dir)
     neg_passed = (neg_res.returncode != 0) and ("Invalid GPU device ID" in neg_res.stderr or "Invalid GPU device ID" in neg_res.stdout or "Invalid CUDA device ID" in neg_res.stderr or "Invalid CUDA device ID" in neg_res.stdout)
     summary["negative_test"] = {
         "passed": neg_passed,
@@ -214,18 +216,18 @@ def main():
 
     run_cmd([
         str(cpu_bin), "--use_own",
-        "--i", str(repo / "test-data/synthetic/synthetic_fallback.star"),
+        "--i", str(synth_dir / "synthetic_fallback.star"),
         "--o", str(fb_cpu_dir / "fb_cpu.mrc"),
         "--patch_x", "3", "--patch_y", "3",
         "--j", "1"
-    ])
+    ], cwd=synth_dir)
     run_cmd([
         str(cuda_bin), "--use_own",
-        "--i", str(repo / "test-data/synthetic/synthetic_fallback.star"),
+        "--i", str(synth_dir / "synthetic_fallback.star"),
         "--o", str(fb_cuda_dir / "fb_cuda.mrc"),
         "--patch_x", "3", "--patch_y", "3",
         "--gpu", str(args.gpu_id)
-    ])
+    ], cwd=synth_dir)
     fb_cmp = run_comparator(comparator, fb_cpu_dir, fb_cuda_dir, "fallback_3x3")
     summary["stages"]["fallback_3x3"] = fb_cmp
 
@@ -242,20 +244,20 @@ def main():
 
         ref_cmd = [
             str(cpu_bin), "--use_own",
-            "--i", str(repo / "test-data/synthetic/synthetic_local_motion.star"),
+            "--i", str(synth_dir / "synthetic_local_motion.star"),
             "--o", str(ref_d / f"{stage_name}.mrc"),
             "--patch_x", str(px), "--patch_y", str(py),
             "--j", "1"
         ]
         cand_cmd = [
             str(cuda_bin), "--use_own",
-            "--i", str(repo / "test-data/synthetic/synthetic_local_motion.star"),
+            "--i", str(synth_dir / "synthetic_local_motion.star"),
             "--o", str(cand_d / f"{stage_name}.mrc"),
             "--patch_x", str(px), "--patch_y", str(py),
             "--gpu", str(args.gpu_id)
         ]
-        run_cmd(ref_cmd)
-        c_res = run_cmd(cand_cmd)
+        run_cmd(ref_cmd, cwd=synth_dir)
+        c_res = run_cmd(cand_cmd, cwd=synth_dir)
         
         # Telemetry
         telemetry = get_telemetry_for_dir(cand_d, c_res.stdout)

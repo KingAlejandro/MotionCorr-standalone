@@ -32,6 +32,17 @@ Inputs: STAR `afc1445e…`, movie TIFF `df298b1b…`, gain `8919cdc7…`, 24-mov
 Raw artifacts on the host under `/home/alex/MotionCorr-issue50-fftsched/`
 (`evidence2/`, `evidence-nsys/`, `evidence-full24/`, `evidence-sanitizer/`).
 
+**CPU regime — matters for reproduction.** Every measurement in this report was taken
+with the **full 124 logical CPUs** of the host available to the process (`--j 8` for
+MotionCorr itself, but no cgroup or affinity cap). A subsequent policy change caps
+MotionCorr work on this host to **8 logical CPUs** (`taskset -c 96-103` on the top-level
+shell, build parallelism ≤ 8, one build *or* benchmark at a time). **Numbers re-measured
+under that cap are not comparable to the ones here** — host-side stages (TIFF read, gain
+and initial sum, hot-pixel scan) will be slower, so a later reader may see an apparent
+regression that is purely the regime change. The GPU-side figures (`global FFT`,
+`global iFFT`, plan construction, work-area size, VRAM, transfer bytes) should be far
+less sensitive, but that is an expectation, not something measured under the cap.
+
 **Shared-host disclosure.** This box was in concurrent use by other agent sessions
 working on adjacent Issue #50 tasks. Timed runs were serialised with
 `flock /tmp/motioncorr-bench.lock`, and `run_evidence2.sh` additionally waits for GPU 1

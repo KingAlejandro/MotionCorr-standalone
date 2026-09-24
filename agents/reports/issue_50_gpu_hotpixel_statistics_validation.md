@@ -87,8 +87,21 @@ Nsight Systems, `nsys stats --report cuda_gpu_mem_size_sum`, matched single-movi
 
 The 56.955 MB drop matches the initial-sum image exactly. D2H count falls from 106 to 109
 operations totalling half the bytes — the large 56.956 MB transfer is gone, replaced by a few
-hundred bytes of index list. Transfer volume is immune to host contention, so this result is
-robust to the measurement problems in §5.
+hundred bytes of index list. Transfer volume is immune to host contention, so this result does not
+depend on box quiescence.
+
+**Re-confirmed on the post-audit-fix binary** (sha256 `15febf55fd685f98d7cbd9b20aa23bb8c2d775e8552534a031dea48ad73daad8`,
+the same binary used for every result in §6-§10), on a settled box (load 1.82, zero GPU processes):
+
+| Operation | Fixed candidate |
+|---|---|
+| Device-to-Host | **56.960 MB** |
+| Host-to-Device | 1,434.797 MB |
+| Device-to-Device | 2,735.358 MB |
+
+Identical to the pre-fix figures. The rigorous-bound fix added `sum|x|` to the reduction, which
+costs 8 additional bytes of D2H and does not change transfer structure — confirmed rather than
+assumed.
 
 ## 5. Provenance (final series, 2026-09-24T19:37:54Z-19:44:13Z, one flock acquisition)
 
@@ -255,7 +268,8 @@ What is established beyond reasonable doubt:
   deliberately perturbed timing profiles including one 1.66x slower.
 - The fallback is real: forcing `collectAboveThreshold` to fail reproduces the reference
   bit-for-bit with the session still alive.
-- Device-to-host transfer volume halves, 113.915 MB to 56.960 MB.
+- Device-to-host transfer volume halves, 113.915 MB to 56.960 MB, confirmed on the exact binary
+  used for all other measurements.
 - `TIMING_DETECT_HOT` drops 21.6%, 48.2 to 37.8 ms, at 6.25 sigma.
 - Peak VRAM unchanged at 3533 MiB, under the 3,584 MiB ceiling.
 

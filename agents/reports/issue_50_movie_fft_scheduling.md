@@ -67,9 +67,21 @@ to fall below 50 MiB before each run. The 12-run timing batch ran 18:51:13–18:
 the Nsight traces at ~18:54Z; a known collision by another session occurred at
 19:05–19:07Z, which is after all timing evidence here was collected and overlaps only
 correctness runs, which contention cannot invalidate. Whole-device VRAM was exactly
-3537 MiB in all 12 runs with no foreign process resident on GPU 1, which corroborates
-that the device itself was quiet. Host-side contention cannot be excluded as rigorously
-as device-side, which is one more reason the process-wall figure is not relied on.
+3537 MiB in all 12 runs with no foreign process resident on GPU 1.
+
+**That corroborates only that GPU 1 was quiet, not the box.** The sampler watched GPU 1
+memory alone — not its utilisation, and not GPUs 0, 2 or 3 — so foreign load elsewhere on
+the host during the 12-run batch is *unrecorded* and cannot be excluded retrospectively.
+This is a real gap: foreign GPU load on this box was later observed to be intermittent
+(one device seen at 89% utilisation and, minutes later, resident-but-idle at 0%), so a
+point-in-time pre-run check can pass while the same workload is about to spike. The
+indirect reassurance is that the GPU-side stage timers were tight (`global FFT` sd 0.153
+baseline / 0.073 candidate), which is not what contention during the batch would look
+like — but that is inference, not measurement. Anyone repeating this should log
+utilisation for **all** devices *during* the series into the artifact, not just device
+memory for one device before each run. Host-side contention in particular cannot be
+excluded as rigorously as device-side, which is one more reason the process-wall figure
+is not relied on.
 
 ---
 
@@ -197,8 +209,8 @@ shape — R2C plan construction 5.1–5.5 ms, C2R 1.9–2.1 ms, and a work area 
 56,986,624 bytes (54.35 MiB) every time. Those are the numbers the VRAM argument and the
 rejected-batch-increase analysis rest on, and they are reproducible.
 
-**The process-level number is noise and is not claimed as a win.** −0.020 s against a
-standard deviation of 0.150 s is unresolvable; `apply gain and initial sum` alone
+**The process-level number is noise and is not claimed as a win.** −0.020 s against a sample
+standard deviation of 0.164 s is unresolvable; `apply gain and initial sum` alone
 spans **275 → 517 ms across the six baseline runs in this same batch**, a 242 ms range
 roughly 130× the size of the effect being sought. The
 honest summary is: **measurable at the stage timer, invisible at process level,
@@ -304,7 +316,7 @@ work area, so plan workspaces cannot silently resize.
 
 One term remains genuinely unmeasured. Whole-device VRAM is traced allocations + CUDA
 context + **driver working set**, and the last of those scales with in-flight work —
-which is exactly what removing 46 of 48 barriers increases. Nsight allocation tracing is
+which is exactly what removing 47 of 49 barriers increases. Nsight allocation tracing is
 blind to it by construction. The bound available is that 5 ms sampling over ~740 samples
 per run reports 3537 MiB with sd 0.000 on *both* arms at NVML's 1 MiB granularity, so
 any **sustained** driver-side increase is below 1 MiB. A transient shorter than 5 ms is

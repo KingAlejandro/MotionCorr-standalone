@@ -217,8 +217,14 @@ def execute_cleanup(cleanable_items: List[Dict[str, Any]], repo_root: Path) -> T
                 removed_count += 1
                 reclaimed_bytes += sz
                 dirs_to_prune.add(p.parent)
+                item["status"] = "REMOVED"
+            elif not p.exists():
+                item["status"] = "NOT_FOUND"
+            else:
+                item["status"] = "SKIPPED_NON_FILE"
         except Exception as e:
             sys.stderr.write(f"Warning: Could not delete {p}: {e}\n")
+            item["status"] = f"FAILED: {e}"
 
     # Prune empty directories if they are within ephemeral locations
     ephemeral_dir_names = {"reviews", "drafts", "logs", "__pycache__"}
@@ -249,7 +255,16 @@ def format_report(
         rows = []
         for item in cleanable_items:
             rel = str(item["path"].relative_to(repo_root))
-            action = "`REMOVED`" if mode == "APPLIED" else "`ELIGIBLE_FOR_REMOVAL`"
+            if mode == "APPLIED":
+                item_st = item.get("status", "REMOVED")
+                if item_st == "REMOVED":
+                    action = "`REMOVED`"
+                elif item_st.startswith("FAILED"):
+                    action = f"`FAILED` ({item_st})"
+                else:
+                    action = f"`{item_st}`"
+            else:
+                action = "`ELIGIBLE_FOR_REMOVAL`"
             rows.append(f"| {item['category']} | `{rel}` | {item['size']} B | {action} |")
         table_str = "\n".join(rows)
     else:

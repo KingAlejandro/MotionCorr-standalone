@@ -44,8 +44,10 @@ public:
     // path, which re-runs the original host scan verbatim.
     bool downloadUnalignedSum(MultidimArray<float> &unaligned_sum);
 
-    // Sum_n (double)d_Isum[n] with a fixed-shape deterministic tree (no FP atomics).
-    bool reduceUnalignedSum(double &sum1);
+    // Sum_n (double)d_Isum[n] and Sum_n |(double)d_Isum[n]|, fixed-shape deterministic
+    // tree (no FP atomics). sum_abs is required because the forward error bound is
+    // gamma_N * sum|x|, which exceeds gamma_N * |sum x| whenever the data changes sign.
+    bool reduceUnalignedSum(double &sum1, double &sum_abs);
 
     // Sum_n ((double)d_Isum[n] - mean)^2. Addends are formed with __dsub_rn/__dmul_rn so
     // they are bit-identical to the host's `d = x - mean; d * d`.

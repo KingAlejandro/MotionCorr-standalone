@@ -20,6 +20,7 @@
 #include <omp.h>
 #include <cfloat>
 #include <cmath>
+#include <limits>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -1375,9 +1376,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 			if (stats_attempt == 0 && movie_session && cuda_gain_sum_done)
 			{
-				double sum1 = 0.0, sum2 = 0.0;
+				double sum1 = 0.0, sum_abs = 0.0, sum2 = 0.0;
 				size_t band = 0;
-				if (movie_session->reduceUnalignedSum(sum1))
+				if (movie_session->reduceUnalignedSum(sum1, sum_abs))
 				{
 					// Same source expressions as the host path, so host rounding is unchanged.
 					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
@@ -1386,12 +1387,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
 						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
 						// Twice the rigorous forward-error bound on the threshold difference
-						// between any two summation orders of the same addend multiset.
+						// between any two summation orders of the same addend multiset:
+						//   |d_mean| <= 2*gamma_N*(sum|x|/N)   |d_std| <= gamma_N*std
+						//   |d_threshold| <= |d_mean| + sigma*|d_std|
+						// sum|x|/N is used rather than mean because the two coincide only for
+						// same-sign data; sigma is read from hotpixel_sigma rather than
+						// hard-coded, so raising it cannot silently shrink the guard.
 						const double n_pix = (double)YXSIZE(Isum);
-						const double u = DBL_EPSILON / 2.0;
+						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
-						const double guard = 4.0 * gamma_n * (gpu_mean + 3.0 * gpu_std);
+						const double mean_abs = sum_abs / n_pix;
+						const double guard = 4.0 * gamma_n * mean_abs
+						                   + 2.0 * (double)hotpixel_sigma * gamma_n * gpu_std;
 						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
+						    std::isfinite(guard) && guard > 0.0 &&
 						    movie_session->collectAboveThreshold(gpu_threshold, guard, gpu_hits, band))
 						{
 							if (band == 0)
@@ -1520,7 +1529,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					// Require both float narrowings to be insensitive to the reduction
 					// order, i.e. stable against the bound above.
 					const double n_pix = (double)YXSIZE(Isum);
-					const double u = DBL_EPSILON / 2.0;
+					const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 					const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 					const double fm = (double)(mean / n_frames), fs = (double)(std / n_frames);
 					const double em = 2.0 * gamma_n * fabs(fm), es = 2.0 * gamma_n * fabs(fs);

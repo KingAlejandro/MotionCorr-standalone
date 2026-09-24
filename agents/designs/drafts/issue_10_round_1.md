@@ -39,14 +39,14 @@ This architectural specification details the algorithmic formulation, component 
 
 ## 3. Mathematical & Algorithmic Formulation
 
-### 3.1 Domain Physics & Coordinates
-- Motion correction models sample drift over exposure frames t in [0, N-1] on coordinates (x, y).
-- Cross-correlation surfaces CCF(dx, dy) are computed in Fourier space using cross-spectral density.
-- Trajectory regularization minimizes frame-to-frame acceleration spikes.
+### 3.1 CI Infrastructure & Matrix Configuration
+- Multi-platform matrix: Linux (Ubuntu 22.04 LTS with GCC 11+ and Clang 14+) and macOS (macOS 13+ with AppleClang).
+- Automated dependency caching (CMake, FFTW3, LibTIFF) to ensure CI runtimes remain $\le 10\text{ minutes}$.
+- Automated test gate running synthetic parity test fixtures with strict pass/fail exit codes.
 
-### 3.2 Convergence & Precision Constraints
-- Interpolation and shift application must adhere to double-precision accumulation where floating-point drift is prone to cancelation.
-- Threshold for convergence: displacement change < 1e-3 px.
+### 3.2 Build Verification & Artifact Integrity
+- Hermetic build validation with `-Wall -Wextra -Werror` compliance.
+- Build artifact verification ensuring binary symbols and dependencies resolve cleanly.
 
 ---
 
@@ -54,34 +54,34 @@ This architectural specification details the algorithmic formulation, component 
 
 ```mermaid
 flowchart TD
-    InputData["Input Movie / Metadata"] --> Runner["motioncorr_runner.cpp"]
-    Runner --> Module["Component #10: Optimize one measured CPU bottleneck without changing scientific outputs"]
-    Module --> ParityGate["Numerical Parity Gate (Issue #4)"]
-    ParityGate --> Output["MRC / STAR Outputs"]
+    PR["Pull Request / Push Event"] --> CI["GitHub Actions Runner Matrix"]
+    CI --> Build["Compile: GCC / Clang / AppleClang"]
+    Build --> Test["Execute Synthetic Parity Test Suite"]
+    Test --> Gate["Automated Parity Gate (Issue #4)"]
+    Gate --> Status["Report CI Check Status"]
 ```
 
 ---
 
 ## 5. Interface Contracts & Data Structures
 
-### 5.1 Modified / Introduced Interfaces
-```cpp
-// Target interfaces for #10
-namespace MotionCorr {
-    struct ModuleConfig {
-        bool enable_verification = true;
-        double tolerance = 1e-6;
-    };
-}
+```yaml
+# CI Pipeline Configuration for #10
+jobs:
+  test_matrix:
+    runs-on: ${ matrix.os }
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13]
+        compiler: [gcc, clang]
 ```
 
 ---
 
 ## 6. Memory Staging & Allocation Strategy
 
-- Enforce zero-allocation loops during iterative Fourier search.
-- Pre-allocate scratch workspace buffers during pipeline initialization.
-- Maximum memory overhead ceiling: $\le 5\%$ RSS delta.
+- Optimize CI runner concurrency and container memory limits (4 GB RSS ceiling per test worker).
+- Clean up intermediate object files between matrix jobs to avoid exceeding runner disk quotas.
 
 ---
 

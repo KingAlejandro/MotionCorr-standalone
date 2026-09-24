@@ -1421,13 +1421,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// FFT
 	RCTIC(TIMING_GLOBAL_FFT);
+	NewFFT::FloatPlan global_fft_plan(nx, ny);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		if (!early_binning) {
-			NewFFT::FourierTransform(Iframes[iframe](), Fframes[iframe]);
+			NewFFT::FourierTransform(Iframes[iframe](), Fframes[iframe], global_fft_plan);
 		} else {
 			MultidimArray<fComplex> Fframe;
-			NewFFT::FourierTransform(Iframes[iframe](), Fframe);
+			NewFFT::FourierTransform(Iframes[iframe](), Fframe, global_fft_plan);
 			Fframes[iframe].reshape(ny, nx / 2 + 1);
 			cropInFourierSpace(Fframe, Fframes[iframe]);
 		}
@@ -1551,10 +1552,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
 	RCTIC(TIMING_GLOBAL_IFFT);
+	NewFFT::FloatPlan global_ifft_plan(nx, ny);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe](), global_ifft_plan);
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
@@ -1598,6 +1600,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
 				RCTIC(TIMING_PREP_PATCH);
 				std::vector<MultidimArray<float> >Ipatches(n_threads);
+				NewFFT::FloatPlan patch_fft_plan(x_end - x_start, y_end - y_start);
 				#pragma omp parallel for num_threads(n_threads)
 				for (int igroup = 0; igroup < n_groups; igroup++) {
 					const int tid = omp_get_thread_num();
@@ -1614,7 +1617,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					RCTOC(TIMING_CLIP_PATCH);
 
 					RCTIC(TIMING_PATCH_FFT);
-					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
+					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup], patch_fft_plan);
 					RCTOC(TIMING_PATCH_FFT);
 				}
 				RCTOC(TIMING_PREP_PATCH);
@@ -1889,9 +1892,10 @@ skip_fitting:
 
 		// Update real space images
 		RCTIC(TIMING_DW_IFFT);
+		NewFFT::FloatPlan dw_ifft_plan(nx, ny);
 		#pragma omp parallel for num_threads(n_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
-			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe](), dw_ifft_plan);
 		}
 		RCTOC(TIMING_DW_IFFT);
 		RCTOC(TIMING_DOSE_WEIGHTING);
@@ -2384,6 +2388,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
 
+	NewFFT::FloatPlan ccf_ifft_plan(ccf_nx, ccf_ny);
 	for (int iter = 1; iter	<= max_iter; iter++) {
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
@@ -2414,7 +2419,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RCTOC(TIMING_CCF_CALC);
 
 			RCTIC(TIMING_CCF_IFFT);
-			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
+			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid](), ccf_ifft_plan);
 			RCTOC(TIMING_CCF_IFFT);
 
 			RCTIC(TIMING_CCF_FIND_MAX);

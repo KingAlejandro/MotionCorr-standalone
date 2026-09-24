@@ -367,13 +367,13 @@ NewFFT::DoublePlan::DoublePlan(int w, int h, int d, unsigned int flags)
 				ndim, &N[0],
 				MULTIDIM_ARRAY(realDummy),
 				(fftw_complex*) MULTIDIM_ARRAY(complexDummy),
-				FFTW_UNALIGNED | flags);
+				flags);
 		
 		planBackward = fftw_plan_dft_c2r(
 				ndim, &N[0],
 				(fftw_complex*) MULTIDIM_ARRAY(complexDummy),
 				MULTIDIM_ARRAY(realDummy),
-				FFTW_UNALIGNED | flags);
+				flags);
 	}	
 	
 	if (planForward == NULL || planBackward == NULL)
@@ -449,13 +449,13 @@ NewFFT::FloatPlan::FloatPlan(int w, int h, int d, unsigned int flags)
 				ndim, &N[0],
 				MULTIDIM_ARRAY(realDummy),
 				(fftwf_complex*) MULTIDIM_ARRAY(complexDummy),
-				FFTW_UNALIGNED | flags);
+				flags);
 		
 		planBackward = fftwf_plan_dft_c2r(
 				ndim, &N[0],
 				(fftwf_complex*) MULTIDIM_ARRAY(complexDummy),
 				MULTIDIM_ARRAY(realDummy),
-				FFTW_UNALIGNED | flags);
+				flags);
 	}
 
 	if (planForward == NULL || planBackward == NULL)

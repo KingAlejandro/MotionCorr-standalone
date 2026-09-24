@@ -18,10 +18,34 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 
-def parse_mrc(filepath: Path) -> Tuple[Dict[str, Any], np.ndarray, bytes]:
+class ArrayProxy:
+    """Lightweight 1D array wrapper when NumPy is not installed."""
+    def __init__(self, data_tuple: Tuple[Any, ...], shape: Tuple[int, ...], raw_bytes: bytes):
+        self._data = data_tuple
+        self.shape = shape
+        self.size = len(data_tuple)
+        self._raw = raw_bytes
+
+    def tobytes(self) -> bytes:
+        return self._raw
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __getitem__(self, idx):
+        return self._data[idx]
+
+
+def parse_mrc(filepath: Path) -> Tuple[Dict[str, Any], Any, bytes]:
     """Parse MRC 2014 file header and pixel data."""
     raw = filepath.read_bytes()
     if len(raw) < 1024:
@@ -47,24 +71,38 @@ def parse_mrc(filepath: Path) -> Tuple[Dict[str, Any], np.ndarray, bytes]:
         "labels": header_bytes[224:1024].decode("ascii", errors="replace").strip(),
     }
 
-    dtype_map = {
-        0: np.dtype("i1"),
-        1: np.dtype("<i2"),
-        2: np.dtype("<f4"),
-        6: np.dtype("<u2"),
-        12: np.dtype("<f2"),
-    }
-    if mode not in dtype_map:
+    mode_itemsize = {0: 1, 1: 2, 2: 4, 6: 2, 12: 2}
+    if mode not in mode_itemsize:
         raise ValueError(f"Unsupported MRC mode {mode} in {filepath}")
 
     expected_pixels = nx * ny * nz
     data_offset = 1024 + nsymbt
-    expected_size = data_offset + expected_pixels * dtype_map[mode].itemsize
+    expected_size = data_offset + expected_pixels * mode_itemsize[mode]
     if len(raw) != expected_size:
         raise ValueError(
             f"MRC payload size mismatch in {filepath}: expected {expected_size} bytes, got {len(raw)}"
         )
-    pixel_data = np.frombuffer(raw, dtype=dtype_map[mode], count=expected_pixels, offset=data_offset)
+
+    payload_bytes = raw[data_offset:]
+    if np is not None:
+        dtype_map = {
+            0: np.dtype("i1"),
+            1: np.dtype("<i2"),
+            2: np.dtype("<f4"),
+            6: np.dtype("<u2"),
+            12: np.dtype("<f2"),
+        }
+        pixel_data = np.frombuffer(raw, dtype=dtype_map[mode], count=expected_pixels, offset=data_offset)
+    else:
+        fmt_map = {
+            0: f"<{expected_pixels}b",
+            1: f"<{expected_pixels}h",
+            2: f"<{expected_pixels}f",
+            6: f"<{expected_pixels}H",
+            12: f"<{expected_pixels}e",
+        }
+        unpacked = struct.unpack(fmt_map[mode], payload_bytes)
+        pixel_data = ArrayProxy(unpacked, shape=(expected_pixels,), raw_bytes=payload_bytes)
 
     return header_info, pixel_data, header_bytes
 
@@ -237,8 +275,8 @@ def compare_trajectories(
 
 
 def compare_images(
-    ref_pixels: np.ndarray,
-    test_pixels: np.ndarray,
+    ref_pixels: Any,
+    test_pixels: Any,
     ref_header: Dict[str, Any],
     test_header: Dict[str, Any],
     ref_raw_header: bytes,
@@ -253,15 +291,46 @@ def compare_images(
             "passed": False,
         }
 
-    if not np.isfinite(ref_pixels).all() or not np.isfinite(test_pixels).all():
-        return {"error": "Non-finite pixel in reference or test MRC", "passed": False}
+    if np is not None and isinstance(ref_pixels, np.ndarray) and isinstance(test_pixels, np.ndarray):
+        if not np.isfinite(ref_pixels).all() or not np.isfinite(test_pixels).all():
+            return {"error": "Non-finite pixel in reference or test MRC", "passed": False}
 
-    diff = test_pixels.astype(np.float64) - ref_pixels.astype(np.float64)
-    abs_diff = np.abs(diff)
-    max_abs_err = float(np.max(abs_diff))
-    rmse = float(np.sqrt(np.mean(diff ** 2)))
-    ref_std = float(np.std(ref_pixels.astype(np.float64)))
-    rel_rmse = rmse / max(ref_std, 1e-12)
+        diff = test_pixels.astype(np.float64) - ref_pixels.astype(np.float64)
+        abs_diff = np.abs(diff)
+        max_abs_err = float(np.max(abs_diff))
+        rmse = float(np.sqrt(np.mean(diff ** 2)))
+        ref_std = float(np.std(ref_pixels.astype(np.float64)))
+        rel_rmse = rmse / max(ref_std, 1e-12)
+        ref_min = float(np.min(ref_pixels))
+        ref_max = float(np.max(ref_pixels))
+        ref_mean = float(np.mean(ref_pixels))
+        test_min = float(np.min(test_pixels))
+        test_max = float(np.max(test_pixels))
+        test_mean = float(np.mean(test_pixels))
+        test_std = float(np.std(test_pixels))
+    else:
+        ref_seq = list(ref_pixels)
+        test_seq = list(test_pixels)
+        for r, t in zip(ref_seq, test_seq):
+            if not math.isfinite(r) or not math.isfinite(t):
+                return {"error": "Non-finite pixel in reference or test MRC", "passed": False}
+        n = len(ref_seq)
+        diffs = [float(t) - float(r) for r, t in zip(ref_seq, test_seq)]
+        abs_diffs = [abs(d) for d in diffs]
+        max_abs_err = max(abs_diffs) if abs_diffs else 0.0
+        sum_sq = sum(d * d for d in diffs)
+        rmse = math.sqrt(sum_sq / n) if n else 0.0
+        ref_min = float(min(ref_seq))
+        ref_max = float(max(ref_seq))
+        ref_mean = float(sum(ref_seq) / n)
+        ref_var = sum((x - ref_mean) ** 2 for x in ref_seq) / n
+        ref_std = math.sqrt(ref_var)
+        rel_rmse = rmse / max(ref_std, 1e-12)
+        test_min = float(min(test_seq))
+        test_max = float(max(test_seq))
+        test_mean = float(sum(test_seq) / n)
+        test_var = sum((x - test_mean) ** 2 for x in test_seq) / n
+        test_std = math.sqrt(test_var)
 
     # Compare every header byte except RELION's run timestamp in the first label.
     core_header_diff = sum(b1 != b2 for b1, b2 in zip(ref_raw_header[:224], test_raw_header[:224]))
@@ -278,14 +347,14 @@ def compare_images(
         "max_abs_pixel_error": max_abs_err,
         "rmse": rmse,
         "relative_rmse": rel_rmse,
-        "ref_pixel_min": float(np.min(ref_pixels)),
-        "ref_pixel_max": float(np.max(ref_pixels)),
-        "ref_pixel_mean": float(np.mean(ref_pixels)),
+        "ref_pixel_min": ref_min,
+        "ref_pixel_max": ref_max,
+        "ref_pixel_mean": ref_mean,
         "ref_pixel_std": ref_std,
-        "test_pixel_min": float(np.min(test_pixels)),
-        "test_pixel_max": float(np.max(test_pixels)),
-        "test_pixel_mean": float(np.mean(test_pixels)),
-        "test_pixel_std": float(np.std(test_pixels)),
+        "test_pixel_min": test_min,
+        "test_pixel_max": test_max,
+        "test_pixel_mean": test_mean,
+        "test_pixel_std": test_std,
         "core_header_diff_bytes": core_header_diff,
         "label_header_diff_bytes": label_diff,
         "normalized_label_diff_bytes": normalized_label_diff,

@@ -51,3 +51,16 @@ target_link_libraries(motioncorr_core PUBLIC
 add_executable(motioncorr src/apps/run_motioncorr.cpp)
 target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
+
+include(CTest)
+if(BUILD_TESTING)
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME SyntheticRegression
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME ReferenceGates
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_gates.py
+                --binary $<TARGET_FILE:motioncorr>)
+    endif()
+endif()

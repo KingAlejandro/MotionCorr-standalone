@@ -1,0 +1,25 @@
+[project]
+name = "motioncorr-standalone"
+version = "0.1.0"
+description = "Standalone Motion Correction Engine with Bit-Exact RELION Parity"
+authors = [
+    {name = "MotionCorr Contributors"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24.0",
+    "requests>=2.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

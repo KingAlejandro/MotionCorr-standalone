@@ -48,6 +48,11 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+option(TIMING "Enable internal timing" OFF)
+if(TIMING)
+    add_compile_definitions(TIMING)
+endif()
+
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
     enable_language(CUDA)
@@ -60,7 +65,8 @@ if(CUDA)
     target_compile_definitions(motioncorr_core PUBLIC _CUDA_ENABLED)
     target_sources(motioncorr_core PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 endif()
 

@@ -12,12 +12,62 @@
 #include <sstream>
 #include <vector>
 
-#define CUFFT_CHECK(cmd) do { \
-    cufftResult err = (cmd); \
-    if (err != CUFFT_SUCCESS) { \
-        REPORT_ERROR("cuFFT error: code " + integerToString(err)); \
+#undef HANDLE_ERROR
+#define HANDLE_ERROR(cmd) do { \
+    cudaError_t err = (cmd); \
+    if (err != cudaSuccess) { \
+        logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
+                << cudaGetErrorString(err) << std::endl; \
+        return false; \
     } \
 } while (0)
+
+#undef LAUNCH_HANDLE_ERROR
+#define LAUNCH_HANDLE_ERROR(cmd) HANDLE_ERROR(cmd)
+
+#define CUFFT_CHECK(cmd) do { \
+    cufftResult result = (cmd); \
+    if (result != CUFFT_SUCCESS) { \
+        logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ \
+                << " : code " << result << std::endl; \
+        return false; \
+    } \
+} while (0)
+
+class CudaMemoryCleanup {
+public:
+    ~CudaMemoryCleanup() {
+        for (size_t i = 0; i < allocations.size(); ++i) {
+            if (allocations[i] != nullptr) cudaFree(allocations[i]);
+        }
+    }
+    void add(void *allocation) { allocations.push_back(allocation); }
+
+private:
+    std::vector<void *> allocations;
+};
+
+class CudaEventCleanup {
+public:
+    ~CudaEventCleanup() {
+        for (size_t i = 0; i < events.size(); ++i) cudaEventDestroy(events[i]);
+    }
+    void add(cudaEvent_t event) { events.push_back(event); }
+
+private:
+    std::vector<cudaEvent_t> events;
+};
+
+class CufftPlanCleanup {
+public:
+    CufftPlanCleanup() : owns_plan(false) {}
+    ~CufftPlanCleanup() { if (owns_plan) cufftDestroy(plan); }
+    void take(cufftHandle handle) { plan = handle; owns_plan = true; }
+
+private:
+    cufftHandle plan;
+    bool owns_plan;
+};
 
 // Dose weighting kernel implementing Grant & Grigorieff (2015) model
 __global__ void applyDoseWeightKernel(
@@ -155,6 +205,10 @@ bool cudaDoseWeightAndInterpolate(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    CudaMemoryCleanup memory_cleanup;
+    CudaEventCleanup event_cleanup;
+    CufftPlanCleanup plan_cleanup;
+
     const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
     const int nx = (nfx - 1) * 2, ny = nfy;
     const int nfy_half = nfy / 2;
@@ -169,13 +223,21 @@ bool cudaDoseWeightAndInterpolate(
     cudaEvent_t ev_start_interp, ev_stop_interp;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+    event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+    event_cleanup.add(ev_stop_total);
     HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
+    event_cleanup.add(ev_start_dw);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
+    event_cleanup.add(ev_stop_dw);
     HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    event_cleanup.add(ev_start_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    event_cleanup.add(ev_stop_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
+    event_cleanup.add(ev_start_interp);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
+    event_cleanup.add(ev_stop_interp);
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -187,16 +249,20 @@ bool cudaDoseWeightAndInterpolate(
 
     size_t total_vram_allocated = 0;
     HANDLE_ERROR(cudaMalloc((void**)&d_Fframe, sz_fframe));
+    memory_cleanup.add(d_Fframe);
     total_vram_allocated += sz_fframe;
 
     HANDLE_ERROR(cudaMalloc((void**)&d_Iframe, sz_iframe));
+    memory_cleanup.add(d_Iframe);
     total_vram_allocated += sz_iframe;
 
     HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
+    memory_cleanup.add(d_Isum);
     total_vram_allocated += sz_iframe;
     HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_iframe));
 
     HANDLE_ERROR(cudaMalloc((void**)&d_doses, n_frames * sizeof(float)));
+    memory_cleanup.add(d_doses);
     total_vram_allocated += n_frames * sizeof(float);
 
     std::vector<float> h_doses(n_frames);
@@ -207,6 +273,7 @@ bool cudaDoseWeightAndInterpolate(
     cufftHandle plan_c2r;
     int n[2] = {ny, nx};
     CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1));
+    plan_cleanup.take(plan_c2r);
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -304,22 +371,6 @@ bool cudaDoseWeightAndInterpolate(
     logfile << "  Real-space Interpolation & Accumulation: " << total_interp_ms << " ms" << std::endl;
     logfile << "  Total Reconstruction Time: " << total_ms << " ms" << std::endl;
 
-    // Cleanup
-    cufftDestroy(plan_c2r);
-    cudaFree(d_Fframe);
-    cudaFree(d_Iframe);
-    cudaFree(d_Isum);
-    cudaFree(d_doses);
-
-    cudaEventDestroy(ev_start_total);
-    cudaEventDestroy(ev_stop_total);
-    cudaEventDestroy(ev_start_dw);
-    cudaEventDestroy(ev_stop_dw);
-    cudaEventDestroy(ev_start_cufft);
-    cudaEventDestroy(ev_stop_cufft);
-    cudaEventDestroy(ev_start_interp);
-    cudaEventDestroy(ev_stop_interp);
-
     return true;
 }
 
@@ -345,12 +396,17 @@ bool cudaRealSpaceInterpolation(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    CudaMemoryCleanup memory_cleanup;
+    CudaEventCleanup event_cleanup;
+
     const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
     cudaEvent_t ev_start_total, ev_stop_total;
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+    event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+    event_cleanup.add(ev_stop_total);
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
     float *d_Iframe = nullptr;
@@ -360,18 +416,22 @@ bool cudaRealSpaceInterpolation(
 
     size_t total_vram_allocated = 0;
     HANDLE_ERROR(cudaMalloc((void**)&d_Iframe, sz_iframe));
+    memory_cleanup.add(d_Iframe);
     total_vram_allocated += sz_iframe;
 
     HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
+    memory_cleanup.add(d_Isum);
     total_vram_allocated += sz_iframe;
     HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_iframe));
 
     if (Isum_even != nullptr && Isum_odd != nullptr) {
         HANDLE_ERROR(cudaMalloc((void**)&d_Isum_even, sz_iframe));
+        memory_cleanup.add(d_Isum_even);
         total_vram_allocated += sz_iframe;
         HANDLE_ERROR(cudaMemset(d_Isum_even, 0, sz_iframe));
 
         HANDLE_ERROR(cudaMalloc((void**)&d_Isum_odd, sz_iframe));
+        memory_cleanup.add(d_Isum_odd);
         total_vram_allocated += sz_iframe;
         HANDLE_ERROR(cudaMemset(d_Isum_odd, 0, sz_iframe));
     }
@@ -438,14 +498,6 @@ bool cudaRealSpaceInterpolation(
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
             << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
-
-    cudaFree(d_Iframe);
-    cudaFree(d_Isum);
-    if (d_Isum_even) cudaFree(d_Isum_even);
-    if (d_Isum_odd) cudaFree(d_Isum_odd);
-
-    cudaEventDestroy(ev_start_total);
-    cudaEventDestroy(ev_stop_total);
 
     return true;
 }

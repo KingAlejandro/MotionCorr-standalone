@@ -293,9 +293,19 @@ the expected signature: the change lives entirely inside the per-movie timer.
 
 It also exceeds the −0.147 s measured directly at the MRC write in the traced runs. Part of
 the remainder is visible (destructors 0.208 → 0.195 s, consistent with ~47 MB less to
-release); roughly 0.06 s is **not** accounted for by any single traced interval. The traced
-and unprofiled binaries differ, so the two numbers are not strictly comparable, and I am not
-going to invent a mechanism for the gap.
+release); roughly 0.055 s is **not** accounted for by any single traced interval.
+
+Page-fault counts narrow this but do not close it. From `/usr/bin/time -v`, the candidate
+takes **18,345 fewer minor page faults** than the baseline (median, uncapped). The removed
+staging buffer is 54.3 MiB = 13,901 pages, so **4,444 faults are avoided beyond the buffer
+itself** — real, and consistent with less downstream allocator pressure. But the buffer's own
+faults are incurred *inside* the traced 46 ms alloc/cast/free interval and are therefore
+already counted; only the beyond-buffer faults are candidates for the residual, and at a
+plausible 1–3 µs per fault those are worth **4–13 ms, not 55 ms**.
+
+So the mechanism is real but too small, and the gap stays open. The traced and unprofiled
+binaries also differ, which limits how hard the two numbers can be compared. I am not going
+to invent a mechanism for the rest.
 
 ### `-O2 -ffp-contract=off`
 
@@ -530,9 +540,14 @@ The GPU host was subsequently capped to 8 logical CPUs. What that does and does 
   −0.155 s, until someone runs enough pairs to separate the two.
 
   Also worth noting: the *baseline* was slightly faster under the cap (3.360 → 3.310 s), the
-  same direction a sibling task saw much more strongly (2.229 → 2.087 s). Pinning to 8
-  adjacent logical CPUs plausibly removes thread-migration and NUMA-crossing cost that an
-  unpinned 124-core box pays. Consistent with the numbers, not measured.
+  same direction a sibling task saw much more strongly (2.229 → 2.087 s). The natural
+  explanation is that pinning to 8 adjacent logical CPUs removes thread-migration and
+  NUMA-crossing cost. **That explanation does not hold for this workload**, and the existing
+  `/usr/bin/time -v` records were enough to check it without running anything new:
+  involuntary context switches — the migration proxy — are **75 uncapped and 70 capped** for
+  the baseline arm. Seventy switches across a 3.3 s run is far too few to account for 50 ms.
+  Whatever moved the baseline here, it was not migration. The sibling task's much larger
+  142 ms shift may still have a different cause; this only rules it out for this workload.
 - **The TIFF decode recommendation does not survive**, measured, not inferred: 0.291 s at 24
   threads uncapped becomes 0.751 s capped, indistinguishable from 8 threads.
 

@@ -155,9 +155,9 @@ def parse_issue_body(body: Optional[str]) -> Dict[str, Any]:
     pass_match = re.search(r"## Pass criteria\s*\n+([^#]+)", body)
     if pass_match:
         criteria_lines = [
-            line.strip("- [ ] ").strip("- [x] ").strip()
+            re.sub(r"^\s*-\s*\[[ xX]\]\s*", "", line).strip()
             for line in pass_match.group(1).strip().splitlines()
-            if line.strip().startswith("- [")
+            if re.match(r"^\s*-\s*\[[ xX]\]", line)
         ]
         parsed["pass_criteria"] = criteria_lines
 

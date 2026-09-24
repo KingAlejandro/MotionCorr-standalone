@@ -69,20 +69,33 @@ __global__ void fusedGainAndSumKernel(
 #define MC_STATS_BLOCKS  1024
 #define MC_STATS_THREADS 256
 
-__global__ void sumUnalignedKernel(const float *d_Isum, const size_t num_pixels, double *d_partials)
+// Also accumulates sum|x|. The forward error bound on a summation is
+// gamma_N * sum|x_i|, NOT gamma_N * |sum x_i| -- those coincide only for
+// same-sign data. Carrying sum|x| keeps the guard rigorous under cancellation
+// (negative gain entries, dark-subtracted input).
+__global__ void sumUnalignedKernel(const float *d_Isum, const size_t num_pixels,
+                                   double *d_partials, double *d_partials_abs)
 {
     __shared__ double sdata[MC_STATS_THREADS];
+    __shared__ double sabs[MC_STATS_THREADS];
     const size_t stride = (size_t)gridDim.x * blockDim.x;
-    double acc = 0.0;
-    for (size_t n = (size_t)blockIdx.x * blockDim.x + threadIdx.x; n < num_pixels; n += stride)
-        acc = __dadd_rn(acc, (double)d_Isum[n]);
+    double acc = 0.0, acc_abs = 0.0;
+    for (size_t n = (size_t)blockIdx.x * blockDim.x + threadIdx.x; n < num_pixels; n += stride) {
+        const double xv = (double)d_Isum[n];
+        acc = __dadd_rn(acc, xv);
+        acc_abs = __dadd_rn(acc_abs, fabs(xv));
+    }
     sdata[threadIdx.x] = acc;
+    sabs[threadIdx.x] = acc_abs;
     __syncthreads();
     for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
-        if (threadIdx.x < s) sdata[threadIdx.x] = __dadd_rn(sdata[threadIdx.x], sdata[threadIdx.x + s]);
+        if (threadIdx.x < s) {
+            sdata[threadIdx.x] = __dadd_rn(sdata[threadIdx.x], sdata[threadIdx.x + s]);
+            sabs[threadIdx.x] = __dadd_rn(sabs[threadIdx.x], sabs[threadIdx.x + s]);
+        }
         __syncthreads();
     }
-    if (threadIdx.x == 0) d_partials[blockIdx.x] = sdata[0];
+    if (threadIdx.x == 0) { d_partials[blockIdx.x] = sdata[0]; d_partials_abs[blockIdx.x] = sabs[0]; }
 }
 
 __global__ void sumSqDevUnalignedKernel(const float *d_Isum, const size_t num_pixels,
@@ -465,18 +478,23 @@ struct StatsScratch {
 };
 } // namespace
 
-bool CudaMovieSession::reduceUnalignedSum(double &sum1) {
+bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
     if (!is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
-    HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, MC_STATS_BLOCKS * sizeof(double)));
-    HANDLE_ERROR(cudaMalloc((void**)&scratch.result, sizeof(double)));
-    sumUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(d_Isum, num_pixels, scratch.partials);
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, 2 * MC_STATS_BLOCKS * sizeof(double)));
+    HANDLE_ERROR(cudaMalloc((void**)&scratch.result, 2 * sizeof(double)));
+    sumUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(
+        d_Isum, num_pixels, scratch.partials, scratch.partials + MC_STATS_BLOCKS);
     HANDLE_ERROR(cudaGetLastError());
     combinePartialsKernel<<<1, 1>>>(scratch.partials, MC_STATS_BLOCKS, scratch.result);
     HANDLE_ERROR(cudaGetLastError());
-    HANDLE_ERROR(cudaMemcpy(&sum1, scratch.result, sizeof(double), cudaMemcpyDeviceToHost));
+    combinePartialsKernel<<<1, 1>>>(scratch.partials + MC_STATS_BLOCKS, MC_STATS_BLOCKS, scratch.result + 1);
+    HANDLE_ERROR(cudaGetLastError());
+    double host[2] = {0.0, 0.0};
+    HANDLE_ERROR(cudaMemcpy(host, scratch.result, 2 * sizeof(double), cudaMemcpyDeviceToHost));
+    sum1 = host[0]; sum_abs = host[1];
     return true;
 }
 
@@ -508,6 +526,9 @@ bool CudaMovieSession::collectAboveThreshold(
     // Chebyshev: sum (x-m)^2 = N*std^2 and every pixel above m + 6*std contributes
     // more than 36*std^2, so fewer than N/36 pixels can exceed the threshold.
     // Derived from N, never hard-coded, so EER super-resolution grids scale.
+    // This assumes hotpixel_sigma == 6. That assumption is fail-safe rather than
+    // load-bearing: a smaller sigma admits more hits, which trips the overflow
+    // check below and falls back to the host scan. A perf cliff, not a wrong answer.
     const unsigned int capacity = (unsigned int)(num_pixels / 36 + 1);
 
     struct CollectScratch {

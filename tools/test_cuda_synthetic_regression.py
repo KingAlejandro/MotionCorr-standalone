@@ -2,17 +2,19 @@
 """Automated verification suite for MotionCorr synthetic regression harness.
 
 Validates the harness acceptance logic through:
-1. Positive parity execution
+1. Positive parity execution on a real CUDA binary
 2. Negative test: Missing output file (e.g., deleted MRC or STAR)
 3. Negative test: Non-zero MotionCorr process exit (crash / abort)
 4. Negative test: Altered image pixels (pixel corruption exceeding tolerance)
 5. Negative test: Incomplete comparison coverage (missing STAR / MRC pair)
-6. Negative test: Non-existent binary path
+6. Negative test: CPU wrapper masquerading as CUDA
+7. Negative test: Non-existent binary path
 
 Ensures every negative scenario reliably causes the harness to exit non-zero,
 report intelligible diagnostic error messages, and preserve failure artifacts.
 """
 
+import argparse
 import os
 import shutil
 import stat
@@ -32,6 +34,13 @@ def find_cpu_binary() -> Path:
         if c.is_file() and os.access(c, os.X_OK):
             return c
     raise RuntimeError("No executable motioncorr binary found in build/ or build-cpu/")
+
+
+def find_cuda_binary() -> Path:
+    candidate = REPO_ROOT / "build-cuda" / "motioncorr"
+    if candidate.is_file() and os.access(candidate, os.X_OK):
+        return candidate
+    raise RuntimeError("No CUDA executable found in build-cuda/; pass --cuda-bin PATH")
 
 
 def create_executable_script(path: Path, content: str) -> None:
@@ -87,20 +96,18 @@ def run_harness(args: List[str]) -> Tuple[int, str, str]:
     return res.returncode, res.stdout, res.stderr
 
 
-def test_positive(cpu_bin: Path, temp_dir: Path) -> bool:
-    """Verify that a normal valid run exits with status 0 and PASS."""
+def test_positive(cpu_bin: Path, cuda_bin: Path, gpu_id: int, temp_dir: Path) -> bool:
+    """Verify a real GPU run exits with status 0 and PASS."""
     print("-> Running Test 1: Positive execution test...")
     out_dir = temp_dir / "positive_run"
     json_report = temp_dir / "positive_report.json"
-    wrapper = temp_dir / "wrap_positive.sh"
-    create_wrapped_binary(wrapper, cpu_bin, "    :")
-
     code, stdout, stderr = run_harness([
         "--cpu-bin", str(cpu_bin),
-        "--cuda-bin", str(wrapper),
+        "--cuda-bin", str(cuda_bin),
+        "--gpu", str(gpu_id),
         "--output-dir", str(out_dir),
         "--json-out", str(json_report),
-        "--gate", "exact",
+        "--gate", "relaxed",
     ])
     if code != 0:
         print(f"FAILED: Expected exit code 0, got {code}\nStdout:\n{stdout}\nStderr:\n{stderr}")
@@ -112,6 +119,23 @@ def test_positive(cpu_bin: Path, temp_dir: Path) -> bool:
         print(f"FAILED: Expected JSON report file {json_report}")
         return False
     print("   PASSED: Positive run exited 0 with OVERALL HARNESS RESULT: PASS")
+    return True
+
+
+def test_negative_cpu_masquerade(cpu_bin: Path, temp_dir: Path) -> bool:
+    """A CPU wrapper that strips --gpu must not pass as CUDA."""
+    print("-> Running Test 6: Negative test - CPU wrapper masquerading as CUDA...")
+    wrapper = temp_dir / "wrap_cpu_as_cuda.sh"
+    create_wrapped_binary(wrapper, cpu_bin, "    :")
+    code, stdout, stderr = run_harness([
+        "--cpu-bin", str(cpu_bin),
+        "--cuda-bin", str(wrapper),
+        "--output-dir", str(temp_dir / "neg_cpu_masquerade"),
+    ])
+    if code == 0 or "CUDA execution evidence missing" not in stdout:
+        print(f"FAILED: CPU masquerade was not specifically rejected; exit={code}\nStdout:\n{stdout}\nStderr:\n{stderr}")
+        return False
+    print("   PASSED: CPU-only execution could not claim CUDA parity.")
     return True
 
 
@@ -236,17 +260,24 @@ def test_negative_missing_binary() -> bool:
 
 
 def main() -> None:
-    cpu_bin = find_cpu_binary()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cpu-bin", type=Path)
+    parser.add_argument("--cuda-bin", type=Path)
+    parser.add_argument("--gpu", type=int, default=0)
+    args = parser.parse_args()
+
+    cpu_bin = args.cpu_bin or find_cpu_binary()
+    cuda_bin = args.cuda_bin or find_cuda_binary()
     print("=" * 78)
     print(" MOTIONCORR SYNTHETIC HARNESS ACCEPTANCE AND NEGATIVE TEST SUITE")
     print("=" * 78)
     print(f"Target Harness: {HARNESS_SCRIPT}")
     print(f"Target Binary:  {cpu_bin}")
+    print(f"CUDA Binary:    {cuda_bin} (GPU {args.gpu})")
     print("=" * 78)
 
     temp_dir = Path(tempfile.mkdtemp(prefix="mc_harness_test_"))
     tests = [
-        test_positive,
         test_negative_missing_output,
         test_negative_process_crash,
         test_negative_altered_pixels,
@@ -255,11 +286,15 @@ def main() -> None:
 
     all_passed = True
     try:
-        for t in tests:
+        if not test_positive(cpu_bin, cuda_bin, args.gpu, temp_dir):
+            all_passed = False
+        for t in tests if all_passed else []:
             if not t(cpu_bin, temp_dir):
                 all_passed = False
                 print(f"FAILED: {t.__name__}")
                 break
+        if all_passed and not test_negative_cpu_masquerade(cpu_bin, temp_dir):
+            all_passed = False
         if all_passed and not test_negative_missing_binary():
             all_passed = False
 

@@ -1,0 +1,7 @@
+# Issue 27: CUDA harness execution and evidence contract
+
+The synthetic harness compares CPU and CUDA outputs under the existing relaxed Gate 2. A numerical match alone cannot establish that a GPU kernel ran: a CPU executable or wrapper could produce identical outputs.
+
+For each requested CUDA movie, require both the startup message naming the requested GPU device in `cuda/run.log` and the `[CUDA Global Alignment Profile]` section with a numeric total alignment time in the movie's `.log`. The first marker is emitted by the CUDA-enabled runner after device selection; the second is emitted after the global CUDA alignment sequence. Missing or mismatched evidence fails the harness and retains artifacts. The machine report records each marker and the measured total. The negative suite must reject a CPU wrapper that strips `--gpu`; its positive case uses a real CUDA binary.
+
+For a merge decision, integrate the current PR 25 branch, build CPU and CUDA binaries from that source, run the integer and subpixel fixtures on the named hackathon GPU, and retain the exact command, source and binary hashes, environment, process exits, full JSON report, and logs. This synthetic result is separate from the experimental 24-movie Gate 2 result and cannot replace it. All established numerical thresholds remain unchanged.

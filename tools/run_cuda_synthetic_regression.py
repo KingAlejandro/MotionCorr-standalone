@@ -16,9 +16,12 @@ Reuses tools/compare_motioncorr.py and adheres strictly to declared acceptance g
 import argparse
 import hashlib
 import json
+import math
 import os
 import platform
+import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -215,6 +218,34 @@ def verify_fixture_outputs(out_dir: Path, movie_base: str) -> List[str]:
     return errors
 
 
+def inspect_cuda_execution(run_log: Path, movie_log: Path, gpu_id: int) -> Dict[str, Any]:
+    """Require markers from device selection and the completed CUDA alignment path."""
+    startup = run_log.read_text(errors="replace") if run_log.is_file() else ""
+    profile = movie_log.read_text(errors="replace") if movie_log.is_file() else ""
+    expected = f"Using CUDA acceleration on GPU device {gpu_id} for global alignment."
+    total = re.search(r"^\s*Total GPU alignment time:\s*([0-9]+(?:\.[0-9]+)?)\s*ms\s*$",
+                      profile, re.MULTILINE)
+    total_ms = float(total.group(1)) if total else None
+    return {
+        "requested_gpu_id": gpu_id,
+        "startup_marker_found": expected in startup,
+        "profile_marker_found": "[CUDA Global Alignment Profile]" in profile,
+        "total_gpu_alignment_ms": total_ms,
+        "movie_log_path": str(movie_log),
+        "complete": expected in startup and "[CUDA Global Alignment Profile]" in profile
+                    and total_ms is not None and math.isfinite(total_ms) and total_ms >= 0,
+    }
+
+
+def read_mrc_dimensions(path: Path) -> Optional[Dict[str, int]]:
+    """Read the corrected MRC shape and pixel mode from its fixed header."""
+    if not path.is_file() or path.stat().st_size < 1024:
+        return None
+    with path.open("rb") as stream:
+        nx, ny, nz, mode = struct.unpack("<4i", stream.read(16))
+    return {"nx": nx, "ny": ny, "nz": nz, "mode": mode}
+
+
 def run_fixture_case(
     case_name: str,
     fixture_star: Path,
@@ -303,6 +334,24 @@ def run_fixture_case(
     if cuda_missing:
         case_report["fail_reasons"].extend(cuda_missing)
 
+    cuda_evidence = inspect_cuda_execution(cuda_log, cuda_dir / f"{movie_base}.log", gpu_id)
+    case_report["cuda_execution"] = cuda_evidence
+    if not cuda_evidence["complete"]:
+        case_report["fail_reasons"].append(
+            "CUDA execution evidence missing or for a different GPU: expected device-selection "
+            "message in run.log and completed global-alignment profile in the movie log"
+        )
+
+    expected_gt = json.loads(ground_truth_json.read_text())
+    expected_dimensions = {"nx": expected_gt["nx"], "ny": expected_gt["ny"], "nz": 1, "mode": 2}
+    cpu_dimensions = read_mrc_dimensions(cpu_dir / f"{movie_base}.mrc")
+    cuda_dimensions = read_mrc_dimensions(cuda_dir / f"{movie_base}.mrc")
+    case_report["output_dimensions"] = {
+        "expected": expected_dimensions, "cpu": cpu_dimensions, "cuda": cuda_dimensions,
+    }
+    if cpu_dimensions != expected_dimensions or cuda_dimensions != expected_dimensions:
+        case_report["fail_reasons"].append("Corrected MRC dimensions or mode do not match the fixture")
+
     # 3. Evaluate Ground Truth Recovery: CPU vs Ground Truth
     cpu_vs_gt_json = case_run_dir / "comp_cpu_vs_gt.json"
     c_gt_code, c_gt_rep, _ = run_comparator(
@@ -319,6 +368,8 @@ def run_fixture_case(
         "comparator_status": c_gt_rep.get("overall_status"),
         "report": c_gt_rep.get("checks", {}).get("ground_truth_recovery", {}),
     }
+    if c_gt_code != 0 or c_gt_rep.get("overall_status") != "PASS":
+        case_report["fail_reasons"].append("CPU ground-truth comparator did not pass")
     gt_cpu = c_gt_rep.get("checks", {}).get("ground_truth_recovery", {})
     if "error" in gt_cpu:
         case_report["fail_reasons"].append(f"CPU GT recovery evaluation error: {gt_cpu['error']}")
@@ -348,6 +399,8 @@ def run_fixture_case(
         "comparator_status": cu_gt_rep.get("overall_status"),
         "report": cu_gt_rep.get("checks", {}).get("ground_truth_recovery", {}),
     }
+    if cu_gt_code != 0 or cu_gt_rep.get("overall_status") != "PASS":
+        case_report["fail_reasons"].append("CUDA ground-truth comparator did not pass")
     gt_cuda = cu_gt_rep.get("checks", {}).get("ground_truth_recovery", {})
     if "error" in gt_cuda:
         case_report["fail_reasons"].append(f"CUDA GT recovery evaluation error: {gt_cuda['error']}")
@@ -701,7 +754,9 @@ def main() -> None:
             "os_release": platform.release(),
             "python": python_bin,
             "cpu_binary": str(cpu_bin),
+            "cpu_binary_sha256": compute_sha256(cpu_bin),
             "cuda_binary": str(cuda_bin),
+            "cuda_binary_sha256": compute_sha256(cuda_bin),
             "gpu_info": gpu_info,
         },
         "configuration": {

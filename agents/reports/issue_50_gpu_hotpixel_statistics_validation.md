@@ -310,6 +310,20 @@ removes thread migration and NUMA-crossing cost that an unpinned 124-core box in
 the uncapped 46 ms may have been the candidate recovering overhead that the cap removes for both
 arms. That is a hypothesis consistent with the numbers, not a measured mechanism.
 
+**The attenuation is tested, not just a point-estimate comparison.** Comparing two medians and
+declaring a difference would be the same error as reading significance off an underpowered series.
+A two-sided permutation test (200,000 relabellings) on the two delta *sets*:
+
+| Metric | Uncapped mean | Capped mean | Regime difference | Welch t | Permutation p |
+|---|---|---|---|---|---|
+| process wall | +46.1 ms (n=40) | +17.1 ms (n=30) | +29.1 ms | +2.76 | **0.0077** |
+| full movie wall | +47.9 ms (n=40) | +17.8 ms (n=30) | +30.0 ms | +3.04 | **0.0037** |
+
+So the regimes genuinely differ and the attenuation is established, not inferred from point
+estimates. (A parallel task ran the same test on their own result and got p = 0.080 — their
+regime difference is *undetermined* between shifted and attenuated. Same test, different
+outcome; worth noting that the classification has to be earned per result.)
+
 **Classification.** A parallel task proposed separating results that are *shifted* by the cap from
 those *eliminated* by it. This one is neither — it is **attenuated**: still resolved, still
 positive, still favoured under both orderings, but a third of the size. The binary needs a third

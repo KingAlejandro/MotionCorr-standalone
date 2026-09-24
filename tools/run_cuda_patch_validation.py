@@ -73,7 +73,7 @@ def parse_telemetry(log_text: str) -> Dict[str, Any]:
             global_prof = entry
         else:
             patches.append(entry)
-    
+
     return {
         "global_profile": global_prof,
         "patch_profiles": patches,
@@ -305,10 +305,10 @@ def main():
         ]
         run_cmd(ref_cmd, cwd=synth_dir)
         c_res = run_cmd(cand_cmd, cwd=synth_dir)
-        
+
         # Telemetry
         telemetry = get_telemetry_for_dir(cand_d, c_res.stdout)
-        
+
         cmp_res = run_comparator(comparator, ref_d, cand_d, stage_name)
         cmp_res["telemetry"] = telemetry
         cmp_res["gpu_startup"] = args.gpu_id if gpu_startup_line in c_res.stdout else None

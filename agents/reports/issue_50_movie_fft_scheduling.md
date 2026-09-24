@@ -43,6 +43,23 @@ regression that is purely the regime change. The GPU-side figures (`global FFT`,
 `global iFFT`, plan construction, work-area size, VRAM, transfer bytes) should be far
 less sensitive, but that is an expectation, not something measured under the cap.
 
+Indirect support for that expectation, from another session's capped re-run of the TIFF
+decode stage (host-side, not one of mine):
+
+| decode threads | 124 CPUs available | capped to 8 |
+|---|---:|---:|
+| 8 | 0.730 s | 0.754 s (−3%) |
+| 24 | 0.291 s | 0.751 s (advantage gone) |
+
+An 8-thread stage that already fits in 8 cores barely moved; a 24-thread stage that
+needed spare cores lost its entire advantage, with corrected pixels identical throughout.
+That is the signature of **host parallelism** being the cap-sensitive variable, which is
+consistent with GPU-side work being largely insulated. It is corroboration of the
+mechanism, **not** a measurement of `global FFT` / `global iFFT` under the cap, and the
+expectation above stays labelled as an expectation. Measuring it directly was declined
+rather than done badly: at the time the box had unrelated work at 89% GPU utilisation
+outside the flock, so a timing window would not have been clean.
+
 **Shared-host disclosure.** This box was in concurrent use by other agent sessions
 working on adjacent Issue #50 tasks. Timed runs were serialised with
 `flock /tmp/motioncorr-bench.lock`, and `run_evidence2.sh` additionally waits for GPU 1

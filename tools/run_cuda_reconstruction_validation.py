@@ -106,7 +106,7 @@ def main():
         "--j", "4"
     ], check=False)
     assert res_neg.returncode != 0, "Expected non-zero return code for invalid GPU"
-    assert "Invalid CUDA device ID" in res_neg.stderr or "Invalid CUDA device ID" in res_neg.stdout, "Expected invalid device ID error message"
+    assert "Invalid GPU device ID" in res_neg.stderr or "Invalid GPU device ID" in res_neg.stdout, "Expected invalid device ID error message"
     summary["stages"]["stage1_negative_test"] = {"status": "PASS", "exit_code": res_neg.returncode}
     print("Stage 1 PASS: Clean exit on invalid GPU device.")
 

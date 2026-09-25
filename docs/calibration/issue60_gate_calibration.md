@@ -779,7 +779,10 @@ about 35 minutes for 246 cells on 3710 x 3838 micrographs.
 
 ## 13. Relationship to the neighbouring issues
 
-* **#58 (gate semantics).** This report supplies the measurement #58 needs: the
+* **#58 (gate semantics).** PR #62 is the gate-contract work and owns
+  `tools/compare_motioncorr.py` and `docs/reference_gates.md`; PR #64 touches
+  neither and the two PRs have zero files in common. This report supplies the
+  measurement #58 needs: the
   `0.001` relative-RMSE limit has no measured relationship to lost signal, and
   the "non-associative parallel reduction" justification is not supported on
   this CPU build. The threshold proposal in section 10 is offered to #58 as
@@ -788,11 +791,20 @@ about 35 minutes for 246 cells on 3710 x 3838 micrographs.
   evaluator here reproduces `Micrograph::getShiftAt` and reports constant offset
   separately from frame-to-frame change, in px and Å, as #59 requires. It is
   used for calibration only; **no displacement-field gate is proposed here**, and
-  none of #59's files were touched. The schema in the design record section 5.1
-  is offered as a coordination point. The #59 known-motion framework was not
-  available on `origin` while this work ran, so layer 2 builds its own forward
-  model; if #59 publishes fixtures, layer 2's `make_object` and
-  `true_trajectory` should be replaced by imports.
+  none of #59's files were touched -- PR #64 and PR #63 have zero files in
+  common.
+
+  #59's PR #63 appeared while this work was running. Its `tools/motion_field.py`
+  and this report's `tools/calibration/mrcio.displacement_field` were written
+  independently from the same source, and they agree: evaluated on the real
+  `00021` motion model over 600 grid points (24 frames x a 5 x 5 detector grid,
+  fields up to 13.94 px), the largest disagreement is **3.6e-15 px**. Two
+  independent readings of the same convention landing on the same numbers is a
+  useful cross-check on both.
+
+  When #63 merges, this module should be replaced by an import of
+  `tools/motion_field.py`, and layer 2's `make_object` and `true_trajectory`
+  should be replaced by #59's fixtures.
 * **#36 (CUDA divergence).** Section 11.1 is the concrete, GPU-free next step.
   The chaotic-amplification mechanism measured in section 7.1 is a candidate
   explanation for the 0/24 failure that requires no CUDA defect.

@@ -1,0 +1,59 @@
+LOCK_ACQUIRED 2026-09-24T23:28:13Z affinity=96-103 nproc=8
+bb53e04 clean build exit=0
+probe tree ok
+probe build exit=0
+== date 2026-09-24T23:29:36Z  PR#54 head bb53e04
+   src a9b7736ed3313a27  src/motioncorr_runner.cpp
+   src 9537a12246f035a9  src/acc/cuda/cuda_movie_session.cu
+   src f4696971603f1c42  src/acc/cuda/cuda_movie_session.h
+-- new
+   binary sha256 = 5f5651d37d6ce8d8425dd034082767acd92c5b4f2475654889ea62165450f5c9
+   CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+   CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]"
+-- probe
+   binary sha256 = 9809e68d47adc34ccd0df6b585784a8825597c8601a8552a56bfb915ac694db5
+   CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+   CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]"
+-- base
+   binary sha256 = fdee080dd1314854c9c93f12c9ddd4f09f85bf34e020718f6547215c325497d9
+   CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+   CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]"
+NVIDIA A100 80GB PCIe, 570.86.10
+BOX_SETTLED gpu0_procs=0 compilers=0 load=2.90 waited=25s
+########## REACHABILITY CONTROLS ##########
+  neg_plain_normal exit=0 :: PROBE gaus_reachable=0 :: Detected 67 hot pixels to be corrected.
+  pos_clustered_normal exit=0 :: PROBE gaus_reachable=1 :: Detected 67 hot pixels to be corrected.
+      WARNING: Gaussian hot-pixel replacement needs host statistics; using the original host scan.
+  neg_plain_signed exit=0 :: PROBE gaus_reachable=0 :: Detected 3 hot pixels to be corrected.
+  pos_clustered_signed exit=0 :: PROBE gaus_reachable=1 :: Detected 3 hot pixels to be corrected.
+      WARNING: Gaussian hot-pixel replacement needs host statistics; using the original host scan.
+########## EXACTNESS vs a11f2f1 ##########
+  gain_plain: PIXELS_OK HDR_OK STAR_OK RNG_ORDER_OK | hot base=67 new=67
+  gain_clustered: PIXELS_OK HDR_OK STAR_OK RNG_ORDER_OK | hot base=67 new=67
+  signed_plain: PIXELS_OK HDR_OK STAR_OK RNG_ORDER_OK | hot base=3 new=3
+  signed_clustered: PIXELS_OK HDR_OK STAR_OK RNG_ORDER_OK | hot base=3 new=3
+  nogain_plain: PIXELS_OK HDR_OK STAR_OK RNG_ORDER_OK | hot base=237 new=237
+########## 24-MOVIE EXACT ##########
+  base exit=0 mrcs=24
+  new exit=0 mrcs=24
+  pixel digests: 24/24 identical differing=0
+  ordered hot_pixels blocks differing: 0
+  base counts: 67 59 70 64 59 65 60 63 73 59 58 70 57 62 69 74 77 61 71 63 62 59 63 70 
+  new  counts: 67 59 70 64 59 65 60 63 73 59 58 70 57 62 69 74 77 61 71 63 62 59 63 70 
+  DATASET STAR IDENTICAL
+########## PAIRED WALL/VRAM n=12 ##########
+GPU0 memory.used before series (foreign baseline) = 1 MiB ; foreign procs on GPU0 = 0
+PAIR wall_base wall_new vram_base vram_new
+W1 2.363470870 2.322382964 3329 3329
+W2 2.866376142 2.340240539 3537 3533
+W3 2.306821205 2.278462570 3537 3533
+W4 2.401944188 2.381491030 3329 3533
+W5 2.327527743 2.331429914 3537 3533
+W6 2.431309369 2.326708363 3537 3533
+W7 2.333539396 2.345987067 3533 3365
+W8 2.274206431 2.362499500 3331 3533
+W9 2.319518894 2.350791863 3533 3533
+W10 2.320217862 2.416917866 3533 3477
+W11 2.315175321 2.417540567 3533 3329
+W12 2.348806129 2.293237614 3533 3537
+VALIDATE54C_ALLDONE 2026-09-24T23:33:41Z

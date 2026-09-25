@@ -34,6 +34,13 @@
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
 
+#ifdef _CUDA_ENABLED
+#include <cufft.h>
+#include "src/acc/cuda/cuda_movie_session.h"
+#include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_realspace_dw.h"
+#endif
+
 class MotioncorrRunner
 {
 public:
@@ -219,6 +226,9 @@ private:
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
 	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+#ifdef _CUDA_ENABLED
+	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+#endif
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);
 

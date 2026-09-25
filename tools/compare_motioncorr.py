@@ -278,6 +278,11 @@ def compare_images(
         "max_abs_pixel_error": max_abs_err,
         "rmse": rmse,
         "relative_rmse": rel_rmse,
+        # relative_rmse = rmse / max(sigma_ref, 1e-12); the denominator is the reference
+        # image's population standard deviation in pixel intensity units, not its L2 norm
+        # and not the MRC header "rms" word. See docs/gate_contract.md.
+        "relative_rmse_denominator": "reference_pixel_population_std",
+        "relative_rmse_denominator_value": ref_std,
         "ref_pixel_min": float(np.min(ref_pixels)),
         "ref_pixel_max": float(np.max(ref_pixels)),
         "ref_pixel_mean": float(np.mean(ref_pixels)),
@@ -459,6 +464,11 @@ def main() -> None:
     parser.add_argument("--image-rmse", type=float, help="Override image RMSE tolerance")
     parser.add_argument("--image-max-err", type=float, help="Override image max pixel error tolerance")
     parser.add_argument("--image-relative-rmse", type=float, help="Override relative image RMSE tolerance (relaxed/custom gates)")
+    parser.add_argument(
+        "--require-complete-coverage",
+        action="store_true",
+        help="Fail unless both the corrected image and the trajectory/STAR pair were compared",
+    )
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON to stdout")
     parser.add_argument("--json-out", type=Path, help="Write machine-readable JSON report to file")
     args = parser.parse_args()
@@ -555,6 +565,10 @@ def main() -> None:
     gate_passed = True
     num_comparisons_run = 0
     errors = input_errors
+    # An unresolved or ambiguous input means the tool cannot see what it is asked to
+    # gate, so it must not report PASS. See docs/gate_contract.md, "Failure behaviour".
+    if input_errors:
+        gate_passed = False
 
     # 1. Compare motion trajectories from STAR files
     if ref_star or test_star:
@@ -714,6 +728,14 @@ def main() -> None:
         "corrected_image": "corrected_image" in report["checks"],
     }
     report["coverage"]["complete"] = all(report["coverage"].values())
+    report["coverage"]["required"] = bool(args.require_complete_coverage)
+    if args.require_complete_coverage and not report["coverage"]["complete"]:
+        gate_passed = False
+        missing = [name for name in ("motion_and_star", "corrected_image")
+                   if not report["coverage"][name]]
+        errors.append(
+            f"Complete coverage required but these comparisons did not run: {', '.join(missing)}"
+        )
 
     if errors:
         report["errors"] = errors
@@ -735,7 +757,10 @@ def main() -> None:
         print(f"Gate Profile:      {args.gate.upper()}")
         print(f"Overall Status:    {report['overall_status']}")
         if not report["coverage"]["complete"]:
-            print("Coverage:          PARTIAL (PASS/FAIL applies only to supplied comparison pairs)")
+            if report["coverage"]["required"]:
+                print("Coverage:          PARTIAL (required complete; gate failed)")
+            else:
+                print("Coverage:          PARTIAL (PASS/FAIL applies only to supplied comparison pairs)")
         print("-" * 72)
 
         if errors:
@@ -768,6 +793,8 @@ def main() -> None:
                 print(f"   Image RMSE:           {im['rmse']:.6e} (threshold: {tol_image_rmse:.6e})")
                 print(f"   Max absolute diff:    {im['max_abs_pixel_error']:.6e} (threshold: {tol_image_max_err:.6e})")
                 print(f"   Relative RMSE:        {im['relative_rmse']:.6e} (threshold: {tol_image_relative_rmse:.6e} in relaxed/custom gate)")
+                print(f"     denominator:        reference pixel population std = {im['relative_rmse_denominator_value']:.6e}")
+                print(f"     equivalent to:      absolute RMSE <= {tol_image_relative_rmse * im['relative_rmse_denominator_value']:.6e} for this reference")
                 print(f"   Normalized headers:   Core metadata: {im['core_header_diff_bytes']} diff bytes, Non-timestamp labels: {im['normalized_label_diff_bytes']} diff bytes")
                 print(f"   Status:               {'PASS' if im['passed'] else 'FAIL'}")
                 if not im["passed"]:

@@ -56,6 +56,15 @@ def main() -> int:
     ap.add_argument("--hot-value", type=int, default=10000)
     ap.add_argument("--pixel-size", type=float, default=0.885)
     ap.add_argument("--seed", type=int, default=20260925)
+    ap.add_argument("--flip-y", action="store_true",
+                    help="write rows bottom-up. The TIFF and MRC movie readers "
+                         "disagree on row order: re-encoding a tutorial TIFF into "
+                         "an MRC stack unchanged gave a relative RMSE of 1.435 "
+                         "against the TIFF run, falling to 0.700 when the output "
+                         "was flipped, because the gain reference is then also "
+                         "applied upside down. The null control in this script "
+                         "exists to catch exactly that, and this flag is how the "
+                         "movie-space arm is made comparable to the TIFF baseline.")
     args = ap.parse_args()
     args.outdir.mkdir(parents=True, exist_ok=True)
 
@@ -63,6 +72,9 @@ def main() -> int:
         stack = np.stack([p.asarray() for p in t.pages]).astype(np.uint16)
     print(f"read {args.tiff.name}: {stack.shape} {stack.dtype} "
           f"min={stack.min()} max={stack.max()} mean={stack.mean():.4f}", flush=True)
+    if args.flip_y:
+        stack = stack[:, ::-1, :].copy()
+        print("flipped rows bottom-up to match the TIFF reader convention", flush=True)
 
     write_mrc_stack_uint16(args.outdir / f"{args.tag}_null.mrcs", stack, args.pixel_size)
     print("wrote null", flush=True)
@@ -77,8 +89,12 @@ def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from tools.calibration import mrcio
     gain, ghdr = mrcio.read_mrc_2d(args.gain)
-    mrcio.write_mrc_2d(args.outdir / f"gain_shift{n}.mrc",
-                       np.roll(np.roll(gain, n, axis=1), n, axis=0), ghdr)
+    g_rolled = np.roll(np.roll(gain, n, axis=1), n, axis=0)
+    if args.flip_y:
+        # The movie rows were flipped, so the translation the detector sees is
+        # downward rather than upward; roll the gain the matching way.
+        g_rolled = np.roll(np.roll(gain, n, axis=1), -n, axis=0)
+    mrcio.write_mrc_2d(args.outdir / f"gain_shift{n}.mrc", g_rolled, ghdr)
     print(f"wrote gain_shift{n}", flush=True)
 
     rng = np.random.default_rng(args.seed)

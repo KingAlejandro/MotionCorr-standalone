@@ -112,6 +112,28 @@ def warp(image: np.ndarray, field: np.ndarray) -> np.ndarray:
     )
 
 
+def apply_shift_set(image: np.ndarray, shifts: np.ndarray) -> np.ndarray:
+    """Average ``image`` over a set of translations, in one transform pair.
+
+    The average of shifted copies is the image convolved with the empirical
+    shift kernel, so the whole set collapses into a single transfer function
+
+        h(k) = (1/N) sum_f exp(-2 pi i k . delta_f)
+
+    applied once. This is algebraically identical to shifting and averaging
+    frame by frame, and avoids N transform pairs per cell on a 3710x3838
+    micrograph.
+    """
+    ny, nx = image.shape
+    fy = np.fft.fftfreq(ny)[:, None]
+    fx = np.fft.rfftfreq(nx)[None, :]
+    h = np.zeros((ny, nx // 2 + 1), dtype=np.complex128)
+    for dx, dy in shifts:
+        h += np.exp(-2j * np.pi * (fx * float(dx) + fy * float(dy)))
+    h /= len(shifts)
+    return np.fft.irfft2(np.fft.rfft2(image) * h, s=(ny, nx))
+
+
 # ---------------------------------------------------------------------------
 # X1 -- accounted-for constant translation
 # ---------------------------------------------------------------------------
@@ -156,11 +178,7 @@ def x2_jitter_output(
     RMSE LARGER than the pipeline would produce for the same delta-B. Layer 2
     measures that bias directly; the report quotes the factor.
     """
-    shifts = x2_jitter_kernel_transfer(sigma_px, n_frames, rng)
-    acc = np.zeros_like(image, dtype=np.float64)
-    for dx, dy in shifts:
-        acc += fourier_shift(image, float(dx), float(dy))
-    return acc / n_frames
+    return apply_shift_set(image, x2_jitter_kernel_transfer(sigma_px, n_frames, rng))
 
 
 # ---------------------------------------------------------------------------
@@ -182,10 +200,7 @@ def x3_drift_shifts(total_px: float, n_frames: int, angle_deg: float = 45.0) -> 
 
 def x3_drift_output(image: np.ndarray, total_px: float, n_frames: int) -> np.ndarray:
     """Layer-1 form of X3. Same noise caveat as :func:`x2_jitter_output`."""
-    acc = np.zeros_like(image, dtype=np.float64)
-    for dx, dy in x3_drift_shifts(total_px, n_frames):
-        acc += fourier_shift(image, float(dx), float(dy))
-    return acc / n_frames
+    return apply_shift_set(image, x3_drift_shifts(total_px, n_frames))
 
 
 # ---------------------------------------------------------------------------

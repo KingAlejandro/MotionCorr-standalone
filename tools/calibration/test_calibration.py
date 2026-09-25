@@ -171,8 +171,41 @@ def test_scale_invariance() -> None:
         )
 
 
+def test_decomposition_never_worse() -> None:
+    """The fitted model must never leave more residual than doing nothing.
+
+    A least-squares decomposition that increases the residual is mis-specified.
+    This control exists because the first version did exactly that on a
+    structured fault, and nothing else in the suite would have caught it.
+    """
+    print("\nControl 7: the decomposition never increases the residual")
+    img = make_micrograph()
+    rng = np.random.default_rng(4242)
+    cases = {
+        "translation 0.7 px": pt.x1_translation(img, 0.7),
+        "envelope 20 A^2": pt.x5_attenuation(img, 20.0),
+        "jitter 0.3 px": pt.x2_jitter_output(img, 0.3, 24, rng),
+        "local field 0.3 px": pt.x4_local_field(img, 0.3, 0.25, rng),
+        "hot pixels 500": pt.x7_hot_pixels(img, 500, rng),
+        "scale 1.02": img * 1.02,
+        "one bad column": np.where(
+            np.arange(img.shape[1])[None, :] == img.shape[1] // 3, img * 1.05, img),
+        "additive noise": img + rng.standard_normal(img.shape) * 0.05,
+    }
+    for name, test in cases.items():
+        m = dg.all_image_diagnostics(img, test)
+        ok = m["std_eps_incoherent"] <= m["std_eps_undecomposed"] * (1 + 1e-9)
+        check(
+            f"{name}",
+            ok,
+            f"eps_inc={m['std_eps_incoherent']:.4e} <= "
+            f"eps_raw={m['std_eps_undecomposed']:.4e} "
+            f"(explained {100*m['std_eps_explained_fraction']:.1f}%)",
+        )
+
+
 def test_nonsquare() -> None:
-    print("\nControl 7: non-square images are handled")
+    print("\nControl 8: non-square images are handled")
     img = make_micrograph(384, 512)
     m = dg.all_image_diagnostics(img, pt.x1_translation(img, 1.0), border_px=50)
     check("non-square translation recovered", abs(m["std_shift_px"] - 1.0) < 0.01,
@@ -180,7 +213,7 @@ def test_nonsquare() -> None:
 
 
 def test_gate2_metric_parity() -> None:
-    print("\nControl 8: existing metrics reproduce tools/compare_motioncorr.py exactly")
+    print("\nControl 9: existing metrics reproduce tools/compare_motioncorr.py exactly")
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     import importlib.util
     spec = importlib.util.spec_from_file_location(
@@ -202,7 +235,7 @@ def test_gate2_metric_parity() -> None:
 
 
 def test_displacement_field() -> None:
-    print("\nControl 9: displacement-field evaluator against the shipped model")
+    print("\nControl 10: displacement-field evaluator against the shipped model")
     star = Path(__file__).resolve().parents[2] / "test-data/fixtures/reference_output/synthetic_128x128_8frames.star"
     d = mrcio.displacement_field(star, 4, 4)
     check("field shape", d["field"].shape == (8, 4, 4, 2), str(d["field"].shape))
@@ -217,7 +250,7 @@ def test_displacement_field() -> None:
 
 
 def test_mrc_roundtrip() -> None:
-    print("\nControl 10: MRC write/read round-trip")
+    print("\nControl 11: MRC write/read round-trip")
     img = make_micrograph(64, 96).astype(np.float32)
     with tempfile.TemporaryDirectory() as td:
         p = Path(td) / "t.mrc"
@@ -237,6 +270,7 @@ def main() -> int:
     test_jitter_matches_theory()
     test_hot_pixel_blind_spot()
     test_scale_invariance()
+    test_decomposition_never_worse()
     test_nonsquare()
     test_gate2_metric_parity()
     test_displacement_field()

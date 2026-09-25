@@ -336,18 +336,36 @@ def spectral_transfer_decomposition(
     envelope_used = math.isfinite(delta_b) and math.isfinite(fit_r2) and fit_r2 >= STD_MIN_FIT_R2
     freq = np.sqrt(fy * fy + fx * fx)
     k_map = freq / pixel_size_a
-    model = fr_shifted * (scale_g if math.isfinite(scale_g) else 1.0)
+    basis = fr_shifted
     if envelope_used:
-        model = model * np.exp(-delta_b * k_map * k_map / 4.0)
+        basis = basis * np.exp(-delta_b * k_map * k_map / 4.0)
+
+    # Refit the scale by global least squares against the shifted, enveloped
+    # reference rather than reading it off the lowest shell. A single-shell
+    # estimate is not a least-squares fit, and it was observed to leave a
+    # residual LARGER than doing nothing at all on a structured fault (a single
+    # mis-gained detector column): eps_incoherent 2.8e-2 against a plain
+    # relative RMSE of 6.6e-3. A decomposition that increases the residual is
+    # mis-specified, so the scale is now the projection coefficient, which
+    # guarantees eps_incoherent <= the undecomposed residual.
+    bw = basis * w
+    denom_g = float(np.real(np.sum(basis * np.conj(bw))))
+    g_ls = float(np.real(np.sum(ft * np.conj(bw))) / denom_g) if denom_g > 0 else 1.0
+    model = basis * g_ls
 
     resid_p = float((np.abs(ft - model) ** 2 * w).sum())
-    ref_p = float((np.abs(fr) ** 2 * w).sum())
-    ref_p_nodc = ref_p - float(np.abs(fr[0, 0]) ** 2)
+    ref_p_nodc = float((np.abs(fr) ** 2 * w).sum()) - float(np.abs(fr[0, 0]) ** 2)
     eps_inc = math.sqrt(resid_p / ref_p_nodc) if ref_p_nodc > 0 else float("nan")
 
+    # The undecomposed residual, for reference: what eps would be if no scale,
+    # shift or envelope were removed. Reported so the decomposition's value is
+    # visible per cell rather than asserted.
+    eps_raw = math.sqrt(float((np.abs(ft - fr) ** 2 * w).sum()) / ref_p_nodc) if ref_p_nodc > 0 else float("nan")
+
     return {
-        "scale_g": scale_g,
-        "scale_dev": abs(scale_g - 1.0) if math.isfinite(scale_g) else float("nan"),
+        "scale_g": g_ls,
+        "scale_g_lowshell": scale_g,
+        "scale_dev": abs(g_ls - 1.0) if math.isfinite(g_ls) else float("nan"),
         "shift_dx_px": dx,
         "shift_dy_px": dy,
         "shift_px": math.hypot(dx, dy),
@@ -357,6 +375,9 @@ def spectral_transfer_decomposition(
         "fit_n_shells": n_fit,
         "envelope_used": bool(envelope_used),
         "eps_incoherent": eps_inc,
+        "eps_undecomposed": eps_raw,
+        "eps_explained_fraction": (1.0 - (eps_inc / eps_raw) ** 2)
+        if (math.isfinite(eps_raw) and eps_raw > 0) else float("nan"),
     }
 
 

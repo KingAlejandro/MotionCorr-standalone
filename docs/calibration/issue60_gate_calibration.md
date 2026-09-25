@@ -145,7 +145,7 @@ the trajectory gate is roughly 200x stricter than the declared harm boundary.
 
 ---
 
-## 4. The instrument, and the four defects its controls caught
+## 4. The instrument, and the defects its controls caught
 
 Eleven controls run in under a minute (`tools/calibration/test_calibration.py`):
 a null control that must read exactly zero, analytic controls against
@@ -373,6 +373,74 @@ which no current Gate 2 metric does.
 
 ---
 
+## 8. Layer 1 -- response curves on real micrographs
+
+Faults of exactly known magnitude injected into the six selection movies' own
+CPU `--j 1` corrected micrographs, 252 cells. Median over the six movies. The
+reference and the test differ by exactly the injected fault and nothing else.
+
+| Fault | severity | relRMSE | **Δ*B* (Å²)** | shift px | eps_inc | max pixel | border/int |
+|:---|---:|---:|---:|---:|---:|---:|---:|
+| none (null control) | — | **0** | 4.6e-16 | 4.4e-20 | 4.0e-21 | **0** | — |
+| translation | 0.10 px | 0.1681 | **6.4e-16** | 0.1000 | 3.1e-15 | 0.97 | 0.99 |
+| translation | 0.25 px | 0.4136 | **1.0e-15** | 0.2500 | 3.1e-15 | 2.40 | 0.99 |
+| translation | 1.00 px | 1.258 | **1.3e-15** | 1.0000 | 3.2e-15 | 7.08 | 0.99 |
+| translation | 4.00 px | 1.395 | **1.4e-15** | 4.0000 | 3.2e-15 | 8.19 | 1.00 |
+| jitter σ | 0.02 px | **0.00144** | 0.0251 | 7.6e-7 | 2.1e-4 | 0.009 | 0.99 |
+| jitter σ | 0.05 px | 0.00906 | 0.1552 | 1.4e-5 | 1.4e-3 | 0.059 | 0.99 |
+| jitter σ | 0.10 px | 0.0337 | 0.5962 | 1.6e-4 | 5.6e-3 | 0.215 | 0.99 |
+| jitter σ | 0.20 px | 0.1389 | 2.719 | 7.1e-4 | 0.0166 | 0.96 | 0.99 |
+| jitter σ | 0.40 px | 0.4097 | **9.911** | 6.0e-3 | 0.0748 | 2.83 | 0.99 |
+| jitter σ | 0.80 px | 0.7743 | 40.02 | 0.0576 | 0.1289 | 5.18 | 0.99 |
+| drift total | 0.05 px | 0.000517 | 0.0070 | 8.7e-18 | 3.3e-4 | 0.003 | 0.99 |
+| drift total | 0.25 px | 0.0128 | 0.1753 | 5.3e-18 | 8.2e-3 | 0.071 | 0.99 |
+| drift total | 1.00 px | 0.1809 | 2.815 | 1.1e-17 | 0.1133 | 1.03 | 0.99 |
+| drift total | 2.00 px | 0.5022 | 11.38 | 1.6e-17 | 0.2958 | 2.99 | 0.99 |
+| local field RMS | 0.05 px | 0.0756 | 1.489 | 4.9e-4 | 0.0516 | 0.77 | 0.91 |
+| local field RMS | 0.20 px | 0.2829 | 6.208 | 1.5e-3 | 0.1816 | 2.61 | 1.08 |
+| local field RMS | 1.00 px | 0.9889 | 44.98 | 0.0395 | 0.5816 | 7.57 | 0.99 |
+| applied Δ*B* | 1 Å² | 0.0546 | **1.001** | 3.5e-18 | 3.7e-5 | 0.37 | 0.99 |
+| applied Δ*B* | 5 Å² | 0.2332 | **5.004** | 1.2e-17 | 1.4e-4 | 1.60 | 0.99 |
+| applied Δ*B* | 25 Å² | 0.6434 | **25.02** | 7.1e-18 | 2.0e-4 | 4.58 | 0.99 |
+| applied Δ*B* | 50 Å² | 0.7957 | **50.04** | 1.5e-17 | 1.6e-4 | 5.69 | 0.99 |
+| hot pixels | 1 | 0.0131 | 5.9e-4 | 5.2e-6 | 0.0131 | **42.8** | 0.00 |
+| hot pixels | 100 | 0.1323 | 6.1e-3 | 1.0e-4 | 0.1323 | **44.9** | 1.06 |
+| hot pixels | 10 000 | 1.325 | 0.0455 | 1.6e-3 | 1.325 | **46.5** | 1.01 |
+
+Four things to read out of this table.
+
+**The estimator is exact on real data.** Applied envelopes of 1, 5, 25 and 50 Å²
+are recovered as 1.001, 5.004, 25.02 and 50.04. Translations of 0.1, 0.25, 1.0
+and 4.0 px are recovered exactly, with Δ*B* at 1e-15 -- the floating-point floor.
+
+**The closed-form prediction holds on real micrographs.** At σ = 0.4 px the
+design record predicted Δ*B* = 8π²σ²a² = 9.895 Å² before any measurement; the
+measurement is 9.911 Å².
+
+**What relative RMSE = 0.001 actually means.** Three independent faults give the
+same answer. Relative RMSE scales as σ² for jitter and as Δ² for drift, and
+approximately linearly in Δ*B* for a direct envelope, so each row can be
+extrapolated to the limit:
+
+| Fault | severity at relRMSE = 0.001 | Δ*B* there | amplitude loss at 3 Å |
+|:---|---:|---:|---:|
+| random jitter | σ = 0.0167 px | 0.017 Å² | 0.048 % |
+| systematic drift | 0.070 px total | 0.014 Å² | 0.038 % |
+| applied envelope | — | 0.018 Å² | 0.051 % |
+
+**The Gate 2 relative-RMSE limit of 0.001 sits at about 0.017 Å² of envelope
+loss, or 0.05 % of amplitude at 3 Å. That is roughly 300x stricter than the
+declared harm boundary of 5 Å².** It is not a scientific limit; it is close to a
+bit-identity requirement expressed in floating point.
+
+**Hot pixels are the one fault the envelope diagnostic cannot see**, and the
+region split names them: the border/interior ratio is exactly 0.00 for a single
+hot pixel, because the whole difference is one interior pixel. `eps_incoherent`
+equals the relative RMSE to four figures in every hot-pixel row, which is the
+signature of a difference the decomposition can explain none of.
+
+---
+
 ## 9. Hold-out validation
 
 The movie split and the severity split were frozen in `prespecification.py` and
@@ -407,6 +475,161 @@ on every movie. The gain responses agree only to within a factor of about 4 on
 selection makes the *particular* value movie-dependent even though its scale is
 not. Both facts are used in section 10: thresholds are set against the stable
 quantity, not the chaotic one.
+
+---
+
+## 10. Recommendation
+
+**Nothing in this section has been applied.** It is a proposal, for review under
+#58, supported by the measurements above. The `0.001` limit remains in force
+until that review concludes.
+
+### 10.1 How each candidate diagnostic performed
+
+Across all three layers: 1129 cells, of which 481 are negligible-tier
+(Δ*B* ≤ 1 Å², no translation above 0.1 px, no scale error above 1 %), 512 are
+unacceptable-tier, and 136 are marginal. "Max on negligible" and "min on
+unacceptable" are what determine whether a false-positive-free threshold exists
+at all; a ratio above 1 means one does.
+
+| Diagnostic | max on negligible | min on unacceptable it owns | ratio | verdict |
+|:---|---:|---:|---:|:---|
+| `image_relative_rmse` | 4.884 | 0.0592 | **0.012** | distributions overlap 80x; no threshold separates |
+| `image_rmse` | 20.54 | 0.0477 | 0.0023 | no threshold separates |
+| `image_max_abs_error` | 228 | 0.765 | 0.0034 | no threshold separates |
+| `rel_rmse_low / mid / high` | 2.88 / 4.84 / 9.24 | 0.0041 / 0.0106 / 0.0119 | ≤ 0.0022 | no threshold separates |
+| `rel_rmse_interior / border` | 4.94 / 4.91 | 0.0591 / 0.0606 | 0.012 | no threshold separates |
+| `std_eps_incoherent` | 4.883 | 1.6e-15 | 3e-16 | no threshold separates |
+| `traj_max_shift_error` | 0.0274 | 0 | 0 | blind to geometry and dose faults |
+| `traj_coord_rms_error` | 0.0162 | 0 | 0 | blind to geometry and dose faults |
+| `field_rms_px` | 0.0315 | 0.0054 | 0.17 | no threshold separates (see note) |
+| `hf_signal_retention_dev` | 4.454 | 0 | 0 | screen only |
+| **`std_delta_b_a2`** | **1.705** | **5.004** | **2.93** | **separates** |
+| **`std_shift_px`** | 0.1 | 0.1 | 1 | **separates**, see 10.3 |
+| **`std_scale_dev`** | 0.01 | 0.01 | 1 | **separates**, see 10.3 |
+
+Note on `field_*`: the displacement-field metrics are only available for the
+layer-3 cells, where no fault reached the unacceptable tier through local
+motion, so their ratio is not a fair test. They are reported, not judged.
+Issue #59 owns that gate.
+
+### 10.2 Why relative RMSE cannot be rescued by moving the number
+
+The negligible-tier maximum for `image_relative_rmse` is 4.884 and the
+unacceptable-tier minimum is 0.0592. The two populations overlap by a factor of
+80, so **no value of the limit gives both a low false-positive and a low
+false-negative rate.**
+
+That maximum is set by hot pixels, which this report's harm criterion cannot
+see. Excluding them, and then also excluding translation and uniform scale --
+the most generous possible reading -- still leaves:
+
+| Negligible-tier subset | cells | max relRMSE | fraction exceeding 0.001 |
+|:---|---:|---:|---:|
+| all | 481 | 4.884 | **57.8 %** |
+| excluding hot pixels | 381 | 0.176 | 46.7 % |
+| excluding hot pixels, translation and uniform scale | 336 | 0.137 | **41.4 %** |
+
+Even on the most generous subset, the current limit fires on 41 % of cells that
+cost essentially no recoverable signal, and the worst of them (0.137, 137x the
+limit) is a σ = 0.05 px residual jitter costing 0.16 Å², i.e. 0.45 % of
+amplitude at 3 Å.
+
+### 10.3 Measured clean band for each discriminator
+
+Before proposing a limit, the honest question is how wide the gap is between the
+largest value a diagnostic takes on something harmless and the smallest value it
+takes on the thing it is supposed to catch. Measured over all 1129 cells:
+
+| Discriminator | largest on negligible cells outside its own fault class | smallest on the fault it must catch | clean band |
+|:---|---:|---:|---:|
+| `std_delta_b_a2` | 1.705 Å² (any negligible cell) | 5.004 Å² (smallest unacceptable envelope) | **2.9x** |
+| `std_shift_px` | 1.42e-2 px (10 000 hot pixels) | 0.1 px (smallest injected translation) | **7.0x** |
+| `std_scale_dev` | 9.79e-3 (10 000 hot pixels); 9.29e-3 (σ = 0.05 px jitter) | 9.89e-4 (a 0.1 % gain error) | **none** |
+
+`std_scale_dev` fails this test and the reason is a property of the estimator,
+not of the fault: when the envelope fit is rejected for low R², the
+least-squares scale absorbs part of the blur, so motion faults push `scale_dev`
+up to about 9e-3. It can separate a 1 % gain error from the rest with a margin of
+only 1.02x, and it cannot detect a 0.1 % gain error at all without alarming on
+blur. **It is therefore recommended as a warning, not as a blocking check**,
+despite separating cleanly when scored against the declared 1 % clause.
+
+### 10.4 Proposed classification
+
+| Check | Class | Proposed limit | Basis |
+|:---|:---|:---|:---|
+| every metric exactly 0 | **strict CPU regression** | exact equality, same platform | measured: 228 runs over twelve movies, `--j 1/2/4/8`, three thread placements, five repeats, all bit-identical. Strictly stronger than the present `--gate exact` 1e-7 tolerances, and it costs nothing because it is already met. |
+| `std_delta_b_a2` | **blocking** | **≤ 2 Å²** | the only diagnostic that separates a boundary it was not handed: 2.9x clean band, FP 0/391 and FN 0/146 on selection, FP 0/90 and FN 0/168 on hold-out, unchanged at harm boundaries of 2, 5 and 10 Å². 2 Å² is 5.4 % amplitude loss at 3 Å. |
+| `std_shift_px` | **blocking** | **≤ 0.05 px** | 7.0x clean band (1.42e-2 px on any non-translation cell against 0.1 px for the smallest injected translation). Catches the accounted-for-translation case that the trajectory metrics miss entirely. |
+| exit status, STAR schema, static metadata | **blocking** | unchanged | no evidence to revise |
+| `std_scale_dev` | **warning** | report | no clean band; see 10.3. It still *identifies* a uniform gain error exactly once one is suspected, which is its real value. |
+| `image_relative_rmse` | **warning** | report the value, do not fail | 41--58 % false-positive rate on negligible cells at 0.001; no separating value exists at any limit |
+| `image_rmse`, `image_max_abs_error` | **warning** | report | same; `max_abs_error` additionally cannot distinguish 1 defect from 10 000 |
+| `traj_max_shift_error`, `traj_coord_rms_error` | **warning** outside strict CPU regression | report | never approached their current limits by any CLI-reachable fault (largest observed 0.0274 px against a 0.05 px limit), and exactly zero for every dose fault and for an accounted-for translation |
+| `std_eps_incoherent`, band and region splits | **warning / attribution** | report | they explain *what kind* of difference occurred; none separates |
+| displacement-field metrics | deferred to **#59** | — | measured here, not proposed as a gate |
+
+### 10.4.1 Panel behaviour
+
+No single diagnostic can do the job: a rigid translation has zero envelope loss
+by construction. The two blocking checks are a panel, and its measured behaviour
+at the declared 5 Å² harm boundary is:
+
+| Panel | Split | Detection | False alarms |
+|:---|:---|---:|---:|
+| Δ*B* ≤ 2 Å² alone | combined | 340/512 (0.664) | 0/481 (0.000) |
+| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px | selection | 199/242 (0.822) | 18/391 (0.046) |
+| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px | hold-out | 253/270 (0.937) | 0/90 (0.000) |
+| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | selection | 242/242 (1.000) | 18/391 (0.046) |
+| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | hold-out | **270/270 (1.000)** | **0/90 (0.000)** |
+| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | combined | **512/512 (1.000)** | 18/481 (0.037) |
+
+All 18 false alarms are the same cell: the layer-1 and layer-2 translation cells
+at exactly 0.1 px, which the declared clause (`> 0.1 px` is unacceptable) puts in
+the negligible tier by strict inequality. Any translation limit below 0.1 px
+alarms on them by construction. They are not evidence of a real false-alarm
+mode, and they do not appear in the hold-out split, whose translation severities
+are 0.25, 1.0 and 4.0 px.
+
+The two blocking checks alone reach 88.3 % detection, missing only the uniform
+gain errors, which is exactly what section 10.3 predicts. Adding `scale_dev` as
+a *warning* rather than a gate leaves those reported but not failing, which is
+the right outcome for a fault that costs no signal.
+
+The recommendation does not depend on the declared harm boundary: moving it from
+5 Å² to 2 or 10 Å² leaves every classification and every limit unchanged.
+
+### 10.5 Uncertainty
+
+* **Sampling.** Six selection and six hold-out movies from one collection on one
+  platform. Movie-to-movie spread is the relevant unit and is reported in
+  section 9: the deterministic faults reproduce to better than 1.5 %, the
+  alignment-mediated ones only to within a factor of about 4 on Δ*B*. The
+  proposed Δ*B* limit of 2 Å² sits 2.9x below the smallest unacceptable value
+  measured and 1.2x above the largest negligible one, so the margin on the
+  *negligible* side is thin and is the place a larger sample could move the
+  answer.
+* **Harm estimator.** Absolute harm from layer 2 scatters by up to ±1.8 Å² at
+  the lowest signal-to-noise, so cells near the 2 Å² limit are assigned to a
+  tier with real uncertainty. The reference-measured Δ*B* used by the gate
+  itself has no such floor: it reads 1e-15 on identical inputs.
+* **Harm currency.** Δ*B* measures envelope loss and nothing else. It is blind
+  to incoherent damage, which is why `image_max_abs_error` is retained as a
+  warning even though it grades nothing.
+* **Estimator contamination.** `std_scale_dev` picks up blur when the envelope
+  fit is rejected for low R², which is why it has no clean band. A better scale
+  estimator would probably recover one; that was not attempted here because it
+  would mean tuning the instrument after seeing the data.
+* **Not established.** Section 11.
+
+### 10.6 The single recommended next step
+
+Run `tools/calibration/decompose_pair.py` on the CUDA corrected micrographs from
+#36 against their CPU references. The files are already on disk, no GPU is
+needed, and it takes seconds per movie. It converts the recorded relative-RMSE
+range of 0.0029--0.0100 into an amplitude loss in percent at a stated resolution,
+which is the number #36, #58 and #61 all actually need and none currently has.
 
 ---
 

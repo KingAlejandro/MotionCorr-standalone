@@ -217,3 +217,104 @@ translation and from harmless arithmetic.
 
 Existing exact CPU parity and corrected-image metrics are untouched and remain available
 through `tools/run_regression_tests.sh` and `tools/compare_motioncorr.py`.
+
+---
+
+## Amendment 1 - fixture roles, and why the realistic-noise case is not a gate
+
+Recorded after the first full run. **No tolerance was changed by this amendment.**
+
+`km_local_noisy` failed every gated metric: local component RMS 0.62 A against a 0.20 A limit.
+Three measurements established that this is the estimator running out of information, not a
+defect in the applied field:
+
+1. **Noise response.** Sweeping the per-pixel noise from sigma/signal = 0.05 to 10 on the same
+   injected field gives local-component RMS 0.089, 0.076, 0.105, 0.262, 0.580 A. The error is
+   proportional to the noise amplitude above a floor, which is the signature of estimator
+   variance.
+2. **Bias versus variance.** Eight replicates that differ only in the detector-noise stream give
+   per-replicate RMS 0.76-1.53 A, a scatter component of 1.05 A, and a mean error field of
+   0.50 A - consistent with zero bias at the resolution eight replicates can provide. A
+   systematic field defect would survive averaging; this does not.
+3. **Information content.** A 4x4 patch grid on 512x512 with 12 frames gives 128*128*12 =
+   197k pixel-frames per patch. A 5x5 grid on a 3710x3838 tutorial movie with 24 frames gives
+   13.7M - seventy times more. Error scales as the inverse square root of that product across a
+   patch-size sweep, so the small fixture is expected to be about 8x less precise.
+
+`km_local_realscale` (2048x2048, 24 frames, 5x5 patches, **identical** injected field and
+identical per-pixel SNR) was then added and **passes every declared tolerance**: global 0.053 A,
+local 0.146 A, total 0.155 A. Predicted from the scaling law: 0.16 A. Measured: 0.146 A.
+
+Cases therefore carry an explicit `role`:
+
+* `role: "gate"` - must meet the declared tolerances. `km_global_hisnr`, `km_local_hisnr`,
+  `km_local_nonsquare`, `km_local_realscale`.
+* `role: "characterization"` - measured and reported in full, excluded from the aggregate.
+  `km_local_noisy`, whose failing numbers stay visible in every report and in the JSON.
+
+A tolerance on recovery accuracy is only enforceable on a fixture carrying enough information to
+resolve it. That is a property of the fixture, measured independently of the gate. The design
+declared the tolerances; it did not, and could not, declare which fixtures could supply enough
+information to reach them.
+
+`km_local_nonsquare` was enlarged from 384x256x10 to 768x512x12 for the same reason: at 61k
+pixel-frames per patch its estimator floor straddled the tier-C limit (measured 0.14-0.26 A
+across seeds). A square control at matched information content was no better, so the geometry,
+not the non-squareness, was the limit - which is also the evidence that the nx/ny normalisation
+is handled correctly. The case exists to catch an axis swap and does that at any size.
+
+## Amendment 2 - the constant-offset limit is tightened from 1.0 px to 0.10 A
+
+**This is stricter than declared, and it closes a blind spot found in the metric itself.**
+
+The mean error `c` is not a free gauge. Truth and recovery are both anchored at the first summed
+frame, so `E(first) == 0` identically and `c` is algebraically tied to the other frames' errors.
+For an error constant across frames 1..N-1, `c = k(N-1)/N`, and removing `c` before computing the
+scatter shrinks the statistic by about `N/sqrt(N-1)` - 3.6x at 12 frames. At the declared 1.0 px
+alarm, a genuine 0.25 px per-frame bias passed every gate. The limit is now tier B, 0.10 A, the
+same as the global component. All gate-role cases pass it with margin.
+
+A bias-inclusive `total_rms_interior_with_offset` is also now reported, ungated, so the
+offset/scatter split cannot hide anything from a reader.
+
+## Amendment 3 - the base image is periodic
+
+**A fixture correctness fix, found by validating the truth against its own pixels.**
+
+The first build rendered particles without wrapping. A Fourier shift is cyclic, so a band of
+width `|shift|` along two edges held content in one frame and nothing in the other, and any
+full-frame cross-correlation optimum was dragged toward zero shift. The measured consequence was
+a 1.2 % low bias in the apparent global trajectory - which presented exactly as a MotionCorr
+defect, and would have been reported as one.
+
+It was caught by measuring the frame-to-frame displacement straight out of the pixels with an
+estimator that shares no code with MotionCorr: it reproduced MotionCorr's answer, not the
+declared truth, and cropping 20 px of border recovered the declared truth to 1.5e-4 px. The base
+image now renders each particle together with its eight neighbouring tiles. After the fix the
+global trajectory bias is 0.024 px, and the pixel-level estimator agrees with the declared field
+to 1.4e-3 px on the full frame.
+
+That check is now permanent: `tools/test_known_motion.py` section 2 runs it on every invocation.
+Nothing else in this design means anything if the ground truth is not actually true.
+
+## Amendment 4 - negative controls are sized from the tolerances, and sensitivity is measured
+
+The first two controls - 0.30 px on one frame, 0.5 px at the field corners - were **not**
+rejected, and should not have been. A single frame displaced by `d` contributes `d/sqrt(N)` to an
+RMS over `N` frames, so at 12 frames a 0.30 px single-frame error is 0.077 A: below tier B by
+construction. Demanding its rejection would demand that the gate violate its own specification.
+
+Control amplitudes are now derived from the declared tolerances, and the suite additionally
+**measures** the smallest rejected defect of each kind by bisection rather than asserting a
+binary outcome:
+
+| defect | detected above |
+|:--|:--|
+| one frame displaced | 0.408 px = 0.361 A |
+| trajectory scale error on every frame | 2.36 % |
+| local field error at the corners, last frame | 0.681 px = 0.603 A |
+| constant bias on every frame but the first | 0.126 px = 0.111 A |
+
+The 2.36 % scale sensitivity is worth stating plainly: the 1.2 % fixture artefact of Amendment 3
+was **below** it. This gate would not have caught that artefact, which is why the pixel-level
+truth validation of Amendment 3 exists as a separate check and not as one more metric.

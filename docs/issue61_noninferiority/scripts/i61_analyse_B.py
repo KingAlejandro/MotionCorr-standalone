@@ -133,7 +133,7 @@ for a in ALL:
         res["arms"][a][s] = entry
 
     # delete-one-movie jackknife, held-out set only, real arms only
-    if a in REAL and all(pp[a].get(f"jk_{m}") for m in held) and all(pp["cpu"].get(f"jk_{m}") for m in held):
+    if all(pp[a].get(f"jk_{m}") for m in held) and all(pp["cpu"].get(f"jk_{m}") for m in held):
         reps = {"B1_rho_primary_corrected": [], "B1_rho_alt_unmasked": [],
                 "B2_d143_delta_A": [], "B3_bfactor_delta_A2": []}
         for m in held:

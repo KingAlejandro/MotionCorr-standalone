@@ -1,0 +1,41 @@
+
+################ ARM P: movie 00030, 5x5, unbound - does the 00021 scaling curve generalise? ################
+2026-09-25T01:50:20Z
+[2026-09-25T01:50:20Z] === P_m30_unbound: threads=[1, 4, 16] reps=2 ===
+[2026-09-25T01:50:20Z] --- rep 1/2, order=[1, 4, 16] ---
+[2026-09-25T01:50:21Z] settle: OK after 0.6s (load1=2.59, procs=0)
+[2026-09-25T01:51:01Z] j=1 rep=1 wall=40.24s user=36.39 rss=2.73GiB foreign=2.14/5.01 cores rc=0
+[2026-09-25T01:51:02Z] settle: OK after 0.6s (load1=2.84, procs=0)
+[2026-09-25T01:51:21Z] j=4 rep=1 wall=17.88s user=51.16 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:51:21Z] settle: OK after 0.5s (load1=3.74, procs=0)
+[2026-09-25T01:51:29Z] j=16 rep=1 wall=7.13s user=62.7 rss=3.64GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:51:29Z] --- rep 2/2, order=[16, 4, 1] ---
+[2026-09-25T01:51:29Z] settle: OK after 0.6s (load1=3.62, procs=0)
+[2026-09-25T01:51:37Z] j=16 rep=2 wall=7.11s user=63.94 rss=3.64GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:51:50Z] settle: OK after 13.3s (load1=4.16, procs=0)
+[2026-09-25T01:52:05Z] j=4 rep=2 wall=13.52s user=39.55 rss=2.94GiB foreign=2.3/4.01 cores rc=0
+[2026-09-25T01:52:05Z] settle: OK after 0.6s (load1=4.12, procs=0)
+[2026-09-25T01:52:47Z] j=1 rep=2 wall=41.74s user=37.7 rss=2.73GiB foreign=2.11/6.01 cores rc=0
+[2026-09-25T01:52:47Z] === done -> results/P_m30_unbound.json ===
+
+################ ARM Q: movie 00030, 5x5, spread ################
+2026-09-25T01:52:47Z
+[2026-09-25T01:52:47Z] === Q_m30_spread: threads=[1, 4, 16] reps=2 ===
+[2026-09-25T01:52:47Z] --- rep 1/2, order=[1, 4, 16] ---
+[2026-09-25T01:52:48Z] settle: OK after 0.6s (load1=3.69, procs=0)
+[2026-09-25T01:53:31Z] j=1 rep=1 wall=41.57s user=37.53 rss=2.73GiB foreign=5.18/14.09 cores rc=0
+[2026-09-25T01:53:44Z] settle: OK after 13.2s (load1=4.15, procs=0)
+[2026-09-25T01:53:58Z] j=4 rep=1 wall=12.71s user=40.37 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:55:30Z] settle: TIMEOUT after 92.5s (load1=3.49, procs=1) -- PROCEEDING, FLAGGED
+[2026-09-25T01:55:37Z] j=16 rep=1 wall=5.19s user=47.72 rss=3.64GiB foreign=3.01/3.01 cores rc=0
+[2026-09-25T01:55:37Z] --- rep 2/2, order=[16, 4, 1] ---
+[2026-09-25T01:56:31Z] settle: OK after 54.3s (load1=4.00, procs=0)
+[2026-09-25T01:56:37Z] j=16 rep=2 wall=5.36s user=50.75 rss=3.64GiB foreign=2.18/3.04 cores rc=0
+[2026-09-25T01:56:46Z] settle: OK after 8.3s (load1=4.10, procs=0)
+[2026-09-25T01:57:04Z] j=4 rep=2 wall=16.86s user=45.26 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:57:09Z] settle: OK after 5.9s (load1=4.07, procs=0)
+[2026-09-25T01:57:51Z] j=1 rep=2 wall=40.95s user=37.07 rss=2.73GiB foreign=2.09/4.01 cores rc=0
+[2026-09-25T01:57:51Z] === done -> results/Q_m30_spread.json ===
+
+################ MOVIE30 SERIES COMPLETE ################
+2026-09-25T01:57:51Z

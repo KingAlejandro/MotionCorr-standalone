@@ -25,8 +25,10 @@ Host `small-refmac-machine` (ssh alias `cpu64`), AMD EPYC 7763, 64 vCPU,
 | `M_patch5x5_placesonly.json` | `OMP_PLACES=cores` alone |
 | `N_j4_unbound_x10.json` | j=4 x 10, unbound — placement-lottery distribution |
 | `O_j4_spread_x10.json` | j=4 x 10, bound |
+| `P_m30_unbound.json` | movie `20170629_00030`, j=1,4,16, unbound — does the 00021 curve generalise? |
+| `Q_m30_spread.json` | same, bound |
 
-`run_all.log` and `run_affinity.log` are the drivers' own logs, including every
+`run_all.log`, `run_affinity.log` and `run_m30.log` are the drivers' own logs, including every
 settle wait and its observed `load1`.
 
 ## Reading the JSON
@@ -57,7 +59,7 @@ cores for the whole session; that is the `foreign_cores_mean ≈ 2.0` baseline.
 | `controls2.c` | hardened machine-ceiling kernels (`fma`, `exp`) — the controls that separate machine scaling from MotionCorr's |
 | `controls.c` | first-pass controls including STREAM-triad bandwidth and FFTW plan-per-call comparison |
 | `fftw_lock_stats.{h,cpp}`, `patch_lock_instr.py` | diagnostic instrumentation that measures wait and hold time on `#pragma omp critical(FourierTransformer_fftw_plan)`; the patcher inserts probes at all six sites |
-| `run_all.sh`, `run_affinity.sh` | the two series drivers |
+| `run_all.sh`, `run_affinity.sh`, `run_movie30.sh` | the three series drivers |
 
 The instrumentation is **diagnostic only** and is deliberately not part of the
 build. Apply it to a scratch copy of the tree:

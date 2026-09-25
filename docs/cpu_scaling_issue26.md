@@ -386,6 +386,32 @@ Binding is worth 32% at the median here and cuts the coefficient of variation by
 ran later in the session under a slightly higher residual load; the within-pair
 comparison is unaffected.)
 
+### 3.6b Does the curve generalise beyond movie 00021?
+
+`20170629_00021` is the default sample for every quick MotionCorr check and is
+known to run low on several statistics, so a single-movie scaling curve is a
+pilot, not a result. Repeating the key points on `20170629_00030`
+(sha256 `878ad41a…`), 2 reps:
+
+| j | 00021 unbound | 00030 unbound | 00021 spread | 00030 spread |
+| --: | --: | --: | --: | --: |
+| 1  | 38.59 s (100%) | 40.99 s (100%) | 38.52 s (100%) | 41.57 s (100%) |
+| 4  | 16.89 s (57.1%) | 15.70 s (65.3%) | 11.88 s (**81.1%**) | 12.71 s (**81.8%**) |
+| 16 | 7.01 s (34.4%) | 7.12 s (36.0%) | 5.18 s (46.5%) | 5.19 s (50.0%) |
+
+The bound efficiencies agree closely (81.1% vs 81.8% at j=4). The unbound j=4
+figures differ more (57.1% vs 65.3%) precisely because that point is the
+placement lottery — 00030's two repetitions were 13.52 s and 17.88 s, straddling
+both modes. That difference is evidence for the lottery, not against the curve.
+
+Caveat on this pair specifically: a third-party job started during arm Q, and its
+j=1 point saw 5.2 foreign cores on average (14.1 peak) against the usual 2.0. The
+j=4 and j=16 points, which carry the conclusion, saw 2.0-3.0. The j=1 numbers
+here should be treated as soft.
+
+The whole-dataset throughput results in section 3.8 use all 24 movies and point
+the same way, so the direction of the finding does not rest on one micrograph.
+
 ### 3.7 Single NUMA node (`numactl --cpunodebind=0 --membind=0`)
 
 Issue #26's Phase 4 proposed this as the NUMA remedy. Measured, 5x5, 2 reps:

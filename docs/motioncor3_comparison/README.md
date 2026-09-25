@@ -366,12 +366,19 @@ Neither happened.
 
 ### 6.5 Intensity scale
 The dose-weighted sums differ in absolute scale by a factor that is **not** a free
-parameter: MotionCorr's DW mean is 4.682 against MotionCor3's 22.937, a ratio of
-4.899 = √24 exactly. RELION weights and normalises the DC term by `1/sqrt(Σw²)`, and at
+parameter. Across all 24 movies the ratio of MotionCor3's DW mean to MotionCorr's is
+**4.89908 (min 4.89898, max 4.89922)** against √24 = 4.89898 — i.e. exact to five
+significant figures on every movie. RELION weights and normalises the DC term by `1/sqrt(Σw²)`, and at
 zero spatial frequency all 24 frame weights are 1, so DC is divided by √24. MotionCor3
 skips index 0 entirely (`GWeightFrame.cu:41`) and leaves DC unweighted. Both conventions
 are defensible; they are not the same, and any pipeline consuming both must not assume a
 common scale.
+
+Relatedly, MotionCor3's unweighted sums contain **exactly-zero pixels** (median 1.97e-5
+of the frame, max 2.38e-5 — roughly 280–340 pixels) while MotionCorr's contain **none**
+on any movie. This is the predicted consequence of §3.2.10: RELION marks every
+`gain == 0` pixel bad and inpaints it, whereas MotionCor3 has no gain-zero rule and those
+pixels simply become 0.0 after the multiply.
 ## 7. Wall time
 
 All figures below come from runs that exited 0 **and** produced 24 corrected

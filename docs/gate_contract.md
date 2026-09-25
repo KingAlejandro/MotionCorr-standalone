@@ -31,8 +31,11 @@ Three consequences, which must accompany any reported result:
 
 - **Tier B is not Tier D.** Passing B does not establish scientific equivalence; failing B does not
   establish signal loss. B measures distance from one particular CPU implementation on one dataset.
-- **Tier B is uncalibrated.** Its limits were never tied to a known amount of lost motion-correction
-  signal. Until #60 reports, treat B as a *change detector*, not an acceptance criterion.
+- **Tier B is uncalibrated.** Its limits were never tied to a known amount of lost
+  motion-correction signal when they were set. #60 has since calibrated them (PR #64, unmerged at
+  time of writing) and finds `0.001` corresponds to ≈ 0.017 Å² of envelope loss, roughly 300x
+  stricter than its declared 5 Å² harm boundary, with negligible and unacceptable tiers
+  overlapping 80x. Treat B as a *change detector*, not an acceptance criterion. See §4A.5.
 - **Upstream parity is a separate axis.** Standalone vs RELION 5.1 (#20) and standalone vs the fixed
   standalone CPU reference (#23, #25) are different comparisons that reuse the same profiles. Never
   merge them into one number. See [`spa_24_movies_validation.md`](spa_24_movies_validation.md).
@@ -177,6 +180,139 @@ For the same fixture, the #4 spec's relative-L2 denominator is `‖ref‖₂/√
 
 ---
 
+## 4A. Other representations of the same measurement
+
+`relative_rmse` is hard to reason about as a bare number. These are **monotone re-expressions of
+the identical quantity** — they add interpretability, not information. Anything that reframes
+`relative_rmse` inherits every blind spot it has; only a decomposition into physically distinct
+terms adds evidence (§4C).
+
+### 4A.1 As a correlation coefficient
+
+Let `A` be the reference image, `B` the test image, `D = B − A`, and `d = relative_rmse`. With
+`σ_B = σ_A(1 + ε)` and `σ_D ≤ rmse` (equality when `mean(D) = 0`), the Pearson correlation between
+the two micrographs is exactly
+
+```
+r = 1 + (ε² − (σ_D/σ_A)²) / (2(1 + ε))
+```
+
+Because `|σ_B − σ_A| ≤ σ_D` (Minkowski), `|ε| ≤ d`, which gives a **rigorous lower bound from
+`relative_rmse` alone**, and a point value when the difference is uncorrelated with the reference:
+
+```
+r ≥ 1 − d² / (2(1 − d))            (bound, no assumptions)
+r ≈ 1 − d² / 2                     (ε ≈ 0)
+```
+
+| | `relative_rmse` | `r` lower bound | `r` if `ε ≈ 0` | "nines" | SNR = `20·log₁₀(1/d)` | unexplained variance `d²` |
+|:--|--:|--:|--:|--:|--:|--:|
+| **Gate limit** | 0.001000 | 0.999999499 | 0.999999500 | 6.30 | 60.0 dB | 0.000100 % |
+| CUDA best movie | 0.002899 | 0.999995785 | 0.999995797 | 5.38 | 50.8 dB | 0.000841 % |
+| CUDA median | 0.006290 | 0.999980091 | 0.999980216 | 4.70 | 44.0 dB | 0.003957 % |
+| CUDA worst movie | 0.010082 | 0.999948661 | 0.999949179 | 4.29 | 39.9 dB | 0.010164 % |
+
+So `relative_rmse ≤ 0.001` is a demand for **six nines of correlation** with the CPU reference, and
+the recorded CUDA outputs deliver between four and five and a half.
+
+Verified against the identity on real fixture pixels (`test-data/fixtures/reference_output/`),
+three difference structures at three magnitudes:
+
+| Difference structure | measured `r` at `d = 0.010082` | `1 − d²/2` | bound |
+|:--|--:|--:|--:|
+| white noise, uncorrelated with the reference | 0.999949190 | 0.999949171 | 0.999948653 |
+| reference's own high-pass content | 0.999962243 | 0.999949170 | 0.999948652 |
+| **pure gain change** | **1.000000000** | 0.999949177 | 0.999948659 |
+
+> [!WARNING]
+> The last row is the point. **Correlation is exactly invariant to a scale error**, so a gain fault
+> of any magnitude reads `r = 1.000000000` while `relative_rmse` reads whatever the scale error
+> costs. Correlation is not a safer gate than `relative_rmse`; it is the same gate with an extra
+> blind spot bolted on. Quote it to make a number legible, never to replace the check.
+
+### 4A.2 As a distance against yardsticks that already exist in this repository
+
+The useful question is not "is 0.006 small" but "small compared with what". Every row below is a
+committed result on the same 24 movies and the same metric.
+
+| Comparison | n | min | median | max | over the `0.001` limit |
+|:--|--:|--:|--:|--:|--:|
+| standalone `j4` vs standalone `j1` | 24 | 0.000000 | 0.000000 | 0.000000 | 0/24 |
+| standalone `j1` vs PR #25 fixed CPU reference | 24 | 0.000000 | 0.000000 | 0.000000 | 0/24 |
+| **CUDA (`--gpu 0 --j 4`) vs fixed CPU `j1`** | 24 | 0.002899 | **0.006290** | 0.010082 | **24/24** |
+| standalone `j1` vs upstream RELION 5.1 `j1` | 24 | 0.000000 | **0.006897** | 0.012245 | 23/24 |
+| standalone `j4` vs upstream RELION 5.1 `j4` | 24 | 0.004199 | 0.006494 | 0.009420 | 24/24 |
+
+Two things follow, and neither requires running anything:
+
+1. **The distribution is bimodal with nothing in between.** CPU against CPU is *exactly* zero on
+   all 24 movies; everything that is not bit-identical lands in 0.0029–0.0122. There is no
+   intermediate population, which is what a saturated detector looks like. #60's calibration
+   (PR #64) reaches the same conclusion from the other direction, by perturbation.
+2. **The CUDA disagreement is the same size as the disagreement this project already ships.**
+   Median CUDA-vs-CPU is 0.006290; median standalone-vs-RELION over its 23 nonzero movies is
+   0.006932 — a ratio of **1.10x**. The second is an open RNG question (#20) that has never been
+   treated as a scientific failure. The same metric at the same magnitude is currently read two
+   different ways depending on which pair it describes.
+
+### 4A.3 How the difference is distributed over pixels
+
+`rmse` and `max_abs_pixel_error` together bound the shape of the difference. With
+`N = 3710 × 3838 = 14,238,980` pixels, a homogeneous Gaussian difference of the observed `rmse`
+would have a largest pixel near `√(2 ln N) = 5.74 · rmse`:
+
+| Quantity, across the 24 CUDA movies | min | median | max |
+|:--|--:|--:|--:|
+| worst pixel `/ σ_ref` | 1.345 | 1.765 | 3.712 |
+| worst pixel `/` white-noise expectation | **32.0x** | **58.0x** | **101.3x** |
+| share of the whole image's squared error in that one pixel | 0.237 % | 0.778 % | 2.376 % |
+
+The median worst pixel is 1.547 where white noise of the same `rmse` predicts 0.031. Since the
+total squared error is `N · rmse²`, only `N · rmse² / max²` = **42 to 422 pixels** (median **129**)
+at the worst-pixel amplitude would account for the entire measured RMSE. The difference is therefore concentrated in
+a very small, very extreme set of pixels rather than spread as arithmetic haze — which is a
+diagnostic pointer for #36, not a root cause, and is consistent with #36's own finding that an
+edge-only explanation is insufficient.
+
+### 4A.4 Correlation between the metrics themselves
+
+Across the 24 CUDA-vs-CPU movies (Pearson / Spearman):
+
+| | `image_rmse` | `max_pixel_error` | `trajectory_rms_px` | `max_shift_px` | `σ_ref` |
+|:--|--:|--:|--:|--:|--:|
+| `relative_rmse` | **0.99 / 0.98** | 0.45 / 0.48 | 0.60 / 0.73 | 0.31 / 0.43 | 0.24 / 0.25 |
+| `image_rmse` | — | 0.45 / 0.48 | 0.59 / 0.77 | 0.29 / 0.45 | 0.34 / 0.34 |
+| `max_pixel_error` | | — | 0.27 / 0.19 | 0.03 / 0.13 | 0.16 / 0.28 |
+| `trajectory_rms_px` | | | — | 0.79 / 0.76 | 0.14 / 0.21 |
+
+- **The two image checks are not independent on this dataset.** `relative_rmse` and `image_rmse`
+  correlate at 0.99, because `σ_ref` varies by only 16 % across these micrographs. Requiring both
+  (§5, the AND policy) buys almost no extra coverage *here*; what differs is the level, not the
+  ranking. The AND still matters across datasets, where `σ_ref` spans 0.81 to 64.28 (§4.2).
+- `relative_rmse` against `trajectory_rms_px` is 0.60 Pearson, reproducing the figure quoted in
+  #36. Association, not attribution.
+- `max_pixel_error` correlates only 0.45 with `relative_rmse` and 0.03 with `max_shift_px`: it is
+  genuinely a different failure mode, consistent with §4A.3.
+- `σ_ref` correlates only 0.24 with `relative_rmse`, so movie-to-movie variation in the relative
+  metric is driven by the numerator, not by micrograph contrast.
+
+### 4A.5 What actually adds information
+
+Everything above is the same number in different clothes. The representation that adds evidence is
+a **decomposition into physically distinct terms** — scale, translation, envelope loss ΔB in Å²,
+incoherent residual — which #60 built and calibrated (PR #64). It reports that `relative_rmse`
+0.001 corresponds to ≈ 0.017 Å² of envelope loss, that a 1 ppm gain perturbation already reads
+2.0e-3, and that the negligible and unacceptable tiers overlap 80x, so no value of the limit
+separates them. #60 proposes ΔB ≤ 2 Å² and translation ≤ 0.05 px as blocking checks, with the
+image metrics demoted to warnings.
+
+**That proposal lands here, under #58, and is not adopted by this document.** Adopting it is a
+numerical-acceptance change and needs the review this contract requires: the scientific evidence
+from #61 and a decision on what Tier A and Tier B are each for. Until then the tiers and limits in
+§1 and §3 stand unchanged.
+
+---
+
 ## 5. Numerical policy history
 
 | Commit / PR | Change | Effect |
@@ -286,6 +422,13 @@ print('mean %.6f  sigma %.6f  L2/sqrt(N) %.6f  ratio %.4f'
 mean 834.965232  sigma 64.281425  L2/sqrt(N) 837.435992  ratio 13.0277
 ```
 
+**Reproduce the §4A tables** — correlation re-expressions, the yardstick comparison, the
+pixel-concentration statistics and the metric cross-correlations — from committed artefacts only:
+
+```bash
+python3 tools/gate_representations.py
+```
+
 **Contract regression tests** (pin the denominator, constant-reference behaviour, exact-gate scope,
 fail-closed inputs, and the coverage flag):
 
@@ -317,7 +460,8 @@ recoverable signal. Root cause is #36.
 |:--|:--|:--|
 | Ground-truth recovery is reported but never thresholded | A backend can drift arbitrarily from known injected motion and still pass | #59 |
 | Local motion model coefficients are compared by nothing in relaxed mode | A local-field defect is invisible to Tier B unless it moves enough pixels | #59 |
-| Tier B limits are uncalibrated against any known signal loss | Cannot say what a given failure costs scientifically | #60 |
+| Tier B limits were not calibrated against any known signal loss when set | #60 (PR #64) has since measured the cost and proposes a ΔB / translation decomposition; that proposal is unadopted pending review here | #60 → #58 |
+| The two image checks are 0.99-correlated on the tutorial dataset | Requiring both adds little coverage there, though it matters across datasets where `σ_ref` spans 0.81–64.28 | #58, §4A.4 |
 | No Tier D metric exists | "Scientific equivalence" cannot currently be claimed or refuted by any gate | #61 |
 | `tools/test_compare_motioncorr.py` is not registered with CTest | The contract tests are not run by CI; CI's Python has no NumPy | #5 |
 | Exit status is only checked when `--test-log` is supplied | A comparison without a log cannot observe process failure | #58, documented above |

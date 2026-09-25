@@ -305,8 +305,39 @@ per-movie state carries, so the property was tested rather than argued.
 | 2-movie serial batch vs 24-movie serial batch | identical | identical | identical |
 | Single-movie mode (`-Serial 0`) vs 24-movie serial batch | **differ, 10.1 % relative RMSE** | identical | **differ** |
 
-**Conclusion: MotionCor3 in serial mode is deterministic and independent of batch
-composition, so the 24-movie batch design is valid.**
+> ### WITHDRAWN (2026-09-25): this control was structurally blind
+> **The conclusion below is wrong.** It was drawn from **movie 00021 only**
+> (`M1=$(sed -n 1p movie_bases.txt)`). Repeating the comparison across **all 24
+> movies** shows MotionCor3 is **not** deterministic:
+>
+> | Two identical 24-movie serial runs, same GPU, same process, same binary | identical | differs |
+> |---|---|---|
+> | aligned sums (pixels) | 9/24 | **15/24** |
+> | dose-weighted sums (pixels) | 9/24 | **15/24** |
+> | `Patch-Full.log` (global trajectory) | **24/24** | 0/24 |
+> | `Patch-Patch.log` (local patch shifts) | 9/24 | **15/24** |
+>
+> Differing movies: 00024 00025 00027 00028 00029 00030 00031 00035 00036 00037
+> 00040 00042 00043 00047 00049 - the same 15 in every category. Global alignment
+> is perfectly reproducible; **the local patch path is not.**
+>
+> Movie 00021 is in the invariant 9, so the control ran clean and could not have
+> observed the condition it asserted. The 2-movie batch-composition control is blind
+> for the same reason: **both** movies it used (00021, 00022) are in the invariant set.
+>
+> **The batch-composition conclusion is withdrawn, not downgraded.** Once run-to-run
+> nondeterminism exists, a difference between two compositions cannot be attributed to
+> composition - repeats of the *same* composition also differ. Isolating composition
+> requires repeats within each composition and a comparison of distributions.
+>
+> This does not affect the wall-time findings, which rest on timers rather than output
+> equality, nor the agreement metrics in section 6, which compare one MotionCorr run
+> against one MotionCor3 run - though section 6 should be read knowing that a
+> MotionCor3 rerun would move the local-patch contribution on ~62% of movies.
+
+**Superseded conclusion (retained for the record):** *MotionCor3 in serial mode is
+deterministic and independent of batch composition, so the 24-movie batch design is
+valid.*
 
 The first version of this control compared single-movie mode against the serial batch
 and reported a difference, which looked like batch-position dependence. It was not:

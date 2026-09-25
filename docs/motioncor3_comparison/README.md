@@ -115,6 +115,50 @@ controls ran clean while being structurally unable to observe the condition they
 asserted. With 9 of 24 movies invariant, a single-movie control had better than a
 one-in-three chance of passing regardless of the truth.
 
+### And: MotionCor3 output depends on which GPU produced it
+
+Measured on SCARF by the multi-GPU scheduling session, holding binary, inputs, settings,
+node and process count constant and varying **only the GPU index**:
+
+| Comparison | movies pixel-identical | median rel. RMSE |
+|---|---|---|
+| same device, repeat runs | 7, 7, 9 of 24 | 3.2-3.8e-2 |
+| **different device (GPU 3 vs GPU 0)** | **0 of 24** | **6.02e-2** |
+| sequential- vs parallel-sharded, same devices | 7 of 24 | 3.18e-2 |
+
+Two separable effects: run-to-run nondeterminism on a fixed device (~3.5e-2), and a
+systematic device-to-device difference that removes the invariant set entirely. Sharding
+and concurrency contribute **nothing** beyond the same-device floor.
+
+Mechanism not established. Two candidates were tested and refuted from source and logs:
+* **Free-VRAM-dependent buffering** - refuted. `CGpuBuffer::mCalcGpuFrames` does size
+  buffers from `cudaMemGetInfo` free memory, but the GPU 3 and GPU 0 runs emit
+  byte-identical allocations (0.11/0.25/0.39/0.02/1.27 GB, CPU 0.00) and identical total
+  memory, so both took the same path.
+* **Atomic reduction order** - refuted. There is no `atomicAdd`/`atomicMax`/`atomicCAS`
+  anywhere in `Align/`, `Correct/`, `BadPixel/` or `Util/`.
+
+The remaining candidate is the multi-stream async design in the patch path
+(`CAlignStack.cpp:36-37,94,172`, `CExtractPatch.cpp:53-54`, `CAlignedSum.cpp:79` each
+create streams with `cudaMemcpyAsync` and scoped syncs), where a missing or mis-scoped
+synchronisation would give results that depend on execution timing - varying run to run
+on one card and systematically between two cards. A `CUDA_LAUNCH_BLOCKING=1` run would
+decide it: if repeats become 24/24 and two devices agree, it is an ordering defect.
+
+**Consequence for this report, and for any cross-tool comparison:** section 6's agreement
+metrics used MotionCor3 output produced on **GPU 0 of the 4GPUs VM**. Given device
+dependence at ~6e-2, those figures characterise *that run on that card*, not MotionCor3
+in general. **MotionCor3 output is not a stable reference**, and any comparison against
+it must name the device that produced it. A numerical gate against MotionCor3 tighter
+than ~6e-2 will pass or fail on which card was drawn.
+
+By contrast, MotionCorr-standalone at `0c7d68f` was verified on SCARF as bit-reproducible
+across devices and process counts: 4-GPU partitioned vs 1-GPU serial, 24/24
+pixel-identical, trajectory max-shift and coordinate RMS errors exactly 0.0. That is a
+statement about **reproducibility, not accuracy** - stability of an answer is not
+evidence that the answer is closer to the true motion, and the two should not be
+conflated.
+
 The agreement metrics in section 6 remain valid as single-run measurements, but should be
 read knowing that a MotionCor3 rerun moves the local-patch contribution on ~62 % of
 movies.

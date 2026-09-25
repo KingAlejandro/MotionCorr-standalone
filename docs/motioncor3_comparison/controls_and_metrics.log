@@ -1,0 +1,32 @@
+=== PROVENANCE 2026-09-24T23:40:59Z
+host=4-gpu-vm affinity=96-103 nproc=8
+74a52b2a84505be7109c7567bd9f3922b4e5c8919d65b3c5c5714bdd26669dfb  /home/alex/mc3-compare/MotionCorr-306bc67/build-mc3cmp/motioncorr
+fed8859b6339ab7ed711526fd316e2d8ebcdae39de54259ce8f659b7a114a493  /home/alex/mc3-compare/MotionCor3-stock/MotionCor3
+2f7216443d78f47ea819ed59791567ae611f47c312066a2538df5949af42fc06  /home/alex/mc3-compare/MotionCor3-o3/MotionCor3
+fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041  movies.star
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  Movies/gain.mrc
+0, 1 MiB, 0 %
+1, 1 MiB, 0 %
+2, 1 MiB, 0 %
+3, 1 MiB, 0 %
+settle wait: 0s (compilers=0 load1=0)
+=== PHASE 1 metrics run
+RESULT,motioncorr_metrics,0:42.99,241%,1764124,0,rc=0,outputs=24,OK,foreign_cpu_mean/max/n=na
+RESULT,motioncor3_metrics,1:15.73,150%,9187060,2344,rc=0,outputs=24,OK,foreign_cpu_mean/max/n=na
+--- mc3 output inventory ---
+     24 _DW.mrc
+      1 MoviesDone.txt
+     24 .mrc
+--- mc3 log inventory ---
+     24 -Patch-Frame.log
+     24 -Patch-Full.log
+     24 -Patch-Patch.log
+=== PHASE 1b MotionCor3 at upstream default -Bft 500 100
+RESULT,motioncor3_bft_default,1:11.51,159%,10391188,0,rc=0,outputs=24,OK,foreign_cpu_mean/max/n=na
+=== PHASE 1c batch-position control
+ctl rc=0 movie=20170629_00021_frameImage
+CONTROL,motioncor3,20170629_00021_frameImage.mrc,alone_vs_batch=DIFFERS
+CONTROL,motioncor3,20170629_00021_frameImage_DW.mrc,alone_vs_batch=DIFFERS
+CONTROL,mc3_traj_alone_md5,78b9e504bcbcd578d152cf502a9bd0b5  -
+CONTROL,mc3_traj_batch_md5,78b9e504bcbcd578d152cf502a9bd0b5  -
+=== metrics-only, done 23:44:15Z

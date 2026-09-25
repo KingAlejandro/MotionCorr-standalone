@@ -1,0 +1,127 @@
+=== PAIRED MotionCor3 stock vs host-O3, n=4
+RESULT,bpair1,stock_first,motioncor3_stock,1:11.78,na,8406512,na,rc=0,outputs=24,OK,foreign=738.0/739.8/66
+RESULT,bpair1,stock_first,motioncor3_o3host,1:10.94,na,9106536,na,rc=0,outputs=24,OK,foreign=741.3/882.2/65
+RESULT,bpair2,o3_first,motioncor3_o3host,1:14.51,na,9048536,na,rc=0,outputs=24,OK,foreign=762.6/905.3/69
+RESULT,bpair2,o3_first,motioncor3_stock,1:11.45,na,9062716,na,rc=0,outputs=24,OK,foreign=744.3/908.4/67
+RESULT,bpair3,stock_first,motioncor3_stock,1:11.33,na,9047568,na,rc=0,outputs=24,OK,foreign=740.9/742.9/66
+RESULT,bpair3,stock_first,motioncor3_o3host,1:09.40,na,9729516,na,rc=0,outputs=24,OK,foreign=746.6/1047.1/65
+RESULT,bpair4,o3_first,motioncor3_o3host,1:11.54,na,8424168,na,rc=0,outputs=24,OK,foreign=742.1/742.9/66
+RESULT,bpair4,o3_first,motioncor3_stock,1:11.22,na,9057480,na,rc=0,outputs=24,OK,foreign=742.9/746.7/66
+=== TIMED PART DONE 2026-09-25T00:31:20Z
+### matched arm (-Bft 150 150)
+  "max": 0.9709809329032861,
+  "mean": 0.9525555438168203
+ },
+ "dw_frc_at_5A": {
+  "n": 24,
+  "min": 0.7697534226084569,
+  "median": 0.8379995595645189,
+  "max": 0.8936143416330119,
+  "mean": 0.8358866478273009
+ },
+ "dw_frc_at_3A": {
+  "n": 24,
+  "min": 0.4696637537547196,
+  "median": 0.6301219598573709,
+  "max": 0.7457598622390522,
+  "mean": 0.6191764316641755
+ },
+ "dw_frc_at_nyquist": {
+  "n": 24,
+  "min": 0.018636478970922844,
+  "median": 0.25578022009313084,
+  "max": 0.564026103947375,
+  "mean": 0.2824985268536982
+ },
+ "dw_frc_res_at_0.5_A": {
+  "n": 23,
+  "min": 1.7831469615061681,
+  "median": 2.5047180477865325,
+  "max": 3.1881960043013247,
+  "mean": 2.4701922490443886
+ },
+ "nodw_frc_at_5A": {
+  "n": 24,
+  "min": 0.7189760679961134,
+  "median": 0.8149673891778004,
+  "max": 0.8928420110903981,
+  "mean": 0.8181063137460335
+ },
+ "nodw_frc_at_nyquist": {
+  "n": 24,
+  "min": 0.007208407681991277,
+  "median": 0.15960203686202884,
+  "max": 0.3462750642657923,
+  "mean": 0.1629750949191476
+ },
+ "dw_linear_scale": {
+  "n": 24,
+  "min": 0.3557158000054948,
+  "median": 0.46124184683792646,
+  "max": 0.5983596148203323,
+  "mean": 0.4631007945506693
+ },
+ "nodw_linear_scale": {
+  "n": 24,
+  "min": 0.36186133163556417,
+  "median": 0.5359918260390772,
+  "max": 0.7107050677003316,
+  "mean": 0.5317685275277455
+ }
+}
+
+### B-factor sensitivity arm (MotionCor3 default -Bft 500 100)
+  "median": 0.28107058097150395,
+  "max": 0.7780329974526629,
+  "mean": 0.3422227506478976
+ },
+ "dw_frc_res_at_0.5_A": {
+  "n": 17,
+  "min": 1.8783855452299798,
+  "median": 2.6517034600892666,
+  "max": 3.351190806276293,
+  "mean": 2.6150070751016843
+ },
+ "nodw_frc_at_5A": {
+  "n": 24,
+  "min": 0.7613963268589053,
+  "median": 0.829573578923124,
+  "max": 0.8908815425354533,
+  "mean": 0.834902486268495
+ },
+ "nodw_frc_at_nyquist": {
+  "n": 24,
+  "min": 0.04618671823531525,
+  "median": 0.21009350718847547,
+  "max": 0.36538847492654203,
+  "mean": 0.21238774255802792
+ },
+ "dw_linear_scale": {
+  "n": 24,
+  "min": 0.385954034231288,
+  "median": 0.5120536705188936,
+  "max": 0.6723876095115519,
+  "mean": 0.511779510002032
+ },
+ "nodw_linear_scale": {
+  "n": 24,
+  "min": 0.43362983196703464,
+  "median": 0.5584306203582485,
+  "max": 0.6799026265109334,
+  "mean": 0.5642405167119688
+ }
+}
+
+### log scrape (fallbacks that would invalidate the comparison)
+{
+ "motioncorr_movies": 24,
+ "motioncorr_with_cuda_warnings": 0,
+ "motioncorr_with_cuda_profile": 24,
+ "motioncorr_local_model_rejected": 0,
+ "motioncor3_movies": 24,
+ "motioncor3_total_bad_patch_entries": 337,
+ "motioncor3_total_patch_entries": 14400
+}
+
+### output manifest
+257

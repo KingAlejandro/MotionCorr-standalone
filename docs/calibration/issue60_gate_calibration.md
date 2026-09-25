@@ -370,3 +370,228 @@ gain perturbation and 3.71 for a single mis-gained column -- faults that act
 through alignment -- but sits at 1.03--1.04 for dose faults and 1.00 for the
 translation, which act uniformly. It distinguishes *where* a difference lives,
 which no current Gate 2 metric does.
+
+---
+
+## 9. Hold-out validation
+
+The movie split and the severity split were frozen in `prespecification.py` and
+committed at `2946770` before any measurement existed. The hold-out movies
+`00042 00044 00046 00047 00048 00049` were not run until the selection matrix
+was complete, and twelve further movies were never touched at all.
+
+Two things were checked on the hold-out set, once.
+
+**The zero floor holds on unseen movies.** All 114 hold-out runs exited 0. Every
+harmless cell -- `--j 2/4/8`, `OMP_PROC_BIND` close/spread, five `--j 1` repeats,
+five `--j 4` repeats, the unchanged-gain rewrite -- was bit-identical, on all six
+movies. Largest value on any diagnostic across the whole harmless hold-out set:
+`1.195e-15`, again the estimator's own floor.
+
+**The fault response reproduces.** Maximum over six selection movies against
+maximum over six different hold-out movies:
+
+| Fault | Δ*B* selection | Δ*B* hold-out | relRMSE selection | relRMSE hold-out |
+|:---|---:|---:|---:|---:|
+| dose x 0.95 | 0.1943 | 0.1935 | 2.263e-2 | 2.237e-2 |
+| dose x 1.25 | 0.7745 | 0.7655 | 9.935e-2 | 9.818e-2 |
+| dose x 0.50 | 3.551 | 3.560 | 2.852e-1 | 2.824e-1 |
+| gain x (1 + 1e-4) | 2.9e-3 | 4.8e-3 | 7.71e-3 | 6.74e-3 |
+| gain x (1 + 1e-2) | 3.4e-3 | 1.3e-2 | 6.21e-2 | 6.33e-2 |
+| one column +5 % gain | 2.5e-3 | 5.3e-3 | 8.11e-3 | 7.93e-3 |
+
+The dose responses agree to better than 1.5 %, which is the well-behaved regime:
+dose weighting is a deterministic filter and the same fault does the same thing
+on every movie. The gain responses agree only to within a factor of about 4 on
+Δ*B* -- these are the alignment-mediated faults, where the chaotic peak
+selection makes the *particular* value movie-dependent even though its scale is
+not. Both facts are used in section 10: thresholds are set against the stable
+quantity, not the chaotic one.
+
+---
+
+## 11. What this does not establish
+
+Stated plainly, because a calibration that only lists its successes is not
+usable as evidence.
+
+1. **No CUDA measurement was made.** No GPU run was launched. Section 1's remark
+   that the recorded CUDA range sits inside the measured saturation band is a
+   *consistency observation*, not a finding. The decisive test is cheap and
+   GPU-free: run `tools/calibration/decompose_pair.py` on the CUDA corrected
+   MRCs already on disk from #36. If Δ*B* is below 1 Å² and `eps_incoherent` is
+   at the ~1e-2 saturation scale, the CUDA difference is arithmetic
+   non-identity. If Δ*B* is several Å², it is real signal loss. That is a
+   recommendation to #36's owner, not a claim here.
+
+2. **Four faults were never exercised through the real binary.** Random
+   inter-frame jitter, systematic drift bias, corrupted local deformation, and
+   applied envelope attenuation are not reachable through the CLI without
+   editing the alignment engine. Editing it would collide with the CUDA and
+   optimisation branches and would make the perturbation itself a confound.
+   They are measured in layers 1 and 2 only. Every claim about them rests on a
+   model of the pipeline rather than the pipeline.
+
+3. **Layer 1 overstates image error for a given harm.** Applying a shift-average
+   to an already-summed micrograph blurs the summed noise as well as the
+   signal; the real pipeline blurs only the signal, because each frame's noise
+   is independent. Layer 2 handles this correctly and is the source of every
+   harm number quoted.
+
+4. **The harm boundary is a judgement.** Δ*B* > 5 Å² was declared in advance and
+   corresponds to 13 % amplitude loss at 3 Å. Section 10 re-reports every
+   conclusion at 2 and 10 Å². It is not derived from a reconstruction
+   experiment; measuring the map-level consequence is issue #61's deliverable.
+
+5. **The signal-quality screen is a screen.** `hf_signal_retention` is a
+   band-limited power ratio. It cannot distinguish signal from noise, so a
+   backend that adds high-frequency noise scores above 1.0. A CTF-fit or FSC
+   measurement is #61's work and was deliberately not duplicated.
+
+6. **Sample size is pilot scale.** Six selection and six hold-out movies, one
+   dataset, one platform, one compiler. Uncertainty is quoted per movie, not per
+   pixel; twelve movies of one collection are not twelve independent
+   observations of "cryo-EM data".
+
+7. **The zero floor is a property of this build on this host.** It is a strong
+   result, but it does not prove that no CPU configuration anywhere produces
+   nonzero variation -- only that thread count 1--8 and thread placement do not,
+   on Linux/GCC 13.3/FFTW 3.3.10, over 228 runs on twelve movies. A macOS or
+   different-FFTW measurement could differ and has not been made.
+
+8. **The translated-movie cell uses a circular roll**, so a 2 px strip wraps.
+   Its residual `eps_incoherent` of 0.081 includes that artefact; the
+   translation and Δ*B* figures do not depend on it.
+
+---
+
+## 12. Reproduction
+
+Every command below was run as written. Substitute your own paths.
+
+**Build (Release is mandatory; an unqualified configure produces `-O0`):**
+
+```sh
+cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build -j 16
+sha256sum build/motioncorr        # d88a6c02...84a4f8
+```
+
+**Controls -- run these first; nothing below is meaningful if they fail:**
+
+```sh
+python3 tools/calibration/test_calibration.py
+python3 tools/calibration/prespecification.py      # prints the frozen matrix
+```
+
+**Layer 3, the real binary (CPU only):**
+
+```sh
+python3 tools/calibration/layer3_pipeline.py --emit-manifest work/manifest_selection.json \
+  --movies selection \
+  --gain-variants '{"null":"Movies/gain_null.mrc","1e-04":"Movies/gain_1e-04.mrc","1e-02":"Movies/gain_1e-02.mrc","badcol":"Movies/gain_badcol.mrc"}'
+
+python3 tools/calibration/layer3_pipeline.py --execute work/manifest_selection.json \
+  --binary $PWD/build/motioncorr --tutorial $PWD/work/tutorial \
+  --stars $PWD/work/star --results $PWD/work/results --workers 8
+
+python3 tools/calibration/layer3_pipeline.py --collect work/manifest_selection.json \
+  --results $PWD/work/results --out work/layer3_selection.json
+```
+
+Repeat with `--movies holdout` for the hold-out matrix.
+
+**Movie-space faults (note `--flip-y`; see section 7.3):**
+
+```sh
+python3 tools/calibration/make_perturbed_movies.py \
+  --tiff work/tutorial/Movies/20170629_00021_frameImage.tiff \
+  --gain work/tutorial/Movies/gain.mrc \
+  --outdir work/tutorial/Movies --tag 00021 --shift-px 2 --hot-counts 100 10000 --flip-y
+```
+
+**Layer 1 and layer 2:**
+
+```sh
+python3 tools/calibration/layer1_inject.py \
+  --reference 00021=work/results/00021__j1_rep0/out/Movies/20170629_00021_frameImage.mrc \
+  ... --out work/l1/layer1_selection.json
+
+for ns in 3 10 20; do
+  python3 tools/calibration/layer2_forward.py --trials 5 --size 1024 1024 \
+    --frames 24 --noise-sigma $ns --out work/l2/layer2_ns${ns}.json
+done
+```
+
+**Analysis and tables:**
+
+```sh
+python3 tools/calibration/analyze.py \
+  --layer1 work/l1/layer1_selection.json \
+  --layer2 work/l2/layer2_ns*.json \
+  --layer3 work/layer3_selection.json work/layer3_holdout.json \
+  --out docs/calibration/data/analysis.json
+
+python3 tools/calibration/summarize.py --layer3 ... --layer1 ... --layer2 ... --stat max
+```
+
+**Decompose an existing pair, e.g. a CUDA output against its CPU reference
+(read-only, no backend re-run):**
+
+```sh
+python3 tools/calibration/decompose_pair.py \
+  --pair "cuda_00021=cpu/.../00021.mrc:cuda/.../00021.mrc" \
+  --ref-star "cuda_00021=cpu/.../00021.star" \
+  --test-star "cuda_00021=cuda/.../00021.star"
+```
+
+Wall time on `cpu64` with 8 workers: layer 3 selection 114 runs in about 10
+minutes, hold-out the same, layer 2 about 10 minutes for 630 cells, layer 1
+about 35 minutes for 246 cells on 3710 x 3838 micrographs.
+
+---
+
+## 13. Relationship to the neighbouring issues
+
+* **#58 (gate semantics).** This report supplies the measurement #58 needs: the
+  `0.001` relative-RMSE limit has no measured relationship to lost signal, and
+  the "non-associative parallel reduction" justification is not supported on
+  this CPU build. The threshold proposal in section 10 is offered to #58 as
+  evidence, not as a change. `docs/reference_gates.md` was not edited.
+* **#59 (known motion and local displacement field).** The displacement-field
+  evaluator here reproduces `Micrograph::getShiftAt` and reports constant offset
+  separately from frame-to-frame change, in px and Å, as #59 requires. It is
+  used for calibration only; **no displacement-field gate is proposed here**, and
+  none of #59's files were touched. The schema in the design record section 5.1
+  is offered as a coordination point. The #59 known-motion framework was not
+  available on `origin` while this work ran, so layer 2 builds its own forward
+  model; if #59 publishes fixtures, layer 2's `make_object` and
+  `true_trajectory` should be replaced by imports.
+* **#36 (CUDA divergence).** Section 11.1 is the concrete, GPU-free next step.
+  The chaotic-amplification mechanism measured in section 7.1 is a candidate
+  explanation for the 0/24 failure that requires no CUDA defect.
+* **#61 (scientific non-inferiority).** Δ*B* in Å² and its amplitude-loss
+  conversion are offered as the pre-registrable non-inferiority margin currency.
+  No downstream refinement work was done and none is claimed.
+* **Movie I/O.** Section 7.3 reports a row-order asymmetry between the TIFF and
+  MRC movie readers. It is reported, not fixed.
+
+---
+
+## 14. Files
+
+| Path | Contents |
+|:---|:---|
+| `agents/designs/issue_60_gate_calibration.md` | design record and prespecification rationale |
+| `tools/calibration/prespecification.py` | the frozen matrix, splits, harm tiers and decision rule |
+| `tools/calibration/diagnostics.py` | existing Gate 2 metrics plus the candidate diagnostics |
+| `tools/calibration/perturbations.py` | fault operators, each in declared physical units |
+| `tools/calibration/test_calibration.py` | the eleven controls |
+| `tools/calibration/layer1_inject.py` | layer 1 driver |
+| `tools/calibration/layer2_forward.py` | layer 2 forward model |
+| `tools/calibration/layer3_pipeline.py` | layer 3 manifest / execute / collect |
+| `tools/calibration/make_perturbed_movies.py` | movie-space faults and container control |
+| `tools/calibration/analyze.py` | noise floor, response curves, threshold search, hold-out |
+| `tools/calibration/summarize.py` | the tables in this report |
+| `tools/calibration/decompose_pair.py` | decompose any existing pair of corrected micrographs |
+| `docs/calibration/data/*.json` | every measurement behind every number above |

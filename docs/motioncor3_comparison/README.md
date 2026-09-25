@@ -28,53 +28,96 @@ RELION SPA tutorial subset (EMPIAR-10204, CC0), identical inputs for both arms.
 
 ## 0a. CORRECTION (2026-09-25): the headline speed result does not reproduce
 
-**The 1.78× speed advantage reported below is an artifact of the `4GPUs` host and must
-not be cited.** A rerun of the same upstream MotionCor3 commit (`dd8b6831`) on a
-dedicated SCARF node finds the two implementations **indistinguishable at 1 GPU**.
+**The 1.78x speed advantage reported below does not reproduce on a dedicated node and
+must not be cited.** What replaces it is narrower than a causal claim, because the two
+sites differ in more than the host.
 
-| | 4GPUs (this document) | SCARF, dedicated node | host effect |
+### What was directly observed
+
+| Site (both arms measured together, same inputs) | MotionCorr-standalone | MotionCor3 1.2.4 | ratio |
 |---|---|---|---|
-| MotionCorr-standalone | 41.67 s | 31.51 s | 1.32× |
-| MotionCor3 1.2.4 | 73.47 s | 31.70 s | **2.32×** |
-| ratio | **1.76×** | **1.006×** | |
+| `4GPUs` shared VM, our commit `306bc67` | 41.67 s | 73.47 s | **1.76x** |
+| SCARF dedicated node, our commit `0c7d68f` | 31.51 s | 31.70 s | **1.006x** |
 
-2.32 / 1.32 = 1.76 — exactly the advantage claimed below. Both tools ran faster on
-SCARF; MotionCor3 gained 1.76× more, and that difference is the entire "advantage".
+Each row is internally valid: both arms ran on the same machine, same inputs, close in
+time. **At 1 GPU on a dedicated node the two implementations are indistinguishable.**
 
-**What it is not** (each eliminated by measurement, not argument):
-* Not TIFF I/O or page cache — SCARF's TIFF load is *slower* (28.12 s vs 16.75 s), and
-  `File system inputs = 0` at both sites.
-* Not `-GpuMemUsage` or frame residency — the `GPU n Allocation time` lines are
-  byte-identical at both sites (0.11/0.25/0.39/0.02/1.27 GB, CPU 0.00 GB).
-* Not iteration count — 1985 vs 1983 alignment iterations.
-* Not MotionCor3's `-O0` host build — the `-O3` host binary was measured on 4GPUs at
-  71.1 s median against stock's 73.5 s. Both ≈4× SCARF.
-* Not GPU contention — all four GPUs read 1 MiB / 0 % immediately before the run.
-* Not a degraded PCIe link — 4GPUs GPU 0 negotiates Gen4 ×16.
-* Not option drift — MotionCor3's printed configuration is byte-identical at both sites.
+### What is NOT established
 
-**Where it is.** Entirely inside `Computation time` (70.71 s vs 16.36 s over 24 movies).
-The stage signature is diagnostic: a pure-device stage (local motion correction) takes
-0.224 s vs 0.207 s — *equal* — while a transfer-heavy stage (apply gain) takes 0.15 s vs
-0.06 s, and the whole compute stage 2.95 s vs 0.68 s. Clocks or memory bandwidth would
-slow every kernel together; these do not. CPU-seconds are 110 vs 77, only 1.43×, so the
-4GPUs run was **stalling, not computing**. That is a host↔device transfer/latency
-signature.
+It is tempting to write `2.32 / 1.32 = 1.76` and conclude the whole advantage was a host
+effect. **That arithmetic is not proof**, for a concrete reason:
 
-**Why it produced a spurious advantage.** PR #51's design goal is end-to-end GPU
-residency — minimising host↔device traffic. On a host with a slow transfer path, the
-implementation that streams more data is penalised more. The measured "advantage" was
-largely our tool being less exposed to a defect of the measurement host, not a property
-of the algorithm.
+* MotionCor3 was the **same commit** (`dd8b6831`) at both sites, so its 73.47 -> 31.70 s
+  (2.32x) is a clean site-to-site comparison.
+* MotionCorr-standalone was **not**: `306bc67` on 4GPUs versus `0c7d68f` on SCARF. Its
+  41.67 -> 31.51 s (1.32x) therefore mixes the host change with ~2 weeks of code change,
+  and the two cannot be separated from these data.
 
-**Leading hypothesis, NOT established:** NUMA locality. 4GPUs has 2 NUMA nodes at
-distance 20 and `taskset -c 96-103` lies entirely on node 1. It is a VM with virtualised
-PCIe, so `nvidia-smi topo -m` reports no per-GPU NUMA binding and cannot settle it.
-Driver version (570.86.10 vs 580.178.04) and virtualisation overhead remain live
-alternatives. Peak RSS 9.06 GB vs 1.84 GB is also unexplained.
+So the coincidence between 2.32/1.32 and the original 1.76x is suggestive, not
+demonstrative. The defensible statement is: **the sites disagree sharply about the
+relative performance of the two tools, and the advantage measured on 4GPUs does not
+survive on SCARF.** Attributing that entirely to the host would require re-measuring
+`306bc67` on SCARF, or `0c7d68f` on 4GPUs - neither has been done.
 
-Everything below this section remains as measured **on 4GPUs**, and the *agreement*
-results (trajectory RMS, FRC) are unaffected — they compare outputs, not speed.
+### What the stage timers do and do not show
+
+Established, from MotionCor3's own instrumentation (same commit both sites, so this
+comparison is clean):
+
+* The gap is entirely inside `Computation time`: 70.71 s vs 16.36 s over 24 movies.
+* It is **not** TIFF I/O or page cache - SCARF's TIFF load is *slower* (28.12 vs
+  16.75 s) and `File system inputs = 0` at both sites.
+* A pure-device stage (local motion correction) costs **0.224 s vs 0.207 s - equal** -
+  while a transfer-heavy stage (apply gain) costs 0.15 s vs 0.06 s.
+* CPU-seconds are 110 vs 77, only 1.43x, against a 4.3x wall difference.
+
+Together these say the 4GPUs run was **stalling rather than computing**, and that
+whatever stalls it does not slow every kernel uniformly.
+
+**The cause is a HYPOTHESIS and remains UNVERIFIED.** Host-to-device transfer latency is
+consistent with the stage signature, and NUMA locality is a plausible mechanism (4GPUs
+has 2 nodes at distance 20 and `taskset -c 96-103` lies wholly on node 1), but *neither
+is established*. Virtualised PCIe and the driver difference (570.86.10 vs 580.178.04)
+remain equally open. A direct diagnostic - pinned **and** pageable transfer bandwidth and
+latency, varying only the memory node - was designed and then **deliberately not run**,
+because foreign jobs came to span the whole 96-103 mask at ~207% CPU and running it would
+have degraded a shared machine for another user. It stays unverified until the box is
+genuinely free.
+
+Also unexplained: peak RSS 9.06 GB vs 1.84 GB for the same binary and options.
+
+### Other hypotheses eliminated by measurement
+
+* Not MotionCor3's `-O0` host build - its `-O3` binary was measured on 4GPUs at 71.1 s
+  median against stock's 73.5 s. Both ~4x SCARF.
+* Not GPU contention - all four GPUs read 1 MiB / 0 % immediately before the 75.7 s run.
+* Not a degraded PCIe link - 4GPUs GPU 0 negotiates Gen4 x16.
+* Not option drift - MotionCor3's printed configuration is byte-identical at both sites.
+* Not `-GpuMemUsage` residency - the `GPU n Allocation time` lines are byte-identical.
+* Not alignment iteration count - 1985 vs 1983.
+
+### Separately: MotionCor3 is not deterministic
+
+Two identical 24-movie serial runs, same GPU, same process, same binary, agree on only
+**9 of 24** aligned sums and 9 of 24 dose-weighted sums. `Patch-Full.log` (global
+trajectory) matches **24/24**; `Patch-Patch.log` differs on the same 15 movies. The
+nondeterminism is confined to the **local patch path**. Independently reproduced on SCARF
+by another session: 7/24 identical, `Patch-Full` 24/24, `Patch-Patch` 9/24.
+
+Median run-to-run relative RMSE is ~3.5e-2, which is **~35x the project's Gate 2
+relative-image-RMSE limit of 1e-3**. Any numerical gate against MotionCor3 output that is
+tighter than MotionCor3's own reproducibility cannot be satisfied in principle.
+
+This invalidated one of this report's own controls - see the withdrawal notice in
+section 5.1. Movies **00021 and 00022 are both in the invariant set of 9**, and they were
+the only movies the determinism and batch-composition controls examined, so those
+controls ran clean while being structurally unable to observe the condition they
+asserted. With 9 of 24 movies invariant, a single-movie control had better than a
+one-in-three chance of passing regardless of the truth.
+
+The agreement metrics in section 6 remain valid as single-run measurements, but should be
+read knowing that a MotionCor3 rerun moves the local-patch contribution on ~62 % of
+movies.
 
 ## 0. Summary of findings
 

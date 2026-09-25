@@ -26,6 +26,56 @@ RELION SPA tutorial subset (EMPIAR-10204, CC0), identical inputs for both arms.
 > enumerated in §3.2. Agreement is quantified with scale-invariant cross-implementation
 > measures (FRC, trajectory RMS), never with byte or pixel equality.
 
+## 0a. CORRECTION (2026-09-25): the headline speed result does not reproduce
+
+**The 1.78× speed advantage reported below is an artifact of the `4GPUs` host and must
+not be cited.** A rerun of the same upstream MotionCor3 commit (`dd8b6831`) on a
+dedicated SCARF node finds the two implementations **indistinguishable at 1 GPU**.
+
+| | 4GPUs (this document) | SCARF, dedicated node | host effect |
+|---|---|---|---|
+| MotionCorr-standalone | 41.67 s | 31.51 s | 1.32× |
+| MotionCor3 1.2.4 | 73.47 s | 31.70 s | **2.32×** |
+| ratio | **1.76×** | **1.006×** | |
+
+2.32 / 1.32 = 1.76 — exactly the advantage claimed below. Both tools ran faster on
+SCARF; MotionCor3 gained 1.76× more, and that difference is the entire "advantage".
+
+**What it is not** (each eliminated by measurement, not argument):
+* Not TIFF I/O or page cache — SCARF's TIFF load is *slower* (28.12 s vs 16.75 s), and
+  `File system inputs = 0` at both sites.
+* Not `-GpuMemUsage` or frame residency — the `GPU n Allocation time` lines are
+  byte-identical at both sites (0.11/0.25/0.39/0.02/1.27 GB, CPU 0.00 GB).
+* Not iteration count — 1985 vs 1983 alignment iterations.
+* Not MotionCor3's `-O0` host build — the `-O3` host binary was measured on 4GPUs at
+  71.1 s median against stock's 73.5 s. Both ≈4× SCARF.
+* Not GPU contention — all four GPUs read 1 MiB / 0 % immediately before the run.
+* Not a degraded PCIe link — 4GPUs GPU 0 negotiates Gen4 ×16.
+* Not option drift — MotionCor3's printed configuration is byte-identical at both sites.
+
+**Where it is.** Entirely inside `Computation time` (70.71 s vs 16.36 s over 24 movies).
+The stage signature is diagnostic: a pure-device stage (local motion correction) takes
+0.224 s vs 0.207 s — *equal* — while a transfer-heavy stage (apply gain) takes 0.15 s vs
+0.06 s, and the whole compute stage 2.95 s vs 0.68 s. Clocks or memory bandwidth would
+slow every kernel together; these do not. CPU-seconds are 110 vs 77, only 1.43×, so the
+4GPUs run was **stalling, not computing**. That is a host↔device transfer/latency
+signature.
+
+**Why it produced a spurious advantage.** PR #51's design goal is end-to-end GPU
+residency — minimising host↔device traffic. On a host with a slow transfer path, the
+implementation that streams more data is penalised more. The measured "advantage" was
+largely our tool being less exposed to a defect of the measurement host, not a property
+of the algorithm.
+
+**Leading hypothesis, NOT established:** NUMA locality. 4GPUs has 2 NUMA nodes at
+distance 20 and `taskset -c 96-103` lies entirely on node 1. It is a VM with virtualised
+PCIe, so `nvidia-smi topo -m` reports no per-GPU NUMA binding and cannot settle it.
+Driver version (570.86.10 vs 580.178.04) and virtualisation overhead remain live
+alternatives. Peak RSS 9.06 GB vs 1.84 GB is also unexplained.
+
+Everything below this section remains as measured **on 4GPUs**, and the *agreement*
+results (trajectory RMS, FRC) are unaffected — they compare outputs, not speed.
+
 ## 0. Summary of findings
 
 1. **Speed — MotionCorr-standalone 306bc67 is 1.78× faster** (median; range 1.68–1.83),

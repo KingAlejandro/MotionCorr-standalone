@@ -318,6 +318,21 @@ Meanwhile the same 24 outputs that fail the 0.001 image limit 24/24 (`default`) 
 confidence, at least 99.97% of the effective data recoverable by CPU. Both facts are true; they
 measure different things. That is the answer to the question this issue posed.
 
+### Independent convergence with Issue #60
+
+Issue #60's controlled-perturbation calibration ([PR #64](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64))
+reaches the same place from the opposite direction. Working forward from perturbations of known
+physical size, it finds that relative RMSE 0.001 corresponds to roughly **0.017 A^2** of envelope
+loss — about 300x stricter than a 5 A^2 harm boundary — that a **1-part-per-million** change to
+the gain reference already reads 2x the limit, and that the response saturates, making relative
+RMSE close to a binary "the arithmetic is not bit-identical" detector.
+
+This study works backward from downstream outcome and finds the matching result: outputs that fail
+that limit 24/24 lose no measurable recoverable signal. Two independent methods, one forward from
+perturbation physics and one backward from reconstruction, agree that the 0.001 relative-RMSE
+result carries no information about scientific quality. Neither study proposes a replacement
+limit; that remains #58's decision, and both are inputs to it.
+
 ---
 
 ## 6. Summary of verdicts

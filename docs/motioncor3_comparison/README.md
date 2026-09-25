@@ -3,6 +3,23 @@
 **Date:** 2026-09-24/25 · **Host:** `4GPUs` (`4-gpu-vm`) · **Dataset:** the 24-movie
 RELION SPA tutorial subset (EMPIAR-10204, CC0), identical inputs for both arms.
 
+> ### ⚠ VENUE: this is the `4GPUs` shared VM result — HISTORICAL
+> Every number in this document was measured on the **`4GPUs` shared VM**:
+> **A100 80GB PCIe**, CUDA 12.8, 124 logical CPUs, our work confined to an 8-CPU
+> `taskset`, with a **third-party job inside that core mask** for part of the series,
+> against **MotionCorr-standalone commit `306bc67`** (the PR #51 head at that time).
+>
+> A separate comparison is being run on **SCARF Slurm** — **A100-SXM4-40GB**, driver
+> 580.178.04, AMD EPYC 7302, 64 CPUs/node, in a **dedicated uncontended allocation**,
+> against the **current** PR #51 head `0c7d68f7`. Different GPU memory size, different
+> interconnect (SXM4 vs PCIe), different CPU, different commit, different contention
+> regime.
+>
+> **No ratio, speedup or agreement figure may be carried between the two venues.**
+> Cite figures from this document as "4GPUs / PCIe-80GB / 306bc67 / contended".
+
+
+
 > **This is not a parity test and no bit-level agreement is claimed or implied.**
 > The two programs implement different algorithms. They were run with the closest
 > equivalent options obtainable, and every option that *cannot* be matched is

@@ -68,6 +68,10 @@ if(CUDA)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
+    # The experimental FFTW path uses the same named OpenMP critical section
+    # as src/fftw.cpp. NVCC does not inherit OpenMP's host compile flags.
+    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
+        PROPERTIES COMPILE_OPTIONS "-Xcompiler=-fopenmp")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 endif()
 

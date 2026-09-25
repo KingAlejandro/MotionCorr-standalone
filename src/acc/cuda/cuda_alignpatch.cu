@@ -6,11 +6,71 @@
 
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include <fftw3.h>
+#include <chrono>
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <vector>
+
+struct ExperimentalFftwCcf {
+    fftwf_complex *spectrum = nullptr;
+    float *image = nullptr;
+    fftwf_plan plan = nullptr;
+
+    ~ExperimentalFftwCcf() {
+        #pragma omp critical(FourierTransformer_fftw_plan)
+        {
+            if (plan) fftwf_destroy_plan(plan);
+        }
+        if (image) fftwf_free(image);
+        if (spectrum) fftwf_free(spectrum);
+    }
+};
+
+// Match the CPU alignPatch search order and RFLOAT interpolation. The input is
+// the unnormalised float FFTW inverse CCF, not the CUDA cuFFT correlation map.
+static void findExperimentalFftwPeak(const float *image, int ccf_nx, int ccf_ny,
+                                     int search_range, RFLOAT ccf_scale_x,
+                                     RFLOAT ccf_scale_y, RFLOAT &shift_x,
+                                     RFLOAT &shift_y) {
+    const RFLOAT EPS = 1e-15;
+    RFLOAT maxval = -1E30;
+    int posx = 0, posy = 0;
+    for (int y = -search_range; y <= search_range; ++y) {
+        const int iy = (y < 0) ? ccf_ny + y : y;
+        for (int x = -search_range; x <= search_range; ++x) {
+            const int ix = (x < 0) ? ccf_nx + x : x;
+            const RFLOAT val = image[(size_t)iy * ccf_nx + ix];
+            if (val > maxval) {
+                posx = x; posy = y; maxval = val;
+            }
+        }
+    }
+
+    int ipx_n = posx - 1, ipx = posx, ipx_p = posx + 1;
+    int ipy_n = posy - 1, ipy = posy, ipy_p = posy + 1;
+    if (ipx_n < 0) ipx_n += ccf_nx;
+    if (ipx < 0) ipx += ccf_nx;
+    if (ipx_p < 0) ipx_p += ccf_nx;
+    if (ipy_n < 0) ipy_n += ccf_ny;
+    if (ipy < 0) ipy += ccf_ny;
+    if (ipy_p < 0) ipy_p += ccf_ny;
+
+    RFLOAT vp = image[(size_t)ipy * ccf_nx + ipx_p];
+    RFLOAT vn = image[(size_t)ipy * ccf_nx + ipx_n];
+    shift_x = (std::abs(vp + vn - 2.0 * maxval) > EPS)
+        ? posx - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval) : posx;
+    vp = image[(size_t)ipy_p * ccf_nx + ipx];
+    vn = image[(size_t)ipy_n * ccf_nx + ipx];
+    shift_y = (std::abs(vp + vn - 2.0 * maxval) > EPS)
+        ? posy - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval) : posy;
+    shift_x *= ccf_scale_x;
+    shift_y *= ccf_scale_y;
+}
 
 #define CUFFT_CHECK(cmd) do { \
     cufftResult err = (cmd); \
@@ -241,17 +301,6 @@ bool cudaAlignPatchDevice(
     cudaEvent_t ev_start_cufft, ev_stop_cufft;
     cudaEvent_t ev_start_d2h, ev_stop_d2h;
 
-    HANDLE_ERROR(cudaEventCreate(&ev_start_total));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
-
-    HANDLE_ERROR(cudaEventRecord(ev_start_total));
-
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
     }
@@ -280,6 +329,10 @@ bool cudaAlignPatchDevice(
     const int nfx = pnx / 2 + 1, nfy = pny;
     const int nfy_half = nfy / 2;
     float2 *d_Fframes = (float2*)d_Fframes_in;
+    const char *hybrid_flag = std::getenv("MOTIONCORR_EXPERIMENTAL_GLOBAL_FFTW");
+    const char *all_hybrid_flag = std::getenv("MOTIONCORR_EXPERIMENTAL_ALL_FFTW");
+    const bool hybrid_fftw = (is_global && hybrid_flag && std::strcmp(hybrid_flag, "1") == 0) ||
+                             (all_hybrid_flag && std::strcmp(all_hybrid_flag, "1") == 0);
 
     // Buffer allocations
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
@@ -288,6 +341,35 @@ bool cudaAlignPatchDevice(
     const size_t sz_fccs    = (size_t)n_frames * ccf_nfy * ccf_nfx * sizeof(float2);
     const size_t sz_iccs    = (size_t)n_frames * ccf_ny * ccf_nx * sizeof(float);
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
+
+    // Construct the experimental host plan before any device resources. An
+    // FFTW setup failure then leaves no CUDA buffers or events to clean up.
+    ExperimentalFftwCcf host_ccf;
+    if (hybrid_fftw) {
+        host_ccf.spectrum = fftwf_alloc_complex((size_t)ccf_nfy * ccf_nfx);
+        host_ccf.image = fftwf_alloc_real((size_t)ccf_ny * ccf_nx);
+        if (!host_ccf.spectrum || !host_ccf.image)
+            REPORT_ERROR("Experimental FFTW global CCF host allocation failed");
+        #pragma omp critical(FourierTransformer_fftw_plan)
+        {
+            host_ccf.plan = fftwf_plan_dft_c2r_2d(ccf_ny, ccf_nx, host_ccf.spectrum,
+                                                   host_ccf.image, FFTW_ESTIMATE);
+        }
+        if (!host_ccf.plan) REPORT_ERROR("Experimental FFTW global CCF plan failed");
+        logfile << " [Experimental FFTW " << (is_global ? "global" : "local")
+                << " CCF enabled]" << std::endl;
+    }
+
+    HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+    HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
+    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
+
+    HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
     float2 *d_Fref = nullptr;
     float *d_weight = nullptr;
@@ -301,21 +383,24 @@ bool cudaAlignPatchDevice(
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
     HANDLE_ERROR(cudaMalloc(&d_weight, sz_weight));
     HANDLE_ERROR(cudaMalloc(&d_Fccs, sz_fccs));
-    HANDLE_ERROR(cudaMalloc(&d_Iccs, sz_iccs));
+    if (!hybrid_fftw) HANDLE_ERROR(cudaMalloc(&d_Iccs, sz_iccs));
     HANDLE_ERROR(cudaMalloc(&d_cur_xshifts, sz_shifts));
     HANDLE_ERROR(cudaMalloc(&d_cur_yshifts, sz_shifts));
     HANDLE_ERROR(cudaMalloc(&d_shiftx, sz_shifts));
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
 
-    size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
+    size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs +
+                                  (hybrid_fftw ? 0 : sz_iccs) + 4 * sz_shifts;
 
-    // Initialize cuFFT batched C2R plan
-    cufftHandle plan_c2r;
-    int n[2] = {ccf_ny, ccf_nx};
-    CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames));
+    cufftHandle plan_c2r = 0;
     size_t cufft_work_size = 0;
-    CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
-    total_vram_allocated += cufft_work_size;
+    if (!hybrid_fftw) {
+        int n[2] = {ccf_ny, ccf_nx};
+        CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx,
+                                 NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames));
+        CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
+        total_vram_allocated += cufft_work_size;
+    }
 
     // Weights computation
     dim3 blockWeights(16, 16);
@@ -332,6 +417,8 @@ bool cudaAlignPatchDevice(
 
     std::vector<float> h_cur_xshifts(n_frames, 0.0f);
     std::vector<float> h_cur_yshifts(n_frames, 0.0f);
+    std::vector<RFLOAT> hybrid_xshifts(hybrid_fftw ? n_frames : 0);
+    std::vector<RFLOAT> hybrid_yshifts(hybrid_fftw ? n_frames : 0);
     std::vector<float> h_shiftx(n_frames, 0.0f);
     std::vector<float> h_shifty(n_frames, 0.0f);
 
@@ -339,6 +426,9 @@ bool cudaAlignPatchDevice(
     float accumulated_kernel_ms = 0.0f;
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
+    double hybrid_transfer_ms = 0.0;
+    double hybrid_fftw_peak_ms = 0.0;
+    size_t hybrid_transfer_bytes = 0;
 
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
@@ -355,55 +445,92 @@ bool cudaAlignPatchDevice(
         HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k1_ms;
 
-        // 3. Batched cuFFT C2R
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
-        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
-        float iter_cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
-        accumulated_cufft_ms += iter_cufft_ms;
+        if (hybrid_fftw) {
+            // FFTW's C2R transform can overwrite its spectrum input. Transfer a
+            // fresh spectrum for each frame and keep all movie frames resident.
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                auto start = std::chrono::steady_clock::now();
+                HANDLE_ERROR(cudaMemcpy(host_ccf.spectrum,
+                    d_Fccs + (size_t)iframe * ccf_nfy * ccf_nfx,
+                    sz_fref, cudaMemcpyDeviceToHost));
+                auto transferred = std::chrono::steady_clock::now();
+                fftwf_execute(host_ccf.plan);
+                findExperimentalFftwPeak(host_ccf.image, ccf_nx, ccf_ny,
+                                         search_range, ccf_scale_x, ccf_scale_y,
+                                         hybrid_xshifts[iframe], hybrid_yshifts[iframe]);
+                auto finished = std::chrono::steady_clock::now();
+                hybrid_transfer_ms += std::chrono::duration<double, std::milli>(transferred - start).count();
+                hybrid_fftw_peak_ms += std::chrono::duration<double, std::milli>(finished - transferred).count();
+                hybrid_transfer_bytes += sz_fref;
+            }
+        } else {
+            // 3. Batched cuFFT C2R
+            HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+            CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+            float iter_cufft_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
+            accumulated_cufft_ms += iter_cufft_ms;
 
-        // 4. Peak finding + subpixel quadratic interpolation
-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
-        findPeakAndInterpolateKernel<<<n_frames, 256>>>(
-            d_Iccs, d_cur_xshifts, d_cur_yshifts,
-            ccf_nx, ccf_ny, search_range,
-            (float)ccf_scale_x, (float)ccf_scale_y, n_frames
-        );
-        LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
-        float k2_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k2_ms;
+            // 4. Peak finding + subpixel quadratic interpolation
+            HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+            findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+                d_Iccs, d_cur_xshifts, d_cur_yshifts,
+                ccf_nx, ccf_ny, search_range,
+                (float)ccf_scale_x, (float)ccf_scale_y, n_frames
+            );
+            LAUNCH_HANDLE_ERROR(cudaGetLastError());
+            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+            float k2_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+            accumulated_kernel_ms += k2_ms;
 
-        // Copy candidate shifts back to host
-        HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
-        HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
-        float iter_d2h_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
-        accumulated_d2h_ms += iter_d2h_ms;
+            // Copy candidate shifts back to host
+            HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
+            HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
+            HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
+            HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
+            float iter_d2h_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
+            accumulated_d2h_ms += iter_d2h_ms;
+        }
 
         // Update relative to frame 0
         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
-        for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
-            h_cur_xshifts[iframe] -= h_cur_xshifts[0];
-            h_cur_yshifts[iframe] -= h_cur_yshifts[0];
-            x_sumsq += (RFLOAT)h_cur_xshifts[iframe] * h_cur_xshifts[iframe];
-            y_sumsq += (RFLOAT)h_cur_yshifts[iframe] * h_cur_yshifts[iframe];
-        }
-        h_cur_xshifts[0] = 0.0f;
-        h_cur_yshifts[0] = 0.0f;
+        if (hybrid_fftw) {
+            for (int iframe = n_frames - 1; iframe >= 0; --iframe) {
+                hybrid_xshifts[iframe] -= hybrid_xshifts[0];
+                hybrid_yshifts[iframe] -= hybrid_yshifts[0];
+                x_sumsq += hybrid_xshifts[iframe] * hybrid_xshifts[iframe];
+                y_sumsq += hybrid_yshifts[iframe] * hybrid_yshifts[iframe];
+            }
+            hybrid_xshifts[0] = 0;
+            hybrid_yshifts[0] = 0;
+            for (int iframe = 0; iframe < n_frames; ++iframe) {
+                xshifts[iframe] += hybrid_xshifts[iframe];
+                yshifts[iframe] += hybrid_yshifts[iframe];
+                h_shiftx[iframe] = (float)(-hybrid_xshifts[iframe] / pnx);
+                h_shifty[iframe] = (float)(-hybrid_yshifts[iframe] / pny);
+            }
+        } else {
+            for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
+                h_cur_xshifts[iframe] -= h_cur_xshifts[0];
+                h_cur_yshifts[iframe] -= h_cur_yshifts[0];
+                x_sumsq += (RFLOAT)h_cur_xshifts[iframe] * h_cur_xshifts[iframe];
+                y_sumsq += (RFLOAT)h_cur_yshifts[iframe] * h_cur_yshifts[iframe];
+            }
+            h_cur_xshifts[0] = 0.0f;
+            h_cur_yshifts[0] = 0.0f;
 
-        for (int iframe = 0; iframe < n_frames; iframe++) {
-            xshifts[iframe] += h_cur_xshifts[iframe];
-            yshifts[iframe] += h_cur_yshifts[iframe];
-            h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
-            h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
+            for (int iframe = 0; iframe < n_frames; iframe++) {
+                xshifts[iframe] += h_cur_xshifts[iframe];
+                yshifts[iframe] += h_cur_yshifts[iframe];
+                h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
+                h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
+            }
         }
 
         // Apply Fourier phase shifts on GPU
@@ -441,17 +568,22 @@ bool cudaAlignPatchDevice(
     logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
     logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
     logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+    if (hybrid_fftw) {
+        logfile << "   FFTW CCF transfer time:      " << std::fixed << std::setprecision(2) << hybrid_transfer_ms << " ms" << std::endl;
+        logfile << "   FFTW CCF + peak host time:   " << std::fixed << std::setprecision(2) << hybrid_fftw_peak_ms << " ms" << std::endl;
+        logfile << "   FFTW CCF transfer bytes:     " << hybrid_transfer_bytes << std::endl;
+    }
     logfile << "   Total GPU alignment time:     " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
     logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
 
     // Cleanup
-    CUFFT_CHECK(cufftDestroy(plan_c2r));
+    if (plan_c2r) CUFFT_CHECK(cufftDestroy(plan_c2r));
     HANDLE_ERROR(cudaFree(d_Fref));
     HANDLE_ERROR(cudaFree(d_weight));
     HANDLE_ERROR(cudaFree(d_Fccs));
-    HANDLE_ERROR(cudaFree(d_Iccs));
+    if (d_Iccs) HANDLE_ERROR(cudaFree(d_Iccs));
     HANDLE_ERROR(cudaFree(d_cur_xshifts));
     HANDLE_ERROR(cudaFree(d_cur_yshifts));
     HANDLE_ERROR(cudaFree(d_shiftx));

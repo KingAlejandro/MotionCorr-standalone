@@ -19,7 +19,7 @@ measured how much signal each fault actually costs.
 The four results that matter:
 
 1. **The harmless-variation floor on this CPU build is exactly zero.** Across
-   178 identical-configuration and thread-varied runs on twelve movies --
+   176 identical-configuration and thread-varied cells on twelve movies --
    `--j 1/2/4/8`, `OMP_PROC_BIND` unset/close/spread, five repeats each -- every
    corrected micrograph and every STAR trajectory was **bit-identical**. The
    largest value seen on any of fifteen diagnostics across every harmless cell
@@ -182,7 +182,8 @@ section 7.
 
 ## 5. Layer 3 -- the harmless-variation floor is exactly zero
 
-228 runs on twelve movies (six selection, six hold-out), all exit status 0.
+247 runs on twelve movies (six selection, six hold-out), all exit status 0. Of
+those, 176 cells are harmless variations and should read zero.
 
 | Harmless variation | cells | largest value on **any** diagnostic |
 |:---|---:|---:|
@@ -192,7 +193,8 @@ section 7.
 | five identical `--j 4` repeats | 48 | 0 (bit-identical) |
 | gain reference rewritten unchanged through this work's MRC writer | 6 | 0 (bit-identical) |
 | movie re-encoded TIFF → MRC, row order matched | 2 | 0 (bit-identical) |
-| **all harmless cells, 1246 diagnostic values** | **178** | **1.478e-15** |
+| each reference against itself | 12 | 0 (bit-identical) |
+| **all harmless cells** | **176** | **1.478e-15** |
 
 The `1.478e-15` is this report's estimator evaluating Δ*B* on two identical
 arrays; it is the instrument's floor, not the pipeline's. No output pixel, no
@@ -559,7 +561,7 @@ despite separating cleanly when scored against the declared 1 % clause.
 
 | Check | Class | Proposed limit | Basis |
 |:---|:---|:---|:---|
-| every metric exactly 0 | **strict CPU regression** | exact equality, same platform | measured: 228 runs over twelve movies, `--j 1/2/4/8`, three thread placements, five repeats, all bit-identical. Strictly stronger than the present `--gate exact` 1e-7 tolerances, and it costs nothing because it is already met. |
+| every metric exactly 0 | **strict CPU regression** | exact equality, same platform | measured: 176 harmless cells over twelve movies, `--j 1/2/4/8`, three thread placements, five repeats, all bit-identical. Strictly stronger than the present `--gate exact` 1e-7 tolerances, and it costs nothing because it is already met. |
 | `std_delta_b_a2` | **blocking** | **≤ 2 Å²** | the only diagnostic that separates a boundary it was not handed: 2.9x clean band, FP 0/391 and FN 0/146 on selection, FP 0/90 and FN 0/168 on hold-out, unchanged at harm boundaries of 2, 5 and 10 Å². 2 Å² is 5.4 % amplitude loss at 3 Å. |
 | `std_shift_px` | **blocking** | **≤ 0.05 px** | 7.0x clean band (1.42e-2 px on any non-translation cell against 0.1 px for the smallest injected translation). Catches the accounted-for-translation case that the trajectory metrics miss entirely. |
 | exit status, STAR schema, static metadata | **blocking** | unchanged | no evidence to revise |
@@ -679,7 +681,8 @@ usable as evidence.
 7. **The zero floor is a property of this build on this host.** It is a strong
    result, but it does not prove that no CPU configuration anywhere produces
    nonzero variation -- only that thread count 1--8 and thread placement do not,
-   on Linux/GCC 13.3/FFTW 3.3.10, over 228 runs on twelve movies. A macOS or
+   on Linux/GCC 13.3/FFTW 3.3.10, over 176 harmless cells on twelve movies. A
+   macOS or
    different-FFTW measurement could differ and has not been made.
 
 8. **The translated-movie cell uses a circular roll**, so a 2 px strip wraps.
@@ -817,4 +820,5 @@ about 35 minutes for 246 cells on 3710 x 3838 micrographs.
 | `tools/calibration/analyze.py` | noise floor, response curves, threshold search, hold-out |
 | `tools/calibration/summarize.py` | the tables in this report |
 | `tools/calibration/decompose_pair.py` | decompose any existing pair of corrected micrographs |
+| `tools/calibration/verify_report_numbers.py` | re-derives every number in this report from the data; exits non-zero on drift |
 | `docs/calibration/data/*.json` | every measurement behind every number above |

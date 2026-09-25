@@ -1,0 +1,127 @@
+{
+  "experiment": "Issue 36 - opt-in hybrid FFTW CUDA path, full 24-movie RELION tutorial gate",
+  "date_utc": "2026-09-25",
+  "source": {
+    "repo": "KingAlejandro/MotionCorr-standalone",
+    "branch": "exp/issue36-fftw-global-hybrid",
+    "commit": "5407373be31a6fe5f79a8cc5709be00723921b19",
+    "tracked_files": 415,
+    "tracked_tree_sha256": "eb13f7dccff08d64e99a576a60e20a6698d1422ca62795ba22b0e9b28b5ecf86",
+    "tree_hash_method": "sha256 of LC_ALL=C-sorted 'sha256sum <path>' lines over all 415 git-tracked files",
+    "verified_identical_on": ["4GPUs:/home/alex/MotionCorr-issue36-full24-run2/src",
+                              "cpu64:/home/ubuntu/MotionCorr-issue36-full24-run2/src"],
+    "staged_from": "git archive of local checkout; tarball sha256 e44ee29c7cbd50bc7f38f74a6915c7c33a4ae2749aa42ded3f65a583da8e3b4c"
+  },
+  "comparator": {
+    "path": "tools/compare_motioncorr.py",
+    "sha256": "8fee004c8caed2845417eff2589549f96929d229bf95308ff8582311a3eaf669",
+    "last_commit_touching_it": "78b546c Define reference outputs and numerical acceptance gates (#19)",
+    "modified": false,
+    "gate": "relaxed",
+    "thresholds_used": {
+      "max_shift_error_px": 0.05,
+      "shift_rmse_px": 0.02,
+      "image_rmse": 0.02,
+      "image_max_pixel_error": 5.0,
+      "image_relative_rmse": 0.001
+    },
+    "overrides_applied": "none",
+    "python": "/home/alex/mc-env/bin/python3 (numpy 2.5.3)"
+  },
+  "binaries": {
+    "cuda": {
+      "host": "4GPUs (4-gpu-vm, 124 logical CPUs)",
+      "path": "/home/alex/MotionCorr-issue36-full24-run2/build-cuda/motioncorr",
+      "sha256": "553ca549e033a3954da6bb9943c4841e78309ad332eaa1306befeb17114d5963",
+      "cmake_flags": "-DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DTIMING=ON -DCMAKE_CUDA_ARCHITECTURES=80",
+      "toolchain": "CUDA 12.8.61, g++ 13.3.0, FFTW3 3.3.10-1ubuntu3",
+      "build_parallelism": "cmake --build -j8 under top-level taskset -c 96-103",
+      "reported_version": "RELION 5.1.0-motioncorr-standalone; Precision: BASE=double, CUDA-ACC=single",
+      "experimental_env_strings_present": ["MOTIONCORR_EXPERIMENTAL_GLOBAL_FFTW", "MOTIONCORR_EXPERIMENTAL_ALL_FFTW"]
+    },
+    "cpu": {
+      "host": "cpu64 (small-refmac-machine, 64 logical CPUs)",
+      "path": "/home/ubuntu/MotionCorr-issue36-full24-run2/build-cpu/motioncorr",
+      "sha256": "a718c01245f0408ae4706d47ed0b019a1fe9afa6da42495ffe5bf8318976f437",
+      "cmake_flags": "-DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DTIMING=OFF",
+      "toolchain": "g++ 13.3.0, FFTW3 3.3.10-1ubuntu3, cmake 4.4.3",
+      "note": "Binary SHA-256 differs from the README's c595f068... because that binary was built from a DIFFERENT source tree (MotionCorr-issue36-fftw-hybrid-src) and a different absolute build path. See reuse_check below."
+    }
+  },
+  "reuse_check_of_existing_cpu_reference": {
+    "candidate": "cpu64:/home/ubuntu/MotionCorr-issue36-fftw-hybrid-build-cpu/motioncorr",
+    "candidate_sha256": "c595f0685f83df446ac6b1b12498a4d35dd70dc7124269d6bc52460a82e7c14c",
+    "candidate_source_tree_sha256": "de8062a4a26ead6a95223bcef015dac9fec91024722f9ea402201caf5f086efd",
+    "matches_commit_5407373_tree": false,
+    "differing_tracked_files": ["CMakeLists.txt", "src/acc/cuda/cuda_alignpatch.cu",
+                                 "agents/designs/issue_36_fftw_hybrid_experiment.md",
+                                 "docs/issue36_fftw_hybrid/** (added by 5407373)"],
+    "decision": "NOT reused. Exact-match precondition failed, and the existing results covered only 2 of 24 movies. Fresh same-source CPU references were produced from 5407373.",
+    "note": "The two non-doc differences are CUDA-only (the ALL_FFTW env hook and its -Xcompiler=-fopenmp compile option), so they would not change a CUDA=OFF build's behaviour; the exact-match precondition still failed, so reuse was declined."
+  },
+  "inputs": {
+    "dataset": "RELION 3.0/5.1 SPA tutorial, 24 movies",
+    "movies_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041",
+    "gain_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+    "combined_24_tiff_plus_gain_sha256": "b88e3cdf68d61d26fe110b84efdbae519c2b0581ba6533e99ec569d5b25ad288",
+    "combined_hash_method": "sha256 of LC_ALL=C-sorted per-file sha256 digests of the 24 TIFFs + gain.mrc",
+    "verified_identical_across_hosts": true,
+    "per_file_hashes": "input_sha256.txt (26 lines: 24 TIFFs + gain.mrc + movies.star)",
+    "host_paths": {
+      "4GPUs": "/home/alex/MotionCorr-standalone/relion30_tutorial",
+      "cpu64": "/home/ubuntu/mc51/tutorial"
+    }
+  },
+  "commands": {
+    "common_options": "--use_own --j 1 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc",
+    "cpu_reference": "OMP_NUM_THREADS=1 <cpu binary> --i movies.star --o CPU_ref/ <common options>",
+    "cuda_default": "taskset -c 96-103 flock /tmp/motioncorr-bench.lock -- <cuda binary> --i movies.star --o CUDA_default/ --gpu 0 <common options>",
+    "cuda_all_fftw": "MOTIONCORR_EXPERIMENTAL_ALL_FFTW=1 taskset -c 96-103 flock /tmp/motioncorr-bench.lock -- <cuda binary> --i movies.star --o CUDA_allfftw/ --gpu 0 <common options>",
+    "comparator_per_movie": "<py> tools/compare_motioncorr.py --ref-mrc CPU_ref/Movies/<M>.mrc --ref-star CPU_ref/Movies/<M>.star --test-mrc CUDA_<mode>/Movies/<M>.mrc --test-star CUDA_<mode>/Movies/<M>.star --gate relaxed --json-out <M>_<mode>_relaxed.json",
+    "invocation_style": "All three configurations processed the full 24-movie movies.star in ONE process each, so they are mutually consistent. init_random_generator(random_seed) is called per movie inside MotioncorrRunner::executeOwnMotionCorrection, so batched and per-movie invocations are equivalent; this was confirmed empirically (see readme_reproduction)."
+  },
+  "runs": {
+    "cpu_reference": {
+      "host": "cpu64", "exit_code": 0, "movies_completed": 24,
+      "wall_clock": "17:30.32", "per_movie_mean_s": 43.8,
+      "max_rss_kb": 2865880,
+      "output_path": "cpu64:/home/ubuntu/MotionCorr-issue36-full24-run2/runroot/CPU_ref"
+    },
+    "cuda_default": {
+      "host": "4GPUs", "gpu": 0, "exit_code": 0, "movies_completed": 24,
+      "wall_clock": "1:07.52", "max_rss_kb": 1648292,
+      "experimental_marker_in_logs": "0 of 24 movie logs",
+      "output_path": "4GPUs:/home/alex/MotionCorr-issue36-full24-run2/runroot/CUDA_default"
+    },
+    "cuda_all_fftw": {
+      "host": "4GPUs", "gpu": 0, "exit_code": 0, "movies_completed": 24,
+      "wall_clock": "1:23.82", "max_rss_kb": 1656208,
+      "experimental_marker_in_logs": "24 of 24 movie logs; each with 1 global + 25 local FFTW CCF activations",
+      "output_path": "4GPUs:/home/alex/MotionCorr-issue36-full24-run2/runroot/CUDA_allfftw"
+    },
+    "note_on_single_run_wall_times": "These are single, unpaired runs recorded alongside the correctness runs. They are NOT a controlled timing result. An optional paired repeat was stopped after it queued behind another GPU job and is excluded."
+  },
+  "cpu_reference_transfer": {
+    "method": "tar stream cpu64 -> local laptop -> 4GPUs (no direct host-to-host auth available)",
+    "integrity_hash_both_ends": "68c1b5158803b704123a6768035e8115e93329883da4d7ddb1ebbbf69ac58f20",
+    "hash_method": "sha256 of 'sha256sum *.mrc *.star' output in CPU_ref/Movies",
+    "verified_identical": true
+  },
+  "readme_reproduction": {
+    "claim": "All four previously published two-movie relative-RMSE values reproduce exactly to 9 decimal places.",
+    "values": {
+      "00021_default":  {"published": 0.006105328, "measured": 0.006105328},
+      "00046_default":  {"published": 0.010438802, "measured": 0.010438802},
+      "00021_all_fftw": {"published": 0.000618735, "measured": 0.000618735},
+      "00046_all_fftw": {"published": 0.000392505, "measured": 0.000392505}
+    },
+    "ccf_bytes_00021_all_fftw": {"published": 360562176, "measured": 360562176}
+  },
+  "concurrency_and_host_hygiene": {
+    "bench_lock": "/tmp/motioncorr-bench.lock used for all 4GPUs movie runs",
+    "cpu_affinity": "all 4GPUs builds and runs launched under top-level taskset -c 96-103; build parallelism -j8",
+    "gpu_state_before_cuda_runs": "all 4 A100s idle, 0 compute apps",
+    "other_activity_observed": "A concurrent agent session ran the same Issue 36 full-24 experiment in /home/alex/MotionCorr-issue36-full24 (no -run2 suffix) on 4GPUs and /home/ubuntu/MotionCorr-issue36-full24 on cpu64, using per-movie STAR invocations. A separate Issue 61 stage-A job took the bench lock at 02:38:51Z. This run used entirely separate directories and never modified another session's artifacts.",
+    "processes_killed": "No other user's processes were touched. An initial unlocked duplicate CPU reference from this task was stopped while the CPU-scaling benchmark was active; a fresh batch reference later completed after that benchmark. An optional timing repeat from this task was stopped after the numerical result was complete. Both partial attempts are excluded from reported results."
+  }
+}

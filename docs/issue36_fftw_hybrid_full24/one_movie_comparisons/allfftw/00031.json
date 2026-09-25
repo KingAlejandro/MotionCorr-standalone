@@ -1,0 +1,176 @@
+{
+  "gate_profile": "relaxed",
+  "tolerances": {
+    "max_shift_error": 0.05,
+    "shift_rmse": 0.02,
+    "image_rmse": 0.02,
+    "image_max_err": 5.0,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 24,
+      "max_abs_diff_x": 0.0025079999999999547,
+      "max_abs_diff_y": 0.0,
+      "max_shift_error": 0.0025079999999999547,
+      "coord_rms_error": 0.0019056590286128123,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": 0.0021909999999999985,
+          "dy": 0.0
+        },
+        {
+          "frame": 3,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 4,
+          "dx": 0.0025079999999999547,
+          "dy": 0.0
+        },
+        {
+          "frame": 5,
+          "dx": 0.0020199999999999108,
+          "dy": 0.0
+        },
+        {
+          "frame": 6,
+          "dx": 0.00010600000000016152,
+          "dy": 0.0
+        },
+        {
+          "frame": 7,
+          "dx": 0.0021900000000001363,
+          "dy": 0.0
+        },
+        {
+          "frame": 8,
+          "dx": 0.000476000000000365,
+          "dy": 0.0
+        },
+        {
+          "frame": 9,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 10,
+          "dx": 7.200000000029405e-05,
+          "dy": 0.0
+        },
+        {
+          "frame": 11,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 12,
+          "dx": 3.9999999996709334e-06,
+          "dy": 0.0
+        },
+        {
+          "frame": 13,
+          "dx": 2.9000000000500847e-05,
+          "dy": 0.0
+        },
+        {
+          "frame": 14,
+          "dx": 0.0024420000000002773,
+          "dy": 0.0
+        },
+        {
+          "frame": 15,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 16,
+          "dx": 0.002189999999999692,
+          "dy": 0.0
+        },
+        {
+          "frame": 17,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 18,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 19,
+          "dx": 0.00219100000000072,
+          "dy": 0.0
+        },
+        {
+          "frame": 20,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 21,
+          "dx": 0.0021900000000005804,
+          "dy": 0.0
+        },
+        {
+          "frame": 22,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 23,
+          "dx": 0.002190999999999832,
+          "dy": 0.0
+        },
+        {
+          "frame": 24,
+          "dx": 0.001840000000001396,
+          "dy": 0.0
+        }
+      ],
+      "passed": true,
+      "fail_reasons": []
+    },
+    "star_fields": {
+      "num_differences": 0,
+      "differences": [],
+      "passed": true
+    },
+    "corrected_image": {
+      "num_pixels": 14238980,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 1.5819900035858154,
+      "rmse": 0.002230261010458064,
+      "relative_rmse": 0.002573402458745437,
+      "ref_pixel_min": -0.3528221845626831,
+      "ref_pixel_max": 15.529995918273926,
+      "ref_pixel_mean": 5.315374374389648,
+      "ref_pixel_std": 0.8666584594565678,
+      "test_pixel_min": -0.35301104187965393,
+      "test_pixel_max": 15.54423999786377,
+      "test_pixel_mean": 5.315375328063965,
+      "test_pixel_std": 0.8666094541549683,
+      "core_header_diff_bytes": 7,
+      "label_header_diff_bytes": 5,
+      "normalized_label_diff_bytes": 0,
+      "passed": false,
+      "fail_reasons": [
+        "Relative image RMSE 2.573402e-03 > 1.000000e-03"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true
+  }
+}

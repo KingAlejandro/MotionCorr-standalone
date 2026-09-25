@@ -1,0 +1,2018 @@
+{
+ "bootstrap": {
+  "method": "paired BCa over movies",
+  "n": 10000,
+  "seed": 61
+ },
+ "development_movies": [
+  "00021",
+  "00046"
+ ],
+ "endpoints": {
+  "allfftw": {
+   "all24": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.08965246617512448,
+      0.00043449999999998584
+     ],
+     "bca_ci95_two_sided": [
+      -0.11156500000000004,
+      0.001267083333333326
+     ],
+     "bca_lower95_one_sided": -0.08965246617512448,
+     "bca_upper95_one_sided": 0.00043449999999998584,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 24,
+     "paired_mean_diff": -0.022256416666666685,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.10853352641221524,
+     "se": 0.0221543133079007,
+     "t_ci95_two_sided": [
+      -0.06808610549466347,
+      0.023573272161330105
+     ],
+     "t_lower95_one_sided": -0.06022606346186521,
+     "t_upper95_one_sided": 0.015713230128531843,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -8.688741073774398,
+      0.41041913776221334
+     ],
+     "bca_ci95_two_sided": [
+      -10.881009344525127,
+      0.5369868487200994
+     ],
+     "bca_lower95_one_sided": -8.688741073774398,
+     "bca_upper95_one_sided": 0.41041913776221334,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 24,
+     "paired_mean_diff": -1.9082641041665813,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 10.924967853444635,
+     "se": 2.2300497247707156,
+     "t_ci95_two_sided": [
+      -6.521473438926427,
+      2.704945230593265
+     ],
+     "t_lower95_one_sided": -5.730282832911252,
+     "t_upper95_one_sided": 1.913754624578089,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -6.503599632746832e-06,
+      0.016054538617915497
+     ],
+     "bca_ci95_two_sided": [
+      -1.019127391549618e-05,
+      0.02007876659222369
+     ],
+     "bca_lower95_one_sided": -6.503599632746832e-06,
+     "bca_upper95_one_sided": 0.016054538617915497,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 24,
+     "paired_mean_diff": 0.004008430610084147,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.019650609997391905,
+     "se": 0.004011163969003671,
+     "t_ci95_two_sided": [
+      -0.004289294261033973,
+      0.012306155481202266
+     ],
+     "t_lower95_one_sided": -0.002866189109516087,
+     "t_upper95_one_sided": 0.01088305032968438,
+     "verdict": "PASS"
+    }
+   },
+   "held22": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.09678768181818186,
+      0.002022136363636351
+     ],
+     "bca_ci95_two_sided": [
+      -0.1206651939019329,
+      0.0021246818181818073
+     ],
+     "bca_lower95_one_sided": -0.09678768181818186,
+     "bca_upper95_one_sided": 0.002022136363636351,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 22,
+     "paired_mean_diff": -0.02262904545454547,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.11343826925835558,
+     "se": 0.02418512026802203,
+     "t_ci95_two_sided": [
+      -0.07292475640032808,
+      0.027666665491237148
+     ],
+     "t_lower95_one_sided": -0.06424541950939608,
+     "t_upper95_one_sided": 0.018987328600305137,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -9.364541449709822,
+      0.46329841086478873
+     ],
+     "bca_ci95_two_sided": [
+      -11.83210732641763,
+      0.5956587277741016
+     ],
+     "bca_lower95_one_sided": -9.364541449709822,
+     "bca_upper95_one_sided": 0.46329841086478873,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 22,
+     "paired_mean_diff": -2.061456818181672,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 11.420243061494968,
+     "se": 2.434804001665917,
+     "t_ci95_two_sided": [
+      -7.124908929244469,
+      3.001995292881125
+     ],
+     "t_lower95_one_sided": -6.251128523786258,
+     "t_upper95_one_sided": 2.128214887422914,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      2.905602739489491e-06,
+      0.017516947652672282
+     ],
+     "bca_ci95_two_sided": [
+      -3.7306244578696127e-07,
+      0.021898714828181762
+     ],
+     "bca_lower95_one_sided": 2.905602739489491e-06,
+     "bca_upper95_one_sided": 0.017516947652672282,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 22,
+     "paired_mean_diff": 0.004381995456655437,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.020522364102778065,
+     "se": 0.004375382728022948,
+     "t_ci95_two_sided": [
+      -0.004717111040523449,
+      0.013481101953834323
+     ],
+     "t_lower95_one_sided": -0.0031469133196757237,
+     "t_upper95_one_sided": 0.011910904232986599,
+     "verdict": "PASS"
+    }
+   }
+  },
+  "ctrl_envelope_b20": {
+   "all24": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.07118732966341298,
+      0.01736957259809557
+     ],
+     "bca_ci95_two_sided": [
+      -0.09042393407569128,
+      0.01938954507317144
+     ],
+     "bca_lower95_one_sided": -0.07118732966341298,
+     "bca_upper95_one_sided": 0.01736957259809557,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 24,
+     "paired_mean_diff": -0.006749625000000019,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.10952682585551225,
+     "se": 0.022357069707723057,
+     "t_ci95_two_sided": [
+      -0.05299874739755049,
+      0.03949949739755046
+     ],
+     "t_lower95_one_sided": -0.04506677021592258,
+     "t_upper95_one_sided": 0.031567520215922545,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -10.103610182918963,
+      -0.7799002136727576
+     ],
+     "bca_ci95_two_sided": [
+      -12.316274069224262,
+      -0.6822465791812805
+     ],
+     "bca_lower95_one_sided": -10.103610182918963,
+     "bca_upper95_one_sided": -0.7799002136727576,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 24,
+     "paired_mean_diff": -3.1050719999998364,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 11.02091924200758,
+     "se": 2.2496357199449437,
+     "t_ci95_two_sided": [
+      -7.7587980527344795,
+      1.5486540527348067
+     ],
+     "t_lower95_one_sided": -6.960658608216207,
+     "t_upper95_one_sided": 0.7505146082165344,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      0.03302504151352022,
+      0.05008809747180864
+     ],
+     "bca_ci95_two_sided": [
+      0.03282151187171196,
+      0.05406661802340408
+     ],
+     "bca_lower95_one_sided": 0.03302504151352022,
+     "bca_upper95_one_sided": 0.05008809747180864,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 24,
+     "paired_mean_diff": 0.03735520499422273,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.02005003197246946,
+     "se": 0.004092695638253227,
+     "t_ci95_two_sided": [
+      0.028888819015021345,
+      0.045821590973424114
+     ],
+     "t_lower95_one_sided": 0.03034085046808599,
+     "t_upper95_one_sided": 0.04436955952035947,
+     "verdict": "PASS"
+    }
+   },
+   "held22": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.08074471262680753,
+      0.017148097206033847
+     ],
+     "bca_ci95_two_sided": [
+      -0.10101595014980848,
+      0.01940334666891839
+     ],
+     "bca_lower95_one_sided": -0.08074471262680753,
+     "bca_upper95_one_sided": 0.017148097206033847,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 22,
+     "paired_mean_diff": -0.009042500000000024,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.1141929315666505,
+     "se": 0.024346014812757086,
+     "t_ci95_two_sided": [
+      -0.05967280946855483,
+      0.04158780946855478
+     ],
+     "t_lower95_one_sided": -0.05093573220080463,
+     "t_upper95_one_sided": 0.03285073220080458,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -10.908081725057906,
+      -0.8641555180180335
+     ],
+     "bca_ci95_two_sided": [
+      -13.347530559074169,
+      -0.7739390305210126
+     ],
+     "bca_lower95_one_sided": -10.908081725057906,
+     "bca_upper95_one_sided": -0.8641555180180335,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 22,
+     "paired_mean_diff": -3.4198663636361744,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 11.472288505820027,
+     "se": 2.445900127679065,
+     "t_ci95_two_sided": [
+      -8.506394131978757,
+      1.6666614047064083
+     ],
+     "t_lower95_one_sided": -7.628631649326592,
+     "t_upper95_one_sided": 0.7888989220542433,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      0.032442452978833095,
+      0.05060949124732844
+     ],
+     "bca_ci95_two_sided": [
+      0.03228975360978033,
+      0.05514713826843887
+     ],
+     "bca_lower95_one_sided": 0.032442452978833095,
+     "bca_upper95_one_sided": 0.05060949124732844,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 22,
+     "paired_mean_diff": 0.03705532722869345,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.02084270250324313,
+     "se": 0.0044436791044783095,
+     "t_ci95_two_sided": [
+      0.027814190641493264,
+      0.04629646381589364
+     ],
+     "t_lower95_one_sided": 0.02940889794728896,
+     "t_upper95_one_sided": 0.044701756510097945,
+     "verdict": "PASS"
+    }
+   }
+  },
+  "ctrl_noise_f005": {
+   "all24": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.07247464001442543,
+      0.027362885527993028
+     ],
+     "bca_ci95_two_sided": [
+      -0.08430637830670284,
+      0.03526983855689602
+     ],
+     "bca_lower95_one_sided": -0.07247464001442543,
+     "bca_upper95_one_sided": 0.027362885527993028,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 24,
+     "paired_mean_diff": -0.015628041666666686,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.15009606593097208,
+     "se": 0.030638231160835316,
+     "t_ci95_two_sided": [
+      -0.07900805172730671,
+      0.04775196839397333
+     ],
+     "t_lower95_one_sided": -0.06813803371375472,
+     "t_upper95_one_sided": 0.036881950380421344,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -6.956589585369504,
+      6.056052195102591
+     ],
+     "bca_ci95_two_sided": [
+      -8.12359911019172,
+      7.522204607309744
+     ],
+     "bca_lower95_one_sided": -6.956589585369504,
+     "bca_upper95_one_sided": 6.056052195102591,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 24,
+     "paired_mean_diff": -0.5276691666666314,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 19.506341653146638,
+     "se": 3.9817153165505794,
+     "t_ci95_two_sided": [
+      -8.764474858771079,
+      7.709136525437816
+     ],
+     "t_lower95_one_sided": -7.351817679296993,
+     "t_upper95_one_sided": 6.296479345963731,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -0.043867507106414655,
+      -0.024759370942572866
+     ],
+     "bca_ci95_two_sided": [
+      -0.04552983328673427,
+      -0.022352984753201976
+     ],
+     "bca_lower95_one_sided": -0.043867507106414655,
+     "bca_upper95_one_sided": -0.024759370942572866,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 24,
+     "paired_mean_diff": -0.03566625045299029,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.029155333700172974,
+     "se": 0.005951307570499536,
+     "t_ci95_two_sided": [
+      -0.047977468150648656,
+      -0.023355032755331923
+     ],
+     "t_lower95_one_sided": -0.0458660270509349,
+     "t_upper95_one_sided": -0.025466473855045677,
+     "verdict": "PASS"
+    }
+   },
+   "held22": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.0792247404180899,
+      0.03043932205655999
+     ],
+     "bca_ci95_two_sided": [
+      -0.09235938668579753,
+      0.03919405645507844
+     ],
+     "bca_lower95_one_sided": -0.0792247404180899,
+     "bca_upper95_one_sided": 0.03043932205655999,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 22,
+     "paired_mean_diff": -0.017048772727272746,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.15700018036414629,
+     "se": 0.03347255092159603,
+     "t_ci95_two_sided": [
+      -0.0866587530421761,
+      0.05256120758763061
+     ],
+     "t_lower95_one_sided": -0.0746464271646183,
+     "t_upper95_one_sided": 0.04054888171007281,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -7.593373763772833,
+      6.572348503989442
+     ],
+     "bca_ci95_two_sided": [
+      -8.958129050416096,
+      8.304270082918572
+     ],
+     "bca_lower95_one_sided": -7.593373763772833,
+     "bca_upper95_one_sided": 6.572348503989442,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 22,
+     "paired_mean_diff": -0.7669565909089381,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 20.39267763464584,
+     "se": 4.347733480115528,
+     "t_ci95_two_sided": [
+      -9.808563329343245,
+      8.274650147525369
+     ],
+     "t_lower95_one_sided": -8.248288120135319,
+     "t_upper95_one_sided": 6.714374938317443,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -0.044296225522489276,
+      -0.023845958944764295
+     ],
+     "bca_ci95_two_sided": [
+      -0.04625762537208674,
+      -0.020966637580014484
+     ],
+     "bca_lower95_one_sided": -0.044296225522489276,
+     "bca_upper95_one_sided": -0.023845958944764295,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 22,
+     "paired_mean_diff": -0.034940978276744986,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.03040328003243008,
+     "se": 0.00648200108247432,
+     "t_ci95_two_sided": [
+      -0.04842103746939839,
+      -0.021460919084091583
+     ],
+     "t_lower95_one_sided": -0.04609483563543158,
+     "t_upper95_one_sided": -0.023787120918058388,
+     "verdict": "PASS"
+    }
+   }
+  },
+  "ctrl_noise_f020": {
+   "all24": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.08177908686620475,
+      0.040668386747896995
+     ],
+     "bca_ci95_two_sided": [
+      -0.09470806297847928,
+      0.05273842092574556
+     ],
+     "bca_lower95_one_sided": -0.08177908686620475,
+     "bca_upper95_one_sided": 0.040668386747896995,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 24,
+     "paired_mean_diff": -0.017561291666666718,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.18702424992136818,
+     "se": 0.03817616515284242,
+     "t_ci95_two_sided": [
+      -0.09653470624670867,
+      0.061412122913375236
+     ],
+     "t_lower95_one_sided": -0.08299033416069236,
+     "t_upper95_one_sided": 0.04786775082735893,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -7.272565306668358,
+      7.48155792102997
+     ],
+     "bca_ci95_two_sided": [
+      -8.816643395088079,
+      8.841857338623779
+     ],
+     "bca_lower95_one_sided": -7.272565306668358,
+     "bca_upper95_one_sided": 7.48155792102997,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 24,
+     "paired_mean_diff": 0.6487833333333887,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 22.229412210255433,
+     "se": 4.537559766426652,
+     "t_ci95_two_sided": [
+      -8.737874210216384,
+      10.035440876883163
+     ],
+     "t_lower95_one_sided": -7.128011155795796,
+     "t_upper95_one_sided": 8.425577822462573,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -0.13605757091485549,
+      -0.11472002896499524
+     ],
+     "bca_ci95_two_sided": [
+      -0.1381237056689846,
+      -0.11249528771239463
+     ],
+     "bca_lower95_one_sided": -0.13605757091485549,
+     "bca_upper95_one_sided": -0.11472002896499524,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 24,
+     "paired_mean_diff": -0.12568792364962514,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.03227405709054895,
+     "se": 0.0065879143167748636,
+     "t_ci95_two_sided": [
+      -0.13931606273781005,
+      -0.11205978456144021
+     ],
+     "t_lower95_one_sided": -0.13697876242438273,
+     "t_upper95_one_sided": -0.11439708487486755,
+     "verdict": "FAIL"
+    }
+   },
+   "held22": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.0892785157391216,
+      0.045363402762290644
+     ],
+     "bca_ci95_two_sided": [
+      -0.10227597532773855,
+      0.05923021119828448
+     ],
+     "bca_lower95_one_sided": -0.0892785157391216,
+     "bca_upper95_one_sided": 0.045363402762290644,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 22,
+     "paired_mean_diff": -0.019157772727272784,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.19564578547781605,
+     "se": 0.04171182161582647,
+     "t_ci95_two_sided": [
+      -0.1059022544483568,
+      0.06758670899381122
+     ],
+     "t_lower95_one_sided": -0.09093309373606126,
+     "t_upper95_one_sided": 0.052617548281515686,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -9.012415094646315,
+      6.670228978470227
+     ],
+     "bca_ci95_two_sided": [
+      -10.840014237649273,
+      8.040715262257338
+     ],
+     "bca_lower95_one_sided": -9.012415094646315,
+     "bca_upper95_one_sided": 6.670228978470227,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 22,
+     "paired_mean_diff": -0.726873227272749,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 22.584355641473476,
+     "se": 4.815000801192016,
+     "t_ci95_two_sided": [
+      -10.740215555806536,
+      9.286469101261037
+     ],
+     "t_lower95_one_sided": -9.012251682957418,
+     "t_upper95_one_sided": 7.558505228411919,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -0.13734531307596876,
+      -0.11454238991319254
+     ],
+     "bca_ci95_two_sided": [
+      -0.1392709822234609,
+      -0.11222529199910808
+     ],
+     "bca_lower95_one_sided": -0.13734531307596876,
+     "bca_upper95_one_sided": -0.11454238991319254,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 22,
+     "paired_mean_diff": -0.12667050813175795,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.03352472364145993,
+     "se": 0.007147495095983126,
+     "t_ci95_two_sided": [
+      -0.14153453788848766,
+      -0.11180647837502825
+     ],
+     "t_lower95_one_sided": -0.1389695095910536,
+     "t_upper95_one_sided": -0.11437150667246229,
+     "verdict": "FAIL"
+    }
+   }
+  },
+  "default": {
+   "all24": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.07295085873608073,
+      0.00021941666666665713
+     ],
+     "bca_ci95_two_sided": [
+      -0.09248646463403337,
+      0.001788499999999989
+     ],
+     "bca_lower95_one_sided": -0.07295085873608073,
+     "bca_upper95_one_sided": 0.00021941666666665713,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 24,
+     "paired_mean_diff": -0.018776833333333336,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.08763179452571482,
+     "se": 0.017887765152701792,
+     "t_ci95_two_sided": [
+      -0.05578049484985856,
+      0.018226828183191882
+     ],
+     "t_lower95_one_sided": -0.049434164723574765,
+     "t_upper95_one_sided": 0.011880498056908093,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -9.599617107435426,
+      -0.03712581980243074
+     ],
+     "bca_ci95_two_sided": [
+      -11.97433492249953,
+      -0.024171675590487683
+     ],
+     "bca_lower95_one_sided": -9.599617107435426,
+     "bca_upper95_one_sided": -0.03712581980243074,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 24,
+     "paired_mean_diff": -2.424855562499905,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 11.615981211263097,
+     "se": 2.371102235779256,
+     "t_ci95_two_sided": [
+      -7.329854247626285,
+      2.4801431226264747
+     ],
+     "t_lower95_one_sided": -6.48862017377934,
+     "t_upper95_one_sided": 1.6389090487795301,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -1.2134201437448449e-05,
+      0.01547009925570357
+     ],
+     "bca_ci95_two_sided": [
+      -2.012293766368512e-05,
+      0.019356243783538386
+     ],
+     "bca_lower95_one_sided": -1.2134201437448449e-05,
+     "bca_upper95_one_sided": 0.01547009925570357,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 24,
+     "paired_mean_diff": 0.0038582285425997685,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.018918014103842102,
+     "se": 0.0038616234584323943,
+     "t_ci95_two_sided": [
+      -0.004130148213259129,
+      0.011846605298458667
+     ],
+     "t_lower95_one_sided": -0.0027600979536875985,
+     "t_upper95_one_sided": 0.010476555038887135,
+     "verdict": "PASS"
+    }
+   },
+   "held22": {
+    "A1_CtfMaxResolution_A": {
+     "bca_ci90_two_sided": [
+      -0.07824281818181818,
+      0.0016792272727272906
+     ],
+     "bca_ci95_two_sided": [
+      -0.09458896975562518,
+      0.0035407272727272713
+     ],
+     "bca_lower95_one_sided": -0.07824281818181818,
+     "bca_upper95_one_sided": 0.0016792272727272906,
+     "label": "arm - cpu (A); positive = worse",
+     "margin": 0.1,
+     "n": 22,
+     "paired_mean_diff": -0.01883313636363636,
+     "rule": "upper one-sided 95% bound of (arm - cpu) <= 0.1",
+     "sd": 0.09153828134163608,
+     "se": 0.01951602715599822,
+     "t_ci95_two_sided": [
+      -0.05941893663133162,
+      0.0217526639040589
+     ],
+     "t_lower95_one_sided": -0.05241520158340418,
+     "t_upper95_one_sided": 0.014748928856131455,
+     "verdict": "PASS"
+    },
+    "A2_DefocusMean_A": {
+     "bca_ci90_two_sided": [
+      -10.451022127546963,
+      -0.03210655237136553
+     ],
+     "bca_ci95_two_sided": [
+      -13.013569841061978,
+      -0.019716660545386334
+     ],
+     "bca_lower95_one_sided": -10.451022127546963,
+     "bca_upper95_one_sided": -0.03210655237136553,
+     "label": "arm - cpu (A)",
+     "margin": 45.0,
+     "n": 22,
+     "paired_mean_diff": -2.6330011590909055,
+     "rule": "two-sided 90% CI of (arm - cpu) inside +/-45.0 (TOST)",
+     "sd": 12.133443782115114,
+     "se": 2.5868589062074694,
+     "t_ci95_two_sided": [
+      -8.01266875479706,
+      2.7466664366152496
+     ],
+     "t_lower95_one_sided": -7.084320262523105,
+     "t_upper95_one_sided": 1.818317944341295,
+     "verdict": "PASS"
+    },
+    "A3_CtfFigureOfMerit_rel": {
+     "bca_ci90_two_sided": [
+      -1.926662821530267e-06,
+      0.01686814534995391
+     ],
+     "bca_ci95_two_sided": [
+      -9.748996616315892e-06,
+      0.021062851653824453
+     ],
+     "bca_lower95_one_sided": -1.926662821530267e-06,
+     "bca_upper95_one_sided": 0.01686814534995391,
+     "label": "(arm - cpu)/cpu, relative",
+     "margin": -0.05,
+     "n": 22,
+     "paired_mean_diff": 0.00422006760180551,
+     "rule": "lower one-sided 95% bound of (arm - cpu) >= -0.05",
+     "sd": 0.019756770721986814,
+     "se": 0.00421215767080114,
+     "t_ci95_two_sided": [
+      -0.004539593806568436,
+      0.012979729010179457
+     ],
+     "t_lower95_one_sided": -0.0030279728157501613,
+     "t_upper95_one_sided": 0.01146810801936118,
+     "verdict": "PASS"
+    }
+   }
+  }
+ },
+ "held_out_movies": [
+  "00022",
+  "00023",
+  "00024",
+  "00025",
+  "00026",
+  "00027",
+  "00028",
+  "00029",
+  "00030",
+  "00031",
+  "00035",
+  "00036",
+  "00037",
+  "00039",
+  "00040",
+  "00042",
+  "00043",
+  "00044",
+  "00045",
+  "00047",
+  "00048",
+  "00049"
+ ],
+ "margins": {
+  "CtfFigureOfMerit": -0.05,
+  "CtfMaxResolution": 0.1,
+  "DefocusMean": 45.0
+ },
+ "per_micrograph": {
+  "allfftw": {
+   "00021": {
+    "CtfAstigmatism": 253.422852,
+    "CtfFigureOfMerit": 0.158494,
+    "CtfMaxResolution": 5.084042,
+    "DefocusMean": 10681.51709,
+    "DefocusU": 10808.228516,
+    "DefocusV": 10554.805664
+   },
+   "00022": {
+    "CtfAstigmatism": 190.527344,
+    "CtfFigureOfMerit": 0.184033,
+    "CtfMaxResolution": 3.792857,
+    "DefocusMean": 9696.895508000001,
+    "DefocusU": 9792.15918,
+    "DefocusV": 9601.631836
+   },
+   "00023": {
+    "CtfAstigmatism": 372.111328,
+    "CtfFigureOfMerit": 0.175062,
+    "CtfMaxResolution": 3.413571,
+    "DefocusMean": 10516.127929999999,
+    "DefocusU": 10702.183594,
+    "DefocusV": 10330.072266
+   },
+   "00024": {
+    "CtfAstigmatism": 319.357422,
+    "CtfFigureOfMerit": 0.174214,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 11499.958008,
+    "DefocusU": 11659.636719,
+    "DefocusV": 11340.279297
+   },
+   "00025": {
+    "CtfAstigmatism": 344.410156,
+    "CtfFigureOfMerit": 0.178078,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10491.4609375,
+    "DefocusU": 10663.666016,
+    "DefocusV": 10319.255859
+   },
+   "00026": {
+    "CtfAstigmatism": 314.82666,
+    "CtfFigureOfMerit": 0.212919,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 8191.430420000001,
+    "DefocusU": 8348.84375,
+    "DefocusV": 8034.01709
+   },
+   "00027": {
+    "CtfAstigmatism": 338.615234,
+    "CtfFigureOfMerit": 0.192522,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 8971.025390499999,
+    "DefocusU": 9140.333008,
+    "DefocusV": 8801.717773
+   },
+   "00028": {
+    "CtfAstigmatism": 342.664062,
+    "CtfFigureOfMerit": 0.180854,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 9956.623047000001,
+    "DefocusU": 10127.955078,
+    "DefocusV": 9785.291016
+   },
+   "00029": {
+    "CtfAstigmatism": 296.179199,
+    "CtfFigureOfMerit": 0.218548,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 8121.7062985,
+    "DefocusU": 8269.795898,
+    "DefocusV": 7973.616699
+   },
+   "00030": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.206178,
+    "CtfMaxResolution": 3.813032,
+    "DefocusMean": 9045.806641,
+    "DefocusU": 9045.806641,
+    "DefocusV": 9045.806641
+   },
+   "00031": {
+    "CtfAstigmatism": 329.142578,
+    "CtfFigureOfMerit": 0.214496,
+    "CtfMaxResolution": 3.365493,
+    "DefocusMean": 9952.747070000001,
+    "DefocusU": 10117.318359,
+    "DefocusV": 9788.175781
+   },
+   "00035": {
+    "CtfAstigmatism": 331.105469,
+    "CtfFigureOfMerit": 0.168966,
+    "CtfMaxResolution": 3.229054,
+    "DefocusMean": 9114.943359500001,
+    "DefocusU": 9280.496094,
+    "DefocusV": 8949.390625
+   },
+   "00036": {
+    "CtfAstigmatism": 257.239258,
+    "CtfFigureOfMerit": 0.175683,
+    "CtfMaxResolution": 3.186,
+    "DefocusMean": 9882.076659999999,
+    "DefocusU": 10010.696289,
+    "DefocusV": 9753.457031
+   },
+   "00037": {
+    "CtfAstigmatism": 252.59375,
+    "CtfFigureOfMerit": 0.151718,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10870.644531,
+    "DefocusU": 10996.941406,
+    "DefocusV": 10744.347656
+   },
+   "00039": {
+    "CtfAstigmatism": 309.727539,
+    "CtfFigureOfMerit": 0.166674,
+    "CtfMaxResolution": 3.463043,
+    "DefocusMean": 9967.2553715,
+    "DefocusU": 10122.119141,
+    "DefocusV": 9812.391602
+   },
+   "00040": {
+    "CtfAstigmatism": 319.367188,
+    "CtfFigureOfMerit": 0.184189,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10953.2001955,
+    "DefocusU": 11112.883789,
+    "DefocusV": 10793.516602
+   },
+   "00042": {
+    "CtfAstigmatism": 291.331055,
+    "CtfFigureOfMerit": 0.222713,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 9935.251465000001,
+    "DefocusU": 10080.916992,
+    "DefocusV": 9789.585938
+   },
+   "00043": {
+    "CtfAstigmatism": 267.825195,
+    "CtfFigureOfMerit": 0.224062,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 10941.1606445,
+    "DefocusU": 11075.073242,
+    "DefocusV": 10807.248047
+   },
+   "00044": {
+    "CtfAstigmatism": 197.677734,
+    "CtfFigureOfMerit": 0.165914,
+    "CtfMaxResolution": 3.413571,
+    "DefocusMean": 11307.0390625,
+    "DefocusU": 11405.87793,
+    "DefocusV": 11208.200195
+   },
+   "00045": {
+    "CtfAstigmatism": 269.928711,
+    "CtfFigureOfMerit": 0.159187,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 11948.5727535,
+    "DefocusU": 12083.537109,
+    "DefocusV": 11813.608398
+   },
+   "00046": {
+    "CtfAstigmatism": 321.506836,
+    "CtfFigureOfMerit": 0.160421,
+    "CtfMaxResolution": 3.620454,
+    "DefocusMean": 12891.825684,
+    "DefocusU": 13052.579102,
+    "DefocusV": 12731.072266
+   },
+   "00047": {
+    "CtfAstigmatism": 285.713867,
+    "CtfFigureOfMerit": 0.167419,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11328.147949499999,
+    "DefocusU": 11471.004883,
+    "DefocusV": 11185.291016
+   },
+   "00048": {
+    "CtfAstigmatism": 272.753906,
+    "CtfFigureOfMerit": 0.164073,
+    "CtfMaxResolution": 3.496829,
+    "DefocusMean": 12012.801758000001,
+    "DefocusU": 12149.178711,
+    "DefocusV": 11876.424805
+   },
+   "00049": {
+    "CtfAstigmatism": 316.208984,
+    "CtfFigureOfMerit": 0.174776,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 12946.978515499999,
+    "DefocusU": 13105.083008,
+    "DefocusV": 12788.874023
+   }
+  },
+  "cpu": {
+   "00021": {
+    "CtfAstigmatism": 243.672852,
+    "CtfFigureOfMerit": 0.158522,
+    "CtfMaxResolution": 5.120357,
+    "DefocusMean": 10681.9711915,
+    "DefocusU": 10803.807617,
+    "DefocusV": 10560.134766
+   },
+   "00022": {
+    "CtfAstigmatism": 190.333008,
+    "CtfFigureOfMerit": 0.184034,
+    "CtfMaxResolution": 3.792857,
+    "DefocusMean": 9696.952636999999,
+    "DefocusU": 9792.119141,
+    "DefocusV": 9601.786133
+   },
+   "00023": {
+    "CtfAstigmatism": 372.075195,
+    "CtfFigureOfMerit": 0.17506,
+    "CtfMaxResolution": 3.413571,
+    "DefocusMean": 10516.121582,
+    "DefocusU": 10702.15918,
+    "DefocusV": 10330.083984
+   },
+   "00024": {
+    "CtfAstigmatism": 319.1875,
+    "CtfFigureOfMerit": 0.174199,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 11498.374023,
+    "DefocusU": 11657.967773,
+    "DefocusV": 11338.780273
+   },
+   "00025": {
+    "CtfAstigmatism": 344.439453,
+    "CtfFigureOfMerit": 0.178075,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10491.4550785,
+    "DefocusU": 10663.674805,
+    "DefocusV": 10319.235352
+   },
+   "00026": {
+    "CtfAstigmatism": 314.834961,
+    "CtfFigureOfMerit": 0.212921,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 8191.419433499999,
+    "DefocusU": 8348.836914,
+    "DefocusV": 8034.001953
+   },
+   "00027": {
+    "CtfAstigmatism": 338.316406,
+    "CtfFigureOfMerit": 0.19252,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 8970.7353515,
+    "DefocusU": 9139.893555,
+    "DefocusV": 8801.577148
+   },
+   "00028": {
+    "CtfAstigmatism": 342.743164,
+    "CtfFigureOfMerit": 0.180858,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 9956.60498,
+    "DefocusU": 10127.976562,
+    "DefocusV": 9785.233398
+   },
+   "00029": {
+    "CtfAstigmatism": 296.118164,
+    "CtfFigureOfMerit": 0.218546,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 8121.713379000001,
+    "DefocusU": 8269.772461,
+    "DefocusV": 7973.654297
+   },
+   "00030": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.206176,
+    "CtfMaxResolution": 3.813032,
+    "DefocusMean": 9045.813477,
+    "DefocusU": 9045.813477,
+    "DefocusV": 9045.813477
+   },
+   "00031": {
+    "CtfAstigmatism": 329.09668,
+    "CtfFigureOfMerit": 0.214507,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 9952.744629,
+    "DefocusU": 10117.292969,
+    "DefocusV": 9788.196289
+   },
+   "00035": {
+    "CtfAstigmatism": 330.938477,
+    "CtfFigureOfMerit": 0.168964,
+    "CtfMaxResolution": 3.229054,
+    "DefocusMean": 9114.942871,
+    "DefocusU": 9280.412109,
+    "DefocusV": 8949.473633
+   },
+   "00036": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.160256,
+    "CtfMaxResolution": 3.714249,
+    "DefocusMean": 9934.624023,
+    "DefocusU": 9934.624023,
+    "DefocusV": 9934.624023
+   },
+   "00037": {
+    "CtfAstigmatism": 257.839844,
+    "CtfFigureOfMerit": 0.151731,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10873.315429999999,
+    "DefocusU": 11002.235352,
+    "DefocusV": 10744.395508
+   },
+   "00039": {
+    "CtfAstigmatism": 309.617188,
+    "CtfFigureOfMerit": 0.166669,
+    "CtfMaxResolution": 3.463043,
+    "DefocusMean": 9967.198242,
+    "DefocusU": 10122.006836,
+    "DefocusV": 9812.389648
+   },
+   "00040": {
+    "CtfAstigmatism": 319.387695,
+    "CtfFigureOfMerit": 0.18419,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10953.373535499999,
+    "DefocusU": 11113.067383,
+    "DefocusV": 10793.679688
+   },
+   "00042": {
+    "CtfAstigmatism": 291.320312,
+    "CtfFigureOfMerit": 0.222718,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 9935.25,
+    "DefocusU": 10080.910156,
+    "DefocusV": 9789.589844
+   },
+   "00043": {
+    "CtfAstigmatism": 267.807617,
+    "CtfFigureOfMerit": 0.224061,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 10941.1674805,
+    "DefocusU": 11075.071289,
+    "DefocusV": 10807.263672
+   },
+   "00044": {
+    "CtfAstigmatism": 208.000977,
+    "CtfFigureOfMerit": 0.165882,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 11299.237793,
+    "DefocusU": 11403.238281,
+    "DefocusV": 11195.237305
+   },
+   "00045": {
+    "CtfAstigmatism": 270.141602,
+    "CtfFigureOfMerit": 0.159186,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 11948.476074,
+    "DefocusU": 12083.546875,
+    "DefocusV": 11813.405273
+   },
+   "00046": {
+    "CtfAstigmatism": 321.514648,
+    "CtfFigureOfMerit": 0.160425,
+    "CtfMaxResolution": 3.620454,
+    "DefocusMean": 12891.817871,
+    "DefocusU": 13052.575195,
+    "DefocusV": 12731.060547
+   },
+   "00047": {
+    "CtfAstigmatism": 287.969727,
+    "CtfFigureOfMerit": 0.167427,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11327.5493165,
+    "DefocusU": 11471.53418,
+    "DefocusV": 11183.564453
+   },
+   "00048": {
+    "CtfAstigmatism": 272.753906,
+    "CtfFigureOfMerit": 0.164074,
+    "CtfMaxResolution": 3.496829,
+    "DefocusMean": 12012.790039,
+    "DefocusU": 12149.166992,
+    "DefocusV": 11876.413086
+   },
+   "00049": {
+    "CtfAstigmatism": 316.329102,
+    "CtfFigureOfMerit": 0.174775,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 12947.3461915,
+    "DefocusU": 13105.510742,
+    "DefocusV": 12789.181641
+   }
+  },
+  "ctrl_envelope_b20": {
+   "00021": {
+    "CtfAstigmatism": 250.239258,
+    "CtfFigureOfMerit": 0.166085,
+    "CtfMaxResolution": 5.120357,
+    "DefocusMean": 10683.661621,
+    "DefocusU": 10808.78125,
+    "DefocusV": 10558.541992
+   },
+   "00022": {
+    "CtfAstigmatism": 191.825195,
+    "CtfFigureOfMerit": 0.190801,
+    "CtfMaxResolution": 3.772895,
+    "DefocusMean": 9696.2700195,
+    "DefocusU": 9792.182617,
+    "DefocusV": 9600.357422
+   },
+   "00023": {
+    "CtfAstigmatism": 368.670898,
+    "CtfFigureOfMerit": 0.181458,
+    "CtfMaxResolution": 3.51397,
+    "DefocusMean": 10515.040527500001,
+    "DefocusU": 10699.375977,
+    "DefocusV": 10330.705078
+   },
+   "00024": {
+    "CtfAstigmatism": 320.212891,
+    "CtfFigureOfMerit": 0.180445,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 11499.6289065,
+    "DefocusU": 11659.735352,
+    "DefocusV": 11339.522461
+   },
+   "00025": {
+    "CtfAstigmatism": 345.55957,
+    "CtfFigureOfMerit": 0.18406,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10491.943847499999,
+    "DefocusU": 10664.723633,
+    "DefocusV": 10319.164062
+   },
+   "00026": {
+    "CtfAstigmatism": 316.52002,
+    "CtfFigureOfMerit": 0.219144,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 8191.2175295,
+    "DefocusU": 8349.477539,
+    "DefocusV": 8032.95752
+   },
+   "00027": {
+    "CtfAstigmatism": 342.0625,
+    "CtfFigureOfMerit": 0.198317,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 8969.262695,
+    "DefocusU": 9140.293945,
+    "DefocusV": 8798.231445
+   },
+   "00028": {
+    "CtfAstigmatism": 342.90332,
+    "CtfFigureOfMerit": 0.186333,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 9956.699707,
+    "DefocusU": 10128.151367,
+    "DefocusV": 9785.248047
+   },
+   "00029": {
+    "CtfAstigmatism": 299.4375,
+    "CtfFigureOfMerit": 0.225086,
+    "CtfMaxResolution": 3.397393,
+    "DefocusMean": 8120.742188,
+    "DefocusU": 8270.460938,
+    "DefocusV": 7971.023438
+   },
+   "00030": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.214229,
+    "CtfMaxResolution": 3.813032,
+    "DefocusMean": 9044.139648,
+    "DefocusU": 9044.139648,
+    "DefocusV": 9044.139648
+   },
+   "00031": {
+    "CtfAstigmatism": 330.046875,
+    "CtfFigureOfMerit": 0.221645,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 9950.5917965,
+    "DefocusU": 10115.615234,
+    "DefocusV": 9785.568359
+   },
+   "00035": {
+    "CtfAstigmatism": 333.055664,
+    "CtfFigureOfMerit": 0.174277,
+    "CtfMaxResolution": 3.258409,
+    "DefocusMean": 9112.885254,
+    "DefocusU": 9279.413086,
+    "DefocusV": 8946.357422
+   },
+   "00036": {
+    "CtfAstigmatism": 272.443359,
+    "CtfFigureOfMerit": 0.181038,
+    "CtfMaxResolution": 3.214574,
+    "DefocusMean": 9880.3251955,
+    "DefocusU": 10016.546875,
+    "DefocusV": 9744.103516
+   },
+   "00037": {
+    "CtfAstigmatism": 264.667969,
+    "CtfFigureOfMerit": 0.156655,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10870.9990235,
+    "DefocusU": 11003.333008,
+    "DefocusV": 10738.665039
+   },
+   "00039": {
+    "CtfAstigmatism": 309.606445,
+    "CtfFigureOfMerit": 0.172213,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 9966.7231445,
+    "DefocusU": 10121.526367,
+    "DefocusV": 9811.919922
+   },
+   "00040": {
+    "CtfAstigmatism": 317.568359,
+    "CtfFigureOfMerit": 0.190046,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10953.646484500001,
+    "DefocusU": 11112.430664,
+    "DefocusV": 10794.862305
+   },
+   "00042": {
+    "CtfAstigmatism": 289.410156,
+    "CtfFigureOfMerit": 0.230021,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 9935.102539,
+    "DefocusU": 10079.807617,
+    "DefocusV": 9790.397461
+   },
+   "00043": {
+    "CtfAstigmatism": 265.704102,
+    "CtfFigureOfMerit": 0.230909,
+    "CtfMaxResolution": 3.349766,
+    "DefocusMean": 10940.849121,
+    "DefocusU": 11073.701172,
+    "DefocusV": 10807.99707
+   },
+   "00044": {
+    "CtfAstigmatism": 209.975586,
+    "CtfFigureOfMerit": 0.170953,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 11297.682129,
+    "DefocusU": 11402.669922,
+    "DefocusV": 11192.694336
+   },
+   "00045": {
+    "CtfAstigmatism": 271.780273,
+    "CtfFigureOfMerit": 0.164443,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 11946.7524415,
+    "DefocusU": 12082.642578,
+    "DefocusV": 11810.862305
+   },
+   "00046": {
+    "CtfAstigmatism": 323.486328,
+    "CtfFigureOfMerit": 0.165815,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 12890.8427735,
+    "DefocusU": 13052.585938,
+    "DefocusV": 12729.099609
+   },
+   "00047": {
+    "CtfAstigmatism": 292.851562,
+    "CtfFigureOfMerit": 0.172922,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11321.004883,
+    "DefocusU": 11467.430664,
+    "DefocusV": 11174.579102
+   },
+   "00048": {
+    "CtfAstigmatism": 270.12207,
+    "CtfFigureOfMerit": 0.169355,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 12013.440918,
+    "DefocusU": 12148.501953,
+    "DefocusV": 11878.379883
+   },
+   "00049": {
+    "CtfAstigmatism": 316.054688,
+    "CtfFigureOfMerit": 0.180014,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 12947.020508,
+    "DefocusU": 13105.047852,
+    "DefocusV": 12788.993164
+   }
+  },
+  "ctrl_noise_f005": {
+   "00021": {
+    "CtfAstigmatism": 249.355469,
+    "CtfFigureOfMerit": 0.15167,
+    "CtfMaxResolution": 5.120357,
+    "DefocusMean": 10685.347656499998,
+    "DefocusU": 10810.025391,
+    "DefocusV": 10560.669922
+   },
+   "00022": {
+    "CtfAstigmatism": 199.977539,
+    "CtfFigureOfMerit": 0.176639,
+    "CtfMaxResolution": 3.714249,
+    "DefocusMean": 9702.3559575,
+    "DefocusU": 9802.344727,
+    "DefocusV": 9602.367188
+   },
+   "00023": {
+    "CtfAstigmatism": 360.370117,
+    "CtfFigureOfMerit": 0.167926,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 10518.235839500001,
+    "DefocusU": 10698.420898,
+    "DefocusV": 10338.050781
+   },
+   "00024": {
+    "CtfAstigmatism": 302.265625,
+    "CtfFigureOfMerit": 0.169455,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 11499.5351565,
+    "DefocusU": 11650.667969,
+    "DefocusV": 11348.402344
+   },
+   "00025": {
+    "CtfAstigmatism": 325.610352,
+    "CtfFigureOfMerit": 0.172101,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10493.0893555,
+    "DefocusU": 10655.894531,
+    "DefocusV": 10330.28418
+   },
+   "00026": {
+    "CtfAstigmatism": 318.92627,
+    "CtfFigureOfMerit": 0.206922,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 8189.9157715,
+    "DefocusU": 8349.378906,
+    "DefocusV": 8030.452637
+   },
+   "00027": {
+    "CtfAstigmatism": 322.976562,
+    "CtfFigureOfMerit": 0.187045,
+    "CtfMaxResolution": 3.089871,
+    "DefocusMean": 8977.4052735,
+    "DefocusU": 9138.893555,
+    "DefocusV": 8815.916992
+   },
+   "00028": {
+    "CtfAstigmatism": 334.666992,
+    "CtfFigureOfMerit": 0.1748,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 9957.218261999999,
+    "DefocusU": 10124.551758,
+    "DefocusV": 9789.884766
+   },
+   "00029": {
+    "CtfAstigmatism": 289.927246,
+    "CtfFigureOfMerit": 0.21157,
+    "CtfMaxResolution": 3.381368,
+    "DefocusMean": 8118.242432000001,
+    "DefocusU": 8263.206055,
+    "DefocusV": 7973.278809
+   },
+   "00030": {
+    "CtfAstigmatism": 282.200195,
+    "CtfFigureOfMerit": 0.220279,
+    "CtfMaxResolution": 3.397393,
+    "DefocusMean": 8984.9536135,
+    "DefocusU": 9126.053711,
+    "DefocusV": 8843.853516
+   },
+   "00031": {
+    "CtfAstigmatism": 339.766602,
+    "CtfFigureOfMerit": 0.206624,
+    "CtfMaxResolution": 3.258409,
+    "DefocusMean": 9948.770996,
+    "DefocusU": 10118.654297,
+    "DefocusV": 9778.887695
+   },
+   "00035": {
+    "CtfAstigmatism": 321.6875,
+    "CtfFigureOfMerit": 0.163262,
+    "CtfMaxResolution": 3.258409,
+    "DefocusMean": 9117.80957,
+    "DefocusU": 9278.65332,
+    "DefocusV": 8956.96582
+   },
+   "00036": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.151726,
+    "CtfMaxResolution": 3.714249,
+    "DefocusMean": 9946.457031,
+    "DefocusU": 9946.457031,
+    "DefocusV": 9946.457031
+   },
+   "00037": {
+    "CtfAstigmatism": 280.564453,
+    "CtfFigureOfMerit": 0.143914,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 10861.3925785,
+    "DefocusU": 11001.674805,
+    "DefocusV": 10721.110352
+   },
+   "00039": {
+    "CtfAstigmatism": 322.510742,
+    "CtfFigureOfMerit": 0.160183,
+    "CtfMaxResolution": 3.381368,
+    "DefocusMean": 9955.5131835,
+    "DefocusU": 10116.768555,
+    "DefocusV": 9794.257812
+   },
+   "00040": {
+    "CtfAstigmatism": 320.431641,
+    "CtfFigureOfMerit": 0.178482,
+    "CtfMaxResolution": 3.050425,
+    "DefocusMean": 10951.599609500001,
+    "DefocusU": 11111.81543,
+    "DefocusV": 10791.383789
+   },
+   "00042": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.195452,
+    "CtfMaxResolution": 3.638832,
+    "DefocusMean": 10000.001953,
+    "DefocusU": 10000.001953,
+    "DefocusV": 10000.001953
+   },
+   "00043": {
+    "CtfAstigmatism": 272.774414,
+    "CtfFigureOfMerit": 0.21793,
+    "CtfMaxResolution": 3.397393,
+    "DefocusMean": 10936.787597999999,
+    "DefocusU": 11073.174805,
+    "DefocusV": 10800.400391
+   },
+   "00044": {
+    "CtfAstigmatism": 247.455078,
+    "CtfFigureOfMerit": 0.159674,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11284.051758,
+    "DefocusU": 11407.779297,
+    "DefocusV": 11160.324219
+   },
+   "00045": {
+    "CtfAstigmatism": 274.691406,
+    "CtfFigureOfMerit": 0.155159,
+    "CtfMaxResolution": 3.171903,
+    "DefocusMean": 11951.427734500001,
+    "DefocusU": 12088.773438,
+    "DefocusV": 11814.082031
+   },
+   "00046": {
+    "CtfAstigmatism": 323.375,
+    "CtfFigureOfMerit": 0.153356,
+    "CtfMaxResolution": 3.620454,
+    "DefocusMean": 12892.650391,
+    "DefocusU": 13054.337891,
+    "DefocusV": 12730.962891
+   },
+   "00047": {
+    "CtfAstigmatism": 285.869141,
+    "CtfFigureOfMerit": 0.161244,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11322.0859375,
+    "DefocusU": 11465.020508,
+    "DefocusV": 11179.151367
+   },
+   "00048": {
+    "CtfAstigmatism": 254.75,
+    "CtfFigureOfMerit": 0.157225,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 12016.973633,
+    "DefocusU": 12144.348633,
+    "DefocusV": 11889.598633
+   },
+   "00049": {
+    "CtfAstigmatism": 317.014648,
+    "CtfFigureOfMerit": 0.168303,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 12946.509277500001,
+    "DefocusU": 13105.016602,
+    "DefocusV": 12788.001953
+   }
+  },
+  "ctrl_noise_f020": {
+   "00021": {
+    "CtfAstigmatism": 275.03125,
+    "CtfFigureOfMerit": 0.139189,
+    "CtfMaxResolution": 5.120357,
+    "DefocusMean": 10706.545898,
+    "DefocusU": 10844.061523,
+    "DefocusV": 10569.030273
+   },
+   "00022": {
+    "CtfAstigmatism": 216.706055,
+    "CtfFigureOfMerit": 0.159338,
+    "CtfMaxResolution": 3.676154,
+    "DefocusMean": 9708.063965000001,
+    "DefocusU": 9816.416992,
+    "DefocusV": 9599.710938
+   },
+   "00023": {
+    "CtfAstigmatism": 398.175781,
+    "CtfFigureOfMerit": 0.154623,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10500.150390499999,
+    "DefocusU": 10699.238281,
+    "DefocusV": 10301.0625
+   },
+   "00024": {
+    "CtfAstigmatism": 279.511719,
+    "CtfFigureOfMerit": 0.147525,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 11514.060547000001,
+    "DefocusU": 11653.816406,
+    "DefocusV": 11374.304688
+   },
+   "00025": {
+    "CtfAstigmatism": 353.030273,
+    "CtfFigureOfMerit": 0.159799,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10493.201659999999,
+    "DefocusU": 10669.716797,
+    "DefocusV": 10316.686523
+   },
+   "00026": {
+    "CtfAstigmatism": 345.941406,
+    "CtfFigureOfMerit": 0.187277,
+    "CtfMaxResolution": 3.397393,
+    "DefocusMean": 8203.768554999999,
+    "DefocusU": 8376.739258,
+    "DefocusV": 8030.797852
+   },
+   "00027": {
+    "CtfAstigmatism": 336.068359,
+    "CtfFigureOfMerit": 0.170912,
+    "CtfMaxResolution": 3.144079,
+    "DefocusMean": 8982.005859500001,
+    "DefocusU": 9150.040039,
+    "DefocusV": 8813.97168
+   },
+   "00028": {
+    "CtfAstigmatism": 335.27832,
+    "CtfFigureOfMerit": 0.161551,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 9960.867676,
+    "DefocusU": 10128.506836,
+    "DefocusV": 9793.228516
+   },
+   "00029": {
+    "CtfAstigmatism": 259.732422,
+    "CtfFigureOfMerit": 0.193213,
+    "CtfMaxResolution": 3.463043,
+    "DefocusMean": 8107.2431639999995,
+    "DefocusU": 8237.109375,
+    "DefocusV": 7977.376953
+   },
+   "00030": {
+    "CtfAstigmatism": 265.451172,
+    "CtfFigureOfMerit": 0.196314,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 8993.378906,
+    "DefocusU": 9126.104492,
+    "DefocusV": 8860.65332
+   },
+   "00031": {
+    "CtfAstigmatism": 320.000977,
+    "CtfFigureOfMerit": 0.183729,
+    "CtfMaxResolution": 3.365493,
+    "DefocusMean": 9952.1450195,
+    "DefocusU": 10112.145508,
+    "DefocusV": 9792.144531
+   },
+   "00035": {
+    "CtfAstigmatism": 318.762695,
+    "CtfFigureOfMerit": 0.143177,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 9119.382324499999,
+    "DefocusU": 9278.763672,
+    "DefocusV": 8960.000977
+   },
+   "00036": {
+    "CtfAstigmatism": 246.369141,
+    "CtfFigureOfMerit": 0.150023,
+    "CtfMaxResolution": 3.258409,
+    "DefocusMean": 9881.5166015,
+    "DefocusU": 10004.701172,
+    "DefocusV": 9758.332031
+   },
+   "00037": {
+    "CtfAstigmatism": 246.681641,
+    "CtfFigureOfMerit": 0.127918,
+    "CtfMaxResolution": 3.157929,
+    "DefocusMean": 10856.977539,
+    "DefocusU": 10980.318359,
+    "DefocusV": 10733.636719
+   },
+   "00039": {
+    "CtfAstigmatism": 287.805664,
+    "CtfFigureOfMerit": 0.150123,
+    "CtfMaxResolution": 3.365493,
+    "DefocusMean": 9964.26709,
+    "DefocusU": 10108.169922,
+    "DefocusV": 9820.364258
+   },
+   "00040": {
+    "CtfAstigmatism": 280.791992,
+    "CtfFigureOfMerit": 0.163529,
+    "CtfMaxResolution": 3.089871,
+    "DefocusMean": 10950.681152000001,
+    "DefocusU": 11091.077148,
+    "DefocusV": 10810.285156
+   },
+   "00042": {
+    "CtfAstigmatism": 278.450195,
+    "CtfFigureOfMerit": 0.198267,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 9932.1206055,
+    "DefocusU": 10071.345703,
+    "DefocusV": 9792.895508
+   },
+   "00043": {
+    "CtfAstigmatism": 262.582031,
+    "CtfFigureOfMerit": 0.195356,
+    "CtfMaxResolution": 3.479854,
+    "DefocusMean": 10943.9765625,
+    "DefocusU": 11075.267578,
+    "DefocusV": 10812.685547
+   },
+   "00044": {
+    "CtfAstigmatism": 249.112305,
+    "CtfFigureOfMerit": 0.138978,
+    "CtfMaxResolution": 3.303456,
+    "DefocusMean": 11301.0981445,
+    "DefocusU": 11425.654297,
+    "DefocusV": 11176.541992
+   },
+   "00045": {
+    "CtfAstigmatism": 237.217773,
+    "CtfFigureOfMerit": 0.134971,
+    "CtfMaxResolution": 3.349766,
+    "DefocusMean": 11965.5786135,
+    "DefocusU": 12084.1875,
+    "DefocusV": 11846.969727
+   },
+   "00046": {
+    "CtfAstigmatism": 341.254883,
+    "CtfFigureOfMerit": 0.143131,
+    "CtfMaxResolution": 3.620454,
+    "DefocusMean": 12898.805175500001,
+    "DefocusU": 13069.432617,
+    "DefocusV": 12728.177734
+   },
+   "00047": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.134108,
+    "CtfMaxResolution": 3.792857,
+    "DefocusMean": 11385.577148,
+    "DefocusU": 11385.577148,
+    "DefocusV": 11385.577148
+   },
+   "00048": {
+    "CtfAstigmatism": 288.115234,
+    "CtfFigureOfMerit": 0.139174,
+    "CtfMaxResolution": 3.463043,
+    "DefocusMean": 12018.609375,
+    "DefocusU": 12162.666992,
+    "DefocusV": 11874.551758
+   },
+   "00049": {
+    "CtfAstigmatism": 357.430664,
+    "CtfFigureOfMerit": 0.149333,
+    "CtfMaxResolution": 3.214574,
+    "DefocusMean": 12946.543457,
+    "DefocusU": 13125.258789,
+    "DefocusV": 12767.828125
+   }
+  },
+  "default": {
+   "00021": {
+    "CtfAstigmatism": 253.689453,
+    "CtfFigureOfMerit": 0.15851,
+    "CtfMaxResolution": 5.084042,
+    "DefocusMean": 10681.4199215,
+    "DefocusU": 10808.264648,
+    "DefocusV": 10554.575195
+   },
+   "00022": {
+    "CtfAstigmatism": 190.379883,
+    "CtfFigureOfMerit": 0.184045,
+    "CtfMaxResolution": 3.792857,
+    "DefocusMean": 9697.0424805,
+    "DefocusU": 9792.232422,
+    "DefocusV": 9601.852539
+   },
+   "00023": {
+    "CtfAstigmatism": 371.983398,
+    "CtfFigureOfMerit": 0.175081,
+    "CtfMaxResolution": 3.413571,
+    "DefocusMean": 10516.043457,
+    "DefocusU": 10702.035156,
+    "DefocusV": 10330.051758
+   },
+   "00024": {
+    "CtfAstigmatism": 318.641602,
+    "CtfFigureOfMerit": 0.174215,
+    "CtfMaxResolution": 3.657398,
+    "DefocusMean": 11498.224121,
+    "DefocusU": 11657.544922,
+    "DefocusV": 11338.90332
+   },
+   "00025": {
+    "CtfAstigmatism": 344.855469,
+    "CtfFigureOfMerit": 0.178096,
+    "CtfMaxResolution": 3.833422,
+    "DefocusMean": 10491.576172000001,
+    "DefocusU": 10664.003906,
+    "DefocusV": 10319.148438
+   },
+   "00026": {
+    "CtfAstigmatism": 315.715332,
+    "CtfFigureOfMerit": 0.212963,
+    "CtfMaxResolution": 3.446394,
+    "DefocusMean": 8191.045654,
+    "DefocusU": 8348.90332,
+    "DefocusV": 8033.187988
+   },
+   "00027": {
+    "CtfAstigmatism": 337.902344,
+    "CtfFigureOfMerit": 0.192518,
+    "CtfMaxResolution": 3.381368,
+    "DefocusMean": 8971.0791015,
+    "DefocusU": 9140.030273,
+    "DefocusV": 8802.12793
+   },
+   "00028": {
+    "CtfAstigmatism": 342.708008,
+    "CtfFigureOfMerit": 0.180817,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 9956.6538085,
+    "DefocusU": 10128.007812,
+    "DefocusV": 9785.299805
+   },
+   "00029": {
+    "CtfAstigmatism": 296.169922,
+    "CtfFigureOfMerit": 0.218553,
+    "CtfMaxResolution": 3.334186,
+    "DefocusMean": 8121.693359,
+    "DefocusU": 8269.77832,
+    "DefocusV": 7973.608398
+   },
+   "00030": {
+    "CtfAstigmatism": 273.482422,
+    "CtfFigureOfMerit": 0.225283,
+    "CtfMaxResolution": 3.397393,
+    "DefocusMean": 8988.863281,
+    "DefocusU": 9125.604492,
+    "DefocusV": 8852.12207
+   },
+   "00031": {
+    "CtfAstigmatism": 328.958984,
+    "CtfFigureOfMerit": 0.214482,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 9952.745117,
+    "DefocusU": 10117.224609,
+    "DefocusV": 9788.265625
+   },
+   "00035": {
+    "CtfAstigmatism": 331.336914,
+    "CtfFigureOfMerit": 0.168966,
+    "CtfMaxResolution": 3.229054,
+    "DefocusMean": 9114.9887695,
+    "DefocusU": 9280.657227,
+    "DefocusV": 8949.320312
+   },
+   "00036": {
+    "CtfAstigmatism": 0.0,
+    "CtfFigureOfMerit": 0.160269,
+    "CtfMaxResolution": 3.714249,
+    "DefocusMean": 9934.556641,
+    "DefocusU": 9934.556641,
+    "DefocusV": 9934.556641
+   },
+   "00037": {
+    "CtfAstigmatism": 256.339844,
+    "CtfFigureOfMerit": 0.151728,
+    "CtfMaxResolution": 3.116739,
+    "DefocusMean": 10872.616211,
+    "DefocusU": 11000.786133,
+    "DefocusV": 10744.446289
+   },
+   "00039": {
+    "CtfAstigmatism": 309.989258,
+    "CtfFigureOfMerit": 0.166619,
+    "CtfMaxResolution": 3.463043,
+    "DefocusMean": 9967.1518555,
+    "DefocusU": 10122.146484,
+    "DefocusV": 9812.157227
+   },
+   "00040": {
+    "CtfAstigmatism": 319.676758,
+    "CtfFigureOfMerit": 0.184183,
+    "CtfMaxResolution": 3.0375,
+    "DefocusMean": 10953.340332,
+    "DefocusU": 11113.178711,
+    "DefocusV": 10793.501953
+   },
+   "00042": {
+    "CtfAstigmatism": 291.230469,
+    "CtfFigureOfMerit": 0.222716,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 9935.292968500002,
+    "DefocusU": 10080.908203,
+    "DefocusV": 9789.677734
+   },
+   "00043": {
+    "CtfAstigmatism": 267.850586,
+    "CtfFigureOfMerit": 0.224057,
+    "CtfMaxResolution": 3.273288,
+    "DefocusMean": 10941.122559,
+    "DefocusU": 11075.047852,
+    "DefocusV": 10807.197266
+   },
+   "00044": {
+    "CtfAstigmatism": 207.62793,
+    "CtfFigureOfMerit": 0.165941,
+    "CtfMaxResolution": 3.429904,
+    "DefocusMean": 11299.262207,
+    "DefocusU": 11403.076172,
+    "DefocusV": 11195.448242
+   },
+   "00045": {
+    "CtfAstigmatism": 270.868164,
+    "CtfFigureOfMerit": 0.15918,
+    "CtfMaxResolution": 3.288303,
+    "DefocusMean": 11948.411621,
+    "DefocusU": 12083.845703,
+    "DefocusV": 11812.977539
+   },
+   "00046": {
+    "CtfAstigmatism": 321.712891,
+    "CtfFigureOfMerit": 0.160398,
+    "CtfMaxResolution": 3.620454,
+    "DefocusMean": 12892.098633000001,
+    "DefocusU": 13052.955078,
+    "DefocusV": 12731.242188
+   },
+   "00047": {
+    "CtfAstigmatism": 287.688477,
+    "CtfFigureOfMerit": 0.167429,
+    "CtfMaxResolution": 3.531281,
+    "DefocusMean": 11327.5229495,
+    "DefocusU": 11471.367188,
+    "DefocusV": 11183.678711
+   },
+   "00048": {
+    "CtfAstigmatism": 272.623047,
+    "CtfFigureOfMerit": 0.164049,
+    "CtfMaxResolution": 3.496829,
+    "DefocusMean": 12012.7470705,
+    "DefocusU": 12149.058594,
+    "DefocusV": 11876.435547
+   },
+   "00049": {
+    "CtfAstigmatism": 316.441406,
+    "CtfFigureOfMerit": 0.174778,
+    "CtfMaxResolution": 3.31875,
+    "DefocusMean": 12947.299804999999,
+    "DefocusU": 13105.520508,
+    "DefocusV": 12789.079102
+   }
+  }
+ }
+}

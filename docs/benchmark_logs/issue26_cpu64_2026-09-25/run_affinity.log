@@ -1,0 +1,119 @@
+
+################ ARM L: OMP_PROC_BIND=close OMP_PLACES=cores ################
+2026-09-25T01:18:11Z
+[2026-09-25T01:18:11Z] === L_patch5x5_close: threads=[2, 4, 8, 16] reps=2 ===
+[2026-09-25T01:18:11Z] --- rep 1/2, order=[2, 4, 8, 16] ---
+[2026-09-25T01:19:29Z] settle: OK after 78.4s (load1=4.12, procs=0)
+[2026-09-25T01:20:05Z] j=2 rep=1 wall=34.80s user=62.06 rss=2.78GiB foreign=2.1/5.01 cores rc=0
+[2026-09-25T01:20:05Z] settle: OK after 0.6s (load1=4.07, procs=0)
+[2026-09-25T01:20:24Z] j=4 rep=1 wall=18.42s user=63.95 rss=2.94GiB foreign=2.08/3.34 cores rc=0
+[2026-09-25T01:20:40Z] settle: OK after 16.2s (load1=4.04, procs=0)
+[2026-09-25T01:20:51Z] j=8 rep=1 wall=10.26s user=68.13 rss=3.18GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:21:09Z] settle: OK after 18.1s (load1=4.11, procs=0)
+[2026-09-25T01:21:17Z] j=16 rep=1 wall=7.38s user=75.88 rss=3.64GiB foreign=2.2/3.51 cores rc=0
+[2026-09-25T01:21:17Z] --- rep 2/2, order=[16, 8, 4, 2] ---
+[2026-09-25T01:21:44Z] settle: OK after 26.4s (load1=4.16, procs=0)
+[2026-09-25T01:21:52Z] j=16 rep=2 wall=7.37s user=75.81 rss=3.64GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:22:31Z] settle: OK after 38.6s (load1=4.11, procs=0)
+[2026-09-25T01:22:41Z] j=8 rep=2 wall=9.96s user=65.55 rss=3.18GiB foreign=2.27/3.52 cores rc=0
+[2026-09-25T01:23:04Z] settle: OK after 23.3s (load1=4.04, procs=0)
+[2026-09-25T01:23:23Z] j=4 rep=2 wall=18.08s user=62.77 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:23:29Z] settle: OK after 5.5s (load1=4.09, procs=0)
+[2026-09-25T01:24:04Z] j=2 rep=2 wall=34.40s user=61.68 rss=2.77GiB foreign=2.1/5.01 cores rc=0
+[2026-09-25T01:24:04Z] === done -> results/L_patch5x5_close.json ===
+
+################ ARM M: OMP_PLACES=cores only (libgomp default policy) ################
+2026-09-25T01:24:04Z
+[2026-09-25T01:24:04Z] === M_patch5x5_placesonly: threads=[2, 4, 8, 16] reps=2 ===
+[2026-09-25T01:24:04Z] --- rep 1/2, order=[2, 4, 8, 16] ---
+[2026-09-25T01:24:05Z] settle: OK after 0.6s (load1=4.03, procs=0)
+[2026-09-25T01:24:41Z] j=2 rep=1 wall=35.21s user=61.75 rss=2.77GiB foreign=2.22/5.18 cores rc=0
+[2026-09-25T01:24:41Z] settle: OK after 0.5s (load1=4.15, procs=0)
+[2026-09-25T01:25:00Z] j=4 rep=1 wall=18.53s user=63.94 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:25:23Z] settle: OK after 23.4s (load1=4.05, procs=0)
+[2026-09-25T01:25:34Z] j=8 rep=1 wall=10.00s user=66.55 rss=3.18GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:25:55Z] settle: OK after 20.7s (load1=4.18, procs=0)
+[2026-09-25T01:26:03Z] j=16 rep=1 wall=7.36s user=75.64 rss=3.64GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:26:03Z] --- rep 2/2, order=[16, 8, 4, 2] ---
+[2026-09-25T01:26:14Z] settle: OK after 10.6s (load1=4.14, procs=0)
+[2026-09-25T01:26:22Z] j=16 rep=2 wall=7.33s user=75.82 rss=3.64GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:26:45Z] settle: OK after 23.1s (load1=4.19, procs=0)
+[2026-09-25T01:26:56Z] j=8 rep=2 wall=9.96s user=65.85 rss=3.18GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:27:19Z] settle: OK after 23.4s (load1=4.03, procs=0)
+[2026-09-25T01:27:38Z] j=4 rep=2 wall=18.12s user=62.86 rss=2.94GiB foreign=2.01/2.02 cores rc=0
+[2026-09-25T01:27:44Z] settle: OK after 5.7s (load1=4.16, procs=0)
+[2026-09-25T01:28:19Z] j=2 rep=2 wall=34.97s user=61.7 rss=2.80GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:28:19Z] === done -> results/M_patch5x5_placesonly.json ===
+
+################ ARM N: unbound j=4 x 10 - characterise the placement lottery ################
+2026-09-25T01:28:19Z
+[2026-09-25T01:28:19Z] === N_j4_unbound_x10: threads=[4] reps=10 ===
+[2026-09-25T01:28:19Z] --- rep 1/10, order=[4] ---
+[2026-09-25T01:28:19Z] settle: OK after 0.6s (load1=4.09, procs=0)
+[2026-09-25T01:28:39Z] j=4 rep=1 wall=19.05s user=53.24 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:28:39Z] --- rep 2/10, order=[4] ---
+[2026-09-25T01:28:40Z] settle: OK after 0.6s (load1=4.13, procs=0)
+[2026-09-25T01:29:00Z] j=4 rep=2 wall=18.58s user=52.84 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:29:00Z] --- rep 3/10, order=[4] ---
+[2026-09-25T01:29:00Z] settle: OK after 0.6s (load1=4.16, procs=0)
+[2026-09-25T01:29:20Z] j=4 rep=3 wall=18.73s user=53.12 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:29:20Z] --- rep 4/10, order=[4] ---
+[2026-09-25T01:29:41Z] settle: OK after 20.7s (load1=4.16, procs=0)
+[2026-09-25T01:29:54Z] j=4 rep=4 wall=13.22s user=40.04 rss=2.94GiB foreign=2.93/5.21 cores rc=0
+[2026-09-25T01:29:54Z] --- rep 5/10, order=[4] ---
+[2026-09-25T01:30:10Z] settle: OK after 15.5s (load1=4.10, procs=0)
+[2026-09-25T01:30:29Z] j=4 rep=5 wall=18.76s user=52.97 rss=2.94GiB foreign=2.1/3.62 cores rc=0
+[2026-09-25T01:30:29Z] --- rep 6/10, order=[4] ---
+[2026-09-25T01:30:30Z] settle: OK after 0.5s (load1=4.14, procs=0)
+[2026-09-25T01:30:50Z] j=4 rep=6 wall=18.88s user=53.75 rss=2.94GiB foreign=2.06/3.01 cores rc=0
+[2026-09-25T01:30:50Z] --- rep 7/10, order=[4] ---
+[2026-09-25T01:31:00Z] settle: OK after 10.7s (load1=4.16, procs=0)
+[2026-09-25T01:31:19Z] j=4 rep=7 wall=18.44s user=52.72 rss=2.94GiB foreign=2.24/4.01 cores rc=0
+[2026-09-25T01:31:19Z] --- rep 8/10, order=[4] ---
+[2026-09-25T01:31:35Z] settle: OK after 15.7s (load1=4.03, procs=0)
+[2026-09-25T01:31:54Z] j=4 rep=8 wall=18.58s user=55.8 rss=2.94GiB foreign=2.21/4.01 cores rc=0
+[2026-09-25T01:31:54Z] --- rep 9/10, order=[4] ---
+[2026-09-25T01:32:05Z] settle: OK after 10.7s (load1=4.08, procs=0)
+[2026-09-25T01:32:22Z] j=4 rep=9 wall=17.55s user=50.47 rss=2.94GiB foreign=2.18/3.51 cores rc=0
+[2026-09-25T01:32:22Z] --- rep 10/10, order=[4] ---
+[2026-09-25T01:32:26Z] settle: OK after 3.0s (load1=4.18, procs=0)
+[2026-09-25T01:32:44Z] j=4 rep=10 wall=18.25s user=63.33 rss=2.94GiB foreign=2.1/3.51 cores rc=0
+[2026-09-25T01:32:44Z] === done -> results/N_j4_unbound_x10.json ===
+
+################ ARM O: spread j=4 x 10 - same, bound ################
+2026-09-25T01:32:44Z
+[2026-09-25T01:32:44Z] === O_j4_spread_x10: threads=[4] reps=10 ===
+[2026-09-25T01:32:44Z] --- rep 1/10, order=[4] ---
+[2026-09-25T01:33:00Z] settle: OK after 15.5s (load1=4.16, procs=0)
+[2026-09-25T01:33:14Z] j=4 rep=1 wall=12.60s user=39.83 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:33:14Z] --- rep 2/10, order=[4] ---
+[2026-09-25T01:33:14Z] settle: OK after 0.5s (load1=4.18, procs=0)
+[2026-09-25T01:33:28Z] j=4 rep=2 wall=12.97s user=40.49 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:33:28Z] --- rep 3/10, order=[4] ---
+[2026-09-25T01:33:41Z] settle: OK after 12.9s (load1=4.13, procs=0)
+[2026-09-25T01:33:53Z] j=4 rep=3 wall=12.35s user=39.6 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:33:53Z] --- rep 4/10, order=[4] ---
+[2026-09-25T01:33:59Z] settle: OK after 5.5s (load1=4.12, procs=0)
+[2026-09-25T01:34:12Z] j=4 rep=4 wall=12.53s user=40.03 rss=2.94GiB foreign=2.16/4.01 cores rc=0
+[2026-09-25T01:34:12Z] --- rep 5/10, order=[4] ---
+[2026-09-25T01:34:20Z] settle: OK after 8.0s (load1=4.11, procs=0)
+[2026-09-25T01:34:34Z] j=4 rep=5 wall=12.88s user=40.62 rss=2.94GiB foreign=2.28/3.34 cores rc=0
+[2026-09-25T01:34:34Z] --- rep 6/10, order=[4] ---
+[2026-09-25T01:34:39Z] settle: OK after 5.5s (load1=4.17, procs=0)
+[2026-09-25T01:34:53Z] j=4 rep=6 wall=12.79s user=40.28 rss=2.94GiB foreign=2.6/5.45 cores rc=0
+[2026-09-25T01:34:53Z] --- rep 7/10, order=[4] ---
+[2026-09-25T01:34:59Z] settle: OK after 5.5s (load1=4.15, procs=0)
+[2026-09-25T01:35:12Z] j=4 rep=7 wall=12.50s user=39.82 rss=2.94GiB foreign=2.01/2.04 cores rc=0
+[2026-09-25T01:35:12Z] --- rep 8/10, order=[4] ---
+[2026-09-25T01:35:20Z] settle: OK after 8.1s (load1=4.06, procs=0)
+[2026-09-25T01:35:34Z] j=4 rep=8 wall=12.44s user=39.49 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:35:34Z] --- rep 9/10, order=[4] ---
+[2026-09-25T01:35:39Z] settle: OK after 5.6s (load1=4.13, procs=0)
+[2026-09-25T01:35:53Z] j=4 rep=9 wall=12.43s user=39.76 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:35:53Z] --- rep 10/10, order=[4] ---
+[2026-09-25T01:35:59Z] settle: OK after 5.6s (load1=4.12, procs=0)
+[2026-09-25T01:36:12Z] j=4 rep=10 wall=12.80s user=40.23 rss=2.94GiB foreign=2.01/2.01 cores rc=0
+[2026-09-25T01:36:12Z] === done -> results/O_j4_spread_x10.json ===
+
+################ AFFINITY SERIES COMPLETE ################
+2026-09-25T01:36:12Z

@@ -8,6 +8,10 @@ efficiency") and the one code change the evidence supports.
 Everything below was measured on **cpu64** (`small-refmac-machine`). No CPU-only
 MotionCorr workload was run on the shared GPU host.
 
+Raw per-run JSON, the driver logs (including every settle wait and its observed
+`load1`), and the full harness are committed under
+[`docs/benchmark_logs/issue26_cpu64_2026-09-25/`](benchmark_logs/issue26_cpu64_2026-09-25/).
+
 ---
 
 ## 1. Provenance

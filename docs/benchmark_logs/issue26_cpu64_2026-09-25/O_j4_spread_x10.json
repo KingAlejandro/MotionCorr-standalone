@@ -1,0 +1,1454 @@
+{
+  "label": "O_j4_spread_x10",
+  "host": "small-refmac-machine",
+  "started_utc": "2026-09-25T01:32:44Z",
+  "binary": "/home/ubuntu/mc-issue26/src-3e3a19679337d3de61327c02eef1a2947cf13517/build-timing/motioncorr",
+  "binary_sha256": "3a669ef89e277592fcf944114b51d0848a17d7648964b5d88f4fade88ef6653d",
+  "star": "movies1.star",
+  "star_sha256": "6a851ed446cdcca438fe1fe1fd2fbf759e6593395dcbf54bbb301a7f816c3e15",
+  "patch": "5",
+  "threads": [
+    4
+  ],
+  "reps": 10,
+  "extra": "",
+  "baseline_note": "~2.0 cores of permanent ctffind load on this host",
+  "nproc": 64,
+  "OMP_PROC_BIND": "spread",
+  "OMP_PLACES": "cores",
+  "OMP_NUM_THREADS": "(unset)",
+  "numactl_prefix": "",
+  "runs": [
+    {
+      "rep": 1,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.601,
+      "rc": 0,
+      "settle_wait_s": 15.5,
+      "load1_pre": 4.16,
+      "utc": "2026-09-25T01:33:13Z",
+      "user_s": 39.83,
+      "sys_s": 5.94,
+      "maxrss_kb": 3087804,
+      "wall_str": "0:12.59",
+      "vol_ctx": 186,
+      "invol_ctx": 188,
+      "minor_faults": 2423290,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 4.22,
+        "own_cores_max": 6.85,
+        "load1_mean": 4.27,
+        "load1_max": 4.37,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.107,
+          "count": 107432
+        },
+        "read movie": {
+          "sec": 0.392,
+          "count": 392757
+        },
+        "apply gain": {
+          "sec": 0.048,
+          "count": 48785
+        },
+        "initial sum": {
+          "sec": 0.037,
+          "count": 37969
+        },
+        "detect hot pixels": {
+          "sec": 0.047,
+          "count": 47838
+        },
+        "fix defects": {
+          "sec": 0.031,
+          "count": 31021
+        },
+        "global FFT": {
+          "sec": 2.403,
+          "count": 2403845
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.344,
+          "count": 344100
+        },
+        "global iFFT": {
+          "sec": 2.535,
+          "count": 2535048
+        },
+        "prepare patch": {
+          "sec": 1.158,
+          "count": 46331
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.144,
+          "count": 240
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.961,
+          "count": 3269
+        },
+        "patch alignment": {
+          "sec": 0.315,
+          "count": 12613
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 160
+        },
+        "align - make reference": {
+          "sec": 0.062,
+          "count": 1208
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.175,
+          "count": 141
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.306,
+          "count": 245
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.378,
+          "count": 7277
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1305
+        },
+        "dose weighting": {
+          "sec": 3.449,
+          "count": 3449801
+        },
+        "dw - calc weight": {
+          "sec": 0.99,
+          "count": 990851
+        },
+        "dw - iFFT": {
+          "sec": 2.458,
+          "count": 2458945
+        },
+        "real space interpolation": {
+          "sec": 0.879,
+          "count": 879860
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 1
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 2,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.968,
+      "rc": 0,
+      "settle_wait_s": 0.5,
+      "load1_pre": 4.18,
+      "utc": "2026-09-25T01:33:28Z",
+      "user_s": 40.49,
+      "sys_s": 6.91,
+      "maxrss_kb": 3086876,
+      "wall_str": "0:12.96",
+      "vol_ctx": 266,
+      "invol_ctx": 195,
+      "minor_faults": 2706435,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 3.95,
+        "own_cores_max": 5.88,
+        "load1_mean": 4.32,
+        "load1_max": 4.46,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.104,
+          "count": 104454
+        },
+        "read movie": {
+          "sec": 0.397,
+          "count": 397872
+        },
+        "apply gain": {
+          "sec": 0.05,
+          "count": 50596
+        },
+        "initial sum": {
+          "sec": 0.039,
+          "count": 39525
+        },
+        "detect hot pixels": {
+          "sec": 0.046,
+          "count": 46478
+        },
+        "fix defects": {
+          "sec": 0.03,
+          "count": 30006
+        },
+        "global FFT": {
+          "sec": 2.294,
+          "count": 2294783
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.391,
+          "count": 391232
+        },
+        "global iFFT": {
+          "sec": 2.529,
+          "count": 2529503
+        },
+        "prepare patch": {
+          "sec": 1.161,
+          "count": 46471
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.136,
+          "count": 227
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.918,
+          "count": 3197
+        },
+        "patch alignment": {
+          "sec": 0.309,
+          "count": 12370
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 155
+        },
+        "align - make reference": {
+          "sec": 0.072,
+          "count": 1401
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.172,
+          "count": 139
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.322,
+          "count": 258
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.416,
+          "count": 8010
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1389
+        },
+        "dose weighting": {
+          "sec": 3.545,
+          "count": 3545807
+        },
+        "dw - calc weight": {
+          "sec": 1.001,
+          "count": 1001441
+        },
+        "dw - iFFT": {
+          "sec": 2.544,
+          "count": 2544361
+        },
+        "real space interpolation": {
+          "sec": 1.189,
+          "count": 1189782
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 1
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 3,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.347,
+      "rc": 0,
+      "settle_wait_s": 12.9,
+      "load1_pre": 4.13,
+      "utc": "2026-09-25T01:33:53Z",
+      "user_s": 39.6,
+      "sys_s": 5.76,
+      "maxrss_kb": 3086212,
+      "wall_str": "0:12.34",
+      "vol_ctx": 204,
+      "invol_ctx": 175,
+      "minor_faults": 2272482,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 4.14,
+        "own_cores_max": 5.87,
+        "load1_mean": 4.3,
+        "load1_max": 4.42,
+        "n_samples": 12
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.105,
+          "count": 105979
+        },
+        "read movie": {
+          "sec": 0.403,
+          "count": 403094
+        },
+        "apply gain": {
+          "sec": 0.045,
+          "count": 45343
+        },
+        "initial sum": {
+          "sec": 0.04,
+          "count": 40266
+        },
+        "detect hot pixels": {
+          "sec": 0.044,
+          "count": 44249
+        },
+        "fix defects": {
+          "sec": 0.029,
+          "count": 29797
+        },
+        "global FFT": {
+          "sec": 2.364,
+          "count": 2364263
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.251,
+          "count": 251768
+        },
+        "global iFFT": {
+          "sec": 2.582,
+          "count": 2582964
+        },
+        "prepare patch": {
+          "sec": 1.18,
+          "count": 47235
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.146,
+          "count": 244
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.934,
+          "count": 3223
+        },
+        "patch alignment": {
+          "sec": 0.302,
+          "count": 12086
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 160
+        },
+        "align - make reference": {
+          "sec": 0.049,
+          "count": 942
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.145,
+          "count": 119
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.329,
+          "count": 264
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.3,
+          "count": 5775
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1460
+        },
+        "dose weighting": {
+          "sec": 3.238,
+          "count": 3238505
+        },
+        "dw - calc weight": {
+          "sec": 0.837,
+          "count": 837411
+        },
+        "dw - iFFT": {
+          "sec": 2.401,
+          "count": 2401088
+        },
+        "real space interpolation": {
+          "sec": 0.895,
+          "count": 895631
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 1
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 4,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.531,
+      "rc": 0,
+      "settle_wait_s": 5.5,
+      "load1_pre": 4.12,
+      "utc": "2026-09-25T01:34:12Z",
+      "user_s": 40.03,
+      "sys_s": 5.87,
+      "maxrss_kb": 3086208,
+      "wall_str": "0:12.52",
+      "vol_ctx": 222,
+      "invol_ctx": 185,
+      "minor_faults": 2456591,
+      "contention": {
+        "foreign_cores_mean": 2.16,
+        "foreign_cores_max": 4.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 4.2,
+        "own_cores_max": 5.85,
+        "load1_mean": 4.27,
+        "load1_max": 4.41,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.108,
+          "count": 108799
+        },
+        "read movie": {
+          "sec": 0.39,
+          "count": 390177
+        },
+        "apply gain": {
+          "sec": 0.047,
+          "count": 47361
+        },
+        "initial sum": {
+          "sec": 0.04,
+          "count": 40804
+        },
+        "detect hot pixels": {
+          "sec": 0.043,
+          "count": 43047
+        },
+        "fix defects": {
+          "sec": 0.029,
+          "count": 29721
+        },
+        "global FFT": {
+          "sec": 2.327,
+          "count": 2327290
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.359,
+          "count": 359681
+        },
+        "global iFFT": {
+          "sec": 2.57,
+          "count": 2570663
+        },
+        "prepare patch": {
+          "sec": 1.187,
+          "count": 47485
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.151,
+          "count": 252
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 2.035,
+          "count": 3392
+        },
+        "patch alignment": {
+          "sec": 0.306,
+          "count": 12266
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 157
+        },
+        "align - make reference": {
+          "sec": 0.06,
+          "count": 1168
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.157,
+          "count": 128
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.35,
+          "count": 281
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.387,
+          "count": 7448
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1299
+        },
+        "dose weighting": {
+          "sec": 3.323,
+          "count": 3323046
+        },
+        "dw - calc weight": {
+          "sec": 0.959,
+          "count": 959455
+        },
+        "dw - iFFT": {
+          "sec": 2.363,
+          "count": 2363588
+        },
+        "real space interpolation": {
+          "sec": 0.911,
+          "count": 911890
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 21
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 5,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.884,
+      "rc": 0,
+      "settle_wait_s": 8.0,
+      "load1_pre": 4.11,
+      "utc": "2026-09-25T01:34:34Z",
+      "user_s": 40.62,
+      "sys_s": 6.23,
+      "maxrss_kb": 3087568,
+      "wall_str": "0:12.88",
+      "vol_ctx": 216,
+      "invol_ctx": 184,
+      "minor_faults": 2617977,
+      "contention": {
+        "foreign_cores_mean": 2.28,
+        "foreign_cores_max": 3.34,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 3.99,
+        "own_cores_max": 5.81,
+        "load1_mean": 4.34,
+        "load1_max": 4.48,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.11,
+          "count": 110376
+        },
+        "read movie": {
+          "sec": 0.397,
+          "count": 397238
+        },
+        "apply gain": {
+          "sec": 0.046,
+          "count": 46995
+        },
+        "initial sum": {
+          "sec": 0.041,
+          "count": 41295
+        },
+        "detect hot pixels": {
+          "sec": 0.047,
+          "count": 47302
+        },
+        "fix defects": {
+          "sec": 0.03,
+          "count": 30754
+        },
+        "global FFT": {
+          "sec": 2.459,
+          "count": 2459793
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.391,
+          "count": 391034
+        },
+        "global iFFT": {
+          "sec": 2.567,
+          "count": 2567378
+        },
+        "prepare patch": {
+          "sec": 1.191,
+          "count": 47646
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.148,
+          "count": 248
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.97,
+          "count": 3283
+        },
+        "patch alignment": {
+          "sec": 0.313,
+          "count": 12553
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 164
+        },
+        "align - make reference": {
+          "sec": 0.067,
+          "count": 1303
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.172,
+          "count": 138
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.345,
+          "count": 277
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.397,
+          "count": 7640
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1416
+        },
+        "dose weighting": {
+          "sec": 3.394,
+          "count": 3394423
+        },
+        "dw - calc weight": {
+          "sec": 1.027,
+          "count": 1027945
+        },
+        "dw - iFFT": {
+          "sec": 2.366,
+          "count": 2366472
+        },
+        "real space interpolation": {
+          "sec": 1.002,
+          "count": 1002458
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 1
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 6,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.793,
+      "rc": 0,
+      "settle_wait_s": 5.5,
+      "load1_pre": 4.17,
+      "utc": "2026-09-25T01:34:53Z",
+      "user_s": 40.28,
+      "sys_s": 6.64,
+      "maxrss_kb": 3086272,
+      "wall_str": "0:12.79",
+      "vol_ctx": 206,
+      "invol_ctx": 187,
+      "minor_faults": 2638668,
+      "contention": {
+        "foreign_cores_mean": 2.6,
+        "foreign_cores_max": 5.45,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 4.55,
+        "own_cores_max": 5.86,
+        "load1_mean": 4.31,
+        "load1_max": 4.45,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.106,
+          "count": 106546
+        },
+        "read movie": {
+          "sec": 0.385,
+          "count": 385546
+        },
+        "apply gain": {
+          "sec": 0.048,
+          "count": 48224
+        },
+        "initial sum": {
+          "sec": 0.041,
+          "count": 41283
+        },
+        "detect hot pixels": {
+          "sec": 0.044,
+          "count": 44236
+        },
+        "fix defects": {
+          "sec": 0.03,
+          "count": 30301
+        },
+        "global FFT": {
+          "sec": 2.372,
+          "count": 2372251
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 3
+        },
+        "global alignment": {
+          "sec": 0.358,
+          "count": 358315
+        },
+        "global iFFT": {
+          "sec": 2.605,
+          "count": 2605255
+        },
+        "prepare patch": {
+          "sec": 1.207,
+          "count": 48299
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.145,
+          "count": 243
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 2.238,
+          "count": 3730
+        },
+        "patch alignment": {
+          "sec": 0.308,
+          "count": 12355
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 161
+        },
+        "align - make reference": {
+          "sec": 0.072,
+          "count": 1390
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.172,
+          "count": 140
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.324,
+          "count": 260
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.381,
+          "count": 7331
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1374
+        },
+        "dose weighting": {
+          "sec": 3.332,
+          "count": 3332531
+        },
+        "dw - calc weight": {
+          "sec": 0.915,
+          "count": 915045
+        },
+        "dw - iFFT": {
+          "sec": 2.417,
+          "count": 2417467
+        },
+        "real space interpolation": {
+          "sec": 1.095,
+          "count": 1095916
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 0
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 7,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.503,
+      "rc": 0,
+      "settle_wait_s": 5.5,
+      "load1_pre": 4.15,
+      "utc": "2026-09-25T01:35:12Z",
+      "user_s": 39.82,
+      "sys_s": 5.68,
+      "maxrss_kb": 3086688,
+      "wall_str": "0:12.50",
+      "vol_ctx": 219,
+      "invol_ctx": 178,
+      "minor_faults": 2326947,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.04,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 3.61,
+        "own_cores_max": 5.78,
+        "load1_mean": 4.27,
+        "load1_max": 4.43,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.106,
+          "count": 106237
+        },
+        "read movie": {
+          "sec": 0.396,
+          "count": 396316
+        },
+        "apply gain": {
+          "sec": 0.051,
+          "count": 51391
+        },
+        "initial sum": {
+          "sec": 0.04,
+          "count": 40535
+        },
+        "detect hot pixels": {
+          "sec": 0.044,
+          "count": 44102
+        },
+        "fix defects": {
+          "sec": 0.029,
+          "count": 29868
+        },
+        "global FFT": {
+          "sec": 2.367,
+          "count": 2367555
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 3
+        },
+        "global alignment": {
+          "sec": 0.348,
+          "count": 348419
+        },
+        "global iFFT": {
+          "sec": 2.639,
+          "count": 2639200
+        },
+        "prepare patch": {
+          "sec": 1.158,
+          "count": 46339
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.151,
+          "count": 251
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.722,
+          "count": 2871
+        },
+        "patch alignment": {
+          "sec": 0.302,
+          "count": 12104
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 162
+        },
+        "align - make reference": {
+          "sec": 0.065,
+          "count": 1254
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.164,
+          "count": 132
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.295,
+          "count": 236
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.374,
+          "count": 7200
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1286
+        },
+        "dose weighting": {
+          "sec": 3.244,
+          "count": 3244498
+        },
+        "dw - calc weight": {
+          "sec": 0.844,
+          "count": 844689
+        },
+        "dw - iFFT": {
+          "sec": 2.399,
+          "count": 2399804
+        },
+        "real space interpolation": {
+          "sec": 0.884,
+          "count": 884888
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 0
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 8,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.435,
+      "rc": 0,
+      "settle_wait_s": 8.1,
+      "load1_pre": 4.06,
+      "utc": "2026-09-25T01:35:34Z",
+      "user_s": 39.49,
+      "sys_s": 5.68,
+      "maxrss_kb": 3086432,
+      "wall_str": "0:12.43",
+      "vol_ctx": 201,
+      "invol_ctx": 177,
+      "minor_faults": 2270329,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 3.64,
+        "own_cores_max": 4.82,
+        "load1_mean": 4.29,
+        "load1_max": 4.52,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.106,
+          "count": 106171
+        },
+        "read movie": {
+          "sec": 0.393,
+          "count": 393025
+        },
+        "apply gain": {
+          "sec": 0.047,
+          "count": 47295
+        },
+        "initial sum": {
+          "sec": 0.04,
+          "count": 40670
+        },
+        "detect hot pixels": {
+          "sec": 0.046,
+          "count": 46258
+        },
+        "fix defects": {
+          "sec": 0.03,
+          "count": 30832
+        },
+        "global FFT": {
+          "sec": 2.361,
+          "count": 2361075
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 2
+        },
+        "global alignment": {
+          "sec": 0.319,
+          "count": 319912
+        },
+        "global iFFT": {
+          "sec": 2.544,
+          "count": 2544521
+        },
+        "prepare patch": {
+          "sec": 1.142,
+          "count": 45710
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.143,
+          "count": 239
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 2.108,
+          "count": 3514
+        },
+        "patch alignment": {
+          "sec": 0.299,
+          "count": 11971
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 160
+        },
+        "align - make reference": {
+          "sec": 0.049,
+          "count": 956
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.149,
+          "count": 119
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.306,
+          "count": 245
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.361,
+          "count": 6956
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1359
+        },
+        "dose weighting": {
+          "sec": 3.324,
+          "count": 3324520
+        },
+        "dw - calc weight": {
+          "sec": 0.861,
+          "count": 861606
+        },
+        "dw - iFFT": {
+          "sec": 2.462,
+          "count": 2462909
+        },
+        "real space interpolation": {
+          "sec": 0.884,
+          "count": 884831
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 0
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 9,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.432,
+      "rc": 0,
+      "settle_wait_s": 5.6,
+      "load1_pre": 4.13,
+      "utc": "2026-09-25T01:35:53Z",
+      "user_s": 39.76,
+      "sys_s": 6.03,
+      "maxrss_kb": 3086780,
+      "wall_str": "0:12.43",
+      "vol_ctx": 255,
+      "invol_ctx": 194,
+      "minor_faults": 2428103,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 3.86,
+        "own_cores_max": 4.86,
+        "load1_mean": 4.28,
+        "load1_max": 4.42,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.105,
+          "count": 105306
+        },
+        "read movie": {
+          "sec": 0.388,
+          "count": 388196
+        },
+        "apply gain": {
+          "sec": 0.045,
+          "count": 45464
+        },
+        "initial sum": {
+          "sec": 0.041,
+          "count": 41179
+        },
+        "detect hot pixels": {
+          "sec": 0.043,
+          "count": 43927
+        },
+        "fix defects": {
+          "sec": 0.03,
+          "count": 30082
+        },
+        "global FFT": {
+          "sec": 2.343,
+          "count": 2343448
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 1
+        },
+        "global alignment": {
+          "sec": 0.338,
+          "count": 338211
+        },
+        "global iFFT": {
+          "sec": 2.543,
+          "count": 2543478
+        },
+        "prepare patch": {
+          "sec": 1.136,
+          "count": 45467
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.144,
+          "count": 240
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 2.028,
+          "count": 3380
+        },
+        "patch alignment": {
+          "sec": 0.318,
+          "count": 12742
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 164
+        },
+        "align - make reference": {
+          "sec": 0.061,
+          "count": 1179
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.135,
+          "count": 109
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.325,
+          "count": 261
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.381,
+          "count": 7344
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1303
+        },
+        "dose weighting": {
+          "sec": 3.297,
+          "count": 3297027
+        },
+        "dw - calc weight": {
+          "sec": 0.905,
+          "count": 905367
+        },
+        "dw - iFFT": {
+          "sec": 2.391,
+          "count": 2391657
+        },
+        "real space interpolation": {
+          "sec": 0.921,
+          "count": 921261
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 2
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    },
+    {
+      "rep": 10,
+      "threads": 4,
+      "order_index": 0,
+      "order": [
+        4
+      ],
+      "wall_s": 12.802,
+      "rc": 0,
+      "settle_wait_s": 5.6,
+      "load1_pre": 4.12,
+      "utc": "2026-09-25T01:36:12Z",
+      "user_s": 40.23,
+      "sys_s": 6.61,
+      "maxrss_kb": 3086644,
+      "wall_str": "0:12.79",
+      "vol_ctx": 254,
+      "invol_ctx": 202,
+      "minor_faults": 2560279,
+      "contention": {
+        "foreign_cores_mean": 2.01,
+        "foreign_cores_max": 2.01,
+        "foreign_cores_min": 2.01,
+        "own_cores_mean": 4.24,
+        "own_cores_max": 5.84,
+        "load1_mean": 4.26,
+        "load1_max": 4.41,
+        "n_samples": 13
+      },
+      "stages": {
+        "read gain": {
+          "sec": 0.108,
+          "count": 108940
+        },
+        "read movie": {
+          "sec": 0.402,
+          "count": 402030
+        },
+        "apply gain": {
+          "sec": 0.051,
+          "count": 51547
+        },
+        "initial sum": {
+          "sec": 0.04,
+          "count": 40577
+        },
+        "detect hot pixels": {
+          "sec": 0.045,
+          "count": 45117
+        },
+        "fix defects": {
+          "sec": 0.029,
+          "count": 29759
+        },
+        "global FFT": {
+          "sec": 2.32,
+          "count": 2320256
+        },
+        "power spectrum": {
+          "sec": 0.0,
+          "count": 3
+        },
+        "global alignment": {
+          "sec": 0.31,
+          "count": 310603
+        },
+        "global iFFT": {
+          "sec": 2.584,
+          "count": 2584392
+        },
+        "prepare patch": {
+          "sec": 1.178,
+          "count": 47149
+        },
+        "prep patch - clip (in thread)": {
+          "sec": 0.16,
+          "count": 267
+        },
+        "prep patch - FFT (in thread)": {
+          "sec": 1.891,
+          "count": 3152
+        },
+        "patch alignment": {
+          "sec": 0.311,
+          "count": 12478
+        },
+        "align - prep weight": {
+          "sec": 0.004,
+          "count": 171
+        },
+        "align - make reference": {
+          "sec": 0.061,
+          "count": 1179
+        },
+        "align - calc CCF (in thread)": {
+          "sec": 0.154,
+          "count": 124
+        },
+        "align - iFFT CCF (in thread)": {
+          "sec": 0.354,
+          "count": 284
+        },
+        "align - argmax CCF (in thread)": {
+          "sec": 0.001,
+          "count": 1
+        },
+        "align - shift in Fourier space": {
+          "sec": 0.355,
+          "count": 6829
+        },
+        "fit polynomial": {
+          "sec": 0.001,
+          "count": 1453
+        },
+        "dose weighting": {
+          "sec": 3.464,
+          "count": 3464315
+        },
+        "dw - calc weight": {
+          "sec": 1.082,
+          "count": 1082482
+        },
+        "dw - iFFT": {
+          "sec": 2.381,
+          "count": 2381823
+        },
+        "real space interpolation": {
+          "sec": 1.061,
+          "count": 1061432
+        },
+        "binning": {
+          "sec": 0.0,
+          "count": 0
+        }
+      },
+      "outputs": {
+        "20170629_00021_frameImage.mrc": {
+          "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+          "core_header_sha256": "88baff29d0b4cb913479f3ce9d8b24b4af69804ffe1b190208a8d70b500c19c5",
+          "bytes": 56956944
+        }
+      }
+    }
+  ],
+  "finished_utc": "2026-09-25T01:36:12Z"
+}

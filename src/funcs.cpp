@@ -567,8 +567,16 @@ RFLOAT icdf_FSnedecor(int d1, int d2, RFLOAT p)
 }
 
 // Uniform distribution ....................................................
+// Box-Muller generates two deviates per pass; rnd_gaus() returns the first and
+// caches the second. The cache lives here rather than inside rnd_gaus() so that
+// re-seeding can clear it: srand() alone would leave a half-used pair behind and
+// the stale partner would be handed out ahead of the freshly seeded stream.
+static float rnd_gaus_cached = 0.;
+static bool rnd_gaus_has_cached = false;
+
 void init_random_generator(int seed)
 {
+    rnd_gaus_has_cached = false;
     if (seed < 0)
     	randomize_random_generator();
     else
@@ -577,6 +585,7 @@ void init_random_generator(int seed)
 
 void randomize_random_generator()
 {
+	rnd_gaus_has_cached = false;
 	srand(static_cast <unsigned> (time(NULL)) );
 }
 
@@ -594,16 +603,15 @@ float rnd_unif(float a, float b)
 float rnd_gaus(float mu, float sigma)
 {
   float U1, U2, W, mult;
-  static float X1, X2;
-  static int call = 0;
+  float X1, X2;
 
   if (sigma == 0)
 	  return mu;
 
-  if (call == 1)
+  if (rnd_gaus_has_cached)
   {
-      call = !call;
-      return (mu + sigma * (float) X2);
+      rnd_gaus_has_cached = false;
+      return (mu + sigma * rnd_gaus_cached);
   }
 
   do
@@ -618,7 +626,8 @@ float rnd_gaus(float mu, float sigma)
   X1 = U1 * mult;
   X2 = U2 * mult;
 
-  call = !call;
+  rnd_gaus_cached = X2;
+  rnd_gaus_has_cached = true;
 
   return (mu + sigma * (float) X1);
 

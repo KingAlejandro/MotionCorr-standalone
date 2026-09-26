@@ -176,7 +176,7 @@ def model_parser(binary, work):
     start = original.index('data_local_motion_model')
     first = next(i for i in range(start + 1, len(original)) if original[i].split() and original[i].split()[0] == '0')
     accepted = []
-    for problem in ['duplicate', 'nonfinite', 'truncated', 'negative_index']:
+    for problem in ['duplicate', 'nonfinite', 'truncated', 'negative_index', 'trailing', 'invalid_index']:
         lines = original.copy()
         if problem == 'truncated':
             del lines[first]
@@ -186,6 +186,10 @@ def model_parser(binary, work):
                 fields[0] = '1'
             elif problem == 'nonfinite':
                 fields[1] = 'nan'
+            elif problem == 'trailing':
+                fields[1] += 'junk'
+            elif problem == 'invalid_index':
+                fields[0] = 'garbage'
             else:
                 fields[0] = '-1'
             lines[first] = ' '.join(fields)

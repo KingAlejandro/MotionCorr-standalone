@@ -1890,7 +1890,6 @@ skip_fitting:
 		logfile << " done" << std::endl;
 		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
 
-
 		// Sum frames and save aligned stack
 		for (int iframe = 0; iframe < n_frames; iframe++)
 		{
@@ -1928,7 +1927,7 @@ skip_fitting:
 			}
 		}
 		RCTOC(TIMING_BINNING);
-		
+
 		// Final output
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);

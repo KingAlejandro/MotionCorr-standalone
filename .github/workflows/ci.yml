@@ -87,8 +87,11 @@ jobs:
           python3 tools/run_known_motion_gates.py --binary "$PWD/build/motioncorr" \
             --outdir "$PWD/ci_known_motion" --json "$PWD/ci_known_motion/summary.json"
           python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
-          if [[ -f tools/test_known_motion_failures.py ]]; then
-            python3 -m unittest discover -s tools -p test_known_motion_failures.py -v
+          if [[ -f tools/test_known_motion_verdicts.py ]]; then
+            python3 tools/test_known_motion_verdicts.py -v
+            python3 tools/test_known_motion_runner.py -v
+          else
+            echo "Verdict-hardening controls are absent; requires the #63 follow-up under #66."
           fi
 
       - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"

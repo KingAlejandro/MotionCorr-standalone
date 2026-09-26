@@ -71,6 +71,11 @@ public:
         const std::vector<float> &replacements // bad_xs.size() * n_frames values
     );
 
+    // End preprocessing after all hot-pixel decisions and sparse updates. Release
+    // gain/sum scratch; movie frames and the caller's host recovery data survive.
+    // Preprocessing methods cannot be used again until release()/initialize().
+    bool releasePreprocessingBuffers();
+
     // In-VRAM batched forward FFT: d_Iframes (R2C) -> d_Fframes with 1/(nx*ny) scaling
     bool computeGlobalForwardFFT();
 

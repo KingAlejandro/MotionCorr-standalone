@@ -415,7 +415,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     MultidimArray<float> &unaligned_sum,
     bool download_sum
 ) {
-    if (!is_initialized) return false;
+    if (!is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t num_pixels = (size_t)ny * nx;
@@ -458,7 +458,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
 }
 
 bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {
-    if (!is_initialized) return false;
+    if (!is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     unaligned_sum.reshape(ny, nx);
     HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum,
@@ -479,7 +479,7 @@ struct StatsScratch {
 } // namespace
 
 bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
-    if (!is_initialized) return false;
+    if (!is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
@@ -499,7 +499,7 @@ bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
 }
 
 bool CudaMovieSession::reduceUnalignedSumSqDev(double mean, double &sum2) {
-    if (!is_initialized) return false;
+    if (!is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
@@ -519,7 +519,7 @@ bool CudaMovieSession::collectAboveThreshold(
     std::vector<int> &indices_ascending,
     size_t &guard_band_count
 ) {
-    if (!is_initialized) return false;
+    if (!is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
 
@@ -607,6 +607,21 @@ bool CudaMovieSession::updateDefectPixels(
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
 
+    return true;
+}
+
+bool CudaMovieSession::releasePreprocessingBuffers() {
+    if (!is_initialized) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    HANDLE_ERROR(cudaDeviceSynchronize());
+    if (d_gain) {
+        HANDLE_ERROR(cudaFree(d_gain));
+        d_gain = nullptr;
+    }
+    if (d_Isum) {
+        HANDLE_ERROR(cudaFree(d_Isum));
+        d_Isum = nullptr;
+    }
     return true;
 }
 

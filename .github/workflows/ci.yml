@@ -5,13 +5,16 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     name: Build & Smoke Check (Ubuntu Linux)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -36,6 +39,12 @@ jobs:
             zlib1g-dev \
             ghostscript
 
+      - name: Install required numerical validation dependencies
+        run: python3 -m pip install 'numpy>=1.24,<3'
+
+      - name: Comparator failure controls
+        run: python3 -m unittest discover -s tools -p test_compare_motioncorr.py -v
+
       - name: Log toolchain & dependency telemetry
         run: |
           echo "=== Compilers & Build Tools ==="
@@ -54,7 +63,7 @@ jobs:
 
       - name: Build standalone MotionCorr
         run: |
-          cmake --build build --parallel $(nproc)
+          cmake --build build --parallel 4
 
       - name: "Smoke Test 1: CLI Help & Version"
         run: |
@@ -65,7 +74,22 @@ jobs:
 
       - name: "Smoke Test 2: Automated CTest Suite"
         run: |
+          ctest --test-dir build --show-only | grep SyntheticRegression
           ctest --test-dir build --output-on-failure --verbose
+
+      - name: Known-motion validation (when included by the source branch)
+        shell: bash
+        run: |
+          if [[ ! -f tools/run_known_motion_gates.py ]]; then
+            echo "Known-motion suite is absent from this revision; PR #63 adds it."
+            exit 0
+          fi
+          python3 tools/run_known_motion_gates.py --binary "$PWD/build/motioncorr" \
+            --outdir "$PWD/ci_known_motion" --json "$PWD/ci_known_motion/summary.json"
+          python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
+          if [[ -f tools/test_known_motion_failures.py ]]; then
+            python3 -m unittest discover -s tools -p test_known_motion_failures.py -v
+          fi
 
       - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"
         run: |
@@ -139,3 +163,29 @@ jobs:
           else
             echo "Expected failure confirmed (engine conflict)."
           fi
+
+  cuda-compile:
+    name: CUDA compile only (no GPU execution)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    container:
+      # Pinned CUDA 12.8 toolchain matches the SCARF hardware validation toolchain.
+      image: nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git cmake build-essential pkg-config libfftw3-dev libtiff-dev \
+            libpng-dev libjpeg-dev zlib1g-dev python3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure CUDA
+        run: |
+          nvcc --version
+          cmake -S . -B build-cuda -DCMAKE_BUILD_TYPE=Release \
+            -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
+      - name: Compile CUDA and linked controls
+        run: cmake --build build-cuda --parallel 4
+      - name: Record scope
+        run: echo "CUDA compilation passed. This job has no GPU and provides no hardware or numerical gate result."

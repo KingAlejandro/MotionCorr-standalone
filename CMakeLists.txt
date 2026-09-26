@@ -85,6 +85,9 @@ if(BUILD_TESTING)
         add_test(NAME HotPixelRngDeterminism
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME RunnerExposure
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case exposure)
     endif()
 endif()
 

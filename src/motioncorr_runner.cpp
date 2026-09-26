@@ -353,13 +353,16 @@ void MotioncorrRunner::initialise()
 
 	// First backup the given list of all micrographs
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
+	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
 	// This list contains those for the output STAR & PDF files
 	fn_ori_micrographs.clear();
 	optics_group_ori_micrographs.clear();
+	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
+	pre_exposure_micrographs.clear();
 
 	bool warned = false;
 
@@ -408,12 +411,14 @@ void MotioncorrRunner::initialise()
 		{
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 
 		if (!ignore_this)
 		{
 			fn_ori_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_ori_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 	}
 
@@ -973,7 +978,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 				MDavg.setValue(EMDL_MICROGRAPH_EVEN, even_micrograph); 
 				MDavg.setValue(EMDL_MICROGRAPH_ODD, odd_micrograph);
 			}
-			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_micrographs[imic]);
+			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_ori_micrographs[imic]);
 
         	}
                 MDavg.setValue(EMDL_MICROGRAPH_NAME, fn_avg);

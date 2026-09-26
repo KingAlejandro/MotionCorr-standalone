@@ -65,7 +65,7 @@ public:
 	std::vector<int> optics_group_micrographs, optics_group_ori_micrographs;
 
     // Pre-exposure for each micrograph (mainly used for tomography)
-    std::vector<RFLOAT> pre_exposure_micrographs;
+    std::vector<RFLOAT> pre_exposure_micrographs, pre_exposure_ori_micrographs;
 
 	// Information about the optics groups
 	ObservationModel obsModel;

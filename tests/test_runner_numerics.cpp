@@ -13,7 +13,11 @@ void require(bool condition, const std::string &message)
 int main(int argc, char **argv)
 {
     try {
-        require(argc == 4, "Usage: runner_numerics bin|model input output");
+        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read input output");
+        if (std::string(argv[1]) == "read") {
+            Micrograph parsed(argv[2]);
+            return 0;
+        }
         MotioncorrRunner runner;
         runner.n_threads = 1;
         if (std::string(argv[1]) == "bin") {
@@ -43,7 +47,7 @@ int main(int argc, char **argv)
             runner.bin_factor = 2;
             runner.do_own = true;
             Micrograph movie(argv[2], "", 2);
-            movie.first_frame = 1;
+            movie.first_frame = 2;
             auto *poly = new ThirdOrderPolynomialModel;
             poly->coeffX.resize(18);
             poly->coeffY.resize(18);
@@ -54,14 +58,19 @@ int main(int argc, char **argv)
             movie.model = poly;
             for (int frame = 1; frame <= movie.getNframes(); ++frame) movie.setGlobalShift(frame, 1.5, -2.5);
             const FileName output = runner.getOutputFileNames(argv[2]).withoutExtension() + ".star";
+            if (std::string(argv[1]) == "write_model") {
+                runner.early_binning = false;
+                runner.saveModel(movie);
+                return 0;
+            }
             for (bool early : {false, true}) {
                 runner.early_binning = early;
                 for (int repeat = 0; repeat < 2; ++repeat) {
                     runner.saveModel(movie);
                     Micrograph restored(output);
-                    for (int frame = 1; frame <= 4; ++frame) {
+                    for (int frame = 2; frame <= 5; ++frame) {
                         RFLOAT localX, localY, x, y;
-                        poly->getShiftAt(frame - 1, .25, -.25, localX, localY);
+                        poly->getShiftAt(frame - movie.first_frame, .25, -.25, localX, localY);
                         restored.getShiftAt(frame, .25, -.25, x, y);
                         const RFLOAT scale = early ? 2 : 1;
                         require(x == localX * scale + 1.5 && y == localY * scale - 2.5,

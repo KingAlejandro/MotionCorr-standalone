@@ -138,7 +138,7 @@ def tomography(binary, work):
                     'tomo1 tilts.star 1.0 300 2.7 0.1\n')
     (work / 'tilts.star').write_text('data_tomo1\n\nloop_\n_rlnMicrographMovieName #1\n'
                                    '_rlnMicrographPreExposure #2\nc.mrc 11\na.mrc 0\nb.mrc 5\n')
-    options = ['--dose_weighting', '--preexposure', '3.5', '--even_odd_split']
+    options = ['--dose_weighting', '--preexposure', '3.5', '--even_odd_split', '--save_noDW']
     invoke(binary, work, star, 'full', options)
     original = (work / 'b.mrc').read_bytes()
     short = bytearray(original[:1024 + 96 * 96 * 2 * 4])
@@ -168,7 +168,37 @@ def tomography(binary, work):
     assert exposures == {'a': 0, 'b': 5, 'c': 11}, exposures
 
 
-CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin, 'exported_units': exported_units, 'tomography': tomography}
+def model_parser(binary, work):
+    fixture(work)
+    (work / 'export').mkdir()
+    subprocess.run([str(HELPER), 'write_model', 'a.mrc', 'export/'], cwd=work, check=True)
+    original = (work / 'export/a.star').read_text().splitlines()
+    start = original.index('data_local_motion_model')
+    first = next(i for i in range(start + 1, len(original)) if original[i].split() and original[i].split()[0] == '0')
+    accepted = []
+    for problem in ['duplicate', 'nonfinite', 'truncated', 'negative_index']:
+        lines = original.copy()
+        if problem == 'truncated':
+            del lines[first]
+        else:
+            fields = lines[first].split()
+            if problem == 'duplicate':
+                fields[0] = '1'
+            elif problem == 'nonfinite':
+                fields[1] = 'nan'
+            else:
+                fields[0] = '-1'
+            lines[first] = ' '.join(fields)
+        malformed = work / (problem + '.star')
+        malformed.write_text('\n'.join(lines) + '\n')
+        result = subprocess.run([str(HELPER), 'read', str(malformed), 'unused'], capture_output=True, text=True)
+        print(problem, 'accepted' if result.returncode == 0 else 'rejected')
+        if result.returncode == 0:
+            accepted.append(problem)
+    assert not accepted, f'Invalid local model accepted: {accepted}'
+
+
+CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin, 'exported_units': exported_units, 'tomography': tomography, 'model_parser': model_parser}
 
 
 def main():

@@ -5,7 +5,7 @@ Tracking #66. These are separate pinned investigations, not a universal release 
 ## CPU shared-runner fixes
 
 [CPU commands, negative controls and limitations](cpu/README.md); [provenance](cpu/provenance.json).
-Source `2c27c7b`, Release, CUDA=OFF on cpu64, affinity 48–55, maximum 8 build jobs. 10/10 CTests pass, preserving historical exact j1/j4 outputs. Base-failing regressions establish the fixed faults. Later review identified a missing-coefficient-row parser hole; its follow-up and final evidence remain in PR #78. These artifacts do not silently cover later commits.
+Source `168841e`, Release, CUDA=OFF on cpu64, affinity 48–55, maximum 8 build jobs. 10/10 CTests pass, preserving historical exact j1/j4 outputs. Base-failing regressions establish the fixed faults. The final parser follow-up rejects missing numeric coefficients while preserving empty trailing legacy filenames; its focused controls and final evidence are included in PR #78. These artifacts do not cover later commits.
 
 ## Native CUDA cleanup and tie ablation
 

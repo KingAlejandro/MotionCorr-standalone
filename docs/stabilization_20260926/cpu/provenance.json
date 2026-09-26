@@ -15,15 +15,15 @@
       "src/motioncorr_runner.cpp": "c699fb67cbf79ce6eef4d288344fd51e1ab825aa51d73d5b35c098825d522e5c",
       "src/motioncorr_runner.h": "ae36706113a80eeb07dadbe34d631092884d30dfd43ce830510d4014f3bf2dcd",
       "src/micrograph_model.cpp": "d3c8d2772c761f877eac4ca3d61e21083e767a16cd3e2b49ab2dc8a8e2410917",
-      "src/metadata_table.cpp": "6b06a79281726f7bebeb2114769ad454eb48f88b4f1a42b1d652dba226be1371",
+      "src/metadata_table.cpp": "8ac9daba232c2a12c26e1d3dcfb6a019505041da66dea105c55028ad65f42c27",
       "src/funcs.cpp": "45f3c54537f876e9f8172479a1e9457c74ecfaa94029cecd1f79a43ce3ca59e2",
       "src/funcs.h": "d5ded8f8691865cf8c4604c649d8f79e5122ca3912d1992902578e68a6ad7e78"
     },
-    "binary_sha256": "c68596ae62c029c06278854a19ccfb850e60fdc46a5f2cf20448ef84cc5696d2"
+    "binary_sha256": "19ca912451ffeb8d5cc32f51aa7426a64a3f2f56a8a2a4a9c40cb53fcbfa88d5"
   },
   "hostname": "small-refmac-machine",
   "base_revision": "3e3a19679337d3de61327c02eef1a2947cf13517",
-  "candidate_revision": "2c27c7bcb8a697bcc78e17c224bc88f338f1b9ff",
+  "candidate_revision": "168841e90017ac2f4fcce66eefdb442b78115690",
   "affinity": "48-55",
   "maximum_build_jobs": 8,
   "cuda": false,
@@ -32,5 +32,15 @@
   "compiler": "g++ Ubuntu 13.3.0-6ubuntu2~24.04.1",
   "ctest_passed": 10,
   "ctest_total": 10,
-  "ctest_elapsed_seconds": 5.2
+  "ctest_elapsed_seconds": 5.2,
+  "previous_candidate": {
+    "revision": "2c27c7bcb8a697bcc78e17c224bc88f338f1b9ff",
+    "binary_sha256": "c68596ae62c029c06278854a19ccfb850e60fdc46a5f2cf20448ef84cc5696d2",
+    "ctest_log": "candidate-ctest.log"
+  },
+  "ctest_log": "row-fix-ctest.log",
+  "additional_regressions": [
+    "index-only coefficient row rejected",
+    "legacy empty trailing MTF filename preserved"
+  ]
 }

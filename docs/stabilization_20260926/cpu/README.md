@@ -1,6 +1,6 @@
 # CPU stabilization handoff
 
-Branch `fix/stabilize-cpu-contract`, worktree `work/stabilize-cpu-20260926`, base `3e3a19679337d3de61327c02eef1a2947cf13517`, candidate `2c27c7bcb8a697bcc78e17c224bc88f338f1b9ff`. Clean worktree; `git diff --check 3e3a196` passes.
+Branch `fix/stabilize-cpu-contract`, worktree `work/stabilize-cpu-20260926`, base `3e3a19679337d3de61327c02eef1a2947cf13517`, candidate `168841e90017ac2f4fcce66eefdb442b78115690`. Clean worktree; `git diff --check 3e3a196` passes.
 
 ## Commits (oldest first)
 
@@ -57,3 +57,9 @@ All logs and provenance are copied into this directory. No GPU jobs, no remote b
 - The new exported-model fixture verifies serialization units mathematically; it does not establish whole-dataset local-motion scientific accuracy.
 - Full tutorial collection, GPU runtime, EER decoder fixtures, mode-12 resume, external MotionCor2, performance benchmarking, and CPU/RELION image RMSE acceptance are not claimed by this CPU package.
 - Source-manifest documentation was not edited under the assigned ownership; root can reconcile it when publishing.
+
+## PR78 reviewer follow-up
+
+Commit `168841e` fixes a reproduced remaining missing-field case: a local-model row containing only final index `35` had been accepted with its omitted coefficient defaulted to zero. The two-column compatibility exception now applies only when the omitted final field has a declared string type. A positive control preserves the legacy empty trailing MTF filename.
+
+The control fails on `2c27c7b` (`pre-fix-missing-coefficient.log`). After the fix, all 10 CTests pass again in 5.20 seconds (`row-fix-ctest.log`), built on the same CPU64 allocation after coordination with the truth worker. Final binary SHA256 is `19ca912451ffeb8d5cc32f51aa7426a64a3f2f56a8a2a4a9c40cb53fcbfa88d5`. Previous candidate logs/hash above remain historical; `provenance.json` identifies both revisions explicitly. No GPU claims or new performance measurements.

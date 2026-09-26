@@ -438,13 +438,15 @@ bool MetaDataTable::setValueFromString(
 		if (EMDL::isDouble(label))
 		{
 			double v;
-			i >> v;
+			if (!(i >> v) || !(i >> std::ws).eof())
+				REPORT_ERROR("Invalid floating-point STAR value: " + value);
 			return setValue(label, v, objectID);
 		}
 		else if (EMDL::isInt(label))
 		{
 			long v;
-			i >> v;
+			if (!(i >> v) || !(i >> std::ws).eof())
+				REPORT_ERROR("Invalid integer STAR value: " + value);
 			return setValue(label, v, objectID);
 		}
 		else if (EMDL::isBool(label))

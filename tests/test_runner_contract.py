@@ -50,7 +50,32 @@ def exposure(binary, work):
         assert read_mrc_pixels(work / f'full/{name}.mrc') == read_mrc_pixels(work / f'resumed/{name}.mrc'), name
 
 
-CASES = {'exposure': exposure}
+def failure(binary, work):
+    star = fixture(work)
+    # A readable but two-frame movie takes the native false-return path.
+    short = bytearray((work / 'b.mrc').read_bytes())
+    struct.pack_into('<i', short, 8, 2)
+    (work / 'b.mrc').write_bytes(short[:1024 + 96 * 96 * 2 * 4])
+    result = invoke(binary, work, star, 'failed', success=False)
+    assert result.returncode != 0, 'A failed movie must fail the command'
+    assert 'b.mrc' in result.stderr and 'failed' in result.stderr.lower()
+    for name in ['a', 'c']:
+        assert (work / f'failed/{name}.mrc').exists(), 'Successful movies must be retained'
+        assert (work / f'failed/{name}.star').exists()
+    assert not (work / 'failed/b.star').exists()
+    assert not (work / 'failed/corrected_micrographs.star').exists()
+
+
+def invalid(binary, work):
+    star = fixture(work)
+    for flag in ['--group_frames', '--eer_grouping', '--j', '--max_io_threads']:
+        result = invoke(binary, work, star, 'invalid', [flag, '0'], success=False)
+        assert result.returncode != 0, flag
+        assert flag + ' must be positive' in result.stderr, result.stderr
+        assert not (work / 'invalid/a.star').exists()
+
+
+CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid}
 
 
 def main():

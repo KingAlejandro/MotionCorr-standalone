@@ -13,9 +13,19 @@ void require(bool condition, const std::string &message)
 int main(int argc, char **argv)
 {
     try {
-        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read input output");
+        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf input output");
         if (std::string(argv[1]) == "read") {
             Micrograph parsed(argv[2]);
+            return 0;
+        }
+        if (std::string(argv[1]) == "legacy_mtf") {
+            MetaDataTable table;
+            table.read(argv[2]);
+            int group;
+            std::string filename;
+            require(table.numberOfObjects() == 1 && table.getValue(EMDL_IMAGE_OPTICS_GROUP, group) && group == 1 &&
+                    table.getValue(EMDL_IMAGE_MTF_FILENAME, filename) && filename.empty(),
+                    "Legacy empty trailing MTF filename was not preserved");
             return 0;
         }
         MotioncorrRunner runner;

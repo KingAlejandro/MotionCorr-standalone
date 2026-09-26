@@ -1630,6 +1630,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		logfile << "Fixed hot pixels." << std::endl;
 	} // !skip_defect
 
+#ifdef _CUDA_ENABLED
+	if (movie_session && !movie_session->releasePreprocessingBuffers())
+		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
+#endif
+
 //#define WRITE_FRAMES
 #ifdef WRITE_FRAMES
 	// Debug output

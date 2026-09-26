@@ -1,0 +1,59 @@
+generated_utc: 2026-09-25T03:00:19Z
+host: 4-gpu-vm  kernel: 6.8.0-136-generic
+cpu_affinity_policy: taskset -c 96-103 on the top-level shell; bench mutex /tmp/motioncorr-bench.lock
+mem_total_GB: 432
+
+## Tool versions
+relion: RELION version: 5.1.0-commit-cb2683 
+ctffind_help_line1: Usage: ctffind [--old-school-input] [--old-school-input-ctffind4] [--amplitude-spectrum-input] [--filtered-amplitude-spectrum-input] [--fast] [-j <num>] [controller_address] [controller_port] [job_code]
+  File "<string>", line 1
+    import sys,numpy,scipy;print(sys.version.split()[0],\"numpy\",numpy.__version__,\"scipy\",scipy.__version__)
+                                                         ^
+SyntaxError: unexpected character after line continuation character
+python: 
+
+## Container / binary digests
+f8fe0e90056d656e286e58d946117275bc07aac3683168041733875dd39b46fd  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_reconstruct
+6809c6977f7c3d4e11261fc438a0ed829d0577c0313d5f78ba9f429340713100  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_postprocess
+2fe3648b1062e243650b5bb753bf942dc120eb5f6cd8c2cfc0d44dbdda52672e  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_preprocess
+2dca46e1ed7b16a11c8642ad8020550091825aa9f7e8c54f75f83085b8a6d87b  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_run_ctffind
+33eab815994300005a923d7d369fce3fab8e7e522729cece7c00bba84e146118  /home/alex/relion-container-tests/bin/relion-container-bin-r2/ctffind
+wrapper_dir: /home/alex/relion-container-tests/bin/relion-container-bin-r2
+
+## Motion-correction arm provenance (consumed from Issue #36)
+# Issue #36 all-FFTW hybrid — full 24-movie Gate 2 run
+generated_utc: 2026-09-25T01:57:04Z
+
+## Source
+branch: exp/issue36-fftw-global-hybrid
+commit: 5407373be31a6fe5f79a8cc5709be00723921b19
+git_tree_object: 49143546da854c065bda92782d8cb467c807257c
+src_tree_checksum_LC_ALL_C: 5db2b1ef3496442b300034a41def89ecffabaeaf1d41c9595ac041de01726a88  (identical on 4GPUs and cpu64)
+
+## Binaries (built from the above source; NOT bit-reproducible vs README - paths embedded)
+4GPUs CUDA  (Release, CUDA=ON, TIMING=ON, arch 80): b6dead328d6c1f2abec144ef19e1111e59e85cd36e94dc5b64bab2f3086ce227  build-cuda/motioncorr
+README recorded CUDA experimental binary:           e7f078904f5890aa435e7419b082df80382a679aa637345fa28a1e0538e06574
+
+## Inputs
+movies.star (24-row, unused for runs; hash check only): fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041
+per-movie STAR set (24 files) combined sha256: d4e71e92da0a079024c8deab0ac70a017e209d0f379a8f3f86e7814b3297f614  (identical on both hosts)
+input manifest (24 TIFF + gain) verified identical on both hosts
+
+## Commands
+CUDA default:  taskset -c 96-103 flock /tmp/motioncorr-bench.lock -- motioncorr --i star/<ID>.star --o out --use_own --gpu 0 --j 1 --seed 1 --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc
+CUDA allfftw:  MOTIONCORR_EXPERIMENTAL_ALL_FFTW=1 <same>
+CPU  ref:      OMP_NUM_THREADS=1 motioncorr --i star/<ID>.star --o out --use_own --j 1 <same numerical flags, no --gpu>  [on cpu64, under /tmp/motioncorr-cpu64-bench.lock]
+
+## Flag engagement control (movie 00021)
+allfftw arm: 1x "Experimental FFTW global CCF enabled" + 25x "Experimental FFTW local CCF enabled" (5x5 patches)
+default arm: 0x both  -> clean positive/negative control
+
+## Downstream matched inputs (RELION 5.0 tutorial precalculated project)
+f31d6726ac657b764b735ada52d5cf4acae29d7d9439edac914b7c28290a3abf  /home/alex/relion-container-tests/data/spa-relion50-precalculated/extracted/Refine3D/job019/run_data.star
+48a32f4dc7baa2285bbd81ead93281b80387f54cec12e496d3c656dd3507a975  /home/alex/relion-container-tests/data/spa-relion50-precalculated/extracted/MaskCreate/job020/mask.mrc
+d12996f626189b73cdbb5f932137266c21eb0985e9efbf6eccebfd8a65ef75dc  /home/alex/relion-container-tests/data/spa-relion50-precalculated/extracted/CtfFind/job003/micrographs_ctf.star
+8027b174b87bb74888d3b8514223ddf9bd3e493fac43c65756e61b0bc5da2d4c  /home/alex/relion-container-tests/data/spa-relion50-precalculated/extracted/mtf_k2_200kV.star
+99ed63950d40fd9c191c626575b3c6afdc91f570585b2e7ee56de6a0ef2da3b7  /home/alex/relion-container-tests/data/spa-relion50-precalculated/extracted/Class3D/job016/run_it025_class002_box256.mrc
+
+## Input movie + gain digests (as used by the consumed arms)
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  /home/alex/mc-issue61/../MotionCorr-issue36-full24/tutorial/Movies/gain.mrc

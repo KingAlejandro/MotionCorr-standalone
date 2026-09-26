@@ -82,6 +82,44 @@ def _stats(vec: np.ndarray, pixel_size: float) -> dict:
             "rms_a": rms * pixel_size, "p95_a": p95 * pixel_size, "max_a": mx * pixel_size}
 
 
+def validate_star(star: mf.MotionStar) -> None:
+    if min(star.nx, star.ny) <= 0 or star.n_frames < 2:
+        raise ValueError("motion STAR must have positive dimensions and at least two frames")
+    if not math.isfinite(star.pixel_size) or star.pixel_size <= 0:
+        raise ValueError("motion STAR pixel size must be finite and positive")
+    if not math.isfinite(star.binning) or star.binning != 1.0 or star.first_frame != 1:
+        raise ValueError("known-motion fixtures require binning=1 and first_frame=1")
+    arrays = [star.global_shift_x, star.global_shift_y]
+    if any(a.shape != (star.n_frames,) for a in arrays):
+        raise ValueError("motion STAR has an incomplete global shift table")
+    if star.motion_model_version == 1:
+        if star.coeff_x is None or star.coeff_y is None:
+            raise ValueError("motion STAR has an incomplete local model")
+        if star.coeff_x.shape != (18,) or star.coeff_y.shape != (18,):
+            raise ValueError("motion STAR local model must have 18 coefficients per axis")
+        arrays.extend([star.coeff_x, star.coeff_y])
+    elif star.motion_model_version != 0:
+        raise ValueError("unsupported motion model version")
+    if not all(np.isfinite(a).all() for a in arrays):
+        raise ValueError("motion STAR has nonfinite or unobserved shifts/coefficients")
+
+
+def compare_fields(gt: dict, star: mf.MotionStar, other: mf.MotionStar) -> float:
+    """Require compatible finite fields before checking exact thread/dose invariance."""
+    validate_star(star)
+    validate_star(other)
+    if (star.nx, star.ny, star.n_frames, star.first_frame, star.pixel_size, star.binning) != (
+            other.nx, other.ny, other.n_frames, other.first_frame, other.pixel_size, other.binning):
+        raise ValueError("invariance comparison has incompatible geometry or frame metadata")
+    frames = np.arange(1, star.n_frames + 1)
+    gx = np.asarray(gt["grid"]["x"], dtype=float)
+    gy = np.asarray(gt["grid"]["y"], dtype=float)
+    difference = np.abs(star.field(frames, gx, gy) - other.field(frames, gx, gy))
+    if difference.size == 0 or not np.isfinite(difference).all():
+        raise ValueError("invariance comparison has an empty or nonfinite field")
+    return float(difference.max())
+
+
 def evaluate(gt: dict, star: mf.MotionStar) -> dict:
     """Compute every field metric. No thresholds are applied here."""
     geo = gt["geometry"]
@@ -89,6 +127,17 @@ def evaluate(gt: dict, star: mf.MotionStar) -> dict:
     grid_x = np.asarray(gt["grid"]["x"], dtype=float)
     grid_y = np.asarray(gt["grid"]["y"], dtype=float)
     truth = np.asarray(gt["expected_applied_field"], dtype=float)   # (F, P, 2) px
+    if not math.isfinite(px) or px <= 0:
+        raise ValueError("fixture pixel size must be finite and positive")
+    if min(geo["nx"], geo["ny"]) <= 0 or geo["n_frames"] < 2:
+        raise ValueError("fixture must have positive dimensions and at least two frames")
+    if grid_x.ndim != 1 or grid_x.size == 0 or grid_y.shape != grid_x.shape:
+        raise ValueError("fixture grid must contain paired x/y positions")
+    if truth.shape != (geo["n_frames"], grid_x.size, 2):
+        raise ValueError("fixture field shape does not match its frames/grid")
+    if not all(np.isfinite(a).all() for a in (grid_x, grid_y, truth)):
+        raise ValueError("fixture grid or truth contains nonfinite values")
+    validate_star(star)
 
     problems = []
     if (star.nx, star.ny) != (geo["nx"], geo["ny"]):
@@ -97,11 +146,13 @@ def evaluate(gt: dict, star: mf.MotionStar) -> dict:
         problems.append(f"output has {star.n_frames} frames, fixture has {geo['n_frames']}")
     if abs(star.pixel_size - px) > 1e-9:
         problems.append(f"output pixel size {star.pixel_size} != fixture {px}")
-    if not np.isfinite(star.global_shift_x).all():
-        problems.append("output global shift table has unobserved frames")
+    if problems:
+        raise ValueError("; ".join(problems))
 
     frames = np.arange(1, star.n_frames + 1)
     recovered = star.field(frames, grid_x, grid_y)                  # (F, P, 2) px
+    if not np.isfinite(recovered).all():
+        raise ValueError("recovered field contains nonfinite values")
 
     # Temporal gauge: motion is only defined relative to a reference frame. Both truth and
     # recovery are already anchored at the first summed frame (truth by construction, recovery
@@ -205,7 +256,7 @@ def apply_gates(metrics: dict) -> dict:
     checks = []
 
     def add(name, value_a, limit_a, gated=True, note=""):
-        passed = (value_a is not None) and (value_a <= limit_a)
+        passed = (value_a is not None) and math.isfinite(value_a) and (value_a <= limit_a)
         checks.append({
             "name": name, "gated": gated,
             "value_a": value_a, "value_px": None if value_a is None else value_a / px,
@@ -260,6 +311,18 @@ def apply_gates(metrics: dict) -> dict:
             "status": "PASS" if all(c["pass"] for c in gated) else "FAIL"}
 
 
+def add_check(gates: dict, name: str, passed: bool, note: str, **values) -> None:
+    """Append a mandatory check and keep the JSON counts and verdict consistent."""
+    gates["checks"].append({
+        "name": name, "gated": True, "pass": bool(passed), "note": note,
+        "value_a": None, "value_px": None, "limit_a": None, "limit_px": None,
+        "amplitude_loss_at_3A": None, "equivalent_bfactor_a2": None, **values,
+    })
+    gates["n_gated"] += 1
+    gates["n_failed"] += int(not passed)
+    gates["status"] = "FAIL" if gates["n_failed"] else "PASS"
+
+
 # --------------------------------------------------------------- applied-field witness -----
 
 def self_consistency(movie_path: Path, star: mf.MotionStar, produced_sum: Path) -> dict:
@@ -269,19 +332,28 @@ def self_consistency(movie_path: Path, star: mf.MotionStar, produced_sum: Path) 
     """
     movie, _ = mf.read_mrc(movie_path)
     got, _ = mf.read_mrc(produced_sum)
+    validate_star(star)
+    if movie.shape != (star.n_frames, star.ny, star.nx) or got.shape != (1, star.ny, star.nx):
+        raise ValueError("witness movie/sum geometry does not match the motion STAR")
+    if not np.isfinite(movie).all() or not np.isfinite(got).all():
+        raise ValueError("witness movie/sum contains nonfinite pixels")
     got = got[0].astype(np.float64)
     recon = mf.reapply_field(movie.astype(np.float64), star)
+    if not np.isfinite(recon).all():
+        raise ValueError("re-applied field produced nonfinite pixels")
     diff = recon - got
     ref_rms = float(np.sqrt(np.mean(got ** 2)))
     rmse = float(np.sqrt(np.mean(diff ** 2)))
+    relative = rmse / ref_rms if ref_rms > 0 else None
+    passed = relative is not None and math.isfinite(relative) and relative <= NUMERICAL_NOISE_RELATIVE_RMSE
     return {
         "reference_rms": ref_rms,
         "absolute_rmse": rmse,
-        "relative_rmse": rmse / ref_rms if ref_rms > 0 else None,
+        "relative_rmse": relative,
+        "status": "PASS" if passed else "FAIL",
         "max_abs_error": float(np.abs(diff).max()),
         "noise_floor_relative_rmse": NUMERICAL_NOISE_RELATIVE_RMSE,
-        "classification": ("numerical_noise" if ref_rms > 0 and
-                           rmse / ref_rms <= NUMERICAL_NOISE_RELATIVE_RMSE else "field_defect"),
+        "classification": "numerical_noise" if passed else "field_defect",
         "note": "float32 FFT arithmetic in the program versus float64 here; a disagreement at "
                 "or below the measured floor is rounding, not a displacement-field error",
     }
@@ -366,7 +438,7 @@ def print_report(report: dict) -> None:
         sc = report["self_consistency"]
         print("\n7. APPLIED-FIELD SELF-CONSISTENCY (reported field re-applied independently)")
         print(f"   reference RMS {sc['reference_rms']:.6g}   absolute RMSE {sc['absolute_rmse']:.6g}"
-              f"   relative RMSE {sc['relative_rmse']:.6e}")
+              f"   relative RMSE {_fmt(sc['relative_rmse'])}")
         print(f"   noise floor {sc['noise_floor_relative_rmse']:.1e} -> "
               f"classified as {sc['classification'].upper()}")
 
@@ -427,6 +499,20 @@ def main() -> int:
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
 
+    if bool(args.movie) != bool(args.summed_image):
+        ap.error("--movie and --summed-image must be provided together")
+    try:
+        return run_check(args)
+    except (OSError, ValueError, KeyError, IndexError, TypeError, OverflowError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        if args.json:
+            args.json.parent.mkdir(parents=True, exist_ok=True)
+            args.json.write_text(json.dumps({"tool": "check_known_motion.py",
+                                            "status": "ERROR", "error": str(exc)}, indent=2) + "\n")
+        return 2
+
+
+def run_check(args) -> int:
     if not args.ground_truth.exists():
         print(f"ERROR: ground truth not found: {args.ground_truth}", file=sys.stderr)
         return 2
@@ -476,10 +562,7 @@ def main() -> int:
 
     if args.compare_star:
         other = mf.read_motion_star(args.compare_star)
-        frames = np.arange(1, star.n_frames + 1)
-        gx = np.asarray(gt["grid"]["x"], dtype=float)
-        gy = np.asarray(gt["grid"]["y"], dtype=float)
-        d = np.abs(star.field(frames, gx, gy) - other.field(frames, gx, gy)).max()
+        d = compare_fields(gt, star, other)
         report[args.compare_label] = {
             "other_star": str(args.compare_star),
             "max_field_difference_px": float(d),
@@ -487,19 +570,17 @@ def main() -> int:
             "note": "dose weighting is a per-frame radial Fourier weight applied after "
                     "alignment; it cannot change the geometry, so any difference is a defect",
         }
-        if d != 0.0:
-            gates["checks"].append({
-                "name": args.compare_label, "gated": True, "value_a": float(d * star.pixel_size),
-                "value_px": float(d), "limit_a": 0.0, "limit_px": 0.0,
-                "amplitude_loss_at_3A": None, "equivalent_bfactor_a2": None, "pass": False,
-                "note": "field changed by a step that cannot change geometry",
-            })
-            gates["n_gated"] += 1
-            gates["n_failed"] += 1
-            gates["status"] = "FAIL"
+        add_check(gates, args.compare_label, d == 0.0,
+                  "field must be exactly invariant under thread/dose changes",
+                  value_a=d * star.pixel_size, value_px=d, limit_a=0.0, limit_px=0.0)
 
     if args.movie and args.summed_image:
         report["self_consistency"] = self_consistency(args.movie, star, args.summed_image)
+        witness = report["self_consistency"]
+        add_check(gates, "applied_image_self_consistency", witness["status"] == "PASS",
+                  "reported field must reproduce the applied non-dose-weighted sum",
+                  value_relative_rmse=witness["relative_rmse"],
+                  limit_relative_rmse=NUMERICAL_NOISE_RELATIVE_RMSE)
 
     report["status"] = gates["status"]
 
@@ -507,7 +588,7 @@ def main() -> int:
         print_report(report)
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
-        args.json.write_text(json.dumps(report, indent=2) + "\n")
+        args.json.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
 
     return 0 if report["status"] == "PASS" else 1
 

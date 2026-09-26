@@ -455,9 +455,9 @@ def main() -> None:
     # Gate profiles and custom tolerances
     parser.add_argument(
         "--gate",
-        choices=["exact", "relaxed", "custom"],
+        choices=["exact", "relaxed", "backend", "custom"],
         default="exact",
-        help="Acceptance gate profile: 'exact' (1-thread exact CPU parity: zero pixel error), 'relaxed' (multi-thread/GPU: tolerance-based), 'custom'",
+        help="Acceptance gate profile: 'exact' (1-thread exact CPU parity: zero pixel error), 'relaxed' (legacy CPU agreement), 'backend' (complete backend comparison with relative RMSE diagnostic), 'custom'",
     )
     parser.add_argument("--max-shift-err", type=float, help="Override max frame shift error tolerance in pixels")
     parser.add_argument("--shift-rmse", type=float, help="Override coordinate RMS shift error tolerance in pixels")
@@ -479,7 +479,7 @@ def main() -> None:
         tol_shift_rmse = 1e-4
         tol_image_rmse = 1e-7
         tol_image_max_err = 1e-7
-    elif args.gate == "relaxed":
+    elif args.gate in ("relaxed", "backend"):
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.02
@@ -489,6 +489,12 @@ def main() -> None:
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.01
         tol_image_max_err = 5.0
+
+    # Backend is a named policy, not a per-dataset threshold-fitting interface.
+    if args.gate == "backend" and any(value is not None for value in (
+            args.max_shift_err, args.shift_rmse, args.image_rmse,
+            args.image_max_err, args.image_relative_rmse)):
+        parser.error("backend thresholds are fixed; use custom for exploratory overrides")
 
     # Apply command-line overrides
     if args.max_shift_err is not None:
@@ -655,12 +661,31 @@ def main() -> None:
                     if img_res["rmse"] > tol_image_rmse:
                         img_passed = False
                         img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e}")
-                    if img_res["relative_rmse"] > tol_image_relative_rmse:
+                    if args.gate != "backend" and img_res["relative_rmse"] > tol_image_relative_rmse:
                         img_passed = False
                         img_fail_reasons.append(f"Relative image RMSE {img_res['relative_rmse']:.6e} > {tol_image_relative_rmse:.6e}")
                     if img_res["max_abs_pixel_error"] > tol_image_max_err:
                         img_passed = False
                         img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")
+
+            if args.gate == "backend" and "error" not in img_res:
+                # MRC dimensions, starts, sampling grid, cell, axis order and origin.
+                # Derived image statistics and run labels need not be byte-identical.
+                geometry_equal = all(ref_raw_h[a:b] == test_raw_h[a:b]
+                                     for a, b in ((0, 76), (196, 208)))
+                geometry_finite = all(math.isfinite(v) for raw in (ref_raw_h, test_raw_h)
+                                      for v in (*struct.unpack_from("<6f", raw, 40),
+                                                *struct.unpack_from("<3f", raw, 196)))
+                img_res["geometry_matches"] = geometry_equal and geometry_finite
+                if not img_res["geometry_matches"]:
+                    img_passed = False
+                    img_fail_reasons.append("MRC geometry differs or contains non-finite values")
+                img_res["relative_rmse_diagnostic"] = {
+                    "value": img_res["relative_rmse"],
+                    "threshold": tol_image_relative_rmse,
+                    "status": "PASS" if img_res["relative_rmse"] <= tol_image_relative_rmse else "FAIL",
+                    "blocking": False,
+                }
 
             img_res["passed"] = img_passed
             img_res["fail_reasons"] = img_fail_reasons
@@ -692,6 +717,9 @@ def main() -> None:
                 errors.append("Ground truth requested but no test movie STAR was resolved")
 
     # 4. Performance & metrics from log files
+    if args.gate == "backend" and not args.test_log:
+        gate_passed = False
+        errors.append("Backend profile requires --test-log with successful process status")
     if args.test_log:
         if not args.test_log.exists():
             gate_passed = False
@@ -728,8 +756,8 @@ def main() -> None:
         "corrected_image": "corrected_image" in report["checks"],
     }
     report["coverage"]["complete"] = all(report["coverage"].values())
-    report["coverage"]["required"] = bool(args.require_complete_coverage)
-    if args.require_complete_coverage and not report["coverage"]["complete"]:
+    report["coverage"]["required"] = bool(args.require_complete_coverage or args.gate == "backend")
+    if report["coverage"]["required"] and not report["coverage"]["complete"]:
         gate_passed = False
         missing = [name for name in ("motion_and_star", "corrected_image")
                    if not report["coverage"][name]]
@@ -793,6 +821,8 @@ def main() -> None:
                 print(f"   Image RMSE:           {im['rmse']:.6e} (threshold: {tol_image_rmse:.6e})")
                 print(f"   Max absolute diff:    {im['max_abs_pixel_error']:.6e} (threshold: {tol_image_max_err:.6e})")
                 print(f"   Relative RMSE:        {im['relative_rmse']:.6e} (threshold: {tol_image_relative_rmse:.6e} in relaxed/custom gate)")
+                if "relative_rmse_diagnostic" in im:
+                    print(f"     diagnostic status: {im['relative_rmse_diagnostic']['status']} (nonblocking; backend profile only)")
                 print(f"     denominator:        reference pixel population std = {im['relative_rmse_denominator_value']:.6e}")
                 print(f"     equivalent to:      absolute RMSE <= {tol_image_relative_rmse * im['relative_rmse_denominator_value']:.6e} for this reference")
                 print(f"   Normalized headers:   Core metadata: {im['core_header_diff_bytes']} diff bytes, Non-timestamp labels: {im['normalized_label_diff_bytes']} diff bytes")

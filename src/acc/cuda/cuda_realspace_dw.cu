@@ -387,9 +387,11 @@ bool cudaDoseWeightAndInterpolate(
     const int nx = (nfx - 1) * 2, ny = nfy;
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
 
+    CudaMemoryCleanup memory_cleanup;
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Fframes, sz_fframes));
+    memory_cleanup.add(d_Fframes);
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         HANDLE_ERROR(cudaMemcpy(
@@ -404,7 +406,6 @@ bool cudaDoseWeightAndInterpolate(
         (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile
     );
 
-    cudaFree(d_Fframes);
     return res;
 }
 
@@ -544,9 +545,11 @@ bool cudaRealSpaceInterpolation(
     const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
     const size_t sz_iframes = (size_t)n_frames * ny * nx * sizeof(float);
 
+    CudaMemoryCleanup memory_cleanup;
     float *d_Iframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Iframes, sz_iframes));
+    memory_cleanup.add(d_Iframes);
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         HANDLE_ERROR(cudaMemcpy(
@@ -561,7 +564,6 @@ bool cudaRealSpaceInterpolation(
         d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile
     );
 
-    cudaFree(d_Iframes);
     return res;
 }
 

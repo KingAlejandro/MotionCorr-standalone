@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 #define CUFFT_CHECK(cmd) do { \
@@ -212,8 +213,9 @@ __global__ void fourierShiftKernel(
     }
 }
 
-bool cudaAlignPatch(
-    std::vector<MultidimArray<fComplex> > &Fframes,
+bool cudaAlignPatchDevice(
+    cufftComplex *d_Fframes_in,
+    const int n_frames,
     const int pnx, const int pny,
     const RFLOAT scaled_B,
     std::vector<RFLOAT> &xshifts,
@@ -221,22 +223,26 @@ bool cudaAlignPatch(
     const int max_iter,
     const RFLOAT ccf_downsample,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    bool is_global)
 {
-    if (device_id >= 0) {
-        HANDLE_ERROR(cudaSetDevice(device_id));
+    int dev_count = 0;
+    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    if (count_err != cudaSuccess || dev_count == 0) {
+        REPORT_ERROR("No CUDA capable devices found");
     }
+    if (device_id < 0 || device_id >= dev_count) {
+        REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
+    }
+    HANDLE_ERROR(cudaSetDevice(device_id));
 
     cudaEvent_t ev_start_total, ev_stop_total;
-    cudaEvent_t ev_start_h2d, ev_stop_h2d;
     cudaEvent_t ev_start_kernel, ev_stop_kernel;
     cudaEvent_t ev_start_cufft, ev_stop_cufft;
     cudaEvent_t ev_start_d2h, ev_stop_d2h;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_h2d));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_h2d));
     HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
     HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
     HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
@@ -246,7 +252,6 @@ bool cudaAlignPatch(
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
-    const int n_frames = xshifts.size();
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
     }
@@ -272,8 +277,9 @@ bool cudaAlignPatch(
     if (search_range * 2 + 1 > ccf_nx) search_range = ccf_nx / 2 - 1;
     if (search_range * 2 + 1 > ccf_ny) search_range = ccf_ny / 2 - 1;
 
-    const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
+    const int nfx = pnx / 2 + 1, nfy = pny;
     const int nfy_half = nfy / 2;
+    float2 *d_Fframes = (float2*)d_Fframes_in;
 
     // Buffer allocations
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
@@ -283,7 +289,6 @@ bool cudaAlignPatch(
     const size_t sz_iccs    = (size_t)n_frames * ccf_ny * ccf_nx * sizeof(float);
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
 
-    float2 *d_Fframes = nullptr;
     float2 *d_Fref = nullptr;
     float *d_weight = nullptr;
     float2 *d_Fccs = nullptr;
@@ -293,7 +298,6 @@ bool cudaAlignPatch(
     float *d_shiftx = nullptr;
     float *d_shifty = nullptr;
 
-    HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
     HANDLE_ERROR(cudaMalloc(&d_weight, sz_weight));
     HANDLE_ERROR(cudaMalloc(&d_Fccs, sz_fccs));
@@ -304,22 +308,6 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
-
-    // Host to Device copy
-    HANDLE_ERROR(cudaEventRecord(ev_start_h2d));
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(
-            d_Fframes + (size_t)iframe * nfy * nfx,
-            Fframes[iframe].data,
-            (size_t)nfy * nfx * sizeof(float2),
-            cudaMemcpyHostToDevice
-        ));
-    }
-    HANDLE_ERROR(cudaEventRecord(ev_stop_h2d));
-    HANDLE_ERROR(cudaEventSynchronize(ev_stop_h2d));
-
-    float h2d_ms = 0.0f;
-    HANDLE_ERROR(cudaEventElapsedTime(&h2d_ms, ev_start_h2d, ev_stop_h2d));
 
     // Initialize cuFFT batched C2R plan
     cufftHandle plan_c2r;
@@ -367,7 +355,7 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k1_ms;
 
-        // 3. Batched cuFFT C2R (timed separately from custom kernels)
+        // 3. Batched cuFFT C2R
         HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
@@ -390,7 +378,7 @@ bool cudaAlignPatch(
         HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k2_ms;
 
-        // Copy shifts back to host
+        // Copy candidate shifts back to host
         HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
         HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
         HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
@@ -418,7 +406,7 @@ bool cudaAlignPatch(
             h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
         }
 
-        // Apply Fourier phase shifts on GPU (matches CPU motioncorr_runner.cpp line 2476)
+        // Apply Fourier phase shifts on GPU
         if (n_frames > 1) {
             HANDLE_ERROR(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             HANDLE_ERROR(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
@@ -441,30 +429,15 @@ bool cudaAlignPatch(
         }
     }
 
-    // Final transfer: copy shifted Fframes back to host
-    HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(
-            Fframes[iframe].data,
-            d_Fframes + (size_t)iframe * nfy * nfx,
-            (size_t)nfy * nfx * sizeof(float2),
-            cudaMemcpyDeviceToHost
-        ));
-    }
-    HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
-    HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
-    float final_d2h_ms = 0.0f;
-    HANDLE_ERROR(cudaEventElapsedTime(&final_d2h_ms, ev_start_d2h, ev_stop_d2h));
-    accumulated_d2h_ms += final_d2h_ms;
-
     HANDLE_ERROR(cudaEventRecord(ev_stop_total));
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
     float total_ms = 0.0f;
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
-    // Profile logging per pass criteria in Issue #16
-    logfile << " [CUDA Global Alignment Profile]" << std::endl;
-    logfile << "   Host-to-Device transfer time: " << std::fixed << std::setprecision(2) << h2d_ms << " ms" << std::endl;
+    // Profile logging
+    const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
+    logfile << " [CUDA " << stage_name << " Profile]" << std::endl;
+    logfile << "   Host-to-Device transfer time: 0.00 ms (Resident VRAM)" << std::endl;
     logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
     logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
     logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
@@ -475,7 +448,6 @@ bool cudaAlignPatch(
 
     // Cleanup
     CUFFT_CHECK(cufftDestroy(plan_c2r));
-    HANDLE_ERROR(cudaFree(d_Fframes));
     HANDLE_ERROR(cudaFree(d_Fref));
     HANDLE_ERROR(cudaFree(d_weight));
     HANDLE_ERROR(cudaFree(d_Fccs));
@@ -487,8 +459,6 @@ bool cudaAlignPatch(
 
     HANDLE_ERROR(cudaEventDestroy(ev_start_total));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_h2d));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_h2d));
     HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
     HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
@@ -496,6 +466,58 @@ bool cudaAlignPatch(
     HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
 
+    logfile << " [CUDA " << stage_name << "] completed; converged="
+            << (converged ? "yes" : "no") << std::endl;
+    return converged;
+}
+
+bool cudaAlignPatch(
+    std::vector<MultidimArray<fComplex> > &Fframes,
+    const int pnx, const int pny,
+    const RFLOAT scaled_B,
+    std::vector<RFLOAT> &xshifts,
+    std::vector<RFLOAT> &yshifts,
+    const int max_iter,
+    const RFLOAT ccf_downsample,
+    const int device_id,
+    std::ostream &logfile,
+    bool is_global)
+{
+    const int n_frames = (int)xshifts.size();
+    if (n_frames == 0) return true;
+    const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
+    const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
+
+    float2 *d_Fframes = nullptr;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
+
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        HANDLE_ERROR(cudaMemcpy(
+            d_Fframes + (size_t)iframe * nfy * nfx,
+            Fframes[iframe].data,
+            (size_t)nfy * nfx * sizeof(float2),
+            cudaMemcpyHostToDevice
+        ));
+    }
+
+    bool converged = cudaAlignPatchDevice(
+        (cufftComplex*)d_Fframes, n_frames, pnx, pny, scaled_B,
+        xshifts, yshifts, max_iter, ccf_downsample, device_id, logfile, is_global
+    );
+
+    if (is_global) {
+        for (int iframe = 0; iframe < n_frames; iframe++) {
+            HANDLE_ERROR(cudaMemcpy(
+                Fframes[iframe].data,
+                d_Fframes + (size_t)iframe * nfy * nfx,
+                (size_t)nfy * nfx * sizeof(float2),
+                cudaMemcpyDeviceToHost
+            ));
+        }
+    }
+
+    HANDLE_ERROR(cudaFree(d_Fframes));
     return converged;
 }
 

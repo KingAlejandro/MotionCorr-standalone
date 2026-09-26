@@ -18,11 +18,15 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <omp.h>
+#include <cmath>
+#include <limits>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_fft_prep.h"
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -42,8 +46,7 @@
 	Timer MCtimer;
 	int TIMING_READ_GAIN = MCtimer.setNew("read gain");
 	int TIMING_READ_MOVIE = MCtimer.setNew("read movie");
-	int TIMING_APPLY_GAIN = MCtimer.setNew("apply gain");
-	int TIMING_INITIAL_SUM = MCtimer.setNew("initial sum");
+	int TIMING_GAIN_AND_SUM = MCtimer.setNew("apply gain and initial sum");
 	int TIMING_DETECT_HOT = MCtimer.setNew("detect hot pixels");
 	int TIMING_FIX_DEFECT = MCtimer.setNew("fix defects");
 	int TIMING_GLOBAL_FFT = MCtimer.setNew("global FFT");
@@ -149,6 +152,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
+	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
+	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
+	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
+	if (max_io_threads == 0 || max_io_threads < -1)
+		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -350,13 +358,16 @@ void MotioncorrRunner::initialise()
 
 	// First backup the given list of all micrographs
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
+	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
 	// This list contains those for the output STAR & PDF files
 	fn_ori_micrographs.clear();
 	optics_group_ori_micrographs.clear();
+	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
+	pre_exposure_micrographs.clear();
 
 	bool warned = false;
 
@@ -365,26 +376,8 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old)
-		{
-			if (even_odd_split)
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic],true);
-				if (exists(fn_avg))
-				{
-			    		process_this = false; // already done
-				}
-			}
-			else
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic]);
-				if (exists(fn_avg) && exists(fn_avg.withoutExtension() + ".star") &&
-                            (grouping_for_ps <= 0 || exists(fn_avg.withoutExtension() + "_PS.mrc")))
-				{
-					process_this = false; // already done
-				}
-			}
-		}
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
 		{
@@ -405,12 +398,14 @@ void MotioncorrRunner::initialise()
 		{
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 
 		if (!ignore_this)
 		{
 			fn_ori_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_ori_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 	}
 
@@ -512,6 +507,70 @@ FileName MotioncorrRunner::getOutputFileNames(FileName fn_mic, bool continue_eve
 	}
 }
 
+namespace {
+// Inspect only the header and file length; resume need not reread image pixels.
+bool completeMrc(const FileName &filename)
+{
+	std::ifstream input(filename.c_str(), std::ios::binary | std::ios::ate);
+	if (!input) return false;
+	const std::streamoff length = input.tellg();
+	Image<float>::MRChead header;
+	input.seekg(0);
+	if (!input.read(reinterpret_cast<char*>(&header), sizeof(header))) return false;
+	Image<float> image;
+	const DataType type = image.parseMRCHeader(&header, -1, false, filename);
+	if (header.nx <= 0 || header.ny <= 0 || header.nz != 1 || header.nsymbt < 0 ||
+	    (type != Float && type != Float16)) return false;
+	const std::streamoff offset = 1024 + static_cast<std::streamoff>(header.nsymbt);
+	if (length < offset) return false;
+	const uint64_t pixels = static_cast<uint64_t>(header.nx) * header.ny;
+	return pixels <= static_cast<uint64_t>(length - offset) / gettypesize(type);
+}
+}
+
+bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+{
+	const FileName average = getOutputFileNames(movie);
+	const FileName root = average.withoutExtension();
+	try
+	{
+		if (!completeMrc(average) ||
+		    (do_dose_weighting && save_noDW && !completeMrc(root + "_noDW.mrc")) ||
+		    (even_odd_split && (!completeMrc(root + "_EVN.mrc") || !completeMrc(root + "_ODD.mrc"))) ||
+		    (grouping_for_ps > 0 && !completeMrc(root + "_PS.mrc")) ||
+		    !exists(root + ".star")) return false;
+
+		// A truncated STAR may contain the general block but lack some shifts.
+		// Validate the frame indices before constructing Micrograph, which indexes them.
+		MetaDataTable general, shifts;
+		general.read(root + ".star", "general");
+		shifts.read(root + ".star", "global_shift");
+		int nframes, width, height;
+		FileName saved_movie;
+		if (!general.getValue(EMDL_IMAGE_SIZE_Z, nframes) || nframes <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
+		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
+		    shifts.numberOfObjects() != nframes) return false;
+		std::vector<bool> seen(nframes, false);
+		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
+		{
+			int frame;
+			RFLOAT x, y;
+			if (!shifts.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, frame) || frame < 1 || frame > nframes ||
+			    seen[frame - 1] || !shifts.getValue(EMDL_MICROGRAPH_SHIFT_X, x) ||
+			    !shifts.getValue(EMDL_MICROGRAPH_SHIFT_Y, y) || !std::isfinite(x) || !std::isfinite(y)) return false;
+			seen[frame - 1] = true;
+		}
+		Micrograph metadata(root + ".star"); // Also require any declared local model to parse.
+		return true;
+	}
+	catch (const RelionError &)
+	{
+		return false; // Incomplete products are retried by --only_do_unfinished.
+	}
+}
+
 void MotioncorrRunner::run()
 {
 	prepareGainReference(true);
@@ -530,6 +589,7 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
+	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
 		if (verb > 0 && imic % barstep == 0)
@@ -559,11 +619,20 @@ void MotioncorrRunner::run()
 		if (result) {
 			saveModel(mic);
 			plotShifts(fn_micrographs[imic], mic);
+		} else {
+			failed_movies.push_back(fn_micrographs[imic]);
 		}
 	}
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
+
+	if (!failed_movies.empty())
+	{
+		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
+		for (const FileName &movie : failed_movies) message += " " + movie;
+		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");
+	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
 	generateLogFilePDFAndWriteStarFiles();
@@ -928,7 +997,19 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 
 	FileName fn_avg = getOutputFileNames(mic.getMovieFilename());
 
-	mic.write(fn_avg.withoutExtension() + ".star");
+	// Alignment uses binned-pixel displacements internally. Export a copy in
+	// original pixels, matching global shifts and Micrograph::getShiftAt().
+	if (do_own && early_binning && mic.model != NULL &&
+	    mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL)
+	{
+		Micrograph exported(mic);
+		ThirdOrderPolynomialModel &model = static_cast<ThirdOrderPolynomialModel&>(*exported.model);
+		model.coeffX *= bin_factor;
+		model.coeffY *= bin_factor;
+		exported.write(fn_avg.withoutExtension() + ".star");
+	}
+	else
+		mic.write(fn_avg.withoutExtension() + ".star");
 }
 
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
@@ -970,7 +1051,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 				MDavg.setValue(EMDL_MICROGRAPH_EVEN, even_micrograph); 
 				MDavg.setValue(EMDL_MICROGRAPH_ODD, odd_micrograph);
 			}
-			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_micrographs[imic]);
+			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_ori_micrographs[imic]);
 
         	}
                 MDavg.setValue(EMDL_MICROGRAPH_NAME, fn_avg);
@@ -1273,82 +1354,273 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 	RCTOC(TIMING_READ_MOVIE);
 
-	// Apply gain
-	RCTIC(TIMING_APPLY_GAIN);
-	if (fn_gain_reference != "") {
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain()) {
-				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), n) *= DIRECT_MULTIDIM_ELEM(Igain(), n);
-			}
+#ifdef _CUDA_ENABLED
+	std::unique_ptr<CudaMovieSession> movie_session;
+	if (use_gpu && !early_binning) {
+		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		if (!movie_session->initialize()) {
+			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
+			movie_session.reset();
 		}
 	}
-	RCTOC(TIMING_APPLY_GAIN);
+#endif
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
-	// First sum unaligned frames
-	RCTIC(TIMING_INITIAL_SUM);
-	for (int iframe = 0; iframe < n_frames; iframe++) {
+	// The resident CUDA preprocessing path keeps decoded frames raw on the host.
+	// Its device copy is gain-corrected; host frames are materialized only if a
+	// later CPU/streaming path actually needs them.
+	bool host_frames_are_raw = false;
+	std::vector<int> resident_bad_xs, resident_bad_ys;
+	std::vector<float> resident_bad_replacements;
+	auto materialize_host_frames = [&]() {
+		if (!host_frames_are_raw) return;
+		const bool apply_gain = (fn_gain_reference != "");
 		#pragma omp parallel for num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			DIRECT_MULTIDIM_ELEM(Isum, n) += DIRECT_MULTIDIM_ELEM(Iframes[iframe](), n);
+		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
+			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain(), pixel) : 1.0f;
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
+		}
+		// Sparse values were computed from the gain-corrected neighborhood in
+		// the original raster/frame/RNG order, so they replace the corresponding
+		// products after the one host gain pass.
+		const size_t n_bad = resident_bad_xs.size();
+		for (int iframe = 0; iframe < n_frames; iframe++)
+			for (size_t idx = 0; idx < n_bad; idx++)
+				DIRECT_A2D_ELEM(Iframes[iframe](), resident_bad_ys[idx], resident_bad_xs[idx]) =
+					resident_bad_replacements[(size_t)iframe * n_bad + idx];
+		host_frames_are_raw = false;
+	};
+	// Apply gain and build the initial sum in one pixel pass. This avoids a
+	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
+	RCTIC(TIMING_GAIN_AND_SUM);
+#ifdef _CUDA_ENABLED
+	bool cuda_gain_sum_done = false;
+	if (movie_session) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
+		// Keep the sum resident: hot-pixel statistics are computed on the device and
+		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
+		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
+		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false)) {
+			cuda_gain_sum_done = true;
+			host_frames_are_raw = true;
+		} else {
+			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
+			movie_session.reset();
+			// The failed CUDA call may have partially written the sum. Start the
+			// original CPU pass from raw frames and a known-zero accumulator.
+			Isum.initZeros();
 		}
 	}
-	RCTOC(TIMING_INITIAL_SUM);
+	if (!cuda_gain_sum_done)
+#endif
+	{
+		const bool apply_gain = (fn_gain_reference != "");
+		#pragma omp parallel for num_threads(n_threads)
+		for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
+			float sum = 0.0f;
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
+				if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
+				sum += value;
+			}
+			DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
+		}
+	}
+	RCTOC(TIMING_GAIN_AND_SUM);
 
 	// Hot pixel
 	if (!skip_defect)
 	{
 		RCTIC(TIMING_DETECT_HOT);
-		RFLOAT mean = 0, std = 0;
-		#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			mean += DIRECT_MULTIDIM_ELEM(Isum, n);
-		}
-		mean /=  YXSIZE(Isum);
-		#pragma omp parallel for reduction(+:std) num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			RFLOAT d = (DIRECT_MULTIDIM_ELEM(Isum, n) - mean);
-			std += d * d;
-		}
-		std = std::sqrt(std / YXSIZE(Isum));
-		const RFLOAT threshold = mean + hotpixel_sigma * std;
-		logfile << "In unaligned sum, Mean = " << mean << " Std = " << std << " Hotpixel threshold = " << threshold << std::endl;
-
+		RFLOAT mean = 0, std = 0, threshold = 0;
 		MultidimArray<bool> bBad(ny, nx);
-		bBad.initZeros();
-		if (fn_defect != "")
-		{
-			fillDefectMask(bBad, fn_defect, n_threads);
-#ifdef DEBUG_HOTPIXELS
-			Image<RFLOAT> tmp(nx, ny);
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
-				DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
-			tmp.write("defect.mrc");
+		int n_bad = 0;
+		const int NUM_MIN_OK = 6;
+		const int D_MAX = isEER ? 4 : 2;
+		bool host_sum_available = true;
+#ifdef _CUDA_ENABLED
+		// On the resident path the sum was deliberately left on the device.
+		host_sum_available = !(movie_session && cuda_gain_sum_done);
 #endif
-		}
-
-		if (fn_gain_reference != "")
+		// Attempt 0 uses GPU statistics; attempt 1 is the original host scan, run
+		// verbatim. Any exactness guard failure falls through to attempt 1.
+		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
-			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+			bool used_gpu_stats = false;
+			std::vector<int> gpu_hits;
+#ifdef _CUDA_ENABLED
+			if (stats_attempt == 0 && movie_session && cuda_gain_sum_done)
 			{
-				if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+				double sum1 = 0.0, sum_abs = 0.0, sum2 = 0.0;
+				size_t band = 0;
+				if (movie_session->reduceUnalignedSum(sum1, sum_abs))
 				{
-					DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+					// Same source expressions as the host path, so host rounding is unchanged.
+					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
+					if (std::isfinite(gpu_mean) && movie_session->reduceUnalignedSumSqDev(gpu_mean, sum2))
+					{
+						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
+						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
+						// Bound the difference between reduction orders, including signed
+						// cancellation in the mean and its second-order contribution to std.
+						// For nearly constant data the latter scales as mean_abs^2/std;
+						// a zero/non-finite std makes the guard fail and uses the host scan.
+						// Widening the band only increases conservative host fallback.
+						const double n_pix = (double)YXSIZE(Isum);
+						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
+						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
+						const double mean_abs = sum_abs / n_pix;
+						const double sigma_abs = std::fabs((double)hotpixel_sigma);
+						const double guard = 4.0 * gamma_n * mean_abs
+						                   + 2.0 * sigma_abs * gamma_n * gpu_std
+						                   + 2.0 * sigma_abs * gamma_n * gamma_n
+						                     * mean_abs * mean_abs / gpu_std;
+						if (std::isfinite(gpu_std) && std::isfinite(gpu_threshold) &&
+						    std::isfinite(guard) && guard > 0.0 &&
+						    movie_session->collectAboveThreshold(gpu_threshold, guard, gpu_hits, band))
+						{
+							if (band == 0)
+							{
+								mean = gpu_mean; std = gpu_std; used_gpu_stats = true;
+							}
+							else
+							{
+								logfile << "WARNING: " << band << " pixel(s) lie within the "
+								        << "hot-pixel threshold guard band; using host statistics."
+								        << std::endl;
+							}
+						}
+					}
+				}
+				if (!used_gpu_stats && !host_sum_available)
+				{
+					if (!movie_session->downloadUnalignedSum(Isum))
+					{
+						logfile << "WARNING: Could not download unaligned sum for host "
+						        << "hot-pixel fallback; discarding resident session." << std::endl;
+						movie_session.reset();
+						REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
+					}
+					host_sum_available = true;
 				}
 			}
-		}
-
-		int n_bad = 0;
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
-			if (DIRECT_MULTIDIM_ELEM(Isum, n) > threshold && !DIRECT_MULTIDIM_ELEM(bBad, n)) {
-				DIRECT_MULTIDIM_ELEM(bBad, n) = true;
-				n_bad++;
-				mic.hotpixelX.push_back(n % nx);
-				mic.hotpixelY.push_back(n / nx);
+#endif
+			if (!used_gpu_stats)
+			{
+				mean = 0; std = 0;
+				#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					mean += DIRECT_MULTIDIM_ELEM(Isum, n);
+				}
+				mean /=  YXSIZE(Isum);
+				#pragma omp parallel for reduction(+:std) num_threads(n_threads)
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					RFLOAT d = (DIRECT_MULTIDIM_ELEM(Isum, n) - mean);
+					std += d * d;
+				}
+				std = std::sqrt(std / YXSIZE(Isum));
 			}
+			threshold = mean + hotpixel_sigma * std;
+
+			n_bad = 0;
+			mic.hotpixelX.clear();
+			mic.hotpixelY.clear();
+			bBad.initZeros();
+			if (fn_defect != "")
+			{
+				fillDefectMask(bBad, fn_defect, n_threads);
+#ifdef DEBUG_HOTPIXELS
+				Image<RFLOAT> tmp(nx, ny);
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
+					DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
+				tmp.write("defect.mrc");
+#endif
+			}
+
+			if (fn_gain_reference != "")
+			{
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+				{
+					if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+					{
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+					}
+				}
+			}
+
+			if (used_gpu_stats)
+			{
+				// The host scan has no cross-index dependence, so filtering the ascending
+				// device list against the pre-mask reproduces bBad, n_bad and the
+				// hotpixelX/Y push order exactly.
+				for (size_t h = 0; h < gpu_hits.size(); h++) {
+					const long int n = (long int)gpu_hits[h];
+					if (!DIRECT_MULTIDIM_ELEM(bBad, n)) {
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+						n_bad++;
+						mic.hotpixelX.push_back(n % nx);
+						mic.hotpixelY.push_back(n / nx);
+					}
+				}
+			}
+			else
+			{
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
+					if (DIRECT_MULTIDIM_ELEM(Isum, n) > threshold && !DIRECT_MULTIDIM_ELEM(bBad, n)) {
+						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
+						n_bad++;
+						mic.hotpixelX.push_back(n % nx);
+						mic.hotpixelY.push_back(n / nx);
+					}
+				}
+			}
+
+			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
+			// If it is reachable, use the original host statistics rather than
+			// depending on a second floating-point error bound for RNG parameters.
+			// Reachability depends only on bBad geometry, before any RNG draw.
+			if (used_gpu_stats)
+			{
+				bool gaus_reachable = false;
+				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				{
+					if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+					int n_ok = 0;
+					for (int dy = -D_MAX; dy <= D_MAX && n_ok <= NUM_MIN_OK; dy++) {
+						int y = i + dy;
+						if (y < 0 || y >= ny) continue;
+						for (int dx = -D_MAX; dx <= D_MAX; dx++) {
+							int x = j + dx;
+							if (x < 0 || x >= nx) continue;
+							if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
+							n_ok++;
+						}
+					}
+					if (n_ok <= NUM_MIN_OK) { gaus_reachable = true; break; }
+				}
+				if (gaus_reachable)
+				{
+					logfile << "WARNING: Gaussian hot-pixel replacement needs host "
+					        << "statistics; using the original host scan." << std::endl;
+#ifdef _CUDA_ENABLED
+					if (!host_sum_available && movie_session) {
+						if (!movie_session->downloadUnalignedSum(Isum)) {
+							logfile << "WARNING: Could not download unaligned sum for host "
+							        << "hot-pixel fallback; discarding resident session." << std::endl;
+							movie_session.reset();
+							REPORT_ERROR("CUDA hot-pixel fallback could not retrieve the unaligned sum.");
+						}
+						host_sum_available = true;
+					}
+#endif
+					continue; // redo detection with host statistics
+				}
+			}
+			break;
 		}
+		logfile << "In unaligned sum, Mean = " << mean << " Std = " << std << " Hotpixel threshold = " << threshold << std::endl;
 		logfile << "Detected " << n_bad << " hot pixels to be corrected." << std::endl;
 		Isum.clear();
 		RCTOC(TIMING_DETECT_HOT);
@@ -1359,9 +1631,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 		init_random_generator(random_seed);
 
-		const int NUM_MIN_OK = 6;
-		const int D_MAX = isEER ? 4 : 2;
 		const int PBUF_SIZE = 100;
+		std::vector<int> bad_xs, bad_ys;
+		bad_xs.reserve(1024);
+		bad_ys.reserve(1024);
+		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+			if (DIRECT_A2D_ELEM(bBad, i, j)) {
+				bad_xs.push_back(j);
+				bad_ys.push_back(i);
+			}
+#ifdef _CUDA_ENABLED
+		if (host_frames_are_raw)
+			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
+#endif
+		size_t bad_idx = 0;
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
@@ -1382,22 +1665,53 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 //						std::cout << " " << DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
-						pbuf[n_ok] = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+						float neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+#ifdef _CUDA_ENABLED
+						if (host_frames_are_raw && fn_gain_reference != "")
+							neighbor *= DIRECT_A2D_ELEM(Igain(), y, x);
+#endif
+						pbuf[n_ok] = neighbor;
 						n_ok++;
 					}
 //					std::cout << std::endl;
 				}
 //				std::cout << "n_ok = " << n_ok;
+				float replacement;
 				if (n_ok > NUM_MIN_OK)
-					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = pbuf[rand() % n_ok];
+					replacement = pbuf[rand() % n_ok];
 				else
-					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = rnd_gaus(frame_mean, frame_std);
+					replacement = rnd_gaus(frame_mean, frame_std);
+#ifdef _CUDA_ENABLED
+				if (host_frames_are_raw) {
+					resident_bad_replacements[(size_t)iframe * bad_xs.size() + bad_idx] = replacement;
+				} else
+#endif
+					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = replacement;
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
+			bad_idx++;
 		}
+#ifdef _CUDA_ENABLED
+		if (movie_session && !bad_xs.empty()) {
+			resident_bad_xs = bad_xs;
+			resident_bad_ys = bad_ys;
+			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
+				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
+				movie_session.reset();
+			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
+				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
+				movie_session.reset();
+			}
+		}
+#endif
 		RCTOC(TIMING_FIX_DEFECT);
 		logfile << "Fixed hot pixels." << std::endl;
 	} // !skip_defect
+
+#ifdef _CUDA_ENABLED
+	if (movie_session && !movie_session->releasePreprocessingBuffers())
+		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
+#endif
 
 //#define WRITE_FRAMES
 #ifdef WRITE_FRAMES
@@ -1421,6 +1735,39 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// FFT
 	RCTIC(TIMING_GLOBAL_FFT);
+	bool cuda_global_fft_done = false;
+#ifdef _CUDA_ENABLED
+	// A discarded session (for example after a checked sparse-update failure)
+	// sends the corrected host movie through the legacy CUDA or CPU FFT path.
+	if (!movie_session && host_frames_are_raw)
+		materialize_host_frames();
+	// The early-binning path crops a full-size Fourier transform, so keep that
+	// path on the CPU until the CUDA implementation supports the same operation.
+	if (movie_session) {
+		logfile << "Computing full-frame Fourier transforms (CUDA in-VRAM)..." << std::endl;
+		cuda_global_fft_done = movie_session->computeGlobalForwardFFT();
+	} else if (use_gpu && !early_binning) {
+		logfile << "Computing full-frame Fourier transforms (CUDA)..." << std::endl;
+		cuda_global_fft_done = cudaForwardFFT2D(Iframes, Fframes, nx, ny, gpu_id, logfile);
+	}
+#endif
+	if (cuda_global_fft_done) {
+#ifdef _CUDA_ENABLED
+		if (!movie_session)
+#endif
+		{
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
+			}
+		}
+	} else {
+	#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
+			movie_session.reset();
+			materialize_host_frames();
+		}
+	#endif
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		if (!early_binning) {
@@ -1433,12 +1780,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		}
 		Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
 	}
+	}
 	RCTOC(TIMING_GLOBAL_FFT);
 
 	RCTIC(TIMING_POWER_SPECTRUM);
 	// Write power spectrum for CTF estimation
 	if (grouping_for_ps > 0)
 	{
+#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			if (!movie_session->downloadFourierFrames(Fframes)) {
+				REPORT_ERROR("Failed to download Fourier frames for power spectrum estimation");
+			}
+		}
+#endif
 		const RFLOAT target_pixel_size = 1.4; // value from CTFFIND 4.1
 
 		// NOTE: Image(X, Y) has MultidimArray(Y, X)!! X is the fast axis.
@@ -1539,7 +1894,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
-	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+#ifdef _CUDA_ENABLED
+	if (movie_session) {
+		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	} else
+#endif
+	{
+		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -1551,11 +1913,34 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
 	RCTIC(TIMING_GLOBAL_IFFT);
+	bool cuda_global_ifft_done = false;
+#ifdef _CUDA_ENABLED
+	if (movie_session) {
+		logfile << "Reconstructing globally aligned frames (CUDA in-VRAM)..." << std::endl;
+		cuda_global_ifft_done = movie_session->computeGlobalInverseFFT();
+	} else if (use_gpu) {
+		logfile << "Reconstructing globally aligned frames (CUDA)..." << std::endl;
+		// Retain the real frames on device for local patch extraction when memory
+		// permits. cudaPreparePatch falls back to the host images otherwise.
+		cuda_global_ifft_done = cudaInverseFFT2D(Fframes, Iframes, nx, ny, gpu_id, logfile, true);
+	}
+#endif
+	if (!cuda_global_ifft_done) {
+#ifdef _CUDA_ENABLED
+		if (movie_session) {
+			// The resident inverse consumes device Fourier frames. Preserve their
+			// globally aligned values for the CPU inverse fallback.
+			if (!movie_session->downloadFourierFrames(Fframes))
+				REPORT_ERROR("Failed to download Fourier frames after resident inverse FFT failure");
+			movie_session.reset();
+		}
+#endif
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
 		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
+	}
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
 
@@ -1571,6 +1956,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const int patch_nx = nx / patch_x, patch_ny = ny / patch_y, n_patches = patch_x * patch_y;
 		std::vector<RFLOAT> patch_xshifts, patch_yshifts, patch_frames, patch_xs, patch_ys;
 		std::vector<MultidimArray<fComplex> > Fpatches(n_groups);
+
+#ifdef _CUDA_ENABLED
+		cufftComplex *d_patch_fcomplex_buffer = nullptr;
+		size_t sz_cached_patch_fcomplex = 0;
+#endif
 
 		int ipatch = 1;
 		for (int iy = 0; iy < patch_y; iy++) {
@@ -1596,32 +1986,88 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				ipatch++;
 
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
-				RCTIC(TIMING_PREP_PATCH);
-				std::vector<MultidimArray<float> >Ipatches(n_threads);
-				#pragma omp parallel for num_threads(n_threads)
-				for (int igroup = 0; igroup < n_groups; igroup++) {
-					const int tid = omp_get_thread_num();
-					Ipatches[tid].reshape(y_end - y_start, x_end - x_start); // end is not included
-					Ipatches[tid].initZeros();
-					RCTIC(TIMING_CLIP_PATCH);
-					for (int iframe = group_start[igroup]; iframe < group_start[igroup] + group_size[igroup]; iframe++) {
-						for (int ipy = y_start; ipy < y_end; ipy++) {
-							for (int ipx = x_start; ipx < x_end; ipx++) {
-								DIRECT_A2D_ELEM(Ipatches[tid], ipy - y_start, ipx - x_start) += DIRECT_A2D_ELEM(Iframes[iframe](), ipy, ipx);
-							}
+				const int patch_w = x_end - x_start;
+				const int patch_h = y_end - y_start;
+				const int patch_nfx = patch_w / 2 + 1;
+				bool converged = false;
+
+#ifdef _CUDA_ENABLED
+				if (movie_session) {
+					RCTIC(TIMING_PREP_PATCH);
+					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
+					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
+						if (d_patch_fcomplex_buffer) cudaFree(d_patch_fcomplex_buffer);
+						if (cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches) != cudaSuccess) {
+							d_patch_fcomplex_buffer = nullptr;
+							sz_cached_patch_fcomplex = 0;
+						} else {
+							sz_cached_patch_fcomplex = sz_fpatches;
 						}
 					}
-					RCTOC(TIMING_CLIP_PATCH);
+					bool prep_ok = false;
+					if (d_patch_fcomplex_buffer) {
+						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
+					}
+					RCTOC(TIMING_PREP_PATCH);
 
-					RCTIC(TIMING_PATCH_FFT);
-					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
-					RCTOC(TIMING_PATCH_FFT);
+					if (prep_ok) {
+						RCTIC(TIMING_PATCH_ALIGN);
+						converged = alignPatchDevice(d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+						RCTOC(TIMING_PATCH_ALIGN);
+					}
 				}
-				RCTOC(TIMING_PREP_PATCH);
+				if (!converged)
+#endif
+				{
+					// Host frames are deliberately raw on the resident path. If a
+					// device patch attempt falls back, download the aligned real frames
+					// before either CUDA staging or CPU patch preparation reads them.
+#ifdef _CUDA_ENABLED
+					if (movie_session && host_frames_are_raw) {
+						if (!movie_session->downloadRealFrames(Iframes))
+							REPORT_ERROR("Failed to download resident real frames for patch fallback");
+						host_frames_are_raw = false;
+					}
+#endif
+					RCTIC(TIMING_PREP_PATCH);
+					bool cuda_patch_prep_done = false;
+#ifdef _CUDA_ENABLED
+					if (use_gpu) {
+						cuda_patch_prep_done = cudaPreparePatch(
+							Iframes, x_start, x_end, y_start, y_end,
+							n_groups, group_start, group_size, Fpatches,
+							gpu_id, logfile
+						);
+					}
+#endif
+					if (!cuda_patch_prep_done) {
+					std::vector<MultidimArray<float> >Ipatches(n_threads);
+					#pragma omp parallel for num_threads(n_threads)
+					for (int igroup = 0; igroup < n_groups; igroup++) {
+						const int tid = omp_get_thread_num();
+						Ipatches[tid].reshape(y_end - y_start, x_end - x_start); // end is not included
+						Ipatches[tid].initZeros();
+						RCTIC(TIMING_CLIP_PATCH);
+						for (int iframe = group_start[igroup]; iframe < group_start[igroup] + group_size[igroup]; iframe++) {
+							for (int ipy = y_start; ipy < y_end; ipy++) {
+								for (int ipx = x_start; ipx < x_end; ipx++) {
+									DIRECT_A2D_ELEM(Ipatches[tid], ipy - y_start, ipx - x_start) += DIRECT_A2D_ELEM(Iframes[iframe](), ipy, ipx);
+								}
+							}
+						}
+						RCTOC(TIMING_CLIP_PATCH);
 
-				RCTIC(TIMING_PATCH_ALIGN);
-				bool converged = alignPatch(Fpatches, x_end - x_start, y_end - y_start, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
-				RCTOC(TIMING_PATCH_ALIGN);
+						RCTIC(TIMING_PATCH_FFT);
+						NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
+						RCTOC(TIMING_PATCH_FFT);
+					}
+					}
+					RCTOC(TIMING_PREP_PATCH);
+
+					RCTIC(TIMING_PATCH_ALIGN);
+					converged = alignPatch(Fpatches, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+					RCTOC(TIMING_PATCH_ALIGN);
+				}
 				if (!converged) continue;
 
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
@@ -1653,6 +2099,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			}
 		}
 		Fpatches.clear();
+#ifdef _CUDA_ENABLED
+		if (d_patch_fcomplex_buffer) {
+			cudaFree(d_patch_fcomplex_buffer);
+			d_patch_fcomplex_buffer = nullptr;
+		}
+#endif
 
 		// Fit polynomial model
 
@@ -1797,59 +2249,118 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 
 skip_fitting:
-	if (!do_dose_weighting || save_noDW) {
-		Iref().initZeros(Iframes[0]());
-		Iref_odd().initZeros(Iframes[0]());
-		Iref_even().initZeros(Iframes[0]());
+#ifdef _CUDA_ENABLED
+	// The retained full-frame cache is only needed while preparing local patches.
+	if (use_gpu) cudaReleaseCachedFrames();
+#endif
+	if (!do_dose_weighting || save_noDW || even_odd_split) {
+		Iref().reshape(ny, nx);
+		Iref().initZeros();
+		Iref_odd().reshape(ny, nx);
+		Iref_odd().initZeros();
+		Iref_even().reshape(ny, nx);
+		Iref_even().initZeros();
 
-		for (int iframe = 0; iframe < n_frames; iframe++){
-			Irefframes[iframe]().initZeros(Iframes[iframe]());	
+#ifdef _CUDA_ENABLED
+		bool cuda_unweighted_done = false;
+		if (movie_session) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			Image<float> *p_even = even_odd_split ? &Iref_even : nullptr;
+			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting (CUDA in-VRAM)..." << std::endl;
+			cuda_unweighted_done = movie_session->reconstructUnweighted(Iref, p_even, p_odd, poly_model);
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+		} else if (use_gpu) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			Image<float> *p_even = even_odd_split ? &Iref_even : nullptr;
+			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting (CUDA)..." << std::endl;
+			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile);
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
 		}
+		if (!cuda_unweighted_done)
+#endif
+		{
+			// A failed CUDA download can leave partial pixels in the output images.
+			// Reset before accumulating the CPU fallback to avoid mixing both paths.
+			Iref().initZeros();
+			if (even_odd_split) {
+				Iref_even().initZeros();
+				Iref_odd().initZeros();
+			}
+#ifdef _CUDA_ENABLED
+			if (movie_session && host_frames_are_raw) {
+				if (!movie_session->downloadRealFrames(Iframes))
+					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
+				host_frames_are_raw = false;
+			} else if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
+				if (!movie_session->downloadRealFrames(Iframes))
+					REPORT_ERROR("Failed to download resident real frames for unweighted fallback");
+			}
+#endif
+			for (int iframe = 0; iframe < n_frames; iframe++){
+				Irefframes[iframe]().initZeros(Iframes[iframe]());	
+			}
 
-		RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
-		logfile << "Summing frames before dose weighting: ";
-		realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
-		logfile << " done" << std::endl;
-		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames before dose weighting: ";
+			realSpaceInterpolation_withoutsum(Irefframes, Iframes, mic.model, logfile);
+			logfile << " done" << std::endl;
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			
+			// Sum frames and save aligned stack
+			for (int iframe = 0; iframe < n_frames; iframe++)
+			{
+			#pragma omp parallel for num_threads(n_threads)
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
+				DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
+				}
+
+			// save odd even aligned stack
+			if (even_odd_split)
+			{
+			if ( iframe % 2 == 0)
+			{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
+				DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+			}
+			}
+			else
+			{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
+				DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
+
+			}
+			}
+			}
+			}
+		}
 
 		// Apply binning
 		RCTIC(TIMING_BINNING);
 		if (!early_binning && bin_factor != 1) {
 			binNonSquareImage(Iref, bin_factor);
+			if (even_odd_split) {
+				binNonSquareImage(Iref_odd, bin_factor);
+				binNonSquareImage(Iref_even, bin_factor);
+			}
 		}
 		RCTOC(TIMING_BINNING);
-		
-		// Sum frames and save aligned stack
-		for (int iframe = 0; iframe < n_frames; iframe++)
-		{
-		#pragma omp parallel for num_threads(n_threads)
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref()) {
-			DIRECT_MULTIDIM_ELEM(Iref(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);
-			}
-
-		// save odd even aligned stack
-		if (even_odd_split)
-		{
-		if ( iframe % 2 == 0)
-		{
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_even()) {
-			DIRECT_MULTIDIM_ELEM(Iref_even(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-		}
-		}
-		else
-		{
-		FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Iref_odd()) {
-			DIRECT_MULTIDIM_ELEM(Iref_odd(), n) += DIRECT_MULTIDIM_ELEM(Irefframes[iframe](), n);			
-
-		}
-		}
-		}
-		}
 
 		// Final output
-                Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-		Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
-		logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		if (!do_dose_weighting || save_noDW) {
+			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
+			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+			logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		}
 		// ODD-EVEN Output
 		if (even_odd_split)
 		{
@@ -1883,25 +2394,59 @@ skip_fitting:
 			}
 		}
 
-		RCTIC(TIMING_DW_WEIGHT);
-		doseWeighting(Fframes, doses, angpix * prescaling);
-		RCTOC(TIMING_DW_WEIGHT);
+		Iref().reshape(ny, nx);
+		Iref().initZeros();
 
-		// Update real space images
-		RCTIC(TIMING_DW_IFFT);
-		#pragma omp parallel for num_threads(n_threads)
-		for (int iframe = 0; iframe < n_frames; iframe++) {
-			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+#ifdef _CUDA_ENABLED
+		bool cuda_dw_done = false;
+		if (movie_session) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
+			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+		} else if (use_gpu) {
+			const ThirdOrderPolynomialModel *poly_model = nullptr;
+			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
+				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
+			}
+			logfile << "Dose weighting and summing frames (CUDA)..." << std::endl;
+			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile);
 		}
-		RCTOC(TIMING_DW_IFFT);
-		RCTOC(TIMING_DOSE_WEIGHTING);
+		if (!cuda_dw_done)
+#endif
+		{
+			// Discard any partial CUDA result before running the CPU reconstruction.
+			Iref().initZeros();
+#ifdef _CUDA_ENABLED
+			// A power-spectrum request may have populated Fframes before global
+			// alignment. Always refresh it from the resident, aligned Fourier
+			// frames before taking the CPU dose-weighting fallback.
+			if (movie_session) {
+				if (!movie_session->downloadFourierFrames(Fframes))
+					REPORT_ERROR("Failed to download aligned Fourier frames for dose-weighting fallback");
+			}
+#endif
+			RCTIC(TIMING_DW_WEIGHT);
+			doseWeighting(Fframes, doses, angpix * prescaling);
+			RCTOC(TIMING_DW_WEIGHT);
 
-		Iref().initZeros(Iframes[0]());
-		RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
-		logfile << "Summing frames after dose weighting: ";
-		realSpaceInterpolation(Iref, Iframes, mic.model, logfile);
-		logfile << " done" << std::endl;
-		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			// Update real space images
+			RCTIC(TIMING_DW_IFFT);
+			#pragma omp parallel for num_threads(n_threads)
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+			}
+			RCTOC(TIMING_DW_IFFT);
+
+			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
+			logfile << "Summing frames after dose weighting: ";
+			realSpaceInterpolation(Iref, Iframes, mic.model, logfile);
+			logfile << " done" << std::endl;
+			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+		}
+		RCTOC(TIMING_DOSE_WEIGHTING);
 
 		// Apply binning
 		RCTIC(TIMING_BINNING);
@@ -2306,10 +2851,16 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	}
 }
 
+#ifdef _CUDA_ENABLED
+bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+	return cudaAlignPatchDevice(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
+}
+#endif
+
 bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
 #ifdef _CUDA_ENABLED
-	if (use_gpu && is_global) {
-		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+	if (use_gpu) {
+		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
 	}
 #endif
 	std::vector<Image<float> > Iccs(n_threads);

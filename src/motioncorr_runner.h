@@ -34,6 +34,13 @@
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
 
+#ifdef _CUDA_ENABLED
+#include <cufft.h>
+#include "src/acc/cuda/cuda_movie_session.h"
+#include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_realspace_dw.h"
+#endif
+
 class MotioncorrRunner
 {
 public:
@@ -58,7 +65,7 @@ public:
 	std::vector<int> optics_group_micrographs, optics_group_ori_micrographs;
 
     // Pre-exposure for each micrograph (mainly used for tomography)
-    std::vector<RFLOAT> pre_exposure_micrographs;
+    std::vector<RFLOAT> pre_exposure_micrographs, pre_exposure_ori_micrographs;
 
 	// Information about the optics groups
 	ObservationModel obsModel;
@@ -186,6 +193,7 @@ public:
 
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
+	bool isMovieComplete(const FileName &movie);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);
@@ -219,6 +227,9 @@ private:
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
 	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+#ifdef _CUDA_ENABLED
+	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+#endif
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);
 

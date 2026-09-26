@@ -302,6 +302,7 @@ def compare_star_fields(
     test_star: Dict[str, Any],
     float_tol: float = 1e-4,
     compare_motion_values: bool = True,
+    require_finite_motion_values: bool = False,
 ) -> Dict[str, Any]:
     """Compare STAR schema and metadata; exact mode also compares motion values."""
     diffs = []
@@ -329,6 +330,12 @@ def compare_star_fields(
             and abs(ref_number - test_number) <= float_tol
         )
 
+    def finite_motion_values(*values: str) -> bool:
+        try:
+            return all(math.isfinite(float(value)) for value in values)
+        except ValueError:
+            return False
+
     for block_name in sorted(all_blocks):
         if block_name not in ref_star:
             diffs.append(f"Block '{block_name}' missing in reference")
@@ -354,6 +361,8 @@ def compare_star_fields(
                     diffs.append(f"Field '{k}' presence mismatch in block '{block_name}'")
                     continue
                 if not compare_motion_values and k in derived_motion_labels:
+                    if require_finite_motion_values and not finite_motion_values(rv, tv):
+                        diffs.append(f"Non-finite or non-numeric motion value in {block_name}.{k}")
                     continue
                 if not values_match(k, rv, tv):
                     diffs.append(f"Value diff in {block_name}.{k}: {rv} vs {tv}")
@@ -374,6 +383,10 @@ def compare_star_fields(
                     continue
                 for label, ref_value, test_value in zip(rc, ref_row, test_row):
                     if not compare_motion_values and label in derived_motion_labels:
+                        if require_finite_motion_values and not finite_motion_values(ref_value, test_value):
+                            diffs.append(
+                                f"Non-finite or non-numeric motion value in {block_name} row {row_number} {label}"
+                            )
                         continue
                     if not values_match(label, ref_value, test_value):
                         diffs.append(
@@ -387,7 +400,7 @@ def compare_star_fields(
     }
 
 
-def parse_time_v_log(text: str) -> Dict[str, Any]:
+def parse_time_v_log(text: str, strict: bool = False) -> Dict[str, Any]:
     """Parse output from /usr/bin/time -v."""
     res = {}
     patterns = {
@@ -398,8 +411,17 @@ def parse_time_v_log(text: str) -> Dict[str, Any]:
         "max_rss_kb": r"Maximum resident set size \(kbytes\):\s*([\d]+)",
         "exit_status": r"Exit status:\s*([\d]+)",
     }
+    if strict:
+        # A backend verdict must refer to one completed invocation. In appended
+        # logs, selecting the first successful status can hide a later failure.
+        for field in ("elapsed_str", "max_rss_kb", "exit_status"):
+            matches = re.findall(r"^\s*" + patterns[field] + r"\s*$", text, re.MULTILINE)
+            if len(matches) != 1:
+                raise ValueError(f"Backend process log requires exactly one {field} record; found {len(matches)}")
+        if re.search(r"^\s*Command (?:terminated by signal|exited with non-zero status)\b", text, re.MULTILINE):
+            raise ValueError("Backend process log reports a failed or signal-terminated command")
     for k, pat in patterns.items():
-        m = re.search(pat, text)
+        m = re.search(r"^\s*" + pat + r"\s*$", text, re.MULTILINE) if strict else re.search(pat, text)
         if m:
             val = m.group(1).strip()
             if k in ("user_time_sec", "system_time_sec"):
@@ -417,6 +439,10 @@ def parse_time_v_log(text: str) -> Dict[str, Any]:
 
     if "max_rss_kb" in res:
         res["max_rss_mb"] = round(res["max_rss_kb"] / 1024.0, 2)
+
+    if strict and ("elapsed_sec" not in res or not math.isfinite(res["elapsed_sec"])
+                   or res["elapsed_sec"] < 0):
+        raise ValueError("Backend process elapsed time must be finite and nonnegative")
 
     return res
 
@@ -455,9 +481,9 @@ def main() -> None:
     # Gate profiles and custom tolerances
     parser.add_argument(
         "--gate",
-        choices=["exact", "relaxed", "custom"],
+        choices=["exact", "relaxed", "backend", "custom"],
         default="exact",
-        help="Acceptance gate profile: 'exact' (1-thread exact CPU parity: zero pixel error), 'relaxed' (multi-thread/GPU: tolerance-based), 'custom'",
+        help="Acceptance gate profile: 'exact' (1-thread exact CPU parity: zero pixel error), 'relaxed' (legacy CPU agreement), 'backend' (complete backend comparison with relative RMSE diagnostic), 'custom'",
     )
     parser.add_argument("--max-shift-err", type=float, help="Override max frame shift error tolerance in pixels")
     parser.add_argument("--shift-rmse", type=float, help="Override coordinate RMS shift error tolerance in pixels")
@@ -479,7 +505,7 @@ def main() -> None:
         tol_shift_rmse = 1e-4
         tol_image_rmse = 1e-7
         tol_image_max_err = 1e-7
-    elif args.gate == "relaxed":
+    elif args.gate in ("relaxed", "backend"):
         tol_max_shift = 0.05
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.02
@@ -489,6 +515,12 @@ def main() -> None:
         tol_shift_rmse = 0.02
         tol_image_rmse = 0.01
         tol_image_max_err = 5.0
+
+    # Backend is a named policy, not a per-dataset threshold-fitting interface.
+    if args.gate == "backend" and any(value is not None for value in (
+            args.max_shift_err, args.shift_rmse, args.image_rmse,
+            args.image_max_err, args.image_relative_rmse)):
+        parser.error("backend thresholds are fixed; use custom for exploratory overrides")
 
     # Apply command-line overrides
     if args.max_shift_err is not None:
@@ -590,6 +622,7 @@ def main() -> None:
             star_diff_res = compare_star_fields(
                 ref_parsed, test_parsed, float_tol=star_tol,
                 compare_motion_values=(args.gate == "exact"),
+                require_finite_motion_values=(args.gate == "backend"),
             )
 
             check_passed = True
@@ -655,12 +688,31 @@ def main() -> None:
                     if img_res["rmse"] > tol_image_rmse:
                         img_passed = False
                         img_fail_reasons.append(f"Image RMSE {img_res['rmse']:.6e} > {tol_image_rmse:.6e}")
-                    if img_res["relative_rmse"] > tol_image_relative_rmse:
+                    if args.gate != "backend" and img_res["relative_rmse"] > tol_image_relative_rmse:
                         img_passed = False
                         img_fail_reasons.append(f"Relative image RMSE {img_res['relative_rmse']:.6e} > {tol_image_relative_rmse:.6e}")
                     if img_res["max_abs_pixel_error"] > tol_image_max_err:
                         img_passed = False
                         img_fail_reasons.append(f"Image max pixel error {img_res['max_abs_pixel_error']:.6e} > {tol_image_max_err:.6e}")
+
+            if args.gate == "backend" and "error" not in img_res:
+                # MRC dimensions, starts, sampling grid, cell, axis order and origin.
+                # Derived image statistics and run labels need not be byte-identical.
+                geometry_equal = all(ref_raw_h[a:b] == test_raw_h[a:b]
+                                     for a, b in ((0, 76), (196, 208)))
+                geometry_finite = all(math.isfinite(v) for raw in (ref_raw_h, test_raw_h)
+                                      for v in (*struct.unpack_from("<6f", raw, 40),
+                                                *struct.unpack_from("<3f", raw, 196)))
+                img_res["geometry_matches"] = geometry_equal and geometry_finite
+                if not img_res["geometry_matches"]:
+                    img_passed = False
+                    img_fail_reasons.append("MRC geometry differs or contains non-finite values")
+                img_res["relative_rmse_diagnostic"] = {
+                    "value": img_res["relative_rmse"],
+                    "threshold": tol_image_relative_rmse,
+                    "status": "PASS" if img_res["relative_rmse"] <= tol_image_relative_rmse else "FAIL",
+                    "blocking": False,
+                }
 
             img_res["passed"] = img_passed
             img_res["fail_reasons"] = img_fail_reasons
@@ -692,12 +744,22 @@ def main() -> None:
                 errors.append("Ground truth requested but no test movie STAR was resolved")
 
     # 4. Performance & metrics from log files
+    if args.gate == "backend" and not args.test_log:
+        gate_passed = False
+        errors.append("Backend profile requires --test-log with successful process status")
     if args.test_log:
         if not args.test_log.exists():
             gate_passed = False
             errors.append(f"Test log file not found: {args.test_log}")
         else:
-            log_metrics = parse_time_v_log(args.test_log.read_text())
+            try:
+                log_metrics = parse_time_v_log(args.test_log.read_text(), strict=args.gate == "backend")
+            except ValueError as error:
+                if args.gate != "backend":
+                    raise
+                gate_passed = False
+                errors.append(str(error))
+                log_metrics = {}
             report["metrics"] = log_metrics
             for required in ("elapsed_sec", "max_rss_kb", "exit_status"):
                 if required not in log_metrics:
@@ -728,8 +790,8 @@ def main() -> None:
         "corrected_image": "corrected_image" in report["checks"],
     }
     report["coverage"]["complete"] = all(report["coverage"].values())
-    report["coverage"]["required"] = bool(args.require_complete_coverage)
-    if args.require_complete_coverage and not report["coverage"]["complete"]:
+    report["coverage"]["required"] = bool(args.require_complete_coverage or args.gate == "backend")
+    if report["coverage"]["required"] and not report["coverage"]["complete"]:
         gate_passed = False
         missing = [name for name in ("motion_and_star", "corrected_image")
                    if not report["coverage"][name]]
@@ -793,6 +855,8 @@ def main() -> None:
                 print(f"   Image RMSE:           {im['rmse']:.6e} (threshold: {tol_image_rmse:.6e})")
                 print(f"   Max absolute diff:    {im['max_abs_pixel_error']:.6e} (threshold: {tol_image_max_err:.6e})")
                 print(f"   Relative RMSE:        {im['relative_rmse']:.6e} (threshold: {tol_image_relative_rmse:.6e} in relaxed/custom gate)")
+                if "relative_rmse_diagnostic" in im:
+                    print(f"     diagnostic status: {im['relative_rmse_diagnostic']['status']} (nonblocking; backend profile only)")
                 print(f"     denominator:        reference pixel population std = {im['relative_rmse_denominator_value']:.6e}")
                 print(f"     equivalent to:      absolute RMSE <= {tol_image_relative_rmse * im['relative_rmse_denominator_value']:.6e} for this reference")
                 print(f"   Normalized headers:   Core metadata: {im['core_header_diff_bytes']} diff bytes, Non-timestamp labels: {im['normalized_label_diff_bytes']} diff bytes")

@@ -2,6 +2,7 @@
 
 import copy
 import json
+import re
 import struct
 import subprocess
 import sys
@@ -17,6 +18,7 @@ from compare_motioncorr import (
     extract_global_shifts,
     parse_mrc,
     parse_star_file,
+    parse_time_v_log,
 )
 
 
@@ -222,6 +224,131 @@ class ComparatorGateTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(report["coverage"]["required"])
         self.assertTrue(any("Complete coverage required" in error for error in report["errors"]))
+
+    def test_backend_retains_relative_failure_as_diagnostic(self):
+        import numpy as np
+        source = FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc"
+        star = source.with_suffix(".star")
+        header, pixels, raw_header = parse_mrc(source)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            reference = (pixels.astype("float64") / pixels.astype("float64").std()).astype("<f4")
+            (root / "ref.mrc").write_bytes(raw_header + reference.tobytes())
+            (root / "test.mrc").write_bytes(raw_header + (reference + np.float32(0.002)).tobytes())
+            log = root / "time.log"
+            log.write_text("Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00\n"
+                           "Maximum resident set size (kbytes): 1000\nExit status: 0\n")
+            args = ("--ref-mrc", root / "ref.mrc", "--test-mrc", root / "test.mrc",
+                    "--ref-star", star, "--test-star", star, "--test-log", log)
+            code, backend = self.run_gate(*args, "--gate", "backend")
+            self.assertEqual(code, 0, backend)
+            self.assertTrue(backend["coverage"]["complete"])
+            diagnostic = backend["checks"]["corrected_image"]["relative_rmse_diagnostic"]
+            self.assertEqual(diagnostic["status"], "FAIL")
+            self.assertFalse(diagnostic["blocking"])
+            code, relaxed = self.run_gate(*args, "--gate", "relaxed")
+            self.assertEqual(code, 1)
+            self.assertFalse(relaxed["checks"]["corrected_image"]["passed"])
+
+            # Keep all backend requirements active, including the absolute bound.
+            (root / "test.mrc").write_bytes(raw_header + (reference + np.float32(0.03)).tobytes())
+            code, report = self.run_gate(*args, "--gate", "backend")
+            self.assertEqual(code, 1)
+            self.assertTrue(any("Image RMSE" in r for r in report["checks"]["corrected_image"]["fail_reasons"]))
+
+            (root / "test.mrc").write_bytes(raw_header + reference.tobytes())
+            for contents in ("", "Exit status: 1\n"):
+                log.write_text(contents)
+                code, report = self.run_gate(*args, "--gate", "backend")
+                self.assertEqual(code, 1)
+                self.assertTrue(report["errors"])
+
+    def test_backend_requires_complete_coverage_and_process_evidence(self):
+        star = FIXTURES / "reference_output" / "synthetic_128x128_8frames.star"
+        code, report = self.run_gate("--ref-star", star, "--test-star", star, "--gate", "backend")
+        self.assertEqual(code, 1)
+        self.assertTrue(report["coverage"]["required"])
+        self.assertTrue(any("requires --test-log" in error for error in report["errors"]))
+        self.assertTrue(any("Complete coverage required" in error for error in report["errors"]))
+
+    def test_backend_rejects_nonfinite_derived_motion_without_comparing_finite_values(self):
+        source = FIXTURES.parent / "synthetic" / "expected" / "synthetic_movie.mrc"
+        star = source.with_suffix(".star")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            candidate = root / "candidate.star"
+            log = root / "time.log"
+            log.write_text("Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00\n"
+                           "Maximum resident set size (kbytes): 1000\nExit status: 0\n")
+            args = ("--ref-mrc", source, "--test-mrc", source, "--ref-star", star,
+                    "--test-star", candidate, "--test-log", log)
+            pattern = r"(data_local_motion_model\s+loop_\s+_rlnMotionModelCoeffsIdx\s+#1\s+_rlnMotionModelCoeff\s+#2\s+0\s+)\S+"
+            for value, expected_code in (("nan", 1), ("inf", 1), ("invalid", 1), ("123.0", 0)):
+                text, count = re.subn(pattern, lambda match: match[1] + value, star.read_text())
+                self.assertEqual(count, 1)
+                candidate.write_text(text)
+                code, report = self.run_gate(*args, "--gate", "backend")
+                self.assertEqual(code, expected_code, report)
+                if expected_code:
+                    self.assertIn("Non-finite or non-numeric", str(report["checks"]["star_fields"]))
+                # The inherited relaxed profile deliberately excludes these values.
+                code, report = self.run_gate(*args, "--gate", "relaxed")
+                self.assertEqual(code, 0, report)
+
+        reference = parse_star_file(star)
+        for label in ("_rlnAccumMotionTotal", "_rlnAccumMotionEarly", "_rlnAccumMotionLate"):
+            reference["general"]["fields"][label] = "0"
+            candidate = copy.deepcopy(reference)
+            candidate["general"]["fields"][label] = "nan"
+            result = compare_star_fields(reference, candidate, compare_motion_values=False,
+                                         require_finite_motion_values=True)
+            self.assertEqual(result["num_differences"], 1, result)
+
+    def test_backend_rejects_invalid_or_ambiguous_process_logs(self):
+        source = FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc"
+        star = source.with_suffix(".star")
+        good = ("Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00\n"
+                "Maximum resident set size (kbytes): 1000\nExit status: 0\n")
+        bad_logs = (
+            good.replace("0:01.00", "0:nan"),
+            good.replace("0:01.00", "0:inf"),
+            good.replace("0:01.00", "0:-1"),
+            good + good.replace("Exit status: 0", "Exit status: 1"),
+            good + good,
+            "Command terminated by signal 9\n" + good,
+            "Command exited with non-zero status 1\n" + good,
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            log = Path(temp) / "time.log"
+            for contents in bad_logs:
+                log.write_text(contents)
+                code, report = self.run_gate("--ref-mrc", source, "--test-mrc", source,
+                                            "--ref-star", star, "--test-star", star,
+                                            "--test-log", log, "--gate", "backend")
+                self.assertEqual(code, 1, (contents, report))
+                self.assertTrue(report["errors"])
+            log.write_text(good)
+            code, report = self.run_gate("--ref-mrc", source, "--test-mrc", source,
+                                        "--ref-star", star, "--test-star", star,
+                                        "--test-log", log, "--gate", "backend")
+            self.assertEqual(code, 0, report)
+        # Existing profiles retain their previous first-record parsing behavior.
+        self.assertEqual(parse_time_v_log(good + good.replace("Exit status: 0", "Exit status: 1"))["exit_status"], 0)
+
+    def test_backend_rejects_geometry_changes_and_threshold_overrides(self):
+        source = FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc"
+        with tempfile.TemporaryDirectory() as temp:
+            changed = Path(temp) / "changed.mrc"
+            raw = bytearray(source.read_bytes())
+            struct.pack_into("<f", raw, 40, 999.0)  # cell size changes; identical pixels
+            changed.write_bytes(raw)
+            code, report = self.run_gate("--ref-mrc", source, "--test-mrc", changed, "--gate", "backend")
+            self.assertEqual(code, 1)
+            self.assertFalse(report["checks"]["corrected_image"]["geometry_matches"])
+        result = subprocess.run([sys.executable, str(Path(__file__).with_name("compare_motioncorr.py")),
+                                 "--gate", "backend", "--image-rmse", "10"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("backend thresholds are fixed", result.stderr)
 
     def test_cli_rejects_nonfinite_tolerance(self):
         result = subprocess.run(

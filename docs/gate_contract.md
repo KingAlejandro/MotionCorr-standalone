@@ -6,8 +6,9 @@ What each MotionCorr numerical gate measures, what it does **not** measure, and 
 Resolves [#58](https://github.com/KingAlejandro/MotionCorr-standalone/issues/58).
 
 > [!IMPORTANT]
-> **No numerical acceptance threshold changes in this document.** The `0.001` relative image
-> limit stays exactly where it is and keeps failing the recorded CUDA results 0/24. It is a
+> **The legacy exact and relaxed profiles keep their thresholds.** The `0.001` relative image
+> limit remains blocking in relaxed and keeps failing the recorded native CUDA results 0/24.
+> The explicit backend profile below records that same failure as nonblocking. It is a
 > **strict CPU-agreement diagnostic**, not a statement about scientific validity. Any change to
 > an acceptance limit requires a separately reviewed proposal backed by the calibration work in
 > [#60](https://github.com/KingAlejandro/MotionCorr-standalone/issues/60) and the scientific
@@ -67,7 +68,7 @@ reported JSON now names it explicitly as `relative_rmse_denominator` with its va
 Therefore `relative_rmse ≤ 0.001` is exactly `rmse ≤ 0.001 · σ_ref`: an absolute limit in intensity
 units that **moves with the dataset**.
 
-**Constant reference** (`σ_ref = 0`): the denominator floors at `1e-12`, so any nonzero `rmse`
+**Constant reference in relaxed/custom** (`σ_ref = 0`): the denominator floors at `1e-12`, so any nonzero `rmse`
 produces roughly `1e12 · rmse` and fails; an exactly zero `rmse` gives `0` and passes. This is
 fail-closed. Before `6c8a105` this branch returned `0.0` and passed unconditionally.
 
@@ -118,11 +119,45 @@ Points that are easy to get wrong:
 - **`--gate custom` is `relaxed` with a stricter default absolute image RMSE (`0.010`).** It is not a
   separate policy; it exists so that `--image-*` and `--shift-*` overrides start from a tighter base.
 - **`--image-relative-rmse` defaults to `1e-3` in every profile** (`:502`) but is only *evaluated*
-  outside `exact`.
+  in `relaxed` and `custom` (diagnostic only in `backend`).
 - **Relaxed and custom exclude the derived motion fields** `_rlnMicrographShiftX/Y`,
   `_rlnMotionModelCoeff`, `_rlnAccumMotionTotal`, `_rlnAccumMotionEarly`, `_rlnAccumMotionLate`
   (`:313`). Global shifts are still recovered from `data_global_shift` and checked as a trajectory.
   **Local motion model coefficients are checked by nothing in relaxed mode.** That gap is #59.
+
+### Explicit backend profile (stabilization #66)
+
+`--gate backend` is an opt-in implementation comparison. It keeps the relaxed absolute image
+RMSE (0.020), maximum pixel error (5), global vector RMS (0.02 pixels), maximum per-axis shift
+(0.05 pixels), static STAR metadata/schema checks, and finite-value requirements. It additionally
+requires matching finite MRC geometry, complete image **and** movie-STAR coverage, and a
+`--test-log` with parseable elapsed time, peak RSS and successful exit status. Threshold overrides
+are rejected for this named profile; `custom` remains available for exploratory comparisons.
+
+Relative RMSE is still calculated with exactly the same denominator and 0.001 threshold. JSON
+stores `checks.corrected_image.relative_rmse_diagnostic` with `status`, `value`, `threshold`,
+and `blocking: false`; the human report prints the diagnostic PASS/FAIL separately. A backend
+PASS can therefore coexist with a relative-RMSE FAIL. It must never be described as passing the
+historical relaxed gate or CPU/RELION Gate 2.
+
+This policy reflects the user's decision to retain the measure as a change diagnostic, **not**
+a proof that every discrepancy comes from the FFT or that the gate is impossible. The hybrid
+experiment passed 12/24 images. FFT rounding and subsequent alignment amplification are distinct
+from downstream CTF estimation. Known-motion truth, applied-image self-consistency, same-backend
+repeat/batch/resume equality, failure handling and independent scientific evidence remain separate
+requirements before a release. Neither existing absolute bounds nor this profile establish
+scientific equivalence on unseen collections.
+
+Example (one movie, with explicit products to avoid directory ambiguity):
+
+```sh
+python tools/compare_motioncorr.py --gate backend \
+  --ref-mrc cpu/movie.mrc --test-mrc cuda/movie.mrc \
+  --ref-star cpu/movie.star --test-star cuda/movie.star \
+  --test-log cuda/time-v.log --json-out comparison.json
+```
+
+The profile does not weaken `exact`, `relaxed`, or `custom`, and historical results are not relabelled.
 
 ### Failure behaviour
 

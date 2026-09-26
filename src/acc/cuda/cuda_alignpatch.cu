@@ -466,6 +466,8 @@ bool cudaAlignPatchDevice(
     HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
 
+    logfile << " [CUDA " << stage_name << "] completed; converged="
+            << (converged ? "yes" : "no") << std::endl;
     return converged;
 }
 

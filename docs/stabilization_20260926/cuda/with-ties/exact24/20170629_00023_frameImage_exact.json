@@ -1,0 +1,242 @@
+{
+  "gate_profile": "exact",
+  "tolerances": {
+    "max_shift_error": 0.0001,
+    "shift_rmse": 0.0001,
+    "image_rmse": 1e-07,
+    "image_max_err": 1e-07,
+    "image_relative_rmse": 0.001
+  },
+  "checks": {
+    "motion_trajectory": {
+      "num_frames": 24,
+      "max_abs_diff_x": 0.0,
+      "max_abs_diff_y": 0.0,
+      "max_shift_error": 0.0,
+      "coord_rms_error": 0.0,
+      "per_frame_diffs": [
+        {
+          "frame": 1,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 2,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 3,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 4,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 5,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 6,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 7,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 8,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 9,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 10,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 11,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 12,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 13,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 14,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 15,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 16,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 17,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 18,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 19,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 20,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 21,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 22,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 23,
+          "dx": 0.0,
+          "dy": 0.0
+        },
+        {
+          "frame": 24,
+          "dx": 0.0,
+          "dy": 0.0
+        }
+      ],
+      "passed": true,
+      "fail_reasons": [
+        "STAR metadata differences: 59 discrepancies found"
+      ]
+    },
+    "star_fields": {
+      "num_differences": 59,
+      "differences": [
+        "Value diff in local_motion_model row 4 _rlnMotionModelCoeff: -0.59487 vs -0.59503",
+        "Value diff in local_motion_model row 7 _rlnMotionModelCoeff: 0.212899 vs 0.212316",
+        "Value diff in local_motion_model row 10 _rlnMotionModelCoeff: 0.292704 vs 0.292867",
+        "Value diff in local_motion_model row 13 _rlnMotionModelCoeff: 1.933619 vs 1.933035",
+        "Value diff in local_motion_model row 16 _rlnMotionModelCoeff: 1.203958 vs 1.204775",
+        "Value diff in local_motion_model row 22 _rlnMotionModelCoeff: 0.080280 vs 0.080548",
+        "Value diff in local_motion_model row 25 _rlnMotionModelCoeff: 0.236890 vs 0.237849",
+        "Value diff in local_motion_model row 28 _rlnMotionModelCoeff: -0.54709 vs -0.54735",
+        "Value diff in local_motion_model row 31 _rlnMotionModelCoeff: -0.10308 vs -0.10212",
+        "Value diff in local_motion_model row 34 _rlnMotionModelCoeff: -0.41725 vs -0.41859",
+        "Value diff in local_motion_model row 35 _rlnMotionModelCoeff: 0.012341 vs 0.012478",
+        "Value diff in local_shift row 97 _rlnMicrographShiftX: -0.24348 vs -0.24549",
+        "Value diff in local_shift row 97 _rlnMicrographShiftY: 0.202106 vs 0.203626",
+        "Value diff in local_shift row 98 _rlnMicrographShiftX: -0.73044 vs -0.73646",
+        "Value diff in local_shift row 98 _rlnMicrographShiftY: 0.606317 vs 0.610877",
+        "Value diff in local_shift row 99 _rlnMicrographShiftX: -1.62940 vs -1.63277",
+        "Value diff in local_shift row 99 _rlnMicrographShiftY: 1.134891 vs 1.135931",
+        "Value diff in local_shift row 100 _rlnMicrographShiftX: -1.78388 vs -1.78643",
+        "Value diff in local_shift row 100 _rlnMicrographShiftY: 1.658301 vs 1.661990",
+        "Value diff in local_shift row 101 _rlnMicrographShiftX: -3.02336 vs -3.02592",
+        "Value diff in local_shift row 101 _rlnMicrographShiftY: 2.377586 vs 2.380807",
+        "Value diff in local_shift row 102 _rlnMicrographShiftX: -2.96847 vs -2.97062",
+        "Value diff in local_shift row 102 _rlnMicrographShiftY: 2.686090 vs 2.690484",
+        "Value diff in local_shift row 103 _rlnMicrographShiftX: -3.57174 vs -3.57584",
+        "Value diff in local_shift row 103 _rlnMicrographShiftY: 2.786727 vs 2.790558",
+        "Value diff in local_shift row 104 _rlnMicrographShiftX: -3.00049 vs -3.00230",
+        "Value diff in local_shift row 104 _rlnMicrographShiftY: 2.838401 vs 2.842359",
+        "Value diff in local_shift row 105 _rlnMicrographShiftX: -4.44386 vs -4.44683",
+        "Value diff in local_shift row 105 _rlnMicrographShiftY: 3.332668 vs 3.336025",
+        "Value diff in local_shift row 106 _rlnMicrographShiftX: -4.75585 vs -4.75754",
+        "Value diff in local_shift row 106 _rlnMicrographShiftY: 3.509608 vs 3.513074",
+        "Value diff in local_shift row 107 _rlnMicrographShiftX: -4.83359 vs -4.83451",
+        "Value diff in local_shift row 107 _rlnMicrographShiftY: 3.275602 vs 3.276702",
+        "Value diff in local_shift row 108 _rlnMicrographShiftX: -4.57458 vs -4.57702",
+        "Value diff in local_shift row 108 _rlnMicrographShiftY: 4.223130 vs 4.224027",
+        "Value diff in local_shift row 109 _rlnMicrographShiftX: -4.85271 vs -4.85463",
+        "Value diff in local_shift row 109 _rlnMicrographShiftY: 4.657552 vs 4.660022",
+        "Value diff in local_shift row 110 _rlnMicrographShiftX: -5.47635 vs -5.47897",
+        "Value diff in local_shift row 110 _rlnMicrographShiftY: 4.515738 vs 4.516555",
+        "Value diff in local_shift row 111 _rlnMicrographShiftX: -5.10049 vs -5.10334",
+        "Value diff in local_shift row 111 _rlnMicrographShiftY: 4.650197 vs 4.654233",
+        "Value diff in local_shift row 112 _rlnMicrographShiftX: -6.36163 vs -6.36407",
+        "Value diff in local_shift row 112 _rlnMicrographShiftY: 5.324593 vs 5.326209",
+        "Value diff in local_shift row 113 _rlnMicrographShiftX: -6.32654 vs -6.32926",
+        "Value diff in local_shift row 113 _rlnMicrographShiftY: 5.795301 vs 5.796953",
+        "Value diff in local_shift row 114 _rlnMicrographShiftX: -6.79600 vs -6.80177",
+        "Value diff in local_shift row 114 _rlnMicrographShiftY: 5.740476 vs 5.739828",
+        "Value diff in local_shift row 115 _rlnMicrographShiftX: -6.56031 vs -6.56493",
+        "Value diff in local_shift row 115 _rlnMicrographShiftY: 5.946889 vs 5.947757",
+        "Value diff in local_shift row 116 _rlnMicrographShiftX: -6.98297 vs -6.98479",
+        "Value diff in local_shift row 116 _rlnMicrographShiftY: 6.507909 vs 6.509673",
+        "Value diff in local_shift row 117 _rlnMicrographShiftX: -7.63520 vs -7.63634",
+        "Value diff in local_shift row 117 _rlnMicrographShiftY: 7.271741 vs 7.267909",
+        "Value diff in local_shift row 118 _rlnMicrographShiftX: -7.81309 vs -7.80804",
+        "Value diff in local_shift row 118 _rlnMicrographShiftY: 6.496991 vs 6.496198",
+        "Value diff in local_shift row 119 _rlnMicrographShiftX: -7.68618 vs -7.68826",
+        "Value diff in local_shift row 119 _rlnMicrographShiftY: 6.962126 vs 6.959929",
+        "Value diff in local_shift row 120 _rlnMicrographShiftX: -7.81735 vs -7.82079",
+        "Value diff in local_shift row 120 _rlnMicrographShiftY: 7.480859 vs 7.484847"
+      ],
+      "passed": false,
+      "fail_reasons": [
+        "STAR metadata differences: 59 discrepancies found"
+      ]
+    },
+    "corrected_image": {
+      "num_pixels": 14238980,
+      "pixel_identical": false,
+      "max_abs_pixel_error": 1.348252773284912,
+      "rmse": 0.0009826715718044225,
+      "relative_rmse": 0.0011483603513378709,
+      "ref_pixel_min": -0.530394971370697,
+      "ref_pixel_max": 11.973663330078125,
+      "ref_pixel_mean": 5.207614421844482,
+      "ref_pixel_std": 0.8557170845019018,
+      "test_pixel_min": -0.5305033922195435,
+      "test_pixel_max": 11.973777770996094,
+      "test_pixel_mean": 5.207612991333008,
+      "test_pixel_std": 0.8557091355323792,
+      "core_header_diff_bytes": 6,
+      "label_header_diff_bytes": 3,
+      "normalized_label_diff_bytes": 0,
+      "passed": false,
+      "fail_reasons": [
+        "Pixels not byte-identical in exact gate (max error: 1.348253e+00)",
+        "Core MRC header mismatch in exact gate: 6 diff bytes (expected 0)"
+      ]
+    }
+  },
+  "overall_status": "FAIL",
+  "coverage": {
+    "motion_and_star": true,
+    "corrected_image": true,
+    "complete": true
+  }
+}

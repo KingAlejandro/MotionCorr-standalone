@@ -170,6 +170,11 @@ public:
 	bool use_gpu;
 	int gpu_id;
 
+	// Metal backend settings
+	bool do_metal;
+	bool use_metal;
+	int metal_device_id;
+
 	// Read command line arguments
 	void read(int argc, char **argv, int rank = 0);
 

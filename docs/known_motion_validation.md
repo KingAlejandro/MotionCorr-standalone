@@ -1,5 +1,44 @@
 # Known-Motion Truth and Applied Displacement-Field Validation
 
+## Stabilization of the verdict (Issue #66)
+
+The historical measurements below have not been rerun with this strengthened validator.
+The repaired checker enforces the existing **1e-4 applied-image self-consistency limit** in
+its exit code and JSON verdict. This witness re-applies the candidate's own reported field
+to its raw frames; it is a different comparison from CPU-versus-CUDA corrected-image RMSE.
+`--movie` and `--summed-image` must be supplied together. Invalid geometry, unsupported
+frame/binning metadata and nonfinite fields or pixels produce an input error, never PASS.
+
+The launcher now requires exact field invariance between j1/j4 and dose weighting off/on.
+Characterization cases may still fail estimator-accuracy limits, with their numbers visible,
+but execution errors, missing outputs, wrong backend, invariance failures and a failed
+applied-image witness block the aggregate regardless of the fixture's role. Missing named
+`--cases` fail before any candidate execution. Binary and fixture paths are resolved before
+changing the child process's working directory.
+
+CPU is selected by omitting `--gpu`; its report records the explicit CPU command, fresh
+movie completion and absence of CUDA markers. This is selection evidence, not an independent
+CPU kernel trace. `--gpu 0` explicitly selects CUDA and requires both the matching startup
+message and `[CUDA Global Alignment] completed;` in each fresh movie log. It therefore needs
+a candidate containing the stable completion marker introduced during Issue #66; an older
+binary's profiling text alone does not satisfy this check.
+
+```sh
+python tools/test_known_motion_verdicts.py -v
+python tools/test_known_motion_runner.py -v
+python tools/run_known_motion_gates.py --binary /absolute/path/to/motioncorr \
+    --gpu 0 --outdir /tmp/km-cuda --include-heavy --json /tmp/km-cuda/all.json
+```
+
+The first two commands are small validator controls, requiring NumPy but no MotionCorr or
+GPU. They include an exact reported field paired with wrong pixels, NaN/Inf pixels, orphan
+witness arguments, wrong image shape, absent cases, changed thread results, missing CUDA
+execution evidence, and a crashing characterization run. A controlled executable exercises
+the real launcher and checker; its fake GPU markers test acceptance logic and are **not**
+evidence of CUDA execution. Hardware/scientific acceptance still requires the final command
+on the exact candidate and the declared fixtures.
+
+
 Resolves [Issue #59](https://github.com/KingAlejandro/MotionCorr-standalone/issues/59).
 
 Design record, written and committed **before** any fixture was generated or any result

@@ -121,7 +121,8 @@ __global__ void findPeakAndInterpolateKernel(
     int total_pts = range_len * range_len;
 
     float local_max = -1e30f;
-    int local_index = total_pts;
+    int local_posx = 0;
+    int local_posy = 0;
 
     for (int idx = threadIdx.x; idx < total_pts; idx += blockDim.x) {
         int sy = idx / range_len - search_range;
@@ -131,27 +132,26 @@ __global__ void findPeakAndInterpolateKernel(
         float val = d_Iccs[frame_offset + iy * ccf_nx + ix];
         if (val > local_max) {
             local_max = val;
-            local_index = idx;
+            local_posx = sx;
+            local_posy = sy;
         }
     }
 
     __shared__ float s_max[256];
-    __shared__ int s_index[256];
+    __shared__ int s_posx[256];
+    __shared__ int s_posy[256];
 
     s_max[threadIdx.x] = local_max;
-    s_index[threadIdx.x] = local_index;
+    s_posx[threadIdx.x] = local_posx;
+    s_posy[threadIdx.x] = local_posy;
     __syncthreads();
 
     for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
         if (threadIdx.x < stride) {
-            // CPU scans y then x and retains the first equal maximum. Compare
-            // raster indices as well as values so the parallel tree keeps that order.
-            const int other = threadIdx.x + stride;
-            if (s_max[other] > s_max[threadIdx.x] ||
-                (s_max[other] == s_max[threadIdx.x] &&
-                 s_index[other] < s_index[threadIdx.x])) {
-                s_max[threadIdx.x] = s_max[other];
-                s_index[threadIdx.x] = s_index[other];
+            if (s_max[threadIdx.x + stride] > s_max[threadIdx.x]) {
+                s_max[threadIdx.x] = s_max[threadIdx.x + stride];
+                s_posx[threadIdx.x] = s_posx[threadIdx.x + stride];
+                s_posy[threadIdx.x] = s_posy[threadIdx.x + stride];
             }
         }
         __syncthreads();
@@ -159,8 +159,8 @@ __global__ void findPeakAndInterpolateKernel(
 
     if (threadIdx.x == 0) {
         float maxval = s_max[0];
-        int posx = s_index[0] < total_pts ? s_index[0] % range_len - search_range : 0;
-        int posy = s_index[0] < total_pts ? s_index[0] / range_len - search_range : 0;
+        int posx = s_posx[0];
+        int posy = s_posy[0];
 
         int ipx_n = posx - 1; if (ipx_n < 0) ipx_n = ccf_nx + ipx_n;
         int ipx   = posx;     if (ipx < 0)   ipx   = ccf_nx + ipx;

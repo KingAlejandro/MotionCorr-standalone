@@ -33,6 +33,9 @@
 #include <src/jaz/single_particle/new_ft.h>
 #include "src/funcs.h"
 #include "src/renderEER.h"
+#include "src/acc/cuda/global_peak_probe.h"
+#include "src/acc/cuda/full_alignment_trace.h"
+#include "src/motioncorr_alignment_weight.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -1135,6 +1138,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
+	if (fullTraceEnabled()) {
+		if (n_threads != 1 || do_at_most != 1)
+			REPORT_ERROR("Full trace requires --j 1 and --do_at_most 1");
+		if (!do_dose_weighting)
+			REPORT_ERROR("Full trace requires --dose_weighting for complete output checkpoints");
+		if (save_noDW)
+			REPORT_ERROR("Full trace does not cover --save_noDW auxiliary output");
+		fullTraceStart(use_gpu ? "cuda" : "cpu", fn_mic);
+	}
 	FileName fn_avg = getOutputFileNames(fn_mic);
 	FileName fn_avg_noDW = fn_avg.withoutExtension() + "_noDW.mrc";
 	FileName fn_log = fn_avg.withoutExtension() + ".log";
@@ -1272,6 +1284,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
 	}
 	RCTOC(TIMING_READ_MOVIE);
+	if (fullTraceEnabled()) {
+		for (int iframe = 0; iframe < n_frames; ++iframe)
+			fullTraceArray(fullTraceKey("pre", 0, "raw", iframe), Iframes[iframe]().data,
+				(size_t)ny * nx * sizeof(float), "f4", integerToString(ny) + "," + integerToString(nx));
+	}
 
 	// Apply gain
 	RCTIC(TIMING_APPLY_GAIN);
@@ -1284,6 +1301,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		}
 	}
 	RCTOC(TIMING_APPLY_GAIN);
+	if (fullTraceEnabled()) {
+		for (int iframe = 0; iframe < n_frames; ++iframe)
+			fullTraceArray(fullTraceKey("pre", 0, "gain", iframe), Iframes[iframe]().data,
+				(size_t)ny * nx * sizeof(float), "f4", integerToString(ny) + "," + integerToString(nx));
+	}
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
@@ -1398,6 +1420,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		RCTOC(TIMING_FIX_DEFECT);
 		logfile << "Fixed hot pixels." << std::endl;
 	} // !skip_defect
+	if (fullTraceEnabled()) {
+		fullTraceArray("mapping_source_frame", frames.data(), frames.size() * sizeof(int), "i4", integerToString(n_frames));
+		fullTraceArray("mapping_group_start", group_start.data(), group_start.size() * sizeof(int), "i4", integerToString(n_groups));
+		fullTraceArray("mapping_group_size", group_size.data(), group_size.size() * sizeof(int), "i4", integerToString(n_groups));
+		for (int iframe = 0; iframe < n_frames; ++iframe)
+			fullTraceArray(fullTraceKey("pre", 0, "defect", iframe), Iframes[iframe]().data,
+				(size_t)ny * nx * sizeof(float), "f4", integerToString(ny) + "," + integerToString(nx));
+	}
 
 //#define WRITE_FRAMES
 #ifdef WRITE_FRAMES
@@ -1434,6 +1464,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
 	}
 	RCTOC(TIMING_GLOBAL_FFT);
+	if (fullTraceEnabled()) {
+		for (int iframe = 0; iframe < n_frames; ++iframe)
+			fullTraceArray(fullTraceKey("pre", 0, "fft", iframe), Fframes[iframe].data,
+				(size_t)YSIZE(Fframes[iframe]) * XSIZE(Fframes[iframe]) * sizeof(fComplex), "c8",
+				integerToString(YSIZE(Fframes[iframe])) + "," + integerToString(XSIZE(Fframes[iframe])));
+	}
 
 	RCTIC(TIMING_POWER_SPECTRUM);
 	// Write power spectrum for CTF estimation
@@ -1539,7 +1575,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
-	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+	alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, fn_mic, "g");
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
@@ -1558,6 +1594,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
+	if (fullTraceEnabled()) {
+		for (int iframe = 0; iframe < n_frames; ++iframe)
+			fullTraceArray(fullTraceKey("g", 0, "ifft", iframe), Iframes[iframe]().data,
+				(size_t)ny * nx * sizeof(float), "f4",
+				integerToString(ny) + "," + integerToString(nx));
+	}
 
 	// Patch based alignment
 	logfile << std::endl << "Local alignments:" << std::endl;
@@ -1593,6 +1635,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
 				logfile << ", X range = [" << x_start << ", " << x_end << "), Y range = [" << y_start << ", " << y_end << ")";
 				logfile << ", Center = (" << x_center << ", " << y_center << ")" << std::endl;
+				const std::string patch_scope = "p" + integerToString(ipatch);
+				if (fullTraceEnabled()) {
+					const int bounds[6] = {x_start, x_end, y_start, y_end, x_center, y_center};
+					fullTraceArray(fullTraceKey(patch_scope, 0, "bounds"), bounds,
+						sizeof(bounds), "i4", "6");
+				}
 				ipatch++;
 
 				std::vector<RFLOAT> local_xshifts(n_groups), local_yshifts(n_groups);
@@ -1612,6 +1660,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						}
 					}
 					RCTOC(TIMING_CLIP_PATCH);
+					if (fullTraceEnabled())
+						fullTraceArray(fullTraceKey(patch_scope, 0, "spatial", igroup), Ipatches[tid].data,
+							(size_t)(y_end - y_start) * (x_end - x_start) * sizeof(float), "f4",
+							integerToString(y_end - y_start) + "," + integerToString(x_end - x_start));
 
 					RCTIC(TIMING_PATCH_FFT);
 					NewFFT::FourierTransform(Ipatches[tid], Fpatches[igroup]);
@@ -1620,8 +1672,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				RCTOC(TIMING_PREP_PATCH);
 
 				RCTIC(TIMING_PATCH_ALIGN);
-				bool converged = alignPatch(Fpatches, x_end - x_start, y_end - y_start, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+				bool converged = alignPatch(Fpatches, x_end - x_start, y_end - y_start, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile, false, fn_mic, patch_scope);
 				RCTOC(TIMING_PATCH_ALIGN);
+				if (fullTraceEnabled()) {
+					fullTraceArray(fullTraceKey(patch_scope, 0, "finalx"), local_xshifts.data(),
+						(size_t)n_groups * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_groups));
+					fullTraceArray(fullTraceKey(patch_scope, 0, "finaly"), local_yshifts.data(),
+						(size_t)n_groups * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_groups));
+				}
 				if (!converged) continue;
 
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
@@ -1659,6 +1717,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		RCTIC(TIMING_FIT_POLYNOMIAL);
 		const int n_obs = patch_frames.size();
 		const int n_params = 18;
+		if (fullTraceEnabled()) {
+			const std::vector<RFLOAT> *observations[] = {&patch_xshifts, &patch_yshifts, &patch_frames, &patch_xs, &patch_ys};
+			const char *names[] = {"obsx", "obsy", "obsframe", "obsposx", "obsposy"};
+			for (int k = 0; k < 5; ++k)
+				fullTraceArray(fullTraceKey("model", 0, names[k]), observations[k]->data(),
+					(size_t)n_obs * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_obs));
+		}
 
 		if (n_obs <= n_params) {
 			std::cerr << fn_mic << ": too few valid local trajectories to fit local motion model." << std::endl;
@@ -1705,6 +1770,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const RFLOAT EPS = 1e-10;
 		solve(matA, vecX, coeffX, EPS);
 		solve(matA, vecY, coeffY, EPS);
+		if (fullTraceEnabled()) {
+			std::vector<RFLOAT> coefficients_x(n_params), coefficients_y(n_params);
+			for (int i = 0; i < n_params; ++i) {
+				coefficients_x[i] = coeffX(i);
+				coefficients_y[i] = coeffY(i);
+			}
+			fullTraceArray(fullTraceKey("model", 0, "coeffx"), coefficients_x.data(),
+				(size_t)n_params * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_params));
+			fullTraceArray(fullTraceKey("model", 0, "coeffy"), coefficients_y.data(),
+				(size_t)n_params * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_params));
+		}
 
 #ifdef DEBUG_OWN
 		std::cout << "Polynomial fitting coefficients for X and Y:" << std::endl;
@@ -1886,6 +1962,14 @@ skip_fitting:
 		RCTIC(TIMING_DW_WEIGHT);
 		doseWeighting(Fframes, doses, angpix * prescaling);
 		RCTOC(TIMING_DW_WEIGHT);
+		if (fullTraceEnabled()) {
+			fullTraceArray(fullTraceKey("dw", 0, "dose"), doses.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+			for (int iframe = 0; iframe < n_frames; ++iframe)
+				fullTraceArray(fullTraceKey("dw", 0, "weightedfft", iframe), Fframes[iframe].data,
+					(size_t)YSIZE(Fframes[iframe]) * XSIZE(Fframes[iframe]) * sizeof(fComplex), "c8",
+					integerToString(YSIZE(Fframes[iframe])) + "," + integerToString(XSIZE(Fframes[iframe])));
+		}
 
 		// Update real space images
 		RCTIC(TIMING_DW_IFFT);
@@ -1894,6 +1978,12 @@ skip_fitting:
 			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		}
 		RCTOC(TIMING_DW_IFFT);
+		if (fullTraceEnabled()) {
+			for (int iframe = 0; iframe < n_frames; ++iframe)
+				fullTraceArray(fullTraceKey("dw", 0, "ifft", iframe), Iframes[iframe]().data,
+					(size_t)YSIZE(Iframes[iframe]()) * XSIZE(Iframes[iframe]()) * sizeof(float), "f4",
+					integerToString(YSIZE(Iframes[iframe]())) + "," + integerToString(XSIZE(Iframes[iframe]())));
+		}
 		RCTOC(TIMING_DOSE_WEIGHTING);
 
 		Iref().initZeros(Iframes[0]());
@@ -1902,6 +1992,10 @@ skip_fitting:
 		realSpaceInterpolation(Iref, Iframes, mic.model, logfile);
 		logfile << " done" << std::endl;
 		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+		if (fullTraceEnabled())
+			fullTraceArray(fullTraceKey("out", 0, "sum"), Iref().data,
+				(size_t)YSIZE(Iref()) * XSIZE(Iref()) * sizeof(float), "f4",
+				integerToString(YSIZE(Iref())) + "," + integerToString(XSIZE(Iref())));
 
 		// Apply binning
 		RCTIC(TIMING_BINNING);
@@ -1915,6 +2009,7 @@ skip_fitting:
 		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
 	}
+	fullTraceEnd();
 
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
@@ -2147,6 +2242,8 @@ void MotioncorrRunner::realSpaceInterpolation(Image <float> &Isum, std::vector<I
 	if (model != NULL) {
 		model_version = model->getModelVersion();
 	}
+	if (fullTraceEnabled() && model_version != MOTION_MODEL_THIRD_ORDER_POLYNOMIAL)
+		REPORT_ERROR("Full trace requires the third-order polynomial output path");
 
 	const int n_frames = Iframes.size();
 	if (model_version == MOTION_MODEL_NULL) {
@@ -2224,6 +2321,10 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 	const int n_frames = Iframes.size();
 	const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 	const Matrix1D<RFLOAT> coeffX = model.coeffX, coeffY = model.coeffY;
+	const bool full_trace = fullTraceEnabled();
+	std::vector<RFLOAT> trace_model_x(full_trace ? (size_t)nx * ny : 0);
+	std::vector<RFLOAT> trace_model_y(full_trace ? (size_t)nx * ny : 0);
+	std::vector<RFLOAT> trace_interpolated(full_trace ? (size_t)nx * ny : 0);
 
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		logfile << "." << std::flush;
@@ -2253,6 +2354,11 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 
 				RFLOAT x_fitted = x_C0 + (x_C1 + x_C2 * x) * x + (x_C3 + x_C4 * y + x_C5 * x) * y;
 				RFLOAT y_fitted = y_C0 + (y_C1 + y_C2 * x) * x + (y_C3 + y_C4 * y + y_C5 * x) * y;
+				if (full_trace) {
+					const size_t pixel = (size_t)iy * nx + ix;
+					trace_model_x[pixel] = x_fitted;
+					trace_model_y[pixel] = y_fitted;
+				}
 
 #ifdef VALIDATE_OPTIMISED_CODE
 				RFLOAT x_fitted2, y_fitted2;
@@ -2275,6 +2381,8 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 				if (y1 >= ny || y0 >= ny - 1) {y0 = ny - 1; valid = false;}
 				if (!valid) {
 					DIRECT_A2D_ELEM(Isum(), iy, ix) += DIRECT_A2D_ELEM(Iframes[iframe](), y0, x0);
+					if (full_trace)
+						trace_interpolated[(size_t)iy * nx + ix] = DIRECT_A2D_ELEM(Iframes[iframe](), y0, x0);
 #ifdef DEBUG_OWN
 					if (std::isnan(DIRECT_A2D_ELEM(Isum(), iy, ix))) {
 						std::cerr << "ix = " << ix << " xfit = " << x_fitted << " iy = " << iy << " ifit = " << y_fitted << std::endl;
@@ -2301,17 +2409,41 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 				}
 #endif
 				DIRECT_A2D_ELEM(Isum(), iy, ix) += val;
+				if (full_trace) trace_interpolated[(size_t)iy * nx + ix] = val;
 			}
+		}
+		if (full_trace) {
+			const std::string shape = integerToString(ny) + "," + integerToString(nx);
+			const std::string real_dtype = sizeof(RFLOAT) == 8 ? "f8" : "f4";
+			fullTraceArray(fullTraceKey("out", 0, "modelx", iframe), trace_model_x.data(),
+				(size_t)ny * nx * sizeof(RFLOAT), real_dtype, shape);
+			fullTraceArray(fullTraceKey("out", 0, "modely", iframe), trace_model_y.data(),
+				(size_t)ny * nx * sizeof(RFLOAT), real_dtype, shape);
+			fullTraceArray(fullTraceKey("out", 0, "interp", iframe), trace_interpolated.data(),
+				(size_t)ny * nx * sizeof(RFLOAT), real_dtype, shape);
+			fullTraceArray(fullTraceKey("out", 0, "cumsum", iframe), Isum().data,
+				(size_t)ny * nx * sizeof(float), "f4",
+				shape);
 		}
 	}
 }
 
-bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global, const std::string &movie_identity, const std::string &trace_scope) {
 #ifdef _CUDA_ENABLED
 	if (use_gpu && is_global) {
-		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, movie_identity);
 	}
 #endif
+	GlobalPeakProbeConfig peak_probe;
+	const bool full_trace = fullTraceEnabled();
+	if (full_trace && trace_scope.empty()) REPORT_ERROR("Full trace alignment scope is missing");
+	if (is_global)
+		readGlobalPeakProbeConfig(peak_probe);
+	if (peak_probe.enabled) {
+		if (peak_probe.frame_index >= (int)xshifts.size() || peak_probe.iteration > max_iter)
+			REPORT_ERROR("Global peak trace frame/iteration is outside this alignment pass");
+		requireFreshGlobalPeakProbeOutput(peak_probe, "cpu");
+	}
 	std::vector<Image<float> > Iccs(n_threads);
 	MultidimArray<fComplex> Fref;
 	std::vector<MultidimArray<fComplex> > Fccs(n_threads);
@@ -2353,6 +2485,14 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 	const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
 	const int nfy_half = nfy / 2;
+	if (peak_probe.capture_arrays) {
+		static_assert(sizeof(fComplex) == 2 * sizeof(float), "Array trace requires interleaved complex float");
+		requireGlobalPeakProbeArrayBudget(peak_probe, "cpu",
+			(size_t)nfy * nfx * sizeof(fComplex),
+			(size_t)ccf_nfy * ccf_nfx * sizeof(float),
+			(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex),
+			(size_t)ccf_ny * ccf_nx * sizeof(float));
+	}
 
 	Fref.reshape(ccf_nfy, ccf_nfx);
 	for (int i = 0; i < n_threads; i++) {
@@ -2374,17 +2514,33 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 	RCTIC(TIMING_PREP_WEIGHT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int y = 0; y < ccf_nfy; y++) {
-		const int ly = (y > ccf_nfy_half) ? (y - ccf_nfy) : y;
-		RFLOAT ly2 = ly * (RFLOAT)ly / (nfy * (RFLOAT)nfy);
-
-		for (int x = 0; x < ccf_nfx; x++) {
-			RFLOAT dist2 = ly2 + x * (RFLOAT)x / (nfx * (RFLOAT)nfx);
-			DIRECT_A2D_ELEM(weight, y, x) = exp(- 2 * dist2 * scaled_B); // 2 for Fref and Fframe
-		}
+		fillMotioncorrAlignmentWeightRow(weight.data + (size_t)y * ccf_nfx,
+			y, ccf_nfx, ccf_nfy, nfx, nfy, scaled_B);
 	}
 	RCTOC(TIMING_PREP_WEIGHT);
+	if (full_trace)
+		fullTraceArray(fullTraceKey(trace_scope, 0, "weight"), weight.data,
+			(size_t)ccf_nfy * ccf_nfx * sizeof(float), "f4",
+			integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+	if (peak_probe.capture_arrays)
+		writeGlobalPeakProbeArray(peak_probe, "cpu", "weight", weight.data,
+			(size_t)ccf_nfy * ccf_nfx * sizeof(float));
 
+	bool peak_trace_written = false;
 	for (int iter = 1; iter	<= max_iter; iter++) {
+		GlobalPeakProbeRecord peak_record = {};
+		std::vector<FullPeakRecord> full_peaks(full_trace ? n_frames : 0);
+		if (full_trace) {
+			for (int iframe = 0; iframe < n_frames; ++iframe)
+				fullTraceArray(fullTraceKey(trace_scope, iter, "input", iframe), Fframes[iframe].data,
+					(size_t)nfy * nfx * sizeof(fComplex), "c8",
+					integerToString(nfy) + "," + integerToString(nfx));
+		}
+		std::vector<fComplex> trace_fccs;
+		std::vector<float> trace_iccs;
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration)
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "input", Fframes[peak_probe.frame_index].data,
+				(size_t)nfy * nfx * sizeof(fComplex));
 		RCTIC(TIMING_MAKE_REF);
 		Fref.initZeros();
 
@@ -2398,6 +2554,13 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			}
 		}
 		RCTOC(TIMING_MAKE_REF);
+		if (full_trace)
+			fullTraceArray(fullTraceKey(trace_scope, iter, "fref"), Fref.data,
+				(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex), "c8",
+				integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration)
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "fref", Fref.data,
+				(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex));
 
 		#pragma omp parallel for num_threads(n_threads)
 		for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -2412,10 +2575,22 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 				}
 			}
 			RCTOC(TIMING_CCF_CALC);
+			if (full_trace)
+				fullTraceArray(fullTraceKey(trace_scope, iter, "fccs", iframe), Fccs[tid].data,
+					(size_t)ccf_nfy * ccf_nfx * sizeof(fComplex), "c8",
+					integerToString(ccf_nfy) + "," + integerToString(ccf_nfx));
+			if (peak_probe.capture_arrays && iter == peak_probe.iteration && iframe == peak_probe.frame_index)
+				trace_fccs.assign(Fccs[tid].data, Fccs[tid].data + (size_t)ccf_nfy * ccf_nfx);
 
 			RCTIC(TIMING_CCF_IFFT);
 			NewFFT::inverseFourierTransform(Fccs[tid], Iccs[tid]());
 			RCTOC(TIMING_CCF_IFFT);
+			if (full_trace)
+				fullTraceArray(fullTraceKey(trace_scope, iter, "iccs", iframe), Iccs[tid]().data,
+					(size_t)ccf_ny * ccf_nx * sizeof(float), "f4",
+					integerToString(ccf_ny) + "," + integerToString(ccf_nx));
+			if (peak_probe.capture_arrays && iter == peak_probe.iteration && iframe == peak_probe.frame_index)
+				trace_iccs.assign(Iccs[tid]().data, Iccs[tid]().data + (size_t)ccf_ny * ccf_nx);
 
 			RCTIC(TIMING_CCF_FIND_MAX);
 			RFLOAT maxval = -1E30;
@@ -2446,6 +2621,7 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			RFLOAT vp, vn;
 			vp = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_p);
 			vn = DIRECT_A2D_ELEM(Iccs[tid](), ipy, ipx_n);
+			RFLOAT x_plus = vp, x_minus = vn;
  			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
 				cur_xshifts[iframe] = posx - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval);
 			} else {
@@ -2454,10 +2630,43 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 
 			vp = DIRECT_A2D_ELEM(Iccs[tid](), ipy_p, ipx);
 			vn = DIRECT_A2D_ELEM(Iccs[tid](), ipy_n, ipx);
- 			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
+			if (std::abs(vp + vn - 2.0 * maxval) > EPS) {
 				cur_yshifts[iframe] = posy - 0.5 * (vp - vn) / (vp + vn - 2.0 * maxval);
 			} else {
 				cur_yshifts[iframe] = posy;
+			}
+			if (full_trace) {
+				FullPeakRecord &r = full_peaks[iframe];
+				r.value[0] = posx; r.value[1] = posy; r.value[2] = maxval;
+				r.value[3] = x_minus; r.value[4] = x_plus;
+				r.value[5] = vn; r.value[6] = vp;
+				r.value[7] = x_plus + x_minus - 2.0 * maxval;
+				r.value[8] = vp + vn - 2.0 * maxval;
+				r.value[9] = cur_xshifts[iframe]; r.value[10] = cur_yshifts[iframe];
+				r.value[11] = cur_xshifts[iframe] * ccf_scale_x;
+				r.value[12] = cur_yshifts[iframe] * ccf_scale_y;
+				r.value[13] = std::abs(r.value[7]) > EPS;
+				r.value[14] = std::abs(r.value[8]) > EPS;
+				r.value[15] = 0;
+			}
+			if (peak_probe.enabled && iter == peak_probe.iteration && iframe == peak_probe.frame_index) {
+				peak_record.frame_index = iframe;
+				peak_record.iteration = iter;
+				peak_record.peak_x = posx;
+				peak_record.peak_y = posy;
+				peak_record.peak_value = peak_record.center = maxval;
+				peak_record.x_minus = x_minus;
+				peak_record.x_plus = x_plus;
+				peak_record.y_minus = vn;
+				peak_record.y_plus = vp;
+				peak_record.denominator_x = x_plus + x_minus - 2.0 * maxval;
+				peak_record.denominator_y = vp + vn - 2.0 * maxval;
+				peak_record.shift_x_unscaled = cur_xshifts[iframe];
+				peak_record.shift_y_unscaled = cur_yshifts[iframe];
+				peak_record.shift_x_scaled = cur_xshifts[iframe] * ccf_scale_x;
+				peak_record.shift_y_scaled = cur_yshifts[iframe] * ccf_scale_y;
+				peak_record.x_interpolated = std::abs(peak_record.denominator_x) > EPS;
+				peak_record.y_interpolated = std::abs(peak_record.denominator_y) > EPS;
 			}
 			cur_xshifts[iframe] *= ccf_scale_x;
 			cur_yshifts[iframe] *= ccf_scale_y;
@@ -2465,6 +2674,31 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			std::cout << "tid " << tid << " Frame " << 1 + iframe << ": raw shift x = " << posx << " y = " << posy << " cc = " << maxval << " interpolated x = " << cur_xshifts[iframe] << " y = " << cur_yshifts[iframe] << std::endl;
 #endif
 			RCTOC(TIMING_CCF_FIND_MAX);
+		}
+		if (full_trace) {
+			fullTraceArray(fullTraceKey(trace_scope, iter, "peaks"), full_peaks.data(),
+				full_peaks.size() * sizeof(FullPeakRecord), "f8",
+				integerToString(n_frames) + ",16");
+			fullTraceArray(fullTraceKey(trace_scope, iter, "rawshiftx"), cur_xshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+			fullTraceArray(fullTraceKey(trace_scope, iter, "rawshifty"), cur_yshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+		}
+		if (peak_probe.capture_arrays && iter == peak_probe.iteration) {
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "fccs", trace_fccs.data(),
+				trace_fccs.size() * sizeof(fComplex));
+			writeGlobalPeakProbeArray(peak_probe, "cpu", "iccs", trace_iccs.data(),
+				trace_iccs.size() * sizeof(float));
+		}
+		if (peak_probe.enabled && iter == peak_probe.iteration) {
+			peak_record.frame0_shift_x_scaled = cur_xshifts[0];
+			peak_record.frame0_shift_y_scaled = cur_yshifts[0];
+			peak_record.frame0_recentered_shift_x = 0.0;
+			peak_record.frame0_recentered_shift_y = 0.0;
+			peak_record.recentered_shift_x = cur_xshifts[peak_probe.frame_index] - cur_xshifts[0];
+			peak_record.recentered_shift_y = cur_yshifts[peak_probe.frame_index] - cur_yshifts[0];
+			writeGlobalPeakProbeRecord(peak_probe, "cpu", "CPU host", movie_identity, peak_record);
+			peak_trace_written = true;
 		}
 
 		// Set origin
@@ -2476,11 +2710,23 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			y_sumsq += cur_yshifts[iframe] * cur_yshifts[iframe];
 		}
 		cur_xshifts[0] = 0; cur_yshifts[0] = 0;
+		if (full_trace) {
+			fullTraceArray(fullTraceKey(trace_scope, iter, "deltax"), cur_xshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+			fullTraceArray(fullTraceKey(trace_scope, iter, "deltay"), cur_yshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+		}
 
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			xshifts[iframe] += cur_xshifts[iframe];
 			yshifts[iframe] += cur_yshifts[iframe];
 //			std::cout << "Shift for Frame " << iframe << ": delta_x = " << cur_xshifts[iframe] << " delta_y = " << cur_yshifts[iframe] << std::endl;
+		}
+		if (full_trace) {
+			fullTraceArray(fullTraceKey(trace_scope, iter, "totalx"), xshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
+			fullTraceArray(fullTraceKey(trace_scope, iter, "totaly"), yshifts.data(),
+				(size_t)n_frames * sizeof(RFLOAT), sizeof(RFLOAT) == 8 ? "f8" : "f4", integerToString(n_frames));
 		}
 
 		// Apply shifts
@@ -2491,6 +2737,12 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			shiftNonSquareImageInFourierTransform(Fframes[iframe], -cur_xshifts[iframe] / pnx, -cur_yshifts[iframe] / pny);
 		}
 		RCTOC(TIMING_FOURIER_SHIFT);
+		if (full_trace) {
+			for (int iframe = 0; iframe < n_frames; ++iframe)
+				fullTraceArray(fullTraceKey(trace_scope, iter, "postshift", iframe), Fframes[iframe].data,
+					(size_t)nfy * nfx * sizeof(fComplex), "c8",
+					integerToString(nfy) + "," + integerToString(nfx));
+		}
 
 		// Test convergence
 		RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
@@ -2501,6 +2753,8 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 			break;
 		}
 	}
+	if (peak_probe.enabled && !peak_trace_written)
+		REPORT_ERROR("Global peak trace iteration was not reached before alignment converged");
 
 #ifdef DEBUG_OWN
 	for (int iframe = 0; iframe < n_frames; iframe++) {

@@ -218,7 +218,7 @@ private:
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
-	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false, const std::string &movie_identity = std::string(), const std::string &trace_scope = std::string());
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);
 

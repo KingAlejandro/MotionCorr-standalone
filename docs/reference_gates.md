@@ -147,7 +147,7 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 |:---|:---:|:---|
 | **Max Frame Shift Error** | `<= 0.05 px` | Trajectory shifts remain within 1/20th of a detector pixel |
 | **Coordinate RMS Shift Error** | `<= 0.02 px` | Global motion drift across all frames is bounded |
-| **Image RMSE** | `<= 0.020` | Relative RMSE $< 0.1\%$ of micrograph standard deviation |
+| **Image RMSE** | `<= 0.020` | Absolute corrected-pixel error bound; this does not imply a particular relative RMSE |
 | **Image Relative RMSE** | `<= 0.001` | Evaluated independently of absolute RMSE; a constant reference with changed pixels fails |
 | **Image Max Absolute Error** | `<= 5.0` | Accommodates isolated edge and hot-pixel interpolation artifacts |
 | **Normalized STAR Schema and Static Metadata** | `0 differences` | Blocks, loop labels/row counts, and static values match; global shifts are checked separately. Local motion coefficients and shifts are not yet an independent numerical gate. |

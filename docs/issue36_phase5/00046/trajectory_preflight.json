@@ -1,0 +1,70 @@
+{
+  "format": "motioncorr-issue36-phase5-v1",
+  "mode": "trajectory",
+  "movie": "Movies/20170629_00046_frameImage.tiff",
+  "movie_sha256": "61094383ce6750976275b13227033dcdb154c8214ef3db402aa6440a505ad377",
+  "gain_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+  "star_sha256": "29be387682e00c48da13d69e517709a8ff0b4583cca31fa037ee9366ffe32a31",
+  "cpu_trace_start_sha256": "8ce34cf984f5cfe0bdfd74b6eb38fb794f09c821d792dfc668d48cf812363cca",
+  "cpu_trace_executable_sha256": "a77777bc84bb033ce279dffc3e036c62100c5f0f43881cccc244753b1a59a6f7",
+  "cpu_trace_array_sha256": {
+    "g_i01_deltax": "5c05e165ed5f2c8ee12e1114c47fc033db003a30840ba30f2a3bd05f0d9b8b17",
+    "g_i01_deltay": "69b28b90aed7eb8506b206115d7ca91c371d9f8ef7fb7f070136d9f5d987f28e",
+    "g_i02_deltax": "f3d431f71405d0355e76ac80aa62a9f303e65a989261f05f49ce93390888994c",
+    "g_i02_deltay": "6ab901f93cb15b94c3f3b83175d4e079a4786ae39f022a169678c8ab83fdc7e2",
+    "g_i02_totalx": "65076d1bd3d9ef0c14882c60ea4ad941a98e2e831a4f2434a950459ec15abc7f",
+    "g_i02_totaly": "519a5830bf8e103bc855a1c49e0e6b9b7a85f247cf79931fa0dbacc0f3bfb49c"
+  },
+  "cpu_global_rmsd_px": [
+    5.753382831751826,
+    0.3752918853719781
+  ],
+  "geometry": {
+    "g_i01_input_f000": [
+      3838,
+      1856
+    ],
+    "g_i01_fref": [
+      972,
+      487
+    ],
+    "g_i02_fref": [
+      972,
+      487
+    ]
+  },
+  "source_sha256": {
+    "src/motioncorr_runner.cpp": "308698c16836147355e06f0358ddca4739c9ada7d6a1ed4f7c03d36a420d1c8f",
+    "src/motioncorr_alignment_weight.h": "03b033e7d0b5c662371e4914fd2d21bc5b87731b4604e134a009ddad7c690a37",
+    "src/acc/cuda/cuda_alignpatch.cu": "77475bf43b10bebefa672d8575f1ed4eb239e849450daf45fd5e55603a39a158"
+  },
+  "candidate_executable_sha256": "5a4470e2111ab41307ee397cc855fd59acc8d82c97fdbb905aa3afc50f6af7cb",
+  "command": [
+    "/home/alex/MotionCorr-issue36-diagnostics-build/build-issue36-cuda/motioncorr",
+    "--i",
+    "/home/alex/MotionCorr-issue36-diagnostics-build/validation/movie_00046.star",
+    "--o",
+    "/home/alex/MotionCorr-issue36-diagnostics-build/validation/issue36_phase5/trajectory_00046/output",
+    "--use_own",
+    "--j",
+    "1",
+    "--do_at_most",
+    "1",
+    "--seed",
+    "1",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "2"
+  ],
+  "cpu_trace_directory": "/home/alex/MotionCorr-issue36-diagnostics-build/validation/release_00046_cpu/trace"
+}

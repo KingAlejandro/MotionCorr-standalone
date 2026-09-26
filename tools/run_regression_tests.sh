@@ -49,6 +49,7 @@ fi
   --ref "${REPO_ROOT}/test-data/fixtures/reference_output" \
   --test "${TMP_RUN_DIR}" \
   --ground-truth "${REPO_ROOT}/test-data/fixtures/synthetic_128x128_8frames_ground_truth.json" \
-  --gate exact
+  --gate exact \
+  --require-complete-coverage
 
 echo "=== Regression Test Passed Successfully! ==="

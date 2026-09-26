@@ -1,0 +1,1063 @@
+{
+  "tool": "run_known_motion_gates.py",
+  "overall": "PASS",
+  "overall_scope": "gate-role accuracy plus execution/backend/invariance/witness checks on every requested case",
+  "binary": "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+  "gpu": null,
+  "results": [
+    {
+      "case": "km_global_hisnr",
+      "role": "gate",
+      "status": "PASS",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_global_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "1",
+            "--patch_y",
+            "1",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.291,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1/km_global_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_global_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "1",
+            "--patch_y",
+            "1",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.324,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1_dw/km_global_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_global_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "1",
+            "--patch_y",
+            "1",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.272,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j4/km_global_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 0,
+        "detected": 0,
+        "injected": 0,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.008294008850118929,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 6.662210584185885e-18,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.00829400885011893,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.022162605404762396,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.022162605404762396,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.005072800580982242,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.022162605404762396,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.023663720356973637,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.008294008850118932,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "applied_image_self_consistency": {
+          "value_a": null,
+          "limit_a": null,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": {
+        "reference_rms": 1201.2452981231218,
+        "absolute_rmse": 8.667484989944686e-05,
+        "relative_rmse": 7.215416371233373e-08,
+        "status": "PASS",
+        "max_abs_error": 0.000437715454836507,
+        "noise_floor_relative_rmse": 0.0001,
+        "classification": "numerical_noise",
+        "note": "float32 FFT arithmetic in the program versus float64 here; a disagreement at or below the measured floor is rounding, not a displacement-field error"
+      },
+      "dose_weighting_invariance": {
+        "other_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1_dw/km_global_hisnr.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    },
+    {
+      "case": "km_local_hisnr",
+      "role": "gate",
+      "status": "PASS",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.371,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1/km_local_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.433,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1_dw/km_local_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_hisnr.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.309,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j4/km_local_hisnr.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 0,
+        "detected": 0,
+        "injected": 0,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.007880941958411148,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.05168533606963602,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.05302449185494003,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.10851095274579911,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.19251412910284343,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.009369314859370294,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.009493487745595513,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.055015469966353016,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.08698664462813348,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "applied_image_self_consistency": {
+          "value_a": null,
+          "limit_a": null,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": {
+        "reference_rms": 1200.8813418823302,
+        "absolute_rmse": 0.00042333679599829236,
+        "relative_rmse": 3.525217531773206e-07,
+        "status": "PASS",
+        "max_abs_error": 0.005567562334363174,
+        "noise_floor_relative_rmse": 0.0001,
+        "classification": "numerical_noise",
+        "note": "float32 FFT arithmetic in the program versus float64 here; a disagreement at or below the measured floor is rounding, not a displacement-field error"
+      },
+      "dose_weighting_invariance": {
+        "other_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1_dw/km_local_hisnr.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    },
+    {
+      "case": "km_local_noisy",
+      "role": "characterization",
+      "status": "FAIL",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_noisy.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.374,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1/km_local_noisy.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_noisy.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.448,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1_dw/km_local_noisy.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_noisy.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.311,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j4/km_local_noisy.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 6,
+        "detected": 6,
+        "injected": 6,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.2606880572016044,
+          "limit_a": 0.1,
+          "pass": false,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.6217382699114746,
+          "limit_a": 0.2,
+          "pass": false,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.6594908145919275,
+          "limit_a": 0.2,
+          "pass": false,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 1.0933738527057826,
+          "limit_a": 0.4,
+          "pass": false,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 1.4388081060531364,
+          "limit_a": 0.8,
+          "pass": false,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.3998647693823769,
+          "limit_a": 0.2,
+          "pass": false,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.41166712156056046,
+          "limit_a": 0.1,
+          "pass": false,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.7478365204912756,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 1.2428477855917104,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": null,
+      "dose_weighting_invariance": {
+        "other_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1_dw/km_local_noisy.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    },
+    {
+      "case": "km_local_nonsquare",
+      "role": "gate",
+      "status": "PASS",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_nonsquare.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.436,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1/km_local_nonsquare.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_nonsquare.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.522,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1_dw/km_local_nonsquare.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_nonsquare.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--skip_defect"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 0.35,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j4/km_local_nonsquare.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 0,
+        "detected": 0,
+        "injected": 0,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.007204948375960789,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.04029206208733108,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.04221714100121316,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.08742074794171101,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.14320914094383205,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.00773354973970403,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.008854843719074563,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.04525510737426573,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.07143847534504807,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "applied_image_self_consistency": {
+          "value_a": null,
+          "limit_a": null,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": {
+        "reference_rms": 1202.959352067852,
+        "absolute_rmse": 0.00045132198469467386,
+        "relative_rmse": 3.7517642131370817e-07,
+        "status": "PASS",
+        "max_abs_error": 0.006569813930809687,
+        "noise_floor_relative_rmse": 0.0001,
+        "classification": "numerical_noise",
+        "note": "float32 FFT arithmetic in the program versus float64 here; a disagreement at or below the measured floor is rounding, not a displacement-field error"
+      },
+      "dose_weighting_invariance": {
+        "other_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1_dw/km_local_nonsquare.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    },
+    {
+      "case": "km_local_realscale",
+      "role": "gate",
+      "status": "PASS",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_realscale.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 4.924,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1/km_local_realscale.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_realscale.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 7.153,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1_dw/km_local_realscale.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr",
+            "--i",
+            "km_local_realscale.star",
+            "--o",
+            "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW"
+          ],
+          "cwd": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion",
+          "exit_code": 0,
+          "seconds": 2.678,
+          "motion_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j4/km_local_realscale.star",
+          "backend_evidence": {
+            "requested": "cpu",
+            "selection": "--use_own without --gpu",
+            "unexpected_cuda_marker": false,
+            "movie_completed": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 6,
+        "detected": 8,
+        "injected": 6,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.05305673814409948,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.14513403812688305,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.15404851928716742,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.26144050644721,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.5232254992594562,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.08304966126670367,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.056485328030368494,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.13893965534701214,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.23658362243245734,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": null,
+      "dose_weighting_invariance": {
+        "other_star": "/home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1_dw/km_local_realscale.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    }
+  ]
+}

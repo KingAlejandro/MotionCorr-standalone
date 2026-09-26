@@ -1,0 +1,366 @@
+
+######## km_global_hisnr  [gate]
+==============================================================================
+ KNOWN-MOTION AND LOCAL-FIELD GATE
+==============================================================================
+Case:            km_global_hisnr
+Motion STAR:     /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_global_hisnr/j1/km_global_hisnr.star
+Geometry:        512 x 512 px, 12 frames, 0.885 A/px, motion model version 0
+Grid:            81 positions (49 interior, 32 border)
+Injected field:  max |field| = 6.2750 px, max local deviation = 0.0000 px
+
+1. CONSTANT OFFSET (reported separately from frame-to-frame change)
+   dx = +0.023755 px   dy = -0.007926 px   |d| = 0.025042 px = 0.022163 A
+
+2. APPLIED-FIELD ERROR, constant offset removed
+   region          n      RMS px      P95 px      max px       RMS A       P95 A       max A
+   all           972    0.009372    0.025042    0.025042    0.008294    0.022163    0.022163
+   interior      588    0.009372    0.025042    0.025042    0.008294    0.022163    0.022163
+   border        384    0.009372    0.025042    0.025042    0.008294    0.022163    0.022163
+
+3. DECOMPOSITION
+   global component (spatial mean per frame)   RMS    0.009372 px     0.008294 A   max    0.022163 A
+   local component  (spatially varying, int.)  RMS    0.000000 px     0.000000 A   max    0.000000 A
+   frame-to-frame change        (interior)     RMS    0.005732 px     0.005073 A   max    0.013484 A
+
+4. PER-FRAME DISTRIBUTION (offset removed, interior positions)
+   frame  applied dx  applied dy     RMS px     P95 px     max px      RMS A      max A
+       1     0.00000     0.00000    0.02504    0.02504    0.02504    0.02216    0.02216
+       2    -1.68830     1.38398    0.00988    0.00988    0.00988    0.00874    0.00874
+       3    -2.75412     2.07706    0.00465    0.00465    0.00465    0.00412    0.00412
+       4    -3.47068     2.45126    0.00314    0.00314    0.00314    0.00278    0.00278
+       5    -3.98952     2.68224    0.00257    0.00257    0.00257    0.00227    0.00227
+       6    -4.40672     2.83937    0.00154    0.00154    0.00154    0.00137    0.00137
+       7    -4.76172     2.96908    0.00103    0.00103    0.00103    0.00091    0.00091
+       8    -5.07771     3.08009    0.00650    0.00650    0.00650    0.00576    0.00576
+       9    -5.38078     3.18528    0.00675    0.00675    0.00675    0.00597    0.00597
+      10    -5.67264     3.28791    0.00775    0.00775    0.00775    0.00686    0.00686
+      11    -5.95971     3.38762    0.00832    0.00832    0.00832    0.00736    0.00736
+      12    -6.24326     3.48910    0.00840    0.00840    0.00840    0.00743    0.00743
+
+5. INTERPOLATION BOUNDARY (reported, not cropped)
+   unfaithful margin 9 px -> 18108 of 262144 output pixels (6.91 %)
+   ceil(max|applied field|) + 2; inside it the corrector clamps to the edge pixel instead of interpolating (realSpaceInterpolation_*)
+
+6. DOSE-WEIGHTING BOUNDARY
+   max field difference with/without dose weighting: 0.000e+00 px  -> IDENTICAL
+   dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect
+
+7. APPLIED-FIELD SELF-CONSISTENCY (reported field re-applied independently)
+   reference RMS 1201.25   absolute RMSE 8.66748e-05   relative RMSE    0.000000
+   noise floor 1.0e-04 -> classified as NUMERICAL_NOISE
+
+8. GATES  (limits from motion-accuracy physics; see the design record)
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.00829    0.10000     0.01%     0.003  PASS
+   local_component_rms                 0.00000    0.20000     0.00%     0.000  PASS
+   total_rms_interior                  0.00829    0.20000     0.01%     0.003  PASS
+   total_p95_interior                  0.02216    0.40000     0.05%     0.019  PASS
+   total_max_interior                  0.02216    0.80000     0.05%     0.019  PASS
+   frame_to_frame_rms_interior         0.00507    0.20000     0.00%     0.001  PASS
+   constant_offset                     0.02216    0.10000     0.05%     0.019  PASS
+   total_rms_interior_with_offset      0.02366                0.06%            report
+   border_rms_reported_not_gated       0.00829                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+   applied_image_self_consistency                                              PASS
+
+OVERALL: PASS  (9/9 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+######## km_local_hisnr  [gate]
+==============================================================================
+ KNOWN-MOTION AND LOCAL-FIELD GATE
+==============================================================================
+Case:            km_local_hisnr
+Motion STAR:     /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_hisnr/j1/km_local_hisnr.star
+Geometry:        512 x 512 px, 12 frames, 0.885 A/px, motion model version 1
+Grid:            81 positions (49 interior, 32 border)
+Injected field:  max |field| = 8.2172 px, max local deviation = 1.9604 px
+
+1. CONSTANT OFFSET (reported separately from frame-to-frame change)
+   dx = -0.003590 px   dy = -0.010108 px   |d| = 0.010727 px = 0.009493 A
+
+2. APPLIED-FIELD ERROR, constant offset removed
+   region          n      RMS px      P95 px      max px       RMS A       P95 A       max A
+   all           972    0.077384    0.161824    0.349061    0.068485    0.143215    0.308919
+   interior      588    0.059915    0.122611    0.217530    0.053024    0.108511    0.192514
+   border        384    0.098290    0.196970    0.349061    0.086987    0.174319    0.308919
+
+3. DECOMPOSITION
+   global component (spatial mean per frame)   RMS    0.008905 px     0.007881 A   max    0.012263 A
+   local component  (spatially varying, int.)  RMS    0.058402 px     0.051685 A   max    0.189536 A
+   frame-to-frame change        (interior)     RMS    0.010587 px     0.009369 A   max    0.022040 A
+
+4. PER-FRAME DISTRIBUTION (offset removed, interior positions)
+   frame  applied dx  applied dy     RMS px     P95 px     max px      RMS A      max A
+       1     0.00000     0.00000    0.01073    0.01073    0.01073    0.00949    0.00949
+       2    -1.69701     1.38643    0.01349    0.01952    0.02490    0.01194    0.02204
+       3    -2.77346     2.08129    0.01830    0.02775    0.03866    0.01619    0.03422
+       4    -3.50238     2.44889    0.02621    0.04152    0.05587    0.02320    0.04944
+       5    -4.03383     2.66946    0.03541    0.05705    0.07616    0.03134    0.06740
+       6    -4.45547     2.82267    0.04382    0.07228    0.09718    0.03878    0.08600
+       7    -4.82217     2.94186    0.05335    0.08803    0.11635    0.04721    0.10297
+       8    -5.15692     3.04261    0.06303    0.10433    0.13746    0.05578    0.12165
+       9    -5.47227     3.13757    0.07194    0.11977    0.15866    0.06367    0.14041
+      10    -5.78519     3.22167    0.08344    0.13726    0.18018    0.07385    0.15946
+      11    -6.09351     3.30874    0.09423    0.15349    0.19779    0.08339    0.17504
+      12    -6.39612     3.39435    0.10368    0.16772    0.21753    0.09176    0.19251
+
+5. INTERPOLATION BOUNDARY (reported, not cropped)
+   unfaithful margin 11 px -> 22044 of 262144 output pixels (8.41 %)
+   ceil(max|applied field|) + 2; inside it the corrector clamps to the edge pixel instead of interpolating (realSpaceInterpolation_*)
+
+6. DOSE-WEIGHTING BOUNDARY
+   max field difference with/without dose weighting: 0.000e+00 px  -> IDENTICAL
+   dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect
+
+7. APPLIED-FIELD SELF-CONSISTENCY (reported field re-applied independently)
+   reference RMS 1200.88   absolute RMSE 0.000423337   relative RMSE    0.000000
+   noise floor 1.0e-04 -> classified as NUMERICAL_NOISE
+
+8. GATES  (limits from motion-accuracy physics; see the design record)
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.00788    0.10000     0.01%     0.002  PASS
+   local_component_rms                 0.05169    0.20000     0.29%     0.105  PASS
+   total_rms_interior                  0.05302    0.20000     0.31%     0.111  PASS
+   total_p95_interior                  0.10851    0.40000     1.28%     0.465  PASS
+   total_max_interior                  0.19251    0.80000     3.98%     1.463  PASS
+   frame_to_frame_rms_interior         0.00937    0.20000     0.01%     0.003  PASS
+   constant_offset                     0.00949    0.10000     0.01%     0.004  PASS
+   total_rms_interior_with_offset      0.05502                0.33%            report
+   border_rms_reported_not_gated       0.08699                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+   applied_image_self_consistency                                              PASS
+
+OVERALL: PASS  (9/9 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+######## km_local_noisy  [characterization]
+==============================================================================
+ KNOWN-MOTION AND LOCAL-FIELD GATE
+==============================================================================
+Case:            km_local_noisy
+Motion STAR:     /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_noisy/j1/km_local_noisy.star
+Geometry:        512 x 512 px, 12 frames, 0.885 A/px, motion model version 1
+Grid:            81 positions (49 interior, 32 border)
+Injected field:  max |field| = 8.2172 px, max local deviation = 1.9604 px
+
+1. CONSTANT OFFSET (reported separately from frame-to-frame change)
+   dx = -0.099754 px   dy = +0.454339 px   |d| = 0.465161 px = 0.411667 A
+
+2. APPLIED-FIELD ERROR, constant offset removed
+   region          n      RMS px      P95 px      max px       RMS A       P95 A       max A
+   all           972    1.055965    1.932819    2.293048    0.934529    1.710545    2.029347
+   interior      588    0.745187    1.235451    1.625772    0.659491    1.093374    1.438808
+   border        384    1.404348    2.113278    2.293048    1.242848    1.870251    2.029347
+
+3. DECOMPOSITION
+   global component (spatial mean per frame)   RMS    0.294563 px     0.260688 A   max    0.411667 A
+   local component  (spatially varying, int.)  RMS    0.702529 px     0.621738 A   max    1.339254 A
+   frame-to-frame change        (interior)     RMS    0.451825 px     0.399865 A   max    1.029964 A
+
+4. PER-FRAME DISTRIBUTION (offset removed, interior positions)
+   frame  applied dx  applied dy     RMS px     P95 px     max px      RMS A      max A
+       1     0.00000     0.00000    0.46516    0.46516    0.46516    0.41167    0.41167
+       2    -2.22535     1.83770    0.61286    0.74152    0.81756    0.54238    0.72354
+       3    -3.09648     2.77651    0.67475    1.04869    1.12007    0.59715    0.99126
+       4    -3.49197     2.85864    0.67269    1.04433    1.26314    0.59533    1.11788
+       5    -4.19946     3.02542    0.81485    1.24522    1.51316    0.72114    1.33915
+       6    -4.55804     3.49997    0.78996    1.22568    1.32005    0.69912    1.16824
+       7    -4.55795     3.41263    0.71457    1.22737    1.46581    0.63240    1.29724
+       8    -5.09668     3.47975    0.74445    1.22553    1.49225    0.65884    1.32064
+       9    -5.40789     3.73719    0.71295    1.12728    1.28581    0.63096    1.13794
+      10    -5.87868     3.67505    0.78158    1.21871    1.42885    0.69170    1.26453
+      11    -6.50197     4.08066    0.95470    1.26579    1.29049    0.84491    1.14208
+      12    -6.32782     3.64540    0.88343    1.41575    1.62577    0.78184    1.43881
+
+5. INTERPOLATION BOUNDARY (reported, not cropped)
+   unfaithful margin 10 px -> 20080 of 262144 output pixels (7.66 %)
+   ceil(max|applied field|) + 2; inside it the corrector clamps to the edge pixel instead of interpolating (realSpaceInterpolation_*)
+
+6. DOSE-WEIGHTING BOUNDARY
+   max field difference with/without dose weighting: 0.000e+00 px  -> IDENTICAL
+   dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect
+
+8. GATES  (limits from motion-accuracy physics; see the design record)
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.26069    0.10000     7.18%     2.683  FAIL
+   local_component_rms                 0.62174    0.20000    34.55%    15.261  FAIL
+   total_rms_interior                  0.65949    0.20000    37.93%    17.170  FAIL
+   total_p95_interior                  1.09337    0.40000    73.04%    47.195  FAIL
+   total_max_interior                  1.43881    0.80000    89.67%    81.727  FAIL
+   frame_to_frame_rms_interior         0.39986    0.20000    16.08%     6.312  FAIL
+   constant_offset                     0.41167    0.10000    16.96%     6.690  FAIL
+   total_rms_interior_with_offset      0.74784               45.84%            report
+   border_rms_reported_not_gated       1.24285                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+
+OVERALL: FAIL  (1/8 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+######## km_local_nonsquare  [gate]
+==============================================================================
+ KNOWN-MOTION AND LOCAL-FIELD GATE
+==============================================================================
+Case:            km_local_nonsquare
+Motion STAR:     /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_nonsquare/j1/km_local_nonsquare.star
+Geometry:        768 x 512 px, 12 frames, 0.885 A/px, motion model version 1
+Grid:            81 positions (49 interior, 32 border)
+Injected field:  max |field| = 8.2192 px, max local deviation = 1.9614 px
+
+1. CONSTANT OFFSET (reported separately from frame-to-frame change)
+   dx = -0.008941 px   dy = -0.004491 px   |d| = 0.010005 px = 0.008855 A
+
+2. APPLIED-FIELD ERROR, constant offset removed
+   region          n      RMS px      P95 px      max px       RMS A       P95 A       max A
+   all           972    0.062855    0.133425    0.257162    0.055627    0.118081    0.227588
+   interior      588    0.047703    0.098781    0.161818    0.042217    0.087421    0.143209
+   border        384    0.080721    0.168844    0.257162    0.071438    0.149427    0.227588
+
+3. DECOMPOSITION
+   global component (spatial mean per frame)   RMS    0.008141 px     0.007205 A   max    0.011387 A
+   local component  (spatially varying, int.)  RMS    0.045528 px     0.040292 A   max    0.143038 A
+   frame-to-frame change        (interior)     RMS    0.008738 px     0.007734 A   max    0.015310 A
+
+4. PER-FRAME DISTRIBUTION (offset removed, interior positions)
+   frame  applied dx  applied dy     RMS px     P95 px     max px      RMS A      max A
+       1     0.00000     0.00000    0.01001    0.01001    0.01001    0.00885    0.00885
+       2    -1.70626     1.38700    0.00882    0.01569    0.01634    0.00781    0.01446
+       3    -2.77531     2.08060    0.01393    0.02618    0.03026    0.01233    0.02678
+       4    -3.50050     2.45175    0.01783    0.03315    0.04429    0.01578    0.03920
+       5    -4.03351     2.67568    0.02404    0.04141    0.05668    0.02127    0.05016
+       6    -4.46109     2.82772    0.03218    0.05108    0.07079    0.02848    0.06265
+       7    -4.82916     2.94601    0.04110    0.06516    0.08631    0.03638    0.07638
+       8    -5.16428     3.04963    0.04978    0.08079    0.10110    0.04406    0.08948
+       9    -5.48354     3.14429    0.05881    0.09627    0.11631    0.05205    0.10294
+      10    -5.79610     3.23180    0.06863    0.11053    0.13335    0.06073    0.11802
+      11    -6.10089     3.32015    0.07571    0.12299    0.14797    0.06701    0.13095
+      12    -6.40723     3.40599    0.08328    0.13527    0.16182    0.07370    0.14321
+
+5. INTERPOLATION BOUNDARY (reported, not cropped)
+   unfaithful margin 11 px -> 27676 of 393216 output pixels (7.04 %)
+   ceil(max|applied field|) + 2; inside it the corrector clamps to the edge pixel instead of interpolating (realSpaceInterpolation_*)
+
+6. DOSE-WEIGHTING BOUNDARY
+   max field difference with/without dose weighting: 0.000e+00 px  -> IDENTICAL
+   dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect
+
+7. APPLIED-FIELD SELF-CONSISTENCY (reported field re-applied independently)
+   reference RMS 1202.96   absolute RMSE 0.000451322   relative RMSE    0.000000
+   noise floor 1.0e-04 -> classified as NUMERICAL_NOISE
+
+8. GATES  (limits from motion-accuracy physics; see the design record)
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.00720    0.10000     0.01%     0.002  PASS
+   local_component_rms                 0.04029    0.20000     0.18%     0.064  PASS
+   total_rms_interior                  0.04222    0.20000     0.20%     0.070  PASS
+   total_p95_interior                  0.08742    0.40000     0.83%     0.302  PASS
+   total_max_interior                  0.14321    0.80000     2.22%     0.810  PASS
+   frame_to_frame_rms_interior         0.00773    0.20000     0.01%     0.002  PASS
+   constant_offset                     0.00885    0.10000     0.01%     0.003  PASS
+   total_rms_interior_with_offset      0.04526                0.22%            report
+   border_rms_reported_not_gated       0.07144                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+   applied_image_self_consistency                                              PASS
+
+OVERALL: PASS  (9/9 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+######## km_local_realscale  [gate]
+==============================================================================
+ KNOWN-MOTION AND LOCAL-FIELD GATE
+==============================================================================
+Case:            km_local_realscale
+Motion STAR:     /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results/km_local_realscale/j1/km_local_realscale.star
+Geometry:        2048 x 2048 px, 24 frames, 0.885 A/px, motion model version 1
+Grid:            81 positions (49 interior, 32 border)
+Injected field:  max |field| = 11.5880 px, max local deviation = 1.9635 px
+
+1. CONSTANT OFFSET (reported separately from frame-to-frame change)
+   dx = -0.062159 px   dy = -0.014490 px   |d| = 0.063825 px = 0.056485 A
+
+2. APPLIED-FIELD ERROR, constant offset removed
+   region          n      RMS px      P95 px      max px       RMS A       P95 A       max A
+   all          1944    0.215781    0.415904    1.033205    0.190966    0.368075    0.914386
+   interior     1176    0.174066    0.295413    0.591215    0.154049    0.261441    0.523225
+   border        768    0.267326    0.590833    1.033205    0.236584    0.522887    0.914386
+
+3. DECOMPOSITION
+   global component (spatial mean per frame)   RMS    0.059951 px     0.053057 A   max    0.108042 A
+   local component  (spatially varying, int.)  RMS    0.163993 px     0.145134 A   max    0.416785 A
+   frame-to-frame change        (interior)     RMS    0.093841 px     0.083050 A   max    0.187590 A
+
+4. PER-FRAME DISTRIBUTION (offset removed, interior positions)
+   frame  applied dx  applied dy     RMS px     P95 px     max px      RMS A      max A
+       1     0.00000     0.00000    0.06383    0.06383    0.06383    0.05649    0.05649
+       2    -1.75634     1.40225    0.06042    0.07902    0.12259    0.05348    0.10849
+       3    -2.89317     2.01414    0.09353    0.14762    0.25068    0.08277    0.22185
+       4    -3.54075     2.48193    0.13428    0.18528    0.29272    0.11884    0.25905
+       5    -4.10948     2.67686    0.13427    0.20607    0.37885    0.11883    0.33528
+       6    -4.46950     2.80724    0.18542    0.26531    0.36299    0.16410    0.32125
+       7    -4.80452     2.91115    0.21839    0.31272    0.36862    0.19328    0.32623
+       8    -5.13888     3.10950    0.22146    0.31392    0.43687    0.19599    0.38663
+       9    -5.40443     3.15588    0.25235    0.36400    0.38620    0.22333    0.34179
+      10    -5.88642     3.33561    0.18379    0.36374    0.59122    0.16265    0.52323
+      11    -6.06039     3.35372    0.20953    0.30652    0.44862    0.18543    0.39703
+      12    -6.35710     3.51341    0.20686    0.29745    0.46984    0.18307    0.41581
+      13    -6.65872     3.63956    0.20411    0.28794    0.48070    0.18064    0.42542
+      14    -6.96023     3.62244    0.18110    0.25751    0.43854    0.16027    0.38810
+      15    -7.21722     3.74824    0.18447    0.27301    0.39868    0.16325    0.35284
+      16    -7.51975     3.86908    0.17026    0.24579    0.40199    0.15068    0.35576
+      17    -7.85267     3.88372    0.16113    0.24127    0.41473    0.14260    0.36704
+      18    -8.10368     3.99386    0.16018    0.22335    0.36589    0.14176    0.32382
+      19    -8.35904     4.10160    0.16653    0.24157    0.32464    0.14738    0.28731
+      20    -8.66792     4.26266    0.15269    0.21772    0.35278    0.13513    0.31221
+      21    -8.96405     4.35862    0.14947    0.21360    0.36111    0.13228    0.31958
+      22    -9.18005     4.41719    0.18770    0.27357    0.29011    0.16611    0.25674
+      23    -9.61905     4.45700    0.15519    0.27886    0.44844    0.13734    0.39687
+      24    -9.77706     4.58168    0.19384    0.26825    0.34930    0.17155    0.30913
+
+5. INTERPOLATION BOUNDARY (reported, not cropped)
+   unfaithful margin 15 px -> 121980 of 4194304 output pixels (2.91 %)
+   ceil(max|applied field|) + 2; inside it the corrector clamps to the edge pixel instead of interpolating (realSpaceInterpolation_*)
+
+6. DOSE-WEIGHTING BOUNDARY
+   max field difference with/without dose weighting: 0.000e+00 px  -> IDENTICAL
+   dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect
+
+8. GATES  (limits from motion-accuracy physics; see the design record)
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.05306    0.10000     0.31%     0.111  PASS
+   local_component_rms                 0.14513    0.20000     2.28%     0.832  PASS
+   total_rms_interior                  0.15405    0.20000     2.57%     0.937  PASS
+   total_p95_interior                  0.26144    0.40000     7.22%     2.698  PASS
+   total_max_interior                  0.52323    0.80000    25.93%    10.808  PASS
+   frame_to_frame_rms_interior         0.08305    0.20000     0.75%     0.272  PASS
+   constant_offset                     0.05649    0.10000     0.35%     0.126  PASS
+   total_rms_interior_with_offset      0.13894                2.09%            report
+   border_rms_reported_not_gated       0.23658                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+
+OVERALL: PASS  (8/8 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+======================================================================================
+ case                   role              status   global A   local A   total A
+ km_global_hisnr        gate              PASS       0.0083    0.0000    0.0083
+ km_local_hisnr         gate              PASS       0.0079    0.0517    0.0530
+ km_local_noisy         characterization  FAIL       0.2607    0.6217    0.6595
+ km_local_nonsquare     gate              PASS       0.0072    0.0403    0.0422
+ km_local_realscale     gate              PASS       0.0531    0.1451    0.1540
+
+ Characterization accuracy failures remain visible. Execution, backend, applied-image
+ and thread/dose-invariance failures always block the aggregate.
+
+ OVERALL: PASS
+======================================================================================

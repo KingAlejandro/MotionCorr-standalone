@@ -152,6 +152,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
+	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
+	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
+	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
+	if (max_io_threads == 0 || max_io_threads < -1)
+		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -538,6 +543,7 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
+	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
 		if (verb > 0 && imic % barstep == 0)
@@ -567,11 +573,20 @@ void MotioncorrRunner::run()
 		if (result) {
 			saveModel(mic);
 			plotShifts(fn_micrographs[imic], mic);
+		} else {
+			failed_movies.push_back(fn_micrographs[imic]);
 		}
 	}
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
+
+	if (!failed_movies.empty())
+	{
+		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
+		for (const FileName &movie : failed_movies) message += " " + movie;
+		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");
+	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
 	generateLogFilePDFAndWriteStarFiles();

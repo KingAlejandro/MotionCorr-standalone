@@ -22,7 +22,7 @@ public:
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
 
-    // Allocate persistent buffers and bounded-batch cuFFT plans
+    // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
 
     // Release all persistent GPU allocations and plans
@@ -76,10 +76,10 @@ public:
     // Preprocessing methods cannot be used again until release()/initialize().
     bool releasePreprocessingBuffers();
 
-    // In-VRAM batched forward FFT: d_Iframes (R2C) -> d_Fframes with 1/(nx*ny) scaling
+    // In-VRAM framewise forward FFT: d_Iframes (R2C) -> d_Fframes with 1/(nx*ny) scaling
     bool computeGlobalForwardFFT();
 
-    // In-VRAM batched inverse FFT: d_Fframes (C2R) -> d_Iframes
+    // In-VRAM framewise inverse FFT: d_Fframes (C2R) -> d_Iframes
     bool computeGlobalInverseFFT();
 
     // In-VRAM Patch Extraction & Batched R2C FFT
@@ -138,17 +138,10 @@ private:
 
     cufftHandle plan_r2c = 0;
     cufftHandle plan_c2r = 0;
-    cufftHandle plan_r2c_tail = 0;
-    cufftHandle plan_c2r_tail = 0;
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
-    bool has_plan_r2c_tail = false;
-    bool has_plan_c2r_tail = false;
-    int fft_batch_size = 0;
     size_t fft_r2c_work_bytes = 0;
     size_t fft_c2r_work_bytes = 0;
-    size_t fft_r2c_tail_work_bytes = 0;
-    size_t fft_c2r_tail_work_bytes = 0;
     size_t fft_work_bytes = 0;
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;

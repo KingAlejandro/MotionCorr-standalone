@@ -26,6 +26,10 @@
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
+#ifdef _METAL_ENABLED
+#include "src/acc/metal/metal_alignpatch.h"
+#include "src/acc/metal/metal_resample.h"
+#endif
 #include "src/micrograph_model.h"
 #include "src/matrix2d.h"
 #include "src/matrix1d.h"
@@ -132,6 +136,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 		REPORT_ERROR("--max_iter is valid only with --do_own");
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
+	bool has_metal_flag = parser.checkOption("--metal", "Use Apple Metal acceleration for global alignment (macOS only)");
+	std::string metal_dev_str = parser.getOption("--metal_device", "Metal device index or name substring (default: 0)", "");
+	do_metal = has_metal_flag || (metal_dev_str.length() > 0);
+	metal_device_req = metal_dev_str;
+	metal_device_id = 0;
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
 		std::cerr << "Since RELION 3.1, --early_binning is on by default. Use --no_early_binning to disable it." << std::endl;
 
@@ -170,6 +179,15 @@ void MotioncorrRunner::initialise()
 		std::cerr << "       You can convert it to a defect map by IMOD utilities e.g. \"clip defect -D defect.txt -f tif movie.mrc defect_map.tif\"." << std::endl;
 		std::cerr << "       See explanations in the SerialEM manual." << std::endl;
 		REPORT_ERROR("The defect file is in the SerialEM format, not MotionCor2's format (x y w h). See above for details.");
+	}
+
+	if (do_metal && !do_own)
+	{
+		REPORT_ERROR("ERROR: --metal is valid only with --use_own.");
+	}
+	if (do_metal && gpu_ids.length() > 0)
+	{
+		REPORT_ERROR("ERROR: Cannot specify both CUDA (--gpu) and Metal (--metal) backends simultaneously.");
 	}
 
 	if (do_motioncor2)
@@ -261,6 +279,75 @@ void MotioncorrRunner::initialise()
 		REPORT_ERROR("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).");
 	}
 #endif
+
+	use_metal = false;
+	if (do_metal)
+	{
+#if defined _METAL_ENABLED
+		int metalCount = metalGetDeviceCount();
+		if (metalCount <= 0)
+		{
+			REPORT_ERROR("ERROR: Metal requested but no compatible Metal devices were found on this system.");
+		}
+		if (metal_device_req.empty())
+		{
+			metal_device_id = 0;
+		}
+		else
+		{
+			bool is_numeric = true;
+			for (size_t ci = 0; ci < metal_device_req.length(); ++ci)
+			{
+				if (!std::isdigit(static_cast<unsigned char>(metal_device_req[ci])))
+				{
+					is_numeric = false;
+					break;
+				}
+			}
+			if (is_numeric)
+			{
+				metal_device_id = textToInteger(metal_device_req);
+			}
+			else
+			{
+				int matched_id = -1;
+				std::string req_lower = metal_device_req;
+				std::transform(req_lower.begin(), req_lower.end(), req_lower.begin(), ::tolower);
+				for (int i = 0; i < metalCount; ++i)
+				{
+					std::string dname = metalGetDeviceName(i);
+					std::string dname_lower = dname;
+					std::transform(dname_lower.begin(), dname_lower.end(), dname_lower.begin(), ::tolower);
+					if (dname_lower.find(req_lower) != std::string::npos)
+					{
+						matched_id = i;
+						break;
+					}
+				}
+				if (matched_id < 0)
+				{
+					std::string available_devs = "";
+					for (int i = 0; i < metalCount; ++i)
+					{
+						available_devs += "\n  [" + integerToString(i) + "] " + metalGetDeviceName(i);
+					}
+					REPORT_ERROR("ERROR: No Metal device matching '" + metal_device_req + "' found. Available devices:" + available_devs);
+				}
+				metal_device_id = matched_id;
+			}
+		}
+		if (metal_device_id < 0 || metal_device_id >= metalCount)
+		{
+			REPORT_ERROR("ERROR: Invalid Metal device ID " + integerToString(metal_device_id) + ". Found " + integerToString(metalCount) + " Metal device(s).");
+		}
+		use_metal = true;
+		std::string devName = metalGetDeviceName(metal_device_id);
+		if (verb > 0)
+			std::cout << "Using Metal acceleration on device " << metal_device_id << " (" << devName << ") for global alignment." << std::endl;
+#else
+		REPORT_ERROR("ERROR: --metal was specified, but MotionCorr was built without Metal support (-DMETAL=ON).");
+#endif
+	}
 
 	// Set up which micrograph movies to process
     is_tomo = false;
@@ -2161,7 +2248,14 @@ void MotioncorrRunner::realSpaceInterpolation(Image <float> &Isum, std::vector<I
 		}
 	} else if (model_version == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) { // Optimised code
 		ThirdOrderPolynomialModel *polynomial_model = (ThirdOrderPolynomialModel*)model;
-		realSpaceInterpolation_ThirdOrderPolynomial(Isum, Iframes, *polynomial_model, logfile);
+#if defined _METAL_ENABLED
+		if (use_metal) {
+			metalRealSpaceInterpolation(Isum, Iframes, *polynomial_model, metal_device_id, logfile);
+		} else
+#endif
+		{
+			realSpaceInterpolation_ThirdOrderPolynomial(Isum, Iframes, *polynomial_model, logfile);
+		}
 	} else { // general code
 		const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
 		for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -2310,6 +2404,11 @@ bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<fComplex> > &Fframes
 #ifdef _CUDA_ENABLED
 	if (use_gpu && is_global) {
 		return cudaAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile);
+	}
+#endif
+#ifdef _METAL_ENABLED
+	if (use_metal && is_global) {
+		return metalAlignPatch(Fframes, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, metal_device_id, logfile);
 	}
 #endif
 	std::vector<Image<float> > Iccs(n_threads);

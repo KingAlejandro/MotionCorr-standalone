@@ -125,6 +125,104 @@ class ComparatorGateTests(unittest.TestCase):
             self.assertGreater(image["rmse"], 0.02)
             self.assertLess(image["relative_rmse"], 0.001)
 
+    def test_relative_rmse_denominator_is_reference_population_std(self):
+        """Pin the documented denominator: sigma(ref), not ||ref||_2 and not the header rms."""
+        source = FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc"
+        offset = 0.05
+        with tempfile.TemporaryDirectory() as temp:
+            changed = Path(temp) / "offset.mrc"
+            raw = bytearray(source.read_bytes())
+            for byte_offset in range(1024, len(raw), 4):
+                value = struct.unpack_from("<f", raw, byte_offset)[0]
+                struct.pack_into("<f", raw, byte_offset, value + offset)
+            changed.write_bytes(raw)
+            ref_header, ref_pixels, ref_raw = parse_mrc(source)
+            test_header, test_pixels, test_raw = parse_mrc(changed)
+            result = compare_images(ref_pixels, test_pixels, ref_header, test_header, ref_raw, test_raw)
+
+        reference = ref_pixels.astype("float64")
+        population_std = float(reference.std())
+        l2_norm_scale = float((reference ** 2).mean() ** 0.5)
+
+        self.assertEqual(result["relative_rmse_denominator"], "reference_pixel_population_std")
+        self.assertAlmostEqual(result["relative_rmse_denominator_value"], population_std, places=9)
+        self.assertAlmostEqual(result["relative_rmse"], result["rmse"] / population_std, places=12)
+        # The #4 design spec named ||ref||_2 instead; the two differ for a nonzero-mean image.
+        self.assertGreater(l2_norm_scale, 2.0 * population_std)
+
+    def test_constant_reference_fails_closed(self):
+        """sigma(ref) == 0 floors the denominator at 1e-12, so any nonzero RMSE fails."""
+        import numpy as np
+
+        header = (FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc").read_bytes()[:1024]
+        with tempfile.TemporaryDirectory() as temp:
+            flat = np.full(128 * 128, 5.0, dtype="<f4")
+            changed = flat.copy()
+            changed[0] = np.float32(5.0) + np.float32(1e-6)
+            ref_path = Path(temp) / "const_ref.mrc"
+            test_path = Path(temp) / "const_test.mrc"
+            ref_path.write_bytes(header + flat.tobytes())
+            test_path.write_bytes(header + changed.tobytes())
+
+            code, report = self.run_gate("--ref-mrc", ref_path, "--test-mrc", test_path, "--gate", "relaxed")
+
+        image = report["checks"]["corrected_image"]
+        self.assertEqual(code, 1)
+        self.assertEqual(image["relative_rmse_denominator_value"], 0.0)
+        self.assertGreater(image["relative_rmse"], 1.0)
+        self.assertLess(image["rmse"], 1e-6)
+        self.assertTrue(any("Relative image RMSE" in reason for reason in image["fail_reasons"]))
+
+    def test_exact_gate_enforces_byte_identity_and_not_the_rmse_thresholds(self):
+        """Exact gate never reports a relative-RMSE failure; byte identity is the enforced check."""
+        source = FIXTURES / "reference_output" / "synthetic_128x128_8frames.mrc"
+        with tempfile.TemporaryDirectory() as temp:
+            changed = Path(temp) / "changed.mrc"
+            raw = bytearray(source.read_bytes())
+            struct.pack_into("<f", raw, 1024, struct.unpack_from("<f", raw, 1024)[0] + 1.0)
+            changed.write_bytes(raw)
+            code, report = self.run_gate(
+                "--ref-mrc", source, "--test-mrc", changed,
+                "--gate", "exact", "--image-relative-rmse", "0",
+            )
+
+        image = report["checks"]["corrected_image"]
+        self.assertEqual(code, 1)
+        self.assertFalse(image["pixel_identical"])
+        self.assertEqual(image["fail_reasons"],
+                         [f"Pixels not byte-identical in exact gate (max error: {image['max_abs_pixel_error']:.6e})"])
+
+    def test_unresolved_or_ambiguous_inputs_fail_closed(self):
+        source = FIXTURES / "reference_output"
+        with tempfile.TemporaryDirectory() as temp:
+            ambiguous = Path(temp) / "ambiguous"
+            ambiguous.mkdir()
+            for name in ("a.mrc", "b.mrc"):
+                (ambiguous / name).write_bytes(
+                    (source / "synthetic_128x128_8frames.mrc").read_bytes())
+            (ambiguous / "synthetic_128x128_8frames.star").write_text(
+                (source / "synthetic_128x128_8frames.star").read_text())
+
+            code, report = self.run_gate("--ref", ambiguous, "--test", ambiguous, "--gate", "relaxed")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(report["overall_status"], "FAIL")
+        self.assertTrue(any("Multiple corrected MRCs" in error for error in report["errors"]))
+
+    def test_require_complete_coverage_is_opt_in(self):
+        star = FIXTURES / "reference_output" / "synthetic_128x128_8frames.star"
+
+        code, report = self.run_gate("--ref-star", star, "--test-star", star, "--gate", "relaxed")
+        self.assertEqual(code, 0)
+        self.assertFalse(report["coverage"]["complete"])
+        self.assertFalse(report["coverage"]["required"])
+
+        code, report = self.run_gate("--ref-star", star, "--test-star", star, "--gate", "relaxed",
+                                     "--require-complete-coverage")
+        self.assertEqual(code, 1)
+        self.assertTrue(report["coverage"]["required"])
+        self.assertTrue(any("Complete coverage required" in error for error in report["errors"]))
+
     def test_cli_rejects_nonfinite_tolerance(self):
         result = subprocess.run(
             [sys.executable, str(Path(__file__).with_name("compare_motioncorr.py")),

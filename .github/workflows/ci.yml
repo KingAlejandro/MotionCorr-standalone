@@ -43,7 +43,7 @@ jobs:
         run: python3 -m pip install 'numpy>=1.24,<3'
 
       - name: Comparator failure controls
-        run: python3 -m unittest discover -s tools -p test_compare_motioncorr.py -v
+        run: python3 tools/test_compare_motioncorr.py -v
 
       - name: Log toolchain & dependency telemetry
         run: |
@@ -87,12 +87,8 @@ jobs:
           python3 tools/run_known_motion_gates.py --binary "$PWD/build/motioncorr" \
             --outdir "$PWD/ci_known_motion" --json "$PWD/ci_known_motion/summary.json"
           python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
-          if [[ -f tools/test_known_motion_verdicts.py ]]; then
-            python3 tools/test_known_motion_verdicts.py -v
-            python3 tools/test_known_motion_runner.py -v
-          else
-            echo "Verdict-hardening controls are absent; requires the #63 follow-up under #66."
-          fi
+          python3 tools/test_known_motion_verdicts.py -v
+          python3 tools/test_known_motion_runner.py -v
 
       - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"
         run: |

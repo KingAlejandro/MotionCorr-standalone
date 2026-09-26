@@ -65,10 +65,32 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(runner_numerics tests/test_runner_numerics.cpp)
+    target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME HotPixelRngDeterminism
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME RunnerExposure
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case exposure)
+        foreach(case failure invalid resume tomography)
+            add_test(NAME Runner_${case}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                    --binary $<TARGET_FILE:motioncorr> --case ${case})
+        endforeach()
+        add_test(NAME RunnerLateBin
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case late_bin)
+        add_test(NAME RunnerExportedUnits
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case exported_units)
+        add_test(NAME RunnerModelParser
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
     endif()
 endif()

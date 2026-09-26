@@ -337,6 +337,9 @@ RFLOAT gaussian2D(RFLOAT x,
  * init_rnd_unif();
  * init_rnd_unif(17891)
  * @endcode
+ *
+ * This also discards any Gaussian deviate cached by rnd_gaus(), so the promise
+ * above holds for rnd_gaus() as well as for rnd_unif().
  */
 void init_random_generator(int seed = -1);
 

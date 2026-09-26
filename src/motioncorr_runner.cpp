@@ -149,6 +149,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	dose_motionstats_cutoff = textToFloat(parser.getOption("--dose_motionstats_cutoff", "Electron dose (in electrons/A2) at which to distinguish early/late global accumulated motion in output statistics", "4."));
 	if (ccf_downsample > 1) REPORT_ERROR("--ccf_downsample cannot exceed 1.");
 	if (skip_defect && !do_own) REPORT_ERROR("--skip_decet is valid only for --use_own");
+	if (group <= 0) REPORT_ERROR("--group_frames must be positive.");
+	if (eer_grouping <= 0) REPORT_ERROR("--eer_grouping must be positive.");
+	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
+	if (max_io_threads == 0 || max_io_threads < -1)
+		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -350,13 +355,16 @@ void MotioncorrRunner::initialise()
 
 	// First backup the given list of all micrographs
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
+	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
 	// This list contains those for the output STAR & PDF files
 	fn_ori_micrographs.clear();
 	optics_group_ori_micrographs.clear();
+	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
+	pre_exposure_micrographs.clear();
 
 	bool warned = false;
 
@@ -365,26 +373,8 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old)
-		{
-			if (even_odd_split)
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic],true);
-				if (exists(fn_avg))
-				{
-			    		process_this = false; // already done
-				}
-			}
-			else
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic]);
-				if (exists(fn_avg) && exists(fn_avg.withoutExtension() + ".star") &&
-                            (grouping_for_ps <= 0 || exists(fn_avg.withoutExtension() + "_PS.mrc")))
-				{
-					process_this = false; // already done
-				}
-			}
-		}
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
 		{
@@ -405,12 +395,14 @@ void MotioncorrRunner::initialise()
 		{
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 
 		if (!ignore_this)
 		{
 			fn_ori_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_ori_micrographs.push_back(optics_group_given_all[imic]);
+			pre_exposure_ori_micrographs.push_back(pre_exposure_given_all[imic]);
 		}
 	}
 
@@ -512,6 +504,70 @@ FileName MotioncorrRunner::getOutputFileNames(FileName fn_mic, bool continue_eve
 	}
 }
 
+namespace {
+// Inspect only the header and file length; resume need not reread image pixels.
+bool completeMrc(const FileName &filename)
+{
+	std::ifstream input(filename.c_str(), std::ios::binary | std::ios::ate);
+	if (!input) return false;
+	const std::streamoff length = input.tellg();
+	Image<float>::MRChead header;
+	input.seekg(0);
+	if (!input.read(reinterpret_cast<char*>(&header), sizeof(header))) return false;
+	Image<float> image;
+	const DataType type = image.parseMRCHeader(&header, -1, false, filename);
+	if (header.nx <= 0 || header.ny <= 0 || header.nz != 1 || header.nsymbt < 0 ||
+	    (type != Float && type != Float16)) return false;
+	const std::streamoff offset = 1024 + static_cast<std::streamoff>(header.nsymbt);
+	if (length < offset) return false;
+	const uint64_t pixels = static_cast<uint64_t>(header.nx) * header.ny;
+	return pixels <= static_cast<uint64_t>(length - offset) / gettypesize(type);
+}
+}
+
+bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+{
+	const FileName average = getOutputFileNames(movie);
+	const FileName root = average.withoutExtension();
+	try
+	{
+		if (!completeMrc(average) ||
+		    (do_dose_weighting && save_noDW && !completeMrc(root + "_noDW.mrc")) ||
+		    (even_odd_split && (!completeMrc(root + "_EVN.mrc") || !completeMrc(root + "_ODD.mrc"))) ||
+		    (grouping_for_ps > 0 && !completeMrc(root + "_PS.mrc")) ||
+		    !exists(root + ".star")) return false;
+
+		// A truncated STAR may contain the general block but lack some shifts.
+		// Validate the frame indices before constructing Micrograph, which indexes them.
+		MetaDataTable general, shifts;
+		general.read(root + ".star", "general");
+		shifts.read(root + ".star", "global_shift");
+		int nframes, width, height;
+		FileName saved_movie;
+		if (!general.getValue(EMDL_IMAGE_SIZE_Z, nframes) || nframes <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
+		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
+		    shifts.numberOfObjects() != nframes) return false;
+		std::vector<bool> seen(nframes, false);
+		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
+		{
+			int frame;
+			RFLOAT x, y;
+			if (!shifts.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, frame) || frame < 1 || frame > nframes ||
+			    seen[frame - 1] || !shifts.getValue(EMDL_MICROGRAPH_SHIFT_X, x) ||
+			    !shifts.getValue(EMDL_MICROGRAPH_SHIFT_Y, y) || !std::isfinite(x) || !std::isfinite(y)) return false;
+			seen[frame - 1] = true;
+		}
+		Micrograph metadata(root + ".star"); // Also require any declared local model to parse.
+		return true;
+	}
+	catch (const RelionError &)
+	{
+		return false; // Incomplete products are retried by --only_do_unfinished.
+	}
+}
+
 void MotioncorrRunner::run()
 {
 	prepareGainReference(true);
@@ -530,6 +586,7 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
+	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
 		if (verb > 0 && imic % barstep == 0)
@@ -559,11 +616,20 @@ void MotioncorrRunner::run()
 		if (result) {
 			saveModel(mic);
 			plotShifts(fn_micrographs[imic], mic);
+		} else {
+			failed_movies.push_back(fn_micrographs[imic]);
 		}
 	}
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
+
+	if (!failed_movies.empty())
+	{
+		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
+		for (const FileName &movie : failed_movies) message += " " + movie;
+		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");
+	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
 	generateLogFilePDFAndWriteStarFiles();
@@ -928,7 +994,19 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 
 	FileName fn_avg = getOutputFileNames(mic.getMovieFilename());
 
-	mic.write(fn_avg.withoutExtension() + ".star");
+	// Alignment uses binned-pixel displacements internally. Export a copy in
+	// original pixels, matching global shifts and Micrograph::getShiftAt().
+	if (do_own && early_binning && mic.model != NULL &&
+	    mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL)
+	{
+		Micrograph exported(mic);
+		ThirdOrderPolynomialModel &model = static_cast<ThirdOrderPolynomialModel&>(*exported.model);
+		model.coeffX *= bin_factor;
+		model.coeffY *= bin_factor;
+		exported.write(fn_avg.withoutExtension() + ".star");
+	}
+	else
+		mic.write(fn_avg.withoutExtension() + ".star");
 }
 
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
@@ -970,7 +1048,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 				MDavg.setValue(EMDL_MICROGRAPH_EVEN, even_micrograph); 
 				MDavg.setValue(EMDL_MICROGRAPH_ODD, odd_micrograph);
 			}
-			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_micrographs[imic]);
+			MDavg.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, pre_exposure_ori_micrographs[imic]);
 
         	}
                 MDavg.setValue(EMDL_MICROGRAPH_NAME, fn_avg);
@@ -1797,7 +1875,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 
 skip_fitting:
-	if (!do_dose_weighting || save_noDW) {
+	if (!do_dose_weighting || save_noDW || even_odd_split) {
 		Iref().initZeros(Iframes[0]());
 		Iref_odd().initZeros(Iframes[0]());
 		Iref_even().initZeros(Iframes[0]());
@@ -1812,13 +1890,6 @@ skip_fitting:
 		logfile << " done" << std::endl;
 		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
 
-		// Apply binning
-		RCTIC(TIMING_BINNING);
-		if (!early_binning && bin_factor != 1) {
-			binNonSquareImage(Iref, bin_factor);
-		}
-		RCTOC(TIMING_BINNING);
-		
 		// Sum frames and save aligned stack
 		for (int iframe = 0; iframe < n_frames; iframe++)
 		{
@@ -1846,10 +1917,23 @@ skip_fitting:
 		}
 		}
 
+		// Apply binning
+		RCTIC(TIMING_BINNING);
+		if (!early_binning && bin_factor != 1) {
+			binNonSquareImage(Iref, bin_factor);
+			if (even_odd_split) {
+				binNonSquareImage(Iref_odd, bin_factor);
+				binNonSquareImage(Iref_even, bin_factor);
+			}
+		}
+		RCTOC(TIMING_BINNING);
+
 		// Final output
-                Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-		Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
-		logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		if (!do_dose_weighting || save_noDW) {
+			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
+			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+			logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		}
 		// ODD-EVEN Output
 		if (even_odd_split)
 		{

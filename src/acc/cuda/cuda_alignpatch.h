@@ -21,7 +21,8 @@ bool cudaAlignPatch(
     const int max_iter,
     const RFLOAT ccf_downsample,
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    bool is_global = false
 );
 #endif
 

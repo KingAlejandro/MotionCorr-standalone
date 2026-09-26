@@ -1,0 +1,422 @@
+#!/usr/bin/env python3
+"""Multi-stage validation and profiling suite for CUDA local patch alignment (Issue #17).
+
+Executes:
+  1. Negative test: --gpu 99 (verifies clean error exit without spurious output)
+  2. Fallback test: synthetic_fallback.mrc (verifies fallback to global trajectory)
+  3. Staged synthetic tests:
+     - 1x1 patch (global baseline)
+     - 3x3 patches (local differential motion)
+     - 5x5 patches (higher density local grid)
+  4. Full experimental tutorial movie:
+     - 20170629_00021_frameImage.tiff (3710x3838x24, gain ref, dose weighting, 5x5 patches)
+  5. 3 steady-state profiling runs capturing H2D, kernel, cuFFT, D2H, and peak VRAM.
+  6. Gate verification using tools/compare_motioncorr.py without altering tolerances.
+"""
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+import sys
+import time
+import socket
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+
+RUN_RECORDS: List[Dict[str, Any]] = []
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def run_cmd(cmd: List[str], check: bool = True, timeout: Optional[int] = 600, cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
+    print(f"[RUN] {' '.join(str(c) for c in cmd)}")
+    t0 = time.time()
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout, cwd=str(cwd) if cwd else None)
+    elapsed = time.time() - t0
+    print(f"      Exit {res.returncode} ({elapsed:.2f}s)")
+    RUN_RECORDS.append({"command": [str(part) for part in cmd], "cwd": str(cwd) if cwd else None,
+                        "exit_code": res.returncode, "wall_seconds": elapsed,
+                        "stdout": res.stdout, "stderr": res.stderr})
+    if check and res.returncode != 0:
+        print(f"STDOUT:\n{res.stdout}")
+        print(f"STDERR:\n{res.stderr}")
+        raise RuntimeError(f"Command failed with exit code {res.returncode}")
+    return res
+
+
+def parse_telemetry(log_text: str) -> Dict[str, Any]:
+    """Parse CUDA timing and memory lines from logfile."""
+    profile_re = re.compile(
+        r"\[CUDA (?P<stage>Global Alignment|Patch Alignment) Profile\]\s+"
+        r"Host-to-Device transfer time:\s+(?P<h2d>[\d\.]+)\s+ms\s+"
+        r"Custom kernel execution time:\s+(?P<kernel>[\d\.]+)\s+ms\s+"
+        r"cuFFT execution time:\s+(?P<cufft>[\d\.]+)\s+ms\s+"
+        r"Device-to-Host transfer time:\s+(?P<d2h>[\d\.]+)\s+ms\s+"
+        r"Total GPU alignment time:\s+(?P<total_gpu>[\d\.]+)\s+ms\s+"
+        r"Buffer VRAM:\s+(?P<buf_vram>[\d\.]+)\s+MiB\s+"
+        r"cuFFT workspace VRAM:\s+(?P<cufft_vram>[\d\.]+)\s+MiB\s+"
+        r"Peak GPU memory allocated:\s+(?P<peak_vram>[\d\.]+)\s+MiB"
+    )
+    patches = []
+    global_prof = None
+    for m in profile_re.finditer(log_text):
+        entry = {k: float(v) if k != "stage" else v for k, v in m.groupdict().items()}
+        if entry["stage"] == "Global Alignment":
+            global_prof = entry
+        else:
+            patches.append(entry)
+
+    return {
+        "global_profile": global_prof,
+        "patch_profiles": patches,
+        "num_patch_profiles": len(patches),
+        "total_patch_gpu_ms": sum(p["total_gpu"] for p in patches) if patches else 0.0
+    }
+
+
+def parse_shifts(star_file: Path) -> List[Tuple[float, float]]:
+    shifts = []
+    if not star_file.exists():
+        return shifts
+    in_loop = False
+    with star_file.open() as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("_rlnMicrographShiftX"):
+                in_loop = True
+                continue
+            if in_loop and line and not line.startswith("_") and not line.startswith("data_") and not line.startswith("loop_"):
+                parts = line.split()
+                if len(parts) >= 2:
+                    try:
+                        shifts.append((float(parts[0]), float(parts[1])))
+                    except ValueError:
+                        pass
+    return shifts
+
+
+def find_mrc_and_star(dir_path: Path) -> Tuple[Optional[Path], Optional[Path]]:
+    """Require one complete movie pair; never select a stale or arbitrary output."""
+    mrcs = sorted(p for p in dir_path.rglob("*.mrc") if p.is_file() and not p.name.endswith(("_noDW.mrc", "_PS.mrc", "_ODD.mrc", "_EVN.mrc")))
+    stars = sorted(p for p in dir_path.rglob("*.star") if p.is_file() and not p.name.startswith("corrected_micrographs"))
+    return (mrcs[0] if len(mrcs) == 1 else None,
+            stars[0] if len(stars) == 1 else None)
+
+
+def motion_model_version(star_file: Optional[Path]) -> Optional[int]:
+    if star_file is None:
+        return None
+    match = re.search(r"(?m)^_rlnMotionModelVersion[ \t]+(\d+)[ \t]*$", star_file.read_text())
+    return int(match.group(1)) if match else None
+
+
+def get_telemetry_for_dir(cand_dir: Path, fallback_stdout: str = "") -> Dict[str, Any]:
+    logs = list(cand_dir.rglob("*.log"))
+    for p in logs:
+        if "frameImage" in p.name:
+            return parse_telemetry(p.read_text())
+        elif "synthetic_" in p.name:
+            return parse_telemetry(p.read_text())
+    if logs:
+        return parse_telemetry(logs[0].read_text())
+    return parse_telemetry(fallback_stdout)
+
+
+def run_comparator(comparator: Path, ref_dir: Path, cand_dir: Path, label: str) -> Dict[str, Any]:
+    ref_mrc, ref_star = find_mrc_and_star(ref_dir)
+    cand_mrc, cand_star = find_mrc_and_star(cand_dir)
+    if not ref_mrc or not cand_mrc or not ref_star or not cand_star:
+        return {
+            "error": f"Expected exactly one MRC/STAR pair for {label}: ref=({ref_mrc}, {ref_star}), cand=({cand_mrc}, {cand_star})",
+            "comparator_exit_code": 3
+        }
+
+    cmd = [
+        sys.executable, str(comparator),
+        "--ref-mrc", str(ref_mrc),
+        "--test-mrc", str(cand_mrc),
+        "--ref-star", str(ref_star),
+        "--test-star", str(cand_star),
+        "--gate", "relaxed",
+        "--json"
+    ]
+    res = run_cmd(cmd, check=False)
+    report = {}
+    try:
+        report = json.loads(res.stdout)
+    except Exception as e:
+        report = {"exit_code": res.returncode, "stdout": res.stdout, "stderr": res.stderr, "error": str(e)}
+    report["comparator_exit_code"] = res.returncode
+    return report
+
+
+def stage_result(report: Dict[str, Any], expected_patches: int, selected_gpu: int) -> Dict[str, Any]:
+    """Keep scientific, coverage, and GPU-execution evidence as independent gates."""
+    telemetry = report.get("telemetry") or {}
+    checks = report.get("checks") or {}
+    scientific_pass = (report.get("overall_status") == "PASS"
+                       and report.get("comparator_exit_code") == 0
+                       and all(checks.get(name, {}).get("passed") is True
+                               for name in ("motion_trajectory", "corrected_image", "star_fields")))
+    coverage_pass = report.get("coverage", {}).get("complete") is True
+    gpu_pass = (report.get("gpu_startup") == selected_gpu
+                and telemetry.get("global_profile") is not None
+                and telemetry.get("num_patch_profiles") == expected_patches)
+    return {"scientific_pass": scientific_pass, "coverage_pass": coverage_pass,
+            "gpu_execution_pass": gpu_pass,
+            "passed": scientific_pass and coverage_pass and gpu_pass}
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run CUDA patch alignment verification suite")
+    parser.add_argument("--repo-dir", type=Path, default=Path("."), help="Path to MotionCorr repo")
+    parser.add_argument("--cpu-bin", type=Path, default=Path("build-cpu/motioncorr"))
+    parser.add_argument("--cuda-bin", type=Path, default=Path("build-cuda/motioncorr"))
+    parser.add_argument("--gpu-id", type=int, default=0)
+    parser.add_argument("--exp-movie", type=Path, required=True, help="Path to experimental TIFF/MRC movie")
+    parser.add_argument("--exp-gain", type=Path, required=True, help="Path to experimental gain reference")
+    parser.add_argument("--output-dir", type=Path, default=Path("validation_results"))
+    args = parser.parse_args()
+
+    repo = args.repo_dir.resolve()
+    out = args.output_dir.resolve()
+    for label, path in (("CPU binary", repo / args.cpu_bin), ("CUDA binary", repo / args.cuda_bin),
+                        ("experimental movie", args.exp_movie), ("gain reference", args.exp_gain)):
+        if not path.is_file():
+            parser.error(f"{label} does not exist: {path}")
+    if out.exists() and any(out.iterdir()):
+        parser.error(f"Output directory must be empty to prevent stale results: {out}")
+    out.mkdir(parents=True, exist_ok=True)
+    comparator = repo / "tools" / "compare_motioncorr.py"
+
+    cpu_bin = (repo / args.cpu_bin).resolve()
+    cuda_bin = (repo / args.cuda_bin).resolve()
+
+    summary: Dict[str, Any] = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "host": socket.gethostname(),
+        "source_commit": subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                                         capture_output=True, text=True, check=True).stdout.strip(),
+        "gpu_id": args.gpu_id,
+        "sha256": {name: sha256_file(path) for name, path in (
+            ("cpu_binary", cpu_bin), ("cuda_binary", cuda_bin),
+            ("experimental_movie", args.exp_movie), ("gain_reference", args.exp_gain),
+            ("synthetic_local_movie", repo / "test-data/synthetic/synthetic_local_motion.mrc"),
+            ("synthetic_fallback_movie", repo / "test-data/synthetic/synthetic_fallback.mrc"))},
+        "stages": {},
+        "steady_state": [],
+        "verdict": "UNKNOWN"
+    }
+    gpu_startup_line = f"Using CUDA acceleration on GPU device {args.gpu_id}"
+
+    synth_dir = repo / "test-data" / "synthetic"
+
+    # ---------------------------------------------------------
+    # Negative Test: Unsupported device / invalid ID
+    # ---------------------------------------------------------
+    print("\n=== NEGATIVE TEST: Invalid Device ID --gpu 99 ===")
+    neg_dir = out / "test_neg"
+    neg_dir.mkdir(parents=True, exist_ok=True)
+    neg_res = run_cmd([
+        str(cuda_bin), "--use_own",
+        "--i", str(synth_dir / "synthetic_local_motion.star"),
+        "--o", str(neg_dir / "neg.mrc"),
+        "--gpu", "99"
+    ], check=False, cwd=synth_dir)
+    device_error = any(message in neg_res.stderr or message in neg_res.stdout
+                       for message in ("Invalid GPU device ID", "Invalid CUDA device ID"))
+    no_partial_output = not any(p.is_file() for p in neg_dir.rglob("*.mrc"))
+    neg_passed = neg_res.returncode != 0 and device_error and no_partial_output
+    summary["negative_test"] = {
+        "passed": neg_passed,
+        "exit_code": neg_res.returncode,
+        "device_error": device_error,
+        "no_partial_output": no_partial_output,
+    }
+    print(f"Negative test passed: {neg_passed} (exit {neg_res.returncode})")
+
+    # ---------------------------------------------------------
+    # Fallback Test: Extreme noise movie
+    # ---------------------------------------------------------
+    print("\n=== FALLBACK TEST: Synthetic Fallback Movie ===")
+    fb_cpu_dir = out / "fb_cpu"
+    fb_cuda_dir = out / "fb_cuda"
+    fb_cpu_dir.mkdir(parents=True, exist_ok=True)
+    fb_cuda_dir.mkdir(parents=True, exist_ok=True)
+
+    run_cmd([
+        str(cpu_bin), "--use_own",
+        "--i", str(synth_dir / "synthetic_fallback.star"),
+        "--o", str(fb_cpu_dir / "fb_cpu.mrc"),
+        "--patch_x", "3", "--patch_y", "3",
+        "--j", "1"
+    ], cwd=synth_dir)
+    fb_gpu_res = run_cmd([
+        str(cuda_bin), "--use_own",
+        "--i", str(synth_dir / "synthetic_fallback.star"),
+        "--o", str(fb_cuda_dir / "fb_cuda.mrc"),
+        "--patch_x", "3", "--patch_y", "3",
+        "--gpu", str(args.gpu_id)
+    ], cwd=synth_dir)
+    fb_cmp = run_comparator(comparator, fb_cpu_dir, fb_cuda_dir, "fallback_3x3")
+    fb_cmp["telemetry"] = get_telemetry_for_dir(fb_cuda_dir, fb_gpu_res.stdout)
+    fb_cmp["gpu_startup"] = args.gpu_id if gpu_startup_line in fb_gpu_res.stdout else None
+    summary["stages"]["fallback_3x3"] = fb_cmp
+    fb_cpu_star = find_mrc_and_star(fb_cpu_dir)[1]
+    fb_gpu_star = find_mrc_and_star(fb_cuda_dir)[1]
+    cpu_model_version = motion_model_version(fb_cpu_star)
+    gpu_model_version = motion_model_version(fb_gpu_star)
+    summary["fallback_check"] = {"cpu_model_version": cpu_model_version,
+                                 "gpu_model_version": gpu_model_version,
+                                 "passed": cpu_model_version == 0 and gpu_model_version == 0}
+
+    # ---------------------------------------------------------
+    # Staged Synthetic Tests: 1x1, 3x3, 5x5
+    # ---------------------------------------------------------
+    for px, py in [(1, 1), (3, 3), (5, 5)]:
+        stage_name = f"synth_{px}x{py}"
+        print(f"\n=== SYNTHETIC STAGE: {stage_name} ===")
+        ref_d = out / f"{stage_name}_cpu"
+        cand_d = out / f"{stage_name}_cuda"
+        ref_d.mkdir(parents=True, exist_ok=True)
+        cand_d.mkdir(parents=True, exist_ok=True)
+
+        ref_cmd = [
+            str(cpu_bin), "--use_own",
+            "--i", str(synth_dir / "synthetic_local_motion.star"),
+            "--o", str(ref_d / f"{stage_name}.mrc"),
+            "--patch_x", str(px), "--patch_y", str(py),
+            "--j", "1"
+        ]
+        cand_cmd = [
+            str(cuda_bin), "--use_own",
+            "--i", str(synth_dir / "synthetic_local_motion.star"),
+            "--o", str(cand_d / f"{stage_name}.mrc"),
+            "--patch_x", str(px), "--patch_y", str(py),
+            "--gpu", str(args.gpu_id)
+        ]
+        run_cmd(ref_cmd, cwd=synth_dir)
+        c_res = run_cmd(cand_cmd, cwd=synth_dir)
+
+        # Telemetry
+        telemetry = get_telemetry_for_dir(cand_d, c_res.stdout)
+
+        cmp_res = run_comparator(comparator, ref_d, cand_d, stage_name)
+        cmp_res["telemetry"] = telemetry
+        cmp_res["gpu_startup"] = args.gpu_id if gpu_startup_line in c_res.stdout else None
+        summary["stages"][stage_name] = cmp_res
+
+    # ---------------------------------------------------------
+    # Full Experimental Movie Test & Steady-state Profiling
+    # ---------------------------------------------------------
+    if args.exp_movie.exists():
+        print(f"\n=== EXPERIMENTAL MOVIE TEST: {args.exp_movie.name} ===")
+        exp_star = out / "exp_input.star"
+        with exp_star.open("w") as f:
+            f.write(f"""# version 30001
+data_optics
+loop_
+_rlnOpticsGroupName #1
+_rlnOpticsGroup #2
+_rlnMicrographOriginalPixelSize #3
+_rlnVoltage #4
+_rlnSphericalAberration #5
+_rlnAmplitudeContrast #6
+opticsGroup1 1 1.06 300.0 2.7 0.1
+
+data_movies
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+{args.exp_movie.resolve()} 1
+""")
+        exp_ref_d = out / "exp_cpu"
+        exp_ref_d.mkdir(parents=True, exist_ok=True)
+        cpu_exp_cmd = [
+            str(cpu_bin), "--use_own",
+            "--i", str(exp_star),
+            "--o", str(exp_ref_d / "corrected.mrc"),
+            "--patch_x", "5", "--patch_y", "5",
+            "--dose_weighting",
+            "--voltage", "300.0",
+            "--angpix", "1.06",
+            "--dose_per_frame", "1.277",
+            "--j", "8"
+        ]
+        cpu_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
+
+        print("Running CPU reference for experimental movie...")
+        t_cpu_0 = time.time()
+        run_cmd(cpu_exp_cmd, timeout=1200)
+        cpu_wall_sec = time.time() - t_cpu_0
+        summary["exp_cpu_wall_sec"] = cpu_wall_sec
+
+        # 3 steady-state CUDA runs
+        gpu_timings = []
+        for irun in range(3):
+            exp_cand_d = out / f"exp_cuda_run{irun+1}"
+            exp_cand_d.mkdir(parents=True, exist_ok=True)
+            cuda_exp_cmd = [
+                str(cuda_bin), "--use_own",
+                "--i", str(exp_star),
+                "--o", str(exp_cand_d / "corrected.mrc"),
+                "--patch_x", "5", "--patch_y", "5",
+                "--dose_weighting",
+                "--voltage", "300.0",
+                "--angpix", "1.06",
+                "--dose_per_frame", "1.277",
+                "--gpu", str(args.gpu_id),
+                "--j", "8"
+            ]
+            cuda_exp_cmd.extend(["--gainref", str(args.exp_gain.resolve())])
+
+            print(f"Running CUDA steady-state run {irun+1}/3...")
+            t_gpu_0 = time.time()
+            c_res = run_cmd(cuda_exp_cmd, timeout=1200)
+            gpu_wall_sec = time.time() - t_gpu_0
+
+            telem = get_telemetry_for_dir(exp_cand_d, c_res.stdout)
+            telem["wall_time_sec"] = gpu_wall_sec
+            gpu_timings.append(telem)
+
+            if irun == 0:
+                exp_cmp = run_comparator(comparator, exp_ref_d, exp_cand_d, "exp_5x5")
+                exp_cmp["telemetry"] = telem
+                exp_cmp["gpu_startup"] = args.gpu_id if gpu_startup_line in c_res.stdout else None
+                summary["stages"]["exp_5x5"] = exp_cmp
+
+        summary["steady_state"] = gpu_timings
+
+    expected_patches = {"fallback_3x3": 9, "synth_1x1": 0,
+                        "synth_3x3": 9, "synth_5x5": 25, "exp_5x5": 25}
+    summary["stage_results"] = {
+        name: stage_result(summary["stages"].get(name, {}), patch_count, args.gpu_id)
+        for name, patch_count in expected_patches.items()
+    }
+    summary["verdict"] = "PASS" if (
+        summary["negative_test"]["passed"]
+        and summary["fallback_check"]["passed"]
+        and all(result["passed"] for result in summary["stage_results"].values())
+        and len(summary["steady_state"]) == 3
+    ) else "FAIL"
+    summary["runs"] = RUN_RECORDS
+
+    # Write summary JSON
+    summary_path = out / "cuda_patch_validation_summary.json"
+    with summary_path.open("w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nSaved validation summary to {summary_path}")
+    print(f"Overall verdict: {summary['verdict']}")
+    return 0 if summary["verdict"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

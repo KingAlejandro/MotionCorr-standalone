@@ -994,7 +994,19 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 
 	FileName fn_avg = getOutputFileNames(mic.getMovieFilename());
 
-	mic.write(fn_avg.withoutExtension() + ".star");
+	// Alignment uses binned-pixel displacements internally. Export a copy in
+	// original pixels, matching global shifts and Micrograph::getShiftAt().
+	if (do_own && early_binning && mic.model != NULL &&
+	    mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL)
+	{
+		Micrograph exported(mic);
+		ThirdOrderPolynomialModel &model = static_cast<ThirdOrderPolynomialModel&>(*exported.model);
+		model.coeffX *= bin_factor;
+		model.coeffY *= bin_factor;
+		exported.write(fn_avg.withoutExtension() + ".star");
+	}
+	else
+		mic.write(fn_avg.withoutExtension() + ".star");
 }
 
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()

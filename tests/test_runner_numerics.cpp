@@ -1,4 +1,6 @@
 #include "src/motioncorr_runner.h"
+#include "src/jaz/single_particle/new_ft.h"
+#include "src/fftw.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -18,7 +20,12 @@ int main(int argc, char **argv)
             Image<float> expected, actual;
             expected.read(argv[2]);
             actual.read(argv[3]);
-            runner.binNonSquareImage(expected, 2);
+            const int nx = XSIZE(expected()), ny = YSIZE(expected());
+            MultidimArray<fComplex> full(ny, nx / 2 + 1), binned(ny / 2, nx / 4 + 1);
+            NewFFT::FourierTransform(expected(), full);
+            cropInFourierSpace(full, binned);
+            expected().reshape(ny / 2, nx / 2);
+            NewFFT::inverseFourierTransform(binned, expected());
             require(expected().sameShape(actual()), "Late-binned image has the wrong dimensions");
             float maximum = 0;
             FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(expected()) {
@@ -70,7 +77,7 @@ int main(int argc, char **argv)
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n';
         return 1;
-    } catch (const RelionError &error) {
+    } catch (RelionError &error) {
         std::cerr << error;
         return 1;
     }

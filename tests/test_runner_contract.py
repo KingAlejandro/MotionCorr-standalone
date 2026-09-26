@@ -123,7 +123,52 @@ def late_bin(binary, work):
                             str(work / ('binned_' + name) / ('a' + suffix))], check=True)
 
 
-CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin}
+def exported_units(binary, work):
+    fixture(work)
+    (work / 'export').mkdir()
+    subprocess.run([str(HELPER), 'model', 'a.mrc', 'export/'], cwd=work, check=True)
+
+
+def tomography(binary, work):
+    fixture(work)
+    star = work / 'tomograms.star'
+    star.write_text('data_global\n\nloop_\n_rlnTomoName #1\n'
+                    '_rlnTomoTiltSeriesStarFile #2\n_rlnMicrographOriginalPixelSize #3\n'
+                    '_rlnVoltage #4\n_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n'
+                    'tomo1 tilts.star 1.0 300 2.7 0.1\n')
+    (work / 'tilts.star').write_text('data_tomo1\n\nloop_\n_rlnMicrographMovieName #1\n'
+                                   '_rlnMicrographPreExposure #2\nc.mrc 11\na.mrc 0\nb.mrc 5\n')
+    options = ['--dose_weighting', '--preexposure', '3.5', '--even_odd_split']
+    invoke(binary, work, star, 'full', options)
+    original = (work / 'b.mrc').read_bytes()
+    short = bytearray(original[:1024 + 96 * 96 * 2 * 4])
+    struct.pack_into('<i', short, 8, 2)
+    (work / 'b.mrc').write_bytes(short)
+    failed = invoke(binary, work, star, 'resume', options, success=False)
+    assert failed.returncode != 0
+    assert (work / 'resume/a.star').exists() and (work / 'resume/c.star').exists()
+    (work / 'b.mrc').write_bytes(original)
+    invoke(binary, work, star, 'resume', options + ['--only_do_unfinished'])
+    for name in ['a', 'b', 'c']:
+        for suffix in ['.mrc', '_EVN.mrc', '_ODD.mrc']:
+            assert read_mrc_pixels(work / ('full/' + name + suffix)) == read_mrc_pixels(work / ('resume/' + name + suffix)), name
+        assert (work / f'full/{name}.star').read_text() == (work / f'resume/{name}.star').read_text(), name
+    tilt_files = [p for p in (work / 'resume').rglob('*.star') if 'data_tomo1' in p.read_text()]
+    assert len(tilt_files) == 1
+    labels, exposures = [], {}
+    for line in tilt_files[0].read_text().splitlines():
+        values = line.split()
+        if not values or values[0].startswith('#'):
+            continue
+        if values[0].startswith('_rln'):
+            labels.append(values[0])
+        elif len(values) == len(labels) and '_rlnMicrographName' in labels:
+            name = Path(values[labels.index('_rlnMicrographName')]).stem
+            exposures[name] = float(values[labels.index('_rlnMicrographPreExposure')])
+    assert exposures == {'a': 0, 'b': 5, 'c': 11}, exposures
+
+
+CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin, 'exported_units': exported_units, 'tomography': tomography}
 
 
 def main():

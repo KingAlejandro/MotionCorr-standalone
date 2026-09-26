@@ -302,6 +302,7 @@ def compare_star_fields(
     test_star: Dict[str, Any],
     float_tol: float = 1e-4,
     compare_motion_values: bool = True,
+    require_finite_motion_values: bool = False,
 ) -> Dict[str, Any]:
     """Compare STAR schema and metadata; exact mode also compares motion values."""
     diffs = []
@@ -329,6 +330,12 @@ def compare_star_fields(
             and abs(ref_number - test_number) <= float_tol
         )
 
+    def finite_motion_values(*values: str) -> bool:
+        try:
+            return all(math.isfinite(float(value)) for value in values)
+        except ValueError:
+            return False
+
     for block_name in sorted(all_blocks):
         if block_name not in ref_star:
             diffs.append(f"Block '{block_name}' missing in reference")
@@ -354,6 +361,8 @@ def compare_star_fields(
                     diffs.append(f"Field '{k}' presence mismatch in block '{block_name}'")
                     continue
                 if not compare_motion_values and k in derived_motion_labels:
+                    if require_finite_motion_values and not finite_motion_values(rv, tv):
+                        diffs.append(f"Non-finite or non-numeric motion value in {block_name}.{k}")
                     continue
                 if not values_match(k, rv, tv):
                     diffs.append(f"Value diff in {block_name}.{k}: {rv} vs {tv}")
@@ -374,6 +383,10 @@ def compare_star_fields(
                     continue
                 for label, ref_value, test_value in zip(rc, ref_row, test_row):
                     if not compare_motion_values and label in derived_motion_labels:
+                        if require_finite_motion_values and not finite_motion_values(ref_value, test_value):
+                            diffs.append(
+                                f"Non-finite or non-numeric motion value in {block_name} row {row_number} {label}"
+                            )
                         continue
                     if not values_match(label, ref_value, test_value):
                         diffs.append(
@@ -387,7 +400,7 @@ def compare_star_fields(
     }
 
 
-def parse_time_v_log(text: str) -> Dict[str, Any]:
+def parse_time_v_log(text: str, strict: bool = False) -> Dict[str, Any]:
     """Parse output from /usr/bin/time -v."""
     res = {}
     patterns = {
@@ -398,8 +411,17 @@ def parse_time_v_log(text: str) -> Dict[str, Any]:
         "max_rss_kb": r"Maximum resident set size \(kbytes\):\s*([\d]+)",
         "exit_status": r"Exit status:\s*([\d]+)",
     }
+    if strict:
+        # A backend verdict must refer to one completed invocation. In appended
+        # logs, selecting the first successful status can hide a later failure.
+        for field in ("elapsed_str", "max_rss_kb", "exit_status"):
+            matches = re.findall(r"^\s*" + patterns[field] + r"\s*$", text, re.MULTILINE)
+            if len(matches) != 1:
+                raise ValueError(f"Backend process log requires exactly one {field} record; found {len(matches)}")
+        if re.search(r"^\s*Command (?:terminated by signal|exited with non-zero status)\b", text, re.MULTILINE):
+            raise ValueError("Backend process log reports a failed or signal-terminated command")
     for k, pat in patterns.items():
-        m = re.search(pat, text)
+        m = re.search(r"^\s*" + pat + r"\s*$", text, re.MULTILINE) if strict else re.search(pat, text)
         if m:
             val = m.group(1).strip()
             if k in ("user_time_sec", "system_time_sec"):
@@ -417,6 +439,10 @@ def parse_time_v_log(text: str) -> Dict[str, Any]:
 
     if "max_rss_kb" in res:
         res["max_rss_mb"] = round(res["max_rss_kb"] / 1024.0, 2)
+
+    if strict and ("elapsed_sec" not in res or not math.isfinite(res["elapsed_sec"])
+                   or res["elapsed_sec"] < 0):
+        raise ValueError("Backend process elapsed time must be finite and nonnegative")
 
     return res
 
@@ -596,6 +622,7 @@ def main() -> None:
             star_diff_res = compare_star_fields(
                 ref_parsed, test_parsed, float_tol=star_tol,
                 compare_motion_values=(args.gate == "exact"),
+                require_finite_motion_values=(args.gate == "backend"),
             )
 
             check_passed = True
@@ -725,7 +752,14 @@ def main() -> None:
             gate_passed = False
             errors.append(f"Test log file not found: {args.test_log}")
         else:
-            log_metrics = parse_time_v_log(args.test_log.read_text())
+            try:
+                log_metrics = parse_time_v_log(args.test_log.read_text(), strict=args.gate == "backend")
+            except ValueError as error:
+                if args.gate != "backend":
+                    raise
+                gate_passed = False
+                errors.append(str(error))
+                log_metrics = {}
             report["metrics"] = log_metrics
             for required in ("elapsed_sec", "max_rss_kb", "exit_status"):
                 if required not in log_metrics:

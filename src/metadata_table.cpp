@@ -1119,9 +1119,12 @@ long int MetaDataTable::readStarLoop(std::ifstream& in, bool do_only_count)
 				}
 				labelPosition++;
 			}
-			if (labelPosition < num_labels && num_labels > 2)
+			// Preserve legacy two-column rows with an empty trailing filename,
+			// but never turn a missing numeric field into its default zero value.
+			const bool legacy_empty_string = num_labels == 2 && labelPosition == 1 &&
+			                                 EMDL::isString(activeLabels[1]);
+			if (labelPosition < num_labels && !legacy_empty_string)
 			{
-				// For backward-compatibility for cases like "fn_mtf <empty>", don't die if num_labels == 2.
 				std::cerr << "Error in line: " << line << std::endl;
 				REPORT_ERROR("A line in the STAR file contains fewer columns than the number of labels. Expected = " + integerToString(num_labels) + " Found = " +  integerToString(labelPosition));
 			}

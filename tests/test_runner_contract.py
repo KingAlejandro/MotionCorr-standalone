@@ -176,10 +176,12 @@ def model_parser(binary, work):
     start = original.index('data_local_motion_model')
     first = next(i for i in range(start + 1, len(original)) if original[i].split() and original[i].split()[0] == '0')
     accepted = []
-    for problem in ['duplicate', 'nonfinite', 'truncated', 'negative_index', 'trailing', 'invalid_index']:
+    for problem in ['duplicate', 'nonfinite', 'truncated', 'negative_index', 'trailing', 'invalid_index', 'missing_coefficient']:
         lines = original.copy()
         if problem == 'truncated':
             del lines[first]
+        elif problem == 'missing_coefficient':
+            lines[first + 35] = '35'
         else:
             fields = lines[first].split()
             if problem == 'duplicate':
@@ -200,6 +202,10 @@ def model_parser(binary, work):
         if result.returncode == 0:
             accepted.append(problem)
     assert not accepted, f'Invalid local model accepted: {accepted}'
+    legacy = work / 'legacy_mtf.star'
+    legacy.write_text('data_optics\n\nloop_\n_rlnOpticsGroup #1\n_rlnMtfFileName #2\n1\n\n')
+    subprocess.run([str(HELPER), 'legacy_mtf', str(legacy), 'unused'], check=True)
+    print('legacy empty trailing string preserved')
 
 
 CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin, 'exported_units': exported_units, 'tomography': tomography, 'model_parser': model_parser}

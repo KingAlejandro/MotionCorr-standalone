@@ -373,26 +373,8 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old)
-		{
-			if (even_odd_split)
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic],true);
-				if (exists(fn_avg))
-				{
-			    		process_this = false; // already done
-				}
-			}
-			else
-			{
-				FileName fn_avg = getOutputFileNames(fn_mic_given_all[imic]);
-				if (exists(fn_avg) && exists(fn_avg.withoutExtension() + ".star") &&
-                            (grouping_for_ps <= 0 || exists(fn_avg.withoutExtension() + "_PS.mrc")))
-				{
-					process_this = false; // already done
-				}
-			}
-		}
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
 		{
@@ -519,6 +501,70 @@ FileName MotioncorrRunner::getOutputFileNames(FileName fn_mic, bool continue_eve
 	else
 	{
 	return fn_out + fn_root + ".mrc";
+	}
+}
+
+namespace {
+// Inspect only the header and file length; resume need not reread image pixels.
+bool completeMrc(const FileName &filename)
+{
+	std::ifstream input(filename.c_str(), std::ios::binary | std::ios::ate);
+	if (!input) return false;
+	const std::streamoff length = input.tellg();
+	Image<float>::MRChead header;
+	input.seekg(0);
+	if (!input.read(reinterpret_cast<char*>(&header), sizeof(header))) return false;
+	Image<float> image;
+	const DataType type = image.parseMRCHeader(&header, -1, false, filename);
+	if (header.nx <= 0 || header.ny <= 0 || header.nz != 1 || header.nsymbt < 0 ||
+	    (type != Float && type != Float16)) return false;
+	const std::streamoff offset = 1024 + static_cast<std::streamoff>(header.nsymbt);
+	if (length < offset) return false;
+	const uint64_t pixels = static_cast<uint64_t>(header.nx) * header.ny;
+	return pixels <= static_cast<uint64_t>(length - offset) / gettypesize(type);
+}
+}
+
+bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+{
+	const FileName average = getOutputFileNames(movie);
+	const FileName root = average.withoutExtension();
+	try
+	{
+		if (!completeMrc(average) ||
+		    (do_dose_weighting && save_noDW && !completeMrc(root + "_noDW.mrc")) ||
+		    (even_odd_split && (!completeMrc(root + "_EVN.mrc") || !completeMrc(root + "_ODD.mrc"))) ||
+		    (grouping_for_ps > 0 && !completeMrc(root + "_PS.mrc")) ||
+		    !exists(root + ".star")) return false;
+
+		// A truncated STAR may contain the general block but lack some shifts.
+		// Validate the frame indices before constructing Micrograph, which indexes them.
+		MetaDataTable general, shifts;
+		general.read(root + ".star", "general");
+		shifts.read(root + ".star", "global_shift");
+		int nframes, width, height;
+		FileName saved_movie;
+		if (!general.getValue(EMDL_IMAGE_SIZE_Z, nframes) || nframes <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
+		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
+		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
+		    shifts.numberOfObjects() != nframes) return false;
+		std::vector<bool> seen(nframes, false);
+		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
+		{
+			int frame;
+			RFLOAT x, y;
+			if (!shifts.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, frame) || frame < 1 || frame > nframes ||
+			    seen[frame - 1] || !shifts.getValue(EMDL_MICROGRAPH_SHIFT_X, x) ||
+			    !shifts.getValue(EMDL_MICROGRAPH_SHIFT_Y, y) || !std::isfinite(x) || !std::isfinite(y)) return false;
+			seen[frame - 1] = true;
+		}
+		Micrograph metadata(root + ".star"); // Also require any declared local model to parse.
+		return true;
+	}
+	catch (const RelionError &)
+	{
+		return false; // Incomplete products are retried by --only_do_unfinished.
 	}
 }
 
@@ -1817,7 +1863,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 
 skip_fitting:
-	if (!do_dose_weighting || save_noDW) {
+	if (!do_dose_weighting || save_noDW || even_odd_split) {
 		Iref().initZeros(Iframes[0]());
 		Iref_odd().initZeros(Iframes[0]());
 		Iref_even().initZeros(Iframes[0]());
@@ -1867,9 +1913,11 @@ skip_fitting:
 		}
 
 		// Final output
-                Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-		Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
-		logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		if (!do_dose_weighting || save_noDW) {
+			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
+			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+			logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
+		}
 		// ODD-EVEN Output
 		if (even_odd_split)
 		{

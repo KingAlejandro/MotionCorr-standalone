@@ -75,7 +75,40 @@ def invalid(binary, work):
         assert not (work / 'invalid/a.star').exists()
 
 
-CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid}
+def resume(binary, work):
+    star = fixture(work)
+    single = work / 'single.star'
+    write_star(single, ['a.mrc'])
+    options = ['--dose_weighting', '--save_noDW', '--even_odd_split',
+               '--grouping_for_ps', '2', '--ps_size', '48']
+    invoke(binary, work, single, 'reference', options)
+    for suffix in ['.mrc', '.star', '_noDW.mrc', '_EVN.mrc', '_ODD.mrc', '_PS.mrc']:
+        for damage in ['missing', 'truncated']:
+            out = work / 'resume'
+            if out.exists():
+                shutil.rmtree(out)
+            shutil.copytree(work / 'reference', out)
+            damaged = out / ('a' + suffix)
+            if damage == 'missing':
+                damaged.unlink()
+            else:
+                damaged.write_bytes(damaged.read_bytes()[:1030 if suffix != '.star' else 120])
+            invoke(binary, work, single, 'resume', options + ['--only_do_unfinished'])
+            for image_suffix in ['.mrc', '_noDW.mrc', '_EVN.mrc', '_ODD.mrc', '_PS.mrc']:
+                assert read_mrc_pixels(out / ('a' + image_suffix)) == read_mrc_pixels(work / 'reference' / ('a' + image_suffix)), (suffix, damage, image_suffix)
+            assert (out / 'a.star').read_text() == (work / 'reference/a.star').read_text()
+    # A complete movie is skipped, including its metadata and optional outputs.
+    before = {p.name: (p.stat().st_mtime_ns, p.read_bytes()) for p in out.glob('a.*')}
+    invoke(binary, work, single, 'resume', options + ['--only_do_unfinished'])
+    assert before == {p.name: (p.stat().st_mtime_ns, p.read_bytes()) for p in out.glob('a.*')}
+    # Even/odd output is requested independently of saving the unweighted sum.
+    invoke(binary, work, single, 'split', ['--dose_weighting', '--even_odd_split'])
+    for suffix in ['.mrc', '_EVN.mrc', '_ODD.mrc', '.star']:
+        assert (work / ('split/a' + suffix)).exists(), suffix
+    assert not (work / 'split/a_noDW.mrc').exists()
+
+
+CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume}
 
 
 def main():

@@ -76,7 +76,7 @@ if(BUILD_TESTING)
         add_test(NAME RunnerExposure
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case exposure)
-        foreach(case failure invalid)
+        foreach(case failure invalid resume)
             add_test(NAME Runner_${case}
                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                     --binary $<TARGET_FILE:motioncorr> --case ${case})

@@ -197,17 +197,58 @@ void progress_bar(long rlen)
 
 
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+static inline int get_timer_thread_id()
+{
+#ifdef _OPENMP
+	return omp_get_thread_num();
+#else
+	return 0;
+#endif
+}
+
+void Timer::ensureAllocated()
+{
+	int max_threads = 1;
+#ifdef _OPENMP
+	max_threads = std::max(256, omp_get_max_threads() * 2);
+#endif
+	if (thread_data.size() < (size_t)max_threads)
+	{
+		thread_data.resize(max_threads);
+	}
+	for (size_t t = 0; t < thread_data.size(); t++)
+	{
+		thread_data[t].start_times.resize(tags.size());
+		thread_data[t].counts.resize(tags.size(), 0);
+		thread_data[t].times.resize(tags.size(), 0);
+	}
+}
+
 void Timer::clear()
 {
 	start_times.clear();
 	counts.clear();
 	times.clear();
 	tags.clear();
+	thread_data.clear();
+	ensureAllocated();
 }
 
 void Timer::initZero()
 {
-	for (int i = 0; i < counts.size(); i++)
+	for (size_t t = 0; t < thread_data.size(); t++)
+	{
+		for (size_t i = 0; i < thread_data[t].counts.size(); i++)
+		{
+			thread_data[t].counts[i] = 0;
+			thread_data[t].times[i] = 0;
+		}
+	}
+	for (size_t i = 0; i < counts.size(); i++)
 	{
 		counts[i] = 0;
 		times[i] = 0;
@@ -216,35 +257,60 @@ void Timer::initZero()
 
 int Timer::setNew(const std::string tag)
 {
-	//std::cerr << " tag = " << tag << std::endl;
 	start_times.push_back(end_time);
 	counts.push_back(0);
 	times.push_back(0);
 	tags.push_back(tag);
-	return start_times.size() - 1;
+	int idx = (int)tags.size() - 1;
+	ensureAllocated();
+	return idx;
 }
 
 void Timer::tic(int timer)
 {
-	gettimeofday(&(start_times[timer]), NULL);
-	counts[timer]++;
+	int tid = get_timer_thread_id();
+	if (tid < (int)thread_data.size() && timer < (int)thread_data[tid].start_times.size())
+	{
+		gettimeofday(&(thread_data[tid].start_times[timer]), NULL);
+		thread_data[tid].counts[timer]++;
+	}
 }
 
 void Timer::toc(int timer)
 {
-	gettimeofday(&end_time, NULL);
-	times[timer] += (end_time.tv_sec - start_times[timer].tv_sec) * 1000000 +
-				   (end_time.tv_usec - start_times[timer].tv_usec);
+	timeval local_end;
+	gettimeofday(&local_end, NULL);
+	int tid = get_timer_thread_id();
+	if (tid < (int)thread_data.size() && timer < (int)thread_data[tid].start_times.size())
+	{
+		long int elapsed = (local_end.tv_sec - thread_data[tid].start_times[timer].tv_sec) * 1000000 +
+		                   (local_end.tv_usec - thread_data[tid].start_times[timer].tv_usec);
+		thread_data[tid].times[timer] += elapsed;
+	}
 }
 
 void Timer::printTimes(bool doClear)
 {
-	for (int i = 0; i < tags.size(); i++)
+	for (size_t i = 0; i < tags.size(); i++)
+	{
+		counts[i] = 0;
+		times[i] = 0;
+		for (size_t t = 0; t < thread_data.size(); t++)
+		{
+			if (i < thread_data[t].counts.size())
+			{
+				counts[i] += thread_data[t].counts[i];
+				times[i] += thread_data[t].times[i];
+			}
+		}
+	}
+
+	for (size_t i = 0; i < tags.size(); i++)
 	{
 		if (counts[i] > 0)
 		{
 			std::cout.width(35);
-			std::cout << std::left << tags[i] << ": " << (times[i]/1000)/1000.0 << " sec (" << times[i] / counts[i] << " microsec/operation)"<<std::endl;
+			std::cout << std::left << tags[i] << ": " << (times[i]/1000)/1000.0 << " sec (" << times[i] / counts[i] << " microsec/operation)" << std::endl;
 		}
 	}
 	if (doClear)

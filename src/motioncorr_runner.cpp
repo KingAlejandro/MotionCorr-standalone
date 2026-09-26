@@ -1550,11 +1550,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_even().reshape(ny, nx);
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
+
+	// The real-space frames produced here are read again in only two places:
+	// patch clipping (needs do_local) and the "before dose weighting" sum
+	// below (needs !do_dose_weighting || save_noDW). When neither applies,
+	// every value written here is overwritten by the post-dose-weighting
+	// inverse transform before anything reads it, so the transform is dead
+	// work. Skipping it is bit-exact, not an approximation.
+	const bool do_local = (patch_x > 2) && (patch_y > 2);
+	const bool need_real_space_before_dw = do_local || !do_dose_weighting || save_noDW;
+
 	RCTIC(TIMING_GLOBAL_IFFT);
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+		if (need_real_space_before_dw)
+			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	RCTOC(TIMING_GLOBAL_IFFT);
@@ -1562,7 +1573,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// Patch based alignment
 	logfile << std::endl << "Local alignments:" << std::endl;
 	logfile << "Patches: X = " << patch_x << " Y = " << patch_y << std::endl;
-	bool do_local = (patch_x > 2) && (patch_y > 2);
 	if (!do_local) {
 		logfile << "Too few patches to do local alignments. Local alignment is skipped." << std::endl;
 	}

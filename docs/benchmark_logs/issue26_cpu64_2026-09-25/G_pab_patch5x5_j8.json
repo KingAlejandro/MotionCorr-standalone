@@ -1,0 +1,148 @@
+{
+  "label": "G_patch5x5_j8",
+  "j": 8,
+  "cfg": "--patch_x 5 --patch_y 5",
+  "pairs": 4,
+  "base": "/home/ubuntu/mc-issue26/src-3e3a19679337d3de61327c02eef1a2947cf13517/build-rel/motioncorr",
+  "cand": "/home/ubuntu/mc-issue26/src-cand/build-rel/motioncorr",
+  "base_sha256": "13d501afd518a7a96aa1556dfb5c5b434ae768617d7ddfe28f463d059192e13d",
+  "cand_sha256": "cf866dce200766a262d053073b0e64bb94c96f5467851a880f577cc8a3fac01e",
+  "started_utc": "2026-09-25T00:56:12Z",
+  "data": [
+    {
+      "pair": 1,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "load1": 6.24,
+      "base": {
+        "wall_s": 9.541,
+        "time_wall": 9.53,
+        "user_s": 51.26,
+        "sys_s": 6.71,
+        "maxrss_kb": 3330436,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "cand": {
+        "wall_s": 7.736,
+        "time_wall": 7.73,
+        "user_s": 41.2,
+        "sys_s": 7.62,
+        "maxrss_kb": 3329708,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "delta_s": -1.8
+    },
+    {
+      "pair": 2,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "load1": 7.24,
+      "cand": {
+        "wall_s": 9.535,
+        "time_wall": 9.53,
+        "user_s": 54.02,
+        "sys_s": 6.03,
+        "maxrss_kb": 3330596,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "base": {
+        "wall_s": 8.899,
+        "time_wall": 8.89,
+        "user_s": 43.56,
+        "sys_s": 6.66,
+        "maxrss_kb": 3330688,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "delta_s": 0.64
+    },
+    {
+      "pair": 3,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "load1": 7.53,
+      "base": {
+        "wall_s": 8.681,
+        "time_wall": 8.67,
+        "user_s": 44.85,
+        "sys_s": 6.08,
+        "maxrss_kb": 3330300,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "cand": {
+        "wall_s": 9.699,
+        "time_wall": 9.69,
+        "user_s": 53.14,
+        "sys_s": 6.39,
+        "maxrss_kb": 3329192,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "delta_s": 1.02
+    },
+    {
+      "pair": 4,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "load1": 8.08,
+      "cand": {
+        "wall_s": 9.699,
+        "time_wall": 9.69,
+        "user_s": 51.78,
+        "sys_s": 6.6,
+        "maxrss_kb": 3330380,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "base": {
+        "wall_s": 9.902,
+        "time_wall": 9.89,
+        "user_s": 57.28,
+        "sys_s": 6.5,
+        "maxrss_kb": 3331984,
+        "pixels_sha256": "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0",
+        "stages": {},
+        "rc": 0
+      },
+      "delta_s": -0.2
+    }
+  ],
+  "summary": {
+    "base_median": 9.21,
+    "cand_median": 9.61,
+    "base_mean": 9.245,
+    "cand_mean": 9.16,
+    "mean_delta_s": -0.085,
+    "sd_delta_s": 1.252,
+    "pct_change": -0.92,
+    "n_pairs_cand_faster": 2,
+    "n_pairs": 4,
+    "delta_base_first_mean": -0.39,
+    "delta_cand_first_mean": 0.22,
+    "positional_bias_P_s": -0.305,
+    "distinct_pixel_digests": [
+      "bf738254a4d9c218ddc723a3ec595c999c3ad27a01a56b97c2d903046a0f77b0"
+    ],
+    "bit_exact_across_all_runs": true
+  },
+  "finished_utc": "2026-09-25T00:57:27Z"
+}

@@ -69,6 +69,25 @@ private:
     bool owns_plan;
 };
 
+namespace {
+struct FramePolynomial {
+    float x[6];
+    float y[6];
+};
+
+FramePolynomial polynomialForFrame(const ThirdOrderPolynomialModel &model, int iframe) {
+    const float z = (float)iframe, z2 = z * z, z3 = z * z2;
+    FramePolynomial result;
+    for (int i = 0; i < 6; ++i) {
+        const int c = 3 * i;
+        // Preserve RFLOAT coefficient arithmetic and cast only the completed sum.
+        result.x[i] = (float)(model.coeffX(c) * z + model.coeffX(c + 1) * z2 + model.coeffX(c + 2) * z3);
+        result.y[i] = (float)(model.coeffY(c) * z + model.coeffY(c + 1) * z2 + model.coeffY(c + 2) * z3);
+    }
+    return result;
+}
+} // namespace
+
 // Dose weighting kernel implementing Grant & Grigorieff (2015) model
 __global__ void applyDoseWeightKernel(
     float2 * __restrict__ d_Fframe,
@@ -314,28 +333,12 @@ bool cudaDoseWeightAndInterpolateDevice(
         // Interpolate and accumulate
         HANDLE_ERROR(cudaEventRecord(ev_start_interp));
         if (model != nullptr) {
-            const float z = (float)iframe, z2 = z * z, z3 = z * z2;
-            const Matrix1D<RFLOAT> &coeffX = model->coeffX;
-            const Matrix1D<RFLOAT> &coeffY = model->coeffY;
-
-            float x_C0 = (float)(coeffX(0)  * z + coeffX(1)  * z2 + coeffX(2)  * z3);
-            float x_C1 = (float)(coeffX(3)  * z + coeffX(4)  * z2 + coeffX(5)  * z3);
-            float x_C2 = (float)(coeffX(6)  * z + coeffX(7)  * z2 + coeffX(8)  * z3);
-            float x_C3 = (float)(coeffX(9)  * z + coeffX(10) * z2 + coeffX(11) * z3);
-            float x_C4 = (float)(coeffX(12) * z + coeffX(13) * z2 + coeffX(14) * z3);
-            float x_C5 = (float)(coeffX(15) * z + coeffX(16) * z2 + coeffX(17) * z3);
-
-            float y_C0 = (float)(coeffY(0)  * z + coeffY(1)  * z2 + coeffY(2)  * z3);
-            float y_C1 = (float)(coeffY(3)  * z + coeffY(4)  * z2 + coeffY(5)  * z3);
-            float y_C2 = (float)(coeffY(6)  * z + coeffY(7)  * z2 + coeffY(8)  * z3);
-            float y_C3 = (float)(coeffY(9)  * z + coeffY(10) * z2 + coeffY(11) * z3);
-            float y_C4 = (float)(coeffY(12) * z + coeffY(13) * z2 + coeffY(14) * z3);
-            float y_C5 = (float)(coeffY(15) * z + coeffY(16) * z2 + coeffY(17) * z3);
+            const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
             interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
                 d_Isum, nullptr, d_Iframe, nx, ny,
-                x_C0, x_C1, x_C2, x_C3, x_C4, x_C5,
-                y_C0, y_C1, y_C2, y_C3, y_C4, y_C5
+                coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
+                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
             );
         } else {
             size_t total_pixels = (size_t)ny * nx;
@@ -477,28 +480,12 @@ bool cudaRealSpaceInterpolationDevice(
         }
 
         if (model != nullptr) {
-            const float z = (float)iframe, z2 = z * z, z3 = z * z2;
-            const Matrix1D<RFLOAT> &coeffX = model->coeffX;
-            const Matrix1D<RFLOAT> &coeffY = model->coeffY;
-
-            float x_C0 = (float)(coeffX(0)  * z + coeffX(1)  * z2 + coeffX(2)  * z3);
-            float x_C1 = (float)(coeffX(3)  * z + coeffX(4)  * z2 + coeffX(5)  * z3);
-            float x_C2 = (float)(coeffX(6)  * z + coeffX(7)  * z2 + coeffX(8)  * z3);
-            float x_C3 = (float)(coeffX(9)  * z + coeffX(10) * z2 + coeffX(11) * z3);
-            float x_C4 = (float)(coeffX(12) * z + coeffX(13) * z2 + coeffX(14) * z3);
-            float x_C5 = (float)(coeffX(15) * z + coeffX(16) * z2 + coeffX(17) * z3);
-
-            float y_C0 = (float)(coeffY(0)  * z + coeffY(1)  * z2 + coeffY(2)  * z3);
-            float y_C1 = (float)(coeffY(3)  * z + coeffY(4)  * z2 + coeffY(5)  * z3);
-            float y_C2 = (float)(coeffY(6)  * z + coeffY(7)  * z2 + coeffY(8)  * z3);
-            float y_C3 = (float)(coeffY(9)  * z + coeffY(10) * z2 + coeffY(11) * z3);
-            float y_C4 = (float)(coeffY(12) * z + coeffY(13) * z2 + coeffY(14) * z3);
-            float y_C5 = (float)(coeffY(15) * z + coeffY(16) * z2 + coeffY(17) * z3);
+            const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
             interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
                 d_Isum, d_sub, d_Iframe, nx, ny,
-                x_C0, x_C1, x_C2, x_C3, x_C4, x_C5,
-                y_C0, y_C1, y_C2, y_C3, y_C4, y_C5
+                coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
+                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
             );
         } else {
             size_t total_pixels = (size_t)ny * nx;

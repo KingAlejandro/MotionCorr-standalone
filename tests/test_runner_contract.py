@@ -30,8 +30,8 @@ def fixture(work):
 
 def exposure(binary, work):
     star = fixture(work)
-    text = star.read_text().replace('_rlnOpticsGroup #2\n',
-                                  '_rlnOpticsGroup #2\n_rlnMicrographPreExposure #3\n')
+    text = star.read_text().replace('_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n',
+                                  '_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n_rlnMicrographPreExposure #3\n')
     for name, dose in [('a', 0), ('b', 5), ('c', 11)]:
         text = text.replace(f'{name}.mrc 1', f'{name}.mrc 1 {dose}')
     star.write_text(text)
@@ -108,14 +108,32 @@ def resume(binary, work):
     assert not (work / 'split/a_noDW.mrc').exists()
 
 
-CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume}
+def late_bin(binary, work):
+    fixture(work)
+    star = work / 'single.star'
+    write_star(star, ['a.mrc'])
+    for name, options, suffixes in [
+        ('unweighted', ['--even_odd_split'], ['.mrc', '_EVN.mrc', '_ODD.mrc']),
+        ('weighted', ['--dose_weighting', '--save_noDW', '--even_odd_split'],
+         ['.mrc', '_noDW.mrc', '_EVN.mrc', '_ODD.mrc'])]:
+        invoke(binary, work, star, 'full_' + name, options)
+        invoke(binary, work, star, 'binned_' + name, options + ['--no_early_binning', '--bin_factor', '2'])
+        for suffix in suffixes:
+            subprocess.run([str(HELPER), 'bin', str(work / ('full_' + name) / ('a' + suffix)),
+                            str(work / ('binned_' + name) / ('a' + suffix))], check=True)
+
+
+CASES = {'exposure': exposure, 'failure': failure, 'invalid': invalid, 'resume': resume, 'late_bin': late_bin}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', required=True, type=Path)
     parser.add_argument('--case', choices=CASES, required=True)
+    parser.add_argument('--helper', type=Path)
     args = parser.parse_args()
+    global HELPER
+    HELPER = args.helper.resolve() if args.helper else None
     with tempfile.TemporaryDirectory(prefix='motioncorr-contract-') as directory:
         CASES[args.case](args.binary.resolve(), Path(directory))
     print(f'PASS runner {args.case}')

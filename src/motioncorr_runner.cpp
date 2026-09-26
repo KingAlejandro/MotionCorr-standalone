@@ -1878,13 +1878,7 @@ skip_fitting:
 		logfile << " done" << std::endl;
 		RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
 
-		// Apply binning
-		RCTIC(TIMING_BINNING);
-		if (!early_binning && bin_factor != 1) {
-			binNonSquareImage(Iref, bin_factor);
-		}
-		RCTOC(TIMING_BINNING);
-		
+
 		// Sum frames and save aligned stack
 		for (int iframe = 0; iframe < n_frames; iframe++)
 		{
@@ -1912,6 +1906,17 @@ skip_fitting:
 		}
 		}
 
+		// Apply binning
+		RCTIC(TIMING_BINNING);
+		if (!early_binning && bin_factor != 1) {
+			binNonSquareImage(Iref, bin_factor);
+			if (even_odd_split) {
+				binNonSquareImage(Iref_odd, bin_factor);
+				binNonSquareImage(Iref_even, bin_factor);
+			}
+		}
+		RCTOC(TIMING_BINNING);
+		
 		// Final output
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);

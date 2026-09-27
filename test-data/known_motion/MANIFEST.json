@@ -1,0 +1,33 @@
+{
+  "cases": {
+    "km_global_hisnr": {
+      "ground_truth_sha256": "ce4a8df71201c933e340b458ea4a81adeae45a787181e88aea86303a5493b2a3",
+      "movie_bytes": 12583936,
+      "movie_sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+    },
+    "km_local_hisnr": {
+      "ground_truth_sha256": "e76efb9e009aa89cead2620db99a945e59c17a70550e8ddb83543d9b78e0174c",
+      "movie_bytes": 12583936,
+      "movie_sha256": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092"
+    },
+    "km_local_noisy": {
+      "ground_truth_sha256": "bd4cf8ebe1dfbb6ba41aab47bc5a77230f50b45f9dd04d53af71933f4a70c4c7",
+      "movie_bytes": 12583936,
+      "movie_sha256": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668"
+    },
+    "km_local_nonsquare": {
+      "ground_truth_sha256": "88d04b9dc4ee99e3764fc6d7c286c2a4e3ad17c1da84ba6e78e46e8139f50f59",
+      "movie_bytes": 18875392,
+      "movie_sha256": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8"
+    },
+    "km_local_realscale": {
+      "ground_truth_sha256": "3482147587e020ccaf36e8274d939cce87a9a7fb4f58d8f3aea5fc979491d242",
+      "movie_bytes": 402654208,
+      "movie_sha256": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7"
+    }
+  },
+  "generator": "generate_known_motion_fixture.py",
+  "generator_sha256": "cf4f2aeb6524a21c61d873bd9537556c71c2b5f0c5bced7ba11ee9aac40bd127",
+  "note": "regenerate with: python3 test-data/generate_known_motion_fixture.py [--include-heavy]; hashes must match on any platform with the same NumPy IEEE-754 double arithmetic",
+  "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+}

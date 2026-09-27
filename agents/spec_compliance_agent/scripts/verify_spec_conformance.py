@@ -239,7 +239,7 @@ def analyze_conformance_heuristics(
     for line in diff_text.splitlines():
         if line.startswith("-") and not line.startswith("---"):
             # Check if default argument was removed/changed
-            if re.search(r"=\s*(true|false|\d+|nullptr|NULL)\s*[,)]", line):
+            if re.search(r"(?<![!=<>])=\s*(true|false|\d+|nullptr|NULL)\s*[,)]", line):
                 side_effects.append({
                     "severity": "WARNING",
                     "file": "source",

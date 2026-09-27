@@ -41,6 +41,35 @@ python3 test-data/generate_synthetic_fixture.py --profile large
 
 ---
 
+## 1b. Known-Motion and Local-Field Gate (Issue #59)
+
+`test-data/known_motion/` holds synthetic movies with a **known global and spatially varying
+displacement field**, used to check the field MotionCorr actually applies -- at declared
+positions and frames, in pixels and angstroms -- rather than only the corrected pixels. This is
+separate from `tools/compare_motioncorr.py`: that tool compares a run to a reference run, this
+one compares a run to ground truth. Gates 1 and 2 are untouched.
+
+The movies are not versioned; they regenerate deterministically in about 2 s and their SHA-256
+hashes are recorded in `test-data/known_motion/MANIFEST.json`.
+
+```sh
+# fixtures (add --include-heavy for the opt-in 400 MB real-scale case)
+python3 test-data/generate_known_motion_fixture.py
+
+# run everything: MotionCorr, the field gate, dose-weighting and thread invariance,
+# and the applied-field self-consistency witness
+python3 tools/run_known_motion_gates.py --outdir /tmp/km59 --json /tmp/km59/all.json
+
+# unit checks, fixture self-validation, negative controls, detection sensitivity
+python3 tools/test_known_motion.py
+```
+
+Tolerances, their physical derivation, results, and the negative controls are in
+[docs/known_motion_validation.md](../docs/known_motion_validation.md); the design record is
+[agents/designs/issue_59_known_motion_local_field_gates.md](../agents/designs/issue_59_known_motion_local_field_gates.md).
+
+---
+
 ## 2. Experimental RELION SPA Tutorial Dataset
 
 The experimental benchmark dataset is the **beta-galactosidase movie subset used by the [RELION SPA tutorial](https://relion.readthedocs.io/en/latest/SPA_tutorial/Introduction.html)**.

@@ -2,6 +2,9 @@
 
 This document formalizes the reference baselines, numerical acceptance gates, and verification tooling for **MotionCorr Standalone**, resolving [Issue #4](https://github.com/KingAlejandro/MotionCorr-standalone/issues/4).
 
+> [!IMPORTANT]
+> **What these gates mean** is specified in [`gate_contract.md`](gate_contract.md) ([#58](https://github.com/KingAlejandro/MotionCorr-standalone/issues/58)): the tier model, the exact relative-RMSE formula and denominator, the per-profile enforcement matrix, failure behaviour, and the numerical-policy history. Gate 2 is a **CPU-agreement diagnostic**, not a test of scientific equivalence. No threshold on this page has been changed.
+
 ---
 
 ## 1. Reference Baselines and Provenance
@@ -113,14 +116,14 @@ graph TD
     C --> C2[Max Shift Error <= 1e-4 px]
     C --> C3[Pixel payload byte-identical]
     C --> C4[Non-timestamp MRC header identical]
-    C --> C5[Exit Code == 0]
+    C --> C5[Exit Code == 0 only with --test-log]
     
     D --> D1[Coordinate RMS Error <= 0.02 px]
     D --> D2[Max Shift Error <= 0.05 px]
-    D --> D3[Pixel RMSE <= 0.020]
+    D --> D3[Absolute Pixel RMSE <= 0.020]
     D --> D4[Max Pixel Error <= 5.000]
-    D --> D5[Relative RMSE <= 0.1 percent]
-    D --> D6[Exit Code == 0]
+    D --> D5[rmse / sigma_ref <= 0.001]
+    D --> D6[Exit Code == 0 only with --test-log]
 ```
 
 ### Gate 1: Strict Parity Gate (`--gate exact`)
@@ -130,14 +133,19 @@ Used for single-threaded CPU regression testing against reference outputs on the
 |:---|:---:|:---|
 | **Max Frame Shift Error** | `<= 0.0001 px` | Max $\max_i (\|\Delta X_i\|, \|\Delta Y_i\|)$ across all frames |
 | **Coordinate RMS Shift Error** | `<= 0.0001 px` | $\sqrt{\frac{1}{N} \sum (\Delta X_i^2 + \Delta Y_i^2)}$ |
-| **Image RMSE** | `<= 1.0e-7` | Root-mean-square pixel error |
-| **Image Max Absolute Error** | `<= 1.0e-7` | Peak individual pixel error |
-| **Pixel-Identical Flag** | `True` | Direct byte equivalence of pixel payload |
+| **Pixel-Identical Flag** | `True` | **The enforced image check.** Byte equivalence of the pixel payload |
+| **Image RMSE** | *reported only* | Printed with a `1.0e-7` label, never compared. Byte identity is strictly stronger |
+| **Image Max Absolute Error** | *reported only* | Printed with a `1.0e-7` label, never compared |
 | **Normalized STAR Schema and Values** | `0 differences` | Static metadata, loop columns/rows, and motion values must match after path normalization |
-| **Process Exit Status** | `0` | Successful execution |
+| **Process Exit Status** | `0` | Enforced **only when `--test-log` is supplied** |
+
+> [!NOTE]
+> The exact gate compares raw bytes, so `+0.0` against `-0.0` fails even though the RMSE is zero. Exact is therefore stricter than the two `1.0e-7` labels above, never weaker. See [`gate_contract.md` §3](gate_contract.md#3-what-each-profile-enforces).
 
 ### Gate 2: Numerical Equivalence Gate (`--gate relaxed`)
 Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (CUDA, JAX, ROCm, Metal).
+
+The name is historical and overstates what this gate establishes. It measures **agreement with one CPU implementation on one dataset**, in pixel units. Its limits have never been calibrated against a known amount of lost motion-correction signal ([#60](https://github.com/KingAlejandro/MotionCorr-standalone/issues/60)), so treat it as a change detector. The heading is kept so existing deep links stay valid.
 
 > [!NOTE]
 > **Why numerical tolerances are necessary for parallel backends:**
@@ -147,11 +155,25 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 |:---|:---:|:---|
 | **Max Frame Shift Error** | `<= 0.05 px` | Trajectory shifts remain within 1/20th of a detector pixel |
 | **Coordinate RMS Shift Error** | `<= 0.02 px` | Global motion drift across all frames is bounded |
-| **Image RMSE** | `<= 0.020` | Relative RMSE $< 0.1\%$ of micrograph standard deviation |
-| **Image Relative RMSE** | `<= 0.001` | Evaluated independently of absolute RMSE; a constant reference with changed pixels fails |
+| **Image Absolute RMSE** | `<= 0.020` | In the MRC's own intensity units. **Not dataset-portable**: on the tutorial micrographs it is 21x–25x looser than the relative limit and never binds; on the committed synthetic fixture it is 3.2x stricter and does bind |
+| **Image Relative RMSE** | `<= 0.001` | $\text{RMSE} / \max(\sigma_{\text{ref}}, 10^{-12})$, where $\sigma_{\text{ref}}$ is the **reference image's population standard deviation** (`ddof = 0`), not $\lVert I_{\text{ref}} \rVert_2$ and not the MRC header `rms` word. Evaluated independently of absolute RMSE; a constant reference with changed pixels fails closed |
 | **Image Max Absolute Error** | `<= 5.0` | Accommodates isolated edge and hot-pixel interpolation artifacts |
 | **Normalized STAR Schema and Static Metadata** | `0 differences` | Blocks, loop labels/row counts, and static values match; global shifts are checked separately. Local motion coefficients and shifts are not yet an independent numerical gate. |
-| **Process Exit Status** | `0` | Clean process termination |
+| **Process Exit Status** | `0` | Enforced **only when `--test-log` is supplied** |
+
+> [!WARNING]
+> **The absolute and relative image limits are not equivalent and never were.** $0.020 = 0.001 \cdot \sigma_{\text{ref}}$ holds only when $\sigma_{\text{ref}} = 20.0$. Measured $\sigma_{\text{ref}}$ is 0.806–0.935 across the 24 tutorial micrographs and 64.281 on the committed synthetic fixture. An earlier revision of this table justified `0.020` as "Relative RMSE < 0.1% of micrograph standard deviation"; that statement was wrong by 21x–25x on the tutorial data, and it was not recalculated when the limit was raised from `0.010` to `0.020` in `93556b4`. Derivation and reproducible commands: [`gate_contract.md` §4](gate_contract.md#4-correcting-the-relative-rmse-documentation).
+
+> [!NOTE]
+> **Numerical-policy history.** `93556b4` made the image check pass if *either* the absolute or the relative limit held. `6c8a105` made them two independent requirements and changed the denominator from the MRC header `rms` word to the computed population standard deviation, and constant-reference behaviour from fail-open to fail-closed. Under the earlier OR policy all 24 CUDA movies would have passed the image check; under the current AND policy they fail on the relative limit alone. Full table: [`gate_contract.md` §5](gate_contract.md#5-numerical-policy-history).
+
+### Custom profile (`--gate custom`)
+`custom` is not a third acceptance tier. It is Gate 2 with a stricter default absolute image RMSE (`0.010`); every other default and all enforcement logic are identical to `relaxed`. It exists so `--image-rmse`, `--image-max-err`, `--image-relative-rmse`, `--max-shift-err` and `--shift-rmse` overrides start from a tighter base. `--image-relative-rmse` defaults to `0.001` in all three profiles but is only evaluated outside `exact`.
+
+### Not gated by any profile
+- **Ground-truth recovery magnitude.** `--ground-truth` reports recovery error and fails only if it cannot be computed. No tolerance is applied. Enforcing it is [#59](https://github.com/KingAlejandro/MotionCorr-standalone/issues/59).
+- **Local motion model coefficients.** Gate 2 and Gate 3 exclude `_rlnMotionModelCoeff`, `_rlnMicrographShiftX/Y` and `_rlnAccumMotion*` from the STAR comparison. Global shifts are checked separately through `data_global_shift`; the local displacement field is checked by nothing. Also [#59](https://github.com/KingAlejandro/MotionCorr-standalone/issues/59).
+- **Scientific outcome.** No gate measures recoverable signal. A Gate 2 failure bounds CPU disagreement; it does not establish signal loss. That is [#61](https://github.com/KingAlejandro/MotionCorr-standalone/issues/61).
 
 ---
 
@@ -159,7 +181,10 @@ Used for multi-threaded CPU execution (`--j 4+`) and new accelerated backends (C
 
 The standalone comparison tool supports both human-readable diagnostics and automated JSON reporting:
 
-Each directory comparison is for one movie. If a directory contains multiple corrected MRC or per-movie STAR files, the tool fails and asks for explicit file paths; run a separate comparison for every movie in a dataset. A file-only comparison is marked as partial coverage, and its PASS/FAIL applies only to the supplied pair. Ground-truth recovery is reported when supplied, but no ground-truth tolerance is applied. A supplied `--test-log` must contain parseable `/usr/bin/time -v` time, memory, and exit status. The regression wrapper also checks the MotionCorr process exit status directly.
+Each directory comparison is for one movie. If a directory contains multiple corrected MRC or per-movie STAR files, the tool reports the ambiguity, fails the gate, and asks for explicit file paths; run a separate comparison for every movie in a dataset. A file-only comparison is marked as partial coverage, and its PASS/FAIL applies only to the supplied pair — pass `--require-complete-coverage` to fail instead when the corrected image or the trajectory/STAR pair was not compared. Ground-truth recovery is reported when supplied, but no ground-truth tolerance is applied. A supplied `--test-log` must contain parseable `/usr/bin/time -v` time, memory, and exit status; without it the process exit status is not checked at all. The regression wrapper also checks the MotionCorr process exit status directly.
+
+> [!NOTE]
+> Until [#58](https://github.com/KingAlejandro/MotionCorr-standalone/issues/58), an unresolved or ambiguous input was written into the report's `errors` list but did not change the exit status, so an ambiguous directory pair exited `0`. It now fails. `--require-complete-coverage` is **off by default**, so no existing caller changes behaviour; `tools/run_regression_tests.sh` passes it. The full failure-behaviour list is in [`gate_contract.md` §3](gate_contract.md#failure-behaviour).
 
 ### Example Usage
 
@@ -168,13 +193,15 @@ Each directory comparison is for one movie. If a directory contains multiple cor
 python3 tools/compare_motioncorr.py \
   --ref test-data/fixtures/reference_output \
   --test my_output_dir \
-  --gate exact
+  --gate exact \
+  --require-complete-coverage
 
-# 2. Multi-thread or GPU backend acceptance gate
+# 2. Multi-thread or GPU backend CPU-agreement diagnostic
 python3 tools/compare_motioncorr.py \
   --ref relion30_tutorial/MotionCorr_j1 \
   --test relion30_tutorial/MotionCorr_cuda \
-  --gate relaxed
+  --gate relaxed \
+  --require-complete-coverage
 
 # 3. Validation with known synthetic ground truth
 python3 tools/compare_motioncorr.py \
@@ -203,4 +230,4 @@ python3 tools/compare_motioncorr.py \
 | **Tutorial Movie (j=4)** | Linux x86_64 (`4GPUs`) | `--use_own --j 4` | `0.006832 px` | `0.005889` | 2.95 GiB | `0` |
 | **Tutorial Movie (CUDA PoC, 2026-09-24 rerun)** | Linux x86_64 (`4GPUs`, A100) | `--use_own --gpu 0 --j 4 --seed 1` | `0.006203 px` | `0.003795` | Not remeasured | `0` |
 
-The CUDA row is the first movie of the deterministic rerun. Its relative image RMSE was `0.004708`, above the `0.001` Gate 2 limit; all 24 experimental movies failed that check despite clean exits. See the [full CUDA validation report](cuda_global_alignment_validation.md). The two older single-movie CPU rows above predate the CPU determinism fix and are historical measurements. Current full-dataset CPU results are summarized in Section 4.
+The CUDA row is the first movie of the deterministic rerun. Its relative image RMSE was `0.004708` — an absolute RMSE of `0.003795` against a reference standard deviation of `0.806` — above the `0.001` Gate 2 limit; all 24 experimental movies failed that check despite clean exits. This bounds disagreement with the CPU reference; it does not by itself establish a loss of recoverable signal. See the [full CUDA validation report](cuda_global_alignment_validation.md). The two older single-movie CPU rows above predate the CPU determinism fix and are historical measurements. Current full-dataset CPU results are summarized in Section 4.

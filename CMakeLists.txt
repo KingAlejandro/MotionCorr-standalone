@@ -48,14 +48,26 @@ target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
 
+option(TIMING "Enable internal timing" OFF)
+if(TIMING)
+    add_compile_definitions(TIMING)
+endif()
+
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
     enable_language(CUDA)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+        set(CMAKE_CUDA_ARCHITECTURES 80)
+    endif()
     set(CMAKE_CUDA_STANDARD 17)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
     find_package(CUDAToolkit REQUIRED)
     target_compile_definitions(motioncorr_core PUBLIC _CUDA_ENABLED)
-    target_sources(motioncorr_core PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu")
+    target_sources(motioncorr_core PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 endif()
 
@@ -65,10 +77,42 @@ install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(runner_numerics tests/test_runner_numerics.cpp)
+    target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME HotPixelRngDeterminism
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME RunnerExposure
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case exposure)
+        foreach(case failure invalid resume tomography)
+            add_test(NAME Runner_${case}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                    --binary $<TARGET_FILE:motioncorr> --case ${case})
+        endforeach()
+        add_test(NAME RunnerLateBin
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case late_bin)
+        add_test(NAME RunnerExportedUnits
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case exported_units)
+        add_test(NAME RunnerModelParser
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+    endif()
+endif()
+if(BUILD_TESTING AND CUDA)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
+        target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)
+        target_link_options(cuda_wrapper_upload_failure PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
+        add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
+        set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
     endif()
 endif()

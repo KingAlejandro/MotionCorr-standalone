@@ -1,0 +1,56 @@
+
+=== NEGATIVE TEST: Invalid Device ID --gpu 99 ===
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/test_neg/neg.mrc --gpu 99
+      Exit 1 (0.10s)
+Negative test passed: True (exit 1)
+
+=== FALLBACK TEST: Synthetic Fallback Movie ===
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cpu/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_fallback.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cpu/fb_cpu.mrc --patch_x 3 --patch_y 3 --j 1
+      Exit 0 (0.37s)
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_fallback.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cuda/fb_cuda.mrc --patch_x 3 --patch_y 3 --gpu 0
+      Exit 0 (0.69s)
+[RUN] /home/alex/mc-env/bin/python /home/alex/MotionCorr-issue17-codex-rerun/tools/compare_motioncorr.py --ref-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cpu/fb_cpu.mrc/synthetic_fallback.mrc --test-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cuda/fb_cuda.mrc/synthetic_fallback.mrc --ref-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cpu/fb_cpu.mrc/synthetic_fallback.star --test-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/fb_cuda/fb_cuda.mrc/synthetic_fallback.star --gate relaxed --json
+      Exit 1 (0.25s)
+
+=== SYNTHETIC STAGE: synth_1x1 ===
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cpu/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cpu/synth_1x1.mrc --patch_x 1 --patch_y 1 --j 1
+      Exit 0 (0.30s)
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cuda/synth_1x1.mrc --patch_x 1 --patch_y 1 --gpu 0
+      Exit 0 (0.66s)
+[RUN] /home/alex/mc-env/bin/python /home/alex/MotionCorr-issue17-codex-rerun/tools/compare_motioncorr.py --ref-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cpu/synth_1x1.mrc/synthetic_local_motion.mrc --test-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cuda/synth_1x1.mrc/synthetic_local_motion.mrc --ref-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cpu/synth_1x1.mrc/synthetic_local_motion.star --test-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_1x1_cuda/synth_1x1.mrc/synthetic_local_motion.star --gate relaxed --json
+      Exit 0 (0.26s)
+
+=== SYNTHETIC STAGE: synth_3x3 ===
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cpu/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cpu/synth_3x3.mrc --patch_x 3 --patch_y 3 --j 1
+      Exit 0 (0.33s)
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cuda/synth_3x3.mrc --patch_x 3 --patch_y 3 --gpu 0
+      Exit 0 (0.67s)
+[RUN] /home/alex/mc-env/bin/python /home/alex/MotionCorr-issue17-codex-rerun/tools/compare_motioncorr.py --ref-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cpu/synth_3x3.mrc/synthetic_local_motion.mrc --test-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cuda/synth_3x3.mrc/synthetic_local_motion.mrc --ref-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cpu/synth_3x3.mrc/synthetic_local_motion.star --test-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_3x3_cuda/synth_3x3.mrc/synthetic_local_motion.star --gate relaxed --json
+      Exit 1 (0.25s)
+
+=== SYNTHETIC STAGE: synth_5x5 ===
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cpu/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cpu/synth_5x5.mrc --patch_x 5 --patch_y 5 --j 1
+      Exit 0 (0.36s)
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/test-data/synthetic/synthetic_local_motion.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cuda/synth_5x5.mrc --patch_x 5 --patch_y 5 --gpu 0
+      Exit 0 (0.71s)
+[RUN] /home/alex/mc-env/bin/python /home/alex/MotionCorr-issue17-codex-rerun/tools/compare_motioncorr.py --ref-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cpu/synth_5x5.mrc/synthetic_local_motion.mrc --test-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cuda/synth_5x5.mrc/synthetic_local_motion.mrc --ref-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cpu/synth_5x5.mrc/synthetic_local_motion.star --test-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/synth_5x5_cuda/synth_5x5.mrc/synthetic_local_motion.star --gate relaxed --json
+      Exit 1 (0.25s)
+
+=== EXPERIMENTAL MOVIE TEST: 20170629_00021_frameImage.tiff ===
+Running CPU reference for experimental movie...
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cpu/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_input.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cpu/corrected.mrc --patch_x 5 --patch_y 5 --dose_weighting --voltage 300.0 --angpix 1.06 --dose_per_frame 1.277 --j 8 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+      Exit 0 (16.09s)
+Running CUDA steady-state run 1/3...
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_input.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cuda_run1/corrected.mrc --patch_x 5 --patch_y 5 --dose_weighting --voltage 300.0 --angpix 1.06 --dose_per_frame 1.277 --gpu 0 --j 8 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+      Exit 0 (16.35s)
+[RUN] /home/alex/mc-env/bin/python /home/alex/MotionCorr-issue17-codex-rerun/tools/compare_motioncorr.py --ref-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cpu/corrected.mrc/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.mrc --test-mrc /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cuda_run1/corrected.mrc/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.mrc --ref-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cpu/corrected.mrc/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.star --test-star /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cuda_run1/corrected.mrc/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.star --gate relaxed --json
+      Exit 1 (0.72s)
+Running CUDA steady-state run 2/3...
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_input.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cuda_run2/corrected.mrc --patch_x 5 --patch_y 5 --dose_weighting --voltage 300.0 --angpix 1.06 --dose_per_frame 1.277 --gpu 0 --j 8 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+      Exit 0 (16.24s)
+Running CUDA steady-state run 3/3...
+[RUN] /home/alex/MotionCorr-issue17-codex-rerun/build-cuda/motioncorr --use_own --i /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_input.star --o /home/alex/MotionCorr-issue17-codex-rerun/validation_review/exp_cuda_run3/corrected.mrc --patch_x 5 --patch_y 5 --dose_weighting --voltage 300.0 --angpix 1.06 --dose_per_frame 1.277 --gpu 0 --j 8 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+      Exit 0 (16.63s)
+
+Saved validation summary to /home/alex/MotionCorr-issue17-codex-rerun/validation_review/cuda_patch_validation_summary.json
+Overall verdict: FAIL

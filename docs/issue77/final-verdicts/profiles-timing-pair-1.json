@@ -1,0 +1,65 @@
+{
+  "note": "Fields come from application profiles. Totals include overlapping categories; do not sum them into end-to-end time. Device process memory samples are separate.",
+  "runs": [
+    {
+      "label": "main",
+      "profile_instances": {
+        "Global Alignment Profile": 24,
+        "Patch Alignment Profile": 600,
+        "Dose-Weighted Reconstruction Profile (Resident VRAM)": 24
+      },
+      "reported_ms_totals": {
+        "Global Alignment Profile": {
+          "Host-to-Device transfer time": 0.0,
+          "Custom kernel execution time": 152.48000000000002,
+          "cuFFT execution time": 30.14999999999999,
+          "Device-to-Host transfer time": 2.1000000000000005,
+          "Total GPU alignment time": 253.84000000000003
+        },
+        "Patch Alignment Profile": {
+          "Host-to-Device transfer time": 0.0,
+          "Custom kernel execution time": 146.1599999999995,
+          "cuFFT execution time": 30.59000000000029,
+          "Device-to-Host transfer time": 35.98999999999989,
+          "Total GPU alignment time": 819.0699999999999
+        },
+        "Dose-Weighted Reconstruction Profile (Resident VRAM)": {
+          "Dose Weighting Kernel": 225.67000000000013,
+          "cuFFT C2R Execution": 516.63,
+          "Interpolation & Accum": 104.04000000000002,
+          "Total DW Reconstruction Time": 1175.4700000000003
+        }
+      }
+    },
+    {
+      "label": "candidate",
+      "profile_instances": {
+        "Global Alignment Profile": 24,
+        "Patch Alignment Profile": 600,
+        "Dose-Weighted Reconstruction Profile (Resident VRAM)": 24
+      },
+      "reported_ms_totals": {
+        "Global Alignment Profile": {
+          "Host-to-Device transfer time": 0.0,
+          "Custom kernel execution time": 149.26,
+          "cuFFT execution time": 30.209999999999997,
+          "Device-to-Host transfer time": 2.0800000000000005,
+          "Total GPU alignment time": 185.02999999999997
+        },
+        "Patch Alignment Profile": {
+          "Host-to-Device transfer time": 0.0,
+          "Custom kernel execution time": 140.0100000000001,
+          "cuFFT execution time": 28.930000000000092,
+          "Device-to-Host transfer time": 35.36999999999986,
+          "Total GPU alignment time": 262.81000000000057
+        },
+        "Dose-Weighted Reconstruction Profile (Resident VRAM)": {
+          "Dose Weighting Kernel": 226.6899999999999,
+          "cuFFT C2R Execution": 512.5100000000001,
+          "Interpolation & Accum": 105.84,
+          "Total DW Reconstruction Time": 1151.5099999999998
+        }
+      }
+    }
+  ]
+}

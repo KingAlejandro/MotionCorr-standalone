@@ -1,0 +1,30 @@
+{
+  "note": "Test-only LD_PRELOAD injection into actual CUDA global alignment allocation/plan calls; not resource exhaustion stress or local-stage fault matrix",
+  "cases": [
+    {
+      "kind": "cudaMalloc",
+      "exit_code": 1,
+      "checks": {
+        "nonsignal_nonzero_exit": true,
+        "injected_alignment_stage": true,
+        "no_global_success_marker": true,
+        "no_corrected_image": true,
+        "no_joint_star": true
+      },
+      "pass": true
+    },
+    {
+      "kind": "cufftPlanMany",
+      "exit_code": 1,
+      "checks": {
+        "nonsignal_nonzero_exit": true,
+        "injected_alignment_stage": true,
+        "no_global_success_marker": true,
+        "no_corrected_image": true,
+        "no_joint_star": true
+      },
+      "pass": true
+    }
+  ],
+  "pass": true
+}

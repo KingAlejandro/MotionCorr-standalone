@@ -1,0 +1,34 @@
+{
+  "baseline_sha": "1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26",
+  "candidate_sha": "5b9e5a4b7e441e6e056b4a9a1f6cf4e2bcf28bce",
+  "job_id": 3510495,
+  "remote_root": "/scratch/scarf1415/mc-issue77-reviewed",
+  "evidence_root": "/scratch/scarf1415/mc-issue77-reviewed/evidence-3510495",
+  "node": "gn3000",
+  "requested": "exclusive scarf23 GPU1 CPUs8",
+  "actual_allocation": "exclusive entire node GPUs4 CPUs64; execution GPU0 only, builds8 threads, runtimej8",
+  "staging_failure": {
+    "job": 3510486,
+    "cause": "SCARF SSH reset left missing harness; stopped before building"
+  },
+  "state": "completed_final_head_validation",
+  "expected_nonzero_log_lines": {
+    "line62": "sampler wait after terminating sampler (expected)",
+    "line71": "invalid GPU device99 negative control (expected)"
+  },
+  "final_candidate_sha": "4934db76583fbfa62e5da6bda0c1bfd18ea79207",
+  "jobs": {
+    "original": 3510495,
+    "confirmation": 3510561,
+    "final_v4_characterization": 3510636,
+    "final_source": 3510657,
+    "cancelled_own_pending": [
+      3510544,
+      3510582
+    ]
+  },
+  "final_evidence_root": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657",
+  "final_archive": "issue77-final4934-complete-evidence.tar.gz",
+  "characterization_archive": "issue77-5b-characterization-evidence.tar.gz",
+  "scope": "Same-CUDA regression; no CPU/RELION science claim; no merges"
+}

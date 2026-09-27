@@ -1,0 +1,2922 @@
+{
+  "what": "same-backend regression A/B, main vs candidate, CUDA native device 0, j=8",
+  "not_a_claim_about": [
+    "CPU/CUDA agreement",
+    "RELION parity",
+    "scientific equivalence"
+  ],
+  "comparator": "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+  "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--gpu",
+    "0",
+    "--j",
+    "8",
+    "--seed",
+    "1"
+  ],
+  "input_star": "movies.star",
+  "tutorial": "/home/vol05/scarf1415/i53-scarf/relion30_tutorial",
+  "ref_binary": "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/build-cuda/motioncorr",
+  "ref_binary_sha256": "5299ebd0aedce467ba0d0f605aaf2554fd940690656f7daaa694c40e5cbd0ab1",
+  "test_binary": "/scratch/scarf1415/mc-issue77-reviewed/src-candidate-3510657/build-cuda/motioncorr",
+  "test_binary_sha256": "871626fc3c65f28d260d152fc4c150ede23b42b8f4fc670207e675ce181ee87c",
+  "normalization_patterns": [
+    "\\d{2}-[A-Za-z]{3}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}",
+    "\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}",
+    "%%CreationDate:.*",
+    "/CreationDate\\s*\\([^)]*\\)",
+    "/ModDate\\s*\\([^)]*\\)",
+    "/ID\\s*\\[[^\\]]*\\]",
+    "\\b\\d+\\.\\d+\\s*(seconds|sec|s)\\b",
+    "took\\s+[0-9.]+",
+    "\\b\\d+\\.\\d+\\s*ms\\b"
+  ],
+  "original_output_root_aliases": {
+    "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8",
+    "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8"
+  },
+  "tree_comparison": {
+    "files": [
+      {
+        "path": "Movies/20170629_00021_frameImage.log",
+        "ref_sha256": "0589a0fd2f736274e3dd5045c72513f17ea2942a51c1c115fd9f9399f9919a50",
+        "test_sha256": "05b4e3ccee5f0d98fd7d371fb2c2d725ab7a2e22efab2aafbc444d4c36d8935d",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16319,
+        "test_bytes": 16325,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 26,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 43,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 56,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 69,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 82,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 95,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage.mrc",
+        "ref_sha256": "2efb5d87e2f4bb5f47c061a484a063f1e2407d60bf93791ffc9609d635df1c75",
+        "test_sha256": "f8bfbf9a944b6a1c503373c8054b4ff6c03d38a322a4353bb99ee9f0b847df05",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage.star",
+        "ref_sha256": "04810f874f4726e2b74431db3c7aef3bc1eab43f7ccfa21853f1f2603ac28221",
+        "test_sha256": "04810f874f4726e2b74431db3c7aef3bc1eab43f7ccfa21853f1f2603ac28221",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage_shifts.eps",
+        "ref_sha256": "148c972bade29522021c4d0f730a20c39b24687b72ed959b09112f31b080cde2",
+        "test_sha256": "ba5a4c7b08dcb09f5d1f8e5176719fbde70d636a558056484cf5688ae6bd946e",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92332,
+        "test_bytes": 92337
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.log",
+        "ref_sha256": "85a61d1bfa1a6be17970db27c854a622b57189bc46a6823428fa62651d71d2c3",
+        "test_sha256": "628f30b006a29ef5c79d6306c31f57da3ce2ed0922121a0c7d241883a9c7b9dd",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16382,
+        "test_bytes": 16386,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.mrc",
+        "ref_sha256": "3f4e302e79514c79fc7043bff7477b23cbf6229bb5c803c11d0277744afc1004",
+        "test_sha256": "4a3e60012cc1f5c3d3a3aeaf4b6a3166e89a4c55d06494161952d517b1ac3478",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.star",
+        "ref_sha256": "66117779deaf93e7d350829ccd82fe9c696af646e7133e885bdc84a731db1b3d",
+        "test_sha256": "66117779deaf93e7d350829ccd82fe9c696af646e7133e885bdc84a731db1b3d",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage_shifts.eps",
+        "ref_sha256": "896d46b43418ea0aa613936bbeb135a9c0ead9769d119cb93f05cdf6b4b96dba",
+        "test_sha256": "2f90de65d27f2160287c666a495effbc3b10eb7ae7948bf19493a7c5a551f1b1",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92331,
+        "test_bytes": 92336
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.log",
+        "ref_sha256": "14ec46bad419d0f0451382a56d7a9c5e2d40a5259034fba6ca864ba56b8850e1",
+        "test_sha256": "0446c1e8534995be5e7e6ba7c033e2f2a437323f4bca30273d7954bf6cd700dd",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16382,
+        "test_bytes": 16386,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.mrc",
+        "ref_sha256": "e2049f37ce1c00a6b2f0f87434ab9c9a03b8cdf64774420a98340465a0811137",
+        "test_sha256": "59636004ee4612c95bb8d753b63bc2069dae33d2821c717d4e7c3346f17ccc92",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.star",
+        "ref_sha256": "2cefbc8f6c200ec4b0718ae5fad7560b39e760728f652aed41ec27c9b6c5b873",
+        "test_sha256": "2cefbc8f6c200ec4b0718ae5fad7560b39e760728f652aed41ec27c9b6c5b873",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage_shifts.eps",
+        "ref_sha256": "96df77d3d34a90031dc09a3b9d9025a8ebb4f83d6aaba06ee5e6a04c3f7f536e",
+        "test_sha256": "94a3408a0444d80a94c4a7e5dbcf2b2329995deecf3d3ad7f6e41198729ffaeb",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92303,
+        "test_bytes": 92308
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.log",
+        "ref_sha256": "54e68f8c1c3a7d2326f2173de2d7bbd2996c5121b0899adfa832f270e03414ff",
+        "test_sha256": "58b069612eb5fa96e38fbd7ae4733818b7ae6e4fae0a952e3a65068144f2ed5f",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16382,
+        "test_bytes": 16386,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.mrc",
+        "ref_sha256": "6e3c293e8adadf89b6e60115e54dd892f2db96300914fe8ca8ccd6291b3753a0",
+        "test_sha256": "868488251d4d9ceed8698d516fcea1d65f92f9f04cf3c505292f7932544425d1",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.star",
+        "ref_sha256": "bb3150fbff77c6511c82edfbd67898706484d32033a84b7f80870eaa4232429f",
+        "test_sha256": "bb3150fbff77c6511c82edfbd67898706484d32033a84b7f80870eaa4232429f",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage_shifts.eps",
+        "ref_sha256": "ec8f6816db876c1dce432bc1972f5448a7f1bcacedf8fd55fabb3751539ad7cf",
+        "test_sha256": "63b0d80f0a43b1d9ca4a305765afd799595fb8b329a259c1e6145383e4b0a901",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92309,
+        "test_bytes": 92314
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.log",
+        "ref_sha256": "9b33f7a22edff1165989c868a097878fc989f914f6a26826ff76de671c7eda77",
+        "test_sha256": "8b6470b64c057cadd61a7b3778ca8676de359fc3884df4c0990f513bf755ca44",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16380,
+        "test_bytes": 16384,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.mrc",
+        "ref_sha256": "02713b16a00a2f07d82457e78d3bee38c563a2963b399d1297d8cdc988ba18a9",
+        "test_sha256": "96d13217cd77623babece48610811b2fe016135ad44e62c9fd1c3a366660e107",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.star",
+        "ref_sha256": "38f78d0fa89db5f8a61bd1ef9d34aaae753dc83638a46c8d4734f119d00cdba4",
+        "test_sha256": "38f78d0fa89db5f8a61bd1ef9d34aaae753dc83638a46c8d4734f119d00cdba4",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage_shifts.eps",
+        "ref_sha256": "7fe9f27de913c2284690a8990fe40348a033374d4e67d0bdfa5cf9cbbe8a56ae",
+        "test_sha256": "82f1abdcd759241c9fa37610dad7ffe4fcf673bb86a3c6b6790c889a774d331e",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92305,
+        "test_bytes": 92310
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.log",
+        "ref_sha256": "04e384edb15d303698ee3b0df354db67c2a441e4b4fcd51a7d565c4e22d0f549",
+        "test_sha256": "14be40e0316ff5430c40cbfc45d63df07176e05a2b9175cc0be2028c47402bf6",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16352,
+        "test_bytes": 16356,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.mrc",
+        "ref_sha256": "59683553a15a7060ad50c51ca8c707c5c6a17cbc84c1bf1a57aa57cf422ae813",
+        "test_sha256": "8bcef4be9f6ace33c4f24321ffd5231fdf15a0fcc4f54d3af866c02c8eb13b84",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.star",
+        "ref_sha256": "1b66bda45b2ff78043afea5b9308b60eedefacbb4e2661a03764345b268d200f",
+        "test_sha256": "1b66bda45b2ff78043afea5b9308b60eedefacbb4e2661a03764345b268d200f",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage_shifts.eps",
+        "ref_sha256": "902e309a78cf73695350a675301143a116fc0064f9d8cf6e253089265b78597c",
+        "test_sha256": "f5d27f6d3ecbcf72c66574a028ddc0241a935f78696bc43a60bc0eaff5fd0640",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92318,
+        "test_bytes": 92323
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.log",
+        "ref_sha256": "ff0f741f2749f11081c4c5b0c5453ca7311b4689c1abb89e0e535fb2eb88265e",
+        "test_sha256": "a2adcca10cd3c74ec9c415296b64535799b3655975aa57b25e73c31c596a4796",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16351,
+        "test_bytes": 16355,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.mrc",
+        "ref_sha256": "faa477d7ab3951c0fc9327d1fe30bf544d9956276740b79ebb821f2185c3cd7d",
+        "test_sha256": "e58afd63d969df680a9715556bf869c4f80b495d504b756d846646f6c1d1a538",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.star",
+        "ref_sha256": "fc9db7600231a29d397d6419df107b22e5293e66e0b471af7386479444c2a092",
+        "test_sha256": "fc9db7600231a29d397d6419df107b22e5293e66e0b471af7386479444c2a092",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage_shifts.eps",
+        "ref_sha256": "768fef7cfbd07c45ae8c1d40113f05f3c644d89d683f6f87e3daf9b4ea7f00cb",
+        "test_sha256": "652df39e311d29325bb3be94f3059b4f806e6ac070cae82f80043a1263e7e600",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92306,
+        "test_bytes": 92311
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.log",
+        "ref_sha256": "fa647f7421c0eee03cf5103db3ec3a4c5b29c3c9ff2db49357a5049fca07f9da",
+        "test_sha256": "6da83200695f09e0889184643b9a02b3e4f243b09d3e34331dacf53363cb9a21",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16354,
+        "test_bytes": 16358,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.mrc",
+        "ref_sha256": "a3ae8407772cbb2fbe9c623ddfb1605de5851771caf2caf998c6bbb92b491d14",
+        "test_sha256": "0b820af35bbd66328ab5b437c445a5dfc2b22962eae8058a21ae56d6cdca38c7",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.star",
+        "ref_sha256": "1586c4b00c0f87c0cacf14e177d5fc6f4070350639dde53d12fe3344f9f00c54",
+        "test_sha256": "1586c4b00c0f87c0cacf14e177d5fc6f4070350639dde53d12fe3344f9f00c54",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage_shifts.eps",
+        "ref_sha256": "f09e596cae16aca2175bc5293e9b07a7f0ef3347e407bf480f50ab2606a1fcd9",
+        "test_sha256": "dcd168aaba0eec048efddfdd0f43ef01a7efb032989bc4de4fb849f3ec403b15",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94746,
+        "test_bytes": 94751
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.log",
+        "ref_sha256": "34e33f7113ec05e32ea956b9f04ceacfd23333fc542ab50a0c868bbda57515e2",
+        "test_sha256": "adc603d581fad3bf99ef1b3aeda4819cf87a381576936813e039a1ff64f72ec4",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16379,
+        "test_bytes": 16383,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.mrc",
+        "ref_sha256": "d835e10bcb3c41bf906e9a7844a6a2977064651b636ba3980c27ff13a11a18f3",
+        "test_sha256": "e4a37029cb8fc42b407139dd567592f63c14245fa9f899b447113f22208a9b14",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.star",
+        "ref_sha256": "5362bb59d2c530bb664e1d9ca16a14cceb0f3f5d8ec53542f23abef81ac9de30",
+        "test_sha256": "5362bb59d2c530bb664e1d9ca16a14cceb0f3f5d8ec53542f23abef81ac9de30",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage_shifts.eps",
+        "ref_sha256": "40c313ee99b0f5417f37c194c3565e30a3940f02f6c46a017a417b9d3ac176a8",
+        "test_sha256": "6604a849fbbd7cc594bb586775dc811453b29b961da3328f7634725be2e0779c",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92286,
+        "test_bytes": 92291
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.log",
+        "ref_sha256": "44535185c4bdaf4556165eb4dc0a71786a22ec8df17186f9265df8401cadc8d8",
+        "test_sha256": "c080252b1d5f3a6f364ba1ac863c33db64780870df4f4d021494589b267f6e58",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16351,
+        "test_bytes": 16355,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.mrc",
+        "ref_sha256": "dea8fab9e927e780342833ab3634806ed998aaa59b01e40fa5c4c38527bfe52d",
+        "test_sha256": "3ad85c0a1a58a6772b2aa495d38484f52d606bdac339b07f25edcf5b5f8233a8",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.star",
+        "ref_sha256": "6bd1a47c3f9944595229b2459432be5bffdf4ad375c666710585661df05f798e",
+        "test_sha256": "6bd1a47c3f9944595229b2459432be5bffdf4ad375c666710585661df05f798e",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage_shifts.eps",
+        "ref_sha256": "8a304c17a6d77707181a2001f9dd9a68b0d34fe0884cbb48d145680662010ec7",
+        "test_sha256": "f0b11dd2c28a734da629d21e7905adb0ac948283e10057a1c6dd7bb5fe20bf01",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92330,
+        "test_bytes": 92335
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.log",
+        "ref_sha256": "765cb7a028faf44334d9ffb90961c6798de635b1eec1b01adba7f16d41b51d08",
+        "test_sha256": "b196c083ce7c98a6af58bbf961ff066ce663438bd61c2ba493e7cd403a1d1560",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16354,
+        "test_bytes": 16357,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.mrc",
+        "ref_sha256": "91e8f6cb95f0354508757c216e302e2d38d8492595c100bf0f79ed01759c0ab6",
+        "test_sha256": "0271527cf687336b838192b0bf773ed0ab6830a04fcea106260aeac429a10181",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.star",
+        "ref_sha256": "87150af6e40276da42a48d17420465ee801640f89057280a5bea260e88b74a7a",
+        "test_sha256": "87150af6e40276da42a48d17420465ee801640f89057280a5bea260e88b74a7a",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage_shifts.eps",
+        "ref_sha256": "2ff4fa111f7a9682d4314ae42e4f5c249f81dbc04ec965b33934c17f3f21ece1",
+        "test_sha256": "e80b5458391d48fc54069c571ac3c78c516bc12d2ec4a9a99597c104018bbe90",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92301,
+        "test_bytes": 92306
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.log",
+        "ref_sha256": "7d9ff3713ecbdcd9193ccd78f76655d631c20709b69fa61823ac4bb230724dd7",
+        "test_sha256": "39de1936d0d84aac0cd5b43a8568775bbacf0d1101264cb627fa68a71bc8b205",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16352,
+        "test_bytes": 16356,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.mrc",
+        "ref_sha256": "c26db2bdb9dc8dccdea67f94f4db3c8b0569c957d8eb161c67ad8a8cd00da3d1",
+        "test_sha256": "0867d284c21c383da8426c749c8d87eb2ceca46d39b08df44b8738ac1b3354ea",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.star",
+        "ref_sha256": "0500abb77e9b213e90a9d87c7db9837c95cbabc2838925ff94e917e6f7734bd9",
+        "test_sha256": "0500abb77e9b213e90a9d87c7db9837c95cbabc2838925ff94e917e6f7734bd9",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage_shifts.eps",
+        "ref_sha256": "b4772a700a6d5a4633cb5eb38fb6a95e042df2f74f9c088f4652fe84d98f3a87",
+        "test_sha256": "057d6dff3f456d850500b713851a28b8178d68264e6b84acc88c887bcf6b5927",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94762,
+        "test_bytes": 94767
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.log",
+        "ref_sha256": "e3850059600857e9f6718bf775a06977860a611359b90bc912e3268216746be0",
+        "test_sha256": "4ae3731df723da98f1e2cabe8b767d3718ad7cb93fbda06274bfb6d72174037b",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16381,
+        "test_bytes": 16385,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 97,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.mrc",
+        "ref_sha256": "e20fa1df580830e9d9042e8a009c220b8b06e02a96506bb6907d17f4eec80ff3",
+        "test_sha256": "f0956c32229e06a2c046b62e32d8d9135c7c08f7030e97859d5e6edc10ab9df4",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.star",
+        "ref_sha256": "12e45c259855e9610355934eb9f05556124c21f3eb00fc4b049c7b9a820c80c6",
+        "test_sha256": "12e45c259855e9610355934eb9f05556124c21f3eb00fc4b049c7b9a820c80c6",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage_shifts.eps",
+        "ref_sha256": "0755c059e59a3e543ca6cb4d62e6ef4fa113613a35fcaf23361b64437e4b95ce",
+        "test_sha256": "ac7358efaa7dc176e779530f81b40f9b092f7d4d6b2379f0e9c0c13ead15d1cc",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92323,
+        "test_bytes": 92328
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.log",
+        "ref_sha256": "55c8cf3c951488882eede0fb01e6f961f11db3364ef41cdddd8dd143941e9e2a",
+        "test_sha256": "7af5c88d4cc6c96bb302e7dbd59a1f873ca40137993d90b44f51b0d13c755087",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16352,
+        "test_bytes": 16356,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.mrc",
+        "ref_sha256": "0cba7b12145bf6c31ab0fb28abcc05b0ba2e94154ce7ae53f54c4bf78cc0e1b9",
+        "test_sha256": "62f09d176eb29efb87ad948ffa77e93022d63ad3cff911f1d0932f7ae2e724e5",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.star",
+        "ref_sha256": "5608a184e287f7dcd084598af879b42e10d022a7d28531629cde9028f4e65538",
+        "test_sha256": "5608a184e287f7dcd084598af879b42e10d022a7d28531629cde9028f4e65538",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage_shifts.eps",
+        "ref_sha256": "29c336522eb443ea4a87cab7bdea0b18c3ee8d5a2711a41226cc29e440fc86a8",
+        "test_sha256": "194e2f7eaf0256251a097080d7ae54c82a2add90d993aa2a1370bd1245189bff",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92335,
+        "test_bytes": 92340
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.log",
+        "ref_sha256": "3fb29b68d27a828adc08b827fd6fd20403e5f82fb930a5be71e6ae84a109ed2c",
+        "test_sha256": "f25bdbe125a64fce29c027d15e4cd55970b94ab19ace494628d3324b33db62f3",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16354,
+        "test_bytes": 16358,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.mrc",
+        "ref_sha256": "eb37f8c0d71ea7c0c80ddb77335cf7baea4304b6cc0f57a0a971384a51397f99",
+        "test_sha256": "d8fb5a757438e0ec71284f73d924212125bff30a1864ec54958abff2850eaaf7",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.star",
+        "ref_sha256": "db91ad132b5da7f7b5d24e25a9f2b583a02d31980a34b103a31e23fc8df74d5b",
+        "test_sha256": "db91ad132b5da7f7b5d24e25a9f2b583a02d31980a34b103a31e23fc8df74d5b",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage_shifts.eps",
+        "ref_sha256": "704c3a3d225281edd5e9a9322924e2c586c3c82d99d8cd1bb91afc6f34d3432d",
+        "test_sha256": "c2f9e5827984558b3e2b0872a6ef5c1c2cb9fedd6a4bd89af26796acdb411ce4",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94730,
+        "test_bytes": 94735
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.log",
+        "ref_sha256": "cf4c9eface14dca5e4ec1accdf2cfbc8166500b25011ed07d7e1af0659b213c2",
+        "test_sha256": "9b2ebf104e99d83b5f70056f80e40501f6fac106fca7910bbe21b3a9ed689c03",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16354,
+        "test_bytes": 16358,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.mrc",
+        "ref_sha256": "4142c3f86c04642d07e8a4d95a71b12253ae10fa1b6be81a60a1255b3c53e054",
+        "test_sha256": "a55eae9eb4bb1829c171727d392b650e18183f8aee7b02d26578799904d10589",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.star",
+        "ref_sha256": "cd8c8cfd8fe2f33068a2a5ad5b236459f5b24d7dcb2fdcba2a9ddc643bc3fc2b",
+        "test_sha256": "cd8c8cfd8fe2f33068a2a5ad5b236459f5b24d7dcb2fdcba2a9ddc643bc3fc2b",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage_shifts.eps",
+        "ref_sha256": "8d978566b9c0a30065592f5e59ea58c7633e8a5068cd85550c0086be3d16d4f6",
+        "test_sha256": "4388c11a60ce2b44d8cff97d1ad79f8d78bc4f427b1b85f1416eed379bb885d0",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92349,
+        "test_bytes": 92354
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.log",
+        "ref_sha256": "6753110268d84a7029b847d88ce7fe6a1b9cb423e36b7f54030a7e22324d76d9",
+        "test_sha256": "b898a19ccf2cc243295b90e797818714f20f3d466f7abf6b0a63271d16fbb317",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16353,
+        "test_bytes": 16357,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.mrc",
+        "ref_sha256": "b660c392209263cbac5ec097bba2bb0c94a7438292ae9d49b0b61af6a619a98f",
+        "test_sha256": "efcaccb10b2ebda3c6514797b68678f972901b58ac2c82944d4e6c33d9631e2a",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.star",
+        "ref_sha256": "e5e3e3fd6cbe33332f32d174bd2bea4f7ed3551083e66349a26aca2e794ae5d2",
+        "test_sha256": "e5e3e3fd6cbe33332f32d174bd2bea4f7ed3551083e66349a26aca2e794ae5d2",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage_shifts.eps",
+        "ref_sha256": "6946a93838b0852170460faf43a9121978d55ed3087edc5165b0184642f0e6dc",
+        "test_sha256": "385839608a93eae9c5b8c35ed0f9d037ebc945919f7b3957557dc0f0d32b09e5",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92296,
+        "test_bytes": 92301
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.log",
+        "ref_sha256": "f8de5ced88fa42e37fe0ce2b1e7884ba5c96288b23cbe2998a0a1fefe2be8c2c",
+        "test_sha256": "482f06a7db2119088d49ea72ac443da5e0077b4836d2b63b05bdfca458128e0e",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16411,
+        "test_bytes": 16415,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.mrc",
+        "ref_sha256": "2bb3113e212af0d0fe916dd8b07c6f7fb057f75cad08738dec9a2fcbb325a7cb",
+        "test_sha256": "f1b39a74bd1562fa36a46f4c174f7f09ecb79a557cae0407956ea06b6cd907a1",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.star",
+        "ref_sha256": "1add7676afe238482d7be0e87fcc0258dadc1761f8f6635d46af04f98a139634",
+        "test_sha256": "1add7676afe238482d7be0e87fcc0258dadc1761f8f6635d46af04f98a139634",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage_shifts.eps",
+        "ref_sha256": "b662186382fcd4c591bdcbc65005e17e691b4e1b8ec71f005921f423f51816cc",
+        "test_sha256": "a911bd345d197679e2e866ea870c4927b624a586360497b0d88fa6665680a8e1",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92356,
+        "test_bytes": 92361
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.log",
+        "ref_sha256": "b9463d513134b88267e71847c73b97ebeb3e9a9d72c0beceb7a4c909d0b36ba5",
+        "test_sha256": "618a31d99bcd36a17cbfaa9dd3633724d5dada436d76c4b5fee1f0f20d3c8bdd",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16352,
+        "test_bytes": 16356,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.mrc",
+        "ref_sha256": "2ea2246c5f8fb46eb80671a8d52d5f1af5481b97c7a01f4bd04bb2bf5fa84b1c",
+        "test_sha256": "09b64f1b21773c09ef67f700048d7614b1d4c7f7c89bfef5e07ba9cc93b4c7e3",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.star",
+        "ref_sha256": "0c487c9fe9b0e3d76d0159aa1a1d7f8ca058b2a4e86f8d0a2dd29a19dcb4de65",
+        "test_sha256": "0c487c9fe9b0e3d76d0159aa1a1d7f8ca058b2a4e86f8d0a2dd29a19dcb4de65",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage_shifts.eps",
+        "ref_sha256": "f14a9a663d7c3ac01f655013b59ddaaab4191cd48f62b742a5f4882a921d165f",
+        "test_sha256": "48b81a200fbec398f2edf1b79722227dc1ff2adb56f87454c1dd8f7dd083e2f3",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94738,
+        "test_bytes": 94743
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.log",
+        "ref_sha256": "fce183420f4604e932eccf4a1e9aace8edb59d08a906ebea46a279ca2424f00c",
+        "test_sha256": "b2d342b3bcbca90b4b77ad181f07bfb9eeb0da26a2da2676755270208c696bd3",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16318,
+        "test_bytes": 16323,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 26,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 43,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 56,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 69,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 82,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 95,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.mrc",
+        "ref_sha256": "a3da18e705fd89d23bc867061436000d86e027f9f6f32995daf9723adc4651e3",
+        "test_sha256": "daaab67ab6845c15ae7b7286e0ca5d97f4d41b93482c8eb5fe994e5a337e97a7",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.star",
+        "ref_sha256": "06ea16dabc7d065b0f5cdb5290e98218e983d416a5d210c27243315435671101",
+        "test_sha256": "06ea16dabc7d065b0f5cdb5290e98218e983d416a5d210c27243315435671101",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage_shifts.eps",
+        "ref_sha256": "112fd29fb6a61573dd4e0780e71a1febb4d1fc9bce6a329e867a183dcf6d5da3",
+        "test_sha256": "678b7e945d7ac80518870a502e612f6050589016fae34770c3c96e057254b05b",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94723,
+        "test_bytes": 94728
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.log",
+        "ref_sha256": "c0021da4dd1cc6c443badc26785f381f1489eff81d935d8732f754b5eeb7584d",
+        "test_sha256": "bfc076fcbe63d8bcd4e97a0c92ad2fd50951d0ff999568df3bc8a210ddcdba81",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16319,
+        "test_bytes": 16324,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 26,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 43,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 56,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 69,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 82,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 95,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.mrc",
+        "ref_sha256": "567921a722265d9b1a724f468617a3bb21d452947cd18ff213519fdf974f3dc7",
+        "test_sha256": "9ad1a60b8e7ab56c04df061e03baa5cfe7126121486b960725f4b50ab98ae97c",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.star",
+        "ref_sha256": "6e0fe205652f2ad3a20f94ba3f5c620d4213c5c7c9db6536c633d0e01b74d142",
+        "test_sha256": "6e0fe205652f2ad3a20f94ba3f5c620d4213c5c7c9db6536c633d0e01b74d142",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage_shifts.eps",
+        "ref_sha256": "354647efdc95829fe0c4774dd3a2c8590ebcc5a17f968987f46f6951b41d83ec",
+        "test_sha256": "e3089e439ef8b371800c590eac1d499c6d1991672ee2a829d9630752f306bcb7",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92362,
+        "test_bytes": 92367
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.log",
+        "ref_sha256": "27f8341511cb820bf744dcbcfb2085602a90749d4069159d7bf1f6ec7f4ced84",
+        "test_sha256": "96523ec44b73a9cf3a13dc1f3cc9a7d8b27c210bf48ab2ecbbf9be681200e622",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16352,
+        "test_bytes": 16357,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.mrc",
+        "ref_sha256": "c8fc9dc856209e640704ec98e0ec02867f7805ac384fa4a4a6ee4b73530e5108",
+        "test_sha256": "8757d62a63e508f5c22f372bb573bcce4c07475a14b76b7e1c7b3bb99e5e710a",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.star",
+        "ref_sha256": "efe693c239b8e9d6282dbe38df0d26dd8396e0ab45de84d378940abb3587d744",
+        "test_sha256": "efe693c239b8e9d6282dbe38df0d26dd8396e0ab45de84d378940abb3587d744",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage_shifts.eps",
+        "ref_sha256": "4428ed51e212e6777c7c4134021f866d4d619ec807f264f9bf20a0d35b383b59",
+        "test_sha256": "995ad6b13eadc34fc530e15182855b2b4f9558e3eeb193cdb9226447a4b473e2",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94751,
+        "test_bytes": 94756
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.log",
+        "ref_sha256": "5d0d7aa0a6ab3d012e6e43d6d22ee89b0a13ec1c97bed5d6c5999c10523520a6",
+        "test_sha256": "33a5365e17eba88b8c7eb69dc98f59c7c9d693a1ab0da596617fc0d06d2b12fe",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16353,
+        "test_bytes": 16357,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.mrc",
+        "ref_sha256": "c1003119b7240a03eca8b4dfbbd75310e7d43b2645e1637ff60fded002729112",
+        "test_sha256": "207e2c206f35c89bacb43db86f337e2d73173c6b362a227ab3d09e12aae600a1",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.star",
+        "ref_sha256": "cce3d9c0905cd997a867288c5b1782cb3d4437a7f999f798e946e95cf47ca529",
+        "test_sha256": "cce3d9c0905cd997a867288c5b1782cb3d4437a7f999f798e946e95cf47ca529",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage_shifts.eps",
+        "ref_sha256": "976b57788187d772441971a9df81e8fe0c7e8e249b95a7626d7f35b79670871e",
+        "test_sha256": "0c034ed9682de29c23e3aa48b2d1fa06945a1b475e3c670c85860eb98b26ca1e",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94735,
+        "test_bytes": 94740
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.log",
+        "ref_sha256": "214b4ee4f29749aa2ca8db5c76c8c86ec6b3f763b76a9001049e11ab282f1cb1",
+        "test_sha256": "1fed6dd20822fcd68ae74b1a6982c1f062db5d5a5e00e3f7825f2a4abc4ce735",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 16353,
+        "test_bytes": 16356,
+        "differing_line_count": 26,
+        "differing_line_samples": [
+          {
+            "line": 27,
+            "ref": "   Peak GPU memory allocated:    1569.59 MiB",
+            "test": "   Tracked alignment memory:     1569.59 MiB"
+          },
+          {
+            "line": 44,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 57,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 70,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 83,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          },
+          {
+            "line": 96,
+            "ref": "   Peak GPU memory allocated:    62.59 MiB",
+            "test": "   Tracked alignment memory:     62.59 MiB"
+          }
+        ]
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.mrc",
+        "ref_sha256": "2bfdd2e5fedbe8ba38160f156f42fa37d3de5700a693935dd6820851f2805a17",
+        "test_sha256": "e2b0dd9168db23161b51ac776c823a27702d46fd822c9db17ef6adc4979af76c",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.star",
+        "ref_sha256": "e8cfa3b811469b2d68aa04c79fa77ef01699e25141d97cee57705977660cef90",
+        "test_sha256": "e8cfa3b811469b2d68aa04c79fa77ef01699e25141d97cee57705977660cef90",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage_shifts.eps",
+        "ref_sha256": "5b31c0e0b5aa62d3215e675eaf1c3c4d2810067805ddce7d40d123ff202456d1",
+        "test_sha256": "acf55c13f73b6a14118e276e9822f6dff0e16e4fa28d0072bcaee1003e9aabc0",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94682,
+        "test_bytes": 94687
+      },
+      {
+        "path": "all_batches.pdf",
+        "ref_sha256": "c7c71f9b5d70752ed7524b8e031bd25c991ab25695ebed330359c0052c8f0bea",
+        "test_sha256": "9ab67fa6dacfbd82f243d63b6498d2387dfab42352560a955d7fd3bf64e8add1",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 401316,
+        "test_bytes": 401492,
+        "differing_line_count": 10971,
+        "differing_line_samples": [
+          {
+            "line": 9,
+            "ref": "{1#-lx",
+            "test": "{\ufffd\u00166<\ufffd\ufffdSj\ufffdh\ufffd\ufffd\\\ufffde\ufffd\ufffd\ufffd\ufffd8'\"HfU"
+          },
+          {
+            "line": 10,
+            "ref": "\ufffd\ufffd\ufffd5\ufffd\ufffd\ufffds\ufffd\ufffdx\ufffd\u007fo\ufffd9\u0011A2\ufffdZ\ufffd%H\ufffd\ufffd'#\ufffd\ufffd$\ufffd!\u0019",
+            "test": "\ufffd\u0004\ufffd\ufffd\ufffdd$3\ufffdd>$\ufffdA\u6ffc\ufffdW|\u000f\ufffd_\ufffd\ufffd\ufffd\ufffd["
+          },
+          {
+            "line": 11,
+            "ref": "2\ufffd\ufffd=\ufffd\ufffd{\ufffd\ufffd\ufffd\u07cf\ufffd\ufffdbx\ufffd\ufffd\ufffd\ufffd\u001a!\ufffd\ufffd\ufffdO\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\ufffd\ufffd\u007f\ufffd\ufffd\ufffd)\ufffd\u007f{\ufffd-~\ufffdP\ufffdk\u0014=\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd\ufffd^\ufffd+\ufffd}t\ufffd\ufffd",
+            "test": "\ufffd\ufffd\ufffd\u0016^#\ufffd>\ufffd\ufffd\ufffd\u001f\u007f\ufffd\u001f\ufffdz"
+          },
+          {
+            "line": 12,
+            "ref": "\u034e\u0398^s\ufffds\ufffd\u05ccz4\ufffd6^c\ufffd\ufffdbi\ufffd^\ufffdhJ\ufffd\ufffd\ufffd>\ufffdCzY\ufffd)\ufffd\ufffd;/R\ufffd\ufffdU,/R\ufffd\ufffdw^\ufffd\u0016\ufffd+Y^\ufffd6\ufffd+\ufffd\ufffdH\ufffd\ufffdb\ufffd\ufffdH\ufffd\ufffdW\ufffdy\ufffdf\ufffd\ufffd\ufffd\ufffdh\u000e!\ufffd\ufffd\ufffd\ufffd9\ufffd\ufffd\u001a\ufffd\u00199\ufffd\ufffd\ufffd;3r\ufffd\ufffd\ufffd\ufffd\ufffd:\ufffd\ufffd;3r\ufffd\ufffdU-3r\ufffd\ufffdUvf\ufffdZ\ufffd+[f\ufffd\ufffd+\ufffd\ufffd\ufffd=\ufffdW\ufffd'\ufffd}\ufffdW\ufffdO\ufffdG\ufffd\ufffd`\ufffd\ufffd.3^s\ufffdF\t\ufffd\ufffd\ufffd",
+            "test": "\ufffd3\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_3\ufffd\ufffdoo\ufffd\ufffd\ufffd\u0018j}\ufffd\ufffdGc\ufffd\ufffd\ufffd\ufffd>\ufffdb|\ufffdiG\u04d8\ufffd\u0016\ufffd\ufffd\ufffd\ufffd\ufffdf;ZJ}\ufffd\ufffd\ufffd\u0594_y\ufffd\ufffd\u0016\ufffd+\uf0ed\ufffd\u05fa"
+          },
+          {
+            "line": 13,
+            "ref": "\ufffd\ufffd\ufffd\ufffd9^\ufffd\ufffd*\ufffd\ufffdj;/\u06aa\u0018\ufffdjy\ufffdV\ufffd\ufffd\ufffd\u038b\ufffd2\ufffd-/\u06ba\ufffdW\ufffdy\ufffd\ufffd\u007f^\ufffd",
+            "test": "=\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdQ\ufffd\ufffd\ufffd\ufffdk\ufffdS,\ufffd\u056b"
+          },
+          {
+            "line": 14,
+            "ref": "\ufffd\ufffdR^q\u0017n\u001b)\ufffd\ufffd\ufffdE\u0013\ufffd\u0221\ufffd\ufffd\ufffd",
+            "test": "M\ufffd\ufffdZ\ufffdGsH/K8\ufffd\u0011^u\ufffdE*u\ufffd\ufffd\ufffdE\ufffd\ufffd\ufffd\ufffd\u038b\ufffdby%\u02cb\ufffdfz\ufffd\ufffd\u0017\ufffd\ufffdU,\ufffd\u0017i\ufffd\ufffd"
+          }
+        ]
+      },
+      {
+        "path": "batch.pdf",
+        "ref_sha256": "806c0f4edcb639689589db521c7eb6bf818d6208e620872d382de3529f544367",
+        "test_sha256": "451ab734cec8fd7262ada9e53937dc26e65546a09d2e9c76c0c68aa503196ac8",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 401374,
+        "test_bytes": 401550,
+        "differing_line_count": 10989,
+        "differing_line_samples": [
+          {
+            "line": 9,
+            "ref": "{1#-lx",
+            "test": "{\ufffd\u00166<\ufffd\ufffdSj\ufffdh\ufffd\ufffd\\\ufffde\ufffd\ufffd\ufffd\ufffd8'\"HfU"
+          },
+          {
+            "line": 10,
+            "ref": "\ufffd\ufffd\ufffd5\ufffd\ufffd\ufffds\ufffd\ufffdx\ufffd\u007fo\ufffd9\u0011A2\ufffdZ\ufffd%H\ufffd\ufffd'#\ufffd\ufffd$\ufffd!\u0019",
+            "test": "\ufffd\u0004\ufffd\ufffd\ufffdd$3\ufffdd>$\ufffdA\u6ffc\ufffdW|\u000f\ufffd_\ufffd\ufffd\ufffd\ufffd["
+          },
+          {
+            "line": 11,
+            "ref": "2\ufffd\ufffd=\ufffd\ufffd{\ufffd\ufffd\ufffd\u07cf\ufffd\ufffdbx\ufffd\ufffd\ufffd\ufffd\u001a!\ufffd\ufffd\ufffdO\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\ufffd\ufffd\u007f\ufffd\ufffd\ufffd)\ufffd\u007f{\ufffd-~\ufffdP\ufffdk\u0014=\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd\ufffd^\ufffd+\ufffd}t\ufffd\ufffd",
+            "test": "\ufffd\ufffd\ufffd\u0016^#\ufffd>\ufffd\ufffd\ufffd\u001f\u007f\ufffd\u001f\ufffdz"
+          },
+          {
+            "line": 12,
+            "ref": "\u034e\u0398^s\ufffds\ufffd\u05ccz4\ufffd6^c\ufffd\ufffdbi\ufffd^\ufffdhJ\ufffd\ufffd\ufffd>\ufffdCzY\ufffd)\ufffd\ufffd;/R\ufffd\ufffdU,/R\ufffd\ufffdw^\ufffd\u0016\ufffd+Y^\ufffd6\ufffd+\ufffd\ufffdH\ufffd\ufffdb\ufffd\ufffdH\ufffd\ufffdW\ufffdy\ufffdf\ufffd\ufffd\ufffd\ufffdh\u000e!\ufffd\ufffd\ufffd\ufffd9\ufffd\ufffd\u001a\ufffd\u00199\ufffd\ufffd\ufffd;3r\ufffd\ufffd\ufffd\ufffd\ufffd:\ufffd\ufffd;3r\ufffd\ufffdU-3r\ufffd\ufffdUvf\ufffdZ\ufffd+[f\ufffd\ufffd+\ufffd\ufffd\ufffd=\ufffdW\ufffd'\ufffd}\ufffdW\ufffdO\ufffdG\ufffd\ufffd`\ufffd\ufffd.3^s\ufffdF\t\ufffd\ufffd\ufffd",
+            "test": "\ufffd3\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_3\ufffd\ufffdoo\ufffd\ufffd\ufffd\u0018j}\ufffd\ufffdGc\ufffd\ufffd\ufffd\ufffd>\ufffdb|\ufffdiG\u04d8\ufffd\u0016\ufffd\ufffd\ufffd\ufffd\ufffdf;ZJ}\ufffd\ufffd\ufffd\u0594_y\ufffd\ufffd\u0016\ufffd+\uf0ed\ufffd\u05fa"
+          },
+          {
+            "line": 13,
+            "ref": "\ufffd\ufffd\ufffd\ufffd9^\ufffd\ufffd*\ufffd\ufffdj;/\u06aa\u0018\ufffdjy\ufffdV\ufffd\ufffd\ufffd\u038b\ufffd2\ufffd-/\u06ba\ufffdW\ufffdy\ufffd\ufffd\u007f^\ufffd",
+            "test": "=\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdQ\ufffd\ufffd\ufffd\ufffdk\ufffdS,\ufffd\u056b"
+          },
+          {
+            "line": 14,
+            "ref": "\ufffd\ufffdR^q\u0017n\u001b)\ufffd\ufffd\ufffdE\u0013\ufffd\u0221\ufffd\ufffd\ufffd",
+            "test": "M\ufffd\ufffdZ\ufffdGsH/K8\ufffd\u0011^u\ufffdE*u\ufffd\ufffd\ufffdE\ufffd\ufffd\ufffd\ufffd\u038b\ufffdby%\u02cb\ufffdfz\ufffd\ufffd\u0017\ufffd\ufffdU,\ufffd\u0017i\ufffd\ufffd"
+          }
+        ]
+      },
+      {
+        "path": "batch.pdf.lst",
+        "ref_sha256": "95ed8238a9e6026ce65fb50b93e0a2053888cb9ce55c0ce38016a67d896bc0e2",
+        "test_sha256": "1d87767eb8308f4b625130fa2dbce882f7c992c6a95f8b622056c7b53b904e7f",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 2808,
+        "test_bytes": 2928
+      },
+      {
+        "path": "corrected_micrographs.star",
+        "ref_sha256": "de15b46e33b9a20b742183ac251e9589f45dd602fee77da26cc615b3ded8f1bc",
+        "test_sha256": "1c1437390758284b33ec330fb92162aa17e99cf7267895ea4625ec58b6943ab2",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+        "ref_sha256": "ee5eabb5054cd34ee1bc464161e18b0f06ca0794d2cd161bb0e6f7b8245e4597",
+        "test_sha256": "ee5eabb5054cd34ee1bc464161e18b0f06ca0794d2cd161bb0e6f7b8245e4597",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 47062,
+        "test_bytes": 47062
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionLate.eps",
+        "ref_sha256": "0a97b9074441980be0ec088121fdfd6183de6db3ad7993e51e69387b40e5a29d",
+        "test_sha256": "0a97b9074441980be0ec088121fdfd6183de6db3ad7993e51e69387b40e5a29d",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 47059,
+        "test_bytes": 47059
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+        "ref_sha256": "4c595c6970fd9d34a1a7ba5318576473fec54c219ca39ffda18b97ca44aee255",
+        "test_sha256": "4c595c6970fd9d34a1a7ba5318576473fec54c219ca39ffda18b97ca44aee255",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 49815,
+        "test_bytes": 49815
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionEarly.eps",
+        "ref_sha256": "60a1f06b0a9a2b6be202e744d456d4aea67a927c8e7f1c67d620df6957cd2c83",
+        "test_sha256": "60a1f06b0a9a2b6be202e744d456d4aea67a927c8e7f1c67d620df6957cd2c83",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 54336,
+        "test_bytes": 54336
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionLate.eps",
+        "ref_sha256": "9475817b5a53565f5aef20228cae5eae50d1e9541e9d3edeace579f8bb1bfd9e",
+        "test_sha256": "9475817b5a53565f5aef20228cae5eae50d1e9541e9d3edeace579f8bb1bfd9e",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 56906,
+        "test_bytes": 56906
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionTotal.eps",
+        "ref_sha256": "c188d77d423371440a5aa352db63f1a5c4d6bb877d2494f8c5c3da7c9b838748",
+        "test_sha256": "c188d77d423371440a5aa352db63f1a5c4d6bb877d2494f8c5c3da7c9b838748",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 56212,
+        "test_bytes": 56212
+      },
+      {
+        "path": "header.pdf",
+        "ref_sha256": "eb11c5d69b556c0f382b9b277988b0ba194dce37ba545758a5c9fe35794b071b",
+        "test_sha256": "3d2944acb3379f2e1797046f37abea6ec8b04b2d35bd82aec4413f53c16cf777",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 34238,
+        "test_bytes": 34238,
+        "differing_line_count": 1,
+        "differing_line_samples": [
+          {
+            "line": 989,
+            "ref": "<rdf:Description rdf:about=\"\" xmlns:xapMM='http://ns.adobe.com/xap/1.0/mm/' xapMM:DocumentID='uuid:f93accd7-f2c4-11fc-0000-322866fa04b1'/>",
+            "test": "<rdf:Description rdf:about=\"\" xmlns:xapMM='http://ns.adobe.com/xap/1.0/mm/' xapMM:DocumentID='uuid:0bb50658-f2c5-11fc-0000-322866fa04b1'/>"
+          }
+        ]
+      },
+      {
+        "path": "header.pdf.lst",
+        "ref_sha256": "be82a28e06ee137631cd966ff2f050c9cd6598e80e2c1d65233e2b949db0b130",
+        "test_sha256": "fb4caa5046c31c38d84b11be82eecfda82aec3aaf72250bd101d78291f52412e",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 739,
+        "test_bytes": 769
+      },
+      {
+        "path": "logfile.pdf",
+        "ref_sha256": "23494eab941f68a657b2712844cf80162911a92e9e8f76c9c8f79d86bcda1d98",
+        "test_sha256": "8ece36023d3d7c48b9d8a12b7ef169189ce77ab9f6daf9b9a0d17b5150c9a997",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 433794,
+        "test_bytes": 433968,
+        "differing_line_count": 11072,
+        "differing_line_samples": [
+          {
+            "line": 766,
+            "ref": "{1#-lx",
+            "test": "{\ufffd\u00166<\ufffd\ufffdSj\ufffdh\ufffd\ufffd\\\ufffde\ufffd\ufffd\ufffd\ufffd8'\"HfU"
+          },
+          {
+            "line": 767,
+            "ref": "\ufffd\ufffd\ufffd5\ufffd\ufffd\ufffds\ufffd\ufffdx\ufffd\u007fo\ufffd9\u0011A2\ufffdZ\ufffd%H\ufffd\ufffd'#\ufffd\ufffd$\ufffd!\u0019",
+            "test": "\ufffd\u0004\ufffd\ufffd\ufffdd$3\ufffdd>$\ufffdA\u6ffc\ufffdW|\u000f\ufffd_\ufffd\ufffd\ufffd\ufffd["
+          },
+          {
+            "line": 768,
+            "ref": "2\ufffd\ufffd=\ufffd\ufffd{\ufffd\ufffd\ufffd\u07cf\ufffd\ufffdbx\ufffd\ufffd\ufffd\ufffd\u001a!\ufffd\ufffd\ufffdO\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\ufffd\ufffd\u007f\ufffd\ufffd\ufffd)\ufffd\u007f{\ufffd-~\ufffdP\ufffdk\u0014=\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd\ufffd^\ufffd+\ufffd}t\ufffd\ufffd",
+            "test": "\ufffd\ufffd\ufffd\u0016^#\ufffd>\ufffd\ufffd\ufffd\u001f\u007f\ufffd\u001f\ufffdz"
+          },
+          {
+            "line": 769,
+            "ref": "\u034e\u0398^s\ufffds\ufffd\u05ccz4\ufffd6^c\ufffd\ufffdbi\ufffd^\ufffdhJ\ufffd\ufffd\ufffd>\ufffdCzY\ufffd)\ufffd\ufffd;/R\ufffd\ufffdU,/R\ufffd\ufffdw^\ufffd\u0016\ufffd+Y^\ufffd6\ufffd+\ufffd\ufffdH\ufffd\ufffdb\ufffd\ufffdH\ufffd\ufffdW\ufffdy\ufffdf\ufffd\ufffd\ufffd\ufffdh\u000e!\ufffd\ufffd\ufffd\ufffd9\ufffd\ufffd\u001a\ufffd\u00199\ufffd\ufffd\ufffd;3r\ufffd\ufffd\ufffd\ufffd\ufffd:\ufffd\ufffd;3r\ufffd\ufffdU-3r\ufffd\ufffdUvf\ufffdZ\ufffd+[f\ufffd\ufffd+\ufffd\ufffd\ufffd=\ufffdW\ufffd'\ufffd}\ufffdW\ufffdO\ufffdG\ufffd\ufffd`\ufffd\ufffd.3^s\ufffdF\t\ufffd\ufffd\ufffd",
+            "test": "\ufffd3\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_3\ufffd\ufffdoo\ufffd\ufffd\ufffd\u0018j}\ufffd\ufffdGc\ufffd\ufffd\ufffd\ufffd>\ufffdb|\ufffdiG\u04d8\ufffd\u0016\ufffd\ufffd\ufffd\ufffd\ufffdf;ZJ}\ufffd\ufffd\ufffd\u0594_y\ufffd\ufffd\u0016\ufffd+\uf0ed\ufffd\u05fa"
+          },
+          {
+            "line": 770,
+            "ref": "\ufffd\ufffd\ufffd\ufffd9^\ufffd\ufffd*\ufffd\ufffdj;/\u06aa\u0018\ufffdjy\ufffdV\ufffd\ufffd\ufffd\u038b\ufffd2\ufffd-/\u06ba\ufffdW\ufffdy\ufffd\ufffd\u007f^\ufffd",
+            "test": "=\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdQ\ufffd\ufffd\ufffd\ufffdk\ufffdS,\ufffd\u056b"
+          },
+          {
+            "line": 771,
+            "ref": "\ufffd\ufffdR^q\u0017n\u001b)\ufffd\ufffd\ufffdE\u0013\ufffd\u0221\ufffd\ufffd\ufffd",
+            "test": "M\ufffd\ufffdZ\ufffdGsH/K8\ufffd\u0011^u\ufffdE*u\ufffd\ufffd\ufffdE\ufffd\ufffd\ufffd\ufffd\u038b\ufffdby%\u02cb\ufffdfz\ufffd\ufffd\u0017\ufffd\ufffdU,\ufffd\u0017i\ufffd\ufffd"
+          }
+        ]
+      }
+    ]
+  },
+  "per_movie_exact_gate": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00021_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00021_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00021_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00021_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00021_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00021_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00022_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00022_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00022_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00022_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00022_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00022_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00023_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00023_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00023_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00023_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00023_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00023_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00024_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00024_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00024_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00024_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00024_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00024_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00025_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00025_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00025_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00025_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00025_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00025_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00026_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00026_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00026_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00026_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00026_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00026_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00027_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00027_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00027_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00027_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00027_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00027_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00028_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00028_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00028_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00028_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00028_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00028_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00029_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00029_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00029_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00029_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00029_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00029_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00030_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00030_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00030_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00030_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00030_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00030_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00031_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00031_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00031_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00031_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00031_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00031_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00035_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00035_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00035_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00035_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00035_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00035_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00036_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00036_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00036_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00036_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00036_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00036_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00037_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00037_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00037_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00037_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00037_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00037_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00039_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00039_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00039_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00039_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00039_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00039_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00040_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00040_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00040_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00040_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00040_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00040_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00042_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00042_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00042_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00042_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00042_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00042_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00043_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00043_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00043_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00043_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00043_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00043_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00044_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00044_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00044_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00044_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00044_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00044_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00045_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00045_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00045_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00045_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00045_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00045_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00046_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00046_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00046_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00046_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00046_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00046_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00047_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00047_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00047_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00047_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00047_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00047_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00048_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00048_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00048_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00048_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00048_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00048_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00049_frameImage.mrc",
+        "--test-mrc",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00049_frameImage.mrc",
+        "--ref-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_main_j8/Movies/20170629_00049_frameImage.star",
+        "--test-star",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/out_candidate_j8/Movies/20170629_00049_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/ab/cmp_candidate_j8_20170629_00049_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00049_frameImage",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "victim": "Movies/20170629_00021_frameImage.mrc",
+    "scope": "Targeted component controls using unchanged MRC oracle; not native pipeline fault injection",
+    "missing": {
+      "detected": true,
+      "victim": "Movies/20170629_00021_frameImage.mrc",
+      "result": {
+        "status": "FAIL",
+        "reason": "required victim missing"
+      }
+    },
+    "pixel": {
+      "detected": true,
+      "victim": "Movies/20170629_00021_frameImage.mrc",
+      "result": {
+        "status": "FAIL",
+        "pixels_compared": 14238980,
+        "pixel_identical": false,
+        "max_abs_pixel_error": 4.76837158203125e-07,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      }
+    },
+    "header": {
+      "detected": true,
+      "victim": "Movies/20170629_00021_frameImage.mrc",
+      "result": {
+        "status": "FAIL",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 1,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      }
+    },
+    "wrong_output_root": {
+      "detected": true,
+      "original_root_present": true,
+      "result": {
+        "status": "FAIL",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": false
+      }
+    },
+    "all_detected": true
+  },
+  "summary": {
+    "artifacts_total": 109,
+    "artifacts_pass": 81,
+    "artifacts_fail": 28,
+    "corrected_images_compared": 24,
+    "corrected_images_pass": 24,
+    "total_pixels_compared": 341735520,
+    "star_files_compared": 25,
+    "auxiliary_compared": 60,
+    "auxiliary_fail": 28,
+    "per_movie_exact_gate_pass": 24,
+    "per_movie_exact_gate_total": 24,
+    "controls_all_detected": true
+  },
+  "overall_graded": "PASS",
+  "overall_auxiliary": "FAIL",
+  "overall": "FAIL"
+}

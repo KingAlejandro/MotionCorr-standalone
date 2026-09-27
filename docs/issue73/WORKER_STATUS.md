@@ -5,7 +5,7 @@ Branch `opus/issue-73-headless-20260927`, base `1d7e13f41b6eaf64b367d49ff0f0f5a3
 (verified identical to live `origin/main` at 2026-09-27; no base update needed).
 Draft PR #87.
 
-## State: protocol frozen and amended, CPU feasibility pilot running
+## State: bounded pilot complete and published; confirmatory study not authorized
 
 | Step | State |
 | --- | --- |
@@ -68,7 +68,7 @@ checks silently score 0 particles. Both are fixed; the zero-particle outputs are
 
 ## What the pilot has confirmed so far (plumbing, not science)
 
-From the running CPU arm's own log, on genuinely independent data:
+From the CPU arm's own log, on genuinely independent data:
 
 - `Movie size: X = 8192 Y = 8192 N = 40` — `--eer_upsampling 2` renders the 8192² grid the
   deposited particles were picked on, and `--eer_grouping 47` yields exactly the depositors'

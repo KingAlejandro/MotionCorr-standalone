@@ -15,7 +15,7 @@ This work does not reuse those movies, does not reinterpret that result, and doe
 | [`HOST_DATA_SURVEY.md`](HOST_DATA_SURVEY.md) | Read-only survey establishing that no independent raw-movie collection is staged on any project host, and why the two other collections present are unusable. |
 | [`results/margins_derivation.json`](results/margins_derivation.json) | Output of `tools/science_issue73/i73_margins.py` — every margin derived from collection physics. |
 | [`results/acquisition_manifest.json`](results/acquisition_manifest.json) | Every byte acquired from the public archive, with hashes, against the ≤ 2 GiB cap. |
-| [`results/PILOT.md`](results/PILOT.md) | Feasibility-pilot results: provenance, binary hashes, native EER handling, geometry and particle-coordinate checks, and what the pilot cannot show. |
+| [`results/PILOT.md`](results/PILOT.md) | Feasibility-pilot results: provenance, binary hashes, exact commands, native EER handling, geometry and particle-coordinate checks, the paired `cpu` vs `cuda` ADR #66 §4 comparison, the cross-host CPU control, the gain-orientation control, and what the pilot cannot show. |
 | [`results/pilot_cpu_check_*.json`](results/) | Raw per-movie output of `i73_check_pilot.py`. |
 | [`results/pilot_cpu_vs_cuda_*.json`](results/) | Raw per-movie ADR #66 §4 comparator output for the paired `cpu` vs `cuda` arms, produced before any re-estimation. |
 | [`results/pilot_hostctl_*.json`](results/) | The `cpu` vs `cpu` cross-host control, against which the backend difference is read. |
@@ -29,7 +29,9 @@ code and from the comparator.
 
 ## Status
 
-See `WORKER_STATUS.md` at the repository root for the current run state.
+See [`WORKER_STATUS.md`](WORKER_STATUS.md) for the current run state. The bounded pilot is
+complete and published; the confirmatory study is not authorized and awaits Alex's resource
+decision.
 
 ## Scope boundaries
 

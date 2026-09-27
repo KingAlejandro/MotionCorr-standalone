@@ -113,6 +113,16 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME WriteFaults
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
+                --binary $<TARGET_FILE:motioncorr>)
+    endif()
+    # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
+    # so it needs POSIX resource limits and an ignorable SIGXFSZ.
+    if(UNIX)
+        add_executable(image_write_faults tests/test_image_write_faults.cpp)
+        target_link_libraries(image_write_faults PRIVATE motioncorr_core)
+        add_test(NAME ImageWriteFaults COMMAND image_write_faults)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)

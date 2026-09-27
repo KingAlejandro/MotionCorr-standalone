@@ -134,8 +134,7 @@ def render_capacity(capacity: Optional[Dict[str, Any]]) -> List[str]:
                   "claim is made.", ""]
         return lines
     lines += [f"- Configuration: `{capacity.get('row_id')}` — "
-              f"{capacity.get('geometry')}, {capacity.get('frames')} frames, "
-              f"{capacity.get('patches')}",
+              f"{capacity.get('note') or 'no description recorded'}",
               f"- Device: {capacity.get('device')} "
               f"({capacity.get('device_total_mib')} MiB total)",
               f"- **Peak device memory observed: "

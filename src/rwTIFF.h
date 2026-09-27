@@ -214,7 +214,16 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 
 			tsize_t stripSize = TIFFStripSize(ftiff);
 			tstrip_t numberOfStrips = TIFFNumberOfStrips(ftiff);
-			tdata_t buf = _TIFFmalloc(stripSize);
+			if (stripSize <= 0)
+				REPORT_ERROR(name + ": Invalid TIFF strip size.");
+			// Local ownership also frees the strip when REPORT_ERROR throws.
+			struct StripBuffer {
+				tdata_t ptr;
+				~StripBuffer() { _TIFFfree(ptr); }
+			} strip_buffer{_TIFFmalloc(stripSize)};
+			tdata_t buf = strip_buffer.ptr;
+			if (!buf)
+				REPORT_ERROR(name + ": Failed to allocate TIFF strip buffer.");
 #ifdef DEBUG_TIFF
 			size_t readsize_n = stripSize * 8 / bitsPerSample;
 			std::cout << "TIFF stripSize=" << stripSize << " numberOfStrips=" << numberOfStrips << " readsize_n=" << readsize_n << std::endl;
@@ -232,7 +241,6 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 				if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
 				    (size_t)actually_read % row_bytes != 0)
 				{
-					_TIFFfree(buf);
 					REPORT_ERROR(name + ": Invalid decoded TIFF strip size.");
 				}
 				tsize_t actually_read_n = actually_read * 8 / bitsPerSample;
@@ -247,7 +255,6 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 				const size_t n_rows = (size_t)actually_read / row_bytes;
 				if (first_row > (size_t)_yDim || n_rows > (size_t)_yDim - first_row)
 				{
-					_TIFFfree(buf);
 					REPORT_ERROR(name + ": Decoded TIFF strips exceed the frame height.");
 				}
 				for (size_t r = 0; r < n_rows; r++)
@@ -260,7 +267,6 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 				rows_read += n_rows;
 			}
 
-			_TIFFfree(buf);
 			if (rows_read != (size_t)_yDim)
 				REPORT_ERROR(name + ": Decoded TIFF strips do not fill the frame.");
 			img_select++;

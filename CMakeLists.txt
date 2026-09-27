@@ -107,6 +107,9 @@ if(BUILD_TESTING)
         add_test(NAME TiffRead
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_tiff_read.py
                 --helper $<TARGET_FILE:runner_numerics>)
+        add_test(NAME DamagedMovie
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)

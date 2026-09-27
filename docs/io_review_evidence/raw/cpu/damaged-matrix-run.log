@@ -1,0 +1,63 @@
+=== provenance ===
+2026-09-27T17:54:09+00:00
+small-refmac-machine
+ 17:54:09 up 299 days,  7:51, 22 users,  load average: 4.38, 4.39, 3.73
+=== binaries ===
+28918ae8438f1e953eda6648d6178544fc3b431158c41cf9907d67f3d8513a1d  /home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr
+0dcb11a35c395bd94303bfda00225ce3ad8107b3ec4e7128d1a36f3afea3fd0e  /home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr
+=== damaged matrix v2: pr91 ===
+{
+  "rows": 16,
+  "graded_rows": 12,
+  "pass": 12,
+  "fail": 0,
+  "observation_rows": 4,
+  "signal_deaths": 0
+}
+  truncated_damaged_first_j1             PASS clean_failure  rc=1 
+  truncated_damaged_last_j1              PASS clean_failure  rc=1 
+  missing_damaged_first_j1               PASS clean_failure  rc=1 
+  missing_damaged_last_j1                PASS clean_failure  rc=1 
+  corrupt_header_damaged_first_j1        PASS clean_failure  rc=1 
+  corrupt_header_damaged_last_j1         PASS clean_failure  rc=1 
+  truncated_partial_damaged_first_j1     OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_partial_damaged_last_j1      OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_damaged_first_j4             PASS clean_failure  rc=1 
+  truncated_damaged_last_j4              PASS clean_failure  rc=1 
+  missing_damaged_first_j4               PASS clean_failure  rc=1 
+  missing_damaged_last_j4                PASS clean_failure  rc=1 
+  corrupt_header_damaged_first_j4        PASS clean_failure  rc=1 
+  corrupt_header_damaged_last_j4         PASS clean_failure  rc=1 
+  truncated_partial_damaged_first_j4     OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_partial_damaged_last_j4      OBSERVED     rc=0 frames 8/24 accepted=True
+overall: PASS
+pr91 matrix exit=0
+=== damaged matrix v2: main ===
+{
+  "rows": 16,
+  "graded_rows": 12,
+  "pass": 6,
+  "fail": 6,
+  "observation_rows": 4,
+  "signal_deaths": 0
+}
+  truncated_damaged_first_j1             FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  truncated_damaged_last_j1              PASS clean_failure  rc=1 
+  missing_damaged_first_j1               FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  missing_damaged_last_j1                PASS clean_failure  rc=1 
+  corrupt_header_damaged_first_j1        FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  corrupt_header_damaged_last_j1         PASS clean_failure  rc=1 
+  truncated_partial_damaged_first_j1     OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_partial_damaged_last_j1      OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_damaged_first_j4             FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  truncated_damaged_last_j4              PASS clean_failure  rc=1 
+  missing_damaged_first_j4               FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  missing_damaged_last_j4                PASS clean_failure  rc=1 
+  corrupt_header_damaged_first_j4        FAIL clean_failure  rc=1 unmet: healthy_outputs_complete
+  corrupt_header_damaged_last_j4         PASS clean_failure  rc=1 
+  truncated_partial_damaged_first_j4     OBSERVED     rc=0 frames 8/24 accepted=True
+  truncated_partial_damaged_last_j4      OBSERVED     rc=0 frames 8/24 accepted=True
+overall: FAIL
+main matrix exit=1
+=== DAMAGED V2 DONE ===
+2026-09-27T18:20:54+00:00

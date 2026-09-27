@@ -190,7 +190,6 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	{
 		if (img_select == -1) img_select = 0; // img_select starts from 0
 
-		size_t haveread_n = 0;
 		for (int i = 0; i < _nDim; i++)
 		{
 			if (TIFFSetDirectory(ftiff, img_select) == 0)
@@ -235,11 +234,15 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 			const size_t row_bytes = packed_4bit ? (size_t)_xDim / 2
 			                                     : (size_t)_xDim * bitsPerSample / 8;
 			const size_t frame_base = (size_t)i * _xDim * _yDim;
+			size_t rows_read = 0;
 			for (tstrip_t strip = 0; strip < numberOfStrips; strip++)
 			{
 				tsize_t actually_read = TIFFReadEncodedStrip(ftiff, strip, buf, stripSize);
-				if (actually_read == -1)
-					REPORT_ERROR((std::string)"Failed to read an image data from " + name);
+				if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
+				    (size_t)actually_read % row_bytes != 0)
+				{
+					REPORT_ERROR(name + ": Invalid decoded TIFF strip size.");
+				}
 				tsize_t actually_read_n = actually_read * 8 / bitsPerSample;
 #ifdef DEBUG_TIFF
 				std::cout << "Reading strip: " << strip << "actually read byte:" << actually_read << std::endl;
@@ -248,8 +251,12 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 					actually_read_n *= 2; // convert physical size to logical size
 				// A strip always holds whole rows, so convert each one directly
 				// into its Y-flipped destination (see the axis note below).
-				const size_t first_row = (haveread_n - frame_base) / _xDim;
-				const size_t n_rows = (size_t)actually_read_n / _xDim;
+				const size_t first_row = rows_read;
+				const size_t n_rows = (size_t)actually_read / row_bytes;
+				if (first_row > (size_t)_yDim || n_rows > (size_t)_yDim - first_row)
+				{
+					REPORT_ERROR(name + ": Decoded TIFF strips exceed the frame height.");
+				}
 				for (size_t r = 0; r < n_rows; r++)
 				{
 					const size_t dest_row = _yDim - 1 - (first_row + r);
@@ -257,9 +264,11 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 					           MULTIDIM_ARRAY(data) + frame_base + dest_row * _xDim,
 					           datatype, _xDim);
 				}
-				haveread_n += actually_read_n;
+				rows_read += n_rows;
 			}
 
+			if (rows_read != (size_t)_yDim)
+				REPORT_ERROR(name + ": Decoded TIFF strips do not fill the frame.");
 			img_select++;
 		}
 

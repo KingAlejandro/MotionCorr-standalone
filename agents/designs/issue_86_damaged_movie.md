@@ -31,3 +31,7 @@ Existing RELION GPL-2.0-or-later notices are preserved. No dependency or third-p
 - `src/rwTIFF.h`
 - `tests/test_damaged_movie.py`
 - `agents/designs/issue_86_damaged_movie.md`
+
+## Reviewed integration and evidence scope
+
+Evidence-only additions under `docs/io_review_evidence/`, including `README_damaged.md` and `VERDICT_damaged.md`, are in scope. Integration with issue85 preserves its save/plot timing inside the per-movie exception boundary, all test registrations, and its per-frame TIFF row bounds. The strip buffer remains owned solely by the issue86 RAII guard, including new issue85 rejection paths; no manual free precedes a throwing rejection when that guard is active. Final integration checks must report healthy CPU/CUDA outputs and damaged/resume behavior separately. Partial directory-chain acceptance remains issue92, not a claimed fix here.

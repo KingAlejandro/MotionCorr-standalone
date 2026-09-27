@@ -34,3 +34,7 @@ Existing RELION GPL-2.0-or-later notices are preserved. No dependency or third-p
 - `tests/test_runner_numerics.cpp`
 - `tests/test_tiff_read.py`
 - `agents/designs/issue_85_movie_io.md`
+
+## Reviewed merge boundary
+
+Evidence-only additions under `docs/io_review_evidence/` are in scope; they preserve source/binary/input provenance and original failed controls. Direct strip-to-destination conversion must reject nonpositive/non-row-aligned or oversized decoded strips, bound each strip within its frame, and require a complete frame. Row progress resets per frame. This prevents malformed positive strip counts from underflowing Y-flipped addressing; it does not detect all missing TIFF directories (#92). Healthy decoded/output order and arithmetic remain unchanged.

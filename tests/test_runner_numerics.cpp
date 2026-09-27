@@ -2,6 +2,7 @@
 #include "src/jaz/single_particle/new_ft.h"
 #include "src/fftw.h"
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -13,7 +14,30 @@ void require(bool condition, const std::string &message)
 int main(int argc, char **argv)
 {
     try {
-        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf input output");
+        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output");
+        if (std::string(argv[1]) == "read_tiff") {
+            // Dump per-row sums of a decoded TIFF stack. Row sums are exact in
+            // double for integer sample values, and any row-striding or Y-flip
+            // error relocates whole rows, so this detects those exactly while
+            // staying small enough for the large packed-4-bit geometries.
+            Image<float> movie;
+            movie.read(argv[2], true, -1, false, true); // all frames, 2D stack
+            const long nx = XSIZE(movie()), ny = YSIZE(movie()), nn = NSIZE(movie());
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open row-sum output");
+            const long dims[3] = {nx, ny, nn};
+            out.write(reinterpret_cast<const char*>(dims), sizeof(dims));
+            for (long n = 0; n < nn; n++) {
+                for (long y = 0; y < ny; y++) {
+                    double rowsum = 0.0;
+                    for (long x = 0; x < nx; x++)
+                        rowsum += DIRECT_NZYX_ELEM(movie(), n, 0, y, x);
+                    out.write(reinterpret_cast<const char*>(&rowsum), sizeof(double));
+                }
+            }
+            require(out.good(), "Failed writing row sums");
+            return 0;
+        }
         if (std::string(argv[1]) == "read") {
             Micrograph parsed(argv[2]);
             return 0;

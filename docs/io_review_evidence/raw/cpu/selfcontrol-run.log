@@ -1,0 +1,43 @@
+=== provenance ===
+2026-09-27T18:01:44+00:00
+small-refmac-machine
+ 18:01:44 up 299 days,  7:59, 22 users,  load average: 3.31, 4.18, 3.96
+e2dfd9c828be5303243a7d82c30ecf62  /home/ubuntu/mc-io-evidence/harness/compare_outputs.py
+28918ae8438f1e953eda6648d6178544fc3b431158c41cf9907d67f3d8513a1d  /home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr
+993cc44000c6e26afaa1b89ac9e33645c744618784b228ee32624767390b7c12  /home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr
+=== regrade pr90 vs main, CPU j1, updated comparator (no rerun) ===
+{
+  "artifacts_total": 0,
+  "artifacts_pass": 0,
+  "artifacts_fail": 0,
+  "corrected_images_compared": 0,
+  "corrected_images_pass": 0,
+  "total_pixels_compared": 0,
+  "star_files_compared": 0,
+  "auxiliary_compared": 0,
+  "auxiliary_fail": 0,
+  "per_movie_exact_gate_pass": 0,
+  "per_movie_exact_gate_total": 0,
+  "controls_all_detected": null
+}
+overall_graded: FAIL overall_auxiliary: PASS overall: FAIL
+regrade exit=1
+=== self-control: main vs main, CPU j1, two independent runs ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+selfctl exit=1
+=== SELFCTL DONE ===
+2026-09-27T18:35:53+00:00

@@ -1,0 +1,1241 @@
+{
+  "what": "interleaved paired end-to-end timing, main vs pr90",
+  "not_a_claim_about": [
+    "any cumulative speedup across a series of merges",
+    "speed measured on a different host or a different allocation",
+    "CPU/CUDA agreement",
+    "scientific equivalence"
+  ],
+  "host": "small-refmac-machine",
+  "started": "2026-09-27T18:53:20+0000",
+  "threads": 8,
+  "taskset": "56-63",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--seed",
+    "1"
+  ],
+  "input_star": "movies.star",
+  "tutorial": "/home/ubuntu/mc51/tutorial",
+  "binaries": {
+    "main": {
+      "path": "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+      "sha256": "28918ae8438f1e953eda6648d6178544fc3b431158c41cf9907d67f3d8513a1d"
+    },
+    "pr90": {
+      "path": "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+      "sha256": "993cc44000c6e26afaa1b89ac9e33645c744618784b228ee32624767390b7c12"
+    }
+  },
+  "page_cache": "not dropped (no root); one discarded warm-up run precedes the blocks",
+  "blocks": [
+    {
+      "block": 1,
+      "order": [
+        "main",
+        "pr90"
+      ],
+      "runs": {
+        "main": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_main_b1",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 226.516,
+          "load1_before": 9.98,
+          "load1_after": 9.81,
+          "stages": {
+            "read gain": {
+              "seconds": 2.774,
+              "microsec_per_operation": 115591
+            },
+            "read movie": {
+              "seconds": 6.046,
+              "microsec_per_operation": 251921
+            },
+            "apply gain and initial sum": {
+              "seconds": 11.643,
+              "microsec_per_operation": 485125
+            },
+            "detect hot pixels": {
+              "seconds": 0.762,
+              "microsec_per_operation": 31764
+            },
+            "fix defects": {
+              "seconds": 1.021,
+              "microsec_per_operation": 42567
+            },
+            "global FFT": {
+              "seconds": 41.25,
+              "microsec_per_operation": 1718786
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 1
+            },
+            "global alignment": {
+              "seconds": 5.914,
+              "microsec_per_operation": 246434
+            },
+            "global iFFT": {
+              "seconds": 43.958,
+              "microsec_per_operation": 1831609
+            },
+            "prepare patch": {
+              "seconds": 24.498,
+              "microsec_per_operation": 40831
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.285,
+              "microsec_per_operation": 297
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 74.273,
+              "microsec_per_operation": 5160
+            },
+            "patch alignment": {
+              "seconds": 6.713,
+              "microsec_per_operation": 11189
+            },
+            "align - prep weight": {
+              "seconds": 0.05,
+              "microsec_per_operation": 81
+            },
+            "align - make reference": {
+              "seconds": 0.621,
+              "microsec_per_operation": 486
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.321,
+              "microsec_per_operation": 111
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 12.843,
+              "microsec_per_operation": 424
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.041,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.037,
+              "microsec_per_operation": 4727
+            },
+            "fit polynomial": {
+              "seconds": 0.039,
+              "microsec_per_operation": 1665
+            },
+            "dose weighting": {
+              "seconds": 71.667,
+              "microsec_per_operation": 2986137
+            },
+            "dw - calc weight": {
+              "seconds": 11.554,
+              "microsec_per_operation": 481424
+            },
+            "dw - iFFT": {
+              "seconds": 41.589,
+              "microsec_per_operation": 1732896
+            },
+            "real space interpolation": {
+              "seconds": 18.453,
+              "microsec_per_operation": 768879
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 1
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        },
+        "pr90": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_pr90_b1",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 210.171,
+          "load1_before": 9.81,
+          "load1_after": 10.04,
+          "stages": {
+            "read gain": {
+              "seconds": 0.123,
+              "microsec_per_operation": 5162
+            },
+            "read movie": {
+              "seconds": 5.501,
+              "microsec_per_operation": 229225
+            },
+            "apply gain and initial sum": {
+              "seconds": 0.847,
+              "microsec_per_operation": 35331
+            },
+            "detect hot pixels": {
+              "seconds": 0.763,
+              "microsec_per_operation": 31825
+            },
+            "fix defects": {
+              "seconds": 0.961,
+              "microsec_per_operation": 40047
+            },
+            "global FFT": {
+              "seconds": 41.086,
+              "microsec_per_operation": 1711945
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 6.063,
+              "microsec_per_operation": 252643
+            },
+            "global iFFT": {
+              "seconds": 43.149,
+              "microsec_per_operation": 1797898
+            },
+            "prepare patch": {
+              "seconds": 24.587,
+              "microsec_per_operation": 40979
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.424,
+              "microsec_per_operation": 307
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 83.686,
+              "microsec_per_operation": 5815
+            },
+            "patch alignment": {
+              "seconds": 6.645,
+              "microsec_per_operation": 11075
+            },
+            "align - prep weight": {
+              "seconds": 0.054,
+              "microsec_per_operation": 86
+            },
+            "align - make reference": {
+              "seconds": 0.629,
+              "microsec_per_operation": 493
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.337,
+              "microsec_per_operation": 110
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 13.158,
+              "microsec_per_operation": 432
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.048,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.076,
+              "microsec_per_operation": 4758
+            },
+            "fit polynomial": {
+              "seconds": 0.04,
+              "microsec_per_operation": 1668
+            },
+            "dose weighting": {
+              "seconds": 71.139,
+              "microsec_per_operation": 2964135
+            },
+            "dw - calc weight": {
+              "seconds": 11.651,
+              "microsec_per_operation": 485493
+            },
+            "dw - iFFT": {
+              "seconds": 40.858,
+              "microsec_per_operation": 1702418
+            },
+            "real space interpolation": {
+              "seconds": 18.539,
+              "microsec_per_operation": 772474
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "write corrected image": {
+              "seconds": 1.938,
+              "microsec_per_operation": 80780
+            },
+            "write star and shift plot": {
+              "seconds": 0.084,
+              "microsec_per_operation": 3527
+            },
+            "joint star and logfile pdf": {
+              "seconds": 0.821,
+              "microsec_per_operation": 821597
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        }
+      },
+      "paired": {
+        "ref_wall_seconds": 226.516,
+        "test_wall_seconds": 210.171,
+        "delta_seconds": -16.345,
+        "test_over_ref": 0.9278,
+        "both_completed": true,
+        "same_micrograph_count": true,
+        "micrographs": 24
+      }
+    },
+    {
+      "block": 2,
+      "order": [
+        "pr90",
+        "main"
+      ],
+      "runs": {
+        "pr90": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_pr90_b2",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 211.298,
+          "load1_before": 10.04,
+          "load1_after": 10.25,
+          "stages": {
+            "read gain": {
+              "seconds": 0.126,
+              "microsec_per_operation": 5276
+            },
+            "read movie": {
+              "seconds": 5.535,
+              "microsec_per_operation": 230656
+            },
+            "apply gain and initial sum": {
+              "seconds": 0.898,
+              "microsec_per_operation": 37448
+            },
+            "detect hot pixels": {
+              "seconds": 0.755,
+              "microsec_per_operation": 31466
+            },
+            "fix defects": {
+              "seconds": 1.028,
+              "microsec_per_operation": 42868
+            },
+            "global FFT": {
+              "seconds": 41.276,
+              "microsec_per_operation": 1719858
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 6.043,
+              "microsec_per_operation": 251807
+            },
+            "global iFFT": {
+              "seconds": 43.52,
+              "microsec_per_operation": 1813354
+            },
+            "prepare patch": {
+              "seconds": 24.622,
+              "microsec_per_operation": 41038
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.379,
+              "microsec_per_operation": 304
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 82.223,
+              "microsec_per_operation": 5711
+            },
+            "patch alignment": {
+              "seconds": 6.623,
+              "microsec_per_operation": 11039
+            },
+            "align - prep weight": {
+              "seconds": 0.067,
+              "microsec_per_operation": 108
+            },
+            "align - make reference": {
+              "seconds": 0.635,
+              "microsec_per_operation": 497
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.284,
+              "microsec_per_operation": 111
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 13.33,
+              "microsec_per_operation": 438
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.049,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.061,
+              "microsec_per_operation": 4746
+            },
+            "fit polynomial": {
+              "seconds": 0.04,
+              "microsec_per_operation": 1681
+            },
+            "dose weighting": {
+              "seconds": 71.561,
+              "microsec_per_operation": 2981726
+            },
+            "dw - calc weight": {
+              "seconds": 11.774,
+              "microsec_per_operation": 490594
+            },
+            "dw - iFFT": {
+              "seconds": 41.175,
+              "microsec_per_operation": 1715653
+            },
+            "real space interpolation": {
+              "seconds": 18.513,
+              "microsec_per_operation": 771410
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "write corrected image": {
+              "seconds": 1.921,
+              "microsec_per_operation": 80049
+            },
+            "write star and shift plot": {
+              "seconds": 0.084,
+              "microsec_per_operation": 3511
+            },
+            "joint star and logfile pdf": {
+              "seconds": 0.814,
+              "microsec_per_operation": 814772
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        },
+        "main": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_main_b2",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 226.24,
+          "load1_before": 10.25,
+          "load1_after": 9.32,
+          "stages": {
+            "read gain": {
+              "seconds": 2.794,
+              "microsec_per_operation": 116441
+            },
+            "read movie": {
+              "seconds": 6.038,
+              "microsec_per_operation": 251616
+            },
+            "apply gain and initial sum": {
+              "seconds": 11.561,
+              "microsec_per_operation": 481730
+            },
+            "detect hot pixels": {
+              "seconds": 0.765,
+              "microsec_per_operation": 31882
+            },
+            "fix defects": {
+              "seconds": 0.948,
+              "microsec_per_operation": 39529
+            },
+            "global FFT": {
+              "seconds": 41.318,
+              "microsec_per_operation": 1721585
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 5.941,
+              "microsec_per_operation": 247548
+            },
+            "global iFFT": {
+              "seconds": 43.825,
+              "microsec_per_operation": 1826077
+            },
+            "prepare patch": {
+              "seconds": 24.547,
+              "microsec_per_operation": 40912
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.468,
+              "microsec_per_operation": 312
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 74.762,
+              "microsec_per_operation": 5195
+            },
+            "patch alignment": {
+              "seconds": 6.675,
+              "microsec_per_operation": 11125
+            },
+            "align - prep weight": {
+              "seconds": 0.049,
+              "microsec_per_operation": 80
+            },
+            "align - make reference": {
+              "seconds": 0.611,
+              "microsec_per_operation": 478
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.271,
+              "microsec_per_operation": 109
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 12.394,
+              "microsec_per_operation": 408
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.041,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.032,
+              "microsec_per_operation": 4723
+            },
+            "fit polynomial": {
+              "seconds": 0.04,
+              "microsec_per_operation": 1678
+            },
+            "dose weighting": {
+              "seconds": 71.52,
+              "microsec_per_operation": 2980038
+            },
+            "dw - calc weight": {
+              "seconds": 11.559,
+              "microsec_per_operation": 481651
+            },
+            "dw - iFFT": {
+              "seconds": 41.436,
+              "microsec_per_operation": 1726527
+            },
+            "real space interpolation": {
+              "seconds": 18.421,
+              "microsec_per_operation": 767542
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 1
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        }
+      },
+      "paired": {
+        "ref_wall_seconds": 226.24,
+        "test_wall_seconds": 211.298,
+        "delta_seconds": -14.942,
+        "test_over_ref": 0.934,
+        "both_completed": true,
+        "same_micrograph_count": true,
+        "micrographs": 24
+      }
+    },
+    {
+      "block": 3,
+      "order": [
+        "main",
+        "pr90"
+      ],
+      "runs": {
+        "main": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_main_b3",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 224.879,
+          "load1_before": 9.32,
+          "load1_after": 9.87,
+          "stages": {
+            "read gain": {
+              "seconds": 2.822,
+              "microsec_per_operation": 117592
+            },
+            "read movie": {
+              "seconds": 6.061,
+              "microsec_per_operation": 252566
+            },
+            "apply gain and initial sum": {
+              "seconds": 11.615,
+              "microsec_per_operation": 483998
+            },
+            "detect hot pixels": {
+              "seconds": 0.771,
+              "microsec_per_operation": 32165
+            },
+            "fix defects": {
+              "seconds": 1.024,
+              "microsec_per_operation": 42700
+            },
+            "global FFT": {
+              "seconds": 41.197,
+              "microsec_per_operation": 1716558
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 5.957,
+              "microsec_per_operation": 248222
+            },
+            "global iFFT": {
+              "seconds": 43.331,
+              "microsec_per_operation": 1805490
+            },
+            "prepare patch": {
+              "seconds": 24.413,
+              "microsec_per_operation": 40689
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.344,
+              "microsec_per_operation": 301
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 76.538,
+              "microsec_per_operation": 5316
+            },
+            "patch alignment": {
+              "seconds": 6.621,
+              "microsec_per_operation": 11036
+            },
+            "align - prep weight": {
+              "seconds": 0.049,
+              "microsec_per_operation": 79
+            },
+            "align - make reference": {
+              "seconds": 0.627,
+              "microsec_per_operation": 491
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.281,
+              "microsec_per_operation": 111
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 12.424,
+              "microsec_per_operation": 409
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.041,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.045,
+              "microsec_per_operation": 4734
+            },
+            "fit polynomial": {
+              "seconds": 0.04,
+              "microsec_per_operation": 1667
+            },
+            "dose weighting": {
+              "seconds": 70.781,
+              "microsec_per_operation": 2949228
+            },
+            "dw - calc weight": {
+              "seconds": 11.522,
+              "microsec_per_operation": 480097
+            },
+            "dw - iFFT": {
+              "seconds": 40.743,
+              "microsec_per_operation": 1697663
+            },
+            "real space interpolation": {
+              "seconds": 18.407,
+              "microsec_per_operation": 766993
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        },
+        "pr90": {
+          "command": [
+            "taskset",
+            "-c",
+            "56-63",
+            "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/home/ubuntu/mc-io-evidence/timing/t_pr90_b3",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 208.531,
+          "load1_before": 9.87,
+          "load1_after": 9.34,
+          "stages": {
+            "read gain": {
+              "seconds": 0.124,
+              "microsec_per_operation": 5192
+            },
+            "read movie": {
+              "seconds": 5.51,
+              "microsec_per_operation": 229621
+            },
+            "apply gain and initial sum": {
+              "seconds": 0.878,
+              "microsec_per_operation": 36604
+            },
+            "detect hot pixels": {
+              "seconds": 0.753,
+              "microsec_per_operation": 31411
+            },
+            "fix defects": {
+              "seconds": 0.954,
+              "microsec_per_operation": 39790
+            },
+            "global FFT": {
+              "seconds": 40.785,
+              "microsec_per_operation": 1699388
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 5.985,
+              "microsec_per_operation": 249395
+            },
+            "global iFFT": {
+              "seconds": 42.686,
+              "microsec_per_operation": 1778588
+            },
+            "prepare patch": {
+              "seconds": 24.459,
+              "microsec_per_operation": 40766
+            },
+            "prep patch - clip (in thread)": {
+              "seconds": 4.486,
+              "microsec_per_operation": 311
+            },
+            "prep patch - FFT (in thread)": {
+              "seconds": 79.33,
+              "microsec_per_operation": 5514
+            },
+            "patch alignment": {
+              "seconds": 6.558,
+              "microsec_per_operation": 10931
+            },
+            "align - prep weight": {
+              "seconds": 0.055,
+              "microsec_per_operation": 89
+            },
+            "align - make reference": {
+              "seconds": 0.615,
+              "microsec_per_operation": 482
+            },
+            "align - calc CCF (in thread)": {
+              "seconds": 3.279,
+              "microsec_per_operation": 108
+            },
+            "align - iFFT CCF (in thread)": {
+              "seconds": 13.233,
+              "microsec_per_operation": 437
+            },
+            "align - argmax CCF (in thread)": {
+              "seconds": 0.047,
+              "microsec_per_operation": 1
+            },
+            "align - shift in Fourier space": {
+              "seconds": 6.033,
+              "microsec_per_operation": 4724
+            },
+            "fit polynomial": {
+              "seconds": 0.04,
+              "microsec_per_operation": 1667
+            },
+            "dose weighting": {
+              "seconds": 70.585,
+              "microsec_per_operation": 2941049
+            },
+            "dw - calc weight": {
+              "seconds": 11.557,
+              "microsec_per_operation": 481570
+            },
+            "dw - iFFT": {
+              "seconds": 40.486,
+              "microsec_per_operation": 1686932
+            },
+            "real space interpolation": {
+              "seconds": 18.46,
+              "microsec_per_operation": 769180
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "write corrected image": {
+              "seconds": 1.912,
+              "microsec_per_operation": 79705
+            },
+            "write star and shift plot": {
+              "seconds": 0.084,
+              "microsec_per_operation": 3528
+            },
+            "joint star and logfile pdf": {
+              "seconds": 0.812,
+              "microsec_per_operation": 812556
+            }
+          },
+          "stage_table_present": true,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        }
+      },
+      "paired": {
+        "ref_wall_seconds": 224.879,
+        "test_wall_seconds": 208.531,
+        "delta_seconds": -16.348,
+        "test_over_ref": 0.9273,
+        "both_completed": true,
+        "same_micrograph_count": true,
+        "micrographs": 24
+      }
+    }
+  ],
+  "discarded_warmup": {
+    "command": [
+      "taskset",
+      "-c",
+      "56-63",
+      "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/timing/warmup",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--seed",
+      "1",
+      "--j",
+      "8"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 231.152,
+    "load1_before": 3.98,
+    "load1_after": 9.98,
+    "stages": {
+      "read gain": {
+        "seconds": 2.809,
+        "microsec_per_operation": 117050
+      },
+      "read movie": {
+        "seconds": 6.099,
+        "microsec_per_operation": 254125
+      },
+      "apply gain and initial sum": {
+        "seconds": 11.687,
+        "microsec_per_operation": 486972
+      },
+      "detect hot pixels": {
+        "seconds": 0.76,
+        "microsec_per_operation": 31707
+      },
+      "fix defects": {
+        "seconds": 1.026,
+        "microsec_per_operation": 42771
+      },
+      "global FFT": {
+        "seconds": 41.915,
+        "microsec_per_operation": 1746470
+      },
+      "power spectrum": {
+        "seconds": 0.0,
+        "microsec_per_operation": 0
+      },
+      "global alignment": {
+        "seconds": 5.953,
+        "microsec_per_operation": 248082
+      },
+      "global iFFT": {
+        "seconds": 45.815,
+        "microsec_per_operation": 1908976
+      },
+      "prepare patch": {
+        "seconds": 24.529,
+        "microsec_per_operation": 40882
+      },
+      "prep patch - clip (in thread)": {
+        "seconds": 4.407,
+        "microsec_per_operation": 306
+      },
+      "prep patch - FFT (in thread)": {
+        "seconds": 80.684,
+        "microsec_per_operation": 5608
+      },
+      "patch alignment": {
+        "seconds": 6.731,
+        "microsec_per_operation": 11219
+      },
+      "align - prep weight": {
+        "seconds": 0.05,
+        "microsec_per_operation": 81
+      },
+      "align - make reference": {
+        "seconds": 0.627,
+        "microsec_per_operation": 491
+      },
+      "align - calc CCF (in thread)": {
+        "seconds": 3.334,
+        "microsec_per_operation": 117
+      },
+      "align - iFFT CCF (in thread)": {
+        "seconds": 12.004,
+        "microsec_per_operation": 395
+      },
+      "align - argmax CCF (in thread)": {
+        "seconds": 0.041,
+        "microsec_per_operation": 1
+      },
+      "align - shift in Fourier space": {
+        "seconds": 6.023,
+        "microsec_per_operation": 4716
+      },
+      "fit polynomial": {
+        "seconds": 0.039,
+        "microsec_per_operation": 1651
+      },
+      "dose weighting": {
+        "seconds": 73.465,
+        "microsec_per_operation": 3061077
+      },
+      "dw - calc weight": {
+        "seconds": 11.537,
+        "microsec_per_operation": 480713
+      },
+      "dw - iFFT": {
+        "seconds": 43.435,
+        "microsec_per_operation": 1809798
+      },
+      "real space interpolation": {
+        "seconds": 18.421,
+        "microsec_per_operation": 767565
+      },
+      "binning": {
+        "seconds": 0.0,
+        "microsec_per_operation": 0
+      }
+    },
+    "stage_table_present": true,
+    "micrographs_written": 24,
+    "stderr_tail": ""
+  },
+  "paired_summary": {
+    "blocks": 3,
+    "ratios_test_over_ref": [
+      0.9278,
+      0.934,
+      0.9273
+    ],
+    "median_ratio": 0.9278,
+    "min_ratio": 0.9273,
+    "max_ratio": 0.934,
+    "deltas_seconds": [
+      -16.345,
+      -14.942,
+      -16.348
+    ],
+    "median_delta_seconds": -16.345,
+    "all_blocks_completed": true,
+    "all_blocks_same_micrograph_count": true
+  },
+  "stage_breakdown": {
+    "align - argmax CCF (in thread)": {
+      "main_median_seconds": 0.041,
+      "pr90_median_seconds": 0.048,
+      "median_delta_seconds": 0.007
+    },
+    "align - calc CCF (in thread)": {
+      "main_median_seconds": 3.281,
+      "pr90_median_seconds": 3.284,
+      "median_delta_seconds": 0.003
+    },
+    "align - iFFT CCF (in thread)": {
+      "main_median_seconds": 12.424,
+      "pr90_median_seconds": 13.233,
+      "median_delta_seconds": 0.809
+    },
+    "align - make reference": {
+      "main_median_seconds": 0.621,
+      "pr90_median_seconds": 0.629,
+      "median_delta_seconds": 0.008
+    },
+    "align - prep weight": {
+      "main_median_seconds": 0.049,
+      "pr90_median_seconds": 0.055,
+      "median_delta_seconds": 0.006
+    },
+    "align - shift in Fourier space": {
+      "main_median_seconds": 6.037,
+      "pr90_median_seconds": 6.061,
+      "median_delta_seconds": 0.024
+    },
+    "apply gain and initial sum": {
+      "main_median_seconds": 11.615,
+      "pr90_median_seconds": 0.878,
+      "median_delta_seconds": -10.737
+    },
+    "binning": {
+      "main_median_seconds": 0.0,
+      "pr90_median_seconds": 0.0,
+      "median_delta_seconds": 0.0
+    },
+    "detect hot pixels": {
+      "main_median_seconds": 0.765,
+      "pr90_median_seconds": 0.755,
+      "median_delta_seconds": -0.01
+    },
+    "dose weighting": {
+      "main_median_seconds": 71.52,
+      "pr90_median_seconds": 71.139,
+      "median_delta_seconds": -0.381
+    },
+    "dw - calc weight": {
+      "main_median_seconds": 11.554,
+      "pr90_median_seconds": 11.651,
+      "median_delta_seconds": 0.097
+    },
+    "dw - iFFT": {
+      "main_median_seconds": 41.436,
+      "pr90_median_seconds": 40.858,
+      "median_delta_seconds": -0.578
+    },
+    "fit polynomial": {
+      "main_median_seconds": 0.04,
+      "pr90_median_seconds": 0.04,
+      "median_delta_seconds": 0.0
+    },
+    "fix defects": {
+      "main_median_seconds": 1.021,
+      "pr90_median_seconds": 0.961,
+      "median_delta_seconds": -0.06
+    },
+    "global FFT": {
+      "main_median_seconds": 41.25,
+      "pr90_median_seconds": 41.086,
+      "median_delta_seconds": -0.164
+    },
+    "global alignment": {
+      "main_median_seconds": 5.941,
+      "pr90_median_seconds": 6.043,
+      "median_delta_seconds": 0.102
+    },
+    "global iFFT": {
+      "main_median_seconds": 43.825,
+      "pr90_median_seconds": 43.149,
+      "median_delta_seconds": -0.676
+    },
+    "patch alignment": {
+      "main_median_seconds": 6.675,
+      "pr90_median_seconds": 6.623,
+      "median_delta_seconds": -0.052
+    },
+    "power spectrum": {
+      "main_median_seconds": 0.0,
+      "pr90_median_seconds": 0.0,
+      "median_delta_seconds": 0.0
+    },
+    "prep patch - FFT (in thread)": {
+      "main_median_seconds": 74.762,
+      "pr90_median_seconds": 82.223,
+      "median_delta_seconds": 7.461
+    },
+    "prep patch - clip (in thread)": {
+      "main_median_seconds": 4.344,
+      "pr90_median_seconds": 4.424,
+      "median_delta_seconds": 0.08
+    },
+    "prepare patch": {
+      "main_median_seconds": 24.498,
+      "pr90_median_seconds": 24.587,
+      "median_delta_seconds": 0.089
+    },
+    "read gain": {
+      "main_median_seconds": 2.794,
+      "pr90_median_seconds": 0.124,
+      "median_delta_seconds": -2.67
+    },
+    "read movie": {
+      "main_median_seconds": 6.046,
+      "pr90_median_seconds": 5.51,
+      "median_delta_seconds": -0.536
+    },
+    "real space interpolation": {
+      "main_median_seconds": 18.421,
+      "pr90_median_seconds": 18.513,
+      "median_delta_seconds": 0.092
+    }
+  },
+  "overall": "MEASURED",
+  "interpretation": "Paired, interleaved, same host, same pin, same options, same input. Reported as a measurement of these two heads on this machine only."
+}

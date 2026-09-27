@@ -1,0 +1,81 @@
+cpu-bind=MASK - gn3000, task  0  0 [474622]: mask 0xffffffffffffffff set
+slurmstepd: error: Unable to create TMPDIR [/scratch/scarf1415/relion-container-tests/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+2026-09-27T19:04:19+01:00
+gn3000.scarf.rl.ac.uk
+index, name, memory.total [MiB]
+0, NVIDIA A100-SXM4-40GB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 40960 MiB
+=== no other compute apps on the device at job start ===
+pid, process_name, used_gpu_memory [MiB]
+1d4dd13cb675b6bb563787070ed209e9479f9b4b9f0a7f1a170c816f387d80b8  /scratch/scarf1415/mc-io-split-evidence/src-main/build-cuda/motioncorr
+6bbc260628a056d63bb37dd0e0f3563f7e7176a8704d068b87753158d7973699  /scratch/scarf1415/mc-io-split-evidence/src-pr90/build-cuda/motioncorr
+e8de1cb7fc3e0ca2734abf9c4579d463605c481ddb7957400c00bb66f231abc1  /scratch/scarf1415/mc-io-split-evidence/src-pr91/build-cuda/motioncorr
+e2dfd9c828be5303243a7d82c30ecf62  /scratch/scarf1415/mc-io-split-evidence/harness/compare_outputs.py
+=== GPU run pr91main (binary: main) ===
+pr91main exit=0
+Using CUDA acceleration on GPU device 0 for global alignment.
+device samples naming motioncorr: 14
+=== GPU run mainA (binary: main) ===
+mainA exit=0
+Using CUDA acceleration on GPU device 0 for global alignment.
+device samples naming motioncorr: 14
+=== GPU run mainB (binary: main) ===
+mainB exit=0
+Using CUDA acceleration on GPU device 0 for global alignment.
+device samples naming motioncorr: 15
+=== self-control grade: main vs main, CUDA, 24 movies ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+selfctl exit=1
+=== pr90 vs main, CUDA backend, 24 movies, re-graded ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+pr90 exit=1
+=== pr91 vs main, CUDA backend, 24 movies, re-graded ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+pr91 exit=1
+=== SELFCTL JOB DONE ===
+2026-09-27T19:10:06+01:00

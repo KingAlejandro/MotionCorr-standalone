@@ -1,0 +1,395 @@
+{
+  "what": "decoded movie buffer, ordered-pixel identity between two builds",
+  "ref_dumper": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+  "ref_dumper_sha256": "daf3fcd1e449fc15e803a4f2e71e295f494571940e68ccb581697ea7a4d274a1",
+  "test_dumper": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+  "test_dumper_sha256": "dd37d237f509b7bc5ec57dde3698121f334fc90e8c9d77188e257e6cd4fce411",
+  "fixture_writer": "/home/ubuntu/mc-io-evidence/src-pr90/tests/test_tiff_read.py",
+  "fixture_writer_sha256": "85bfa60d3554b3277ab704ff5f8f33e50ad893d71f72a827bcba783b2f6573ae",
+  "cases": [
+    {
+      "case": "u16_deflate_rps1",
+      "movie": "/home/ubuntu/mc-io-evidence/work/tmpwrdott8h/u16_deflate_rps1.tif",
+      "movie_sha256": "ca87cd08ade8bdf4c2c71b10b5b5e44631da36ad22aca2d868a59584a0b9b8ef",
+      "movie_bytes": 8969,
+      "ref_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+        "exit_code": 0,
+        "stdout": "dims 29 37 3 pixels 3219",
+        "stderr": ""
+      },
+      "test_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+        "exit_code": 0,
+        "stdout": "dims 29 37 3 pixels 3219",
+        "stderr": ""
+      },
+      "ref_dump_sha256": "0884539231d03a57a1e30e104d558a505195d0867075d3e2cf9dde71a091a0a5",
+      "test_dump_sha256": "0884539231d03a57a1e30e104d558a505195d0867075d3e2cf9dde71a091a0a5",
+      "comparison": {
+        "comparable": true,
+        "dims": [
+          29,
+          37,
+          3
+        ],
+        "pixels_compared": 3219,
+        "pixels_matched": 3219,
+        "pixels_differing": 0,
+        "identical": true,
+        "first_differing_index": null,
+        "max_abs_difference": 0.0
+      },
+      "controls": {
+        "perm_row_sums_unchanged": true,
+        "perm_bytes_changed": true,
+        "perm": {
+          "comparable": true,
+          "dims": [
+            29,
+            37,
+            3
+          ],
+          "pixels_compared": 3219,
+          "pixels_matched": 3217,
+          "pixels_differing": 2,
+          "identical": false,
+          "first_differing_index": 1595,
+          "max_abs_difference": 19173.0
+        },
+        "perm_detected": true,
+        "bitflip": {
+          "comparable": true,
+          "dims": [
+            29,
+            37,
+            3
+          ],
+          "pixels_compared": 3219,
+          "pixels_matched": 3218,
+          "pixels_differing": 1,
+          "identical": false,
+          "first_differing_index": 1073,
+          "max_abs_difference": 1.0
+        },
+        "bitflip_detected": true,
+        "missing": {
+          "comparable": false,
+          "reason": "missing reference dump u16_deflate_rps1.ref.absent.bin"
+        },
+        "missing_detected": true
+      },
+      "controls_ok": true,
+      "status": "PASS"
+    },
+    {
+      "case": "u16_raw_rps7",
+      "movie": "/home/ubuntu/mc-io-evidence/work/tmpwrdott8h/u16_raw_rps7.tif",
+      "movie_sha256": "00a77b5b7b017fb50c0b5f48f4add0401ece147d4af679cd45e57e454300a418",
+      "movie_bytes": 3612,
+      "ref_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+        "exit_code": 0,
+        "stdout": "dims 16 50 2 pixels 1600",
+        "stderr": ""
+      },
+      "test_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+        "exit_code": 0,
+        "stdout": "dims 16 50 2 pixels 1600",
+        "stderr": ""
+      },
+      "ref_dump_sha256": "c342edeec511bb3c3c0027b4621d9f83b1cb1c332df08d7713b9e7e2faf7f719",
+      "test_dump_sha256": "c342edeec511bb3c3c0027b4621d9f83b1cb1c332df08d7713b9e7e2faf7f719",
+      "comparison": {
+        "comparable": true,
+        "dims": [
+          16,
+          50,
+          2
+        ],
+        "pixels_compared": 1600,
+        "pixels_matched": 1600,
+        "pixels_differing": 0,
+        "identical": true,
+        "first_differing_index": null,
+        "max_abs_difference": 0.0
+      },
+      "controls": {
+        "perm_row_sums_unchanged": true,
+        "perm_bytes_changed": true,
+        "perm": {
+          "comparable": true,
+          "dims": [
+            16,
+            50,
+            2
+          ],
+          "pixels_compared": 1600,
+          "pixels_matched": 1598,
+          "pixels_differing": 2,
+          "identical": false,
+          "first_differing_index": 800,
+          "max_abs_difference": 14282.0
+        },
+        "perm_detected": true,
+        "bitflip": {
+          "comparable": true,
+          "dims": [
+            16,
+            50,
+            2
+          ],
+          "pixels_compared": 1600,
+          "pixels_matched": 1599,
+          "pixels_differing": 1,
+          "identical": false,
+          "first_differing_index": 533,
+          "max_abs_difference": 1.0
+        },
+        "bitflip_detected": true,
+        "missing": {
+          "comparable": false,
+          "reason": "missing reference dump u16_raw_rps7.ref.absent.bin"
+        },
+        "missing_detected": true
+      },
+      "controls_ok": true,
+      "status": "PASS"
+    },
+    {
+      "case": "packed4bit_k2sr",
+      "movie": "/home/ubuntu/mc-io-evidence/work/tmpwrdott8h/packed4bit_k2sr.tif",
+      "movie_sha256": "7f0058392386a8adcdc6db18837d223810606c20b0c65bed3952d5639fcc8403",
+      "movie_bytes": 28486882,
+      "ref_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+        "exit_code": 0,
+        "stdout": "dims 7420 7676 1 pixels 56955920",
+        "stderr": ""
+      },
+      "test_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+        "exit_code": 0,
+        "stdout": "dims 7420 7676 1 pixels 56955920",
+        "stderr": ""
+      },
+      "ref_dump_sha256": "0990846edea4c37680796724d507cae9a5745119deb2d36b8d02f605cdb68ec2",
+      "test_dump_sha256": "0990846edea4c37680796724d507cae9a5745119deb2d36b8d02f605cdb68ec2",
+      "comparison": {
+        "comparable": true,
+        "dims": [
+          7420,
+          7676,
+          1
+        ],
+        "pixels_compared": 56955920,
+        "pixels_matched": 56955920,
+        "pixels_differing": 0,
+        "identical": true,
+        "first_differing_index": null,
+        "max_abs_difference": 0.0
+      },
+      "controls": {
+        "perm_row_sums_unchanged": true,
+        "perm_bytes_changed": true,
+        "perm": {
+          "comparable": true,
+          "dims": [
+            7420,
+            7676,
+            1
+          ],
+          "pixels_compared": 56955920,
+          "pixels_matched": 56955918,
+          "pixels_differing": 2,
+          "identical": false,
+          "first_differing_index": 28477960,
+          "max_abs_difference": 4.0
+        },
+        "perm_detected": true,
+        "bitflip": {
+          "comparable": true,
+          "dims": [
+            7420,
+            7676,
+            1
+          ],
+          "pixels_compared": 56955920,
+          "pixels_matched": 56955919,
+          "pixels_differing": 1,
+          "identical": false,
+          "first_differing_index": 18985306,
+          "max_abs_difference": 1.0
+        },
+        "bitflip_detected": true,
+        "missing": {
+          "comparable": false,
+          "reason": "missing reference dump packed4bit_k2sr.ref.absent.bin"
+        },
+        "missing_detected": true
+      },
+      "controls_ok": true,
+      "status": "PASS"
+    },
+    {
+      "case": "real:20170629_00021_frameImage",
+      "movie": "/home/ubuntu/mc51/tutorial/Movies/20170629_00021_frameImage.tiff",
+      "movie_sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+      "movie_bytes": 126550106,
+      "ref_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+        "exit_code": 0,
+        "stdout": "dims 3710 3838 24 pixels 341735520",
+        "stderr": ""
+      },
+      "test_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+        "exit_code": 0,
+        "stdout": "dims 3710 3838 24 pixels 341735520",
+        "stderr": ""
+      },
+      "ref_dump_sha256": "15c49b8993d51af55dddb4af265c18fac622b20fbf53ffd9d0f0d807720d4d41",
+      "test_dump_sha256": "15c49b8993d51af55dddb4af265c18fac622b20fbf53ffd9d0f0d807720d4d41",
+      "comparison": {
+        "comparable": true,
+        "dims": [
+          3710,
+          3838,
+          24
+        ],
+        "pixels_compared": 341735520,
+        "pixels_matched": 341735520,
+        "pixels_differing": 0,
+        "identical": true,
+        "first_differing_index": null,
+        "max_abs_difference": 0.0
+      },
+      "controls": {
+        "perm_row_sums_unchanged": true,
+        "perm_bytes_changed": true,
+        "perm": {
+          "comparable": true,
+          "dims": [
+            3710,
+            3838,
+            24
+          ],
+          "pixels_compared": 341735520,
+          "pixels_matched": 341735518,
+          "pixels_differing": 2,
+          "identical": false,
+          "first_differing_index": 170867760,
+          "max_abs_difference": 2.0
+        },
+        "perm_detected": true,
+        "bitflip": {
+          "comparable": true,
+          "dims": [
+            3710,
+            3838,
+            24
+          ],
+          "pixels_compared": 341735520,
+          "pixels_matched": 341735519,
+          "pixels_differing": 1,
+          "identical": false,
+          "first_differing_index": 113911840,
+          "max_abs_difference": 1.0
+        },
+        "bitflip_detected": true,
+        "missing": {
+          "comparable": false,
+          "reason": "missing reference dump real_20170629_00021_frameImage.ref.absent.bin"
+        },
+        "missing_detected": true
+      },
+      "controls_ok": true,
+      "status": "PASS"
+    },
+    {
+      "case": "real:20170629_00035_frameImage",
+      "movie": "/home/ubuntu/mc51/tutorial/Movies/20170629_00035_frameImage.tiff",
+      "movie_sha256": "407f435a5dec04e5425feb7ef34d014b047765a9fa07d25093035245fa56253c",
+      "movie_bytes": 134600552,
+      "ref_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_main",
+        "exit_code": 0,
+        "stdout": "dims 3710 3838 24 pixels 341735520",
+        "stderr": ""
+      },
+      "test_run": {
+        "binary": "/home/ubuntu/mc-io-evidence/dump_decoded_pr90",
+        "exit_code": 0,
+        "stdout": "dims 3710 3838 24 pixels 341735520",
+        "stderr": ""
+      },
+      "ref_dump_sha256": "c29049e2e88cf16136979d18c7a4ab6c09e6bf4846383686fa1c23f7770e4adc",
+      "test_dump_sha256": "c29049e2e88cf16136979d18c7a4ab6c09e6bf4846383686fa1c23f7770e4adc",
+      "comparison": {
+        "comparable": true,
+        "dims": [
+          3710,
+          3838,
+          24
+        ],
+        "pixels_compared": 341735520,
+        "pixels_matched": 341735520,
+        "pixels_differing": 0,
+        "identical": true,
+        "first_differing_index": null,
+        "max_abs_difference": 0.0
+      },
+      "controls": {
+        "perm_row_sums_unchanged": true,
+        "perm_bytes_changed": true,
+        "perm": {
+          "comparable": true,
+          "dims": [
+            3710,
+            3838,
+            24
+          ],
+          "pixels_compared": 341735520,
+          "pixels_matched": 341735518,
+          "pixels_differing": 2,
+          "identical": false,
+          "first_differing_index": 170867760,
+          "max_abs_difference": 1.0
+        },
+        "perm_detected": true,
+        "bitflip": {
+          "comparable": true,
+          "dims": [
+            3710,
+            3838,
+            24
+          ],
+          "pixels_compared": 341735520,
+          "pixels_matched": 341735519,
+          "pixels_differing": 1,
+          "identical": false,
+          "first_differing_index": 113911840,
+          "max_abs_difference": 1.0
+        },
+        "bitflip_detected": true,
+        "missing": {
+          "comparable": false,
+          "reason": "missing reference dump real_20170629_00035_frameImage.ref.absent.bin"
+        },
+        "missing_detected": true
+      },
+      "controls_ok": true,
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "cases": 5,
+    "pass": 5,
+    "fail": 0,
+    "unrun": 0,
+    "total_pixels_matched": 740431779,
+    "total_pixels_compared": 740431779
+  },
+  "overall": "PASS"
+}

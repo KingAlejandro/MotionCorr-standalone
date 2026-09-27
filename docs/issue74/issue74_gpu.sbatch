@@ -154,7 +154,10 @@ wc -l "$E/inputs.sha256"
 
 echo "=============== 5. correctness runs (all 24 tutorial movies) ==============="
 run_all24() { # run_all24 <tag> <binary> <profile-env-or-unset>
-    local tag="$1" bin="$2" prof="$3" out="$W/out/$tag"
+    # Deliberately separate statements: under `set -u`, a name declared in the
+    # same `local` is not yet usable by a later assignment in that declaration.
+    local tag="$1" bin="$2" prof="$3"
+    local out="$W/out/$tag"
     mkdir -p "$out"
     echo "--- run_all24 $tag bin=$bin RELION_CUDA_DETAILED_PROFILE=${prof:-<unset>}"
     ( cd "$W/in"
@@ -321,7 +324,8 @@ fi
 
 echo "=============== 9. GPU memory sampling, one pair ==============="
 sample_pair() { # sample_pair <tag> <prof>
-    local tag="$1" prof="$2" out="$W/t/mem-$tag"
+    local tag="$1" prof="$2"
+    local out="$W/t/mem-$tag"
     mkdir -p "$out"
     nvidia-smi --query-gpu=timestamp,memory.used,utilization.gpu \
         --format=csv,noheader -l 1 > "$E/nvsmi-$tag.csv" &

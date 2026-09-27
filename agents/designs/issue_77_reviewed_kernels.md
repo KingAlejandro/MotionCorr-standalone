@@ -36,6 +36,13 @@ replacement buffer pairs before committing either pointer; clear metadata
 before uploads so a partial upload cannot match an old valid key. Grow patch
 scratch transactionally. Log tracked alignment storage, not a whole-movie peak.
 
+Actual CUDA/cuFFT allocation, execution, copy and event errors must throw through
+`REPORT_ERROR`, matching main's fail-closed alignment contract. The boolean return
+means convergence only: global callers may ignore it, so no execution failure may
+return `false` and allow publication of an unaligned or partially aligned movie.
+Scoped cleanup runs during exception unwinding. Fault-injection validation remains
+required before claiming all failure paths were exercised.
+
 ## Stream ordering and synchronization
 
 All touched transforms, kernels and copies use the default CUDA stream.

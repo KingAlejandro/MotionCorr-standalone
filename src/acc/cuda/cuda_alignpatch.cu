@@ -18,7 +18,7 @@
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
-        return false; \
+        REPORT_ERROR("CUDA patch alignment failed: " + std::string(cudaGetErrorString(err))); \
     } \
 } while (0)
 
@@ -30,7 +30,7 @@
     if (result != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ \
                 << " : code " << result << std::endl; \
-        return false; \
+        REPORT_ERROR("cuFFT patch alignment failed: code " + integerToString(result)); \
     } \
 } while (0)
 
@@ -371,7 +371,6 @@ bool cudaAlignPatchDevice(
 {
     if (d_Fframes == nullptr) {
         REPORT_ERROR("cudaAlignPatchDevice received null device pointer");
-        return false;
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
     AlignCacheFailureCleanup cache_cleanup;
@@ -455,7 +454,7 @@ bool cudaAlignPatchDevice(
             cleanup_temp();
             logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__
                     << " : cudaMalloc failed for patch alignment cache" << std::endl;
-            return false;
+            REPORT_ERROR("CUDA allocation failed for patch alignment cache");
         }
 
         int n[2] = {ccf_ny, ccf_nx};
@@ -465,7 +464,7 @@ bool cudaAlignPatchDevice(
             cleanup_temp();
             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__
                     << " : cufftPlanMany failed for patch alignment" << std::endl;
-            return false;
+            REPORT_ERROR("cuFFT plan creation failed for patch alignment");
         }
 
         size_t cufft_work_size = 0;
@@ -473,7 +472,7 @@ bool cudaAlignPatchDevice(
         if (size_result != CUFFT_SUCCESS) {
             cleanup_temp();
             logfile << "cuFFT error obtaining patch workspace size: " << size_result << std::endl;
-            return false;
+            REPORT_ERROR("cuFFT patch workspace query failed: code " + integerToString(size_result));
         }
 
         // Commit to cache only after all allocations and plan creation succeed
@@ -540,7 +539,6 @@ bool cudaAlignPatchDevice(
     AlignPatchEvents events;
     if (!events.init()) {
         REPORT_ERROR("Failed to initialize CUDA events for patch alignment");
-        return false;
     }
 
     HANDLE_ERROR(cudaEventRecord(events.ev_start_total));

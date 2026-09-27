@@ -79,8 +79,15 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
-    find_package(Python3 COMPONENTS Interpreter)
-    if(Python3_Interpreter_FOUND)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    execute_process(
+        COMMAND "${Python3_EXECUTABLE}" -c "import numpy"
+        RESULT_VARIABLE _NUMPY_CHECK
+        OUTPUT_QUIET ERROR_QUIET
+    )
+    if(NOT _NUMPY_CHECK EQUAL 0)
+        message(FATAL_ERROR "BUILD_TESTING=ON requires Python 3 with 'numpy' installed.")
+    endif()
         add_test(NAME SyntheticRegression
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -113,7 +120,8 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
-    endif()
+        add_test(NAME CiFailClosedControls
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
 endif()
 if(BUILD_TESTING AND CUDA)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -283,7 +283,7 @@ def git_commit(repo_root: Path) -> str:
 
 def generate_case(name: str, outdir: Path, repo_root: Path,
                   noise_rel: float | None = None, noise_seed_offset: int = 0,
-                  label: str | None = None) -> dict:
+                  label: str | None = None, write_manifest: bool = False) -> dict:
     """Generate one case.
 
     ``noise_rel`` and ``noise_seed_offset`` exist for the noise response curve and the
@@ -435,8 +435,8 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
         "expected_applied_field": np.round(-grid_field, 12).tolist(),
     }
     gt_path = outdir / f"{out_name}_ground_truth.json"
-    gt_path.write_text(json.dumps(gt, indent=2) + "\n")
-
+    if not gt_path.exists() or write_manifest:
+        gt_path.write_text(json.dumps(gt, indent=2) + "\n")
     return {
         "case": out_name, "mrcs": str(mrcs), "star": str(star), "ground_truth": str(gt_path),
         "sha256": gt["movie_sha256"], "bytes": mrcs.stat().st_size,
@@ -456,6 +456,8 @@ def main() -> None:
     ap.add_argument("--noise-seed-offset", type=int, default=0,
                     help="change only the detector-noise stream; for replicate studies")
     ap.add_argument("--label", default=None, help="output file stem (defaults to the case name)")
+    ap.add_argument("--write-manifest", action="store_true", default=False,
+                    help="write/update MANIFEST.json in the output directory (explicit maintenance operation)")
     ap.add_argument("--include-heavy", action="store_true",
                     help=f"with --case all, also build the large opt-in cases: "
                          f"{', '.join(sorted(HEAVY))}")
@@ -471,7 +473,7 @@ def main() -> None:
     infos = []
     for name in names:
         info = generate_case(name, args.outdir, repo_root, noise_rel=args.noise_rel,
-                             noise_seed_offset=args.noise_seed_offset, label=args.label)
+                             noise_seed_offset=args.noise_seed_offset, label=args.label, write_manifest=args.write_manifest)
         infos.append(info)
         print(f"{info['case']}: {info['mrcs']} ({info['bytes']} bytes, "
               f"sha256 {info['sha256'][:16]}...)")
@@ -481,7 +483,7 @@ def main() -> None:
     # The .mrcs files are not versioned -- they are reproducible from this script in seconds.
     # The manifest is, so a regenerated fixture that does not match the recorded hash is a
     # visible change rather than a silent one.
-    if args.case == "all" and args.noise_rel is None and not args.noise_seed_offset:
+    if args.write_manifest and args.case == "all" and args.noise_rel is None and not args.noise_seed_offset:
         manifest = args.outdir / "MANIFEST.json"
         existing = json.loads(manifest.read_text()) if manifest.exists() else {"cases": {}}
         existing.setdefault("cases", {})

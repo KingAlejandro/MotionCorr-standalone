@@ -50,6 +50,9 @@
 #define IMAGE_H
 
 #include <cstdint>
+#include <cerrno>
+#include <cstring>
+#include <string>
 #include <typeinfo>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -208,6 +211,7 @@ public:
 	FileName  ext_name; // Filename extension
 	bool	  exist;    // Shows if the file exists
 	bool	  isTiff;   // Shows if this is a TIFF file
+	bool	  writable; // Opened for writing, so it has buffers worth flushing
 
 	/** Empty constructor
 	 */
@@ -219,13 +223,20 @@ public:
 		ext_name="";
 		exist=false;
 		isTiff=false;
+		writable=false;
 	}
 
 	/** Destructor: closes file (if it still open)
+	 *
+	 * This cannot report a failure. A destructor is implicitly noexcept, so
+	 * throwing here would call std::terminate and take the whole batch down
+	 * without naming the file -- which is what a deferred flush error used to
+	 * do. Writers must therefore call closeFile() explicitly and let that
+	 * throw; see Image::write().
 	 */
 	~fImageHandler()
 	{
-		closeFile();
+		releaseHandles();
 	}
 
 	void openFile(const FileName &name, int mode = WRITE_READONLY)
@@ -289,6 +300,11 @@ public:
 			wmChar = "r+";
 			break;
 		}
+
+		// Only a stream we wrote to has buffered bytes that a later flush can
+		// fail on; read streams are closed without flushing, so read behaviour
+		// is unchanged by the checked close below.
+		writable = (mode != WRITE_READONLY);
 
 		if (ext_name.contains("img") || ext_name.contains("hed"))
 		{
@@ -356,29 +372,75 @@ public:
 
 	}
 
-	void closeFile()
+	/** Flush and close every handle, never throwing.
+	 *
+	 * Returns the errno of the first failure, or 0. Handles are released and
+	 * nulled even when a close fails, so neither the caller nor the destructor
+	 * can close them twice.
+	 *
+	 * Flushing matters: stdio buffers writes, so ENOSPC, EDQUOT or EIO can
+	 * first become visible here, after every fwrite has already reported its
+	 * full item count. Checking write counts alone therefore does not cover
+	 * the contract.
+	 */
+	int releaseHandles()
 	{
 		ext_name="";
 		exist=false;
 
-		// Check whether the file was closed already
-		if (fimg == NULL && fhed == NULL && ftiff == NULL)
-			return;
+		int first_errno = 0;
 
-		if (isTiff && ftiff != NULL) {
+		if (ftiff != NULL)
+		{
 			TIFFClose(ftiff);
 			ftiff = NULL;
 		}
 
-		if (!isTiff && fclose(fimg) != 0)
-			REPORT_ERROR((std::string)"Can not close image file ");
-		else
+		if (fimg != NULL)
+		{
+			if (writable)
+			{
+				errno = 0;
+				if (fflush(fimg) != 0 || ferror(fimg) != 0)
+					first_errno = (errno != 0) ? errno : EIO;
+			}
+			errno = 0;
+			if (fclose(fimg) != 0 && first_errno == 0)
+				first_errno = (errno != 0) ? errno : EIO;
 			fimg = NULL;
+		}
 
-		if (fhed != NULL &&  fclose(fhed) != 0)
-			REPORT_ERROR((std::string)"Can not close header file ");
-		else
+		if (fhed != NULL)
+		{
+			if (writable)
+			{
+				errno = 0;
+				if ((fflush(fhed) != 0 || ferror(fhed) != 0) && first_errno == 0)
+					first_errno = (errno != 0) ? errno : EIO;
+			}
+			errno = 0;
+			if (fclose(fhed) != 0 && first_errno == 0)
+				first_errno = (errno != 0) ? errno : EIO;
 			fhed = NULL;
+		}
+
+		writable = false;
+		return first_errno;
+	}
+
+	/** Close the file and report a deferred write error as a named failure.
+	 *
+	 * Writers call this instead of relying on the destructor, so that a flush
+	 * error becomes a per-movie RelionError naming the product rather than a
+	 * std::terminate.
+	 */
+	void closeFile(const FileName &name = "")
+	{
+		const int err = releaseHandles();
+		if (err != 0)
+			REPORT_ERROR("Failed to flush and close image file " +
+			             (std::string)(name == "" ? FileName("(unnamed)") : name) +
+			             ": " + strerror(err));
 	}
 
 };
@@ -572,8 +634,11 @@ public:
 		fImageHandler hFile;
 		hFile.openFile(name, mode);
 		_write(fname, hFile, select_img, isStack, mode, datatype);
-		// the destructor of fImageHandler will close the file
-
+		// Close here rather than in the destructor. The payload is still in the
+		// stdio buffer at this point on small images, so a full disk or quota
+		// surfaces at this flush and nowhere earlier; the destructor cannot
+		// report it, and would call std::terminate if it tried.
+		hFile.closeFile(fname);
 	}
 
 	/** Cast a page of data from type dataType to type Tdest
@@ -1565,9 +1630,9 @@ private:
 		   ext_name.contains("stk") || ext_name.contains("vol"))
 			err = writeSPIDER(select_img, isStack, mode, datatype);
 		else if (ext_name.contains("mrcs"))
-			writeMRC(select_img, true, mode, datatype);
+			err = writeMRC(select_img, true, mode, datatype);
 		else if (ext_name.contains("mrc"))
-			writeMRC(select_img, false, mode, datatype);
+			err = writeMRC(select_img, false, mode, datatype);
 		else if (ext_name.contains("img") || ext_name.contains("hed"))
 			writeIMAGIC(select_img, mode);
 		else

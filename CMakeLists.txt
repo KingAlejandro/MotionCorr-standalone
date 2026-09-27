@@ -79,6 +79,11 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    # Issue #74: the optional CUDA profiling policy header is plain C++, so its
+    # default (detailed events on) is guarded in CPU CI without a GPU.
+    add_executable(cuda_profile_policy tests/test_cuda_profile_policy.cpp)
+    target_include_directories(cuda_profile_policy PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME CudaProfilePolicyDefault COMMAND cuda_profile_policy)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression

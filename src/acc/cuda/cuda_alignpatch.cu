@@ -1,6 +1,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_profile_policy.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 
@@ -236,19 +237,26 @@ bool cudaAlignPatchDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // See cuda_profile_policy.h. The total pair below is always created: it is
+    // the stage's single checked completion boundary and the source of the
+    // always-reported total time. The substage pairs are profiling-only.
+    const bool detailed_profile = cudaDetailedProfileEnabled();
+
     cudaEvent_t ev_start_total, ev_stop_total;
-    cudaEvent_t ev_start_kernel, ev_stop_kernel;
-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
-    cudaEvent_t ev_start_d2h, ev_stop_d2h;
+    cudaEvent_t ev_start_kernel = nullptr, ev_stop_kernel = nullptr;
+    cudaEvent_t ev_start_cufft = nullptr, ev_stop_cufft = nullptr;
+    cudaEvent_t ev_start_d2h = nullptr, ev_stop_d2h = nullptr;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
-    HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
+    if (detailed_profile) {
+        HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
+        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+        HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
+    }
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -339,54 +347,64 @@ bool cudaAlignPatchDevice(
     float accumulated_kernel_ms = 0.0f;
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
+    int shift_uploads = 0;
 
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
 
         // 2. CCF computation
         computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
-        float k1_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k1_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+            float k1_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
+            accumulated_kernel_ms += k1_ms;
+        }
 
         // 3. Batched cuFFT C2R
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
-        float iter_cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
-        accumulated_cufft_ms += iter_cufft_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+            float iter_cufft_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
+            accumulated_cufft_ms += iter_cufft_ms;
+        }
 
         // 4. Peak finding + subpixel quadratic interpolation
-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
             (float)ccf_scale_x, (float)ccf_scale_y, n_frames
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
-        float k2_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k2_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+            float k2_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+            accumulated_kernel_ms += k2_ms;
+        }
 
-        // Copy candidate shifts back to host
-        HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
+        // Copy candidate shifts back to host. This blocking download is the
+        // ordering the iteration actually depends on, in both modes.
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
         HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
         HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
-        float iter_d2h_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
-        accumulated_d2h_ms += iter_d2h_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
+            float iter_d2h_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
+            accumulated_d2h_ms += iter_d2h_ms;
+        }
 
         // Update relative to frame 0
         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
@@ -410,14 +428,17 @@ bool cudaAlignPatchDevice(
         if (n_frames > 1) {
             HANDLE_ERROR(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             HANDLE_ERROR(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
-            HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+            if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
             fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
             LAUNCH_HANDLE_ERROR(cudaGetLastError());
-            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
-            float shift_kernel_ms = 0.0f;
-            HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
-            accumulated_kernel_ms += shift_kernel_ms;
+            if (detailed_profile) {
+                HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+                HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+                float shift_kernel_ms = 0.0f;
+                HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
+                accumulated_kernel_ms += shift_kernel_ms;
+            }
+            shift_uploads += 2;
         }
 
         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
@@ -434,17 +455,29 @@ bool cudaAlignPatchDevice(
     float total_ms = 0.0f;
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
-    // Profile logging
+    // Profile logging. Existing keys keep their exact spelling so that the
+    // tools that already parse them keep working; the qualifiers after the
+    // value are what changed, and they are corrections of previously
+    // overstated labels rather than new measurements.
+    const size_t shift_upload_bytes = (size_t)shift_uploads * sz_shifts;
     const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
     logfile << " [CUDA " << stage_name << " Profile]" << std::endl;
-    logfile << "   Host-to-Device transfer time: 0.00 ms (Resident VRAM)" << std::endl;
-    logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
-    logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
-    logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+    logfile << "   Host-to-Device transfer time: 0.00 ms (not measured; frames stay resident, but "
+            << shift_uploads << " shift uploads totalling " << shift_upload_bytes << " B did occur)" << std::endl;
+    if (detailed_profile) {
+        logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
+        logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
+        logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+    } else {
+        logfile << "   Custom kernel execution time: n/a (detailed profiling disabled)" << std::endl;
+        logfile << "   cuFFT execution time:         n/a (detailed profiling disabled)" << std::endl;
+        logfile << "   Device-to-Host transfer time: n/a (detailed profiling disabled)" << std::endl;
+    }
     logfile << "   Total GPU alignment time:     " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
-    logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB (in scope here, including the caller-owned frame buffer)" << std::endl;
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
-    logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
+    logfile << "   Detailed event profiling:     " << (detailed_profile ? "on" : "off") << std::endl;
 
     // Cleanup
     CUFFT_CHECK(cufftDestroy(plan_c2r));
@@ -459,12 +492,14 @@ bool cudaAlignPatchDevice(
 
     HANDLE_ERROR(cudaEventDestroy(ev_start_total));
     HANDLE_ERROR(cudaEventDestroy(ev_stop_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
+    if (detailed_profile) {
+        HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
+        HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
+        HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
+        HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
+        HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
+        HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
+    }
 
     logfile << " [CUDA " << stage_name << "] completed; converged="
             << (converged ? "yes" : "no") << std::endl;

@@ -238,8 +238,20 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 					actually_read_n *= 2; // convert physical size to logical size
 				// A strip always holds whole rows, so convert each one directly
 				// into its Y-flipped destination (see the axis note below).
+				//
+				// Bound the strip against the frame before using it. The
+				// destination row is _yDim-1-row, so a row index past the end
+				// underflows size_t and writes far outside the buffer; and a
+				// strip that is not a whole number of rows would silently
+				// shift every subsequent row. A well-formed TIFF cannot do
+				// either, but the values come from the file, so they are
+				// checked rather than trusted.
+				if (actually_read_n <= 0 || actually_read_n % _xDim != 0)
+					REPORT_ERROR(name + ": a TIFF strip does not hold a whole number of image rows.");
 				const size_t first_row = (haveread_n - frame_base) / _xDim;
 				const size_t n_rows = (size_t)actually_read_n / _xDim;
+				if (first_row + n_rows > (size_t)_yDim)
+					REPORT_ERROR(name + ": TIFF strip data extends past the end of the image.");
 				for (size_t r = 0; r < n_rows; r++)
 				{
 					const size_t dest_row = _yDim - 1 - (first_row + r);

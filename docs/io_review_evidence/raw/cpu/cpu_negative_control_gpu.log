@@ -1,0 +1,33 @@
+=== CPU-build negative control for the CUDA execution witness ===
+2026-09-27T17:48:57+00:00
+small-refmac-machine
+A CPU-only build must refuse --gpu with a named error. This is what makes the
+SCARF native-CUDA witness falsifiable: the marker cannot be printed by a
+build that has no CUDA in it.
+
+--- main ---
+CUDA:BOOL=OFF
+28918ae8438f1e953eda6648d6178544fc3b431158c41cf9907d67f3d8513a1d  /home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr
+cuda libs linked: 0
+==================
+ERROR: 
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+exit=1 (must be nonzero)
+
+--- pr90 ---
+CUDA:BOOL=OFF
+993cc44000c6e26afaa1b89ac9e33645c744618784b228ee32624767390b7c12  /home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr
+cuda libs linked: 0
+==================
+ERROR: 
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+exit=1 (must be nonzero)
+
+--- pr91 ---
+CUDA:BOOL=OFF
+0dcb11a35c395bd94303bfda00225ce3ad8107b3ec4e7128d1a36f3afea3fd0e  /home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr
+cuda libs linked: 0
+==================
+ERROR: 
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+exit=1 (must be nonzero)

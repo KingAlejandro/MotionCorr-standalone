@@ -1,0 +1,410 @@
+{
+  "what": "--only_do_unfinished resume after damaged-input failure, pr91",
+  "binary": "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+  "binary_sha256": "0dcb11a35c395bd94303bfda00225ce3ad8107b3ec4e7128d1a36f3afea3fd0e",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--seed",
+    "1"
+  ],
+  "threads": 1,
+  "movies": [
+    "20170629_00021_frameImage.tiff",
+    "20170629_00022_frameImage.tiff",
+    "RESUME_frameImage.tiff"
+  ],
+  "damaged_truncated_bytes": 1048576,
+  "damaged_original_bytes": 131245904,
+  "input_hashes": {
+    "20170629_00021_frameImage.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "20170629_00022_frameImage.tiff": "cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47",
+    "20170629_00023_frameImage.tiff": "87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f",
+    "RESUME_frameImage.tiff": "379e82ceb198ea1fbb5cb61c859476cc9b4d99180d15e18b9050122b353d5acd",
+    "gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "run1": {
+    "command": [
+      "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+      "--i",
+      "resume_batch.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--seed",
+      "1",
+      "--j",
+      "1",
+      "--pipeline_control",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume/"
+    ],
+    "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/RESUME_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n0.68/2.05 min ...................~~(,_,\">                                     [oo]\n1.37/2.05 min .......................................~~(,_,\">                 [oo]\n1.37/1.37 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+    "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/RESUME_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x64bc73af6217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x64bc73b1e0e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x64bc73c419e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x64bc73c43ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x64bc73ba2923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x64bc73aecea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x782f6022a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x782f6022a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x64bc73aed905]\n==================\nERROR: \nImage::openFile cannot open: Movies/RESUME_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/RESUME_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x64bc73af6217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x64bc73ad0ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x64bc73aecea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x782f6022a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x782f6022a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x64bc73aed905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/RESUME_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+    "scheduled_movies": [
+      "20170629_00021_frameImage",
+      "20170629_00022_frameImage",
+      "RESUME_frameImage"
+    ],
+    "markers": {
+      "RELION_JOB_EXIT_SUCCESS": false,
+      "RELION_JOB_EXIT_FAILURE": true,
+      "RELION_JOB_EXIT_ABORTED": false
+    },
+    "exit_code": 1,
+    "kind": "clean_failure"
+  },
+  "state_after_run1": {
+    "per_movie": {
+      "20170629_00021_frameImage": {
+        "image": {
+          "sha256": "7b9123a50e25cffd5232c5d3875ead72ba42b1e21b66e170dd38cfed634fbc24",
+          "mtime_ns": 1790531691560633776,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+          "mtime_ns": 1790531691748633121,
+          "bytes": 44556
+        },
+        "complete": true
+      },
+      "20170629_00022_frameImage": {
+        "image": {
+          "sha256": "06789797c4e5a8e2ed75494e69801082fc9e12c8d857fc135d6167c5ca0ad367",
+          "mtime_ns": 1790531732576490784,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+          "mtime_ns": 1790531732797490014,
+          "bytes": 44421
+        },
+        "complete": true
+      },
+      "RESUME_frameImage": {
+        "image": null,
+        "model": null,
+        "complete": false
+      }
+    },
+    "joint": {
+      "corrected_micrographs.star": null,
+      "logfile.pdf": null
+    }
+  },
+  "run1_checks": {
+    "nonzero_exit": true,
+    "clean_failure_not_signal": true,
+    "healthy_complete": true,
+    "damaged_absent": true,
+    "joint_withheld": true,
+    "failure_marker": true,
+    "success_marker_absent": true
+  },
+  "run2": {
+    "command": [
+      "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+      "--i",
+      "resume_batch.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--seed",
+      "1",
+      "--j",
+      "1",
+      "--pipeline_control",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume/",
+      "--only_do_unfinished"
+    ],
+    "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n (skipping all micrographs for which a corrected movie already exists) \n  * Movies/RESUME_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+    "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/RESUME_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f6594901217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5f65949290e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5f6594a4c9e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5f6594a4ece4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5f65949ad923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f65948f7ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x751e0522a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x751e0522a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f65948f8905]\n==================\nERROR: \nImage::openFile cannot open: Movies/RESUME_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/RESUME_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f6594901217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5f65948dbab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f65948f7ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x751e0522a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x751e0522a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f65948f8905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/RESUME_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+    "scheduled_movies": [
+      "RESUME_frameImage"
+    ],
+    "markers": {
+      "RELION_JOB_EXIT_SUCCESS": false,
+      "RELION_JOB_EXIT_FAILURE": true,
+      "RELION_JOB_EXIT_ABORTED": false
+    },
+    "exit_code": 1,
+    "kind": "clean_failure"
+  },
+  "state_after_run2": {
+    "per_movie": {
+      "20170629_00021_frameImage": {
+        "image": {
+          "sha256": "7b9123a50e25cffd5232c5d3875ead72ba42b1e21b66e170dd38cfed634fbc24",
+          "mtime_ns": 1790531691560633776,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+          "mtime_ns": 1790531691748633121,
+          "bytes": 44556
+        },
+        "complete": true
+      },
+      "20170629_00022_frameImage": {
+        "image": {
+          "sha256": "06789797c4e5a8e2ed75494e69801082fc9e12c8d857fc135d6167c5ca0ad367",
+          "mtime_ns": 1790531732576490784,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+          "mtime_ns": 1790531732797490014,
+          "bytes": 44421
+        },
+        "complete": true
+      },
+      "RESUME_frameImage": {
+        "image": null,
+        "model": null,
+        "complete": false
+      }
+    },
+    "joint": {
+      "corrected_micrographs.star": null,
+      "logfile.pdf": null
+    }
+  },
+  "run2_not_regenerated": {
+    "20170629_00021_frameImage": {
+      "image": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "model": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "not_regenerated": true
+    },
+    "20170629_00022_frameImage": {
+      "image": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "model": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "not_regenerated": true
+    }
+  },
+  "run2_checks": {
+    "nonzero_exit": true,
+    "clean_failure_not_signal": true,
+    "healthy_not_regenerated": true,
+    "damaged_retried_per_runner_log": true,
+    "healthy_not_scheduled": true,
+    "damaged_named_in_error": true,
+    "joint_still_withheld": true,
+    "failure_marker": true
+  },
+  "replacement": {
+    "source": "/home/ubuntu/mc-io-evidence/resume-pr91/inputs/Movies/20170629_00023_frameImage.tiff",
+    "sha256": "87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f",
+    "bytes": 131245904
+  },
+  "run3": {
+    "command": [
+      "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+      "--i",
+      "resume_batch.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--seed",
+      "1",
+      "--j",
+      "1",
+      "--pipeline_control",
+      "/home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume/",
+      "--only_do_unfinished"
+    ],
+    "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n (skipping all micrographs for which a corrected movie already exists) \n  * Movies/RESUME_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  41/  41 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/resume-pr91/out_pr91_resume/logfile.pdf\nread gain                          : 0.089 sec (89942 microsec/operation)\nread movie                         : 1.362 sec (1362715 microsec/operation)\napply gain and initial sum         : 3.834 sec (3834949 microsec/operation)\ndetect hot pixels                  : 0.053 sec (53518 microsec/operation)\nfix defects                        : 0.04 sec (40329 microsec/operation)\nglobal FFT                         : 7.46 sec (7460213 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 0.997 sec (997199 microsec/operation)\nglobal iFFT                        : 8.149 sec (8149510 microsec/operation)\nprepare patch                      : 4.296 sec (171854 microsec/operation)\nprep patch - clip (in thread)      : 0.156 sec (260 microsec/operation)\nprep patch - FFT (in thread)       : 4.111 sec (6852 microsec/operation)\npatch alignment                    : 0.672 sec (26885 microsec/operation)\nalign - prep weight                : 0.007 sec (278 microsec/operation)\nalign - make reference             : 0.1 sec (1856 microsec/operation)\nalign - calc CCF (in thread)       : 0.064 sec (49 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.421 sec (324 microsec/operation)\nalign - argmax CCF (in thread)     : 0 sec (0 microsec/operation)\nalign - shift in Fourier space     : 1.072 sec (19867 microsec/operation)\nfit polynomial                     : 0.001 sec (1278 microsec/operation)\ndose weighting                     : 13.713 sec (13713176 microsec/operation)\ndw - calc weight                   : 2.605 sec (2605625 microsec/operation)\ndw - iFFT                          : 7.624 sec (7624327 microsec/operation)\nreal space interpolation           : 3.479 sec (3479939 microsec/operation)\nbinning                            : 0 sec (1 microsec/operation)\n",
+    "stderr_tail": "",
+    "scheduled_movies": [
+      "RESUME_frameImage"
+    ],
+    "markers": {
+      "RELION_JOB_EXIT_SUCCESS": true,
+      "RELION_JOB_EXIT_FAILURE": false,
+      "RELION_JOB_EXIT_ABORTED": false
+    },
+    "exit_code": 0,
+    "kind": "clean_success"
+  },
+  "state_after_run3": {
+    "per_movie": {
+      "20170629_00021_frameImage": {
+        "image": {
+          "sha256": "7b9123a50e25cffd5232c5d3875ead72ba42b1e21b66e170dd38cfed634fbc24",
+          "mtime_ns": 1790531691560633776,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+          "mtime_ns": 1790531691748633121,
+          "bytes": 44556
+        },
+        "complete": true
+      },
+      "20170629_00022_frameImage": {
+        "image": {
+          "sha256": "06789797c4e5a8e2ed75494e69801082fc9e12c8d857fc135d6167c5ca0ad367",
+          "mtime_ns": 1790531732576490784,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+          "mtime_ns": 1790531732797490014,
+          "bytes": 44421
+        },
+        "complete": true
+      },
+      "RESUME_frameImage": {
+        "image": {
+          "sha256": "a1f029b448f029534106183212ab546b0f953a57d56b3531cf99694aa2ce000b",
+          "mtime_ns": 1790531776264338477,
+          "bytes": 56956944
+        },
+        "model": {
+          "sha256": "7284e71d453ba35fb6178a7ee9f41e1f66b7562b3d0f76c6a0d2abe1b6a832c4",
+          "mtime_ns": 1790531776456337808,
+          "bytes": 44332
+        },
+        "complete": true
+      }
+    },
+    "joint": {
+      "corrected_micrographs.star": {
+        "sha256": "24784b441495036c59fa731626cbf27352f604969a73609402747b668e79215d",
+        "bytes": 1203
+      },
+      "logfile.pdf": {
+        "sha256": "5802ccdcfeb724102d375b2d390c423f68344be231237a0a57442fda1f90cae4",
+        "bytes": 76636
+      }
+    }
+  },
+  "run3_not_regenerated": {
+    "20170629_00021_frameImage": {
+      "image": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "model": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "not_regenerated": true
+    },
+    "20170629_00022_frameImage": {
+      "image": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "model": {
+        "sha256_same": true,
+        "mtime_same": true,
+        "not_regenerated": true
+      },
+      "not_regenerated": true
+    }
+  },
+  "joint_star_coverage": {
+    "names": [
+      "20170629_00021_frameImage",
+      "20170629_00022_frameImage",
+      "RESUME_frameImage"
+    ],
+    "expected": [
+      "20170629_00021_frameImage",
+      "20170629_00022_frameImage",
+      "RESUME_frameImage"
+    ],
+    "complete": true
+  },
+  "run3_checks": {
+    "zero_exit": true,
+    "all_movies_complete": true,
+    "formerly_damaged_now_produced": true,
+    "healthy_still_not_regenerated": true,
+    "joint_star_present": true,
+    "joint_pdf_present": true,
+    "joint_star_covers_all_movies": true,
+    "success_marker": true,
+    "failure_marker_absent": true
+  },
+  "summary": {
+    "run1_checks": {
+      "pass": 7,
+      "total": 7,
+      "unmet": []
+    },
+    "run2_checks": {
+      "pass": 8,
+      "total": 8,
+      "unmet": []
+    },
+    "run3_checks": {
+      "pass": 9,
+      "total": 9,
+      "unmet": []
+    }
+  },
+  "overall": "PASS"
+}

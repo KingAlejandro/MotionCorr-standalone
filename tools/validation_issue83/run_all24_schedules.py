@@ -28,8 +28,9 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from run_matrix import (backend_witness, compare_pair, product_hashes,  # noqa: E402
-                        run_binary, sha256)
+                        report_name, run_binary, sha256)
 import products as prod  # noqa: E402
+from products import output_stem  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_MOVIES = 24
@@ -43,11 +44,8 @@ def read_movie_stems(star: Path) -> List[str]:
     if "rlnMicrographMovieName" not in fields:
         raise SystemExit(f"{star}: no rlnMicrographMovieName column")
     column = fields.index("rlnMicrographMovieName")
-    stems = []
-    for row in movies.get("rows", []):
-        name = Path(row[column]).name
-        stems.append(Path(name).stem.replace(".", "_"))
-    return stems
+    # Keep the movie's relative directory: the runner writes products under it.
+    return [output_stem(row[column]) for row in movies.get("rows", [])]
 
 
 def main() -> int:
@@ -151,7 +149,9 @@ def main() -> int:
                     name = f"{stem}.star" if suffix == ".star" else f"{stem}{suffix}"
                     src = base_dir / name
                     if src.exists():
-                        (sched_dir / name).write_bytes(src.read_bytes())
+                        target = sched_dir / name
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(src.read_bytes())
             entry["seeded_movies"] = seeded
             before = product_hashes(sched_dir, seeded, suffixes)
             last = run_binary(opts.binary, runroot, star, sched_dir, args, opts.gpu,
@@ -190,7 +190,7 @@ def main() -> int:
         comparisons = {}
         for stem in stems:
             comparisons[stem] = compare_pair(opts.compare_tool, base_dir, sched_dir,
-                                             stem, reports / f"{stem}_exact.json")
+                                             stem, reports / report_name(stem, "exact"))
         entry["per_movie"] = comparisons
         entry["movies_compared"] = len(comparisons)
         entry["movies_passed"] = sum(1 for c in comparisons.values() if c["passed"])

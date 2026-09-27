@@ -16,12 +16,30 @@ under its existing ``exact`` profile. Nothing here sets a numerical threshold.
 from __future__ import annotations
 
 import math
+import os
 import re
 import struct
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 MRC_HEADER_BYTES = 1024
+
+
+def output_stem(movie_relpath: str) -> str:
+    """Output stem the runner derives from a movie name in the input STAR.
+
+    Mirrors ``MotioncorrRunner::getOutputFileNames``: the extension is dropped
+    and every remaining dot becomes an underscore. The movie's relative
+    directory is kept, so a movie listed as ``Movies/x.mrcs`` writes its
+    products to ``<outdir>/Movies/x.*`` rather than to the top level.
+    """
+    text = str(movie_relpath)
+    dot = text.rfind(".")
+    slash = max(text.rfind("/"), text.rfind(os.sep))
+    if dot > slash:
+        text = text[:dot]
+    head, sep, tail = text.rpartition("/")
+    return f"{head}{sep}{tail.replace('.', '_')}" if sep else tail.replace(".", "_")
 
 #: MRC mode -> bytes per sample, restricted to the modes this program writes.
 MRC_MODE_ITEMSIZE = {0: 1, 1: 2, 2: 4, 6: 2, 12: 2}
@@ -222,19 +240,19 @@ def check_products(out_dir: Path, movie_stems: List[str], suffixes: List[str],
     directions.
     """
     report: Dict[str, Any] = {"movies": {}, "errors": [], "inventory_complete": True}
-    expected_names = set()
+    expected_paths = set()
 
     for stem in movie_stems:
         entry: Dict[str, Any] = {"headers": {}, "star": None}
         for suffix in suffixes:
             if suffix == ".star":
                 path = out_dir / f"{stem}.star"
-                expected_names.add(path.name)
+                expected_paths.add(path.resolve())
                 entry["star"] = check_movie_star(path, star_expect)
                 report["errors"].extend(entry["star"]["errors"])
                 continue
             path = out_dir / f"{stem}{suffix}"
-            expected_names.add(path.name)
+            expected_paths.add(path.resolve())
             if not path.exists():
                 report["errors"].append(f"{path.name}: missing declared product")
                 continue
@@ -252,10 +270,13 @@ def check_products(out_dir: Path, movie_stems: List[str], suffixes: List[str],
                         f"expected {want_nx}x{want_ny}")
         report["movies"][stem] = entry
 
-    produced = {p.name for p in out_dir.glob("*.mrc")} | {p.name for p in out_dir.glob("*.star")}
+    # Products live under the movie's relative directory, so scan recursively.
+    produced = {p.resolve() for p in out_dir.rglob("*.mrc")}
+    produced |= {p.resolve() for p in out_dir.rglob("*.star")}
     # The joint dataset STAR is written once per run, not per movie.
-    produced.discard("corrected_micrographs.star")
-    unexpected = sorted(produced - expected_names)
+    produced.discard((out_dir / "corrected_micrographs.star").resolve())
+    unexpected = sorted(str(p.relative_to(out_dir.resolve()))
+                        for p in produced - expected_paths)
     if unexpected:
         report["unexpected_products"] = unexpected
         report["errors"].append(f"unexpected products present: {', '.join(unexpected)}")

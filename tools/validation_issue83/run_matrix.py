@@ -39,6 +39,7 @@ from typing import Any, Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import matrix as declared  # noqa: E402
 import products as prod  # noqa: E402
+from products import output_stem  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -107,13 +108,16 @@ def build_dataset(work: Path, fixture: str, fixtures_dir: Path, n_movies: int,
     if not source.exists():
         raise SystemExit(f"fixture movie not found: {source}")
 
-    stems = []
+    names, stems = [], []
     for index in range(n_movies):
-        stem = f"{fixture}_m{index + 1:02d}"
-        target = movies_dir / f"{stem}.mrcs"
+        name = f"{fixture}_m{index + 1:02d}"
+        target = movies_dir / f"{name}.mrcs"
         if not target.exists():
             shutil.copyfile(source, target)
-        stems.append(stem)
+        names.append(name)
+        # The runner keeps the movie's relative directory in the output path,
+        # so products land under <outdir>/Movies/<name>.*, not at the top level.
+        stems.append(output_stem(f"Movies/{name}.mrcs"))
 
     star = work / "movies.star"
     lines = [
@@ -125,14 +129,16 @@ def build_dataset(work: Path, fixture: str, fixtures_dir: Path, n_movies: int,
         "", "", "# version 30001", "", "data_movies", "", "loop_",
         "_rlnMicrographMovieName #1", "_rlnOpticsGroup #2",
     ]
-    lines += [f"Movies/{stem}.mrcs 1" for stem in stems]
+    lines += [f"Movies/{name}.mrcs 1" for name in names]
     star.write_text("\n".join(lines) + "\n")
 
     # A second STAR holding only the middle movie, used to create a non-prefix
     # completion state before resuming the full dataset.
-    middle = stems[len(stems) // 2]
+    middle_index = len(names) // 2
     single = work / "movies_nonprefix.star"
-    single.write_text("\n".join(lines[:-n_movies] + [f"Movies/{middle}.mrcs 1"]) + "\n")
+    single.write_text(
+        "\n".join(lines[:-n_movies] + [f"Movies/{names[middle_index]}.mrcs 1"]) + "\n")
+    middle = stems[middle_index]
 
     return {"star": star, "nonprefix_star": single, "stems": stems,
             "nonprefix_stem": middle, "movie_sha256": sha256(source)}
@@ -192,13 +198,20 @@ def run_binary(binary: Path, cwd: Path, star: Path, out_dir: Path,
 
 
 def product_hashes(out_dir: Path, stems: List[str], suffixes: List[str]) -> Dict[str, str]:
+    """Digest every declared product, keyed by its path relative to ``out_dir``."""
     digests = {}
     for stem in stems:
         for suffix in suffixes:
-            path = out_dir / (f"{stem}.star" if suffix == ".star" else f"{stem}{suffix}")
+            relative = f"{stem}.star" if suffix == ".star" else f"{stem}{suffix}"
+            path = out_dir / relative
             if path.exists():
-                digests[path.name] = sha256(path)
+                digests[relative] = sha256(path)
     return digests
+
+
+def report_name(stem: str, schedule: str) -> str:
+    """Flatten a movie stem that may contain directories into a report filename."""
+    return f"{stem.replace('/', '__')}_{schedule}.json"
 
 
 def compare_pair(compare_tool: Path, ref_dir: Path, test_dir: Path, stem: str,
@@ -406,7 +419,7 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
         comparisons = {}
         for stem in dataset["stems"]:
             comparisons[stem] = compare_pair(compare_tool, base_dir, sched_dir, stem,
-                                             reports / f"{stem}_exact.json")
+                                             reports / report_name(stem, "exact"))
         entry["comparisons"] = comparisons
         entry["movies_compared"] = len(comparisons)
         entry["movies_passed"] = sum(1 for c in comparisons.values() if c["passed"])

@@ -73,6 +73,9 @@
 	int TIMING_DW_IFFT = MCtimer.setNew("dw - iFFT");
 	int TIMING_REAL_SPACE_INTERPOLATION = MCtimer.setNew("real space interpolation");
 	int TIMING_BINNING = MCtimer.setNew("binning");
+	int TIMING_WRITE_RESULT = MCtimer.setNew("write corrected image");
+	int TIMING_SAVE_MODEL_PLOT = MCtimer.setNew("write star and shift plot");
+	int TIMING_LOGFILE_PDF = MCtimer.setNew("joint star and logfile pdf");
 //	int TIMING_ = MCtimer.setNew("");
 
 #else
@@ -617,8 +620,10 @@ void MotioncorrRunner::run()
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 
 		if (result) {
+			RCTIC(TIMING_SAVE_MODEL_PLOT);
 			saveModel(mic);
 			plotShifts(fn_micrographs[imic], mic);
+			RCTOC(TIMING_SAVE_MODEL_PLOT);
 		} else {
 			failed_movies.push_back(fn_micrographs[imic]);
 		}
@@ -635,7 +640,9 @@ void MotioncorrRunner::run()
 	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
+	RCTIC(TIMING_LOGFILE_PDF);
 	generateLogFilePDFAndWriteStarFiles();
+	RCTOC(TIMING_LOGFILE_PDF);
 
 #ifdef TIMING
         MCtimer.printTimes(false);
@@ -1417,15 +1424,35 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
-		#pragma omp parallel for num_threads(n_threads)
-		for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
-			float sum = 0.0f;
+		const long int n_pixels = YXSIZE(Isum);
+		// Walk a tile of pixels through every frame before moving to the next
+		// tile. Frame-minor traversal of the whole image touches n_frames
+		// separate multi-MB buffers per pixel, so each inner step lands on a
+		// different page; tiling turns that into one sequential run per frame
+		// while the tile's slice of Isum and the gain stay in cache.
+		//
+		// Each pixel still accumulates frames 0..n_frames-1 in that order into
+		// a float, so every stored sum is bit-identical to the untiled loop.
+		const long int tile = 4096;
+		float *const sum_ptr = &DIRECT_MULTIDIM_ELEM(Isum, 0);
+		const float *const gain_ptr = apply_gain ? &DIRECT_MULTIDIM_ELEM(Igain(), 0) : nullptr;
+		#pragma omp parallel for num_threads(n_threads) schedule(static)
+		for (long int base = 0; base < n_pixels; base += tile) {
+			const long int end = XMIPP_MIN(base + tile, n_pixels);
+			for (long int pixel = base; pixel < end; pixel++)
+				sum_ptr[pixel] = 0.0f;
 			for (int iframe = 0; iframe < n_frames; iframe++) {
-				float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
-				if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
-				sum += value;
+				float *const frame_ptr = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+				if (apply_gain) {
+					for (long int pixel = base; pixel < end; pixel++) {
+						frame_ptr[pixel] *= gain_ptr[pixel];
+						sum_ptr[pixel] += frame_ptr[pixel];
+					}
+				} else {
+					for (long int pixel = base; pixel < end; pixel++)
+						sum_ptr[pixel] += frame_ptr[pixel];
+				}
 			}
-			DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
 		}
 	}
 	RCTOC(TIMING_GAIN_AND_SUM);
@@ -2356,6 +2383,7 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
@@ -2372,6 +2400,7 @@ skip_fitting:
 		logfile << "Written aligned but non-dose weighted sum of odd frames to " << (fn_avg.withoutExtension() + "_ODD.mrc") << std::endl;
 		logfile << "Written aligned but non-dose weighted sum of even frames to " << (fn_avg.withoutExtension() + "_EVN.mrc") << std::endl;
 		}
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Dose weighting
@@ -2456,9 +2485,11 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Set the start frame for the local motion model.

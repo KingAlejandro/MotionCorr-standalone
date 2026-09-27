@@ -15,6 +15,9 @@ This work does not reuse those movies, does not reinterpret that result, and doe
 | [`HOST_DATA_SURVEY.md`](HOST_DATA_SURVEY.md) | Read-only survey establishing that no independent raw-movie collection is staged on any project host, and why the two other collections present are unusable. |
 | [`results/margins_derivation.json`](results/margins_derivation.json) | Output of `tools/science_issue73/i73_margins.py` — every margin derived from collection physics. |
 | [`results/acquisition_manifest.json`](results/acquisition_manifest.json) | Every byte acquired from the public archive, with hashes, against the ≤ 2 GiB cap. |
+| [`results/PILOT.md`](results/PILOT.md) | Feasibility-pilot results: provenance, binary hashes, native EER handling, geometry and particle-coordinate checks, and what the pilot cannot show. |
+| [`results/pilot_cpu_check_*.json`](results/) | Raw per-movie output of `i73_check_pilot.py`. |
+| [`WORKER_STATUS.md`](WORKER_STATUS.md) | Live run state, compute used, and the resource decision awaiting Alex. |
 
 Tooling lives in [`tools/science_issue73/`](../../tools/science_issue73/), isolated from production
 code and from the comparator.

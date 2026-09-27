@@ -1,0 +1,33 @@
+{
+  "caveat": "One configuration on one device. Not a capacity claim for other geometries, frame counts or devices. No CPU-fallback behaviour is claimed or inferred from the exit status.",
+  "command": [
+    "python3",
+    "-u",
+    "tools/validation_issue83/run_matrix.py",
+    "--binary",
+    "/scratch/scarf1415/mc-i83-tree/build-cuda/motioncorr",
+    "--gpu",
+    "0",
+    "--fixtures-dir",
+    "/scratch/scarf1415/mc-i83-tree/fixtures",
+    "--outdir",
+    "/scratch/scarf1415/mc-i83-tree/evidence3/matrix-realscale",
+    "--include-heavy",
+    "--rows",
+    "realscale_local",
+    "--json",
+    "/scratch/scarf1415/mc-i83-tree/evidence3/matrix-realscale/summary.json"
+  ],
+  "device": 0,
+  "device_total_mib": 40960,
+  "elapsed_sec": 20.8,
+  "note": "2048x2048, 24 frames, local 5x5 patches, native CUDA",
+  "peak_used_mib": 1266,
+  "returncode": 1,
+  "row_id": "realscale_local",
+  "sample_interval_sec": 0.5,
+  "samples": 32,
+  "schema": "issue83-capacity/1",
+  "stderr_tail": "",
+  "stdout_tail": "[issue83] realscale_local ...\n[issue83] realscale_local: pass\n{\n  \"declared\": 25,\n  \"attempted\": 1,\n  \"pass\": 1,\n  \"fail\": 0,\n  \"error\": 0\n}\nUNRUN rows: bin1, defect_detect, defect_file, defect_skip, dose_off, dose_on, dose_on_preexposure, dose_on_savenoDW, early_bin2, evenodd, evenodd_dose_noDW, frames_subset, gain_none, gain_nonunity, gain_unity, global_nonsquare, global_square, group_frames_2, group_frames_invalid, late_bin2, local_nonsquare, local_square, power_spectrum, threads_invalid\n"
+}

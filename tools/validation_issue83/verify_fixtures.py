@@ -71,15 +71,15 @@ def main() -> int:
         "manifest_ref": opts.ref,
         "manifest_source_commit": manifest.get("source_commit"),
         "fixtures_dir": str(opts.fixtures_dir),
-        "numpy_version": None,
+        "verifier_numpy_version": None,
         "cases": {},
         "mismatched": [],
         "missing": [],
         "undeclared": [],
     }
     try:
-        import numpy  # noqa: WPS433 -- recorded for provenance only
-        result["numpy_version"] = numpy.__version__
+        import numpy  # noqa: WPS433 -- the checking process, not the generator
+        result["verifier_numpy_version"] = numpy.__version__
     except ImportError:
         pass
 
@@ -120,7 +120,7 @@ def main() -> int:
             print(f"          observed {entry['observed']}")
     if result["undeclared"]:
         print(f"undeclared fixtures: {', '.join(result['undeclared'])}")
-    print(f"numpy {result['numpy_version']}; "
+    print(f"verifier numpy {result['verifier_numpy_version']}; "
           f"manifest from {opts.ref} ({result['manifest_source_commit']})")
     print("VERIFIED" if result["verified"] else "NOT VERIFIED")
     return 0 if result["verified"] else 1

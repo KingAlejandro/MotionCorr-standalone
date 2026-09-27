@@ -41,8 +41,13 @@ BASE=/home/vol05/scarf1415/mc-issue74-base
 RUN=/home/vol05/scarf1415/mc-issue74-run
 E="$RUN/ev-${SLURM_JOB_ID}"
 W="/tmp/i74-${SLURM_JOB_ID}"
-CAND_SHA=e0bc6c3257dd9a046a7c85bb40b16b73e4d57302
+# The candidate clone tracks the branch tip, which also carries documentation
+# commits. What must be pinned is the code that gets compiled, so the job
+# asserts that everything it builds is identical to the reviewed code commit
+# and records the actual tip separately.
+CODE_SHA=e0bc6c3257dd9a046a7c85bb40b16b73e4d57302
 BASE_SHA=1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26
+BUILT_PATHS=(src CMakeLists.txt tests)
 REF=/home/vol05/scarf1415/mc-stabilize-20260926/evidence/baseline
 COMPARE24=/home/vol05/scarf1415/compare24.py
 SRC_MOVIES=/home/vol05/scarf1415/i53-scarf/relion30_tutorial/Movies
@@ -90,18 +95,20 @@ git -C "$BASE" status --porcelain
 
 GOT_CAND=$(git -C "$CAND" rev-parse HEAD)
 GOT_BASE=$(git -C "$BASE" rev-parse HEAD)
-echo "candidate HEAD = $GOT_CAND (want $CAND_SHA)"
+echo "candidate tip  = $GOT_CAND"
 echo "baseline  HEAD = $GOT_BASE (want $BASE_SHA)"
-if [ "$GOT_CAND" = "$CAND_SHA" ] && [ "$GOT_BASE" = "$BASE_SHA" ]; then
-    record PASS "source trees at the intended commits"
+CODE_DRIFT=$(git -C "$CAND" diff --name-only "$CODE_SHA" HEAD -- "${BUILT_PATHS[@]}")
+echo "compiled-path drift vs $CODE_SHA: ${CODE_DRIFT:-<none>}"
+if [ "$GOT_BASE" = "$BASE_SHA" ] && [ -z "$CODE_DRIFT" ]; then
+    record PASS "baseline at $BASE_SHA; every compiled path identical to $CODE_SHA (tip $GOT_CAND)"
 else
     record FAIL "source trees at the intended commits"
-    echo "refusing to continue: wrong commits"; exit 1
+    echo "refusing to continue: wrong commits or compiled-path drift"; exit 1
 fi
 
 # The two arms must differ in exactly the files this issue owns.
-git -C "$CAND" diff --stat "$BASE_SHA" "$CAND_SHA" | tee "$E/candidate-vs-baseline.diffstat"
-git -C "$CAND" diff "$BASE_SHA" "$CAND_SHA" > "$E/candidate-vs-baseline.diff"
+git -C "$CAND" diff --stat "$BASE_SHA" "$CODE_SHA" | tee "$E/candidate-vs-baseline.diffstat"
+git -C "$CAND" diff "$BASE_SHA" "$CODE_SHA" > "$E/candidate-vs-baseline.diff"
 
 sha256sum "$CAND"/src/acc/cuda/*.cu "$CAND"/src/acc/cuda/*.h \
           "$BASE"/src/acc/cuda/*.cu "$BASE"/src/acc/cuda/*.h > "$E/sources.sha256"

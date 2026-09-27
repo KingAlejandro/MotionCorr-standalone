@@ -17,6 +17,7 @@
  * source code. Additional authorship citations may be added, but existing
  * author citations must be preserved.
  ***************************************************************************/
+#include <exception>
 #include <src/motioncorr_runner.h>
 
 
@@ -34,6 +35,20 @@ int main(int argc, char *argv[])
 	{
 		//prm.usage();
 		std::cerr << XE;
+		return RELION_EXIT_FAILURE;
+	}
+	// Without these, anything that is not a RelionError (std::bad_alloc from a
+	// 1.37 GB frame buffer, for instance) escapes main and calls std::terminate,
+	// so no failure exit code is written and a RELION pipeliner job is left
+	// marked Running for ever.
+	catch (std::exception &e)
+	{
+		std::cerr << "ERROR: " << e.what() << std::endl;
+		return RELION_EXIT_FAILURE;
+	}
+	catch (...)
+	{
+		std::cerr << "ERROR: unrecognised exception" << std::endl;
 		return RELION_EXIT_FAILURE;
 	}
 

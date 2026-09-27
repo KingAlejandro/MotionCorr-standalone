@@ -41,29 +41,40 @@
     ]
   },
   "stage_2_feasibility_movies": {
-    "status": "PLANNED - frozen before acquisition, see PROTOCOL.md section 4",
-    "selection_rule": "the two micrographs carrying the most deposited particles, maximising pilot particle count within the cap",
-    "expected_total_MiB": 1514.48,
+    "status": "ACQUIRED 2026-09-27",
+    "selection_rule": "the two micrographs carrying the most deposited particles, maximising pilot particle count within the cap; frozen before acquisition, see PROTOCOL.md section 4",
+    "total_bytes": 1588045828,
+    "total_MiB": 1514.48,
     "files": [
       {
         "path": "RawMicrographs/Images-Disc1/GridSquare_4650360/Data/FoilHole_4677724_Data_4659374_4659376_20230406_041554_EER.eer",
-        "expected_MiB": 756.2,
-        "deposited_particles": 54
+        "staged_as": "stage/movies/FoilHole_4677724_041554_EER.eer",
+        "bytes": 792936370,
+        "MiB": 756.2,
+        "sha256": "b25af46fbaace4cfb2ad67a91ad627b5a4c04a988271854c09753eaea4974221",
+        "deposited_particles": 54,
+        "verified": "1911 IFDs (raw detector frames), 4096x4096, TIFF compression tag 65001 (EER); tools/science_issue73/i73_eer_probe.py"
       },
       {
         "path": "RawMicrographs/Images-Disc1/GridSquare_4650302/Data/FoilHole_4681533_Data_4659374_4659376_20230406_062633_EER.eer",
-        "expected_MiB": 758.28,
-        "deposited_particles": 50
+        "staged_as": "stage/movies/FoilHole_4681533_062633_EER.eer",
+        "bytes": 795109458,
+        "MiB": 758.28,
+        "sha256": "3c8d113fd59ac1c2f873b54c9aa6775477cf5e2314a8e0bbd8957f03b5c92e98",
+        "deposited_particles": 50,
+        "verified": "1911 IFDs (raw detector frames), 4096x4096, TIFF compression tag 65001 (EER); tools/science_issue73/i73_eer_probe.py"
       }
     ]
   },
   "budget": {
-    "acquired_MiB": 61.05,
-    "planned_MiB": 1514.48,
-    "projected_total_MiB": 1575.53,
+    "stage_1_metadata_MiB": 61.05,
+    "stage_2_movies_MiB": 1514.48,
+    "acquired_total_bytes": 1652061501,
+    "acquired_total_MiB": 1575.53,
     "cap_MiB": 2048,
     "headroom_MiB": 472.47,
-    "within_cap": true
+    "within_cap": true,
+    "note": "Acquisition is complete. No further bytes will be taken from the archive under this issue's cap."
   },
   "not_acquired": {
     "confirmatory_set_GiB": 270,

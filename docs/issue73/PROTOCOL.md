@@ -274,3 +274,52 @@ Stated before results exist, not retrofitted.
   and back off rather than retrying in a loop.
 - Coordinate with the active #85 I/O work: no concurrent benchmark on a shared allocation.
 - No credential changes, no new accounts, no paid services.
+
+## 12. Protocol amendments
+
+Amendments are appended, never applied by editing the frozen text above. Each records what was
+still open, what fixed it, and whether any arm output existed at the time.
+
+### Amendment 1 — `--eer_grouping` and `--dose_per_frame` fixed (2026-09-27)
+
+§5 left exactly two values open, to be fixed by §8 step 2. This amendment fixes the first.
+**No corrected micrograph existed on this collection when it was written, from either arm**, so
+no outcome could have influenced it.
+
+Measured with `tools/science_issue73/i73_eer_probe.py`, which walks the TIFF IFD chain and
+decodes nothing:
+
+| Quantity | Value | Source |
+| --- | --- | --- |
+| Raw detector frames per movie | **1911** (both movies) | IFD count |
+| Physical frame size | 4096 × 4096 | TIFF tags 256/257 |
+| EER compression tag | 65001 | TIFF tag 259 |
+| Gain | 4096 × 4096, 32-bit float, LZW | TIFF tags 256/257/258/259 |
+| Depositors' rendered fractions | **40** | EMPIAR API `frames_per_image` |
+| Total dose | 50 e⁻/Å² | EMPIAR API imageset details |
+| Raw physical pixel | 0.97 Å | EMPIAR API `pixel_width` |
+
+`src/motioncorr_runner.cpp:1259` computes `nn = getNFrames() / eer_grouping` with the remainder
+truncated, and renders fraction *i* from raw frames `i·G+1 … (i+1)·G`. So:
+
+```
+--eer_grouping   47        floor(1911 / 47) = 40 fractions, matching the depositors
+--dose_per_frame 1.2297    50 e/Å² x 47/1911, the dose actually in one rendered fraction
+```
+
+Frames 1881–1911 (31 of 1911, 1.6 % of dose) are truncated by the integer division. This is the
+code's own behaviour, is identical in both arms, and is recorded rather than worked around.
+
+Two independent confirmations of `--eer_upsampling 2`, already fixed in §5: the EMPIAR physical
+pixel 0.97 Å halves to exactly the 0.485 Å in the deposited particle metadata, and the measured
+4096² gain against an 8192² render grid is the supported `(gain=det=4K, grid=8K)` case at
+`src/renderEER.h:149`.
+
+Still open, per §5: **gain orientation** (`--gain_rot` / `--gain_flip`), which needs a rendered
+micrograph to confirm and is therefore settled in §8 step 2 proper.
+
+### Amendment 2 — cross-reference correction (2026-09-27)
+
+§5 and §10 cite "§7 step 2" for the values deferred to the feasibility pilot. The execution order
+is **§8**; §7 is the harmful controls. Editorial only — no endpoint, margin, set or option
+changes. Recorded here rather than silently corrected in place.

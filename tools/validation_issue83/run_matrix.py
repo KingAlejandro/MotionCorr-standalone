@@ -290,7 +290,7 @@ def expected_geometry(row: declared.Row, geometry: Dict[str, Any]) -> Optional[t
 
 def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
             base_work: Path, compare_tool: Path) -> Dict[str, Any]:
-    geometry = declared.FIXTURES[row.fixture]
+    geometry = dict(declared.FIXTURES[row.fixture])
     work = base_work / row.row_id
     work.mkdir(parents=True, exist_ok=True)
 
@@ -299,6 +299,26 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
         "notes": row.notes, "backend": "cuda" if opts.gpu is not None else "cpu",
         "schedules": {}, "errors": [], "status": "unrun",
     }
+
+    # Take the geometry from the fixture itself rather than trusting the
+    # declaration, and say so loudly when the two disagree: a stale constant
+    # here silently becomes a wrong expectation about the product.
+    header = prod.read_mrc_header(fixtures_dir / f"{row.fixture}.mrcs")
+    if "error" in header:
+        result["errors"].append(f"fixture unreadable: {header['error']}")
+    else:
+        observed = {"nx": header["nx"], "ny": header["ny"], "frames": header["nz"]}
+        drift = {k: (geometry.get(k), v) for k, v in observed.items()
+                 if int(geometry.get(k, -1)) != int(v)}
+        if drift:
+            result["declaration_drift"] = {k: {"declared": d, "fixture": f}
+                                           for k, (d, f) in drift.items()}
+            result["errors"].append(
+                "declared fixture geometry does not match the fixture: "
+                + ", ".join(f"{k} declared {d}, fixture has {f}"
+                            for k, (d, f) in sorted(drift.items())))
+        geometry.update(observed)
+    result["geometry"] = {k: geometry.get(k) for k in ("nx", "ny", "frames")}
 
     aux = build_aux_fixtures(work / "aux", int(geometry["nx"]), int(geometry["ny"]))
     args = [aux.get(token, token) for token in row.args]

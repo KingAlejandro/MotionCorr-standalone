@@ -34,7 +34,7 @@ FIXTURES: Dict[str, Dict[str, object]] = {
                        "voltage": 300.0, "dose_per_frame": 1.277, "heavy": False},
     "km_local_nonsquare": {"nx": 768, "ny": 512, "frames": 12, "angpix": 0.885,
                            "voltage": 300.0, "dose_per_frame": 1.277, "heavy": False},
-    "km_local_realscale": {"nx": 2048, "ny": 2048, "frames": 12, "angpix": 0.885,
+    "km_local_realscale": {"nx": 2048, "ny": 2048, "frames": 24, "angpix": 0.885,
                            "voltage": 300.0, "dose_per_frame": 1.277, "heavy": True},
 }
 

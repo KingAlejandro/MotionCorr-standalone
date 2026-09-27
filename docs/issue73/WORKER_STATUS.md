@@ -42,8 +42,14 @@ From the running CPU arm's own log, on genuinely independent data:
 - Global alignment converges 2.85 → 0.32 px; all 25 patches converge to 0.14–0.85 px.
 - 85 hot pixels detected and corrected; polynomial fit RMSD X 1.96 / Y 1.54 px.
 
-Still to check: corrected-micrograph header geometry, gain orientation, and whether deposited
-fractional coordinates land on real particles (`tools/science_issue73/i73_check_pilot.py`).
+Then checked and passed (`tools/science_issue73/i73_check_pilot.py`, raw output in
+`results/pilot_cpu_check_*.json`): corrected micrographs are 8192² at 0.485 Å with zero
+non-finite pixels, and the deposited coordinates discriminate particles from random positions at
+AUC 0.912 / 0.946, with the y-flipped control at chance (0.452 / 0.489) — so the gain orientation
+is right as-is and the test is not one that returns a high value for any input.
+
+The arm comparator was itself self-tested before use: identical input gives exact zeros and
+bitwise identity, two different movies raise three blocking failures.
 
 ## Build provenance
 

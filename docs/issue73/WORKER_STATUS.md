@@ -23,14 +23,48 @@ Draft PR #87.
 | Fix `--eer_grouping` / `--dose_per_frame` | DONE — `PROTOCOL AMENDMENT` `e9a5f84` |
 | CPU pilot on 2 development movies | DONE — both exit 0, `results/PILOT.md` |
 | Fix gain orientation | DONE — `PROTOCOL AMENDMENT` 3; no rotation/flip needed |
-| Paired native-CUDA pilot | RUNNING — SCARF Slurm job `3510296`, dedicated GPU allocation |
+| Paired native-CUDA pilot | DONE — SCARF job `3510296`, `gpu-devel`/`gn0001`/A100. All 4 runs exit 0 |
+| ADR #66 §4 comparison of the two arms | DONE — **0 blocking failures** on both movies (`results/PILOT.md`) |
+| Cross-host CPU control | DONE — two independent CPU builds are **bitwise identical** |
+| PR #87 review — contradictory `ctrl_noise_f005` rule | DONE — `PROTOCOL AMENDMENT` 4 |
+| PR #87 review — unsupported gain-orientation claim | DONE — `PROTOCOL AMENDMENT` 5, conclusion withdrawn |
+| Gain-orientation control (8 transforms, 1 movie) | DONE — negative: the AUC test **cannot** verify orientation. `PROTOCOL AMENDMENT` 6 |
+| Particle-contrast AUC on both arms | DONE — `cuda` matches `cpu` (ΔAUC ≤ 0.001) |
 | Confirmatory 350-movie study | **BLOCKED — not authorized** (see below) |
 
 ## Result claims so far
 
-**None.** No scientific pass/fail is claimed. Nothing here establishes signal equivalence
-between backends. The pilot is a plumbing and orientation check on two development movies with
-~104 particles and is declared incapable of the primary endpoint by `PROTOCOL.md` §10.
+**No scientific pass/fail, and no equivalence claim.** `PROTOCOL.md` §10 declares this subset
+incapable of the primary endpoint; 104 particles across two movies cannot produce an FSC, a ρ or a
+harmful control, and image-level agreement is not signal equivalence.
+
+What *is* claimed, bounded to the two movies measured: on a genuinely independent collection the
+two backends agree on the corrected micrograph and the motion trajectory inside every blocking
+ADR #66 §4 threshold, with **0 blocking failures**, measured before any re-estimation. Relative
+image RMSE (~0.010–0.011) exceeds its 0.001 reporting level and remains non-blocking per ADR #66
+§4; it is reported, not promoted, and its threshold is not touched. The arms are **not** bitwise
+identical — essentially every pixel differs, diffusely and at low amplitude.
+
+The cross-host control is what gives that number meaning: two independently built CPU binaries on
+different hosts, distributions and **compiler major versions** (gcc 13.3.0 vs 11.5.0) produce a
+**bitwise identical** micrograph, so the cpu-vs-cuda difference cannot be written off as build
+variation — but it also sits far inside every blocking threshold.
+
+Scale, same instrument, same movie: `cpu` vs `cpu` across hosts **0.000**; `cpu` vs `cuda`
+**0.0124–0.0142**; a known-wrong gain orientation **0.047–0.080**, which exceeds the 0.020 blocking
+threshold. The comparator detects a real physical misconfiguration of this collection, and the
+backend difference sits below that and inside the limit.
+
+Gain orientation itself is **unverified**, not confirmed. The eight-transform control came back
+negative: particle AUC spans only 0.9104–0.9153 across every possible orientation and the frozen
+setting ranks fourth of eight, so the test has no power to choose. That also falsifies the premise
+Amendment 3 had reasoned from — a misapplied gain does *not* destroy particle contrast here.
+
+Two honest failures are recorded rather than cleaned up: a defect in this study's own comparator
+(a metric of exactly 0.0 was reported `UNMEASURED` instead of `WITHIN`, so the first null
+self-test never exercised the thresholds), and a `--movie` key error that made four particle
+checks silently score 0 particles. Both are fixed; the zero-particle outputs are preserved in
+`results/zero_particle_runs/`.
 
 ## What the pilot has confirmed so far (plumbing, not science)
 

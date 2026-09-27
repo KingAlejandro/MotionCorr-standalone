@@ -35,6 +35,43 @@ the files were right.
 | `cpu` | `cpu64` | `20b12ef4dae275e331cf19c19ddbedd99f8626d8405a6dfc9f86903eda7600db` | none |
 | `cpu` | `4GPUs` | `770f82de32cba6e5e1a95517aab1aa53c95237acc7e920758545a7e8519b8f53` | none |
 | `cuda` | `4GPUs` | `cc2a1573fde8313c4e400d0a099b4ca6502448b385176e5dabe4b1590092d914` | `libcudart.so.12`, `libcufft.so.11` |
+| **`cpu`** | **SCARF** | `e7e9c9b08939d6bf9044ba6a1972e360530ebbb80630d5537635ea24f2596311` | none |
+| **`cuda`** | **SCARF** | `b09ece2490974bdb2f1aa7ef956563783476f06bf55c98d0a22c825822ac2eb0` | `libcudart.so.12`, `libcufft.so.11` |
+
+The two SCARF binaries are the paired arms actually compared. Compilers: `cpu64` Ubuntu 24.04
+gcc 13.3.0; SCARF Rocky 9 gcc 11.5.0; CUDA 12.4.0 from the facility's existing module tree
+(`/apps20/sw/easybuilt/rocky/9/generic/software/CUDA/12.4.0`), `-DCMAKE_CUDA_ARCHITECTURES=80`.
+Nothing was installed on any host. The CPU arms are configured `-DCUDA=OFF` (`CMakeLists.txt:56`)
+and `ldd` reports no CUDA library on them.
+
+### Exact commands
+
+Both arms, identical but for `--gpu 0` on the `cuda` arm:
+
+```
+motioncorr --i stage/movies/<MOVIE>.eer --o <OUT>/ \
+  --use_own --j 1 --seed 1 \
+  --dose_weighting --dose_per_frame 1.2297 \
+  --patch_x 5 --patch_y 5 --bfactor 150 \
+  --eer_upsampling 2 --eer_grouping 47 \
+  --gainref stage/meta/gain.tif --angpix 0.485 --voltage 300     [--gpu 0]
+```
+
+Gain-orientation control adds `--gain_rot {0,1,2,3} --gain_flip {0,1}`. Analysis:
+
+```
+python3 tools/science_issue73/i73_compare_arms.py \
+  --a-mrc <CPU>.mrc --a-star <CPU>.star --b-mrc <CUDA>.mrc --b-star <CUDA>.star \
+  --a-label cpu --b-label cuda
+
+python3 tools/science_issue73/i73_check_pilot.py \
+  --mrc <ARM>.mrc --movie FoilHole_4677724 \
+  --passthrough stage/meta/J189_passthrough_particles.cs
+```
+
+Note the `--movie` value is the **hole ID**, not the full EER basename; see the preserved
+zero-particle runs below. Particle file sha256 `171fe2ac208d9b841c8eded8d9fd0dac82599e9ddd266cb81b57729444efc122`,
+verified identical on `cpu64` and SCARF.
 
 Both hosts resolved the same library stack (libtiff 4.5.1, fftw 3.3.10, gcc 13.3.0), which keeps
 the host contribution small. Building the `cpu` arm on *both* hosts is deliberate: it gives a
@@ -91,10 +128,124 @@ is reported loudly rather than absorbed.
 
 ## Stage 2 — paired `cuda` arm
 
-Status: **pending a GPU window.** Results, when produced, are compared with
-`tools/science_issue73/i73_compare_arms.py` on the corrected micrograph and the global shift
-table — before any re-estimation — against the ADR #66 §4 thresholds, with relative image RMSE
-carried as a non-blocking diagnostic.
+Ran on SCARF Slurm job `3510296`, partition `gpu-devel`, node `gn0001`, NVIDIA A100-SXM4-40GB.
+Dedicated allocation; `gpu-devel` carries a separate QOS from the `gpu` partition holding other
+agents' jobs, so nothing was shared and no other allocation was delayed. **Both arms ran on the
+same node against the same staged input, so the backend is the only thing that differs.**
+
+| Arm | Movie 1 | Movie 2 | Exit |
+| --- | ---: | ---: | --- |
+| `cpu` | 7:34 | 8:03 | 0 |
+| `cuda` | 0:37 | 0:38 | 0 |
+
+Wall-clock is recorded as provenance, not as a benchmark: this was one run per arm on a shared
+facility, with no repeats and no contention control, so it does not support a speedup claim.
+
+### ADR #66 §4 comparator, on the corrected micrograph before any re-estimation
+
+`tools/science_issue73/i73_compare_arms.py`. Raw output in `pilot_cpu_vs_cuda_*.json`.
+
+| Metric | Movie 1 | Movie 2 | Threshold | Blocking | State |
+| --- | ---: | ---: | ---: | --- | --- |
+| absolute image RMSE | 0.014232 | 0.012418 | 0.020 | yes | WITHIN |
+| max abs pixel error | 0.7756 | 1.0338 | 5.0 | yes | WITHIN |
+| global trajectory vector RMS | 0.005790 px | 0.006445 px | 0.02 | yes | WITHIN |
+| max per-axis global shift diff | 0.00878 px | 0.01326 px | 0.05 | yes | WITHIN |
+| static STAR discrepancies | 0 | 0 | 0 | yes | WITHIN |
+| relative image RMSE | 0.011061 | 0.009625 | 0.001 | **no** | EXCEEDS_NONBLOCKING |
+
+**Zero blocking failures on both movies.** Two things this does not say. The arms are *not*
+bitwise identical — 67 108 493 and 67 108 538 of 67 108 864 pixels differ, so essentially every
+pixel, diffusely and at low amplitude. And relative image RMSE sits roughly 10× its ADR #66
+reporting level. Per ADR #66 §4 that quantity is non-blocking and it stays non-blocking here; it
+is reported because it is real, not promoted to a conclusion, and its threshold is not touched.
+
+### Cross-host CPU control
+
+The point of the control: a difference between arms means nothing until you know what a difference
+between two *identical* backends looks like. The `cpu64` corrected micrograph for movie 1 was
+moved to SCARF (sha256 `ccf2f689…` verified unchanged on arrival) and compared against the SCARF
+`cpu` output for the same movie.
+
+| Metric | `cpu` (cpu64) vs `cpu` (SCARF) |
+| --- | ---: |
+| absolute image RMSE | **0.0** |
+| relative image RMSE | **0.0** |
+| max abs pixel error | **0.0** |
+| differing pixels | **0 of 67 108 864** |
+| global trajectory vector RMS | **0.0 px** |
+
+All six ADR #66 §4 checks are **WITHIN** at exactly 0.0. Two independently built CPU binaries —
+`cpu64` (Ubuntu 24.04, **gcc 13.3.0**) and SCARF (Rocky 9, **gcc 11.5.0**), different
+distributions, different compiler major versions, separately resolved library stacks — produce the
+**bitwise identical** corrected micrograph. (The two `.mrc` files have different sha256 because
+the MRC header carries per-run text labels; the pixel data is identical.)
+
+That makes the comparison sharp rather than reassuring. The cpu-vs-cuda difference **cannot** be
+attributed to host or build variation, because host and build variation on this collection is
+exactly zero. The ~1 % relative RMSE between arms is attributable to the CUDA backend itself. It
+is well inside every blocking threshold in ADR #66 §4, and it is not noise in the measurement.
+
+### Particle-coordinate check replicated on the `cuda` micrographs
+
+Geometry on both `cuda` outputs: 8192 × 8192, 0.485 Å, zero non-finite pixels — matching the `cpu`
+arm. Raw output in `pilot_scarf_cuda_check_*.json` and `pilot_scarf_cpu_check_*.json`.
+
+| Movie | Particles | AUC `cpu` | AUC `cuda` | AUC `cuda`, y flipped |
+| --- | ---: | ---: | ---: | ---: |
+| `FoilHole_4677724_…` | 54 | 0.9120 | 0.9110 | 0.4517 |
+| `FoilHole_4681533_…` | 50 | 0.9465 | 0.9461 | 0.4898 |
+
+The `cuda` arm recovers particle signal at the deposited coordinates indistinguishably from the
+`cpu` arm (ΔAUC 0.0010 and 0.0004), with the flipped control at chance in both arms. The SCARF
+`cpu` values reproduce the `cpu64` values exactly, as bitwise identity requires.
+
+**A failed run, preserved.** The first pass of this check returned **0 particles** on every
+micrograph. The cause was operator error, not data: `--movie` was given the full EER basename
+`FoilHole_4677724_041554_EER`, but the deposited `location/micrograph_path` matches only the hole
+ID `FoilHole_4677724`. The SCARF copy of the particle file was verified byte-identical to the
+`cpu64` copy (both sha256 `171fe2ac…`), so the "missing particles" hypothesis was wrong. The
+zero-particle outputs are kept in `zero_particle_runs/` rather than discarded, because a check
+that silently scores nothing looks exactly like a check that passed.
+
+## Stage 2b — gain-orientation control (Amendment 5, executed)
+
+Eight dihedral transforms of the gain, one movie, `cpu` arm on `cpu64`, no new download. Full
+record in `PROTOCOL.md` Amendment 6; raw artifacts in `gain_orientation/`.
+
+The outcome is the **negative** branch prespecified in Amendment 5. Particle AUC across all eight
+orientations spans only 0.9104–0.9153 and the frozen identity setting ranks **fourth of eight**,
+so the AUC test cannot verify gain orientation and that assumption stays **unverified**.
+
+This is not because the transforms do nothing. The gain is strongly non-uniform (mean 1.0043,
+std 2.3249, CV 2.31, max 2234.9; only 31 % of pixels within 1 % of the mean), and rotating it moves
+the corrected micrograph by absolute RMSE **0.047–0.080** — 2.3–4× the ADR #66 §4 blocking
+threshold. A plainly misapplied gain therefore changes the image a great deal and leaves particle
+contrast untouched, which falsifies the premise Amendment 3 reasoned from.
+
+It also puts the backend difference on a scale. Against the same instrument, on the same movie:
+
+| Perturbation | Absolute image RMSE | vs 0.020 blocking threshold |
+| --- | ---: | --- |
+| `cpu` vs `cpu`, different host and compiler | **0.000** | within |
+| `cpu` vs `cuda`, same node | 0.0124–0.0142 | within |
+| Known-wrong gain orientation | 0.047–0.080 | **exceeds** |
+
+The comparator is not insensitive — it flags a real physical misconfiguration of this collection
+well above threshold — and the backend difference sits below that and inside the limit. This is an
+**image-level** observation only. It is not a §7 harmful control, there is no ρ, FSC or resolution
+in it, and the §7 controls remain unrun.
+
+### What Stage 2 establishes, and what it does not
+
+It establishes that on a genuinely independent collection the native CUDA backend produces
+corrected micrographs and motion trajectories that agree with the CPU backend inside every
+blocking ADR #66 §4 threshold, measured before any re-estimation step could absorb a difference.
+
+It establishes **no scientific equivalence**. There is no FSC, no resolution, no ρ, and no harmful
+control here. With 104 deposited particles across two movies this pilot is declared incapable of
+the primary endpoint by `PROTOCOL.md` §10, and image-level agreement is not signal equivalence —
+a point `PROTOCOL.md` makes about `CtfMaxResolution` and which applies with equal force to RMSE.
 
 ## Stage 3 — confirmatory set
 

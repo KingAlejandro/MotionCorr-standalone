@@ -19,6 +19,9 @@ This work does not reuse those movies, does not reinterpret that result, and doe
 | [`results/pilot_cpu_check_*.json`](results/) | Raw per-movie output of `i73_check_pilot.py`. |
 | [`results/pilot_cpu_vs_cuda_*.json`](results/) | Raw per-movie ADR #66 §4 comparator output for the paired `cpu` vs `cuda` arms, produced before any re-estimation. |
 | [`results/pilot_hostctl_*.json`](results/) | The `cpu` vs `cpu` cross-host control, against which the backend difference is read. |
+| [`results/pilot_scarf_*_check_*.json`](results/) | Geometry and particle-contrast AUC for both arms on SCARF. |
+| [`results/gain_orientation/`](results/gain_orientation/) | The eight-transform gain-orientation control (Amendment 6): per-orientation AUC, and image RMSE against the identity. |
+| [`results/zero_particle_runs/`](results/zero_particle_runs/) | Preserved failed runs that scored **0 particles** through an operator error in `--movie`. Kept deliberately: a check that silently scores nothing looks like a check that passed. |
 | [`WORKER_STATUS.md`](WORKER_STATUS.md) | Live run state, compute used, and the resource decision awaiting Alex. |
 
 Tooling lives in [`tools/science_issue73/`](../../tools/science_issue73/), isolated from production

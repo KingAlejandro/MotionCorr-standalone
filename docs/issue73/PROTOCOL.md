@@ -445,3 +445,59 @@ identity is uniquely best, the assumption is verified; if several are indistingu
 is not sensitive enough on this specimen and the assumption stays unverified and is declared so.
 Prespecified now so the outcome cannot be reinterpreted afterwards. Cost is CPU-only on `cpu64`,
 one movie, no new download.
+
+### Amendment 6 — the gain-orientation control ran: the AUC test cannot verify orientation (2026-09-27)
+
+The control prespecified in Amendment 5 has been executed, on `cpu64`, CPU arm only, one
+development movie, with no new download. It landed on the **"several are indistinguishable"**
+branch that Amendment 5 declared in advance, so the assumption stays unverified.
+
+Eight distinct dihedral transforms of the gain (`--gain_rot` 0–3 × `--gain_flip` 0–1; `flip 2`
+duplicates `(rot+2, flip 1)` and was not rerun). Raw artifacts in
+`results/gain_orientation/`.
+
+| Config | `--gain_rot` | `--gain_flip` | Particles | **AUC vs random** | Image absolute RMSE vs identity |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `r1f0` | 1 | 0 | 54 | 0.9153 | 0.0647 |
+| `r2f1` | 2 | 1 | 54 | 0.9145 | 0.0491 |
+| `r3f1` | 3 | 1 | 54 | 0.9135 | 0.0467 |
+| **`r0f0` (identity, the frozen setting)** | 0 | 0 | 54 | **0.9120** | — |
+| `r0f1` | 0 | 1 | 54 | 0.9116 | 0.0480 |
+| `r2f0` | 2 | 0 | 54 | 0.9114 | 0.0604 |
+| `r3f0` | 3 | 0 | 54 | 0.9106 | 0.0582 |
+| `r1f1` | 1 | 1 | 54 | 0.9104 | 0.0795 |
+
+**The AUC does not discriminate.** All eight lie in 0.9104–0.9153, and the frozen identity setting
+ranks **fourth of eight**. The spread across every possible gain orientation (0.005) is far smaller
+than the spread between the two movies under the identity setting alone (0.912 vs 0.946).
+
+**This is not because the transforms are no-ops.** The gain is strongly non-uniform — mean 1.0043,
+std 2.3249, max 2234.9, coefficient of variation 2.31, with only 31 % of pixels within 1 % of the
+mean. Rotating it changes the corrected micrograph by absolute RMSE 0.047–0.080, which is
+**2.3–4× the ADR #66 §4 blocking threshold of 0.020**, and every one of the eight outputs differs
+from every other in essentially all 67 108 864 pixels.
+
+**Consequence for Amendment 3.** Its premise — "a misapplied gain imposes a fixed pattern that
+destroys particle contrast" — is **false on this specimen**, now measured rather than assumed. A
+plainly misapplied gain leaves particle contrast untouched at AUC ≈ 0.91. So the original
+inference was not merely under-supported, as Amendment 5 conceded; its physical reasoning does not
+hold here. Amendment 5's withdrawal stands, and is now backed by the counterfactual.
+
+**What survives.** The two narrow claims from Amendment 3 are unaffected and are confirmed at every
+orientation: the deposited fractional y maps to MRC row order as-is, and there is real particle
+signal at the deposited coordinates (AUC ≈ 0.91 against a random control at ≈ 0.5).
+
+**Status of the option set.** Unchanged and still `(no --gain_rot, no --gain_flip, no
+--defect_file)`, still carried as **assumed and unverified**. It is the deposited gain used as
+deposited, which is the correct default; this study simply has no instrument that can confirm it.
+Verification would need an external reference — the depositors' own corrected micrographs, or a
+specimen with a strongly anisotropic known feature — and neither is in scope under the ≤ 2 GiB cap.
+Recorded as a known, bounded limitation rather than resolved by assertion.
+
+**Unplanned by-product, reported as such.** Because a rotated gain is a known-wrong configuration
+that the image comparator flags well above threshold (0.047–0.080 against a 0.020 blocking limit),
+this doubles as a sensitivity demonstration for the *image-level* comparator: it detects a real
+physical misconfiguration of this collection. That is an image-level statement only. It is **not**
+a harmful control in the §7 sense — there is no ρ, no FSC and no resolution here — and it does not
+substitute for the §7 controls, which remain unrun. It was not prespecified as a control and is
+reported as an observation, not as a passed gate.

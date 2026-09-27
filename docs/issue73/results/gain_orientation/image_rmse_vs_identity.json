@@ -1,0 +1,25 @@
+{
+  "what": "Corrected micrograph of FoilHole_4677724_041554_EER rendered with the gain transformed by each dihedral element, each compared against the identity (r0f0) with tools/science_issue73/i73_compare_arms.py.",
+  "movie": "FoilHole_4677724_041554_EER",
+  "host": "cpu64",
+  "arm": "cpu",
+  "reference": "r0f0 (--gain_rot 0 --gain_flip 0)",
+  "adr66_absolute_image_rmse_blocking_threshold": 0.020,
+  "rows": [
+    {"cfg": "r1f0", "gain_rot": 1, "gain_flip": 0, "absolute_image_rmse": 0.064690, "relative_image_rmse": 0.050275, "max_abs_pixel_error": 2.2698, "n_differing_pixels": 67108810},
+    {"cfg": "r2f0", "gain_rot": 2, "gain_flip": 0, "absolute_image_rmse": 0.060359, "relative_image_rmse": 0.046908, "max_abs_pixel_error": 2.3045, "n_differing_pixels": 67108804},
+    {"cfg": "r3f0", "gain_rot": 3, "gain_flip": 0, "absolute_image_rmse": 0.058219, "relative_image_rmse": 0.045245, "max_abs_pixel_error": 2.4498, "n_differing_pixels": 67108793},
+    {"cfg": "r0f1", "gain_rot": 0, "gain_flip": 1, "absolute_image_rmse": 0.048015, "relative_image_rmse": 0.037315, "max_abs_pixel_error": 2.3164, "n_differing_pixels": 67108791},
+    {"cfg": "r1f1", "gain_rot": 1, "gain_flip": 1, "absolute_image_rmse": 0.079506, "relative_image_rmse": 0.061789, "max_abs_pixel_error": 2.2561, "n_differing_pixels": 67108810},
+    {"cfg": "r2f1", "gain_rot": 2, "gain_flip": 1, "absolute_image_rmse": 0.049058, "relative_image_rmse": 0.038126, "max_abs_pixel_error": 2.2337, "n_differing_pixels": 67108794},
+    {"cfg": "r3f1", "gain_rot": 3, "gain_flip": 1, "absolute_image_rmse": 0.046696, "relative_image_rmse": 0.036290, "max_abs_pixel_error": 2.3574, "n_differing_pixels": 67108797}
+  ],
+  "gain_statistics": {
+    "source": "gainctl/r1f0/gain.mrc as written by the runner",
+    "shape": [4096, 4096],
+    "mean": 1.004346, "std": 2.324866, "min": 0.0, "max": 2234.883057,
+    "coefficient_of_variation": 2.314806,
+    "fraction_pixels_within_1pct_of_mean": 0.3098,
+    "note": "The gain is far from flat, so a wrongly oriented gain is a real physical perturbation, not a no-op."
+  }
+}

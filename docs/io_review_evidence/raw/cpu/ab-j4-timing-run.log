@@ -1,0 +1,56 @@
+=== provenance ===
+2026-09-27T18:38:40+00:00
+small-refmac-machine
+ 18:38:40 up 299 days,  8:36, 21 users,  load average: 2.88, 3.69, 4.34
+e2dfd9c828be5303243a7d82c30ecf62  /home/ubuntu/mc-io-evidence/harness/compare_outputs.py
+bfedcf465760db0ca5c4f8c697176773  /home/ubuntu/mc-io-evidence/harness/timing_blocks.py
+=== A/B at --j 4 ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+ab j4 exit=1
+=== AB J4 DONE ===
+2026-09-27T18:53:20+00:00
+=== waiting for my other legs to finish ===
+machine free of my work
+2026-09-27T18:53:20+00:00
+ 18:53:20 up 299 days,  8:51, 21 users,  load average: 3.98, 4.87, 4.83
+=== interleaved paired timing, 3 blocks, --j 8, alone ===
+block 1 order=['main', 'pr90'] main=226.516s pr90=210.171s ratio=0.9278
+block 2 order=['pr90', 'main'] main=226.24s pr90=211.298s ratio=0.934
+block 3 order=['main', 'pr90'] main=224.879s pr90=208.531s ratio=0.9273
+{
+  "blocks": 3,
+  "ratios_test_over_ref": [
+    0.9278,
+    0.934,
+    0.9273
+  ],
+  "median_ratio": 0.9278,
+  "min_ratio": 0.9273,
+  "max_ratio": 0.934,
+  "deltas_seconds": [
+    -16.345,
+    -14.942,
+    -16.348
+  ],
+  "median_delta_seconds": -16.345,
+  "all_blocks_completed": true,
+  "all_blocks_same_micrograph_count": true
+}
+overall: MEASURED
+timing exit=0
+=== TIMING DONE ===
+2026-09-27T19:18:59+00:00

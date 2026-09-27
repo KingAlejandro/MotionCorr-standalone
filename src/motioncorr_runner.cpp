@@ -2251,7 +2251,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 skip_fitting:
 #ifdef _CUDA_ENABLED
 	// The retained full-frame cache is only needed while preparing local patches.
-	if (use_gpu) cudaReleaseCachedFrames();
+	if (use_gpu) {
+		cudaReleaseCachedFrames();
+		cudaReleaseAlignPatchCache();
+	}
 #endif
 	if (!do_dose_weighting || save_noDW || even_odd_split) {
 		Iref().reshape(ny, nx);

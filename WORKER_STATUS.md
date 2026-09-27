@@ -5,11 +5,11 @@
 **Task class**: correctness (tiny scoped fix)  
 **Branch**: round96/97-grok-4-3 (isolated origin/main worktree)  
 **Base commit**: 4c952b3f54479653512c4d208e09c9a8c02f3726 (main)  
-**Phase**: Planning complete; ADR/whitelist published; GitHub comment posted (https://github.com/KingAlejandro/MotionCorr-standalone/issues/97#issuecomment-5860947483); now implementing minimal fix + reproduction on real path  
-**Changed files**: (none yet)  
+**Phase**: Draft PR #100 ready for independent review (https://github.com/KingAlejandro/MotionCorr-standalone/pull/100); core fix complete and pushed; test addition reverted to obey strict private-API / tiny-PR boundary; milestone comment posted on #97.  
+**Changed files**: src/motioncorr_runner.cpp (5 lines net), planning docs; test addition reverted (private method would require header change — out of tiny scope)  
 **Blockers**: None (CPU-only; GPU waits for #26 coordinated slot)  
 **NEEDS_GPU**: No — prepare only; wait for issue26 slot per COMMON.md  
-**Next step**: Write short correctness ADR + whitelist; publish GitHub progress comment on #97; verify call-site; implement minimal fix + bounded regression test.
+**Next step**: Await independent review of PR #100. If approved, maintainer merges. GPU work remains blocked until #26 slot. All other tasks preserved.
 
 ## Scoped plan (per issue-97.json + task-97.md + COMMON.md)
 - Own ONLY the saved-first-frame-origin recentering fix.

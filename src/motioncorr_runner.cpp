@@ -1213,6 +1213,14 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 }
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+#ifdef _CUDA_ENABLED
+    // Normal execution releases this scratch before reconstruction. Also cover
+    // early returns and exceptions while a CUDA movie is being processed.
+    struct AlignPatchCacheCleanup {
+        bool enabled;
+        ~AlignPatchCacheCleanup() noexcept { if (enabled) cudaReleaseAlignPatchCache(); }
+    } align_patch_cache_cleanup{use_gpu};
+#endif
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();

@@ -60,7 +60,7 @@ private:
 
 class CufftPlanCleanup {
 public:
-    CufftPlanCleanup() : owns_plan(false) {}\
+    CufftPlanCleanup() : owns_plan(false) {}
     ~CufftPlanCleanup() { if (owns_plan) cufftDestroy(plan); }
     void take(cufftHandle handle) { plan = handle; owns_plan = true; }
 
@@ -320,7 +320,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Copy frame from resident buffer in VRAM
         const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
-        HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
+        // Same-stream copy/weight/FFT/interpolation ordering protects reused tiles.
+        HANDLE_ERROR(cudaMemcpyAsync(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice, 0));
 
         // Dose weighting
         HANDLE_ERROR(cudaEventRecord(ev_start_dw[iframe]));

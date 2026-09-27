@@ -646,14 +646,14 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (!is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
-    // and only reuse the tile after that transform has completed.
+    // C2R can overwrite its input. Copies and transforms use the same default
+    // stream, so each transform finishes before the next copy reuses its tile.
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
-                                complex_stride * sizeof(cufftComplex),
-                                cudaMemcpyDeviceToDevice));
+        HANDLE_ERROR(cudaMemcpyAsync(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
+                                     complex_stride * sizeof(cufftComplex),
+                                     cudaMemcpyDeviceToDevice, 0));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, d_inverse_tile,
                                  (cufftReal*)(d_Iframes + (size_t)iframe * real_stride)));
     }
@@ -667,39 +667,64 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (!is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (!is_initialized || n_groups <= 0 || !d_out_fpatches || !group_start || !group_size) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    // Reuse or allocate cached scratch buffers
+    // Allocate replacement scratch before releasing the old allocation, so a
+    // failed growth request leaves ownership and capacity consistent.
     if (!d_Ipatches || sz_cached_Ipatches < sz_all_patch_real) {
+        float *replacement = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&replacement, sz_all_patch_real));
         if (d_Ipatches) cudaFree(d_Ipatches);
-        HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
+        d_Ipatches = replacement;
         sz_cached_Ipatches = sz_all_patch_real;
     }
-    bool need_upload_groups = false;
-    if (!d_group_start || cached_ngroups_alloc < n_groups) {
-        if (d_group_start) cudaFree(d_group_start);
-        if (d_group_size) cudaFree(d_group_size);
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
-        cached_ngroups_alloc = n_groups;
+
+    const size_t group_bytes = (size_t)n_groups * sizeof(int);
+    const bool replace_groups = !d_group_start || !d_group_size || cached_ngroups_alloc < n_groups;
+    const bool upload_groups = replace_groups ||
+        cached_group_start.size() != (size_t)n_groups ||
+        cached_group_size.size() != (size_t)n_groups ||
+        memcmp(cached_group_start.data(), group_start, group_bytes) != 0 ||
+        memcmp(cached_group_size.data(), group_size, group_bytes) != 0;
+    if (upload_groups) {
+        int *new_start = d_group_start;
+        int *new_size = d_group_size;
+        if (replace_groups) {
+            new_start = nullptr;
+            new_size = nullptr;
+            const cudaError_t start_error = cudaMalloc((void**)&new_start, group_bytes);
+            const cudaError_t size_error = start_error == cudaSuccess
+                ? cudaMalloc((void**)&new_size, group_bytes) : start_error;
+            if (size_error != cudaSuccess) {
+                if (new_start) cudaFree(new_start);
+                if (new_size) cudaFree(new_size);
+                logfile << "CUDA group allocation failed: " << cudaGetErrorString(size_error) << std::endl;
+                return false;
+            }
+        }
+        // Invalidate before either upload. A failed second copy must not leave
+        // the old host key describing a partially overwritten device pair.
         cached_group_start.clear();
         cached_group_size.clear();
-        need_upload_groups = true;
-    }
-    if (!need_upload_groups) {
-        if ((int)cached_group_start.size() != n_groups ||
-            memcmp(cached_group_start.data(), group_start, n_groups * sizeof(int)) != 0 ||
-            memcmp(cached_group_size.data(), group_size, n_groups * sizeof(int)) != 0) {
-            need_upload_groups = true;
+        const cudaError_t start_error = cudaMemcpy(new_start, group_start, group_bytes, cudaMemcpyHostToDevice);
+        const cudaError_t size_error = start_error == cudaSuccess
+            ? cudaMemcpy(new_size, group_size, group_bytes, cudaMemcpyHostToDevice) : start_error;
+        if (size_error != cudaSuccess) {
+            if (replace_groups) { cudaFree(new_start); cudaFree(new_size); }
+            logfile << "CUDA group upload failed: " << cudaGetErrorString(size_error) << std::endl;
+            return false;
         }
-    }
-    if (need_upload_groups) {
-        HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-        HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+        if (replace_groups) {
+            if (d_group_start) cudaFree(d_group_start);
+            if (d_group_size) cudaFree(d_group_size);
+            d_group_start = new_start;
+            d_group_size = new_size;
+            cached_ngroups_alloc = n_groups;
+        }
         cached_group_start.assign(group_start, group_start + n_groups);
         cached_group_size.assign(group_size, group_size + n_groups);
     }

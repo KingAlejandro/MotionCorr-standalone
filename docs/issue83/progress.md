@@ -144,13 +144,93 @@ fix was shipped as an incremental bundle whose sha256 was verified on arrival
 - No production CUDA, runner, CMake or I/O file was modified; #85 owns active
   I/O work, #74 owns event profiling, #53/#55 own the scheduler.
 
+## Capacity datapoint
+
+Issue #83 asks for a memory contract to be *measured* where a capacity claim is
+made, so exactly one datapoint was taken rather than a sweep: the largest
+declared row, `realscale_local` (2048x2048, 24 frames, local 5x5, native CUDA),
+sampled from `nvidia-smi --query-compute-apps` every 0.5 s while it ran.
+
+**Peak 1266 MiB of 40960 MiB** on one A100-SXM4-40GB, 32 samples (job 3510288).
+
+The sampler reads the driver, not anything the program says about itself. This
+is one configuration on one device and is not a capacity claim for other
+geometries, frame counts or devices. No CPU-fallback behaviour is claimed, and
+none is inferred from any exit status. Exhaustion and allocation fault
+injection stay with **#69**.
+
+That job's wrapper returned 1, which is the harness behaving correctly rather
+than a row failing: it was invoked with `--rows realscale_local`, so 24 of the
+25 declared rows were unrun, and an incomplete matrix is deliberately nonzero.
+The row itself passed -- 2/2 movies exact under repeat, batch and non-prefix
+resume, native CUDA witnessed, `declaration_drift` null.
+
+## Fourth harness defect -- a renderer field that was never emitted
+
+`render_capacity()` read `geometry`, `frames` and `patches` from the capacity
+JSON. `measure_capacity.py` emits none of them; the configuration description
+is in `note`. Published as-is the report would have read
+"None, None frames, None". Fixed in `d48d875` to render the recorded note.
+
+Worth stating plainly: this was caught by reading the renderer against the
+producer, not by running it. A report generator that fails silently into
+`None` is exactly the kind of thing that turns into a confident-looking table
+with nothing behind it.
+
+## Fixture drift between hosts, and a provenance claim that was wrong
+
+Prompted by re-reading review on PR #82, which flags that
+`test-data/generate_known_motion_fixture.py:489` rewrites every recorded hash
+instead of comparing against the committed manifest, the fixture provenance
+here was rechecked properly. It did not hold.
+
+SCARF's system NumPy is **1.22.4**; cpu64's is 2.x. The same generator at the
+same commit produced **different bytes** for all five cases. Each host had also
+written its own `MANIFEST.json` next to its own fixtures, so each host agreed
+with itself and the divergence was invisible to the check performed earlier.
+cpu64's fixtures match the committed manifest; SCARF's did not.
+
+Regenerating on SCARF under `netcdf4-python/1.7.2-foss-2025a` (NumPy 2.3.1)
+reproduces the committed hashes exactly, which isolates the cause to the NumPy
+1.22-versus-2.x arithmetic the manifest's own note warns about.
+
+What this does and does not invalidate, stated separately:
+
+- **Schedule equality is unaffected.** Repeat, batch and resume are each
+  compared against a base run on the same host over the same bytes. Whether
+  those bytes are the declared ones does not bear on whether an identical
+  configuration reproduces identical pixels.
+- **Native CUDA witnesses are unaffected.** They come from runner and kernel
+  output, not from the input.
+- **The all-24 leg is unaffected.** It reads the real tutorial runroot, not
+  generated fixtures.
+- **Motion-truth verdicts on SCARF were affected in provenance** and were
+  re-run on verified fixtures. The earlier verdicts were internally consistent
+  -- ground truth was generated alongside the movie -- but they were not the
+  declared, versioned fixture, so they are superseded rather than cited.
+
+`tools/validation_issue83/verify_fixtures.py` (`f51b45f`) reads the manifest
+from git and refuses to proceed on mismatch. The corrective job aborts before
+producing any evidence if the check fails, so undeclared inputs cannot silently
+become published results.
+
+This is the failure mode the issue warned about in a different guise: exit
+status, counts and a matching-looking hash table are not provenance. The table
+was real; it was just a comparison of the fixtures against themselves.
+
 ## Runs of record
 
 | Leg | Host | Commit | Outputs |
 |---|---|---|---|
-| GPU matrix + all-24 + report | SCARF `gn0005` (exclusive) | `bab9f46` | job 3510283, `evidence3/` |
+| GPU matrix + all-24 + report | SCARF `gn0005` (exclusive) | `d48d875` | job 3510290, `evidence4/` |
+| Capacity datapoint + realscale row | SCARF `gn0005` (exclusive) | `0a6dbff` | job 3510288, `evidence3/capacity.json` |
 | CPU matrix (diagnostic) | cpu64, `taskset -c 56-63` | `bab9f46` | `evidence3/matrix-cpu/` |
 
-Superseded runs: 3510276 (output-path bug), 3510277 (quota/SIGPIPE), and the
-first cpu64 matrix (harness expectations 2 and 3). Their verdicts are not
-carried into the report.
+The GPU matrix and all-24 legs were re-run in full at `d48d875` rather than
+splicing the corrected `realscale_local` row into the earlier `bab9f46` report:
+one published table should come from one harness revision, and the rerun costs
+about ten minutes on an already-allocated exclusive node.
+
+Superseded runs: 3510276 (output-path bug), 3510277 (quota/SIGPIPE), 3510283
+(`realscale_local` declaration drift, since fixed), and the first cpu64 matrix
+(harness expectations 2 and 3). Their verdicts are not carried into the report.

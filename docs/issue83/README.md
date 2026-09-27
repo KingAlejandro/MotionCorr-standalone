@@ -7,7 +7,7 @@ core (PR #82) and evidence (PR #81) under the ADR #66 stabilization spec.
 |---|---|
 | `support-report.md` | Generated compact support table. Rows without a raw result are named `unrun`. |
 | `provenance.md` | Hosts, devices, load, affinity, source/binary/input hashes, exact commands. |
-| `progress.md` | Raw chronological worklog, including the one defect found and fixed. |
+| `progress.md` | Raw chronological worklog, including every defect found and how each was told apart from a product defect. |
 | `raw/` | Machine-readable per-case reports the table is rendered from. |
 
 ## What this validates, and what it does not
@@ -47,14 +47,30 @@ Deliberately out of scope, tracked elsewhere:
 
 - EER and compressed decoding rows: issue **#8** (declared unsupported here).
 - Broad allocation/plan/execution fault injection and memory-capacity sweeps:
-  issue **#69**.
+  issue **#69**. Exactly one measured capacity datapoint is in scope here —
+  peak device memory for the largest declared row, sampled from the driver.
+  It is a measurement of one configuration, not a capacity contract.
 - Multi-GPU sharding: issues **#53 / #55**. The scheduler is consumed only once
   its aggregation is independently valid; no second scheduler is created here.
 - Optional CUDA event profiling: issue **#74**.
 - Active I/O and gain-sum optimization: issue **#85**.
 
+- The CUDA resident-alignment **fallback** path: not exercised here. Review on
+  PR **#82** reports that the fallback at `motioncorr_runner.cpp:2019` retries
+  without resetting `local_xshifts`/`local_yshifts`. The largest declared row
+  peaked at 1266 MiB of 40960, so nothing in this matrix comes near triggering
+  it. A local row passing here says nothing about that path.
+
 Early binning is never compared against late binning as an exact oracle (#68).
 Each binning mode is only compared against itself across schedules.
+
+## Fixture provenance
+
+Fixtures are verified against the manifest **tracked in git**, by
+`tools/validation_issue83/verify_fixtures.py`, not against the copy the
+generator writes next to its own output. The latter agrees by construction and
+hid a genuine cross-host divergence (NumPy 1.22.4 versus 2.x) during this work.
+A run whose fixtures fail that check does not produce evidence.
 
 ## Replay
 

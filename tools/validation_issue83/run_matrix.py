@@ -215,14 +215,19 @@ def report_name(stem: str, schedule: str) -> str:
 
 
 def compare_pair(compare_tool: Path, ref_dir: Path, test_dir: Path, stem: str,
-                 report_path: Path) -> Dict[str, Any]:
-    """Per-movie exact comparison, delegated verbatim to the merged comparator."""
+                 report_path: Path, image_only: bool = False) -> Dict[str, Any]:
+    """Per-product exact comparison, delegated verbatim to the merged comparator.
+
+    ``image_only`` compares just the image, for auxiliary products such as
+    ``_noDW``/``_EVN``/``_ODD``/``_PS`` that have no STAR of their own.
+    """
     cmd = [sys.executable, str(compare_tool),
            "--ref-mrc", str(ref_dir / f"{stem}.mrc"),
-           "--test-mrc", str(test_dir / f"{stem}.mrc"),
-           "--ref-star", str(ref_dir / f"{stem}.star"),
-           "--test-star", str(test_dir / f"{stem}.star"),
-           "--gate", "exact", "--json-out", str(report_path)]
+           "--test-mrc", str(test_dir / f"{stem}.mrc")]
+    if not image_only:
+        cmd += ["--ref-star", str(ref_dir / f"{stem}.star"),
+                "--test-star", str(test_dir / f"{stem}.star")]
+    cmd += ["--gate", "exact", "--json-out", str(report_path)]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     entry: Dict[str, Any] = {"command": cmd, "returncode": proc.returncode}
     if report_path.exists():
@@ -263,7 +268,10 @@ def expected_star(row: declared.Row, geometry: Dict[str, Any]) -> Dict[str, Any]
         "first_frame": first_frame,
         "dose_per_frame": float(value_of("--dose_per_frame", 1)) if dose_on else None,
         "pre_exposure": float(value_of("--preexposure", 0)),
-        "n_summed_frames": last - first_frame + 1,
+        # The trajectory spans the whole movie; frames outside the summed window
+        # are written as NOT_OBSERVED rather than omitted.
+        "n_trajectory_rows": total,
+        "n_observed_frames": last - first_frame + 1,
     }
 
 
@@ -350,8 +358,6 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
         result["errors"].append("CPU run produced a CUDA marker")
     result["errors"].extend(inventory["errors"])
 
-    base_hashes = product_hashes(base_dir, dataset["stems"], suffixes)
-
     # --------------------------------------------------------- other schedules
     for schedule in row.schedules:
         sched_dir = work / schedule
@@ -384,6 +390,9 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
             entry["runs"].append({"stage": "nonprefix_seed",
                                   "returncode": first["returncode"],
                                   "elapsed_sec": first["elapsed_sec"]})
+            # Byte identity is the right test here: it shows the completed
+            # products were left untouched, not merely rewritten to the same
+            # pixels. A rewrite would change the MRC label timestamp.
             seeded = product_hashes(sched_dir, [dataset["nonprefix_stem"]], suffixes)
             entry["seeded_movie"] = dataset["nonprefix_stem"]
             entry["seeded_hashes"] = seeded
@@ -424,24 +433,37 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
         entry["movies_compared"] = len(comparisons)
         entry["movies_passed"] = sum(1 for c in comparisons.values() if c["passed"])
 
-        # Non-declared products must also match, so even/odd, noDW and PS
-        # images are hashed rather than assumed identical.
-        sched_hashes = product_hashes(sched_dir, dataset["stems"], suffixes)
+        # Auxiliary products must match too, so even/odd, noDW and PS images are
+        # compared rather than assumed identical. They go through the same
+        # comparator as the main image: a raw digest would flag the MRC label
+        # timestamp, which the comparator normalizes away, as a difference.
         extra_suffixes = [s for s in suffixes if s not in (".mrc", ".star")]
-        hash_mismatch = sorted(
-            name for name in base_hashes
-            if any(name.endswith(s) for s in extra_suffixes)
-            and sched_hashes.get(name) != base_hashes[name])
-        entry["extra_product_hash_mismatch"] = hash_mismatch
-        if hash_mismatch:
+        extra: Dict[str, Any] = {}
+        for stem in dataset["stems"]:
+            for suffix in extra_suffixes:
+                name = f"{stem}{suffix}"
+                extra_stem = name[:-len(".mrc")] if name.endswith(".mrc") else name
+                if not (base_dir / name).exists():
+                    continue
+                if not (sched_dir / name).exists():
+                    extra[name] = {"passed": False, "error": "missing in this schedule"}
+                    continue
+                extra[name] = compare_pair(compare_tool, base_dir, sched_dir,
+                                           extra_stem,
+                                           reports / report_name(extra_stem, "exact"),
+                                           image_only=True)
+        entry["extra_products"] = extra
+        extra_failed = sorted(name for name, c in extra.items() if not c["passed"])
+        if extra_failed:
             result["errors"].append(
-                f"{schedule}: extra products differ from base: {', '.join(hash_mismatch)}")
+                f"{schedule}: auxiliary products differ from base: "
+                f"{', '.join(extra_failed)}")
 
         entry["passed"] = (
             entry["movies_compared"] == len(dataset["stems"])
             and entry["movies_passed"] == entry["movies_compared"]
             and entry["inventory"]["inventory_complete"]
-            and not hash_mismatch
+            and not extra_failed
             and entry.get("preserved_seeded_outputs", True)
         )
         if not entry["passed"]:

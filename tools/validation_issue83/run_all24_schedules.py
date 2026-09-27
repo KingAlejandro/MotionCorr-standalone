@@ -197,10 +197,14 @@ def main() -> int:
         entry["failed_movies"] = sorted(s for s, c in comparisons.items()
                                         if not c["passed"])
 
+        # Informational only. A byte digest also covers the MRC label
+        # timestamp, so a product can be pixel-exact here yet not byte-equal;
+        # the pass condition is the comparator verdict above, not this count.
         sched_hashes = product_hashes(sched_dir, stems, suffixes)
-        entry["hash_identical_products"] = sum(
+        entry["byte_identical_products"] = sum(
             1 for name, digest in base_hashes.items()
             if sched_hashes.get(name) == digest)
+        entry["products_compared_by_digest"] = len(base_hashes)
 
         entry["passed"] = (not missing
                            and entry["movies_compared"] == len(stems)

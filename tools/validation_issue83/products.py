@@ -24,6 +24,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 MRC_HEADER_BYTES = 1024
 
+#: Sentinel written for frames that were not aligned (src/micrograph_model.cpp:29).
+NOT_OBSERVED = -9999.0
+
 
 def output_stem(movie_relpath: str) -> str:
     """Output stem the runner derives from a movie name in the input STAR.
@@ -199,6 +202,7 @@ def check_movie_star(path: Path, expect: Dict[str, Any]) -> Dict[str, Any]:
     fields = shifts.get("fields", [])
     rows = shifts.get("rows", [])
     result["n_global_shift_rows"] = len(rows)
+    observed = 0
     if not rows:
         result["errors"].append(f"{path.name}: empty global_shift table")
     else:
@@ -213,15 +217,27 @@ def check_movie_star(path: Path, expect: Dict[str, Any]) -> Dict[str, Any]:
                     result["errors"].append(
                         f"{path.name}: global_shift row {row_index} is short")
                     continue
-                for column in (ix, iy):
-                    value = _as_float(row[column])
-                    if value is None or not math.isfinite(value):
-                        result["errors"].append(
-                            f"{path.name}: nonfinite global shift at row {row_index}")
-        want_rows = expect.get("n_summed_frames")
+                values = [_as_float(row[column]) for column in (ix, iy)]
+                if any(v is None or not math.isfinite(v) for v in values):
+                    result["errors"].append(
+                        f"{path.name}: nonfinite global shift at row {row_index}")
+                    continue
+                # Frames outside the summed window are recorded as NOT_OBSERVED,
+                # not omitted, so the table always spans the whole movie.
+                if not all(v == NOT_OBSERVED for v in values):
+                    observed += 1
+        result["n_observed_shift_rows"] = observed
+
+        want_rows = expect.get("n_trajectory_rows")
         if want_rows is not None and len(rows) != want_rows:
             result["errors"].append(
-                f"{path.name}: {len(rows)} global_shift rows, expected {want_rows}")
+                f"{path.name}: {len(rows)} global_shift rows, expected one per "
+                f"movie frame ({want_rows})")
+        want_observed = expect.get("n_observed_frames")
+        if want_observed is not None and observed != want_observed:
+            result["errors"].append(
+                f"{path.name}: {observed} observed global_shift rows, "
+                f"expected {want_observed}")
 
     local = blocks.get("local_shift", {}).get("rows", [])
     result["n_local_shift_rows"] = len(local)

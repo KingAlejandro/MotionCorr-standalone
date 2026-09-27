@@ -2157,10 +2157,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				std::vector<RFLOAT> interpolated_xshifts(n_frames), interpolated_yshifts(n_frames);
 				interpolateShifts(group_start, group_size, local_xshifts, local_yshifts, n_frames, interpolated_xshifts, interpolated_yshifts);
 				if (interpolate_shifts) {
-					// Recenter to the first frame
+					// Recenter to the first frame (save origin before in-place mutation to fix first-frame offset loss)
+					RFLOAT origin_x = interpolated_xshifts[0];
+					RFLOAT origin_y = interpolated_yshifts[0];
 					for (int iframe = 0; iframe < n_frames; iframe++) {
-						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
-						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
+						interpolated_xshifts[iframe] -= origin_x;
+						interpolated_yshifts[iframe] -= origin_y;
 					}
 					// Store shifts
 					for (int iframe = 0; iframe < n_frames; iframe++) {

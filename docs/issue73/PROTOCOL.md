@@ -354,3 +354,94 @@ This fixes the last value §5 left open. All options in §5 are now fully determ
 §5 and §10 cite "§7 step 2" for the values deferred to the feasibility pilot. The execution order
 is **§8**; §7 is the harmful controls. Editorial only — no endpoint, margin, set or option
 changes. Recorded here rather than silently corrected in place.
+
+### Amendment 4 — the `ctrl_noise_f005` decision rule was self-contradictory (2026-09-27)
+
+Raised in PR #87 review. The objection is correct and the rule is replaced.
+
+**The defect.** For additive noise of variance `f·var`, the prespecified expectation is
+ρ = 1/(1+f). At `f = 0.05` that is **0.95238**, which lies *above* the 0.95 non-inferiority
+margin. §7 nonetheless required this control to be "resolved below 0.95". A control whose true
+value sits above the margin can only be resolved below it by an error, and increasing *n* makes
+the bound converge on 0.952 — that is, tighter data makes the requirement *less* satisfiable, not
+more. Power cannot repair it. The rule conflated two different questions.
+
+**The two questions, now kept apart.**
+
+| | Question | Test |
+| --- | --- | --- |
+| **D** | Can the instrument detect degradation at all? Is ρ < 1? | upper one-sided 95 % bound on ρ < 1.000 |
+| **N** | Can the instrument reject non-inferiority? Is ρ < 0.95? | upper one-sided 95 % bound on ρ < 0.950 |
+
+**Buffer rule, prespecified.** A control may be *required* to answer **N** only if its expected ρ
+is ≤ **0.90** — at least 0.05 beyond the margin, the same distance the margin itself sits from
+1.0. Controls above the margin are reported against **D** only.
+
+**Revised controls.**
+
+| Control | `f` | Expected ρ | Asked | Blocking |
+| --- | ---: | ---: | --- | --- |
+| `ctrl_noise_f005` | 0.05 | 0.952 | **D** — near-margin characterization. Above the margin, so **N** is not asked of it. | no |
+| `ctrl_noise_f011` | 0.1111 | **0.900** | **N** — the closest-to-margin control that satisfies the buffer rule | **yes** |
+| `ctrl_noise_f020` | 0.20 | 0.833 | **N** — clear harm | **yes** |
+| `ctrl_envelope_b20` | — | ≈ 1.00 | specificity: large image RMSE must *not* move ρ | **yes** |
+
+**Revised decision rule.**
+
+- If `ctrl_noise_f011` is not resolved below 0.95 at the confirmatory set's own *n*, the instrument
+  is underpowered on this collection: **INCONCLUSIVE**, and a `cuda` PASS is not reportable.
+- If `ctrl_noise_f020` is not resolved below 0.95, likewise INCONCLUSIVE — a fortiori.
+- If `ctrl_envelope_b20` **is** resolved below 0.95, the instrument manufactures harm from a change
+  that removes no information: INCONCLUSIVE. (New; the old §7 stated an expectation for this
+  control but attached no consequence to its failure.)
+- `ctrl_noise_f005` is reported but does not gate. If its upper bound is not below 1.0, that is
+  recorded in the report as a measured power limitation of this collection, not as a pass.
+- Unchanged: an absent or unmeasured harmful-control response is never equivalence.
+
+**This is not a loosening.** The replaced rule gated on a control that could not satisfy it, which
+is a gate that fails open or fails arbitrarily rather than one that fails safe. The new blocking
+control at ρ = 0.900 is *stricter* than the `f = 0.20` control already prespecified, and a
+consequence is newly attached to the specificity control. The 0.95 margin, the primary endpoint,
+every secondary margin, the analysis sets and the comparator thresholds are untouched.
+
+No outcome was inspected in making this change: no confirmatory movie has been processed and ρ has
+not been computed on either arm. `tools/science_issue73/i73_margins.py` is unchanged — the margin
+it derives is not edited here.
+
+### Amendment 5 — the gain-orientation conclusion of Amendment 3 is withdrawn (2026-09-27)
+
+Raised in PR #87 review. The objection is correct.
+
+**What Amendment 3 claimed.** That particle-vs-random AUC of 0.91–0.95 at the deposited
+coordinates, with a y-flipped comparison at chance, is "positive evidence the gain is applied in
+the right orientation".
+
+**Why that does not follow.** The y-flip comparison flips the *coordinate lookup*, not the gain.
+It therefore controls the coordinate convention and nothing else. The AUC result supports two
+narrower claims, which stand:
+
+1. the deposited CryoSPARC fractional y maps to MRC row order **as-is**, and
+2. there is real particle signal at the deposited positions, so the pipeline is not producing noise.
+
+It does not separate those from the orientation of the detector gain, because no variant with a
+differently-oriented gain was ever rendered and scored. An argument of the form "a misapplied gain
+would destroy contrast, contrast survives, therefore the gain is right" needs the counterfactual
+actually measured; asserting it is circular.
+
+**Status.** The frozen option set is unchanged —
+
+```
+(no --gain_rot, no --gain_flip, no --defect_file)
+```
+
+— because that is what the deposited gain and the RELION defaults imply, but it is now carried as
+**assumed and unverified**, not established. §5's open item on gain orientation is reopened, and
+Amendment 3's final sentence ("All options in §5 are now fully determined") is retracted.
+
+**The control that would settle it**, recorded here before it runs: re-render one development
+movie under each distinct orientation of the gain (the eight dihedral transforms reachable through
+`--gain_rot` 0–3 × `--gain_flip` 0–2) and score each with the same particle-contrast AUC. If the
+identity is uniquely best, the assumption is verified; if several are indistinguishable, the test
+is not sensitive enough on this specimen and the assumption stays unverified and is declared so.
+Prespecified now so the outcome cannot be reinterpreted afterwards. Cost is CPU-only on `cpu64`,
+one movie, no new download.

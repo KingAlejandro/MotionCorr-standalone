@@ -176,11 +176,14 @@ def main() -> None:
 
     checks = {}
     for name, ref in ADR66.items():
-        val = (out["image"].get(name)
-               or out.get("trajectory", {}).get(name)
-               or out["static_star"].get(name))
-        if name == "static_star_discrepancies":
-            val = out["static_star"]["static_star_discrepancies"]
+        # Look the metric up by key presence, not truthiness: a metric of exactly
+        # 0.0 is the *most* informative result there is (perfect agreement) and
+        # `a or b or c` would discard it and report UNMEASURED.
+        val = None
+        for section in (out["image"], out.get("trajectory", {}), out["static_star"]):
+            if name in section:
+                val = section[name]
+                break
         if val is None:
             checks[name] = {"value": None, "state": "UNMEASURED"}
             continue

@@ -17,6 +17,8 @@ This work does not reuse those movies, does not reinterpret that result, and doe
 | [`results/acquisition_manifest.json`](results/acquisition_manifest.json) | Every byte acquired from the public archive, with hashes, against the ≤ 2 GiB cap. |
 | [`results/PILOT.md`](results/PILOT.md) | Feasibility-pilot results: provenance, binary hashes, native EER handling, geometry and particle-coordinate checks, and what the pilot cannot show. |
 | [`results/pilot_cpu_check_*.json`](results/) | Raw per-movie output of `i73_check_pilot.py`. |
+| [`results/pilot_cpu_vs_cuda_*.json`](results/) | Raw per-movie ADR #66 §4 comparator output for the paired `cpu` vs `cuda` arms, produced before any re-estimation. |
+| [`results/pilot_hostctl_*.json`](results/) | The `cpu` vs `cpu` cross-host control, against which the backend difference is read. |
 | [`WORKER_STATUS.md`](WORKER_STATUS.md) | Live run state, compute used, and the resource decision awaiting Alex. |
 
 Tooling lives in [`tools/science_issue73/`](../../tools/science_issue73/), isolated from production

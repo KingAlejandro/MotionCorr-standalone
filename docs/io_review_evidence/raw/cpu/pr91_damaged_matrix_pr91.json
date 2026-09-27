@@ -1,0 +1,2031 @@
+{
+  "what": "damaged-input failure contract, pr91 build, CPU",
+  "binary": "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+  "binary_sha256": "0dcb11a35c395bd94303bfda00225ce3ad8107b3ec4e7128d1a36f3afea3fd0e",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--seed",
+    "1"
+  ],
+  "tutorial": "/home/ubuntu/mc51/tutorial",
+  "input_hashes": {
+    "20170629_00021_frameImage.tiff": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "20170629_00022_frameImage.tiff": "cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47",
+    "20170629_00023_frameImage.tiff": "87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f",
+    "gain.mrc": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "rows": [
+    {
+      "row": "truncated_damaged_first_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "truncated",
+        "original_bytes": 131245904,
+        "written_bytes": 1048576,
+        "note": "prefix short enough that no complete IFD survives"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "379e82ceb198ea1fbb5cb61c859476cc9b4d99180d15e18b9050122b353d5acd",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_damaged_first_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_first_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_first_j1/"
+        ],
+        "wall_seconds": 81.74,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n0.68/1.02 min .......................................~~(,_,\">                 [oo]\n1.35/1.35 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5fb8fa3e9217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5fb8fa4110e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5fb8fa5349e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5fb8fa536ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5fb8fa495923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5fb8fa3dfea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x79613e82a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x79613e82a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5fb8fa3e0905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5fb8fa3e9217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5fb8fa3c3ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5fb8fa3dfea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x79613e82a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x79613e82a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5fb8fa3e0905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "7b9123a50e25cffd5232c5d3875ead72ba42b1e21b66e170dd38cfed634fbc24",
+            "image_mtime_ns": 1790531691859632733,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790531692057632043,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "06789797c4e5a8e2ed75494e69801082fc9e12c8d857fc135d6167c5ca0ad367",
+            "image_mtime_ns": 1790531732598490707,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790531732820489933,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "truncated_damaged_last_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "truncated",
+        "original_bytes": 131245904,
+        "written_bytes": 1048576,
+        "note": "prefix short enough that no complete IFD survives"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "379e82ceb198ea1fbb5cb61c859476cc9b4d99180d15e18b9050122b353d5acd",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_damaged_last_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_last_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_last_j1/"
+        ],
+        "wall_seconds": 81.57,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n0.67/2.00 min ...................~~(,_,\">                                     [oo]\n1.35/2.02 min .......................................~~(,_,\">                 [oo]\n1.35/1.35 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x59ad431ec217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x59ad432140e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x59ad433379e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x59ad43339ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x59ad43298923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x59ad431e2ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x71b0fae2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x71b0fae2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x59ad431e3905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x59ad431ec217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x59ad431c6ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x59ad431e2ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x71b0fae2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x71b0fae2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x59ad431e3905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "4f908e2c5973cf3d8a0b31ce306a0b5a158953eee250864d8b406300590d7bf3",
+            "image_mtime_ns": 1790531773413348416,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790531773620347695,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "8cb299778b495393300b0dc21b7f89b8187cbed8d55357c53041f92d7f402ab5",
+            "image_mtime_ns": 1790531814426205435,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790531814635204707,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "missing_damaged_first_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "missing",
+        "note": "input file absent entirely"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_missing_damaged_first_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_first_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_first_j1/"
+        ],
+        "wall_seconds": 82.19,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n0.68/1.02 min .......................................~~(,_,\">                 [oo]\n1.37/1.37 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "in: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 276\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x64d5a8496217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x71eee) [0x64d5a84bdeee]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x64d5a85e19e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x64d5a85e3ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x64d5a8542923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x64d5a848cea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f8aeba2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f8aeba2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x64d5a848d905]\n==================\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x64d5a8496217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x64d5a8470ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x64d5a848cea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f8aeba2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f8aeba2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x64d5a848d905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "962913378d1c1ffae120c062041154ac00168142259a2c9c16c58ea5017fece5",
+            "image_mtime_ns": 1790531855504062227,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790531855712061502,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "50894635bd37de1258b75b2bdd053974f33508be4c4c5a416fd17a22a4757c66",
+            "image_mtime_ns": 1790531896697918613,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790531896904917892,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "missing_damaged_last_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "missing",
+        "note": "input file absent entirely"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_missing_damaged_last_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_last_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_last_j1/"
+        ],
+        "wall_seconds": 83.56,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n0.72/2.15 min ...................~~(,_,\">                                     [oo]\n1.40/2.10 min .......................................~~(,_,\">                 [oo]\n1.40/1.40 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "in: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 276\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5bf66a77c217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x71eee) [0x5bf66a7a3eee]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5bf66a8c79e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5bf66a8c9ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5bf66a828923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5bf66a772ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ab22122a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ab22122a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5bf66a773905]\n==================\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5bf66a77c217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5bf66a756ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5bf66a772ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ab22122a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ab22122a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5bf66a773905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "fd926612259af58ea39e8f7a58add8850822c243bce2f94588a365e90e353fce",
+            "image_mtime_ns": 1790531939105770769,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790531939304770075,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "77fef1c4dd25954f678ccc532df9abb821cc3407eb4d35d8996c8f81721590bb",
+            "image_mtime_ns": 1790531980334627034,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790531980543626305,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "corrupt_header_damaged_first_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "corrupt_header",
+        "bytes_patched": 8,
+        "offset": 0,
+        "original_bytes": 131245904
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "a40df4780dff208608b8f6bceba44f17a0fbf449668b9b9b79797d9260b6f63a",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_corrupt_header_damaged_first_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_first_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_first_j1/"
+        ],
+        "wall_seconds": 82.73,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n  40/  60 sec .......................................~~(,_,\">                 [oo]\n1.37/1.37 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "Movies/DAMAGED_frameImage.tiff: Not a TIFF or MDI file, bad magic number 65280 (0xff00).\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f09a3dd4217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5f09a3dfc0e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5f09a3f1f9e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5f09a3f21ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5f09a3e80923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f09a3dcaea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7363b542a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7363b542a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f09a3dcb905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f09a3dd4217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5f09a3daeab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f09a3dcaea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7363b542a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7363b542a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f09a3dcb905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "f90f3b32fe05cb0ef1007bcdf6992e0d4614a05f540d8465c50a0d12fcba6654",
+            "image_mtime_ns": 1790532021780482543,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532021981481842,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "23abd00aa10367ab6d44c07f4add7e7f3d95e5e08693896fbd05a6c87dbe0c3a",
+            "image_mtime_ns": 1790532063664336525,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532063866335821,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "corrupt_header_damaged_last_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "corrupt_header",
+        "bytes_patched": 8,
+        "offset": 0,
+        "original_bytes": 131245904
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "a40df4780dff208608b8f6bceba44f17a0fbf449668b9b9b79797d9260b6f63a",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_corrupt_header_damaged_last_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_last_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_last_j1/"
+        ],
+        "wall_seconds": 82.72,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n0.68/2.05 min ...................~~(,_,\">                                     [oo]\n1.38/2.07 min .......................................~~(,_,\">                 [oo]\n1.38/1.38 min ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "Movies/DAMAGED_frameImage.tiff: Not a TIFF or MDI file, bad magic number 65280 (0xff00).\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x626987f0b217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x626987f330e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x6269880569e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x626988058ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x626987fb7923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x626987f01ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a882a82a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a882a82a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x626987f02905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x626987f0b217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x626987ee5ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x626987f01ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a882a82a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a882a82a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x626987f02905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "d8e0fa8bc91a6e6caf318a9ac2e6d409d9f3cc5e3eb740a6f7661b1d5e200b84",
+            "image_mtime_ns": 1790532105691190009,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532105890189315,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "b122ae1e41e41dc484dab992177c09ffe807a836102340703eaf6345229f5d84",
+            "image_mtime_ns": 1790532147015045943,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532147212045256,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "truncated_partial_damaged_first_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "truncated_partial",
+        "original_bytes": 131245904,
+        "written_bytes": 43748634,
+        "note": "long prefix; some complete IFDs survive"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "f387c9a1b3a9f815be20795621408e3c304dfc7a8736e92d34ec9b88698cec4c",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_partial_damaged_first_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j1/"
+        ],
+        "wall_seconds": 96.34,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  14/  42 sec ...................~~(,_,\">                                     [oo]\n0.90/1.35 min .......................................~~(,_,\">                 [oo]\n1.60/1.60 min ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j1/logfile.pdf\nread gain                          : 0.271 sec (90370 microsec/operation)\nread movie                         : 3.19 sec (1063647 microsec/operation)\napply gain and initial sum         : 7.485 sec (2495185 microsec/operation)\ndetect hot pixels                  : 0.153 sec (51280 microsec/operation)\nfix defects                        : 0.118 sec (39458 microsec/operation)\nglobal FFT                         : 18.039 sec (6013205 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 1.863 sec (621238 microsec/operation)\nglobal iFFT                        : 19.559 sec (6519883 microsec/operation)\nprepare patch                      : 10.021 sec (133619 microsec/operation)\nprep patch - clip (in thread)      : 0.375 sec (268 microsec/operation)\nprep patch - FFT (in thread)       : 9.573 sec (6838 microsec/operation)\npatch alignment                    : 1.589 sec (21194 microsec/operation)\nalign - prep weight                : 0.02 sec (258 microsec/operation)\nalign - make reference             : 0.189 sec (1184 microsec/operation)\nalign - calc CCF (in thread)       : 0.137 sec (46 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.902 sec (303 microsec/operation)\nalign - argmax CCF (in thread)     : 0.002 sec (0 microsec/operation)\nalign - shift in Fourier space     : 2.194 sec (13713 microsec/operation)\nfit polynomial                     : 0.003 sec (1003 microsec/operation)\ndose weighting                     : 32.688 sec (10896312 microsec/operation)\ndw - calc weight                   : 6.297 sec (2099090 microsec/operation)\ndw - iFFT                          : 18.284 sec (6094780 microsec/operation)\nreal space interpolation           : 8.095 sec (2698363 microsec/operation)\nbinning                            : 0 sec (0 microsec/operation)\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\n",
+        "exit_code": 0,
+        "kind": "clean_success",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": true,
+          "RELION_JOB_EXIT_FAILURE": false,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "c400676dd82da22c8d01afcccef207034d97b952788c9071d5469cd3cedf0c0a",
+            "image_mtime_ns": 1790532161140996695,
+            "model_sha256": "9d1f32c77092301b8115845708a7a9600c650c720ae158844246556113789f42",
+            "model_mtime_ns": 1790532161212996444,
+            "complete": true
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "f8b69373929ed47730344385152abe882fef2636cb3ae347fc01e81e64f6b51b",
+            "image_mtime_ns": 1790532201796854958,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532201988854289,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "a34cd0c807e684476c1738a8e5dc5fd7ca75cec1eda477df9eaa10c6fb71e95a",
+            "image_mtime_ns": 1790532243441709774,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532243632709108,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": true,
+          "logfile.pdf": true
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": false,
+        "aggregate_message": false,
+        "retention_message": false
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 8
+        }
+      },
+      "observation": {
+        "exit_code": 0,
+        "exit_kind": "clean_success",
+        "damaged_movie_accepted": true,
+        "frames_decoded_from_damaged": 8,
+        "frames_decoded_from_healthy": 24,
+        "frames_lost": 16,
+        "joint_star_emitted": true,
+        "joint_pdf_emitted": true,
+        "success_marker": true
+      },
+      "status": "OBSERVED"
+    },
+    {
+      "row": "truncated_partial_damaged_last_j1",
+      "threads": 1,
+      "damage": {
+        "damage": "truncated_partial",
+        "original_bytes": 131245904,
+        "written_bytes": 43748634,
+        "note": "long prefix; some complete IFDs survive"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "f387c9a1b3a9f815be20795621408e3c304dfc7a8736e92d34ec9b88698cec4c",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_partial_damaged_last_j1.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j1",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "1",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j1/"
+        ],
+        "wall_seconds": 96.34,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n0.68/2.05 min ...................~~(,_,\">                                     [oo]\n1.38/2.07 min .......................................~~(,_,\">                 [oo]\n1.60/1.60 min ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j1/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j1/logfile.pdf\nread gain                          : 0.275 sec (91876 microsec/operation)\nread movie                         : 3.203 sec (1067803 microsec/operation)\napply gain and initial sum         : 7.566 sec (2522214 microsec/operation)\ndetect hot pixels                  : 0.16 sec (53576 microsec/operation)\nfix defects                        : 0.122 sec (40826 microsec/operation)\nglobal FFT                         : 17.951 sec (5983739 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 1.888 sec (629602 microsec/operation)\nglobal iFFT                        : 19.696 sec (6565568 microsec/operation)\nprepare patch                      : 10.044 sec (133929 microsec/operation)\nprep patch - clip (in thread)      : 0.378 sec (270 microsec/operation)\nprep patch - FFT (in thread)       : 9.591 sec (6850 microsec/operation)\npatch alignment                    : 1.577 sec (21028 microsec/operation)\nalign - prep weight                : 0.02 sec (262 microsec/operation)\nalign - make reference             : 0.191 sec (1194 microsec/operation)\nalign - calc CCF (in thread)       : 0.137 sec (46 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.898 sec (302 microsec/operation)\nalign - argmax CCF (in thread)     : 0.002 sec (0 microsec/operation)\nalign - shift in Fourier space     : 2.208 sec (13801 microsec/operation)\nfit polynomial                     : 0.002 sec (965 microsec/operation)\ndose weighting                     : 32.482 sec (10827498 microsec/operation)\ndw - calc weight                   : 6.129 sec (2043313 microsec/operation)\ndw - iFFT                          : 18.237 sec (6079088 microsec/operation)\nreal space interpolation           : 8.102 sec (2700880 microsec/operation)\nbinning                            : 0 sec (0 microsec/operation)\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\n",
+        "exit_code": 0,
+        "kind": "clean_success",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": true,
+          "RELION_JOB_EXIT_FAILURE": false,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "fb7de5da97f8a224b5c494cad4e6e3c980e1a79f021ffc752053f7484423497d",
+            "image_mtime_ns": 1790532285180564261,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532285372563592,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "4d16a6ec02697113622d35f77dde0e13d63c3b771387ec4485da1bccc18e3c32",
+            "image_mtime_ns": 1790532326967418582,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532327157417920,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "12fe63671ef8a42eeeaa116f82a0a4cab43bdd2e1e3354d8f70c61dee5bfe253",
+            "image_mtime_ns": 1790532340326372009,
+            "model_sha256": "9d1f32c77092301b8115845708a7a9600c650c720ae158844246556113789f42",
+            "model_mtime_ns": 1790532340398371758,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": true,
+          "logfile.pdf": true
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": false,
+        "aggregate_message": false,
+        "retention_message": false
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 8
+        }
+      },
+      "observation": {
+        "exit_code": 0,
+        "exit_kind": "clean_success",
+        "damaged_movie_accepted": true,
+        "frames_decoded_from_damaged": 8,
+        "frames_decoded_from_healthy": 24,
+        "frames_lost": 16,
+        "joint_star_emitted": true,
+        "joint_pdf_emitted": true,
+        "success_marker": true
+      },
+      "status": "OBSERVED"
+    },
+    {
+      "row": "truncated_damaged_first_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "truncated",
+        "original_bytes": 131245904,
+        "written_bytes": 1048576,
+        "note": "prefix short enough that no complete IFD survives"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "379e82ceb198ea1fbb5cb61c859476cc9b4d99180d15e18b9050122b353d5acd",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_damaged_first_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_first_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_first_j4/"
+        ],
+        "wall_seconds": 33.61,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n  16/  24 sec .......................................~~(,_,\">                 [oo]\n  33/  33 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5c63d87b2217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5c63d87da0e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5c63d88fd9e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5c63d88ffce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5c63d885e923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5c63d87a8ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77de9c42a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77de9c42a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5c63d87a9905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5c63d87b2217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5c63d878cab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5c63d87a8ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77de9c42a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77de9c42a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5c63d87a9905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "f1e11a70605fe541ad4d4ba2bcba41f734bee7963c01d0a7b6c7e8ceef8ac261",
+            "image_mtime_ns": 1790532357599311791,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532357792311118,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "c33413e3ea2b5085077f2af0c5bff9079eba2dbaa90b1d6416cf19e6782fc50a",
+            "image_mtime_ns": 1790532374471252971,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532374665252295,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "truncated_damaged_last_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "truncated",
+        "original_bytes": 131245904,
+        "written_bytes": 1048576,
+        "note": "prefix short enough that no complete IFD survives"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "379e82ceb198ea1fbb5cb61c859476cc9b4d99180d15e18b9050122b353d5acd",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_damaged_last_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_last_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_damaged_last_j4/"
+        ],
+        "wall_seconds": 33.84,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  17/  51 sec ...................~~(,_,\">                                     [oo]\n  34/  51 sec .......................................~~(,_,\">                 [oo]\n  34/  34 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 5421176.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x63c79bec0217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x63c79bee80e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x63c79c00b9e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x63c79c00dce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x63c79bf6c923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x63c79beb6ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7eab89e2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7eab89e2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x63c79beb7905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x63c79bec0217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x63c79be9aab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x63c79beb6ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7eab89e2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7eab89e2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x63c79beb7905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "a5cd52041f8e386228a67de09b6800e60fea510dc5a7c59971e615ca3304dfbd",
+            "image_mtime_ns": 1790532391555193412,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532391750192733,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "75d24d5e2fd91fd5c3bb435725d27735867f694699fed56546442f26fa1c1921",
+            "image_mtime_ns": 1790532408556134142,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532408761133428,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "missing_damaged_first_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "missing",
+        "note": "input file absent entirely"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_missing_damaged_first_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_first_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_first_j4/"
+        ],
+        "wall_seconds": 34.73,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n  18/  27 sec .......................................~~(,_,\">                 [oo]\n  35/  35 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "in: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 276\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5a9faedf7217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x71eee) [0x5a9faee1eeee]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5a9faef429e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5a9faef44ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5a9faeea3923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5a9faededea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x79a5af42a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x79a5af42a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5a9faedee905]\n==================\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5a9faedf7217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5a9faedd1ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5a9faededea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x79a5af42a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x79a5af42a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5a9faedee905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "052c90366f8cc1dc0a9a6756cbd273fccb3d46917e9615e95c0926150cd50f0a",
+            "image_mtime_ns": 1790532426179072703,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532426391071964,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "48bdb8431f472c0917d40262edfb3cb4fe1e7bd89bd02954eebeabc5b099a259",
+            "image_mtime_ns": 1790532443364012790,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532443574012058,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "missing_damaged_last_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "missing",
+        "note": "input file absent entirely"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_missing_damaged_last_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_last_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_missing_damaged_last_j4/"
+        ],
+        "wall_seconds": 34.37,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  17/  51 sec ...................~~(,_,\">                                     [oo]\n  35/  52 sec .......................................~~(,_,\">                 [oo]\n  35/  35 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "in: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 276\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5880438fd217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x71eee) [0x588043924eee]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x588043a489e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x588043a4ace4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5880439a9923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5880438f3ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7c226322a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7c226322a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5880438f4905]\n==================\nERROR: \nCannot read file Movies/DAMAGED_frameImage.tiff It does not exist\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5880438fd217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5880438d7ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5880438f3ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7c226322a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7c226322a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5880438f4905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "398b21568cc305724be6bcf84b5a3836e94a2b01ea0c72c172429bf8dfcda5b3",
+            "image_mtime_ns": 1790532460712952307,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532460916951596,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "2a8ecea4c5cd7e6f9b8bb725d5666f122007193dd86cba211f61637da21bbc02",
+            "image_mtime_ns": 1790532477822892657,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532478029891936,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "corrupt_header_damaged_first_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "corrupt_header",
+        "bytes_patched": 8,
+        "offset": 0,
+        "original_bytes": 131245904
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "a40df4780dff208608b8f6bceba44f17a0fbf449668b9b9b79797d9260b6f63a",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_corrupt_header_damaged_first_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_first_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_first_j4/"
+        ],
+        "wall_seconds": 33.86,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ...................~~(,_,\">                                     [oo]\n  17/  25 sec .......................................~~(,_,\">                 [oo]\n  34/  34 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "Movies/DAMAGED_frameImage.tiff: Not a TIFF or MDI file, bad magic number 65280 (0xff00).\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f091f14a217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5f091f1720e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5f091f2959e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5f091f297ce4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5f091f1f6923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f091f140ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77a786a2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77a786a2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f091f141905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5f091f14a217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5f091f124ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5f091f140ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77a786a2a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77a786a2a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5f091f141905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "44c95f3831a8f075946e775f94402dfb9d9c18255f0bf9bf8d63ddf805c4b544",
+            "image_mtime_ns": 1790532495304831711,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532495498831035,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "bc5a1e03add3ffd6b3c37fd0018084a173f1ab7366bb5c3ae73455e10ebcca46",
+            "image_mtime_ns": 1790532512272772556,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532512467771876,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "corrupt_header_damaged_last_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "corrupt_header",
+        "bytes_patched": 8,
+        "offset": 0,
+        "original_bytes": 131245904
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "a40df4780dff208608b8f6bceba44f17a0fbf449668b9b9b79797d9260b6f63a",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_corrupt_header_damaged_last_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_last_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_corrupt_header_damaged_last_j4/"
+        ],
+        "wall_seconds": 33.66,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  16/  48 sec ...................~~(,_,\">                                     [oo]\n  33/  49 sec .......................................~~(,_,\">                 [oo]\n  33/  33 sec ............................................................~~(,_,\"> yum!\n\n RELION version: 5.1.0-motioncorr-standalone\n exiting with an error ...\n",
+        "stderr_tail": "Movies/DAMAGED_frameImage.tiff: Not a TIFF or MDI file, bad magic number 65280 (0xff00).\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/image.h, line 324\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5b07accfd217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x720e5) [0x5b07acd250e5]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x1959e3) [0x5b07ace489e3]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x197ce4) [0x5b07ace4ace4]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0xf6923) [0x5b07acda9923]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5b07accf3ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a8e8462a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a8e8462a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5b07accf4905]\n==================\nERROR: \nImage::openFile cannot open: Movies/DAMAGED_frameImage.tiff\nContinuing with the remaining movies.\nin: /home/ubuntu/mc-io-evidence/src-pr91/src/motioncorr_runner.cpp, line 640\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n=== Backtrace  ===\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x4a217) [0x5b07accfd217]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x24ab0) [0x5b07accd7ab0]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x40ea3) [0x5b07accf3ea3]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a8e8462a1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a8e8462a28b]\n/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr(+0x41905) [0x5b07accf4905]\n==================\nERROR: \nMotion correction failed for 1 movie(s): Movies/DAMAGED_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.\n",
+        "exit_code": 1,
+        "kind": "clean_failure",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": false,
+          "RELION_JOB_EXIT_FAILURE": true,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "8ec6189725ef1885314321667e35a68594ee940b6bb64c8d663e6f50d47cd27e",
+            "image_mtime_ns": 1790532529725711711,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532529917711041,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "b9d7dffd0f6f80cdb864ba30213d3120b07742a1833a6dfc73ab59b55d20444d",
+            "image_mtime_ns": 1790532546541653086,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532546744652378,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": false,
+            "model_present": false,
+            "complete": false
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": false,
+          "logfile.pdf": false
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": true,
+        "aggregate_message": true,
+        "retention_message": true
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": false
+        }
+      },
+      "checks": {
+        "nonzero_exit": true,
+        "clean_failure_not_signal": true,
+        "damaged_movie_named": true,
+        "healthy_outputs_complete": true,
+        "damaged_output_absent": true,
+        "joint_star_withheld": true,
+        "joint_pdf_withheld": true,
+        "failure_marker_written": true,
+        "success_marker_absent": true
+      },
+      "status": "PASS"
+    },
+    {
+      "row": "truncated_partial_damaged_first_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "truncated_partial",
+        "original_bytes": 131245904,
+        "written_bytes": 43748634,
+        "note": "long prefix; some complete IFDs survive"
+      },
+      "order": "damaged_first",
+      "movies": [
+        "DAMAGED_frameImage.tiff",
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "f387c9a1b3a9f815be20795621408e3c304dfc7a8736e92d34ec9b88698cec4c",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_partial_damaged_first_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j4/"
+        ],
+        "wall_seconds": 39.91,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/DAMAGED_frameImage.tiff\n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n   6/  18 sec ...................~~(,_,\">                                     [oo]\n  22/  33 sec .......................................~~(,_,\">                 [oo]\n  39/  39 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j4/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_first_j4/logfile.pdf\nread gain                          : 0.264 sec (88146 microsec/operation)\nread movie                         : 1.092 sec (364071 microsec/operation)\napply gain and initial sum         : 1.995 sec (665003 microsec/operation)\ndetect hot pixels                  : 0.102 sec (34148 microsec/operation)\nfix defects                        : 0.12 sec (40199 microsec/operation)\nglobal FFT                         : 7.404 sec (2468164 microsec/operation)\npower spectrum                     : 0 sec (5 microsec/operation)\nglobal alignment                   : 0.911 sec (303778 microsec/operation)\nglobal iFFT                        : 7.975 sec (2658539 microsec/operation)\nprepare patch                      : 4.455 sec (59400 microsec/operation)\nprep patch - clip (in thread)      : 0.405 sec (289 microsec/operation)\nprep patch - FFT (in thread)       : 6.83 sec (4878 microsec/operation)\npatch alignment                    : 0.822 sec (10960 microsec/operation)\nalign - prep weight                : 0.01 sec (132 microsec/operation)\nalign - make reference             : 0.094 sec (589 microsec/operation)\nalign - calc CCF (in thread)       : 0.219 sec (74 microsec/operation)\nalign - iFFT CCF (in thread)       : 1.043 sec (350 microsec/operation)\nalign - argmax CCF (in thread)     : 0.003 sec (1 microsec/operation)\nalign - shift in Fourier space     : 1.016 sec (6352 microsec/operation)\nfit polynomial                     : 0.002 sec (954 microsec/operation)\ndose weighting                     : 13.39 sec (4463340 microsec/operation)\ndw - calc weight                   : 2.248 sec (749427 microsec/operation)\ndw - iFFT                          : 7.515 sec (2505213 microsec/operation)\nreal space interpolation           : 3.597 sec (1199145 microsec/operation)\nbinning                            : 0 sec (2 microsec/operation)\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\n",
+        "exit_code": 0,
+        "kind": "clean_success",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": true,
+          "RELION_JOB_EXIT_FAILURE": false,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "DAMAGED_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "1929e74785f69ffe55d26cf747fad7cd581884202dfefe93bc355cb55c4783a3",
+            "image_mtime_ns": 1790532553143630070,
+            "model_sha256": "9d1f32c77092301b8115845708a7a9600c650c720ae158844246556113789f42",
+            "model_mtime_ns": 1790532553216629816,
+            "complete": true
+          },
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "a651040f007e579702f3c84f443c5cbe3ea30112f5460f1c9457f32a18696544",
+            "image_mtime_ns": 1790532569642572550,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532569837571871,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "7d3ad286dda4b874d957d6b9c361116c7aaca911d8ab8edff16270e4a1577f6f",
+            "image_mtime_ns": 1790532586522513703,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532586722513005,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": true,
+          "logfile.pdf": true
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": false,
+        "aggregate_message": false,
+        "retention_message": false
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 8
+        }
+      },
+      "observation": {
+        "exit_code": 0,
+        "exit_kind": "clean_success",
+        "damaged_movie_accepted": true,
+        "frames_decoded_from_damaged": 8,
+        "frames_decoded_from_healthy": 24,
+        "frames_lost": 16,
+        "joint_star_emitted": true,
+        "joint_pdf_emitted": true,
+        "success_marker": true
+      },
+      "status": "OBSERVED"
+    },
+    {
+      "row": "truncated_partial_damaged_last_j4",
+      "threads": 4,
+      "damage": {
+        "damage": "truncated_partial",
+        "original_bytes": 131245904,
+        "written_bytes": 43748634,
+        "note": "long prefix; some complete IFDs survive"
+      },
+      "order": "damaged_last",
+      "movies": [
+        "20170629_00021_frameImage.tiff",
+        "20170629_00022_frameImage.tiff",
+        "DAMAGED_frameImage.tiff"
+      ],
+      "damaged_input_sha256": "f387c9a1b3a9f815be20795621408e3c304dfc7a8736e92d34ec9b88698cec4c",
+      "run": {
+        "command": [
+          "/home/ubuntu/mc-io-evidence/src-pr91/build-cpu/motioncorr",
+          "--i",
+          "batch_truncated_partial_damaged_last_j4.star",
+          "--o",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j4",
+          "--use_own",
+          "--dose_weighting",
+          "--dose_per_frame",
+          "1.277",
+          "--patch_x",
+          "5",
+          "--patch_y",
+          "5",
+          "--bfactor",
+          "150",
+          "--gainref",
+          "Movies/gain.mrc",
+          "--seed",
+          "1",
+          "--j",
+          "4",
+          "--pipeline_control",
+          "/home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j4/"
+        ],
+        "wall_seconds": 40.19,
+        "stdout_tail": " Using our own implementation based on MOTIONCOR2 algorithm\n to correct beam-induced motion for the following micrographs: \n  * Movies/20170629_00021_frameImage.tiff\n  * Movies/20170629_00022_frameImage.tiff\n  * Movies/DAMAGED_frameImage.tiff\n Correcting beam-induced motions using our own implementation ...\n000/??? sec ~~(,_,\">                                                          [oo]\n  17/  51 sec ...................~~(,_,\">                                     [oo]\n  34/  51 sec .......................................~~(,_,\">                 [oo]\n  40/  40 sec ............................................................~~(,_,\"> yum!\n Generating joint STAR file ... \n000/??? sec ~~(,_,\">                                                          [oo]\n   0/   0 sec ............................................................~~(,_,\"> yum!\n Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j4/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/damaged-pr91/out_pr91_truncated_partial_damaged_last_j4/logfile.pdf\nread gain                          : 0.265 sec (88651 microsec/operation)\nread movie                         : 1.094 sec (364972 microsec/operation)\napply gain and initial sum         : 2.042 sec (680741 microsec/operation)\ndetect hot pixels                  : 0.102 sec (34103 microsec/operation)\nfix defects                        : 0.122 sec (40924 microsec/operation)\nglobal FFT                         : 7.413 sec (2471294 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 0.919 sec (306371 microsec/operation)\nglobal iFFT                        : 8.037 sec (2679320 microsec/operation)\nprepare patch                      : 4.45 sec (59334 microsec/operation)\nprep patch - clip (in thread)      : 0.393 sec (281 microsec/operation)\nprep patch - FFT (in thread)       : 6.264 sec (4474 microsec/operation)\npatch alignment                    : 0.849 sec (11322 microsec/operation)\nalign - prep weight                : 0.011 sec (141 microsec/operation)\nalign - make reference             : 0.09 sec (565 microsec/operation)\nalign - calc CCF (in thread)       : 0.225 sec (76 microsec/operation)\nalign - iFFT CCF (in thread)       : 0.88 sec (296 microsec/operation)\nalign - argmax CCF (in thread)     : 0.003 sec (1 microsec/operation)\nalign - shift in Fourier space     : 1.087 sec (6794 microsec/operation)\nfit polynomial                     : 0.002 sec (950 microsec/operation)\ndose weighting                     : 13.513 sec (4504498 microsec/operation)\ndw - calc weight                   : 2.304 sec (768102 microsec/operation)\ndw - iFFT                          : 7.611 sec (2537237 microsec/operation)\nreal space interpolation           : 3.587 sec (1195684 microsec/operation)\nbinning                            : 0 sec (1 microsec/operation)\n",
+        "stderr_tail": "TIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\nTIFFFetchDirectory: Can not read TIFF directory count.\nTIFFReadDirectory: Failed to read directory at offset 49168762.\n",
+        "exit_code": 0,
+        "kind": "clean_success",
+        "markers": {
+          "RELION_JOB_EXIT_SUCCESS": true,
+          "RELION_JOB_EXIT_FAILURE": false,
+          "RELION_JOB_EXIT_ABORTED": false
+        }
+      },
+      "products": {
+        "per_movie": {
+          "20170629_00021_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "935972591522e923948ba9600d96137105bbe28ff5f2ae5db8ec576ad4800b48",
+            "image_mtime_ns": 1790532604291451756,
+            "model_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "model_mtime_ns": 1790532604484451083,
+            "complete": true
+          },
+          "20170629_00022_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "f1503e874bef0a3469f3351ebb38f714e88bc26cea18aa5996827c3605e03479",
+            "image_mtime_ns": 1790532621252392625,
+            "model_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+            "model_mtime_ns": 1790532621447391946,
+            "complete": true
+          },
+          "DAMAGED_frameImage": {
+            "image_present": true,
+            "model_present": true,
+            "image_bytes": 56956944,
+            "image_sha256": "6e03a9c5e1a8b518567c93ec54460cbd446135aeca975306907db3a06e2392d1",
+            "image_mtime_ns": 1790532627273371635,
+            "model_sha256": "9d1f32c77092301b8115845708a7a9600c650c720ae158844246556113789f42",
+            "model_mtime_ns": 1790532627343371391,
+            "complete": true
+          }
+        },
+        "joint": {
+          "corrected_micrographs.star": true,
+          "logfile.pdf": true
+        }
+      },
+      "failure_naming": {
+        "damaged_movie_named": false,
+        "aggregate_message": false,
+        "retention_message": false
+      },
+      "decoded_size": {
+        "20170629_00021_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "20170629_00022_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 24
+        },
+        "DAMAGED_frameImage": {
+          "log_present": true,
+          "movie_size_line_found": true,
+          "nx": 3710,
+          "ny": 3838,
+          "frames_decoded": 8
+        }
+      },
+      "observation": {
+        "exit_code": 0,
+        "exit_kind": "clean_success",
+        "damaged_movie_accepted": true,
+        "frames_decoded_from_damaged": 8,
+        "frames_decoded_from_healthy": 24,
+        "frames_lost": 16,
+        "joint_star_emitted": true,
+        "joint_pdf_emitted": true,
+        "success_marker": true
+      },
+      "status": "OBSERVED"
+    }
+  ],
+  "summary": {
+    "rows": 16,
+    "graded_rows": 12,
+    "pass": 12,
+    "fail": 0,
+    "observation_rows": 4,
+    "signal_deaths": 0
+  },
+  "overall": "PASS"
+}

@@ -1,0 +1,79 @@
+=================================================================
+  MotionCorr Metal GPU Resampling Test Harness (Issue #35 Phase 2)
+=================================================================
+Test Configuration:
+  Dimensions: 512 x 512
+  Frames:     16
+  Total Pixels to Resample: 4194304
+
+-------------------------------------------------------------
+Test Case 1: Standard Bilinear Resampling (Uniform Weights)
+-------------------------------------------------------------
+  CPU Wall Time: 15.5066 ms
+[Metal Real-Space Resampling Profile]
+Device: Apple M4 Pro
+Frames: 16 (512x512)
+Kernel Wall Time: 0.1847 s
+  GPU Dispatch Time: 185.6813 ms
+
+  [Parity Metrics - Test 1]:
+    Max Pixel Difference:  2.929688e-03 (component threshold: <= 5.0)
+    Mean Pixel Difference: 5.090795e-05
+    RMSE:                  1.473489e-04
+    Relative Image RMSE:   8.344010e-08 (0.0000%, component threshold: <= 0.1%)
+    Component Parity Status:         PASSED
+
+-------------------------------------------------------------
+Test Case 2: Dose-Weighted Bilinear Resampling
+-------------------------------------------------------------
+[Metal Real-Space Resampling Profile]
+Device: Apple M4 Pro
+Frames: 16 (512x512)
+Kernel Wall Time: 0.0072 s
+
+  [Parity Metrics - Test 2 (Dose-Weighted)]:
+    Max Pixel Difference:  1.586914e-03 (component threshold: <= 5.0)
+    Mean Pixel Difference: 2.652127e-05
+    RMSE:                  7.720658e-05
+    Relative Image RMSE:   6.600963e-08 (0.0000%, component threshold: <= 0.1%)
+    Component Parity Status:         PASSED
+
+-------------------------------------------------------------
+Test Case 3: Edge Clamping Validation (Extreme Boundary Shifts)
+-------------------------------------------------------------
+[Metal Real-Space Resampling Profile]
+Device: Apple M4 Pro
+Frames: 16 (512x512)
+Kernel Wall Time: 0.0113 s
+
+  [Parity Metrics - Test 3 (Edge Clamping)]:
+    Max Pixel Difference:  0.000000e+00 (component threshold: <= 5.0)
+    Mean Pixel Difference: 0.000000e+00
+    RMSE:                  0.000000e+00
+    Relative Image RMSE:   0.000000e+00 (0.0000%, component threshold: <= 0.1%)
+    Component Parity Status:         PASSED
+
+-------------------------------------------------------------
+Test Case 4: High-Resolution Scale Test (2048 x 2048, 16 frames)
+-------------------------------------------------------------
+  CPU Wall Time: 250.46 ms
+[Metal Real-Space Resampling Profile]
+Device: Apple M4 Pro
+Frames: 16 (2048x2048)
+Kernel Wall Time: 0.1091 s
+  GPU Dispatch Time: 112.22 ms
+
+  [Parity Metrics - Test 4 (High-Resolution)]:
+    Max Pixel Difference:  2.441406e-04 (component threshold: <= 5.0)
+    Mean Pixel Difference: 9.100462e-06
+    RMSE:                  3.051148e-05
+    Relative Image RMSE:   2.865113e-08 (0.0000%, component threshold: <= 0.1%)
+    Component Parity Status:         PASSED
+    Resampling Speedup:    2.23x
+
+=============================================================
+  Overall Test Suite Result: ALL COMPONENT CHECKS PASSED (FULL MOTIONCORR GATE 2 NOT EVALUATED)
+=============================================================
+real 1.45
+user 0.69
+sys 0.13

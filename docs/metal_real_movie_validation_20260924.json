@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-24",
+  "tested_revision": "637b8117c83c670b6556ee6ef31a594ed6f78494",
+  "host": {
+    "device": "Apple M4 Pro",
+    "os": "macOS 26.6.2",
+    "architecture": "arm64",
+    "build": "Release -O3, METAL=ON"
+  },
+  "input": {
+    "dataset_source": "RELION SPA tutorial archive ftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion30_tutorial_data.tar",
+    "movie": "20170629_00021_frameImage.tiff",
+    "frames": 24,
+    "dimensions": [
+      3710,
+      3838
+    ],
+    "bits_per_pixel": 16,
+    "size_bytes": 126550106,
+    "sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "gain_reference_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1"
+  },
+  "run_options": [
+    "--use_own",
+    "--j 1",
+    "--seed 1",
+    "--dose_weighting",
+    "--dose_per_frame 1.277",
+    "--patch_x 5",
+    "--patch_y 5",
+    "--bfactor 150",
+    "--gainref gain.mrc"
+  ],
+  "process_exit_codes": {
+    "cpu_run_1": 0,
+    "cpu_run_2": 0,
+    "metal_run_1": 0,
+    "metal_run_2": 0
+  },
+  "timings_seconds": {
+    "cpu": [
+      29.64,
+      29.1
+    ],
+    "metal": [
+      29.94,
+      26.66
+    ],
+    "cpu_two_run_median": 29.37,
+    "metal_two_run_median": 28.3,
+    "median_cpu_over_metal_ratio": 1.0378,
+    "acceptance": "Exploratory only: two runs per backend, no randomized thermal control; three steady-state repeats required by issue #32 are incomplete."
+  },
+  "gate": {
+    "profile": "relaxed",
+    "limits": {
+      "coordinate_rms_px": 0.02,
+      "max_shift_px": 0.05,
+      "image_rmse": 0.02,
+      "relative_image_rmse": 0.001,
+      "max_pixel_error": 5.0,
+      "normalized_star_differences": 0
+    },
+    "pair_1": {
+      "coordinate_rms_px": 0.0099127846,
+      "max_shift_px": 0.015351,
+      "image_rmse": 0.0106666132,
+      "relative_image_rmse": 0.0132319408,
+      "max_pixel_error": 2.2723684,
+      "normalized_star_differences": 0,
+      "status": "FAIL"
+    },
+    "pair_2": {
+      "coordinate_rms_px": 0.0099127846,
+      "max_shift_px": 0.015351,
+      "image_rmse": 0.0106574214,
+      "relative_image_rmse": 0.0132205384,
+      "max_pixel_error": 2.2723684,
+      "normalized_star_differences": 0,
+      "status": "FAIL"
+    },
+    "overall_status": "FAIL",
+    "failure": "Relative corrected-image RMSE is greater than 0.001 in both output pairs."
+  },
+  "output_mrc_sha256": {
+    "cpu_run_1": "5cf89d4604aa6b7cb4c4ef5e1103011a63ec3615d18d728d76ac6c4f8b74a57b",
+    "cpu_run_2": "237ac698b874e25d653afd6ea6abf012b9052ea58e7f53f999a29a575fffd27d",
+    "metal_run_1": "0e983800912d0f642db0275e21a242b42732cfca72045836c6e0e6fa413ec2e3",
+    "metal_run_2": "0008f7b6abc7ff9d1ae1b4955e501d017f17a6f4d5578a1daa8169299f58c69e"
+  },
+  "profile_run_2": {
+    "metal_global_alignment_ms": {
+      "host_to_device": 381.9,
+      "custom_kernels": 149.24,
+      "mpsgraph_fft": 288.78,
+      "device_to_host": 147.53,
+      "total": 976.41
+    },
+    "metal_peak_allocation_mib": 1482.91,
+    "cpu_global_alignment_seconds": [
+      0.736,
+      0.779
+    ],
+    "cpu_real_space_interpolation_seconds": [
+      1.475865,
+      1.643852
+    ],
+    "metal_real_space_interpolation_seconds": 1.43743,
+    "metal_resample_kernel_seconds": 0.9898
+  },
+  "component_probe": {
+    "source": "tests/metal_resample_probe.mm",
+    "log": "docs/metal_resample_probe_20260924.log",
+    "synthetic_case": "2048x2048x16",
+    "cpu_ms": 250.46,
+    "metal_dispatch_ms": 112.22,
+    "single_case_component_speedup": 2.23,
+    "component_parity": "PASS",
+    "full_motioncorr_gate_evaluated": false
+  },
+  "limitations": [
+    "One movie only",
+    "5x5 patches only",
+    "Dose weighting enabled only",
+    "No full 24-movie run",
+    "Only two timings per backend",
+    "Ghostscript unavailable for optional PDF log assembly"
+  ],
+  "artifact_policy": "The public 126 MB movie and 57 MB gain file are not included."
+}

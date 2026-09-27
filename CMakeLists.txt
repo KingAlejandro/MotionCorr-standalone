@@ -79,6 +79,10 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    # Device-free control for the issue #69 patch-retry shift-state contract.
+    add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
+    target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
+    add_test(NAME PatchRetryState COMMAND patch_retry_state)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression

@@ -1,0 +1,674 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3de26b4..f77b377 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -79,6 +79,11 @@ include(CTest)
+ if(BUILD_TESTING)
+     add_executable(runner_numerics tests/test_runner_numerics.cpp)
+     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
++    # Issue #74: the optional CUDA profiling policy header is plain C++, so its
++    # default (detailed events on) is guarded in CPU CI without a GPU.
++    add_executable(cuda_profile_policy tests/test_cuda_profile_policy.cpp)
++    target_include_directories(cuda_profile_policy PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
++    add_test(NAME CudaProfilePolicyDefault COMMAND cuda_profile_policy)
+     find_package(Python3 COMPONENTS Interpreter)
+     if(Python3_Interpreter_FOUND)
+         add_test(NAME SyntheticRegression
+diff --git a/docs/issue74/audit.md b/docs/issue74/audit.md
+new file mode 100644
+index 0000000..27769d9
+--- /dev/null
++++ b/docs/issue74/audit.md
+@@ -0,0 +1,139 @@
++# Issue 74 — Optional CUDA profiling overhead: synchronization audit
++
++Base commit `1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26` (equal to `origin/main` at fetch
++time on 2026-09-27; `origin/integrate/cuda-stabilization` is 9 commits behind it and was
++not used as a base). Experimental core #82 and evidence #81 are merged.
++
++This is the "audit which events/synchronizations are profiling-only versus
++correctness/error checks" step. It is a reading of the merged source, not a measurement.
++
++## 1. The backend markers already exist and are reused unchanged
++
++Issue #74 item 1 (a cheap completed-backend marker independent of profiling) is already
++implemented and merged. Nothing here re-implements it.
++
++| marker | emitted by | consumed by |
++|---|---|---|
++| `Using CUDA acceleration on GPU device <N> for global alignment.` (stdout) | `src/motioncorr_runner.cpp:264` | `tools/run_known_motion_gates.py:65` |
++| `[CUDA Global Alignment] completed; converged=<yes\|no>` (per-movie log) | `src/acc/cuda/cuda_alignpatch.cu`, after the profile block | `tools/run_known_motion_gates.py:66` |
++
++`backend_evidence()` in `tools/run_known_motion_gates.py` requires **both** when `--gpu`
++is given, and when `--gpu` is absent it *rejects* a run in which either marker appears —
++that is the CPU-masquerade control, and it works in both directions.
++
++Both markers sit outside the `[CUDA ... Profile]` block, so the profile block is not load
++bearing for the execution witness. That is what makes this issue safe to attempt at all.
++
++## 2. Classification of every event and synchronization in the two owned files
++
++### `src/acc/cuda/cuda_alignpatch.cu`, `cudaAlignPatchDevice`
++
++Called once per movie for global alignment and once per patch for patch alignment
++(`5x5 = 25` patches in the tutorial configuration), up to `max_iter` iterations each.
++
++| site | kind | verdict |
++|---|---|---|
++| `ev_start_total` / `ev_stop_total` + one `cudaEventSynchronize` | one per call | **correctness-relevant.** This is the stage's single checked completion boundary: it is `HANDLE_ERROR`-wrapped and it runs before the completion marker is printed. Kept unconditional. |
++| `ev_start_kernel` / `ev_stop_kernel` + `cudaEventSynchronize` after reference+CCF | 1 per iteration | profiling-only |
++| same pair, after peak finding | 1 per iteration | profiling-only |
++| same pair, after the Fourier shift kernel | 1 per iteration when `n_frames > 1` | profiling-only |
++| `ev_start_cufft` / `ev_stop_cufft` + `cudaEventSynchronize` | 1 per iteration | profiling-only |
++| `ev_start_d2h` / `ev_stop_d2h` + `cudaEventSynchronize` | 1 per iteration | profiling-only |
++| `LAUNCH_HANDLE_ERROR(cudaGetLastError())` after each launch | 4 per iteration | **correctness.** Unchanged. |
++| blocking `cudaMemcpy` D2H of candidate shifts | 2 per iteration | **correctness.** This is the real ordering the iteration depends on: the host cannot read shifts early, and a sticky kernel fault from anything enqueued earlier in the iteration surfaces here, error-checked. Unchanged. |
++| blocking `cudaMemcpy` H2D of `d_shiftx`/`d_shifty` | 2 per iteration | **correctness.** Unchanged. Also the reason the old H2D label was wrong — see §4. |
++
++So per call the profiling-only synchronizations are `5 x iterations` (4 when
++`n_frames == 1`), against exactly one synchronization that is actually required.
++
++### `src/acc/cuda/cuda_realspace_dw.cu`, `cudaDoseWeightAndInterpolateDevice`
++
++| site | kind | verdict |
++|---|---|---|
++| `ev_start_total` / `ev_stop_total` + one `cudaEventSynchronize` | one per call | **correctness-relevant**, same argument as above. Kept unconditional. |
++| `ev_*_dw`, `ev_*_cufft`, `ev_*_interp` + their `cudaEventSynchronize` | 3 per frame | profiling-only |
++| `LAUNCH_HANDLE_ERROR` after each launch | 2 per frame | **correctness.** Unchanged. |
++| blocking `cudaMemcpy` D2H of `d_Isum` | 1 per call | **correctness.** Unchanged. |
++
++3 profiling-only synchronizations per frame, so 72 for a 24-frame movie.
++
++### `src/acc/cuda/cuda_realspace_dw.cu`, `cudaRealSpaceInterpolationDevice`
++
++Only the total pair. Nothing profiling-only to make optional; left alone apart from a
++label correction.
++
++### Not touched
++
++`src/acc/cuda/cuda_movie_session.cu` holds the session per-frame workspace
++synchronization and the `cudaDeviceSynchronize()` completion/error boundaries
++(lines 325, 433, 587, 595, 617, 626, 645). Those are out of scope for this issue and are
++unmodified. `src/motioncorr_runner.cpp` TIMING tags, the TIFF/MRC readers, the gain/sum
++loops and the scheduler are untouched (#85 / #53 overlap).
++
++## 3. Why removing the profiling-only synchronizations cannot change results
++
++1. **Ordering.** Everything runs on the default stream, which this change does not alter.
++   Stream order already guarantees that frame `i+1`'s copy into `d_Fframe` follows frame
++   `i`'s `cufftExecC2R` read of it, that frame `i+1`'s inverse FFT write to `d_Iframe`
++   follows frame `i`'s interpolation read, and that iteration `n+1`'s kernels follow
++   iteration `n`'s. No new streams, batches or allocations are introduced.
++2. **Reduction order.** `d_Isum` accumulation stays a sequential in-stream chain of the
++   same kernels in the same order, so the floating-point reduction order is identical.
++   No arithmetic is touched.
++3. **Host reads.** Every device-to-host download is a blocking `cudaMemcpy` to pageable
++   memory, so the host still cannot observe an unfinished result.
++4. **Error detection.** Launch-configuration faults are still caught by the unchanged
++   `LAUNCH_HANDLE_ERROR(cudaGetLastError())` immediately after each launch. A kernel
++   execution fault is sticky and is returned by the next CUDA call, which is an
++   error-checked blocking copy within the same iteration/frame, and in the worst case by
++   the always-on total-event synchronization before the stage prints its completion
++   marker. Detection granularity coarsens from per-substage to per-stage; detection
++   itself does not go away, and no failed run can print a completion marker.
++
++The honest limit of this argument: it is a source-level argument. It is not evidence.
++The measurement plan in `plan.md` is what has to show that both modes produce identical
++pixels, headers, STAR and trajectories.
++
++## 4. Label corrections (issue #74 item 3)
++
++Three labels overstated what was measured. All three are corrected in place, keeping the
++existing key spelling byte-identical so that the tools which already parse them keep
++parsing them.
++
++| line | was | problem |
++|---|---|---|
++| alignment profile | `Host-to-Device transfer time: 0.00 ms (Resident VRAM)` | false. Two H2D shift uploads happen per iteration when `n_frames > 1`. Now reports that the figure is not measured and states how many uploads and how many bytes actually occurred. |
++| alignment profile | `Peak GPU memory allocated:` | this is the sum of the buffers this one call allocates, not a process peak. Qualified as such. |
++| alignment profile | `Buffer VRAM:` | includes `sz_fframes`, which the caller owns and this function does not allocate. Qualified as such. |
++| both reconstruction profiles | `Peak VRAM:` | same function-scratch-vs-process-peak overstatement. Qualified as such. |
++
++## 5. Pre-existing finding, reported not fixed
++
++Two legacy validators already fail to match the current log format and were therefore
++already dead as parsers, before this change:
++
++* `tools/run_cuda_patch_validation.py:57-67` — its concatenated regex requires
++  `Host-to-Device transfer time: <num> ms` to be followed only by whitespace, but the
++  merged source has emitted `0.00 ms (Resident VRAM)` since before this branch.
++* `tools/run_cuda_reconstruction_validation.py:56-64` — expects
++  `[CUDA Reconstruction Profile]`, `Analytical Dose Weighting:`, `cuFFT Inverse C2R:`,
++  `Real-space Interpolation & Accumulation:` and `Total Reconstruction Time:`; the merged
++  source emits `[CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]`,
++  `Dose Weighting Kernel:`, `cuFFT C2R Execution:`, `Interpolation & Accum:` and
++  `Total DW Reconstruction Time:`.
++
++Neither is used by CI (`.github/workflows/ci.yml` compiles CUDA but runs no CUDA
++hardware validation) and neither is in this issue's ownership, so both are left as they
++are and reported here instead.
++
++The parsers that *are* live keep working:
++`tools/run_known_motion_gates.py` (markers only, unchanged),
++`tools/run_cuda_synthetic_regression.py:226` (anchored `Total GPU alignment time:` line,
++which is still numeric in both modes and had no trailing text added), and
++`tools/compare_cuda_dataset.py` (per-field unanchored regexes, tolerant of the added
++qualifiers; its detailed fields correctly become absent when the detailed events are off,
++because in that mode they genuinely were not measured).
++
++`tools/compare_motioncorr.py`, which decides exact-output equality, reads MRC headers and
++data, STAR files and trajectories. It does not read the per-movie log, so none of these
++log-text changes can affect an exactness verdict.
+diff --git a/src/acc/cuda/cuda_alignpatch.cu b/src/acc/cuda/cuda_alignpatch.cu
+index 32f46c9..18ecc69 100644
+--- a/src/acc/cuda/cuda_alignpatch.cu
++++ b/src/acc/cuda/cuda_alignpatch.cu
+@@ -1,6 +1,7 @@
+ #ifdef _CUDA_ENABLED
+ 
+ #include "src/acc/cuda/cuda_alignpatch.h"
++#include "src/acc/cuda/cuda_profile_policy.h"
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/error.h"
+ 
+@@ -236,19 +237,26 @@ bool cudaAlignPatchDevice(
+     }
+     HANDLE_ERROR(cudaSetDevice(device_id));
+ 
++    // See cuda_profile_policy.h. The total pair below is always created: it is
++    // the stage's single checked completion boundary and the source of the
++    // always-reported total time. The substage pairs are profiling-only.
++    const bool detailed_profile = cudaDetailedProfileEnabled();
++
+     cudaEvent_t ev_start_total, ev_stop_total;
+-    cudaEvent_t ev_start_kernel, ev_stop_kernel;
+-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
+-    cudaEvent_t ev_start_d2h, ev_stop_d2h;
++    cudaEvent_t ev_start_kernel = nullptr, ev_stop_kernel = nullptr;
++    cudaEvent_t ev_start_cufft = nullptr, ev_stop_cufft = nullptr;
++    cudaEvent_t ev_start_d2h = nullptr, ev_stop_d2h = nullptr;
+ 
+     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
++    if (detailed_profile) {
++        HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
++        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
++        HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
++    }
+ 
+     HANDLE_ERROR(cudaEventRecord(ev_start_total));
+ 
+@@ -339,54 +347,64 @@ bool cudaAlignPatchDevice(
+     float accumulated_kernel_ms = 0.0f;
+     float accumulated_cufft_ms = 0.0f;
+     float accumulated_d2h_ms = 0.0f;
++    int shift_uploads = 0;
+ 
+     for (int iter = 1; iter <= max_iter; iter++) {
+         // 1. Reference computation
+-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+ 
+         // 2. CCF computation
+         computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+-        float k1_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
+-        accumulated_kernel_ms += k1_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
++            float k1_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
++            accumulated_kernel_ms += k1_ms;
++        }
+ 
+         // 3. Batched cuFFT C2R
+-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+-        float iter_cufft_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
+-        accumulated_cufft_ms += iter_cufft_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
++            float iter_cufft_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
++            accumulated_cufft_ms += iter_cufft_ms;
++        }
+ 
+         // 4. Peak finding + subpixel quadratic interpolation
+-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+             d_Iccs, d_cur_xshifts, d_cur_yshifts,
+             ccf_nx, ccf_ny, search_range,
+             (float)ccf_scale_x, (float)ccf_scale_y, n_frames
+         );
+         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+-        float k2_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+-        accumulated_kernel_ms += k2_ms;
+-
+-        // Copy candidate shifts back to host
+-        HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
++            float k2_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
++            accumulated_kernel_ms += k2_ms;
++        }
++
++        // Copy candidate shifts back to host. This blocking download is the
++        // ordering the iteration actually depends on, in both modes.
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
+         HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
+         HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
+-        float iter_d2h_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
+-        accumulated_d2h_ms += iter_d2h_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
++            float iter_d2h_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
++            accumulated_d2h_ms += iter_d2h_ms;
++        }
+ 
+         // Update relative to frame 0
+         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
+@@ -410,14 +428,17 @@ bool cudaAlignPatchDevice(
+         if (n_frames > 1) {
+             HANDLE_ERROR(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
+             HANDLE_ERROR(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
+-            HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
++            if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+             fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
+             LAUNCH_HANDLE_ERROR(cudaGetLastError());
+-            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
+-            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+-            float shift_kernel_ms = 0.0f;
+-            HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
+-            accumulated_kernel_ms += shift_kernel_ms;
++            if (detailed_profile) {
++                HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
++                HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
++                float shift_kernel_ms = 0.0f;
++                HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
++                accumulated_kernel_ms += shift_kernel_ms;
++            }
++            shift_uploads += 2;
+         }
+ 
+         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
+@@ -434,17 +455,29 @@ bool cudaAlignPatchDevice(
+     float total_ms = 0.0f;
+     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
+ 
+-    // Profile logging
++    // Profile logging. Existing keys keep their exact spelling so that the
++    // tools that already parse them keep working; the qualifiers after the
++    // value are what changed, and they are corrections of previously
++    // overstated labels rather than new measurements.
++    const size_t shift_upload_bytes = (size_t)shift_uploads * sz_shifts;
+     const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
+     logfile << " [CUDA " << stage_name << " Profile]" << std::endl;
+-    logfile << "   Host-to-Device transfer time: 0.00 ms (Resident VRAM)" << std::endl;
+-    logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
+-    logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
+-    logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
++    logfile << "   Host-to-Device transfer time: 0.00 ms (not measured; frames stay resident, but "
++            << shift_uploads << " shift uploads totalling " << shift_upload_bytes << " B did occur)" << std::endl;
++    if (detailed_profile) {
++        logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
++        logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
++        logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
++    } else {
++        logfile << "   Custom kernel execution time: n/a (detailed profiling disabled)" << std::endl;
++        logfile << "   cuFFT execution time:         n/a (detailed profiling disabled)" << std::endl;
++        logfile << "   Device-to-Host transfer time: n/a (detailed profiling disabled)" << std::endl;
++    }
+     logfile << "   Total GPU alignment time:     " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
+-    logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB" << std::endl;
++    logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB (in scope here, including the caller-owned frame buffer)" << std::endl;
+     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
+-    logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
++    logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
++    logfile << "   Detailed event profiling:     " << (detailed_profile ? "on" : "off") << std::endl;
+ 
+     // Cleanup
+     CUFFT_CHECK(cufftDestroy(plan_c2r));
+@@ -459,12 +492,14 @@ bool cudaAlignPatchDevice(
+ 
+     HANDLE_ERROR(cudaEventDestroy(ev_start_total));
+     HANDLE_ERROR(cudaEventDestroy(ev_stop_total));
+-    HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
+-    HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
+-    HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
+-    HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
+-    HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
+-    HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
++    if (detailed_profile) {
++        HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
++        HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
++        HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
++        HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
++        HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
++        HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
++    }
+ 
+     logfile << " [CUDA " << stage_name << "] completed; converged="
+             << (converged ? "yes" : "no") << std::endl;
+diff --git a/src/acc/cuda/cuda_profile_policy.h b/src/acc/cuda/cuda_profile_policy.h
+new file mode 100644
+index 0000000..ed353d2
+--- /dev/null
++++ b/src/acc/cuda/cuda_profile_policy.h
+@@ -0,0 +1,62 @@
++#ifndef CUDA_PROFILE_POLICY_H_
++#define CUDA_PROFILE_POLICY_H_
++
++// Optional detailed CUDA event profiling policy (issue #74).
++//
++// "Detailed" profiling means the per-substage and per-frame cudaEvent pairs
++// inside cuda_alignpatch.cu and cuda_realspace_dw.cu, together with the
++// cudaEventSynchronize() call that each of them needs before its elapsed time
++// can be read. Those synchronizations exist only so that a duration can be
++// printed. They are not what makes the results correct:
++//
++//   * ordering between stages is provided by the default stream, which is
++//     unchanged here;
++//   * the host never reads device results early, because every download is a
++//     blocking cudaMemcpy to pageable host memory;
++//   * every stage still ends with one checked completion boundary -- the
++//     always-on total event pair and its cudaEventSynchronize(), which is
++//     error-checked exactly as before -- so a kernel fault is still reported
++//     before the stage prints its completion marker.
++//
++// Nothing here changes arithmetic, reduction order, streams, batching or
++// allocation. Only whether intermediate durations are measured and printed.
++//
++// Default: ENABLED, which reproduces the behaviour shipped in #82 byte for
++// byte. This header adds the switch and documents the default; it does not
++// change it.
++//
++// Runtime:  RELION_CUDA_DETAILED_PROFILE=0 disables the detailed events.
++//           Accepted "off" spellings: "0", "off", "OFF", "false", "FALSE", "no".
++//           Anything else, including unset, leaves the build default in place.
++// Build:    -DRELION_CUDA_DETAILED_PROFILE_DEFAULT=0 flips the default without
++//           touching this file.
++//
++// The runtime switch is deliberate: it lets the enabled and disabled arms of a
++// measurement run from one identical binary, so the comparison cannot be
++// confounded by codegen differences.
++
++#include <cstdlib>
++#include <cstring>
++
++#ifndef RELION_CUDA_DETAILED_PROFILE_DEFAULT
++#define RELION_CUDA_DETAILED_PROFILE_DEFAULT 1
++#endif
++
++static bool cudaDetailedProfileFromEnvironment()
++{
++    const char *value = getenv("RELION_CUDA_DETAILED_PROFILE");
++    if (value == nullptr || value[0] == '\0')
++        return RELION_CUDA_DETAILED_PROFILE_DEFAULT != 0;
++    return !(strcmp(value, "0") == 0 || strcmp(value, "off") == 0 ||
++             strcmp(value, "OFF") == 0 || strcmp(value, "false") == 0 ||
++             strcmp(value, "FALSE") == 0 || strcmp(value, "no") == 0);
++}
++
++// Resolved once per process; safe to call from OpenMP movie threads.
++static bool cudaDetailedProfileEnabled()
++{
++    static const bool enabled = cudaDetailedProfileFromEnvironment();
++    return enabled;
++}
++
++#endif /* CUDA_PROFILE_POLICY_H_ */
+diff --git a/src/acc/cuda/cuda_realspace_dw.cu b/src/acc/cuda/cuda_realspace_dw.cu
+index baf275a..898af5b 100644
+--- a/src/acc/cuda/cuda_realspace_dw.cu
++++ b/src/acc/cuda/cuda_realspace_dw.cu
+@@ -1,6 +1,7 @@
+ #ifdef _CUDA_ENABLED
+ 
+ #include "src/acc/cuda/cuda_realspace_dw.h"
++#include "src/acc/cuda/cuda_profile_policy.h"
+ #include "src/acc/cuda/cuda_settings.h"
+ #include "src/error.h"
+ 
+@@ -235,27 +236,34 @@ bool cudaDoseWeightAndInterpolateDevice(
+     const size_t sz_fframe = (size_t)nfy * nfx * sizeof(float2);
+     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
+ 
++    // See cuda_profile_policy.h. The total pair is always created; the three
++    // per-frame pairs below are profiling-only and cost one host-side wait per
++    // frame stage each.
++    const bool detailed_profile = cudaDetailedProfileEnabled();
++
+     cudaEvent_t ev_start_total, ev_stop_total;
+-    cudaEvent_t ev_start_dw, ev_stop_dw;
+-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
+-    cudaEvent_t ev_start_interp, ev_stop_interp;
++    cudaEvent_t ev_start_dw = nullptr, ev_stop_dw = nullptr;
++    cudaEvent_t ev_start_cufft = nullptr, ev_stop_cufft = nullptr;
++    cudaEvent_t ev_start_interp = nullptr, ev_stop_interp = nullptr;
+ 
+     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+     event_cleanup.add(ev_start_total);
+     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+     event_cleanup.add(ev_stop_total);
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
+-    event_cleanup.add(ev_start_dw);
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
+-    event_cleanup.add(ev_stop_dw);
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+-    event_cleanup.add(ev_start_cufft);
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+-    event_cleanup.add(ev_stop_cufft);
+-    HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
+-    event_cleanup.add(ev_start_interp);
+-    HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
+-    event_cleanup.add(ev_stop_interp);
++    if (detailed_profile) {
++        HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
++        event_cleanup.add(ev_start_dw);
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
++        event_cleanup.add(ev_stop_dw);
++        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
++        event_cleanup.add(ev_start_cufft);
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
++        event_cleanup.add(ev_stop_cufft);
++        HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
++        event_cleanup.add(ev_start_interp);
++        HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
++        event_cleanup.add(ev_stop_interp);
++    }
+ 
+     HANDLE_ERROR(cudaEventRecord(ev_start_total));
+ 
+@@ -310,28 +318,32 @@ bool cudaDoseWeightAndInterpolateDevice(
+         HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
+ 
+         // Dose weighting
+-        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+         applyDoseWeightKernel<<<gridDW, blockDW>>>(
+             d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
+         );
+         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
+-        float dw_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
+-        total_dw_ms += dw_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
++            float dw_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
++            total_dw_ms += dw_ms;
++        }
+ 
+         // Inverse FFT
+-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+-        float cufft_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
+-        total_cufft_ms += cufft_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
++            float cufft_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
++            total_cufft_ms += cufft_ms;
++        }
+ 
+         // Interpolate and accumulate
+-        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
++        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_interp));
+         if (model != nullptr) {
+             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
+ 
+@@ -347,11 +359,13 @@ bool cudaDoseWeightAndInterpolateDevice(
+             accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, nullptr, d_Iframe, total_pixels);
+         }
+         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+-        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
+-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
+-        float interp_ms = 0.0f;
+-        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
+-        total_interp_ms += interp_ms;
++        if (detailed_profile) {
++            HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
++            HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
++            float interp_ms = 0.0f;
++            HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
++            total_interp_ms += interp_ms;
++        }
+     }
+ 
+     // Single D2H download of reconstructed image
+@@ -365,11 +379,18 @@ bool cudaDoseWeightAndInterpolateDevice(
+     logfile << " [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]" << std::endl;
+     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
+     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
+-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+-    logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
+-    logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
+-    logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
++            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
++    if (detailed_profile) {
++        logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
++        logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
++        logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
++    } else {
++        logfile << "  Dose Weighting Kernel: n/a (detailed profiling disabled)" << std::endl;
++        logfile << "  cuFFT C2R Execution:   n/a (detailed profiling disabled)" << std::endl;
++        logfile << "  Interpolation & Accum: n/a (detailed profiling disabled)" << std::endl;
++    }
+     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
++    logfile << "  Detailed event profiling: " << (detailed_profile ? "on" : "off") << std::endl;
+ 
+     return true;
+ }
+@@ -511,7 +532,7 @@ bool cudaRealSpaceInterpolationDevice(
+     logfile << " [CUDA Unweighted Reconstruction Profile (Resident VRAM)]" << std::endl;
+     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
+     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
+-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
++            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
+     logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
+ 
+     return true;
+diff --git a/tests/test_cuda_profile_policy.cpp b/tests/test_cuda_profile_policy.cpp
+new file mode 100644
+index 0000000..980400e
+--- /dev/null
++++ b/tests/test_cuda_profile_policy.cpp
+@@ -0,0 +1,59 @@
++// Issue #74: the optional detailed CUDA profiling policy must stay explicit
++// and must default to the behaviour shipped in #82 (detailed events ON).
++//
++// The policy header is plain C++ and pulls in no CUDA headers, so this runs in
++// ordinary CPU CI with no GPU. It exercises the uncached environment parser;
++// cudaDetailedProfileEnabled() caches its answer for the life of the process
++// by design, so it is checked once for the unset-environment default.
++
++#include "src/acc/cuda/cuda_profile_policy.h"
++
++#include <cstdio>
++#include <cstdlib>
++
++static int failures = 0;
++
++static void check(const char *what, bool got, bool want)
++{
++    if (got != want) {
++        std::printf("FAIL: %s -> %s, expected %s\n", what,
++                    got ? "enabled" : "disabled", want ? "enabled" : "disabled");
++        failures++;
++    } else {
++        std::printf("ok:   %s -> %s\n", what, got ? "enabled" : "disabled");
++    }
++}
++
++static void checkValue(const char *value, bool want)
++{
++    setenv("RELION_CUDA_DETAILED_PROFILE", value, 1);
++    check(value, cudaDetailedProfileFromEnvironment(), want);
++}
++
++int main()
++{
++    unsetenv("RELION_CUDA_DETAILED_PROFILE");
++    check("<unset> (build default)", cudaDetailedProfileFromEnvironment(),
++          RELION_CUDA_DETAILED_PROFILE_DEFAULT != 0);
++    check("<unset> is the #82 behaviour", cudaDetailedProfileEnabled(), true);
++
++    checkValue("", true);            // empty falls back to the build default
++    checkValue("0", false);
++    checkValue("off", false);
++    checkValue("OFF", false);
++    checkValue("false", false);
++    checkValue("FALSE", false);
++    checkValue("no", false);
++    checkValue("1", true);
++    checkValue("on", true);
++    checkValue("yes", true);
++    checkValue("anything else", true);
++
++    unsetenv("RELION_CUDA_DETAILED_PROFILE");
++    if (failures == 0) {
++        std::printf("PASS\n");
++        return 0;
++    }
++    std::printf("FAILED (%d)\n", failures);
++    return 1;
++}

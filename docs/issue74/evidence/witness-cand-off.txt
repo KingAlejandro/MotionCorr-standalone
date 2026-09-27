@@ -1,0 +1,22 @@
+source  = /home/vol05/scarf1415/mc-issue74-run/ev-3510295/kmg-cand-off.json
+expect  = cuda
+
+ok   km_global_hisnr          j1     requested=cuda startup=True completion=True
+ok   km_global_hisnr          j1_dw  requested=cuda startup=True completion=True
+ok   km_global_hisnr          j4     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_hisnr           j4     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_noisy           j4     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j4     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_realscale       j4     requested=cuda startup=True completion=True
+
+runs_checked=15 bad=0 errored_cases=0
+CUDA EXECUTION WITNESS: PASS
+This verdict is about the backend only. It says nothing about estimator accuracy gates, which are reported separately and whose historical failures remain failures.

@@ -76,6 +76,19 @@ The deposited coordinates land on real particles, and the gain orientation is ri
 (Amendment 3). The flipped control sitting at chance shows the test discriminates rather than
 returning a high value for any input.
 
+### Comparator self-test
+
+A comparator that cannot fail proves nothing, so `i73_compare_arms.py` was checked in both
+directions on the `cpu64` outputs before being used on any arm pair.
+
+| Test | Input | Result |
+| --- | --- | --- |
+| Null | movie 1 against itself | absolute RMSE **0.0**, relative RMSE **0.0**, max pixel error **0.0**, bitwise identical, 0 differing pixels of 67 108 864, trajectory RMS 0.0, 0 static discrepancies, no blocking failures |
+| Discrimination | movie 1 against movie 2 | absolute RMSE 0.498, relative RMSE 0.387, max pixel error 4.04, trajectory RMS 6.96 px, max per-axis 7.25 px — **3 blocking failures** raised |
+
+So a zero result means genuine agreement rather than a broken measurement, and a real difference
+is reported loudly rather than absorbed.
+
 ## Stage 2 — paired `cuda` arm
 
 Status: **pending a GPU window.** Results, when produced, are compared with

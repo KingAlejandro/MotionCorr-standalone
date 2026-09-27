@@ -30,8 +30,8 @@ Dedicated SCARF job 3509043 on gn3000, CUDA 12.8 Release sm80 TIMING=ON.
 
 - **24/24 exact** tutorial comparisons against the current CUDA base `0c7d68f`, independently checked from complete per-movie results.
 - **4/4 native CUDA motion-truth gate cases pass**, including global, local, nonsquare and 2048×2048 real-scale fixtures. All 15 fixture runs have exit 0 and matching requested GPU startup plus completed CUDA alignment evidence.
-- Thread and dose displacement fields are exactly invariant. Applied-image witness checks pass the existing `1e-4` relative threshold.
-- The noisy small-canvas characterization case remains FAIL for motion accuracy; its backend, execution, invariance and applied-image checks pass. It is not reported as recovered motion.
+- Thread and dose displacement fields are exactly invariant. The three defect-free cases (global, local high-SNR and nonsquare) pass the applied-image witness at the existing `1e-4` relative threshold. Real-scale and noisy cases do not evaluate that raw-image witness because defect replacement changes the input.
+- The noisy small-canvas characterization case remains FAIL for motion accuracy; its backend, execution and invariance checks pass. It is not reported as recovered motion.
 - Six injected wrapper upload failures return false without tracked allocation leaks.
 - GitHub CPU validation and CUDA compilation both passed for this exact source; compilation is distinct from the SCARF execution above.
 
@@ -50,6 +50,10 @@ combinations, larger/low-memory behavior and independent-collection scientific g
 further evidence. Shared-runner correctness controls were executed on CPU and are not silently
 presented as full GPU option coverage. Scheduler aggregation/resume and optional profiling remain
 separate issues #53/#55 and #74.
+
+Integrated-candidate repeat/batch/shard/resume equality across all 24 movies and the full GPU option matrix remain unrun. CPU-raster tied-peak selection remains excluded under #70. The wider ADR is therefore incomplete; this record supports only its experimental core milestone.
+
+The truth archive preserves the aggregate per-run verdicts and parsed backend evidence, but not individual raw CUDA run logs or per-run gate files. This publication limitation does not expand the validation claim.
 
 ## Recovered completed T3 multi-GPU experiment
 

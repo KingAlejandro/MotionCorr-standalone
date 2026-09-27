@@ -141,12 +141,14 @@ def render_capacity(capacity: Optional[Dict[str, Any]]) -> List[str]:
               f"{capacity.get('peak_used_mib')} MiB**, sampled every "
               f"{capacity.get('sample_interval_sec')} s over "
               f"{capacity.get('samples')} samples",
-              f"- Run exit status: {capacity.get('returncode')}",
+              f"- Exit status of the sampled command: "
+              f"{capacity.get('returncode')} — recorded, not interpreted. The "
+              f"row's own verdict is in the matrix table above; an exit status "
+              f"is never read here as evidence of success, failure or fallback.",
               "",
               "This is a measurement of one configuration on one device, not a "
               "capacity claim for other geometries, frame counts or devices. "
-              "No universal CPU-fallback behaviour is claimed, and no fallback "
-              "is inferred from any exit status.", ""]
+              "No universal CPU-fallback behaviour is claimed.", ""]
     return lines
 
 

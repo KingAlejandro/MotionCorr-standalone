@@ -22,6 +22,35 @@ The ablation attributes the two changed movies to CPU-raster tie selection. A di
 
 These are CUDA-to-CUDA comparisons. They neither pass nor change historical CPU/RELION Gate 2. Shared-runner integration and repaired CPU/CUDA truth checks are separate candidate evidence.
 
+## Combined candidate
+
+Source `283046334ff0f66700017a8c43ef0824ea5f1535`, executable SHA256
+`84088930f24af663430cffacfbc4519fc68887aef50709e61ee0f71b1aca2f8d`.
+Dedicated SCARF job 3509043 on gn3000, CUDA 12.8 Release sm80 TIMING=ON.
+
+- **24/24 exact** tutorial comparisons against the current CUDA base `0c7d68f`, independently checked from complete per-movie results.
+- **4/4 native CUDA motion-truth gate cases pass**, including global, local, nonsquare and 2048×2048 real-scale fixtures. All 15 fixture runs have exit 0 and matching requested GPU startup plus completed CUDA alignment evidence.
+- Thread and dose displacement fields are exactly invariant. Applied-image witness checks pass the existing `1e-4` relative threshold.
+- The noisy small-canvas characterization case remains FAIL for motion accuracy; its backend, execution, invariance and applied-image checks pass. It is not reported as recovered motion.
+- Six injected wrapper upload failures return false without tracked allocation leaks.
+- GitHub CPU validation and CUDA compilation both passed for this exact source; compilation is distinct from the SCARF execution above.
+
+[Raw exact comparisons](cuda/integrated/exact24), [truth report](cuda/integrated/truth/summary.json),
+[job/device/source log](cuda/integrated/job-3509043.log), [binary hashes](cuda/integrated/binaries.sha256).
+
+This supports the **experimental core integration** in #82. It does not complete the wider #66
+roadmap. CPU/RELION Gate 2 failures remain recorded; no new full-dataset CPU-agreement verdict is
+claimed here. The optional backend profile retains relative RMSE as an explicitly nonblocking
+0.001 diagnostic while requiring complete finite products and the existing other comparison bounds.
+
+The validated native CUDA tutorial configuration uses bin factor 1, gain, 5×5 patches, dose
+weighting and a fixed seed. Synthetic native checks additionally cover global alignment and
+nonsquare geometry. EER/compressed inputs, exhaustive frame-selection/grouping/binning/output
+combinations, larger/low-memory behavior and independent-collection scientific generality require
+further evidence. Shared-runner correctness controls were executed on CPU and are not silently
+presented as full GPU option coverage. Scheduler aggregation/resume and optional profiling remain
+separate issues #53/#55 and #74.
+
 ## Recovered completed T3 multi-GPU experiment
 
 T3's Multi-GPU Movie Scheduling task completed a later experiment than the previously inspected failed-cold-cache phase10. [Raw final log](scarf-t3/final.txt), [exact script](scarf-t3/final.sh), [Slurm allocation](scarf-t3/pf.sbatch). Source for ours `0c7d68f`. Job 3508552, gn3000, scarf23, 4 A100s, 16 logical CPU mask 0–15; four processes share this mask. Ours uses j=8 per process; MC3 uses one GPU per process. Tools interleaved. These are batch wall times including input/output.

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include <omp.h>
 #include <cmath>
+#include <exception>
 #include <limits>
 
 #include "src/motioncorr_runner.h"
@@ -600,7 +601,9 @@ void MotioncorrRunner::run()
 
 		// Abort through the pipeline_control system
 		if (pipeline_control_check_abort_job())
+		{
 			exit(RELION_EXIT_ABORTED);
+		}
 
 		Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
 
@@ -612,12 +615,22 @@ void MotioncorrRunner::run()
 		obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
 
 		bool result = false;
-		if (do_own)
-			result = executeOwnMotionCorrection(mic);
-		else if (do_motioncor2)
-			result = executeMotioncor2(mic);
-		else
+		if (!do_own && !do_motioncor2)
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
+		try
+		{
+			result = do_own ? executeOwnMotionCorrection(mic) : executeMotioncor2(mic);
+		}
+		catch (RelionError &XE)
+		{
+			// A damaged movie is one movie's problem. The failed_movies list below
+			// already exists to record it and still fail the job at the end, but a
+			// throw used to bypass it and take the whole batch down, losing the
+			// other movies' results and the joint STAR and logfile.pdf with them.
+			std::cerr << XE;
+			std::cerr << "Continuing with the remaining movies." << std::endl;
+			result = false;
+		}
 
 		if (result) {
 			RCTIC(TIMING_SAVE_MODEL_PLOT);
@@ -1382,14 +1395,30 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
+	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
+	// that leaves an OpenMP structured block is undefined behaviour: the runtime
+	// calls std::terminate, so one truncated movie used to abort the whole run
+	// with SIGABRT instead of failing just that movie. Capture per frame and
+	// rethrow on the serial path, where run()'s caller records the failure and
+	// continues with the remaining movies.
+	std::vector<std::exception_ptr> read_errors(n_frames);
 	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
-		if (isEER)
-			renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
-		else if (isCompressedMRC)
-			compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
-		else
-			Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+		try {
+			if (isEER)
+				renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
+			else if (isCompressedMRC)
+				compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+			else
+				Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+		} catch (...) {
+			read_errors[iframe] = std::current_exception();
+		}
+	}
+	// Report the lowest frame index rather than whichever thread failed first,
+	// so the error a user sees does not depend on the OpenMP schedule.
+	for (int iframe = 0; iframe < n_frames; iframe++) {
+		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
 	}
 	RCTOC(TIMING_READ_MOVIE);
 

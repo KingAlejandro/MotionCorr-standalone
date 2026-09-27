@@ -169,7 +169,13 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 		_zDim = _nDim = 1;
 
 	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
-	data.coreAllocateReuse();
+	// Only reserve the pixel buffer when the pixels are actually wanted. A
+	// header-only read reserved the whole stack -- 1.37 GB for a 24-frame
+	// 3710x3838 movie -- and the runner does two of those per movie before any
+	// frame is read. setDimensions still runs, so XSIZE/YSIZE/NSIZE callers are
+	// unaffected. readMRC already allocates inside its own readdata guard.
+	if (readdata)
+		data.coreAllocateReuse();
 	
 	/*
 	if ( header->mx && header->a!=0)//ux

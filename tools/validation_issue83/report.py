@@ -42,11 +42,23 @@ def schedule_cell(entry: Dict[str, Any], schedule: str) -> str:
 
 
 def render_matrix(report: Optional[Dict[str, Any]]) -> List[str]:
-    lines = ["### Implementation coverage (native CUDA)", "",
+    # On a CPU run the absence of a CUDA marker is the required result, not a
+    # failure, so the witness column is labelled by the backend that was used.
+    device = (report or {}).get("provenance", {}).get("gpu")
+    on_gpu = device is not None
+    heading = (f"### Implementation coverage (native CUDA, device {device})" if on_gpu
+               else "### Implementation coverage (CPU backend — separate diagnostic)")
+    witness_column = "Native witness" if on_gpu else "CUDA marker absent"
+    lines = [heading, "",
              "Exact = every movie identical to the uninterrupted run under "
-             "`compare_motioncorr.py --gate exact`.", "",
-             "| Row | Axes | Native witness | Products | Repeat | Batch | Resume (non-prefix) | Verdict |",
-             "|---|---|---|---|---|---|---|---|"]
+             "`compare_motioncorr.py --gate exact`.", ""]
+    if not on_gpu:
+        lines += ["This run used the CPU backend. A CUDA marker here would mean "
+                  "a masquerading run, so the column below requires its "
+                  "**absence**.", ""]
+    lines += [f"| Row | Axes | {witness_column} | Products | Repeat | Batch "
+              "| Resume (non-prefix) | Verdict |",
+              "|---|---|---|---|---|---|---|---|"]
     by_id: Dict[str, Dict[str, Any]] = {}
     if report:
         by_id = {r["row_id"]: r for r in report.get("results", [])}
@@ -67,7 +79,11 @@ def render_matrix(report: Optional[Dict[str, Any]]) -> List[str]:
                            f"named={reject.get('option_named')}")
             repeat = batch = resume = "n/a"
         else:
-            native = "yes" if witness.get("native_cuda_proven") else "**no**"
+            if on_gpu:
+                native = "yes" if witness.get("native_cuda_proven") else "**no**"
+            else:
+                native = ("**masquerade**" if witness.get("unexpected_cuda_marker")
+                          else "confirmed absent")
             inventory = base.get("inventory", {})
             productcell = ("complete" if inventory.get("inventory_complete")
                            else "**incomplete**")
@@ -125,10 +141,18 @@ def render_numerical(truth: Optional[Dict[str, Any]],
             role = entry.get("role", "")
             lines.append(f"- Motion truth `{case}` ({role}): **{verdict}**")
     if cpu_diag is None:
-        lines.append("- CPU-agreement diagnostic: _unrun_ in this report.")
+        lines.append("- CPU-backend diagnostic: _unrun_ in this report.")
     else:
-        lines.append(f"- CPU-agreement diagnostic: {cpu_diag.get('summary', 'see raw')}"
-                     " (nonblocking, explicit profile only).")
+        counts = cpu_diag.get("counts", {})
+        unrun = cpu_diag.get("unrun_rows", [])
+        host = cpu_diag.get("provenance", {}).get("hostname", "unknown host")
+        lines.append(
+            f"- CPU-backend diagnostic (`{host}`): {counts.get('pass')} pass, "
+            f"{counts.get('fail')} fail, {counts.get('error')} error of "
+            f"{counts.get('attempted')} attempted"
+            + (f"; unrun: {', '.join(unrun)}" if unrun else "")
+            + ". This is a separate verdict: it neither establishes nor "
+              "overrides any native CUDA result above.")
     lines += ["",
               "Historical CPU/RELION Gate 2 failures remain failures. An exact "
               "schedule comparison never converts one into a pass."]

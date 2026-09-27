@@ -100,7 +100,7 @@ def compare_shifts(shifts1, shifts2):
     return max_diff, rmsd
 
 
-def run_motioncorr(binary: Path, movie: Path, out_dir: Path, threads: int = 1):
+def run_motioncorr(binary: Path, movie: Path, out_dir: Path, threads: int = 1, gpu: int = None):
     """Run motioncorr on the synthetic movie fixture."""
     cmd = [
         str(binary.resolve()),
@@ -116,6 +116,9 @@ def run_motioncorr(binary: Path, movie: Path, out_dir: Path, threads: int = 1):
         "--patch_y", "3",
         "--bfactor", "150",
     ]
+    if gpu is not None:
+        cmd.extend(["--gpu", str(gpu)])
+
     res = subprocess.run(cmd, cwd=str(out_dir), capture_output=True, text=True)
     if res.returncode != 0:
         print("STDOUT:\n", res.stdout)
@@ -123,7 +126,7 @@ def run_motioncorr(binary: Path, movie: Path, out_dir: Path, threads: int = 1):
         raise RuntimeError(f"Command failed with exit code {res.returncode}: {' '.join(cmd)}")
 
 
-def test_synthetic_regression(binary: Path = None, threads_to_test=(1, 4)):
+def test_synthetic_regression(binary: Path = None, threads_to_test=(1, 4), gpu: int = None):
     repo_root = Path(__file__).resolve().parent.parent
 
     if binary is None:
@@ -148,7 +151,7 @@ def test_synthetic_regression(binary: Path = None, threads_to_test=(1, 4)):
     for threads in threads_to_test:
         with tempfile.TemporaryDirectory(prefix=f"synth_test_t{threads}_") as tmpdir:
             out_dir = Path(tmpdir)
-            run_motioncorr(binary, movie_path, out_dir, threads=threads)
+            run_motioncorr(binary, movie_path, out_dir, threads=threads, gpu=gpu)
 
             # Find output MRC and STAR
             mrc_files = list(out_dir.glob("**/synthetic_movie.mrc"))
@@ -163,7 +166,8 @@ def test_synthetic_regression(binary: Path = None, threads_to_test=(1, 4)):
             m_diff, m_rmse = compare_mrc(exp_mrc_data, actual_mrc_data)
             t_diff, t_rmsd = compare_shifts(exp_shifts, actual_shifts)
 
-            print(f"Results for --j {threads} vs Expected Old Baseline:")
+            mode_str = f"--j {threads}" if gpu is None else f"--j {threads} --gpu {gpu}"
+            print(f"Results for {mode_str} vs Expected Reference:")
             print(f"  Image Max Pixel Difference: {m_diff:.6e}")
             print(f"  Image RMSE:                 {m_rmse:.6e}")
             print(f"  Shift Max Difference (px):  {t_diff:.6e}")
@@ -183,13 +187,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, default=None, help="Path to motioncorr binary")
     parser.add_argument("--threads", type=str, default="1,4", help="Comma-separated thread counts to test")
+    parser.add_argument("--gpu", type=int, default=None, help="GPU device ID to test native CUDA execution")
     args = parser.parse_args()
 
     threads = [int(x.strip()) for x in args.threads.split(",")]
-    success = test_synthetic_regression(binary=args.binary, threads_to_test=threads)
+    success = test_synthetic_regression(binary=args.binary, threads_to_test=threads, gpu=args.gpu)
     sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":
     main()
-

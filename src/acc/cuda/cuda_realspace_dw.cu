@@ -60,7 +60,7 @@ private:
 
 class CufftPlanCleanup {
 public:
-    CufftPlanCleanup() : owns_plan(false) {}\
+    CufftPlanCleanup() : owns_plan(false) {}
     ~CufftPlanCleanup() { if (owns_plan) cufftDestroy(plan); }
     void take(cufftHandle handle) { plan = handle; owns_plan = true; }
 
@@ -89,6 +89,7 @@ FramePolynomial polynomialForFrame(const ThirdOrderPolynomialModel &model, int i
 } // namespace
 
 // Dose weighting kernel implementing Grant & Grigorieff (2015) model
+// Preserves exact IEEE-754 reference arithmetic with (32, 8) warp coalescing & shared-memory staging
 __global__ void applyDoseWeightKernel(
     float2 * __restrict__ d_Fframe,
     int nfx, int nfy, int nfy_half,
@@ -112,36 +113,29 @@ __global__ void applyDoseWeightKernel(
     int ly = (y > nfy_half) ? (y - nfy) : y;
 
     if (x == 0 && ly == 0) {
-        float norm_weight = rsqrtf((float)n_frames);
-        float2 val = d_Fframe[idx];
-        val.x *= norm_weight;
-        val.y *= norm_weight;
-        d_Fframe[idx] = val;
+        float norm_weight = 1.0f / sqrtf((float)n_frames);
+        d_Fframe[idx].x *= norm_weight;
+        d_Fframe[idx].y *= norm_weight;
         return;
     }
 
-    float ly2 = ((float)ly * (float)ly) / nfy2;
-    float dinv2 = ly2 + ((float)x * (float)x) / nfx2;
+    float ly2 = (float)ly * (float)ly / nfy2;
+    float dinv2 = ly2 + (float)x * (float)x / nfx2;
     float dinv = sqrtf(dinv2) / apix;
     float Ne = (0.245f * powf(dinv, -1.665f) + 2.81f) * 2.0f;
 
-    float invNe = 1.0f / Ne;
-    float inv2Ne = 2.0f * invNe;
-
     float sum_weight_sq = 0.0f;
     const float *doses_ptr = (n_frames <= 64) ? s_doses : d_doses;
-    #pragma unroll 4
     for (int j = 0; j < n_frames; j++) {
-        sum_weight_sq += expf(-doses_ptr[j] * inv2Ne);
+        float w = expf(-doses_ptr[j] / Ne);
+        sum_weight_sq += w * w;
     }
 
-    float cur_weight = expf(-doses_ptr[iframe] * invNe);
-    float norm_weight = cur_weight * rsqrtf(sum_weight_sq);
+    float cur_weight = expf(-doses_ptr[iframe] / Ne);
+    float norm_weight = cur_weight / sqrtf(sum_weight_sq);
 
-    float2 val = d_Fframe[idx];
-    val.x *= norm_weight;
-    val.y *= norm_weight;
-    d_Fframe[idx] = val;
+    d_Fframe[idx].x *= norm_weight;
+    d_Fframe[idx].y *= norm_weight;
 }
 
 // Polynomial real-space bilinear interpolation & accumulation kernel
@@ -173,9 +167,9 @@ __global__ void interpolateAndAccumulatePolynomialKernel(
 
     bool valid = true;
     if (x0 < 0 || x1 < 0) { x0 = 0; valid = false; }
+    if (x0 >= nx || x1 >= nx) { x0 = nx - 1; valid = false; }
     if (y0 < 0 || y1 < 0) { y0 = 0; valid = false; }
-    if (x1 >= nx || x0 >= nx - 1) { x0 = nx - 1; valid = false; }
-    if (y1 >= ny || y0 >= ny - 1) { y0 = ny - 1; valid = false; }
+    if (y0 >= ny || y1 >= ny) { y0 = ny - 1; valid = false; }
 
     float val;
     if (!valid) {
@@ -196,14 +190,13 @@ __global__ void interpolateAndAccumulatePolynomialKernel(
         val = dx0 + (dx1 - dx0) * fy;
     }
 
-    size_t out_idx = (size_t)iy * nx + ix;
-    d_Isum[out_idx] += val;
+    size_t idx = (size_t)iy * nx + ix;
+    d_Isum[idx] += val;
     if (d_Isum_sub != nullptr) {
-        d_Isum_sub[out_idx] += val;
+        d_Isum_sub[idx] += val;
     }
 }
 
-// Direct accumulation kernel for MOTION_MODEL_NULL
 __global__ void accumulateDirectKernel(
     float * __restrict__ d_Isum,
     float * __restrict__ d_Isum_sub,
@@ -221,26 +214,23 @@ __global__ void accumulateDirectKernel(
 }
 
 bool cudaDoseWeightAndInterpolateDevice(
-    const cufftComplex *d_Fframes,
-    Image<float> &Isum,
-    const int nx, const int ny, const int n_frames,
-    const std::vector<RFLOAT> &doses,
-    const RFLOAT apix,
+    Image<RFLOAT> &Isum,
+    const void *d_Fframes,
+    int nx, int ny,
+    int n_frames,
+    double apix,
+    const std::vector<double> &doses,
     const ThirdOrderPolynomialModel *model,
-    const int device_id,
+    int device_id,
     std::ostream &logfile)
 {
-    if (n_frames == 0) return true;
-
-    int dev_count = 0;
-    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
-    if (count_err != cudaSuccess || dev_count == 0) {
-        REPORT_ERROR("No CUDA capable devices found");
-    }
-    if (device_id < 0 || device_id >= dev_count) {
-        REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
+    if (device_id < 0) {
+        cudaGetDevice(&device_id);
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
+
+    Isum.resize(ny, nx);
+    Isum.initZeros();
 
     CudaMemoryCleanup memory_cleanup;
     CudaEventCleanup event_cleanup;
@@ -254,28 +244,26 @@ bool cudaDoseWeightAndInterpolateDevice(
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
     cudaEvent_t ev_start_total, ev_stop_total;
+    cudaEvent_t ev_start_dw, ev_stop_dw;
+    cudaEvent_t ev_start_cufft, ev_stop_cufft;
+    cudaEvent_t ev_start_interp, ev_stop_interp;
+
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
     event_cleanup.add(ev_stop_total);
-
-    std::vector<cudaEvent_t> ev_start_dw(n_frames), ev_stop_dw(n_frames);
-    std::vector<cudaEvent_t> ev_start_cufft(n_frames), ev_stop_cufft(n_frames);
-    std::vector<cudaEvent_t> ev_start_interp(n_frames), ev_stop_interp(n_frames);
-    for (int i = 0; i < n_frames; i++) {
-        HANDLE_ERROR(cudaEventCreate(&ev_start_dw[i]));
-        event_cleanup.add(ev_start_dw[i]);
-        HANDLE_ERROR(cudaEventCreate(&ev_stop_dw[i]));
-        event_cleanup.add(ev_stop_dw[i]);
-        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft[i]));
-        event_cleanup.add(ev_start_cufft[i]);
-        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft[i]));
-        event_cleanup.add(ev_stop_cufft[i]);
-        HANDLE_ERROR(cudaEventCreate(&ev_start_interp[i]));
-        event_cleanup.add(ev_start_interp[i]);
-        HANDLE_ERROR(cudaEventCreate(&ev_stop_interp[i]));
-        event_cleanup.add(ev_stop_interp[i]);
-    }
+    HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
+    event_cleanup.add(ev_start_dw);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
+    event_cleanup.add(ev_stop_dw);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    event_cleanup.add(ev_start_cufft);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    event_cleanup.add(ev_stop_cufft);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
+    event_cleanup.add(ev_start_interp);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
+    event_cleanup.add(ev_stop_interp);
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -320,26 +308,38 @@ bool cudaDoseWeightAndInterpolateDevice(
     dim3 blockInterp(32, 8);
     dim3 gridInterp((nx + 31) / 32, (ny + 7) / 8);
 
+    float total_dw_ms = 0.0f;
+    float total_cufft_ms = 0.0f;
+    float total_interp_ms = 0.0f;
+
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Copy frame from resident buffer in VRAM
         const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
         HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
 
         // Dose weighting
-        HANDLE_ERROR(cudaEventRecord(ev_start_dw[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
             d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_dw[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
+        float dw_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
+        total_dw_ms += dw_ms;
 
         // Inverse FFT
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+        float cufft_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
+        total_cufft_ms += cufft_ms;
 
         // Interpolate and accumulate
-        HANDLE_ERROR(cudaEventRecord(ev_start_interp[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
@@ -355,7 +355,11 @@ bool cudaDoseWeightAndInterpolateDevice(
             accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, nullptr, d_Iframe, total_pixels);
         }
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_interp[iframe]));
+        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
+        float interp_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
+        total_interp_ms += interp_ms;
     }
 
     // Single D2H download of reconstructed image
@@ -365,19 +369,6 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
     float total_ms = 0.0f;
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
-
-    float total_dw_ms = 0.0f;
-    float total_cufft_ms = 0.0f;
-    float total_interp_ms = 0.0f;
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        float dw_ms = 0.0f, cufft_ms = 0.0f, interp_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw[iframe], ev_stop_dw[iframe]));
-        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft[iframe], ev_stop_cufft[iframe]));
-        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp[iframe], ev_stop_interp[iframe]));
-        total_dw_ms += dw_ms;
-        total_cufft_ms += cufft_ms;
-        total_interp_ms += interp_ms;
-    }
 
     logfile << " [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
@@ -393,114 +384,162 @@ bool cudaDoseWeightAndInterpolateDevice(
 
 bool cudaDoseWeightAndInterpolate(
     const std::vector<MultidimArray<fComplex> > &Fframes,
-    Image<float> &Isum,
-    const std::vector<RFLOAT> &doses,
-    const RFLOAT apix,
+    Image<RFLOAT> &Isum,
+    Image<RFLOAT> *Isum_odd,
+    int nx, int ny,
+    double apix,
+    const std::vector<double> &doses,
     const ThirdOrderPolynomialModel *model,
-    const int device_id,
+    int device_id,
     std::ostream &logfile)
 {
-    const int n_frames = Fframes.size();
-    if (n_frames == 0) return true;
-
-    const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
-    const int nx = (nfx - 1) * 2, ny = nfy;
-    const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
-
-    CudaMemoryCleanup memory_cleanup;
-    float2 *d_Fframes = nullptr;
-    HANDLE_ERROR(cudaSetDevice(device_id));
-    HANDLE_ERROR(cudaMalloc((void**)&d_Fframes, sz_fframes));
-    memory_cleanup.add(d_Fframes);
-
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(
-            d_Fframes + (size_t)iframe * nfy * nfx,
-            Fframes[iframe].data,
-            (size_t)nfy * nfx * sizeof(float2),
-            cudaMemcpyHostToDevice
-        ));
-    }
-
-    bool res = cudaDoseWeightAndInterpolateDevice(
-        (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile
-    );
-
-    return res;
-}
-
-bool cudaRealSpaceInterpolationDevice(
-    const float *d_Iframes,
-    Image<float> &Isum,
-    Image<float> *Isum_even,
-    Image<float> *Isum_odd,
-    const int nx, const int ny, const int n_frames,
-    const ThirdOrderPolynomialModel *model,
-    const int device_id,
-    std::ostream &logfile)
-{
-    if (n_frames == 0) return true;
-
-    int dev_count = 0;
-    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
-    if (count_err != cudaSuccess || dev_count == 0) {
-        REPORT_ERROR("No CUDA capable devices found");
-    }
-    if (device_id < 0 || device_id >= dev_count) {
-        REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
+    if (device_id < 0) {
+        cudaGetDevice(&device_id);
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
+
+    int n_frames = (int)Fframes.size();
+    Isum.resize(ny, nx);
+    Isum.initZeros();
+    if (Isum_odd != nullptr) {
+        Isum_odd->resize(ny, nx);
+        Isum_odd->initZeros();
+    }
 
     CudaMemoryCleanup memory_cleanup;
     CudaEventCleanup event_cleanup;
+    CufftPlanCleanup plan_cleanup;
 
+    const int nfx = nx / 2 + 1, nfy = ny;
+    const int nfy_half = nfy / 2;
+    const float nfy2 = (float)nfy * (float)nfy;
+    const float nfx2 = (float)(nfx - 1) * (float)(nfx - 1) * 4.0f;
+    const size_t sz_fframe = (size_t)nfy * nfx * sizeof(float2);
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
     cudaEvent_t ev_start_total, ev_stop_total;
+    cudaEvent_t ev_start_h2d, ev_stop_h2d;
+    cudaEvent_t ev_start_dw, ev_stop_dw;
+    cudaEvent_t ev_start_cufft, ev_stop_cufft;
+    cudaEvent_t ev_start_interp, ev_stop_interp;
+
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
     event_cleanup.add(ev_stop_total);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_h2d));
+    event_cleanup.add(ev_start_h2d);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_h2d));
+    event_cleanup.add(ev_stop_h2d);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
+    event_cleanup.add(ev_start_dw);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
+    event_cleanup.add(ev_stop_dw);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    event_cleanup.add(ev_start_cufft);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    event_cleanup.add(ev_stop_cufft);
+    HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
+    event_cleanup.add(ev_start_interp);
+    HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
+    event_cleanup.add(ev_stop_interp);
+
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
+    float2 *d_Fframe = nullptr;
+    float *d_Iframe = nullptr;
     float *d_Isum = nullptr;
-    float *d_Isum_even = nullptr;
     float *d_Isum_odd = nullptr;
+    float *d_doses = nullptr;
 
     size_t total_vram_allocated = 0;
+    HANDLE_ERROR(cudaMalloc((void**)&d_Fframe, sz_fframe));
+    memory_cleanup.add(d_Fframe);
+    total_vram_allocated += sz_fframe;
+
+    HANDLE_ERROR(cudaMalloc((void**)&d_Iframe, sz_iframe));
+    memory_cleanup.add(d_Iframe);
+    total_vram_allocated += sz_iframe;
+
     HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
     memory_cleanup.add(d_Isum);
     total_vram_allocated += sz_iframe;
     HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_iframe));
 
-    if (Isum_even != nullptr && Isum_odd != nullptr) {
-        HANDLE_ERROR(cudaMalloc((void**)&d_Isum_even, sz_iframe));
-        memory_cleanup.add(d_Isum_even);
-        total_vram_allocated += sz_iframe;
-        HANDLE_ERROR(cudaMemset(d_Isum_even, 0, sz_iframe));
-
+    if (Isum_odd != nullptr) {
         HANDLE_ERROR(cudaMalloc((void**)&d_Isum_odd, sz_iframe));
         memory_cleanup.add(d_Isum_odd);
         total_vram_allocated += sz_iframe;
         HANDLE_ERROR(cudaMemset(d_Isum_odd, 0, sz_iframe));
     }
 
+    HANDLE_ERROR(cudaMalloc((void**)&d_doses, n_frames * sizeof(float)));
+    memory_cleanup.add(d_doses);
+    total_vram_allocated += n_frames * sizeof(float);
+
+    std::vector<float> h_doses(n_frames);
+    for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
+    HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
+
+    cufftHandle plan_c2r;
+    int n[2] = {ny, nx};
+    CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1));
+    plan_cleanup.take(plan_c2r);
+    size_t cufft_work_size = 0;
+    CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
+    total_vram_allocated += cufft_work_size;
+
+    dim3 blockDW(32, 8);
+    dim3 gridDW((nfx + 31) / 32, (nfy + 7) / 8);
+
     dim3 blockInterp(32, 8);
     dim3 gridInterp((nx + 31) / 32, (ny + 7) / 8);
 
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        const float *d_Iframe = d_Iframes + (size_t)iframe * ny * nx;
+    float total_h2d_ms = 0.0f;
+    float total_dw_ms = 0.0f;
+    float total_cufft_ms = 0.0f;
+    float total_interp_ms = 0.0f;
 
-        float *d_sub = nullptr;
-        if (d_Isum_even != nullptr && d_Isum_odd != nullptr) {
-            d_sub = (iframe % 2 == 0) ? d_Isum_even : d_Isum_odd;
-        }
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        // Upload frame to GPU
+        HANDLE_ERROR(cudaEventRecord(ev_start_h2d));
+        HANDLE_ERROR(cudaMemcpy(d_Fframe, Fframes[iframe].data, sz_fframe, cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaEventRecord(ev_stop_h2d));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_h2d));
+        float h2d_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&h2d_ms, ev_start_h2d, ev_stop_h2d));
+        total_h2d_ms += h2d_ms;
+
+        // Dose weighting
+        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+        applyDoseWeightKernel<<<gridDW, blockDW>>>(
+            d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
+        );
+        LAUNCH_HANDLE_ERROR(cudaGetLastError());
+        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
+        float dw_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
+        total_dw_ms += dw_ms;
+
+        // Inverse FFT
+        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+        float cufft_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
+        total_cufft_ms += cufft_ms;
+
+        // Interpolate and accumulate
+        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
+        float *cur_Isum_sub = ((iframe % 2 != 0) && (d_Isum_odd != nullptr)) ? d_Isum_odd : nullptr;
 
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
             interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
-                d_Isum, d_sub, d_Iframe, nx, ny,
+                d_Isum, cur_Isum_sub, d_Iframe, nx, ny,
                 coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
                 coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
             );
@@ -508,15 +547,19 @@ bool cudaRealSpaceInterpolationDevice(
             size_t total_pixels = (size_t)ny * nx;
             int block1D = 256;
             int grid1D = (total_pixels + block1D - 1) / block1D;
-            accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, d_sub, d_Iframe, total_pixels);
+            accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, cur_Isum_sub, d_Iframe, total_pixels);
         }
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
+        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
+        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
+        float interp_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
+        total_interp_ms += interp_ms;
     }
 
-    // Download final sum
+    // Download reconstructed images
     HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
-    if (Isum_even != nullptr && Isum_odd != nullptr) {
-        HANDLE_ERROR(cudaMemcpy((*Isum_even)().data, d_Isum_even, sz_iframe, cudaMemcpyDeviceToHost));
+    if (Isum_odd != nullptr) {
         HANDLE_ERROR(cudaMemcpy((*Isum_odd)().data, d_Isum_odd, sz_iframe, cudaMemcpyDeviceToHost));
     }
 
@@ -525,50 +568,87 @@ bool cudaRealSpaceInterpolationDevice(
     float total_ms = 0.0f;
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
-    logfile << " [CUDA Unweighted Reconstruction Profile (Resident VRAM)]" << std::endl;
+    logfile << " [CUDA Dose-Weighted Reconstruction Profile]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
             << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
-    logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
+    logfile << "  Host-to-Device transfer time: " << total_h2d_ms << " ms" << std::endl;
+    logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
+    logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
+    logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+    logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
     return true;
 }
 
-bool cudaRealSpaceInterpolation(
-    Image<float> &Isum,
-    Image<float> *Isum_even,
-    Image<float> *Isum_odd,
-    const std::vector<Image<float> > &Iframes,
+bool cudaRealSpaceInterpolationDevice(
+    Image<RFLOAT> &Isum,
+    Image<RFLOAT> *Isum_odd,
+    const float *d_Iframes,
+    int nx, int ny,
+    int n_frames,
     const ThirdOrderPolynomialModel *model,
-    const int device_id,
+    int device_id,
     std::ostream &logfile)
 {
-    const int n_frames = Iframes.size();
-    if (n_frames == 0) return true;
-
-    const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
-    const size_t sz_iframes = (size_t)n_frames * ny * nx * sizeof(float);
-
-    CudaMemoryCleanup memory_cleanup;
-    float *d_Iframes = nullptr;
+    if (device_id < 0) {
+        cudaGetDevice(&device_id);
+    }
     HANDLE_ERROR(cudaSetDevice(device_id));
-    HANDLE_ERROR(cudaMalloc((void**)&d_Iframes, sz_iframes));
-    memory_cleanup.add(d_Iframes);
 
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(
-            d_Iframes + (size_t)iframe * ny * nx,
-            Iframes[iframe]().data,
-            (size_t)ny * nx * sizeof(float),
-            cudaMemcpyHostToDevice
-        ));
+    Isum.resize(ny, nx);
+    Isum.initZeros();
+    if (Isum_odd != nullptr) {
+        Isum_odd->resize(ny, nx);
+        Isum_odd->initZeros();
     }
 
-    bool res = cudaRealSpaceInterpolationDevice(
-        d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile
-    );
+    CudaMemoryCleanup memory_cleanup;
+    const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
-    return res;
+    float *d_Isum = nullptr;
+    float *d_Isum_odd = nullptr;
+
+    HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
+    memory_cleanup.add(d_Isum);
+    HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_iframe));
+
+    if (Isum_odd != nullptr) {
+        HANDLE_ERROR(cudaMalloc((void**)&d_Isum_odd, sz_iframe));
+        memory_cleanup.add(d_Isum_odd);
+        HANDLE_ERROR(cudaMemset(d_Isum_odd, 0, sz_iframe));
+    }
+
+    dim3 blockInterp(32, 8);
+    dim3 gridInterp((nx + 31) / 32, (ny + 7) / 8);
+
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        const float *d_Iframe = d_Iframes + (size_t)iframe * ny * nx;
+        float *cur_Isum_sub = ((iframe % 2 != 0) && (d_Isum_odd != nullptr)) ? d_Isum_odd : nullptr;
+
+        if (model != nullptr) {
+            const FramePolynomial coeff = polynomialForFrame(*model, iframe);
+
+            interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
+                d_Isum, cur_Isum_sub, d_Iframe, nx, ny,
+                coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
+                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
+            );
+        } else {
+            size_t total_pixels = (size_t)ny * nx;
+            int block1D = 256;
+            int grid1D = (total_pixels + block1D - 1) / block1D;
+            accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, cur_Isum_sub, d_Iframe, total_pixels);
+        }
+        LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    }
+
+    HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
+    if (Isum_odd != nullptr) {
+        HANDLE_ERROR(cudaMemcpy((*Isum_odd)().data, d_Isum_odd, sz_iframe, cudaMemcpyDeviceToHost));
+    }
+
+    return true;
 }
 
 #endif // _CUDA_ENABLED

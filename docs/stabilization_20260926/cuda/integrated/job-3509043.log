@@ -1,0 +1,56 @@
+2026-09-26T12:48:53+01:00
+gn3000.scarf.rl.ac.uk
+283046334ff0f66700017a8c43ef0824ea5f1535
+Sat Sep 26 12:48:53 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   27C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA A100-SXM4-40GB          On  |   00000000:41:00.0 Off |                    0 |
+| N/A   26C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA A100-SXM4-40GB          On  |   00000000:81:00.0 Off |                    0 |
+| N/A   25C    P0             49W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA A100-SXM4-40GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   27C    P0             54W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Cpus_allowed_list:	0-63
+ 12:48:55 up 15 days, 12:48,  0 users,  load average: 0.05, 0.33, 0.31
+Internal ctest changing into directory: /home/vol05/scarf1415/mc-stabilize-integration/build-cuda
+Test project /home/vol05/scarf1415/mc-stabilize-integration/build-cuda
+    Start 11: CudaWrapperUploadFailure
+1/1 Test #11: CudaWrapperUploadFailure .........   Passed    1.61 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+cuda        =   1.61 sec*proc (1 test)
+hardware    =   1.61 sec*proc (1 test)
+
+Total Test time (real) =   1.62 sec
+{
+  "n_movies": 24,
+  "passed": 24,
+  "failed": 0,
+  "gate_c": "PASS"
+}
+2026-09-26T12:51:48+01:00

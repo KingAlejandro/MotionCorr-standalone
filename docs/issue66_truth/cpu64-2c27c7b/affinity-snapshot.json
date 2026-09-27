@@ -1,0 +1,17 @@
+[
+  {
+    "pid": 2623102,
+    "command": "python3 run_cpu.py ",
+    "cpus_allowed": "48-55"
+  },
+  {
+    "pid": 2623173,
+    "command": "/usr/bin/python3 /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/tools/run_known_motion_gates.py --binary /home/ubuntu/mc-stabilize-20260926-cpu/build-candidate/motioncorr --fixtures /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion --outdir /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/all-results --include-heavy --json /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/known-motion-all.json ",
+    "cpus_allowed": "48-55"
+  },
+  {
+    "pid": 2623174,
+    "command": "/usr/bin/python3 /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/generate_known_motion_fixture.py --outdir /home/ubuntu/mc-stabilize-20260926-truth-0f203d4/test-data/known_motion --include-heavy ",
+    "cpus_allowed": "48-55"
+  }
+]

@@ -1,0 +1,51 @@
+
+1. UNIT CHECKS
+  PASS  field() reproduces getShiftAt term by term   (max |d| = 7.11e-15)
+  PASS  nx/ny normalisation is not interchangeable   (|d| = 28.5591 px)
+  PASS  STAR round-trip preserves the field   (max |d| = 6.76e-13 px)
+  PASS  0.10 A residual costs ~1.1 % amplitude at 3 A   (1.09 %)
+  PASS  0.20 A residual is equivalent to B = 1.58 A^2   (B = 1.579)
+
+2. FIXTURE SELF-VALIDATION (truth versus the pixels it claims to describe)
+  PASS  declared field matches the motion measured from the pixels   (max |d| = 1.38e-03 px)
+
+3. NEGATIVE CONTROLS (a gate that cannot fail is not a gate)
+  PASS  unperturbed run passes   (7/7)
+  PASS  wrong_global_frame (amp 0.6 px): rejected   (global_component_rms up to 0.147 A; overall FAIL)
+  PASS  trajectory_scale (amp 0.05 px): rejected   (constant_offset up to 0.214 A; overall FAIL)
+  PASS  wrong_local_field (amp 1.0 px): rejected   (local_component_rms up to 0.270 A; overall FAIL)
+  PASS  wrong_local_field: global_component_rms still passes   (0.0082 A vs 0.1000 A)
+  PASS  sign_flip (amp 1.0 px): rejected   (global_component_rms, local_component_rms, total_rms_interior up to 3.750 A; overall FAIL)
+  PASS  axis_swap (amp 1.0 px): rejected   (total_rms_interior up to 3.511 A; overall FAIL)
+  PASS  uniform_bias (amp 0.25 px): rejected   (constant_offset up to 0.200 A; overall FAIL)
+  PASS  uniform_bias: frame_to_frame_rms_interior still passes   (0.0681 A vs 0.2000 A)
+  PASS  fft_rounding: accepted as harmless   (worst gated metric 5.30e-02 A)
+  PASS  fft_rounding: global_component_rms still passes   (0.0079 A vs 0.1000 A)
+  PASS  fft_rounding: local_component_rms still passes   (0.0517 A vs 0.2000 A)
+  PASS  fft_rounding: total_rms_interior still passes   (0.0530 A vs 0.2000 A)
+  PASS  fft_rounding: constant_offset still passes   (0.0095 A vs 0.1000 A)
+
+4. ARITHMETIC NOISE FLOOR VERSUS FIELD DEFECT (self-consistency response)
+    injected field error (px)   relative RMSE   classification
+                            0       3.525e-07  numerical_noise
+  PASS  unperturbed field re-applies to the program's own pixels   (relative RMSE 3.53e-07)
+                        1e-06       3.475e-07  numerical_noise
+  PASS  rounding-scale field change stays at the noise floor   (relative RMSE 3.48e-07)
+                        0.001       1.002e-05  numerical_noise
+                         0.01       1.018e-04     field_defect
+                          0.1       1.019e-03     field_defect
+  PASS  a 0.1 px field error is not rounding   (2891x the floor)
+                          0.5       5.087e-03     field_defect
+
+5. DETECTION SENSITIVITY (smallest rejected defect, by bisection)
+   defect                    threshold  units
+   wrong_global_frame           0.4081  px on one frame = 0.361 A
+  PASS  wrong_global_frame: detection threshold is finite and subpixel-scale   (0.4081 px on one frame)
+   trajectory_scale             0.0235  fractional scale error on every frame
+  PASS  trajectory_scale: detection threshold is finite and subpixel-scale   (0.0235 fractional scale error on every frame)
+   wrong_local_field            0.6826  px at the field corners on the last frame = 0.604 A
+  PASS  wrong_local_field: detection threshold is finite and subpixel-scale   (0.6826 px at the field corners on the last frame)
+   uniform_bias                 0.1267  px on every frame but the first = 0.112 A
+  PASS  uniform_bias: detection threshold is finite and subpixel-scale   (0.1267 px on every frame but the first)
+
+27 passed, 0 failed

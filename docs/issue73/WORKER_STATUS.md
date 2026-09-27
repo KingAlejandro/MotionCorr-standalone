@@ -21,8 +21,9 @@ Draft PR #87.
 | Acquire ≤ 2 GiB feasibility subset | DONE — **1575.5 MiB of 2048 MiB**, hashed in `acquisition_manifest.json`. Acquisition closed. |
 | CPU-only build at pinned commit | DONE — `20b12ef4…`, zero CUDA linkage |
 | Fix `--eer_grouping` / `--dose_per_frame` | DONE — `PROTOCOL AMENDMENT` `e9a5f84` |
-| CPU pilot on 2 development movies | IN PROGRESS |
-| Paired native-CUDA pilot | PENDING — needs GPU window |
+| CPU pilot on 2 development movies | DONE — both exit 0, `results/PILOT.md` |
+| Fix gain orientation | DONE — `PROTOCOL AMENDMENT` 3; no rotation/flip needed |
+| Paired native-CUDA pilot | RUNNING — SCARF Slurm job `3510296`, dedicated GPU allocation |
 | Confirmatory 350-movie study | **BLOCKED — not authorized** (see below) |
 
 ## Result claims so far
@@ -61,9 +62,17 @@ fractional coordinates land on real particles (`tools/science_issue73/i73_check_
 
 - `cpu64` (`small-refmac-machine`): load checked before each step (2.0–3.1 of 64), everything
   pinned `taskset -c 48-55`, build `-j 8`. One sequential pilot, `--j 1`. No benchmark.
-- `4GPUs`: read-only listing only. No job launched, no other user's process or `llama` touched.
-- `scarf`: read-only listing only. Login connections reset intermittently — backed off, no
-  retry loop.
+- `4GPUs`: built both arms (`-j 8`, `taskset -c 96-103`) and staged data, then **did not run**.
+  The shared `flock /tmp/motioncorr-bench.lock` was held by another agent's `/home/alex/matrix.sh`
+  (1 d 15 h, 0.1 % CPU, sleep loop). My queued waiter was cancelled — my own process only.
+  `matrix.sh` was left untouched, and so was the other user's GPU process on device 1. Bypassing
+  the lock because the holder looked idle would defeat the coordination it exists for, so the
+  run moved to the protocol-preferred route instead.
+- `scarf`: the GPU route actually used. One multiplexed connection, no retry loop, no login-node
+  build — clone, build and run all inside Slurm jobs on `gpu-devel`, which has a separate QOS
+  from the `gpu` partition where other agents' `mc-i83e`, `mc-i74` and `mcfaults` jobs sit, so
+  this work neither shares nor delays their allocations. CUDA 12.4 was found already installed at
+  `/apps20/.../generic/software/CUDA/12.4.0`; nothing was installed.
 - No sudo. No other user's home or permission-restricted mount read. No credential change, no
   new account, no paid service.
 

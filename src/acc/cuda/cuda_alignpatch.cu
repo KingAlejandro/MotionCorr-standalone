@@ -19,6 +19,78 @@
     } \
 } while (0)
 
+// Issue #69. Every error macro in this translation unit leaves by exception:
+// HANDLE_ERROR here is the cuda_settings.h variant, i.e. CRITICAL(ERRGPUKERN) ->
+// REPORT_ERROR -> throw RelionError, and CUFFT_CHECK throws directly. run() catches
+// RelionError per movie and continues with the remaining movies, so any resource this
+// file owns and does not unwind is leaked for the lifetime of the process, once per
+// failing global alignment and once per failing patch.
+//
+// These mirror the helpers cuda_realspace_dw.cu has used since #82. They live in an
+// anonymous namespace so this file does not add another global-scope definition of a
+// name that file and cuda_fft_prep.cu already define independently.
+//
+// releaseAll() exists so the success path can still report a failing release, which the
+// straight-line cleanup block used to do. Unlike that block it keeps going after the
+// first failure, so one bad handle cannot strand the rest, and it is idempotent, so the
+// destructor is a harmless backstop on the throwing paths.
+namespace {
+
+class ScopedDeviceMemory {
+public:
+    ~ScopedDeviceMemory() { (void)releaseAll(); }
+    void add(void *allocation) { allocations.push_back(allocation); }
+    cudaError_t releaseAll() {
+        cudaError_t first_error = cudaSuccess;
+        for (size_t i = 0; i < allocations.size(); ++i) {
+            if (allocations[i] == nullptr) continue;
+            const cudaError_t err = cudaFree(allocations[i]);
+            if (err != cudaSuccess && first_error == cudaSuccess) first_error = err;
+        }
+        allocations.clear();
+        return first_error;
+    }
+
+private:
+    std::vector<void *> allocations;
+};
+
+class ScopedCudaEvents {
+public:
+    ~ScopedCudaEvents() { (void)releaseAll(); }
+    void add(cudaEvent_t event) { events.push_back(event); }
+    cudaError_t releaseAll() {
+        cudaError_t first_error = cudaSuccess;
+        for (size_t i = 0; i < events.size(); ++i) {
+            const cudaError_t err = cudaEventDestroy(events[i]);
+            if (err != cudaSuccess && first_error == cudaSuccess) first_error = err;
+        }
+        events.clear();
+        return first_error;
+    }
+
+private:
+    std::vector<cudaEvent_t> events;
+};
+
+class ScopedCufftPlan {
+public:
+    ScopedCufftPlan() : plan(0), owns_plan(false) {}
+    ~ScopedCufftPlan() { (void)releaseAll(); }
+    void take(cufftHandle handle) { plan = handle; owns_plan = true; }
+    cufftResult releaseAll() {
+        if (!owns_plan) return CUFFT_SUCCESS;
+        owns_plan = false;
+        return cufftDestroy(plan);
+    }
+
+private:
+    cufftHandle plan;
+    bool owns_plan;
+};
+
+} // namespace
+
 static int findGoodSizeCuda(int request) {
     const int good_numbers[] = {192, 216, 256, 288, 324,
                                 384, 432, 486, 512, 576, 648,
@@ -236,19 +308,35 @@ bool cudaAlignPatchDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // Ownership (issue #69): everything registered below is owned by this call and is
+    // released on every exit path, including the throwing ones. d_Fframes_in is
+    // borrowed -- it is the resident Fourier stack or the caller's patch scratch -- and
+    // is modified in place but never freed here.
+    ScopedDeviceMemory memory_cleanup;
+    ScopedCudaEvents event_cleanup;
+    ScopedCufftPlan plan_cleanup;
+
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_kernel, ev_stop_kernel;
     cudaEvent_t ev_start_cufft, ev_stop_cufft;
     cudaEvent_t ev_start_d2h, ev_stop_d2h;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+    event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+    event_cleanup.add(ev_stop_total);
     HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
+    event_cleanup.add(ev_start_kernel);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
+    event_cleanup.add(ev_stop_kernel);
     HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    event_cleanup.add(ev_start_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    event_cleanup.add(ev_stop_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
+    event_cleanup.add(ev_start_d2h);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
+    event_cleanup.add(ev_stop_d2h);
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -298,14 +386,23 @@ bool cudaAlignPatchDevice(
     float *d_shiftx = nullptr;
     float *d_shifty = nullptr;
 
+    // Register each allocation immediately, before the next one can throw.
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
+    memory_cleanup.add(d_Fref);
     HANDLE_ERROR(cudaMalloc(&d_weight, sz_weight));
+    memory_cleanup.add(d_weight);
     HANDLE_ERROR(cudaMalloc(&d_Fccs, sz_fccs));
+    memory_cleanup.add(d_Fccs);
     HANDLE_ERROR(cudaMalloc(&d_Iccs, sz_iccs));
+    memory_cleanup.add(d_Iccs);
     HANDLE_ERROR(cudaMalloc(&d_cur_xshifts, sz_shifts));
+    memory_cleanup.add(d_cur_xshifts);
     HANDLE_ERROR(cudaMalloc(&d_cur_yshifts, sz_shifts));
+    memory_cleanup.add(d_cur_yshifts);
     HANDLE_ERROR(cudaMalloc(&d_shiftx, sz_shifts));
+    memory_cleanup.add(d_shiftx);
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
+    memory_cleanup.add(d_shifty);
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
 
@@ -313,6 +410,7 @@ bool cudaAlignPatchDevice(
     cufftHandle plan_c2r;
     int n[2] = {ccf_ny, ccf_nx};
     CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames));
+    plan_cleanup.take(plan_c2r);
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -446,25 +544,12 @@ bool cudaAlignPatchDevice(
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
 
-    // Cleanup
-    CUFFT_CHECK(cufftDestroy(plan_c2r));
-    HANDLE_ERROR(cudaFree(d_Fref));
-    HANDLE_ERROR(cudaFree(d_weight));
-    HANDLE_ERROR(cudaFree(d_Fccs));
-    HANDLE_ERROR(cudaFree(d_Iccs));
-    HANDLE_ERROR(cudaFree(d_cur_xshifts));
-    HANDLE_ERROR(cudaFree(d_cur_yshifts));
-    HANDLE_ERROR(cudaFree(d_shiftx));
-    HANDLE_ERROR(cudaFree(d_shifty));
-
-    HANDLE_ERROR(cudaEventDestroy(ev_start_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
+    // Cleanup. Release through the same objects that own the throwing paths, so there
+    // is exactly one release mechanism and no path can free twice. Every resource is
+    // attempted even if an earlier one fails; the first failure is still reported.
+    CUFFT_CHECK(plan_cleanup.releaseAll());
+    HANDLE_ERROR(memory_cleanup.releaseAll());
+    HANDLE_ERROR(event_cleanup.releaseAll());
 
     logfile << " [CUDA " << stage_name << "] completed; converged="
             << (converged ? "yes" : "no") << std::endl;
@@ -488,9 +573,14 @@ bool cudaAlignPatch(
     const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
 
+    // Issue #69: this staging buffer is owned by the wrapper, and every step below --
+    // the uploads, the device call and the global copyback -- can leave by exception.
+    // Register it before the first of them can throw.
+    ScopedDeviceMemory memory_cleanup;
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
+    memory_cleanup.add(d_Fframes);
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         HANDLE_ERROR(cudaMemcpy(
@@ -517,7 +607,7 @@ bool cudaAlignPatch(
         }
     }
 
-    HANDLE_ERROR(cudaFree(d_Fframes));
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return converged;
 }
 

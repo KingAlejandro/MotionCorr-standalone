@@ -318,6 +318,37 @@ pixel 0.97 Å halves to exactly the 0.485 Å in the deposited particle metadata,
 Still open, per §5: **gain orientation** (`--gain_rot` / `--gain_flip`), which needs a rendered
 micrograph to confirm and is therefore settled in §8 step 2 proper.
 
+### Amendment 3 — gain orientation fixed, no correction needed (2026-09-27)
+
+§5 left gain orientation open because it needs a rendered micrograph to settle. It is now
+settled, from the `cpu` arm on the two **development** movies only. No confirmatory movie has
+been processed and no endpoint has been computed, so this cannot have been tuned to an outcome.
+
+Scored by `tools/science_issue73/i73_check_pilot.py`: inner-disc-minus-annulus contrast at each
+deposited particle against 20× as many matched random positions, as an AUC.
+
+| Movie | Particles | AUC, y as-is | AUC, y flipped | Particle \|contrast\| | Random \|contrast\| |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `FoilHole_4677724_…_041554_EER` | 54 | **0.912** | 0.452 | 0.0199 | 0.0063 |
+| `FoilHole_4681533_…_062633_EER` | 50 | **0.946** | 0.489 | 0.0202 | 0.0061 |
+
+Both movies agree, so:
+
+```
+(no --gain_rot, no --gain_flip, no --defect_file)
+```
+
+A misapplied gain imposes a fixed pattern that destroys particle contrast, so an AUC of 0.91–0.95
+at the depositors' own coordinates is positive evidence the gain is applied in the right
+orientation, not merely an absence of error. The flipped convention sits at chance (0.45–0.49),
+which is what a wrong frame looks like and confirms the test can tell the two apart.
+
+The deposited CryoSPARC fractional y maps directly to MRC row order (**y as-is**). That is a
+property of the deposited metadata, identical for both arms, and is frozen here for the
+confirmatory set.
+
+This fixes the last value §5 left open. All options in §5 are now fully determined.
+
 ### Amendment 2 — cross-reference correction (2026-09-27)
 
 §5 and §10 cite "§7 step 2" for the values deferred to the feasibility pilot. The execution order

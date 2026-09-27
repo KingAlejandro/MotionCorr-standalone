@@ -1219,6 +1219,35 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
+const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERRenderer &renderer,
+                                                              int nx, int ny)
+{
+	// Miss on anything that changes what the gain array should contain. The EER
+	// gain is derived from the renderer's detector geometry and the upsampling
+	// factor, so it is only reusable when both match as well as the path.
+	const bool hit = gain_cache_filled &&
+	                 gain_cache_name == fn_gain_reference &&
+	                 gain_cache_is_eer == is_eer &&
+	                 gain_cache_nx == nx && gain_cache_ny == ny &&
+	                 (!is_eer || gain_cache_eer_upsampling == eer_upsampling);
+	if (!hit)
+	{
+		// Only ever refilled here, at the top of a movie, so the raw pointers
+		// taken into this array further down cannot be invalidated under them.
+		if (is_eer)
+			renderer.loadEERGain(fn_gain_reference, gain_cache());
+		else
+			gain_cache.read(fn_gain_reference);
+		gain_cache_name = fn_gain_reference;
+		gain_cache_is_eer = is_eer;
+		gain_cache_nx = nx;
+		gain_cache_ny = ny;
+		gain_cache_eer_upsampling = eer_upsampling;
+		gain_cache_filled = true;
+	}
+	return gain_cache();
+}
+
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
@@ -1245,7 +1274,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		logfile << "Limitted the number of IO threads per movie to " << n_io_threads << " thread(s)." << std::endl;
 	}
 
-	Image<float> Ihead, Igain, Iref, Iref_odd, Iref_even;
+	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
 	std::vector<Image<float> > Irefframes;
@@ -1335,14 +1364,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// Read gain reference
 	RCTIC(TIMING_READ_GAIN);
+	// Bound to the cached array; empty when no gain was requested.
+	static const MultidimArray<float> no_gain;
+	const MultidimArray<float> &Igain = (fn_gain_reference != "")
+	                                  ? gainReferenceFor(isEER, renderer, nx, ny)
+	                                  : no_gain;
 	if (fn_gain_reference != "") {
-		if (isEER)
-			renderer.loadEERGain(fn_gain_reference, Igain());
-		else
-			Igain.read(fn_gain_reference);
-
-		if (XSIZE(Igain()) != nx || YSIZE(Igain()) != ny) {
-			std::cerr << "fn_mic: " << fn_mic << " nx = " << nx << " ny = " << ny << " gain nx = " << XSIZE(Igain()) << " gain ny = " << YSIZE(Igain()) <<  std::endl;
+		// Checked on every movie, hit or miss. This is the only guard that the
+		// gain matches this movie, and the fused gain-and-sum loop below indexes
+		// it through a raw pointer, so a stale size would read out of bounds.
+		if (XSIZE(Igain) != nx || YSIZE(Igain) != ny) {
+			std::cerr << "fn_mic: " << fn_mic << " nx = " << nx << " ny = " << ny << " gain nx = " << XSIZE(Igain) << " gain ny = " << YSIZE(Igain) <<  std::endl;
 			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
 		}
 	}
@@ -1385,7 +1417,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		const bool apply_gain = (fn_gain_reference != "");
 		#pragma omp parallel for num_threads(n_threads)
 		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
-			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain(), pixel) : 1.0f;
+			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain, pixel) : 1.0f;
 			for (int iframe = 0; iframe < n_frames; iframe++)
 				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
 		}
@@ -1405,7 +1437,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 	bool cuda_gain_sum_done = false;
 	if (movie_session) {
-		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
 		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
@@ -1435,7 +1467,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		// a float, so every stored sum is bit-identical to the untiled loop.
 		const long int tile = 4096;
 		float *const sum_ptr = &DIRECT_MULTIDIM_ELEM(Isum, 0);
-		const float *const gain_ptr = apply_gain ? &DIRECT_MULTIDIM_ELEM(Igain(), 0) : nullptr;
+		const float *const gain_ptr = apply_gain ? &DIRECT_MULTIDIM_ELEM(Igain, 0) : nullptr;
 		#pragma omp parallel for num_threads(n_threads) schedule(static)
 		for (long int base = 0; base < n_pixels; base += tile) {
 			const long int end = XMIPP_MIN(base + tile, n_pixels);
@@ -1568,9 +1600,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 			if (fn_gain_reference != "")
 			{
-				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
 				{
-					if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+					if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
 					{
 						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
 					}
@@ -1695,7 +1727,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						float neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 #ifdef _CUDA_ENABLED
 						if (host_frames_are_raw && fn_gain_reference != "")
-							neighbor *= DIRECT_A2D_ELEM(Igain(), y, x);
+							neighbor *= DIRECT_A2D_ELEM(Igain, y, x);
 #endif
 						pbuf[n_ok] = neighbor;
 						n_ok++;

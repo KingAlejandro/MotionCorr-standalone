@@ -2173,6 +2173,30 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				if (!converged)
 #endif
 				{
+#ifdef _CUDA_ENABLED
+					// Issue #69: restart the shift state before the second attempt.
+					//
+					// alignPatch() and cudaAlignPatchDevice() both *accumulate*
+					// (xshifts[i] += cur_xshifts[i]) and neither reads the incoming
+					// values to pre-shift its input. The caller owes them the invariant
+					// that the incoming shifts already describe the supplied Fframes.
+					//
+					// A resident attempt that ran and did not converge leaves its
+					// estimate S1 in these vectors, and applied its Fourier phase
+					// shifts only to d_patch_fcomplex_buffer -- its own scratch, which
+					// the next preparePatchInVram overwrites wholesale. The resident
+					// real frames and the host Iframes are untouched by a patch
+					// attempt. So the retry below re-extracts exactly the same
+					// unshifted data and would add an independent second estimate S2
+					// on top of S1, publishing roughly twice the true local shift for
+					// this patch.
+					//
+					// Because the first attempt modified nothing else, zeroing these
+					// two vectors restores everything it touched, and the retry starts
+					// from the same state the first attempt started from.
+					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
+					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.

@@ -191,6 +191,25 @@ ROWS: List[Row] = [
 NEUTRAL_EQUIVALENCES = [("gain_unity", "gain_none")]
 
 
+#: Coverage this matrix deliberately does not attempt, with where it belongs.
+#: Published with the table so an unrun row is named rather than implied.
+DEFERRED = [
+    ("Process-shard schedules", "#53 / #55",
+     "The multi-GPU scheduler is unmerged and #53 reports that "
+     "`--gpu 0:1:2:3` silently uses a single device with movies run serially. "
+     "Sharding is consumed only once that wrapper's aggregation is "
+     "independently valid; no second scheduler is written here."),
+    ("EER and compressed decoding paths", "#8",
+     "Declared unsupported here until separately evidenced."),
+    ("Broad allocation / plan / execution fault injection", "#69",
+     "Only the single measured capacity datapoint below is in scope."),
+    ("Optional CUDA event profiling", "#74", "Owned there."),
+    ("Early-versus-late binning as an exact oracle", "#68",
+     "Never compared that way. Each binning mode is compared only against "
+     "itself across schedules."),
+]
+
+
 def rows_by_id() -> Dict[str, Row]:
     return {r.row_id: r for r in ROWS}
 

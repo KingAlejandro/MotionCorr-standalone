@@ -3378,19 +3378,36 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// TODO: error handling !!
-		while (!f_defect.eof()) {
-			int x, y, w, h;
-			f_defect >> x >> y >> w >> h;
-			for (int iy = y, ylim = y + h; iy < ylim; iy++)
-			{
-				if (iy < 0 || iy >= ny) continue;
-				for (int ix = x, xlim = x + w; ix < xlim; ix++)
-				{
-					if (ix < 0 || ix >= nx) continue;
-					DIRECT_A2D_ELEM(bBad, iy, ix) = true;
-				}
+		// TODO: error handling !! (implemented — issue #98)
+		// wide init + extraction check + overflow-safe pre-clip
+		int record_num = 0;
+		while (true) {
+			f_defect >> std::ws;
+			if (f_defect.eof()) break;
+
+			long long x = 0, y = 0, w = 0, h = 0;
+			if (!(f_defect >> x >> y >> w >> h)) {
+				REPORT_ERROR("Malformed or partial defect record #" +
+				             std::to_string(record_num) + " in " + fn_defect);
 			}
+			++record_num;
+
+			if (w <= 0 || h <= 0) continue;
+
+			auto safe_add = [](long long a, long long b) -> long long {
+				if (b <= 0) return a;
+				if (a > LLONG_MAX - b) return LLONG_MAX;
+				return a + b;
+			};
+			long long x0 = std::max(0LL, x);
+			long long x1 = std::min((long long)nx, safe_add(x, w));
+			long long y0 = std::max(0LL, y);
+			long long y1 = std::min((long long)ny, safe_add(y, h));
+			if (x0 >= x1 || y0 >= y1) continue;
+
+			for (long long iy = y0; iy < y1; ++iy)
+				for (long long ix = x0; ix < x1; ++ix)
+				DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
 		}
 
 		f_defect.close();

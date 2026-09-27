@@ -73,6 +73,9 @@
 	int TIMING_DW_IFFT = MCtimer.setNew("dw - iFFT");
 	int TIMING_REAL_SPACE_INTERPOLATION = MCtimer.setNew("real space interpolation");
 	int TIMING_BINNING = MCtimer.setNew("binning");
+	int TIMING_WRITE_RESULT = MCtimer.setNew("write corrected image");
+	int TIMING_SAVE_MODEL_PLOT = MCtimer.setNew("write star and shift plot");
+	int TIMING_LOGFILE_PDF = MCtimer.setNew("joint star and logfile pdf");
 //	int TIMING_ = MCtimer.setNew("");
 
 #else
@@ -617,8 +620,10 @@ void MotioncorrRunner::run()
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 
 		if (result) {
+			RCTIC(TIMING_SAVE_MODEL_PLOT);
 			saveModel(mic);
 			plotShifts(fn_micrographs[imic], mic);
+			RCTOC(TIMING_SAVE_MODEL_PLOT);
 		} else {
 			failed_movies.push_back(fn_micrographs[imic]);
 		}
@@ -635,7 +640,9 @@ void MotioncorrRunner::run()
 	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
+	RCTIC(TIMING_LOGFILE_PDF);
 	generateLogFilePDFAndWriteStarFiles();
+	RCTOC(TIMING_LOGFILE_PDF);
 
 #ifdef TIMING
         MCtimer.printTimes(false);
@@ -2356,6 +2363,7 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
@@ -2372,6 +2380,7 @@ skip_fitting:
 		logfile << "Written aligned but non-dose weighted sum of odd frames to " << (fn_avg.withoutExtension() + "_ODD.mrc") << std::endl;
 		logfile << "Written aligned but non-dose weighted sum of even frames to " << (fn_avg.withoutExtension() + "_EVN.mrc") << std::endl;
 		}
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Dose weighting
@@ -2456,9 +2465,11 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Set the start frame for the local motion model.

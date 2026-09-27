@@ -1,0 +1,43 @@
+{
+  "scope": "Frozen-head bounded PR90/91 merge validation, no production edits or merges",
+  "state": "COMPLETE",
+  "baseline": "1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26",
+  "standalone": "7a4f93f782a970fd146527beb5fd49e64695c1dc",
+  "combined": "e4f6769b0e1eb565fb1aed8de760efe1e6dc86f6",
+  "cpu": {
+    "host": "small-refmac-machine",
+    "mask": "48-55",
+    "healthy_threads": 4,
+    "build_parallelism": 8,
+    "pid_completed": 2967312,
+    "component_pid_completed": 2977184,
+    "report_root": "raw-cpu/evidence"
+  },
+  "cuda": {
+    "job": 3510669,
+    "node": "gn3000",
+    "GPU": "A100 SXM4 40GB",
+    "exclusive": true,
+    "device": 0,
+    "healthy_threads": 8,
+    "build_parallelism": 8,
+    "report_root": "raw-gpu/evidence-3510669"
+  },
+  "archives": {
+    "io-merge-cpu-evidence.tar.gz": {
+      "sha256": "97e72ecb613c7b301896e625a34a182ef8f5c47320adcfa27ba205859468ddd0",
+      "bytes": 302914
+    },
+    "io-merge-gpu-3510669-evidence.tar.gz": {
+      "sha256": "c5803110a8c27991ef2615b0aa603f0901080d9bfa8da8fa676d1a50a3156145",
+      "bytes": 890715
+    }
+  },
+  "benchmarks": "No new benchmark results on these source heads",
+  "limitations": [
+    "Four auxiliary PDF comparisons fail and are preserved; required scientific products pass.",
+    "Long truncated TIFF directory chain is still accepted as eight frames; four observation-only cases retained.",
+    "Strip count injection is targeted reader-component evidence, not real malformed-encoded-strip fixture nor native pipeline stress.",
+    "Same-backend regression only, not CPU/CUDA or RELION scientific equivalence."
+  ]
+}

@@ -58,8 +58,16 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	TIFFGetFieldDefaulted(ftiff, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
 	TIFFGetFieldDefaulted(ftiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
 
-	// Find the number of frames
-	while (TIFFSetDirectory(ftiff, _nDim) != 0) _nDim++;
+	// Find the number of frames.
+	// TIFFNumberOfDirectories walks the IFD offset chain without parsing each
+	// directory. The previous TIFFSetDirectory loop fully read every directory,
+	// including its per-strip offset and byte-count arrays, and the caller
+	// re-runs this for every frame it reads, so the cost was quadratic in the
+	// frame count. For a well-formed file the count is the same; a directory
+	// too corrupt to parse is now caught by the per-frame read below, which
+	// still validates width, height and pixel format against the first frame,
+	// instead of silently shortening the movie.
+	_nDim = TIFFNumberOfDirectories(ftiff);
 	// and go back to the start
 	TIFFSetDirectory(ftiff, 0);
 
@@ -161,7 +169,13 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 		_zDim = _nDim = 1;
 
 	data.setDimensions(_xDim, _yDim, _zDim, _nDim);
-	data.coreAllocateReuse();
+	// Only reserve the pixel buffer when the pixels are actually wanted. A
+	// header-only read reserved the whole stack -- 1.37 GB for a 24-frame
+	// 3710x3838 movie -- and the runner does two of those per movie before any
+	// frame is read. setDimensions still runs, so XSIZE/YSIZE/NSIZE callers are
+	// unaffected. readMRC already allocates inside its own readdata guard.
+	if (readdata)
+		data.coreAllocateReuse();
 	
 	/*
 	if ( header->mx && header->a!=0)//ux
@@ -176,10 +190,10 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	{
 		if (img_select == -1) img_select = 0; // img_select starts from 0
 
-		size_t haveread_n = 0;
 		for (int i = 0; i < _nDim; i++)
 		{
-			TIFFSetDirectory(ftiff, img_select);
+			if (TIFFSetDirectory(ftiff, img_select) == 0)
+				REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select));
 
 			// Make sure image property is consistent for all frames
 			uint32_t cur_width, cur_length;
@@ -205,22 +219,50 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 			size_t readsize_n = stripSize * 8 / bitsPerSample;
 			std::cout << "TIFF stripSize=" << stripSize << " numberOfStrips=" << numberOfStrips << " readsize_n=" << readsize_n << std::endl;
 #endif
+			// Bytes backing one decoded row. For packed 4-bit data the file
+			// reports 8 bits per sample but _xDim was doubled to the logical
+			// pixel count, so a logical pixel occupies 4 bits, not 8.
+			const size_t row_bytes = packed_4bit ? (size_t)_xDim / 2
+			                                     : (size_t)_xDim * bitsPerSample / 8;
+			const size_t frame_base = (size_t)i * _xDim * _yDim;
+			size_t rows_read = 0;
 			for (tstrip_t strip = 0; strip < numberOfStrips; strip++)
 			{
 				tsize_t actually_read = TIFFReadEncodedStrip(ftiff, strip, buf, stripSize);
-				if (actually_read == -1)
-					REPORT_ERROR((std::string)"Failed to read an image data from " + name);
+				if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
+				    (size_t)actually_read % row_bytes != 0)
+				{
+					_TIFFfree(buf);
+					REPORT_ERROR(name + ": Invalid decoded TIFF strip size.");
+				}
 				tsize_t actually_read_n = actually_read * 8 / bitsPerSample;
 #ifdef DEBUG_TIFF
 				std::cout << "Reading strip: " << strip << "actually read byte:" << actually_read << std::endl;
 #endif
 				if (packed_4bit)
 					actually_read_n *= 2; // convert physical size to logical size
-				castPage2T((char*)buf, MULTIDIM_ARRAY(data) + haveread_n, datatype, actually_read_n);
-				haveread_n += actually_read_n;
+				// A strip always holds whole rows, so convert each one directly
+				// into its Y-flipped destination (see the axis note below).
+				const size_t first_row = rows_read;
+				const size_t n_rows = (size_t)actually_read / row_bytes;
+				if (first_row > (size_t)_yDim || n_rows > (size_t)_yDim - first_row)
+				{
+					_TIFFfree(buf);
+					REPORT_ERROR(name + ": Decoded TIFF strips exceed the frame height.");
+				}
+				for (size_t r = 0; r < n_rows; r++)
+				{
+					const size_t dest_row = _yDim - 1 - (first_row + r);
+					castPage2T((char*)buf + r * row_bytes,
+					           MULTIDIM_ARRAY(data) + frame_base + dest_row * _xDim,
+					           datatype, _xDim);
+				}
+				rows_read += n_rows;
 			}
 
 			_TIFFfree(buf);
+			if (rows_read != (size_t)_yDim)
+				REPORT_ERROR(name + ": Decoded TIFF strips do not fill the frame.");
 			img_select++;
 		}
 
@@ -237,25 +279,9 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 
 		   So, the origin and the direction of the Y axis are the opposite between MRC and TIFF.
 		   IMOD, EMAN2, SerialEM and MotionCor2 flip the Y axis whenever they read or write a TIFF file.
-		   We follow this.
+		   We follow this; the flip is applied per row as each strip is decoded above,
+		   which produces the same image as the separate reversing pass it replaces.
 		*/
-
-		T tmp;
-		const int ylim = _yDim / 2, z = 0;
-		for (int n = 0; n < _nDim; n++)
-			{
-			for (int y1 = 0; y1 < ylim; y1++)
-			{
-				const int y2 = _yDim - 1 - y1;
-				for (int x = 0; x < _xDim; x++)
-				{
-					 // TODO: memcpy or pointer arithmetic is probably faster
-					tmp = DIRECT_NZYX_ELEM(data, n, z, y1, x);
-					DIRECT_NZYX_ELEM(data, n, z, y1, x) = DIRECT_NZYX_ELEM(data, n, z, y2, x);
-					DIRECT_NZYX_ELEM(data, n, z, y2, x) = tmp;
-				}
-			}
-		} 
 	}
 
 	return 0;

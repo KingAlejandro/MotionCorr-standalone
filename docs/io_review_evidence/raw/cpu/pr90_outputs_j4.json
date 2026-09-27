@@ -1,0 +1,2168 @@
+{
+  "what": "same-backend regression A/B, main vs pr90, CPU, j=4",
+  "not_a_claim_about": [
+    "CPU/CUDA agreement",
+    "RELION parity",
+    "scientific equivalence"
+  ],
+  "comparator": "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+  "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--j",
+    "4",
+    "--seed",
+    "1"
+  ],
+  "input_star": "movies.star",
+  "tutorial": "/home/ubuntu/mc51/tutorial",
+  "ref_binary": "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+  "ref_binary_sha256": "28918ae8438f1e953eda6648d6178544fc3b431158c41cf9907d67f3d8513a1d",
+  "test_binary": "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+  "test_binary_sha256": "993cc44000c6e26afaa1b89ac9e33645c744618784b228ee32624767390b7c12",
+  "normalization_patterns": [
+    "\\d{2}-[A-Za-z]{3}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}",
+    "\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}",
+    "%%CreationDate:.*",
+    "/CreationDate\\s*\\([^)]*\\)",
+    "/ModDate\\s*\\([^)]*\\)",
+    "/ID\\s*\\[[^\\]]*\\]",
+    "\\b\\d+\\.\\d+\\s*(seconds|sec|s)\\b",
+    "took\\s+[0-9.]+",
+    "\\b\\d+\\.\\d+\\s*ms\\b"
+  ],
+  "ref_run": {
+    "command": [
+      "/home/ubuntu/mc-io-evidence/src-main/build-cpu/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--j",
+      "4",
+      "--seed",
+      "1"
+    ],
+    "cwd": "/home/ubuntu/mc51/tutorial",
+    "exit_code": 0,
+    "wall_seconds": 429.216,
+    "stdout_tail": "evidence/ab-j4/out_main_j4/corrected_micrographs.star\n Now generating logfile.pdf ... \n Done! Written: /home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/logfile.pdf\nread gain                          : 2.828 sec (117871 microsec/operation)\nread movie                         : 11.632 sec (484681 microsec/operation)\napply gain and initial sum         : 22.656 sec (944018 microsec/operation)\ndetect hot pixels                  : 0.737 sec (30747 microsec/operation)\nfix defects                        : 1.015 sec (42323 microsec/operation)\nglobal FFT                         : 84.584 sec (3524343 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 10.899 sec (454155 microsec/operation)\nglobal iFFT                        : 87.803 sec (3658461 microsec/operation)\nprepare patch                      : 45.408 sec (75680 microsec/operation)\nprep patch - clip (in thread)      : 3.997 sec (277 microsec/operation)\nprep patch - FFT (in thread)       : 64.72 sec (4495 microsec/operation)\npatch alignment                    : 8.77 sec (14617 microsec/operation)\nalign - prep weight                : 0.087 sec (139 microsec/operation)\nalign - make reference             : 1.09 sec (853 microsec/operation)\nalign - calc CCF (in thread)       : 2.365 sec (78 microsec/operation)\nalign - iFFT CCF (in thread)       : 9.631 sec (314 microsec/operation)\nalign - argmax CCF (in thread)     : 0.034 sec (1 microsec/operation)\nalign - shift in Fourier space     : 11.89 sec (9310 microsec/operation)\nfit polynomial                     : 0.03 sec (1264 microsec/operation)\ndose weighting                     : 142.594 sec (5941442 microsec/operation)\ndw - calc weight                   : 22.668 sec (944508 microsec/operation)\ndw - iFFT                          : 83.177 sec (3465722 microsec/operation)\nreal space interpolation           : 36.624 sec (1526006 microsec/operation)\nbinning                            : 0 sec (0 microsec/operation)\n",
+    "stderr_tail": ""
+  },
+  "test_run": {
+    "command": [
+      "/home/ubuntu/mc-io-evidence/src-pr90/build-cpu/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--j",
+      "4",
+      "--seed",
+      "1"
+    ],
+    "cwd": "/home/ubuntu/mc51/tutorial",
+    "exit_code": 0,
+    "wall_seconds": 394.881,
+    "stdout_tail": "osec/operation)\nread movie                         : 10.763 sec (448466 microsec/operation)\napply gain and initial sum         : 1.078 sec (44920 microsec/operation)\ndetect hot pixels                  : 0.745 sec (31051 microsec/operation)\nfix defects                        : 0.949 sec (39582 microsec/operation)\nglobal FFT                         : 82.957 sec (3456555 microsec/operation)\npower spectrum                     : 0 sec (0 microsec/operation)\nglobal alignment                   : 10.69 sec (445437 microsec/operation)\nglobal iFFT                        : 84.486 sec (3520285 microsec/operation)\nprepare patch                      : 45.424 sec (75708 microsec/operation)\nprep patch - clip (in thread)      : 4.032 sec (280 microsec/operation)\nprep patch - FFT (in thread)       : 74.094 sec (5146 microsec/operation)\npatch alignment                    : 8.624 sec (14373 microsec/operation)\nalign - prep weight                : 0.087 sec (140 microsec/operation)\nalign - make reference             : 1.059 sec (830 microsec/operation)\nalign - calc CCF (in thread)       : 2.4 sec (79 microsec/operation)\nalign - iFFT CCF (in thread)       : 9.913 sec (323 microsec/operation)\nalign - argmax CCF (in thread)     : 0.037 sec (1 microsec/operation)\nalign - shift in Fourier space     : 11.562 sec (9054 microsec/operation)\nfit polynomial                     : 0.03 sec (1269 microsec/operation)\ndose weighting                     : 139.745 sec (5822720 microsec/operation)\ndw - calc weight                   : 22.791 sec (949641 microsec/operation)\ndw - iFFT                          : 80.112 sec (3338028 microsec/operation)\nreal space interpolation           : 36.698 sec (1529086 microsec/operation)\nbinning                            : 0 sec (2 microsec/operation)\nwrite corrected image              : 1.832 sec (76371 microsec/operation)\nwrite star and shift plot          : 0.084 sec (3508 microsec/operation)\njoint star and logfile pdf         : 0.82 sec (820711 microsec/operation)\n",
+    "stderr_tail": ""
+  },
+  "tree_comparison": {
+    "files": [
+      {
+        "path": "Movies/20170629_00021_frameImage.log",
+        "ref_sha256": "51fc8210e26249e523c116cd71d330d453a284b84fe6d0c4eada39a5513675cd",
+        "test_sha256": "e9868896b9e101b90abadc7fb9669e1d335f11700ed0f2ebe7b3cae44c44684a",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4834,
+        "test_bytes": 4834
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage.mrc",
+        "ref_sha256": "6903530f2d4e6dbdace04e15360008d0be959cb7c9318494f5d0d86bd10db0b2",
+        "test_sha256": "6ae7d5c3ccefd1cf385bd19d96ec16b15048c0b9862fd279ba4aa89adebb0867",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage.star",
+        "ref_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+        "test_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00021_frameImage_shifts.eps",
+        "ref_sha256": "914f71e048220d9d1314c788b06812e44e613d89a35dc95de3fe6cf04e11714d",
+        "test_sha256": "0be8ba0cd37529502e5213b66f97af77ee09cbb9c8a3e01eed3f9adfba3ef7f5",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92305,
+        "test_bytes": 92305
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.log",
+        "ref_sha256": "d346fadf872a10aa9addc51abc92673b029604c50b876f07e16ce15d71cf11ef",
+        "test_sha256": "eea0a668b53dedb6417a11db78dbbc9b98b286736277af6ba75c08635dbce5ef",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4896,
+        "test_bytes": 4896
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.mrc",
+        "ref_sha256": "7b29b84805c7ba273535a9edd12309d8179662b689cf4f19e83e1bda39c1bc0b",
+        "test_sha256": "b3349676c6da7286fa2f790bf093b17b9129fb480f1727917a579e5fefd600c3",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage.star",
+        "ref_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+        "test_sha256": "d04211ec1a395d5f608456372eb5094eb3b75246c07df1bc28813c4797757835",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00022_frameImage_shifts.eps",
+        "ref_sha256": "633b6aa270f3924d91cf6110cec9f8701b23cb080dd49884fd9ff1f0b3956024",
+        "test_sha256": "d662e013859244b8eb9b64ceaf4a413b87c250868c5f46ec77f9a55ddeec10cf",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92303,
+        "test_bytes": 92303
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.log",
+        "ref_sha256": "5b1df5498a478634ffb17fc04542dcc67ba975e322e76430f363ade75a9b11cf",
+        "test_sha256": "f8d42cd0d7ce17e6f32b12b4cf8adebf084ea468091ff631861db687476e405b",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4885,
+        "test_bytes": 4885
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.mrc",
+        "ref_sha256": "a4f0027c330d2aae2735c3c392655552a48625301611215e4e7f3c869788edd3",
+        "test_sha256": "bb924978699f5368a4056ce393bfe0498ba3d4842bc279146220377b0d595f62",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage.star",
+        "ref_sha256": "965c232ced4d55c86a303d392130b4a8f410546699cf001a80d4351f6302e0a8",
+        "test_sha256": "965c232ced4d55c86a303d392130b4a8f410546699cf001a80d4351f6302e0a8",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00023_frameImage_shifts.eps",
+        "ref_sha256": "316f9670a2f296464070e2af94a43b289a6b2b98b5851e242b7a355ed9bf4fd8",
+        "test_sha256": "a8a7db9448c5382bd6d14a221c5d1cf2a9186001a04c7a3340ef81c0e7c6a7d9",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92291,
+        "test_bytes": 92291
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.log",
+        "ref_sha256": "9141bd3990ea1d863b11dce3c8d893c85592fd6f26f2963b9ecb21896d136ca4",
+        "test_sha256": "a0d00f768a9453503dda388dd314b00c61173aa140cbf7e7861fc71f18516faf",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4894,
+        "test_bytes": 4894
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.mrc",
+        "ref_sha256": "14e98a9875be1e6c4fd94fe609606061379d3e543a71dff8dac66956158c0728",
+        "test_sha256": "25277118635de44ea92b722c601d2fd988eb3cebc7b9c9c545519638f7d983ae",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage.star",
+        "ref_sha256": "e800d549a3b6d40ab38dedc34468eec9963a6a306ee4eedd47038aa1468c4c12",
+        "test_sha256": "e800d549a3b6d40ab38dedc34468eec9963a6a306ee4eedd47038aa1468c4c12",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00024_frameImage_shifts.eps",
+        "ref_sha256": "ea73035661d77a3feff63c9fba10e48e19c7542c4a83001b9742e1b85c09c403",
+        "test_sha256": "2236ac34f76f4352b049a7bbb6da819b514bab2dd204b88c5e4fc6d9e82fc7d7",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92309,
+        "test_bytes": 92309
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.log",
+        "ref_sha256": "230917e06c5a112a526287f838d0d8ff57f5550d814ab7501f37a52f72f427b6",
+        "test_sha256": "999c4621736500ed70d2f80e746deac2db3b74a7113253c9d3bd5e7ebe3119c2",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4886,
+        "test_bytes": 4886
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.mrc",
+        "ref_sha256": "65ee0e81602aeee273ae0a6f6078c72cbad83e39a46fb73cc65290148b1a2eab",
+        "test_sha256": "232b1ca904640af43f5bfc153dcca2eca27701ced674a9f93f009d5a1a8cbae7",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 2,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage.star",
+        "ref_sha256": "d1b8234829332820765a2ea145ce4ea7ab81807d5b042da40a257a5ee291dc55",
+        "test_sha256": "d1b8234829332820765a2ea145ce4ea7ab81807d5b042da40a257a5ee291dc55",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00025_frameImage_shifts.eps",
+        "ref_sha256": "972e4b28614c235c20f364d18e1dabd7ccf4faaf2c676787aaf6eca5f9608405",
+        "test_sha256": "a337bba0b90cd48781dbc35bf9dbe0a2b7008fd9b8aa6af9fe4ce429773e7c78",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92293,
+        "test_bytes": 92293
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.log",
+        "ref_sha256": "e011d7b9064d8247db970abcfe878cff262c233d2766a181d56e7a7d34eaf9d1",
+        "test_sha256": "2cc761d839bb6f9ba3dbb4d9d7468f3fcf5d2df23834461ea1c65051c9bd110d",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4851,
+        "test_bytes": 4851
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.mrc",
+        "ref_sha256": "42b51d8156257888c44e9b9ad089af2c95ae6c96961da110d38d3b1edefa27a2",
+        "test_sha256": "99396ebd23d9dc08ba7bc9ba47685248c2f5c650ba9e211df91801ad0f05ec7a",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 2,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage.star",
+        "ref_sha256": "397b2d7d381dcc911ba7992b0c38d3f769655d21c4eb3c6202b11df9d7cf6b82",
+        "test_sha256": "397b2d7d381dcc911ba7992b0c38d3f769655d21c4eb3c6202b11df9d7cf6b82",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00026_frameImage_shifts.eps",
+        "ref_sha256": "e34347005c7f2856a3e6b45c20d45d2d103a7ae50936c62d6181e6b83dfd3ccf",
+        "test_sha256": "6f4c27c09987847f33e1c39f12d22fcdabcb27dd7d74d04b5898b71ab3b799c7",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92316,
+        "test_bytes": 92316
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.log",
+        "ref_sha256": "9d30febf5314f8e2d587ff651e0f77b89d76b4f533e12a608392451f128d13d8",
+        "test_sha256": "f527960da08b8f40b339bf88950f85c5be88e29ff6c1ae8dab0f74fb0c630bbc",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4852,
+        "test_bytes": 4852
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.mrc",
+        "ref_sha256": "f958d32a03774e458491e68be98c12515dee678e523a9b727323a1747381dca0",
+        "test_sha256": "29b0e60c9164539493a255c5680572142fef1f0aa8502ff10ac52fdc241abbbe",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 1,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage.star",
+        "ref_sha256": "8b84e1a091120338295579c6b860d7f15b08b97cf87921909f531752e052671a",
+        "test_sha256": "8b84e1a091120338295579c6b860d7f15b08b97cf87921909f531752e052671a",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00027_frameImage_shifts.eps",
+        "ref_sha256": "b55856d0651346dd219e1e65a1e4a70ce860d4af1650d3c3880bf8ad22785898",
+        "test_sha256": "cd07215df0aafb0d1d1416ab10a4b068891a003b3743269e24118d2ea44eddb6",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92306,
+        "test_bytes": 92306
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.log",
+        "ref_sha256": "7fb7edf246c2fb0dd52eff08c9c4a6f6d1ea759c9fb8bd8f227f4be32e0e50e9",
+        "test_sha256": "9246e4ddba34bc59ba72974a5316c8b495d243a856acb35b97ba4c94c4b75833",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4843,
+        "test_bytes": 4843
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.mrc",
+        "ref_sha256": "4f84246497845621379520b5aaa1ca5458d8e31066db2cbd64bc3a514a0adc85",
+        "test_sha256": "0cb852b6f22df85980d793521af47278e4e8fd38039a45f7da4f7f9090a98714",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 2,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage.star",
+        "ref_sha256": "8649ab75767fea6623ebb044bd3ed9e81c1e4ba62295914473eb87109097844f",
+        "test_sha256": "8649ab75767fea6623ebb044bd3ed9e81c1e4ba62295914473eb87109097844f",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00028_frameImage_shifts.eps",
+        "ref_sha256": "2b3c921684ca497e6ddb4451e638d0dd1cc6472df83b9e1c71b4fd9cb024038f",
+        "test_sha256": "e5dcb46e9130c171ed353f0f2d5a23b69ac617a497339f883dfc1bcb31c9227f",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94697,
+        "test_bytes": 94697
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.log",
+        "ref_sha256": "1defefa3ce1d2f391cc2f3f948f647ae1aefe3b32234d78af471382cda318782",
+        "test_sha256": "241acb9dfdc3e6007def6d1a21a213434a4db9bc6725f7f65a02d6246a280283",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4889,
+        "test_bytes": 4889
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.mrc",
+        "ref_sha256": "d1430d6ff6ae9ea827d6de47b86018b8c57325b3856baccc20d4d3922b6cf00a",
+        "test_sha256": "db28eabb7393a87e96d49403e434b08094d2443ae5246679295c959e2345a0ca",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage.star",
+        "ref_sha256": "0c1f3260130b25bc38a36f80016f538193f1389a5485d8637758350e07a4622f",
+        "test_sha256": "0c1f3260130b25bc38a36f80016f538193f1389a5485d8637758350e07a4622f",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00029_frameImage_shifts.eps",
+        "ref_sha256": "87cea87d49a78ef794f5bcf344ec9c228c7cd63dacedf9bf3e771e84906861ed",
+        "test_sha256": "0c4cbc5eb4547a4594f8ad6b5e70cc152cd2f442913fe4b5f391970745645043",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92292,
+        "test_bytes": 92292
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.log",
+        "ref_sha256": "f55f5863c042f405bbbb658b6928a2361227398bed59fed12df7ce74b43c99a1",
+        "test_sha256": "df2442434a1e4722e65a72984cb98c1b342d8c7dcd7879af4d3bcf34914a8937",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4859,
+        "test_bytes": 4859
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.mrc",
+        "ref_sha256": "0854b9f1ed5926c9b033fd6742f90ec9498d3cd110a73b1294fe9f21a2a198f2",
+        "test_sha256": "4b025c9b7ea3d3d00df5ea459f9345e377565f4015692003e63072ff3dffa908",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage.star",
+        "ref_sha256": "74fe6e3406754171974c1206a38e9cd86fb9261de57aa499d36e807720c48a64",
+        "test_sha256": "74fe6e3406754171974c1206a38e9cd86fb9261de57aa499d36e807720c48a64",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00030_frameImage_shifts.eps",
+        "ref_sha256": "e766bdc937373d1825f8bda19855ce95245af20604d8871eeebb90000aa223ac",
+        "test_sha256": "c5e0fc221744ac31b3acd027d1592a6ebe662f870228c936f2b4dc0ac18c853c",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92281,
+        "test_bytes": 92281
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.log",
+        "ref_sha256": "c3cfa3b35739176d6ecc2a8af638bb104ef6b6eeaa32037df07e59fbe4b8bb3a",
+        "test_sha256": "a2f278ea2cf7e8474e06081bff1896ce0cd5c8924801bca3704a3beccc687809",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4860,
+        "test_bytes": 4860
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.mrc",
+        "ref_sha256": "42ee25b6972f3adf6c3ba5fb95fb6ce7f2b12d27be25143bac8a3f2235f1349c",
+        "test_sha256": "45be79661e2b6aca5994ba0d92e0402255a84d6f341e319a799ce65aee94f705",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 2,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage.star",
+        "ref_sha256": "9ecab1fc0bf746648994d4fde668b036fa3361a776ff1392068391208300e1e3",
+        "test_sha256": "9ecab1fc0bf746648994d4fde668b036fa3361a776ff1392068391208300e1e3",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00031_frameImage_shifts.eps",
+        "ref_sha256": "706296898efba834539a18f2e35f8fee47445dd777645d256a39d87273adaeba",
+        "test_sha256": "21b5f3f05ce4f45a4c5505504c5bfa31ae27cc7480653b0cee616fe7c6a7ce23",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92270,
+        "test_bytes": 92270
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.log",
+        "ref_sha256": "442bec8d572b5d587ca3749307749f4f860ed7d76369f3928e242c41ca66f544",
+        "test_sha256": "7e3d0233dbe1b823c8407298f53709d7a72a86bb37ae3371196af00f3840d275",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4838,
+        "test_bytes": 4838
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.mrc",
+        "ref_sha256": "e73350ffa6e17c11c105943c3a12413c16d19b6d08a1fb8fab403737517d82e4",
+        "test_sha256": "30b59aeb57c45e7ecfd8752126503e17091615c6faad2882e75800386ee7c08c",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage.star",
+        "ref_sha256": "dfae9c518fecf6c8ab6954d33dc72106ab81d8765a847307284f657882c29d4b",
+        "test_sha256": "dfae9c518fecf6c8ab6954d33dc72106ab81d8765a847307284f657882c29d4b",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00035_frameImage_shifts.eps",
+        "ref_sha256": "b36bf80c5679f602de1b909d3023046a7f385787d5a93a4dd2fcdaab830ad805",
+        "test_sha256": "fafd447ecc148fef909740be6c482200e920de73544b17037da74a2403296da9",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94740,
+        "test_bytes": 94740
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.log",
+        "ref_sha256": "101ed70fdc4f60a9ec2175e55dd028bdd0c65970dd0f0f8434fdc919ea690129",
+        "test_sha256": "73861cbe3138e122c80549ef256975b000ef41997654ae01db1a9603cff61def",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4883,
+        "test_bytes": 4883
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.mrc",
+        "ref_sha256": "0807639d36f96919483294ecb62346f818f2ef3f6da3091cca410f3b362066bf",
+        "test_sha256": "624f9aed3671a988b88611be2e7542216001b7c89dbe452c1c3784ffc27fd878",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage.star",
+        "ref_sha256": "97a9e9f25886c19ce6fcace29b4ae1ae24495ac5983422ae7c84a2dd990374da",
+        "test_sha256": "97a9e9f25886c19ce6fcace29b4ae1ae24495ac5983422ae7c84a2dd990374da",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00036_frameImage_shifts.eps",
+        "ref_sha256": "90c2a15e01b91cf44572678a0f7433833b783550b8d3e9b5a5def6b9984c2845",
+        "test_sha256": "bed44912170627566cd9d5e1bae6050eb926ad32f54058de9bef8b03f9726abd",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92237,
+        "test_bytes": 92237
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.log",
+        "ref_sha256": "c3671ce3b8b5dfb8be544619dd46df6b2ccc318b4a25b013403bfed6dba2d7f6",
+        "test_sha256": "6a24313081aad936d46feef57fd590ac1000c45fd219ebc268001d177a877a09",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4848,
+        "test_bytes": 4848
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.mrc",
+        "ref_sha256": "98e066666e6aa24212320f5032ee11dd4cf588f0cfcc8ed6074b80604cd69dfb",
+        "test_sha256": "7eb8ff9d2925b00c6f0500692bdefb3ae75b47ffec8a3adcca66119d89a93487",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 2,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage.star",
+        "ref_sha256": "b38116f730bd16226368467db2b22cb809d322bb403a0b681df2f0cb9c73fdd2",
+        "test_sha256": "b38116f730bd16226368467db2b22cb809d322bb403a0b681df2f0cb9c73fdd2",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00037_frameImage_shifts.eps",
+        "ref_sha256": "359b765fd5fe398e1cd729ba9bfd23222815628c08aa462a3b28476f0bec2801",
+        "test_sha256": "1251feff431221a3d2cce0e6898ff76a822c6a72be04bc0883a8e7c7755fa6ba",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92258,
+        "test_bytes": 92258
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.log",
+        "ref_sha256": "9f681ec41a543ecb8c79d40c7b09c07c5b750ebea76f3ded448bfe32220ce1d0",
+        "test_sha256": "a4a2a3f49f68d34df750d401e2ae856e9d9899d6644a201fa8d5da4644075f05",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4854,
+        "test_bytes": 4854
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.mrc",
+        "ref_sha256": "9368d02be8d81971051c1bc681a3945e15fae47c87301ecea0efe639edc99a6f",
+        "test_sha256": "c281dd265eb1023121a31ca45a82847458e78036c09c4b4b6a70ce374d621215",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 3,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage.star",
+        "ref_sha256": "e10c839d63d3312d673dff50bfbed484dfe1358c6fac7b8488bef6e9a32fe99c",
+        "test_sha256": "e10c839d63d3312d673dff50bfbed484dfe1358c6fac7b8488bef6e9a32fe99c",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00039_frameImage_shifts.eps",
+        "ref_sha256": "ce6b6c41ab0f5b2919cff3dd002b2e4c8992bb671c18f5737ff12bf8d148dbd1",
+        "test_sha256": "9698311e09e5ebb14b940e988a96ef6370d0b12d4568e08f9809055729b2bb07",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94707,
+        "test_bytes": 94707
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.log",
+        "ref_sha256": "6f0e774bff8eceb0fcad39267e37e587db6bdf065ce428768bd8c14181fad7f1",
+        "test_sha256": "fc4c896366d371aee81a4c939eada387e10177c599c9cab7083516aa2ce5d143",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4855,
+        "test_bytes": 4855
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.mrc",
+        "ref_sha256": "4f4711d83ac6ae8ea98cabe8c9a63e602321d636ef10508147b6f6659cec6c5a",
+        "test_sha256": "b58819dc1432207038bde3026f46f0a0f9442435f7407ae9e9274a409dac8038",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage.star",
+        "ref_sha256": "80e0eeae29bf21c9ea6b3c69c0289bc6577d76ecdddcaa8723c54493896fbce5",
+        "test_sha256": "80e0eeae29bf21c9ea6b3c69c0289bc6577d76ecdddcaa8723c54493896fbce5",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00040_frameImage_shifts.eps",
+        "ref_sha256": "b7e4b24536e2e7678ee3dd82430828bad885fd3834a9c3c1cd711ec5e9fb1200",
+        "test_sha256": "1bfe3029d8be5c07ac3cc569ffac88db20ce189ef5acc9ae23444d0fc95c9093",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92294,
+        "test_bytes": 92294
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.log",
+        "ref_sha256": "e6806b25e04c5ece2314f46fdece0c590a17acfd3b4911ae4693f4d6ecc540af",
+        "test_sha256": "c567a2699fcf3bc79c924bf288e24acc2d2ab15496369813cd86f9f0285b47ad",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4869,
+        "test_bytes": 4869
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.mrc",
+        "ref_sha256": "a707da599bfe9f9b1a5f9c5da18356a2bc7b24064b45ccdf15b974077e59d128",
+        "test_sha256": "b09854bef587e0dd6c4a88495270d28d8409a2964885c7aa5309c12cb0b9f43c",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage.star",
+        "ref_sha256": "653b73621c180db7b3cf93235ba1d3cdc5bd0f666ded03c70cb07b27db33a05c",
+        "test_sha256": "653b73621c180db7b3cf93235ba1d3cdc5bd0f666ded03c70cb07b27db33a05c",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00042_frameImage_shifts.eps",
+        "ref_sha256": "0929cbaa48c406edc863c313d80387b6b593c0f792f7eb542620453e74abae12",
+        "test_sha256": "c9085587d32c1b44944e7664ffb31197fd698d01e0501011d265ab9d6fc5a0ea",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92279,
+        "test_bytes": 92279
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.log",
+        "ref_sha256": "7cc30148d8377c5ce1cd82b9a50e82027301ea7042c46b46d0e63124ef419a06",
+        "test_sha256": "52d57bd86efce415ac8e3de68381d41c146ad20c05ae490887200f1e20d803ad",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4922,
+        "test_bytes": 4922
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.mrc",
+        "ref_sha256": "1ff893811bdf609c16af91da0990995a5033519fac8ce7ac9835567cfe48b156",
+        "test_sha256": "be5cccfa74ae8a105cbf2749ed6bb402aa034b5b3ae1db641d88c31f94b74348",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage.star",
+        "ref_sha256": "735ddbb7d422feb1c9b8f350200ec37302273f79fa66f917c91957f012b7e0f0",
+        "test_sha256": "735ddbb7d422feb1c9b8f350200ec37302273f79fa66f917c91957f012b7e0f0",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00043_frameImage_shifts.eps",
+        "ref_sha256": "c5d687f7c46b76ff42d8ce115868bacdb3afbef3d3b50401dda56feb01b3ae56",
+        "test_sha256": "3cf05293a45cf298d0ac317695b90b753a65b921edef2f1589ed411881aae129",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92278,
+        "test_bytes": 92278
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.log",
+        "ref_sha256": "c8666735bf07be170640c7e8f6efb896d6cd6ee28125e119e45ff350be64ee5c",
+        "test_sha256": "0056490030a7d147b692bf666ac85caedbdc9e6c1328e120b455817963e9f38a",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4843,
+        "test_bytes": 4843
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.mrc",
+        "ref_sha256": "2f38e93d90ca9e19d64f9cd5507a7b0ead705180629bf470189573acd7421c95",
+        "test_sha256": "16ebf6ea7d93a598b95f0c3f641d7caab0efccb430c6e7f4db941210096b25e1",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage.star",
+        "ref_sha256": "2794799c8f9885a7b0beaccf7b0066c73945d9176bc55b364456b8b2d64f2702",
+        "test_sha256": "2794799c8f9885a7b0beaccf7b0066c73945d9176bc55b364456b8b2d64f2702",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00044_frameImage_shifts.eps",
+        "ref_sha256": "44740a18411762c8b0c63fb3fadc5132e5b021ffd0359e6eeac1b290654e4a4f",
+        "test_sha256": "6429d99a3d73b1ea74e02bb806388aaf5dc62202ae1f409a680a33c9c816afe0",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94697,
+        "test_bytes": 94697
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.log",
+        "ref_sha256": "5a10c90d557dbc893c4b10e00f1ae410be496eede12f665dcf59e147e8ae7112",
+        "test_sha256": "33b1da5b9e857dc842f8660db45c81756de572304a0c1147ff3d1e7e1e13b0ec",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4821,
+        "test_bytes": 4821
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.mrc",
+        "ref_sha256": "3289943a594a069c50ecd422cbbd0463f3d0ec2dd7dc7c2bb9b9c7200e479011",
+        "test_sha256": "ce8f84a3bf029483f73c6ebc0b7118d8f97a6d07886ac18c26fc0249d6a34f0e",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage.star",
+        "ref_sha256": "1108b9f1d4c9796bcd3334e30988952837f1c317ead2518979f845c051d80d5d",
+        "test_sha256": "1108b9f1d4c9796bcd3334e30988952837f1c317ead2518979f845c051d80d5d",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00045_frameImage_shifts.eps",
+        "ref_sha256": "1ee6db6a2a60f7e1963221855b98b678b3416fda2555e0b48c6887d930abef69",
+        "test_sha256": "59f2dda46a3ef04189d02c3a426e8b10c757e50059b4540114e88bf663eecdc4",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94689,
+        "test_bytes": 94689
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.log",
+        "ref_sha256": "e9237a79bd7f3b631ccb2acbca8057419069d499cac043a9d52d7fe93ad89218",
+        "test_sha256": "79c5ece72ef51dfd8c9c830c1988de56b4b63ac19382697433beda16eff91a0f",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4819,
+        "test_bytes": 4819
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.mrc",
+        "ref_sha256": "dc4871a553bfb49b2a6a580a6ecb4d8607c5425330a272eb2e1175309e07ded8",
+        "test_sha256": "d840629dbe5995f35a5e49097be9bd3474c2cc707b42b8bfff99143af4a129e1",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage.star",
+        "ref_sha256": "3059fa3ccf335971b983de422dedd3d5d9cc70f4900b6d328cf9c1a6da7ddb5d",
+        "test_sha256": "3059fa3ccf335971b983de422dedd3d5d9cc70f4900b6d328cf9c1a6da7ddb5d",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00046_frameImage_shifts.eps",
+        "ref_sha256": "535e4ec3672405cedf7c28b964137868d6580e7af1a315f0ee9e478683fb8a15",
+        "test_sha256": "667161c1d082cad0506f67ce23d9d8c0124b479e04e482708d37d851b9606c8b",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 92340,
+        "test_bytes": 92340
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.log",
+        "ref_sha256": "bd862aa477fdf6f4aee0fcee14e636ffa9dca89c9924cdd63ffd60640e4b344e",
+        "test_sha256": "d3974aaa6264318fc09e13a61dd874e43a268e1275b4b2393b9b6cd95e342dac",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4847,
+        "test_bytes": 4847
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.mrc",
+        "ref_sha256": "5c35fed7ab415aa17466536e7d7d17496cce9646fffbb5155c94247e2f5321cc",
+        "test_sha256": "2fbb8fdae48ee5ca4eeafb54d1d55c749fa65804e8574bbca6c1e4deeed6d5c6",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage.star",
+        "ref_sha256": "a8d10192a7a986bfbf1efa11e377bb62201f6a52a85cd04f581598cd253875c6",
+        "test_sha256": "a8d10192a7a986bfbf1efa11e377bb62201f6a52a85cd04f581598cd253875c6",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00047_frameImage_shifts.eps",
+        "ref_sha256": "16d32e652e5757bc118b5b4933fdf7d2d8f2cf9b10d5dfbcd6ff6e7c902bf884",
+        "test_sha256": "d7e17567f38c1781641621c605ee942b9cc9ad0e6e29e0980a9c7554507d8943",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94712,
+        "test_bytes": 94712
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.log",
+        "ref_sha256": "7d172ffb06ac3b1a5429828153638add37c7fe8924d5bc5d2105bdb3f4af9e15",
+        "test_sha256": "a6ea026610d09dd8c94ecd3c49df60512d4e474dd60cb7d2581cbf977fe8e05f",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4846,
+        "test_bytes": 4846
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.mrc",
+        "ref_sha256": "aa2c32749f65fb8134b9c4e94c19668667ddd73ee3f261c22a736d533e62a97b",
+        "test_sha256": "dbc641a4101009b45142f3b5a0b65cc10ae5e3664c57dc84396986a7c967a424",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage.star",
+        "ref_sha256": "892f617c173e3ba0e5ad95b83205ebf58951f4fd82628902b73682bfe8245120",
+        "test_sha256": "892f617c173e3ba0e5ad95b83205ebf58951f4fd82628902b73682bfe8245120",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00048_frameImage_shifts.eps",
+        "ref_sha256": "b39ec2056ef637f049e90c28810ef85c4c71066426f03c8051e2ceb27c66a548",
+        "test_sha256": "ac9bd85311e1a617a1d46179352b48eaf9c499cc275b5f3d276f7cd3baa45917",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94692,
+        "test_bytes": 94692
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.log",
+        "ref_sha256": "529c513622825118c6f3052f89a3889861cdadc6668dafef584d78fae8002977",
+        "test_sha256": "74606a513da08cc8c2d0dc45f35ff1ec80f905eaa9a151601ca9be10e3f06d98",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 4851,
+        "test_bytes": 4851
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.mrc",
+        "ref_sha256": "c8e134efdb0aacd586fc741656105503628bfd35dafb927d41d31cd7cba463f8",
+        "test_sha256": "ba4cf417dd17ed933aa2124e698011019cc5732369b55d85a8e2b7a521505f4c",
+        "kind": "corrected_image",
+        "status": "PASS",
+        "pixels_compared": 14238980,
+        "pixel_identical": true,
+        "max_abs_pixel_error": 0.0,
+        "core_header_diff_bytes": 0,
+        "label_header_diff_bytes_raw": 4,
+        "normalized_label_diff_bytes": 0,
+        "header_normalization": "RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels"
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage.star",
+        "ref_sha256": "04972e269e61e712bbcddec9b4821cf28c741e4320d05c032352bfa99ca534ae",
+        "test_sha256": "04972e269e61e712bbcddec9b4821cf28c741e4320d05c032352bfa99ca534ae",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "Movies/20170629_00049_frameImage_shifts.eps",
+        "ref_sha256": "595d7d18cc1fe635d08df3ef0b690ea703af780710e30210d10ec6f329b1bc41",
+        "test_sha256": "f92ac0481a0a790f44016a6fd1d6c065522b54bf66910205c35cad02b63be468",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 94722,
+        "test_bytes": 94722
+      },
+      {
+        "path": "all_batches.pdf",
+        "ref_sha256": "810a0b5db9ed62293d2a21f7aa9d89783e713f48319e3b35fd9e9b69b74f15ae",
+        "test_sha256": "b1814f213768ee134423cbc19392623534076a47d3370d9352d5901d5d0f17da",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 401906,
+        "test_bytes": 401887,
+        "differing_line_count": 10842,
+        "differing_line_samples": [
+          {
+            "line": 7,
+            "ref": "x\ufffd\ufffd\ufffd]\ufffd.\ufffdq\ufffd\ufffd\ufffdW\ufffd]\ufffd\ufffd",
+            "test": "x\ufffd\ufffd\ufffd\u02ce.;r\ufffd\ufffd\ufffd\u00145skp\ufffd\ufffd\ufffd\u0005\ufffd\u00190"
+          },
+          {
+            "line": 8,
+            "ref": "~\u007f w\u0001\ufffd AraK\u0017\t\ufffd@\ufffd\ufffdG\ufffd\ufffd\ufffd%[\ufffd\ufffd\ufffd\u07c7\ufffdjU\ufffd\ufffd# 6\ufffd}\ufffd\ufffd\ufffd\ufffdn\ufffd\ufffd\ufffd\ufffd.\ufffd\ufffd\ufffd{x\ufffd\ufffd \ufffd\ufffd\u007f?\ufffd\ufffd\ufffd\ufffd7\ufffd\ufffd\u001f\ufffd\ufffd\u0016\ufffd\ufffd\ufffd~",
+            "test": "\u001b\ufffd@\ufffd"
+          },
+          {
+            "line": 9,
+            "ref": "\ufffd\u0011B\u001f\ufffd\u0627\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\u007f\ufffd\ufffd\ufffd\ufffd5Sz\ufffd\ufffd\ufffdK\ufffd\ufffd\ufffd\ufffd\ufffd(<\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd`\ufffd\ufffd\u0015\ufffd>:r}\ufffdfGgL\ufffd9\ufffd\ufffd9\ufffdkF",
+            "test": "\u0630\ufffdF\ufffdtZjao\ufffd\ufffd\u0017\ufffd~{3V\ufffd\b\ufffdYu\u001a\ufffd\u0004i\ufffd\u007fe$3\ufffdd~$#\ufffdQ\ufffd\ufffd"
+          },
+          {
+            "line": 10,
+            "ref": "M\ufffd\ufffd\ufffd\ufffd%\ufffdX\u06abW;\ufffdRy\ufffd\ufffd\ufffd\ufffd^Vp\ufffd#\ufffd\uab8bT\ufffdx\u0015\ufffd\ufffdTs{\ufffd]\u0017\ufffd\ufffd\ufffdJV\u0017\ufffd\ufffd\ufffdJ\ufffd.R\ufffdu\ufffd.\ufffd(\ufffd\u0015v]\ufffd\ufffd\ufffdkv",
+            "test": "^\ufffd=\ufffd\ufffd\ufffd\u07cf\ufffdo?\ufffdM\u007f\ufffd\ufffd?\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdk\ufffd\ufffd\ufffd:\ufffd\ufffd?\ufffd\ufffd?\ufffd\ufffd\u001a\ufffdg\b\ufffd\ufffd\ufffd\ufffdz\u007f\u0354\u07bf\ufffd\ufffd\u0012\ufffdc\ufffd\ufffd5"
+          },
+          {
+            "line": 11,
+            "ref": "\ufffd!\ufffd\u05d8~4\ufffd\u0011_\ufffd*#\ufffd:_}WFN\ufffd\ufffd\ufffd\ufffds^\ufffd_uWF\ufffd3\ufffd\ufffdUF.=\ufffd\u02ae\ufffd\\\ufffd|e\ufffd\ufffd\ufffdR\u007f\ufffd]\u0019\ufffd\ufffd\ufffd\ufffd\ufffdD\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdh\ufffd\u0015\ufffd6\ufffde\ufffdk\ufffd\ufffd(!\ufffd\u05f0\ufffd-a\ufffd\u05fe\ufffd\u0012{zu\ufffd\ufffd\ufffdjx\ufffd]\u0019%\ufffd\ufffdV\u0019\ufffd\ufffd\ufffd*\ufffd2J\u0019\ufffdU\ufffd2Jm\ufffdwe\ufffdV\ufffd+Ye\ufffd\ufffd",
+            "test": "\ufffd\u0198\ufffd}4\ufffd\ufffdj\u04ce\ufffd1_-\ue8f9\ufffdW\ufffdv\ufffd\ufffd\ufffd*u\u001f\ufffd)\ufffd\ufffd-\ufffdW\ufffd\u0007[\ufffd\ufffdu\u001b<\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdGSh\ufffd5v\ufffd)\ufffd\ufffd\ufffd\u054e\ufffdT^\ufffd\ufffd9\ufffd\ufffd\u0015\ufffd\ufffd\b\ufffd\ufffd\ufffd\"\ufffd:^\ufffd\ufffd\"\ufffd\ufffd^y\ufffdEj\ufffd\ufffd\ufffd\ufffdEj3\ufffd\u04ae\ufffd\ufffd\ufffdj"
+          },
+          {
+            "line": 12,
+            "ref": "\ufffdx\\\ufffd\ufffd\ufffd\ufffd\ufffd(\ufffd\ufffdW\u062d[f\ufffd\ufffdiuQC\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_\ufffd\ufffd\ufffdQ_}\ufffdEM-\ufffd\ufffd\ufffdE\ufffd%\ufffd\uab8bZ\ufffd|\u0015\ufffd\ufffdU\ufffd\ufffd\ufffd\ufffd\ufffd^_\u065e\ufffd\ufffd\ufffd_\ufffd8\ufffds|E\ufffd\ufffd:\ufffd|\ufffd]\u0017u\ufffd\ufffd",
+            "test": "\ufffd\ufffd4\ufffdx\ufffd]\u0017i\ufffd\ufffd\ufffd\ufffdGs\b\ufffd5\ufffd\u001f\ufffda\ufffd\u05f0\ufffd\u0231\ufffdW\u07d5\ufffdS\ufffdf\ufffd\ufffd\ufffd\ufffdW\u0755\ufffd\ufffd\u032fj\ufffd\ufffdK\ufffd\ufffd\ufffd+#\ufffd2_\ufffd*#\ufffd\ufffd_iWF\ue87e\ufffd=Q\ufffd#\ufffd\ufffd~\ufffd<Z|\u0005\ufffd\ufffdu\ufffd\ufffd6J\ufffd\ufffd5\ufffduK\ufffd\ufffdo\ufffd\u011e^\ufffd*\ufffd\ufffd\u001a^mWF\ufffdi\ufffd\ufffdUF)\ufffd\ufffd\u02ae\ufffdRFy\u0015\ufffd\ufffdR[z\ufffd]\u0019\ufffd\ufffd\ufffdJV\u0019\ufffdi\ufffd+"
+          }
+        ]
+      },
+      {
+        "path": "batch.pdf",
+        "ref_sha256": "90298c859433b282ac7f59f381fa4f9ede44ed0665946143877f3bd622f94404",
+        "test_sha256": "50cb2b2b0c73a5bfd619de6296d5ff594a0019f558ea96c947db2bcaeafb4ca8",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 402055,
+        "test_bytes": 402036,
+        "differing_line_count": 10836,
+        "differing_line_samples": [
+          {
+            "line": 7,
+            "ref": "x\ufffd\ufffd\ufffd]\ufffd.\ufffdq\ufffd\ufffd\ufffdW\ufffd]\ufffd\ufffd",
+            "test": "x\ufffd\ufffd\ufffd\u02ce.;r\ufffd\ufffd\ufffd\u00145skp\ufffd\ufffd\ufffd\u0005\ufffd\u00190"
+          },
+          {
+            "line": 8,
+            "ref": "~\u007f w\u0001\ufffd AraK\u0017\t\ufffd@\ufffd\ufffdG\ufffd\ufffd\ufffd%[\ufffd\ufffd\ufffd\u07c7\ufffdjU\ufffd\ufffd# 6\ufffd}\ufffd\ufffd\ufffd\ufffdn\ufffd\ufffd\ufffd\ufffd.\ufffd\ufffd\ufffd{x\ufffd\ufffd \ufffd\ufffd\u007f?\ufffd\ufffd\ufffd\ufffd7\ufffd\ufffd\u001f\ufffd\ufffd\u0016\ufffd\ufffd\ufffd~",
+            "test": "\u001b\ufffd@\ufffd"
+          },
+          {
+            "line": 9,
+            "ref": "\ufffd\u0011B\u001f\ufffd\u0627\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\u007f\ufffd\ufffd\ufffd\ufffd5Sz\ufffd\ufffd\ufffdK\ufffd\ufffd\ufffd\ufffd\ufffd(<\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd`\ufffd\ufffd\u0015\ufffd>:r}\ufffdfGgL\ufffd9\ufffd\ufffd9\ufffdkF",
+            "test": "\u0630\ufffdF\ufffdtZjao\ufffd\ufffd\u0017\ufffd~{3V\ufffd\b\ufffdYu\u001a\ufffd\u0004i\ufffd\u007fe$3\ufffdd~$#\ufffdQ\ufffd\ufffd"
+          },
+          {
+            "line": 10,
+            "ref": "M\ufffd\ufffd\ufffd\ufffd%\ufffdX\u06abW;\ufffdRy\ufffd\ufffd\ufffd\ufffd^Vp\ufffd#\ufffd\uab8bT\ufffdx\u0015\ufffd\ufffdTs{\ufffd]\u0017\ufffd\ufffd\ufffdJV\u0017\ufffd\ufffd\ufffdJ\ufffd.R\ufffdu\ufffd.\ufffd(\ufffd\u0015v]\ufffd\ufffd\ufffdkv",
+            "test": "^\ufffd=\ufffd\ufffd\ufffd\u07cf\ufffdo?\ufffdM\u007f\ufffd\ufffd?\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdk\ufffd\ufffd\ufffd:\ufffd\ufffd?\ufffd\ufffd?\ufffd\ufffd\u001a\ufffdg\b\ufffd\ufffd\ufffd\ufffdz\u007f\u0354\u07bf\ufffd\ufffd\u0012\ufffdc\ufffd\ufffd5"
+          },
+          {
+            "line": 11,
+            "ref": "\ufffd!\ufffd\u05d8~4\ufffd\u0011_\ufffd*#\ufffd:_}WFN\ufffd\ufffd\ufffd\ufffds^\ufffd_uWF\ufffd3\ufffd\ufffdUF.=\ufffd\u02ae\ufffd\\\ufffd|e\ufffd\ufffd\ufffdR\u007f\ufffd]\u0019\ufffd\ufffd\ufffd\ufffd\ufffdD\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdh\ufffd\u0015\ufffd6\ufffde\ufffdk\ufffd\ufffd(!\ufffd\u05f0\ufffd-a\ufffd\u05fe\ufffd\u0012{zu\ufffd\ufffd\ufffdjx\ufffd]\u0019%\ufffd\ufffdV\u0019\ufffd\ufffd\ufffd*\ufffd2J\u0019\ufffdU\ufffd2Jm\ufffdwe\ufffdV\ufffd+Ye\ufffd\ufffd",
+            "test": "\ufffd\u0198\ufffd}4\ufffd\ufffdj\u04ce\ufffd1_-\ue8f9\ufffdW\ufffdv\ufffd\ufffd\ufffd*u\u001f\ufffd)\ufffd\ufffd-\ufffdW\ufffd\u0007[\ufffd\ufffdu\u001b<\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdGSh\ufffd5v\ufffd)\ufffd\ufffd\ufffd\u054e\ufffdT^\ufffd\ufffd9\ufffd\ufffd\u0015\ufffd\ufffd\b\ufffd\ufffd\ufffd\"\ufffd:^\ufffd\ufffd\"\ufffd\ufffd^y\ufffdEj\ufffd\ufffd\ufffd\ufffdEj3\ufffd\u04ae\ufffd\ufffd\ufffdj"
+          },
+          {
+            "line": 12,
+            "ref": "\ufffdx\\\ufffd\ufffd\ufffd\ufffd\ufffd(\ufffd\ufffdW\u062d[f\ufffd\ufffdiuQC\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_\ufffd\ufffd\ufffdQ_}\ufffdEM-\ufffd\ufffd\ufffdE\ufffd%\ufffd\uab8bZ\ufffd|\u0015\ufffd\ufffdU\ufffd\ufffd\ufffd\ufffd\ufffd^_\u065e\ufffd\ufffd\ufffd_\ufffd8\ufffds|E\ufffd\ufffd:\ufffd|\ufffd]\u0017u\ufffd\ufffd",
+            "test": "\ufffd\ufffd4\ufffdx\ufffd]\u0017i\ufffd\ufffd\ufffd\ufffdGs\b\ufffd5\ufffd\u001f\ufffda\ufffd\u05f0\ufffd\u0231\ufffdW\u07d5\ufffdS\ufffdf\ufffd\ufffd\ufffd\ufffdW\u0755\ufffd\ufffd\u032fj\ufffd\ufffdK\ufffd\ufffd\ufffd+#\ufffd2_\ufffd*#\ufffd\ufffd_iWF\ue87e\ufffd=Q\ufffd#\ufffd\ufffd~\ufffd<Z|\u0005\ufffd\ufffdu\ufffd\ufffd6J\ufffd\ufffd5\ufffduK\ufffd\ufffdo\ufffd\u011e^\ufffd*\ufffd\ufffd\u001a^mWF\ufffdi\ufffd\ufffdUF)\ufffd\ufffd\u02ae\ufffdRFy\u0015\ufffd\ufffdR[z\ufffd]\u0019\ufffd\ufffd\ufffdJV\u0019\ufffdi\ufffd+"
+          }
+        ]
+      },
+      {
+        "path": "batch.pdf.lst",
+        "ref_sha256": "7b149a3ae6bd8632cbe6130159574f1dee4bf58761e1972d2a3847512a8c2927",
+        "test_sha256": "e285baf9f32b12fbdb3dfb82976a685e66cf91ea58003cb70f022ea930b8bb87",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 2160,
+        "test_bytes": 2160
+      },
+      {
+        "path": "corrected_micrographs.star",
+        "ref_sha256": "c1e0640bebcfce7472b470cdd1e74bfdfeedc23ce005ff1c45ab18f393d8db79",
+        "test_sha256": "756a28b31db8e0cea421813620af25c7156a698023019b58831fc5c2e368e85d",
+        "kind": "metadata",
+        "status": "PASS",
+        "field_comparison": {
+          "num_differences": 0,
+          "differences": []
+        },
+        "normalized_text_identical": true
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+        "ref_sha256": "aa8993dcbddc2fff74b81e5a205137d85121909c2338378f893bdfda51dbb901",
+        "test_sha256": "aa8993dcbddc2fff74b81e5a205137d85121909c2338378f893bdfda51dbb901",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 47069,
+        "test_bytes": 47069
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionLate.eps",
+        "ref_sha256": "bb354000d85b20b5c66320157f59213450bd3b02ffaa817f4c81d796d7bfa4d9",
+        "test_sha256": "bb354000d85b20b5c66320157f59213450bd3b02ffaa817f4c81d796d7bfa4d9",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 47057,
+        "test_bytes": 47057
+      },
+      {
+        "path": "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+        "ref_sha256": "0a89be2578e82002552f4b5d0fc6c5773f70cd87330114b3bbc163d796c2f909",
+        "test_sha256": "0a89be2578e82002552f4b5d0fc6c5773f70cd87330114b3bbc163d796c2f909",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 49816,
+        "test_bytes": 49816
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionEarly.eps",
+        "ref_sha256": "7132fe8a0cbcfe88fe6865794841893935115291b87f1ca36b9cf1aef021c75a",
+        "test_sha256": "7132fe8a0cbcfe88fe6865794841893935115291b87f1ca36b9cf1aef021c75a",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 54334,
+        "test_bytes": 54334
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionLate.eps",
+        "ref_sha256": "132f0a62fc9ca89c7763cea21f9a3b8da5841d573473a2f500dbd1623e2fbdfc",
+        "test_sha256": "132f0a62fc9ca89c7763cea21f9a3b8da5841d573473a2f500dbd1623e2fbdfc",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 56902,
+        "test_bytes": 56902
+      },
+      {
+        "path": "corrected_micrographs_hist_rlnAccumMotionTotal.eps",
+        "ref_sha256": "83c2a7eca2b868283417e55c159886d54ad42cde86bc4dab9451b1dbe25c66aa",
+        "test_sha256": "83c2a7eca2b868283417e55c159886d54ad42cde86bc4dab9451b1dbe25c66aa",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": true,
+        "identical_normalized": true,
+        "ref_bytes": 56208,
+        "test_bytes": 56208
+      },
+      {
+        "path": "header.pdf",
+        "ref_sha256": "94278f8aca672c589afb28823b0126205b929e91f906871ef3a4b8eb1c35a374",
+        "test_sha256": "ea5d474c3c78c526a7d63f71d0b694a5ecffb4600ba0411e15de42930a7f7d11",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 34263,
+        "test_bytes": 34263,
+        "differing_line_count": 1,
+        "differing_line_samples": [
+          {
+            "line": 998,
+            "ref": "<rdf:Description rdf:about=\"\" xmlns:xapMM='http://ns.adobe.com/xap/1.0/mm/' xapMM:DocumentID='uuid:351f6343-f2c0-11fc-0000-bcbf948b951b'/>",
+            "test": "<rdf:Description rdf:about=\"\" xmlns:xapMM='http://ns.adobe.com/xap/1.0/mm/' xapMM:DocumentID='uuid:208f9ac7-f2c1-11fc-0000-bcbf948b951b'/>"
+          }
+        ]
+      },
+      {
+        "path": "header.pdf.lst",
+        "ref_sha256": "c8aed1d845248ca29664e99163cfa6c9e8b2808bfe3457cc6210333775453971",
+        "test_sha256": "f7dd2c5b08fcf48315078aa13200a3bf58514cacff8f19243b3cbbb9844f24c6",
+        "kind": "auxiliary",
+        "status": "PASS",
+        "identical_bytes": false,
+        "identical_normalized": true,
+        "ref_bytes": 577,
+        "test_bytes": 577
+      },
+      {
+        "path": "logfile.pdf",
+        "ref_sha256": "54942e43365f9082cd4ff95090ee6848e724f675449d714913127166772789b1",
+        "test_sha256": "9db3b87aea2cc934f64ad2c798681028d44b7d42d7e5152e9cff211e9aecb91a",
+        "kind": "auxiliary",
+        "status": "FAIL",
+        "identical_bytes": false,
+        "identical_normalized": false,
+        "ref_bytes": 434267,
+        "test_bytes": 434248,
+        "differing_line_count": 11078,
+        "differing_line_samples": [
+          {
+            "line": 752,
+            "ref": "x\ufffd\ufffd\ufffd]\ufffd.\ufffdq\ufffd\ufffd\ufffdW\ufffd]\ufffd\ufffd",
+            "test": "x\ufffd\ufffd\ufffd\u02ce.;r\ufffd\ufffd\ufffd\u00145skp\ufffd\ufffd\ufffd\u0005\ufffd\u00190"
+          },
+          {
+            "line": 753,
+            "ref": "~\u007f w\u0001\ufffd AraK\u0017\t\ufffd@\ufffd\ufffdG\ufffd\ufffd\ufffd%[\ufffd\ufffd\ufffd\u07c7\ufffdjU\ufffd\ufffd# 6\ufffd}\ufffd\ufffd\ufffd\ufffdn\ufffd\ufffd\ufffd\ufffd.\ufffd\ufffd\ufffd{x\ufffd\ufffd \ufffd\ufffd\u007f?\ufffd\ufffd\ufffd\ufffd7\ufffd\ufffd\u001f\ufffd\ufffd\u0016\ufffd\ufffd\ufffd~",
+            "test": "\u001b\ufffd@\ufffd"
+          },
+          {
+            "line": 754,
+            "ref": "\ufffd\u0011B\u001f\ufffd\u0627\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdkx\ufffd!\ufffd\u007f\ufffd\ufffd\ufffd\ufffd5Sz\ufffd\ufffd\ufffdK\ufffd\ufffd\ufffd\ufffd\ufffd(<\u001ac\u03af\ufffd\ufffd\ufffd\u0014\ufffdM;\ufffd\ufffd|\ufffd\ufffd\ufffd\ufffd\ufffd_5\ufffd\ufffdR\ufffd\ufffd}\ufffd\ufffd\ufffd\ufffd\u00ce\ufffd\u0010_y\u001fl}\ufffd\ufffdm\ufffd`\ufffd\ufffd\u0015\ufffd>:r}\ufffdfGgL\ufffd9\ufffd\ufffd9\ufffdkF",
+            "test": "\u0630\ufffdF\ufffdtZjao\ufffd\ufffd\u0017\ufffd~{3V\ufffd\b\ufffdYu\u001a\ufffd\u0004i\ufffd\u007fe$3\ufffdd~$#\ufffdQ\ufffd\ufffd"
+          },
+          {
+            "line": 755,
+            "ref": "M\ufffd\ufffd\ufffd\ufffd%\ufffdX\u06abW;\ufffdRy\ufffd\ufffd\ufffd\ufffd^Vp\ufffd#\ufffd\uab8bT\ufffdx\u0015\ufffd\ufffdTs{\ufffd]\u0017\ufffd\ufffd\ufffdJV\u0017\ufffd\ufffd\ufffdJ\ufffd.R\ufffdu\ufffd.\ufffd(\ufffd\u0015v]\ufffd\ufffd\ufffdkv",
+            "test": "^\ufffd=\ufffd\ufffd\ufffd\u07cf\ufffdo?\ufffdM\u007f\ufffd\ufffd?\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdk\ufffd\ufffd\ufffd:\ufffd\ufffd?\ufffd\ufffd?\ufffd\ufffd\u001a\ufffdg\b\ufffd\ufffd\ufffd\ufffdz\u007f\u0354\u07bf\ufffd\ufffd\u0012\ufffdc\ufffd\ufffd5"
+          },
+          {
+            "line": 756,
+            "ref": "\ufffd!\ufffd\u05d8~4\ufffd\u0011_\ufffd*#\ufffd:_}WFN\ufffd\ufffd\ufffd\ufffds^\ufffd_uWF\ufffd3\ufffd\ufffdUF.=\ufffd\u02ae\ufffd\\\ufffd|e\ufffd\ufffd\ufffdR\u007f\ufffd]\u0019\ufffd\ufffd\ufffd\ufffd\ufffdD\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdh\ufffd\u0015\ufffd6\ufffde\ufffdk\ufffd\ufffd(!\ufffd\u05f0\ufffd-a\ufffd\u05fe\ufffd\u0012{zu\ufffd\ufffd\ufffdjx\ufffd]\u0019%\ufffd\ufffdV\u0019\ufffd\ufffd\ufffd*\ufffd2J\u0019\ufffdU\ufffd2Jm\ufffdwe\ufffdV\ufffd+Ye\ufffd\ufffd",
+            "test": "\ufffd\u0198\ufffd}4\ufffd\ufffdj\u04ce\ufffd1_-\ue8f9\ufffdW\ufffdv\ufffd\ufffd\ufffd*u\u001f\ufffd)\ufffd\ufffd-\ufffdW\ufffd\u0007[\ufffd\ufffdu\u001b<\ufffdk\u007f\u0172\ufffd\ufffd\\_\ufffd\ufffd\ufffd\u0019\ufffdk\ufffd}t\ufffd\ufffdGSh\ufffd5v\ufffd)\ufffd\ufffd\ufffd\u054e\ufffdT^\ufffd\ufffd9\ufffd\ufffd\u0015\ufffd\ufffd\b\ufffd\ufffd\ufffd\"\ufffd:^\ufffd\ufffd\"\ufffd\ufffd^y\ufffdEj\ufffd\ufffd\ufffd\ufffdEj3\ufffd\u04ae\ufffd\ufffd\ufffdj"
+          },
+          {
+            "line": 757,
+            "ref": "\ufffdx\\\ufffd\ufffd\ufffd\ufffd\ufffd(\ufffd\ufffdW\u062d[f\ufffd\ufffdiuQC\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd_\ufffd\ufffd\ufffdQ_}\ufffdEM-\ufffd\ufffd\ufffdE\ufffd%\ufffd\uab8bZ\ufffd|\u0015\ufffd\ufffdU\ufffd\ufffd\ufffd\ufffd\ufffd^_\u065e\ufffd\ufffd\ufffd_\ufffd8\ufffds|E\ufffd\ufffd:\ufffd|\ufffd]\u0017u\ufffd\ufffd",
+            "test": "\ufffd\ufffd4\ufffdx\ufffd]\u0017i\ufffd\ufffd\ufffd\ufffdGs\b\ufffd5\ufffd\u001f\ufffda\ufffd\u05f0\ufffd\u0231\ufffdW\u07d5\ufffdS\ufffdf\ufffd\ufffd\ufffd\ufffdW\u0755\ufffd\ufffd\u032fj\ufffd\ufffdK\ufffd\ufffd\ufffd+#\ufffd2_\ufffd*#\ufffd\ufffd_iWF\ue87e\ufffd=Q\ufffd#\ufffd\ufffd~\ufffd<Z|\u0005\ufffd\ufffdu\ufffd\ufffd6J\ufffd\ufffd5\ufffduK\ufffd\ufffdo\ufffd\u011e^\ufffd*\ufffd\ufffd\u001a^mWF\ufffdi\ufffd\ufffdUF)\ufffd\ufffd\u02ae\ufffdRFy\u0015\ufffd\ufffdR[z\ufffd]\u0019\ufffd\ufffd\ufffdJV\u0019\ufffdi\ufffd+"
+          }
+        ]
+      }
+    ]
+  },
+  "per_movie_exact_gate": [
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00021_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00021_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00021_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00021_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00021_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00021_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00022_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00022_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00022_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00022_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00022_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00022_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00023_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00023_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00023_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00023_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00023_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00023_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00024_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00024_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00024_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00024_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00024_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00024_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00025_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00025_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00025_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00025_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00025_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00025_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00026_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00026_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00026_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00026_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00026_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00026_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00027_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00027_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00027_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00027_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00027_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00027_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00028_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00028_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00028_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00028_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00028_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00028_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00029_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00029_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00029_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00029_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00029_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00029_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00030_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00030_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00030_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00030_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00030_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00030_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00031_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00031_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00031_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00031_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00031_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00031_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00035_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00035_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00035_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00035_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00035_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00035_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00036_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00036_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00036_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00036_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00036_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00036_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00037_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00037_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00037_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00037_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00037_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00037_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00039_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00039_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00039_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00039_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00039_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00039_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00040_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00040_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00040_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00040_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00040_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00040_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00042_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00042_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00042_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00042_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00042_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00042_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00043_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00043_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00043_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00043_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00043_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00043_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00044_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00044_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00044_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00044_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00044_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00044_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00045_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00045_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00045_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00045_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00045_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00045_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00046_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00046_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00046_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00046_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00046_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00046_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00047_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00047_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00047_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00047_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00047_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00047_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00048_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00048_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00048_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00048_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00048_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00048_frameImage",
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/home/ubuntu/.mc-venv/bin/python3",
+        "/home/ubuntu/mc-io-evidence/src-pr90/tools/compare_motioncorr.py",
+        "--ref-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00049_frameImage.mrc",
+        "--test-mrc",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00049_frameImage.mrc",
+        "--ref-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_main_j4/Movies/20170629_00049_frameImage.star",
+        "--test-star",
+        "/home/ubuntu/mc-io-evidence/ab-j4/out_pr90_j4/Movies/20170629_00049_frameImage.star",
+        "--gate",
+        "exact",
+        "--require-complete-coverage",
+        "--json-out",
+        "/home/ubuntu/mc-io-evidence/ab-j4/cmp_pr90_j4_20170629_00049_frameImage.json"
+      ],
+      "exit_code": 0,
+      "overall_status": "PASS",
+      "coverage_complete": true,
+      "stderr_tail": "",
+      "movie": "20170629_00049_frameImage",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "victim": "Movies/20170629_00021_frameImage.mrc",
+    "missing": {
+      "detected": true,
+      "failing_paths": [
+        "Movies/20170629_00021_frameImage.log",
+        "Movies/20170629_00021_frameImage.mrc",
+        "Movies/20170629_00021_frameImage_shifts.eps",
+        "Movies/20170629_00022_frameImage.log",
+        "Movies/20170629_00022_frameImage_shifts.eps"
+      ],
+      "first_reason": null
+    },
+    "pixel": {
+      "detected": true,
+      "failing_paths": [
+        "Movies/20170629_00021_frameImage.log",
+        "Movies/20170629_00021_frameImage.mrc",
+        "Movies/20170629_00021_frameImage_shifts.eps",
+        "Movies/20170629_00022_frameImage.log",
+        "Movies/20170629_00022_frameImage_shifts.eps"
+      ],
+      "first_reason": null
+    },
+    "header": {
+      "detected": true,
+      "failing_paths": [
+        "Movies/20170629_00021_frameImage.log",
+        "Movies/20170629_00021_frameImage.mrc",
+        "Movies/20170629_00021_frameImage_shifts.eps",
+        "Movies/20170629_00022_frameImage.log",
+        "Movies/20170629_00022_frameImage_shifts.eps"
+      ],
+      "first_reason": null
+    },
+    "all_detected": true
+  },
+  "summary": {
+    "artifacts_total": 109,
+    "artifacts_pass": 105,
+    "artifacts_fail": 4,
+    "corrected_images_compared": 24,
+    "corrected_images_pass": 24,
+    "total_pixels_compared": 341735520,
+    "star_files_compared": 25,
+    "auxiliary_compared": 60,
+    "auxiliary_fail": 4,
+    "per_movie_exact_gate_pass": 24,
+    "per_movie_exact_gate_total": 24,
+    "controls_all_detected": true
+  },
+  "overall_graded": "PASS",
+  "overall_auxiliary": "FAIL",
+  "overall": "FAIL"
+}

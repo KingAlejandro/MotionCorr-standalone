@@ -502,6 +502,23 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 		fwrite(header, MRCSIZE, 1, fimg);
 	freeMemory(header, sizeof(MRChead));
 
+	// When the file type already matches the in-memory type, castPage2Datatype
+	// is a straight memcpy into a scratch buffer that is then written and
+	// freed. Write from the array instead: same bytes, without allocating and
+	// first-touching a second full-size image per output file.
+	const bool write_in_place = (output_type == Float && typeid(T) == typeid(float));
+
+	if (write_in_place && NSIZE(data) == 1 && mode == WRITE_OVERWRITE)
+	{
+		fwrite(MULTIDIM_ARRAY(data), datasize, 1, fimg);
+
+		// Unlock the file
+		fl.l_type = F_UNLCK;
+		fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
+
+		return(0);
+	}
+
 	//write only once, ignore select_img
 	char* fdata = (char*)askMemory(datasize);
 	//think about writing in several chunks

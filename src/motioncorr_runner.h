@@ -34,6 +34,8 @@
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
 
+class EERRenderer;
+
 #ifdef _CUDA_ENABLED
 #include <cufft.h>
 #include "src/acc/cuda/cuda_movie_session.h"
@@ -132,6 +134,26 @@ public:
 
 	// Gain reference file
 	FileName fn_gain_reference;
+
+	// The gain reference is fixed for a whole run (prepareGainReference resolves
+	// fn_gain_reference once, before the movie loop), so it is read from disk on
+	// the first movie and reused afterwards. Keyed on the geometry as well as the
+	// path: a movie of different dimensions, or a different EER upsampling, must
+	// miss and reload rather than silently reuse a wrongly sized array.
+	// A member rather than a file-static: the movie loop is serial, so this needs
+	// no synchronisation, and that reasoning stays checkable.
+	Image<float> gain_cache;
+	FileName gain_cache_name;
+	int gain_cache_nx = 0, gain_cache_ny = 0;
+	bool gain_cache_is_eer = false;
+	int gain_cache_eer_upsampling = 0;
+	bool gain_cache_filled = false;
+
+	// Returns the gain for this movie, reading it only on a cache miss.
+	// Const so the read-only invariant is enforced by the compiler: callers must
+	// not mutate shared state that every later movie will reuse.
+	const MultidimArray<float>& gainReferenceFor(bool is_eer, EERRenderer &renderer,
+	                                             int nx, int ny);
 	int gain_rotation, gain_flip;
 
 	// Defect file

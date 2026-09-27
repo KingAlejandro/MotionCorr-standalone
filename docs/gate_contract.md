@@ -25,10 +25,15 @@ questions, and the second was named in a way that implied the fourth.
 |:--|:--|:--|:--|:--|:--|
 | **A. CPU regression** | Does this build reproduce the recorded standalone CPU output byte for byte? | Committed standalone CPU output, same platform | `--gate exact` | **Yes** | #4 / #58 |
 | **B. Backend CPU agreement** | How far does a new backend sit from the CPU reference, in pixel units? | Fixed standalone CPU `--j 1` output | `--gate relaxed` | **Yes**, as a diagnostic | #36 / #58 |
-| **C. Motion truth** | Is known injected motion recovered, globally and in the local field? | Synthetic ground truth | reported, never thresholded | **No** | #59 |
+| **C. Motion truth** | Is known injected motion recovered, globally and in the local field? | Synthetic ground truth | `tools/run_known_motion_gates.py`; comparator reports truth separately | **Yes**, for declared gate-role fixtures in the separate launcher | #59 / #63 / #79 |
 | **D. Scientific outcome** | Is recoverable cryo-EM signal preserved? | Downstream CTF / FSC / relative B-factor | not implemented | **No** | #61 |
 
 Three consequences, which must accompany any reported result:
+
+Motion-truth enforcement belongs to the separate known-motion launcher, not
+`compare_motioncorr.py`. Gate-role fixtures enforce recovery, declared invariance and
+applicable applied-image witness checks. Characterization failures stay visible without
+becoming a claim that noisy motion was recovered.
 
 - **Tier B is not Tier D.** Passing B does not establish scientific equivalence; failing B does not
   establish signal loss. B measures distance from one particular CPU implementation on one dataset.

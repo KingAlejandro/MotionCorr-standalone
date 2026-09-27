@@ -7,6 +7,14 @@
 - Status: approved for implementation by the integrating agent under that authorization. Independent exact-candidate review remains required.
 - Milestone: integrated **experimental** native CUDA candidate; wider support requires the declared unrun cases.
 
+## Experimental milestone review, 27 September 2026
+
+The reviewed executable from `2830463` passes 24/24 exact native-CUDA tutorial comparisons against `0c7d68f`, four declared CUDA motion-truth gate cases and six injected wrapper upload controls. CPU runner controls and CPU/CUDA CI are recorded separately. Documentation-only follow-ups do not change that executable. This supports the experimental core milestone, not full conformance to this ADR.
+
+The noisy characterization still fails motion accuracy. Applied-image witnesses are evaluated only for the three defect-free fixtures; the real-scale and noisy fixtures skip that raw-image witness because preprocessing changes their inputs.
+
+Full ADR conformance remains incomplete. CPU-raster tie selection (#70), optional profiling (#74), integrated-candidate repeat/batch/shard/resume equality on all 24 movies, the full GPU option matrix, paired performance/peak-memory measurements and independent-collection scientific validation (#73) remain separate work. Historical CPU/RELION Gate 2 failures are not converted to passes.
+
 ## 1. Scope and invariants
 
 Fix demonstrated metadata, failure, RNG-cache and output-ordering faults. Repair validation verdicts. Preserve native CUDA residency and simplify only proven redundant state/lifetimes. Keep FFT engines, weighting formulas, interpolation precision, normal reduction order, and numerical defaults. Explicit correctness exceptions are Gaussian cache reset, late-binning sum order, original-pixel exported motion units and CPU-order tied-peak selection. Unaffected outputs must remain exact.

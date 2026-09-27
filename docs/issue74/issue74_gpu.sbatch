@@ -241,16 +241,34 @@ kmg() { # kmg <tag> <binary> <prof> <extra args...>
           --outdir "$E/kmg-$tag" --json "$E/kmg-$tag.json" "$@" ) \
         > "$E/kmg-$tag.log" 2>&1
 }
-gate "known-motion gates, GPU, profiling ON  (global/local/DW/real-scale)" \
-    kmg cand-on "$CAND_BIN" "" --gpu 0
-gate "known-motion gates, GPU, profiling OFF (global/local/DW/real-scale)" \
-    kmg cand-off "$CAND_BIN" "0" --gpu 0
-gate "known-motion gates, GPU, baseline binary" \
-    kmg base "$BASE_BIN" "" --gpu 0
-# No --gpu: backend_evidence() must REJECT any run that shows CUDA markers, so a
-# pass here is the proof that the witness is not satisfiable by a CPU run.
-gate "known-motion gates, CPU control (masquerade rejection)" \
-    kmg cpu-control "$CAND_BIN" "0"
+# Two different questions are deliberately kept apart here.
+#
+#   (a) BACKEND WITNESS - did this actually execute on CUDA? Judged only from
+#       backend_evidence in the JSON, by check_backend_witness.py.
+#   (b) ESTIMATOR ACCURACY - the aggregate gate verdict. Reported, never used to
+#       answer (a). Historical CPU accuracy failures remain failures and are not
+#       this issue's to hide or to fix, so grading the CPU masquerade control on
+#       the aggregate exit status would be wrong in both directions.
+WIT="$CAND/docs/issue74/check_backend_witness.py"
+
+for arm in "cand-on:$CAND_BIN:" "cand-off:$CAND_BIN:0" "base:$BASE_BIN:"; do
+    tag=${arm%%:*}; rest=${arm#*:}; bin=${rest%%:*}; prof=${rest#*:}
+    kmg "$tag" "$bin" "$prof" --gpu 0
+    rc=$?
+    echo "known-motion aggregate exit for $tag: $rc (accuracy + gates; NOT the backend verdict)"
+    record INFO "known-motion aggregate (accuracy) $tag: exit=$rc"
+    gate "CUDA execution witness, known-motion gates, $tag" \
+        python3 "$WIT" --json "$E/kmg-$tag.json" --expect cuda \
+            --report "$E/witness-$tag.txt"
+done
+
+# No --gpu: backend_evidence() must REJECT any run that shows a CUDA marker.
+# A pass here is what makes the marker a witness rather than a printed string.
+kmg cpu-control "$CAND_BIN" "0"
+echo "known-motion aggregate exit for cpu-control: $? (accuracy; NOT the backend verdict)"
+gate "CPU masquerade rejection (no CUDA marker on a CPU run)" \
+    python3 "$WIT" --json "$E/kmg-cpu-control.json" --expect cpu \
+        --report "$E/witness-cpu-control.txt"
 
 echo "=============== 8. paired interleaved timing (ABBA x3) ==============="
 # One binary, two environments. Blocks are ABBA so that linear drift in node

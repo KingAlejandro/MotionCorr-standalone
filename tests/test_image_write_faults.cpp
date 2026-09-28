@@ -22,6 +22,7 @@
 
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <csignal>
 #include <cstdio>
 #include <iostream>
@@ -174,25 +175,61 @@ int main()
         check(!negSmall.threw, "negative control (small, no limit) threw: " + negSmall.message);
         check(negSmall.size == SMALL_BYTES, "negative control (small) wrote the wrong size");
 
-        // ---- 5. Destructor safety --------------------------------------
-        // A handler whose stream cannot be flushed must be destroyed quietly.
-        // Reaching the line after this block is the whole assertion: the old
-        // destructor called REPORT_ERROR here, and a throw from a noexcept
-        // destructor is std::terminate, so this test binary would abort.
+        // ---- 5. Explicit close reports, destructor stays quiet ------------
+        // Paired, so neither half can pass vacuously. Both halves buffer the
+        // same 3000 bytes under the same 1536-byte limit -- below the stdio
+        // buffer, so nothing reaches the fd and the flush must fail.
+        //
+        // 5a proves those conditions really do produce an error, which is what
+        // makes 5b meaningful: 5b then destroys such a handler and must neither
+        // throw nor terminate. Without 5a, 5b would pass just as happily if the
+        // flush had quietly succeeded.
         {
             const std::string d_path = dir + "/dtor.mrc";
+            const std::vector<char> junk(3000, 'x');
+
+            // 5a: the same fault, reported through the explicit close.
+            remove(d_path.c_str());
+            setFileSizeLimit(1536);
+            bool explicit_close_threw = false;
+            std::string explicit_message;
+            {
+                fImageHandler h;
+                h.openFile(d_path, WRITE_OVERWRITE);
+                check(fwrite(junk.data(), junk.size(), 1, h.fimg) == 1,
+                      "the buffered write itself must succeed, or 5a is testing the "
+                      "wrong thing");
+                try {
+                    h.closeFile(d_path);
+                } catch (RelionError &e) {
+                    explicit_close_threw = true;
+                    explicit_message = e.msg;
+                }
+            }
+            setFileSizeLimit(RLIM_INFINITY);
+            check(explicit_close_threw,
+                  "an explicit close over an unflushable stream must report the failure");
+            check(explicit_message.find(d_path) != std::string::npos,
+                  "the close failure must name the file, got: " + explicit_message);
+            check(fileSize(d_path) >= 0 && fileSize(d_path) < 3000,
+                  "the flush was not actually prevented, so 5a and 5b prove nothing");
+
+            // 5b: identical conditions, but left to the destructor. Reaching the
+            // line after this block is the assertion -- the old destructor called
+            // REPORT_ERROR here, and a throw from a noexcept destructor is
+            // std::terminate, so this binary would abort instead.
             remove(d_path.c_str());
             setFileSizeLimit(1536);
             {
                 fImageHandler h;
                 h.openFile(d_path, WRITE_OVERWRITE);
-                const std::vector<char> junk(1400, 'x');
                 fwrite(junk.data(), junk.size(), 1, h.fimg);
                 // h goes out of scope here with unflushable buffered bytes.
             }
             setFileSizeLimit(RLIM_INFINITY);
             remove(d_path.c_str());
-            std::cout << "  destructor with an unflushable stream did not terminate" << std::endl;
+            std::cout << "  explicit close reported it; the destructor did not terminate"
+                      << std::endl;
         }
     } catch (RelionError &e) {
         setFileSizeLimit(RLIM_INFINITY);

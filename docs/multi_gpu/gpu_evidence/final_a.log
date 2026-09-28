@@ -1,0 +1,264 @@
++ echo '=== P0. PREFLIGHT ==='
+=== P0. PREFLIGHT ===
++ date -Is
+2026-09-28T06:47:23+00:00
++ hostname
+4-gpu-vm
+++ nvidia-smi --query-compute-apps=pid --format=csv,noheader
+++ grep -c .
++ '[' 0 -eq 0 ']'
++ nvidia-smi --query-gpu=index,uuid,memory.used --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
++ cat /proc/loadavg
+1.49 1.21 1.43 2/2738 1205397
++ grep Cpus_allowed_list /proc/self/status
+Cpus_allowed_list:	0-123
++ numactl --hardware
++ sed -n '1,2p;5,6p'
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61
+node 1 cpus: 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123
+node 1 size: 221732 MB
++ cat /home/alex/mc-i53-gpu/final_provenance.txt
+final_head=9a1f525c2f580eab93cbc61dd3920bcc0d445540
+prev_head_of_serial_baseline=3a1115e34f56a975d980df1e341889d41434e221
+base=4c952b3f54479653512c4d208e09c9a8c02f3726
+staged_via=git archive of committed tree, COPYFILE_DISABLE=1
+porcelain:
+
+[end]
++ sha256sum /home/alex/MotionCorr-standalone/relion30_tutorial/movies.star /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041  /home/alex/MotionCorr-standalone/relion30_tutorial/movies.star
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
++ cd /home/alex/MotionCorr-standalone/relion30_tutorial/Movies
+++ sha256sum -c SHA256SUMS.txt
+++ grep -c ': OK$'
++ echo fixture_ok=25
+fixture_ok=25
++ echo '=== P1. BUILD FINAL SOURCE ==='
+=== P1. BUILD FINAL SOURCE ===
++ export PATH=/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ PATH=/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ taskset -c 96-103 cmake -S /home/alex/mc-i53-gpu/src-final -B /home/alex/mc-i53-gpu/build-final -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python
++ taskset -c 96-103 cmake --build /home/alex/mc-i53-gpu/build-final -j 8 --target motioncorr
++ echo BUILD_FINAL_RC=0
+BUILD_FINAL_RC=0
++ sha256sum /home/alex/mc-i53-gpu/build-final/motioncorr /home/alex/mc-i53-gpu/build-head/motioncorr
+d4e3afb878eb847ac5ff16c73bfee5295002c126443fa37b663f7174f8d9d258  /home/alex/mc-i53-gpu/build-final/motioncorr
+7e71c66d226756ccc90db757426ce80cc18615f760dc50acb1fd607e1d70111f  /home/alex/mc-i53-gpu/build-head/motioncorr
++++ sha256sum /home/alex/mc-i53-gpu/build-final/motioncorr
++++ cut '-d ' -f1
++++ sha256sum /home/alex/mc-i53-gpu/build-head/motioncorr
++++ cut '-d ' -f1
+++ '[' d4e3afb878eb847ac5ff16c73bfee5295002c126443fa37b663f7174f8d9d258 = 7e71c66d226756ccc90db757426ce80cc18615f760dc50acb1fd607e1d70111f ']'
+++ echo 0
++ echo BINARY_UNCHANGED=0
+BINARY_UNCHANGED=0
+++ strings /home/alex/mc-i53-gpu/build-head/motioncorr
+++ grep -c src-head
++ echo embedded_path_strings_head=53
+embedded_path_strings_head=53
+++ strings /home/alex/mc-i53-gpu/build-final/motioncorr
+++ grep -c src-final
++ echo embedded_path_strings_final=53
+embedded_path_strings_final=53
+++ stat -c%s /home/alex/mc-i53-gpu/build-head/motioncorr
+++ stat -c%s /home/alex/mc-i53-gpu/build-final/motioncorr
++ echo 'size_head=2659056 size_final=2659056'
+size_head=2659056 size_final=2659056
++ cd /home/alex/mc-i53-gpu/run
++ '[' -d serial ']'
++ '[' '!' -d serial_oldsrc ']'
++ mv serial serial_oldsrc
+++ find serial_oldsrc -name '*.mrc' '!' -name '*_PS.mrc' '!' -name gain.mrc
+++ wc -l
++ echo 'old_source_serial_mrc=24  (source 3a1115e, retained and labelled)'
+old_source_serial_mrc=24  (source 3a1115e, retained and labelled)
++ echo '=== A1. FRESH SERIAL BASELINE ON FINAL BINARY ==='
+=== A1. FRESH SERIAL BASELINE ON FINAL BINARY ===
++ rm -rf serialF
++ env CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 taskset -c 96-111 /home/alex/mc-i53-gpu/build-final/motioncorr --i movies.star --o serialF/ --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
++ echo SERIALF_RC=0
+SERIALF_RC=0
++ grep -m1 'Using CUDA acceleration' serialF.log
+++ find serialF -name '*.mrc' '!' -name '*_PS.mrc' '!' -name gain.mrc
+++ wc -l
++ echo serialF_mrc=24
+serialF_mrc=24
+++ wc -l
+++ grep -l 'CUDA Global Alignment Profile' serialF/Movies/20170629_00021_frameImage.log serialF/Movies/20170629_00022_frameImage.log serialF/Movies/20170629_00023_frameImage.log serialF/Movies/20170629_00024_frameImage.log serialF/Movies/20170629_00025_frameImage.log serialF/Movies/20170629_00026_frameImage.log serialF/Movies/20170629_00027_frameImage.log serialF/Movies/20170629_00028_frameImage.log serialF/Movies/20170629_00029_frameImage.log serialF/Movies/20170629_00030_frameImage.log serialF/Movies/20170629_00031_frameImage.log serialF/Movies/20170629_00035_frameImage.log serialF/Movies/20170629_00036_frameImage.log serialF/Movies/20170629_00037_frameImage.log serialF/Movies/20170629_00039_frameImage.log serialF/Movies/20170629_00040_frameImage.log serialF/Movies/20170629_00042_frameImage.log serialF/Movies/20170629_00043_frameImage.log serialF/Movies/20170629_00044_frameImage.log serialF/Movies/20170629_00045_frameImage.log serialF/Movies/20170629_00046_frameImage.log serialF/Movies/20170629_00047_frameImage.log serialF/Movies/20170629_00048_frameImage.log serialF/Movies/20170629_00049_frameImage.log
++ echo serialF_cuda_stage_logs=0
+serialF_cuda_stage_logs=0
++ echo '=== A1b. WITNESSED SINGLE-WORKER SERIAL (launcher-inertness control) ==='
+=== A1b. WITNESSED SINGLE-WORKER SERIAL (launcher-inertness control) ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/run_multi_gpu.py --star movies.star --out serial1 --binary /home/alex/mc-i53-gpu/build-final/motioncorr --devices GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 --cpus 96-111 -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
+TOTAL	24
+serial1/shards/shard_1way_0.star	24
+manifest	serial1/shards/shard_manifest.json
+{
+  "n_workers": 1,
+  "wall_seconds": 37.206,
+  "returncodes": [
+    0
+  ],
+  "verdict": "PASS"
+}
++ echo SERIAL1_RC=0
+SERIAL1_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''serial1/status.json'\''));w=d['\''gpu_witness'\'']
+print('\''S1_VERDICT=%s'\''%d['\''verdict'\'']);print('\''S1_WITNESS_OK=%s'\''%w['\''all_pids_witnessed_on_intended_distinct_devices'\''])
+print('\''S1_DEVICES=%d'\''%w['\''distinct_devices_witnessed'\'']);print('\''S1_UNWITNESSED=%s'\''%w['\''unwitnessed_pids'\''])
+print('\''S1_MASKS=%s'\''%d['\''cpu_masks'\''])
+for k,v in w['\''witnessed'\''].items(): print('\''  pid'\'',k,'\''->'\'',v)'
+S1_VERDICT=PASS
+S1_WITNESS_OK=True
+S1_DEVICES=1
+S1_UNWITNESSED=[]
+S1_MASKS=['96-111']
+  pid 1210768 -> ['GPU-eddb42fe-4f9a-adde-76d3-b924e14add54']
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialF --test serial1/w0 --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest serial1/shards/shard_manifest.json --out exact_serial1 --python /home/alex/mc-env/bin/python
+  FAIL 20170629_00021_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00022_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00023_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00024_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00025_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00026_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00027_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00028_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00029_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00030_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00031_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00035_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00036_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00037_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00039_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00040_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00042_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00043_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00044_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00045_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00046_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00047_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00048_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00049_frameImage FAIL pixel_identical= False
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 0,
+  "failed": 24,
+  "verdict": "FAIL"
+}
++ echo COMPARE_SERIAL1_RC=1
+COMPARE_SERIAL1_RC=1
++ echo '=== A2. SHARDED 2 WORKERS, DISJOINT MASKS ==='
+=== A2. SHARDED 2 WORKERS, DISJOINT MASKS ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/run_multi_gpu.py --star movies.star --out sh2 --binary /home/alex/mc-i53-gpu/build-final/motioncorr --devices GPU-eddb42fe-4f9a-adde-76d3-b924e14add54,GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d --cpus '96-103;104-111' -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
+TOTAL	24
+sh2/shards/shard_2way_0.star	12
+sh2/shards/shard_2way_1.star	12
+manifest	sh2/shards/shard_manifest.json
+{
+  "n_workers": 2,
+  "wall_seconds": 19.747,
+  "returncodes": [
+    0,
+    0
+  ],
+  "verdict": "PASS"
+}
++ echo SHARDED_RC=0
+SHARDED_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''sh2/status.json'\''));w=d['\''gpu_witness'\'']
+print('\''VERDICT=%s'\''%d['\''verdict'\'']);print('\''WITNESS_OK=%s'\''%w['\''all_pids_witnessed_on_intended_distinct_devices'\''])
+print('\''DISTINCT_DEVICES=%d'\''%w['\''distinct_devices_witnessed'\'']);print('\''UNWITNESSED=%s'\''%w['\''unwitnessed_pids'\''])
+print('\''SHARED=%s'\''%w['\''shared_devices'\'']);print('\''WRONG=%s'\''%w['\''wrong_device'\''])
+print('\''CPU_MASKS=%s'\''%d['\''cpu_masks'\'']);print('\''SAMPLES=%d'\''%w['\''n_samples'\''])
+for k,v in w['\''witnessed'\''].items(): print('\''  pid'\'',k,'\''->'\'',v)'
+VERDICT=PASS
+WITNESS_OK=True
+DISTINCT_DEVICES=2
+UNWITNESSED=[]
+SHARED=[]
+WRONG=[]
+CPU_MASKS=['96-103', '104-111']
+SAMPLES=36
+  pid 1211780 -> ['GPU-eddb42fe-4f9a-adde-76d3-b924e14add54']
+  pid 1211782 -> ['GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d']
++ for k in 0 1
++ grep -m1 'Using CUDA acceleration' sh2/w0/run.log
+Using CUDA acceleration on GPU device 0 for global alignment.
+++ wc -l
+++ grep -l 'CUDA Global Alignment Profile' sh2/w0/Movies/20170629_00021_frameImage.log sh2/w0/Movies/20170629_00022_frameImage.log sh2/w0/Movies/20170629_00023_frameImage.log sh2/w0/Movies/20170629_00024_frameImage.log sh2/w0/Movies/20170629_00025_frameImage.log sh2/w0/Movies/20170629_00026_frameImage.log sh2/w0/Movies/20170629_00027_frameImage.log sh2/w0/Movies/20170629_00028_frameImage.log sh2/w0/Movies/20170629_00029_frameImage.log sh2/w0/Movies/20170629_00030_frameImage.log sh2/w0/Movies/20170629_00031_frameImage.log sh2/w0/Movies/20170629_00035_frameImage.log
++ echo 'w0 cuda_stage_logs=12'
+w0 cuda_stage_logs=12
+++ /home/alex/mc-env/bin/python -c 'import json;print(json.load(open('\''sh2/w0/command.json'\''))['\''pid'\''])'
++ taskset -cp 1211780
++ true
++ for k in 0 1
++ grep -m1 'Using CUDA acceleration' sh2/w1/run.log
+Using CUDA acceleration on GPU device 0 for global alignment.
+++ grep -l 'CUDA Global Alignment Profile' sh2/w1/Movies/20170629_00036_frameImage.log sh2/w1/Movies/20170629_00037_frameImage.log sh2/w1/Movies/20170629_00039_frameImage.log sh2/w1/Movies/20170629_00040_frameImage.log sh2/w1/Movies/20170629_00042_frameImage.log sh2/w1/Movies/20170629_00043_frameImage.log sh2/w1/Movies/20170629_00044_frameImage.log sh2/w1/Movies/20170629_00045_frameImage.log sh2/w1/Movies/20170629_00046_frameImage.log sh2/w1/Movies/20170629_00047_frameImage.log sh2/w1/Movies/20170629_00048_frameImage.log sh2/w1/Movies/20170629_00049_frameImage.log
+++ wc -l
++ echo 'w1 cuda_stage_logs=12'
+w1 cuda_stage_logs=12
+++ /home/alex/mc-env/bin/python -c 'import json;print(json.load(open('\''sh2/w1/command.json'\''))['\''pid'\''])'
++ taskset -cp 1211782
++ true
++ echo '=== A3. MERGE + AGGREGATE ==='
+=== A3. MERGE + AGGREGATE ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/merge_workers.py --manifest sh2/shards/shard_manifest.json --workers sh2/w0 sh2/w1 --status sh2/status.json --out m2 --report merge2.json --aggregate-with /home/alex/mc-i53-gpu/build-final/motioncorr --input-star movies.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 96,
+  "verdict": "PASS"
+}
++ echo MERGE_RC=0
+MERGE_RC=0
++ echo '=== A4. EXACT 24 PAIRS, serial vs sharded ==='
+=== A4. EXACT 24 PAIRS, serial vs sharded ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialF --test m2 --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest sh2/shards/shard_manifest.json --out exact2 --python /home/alex/mc-env/bin/python
+  FAIL 20170629_00021_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00022_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00023_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00024_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00025_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00026_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00027_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00028_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00029_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00030_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00031_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00035_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00036_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00037_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00039_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00040_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00042_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00043_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00044_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00045_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00046_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00047_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00048_frameImage FAIL pixel_identical= False
+  FAIL 20170629_00049_frameImage FAIL pixel_identical= False
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 0,
+  "failed": 24,
+  "verdict": "FAIL"
+}
++ echo COMPARE_RC=1
+COMPARE_RC=1
++ /home/alex/mc-env/bin/python -
+AGGREGATE_STAR_IDENTICAL=0
++ echo '=== ARMS THROUGH A4 DONE ==='
+=== ARMS THROUGH A4 DONE ===
++ date -Is
+2026-09-28T06:59:50+00:00
+FINAL_A_OUTER_RC=0

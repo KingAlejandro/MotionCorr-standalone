@@ -1,0 +1,65 @@
+{
+  "input_star": "movies.star",
+  "binary": "/home/alex/mc-i53-gpu/build-final/motioncorr",
+  "n_workers": 1,
+  "worker_args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--j",
+    "4",
+    "--max_io_threads",
+    "4"
+  ],
+  "cpus": "96-111",
+  "cpu_masks": [
+    "96-111"
+  ],
+  "wall_seconds": 37.206,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "manifest": "serial1/shards/shard_manifest.json",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 1210768,
+      "returncode": 0,
+      "log": "serial1/w0/run.log"
+    }
+  ],
+  "devices": [
+    {
+      "smi_index": "0",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    }
+  ],
+  "gpu_witness": {
+    "expected": {
+      "1210768": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+    },
+    "witnessed": {
+      "1210768": [
+        "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54"
+      ]
+    },
+    "unwitnessed_pids": [],
+    "wrong_device": [],
+    "shared_devices": [],
+    "distinct_devices_witnessed": 1,
+    "all_pids_witnessed_on_intended_distinct_devices": true,
+    "sampler_errors": [],
+    "n_samples": 67
+  },
+  "verdict": "PASS"
+}

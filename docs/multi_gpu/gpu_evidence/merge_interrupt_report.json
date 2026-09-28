@@ -1,0 +1,51 @@
+{
+  "manifest": "itr/shards/shard_manifest.json",
+  "merged_into": "m_itr",
+  "n_movies_expected": 24,
+  "n_files_staged": 69,
+  "worker_exit_codes": {
+    "0": -9,
+    "1": 0
+  },
+  "launcher_verdict": "FAIL",
+  "per_worker_aggregates_preserved": [
+    "_workers/w0/command.json",
+    "_workers/w0/run.log",
+    "_workers/w1/all_batches.pdf",
+    "_workers/w1/batch.pdf",
+    "_workers/w1/batch.pdf.lst",
+    "_workers/w1/command.json",
+    "_workers/w1/corrected_micrographs.star",
+    "_workers/w1/corrected_micrographs_all_rlnAccumMotionEarly.eps",
+    "_workers/w1/corrected_micrographs_all_rlnAccumMotionLate.eps",
+    "_workers/w1/corrected_micrographs_all_rlnAccumMotionTotal.eps",
+    "_workers/w1/corrected_micrographs_hist_rlnAccumMotionEarly.eps",
+    "_workers/w1/corrected_micrographs_hist_rlnAccumMotionLate.eps",
+    "_workers/w1/corrected_micrographs_hist_rlnAccumMotionTotal.eps",
+    "_workers/w1/header.pdf",
+    "_workers/w1/header.pdf.lst",
+    "_workers/w1/logfile.pdf",
+    "_workers/w1/run.log"
+  ],
+  "problems": [
+    "worker 0: exited -9",
+    "launcher verdict is FAIL, not PASS; gpu_witness: unwitnessed=[], wrong_device=[], shared_devices=[]",
+    "lost: Movies/20170629_00026_frameImage.tiff has no .mrc output (expected Movies/20170629_00026_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00026_frameImage.tiff has no .star output (expected Movies/20170629_00026_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00027_frameImage.tiff has no .mrc output (expected Movies/20170629_00027_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00027_frameImage.tiff has no .star output (expected Movies/20170629_00027_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00028_frameImage.tiff has no .mrc output (expected Movies/20170629_00028_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00028_frameImage.tiff has no .star output (expected Movies/20170629_00028_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00029_frameImage.tiff has no .mrc output (expected Movies/20170629_00029_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00029_frameImage.tiff has no .star output (expected Movies/20170629_00029_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00030_frameImage.tiff has no .mrc output (expected Movies/20170629_00030_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00030_frameImage.tiff has no .star output (expected Movies/20170629_00030_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00031_frameImage.tiff has no .mrc output (expected Movies/20170629_00031_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00031_frameImage.tiff has no .star output (expected Movies/20170629_00031_frameImage.star, shard 0)",
+    "lost: Movies/20170629_00035_frameImage.tiff has no .mrc output (expected Movies/20170629_00035_frameImage.mrc, shard 0)",
+    "lost: Movies/20170629_00035_frameImage.tiff has no .star output (expected Movies/20170629_00035_frameImage.star, shard 0)"
+  ],
+  "verdict": "FAIL",
+  "logfile_pdf": "not produced and not claimed equivalent; the PDF batch loop is path-dependent by construction (see module docstring)",
+  "aggregate_star": "not attempted: staging failed"
+}

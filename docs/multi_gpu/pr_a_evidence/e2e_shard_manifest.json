@@ -1,0 +1,76 @@
+{
+  "input_star": "movies.star",
+  "input_sha256": "1cd6b99c0afb91ac51d5dc2aed3b0647b0d7a58fc00bdbdafc157a8104d4ed8b",
+  "movie_block": "movies",
+  "labels": [
+    "rlnMicrographMovieName",
+    "rlnOpticsGroup",
+    "rlnMicrographPreExposure"
+  ],
+  "n_movies": 6,
+  "n_shards": 3,
+  "partition": "contiguous",
+  "canonical_movies": [
+    "Movies/mov_00.tiff",
+    "Movies/mov_01.tiff",
+    "Movies/mov_02.tiff",
+    "Movies/sub dir/mov_03.tiff",
+    "Movies/mov_04.tiff",
+    "Movies/mov_05.tiff"
+  ],
+  "canonical_output_roots": [
+    "Movies/mov_00",
+    "Movies/mov_01",
+    "Movies/mov_02",
+    "Movies/sub dir/mov_03",
+    "Movies/mov_04",
+    "Movies/mov_05"
+  ],
+  "shards": [
+    {
+      "index": 0,
+      "path": "sharded/shards/shard_3way_0.star",
+      "sha256": "dfa69375e07b37bc647b3e901945bdbe16a06219ab6a0661ea05d03aa365b433",
+      "n_movies": 2,
+      "first_input_row": 0,
+      "movies": [
+        "Movies/mov_00.tiff",
+        "Movies/mov_01.tiff"
+      ],
+      "output_roots": [
+        "Movies/mov_00",
+        "Movies/mov_01"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "sharded/shards/shard_3way_1.star",
+      "sha256": "e1aab23153405c54f9191f589cf4fc542c916477597ed831044c3d6b7cf5ec3d",
+      "n_movies": 2,
+      "first_input_row": 2,
+      "movies": [
+        "Movies/mov_02.tiff",
+        "Movies/sub dir/mov_03.tiff"
+      ],
+      "output_roots": [
+        "Movies/mov_02",
+        "Movies/sub dir/mov_03"
+      ]
+    },
+    {
+      "index": 2,
+      "path": "sharded/shards/shard_3way_2.star",
+      "sha256": "be26e245e36e8f83bf1789359ffa0cf396cef35ebe024acbc20d38377a8e5a8b",
+      "n_movies": 2,
+      "first_input_row": 4,
+      "movies": [
+        "Movies/mov_04.tiff",
+        "Movies/mov_05.tiff"
+      ],
+      "output_roots": [
+        "Movies/mov_04",
+        "Movies/mov_05"
+      ]
+    }
+  ]
+}

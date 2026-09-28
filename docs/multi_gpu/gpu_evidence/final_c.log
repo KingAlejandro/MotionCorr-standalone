@@ -1,0 +1,83 @@
++ cd /home/alex/mc-i53-gpu/run
++ date -Is
+2026-09-28T07:01:08+00:00
++ echo '=== concurrent occupancy ==='
+=== concurrent occupancy ===
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
+1212781, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3368 MiB
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3431 MiB, 21 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
++ cat /proc/loadavg
+2.28 3.45 2.86 2/2758 1213042
++ '[' -d serialF ']'
++ '[' '!' -d serialF_cpu_mislabelled ']'
++ mv serialF serialF_cpu_mislabelled
++ mv serialF.log serialF_cpu_mislabelled.log
+++ find serialF_cpu_mislabelled -name '*.mrc' '!' -name '*_PS.mrc' '!' -name gain.mrc
+++ wc -l
++ echo cpu_arm_retained=24
+cpu_arm_retained=24
++ echo '=== A1c. SERIAL CUDA BASELINE (--gpu 0 present this time) ==='
+=== A1c. SERIAL CUDA BASELINE (--gpu 0 present this time) ===
++ rm -rf serialG
++ env CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 taskset -c 96-111 /home/alex/mc-i53-gpu/build-final/motioncorr --i movies.star --o serialG/ --gpu 0 --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
++ echo SERIALG_RC=0
+SERIALG_RC=0
++ grep -m1 'Using CUDA acceleration' serialG.log
+Using CUDA acceleration on GPU device 0 for global alignment.
+++ find serialG -name '*.mrc' '!' -name '*_PS.mrc' '!' -name gain.mrc
+++ wc -l
++ echo serialG_mrc=24
+serialG_mrc=24
+++ grep -l 'CUDA Global Alignment Profile' serialG/Movies/20170629_00021_frameImage.log serialG/Movies/20170629_00022_frameImage.log serialG/Movies/20170629_00023_frameImage.log serialG/Movies/20170629_00024_frameImage.log serialG/Movies/20170629_00025_frameImage.log serialG/Movies/20170629_00026_frameImage.log serialG/Movies/20170629_00027_frameImage.log serialG/Movies/20170629_00028_frameImage.log serialG/Movies/20170629_00029_frameImage.log serialG/Movies/20170629_00030_frameImage.log serialG/Movies/20170629_00031_frameImage.log serialG/Movies/20170629_00035_frameImage.log serialG/Movies/20170629_00036_frameImage.log serialG/Movies/20170629_00037_frameImage.log serialG/Movies/20170629_00039_frameImage.log serialG/Movies/20170629_00040_frameImage.log serialG/Movies/20170629_00042_frameImage.log serialG/Movies/20170629_00043_frameImage.log serialG/Movies/20170629_00044_frameImage.log serialG/Movies/20170629_00045_frameImage.log serialG/Movies/20170629_00046_frameImage.log serialG/Movies/20170629_00047_frameImage.log serialG/Movies/20170629_00048_frameImage.log serialG/Movies/20170629_00049_frameImage.log
+++ wc -l
++ echo serialG_cuda_stage_logs=24
+serialG_cuda_stage_logs=24
++ echo '=== C1. LAUNCHER INERTNESS: plain serial vs witnessed 1-worker ==='
+=== C1. LAUNCHER INERTNESS: plain serial vs witnessed 1-worker ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialG --test serial1/w0 --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest serial1/shards/shard_manifest.json --out exact_inert --python /home/alex/mc-env/bin/python
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo COMPARE_INERT_RC=0
+COMPARE_INERT_RC=0
++ echo '=== C2. MAIN CLAIM: serial CUDA vs 2-worker sharded CUDA, 24 pairs ==='
+=== C2. MAIN CLAIM: serial CUDA vs 2-worker sharded CUDA, 24 pairs ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialG --test m2 --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest sh2/shards/shard_manifest.json --out exact_main --python /home/alex/mc-env/bin/python
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo COMPARE_MAIN_RC=0
+COMPARE_MAIN_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''exact_main/exact_summary.json'\''))
+print('\''MAIN=%s'\''%{k:d[k] for k in ('\''n_expected'\'','\''n_compared'\'','\''passed'\'','\''failed'\'','\''verdict'\'')})
+bad=[r for r in d['\''results'\''] if not r.get('\''gate_c_pass'\'')]
+print('\''MAIN_FAILING=%s'\''%[r['\''movie'\''] for r in bad][:5])
+print('\''MAIN_reports_unique=%d/%d'\''%(len({r.get('\''report'\'') for r in d['\''results'\'']}),len(d['\''results'\''])))'
+MAIN={'n_expected': 24, 'n_compared': 24, 'passed': 24, 'failed': 0, 'verdict': 'PASS'}
+MAIN_FAILING=[]
+MAIN_reports_unique=24/24
++ echo '=== C3. AGGREGATE STAR serialG vs m2 ==='
+=== C3. AGGREGATE STAR serialG vs m2 ===
++ /home/alex/mc-env/bin/python -
+AGGREGATE_STAR_IDENTICAL=1
++ echo '=== C DONE ==='
+=== C DONE ===
++ date -Is
+2026-09-28T07:02:29+00:00
++ nvidia-smi --query-compute-apps=pid,gpu_uuid --format=csv,noheader
+1213665, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
+FINAL_C_OUTER_RC=0

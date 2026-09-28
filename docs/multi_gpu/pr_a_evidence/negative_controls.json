@@ -1,0 +1,374 @@
+{
+  "n_mutations": 45,
+  "n_attempted": 45,
+  "n_skipped": 0,
+  "n_detected": 45,
+  "survivors": [],
+  "results": [
+    {
+      "mutation": "partition preflight disabled",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_output_name_collision": "detected",
+        "case_duplicate_movie_in_input": "detected",
+        "case_collapsed_spaces_are_a_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "empty-shard guard removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_empty_shard_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "shards re-serialized from parsed values instead of original bytes",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_roundtrip_and_metadata": "detected",
+        "case_clean_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "C++-reader refusals removed from the STAR parser",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_star_parser_refusals": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "decorated-output collision preflight removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_decorated_output_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "output attribution falls back to naive suffix stripping",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_real_output_suffixes_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "per-worker aggregates published into the merged tree",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_clean_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "lost-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_lost_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_and_misrouted_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "misrouted check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_and_misrouted_output": "detected",
+        "case_real_output_suffixes_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "unassigned-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_unassigned_movie_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "worker exit codes no longer gate the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_worker_blocks_merge": "detected",
+        "case_killed_worker_then_nonprefix_resume": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "missing --status no longer refuses the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_missing_status_blocks_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "distinct-device assertion removed from the GPU witness",
+      "file": "tools/multi_gpu/gpu_witness.py",
+      "cases": {
+        "case_gpu_witness_logic": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "unwitnessed PIDs counted as witnessed",
+      "file": "tools/multi_gpu/gpu_witness.py",
+      "cases": {
+        "case_gpu_witness_logic": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate row-order check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_wrong_order_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate extra arguments dropped instead of forwarded",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_star_canonical_order": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "launcher verdict no longer gates the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_device_witness_blocks_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate-name match moved back ahead of attribution",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_name_shadowing": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reserved-name preflight removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_reserved_name_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "short rows silently accepted",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_short_row_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "output_root strips the extension only within the basename",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_output_root_matches_withoutextension": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "--link no longer refused alongside --aggregate-with",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_link_with_aggregate_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "missing worker directory no longer reported",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_missing_worker_directory": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "per-worker CPU masks collapse to one shared mask",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_per_worker_cpu_masks": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "sampler stop flag shadows threading.Thread._stop again",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_sampler_lifecycle": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "sampler backend errors no longer recorded",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_sampler_lifecycle": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "--devices with --no-witness accepted again",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_devices_with_no_witness_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "compare24 keys reports by basename again",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge matches absolute roots without normalizing",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_absolute_movie_roots_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge completeness check un-normalizes the root",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_absolute_movie_roots_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate step runs even when staging failed",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_staging_never_reprocesses": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge --out no longer resolved",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_merge_out_is_resolved": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "comparison report identity is not injective",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_injective_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reused reports no longer validated against their root",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_injective_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "collision preflight uses raw roots again",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_normalized_root_collision_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge drops the duplicate-coverage guard",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "zero-pair manifest accepted by the comparator",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate normalized roots accepted by the comparator",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "empty manifest accepted by the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "manifest publishes raw rather than canonical output roots",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_normalized_root_collision_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "worker-relative root stops collapsing interior separators",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_interior_double_slash_is_the_same_product": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate coverage overwrites the owner and invents misroutes",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_interior_double_slash_is_the_same_product": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reuse sidecar records only the root again",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_reuse_pins_the_trees_not_just_the_root": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "launcher no longer refuses an existing --out",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_launcher_refuses_cpu_gpu_confusion": "detected"
+      },
+      "status": "detected"
+    }
+  ]
+}

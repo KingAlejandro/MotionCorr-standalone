@@ -1,0 +1,35 @@
+START 2026-09-28T07:08:17+00:00
+############ CONTROL A re-compared with the timing filter ############
+=== base vs candidate ===
+  DIFF run.log (4962 vs 4962 bytes)
+
+106 files compared, 24 MRC images, 341735520 pixels, 1 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 3 differing files (expected 3 = 1 already differing + 2 perturbed)
+
+FAIL outputs differ
+A_exit=1
+
+############ Is the F5 double-count reachable at all here? ############
+At --max_iter 1 every patch reported converged=no in BOTH arms and the images
+were identical -- because the host retry runs with the SAME max_iter on the SAME
+data, so it cannot converge either, and 'if (!converged) continue' skips the
+patch in both arms. The accumulated shift never reaches the polynomial fit.
+Probing higher max_iter for a window where the device fails but the retry succeeds.
+--- max_iter=2 ---
+  exits base=0 cand=0   device alignments: converged=no:37 converged=yes:595
+106 files compared, 24 MRC images, 341735520 pixels, 1 differing
+negative control reported 3 differing files (expected 3 = 1 already differing + 2 perturbed)
+FAIL outputs differ
+--- max_iter=3 ---
+  exits base=0 cand=0   device alignments: converged=no:0 converged=yes:624
+106 files compared, 24 MRC images, 341735520 pixels, 1 differing
+negative control reported 3 differing files (expected 3 = 1 already differing + 2 perturbed)
+FAIL outputs differ
+--- max_iter=4 ---
+  exits base=0 cand=0   device alignments: converged=no:0 converged=yes:624
+106 files compared, 24 MRC images, 341735520 pixels, 1 differing
+negative control reported 3 differing files (expected 3 = 1 already differing + 2 perturbed)
+FAIL outputs differ
+DONE 2026-09-28T07:13:19+00:00

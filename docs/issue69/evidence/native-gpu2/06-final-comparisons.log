@@ -1,0 +1,65 @@
+START 2026-09-28T07:16:12+00:00
+NOTE: all comparisons below normalise out (a) each arm's own output root, which
+both arms write into their own products, (b) measured durations, and (c) the MRC
+label block, which carries a creation timestamp. MRC pixel payloads, the first 224
+header bytes, and STAR/EPS content are compared exactly.
+
+############ healthy all-24, default max_iter ############
+device alignments: converged=no:0 converged=yes:624   (nonconverged => retry path engaged)
+=== base vs candidate ===
+
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+exit=0
+
+############ forced nonconvergence, max_iter=2 ############
+device alignments: converged=no:37 converged=yes:595   (nonconverged => retry path engaged)
+=== base vs candidate ===
+
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+exit=0
+
+############ max_iter=3 ############
+device alignments: converged=no:0 converged=yes:624   (nonconverged => retry path engaged)
+=== base vs candidate ===
+
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+exit=0
+
+############ max_iter=4 ############
+device alignments: converged=no:0 converged=yes:624   (nonconverged => retry path engaged)
+=== base vs candidate ===
+
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+exit=0
+
+############ device-backend witnesses, healthy arm ############
+     24 [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+     24 [CUDA Global Alignment Profile]
+    600 [CUDA Patch Alignment Profile]
+
+############ per-arm product inventory ############
+  a   base mrc=24 star=25 | cand mrc=24 star=25
+  m2  base mrc=24 star=25 | cand mrc=24 star=25
+  m3  base mrc=24 star=25 | cand mrc=24 star=25
+  m4  base mrc=24 star=25 | cand mrc=24 star=25
+DONE 2026-09-28T07:17:17+00:00

@@ -1,0 +1,60 @@
+START 2026-09-28T06:54:08+00:00 host=4-gpu-vm
+### placement and device identity, re-checked at launch ###
+pid 1208563's current affinity list: 112-119
+/user.slice
+policy: default
+preferred node: current
+physcpubind: 112 113 114 115 116 117 118 119 
+CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598  (selected by UUID, not ordinal)
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+-- compute apps before launch (must be empty on my device) --
+ 06:54:08 up 69 days, 20:21, 11 users,  load average: 3.97, 3.37, 2.36
+
+### binary + source hashes ###
+1d9cf8def269d77d3e627df64ae8c6fbf2ce62bca7cc6866645f92e677f121d9  /home/alex/MotionCorr-i69-gpu2/build/motioncorr
+12554e40d05524524278a4dd828eb13315c1831f5bd17152f846107c4bffbe57  /home/alex/MotionCorr-i69-gpu2/build/cuda_fault_matrix
+f2b7e2338510767d4ff063ec7737f4cbff92457eb1bacbde4ef85b230abf913b  /home/alex/MotionCorr-i69-gpu2/build/cuda_error_class
+db3afe28998b409fcb045861ceaeb3e42c52356fb12c926979ed2e65a84a910b  /home/alex/MotionCorr-i69-gpu2/build/cuda_wrapper_upload_failure
+ac4ff0baf5b435fa4c7912f0455f07893a29c901a543604105c721177a27780d  src/acc/cuda/cuda_failure_state.h
+f16ea4a2f90a38ac5e66ec819e3d35b6e8f0a728c2aa47a0fdc6e05860fe54d1  src/acc/cuda/cuda_scoped_resources.h
+fdc999b43d96cad5213745a6b8f58ce62a66f0e2fa188d3f042eb6f352e14211  src/acc/cuda/cuda_error_class.h
+ce5b2585c1afed19f78e8df046be174553e6aaf37edfb202892c93781cd51521  src/acc/cuda/cuda_movie_session.cu
+6affaadb3560f03b6921b5221611c3ee77c0176a4cc52b8568ff7c4e1ef0ef00  src/motioncorr_runner.cpp
+
+### CONTROL 1: device-free predicate + production session-state + capacity ###
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+6 session-state sequences, 0 failures
+3 capacity controls, 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     A later fatal error is latched monotonically by the production
+     session state even when an earlier recoverable one was recorded
+     and the last-error slot has since been cleared.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+exit=0
+
+### CONTROL 2: existing wrapper upload-failure control (regression) ###
+All six failed uploads returned false and released their allocations
+exit=0
+
+### CONTROL 3: bounded CUDA fault matrix -- NEVER PREVIOUSLY EXECUTED ###
+ERROR: out of memory in /home/alex/MotionCorr-i69-gpu2/src/acc/cuda/cuda_alignpatch.cu at line 337 (error-code 2)
+Issue #69 CUDA fault matrix. Clean run uses: cudaMalloc=42 cudaMemcpy H2D=19 cudaMemcpy D2H=16 cudaMemcpy D2D=8 cudaMemset=5 cudaDeviceSynchronize=12 cufftCreate=2 cufftMakePlanMany=2 cufftSetWorkArea=2 cufftPlanMany=4 cufftExec=17
+
+primitive                n    stage reached                      exit                   owned   inputs  
+cudaMalloc               1    session initialize                 returned false         0       intact   
+cudaMalloc               2    session initialize                 returned false         0       intact   
+cudaMalloc               3    session initialize                 returned false         0       intact   
+cudaMalloc               4    session initialize                 returned false         0       intact   
+cudaMalloc               5    session initialize                 returned false         0       intact   
+cudaMalloc               6    gain and unaligned sum             returned false         0       intact   
+cudaMalloc               7    reduce unaligned sum               returned false         0       intact   
+cudaMalloc               8    reduce unaligned sum               returned false         0       intact   
+cudaMalloc               9    reduce unaligned sumsqdev          returned false         0       intact   

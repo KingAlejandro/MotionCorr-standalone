@@ -7,22 +7,35 @@ that it does not matter.
 
 Source frozen at `e191aab`. Latest head is docs-only on top of it.
 
-## A. Not run, and not claimed anywhere
+## A. Run natively on GPU2 (28 Sep), and what is still not run
 
 | Layer | Status |
 |---|---|
-| Bounded CUDA fault matrix (`tests/cuda_fault_matrix.cpp`) | built, linked, interposition verified at relocation level — **never executed** |
-| Forced-nonconvergence end-to-end witness for the retry fix | **unrun**; `gpu_plan.md` item 4 |
-| Early-binning streaming control (pass criterion 4) | **unrun**; `gpu_plan.md` item 5 |
-| Healthy same-backend all-24 CUDA control | **unrun**; `gpu_plan.md` item 6 |
-| Any build on a CUDA toolkit older than 12.8 | **unrun** — the `CUDART_VERSION` guards are reasoned, not exercised |
-| **Any CUDA build at all of the P1b/P2 fixes** | **NOT BUILT** — #53 holds the shared GPU slot. `cuda_failure_state.h`, `cuda_scoped_resources.h` and their controls have never been compiled. This is the single highest-risk item on this list: an unbuilt CUDA change has already shipped once on this branch with 14 compile errors while cpu64 was green |
+| CUDA build of every fix, incl. P1b/P2 | **ran** — 0 compile errors, 0 warnings in changed files |
+| Bounded CUDA fault matrix | **ran** — 132 trials, 0 failures, 0 leaks, 0 damaged inputs |
+| Device-free predicate / session-state / capacity suites | **ran** — 43 cases, 0 failures |
+| Wrapper upload-failure regression | **ran** — passes |
+| Healthy all-24 same-backend CUDA control | **ran** — 24 images, 341,735,520 pixels, 0 differing, negative control able to fail |
+| Forced-nonconvergence retry witness | **ran, and F5 DID NOT REPRODUCE** — see below |
+| Early-binning streaming control | **UNRUN** — no valid bin factor for this geometry; every arm errors identically |
+| Genuine poisoned context (illegal address / ECC) | **UNRUN** — cannot be synthesised; P1/P1b exercised by injected codes and session-state sequences only |
+| Any build on a CUDA toolkit older than 12.8 | **UNRUN** — the `CUDART_VERSION` guards are reasoned, not exercised |
 | Pass criterion 3 (retry reprocesses partial even/odd/DW products) | not this task's; #99/#53's completion contract |
 
-No GPU slot was ever assigned to this task and no GPU execution occurred. The bench
-lock being free and the devices idle is availability, not authorization.
+**F5 is source-demonstrated and CPU-demonstrated but not natively reproduced.** Across
+2,472 patch alignments on 24 movies at `max_iter` 1/2/3/4 — including `max_iter=1` where
+all 1224 device alignments reported nonconvergence — base and candidate output was
+byte-identical. Both attempts share the same `max_iter` on the same data, so the retry
+almost always fails to converge too and `if (!converged) continue` skips the patch in
+both arms, discarding the accumulated shift before it reaches the polynomial fit. The
+double count needs the retry to converge where the device did not, i.e. the float/double
+borderline near the 0.5 px tolerance. **Consequence for whoever picks this up: the
+skip-on-nonconvergence alternative rejected in the ADR is now the better-looking
+option**, because the retry it removes essentially never changes the outcome.
 
-## B. Known gaps in what the controls can observe
+No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throughout.
+
+## B. Known gaps## B. Known gaps in what the controls can observe
 
 1. **The predicates are tested; the paths are not.** `cudaErrorPoisonsContext` and
    `cudaRetryDecisionFor` have 34 unit cases between them. The real resident

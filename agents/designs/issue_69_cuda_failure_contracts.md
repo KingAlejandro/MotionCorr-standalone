@@ -138,6 +138,18 @@ Two policies close the defect.
   CPU-only upstream behaviour where nonconvergence means `continue`, and keep the
   fallback only for `prep_ok == false`. Rejected for now.
 
+**Native update (28 Sep), after this was written.** The choice below still holds, but
+its premise was too strong. On 24 tutorial movies across four `max_iter` settings —
+2,472 patch alignments, including one configuration where *every* patch reported
+nonconvergence — base and candidate produced byte-identical output. Both attempts share
+the same `max_iter` on the same data, so when the device attempt fails to converge the
+retry almost always fails too and the patch is skipped in both arms, discarding the
+accumulated shift before it reaches the fit. The double count is observable only in the
+float/double borderline near the 0.5 px tolerance, which did not occur. F5 is therefore
+a guard against a narrow window, not a repair of a commonly-hit defect — and **(B)
+skip-on-nonconvergence now looks better than it did here**, because the retry it removes
+is one that essentially never changes the outcome. See RESULTS §5d.
+
 (A) is chosen because it has the smaller behavioural delta: no patch that contributes an
 observation today stops contributing, so the polynomial fit's observation count cannot
 newly drop below `n_params` and fail a movie that currently succeeds. (B) is probably the

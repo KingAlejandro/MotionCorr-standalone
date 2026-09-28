@@ -15,12 +15,13 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
 | CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures, CUDART 12080 |
 | Retry-verdict controls, incl. cleared-last-error fatal (device-free) | 13 cases, 0 failures — **at the previous head; NOT re-run, see §5c** |
-| P1/P2 fixes from the Codex PR107 review (`cuda_failure_state.h`, `cuda_scoped_resources.h`) | **NOT BUILT and NOT RUN — no GPU slot; #53 holds it** |
+| P1/P2 fixes from the Codex PR107 review | built clean on GPU2 (0 compile errors) and exercised by the device-free suites |
+| Early-binning streaming control | **UNRUN** — no valid bin factor exists for this geometry, see §5d |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
-| Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
-| Forced-nonconvergence end-to-end witness | **NEEDS_GPU, not run** |
-| Healthy same-backend 24-movie CUDA control | **NEEDS_GPU, not run** |
+| Bounded CUDA fault matrix | **ran natively on GPU2: 132 trials, 0 failures, 0 leaks** |
+| Forced-nonconvergence end-to-end witness | ran natively; **F5 did not reproduce** — see §5d |
+| Healthy same-backend 24-movie CUDA control | **ran natively: 24 images, 341,735,520 pixels, 0 differing** |
 
 No pass is claimed for anything in the second group.
 
@@ -436,6 +437,115 @@ Accessors and call sites were cross-checked against their declarations by hand. 
 checking is not a compiler, and on this branch an unbuilt CUDA change has already
 shipped once with 14 compile errors while the CPU suite was green (§5b). **Nothing in
 §5c should be treated as validated until it builds.**
+
+## 5d. Native acceptance on GPU2
+
+Alex authorised parallel GPU use on 28 Sep; #69 was assigned **GPU2**
+(`GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598`), CPUs **112-119** on node1, all
+descendants ≤ 8, `j4`/`io2`, under `/tmp/motioncorr-gpu2-correctness.lock`. #53 retained
+GPU0/1 and 96-111 and was **active throughout** — its processes are visible in the
+provenance with 426 MiB each on GPU0/1, and were not touched. GPU2 read 1 MiB before and
+after every run.
+
+**No timing is recorded or claimed from any of this.** Competing MotionCorr arms were
+running on the same VM, so wall times here would be characterisation at best. All
+comparisons normalise measured durations out.
+
+Full evidence: [`evidence/native-gpu2/`](evidence/native-gpu2/), provenance in
+[`07-provenance.txt`](evidence/native-gpu2/07-provenance.txt).
+
+### Build — the unbuilt gap is closed
+
+`configure=0`, `build=0`, **0 compile errors**, zero warnings in changed files, all
+binaries linked, at the frozen source. Both reviewers had bounded their confirmations
+as reads and asked that "must compile under `-DCUDA=ON`" remain a merge gate; it now
+does compile.
+
+### The bounded fault matrix, executed for the first time
+
+```
+Clean run uses: cudaMalloc=42 H2D=19 D2H=16 D2D=8 memset=5 sync=12
+                cufftCreate=2 cufftMakePlanMany=2 cufftSetWorkArea=2 cufftPlanMany=4 cufftExec=17
+132 trials, 0 failures
+```
+
+Every ordinal of every wrapped primitive, plus successive-movie trials with the fault on
+the third movie. **Zero leaks and zero damaged inputs in all 132 trials.** The row that
+matters most for F1 is `cudaMalloc 16 | global alignment | threw RelionError | owned=0` —
+the exact path that previously leaked eight buffers, a cuFFT plan and eight events, now
+releasing cleanly on the throwing path with events and plans tracked, not just memory.
+
+The existing wrapper upload-failure control still passes (no regression), and the
+device-free suites pass: 21 classifier + 13 retry + 6 production session-state + 3
+capacity controls, 0 failures.
+
+### Healthy all-24 same-backend — identical
+
+24 movies, base `4c952b3f` versus candidate, both CUDA Release on GPU2:
+
+```
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+```
+
+Device-backend witnesses confirm the resident CUDA path actually executed rather than
+silently falling back: **24** global alignments, **600** patch alignments (24 × 25), **24**
+dose-weighted resident-VRAM reconstructions.
+
+### F5 did not reproduce natively, and that narrows my own earlier claim
+
+This is the result I would most want a reader not to miss.
+
+| `--max_iter` | device alignments nonconverged | converged | images differing |
+|---|---|---|---|
+| 1 | 1224 | 0 | **0** |
+| 2 | 37 | 595 | **0** |
+| 3 | 0 | 624 | **0** |
+| 4 | 0 | 624 | **0** |
+
+At `max_iter=1` **every** patch reported `converged=no`, so the retry path engaged
+everywhere — and the outputs were still byte-identical. At `max_iter=2` the path engaged
+for 37 patches, same result.
+
+The reason is structural and I had missed it. Both attempts use the **same** `max_iter`
+on the **same** data: `alignPatchDevice` and `alignPatch` are each passed the same
+member. So when the device attempt fails to converge, the retry almost always fails too,
+and `if (!converged) continue` **skips the patch in both arms** — the accumulated shift
+is discarded before it ever reaches the polynomial fit. The double count is only
+*observable* when the retry converges where the device attempt did not, which given
+identical algorithm, data and budget requires the float/double borderline near the
+0.5 px tolerance. That window did not occur in 2,472 patch alignments across four
+configurations on 24 movies.
+
+**So F5 is source-demonstrated and CPU-demonstrated, but not natively reproduced.** The
+defect is real — `alignPatch` accumulates, the vectors are not reset, and the CPU
+control shows the exact doubling — but §5b/the ADR framed it as though it routinely
+reached the fit, and the hardware says otherwise. Two consequences worth recording:
+the fix is a correctness guard against a narrow window rather than a repair of a
+commonly-hit bug, and the **skip-on-nonconvergence** alternative the ADR rejected now
+looks better than when it was rejected, because the retry it removes is one that
+essentially never changes the outcome.
+
+### Early-binning: UNRUN
+
+Four bin factors (1.855, 2.5, 3.71, 1.9175) all fail on this 3710×3838 geometry with
+*"The dimensions of the image after binning must be even"* — 3710/2 = 1855 is odd. Base
+and candidate fail **identically**, which is consistent with no regression, but a
+control whose every arm errors out is not a pass and is not counted as one. Pass
+criterion 4's early-binning half remains **unsatisfied**; it needs a geometry where the
+option is usable.
+
+### A failed first attempt, preserved
+
+[`03-e2e-FAILED-first-attempt.log`](evidence/native-gpu2/03-e2e-FAILED-first-attempt.log)
+is kept. That attempt was invalid and I nearly reported it as a result: `--i` took an
+**unquoted** glob, so the parser saw 24 arguments and used only the first — one movie,
+and `20170629_00021`, which is documented as unrepresentative. The output count was also
+wrong, because products nest under the input's absolute path and a flat `ls` found none,
+so it read as `mrc=0` — a zero-file comparison, the precise anti-pattern the round
+instructions prohibit. Both are harness defects, both are fixed, and the broken run is
+retained rather than deleted.
 
 ## 6. Findings fixed
 

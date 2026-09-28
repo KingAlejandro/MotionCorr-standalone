@@ -101,6 +101,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	first_frame_sum =  textToInteger(parser.getOption("--first_frame_sum", "First movie frame used in output sum (start at 1)", "1"));
 	if (first_frame_sum < 1) first_frame_sum = 1;
 	last_frame_sum =  textToInteger(parser.getOption("--last_frame_sum", "Last movie frame used in output sum (0 or negative: use all)", "-1"));
+	expected_frames = textToInteger(parser.getOption("--expected_frames", "Expected number of frames per movie (optional; validates frame count against authoritative expectation)", "-1"));
 	eer_grouping = textToInteger(parser.getOption("--eer_grouping", "EER grouping", "40"));
 	eer_upsampling = textToInteger(parser.getOption("--eer_upsampling", "EER upsampling (1 = physical or 2 = 2x super-resolution)", "1"));
 
@@ -321,6 +322,18 @@ void MotioncorrRunner::initialise()
                 pre_exposure_micrographs.push_back(0.0);
             }
 
+            int my_expected_frames;
+            if (MDin.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, my_expected_frames) ||
+                MDin.getValue(EMDL_PARTICLE_NR_FRAMES, my_expected_frames) ||
+                MDin.getValue(EMDL_TOMO_TILT_MOVIE_FRAMECOUNT, my_expected_frames))
+            {
+                expected_frames_micrographs.push_back(my_expected_frames);
+            }
+            else
+            {
+                expected_frames_micrographs.push_back(expected_frames);
+            }
+
 		}
 	}
 	else
@@ -328,6 +341,7 @@ void MotioncorrRunner::initialise()
 		fn_in.globFiles(fn_micrographs);
 		optics_group_micrographs.resize(fn_micrographs.size(), 1);
 		pre_exposure_micrographs.resize(fn_micrographs.size(), 0.0);
+		expected_frames_micrographs.resize(fn_micrographs.size(), expected_frames);
 		obsModel.opticsMdt.clear();
 		obsModel.opticsMdt.addObject();
 	}
@@ -612,6 +626,13 @@ void MotioncorrRunner::run()
 		{
 			// Header parsing is also a per-movie failure, not a batch abort.
 			Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
+			int exp_frames = (imic < (long int)expected_frames_micrographs.size()) ? expected_frames_micrographs[imic] : expected_frames;
+			if (exp_frames > 0 && mic.getNframes() != exp_frames)
+			{
+				REPORT_ERROR("Movie " + fn_micrographs[imic] + " frame count mismatch: expected " +
+				             integerToString(exp_frames) + " frames, but decoded " +
+				             integerToString(mic.getNframes()) + " frames.");
+			}
 			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
@@ -1313,6 +1334,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	{
 		Ihead.read(fn_mic, false, -1, false, true); // select_img -1, mmap false, is_2D true
 		nx = XSIZE(Ihead()); ny = YSIZE(Ihead()); nn = NSIZE(Ihead());
+		if (expected_frames > 0 && nn != expected_frames)
+		{
+			REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " +
+			             integerToString(expected_frames) + " frames, but decoded " +
+			             integerToString(nn) + " frames.");
+		}
 	}
 
 	// Which frame to use?

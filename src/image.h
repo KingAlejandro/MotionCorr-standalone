@@ -51,11 +51,106 @@
 
 #include <cstdint>
 #include <typeinfo>
+#include <string>
+#include <vector>
+#include <memory>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <tiffio.h>
+#if defined(__has_include)
+#if __has_include(<tiffvers.h>)
+#include <tiffvers.h>
+#endif
+#endif
+
+#if defined(TIFFLIB_AT_LEAST)
+#if TIFFLIB_AT_LEAST(4, 5, 0)
+#define MOTIONCORR_USE_TIFF_EXTR 1
+#endif
+#endif
+
+struct TiffErrorContext {
+	bool has_error = false;
+	std::string last_error;
+	std::vector<std::string> errors;
+
+	void clear() {
+		has_error = false;
+		last_error.clear();
+		errors.clear();
+	}
+
+	void add_error(const std::string& err) {
+		has_error = true;
+		last_error = err;
+		errors.push_back(err);
+	}
+};
+
+inline thread_local TiffErrorContext* g_tls_tiff_error_context = nullptr;
+
+struct TiffErrorScope {
+	TiffErrorContext* prev;
+	TiffErrorScope(TiffErrorContext* ctx) {
+		prev = g_tls_tiff_error_context;
+		g_tls_tiff_error_context = ctx;
+	}
+	~TiffErrorScope() {
+		g_tls_tiff_error_context = prev;
+	}
+};
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+inline int motioncorr_tiff_error_ext_r(TIFF* tif, void* user_data, const char* module, const char* fmt, va_list ap)
+{
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	std::string msg = module ? (std::string(module) + ": " + buf) : std::string(buf);
+	while (!msg.empty() && (msg.back() == '\n' || msg.back() == '\r'))
+		msg.pop_back();
+
+	if (user_data)
+		static_cast<TiffErrorContext*>(user_data)->add_error(msg);
+	else if (g_tls_tiff_error_context)
+		g_tls_tiff_error_context->add_error(msg);
+	return 1;
+}
+
+inline int motioncorr_tiff_warning_ext_r(TIFF* tif, void* user_data, const char* module, const char* fmt, va_list ap)
+{
+	return 1;
+}
+#endif
+
+inline void motioncorr_tiff_error_compat(const char* module, const char* fmt, va_list ap)
+{
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	std::string msg = module ? (std::string(module) + ": " + buf) : std::string(buf);
+	while (!msg.empty() && (msg.back() == '\n' || msg.back() == '\r'))
+		msg.pop_back();
+
+	if (g_tls_tiff_error_context)
+		g_tls_tiff_error_context->add_error(msg);
+}
+
+inline void motioncorr_tiff_warning_compat(const char* module, const char* fmt, va_list ap)
+{
+	// Non-fatal warnings ignored
+}
+
+inline void initTiffErrorHandlersOnce()
+{
+	static bool initialized = false;
+	if (!initialized) {
+		TIFFSetErrorHandler(motioncorr_tiff_error_compat);
+		TIFFSetWarningHandler(motioncorr_tiff_warning_compat);
+		initialized = true;
+	}
+}
+
 #include "src/funcs.h"
 #include "src/memory.h"
 #include "src/filename.h"
@@ -208,6 +303,7 @@ public:
 	FileName  ext_name; // Filename extension
 	bool	  exist;    // Shows if the file exists
 	bool	  isTiff;   // Shows if this is a TIFF file
+	std::shared_ptr<TiffErrorContext> tiff_err_ctx;
 
 	/** Empty constructor
 	 */
@@ -219,6 +315,7 @@ public:
 		ext_name="";
 		exist=false;
 		isTiff=false;
+		tiff_err_ctx = std::make_shared<TiffErrorContext>();
 	}
 
 	/** Destructor: closes file (if it still open)
@@ -320,8 +417,31 @@ public:
 			if (mode != WRITE_READONLY)
 				REPORT_ERROR((std::string)"TIFF is supported only for reading");
 
-			if ((ftiff = TIFFOpen(fileName.c_str(), "r")) == NULL)
-				REPORT_ERROR((std::string)"Image::openFile cannot open: " + name);
+			initTiffErrorHandlersOnce();
+			if (!tiff_err_ctx)
+				tiff_err_ctx = std::make_shared<TiffErrorContext>();
+			tiff_err_ctx->clear();
+			TiffErrorScope scope(tiff_err_ctx.get());
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+			TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
+			if (opts) {
+				TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, tiff_err_ctx.get());
+				TIFFOpenOptionsSetWarningHandlerExtR(opts, motioncorr_tiff_warning_ext_r, tiff_err_ctx.get());
+			}
+			ftiff = TIFFOpenExt(fileName.c_str(), "r", opts);
+			if (opts) {
+				TIFFOpenOptionsFree(opts);
+			}
+#else
+			ftiff = TIFFOpen(fileName.c_str(), "r");
+#endif
+
+			if (ftiff == NULL)
+			{
+				std::string detail = tiff_err_ctx->has_error ? (": " + tiff_err_ctx->last_error) : "";
+				REPORT_ERROR((std::string)"Image::openFile cannot open: " + name + detail);
+			}
 		}
 		else
 		{
@@ -366,6 +486,7 @@ public:
 			return;
 
 		if (isTiff && ftiff != NULL) {
+			TiffErrorScope scope(tiff_err_ctx ? tiff_err_ctx.get() : nullptr);
 			TIFFClose(ftiff);
 			ftiff = NULL;
 		}
@@ -1383,11 +1504,34 @@ public:
 		MDMainHeader.clear();
 		MDMainHeader.addObject();
 
+		initTiffErrorHandlersOnce();
+		TiffErrorContext mem_tiff_ctx;
+		TiffErrorScope scope(&mem_tiff_ctx);
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+		TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
+		if (opts) {
+			TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, &mem_tiff_ctx);
+			TIFFOpenOptionsSetWarningHandlerExtR(opts, motioncorr_tiff_warning_ext_r, &mem_tiff_ctx);
+		}
+		TIFF* ftiff = TIFFClientOpenExt("in-memory-tiff", "r", (thandle_t)&handle,
+		                                TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
+		                                TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
+		                                TiffInMemoryUnmapFileProc, opts);
+		if (opts)
+			TIFFOpenOptionsFree(opts);
+#else
 		TIFF* ftiff = TIFFClientOpen("in-memory-tiff", "r", (thandle_t)&handle,
 		                             TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
 		                             TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
 		                             TiffInMemoryUnmapFileProc);
-		err = readTIFF(ftiff, select_img, readdata, true, "in-memory-tiff");
+#endif
+		if (!ftiff)
+		{
+			std::string detail = mem_tiff_ctx.has_error ? (": " + mem_tiff_ctx.last_error) : "";
+			REPORT_ERROR("readFromMemory cannot open in-memory TIFF" + detail);
+		}
+		err = readTIFF(ftiff, select_img, readdata, true, "in-memory-tiff", &mem_tiff_ctx);
 		TIFFClose(ftiff);
 
 		return err;
@@ -1443,7 +1587,7 @@ private:
 				ext_name.contains("st")) //stk stack MUST go BEFORE plain st
 			err = readMRC(select_img, true, name);
 		else if (ext_name.contains("tif"))
-			err = readTIFF(hFile.ftiff, select_img, readdata, true, name);
+			err = readTIFF(hFile.ftiff, select_img, readdata, true, name, hFile.tiff_err_ctx.get());
 		else if (select_img >= 0 && ext_name.contains("mrc"))
 			REPORT_ERROR("Image::read ERROR: stacks of images in MRC-format should have extension .mrcs; .mrc extensions are reserved for 3D maps.");
 		else if (ext_name.contains("mrc") || ext_name.contains("map")) // mrc 3D map

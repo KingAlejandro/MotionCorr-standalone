@@ -9,9 +9,19 @@ Raw artifacts in this directory:
 | file | contents |
 |---|---|
 | `cpu64_validation_run.log` | complete raw run: provenance, builds, ctest, all 8 integration arms |
-| `cpu64_product_comparison.log` | raw output of the product comparison |
+| `cpu64_product_comparison.log` | raw output of the product comparison (`compare_products.py`) |
 | `run_validation.sh` | the exact script that produced the run |
-| `compare_products.py` | the comparator |
+| `compare_products.py` | the comparator actually relied on |
+
+**Read the raw log's own `GATE:` line with care.** `run_validation.sh` ends by invoking an
+earlier comparator that only inspected the top level of each arm directory. motioncorr mirrors
+the input path under the output directory, so the per-movie `.mrc` and `.star` are nested and
+that first version never saw them — it compared only the joint summary STAR and therefore
+reported the option-on arms as unchanged. Its `GATE: ATTENTION` line in
+`cpu64_validation_run.log` is an artifact of that flaw and is superseded by
+`compare_products.py` / `cpu64_product_comparison.log`, which walks recursively and matches by
+basename (necessary because the synthetic input lives under `src-base/` vs `src-fixed/`, so the
+nested paths differ between arms by construction).
 
 ## Host, placement and NUMA
 
@@ -61,7 +71,7 @@ fake a green negative control.
 | tree | commit | binary sha256 |
 |---|---|---|
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` | `b27f7351d0b0481c01fe99df89f792bf3dc0782d572b05530bcd86dbd6911a0c` |
-| fixed | `792f1e6725dccfa3544acbc152ea6896060d4f02` | `9fb0c0be1439fbc2365875578744bd1738bb9fad29ce214f3a3033f793338d11` |
+| fixed | `85dd1f9a4c7b96e224034b009236a1a2600e5e46` | `cd9a7316eecf108132afabe6041f26433e741611d816901257e8f6252fa56de1` |
 
 `CMAKE_BUILD_TYPE=Release` was set explicitly for both: an unqualified configure in this
 project builds `-O0`. Compiler `g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`,
@@ -82,14 +92,21 @@ f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  20170629_00026
 `MotioncorrRunner::recenterShiftsToFirstFrame`. The only arithmetic reproduced in the
 test is the OLD in-place loop, which is the negative control, not the code under test.
 
-- fixed tree: `RunnerInterpolateRecenter` **Passed**; all 4 witnesses pass.
+- fixed tree: `RunnerInterpolateRecenter` **Passed**; all 4 witnesses plus the empty-input
+  guard pass, including the two carrying a nonzero interpolated origin on both axes.
 - base tree: the case **does not exist** (`Total Tests: 0` when filtered), confirming it is new.
 - full suite, fixed tree: **14/14 passed**.
 - full suite, base tree: **13/13 passed** — the fixed tree adds exactly one test and regresses none.
 
-Mutation test (run locally, not on cpu64): reverting `recenterShiftsToFirstFrame` to the
-original in-place loop makes the case fail with
-`corrected X differs at frame 1: got 0.000000 expected 1.000000`, exit 1.
+Mutation test, per axis (run locally, not on cpu64). The earlier version of this test could
+not have caught a Y-only regression, because all of its bug-exposing witnesses had `yshifts`
+all-zero:
+
+| mutation | result |
+|---|---|
+| X branch reverted to `-= xshifts[0]` | FAIL, exit 1: `corrected X at frame 1: got 0.000000 expected 1.000000` |
+| Y branch reverted to `-= yshifts[0]` | FAIL, exit 1: `corrected Y at frame 1: got 0.000000 expected -1.500000` |
+| fix intact | pass, exit 0 |
 
 All witnesses are exactly representable, so expected values are compared with `==` and
 **no tolerance is used anywhere** in the test.

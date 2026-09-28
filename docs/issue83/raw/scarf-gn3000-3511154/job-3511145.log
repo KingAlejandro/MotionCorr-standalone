@@ -1,0 +1,83 @@
+=== provenance ===
+2026-09-28T09:14:39+01:00
+gn3000.scarf.rl.ac.uk
+7ba584eaf5eae28661d80880fdf220c130c235dc
+ M test-data/known_motion/MANIFEST.json
+ M test-data/known_motion/km_global_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_noisy_ground_truth.json
+ M test-data/known_motion/km_local_nonsquare_ground_truth.json
+ M test-data/known_motion/km_local_realscale_ground_truth.json
+?? build-cuda/
+?? evidence-native/
+?? evidence-native2/
+?? fixtures/
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA A100-SXM4-40GB, GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d, 580.178.04, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, GPU-2e1b6776-2dce-cad6-5e4c-9d0d58849616, 580.178.04, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, GPU-69bdbeb9-d502-8487-0f78-98e7d4b6c73a, 580.178.04, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, GPU-0ade54fe-adbf-ca88-2135-90cbf33b2cbb, 580.178.04, 40960 MiB
+CUDA_VISIBLE_DEVICES=0,1,2,3
+SLURM_JOB_ID=3511145 SLURM_JOB_NODELIST=gn3000
+Cpus_allowed_list:	0-63
+Mems_allowed_list:	0-7
+ 09:14:40 up 17 days,  9:14,  0 users,  load average: 2.11, 2.13, 2.25
+8
+=== binary reused from the first allocation, identified by digest ===
+0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e  /work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr
+=== fixtures: interpreter checked before anything is generated ===
+generator python: /apps20/sw/easybuilt/rocky/9/amd/zen2/software/Python/3.13.1-GCCcore-14.2.0/bin/python3
+numpy 2.3.1
+f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_global_hisnr.mrcs
+2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_hisnr.mrcs
+98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_noisy.mrcs
+9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_nonsquare.mrcs
+886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_realscale.mrcs
+=== (a) verify_fixtures against the committed manifest ===
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_realscale
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 8032 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+verifier numpy 2.3.1; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 5 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth), km_local_realscale (ground_truth)
+--- verify_fixtures exit=0
+=== (b) negative controls WITH real fixtures ===
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  partial_schedules
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+{
+  "pass": 10,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+=== (c) motion truth gates (separate verdict, existing tool) ===

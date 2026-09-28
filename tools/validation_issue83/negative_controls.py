@@ -470,17 +470,46 @@ def control_report_attributes_each_section(_tmp: Path,
                              "started_utc": "2026-09-28T08:04:42Z"},
               "counts": {"declared": 25, "attempted": 25, "pass": 25,
                          "fail": 0, "error": 0},
-              "matrix_complete": True, "unrun_rows": [], "results": {}}
+              "matrix_complete": True, "unrun_rows": [], "results": {},
+              "finished_utc": "2026-09-28T08:26:50Z"}
     same = {"provenance": dict(matrix["provenance"],
-                               started_utc="2026-09-28T09:10:00Z"),
+                               started_utc="2026-09-28T08:10:00Z"),
             "movies_in_star": 24, "expected_movies": 24, "all24_equal": True,
             "schedules": {}, "errors": []}
     text = "\n".join(rep.render_all24(same, matrix))
     require("Source record:" in text and "gn3000" in text,
             f"the integrated screen did not name the run it came from: {text}")
-    require("Not the run named in the provenance block" not in text,
-            f"two sections from the same host, device and binary were reported "
-            f"as different runs: {text}")
+    require("Not the run named in the provenance block" not in text
+            and "Outside the run window" not in text,
+            f"a section measured inside the header's own run window was "
+            f"reported as a different run: {text}")
+
+    # Two jobs on one node reusing one binary agree on host, device and
+    # binary digest, so the identity check above cannot separate them. This is
+    # not hypothetical: jobs 3511139 and 3511154 are exactly that pair, and the
+    # published report is assembled from both. The declared run window is what
+    # tells them apart.
+    for stamp in ("2026-09-28T08:03:00Z", "2026-09-28T08:40:00Z"):
+        later = {"provenance": dict(matrix["provenance"], started_utc=stamp),
+                 "movies_in_star": 24, "expected_movies": 24,
+                 "all24_equal": True, "schedules": {}, "errors": []}
+        text = "\n".join(rep.render_all24(later, matrix))
+        require("Outside the run window" in text,
+                f"a section measured at {stamp}, outside the header's "
+                f"{matrix['provenance']['started_utc']} to "
+                f"{matrix['finished_utc']} window, rendered as part of that "
+                f"run: {text}")
+        require(stamp in text and matrix["finished_utc"] in text,
+                f"the window divergence was announced without naming the two "
+                f"times it rests on: {text}")
+
+    # An unknown window is not evidence of divergence. A record that never
+    # recorded when it finished must not make every section look foreign.
+    windowless = dict(matrix)
+    windowless.pop("finished_utc")
+    require("Outside the run window" not in "\n".join(
+                rep.render_all24(later, windowless)),
+            "a missing finish time was read as proof of a different run")
 
     other = json.loads(json.dumps(same))
     other["provenance"]["hostname"] = "gn0005.scarf.rl.ac.uk"
@@ -533,6 +562,17 @@ def control_report_attributes_each_section(_tmp: Path,
     require("host and binary not recorded" in text,
             f"an unattributable capacity datapoint was rendered under the "
             f"header's provenance as though it belonged to that run: {text}")
+
+    # The aggregate sentence is the line most likely to be quoted on its own,
+    # so the caveat has to survive being read without the sections above it.
+    require(rep.is_other_run(other, matrix) and rep.is_other_run(later, matrix),
+            "a section from another host, and one outside the run window, were "
+            "both reported as belonging to the header's run")
+    require(not rep.is_other_run(same, matrix),
+            "a section from the header's own run was reported as foreign")
+    require(not rep.is_other_run({"schedules": {}}, matrix),
+            "a record with no provenance was asserted to be a different run, "
+            "which is a claim its own emptiness cannot support")
     return {"status": "pass",
             "reproduced": "one header over sections from two different jobs",
             "now": "each section names its host, device and binary, and a "

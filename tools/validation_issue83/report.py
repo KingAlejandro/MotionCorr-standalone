@@ -151,7 +151,8 @@ def record_source(record: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     return {"hostname": prov.get("hostname"),
             "gpu": prov.get("gpu", record.get("gpu")),
             "binary_sha256": prov.get("binary_sha256"),
-            "started_utc": prov.get("started_utc")}
+            "started_utc": prov.get("started_utc"),
+            "finished_utc": record.get("finished_utc")}
 
 
 def source_attribution(record: Optional[Dict[str, Any]],
@@ -167,7 +168,10 @@ def source_attribution(record: Optional[Dict[str, Any]],
     header is named rather than left for the reader to notice.
     """
     src = record_source(record)
-    if not any(v is not None for v in src.values()):
+    # ``finished_utc`` alone identifies nothing -- it is carried only so this
+    # record can serve as the reference window for another section.
+    if not any(src.get(k) is not None
+               for k in ("hostname", "gpu", "binary_sha256", "started_utc")):
         return []
     bits = [f"`{src['hostname']}`" if src.get("hostname") else "host not recorded",
             "CPU" if src.get("gpu") is None else f"device {src['gpu']}"]
@@ -177,14 +181,50 @@ def source_attribution(record: Optional[Dict[str, Any]],
         bits.append(f"started {src['started_utc']}")
     lines = ["- Source record: " + ", ".join(bits)]
     ref = record_source(reference)
-    differs = [key for key in ("hostname", "gpu", "binary_sha256")
-               if ref.get(key) is not None and src.get(key) is not None
-               and ref[key] != src[key]]
+    differs = diverging_fields(src, ref)
     if differs:
         lines.append("- **Not the run named in the provenance block above** — "
                      + ", ".join(differs)
                      + " differ, so these two sections are not one measurement.")
+    elif outside_reference_window(src, ref):
+        # Two jobs on the same node reusing the same binary agree on every
+        # field above, so the header's identity check cannot separate them.
+        # The header states a run window; a section measured outside it was
+        # not produced by the run the header describes.
+        lines.append(f"- **Outside the run window named above** — measured at "
+                     f"{src['started_utc']}, but the provenance block describes "
+                     f"{ref['started_utc']} to {ref['finished_utc']}. Same host "
+                     f"and same binary, different run.")
     return lines
+
+
+def diverging_fields(src: Dict[str, Any], ref: Dict[str, Any]) -> List[str]:
+    """Identity fields on which two records disagree, ignoring unknowns."""
+    return [key for key in ("hostname", "gpu", "binary_sha256")
+            if ref.get(key) is not None and src.get(key) is not None
+            and ref[key] != src[key]]
+
+
+def is_other_run(record: Optional[Dict[str, Any]],
+                 reference: Optional[Dict[str, Any]]) -> bool:
+    """Was this section measured by a run other than the header's?"""
+    src, ref = record_source(record), record_source(reference)
+    return bool(diverging_fields(src, ref) or outside_reference_window(src, ref))
+
+
+def outside_reference_window(src: Dict[str, Any],
+                             ref: Dict[str, Any]) -> bool:
+    """Did this section start outside the window the header declares?
+
+    Timestamps are the harness's own ISO-8601 UTC strings, which sort
+    lexicographically, so no parsing is needed and a malformed or missing
+    stamp is simply not evidence of divergence.
+    """
+    start, lo, hi = (src.get("started_utc"), ref.get("started_utc"),
+                     ref.get("finished_utc"))
+    if not (start and lo and hi):
+        return False
+    return start < lo or start > hi
 
 
 def render_all24(report: Optional[Dict[str, Any]],
@@ -465,6 +505,17 @@ def main() -> int:
                "**The declared matrix is not complete.** Unrun and failing rows "
                "are named above; this report does not claim the broad matrix "
                "passed."), ""]
+    # The aggregate sentence is the line most likely to be quoted on its own,
+    # so it carries the multi-run caveat rather than relying on the reader
+    # having read the section attributions above.
+    assembled = [name for name, record in (("integrated all-24 screen", all24),
+                                           ("capacity datapoint", capacity),
+                                           ("motion-truth gates", truth))
+                 if record is not None and is_other_run(record, matrix_report)]
+    if assembled:
+        lines += ["This aggregate is assembled from more than one run: the "
+                  + ", ".join(assembled) + " did not come from the run named "
+                  "in the provenance block. Each section says so above.", ""]
 
     opts.out.parent.mkdir(parents=True, exist_ok=True)
     opts.out.write_text("\n".join(lines) + "\n")

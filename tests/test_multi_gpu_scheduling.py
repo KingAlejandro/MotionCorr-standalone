@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -776,6 +777,46 @@ def case_aggregate_name_shadowing(tmp: Path) -> None:
         assert not (tmp / "merged" / "_workers" / "w1" / (root + ".mrc")).exists()
 
 
+def case_per_worker_cpu_masks(tmp: Path) -> None:
+    """Workers can be pinned to disjoint CPU masks, and a bad count is refused."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_bad",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--cpus", "0-1;2-3;4-5"])
+    assert cp.returncode == 2 and "3 masks for 2 worker" in cp.stderr, cp.stderr
+
+    if shutil.which("taskset") is None:
+        # macOS has no taskset. The launcher must refuse rather than run
+        # unpinned, which would silently break a shared-host core budget.
+        cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star,
+                  "--out", tmp / "r_no_taskset", "--binary", FAKE, "--workers", "2",
+                  "--no-witness", "--cpus", "0-1;2-3"])
+        assert cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr
+        print("      (taskset absent: pinning asserted only as a refusal here; the "
+              "launch path is exercised on the Linux validation host)")
+        return
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_per",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--cpus", "0-1;2-3"])
+    assert cp.returncode == 0, cp.stderr
+    status = json.loads((tmp / "r_per" / "status.json").read_text())
+    assert status["cpu_masks"] == ["0-1", "2-3"], status["cpu_masks"]
+    for k, mask in enumerate(["0-1", "2-3"]):
+        cmd = json.loads((tmp / "r_per" / f"w{k}" / "command.json").read_text())
+        assert cmd["cpu_mask"] == mask, cmd
+        assert cmd["command"][:3] == ["taskset", "-c", mask], cmd["command"]
+
+    # a single mask still applies to every worker
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_one",
+              "--binary", FAKE, "--workers", "2", "--no-witness", "--cpus", "0-3"])
+    assert cp.returncode == 0, cp.stderr
+    assert json.loads((tmp / "r_one" / "status.json").read_text())["cpu_masks"] == \
+        ["0-3", "0-3"]
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -802,6 +843,7 @@ CASES = [
     case_aggregate_star_canonical_order,
     case_aggregate_wrong_order_rejected,
     case_launcher_refuses_cpu_gpu_confusion,
+    case_per_worker_cpu_masks,
     case_gpu_witness_logic,
 ]
 

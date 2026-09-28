@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import signal
 import subprocess
 import sys
@@ -87,7 +88,12 @@ def main(argv: list[str] | None = None) -> int:
                          "one worker per entry. Omit for CPU workers.")
     ap.add_argument("--workers", type=int, default=None,
                     help="worker count when --devices is omitted (CPU workers)")
-    ap.add_argument("--cpus", default=None, help="taskset -c mask applied to every worker")
+    ap.add_argument("--cpus", default=None,
+                    help="taskset -c mask for the workers. One mask applies to every "
+                         "worker; N ';'-separated masks pin each worker separately, "
+                         "e.g. --cpus '96-103;104-111'. Disjoint per-worker masks are "
+                         "what keep two workers on one node from sharing cores, which "
+                         "a single shared mask does not.")
     ap.add_argument("--sample-interval", type=float, default=0.5)
     ap.add_argument("--no-witness", action="store_true",
                     help="skip GPU witnessing; only valid with CPU workers")
@@ -122,6 +128,23 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         n = a.workers
 
+    masks: list[str | None] = [None] * n
+    if a.cpus:
+        parts = [m.strip() for m in a.cpus.split(";") if m.strip()]
+        if len(parts) == 1:
+            masks = [parts[0]] * n
+        elif len(parts) == n:
+            masks = parts
+        else:
+            print(f"FAIL: --cpus has {len(parts)} masks for {n} worker(s); give one "
+                  "mask for all or exactly one per worker", file=sys.stderr)
+            return 2
+        if shutil.which("taskset") is None:
+            print("FAIL: --cpus needs taskset, which is not on PATH. Refusing rather "
+                  "than running unpinned, which would silently break a shared-host "
+                  "core budget.", file=sys.stderr)
+            return 2
+
     out.mkdir(parents=True)
     shard_dir = out / "shards"
     rc = partition_star.main(["--star", a.star, "--n", str(n),
@@ -148,8 +171,8 @@ def main(argv: list[str] | None = None) -> int:
             wdir.mkdir()
             env = dict(os.environ)
             cmd: list[str] = []
-            if a.cpus:
-                cmd += ["taskset", "-c", a.cpus]
+            if masks[k]:
+                cmd += ["taskset", "-c", masks[k]]
             cmd += [a.binary,
                     "--i", str(shard_dir / f"shard_{n}way_{k}.star"),
                     "--o", str(wdir) + os.sep]
@@ -167,6 +190,7 @@ def main(argv: list[str] | None = None) -> int:
                 "index": k, "command": cmd, "pid": p.pid,
                 "cuda_visible_devices": env.get("CUDA_VISIBLE_DEVICES"),
                 "device": devices[k] if devices else None,
+                "cpu_mask": masks[k],
             }, indent=2) + "\n")
 
         results = []
@@ -216,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
         "n_workers": n,
         "worker_args": extra,
         "cpus": a.cpus,
+        "cpu_masks": masks,
         "wall_seconds": round(wall, 3),
         "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and "
                              "is not a benchmark. #26 owns the measurement matrix.",

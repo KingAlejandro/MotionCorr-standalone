@@ -21,7 +21,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-# (label, file, old, new, cases that must fail once mutated)
+# (label, file, old, new, cases that must fail once mutated[, requires-binary])
+# A trailing 6th element names an executable the case needs. If it is absent the
+# mutation is reported SKIPPED, never "detected" -- a mutation whose case cannot
+# run in this environment has not been shown to be caught anywhere.
 MUTATIONS = [
     ("partition preflight disabled",
      "tools/multi_gpu/partition_star.py",
@@ -174,6 +177,12 @@ MUTATIONS = [
      '            _unused = (f"worker {k}: {wpath} is not a directory")  # MUTATED',
      ["case_missing_worker_directory"]),
 
+    ("per-worker CPU masks collapse to one shared mask",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "        elif len(parts) == n:\n            masks = parts",
+     "        elif len(parts) == n:\n            masks = [parts[0]] * n  # MUTATED",
+     ["case_per_worker_cpu_masks"], "taskset"),
+
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",
      "    if out.exists():",
@@ -196,7 +205,16 @@ def main(argv: list[str] | None = None) -> int:
 
     results = []
     survivors = []
-    for label, relpath, old, new, cases in MUTATIONS:
+    skipped = 0
+    for entry in MUTATIONS:
+        label, relpath, old, new, cases = entry[:5]
+        requires = entry[5] if len(entry) > 5 else None
+        if requires and shutil.which(requires) is None:
+            skipped += 1
+            results.append({"mutation": label, "file": relpath, "status": "SKIPPED",
+                            "reason": f"{requires} not on PATH; this mutation is not "
+                                      "claimed to be detected in this environment"})
+            continue
         with tempfile.TemporaryDirectory(prefix="negctl_") as td:
             tree = Path(td) / "tree"
             for sub in ("tools/multi_gpu", "tests"):
@@ -228,12 +246,16 @@ def main(argv: list[str] | None = None) -> int:
         for case, verdict in r.get("cases", {}).items():
             print(f"                    {verdict:>9}  {case}")
 
-    record = {"n_mutations": len(MUTATIONS),
+    n_attempted = len(MUTATIONS) - skipped
+    record = {"n_mutations": len(MUTATIONS), "n_attempted": n_attempted,
+              "n_skipped": skipped,
               "n_detected": sum(1 for r in results if r["status"] == "detected"),
               "survivors": survivors, "results": results}
     if a.json_out:
         Path(a.json_out).write_text(json.dumps(record, indent=2) + "\n")
-    print(f"\n{record['n_detected']}/{record['n_mutations']} mutations detected")
+    print(f"\n{record['n_detected']}/{n_attempted} mutations detected"
+          + (f" ({skipped} skipped for a missing tool, and not claimed)"
+             if skipped else ""))
     if survivors:
         print("SURVIVED (guard does not observe what it asserts):")
         for s in survivors:

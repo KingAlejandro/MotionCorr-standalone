@@ -22,6 +22,7 @@
 #include <exception>
 #include <limits>
 #include <climits>
+#include <cctype>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -3330,17 +3331,47 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// TODO: error handling !! (implemented — issue #98)
-		// wide init + extraction check + overflow-safe pre-clip
-		int record_num = 0;
-		while (true) {
-			f_defect >> std::ws;
-			if (f_defect.eof()) break;
+		// Extraction-checked parse (issue #98). The supported contract is the
+		// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
+		// Comments, headers and a UTF-8 BOM are NOT part of that format and are
+		// rejected with a specific diagnostic rather than silently mis-parsed.
+		// Blank lines and surrounding whitespace are ignored; an empty file is
+		// valid and masks nothing; non-positive w/h is a no-op rectangle.
+		if (f_defect.peek() == 0xEF) {
+			REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
+			             "mark. The MotionCor2 txt defect format is plain ASCII "
+			             "'x y w h' records; re-save the file without a BOM.");
+		}
 
+		long long record_num = 0, line = 1;
+		while (true) {
+			// Skip whitespace by hand so diagnostics can name a line number.
+			int c;
+			while ((c = f_defect.peek()) != EOF && isspace(c)) {
+				if (c == '\n') line++;
+				f_defect.get();
+			}
+			if (f_defect.peek() == EOF) break;
+
+			const long long record_line = line;
 			long long x = 0, y = 0, w = 0, h = 0;
 			if (!(f_defect >> x >> y >> w >> h)) {
-				REPORT_ERROR("Malformed or partial defect record #" +
-				             std::to_string(record_num) + " in " + fn_defect);
+				// Error path only: recover the offending token for the message.
+				f_defect.clear();
+				std::string token;
+				f_defect >> token;
+				const std::string where = " (record " + std::to_string(record_num + 1) +
+				                          ", line " + std::to_string(record_line) +
+				                          ") of " + fn_defect;
+				if (token.empty()) {
+					REPORT_ERROR("Truncated defect record" + where +
+					             ": expected four integers 'x y w h', but the file "
+					             "ended mid-record.");
+				}
+				REPORT_ERROR("Malformed defect record" + where +
+				             ": expected four integers 'x y w h', found \"" + token +
+				             "\". The MotionCor2 txt defect format does not support "
+				             "comments, headers or non-integer fields.");
 			}
 			++record_num;
 
@@ -3358,8 +3389,10 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 			if (x0 >= x1 || y0 >= y1) continue;
 
 			for (long long iy = y0; iy < y1; ++iy)
+			{
 				for (long long ix = x0; ix < x1; ++ix)
-				DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
+					DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
+			}
 		}
 
 		f_defect.close();

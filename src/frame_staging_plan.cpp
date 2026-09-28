@@ -332,6 +332,11 @@ Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
 	// staged ring into the retained stack at chunk == n_frames, so the cheapest
 	// point can be the largest one. n_frames is also the maximum, so if it fits
 	// nothing larger needs looking for.
+	//
+	// Because the loop below searches [1, n_frames-1], this probe is the ONLY
+	// way any policy -- aliasing or not -- can return the full frame count.
+	// It is load-bearing for every budget whose answer is n_frames, not just
+	// for the aliasing case that motivated it.
 	probe.chunk_frames = geom.n_frames;
 	Budget whole;
 	if (computeBudget(geom, probe, whole) && whole.host_bytes <= host_budget_bytes) {
@@ -358,12 +363,13 @@ Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
 		}
 	}
 
-	// Reachable now, unlike in the pre-alias version: n_frames == 1 makes the
-	// search interval [1, 0] empty, so a single-frame movie that failed the
-	// whole-movie probe but passed the chunk-1 probe lands here. For F == 1
-	// those two probes are the same policy, so it cannot actually happen -- but
-	// the guard no longer rests on that, and returning Inadmissible is correct
-	// either way.
+	// Still unreachable. The only way to arrive with best == 0 is an empty
+	// search interval, i.e. n_frames == 1 -- and for F == 1 the chunk-1 and
+	// whole-movie probes evaluate the identical policy, so a chunk-1 pass
+	// implies a whole-movie pass and the function has already returned Fits.
+	// Retained as a guard rather than an assertion because Inadmissible is the
+	// safe answer if that reasoning is ever invalidated; a mutation gate will
+	// report a permanent survivor here.
 	if (best < 1) return Admission::Inadmissible;
 
 	out_chunk = best;
@@ -395,6 +401,18 @@ bool buildSchedule(const bool *bad_mask, int nx, int ny, int n_frames, int d_max
 	out.ny = ny;
 	out.n_frames = n_frames;
 	out.d_max = d_max;
+
+	// Count first so the index vectors can be reserved exactly. Without this,
+	// push_back's geometric growth leaves up to 2x capacity overshoot on
+	// bad_x/bad_y, which computeBudget's charge would not cover -- and a term
+	// that exists to be an upper bound must not under-charge. Counting is a
+	// bool scan over a mask that is about to be scanned again anyway.
+	// Found by review of the charge added for the Codex capacity finding.
+	size_t n_bad_count = 0;
+	for (size_t n = 0; n < (size_t)nx * ny; n++)
+		if (bad_mask[n]) n_bad_count++;
+	out.bad_y.reserve(n_bad_count);
+	out.bad_x.reserve(n_bad_count);
 
 	// Raster order, matching FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D over bBad.
 	for (int i = 0; i < ny; i++)

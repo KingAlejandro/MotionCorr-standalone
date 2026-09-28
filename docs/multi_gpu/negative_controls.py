@@ -183,6 +183,18 @@ MUTATIONS = [
      "        elif len(parts) == n:\n            masks = [parts[0]] * n  # MUTATED",
      ["case_per_worker_cpu_masks"], "taskset"),
 
+    ("sampler stop flag shadows threading.Thread._stop again",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "        self._stop_event = threading.Event()",
+     "        self._stop = self._stop_event = threading.Event()  # MUTATED",
+     ["case_sampler_lifecycle"]),
+
+    ("sampler backend errors no longer recorded",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "                self.errors.append(str(exc))",
+     "                pass  # MUTATED",
+     ["case_sampler_lifecycle"]),
+
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",
      "    if out.exists():",

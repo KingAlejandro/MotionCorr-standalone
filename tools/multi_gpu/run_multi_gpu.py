@@ -56,19 +56,23 @@ class Sampler(threading.Thread):
         self.interval = interval
         self.samples: list[dict[str, object]] = []
         self.errors: list[str] = []
-        self._stop = threading.Event()
+        # NOT self._stop: threading.Thread already defines a private _stop(), and
+        # join() calls it through _wait_for_tstate_lock() once the thread has
+        # finished. Shadowing it with an Event makes every join() raise
+        # "'Event' object is not callable" after the workers have already run.
+        self._stop_event = threading.Event()
 
     def run(self) -> None:
-        while not self._stop.is_set():
+        while not self._stop_event.is_set():
             try:
                 self.samples.append({"t": time.time(), "apps": gpu_witness.compute_apps()})
             except gpu_witness.WitnessError as exc:
                 self.errors.append(str(exc))
                 return
-            self._stop.wait(self.interval)
+            self._stop_event.wait(self.interval)
 
     def stop(self) -> None:
-        self._stop.set()
+        self._stop_event.set()
 
     def observations(self) -> list[dict[str, str]]:
         flat = []

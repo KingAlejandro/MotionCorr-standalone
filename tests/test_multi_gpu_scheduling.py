@@ -28,6 +28,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -817,6 +818,75 @@ def case_per_worker_cpu_masks(tmp: Path) -> None:
         ["0-3", "0-3"]
 
 
+def case_sampler_lifecycle(tmp: Path) -> None:
+    """The device sampler can be started, stopped and joined without raising.
+
+    threading.Thread defines a private _stop(), and join() calls it through
+    _wait_for_tstate_lock() once the thread has finished. An Event attribute
+    named _stop shadows it, so every join() after the workers ran raised
+    "'Event' object is not callable" -- aborting the launcher *after* the whole
+    dataset had been processed, and leaving no status.json. No CPU case reached
+    this path, because the sampler only runs when --devices is given.
+    """
+    sys.path.insert(0, str(TOOLS))
+    import gpu_witness
+    import run_multi_gpu
+
+    calls = {"n": 0}
+
+    def fake_compute_apps():
+        calls["n"] += 1
+        return [{"pid": "1", "gpu_uuid": "GPU-aaaa", "used_gpu_memory": "1 MiB"}]
+
+    # Assert the invariant directly, not only through join(). CPython 3.12's
+    # _wait_for_tstate_lock() calls self._stop(); 3.14's does not, so exercising
+    # join() alone catches this on the validation host and silently misses it on
+    # a newer interpreter.
+    import threading as _threading
+    probe = run_multi_gpu.Sampler(0.01)
+    assert not isinstance(getattr(probe, "_stop", None), _threading.Event), (
+        "Sampler shadows threading.Thread._stop with an Event; join() raises "
+        "\"'Event' object is not callable\" on CPython 3.12")
+    # (CPython 3.14 removed Thread._stop entirely, so absent is fine; an Event
+    # in its place is the defect, on every version.)
+
+    real = gpu_witness.compute_apps
+    gpu_witness.compute_apps = fake_compute_apps
+    try:
+        s = run_multi_gpu.Sampler(0.01)
+        s.start()
+        deadline = time.time() + 5
+        while calls["n"] < 2 and time.time() < deadline:
+            time.sleep(0.01)
+        s.stop()
+        s.join(timeout=5)          # the call that used to raise
+        assert not s.is_alive(), "sampler did not stop"
+        assert calls["n"] >= 2, f"sampler only polled {calls['n']} time(s)"
+        assert s.errors == [], s.errors
+        obs = s.observations()
+        assert obs and obs[0]["gpu_uuid"] == "GPU-aaaa", obs
+        # joining a second time, and after the thread is long dead, must also work
+        s.join(timeout=5)
+    finally:
+        gpu_witness.compute_apps = real
+
+    # a sampler whose backend fails records the error and stops, rather than
+    # leaving the launcher to treat an empty sample set as a clean witness
+    def boom():
+        raise gpu_witness.WitnessError("nvidia-smi exploded")
+
+    gpu_witness.compute_apps = boom
+    try:
+        s2 = run_multi_gpu.Sampler(0.01)
+        s2.start()
+        s2.join(timeout=5)
+        assert not s2.is_alive()
+        assert s2.errors and "exploded" in s2.errors[0], s2.errors
+        assert s2.observations() == []
+    finally:
+        gpu_witness.compute_apps = real
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -845,6 +915,7 @@ CASES = [
     case_launcher_refuses_cpu_gpu_confusion,
     case_per_worker_cpu_masks,
     case_gpu_witness_logic,
+    case_sampler_lifecycle,
 ]
 
 

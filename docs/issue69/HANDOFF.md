@@ -99,8 +99,9 @@ No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throug
 15. `RESULTS.md` summary row says "all three test binaries linked" — off by one against
     §5's five, and now unevidenced because the regenerated `cuda-compile.log` no longer
     lists the binaries.
-16. **`RESULTS.md` never mentions the early-binning control**, though `gpu_plan.md`, the
-    PR body and the issue comments all do.
+16. ~~**`RESULTS.md` never mentions the early-binning control.**~~ **Fixed** — it is now
+    in the summary table and §5d. Retained for traceability; a hand-off list carrying an
+    already-fixed finding is itself a defect, and this one was caught by review.
 17. ADR "lands near `S`" phrasing — ambiguous rather than false in ADR context.
 18. `preprocessed_tu_control.sh` buckets any differing line containing `RelionError(`
     as `__LINE__` metadata, so a changed error *string* would be classified benign.

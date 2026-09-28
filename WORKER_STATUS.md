@@ -22,6 +22,9 @@
   poisoning latch and diagnostic provenance for the Codex P1 fix)
 - `src/acc/cuda/cuda_scoped_resources.h` (**new production header**, fixed-capacity
   scoped owners for the Codex P2 fix)
+- `src/acc/cuda/cuda_fft_prep.h` / `.cu` (P1c: an optional failure out-parameter and
+  recording in the consuming handlers. **No FFT computation is touched** — see the
+  note below, which previously read as if the file were off-limits entirely)
 - `src/acc/cuda/cuda_error_class.h` (**new production header**, added mid-round so the
   F6 predicate could be unit tested; `#ifdef _CUDA_ENABLED`-guarded, no new logic. It
   was not on the original whitelist and should have been added when it was created —
@@ -31,8 +34,10 @@
 - `CMakeLists.txt` (test registration and test-target link options only)
 - `agents/designs/issue_69_cuda_failure_contracts.md`, `docs/issue69/**`, `WORKER_STATUS.md`
 
-Not touched: allocators, `custom_allocator.cuh`, `acc_ptr.h`, FFT engine, numerical
-gates, defaults, compiler flags, dependencies, any other issue's files.
+Not touched: allocators, `custom_allocator.cuh`, `acc_ptr.h`, **FFT computation**
+(`cuda_fft_prep.{h,cu}` gained an error-reporting out-parameter for P1c; no transform,
+plan geometry or scaling changed), numerical gates, defaults, compiler flags,
+dependencies, any other issue's files.
 
 ## Coordination
 
@@ -97,10 +102,11 @@ Production:
 - `src/acc/cuda/cuda_error_class.h` — new, the F6 predicate, extracted so it is testable
 - `src/acc/cuda/cuda_failure_state.h` — new, monotonic poisoning latch (Codex P1)
 - `src/acc/cuda/cuda_scoped_resources.h` — new, fixed-capacity owners (Codex P2)
+- `src/acc/cuda/cuda_fft_prep.h` / `.cu` — P1c failure out-parameter and recording
 
-The whitelist failed to catch these two new `src/` files when they were created, for
-the second round running, and the spec review caught it again. The list above is now
-seven production files, not five.
+The whitelist has now failed three rounds running to record files as they were touched
+— twice for new `src/` headers, once for `cuda_fft_prep.{h,cu}` — and review caught it
+every time. The list above is **nine** production files, not five or seven.
 
 Tests and build:
 - `tests/test_patch_retry_state.cpp` (new, CPU), `tests/cuda_error_class.cpp` (new,

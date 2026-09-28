@@ -64,9 +64,12 @@ failing run is kept rather than overwritten; the `WORKER_STATUS.md` model-compar
 record counts it as one of two self-corrections.
 
 The CPU suite was rebuilt from scratch and re-run after each review round. The run
-backing the figures in this document is the one at the current head,
-`2026-09-28T02:20:05` to `02:20:32` in
-[`evidence/cpu-revalidation.log`](evidence/cpu-revalidation.log): configure 0, build 0,
+backing the figures in this document is the one at the current head. Its START/DONE
+timestamps are the first and last lines of
+[`evidence/cpu-revalidation.log`](evidence/cpu-revalidation.log) and are **deliberately
+not repeated here**: a hand-typed copy went stale three times on this branch and was
+blocked by review every time. Read them from the log. That run records configure 0,
+build 0,
 **14/14 passed**, same-backend control passed with its negative control reporting
 exactly two files, retry-state control passed, and the preprocessed-TU control passed
 with
@@ -518,6 +521,13 @@ is discarded before it ever reaches the polynomial fit. The double count is only
 identical algorithm, data and budget requires the float/double borderline near the
 0.5 px tolerance. That window did not occur in 2,472 patch alignments across four
 configurations on 24 movies.
+
+Reading the cited probe log honestly: it prints `FAIL outputs differ` four times and
+`1 differing`. That one file is `run.log`, whose only difference is RELION's progress
+bar and wall times — the negative-control arithmetic in the same log confirms it
+(`expected 3 = 1 already differing + 2 perturbed`). The table above counts **images**,
+and no image differs in any arm. The comparator was subsequently taught to filter those
+timing lines, which is why the final comparison reports 0 differing files outright.
 
 **So F5 is source-demonstrated and CPU-demonstrated, but not natively reproduced.** The
 defect is real — `alignPatch` accumulates, the vectors are not reset, and the CPU

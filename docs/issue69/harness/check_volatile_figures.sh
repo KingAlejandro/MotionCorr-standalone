@@ -27,26 +27,34 @@ for f in $DOCS "$EV/cpu-provenance.txt" "$EV/cpu-revalidation.log"; do
     [ -r "$f" ] || { echo "FAIL cannot read $f"; exit 2; }
 done
 
-echo "== 1. evidence hashes quoted in the docs must exist in the evidence =="
-# Only the `xxxxxxxx…` form is checked. That ellipsis convention is used exclusively for
-# hashes copied out of the evidence; bare `xxxxxxxx` is a git SHA, which legitimately
-# has no business being in an evidence log.
+echo "== 1. evidence hashes quoted in the docs must be CURRENT, not merely present =="
+# "Appears somewhere in evidence/" is not a currency test: the tree deliberately
+# preserves superseded logs, so a stale hash can still be found there. Review supplied a
+# live counter-example (9dd05f93 survives in cpu-build-and-ctest.log). Binary hashes are
+# therefore bound to the CURRENT cpu-provenance.txt binaries block specifically.
 python3 - "$EV" $DOCS <<'PYEOF' || fail=1
-import os, re, subprocess, sys
+import os, re, sys
 ev, docs = sys.argv[1], sys.argv[2:]
-blob = ""
+prov = open(os.path.join(ev, "cpu-provenance.txt"), errors="ignore").read()
+binaries = prov.split("=== binaries ===")[-1] if "=== binaries ===" in prov else ""
+allev = ""
 for root, _, files in os.walk(ev):
     for f in files:
-        try: blob += open(os.path.join(root, f), errors="ignore").read()
+        try: allev += open(os.path.join(root, f), errors="ignore").read()
         except OSError: pass
 bad = []
 for d in docs:
-    for h in set(re.findall(r'`([0-9a-f]{8})\u2026`', open(d).read())):
-        if h not in blob:
-            bad.append((os.path.basename(d), h))
-for d, h in sorted(bad):
-    print("  FAIL %s quotes evidence hash %s... which appears nowhere in evidence/" % (d, h))
-print("  checked %d docs against the evidence tree" % len(docs))
+    text = open(d).read()
+    for m in re.finditer(r'(base|candidate) `([0-9a-f]{8})\u2026`', text):
+        kind, h = m.group(1), m.group(2)
+        if h not in binaries:
+            bad.append((os.path.basename(d), kind, h, "not in the CURRENT binaries block"))
+    for h in set(re.findall(r'`([0-9a-f]{8})\u2026`', text)):
+        if h not in allev:
+            bad.append((os.path.basename(d), "hash", h, "absent from evidence/ entirely"))
+for d, kind, h, why in sorted(set(bad)):
+    print("  FAIL %s: %s %s... %s" % (d, kind, h, why))
+print("  binary hashes bound to the current provenance; %d docs scanned" % len(docs))
 sys.exit(1 if bad else 0)
 PYEOF
 
@@ -54,16 +62,18 @@ echo "== 2. no timestamp may be presented as the current run unless it is =="
 start=$(grep -m1 -oE '^START [0-9T:+-]+' "$EV/cpu-revalidation.log" | awk '{print $2}')
 note "evidence run starts ${start}"
 # Paragraph-scoped: a blank line separates paragraphs, so a wrap cannot hide the claim.
-if python3 - "$R" "${start%%+*}" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read(); cur = sys.argv[2]; bad = []
-for para in text.split("\n\n"):
-    if re.search(r'current head', para, re.I):
-        for ts in re.findall(r'2026-\d\d-\d\dT\d\d:\d\d:\d\d', para):
-            if ts != cur:
-                bad.append(ts)
+if python3 - "${start%%+*}" $DOCS <<'PY'
+import os, re, sys
+cur = sys.argv[1]; bad = []
+for d in sys.argv[2:]:
+    for para in open(d).read().split("\n\n"):
+        if re.search(r'current head', para, re.I):
+            for ts in re.findall(r'2026-\d\d-\d\dT\d\d:\d\d:\d\d', para):
+                if ts != cur:
+                    bad.append((os.path.basename(d), ts))
 if bad:
-    print("  FAIL these timestamps sit in a paragraph claiming the current head: %s" % sorted(set(bad)))
+    for d, ts in sorted(set(bad)):
+        print("  FAIL %s: %s sits in a paragraph claiming the current head" % (d, ts))
     sys.exit(1)
 sys.exit(0)
 PY
@@ -76,7 +86,11 @@ EXEMPT="cudaDeviceReset cudaGetLastError cudaMalloc cudaFree cudaMemcpy cudaMems
         cudaEventCreate cudaEventDestroy cudaDeviceSynchronize cudaSetDevice
         cufftCreate cufftDestroy cufftPlanMany cufftMakePlanMany cufftSetWorkArea
         cufftExecR2C cufftExecC2R if for while switch return sizeof"
-for sym in $(grep -ohE '`[a-zA-Z_][a-zA-Z0-9_]*\(' $DOCS | tr -d '`(' | sort -u); do
+# Two alternatives, because each has caught a real defect: `ident(` catches
+# cudaRetryVerdictFor(a, b, c), and the bare-getter form catches the getFirstError row,
+# which was written without parens and which v2 would otherwise have missed.
+for sym in $( { grep -ohE '`[a-zA-Z_][a-zA-Z0-9_]*\(' $DOCS | tr -d '`(';
+                grep -ohE '`(get|has|is)[A-Z][a-zA-Z0-9_]*`' $DOCS | tr -d '`'; } | sort -u); do
     case " $EXEMPT " in *" $sym "*) continue;; esac
     grep -rqE "\b${sym}\b" "$ROOT/src" "$ROOT/tests" || bad "identifier ${sym}() is named in the docs but absent from src/ and tests/"
 done
@@ -85,7 +99,8 @@ note "identifier scan complete (external CUDA APIs exempted by name)"
 echo "== 4. control counts quoted in RESULTS must match the evidence =="
 check_count () {  # $1=regex in docs, $2=regex in evidence, $3=label
     d=$(grep -ohE "$1" $DOCS | grep -oE '[0-9]+' | head -1 || true)
-    e=$(grep -rhoE "$2" "$EV" 2>/dev/null | grep -oE '[0-9]+' | sort -u | tail -1 || true)
+    # Numeric max, not lexicographic: sort -u put "99" after "132".
+    e=$(grep -rhoE "$2" "$EV" 2>/dev/null | grep -oE '[0-9]+' | sort -n -u | tail -1 || true)
     if [ -z "$d" ]; then note "$3: not quoted in docs"; return; fi
     if [ -z "$e" ]; then bad "$3: quoted as $d in docs but not found in evidence"; return; fi
     if [ "$d" = "$e" ]; then note "$3: $d matches evidence"; else bad "$3: docs say $d, evidence says $e"; fi

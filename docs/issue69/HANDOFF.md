@@ -61,7 +61,13 @@ No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throug
    source; the fault matrix never touches `cudaPreparePatch`; the healthy run only takes
    the success path. **Closing this needs a control that drives `cudaPreparePatch` with
    an injected fault** — the `--wrap` harness could do it, since that helper's
-   allocations and copies already pass through the interposed primitives.
+   allocations and copies already pass through the interposed primitives
+   (`cudaMalloc`, `cudaMemcpy`, `cufftPlanMany`, `cufftExecR2C`, all already wrapped).
+   **One detail a future implementer must not miss:** the wrappers currently return only
+   *recoverable* codes (`cudaErrorMemoryAllocation`, `cudaErrorInvalidValue`,
+   `CUFFT_ALLOC_FAILED`). Injecting those exercises the recording path and the PERMITTED
+   branch but **not** the FATAL refusal, which needs a poisoning code. The injected code
+   set must be widened, not just an ordinal added.
 8. **The `decisive`-code assertion in `cuda_error_class.cpp` cannot fail** against the
    current implementation — both fatal branches assign a code they have just proven
    poisons. It is a ratchet against a future refactor, not evidence about present
@@ -69,45 +75,45 @@ No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throug
 
 ## C. Code items, unfixed
 
-8. ~~**Fatal message can misattribute the location.**~~ **Fixed** in the P1b change: the
+9. ~~**Fatal message can misattribute the location.**~~ **Fixed** in the P1b change: the
    message now names the stage that latched the poisoning code, or says the code was
    pending with no stage. Original text retained for traceability: `motioncorr_runner.cpp` appends
    `", recorded at <stage>:<line>"` unconditionally. When the *pending* code forced the
    verdict — the exact compound path the P1 fix addresses — it prints the fatal code
    with the location of the earlier benign failure, and `recorded at :0` when nothing
    was recorded. Remedy: emit the clause only when `decision.decisive == recorded`.
-9. **`cudaRetryDecisionFor` discards `recorded_cufft`.** Documented and pinned by two
+10. **`cudaRetryDecisionFor` discards `recorded_cufft`.** Documented and pinned by two
    test rows, but a parameter that is never consulted is a trap for a future reader.
-10. **Sticky-first attribution.** A benign early failure supplies the stage and line
+11. **Sticky-first attribution.** A benign early failure supplies the stage and line
     reported for a later unrelated patch failure. The verdict is unaffected after the
     P1 fix; only the attribution can mislead.
-11. **Three dead fields** on the per-movie `TrialResult`, all sourced from globals.
-12. **`friend struct MotioncorrRunnerTestAccess;`** grants the test access to every
+12. **Three dead fields** on the per-movie `TrialResult`, all sourced from globals.
+13. **`friend struct MotioncorrRunnerTestAccess;`** grants the test access to every
     private member, not just `alignPatch`. Accepted as the minimum hook, but it is a
     permanent test hook in a production header and a precedent for the class.
-13. **F6's `cudaGetLastError` residual**: the robust form is returning the failing code
+14. **F6's `cudaGetLastError` residual**: the robust form is returning the failing code
     out of `preparePatchInVram`. Deferred because it widens an interface PR93 also
     edits. **Should become a tracked issue rather than an ADR paragraph.**
 
 ## D. Documentation items, unfixed
 
-14. **`RESULTS.md` §5's classifier block quotes a superseded version of
+15. **`RESULTS.md` §5's classifier block quotes a superseded version of
     `cuda-interposition.log`** — stale but true, and it under-claims (the current log
     says `21 classifier cases … [CUDART_VERSION 12080]` plus `13 retry cases`). The
     omitted line is quoted correctly elsewhere in the same file. Refresh next time that
     section is touched.
-15. `RESULTS.md` summary row says "all three test binaries linked" — off by one against
+16. `RESULTS.md` summary row says "all three test binaries linked" — off by one against
     §5's five, and now unevidenced because the regenerated `cuda-compile.log` no longer
     lists the binaries.
-16. ~~**`RESULTS.md` never mentions the early-binning control.**~~ **Fixed** — it is now
+17. ~~**`RESULTS.md` never mentions the early-binning control.**~~ **Fixed** — it is now
     in the summary table and §5d. Retained for traceability; a hand-off list carrying an
     already-fixed finding is itself a defect, and this one was caught by review.
-17. ADR "lands near `S`" phrasing — ambiguous rather than false in ADR context.
-18. `preprocessed_tu_control.sh` buckets any differing line containing `RelionError(`
+18. ADR "lands near `S`" phrasing — ambiguous rather than false in ADR context.
+19. `preprocessed_tu_control.sh` buckets any differing line containing `RelionError(`
     as `__LINE__` metadata, so a changed error *string* would be classified benign.
-19. The coordination-file exclusion is in `.git/info/exclude` — clone-local, does not
+20. The coordination-file exclusion is in `.git/info/exclude` — clone-local, does not
     travel to a fresh clone.
-20. `RESULTS.md` "source hashes on the GPU host match the cpu64 hashes exactly" — true,
+21. `RESULTS.md` "source hashes on the GPU host match the cpu64 hashes exactly" — true,
     but the GPU log now carries three files against provenance's five.
 
 ## E. Integration

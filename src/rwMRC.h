@@ -299,12 +299,17 @@ std::string mrcWriteBlock(FILE *fimg, const void *buffer, size_t bytes, const st
 	if (bytes == 0) return "";
 
 	errno = 0;
-	if (fwrite(buffer, bytes, 1, fimg) == 1 && ferror(fimg) == 0) return "";
+	// A single-item fwrite returns 1 only if every byte was accepted, so the
+	// count is the whole test. The stream error indicator is deliberately not
+	// consulted: it is sticky, so an earlier failure on a reused "r+" stream
+	// would condemn a write that actually succeeded.
+	if (fwrite(buffer, bytes, 1, fimg) == 1) return "";
 
 	const int saved_errno = errno;
 	return "Failed to write " + stage + " (" + std::to_string(bytes) +
 	       " bytes) to " + (std::string)filename + ": " +
-	       (saved_errno != 0 ? strerror(saved_errno) : "short write");
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("short write"));
 }
 
 /** Seek within an MRC file being written, failing closed. */
@@ -315,7 +320,8 @@ std::string mrcSeek(FILE *fimg, long int offset, int whence, const std::string &
 
 	const int saved_errno = errno;
 	return "Failed to seek to " + stage + " in " + (std::string)filename + ": " +
-	       (saved_errno != 0 ? strerror(saved_errno) : "seek failed");
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("seek failed"));
 }
 
 int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERWRITE, const DataType datatype=Unknown_Type) /* TODO: add type */
@@ -580,8 +586,11 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 				for (size_t i = imgStart; i < imgEnd && write_error.empty(); i++)
 				{
 					castPage2Datatype(MULTIDIM_ARRAY(data) + i * datasize_n, fdata, output_type, datasize_n);
-					write_error = mrcWriteBlock(fimg, fdata, datasize,
-					                            "image data (slice " + std::to_string(i) + ")");
+					// The slice label is appended only on failure, so the success
+					// path of a long stack write allocates nothing extra per frame.
+					write_error = mrcWriteBlock(fimg, fdata, datasize, "image data");
+					if (!write_error.empty())
+						write_error += " (slice " + std::to_string(i) + ")";
 				}
 			}
 		}

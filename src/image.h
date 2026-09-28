@@ -53,6 +53,7 @@
 #include <cerrno>
 #include <cstring>
 #include <string>
+#include <system_error>
 #include <typeinfo>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -212,6 +213,7 @@ public:
 	bool	  exist;    // Shows if the file exists
 	bool	  isTiff;   // Shows if this is a TIFF file
 	bool	  writable; // Opened for writing, so it has buffers worth flushing
+	FileName  open_name; // Path currently held, so a deferred error can name it
 
 	/** Empty constructor
 	 */
@@ -224,6 +226,7 @@ public:
 		exist=false;
 		isTiff=false;
 		writable=false;
+		open_name="";
 	}
 
 	/** Destructor: closes file (if it still open)
@@ -251,8 +254,10 @@ public:
 				return SIZE_MAX;
 		}();
 
-		// Close any file that was left open in this handler
-		if (!(fimg ==NULL && fhed == NULL))
+		// Close any file that was left open in this handler. ftiff is included:
+		// leaving it out skipped the close entirely for a TIFF-only handler, and
+		// the TIFFOpen below would then overwrite and leak the old handle.
+		if (!(fimg == NULL && fhed == NULL && ftiff == NULL))
 			closeFile();
 
 		FileName fileName, headName = "";
@@ -330,6 +335,10 @@ public:
 
 		isTiff = ext_name.contains("tif");
 
+		// Recorded after the extension rewrites above, so a deferred error names
+		// the path actually opened.
+		open_name = fileName;
+
 		// Open image file
 		if (isTiff) 
 		{
@@ -387,6 +396,7 @@ public:
 	{
 		ext_name="";
 		exist=false;
+		open_name="";
 
 		int first_errno = 0;
 
@@ -436,11 +446,15 @@ public:
 	 */
 	void closeFile(const FileName &name = "")
 	{
+		// Captured before releaseHandles() clears it. Falling back to the path
+		// recorded at open time matters for the handler-reuse branch above,
+		// which has no name to pass but is closing a file we did write.
+		const FileName reported = (name != "") ? name : open_name;
 		const int err = releaseHandles();
 		if (err != 0)
 			REPORT_ERROR("Failed to flush and close image file " +
-			             (std::string)(name == "" ? FileName("(unnamed)") : name) +
-			             ": " + strerror(err));
+			             (std::string)(reported == "" ? FileName("(unnamed)") : reported) +
+			             ": " + std::generic_category().message(err));
 	}
 
 };

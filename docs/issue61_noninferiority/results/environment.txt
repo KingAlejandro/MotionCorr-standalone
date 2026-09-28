@@ -1,4 +1,4 @@
-generated_utc: 2026-09-28T07:17:35Z
+generated_utc: 2026-09-28T07:20:23Z
 host: 4-gpu-vm  kernel: 6.8.0-136-generic
 study_cpu_policy: 4GPUs work under top-level taskset -c 96-103 behind /tmp/motioncorr-bench.lock;
                   cpu64 follow-up work under taskset -c 32-63 (NUMA node 1) behind /tmp/motioncorr-issue96-cpu-validation.lock
@@ -18,6 +18,8 @@ f8fe0e90056d656e286e58d946117275bc07aac3683168041733875dd39b46fd  /home/alex/rel
 2dca46e1ed7b16a11c8642ad8020550091825aa9f7e8c54f75f83085b8a6d87b  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_run_ctffind
 33eab815994300005a923d7d369fce3fab8e7e522729cece7c00bba84e146118  /home/alex/relion-container-tests/bin/relion-container-bin-r2/ctffind
 wrapper_dir: /home/alex/relion-container-tests/bin/relion-container-bin-r2
+container_image: /home/alex/relion-container-tests/sifs/relion-5.1.0-cuda12.8-sm80-full-plus-tomo-r2.sif
+b4f659198f78a0a909882d17e254dcaf185c20c68e6f9079e87be303ee225c3c  /home/alex/relion-container-tests/sifs/relion-5.1.0-cuda12.8-sm80-full-plus-tomo-r2.sif
 
 ## Motion-correction arm provenance (consumed from Issue #36)
 # Issue #36 all-FFTW hybrid — full 24-movie Gate 2 run

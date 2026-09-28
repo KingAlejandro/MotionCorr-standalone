@@ -41,16 +41,26 @@ and core header (bytes 0-223) are digested separately in
 [`results/arm_provenance.json`](results/arm_provenance.json), because the MRC label region carries
 a `strftime` timestamp and whole-file hashing gives false mismatches.
 
-### The three instrument controls
+### The instrument controls
 
-The protocol requires that each endpoint be shown to observe what it asserts. Three controls were
-built by transforming the `cpu` arm's micrographs:
+The protocol requires that each endpoint be shown to observe what it asserts. Seven controls were
+built by transforming the `cpu` arm's micrographs. Three shipped with PR #65; four
+margin-calibrated ones were added after review showed the original set could not demonstrate
+rejection at the harm margin (see section 3).
 
 | Control | Construction | What it tests |
 | --- | --- | --- |
-| `ctrl_noise_f005` | + independent Gaussian noise, variance `0.05 x var(micrograph)` | can the endpoint see a known 5% effective-data loss? |
-| `ctrl_noise_f020` | same at `f = 0.20` | response at a clearly unacceptable loss |
-| `ctrl_envelope_b20` | Fourier multiplication by `exp(-20 s^2 / 4)`, identical for every micrograph | does a large *image* change necessarily mean signal loss? |
+| `ctrl_noise_f005` | + independent Gaussian noise, variance `0.05 x var(micrograph)` | response curve only: its true loss is milder than the margin, so it certifies nothing |
+| `ctrl_noise_f0062` | as above, `f = 0.062` | **at** the harm margin: can a harmful arm earn a PASS? |
+| `ctrl_noise_f0076` | as above, `f = 0.076` | just beyond the margin |
+| `ctrl_noise_f011` | as above, `f = 0.110` | beyond the margin: must be positively rejected |
+| `ctrl_noise_f020` | as above, `f = 0.200` | clearly unacceptable loss |
+| `ctrl_envelope_b20` | Fourier multiplication by `exp(-20 s^2 / 4)`, identical for every micrograph | specificity: does a large *image* change necessarily mean signal loss? |
+
+`ctrl_envelope_b20` is the direct empirical demonstration of this issue's premise: image RMSE and
+recoverable signal are not interchangeable. These controls are an instrument calibration of one
+endpoint. The systematic perturbation matrix for diagnostic calibration is Issue #60's scope and
+is not duplicated here.
 
 ### Analysis sets
 
@@ -186,19 +196,65 @@ loss that B1 targets is 0.016 A, below a shell. The verdict is reported as the r
 INCONCLUSIVE, and B2 is a coarse secondary for exactly this reason. `allfftw` has zero spread
 across all 22 replicates and passes.
 
-### Validity of the primary endpoint — the precondition the protocol set
+### Validity of the primary endpoint — corrected after review
 
-| Control | `rho` (primary) | one-sided 95% bound | distance from 1.0 |
-| --- | ---: | ---: | ---: |
-| `ctrl_noise_f005` (known ~5% loss) | **0.9666** | 0.9567 | **5.8 SE** |
-| `ctrl_noise_f020` (known ~20% loss) | **0.8775** | point estimate only | - |
-| `ctrl_envelope_b20` (81% of 3-2 A power removed) | **1.0039** | 1.0021 | +3.7 SE, favourable |
+**The version of this section published up to `ef5935e` was wrong, and the error mattered.** It
+claimed the precondition was met because `ctrl_noise_f005` sat 5.8 standard errors away from
+`rho = 1.0`. Being displaced from 1.0 is not the same as resolving the harm margin: that control
+measured `rho = 0.9666` with a lower bound of `0.9567`, which is a clean **PASS** against the 0.95
+margin. It therefore never exercised the decision B1 has to make, and certified nothing. Raised as
+[r4119264405](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264405)
+and Copilot 4111302884; the criterion is tightened in [Amendment 1](PROTOCOL.md#10-amendments) and
+is now enforced in code rather than asserted in prose.
 
-The precondition is met: `rho` resolves the 5% control at 5.8 standard errors and orders the two
-noise levels correctly. Measured losses (3.3%, 12.2%) are smaller than the naive `1/(1+f)`
-prediction (4.8%, 16.7%) because the added noise is white while the micrograph's variance is
-concentrated at low frequency, so the per-shell noise increase in the 8-3 A band is less than `f`.
-The direction, ordering and magnitude are right, which is what the precondition requires.
+Two properties have to be separated, and only one of them is attainable at the margin:
+
+- **S1 — a control at or beyond the harm margin must not earn a PASS.** This is the property that
+  actually protects a non-inferiority claim, and it is testable arbitrarily close to the margin.
+- **S2 — a control at or beyond the margin is positively rejected** (upper bound below the margin).
+  This can *never* hold for a control sitting exactly at the margin, whose upper bound necessarily
+  exceeds its own point estimate. S2 is only ever demonstrable strictly beyond the margin, and how
+  far beyond is a property of the design's precision, not of the margin.
+
+Four margin-calibrated controls were therefore built and run, with their target levels predicted
+and committed before the reconstructions were analysed
+([`results/sensitivity_certificate.json`](results/sensitivity_certificate.json)):
+
+| Control | `f` | predicted `rho` | measured `rho` | lower 95% | upper 95% | earns a PASS? | positively rejected? |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| `ctrl_noise_f0062` | 0.062 | 0.950 | **0.94914** | 0.93630 | 0.96198 | **No** | no (impossible here) |
+| `ctrl_noise_f0076` | 0.076 | 0.950 | 0.93963 | 0.92720 | 0.95206 | No | no |
+| `ctrl_noise_f011` | 0.110 | 0.929 | 0.91460 | 0.90017 | 0.92902 | No | **Yes** |
+| `ctrl_noise_f020` | 0.200 | 0.8775 | **0.87753** | 0.85535 | 0.89972 | No | **Yes** |
+
+- **S1 is demonstrated at the margin.** `ctrl_noise_f0062` lands at `rho = 0.94914`, which is the
+  0.95 harm margin to within 0.0009, and it does **not** earn a PASS (lower bound 0.9363). An arm
+  as degraded as the study has declared unacceptable cannot be cleared by this test.
+- **S2 is demonstrated at `rho = 0.9146`**, an 8.5% effective-data loss. Between the margin and
+  that boundary the test declines to pass a harmful arm but does not positively flag it, which is
+  the expected behaviour of any finite-precision non-inferiority design and is reported rather
+  than glossed.
+- The `f020` control reproduces the PR #65 value **exactly** (0.87753 on both hosts), and its
+  interval — previously a point estimate only — is now complete.
+
+**The gate is not a no-op, and that is shown rather than claimed.** Re-running the identical
+analysis with the certificate withheld
+([`results/stageB_NEGATIVE_CONTROL_no_certificate.json`](results/stageB_NEGATIVE_CONTROL_no_certificate.json))
+drives **every** real-arm Stage B verdict from PASS to INCONCLUSIVE, including arms whose bounds
+sit 300 standard errors inside the margin. The pre-override verdict is retained in the JSON as
+`verdict_before_validity_gate`.
+
+**Cross-host chain.** The controls ran on `cpu64` and the real arms on `4GPUs`, so the sensitivity
+statement only transfers if the two are the same computation. That is established, not assumed:
+the CPU-baseline half-maps are **bit-identical** across the two hosts
+(`8f118ad7...` / `8bfce61d...`, pixel payload, both halves), and `ctrl_noise_f020` reproduces its
+`rho` to all printed digits. The certificate carries both digests and the consuming gate records
+them.
+
+**What a PASS now means.** A real arm passed a test that has been shown to refuse a PASS to a
+control at the harm margin and to positively reject one at an 8.5% loss. It does not mean the
+arms were shown to differ from CPU by less than 5%; it means no such difference was detectable by
+an endpoint with that demonstrated behaviour.
 
 ### The specificity control is the point of this issue
 
@@ -223,15 +279,26 @@ claim resting on `00021` or `00046` alone should be treated as a pilot, not a re
 
 ### Verification that the matched design is actually matched
 
-Two checks, because "the arms are identical except for the micrograph" is an assertion that has
-to be observable ([`scripts/i61_verify.sh`](scripts/i61_verify.sh)):
+"The arms are identical except for the micrograph" is an assertion, so it is tested
+([`scripts/i61_verify.py`](scripts/i61_verify.py),
+[`results/matched_design_verification.json`](results/matched_design_verification.json)). The
+check published up to `ef5935e` hashed seven columns *by position* and covered five of six arms;
+review findings
+[r4119264419](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264419),
+[r4119264433](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264433)
+and Copilot 4111302966 established that it silently omitted `_rlnAnglePsi` — one of the three
+orientation fields the matched-orientation premise depends on — and could not support the
+six-arm claim the report made. Replaced by a name-resolved check:
 
 | Check | Result |
 | --- | --- |
-| Extracted particle stacks differ between arms (movie 00022, 42,730,496 bytes each) | six distinct SHA-256 digests — the arms really are different data |
-| Coordinates, orientations, origins and `rlnRandomSubset` across the held-out 4095 particles | **byte-identical digest `d54438c50f9b83f8` in all six arms** |
-| Held-out particle count | 4095 in all six arms |
-| `relion_postprocess` phase-randomisation threshold, held-out set | **16.768418 A in all six arms**, so the solvent-corrected FSCs are directly comparable |
+| all 18 declared metadata fields **present** in every arm (absence must fail, not pass) | yes, 6/6 arms |
+| three orientation fields, both origins, both coordinates, half-set membership, CTF set, identical across arms | one shared digest per field across all six arms |
+| whole `data_particles` block identical across arms, as a catch-all for fields not named | one digest, `2a01408f40c649ef` |
+| particles per arm | 4452 in all six |
+| extracted particle stacks **differ** between arms, every movie | 144 digests (24 movies x 6 arms), all distinct per movie |
+| `relion_postprocess` phase-randomisation threshold, held-out set | 16.768418 A in all six arms |
+| verdict | `MATCHED_DESIGN_VERIFIED` |
 
 The one exception is in the secondary all-24 set, where `ctrl_noise_f020` randomises from
 16.77 A while every other arm randomises from 11.80 A. That affects only that control's
@@ -347,6 +414,7 @@ equivalence test.
 | A | A3 CtfFigureOfMerit | -5% relative | PASS | PASS |
 | A | A4 band power ratio | descriptive | 1.00000-1.00006 | 0.99999-1.00000 |
 | **B** | **B1 effective-data fraction `rho`** | **>= 0.95** | **PASS** (>= 0.99969) | **PASS** (>= 0.99992) |
+| B | *validity gate on all Stage B rows* | control at the margin must not pass; one beyond it must be rejected | SATISFIED (S1 at `rho` 0.94914, S2 at 0.91460) | same |
 | B | B2 `d143` delta | <= +0.05 A | INCONCLUSIVE (shell quantisation; point 0.000 A) | PASS |
 | B | B3 auto-B delta | >= -10 A^2 | PASS | PASS |
 | C | C1 `d143` after independent auto-refinement | <= +0.05 A | PASS | PASS |
@@ -486,6 +554,15 @@ roughly 30 minutes of actual compute, and Stage C needs the GPUs regardless. The
 the single-job mutex — the constraints that convention exists to enforce — were honoured
 throughout.
 
+The 2026-09-28 follow-up controls ran on **`cpu64`** under `taskset -c 32-63` (NUMA node 1,
+`numactl --cpunodebind=1 --preferred=1`), at most 12 concurrent, behind
+`/tmp/motioncorr-issue96-cpu-validation.lock`, queued behind other Issue #96 workers and with the
+long-running `ctffind` processes left untouched. No GPU was used and no MotionCorr run was
+launched. Statistics were computed with an isolated `~/.mc-i61-venv` (Python 3.12.3, NumPy 2.5.3,
+SciPy 1.18.1) so the shared validation venv was not modified; the `4GPUs` analyses continue to use
+its Python 3.12.3 / NumPy 2.4.6 / SciPy 1.17.1 environment, and `ctrl_noise_f020` reproduces
+identically under both.
+
 ### Time and peak memory
 
 | Stage | Unit | Wall | Peak RSS |
@@ -498,6 +575,7 @@ throughout.
 | `relion_postprocess` batch | 122 jobs, 8-way parallel | 4 min 30 s | - |
 | `relion_refine_mpi` auto-refine | 4095 particles, 3 ranks x 3 threads, 4x A100, 15-17 iterations | 5 min 31 s - 6 min 54 s | 2.84 GB |
 | Stage C total | 3 arms x 3 seeds = 9 refinements + 9 post-processing runs | 57 min | - |
+| Follow-up controls (`cpu64`) | 5 arms x (extract + 46 reconstructions + 23 post-processing), 12-way | 18 min total | 12 x ~4.3 GB |
 
 244 reconstructions and 122 post-processing runs completed with zero failures. Four
 post-processing logs contain an `ERROR` line from Ghostscript failing to write `logfile.pdf`
@@ -507,3 +585,38 @@ numerical output.
 The discarded first Stage C pass (uncontrolled time-derived seeds) is retained in
 [`results/stageC_refinement.json`](results/stageC_refinement.json) under
 `uncontrolled_seed_pass`, so the correction is auditable rather than merely asserted.
+
+---
+
+## 9. Disposition of the PR #65 review
+
+Seventeen findings were raised against `ef5935e` — five by the Codex reviewer, twelve by Copilot.
+All were verified against the source before being acted on. Every one is fixed, except one whose
+premise does not hold in this environment and which is documented rather than changed.
+
+| Finding | Substance | Disposition |
+| --- | --- | --- |
+| [r4119264405](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264405) **P1** | the 5% control passed the margin, so it never showed B1 can reject harm | **Confirmed.** [Amendment 1](PROTOCOL.md#10-amendments) tightens the criterion; four margin-calibrated controls added; S1 demonstrated at the margin (`rho` 0.94914), S2 at 0.91460 |
+| [r4119264412](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264412) / 4111302884 | the precondition was prose, not code; a bad control run would still emit PASS | **Confirmed.** Enforced in `i61_analyse_B.py`, with a negative control proving it bites |
+| [r4119264419](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264419) | positional hashing covered 7 columns and omitted `_rlnAnglePsi` | **Confirmed.** Replaced by name-resolved checking of 18 fields plus the whole block, with presence asserted |
+| [r4119264427](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264427) / 4111302980 | committed provenance recorded a `SyntaxError`, not the tool versions, and could not have come from the committed script | **Confirmed.** Regenerated from the committed command; the erroneous artifact is retained as `environment.superseded-ef5935e.txt` with a header explaining why |
+| [r4119264433](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264433) / 4111302966 | stack verification omitted `ctrl_noise_f020` | **Confirmed.** Now 144 stacks: every movie in every arm |
+| 4111302870 | jackknife sample discovered by glob, not pinned to the protocol's 22 movies | **Confirmed.** Pinned; the analysis aborts if the replicate set on disk differs |
+| 4111302893 | `i61_extract.sh` aborts under `set -u` with `ARMS` unset | **Confirmed.** Default added |
+| 4111302903 | `i61_phase2.sh` consumed a job file it never generated | **Confirmed.** Generates it first and fails if that step fails |
+| 4111302920 | two missing files compared equal, so absent inputs counted as payload identity | **Confirmed**, and the sharpest of the set: a check that could not observe what it asserted. Completeness is now required before any identity claim, the count of pairs actually compared is recorded, and the script exits non-zero on any missing input |
+| 4111302927 / 4111302938 | batch drivers discarded the `xargs` status and always printed a success marker | **Confirmed.** Markers are conditional on exit status, expected output count, and absence of non-Ghostscript errors |
+| 4111302943 | stage 0 assumed `results/` and `logs/` pre-existed | **Confirmed.** Created |
+| 4111302990 | container image resolved but never emitted or hashed | **Confirmed.** Image path and SHA-256 now recorded |
+| 4111302949 | `i61_stageC2.sh` drops `--allow-run-as-root` | **Premise does not hold here.** That flag is required only when MPI runs as root; these runs executed as the unprivileged user `alex` and all nine refinements completed. The script records the command that was actually executed and is annotated rather than altered |
+
+One further defect was found by this work rather than by review, and is recorded because it is the
+same class as 4111302920: the first version of the new validity gate reported `S1 = True` while
+having no interval to evaluate it against, because the candidate records carried no lower bound.
+It now fails closed — a harmful control without an interval makes S1 *unproven*, not satisfied.
+
+**Effect on the results.** None of the reported endpoint values changed. The corrected analysis
+reproduces every previously published number exactly, including all 72 corrected-micrograph pixel
+digests and the Stage B bounds. What changed is what those numbers are licensed to support: the
+Stage B PASS verdicts now rest on a sensitivity demonstration that the original set of controls
+could not provide.

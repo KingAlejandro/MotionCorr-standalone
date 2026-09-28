@@ -67,7 +67,9 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0001086503532002,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     },
     "B1_rho_primary_corrected": {
      "ci95_two_sided": [
@@ -106,7 +108,9 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0000456960857798,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     },
     "B2_d143_delta_A": {
      "ci95_two_sided": [
@@ -145,7 +149,9 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.0,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     },
     "B3_bfactor_delta_A2": {
      "ci95_two_sided": [
@@ -184,7 +190,9 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 0.10216366458421586,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     }
    }
   },
@@ -688,7 +696,9 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.000471977655221,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     },
     "B1_rho_primary_corrected": {
      "ci95_two_sided": [
@@ -727,7 +737,9 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0002266499221248,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     },
     "B2_d143_delta_A": {
      "ci95_two_sided": [
@@ -766,7 +778,9 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.05079679978452561,
-     "verdict": "INCONCLUSIVE"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "INCONCLUSIVE"
     },
     "B3_bfactor_delta_A2": {
      "ci95_two_sided": [
@@ -805,7 +819,9 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 1.6850033008058758,
-     "verdict": "PASS"
+     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "verdict": "INCONCLUSIVE",
+     "verdict_before_validity_gate": "PASS"
     }
    }
   }
@@ -910,19 +926,16 @@
   }
  },
  "validity": {
-  "S1_controls_evaluated": 4,
+  "S1_controls_evaluated": 0,
   "S1_controls_that_wrongly_passed": [],
   "S1_controls_without_an_interval": [
    "ctrl_noise_f020"
   ],
-  "S1_demonstrated_no_false_pass_down_to_rho": 0.9491405795719606,
-  "S1_no_harmful_control_passes": true,
+  "S1_demonstrated_no_false_pass_down_to_rho": null,
+  "S1_no_harmful_control_passes": false,
   "S2_at_the_exact_margin_is_unattainable_by_construction": true,
-  "S2_certifying_controls": [
-   "ctrl_noise_f011",
-   "ctrl_noise_f020"
-  ],
-  "S2_sensitivity_demonstrated": true,
+  "S2_certifying_controls": [],
+  "S2_sensitivity_demonstrated": false,
   "candidates": [
    {
     "at_or_beyond_harm": false,
@@ -978,117 +991,14 @@
     "source": "this run",
     "upper95": 1.0056800639682846,
     "why": "degradation is milder than the harm margin, so it never exercises the decision"
-   },
-   {
-    "at_or_beyond_harm": true,
-    "control": "ctrl_noise_f0062",
-    "earned_a_pass": false,
-    "equivalence_proof": {
-     "bit_identical": true,
-     "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
-     "cpu_baseline_half_map_payload_sha256_peer_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
-      "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
-      "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
-     },
-     "cpu_baseline_half_map_payload_sha256_this_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
-     },
-     "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
-    },
-    "lower95": 0.9362976728552266,
-    "rejected_at_margin": false,
-    "rho": 0.9491405795719606,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9619834862886947,
-    "why": "does not certify B1"
-   },
-   {
-    "at_or_beyond_harm": true,
-    "control": "ctrl_noise_f0076",
-    "earned_a_pass": false,
-    "equivalence_proof": {
-     "bit_identical": true,
-     "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
-     "cpu_baseline_half_map_payload_sha256_peer_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
-      "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
-      "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
-     },
-     "cpu_baseline_half_map_payload_sha256_this_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
-     },
-     "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
-    },
-    "lower95": 0.9272020045839827,
-    "rejected_at_margin": false,
-    "rho": 0.9396329214483049,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9520638383126271,
-    "why": "does not certify B1"
-   },
-   {
-    "at_or_beyond_harm": true,
-    "control": "ctrl_noise_f011",
-    "earned_a_pass": false,
-    "equivalence_proof": {
-     "bit_identical": true,
-     "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
-     "cpu_baseline_half_map_payload_sha256_peer_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
-      "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
-      "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
-     },
-     "cpu_baseline_half_map_payload_sha256_this_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
-     },
-     "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
-    },
-    "lower95": 0.9001727634258705,
-    "rejected_at_margin": true,
-    "rho": 0.9145985016381414,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9290242398504123,
-    "why": "certifies B1: at or beyond the harm margin and rejected by the test"
-   },
-   {
-    "at_or_beyond_harm": true,
-    "control": "ctrl_noise_f020",
-    "earned_a_pass": false,
-    "equivalence_proof": {
-     "bit_identical": true,
-     "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
-     "cpu_baseline_half_map_payload_sha256_peer_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
-      "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
-      "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
-     },
-     "cpu_baseline_half_map_payload_sha256_this_host": {
-      "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-      "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
-     },
-     "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
-    },
-    "lower95": 0.8553528495109983,
-    "rejected_at_margin": true,
-    "rho": 0.8775343864826751,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.8997159234543519,
-    "why": "certifies B1: at or beyond the harm margin and rejected by the test"
    }
   ],
-  "certificate_path": "/home/alex/mc-issue61/sensitivity_certificate.json",
-  "demonstrated_detection_boundary_rho": 0.9145985016381414,
-  "forced_inconclusive": false,
+  "certificate_path": null,
+  "demonstrated_detection_boundary_rho": null,
+  "forced_inconclusive": true,
   "margin": 0.95,
+  "reason": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
   "rule": "a Stage B verdict for a real arm may stand only if (S1) no control at or beyond the 0.95 harm margin earns a PASS, AND (S2) at least one such control is positively rejected",
-  "sensitivity_demonstrated": true
+  "sensitivity_demonstrated": false
  }
 }

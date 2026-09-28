@@ -287,3 +287,41 @@ Because they are derived from the CPU arm, the CPU baseline is recomputed on `cp
 comparison is self-contained on that host. The transfer of the resulting sensitivity statement to
 the `4GPUs` real-arm comparison requires that the two pipelines be the same computation, which is
 established by digest equality of the CPU baseline half-maps rather than assumed.
+
+#### Amendment 1 — outcome
+
+Executed on `cpu64` on 2026-09-28 under `taskset -c 32-63` (NUMA node 1) behind
+`/tmp/motioncorr-issue96-cpu-validation.lock`, 12 concurrent, `ctffind` untouched. Predictions
+above were committed at `593611c`, before the reconstructions were analysed.
+
+| Control | `f` | predicted `rho` | measured `rho` | lower 95% | upper 95% | earns a PASS? | positively rejected? |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| `ctrl_noise_f0062` | 0.062 | 0.950 | 0.94914 | 0.93630 | 0.96198 | **No** | no |
+| `ctrl_noise_f0076` | 0.076 | 0.950 | 0.93963 | 0.92720 | 0.95206 | No | no |
+| `ctrl_noise_f011` | 0.110 | 0.929 | 0.91460 | 0.90017 | 0.92902 | No | **Yes** |
+| `ctrl_noise_f020` | 0.200 | 0.8775 | 0.87753 | 0.85535 | 0.89972 | No | **Yes** |
+
+`ctrl_noise_f0062` was added after the first three, once they showed the original response model
+`k = 0.694` had to be recalibrated to `k = 0.847`; its target of `rho = 0.950` was likewise
+recorded before analysis and landed at 0.94914.
+
+**Outcome.** The amended criterion is met: `ctrl_noise_f011` and `ctrl_noise_f020` are at or
+beyond the margin and are rejected, giving a demonstrated detection boundary of `rho = 0.9146`.
+The criterion the amendment actually needed, and which the analysis now also enforces, is the
+companion property **S1**: no control at or beyond the margin may earn a PASS. That is
+demonstrated at `rho = 0.94914`, i.e. **at the margin**. Positive rejection exactly at the margin
+(S2) is impossible by construction, because a control whose true `rho` equals the margin has an
+upper bound above it; the report states this rather than treating the gap as a result.
+
+**Residual limit.** Between `rho = 0.95` and `rho = 0.9146` the endpoint declines to pass a
+harmful arm but does not positively flag it. No experiment can remove that band; narrowing it
+requires more movies (a smaller jackknife SE), not a different control.
+
+**Discriminating negative.** Re-running the same analysis with the certificate withheld forces
+every real-arm Stage B verdict from PASS to INCONCLUSIVE
+(`results/stageB_NEGATIVE_CONTROL_no_certificate.json`), so the gate is demonstrably not a no-op.
+
+**Cross-host validity.** The controls ran on `cpu64` and the real arms on `4GPUs`. The CPU
+baseline half-maps are bit-identical between the two hosts (pixel payload, both halves), and
+`ctrl_noise_f020` reproduces its PR #65 `rho` to all printed digits, so the two runs are the same
+computation and the sensitivity statement transfers without inference.

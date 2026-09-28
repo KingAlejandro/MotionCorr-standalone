@@ -224,15 +224,17 @@ def sensitivity_candidates(res, margin, cert_path):
         src = "this run"
         if not jk or "error" in jk:
             pt = entry.get("held22", {}).get("B1_rho_primary_corrected", {}).get("value")
-            out.append({"control": a, "source": src, "rho": pt, "upper95": None,
+            out.append({"control": a, "source": src, "rho": pt, "upper95": None, "lower95": None,
+                        "earned_a_pass": None,
                         "at_or_beyond_harm": (pt is not None and pt <= margin),
                         "rejected_at_margin": False,
                         "why": "no jackknife interval, so the endpoint cannot be shown to reject it"})
             continue
-        pt, ub = jk["point_estimate"], jk["upper95_one_sided"]
+        pt, ub, lb = jk["point_estimate"], jk["upper95_one_sided"], jk["lower95_one_sided"]
         at_harm = pt <= margin
         rejected = ub < margin
-        out.append({"control": a, "source": src, "rho": pt, "upper95": ub,
+        out.append({"control": a, "source": src, "rho": pt, "upper95": ub, "lower95": lb,
+                    "earned_a_pass": bool(lb >= margin),
                     "at_or_beyond_harm": at_harm, "rejected_at_margin": bool(at_harm and rejected),
                     "why": ("certifies B1" if (at_harm and rejected) else
                             "degradation is milder than the harm margin, so it never exercises the decision"
@@ -241,11 +243,13 @@ def sensitivity_candidates(res, margin, cert_path):
     if cert_path and os.path.exists(cert_path):
         cert = json.load(open(cert_path))
         for c in cert.get("controls", []):
-            pt, ub = c.get("rho"), c.get("upper95")
+            pt, ub, lb = c.get("rho"), c.get("upper95"), c.get("lower95")
             at_harm = pt is not None and pt <= margin
             rejected = ub is not None and ub < margin
             out.append({"control": c.get("control"), "source": cert.get("source", cert_path),
-                        "rho": pt, "upper95": ub, "at_or_beyond_harm": at_harm,
+                        "rho": pt, "upper95": ub, "lower95": lb,
+                        "earned_a_pass": (None if lb is None else bool(lb >= margin)),
+                        "at_or_beyond_harm": at_harm,
                         "rejected_at_margin": bool(at_harm and rejected),
                         "equivalence_proof": cert.get("equivalence_proof"),
                         "why": c.get("why", "")})
@@ -254,24 +258,63 @@ def sensitivity_candidates(res, margin, cert_path):
 
 MARGIN_B1 = MARGIN["B1_rho"]
 cands = sensitivity_candidates(res, MARGIN_B1, SENSITIVITY_CERT)
+
+# Two distinct properties, only one of which is attainable at the margin itself.
+#
+#   S1  no control at or beyond the harm margin may EARN A PASS.  This is the property that
+#       actually protects a non-inferiority PASS, and it is testable arbitrarily close to the
+#       margin.  If it fails, the endpoint can hand a clean bill of health to a harmful arm
+#       and no real-arm verdict from it means anything.
+#   S2  some control at or beyond the margin is positively REJECTED (upper bound < margin).
+#       Note this can never hold for a control sitting exactly AT the margin, whose upper
+#       bound necessarily exceeds its own point estimate; S2 is therefore only ever
+#       demonstrable strictly beyond the margin, and how far beyond is a property of the
+#       design's precision, not of the margin.
+harmful = [c for c in cands if c["at_or_beyond_harm"]]
+# fail closed: a harmful control we cannot evaluate is not evidence that S1 holds
+unevaluable = [c for c in harmful if c.get("lower95") is None]
+wrongly_passing = [c for c in harmful
+                   if c.get("lower95") is not None and c["lower95"] >= MARGIN_B1]
+s1_testable = [c for c in harmful if c.get("lower95") is not None]
 certifying = [c for c in cands if c["rejected_at_margin"]]
-# the tightest certifying control is the demonstrated detection boundary
+# tightest control the test positively rejects, and tightest it correctly refuses to pass
 boundary = max((c for c in certifying), key=lambda c: c["rho"], default=None)
+no_false_pass = [c for c in harmful
+                 if c.get("lower95") is not None and c["lower95"] < MARGIN_B1]
+nfp_boundary = max((c for c in no_false_pass), key=lambda c: c["rho"], default=None)
+
 res["validity"] = {
-    "rule": ("a Stage B verdict for a real arm may stand only if some positive control with "
-             f"rho <= {MARGIN_B1} also has an upper one-sided 95% bound < {MARGIN_B1}"),
+    "rule": ("a Stage B verdict for a real arm may stand only if (S1) no control at or beyond "
+             f"the {MARGIN_B1} harm margin earns a PASS, AND (S2) at least one such control is "
+             "positively rejected"),
     "margin": MARGIN_B1,
     "candidates": cands,
-    "sensitivity_demonstrated": bool(certifying),
+    "S1_no_harmful_control_passes": bool(s1_testable) and not wrongly_passing,
+    "S1_controls_evaluated": len(s1_testable),
+    "S1_controls_without_an_interval": [c["control"] for c in unevaluable],
+    "S1_controls_that_wrongly_passed": [c["control"] for c in wrongly_passing],
+    "S1_demonstrated_no_false_pass_down_to_rho": (nfp_boundary["rho"] if nfp_boundary else None),
+    "S2_sensitivity_demonstrated": bool(certifying),
+    "S2_certifying_controls": [c["control"] for c in certifying],
     "demonstrated_detection_boundary_rho": (boundary["rho"] if boundary else None),
-    "certifying_controls": [c["control"] for c in certifying],
+    "S2_at_the_exact_margin_is_unattainable_by_construction": True,
+    "sensitivity_demonstrated": bool(certifying) and bool(s1_testable) and not wrongly_passing,
     "certificate_path": SENSITIVITY_CERT or None,
 }
 
-if not certifying:
-    reason = ("validity precondition FAILED: no positive control was both at or beyond the "
-              f"{MARGIN_B1} harm margin and rejected by the test, so B1 has not been shown to "
-              "resolve its own margin")
+if wrongly_passing or not certifying or not s1_testable:
+    if not s1_testable:
+        reason = ("validity precondition FAILED (S1 untestable): no control at or beyond the "
+                  f"{MARGIN_B1} harm margin has a confidence interval, so it is unknown whether "
+                  "a harmful arm could earn a PASS")
+    elif wrongly_passing:
+        reason = ("validity precondition FAILED (S1): control(s) "
+                  f"{[c['control'] for c in wrongly_passing]} are at or beyond the {MARGIN_B1} "
+                  "harm margin yet earned a PASS, so the endpoint can clear a harmful arm")
+    else:
+        reason = ("validity precondition FAILED (S2): no positive control was both at or beyond "
+                  f"the {MARGIN_B1} harm margin and rejected by the test, so B1 has not been "
+                  "shown to resolve its own margin")
     res["validity"]["forced_inconclusive"] = True
     res["validity"]["reason"] = reason
     for a in REAL:
@@ -291,6 +334,10 @@ json.dump(res, open(f"{ROOT}/results/{OUT_NAME}", "w"), indent=1, sort_keys=True
 
 v = res["validity"]
 print("validity precondition:", "SATISFIED" if v["sensitivity_demonstrated"] else "FAILED")
+print(f"   S1 no harmful control earns a PASS : {v['S1_no_harmful_control_passes']}"
+      f"  (demonstrated down to rho = {v['S1_demonstrated_no_false_pass_down_to_rho']})")
+print(f"   S2 a harmful control is rejected   : {v['S2_sensitivity_demonstrated']}"
+      f"  (boundary rho = {v['demonstrated_detection_boundary_rho']})")
 for c in v["candidates"]:
     print(f"   control {c['control']:20s} rho={c['rho'] if c['rho'] is None else round(c['rho'],5)!s:>8s}"
           f" upper95={c['upper95'] if c['upper95'] is None else round(c['upper95'],5)!s:>8s}"

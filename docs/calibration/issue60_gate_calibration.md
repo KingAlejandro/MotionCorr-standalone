@@ -7,8 +7,8 @@ Evidence report for [issue #60](https://github.com/KingAlejandro/MotionCorr-stan
 > reclassified. Section 10 is a *proposal* for separate review.
 >
 > **Revised 28 September 2026** after four confirmed review findings on PR #64.
-> Two of the three proposed blocking checks are withdrawn as inconclusive and
-> the published hold-out figures are superseded. Start at **§0**.
+> **All three** proposed blocking checks are withdrawn as inconclusive and the
+> published hold-out figures are superseded. Start at **§0**.
 
 ---
 
@@ -20,8 +20,10 @@ All four are real. Each is reproduced against the pre-review code by
 `tools/calibration/reproduce_review_findings.py` and guarded going forward by
 `tools/calibration/test_contracts.py`.
 
-**No threshold was changed and no gate was relaxed to resolve them.** Two of the
-three proposed blocking checks are withdrawn as inconclusive as a result.
+**No threshold was changed and no gate was relaxed to resolve them.** All three
+proposed blocking checks are withdrawn as inconclusive as a result — including
+the one that initially survived the split and tiering corrections, because the
+Layer-2 dose arm restored by finding 4 is the arm it fails on (§6.1).
 
 | # | Finding | Status | Effect |
 |:--|:---|:---|:---|
@@ -43,8 +45,9 @@ withdrawn along with the rest of §10's published hold-out numbers.
 | "hold-out 270/270 detection, 0/90 false alarms" | **withdrawn** — computed on a leaked split, and overstated even within it |
 | `std_shift_px ≤ 0.05 px` blocking, "7.0x clean band" | **withdrawn, inconclusive** — its positive class was the accounted translation |
 | `std_scale_dev` "separates cleanly against the declared 1 % clause" | **withdrawn, inconclusive** — its positive class was the uniform gain error, and the new C2 control shows the diagnostic is blind to the frame-dependent error the clause actually names (§10.3) |
-| `std_delta_b_a2 ≤ 2 Å²` blocking | **revised and retained** — re-derived on the corrected split and tiering as **≤ 3.38 Å²**; survives under both readings of the translation clause (§10.4) |
-| §5 zero floor, §6 harm bridge, §7 real-pipeline response, §8 layer-1 curves | **unchanged** — none depends on the split or the tiering |
+| `std_delta_b_a2 ≤ 2 Å²` blocking | **withdrawn, inconclusive** — it survived the split and tiering corrections, then failed once the restored dose arm was included: the highest value on a negligible cell is 27x the lowest on an unacceptable one, and the instrument rejects its own fit in all 90 dose cells (§6.1, §10.1) |
+| §5 zero floor, §7 real-pipeline response, §8 layer-1 curves | **unchanged** — none depends on the split or the tiering |
+| §6 harm bridge "reference-measured Δ*B* tracks absolute harm" | **scope narrowed** — the measurement stands for applied attenuation (ratio 1.00) and motion faults (0.9–1.1), and is now shown **not** to extend to dose-weighting faults, where it is anti-correlated with harm (§6.1) |
 
 ### 0.2 The hold-out is no longer blind, and that is not repairable
 

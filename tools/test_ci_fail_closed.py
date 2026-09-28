@@ -162,9 +162,9 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 17 tests: the 13 pre-existing ones, the
-        # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, and
-        # the #98 DefectParser.
+        # The integrated suite registers 18 tests: the 13 pre-existing ones, the
+        # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
+        # #98 DefectParser, and the #53 MultiGpuScheduling.
         INTEGRATED_SUITE = [
             "SyntheticRegression",
             "HotPixelRngDeterminism",
@@ -183,6 +183,7 @@ exec "{sys.executable}" "$@"
             "WriteFaults",
             "ImageWriteFaults",
             "DefectParser",
+            "MultiGpuScheduling",
         ]
 
         def drop_one(name: str):
@@ -200,7 +201,8 @@ exec "{sys.executable}" "$@"
 
         # Case B: a required test is absent, the count gate is satisfied, so the
         # only thing that can reject the collection is the missing-name check.
-        for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults", "DefectParser"):
+        for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults", "DefectParser",
+                        "MultiGpuScheduling"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

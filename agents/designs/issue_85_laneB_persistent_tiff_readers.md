@@ -170,9 +170,16 @@ peak to reach the pool size rather than one worker draining the queue.
 
 A two-damaged-frame fixture checks that the error the caller sees belongs to
 the lowest position in `frames` at 1/2/4/8 readers, not to whichever worker
-failed first. `tiffMovieReaderApplies` has its own table of 16 names checked
-against `Image::_read`'s dispatch order, including `.stif`, `.gain` and an
-explicit `:mrc` override.
+failed first. A one-damaged-frame fixture, located by walking the IFD chain,
+checks that every frame the reference decoded is still decoded correctly by
+the pool after a sibling frame failed, and that a pool whose reopen failed is
+reported on reuse rather than handing a closed `TIFF*` to LibTIFF.
+`tiffMovieReaderApplies` has its own table of 16 names checked against
+`Image::_read`'s dispatch order, including `.stif`, `.gain` and an explicit
+`:mrc` override.
+
+422 checks in total, passing on both the LibTIFF >= 4.5 per-handle build and
+the forced < 4.5 `thread_local` build.
 
 ## Limitations
 

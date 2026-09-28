@@ -136,7 +136,7 @@ which has not been done.
 [`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt), whose source hashes are
 verified identical to the pinned head before the binaries are quoted. **Read them
 there, not here** — a hand-typed copy of the candidate hash has gone stale twice. At
-the time of writing: base `cb1e1cb1…`, candidate `4e55739c…`. Every change in this branch to
+the time of writing: base `cb1e1cb1…`, candidate `4a6abab1…`. Every change in this branch to
 `motioncorr_runner.cpp` is inside `#ifdef _CUDA_ENABLED`, so a CPU-only build should
 contain no new code — but the binaries are not identical, and a hash difference left
 unexplained is exactly the kind of thing that later gets waved away.
@@ -547,6 +547,64 @@ so it read as `mrc=0` — a zero-file comparison, the precise anti-pattern the r
 instructions prohibit. Both are harness defects, both are fixed, and the broken run is
 retained rather than deleted.
 
+## 5e. Second boundary: fatal error consumed by the FALLBACK preparation
+
+Codex PR107 `discussion_r4119570895`, and it was right.
+
+The §5c health check runs **before** `cudaPreparePatch`, so it structurally cannot see a
+fatal error raised *by* that preparation. The surviving sequence:
+
+1. the resident attempt is nonconverged, or fails recoverably — nothing fatal yet;
+2. the pre-fallback check therefore **permits**, correctly;
+3. `cudaPreparePatch` hits a fatal fault. Its own handler **consumes** the code, logs
+   it and returns `false`, clearing the thread's last-error slot;
+4. the caller CPU-prepares, then `alignPatch` **re-dispatches CUDA** because `use_gpu`
+   is still true — onto the context step 3 just killed.
+
+Neither thing a caller can inspect afterwards sees it: the session state never observed
+this failure, and the slot is empty. **A peek at a cleared slot is not a health check.**
+
+The fix carries the status out of the helper. `cudaPreparePatch` takes an optional
+`CudaFailureState *failure` (defaulted `nullptr`, so no other caller changes) and
+`cuda_fft_prep.cu`'s consuming handlers record into it. The runner checks that state
+immediately after a failed fallback preparation and refuses the re-dispatch on a
+poisoning code, naming the stage and line **the fallback itself** recorded rather than
+the resident attempt's unrelated earlier failure. A recoverable fallback failure still
+permits the host path.
+
+The control is ordered as production orders it and is discriminating: it asserts the
+pre-fallback check permits, the post-fallback check refuses, the refusal names the code
+the fallback consumed, and — the part that makes it discriminating — that **the resident
+state alone still reads permitted** and **a cleared slot alone never justifies a fatal
+verdict**. A fix consulting only the session, or only peeking at the slot, fails it.
+
+### Executed on the corrected source
+
+`cpu64`, validation lock, cores 32-63, `cpubind`/`nodebind` 1, 215 GB available, 16 MB /
+686-file payload, both `ctffind` processes recorded and untouched: configure 0, build 0,
+**14/14 CTest**, same-backend identical with negative control, retry-state control
+passing, preprocessed-TU `anything else = 0`.
+
+GPU2 `GPU-063e5232-…`, CPUs 112-119, per-device lock, after an occupancy and identity
+recheck ([`evidence/native-gpu2/08-corrected-source-gpu2.log`](evidence/native-gpu2/08-corrected-source-gpu2.log)):
+
+```
+configure=0  build=0  compile errors=0
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+8 session-state sequences, 0 failures      <- was 6; the two new ones are this boundary
+3 capacity controls, 0 failures
+132 trials, 0 failures                     <- fault matrix re-run, FAIL rows: 0
+all-24: 106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+        negative control reported 2 differing files (expected 2)
+```
+
+Source hashes match byte-for-byte across the worktree, `cpu64` and the GPU host.
+
+**Unchanged and still true:** F5 **did not reproduce** natively (§5d); a genuine
+poisoned context, the early-binning control and any older-toolkit build remain
+**UNRUN**; no timing is recorded or claimed.
+
 ## 6. Findings fixed
 
 Against `4c952b3f`; full detail in the ADR. Seven, not six: F7 was found while acting
@@ -560,6 +618,7 @@ on a review finding.
 | F4 | Pointer cleared after the free, so a failing `cudaFree` left it set for `release()` to free again | `cuda_movie_session.cu` `releasePreprocessingBuffers` |
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
+| P1c | A fatal error consumed by the **fallback** `cudaPreparePatch` was invisible to a health check that ran before it, so `alignPatch` re-dispatched CUDA onto a context that preparation had just killed | `cuda_fft_prep.{h,cu}`, `motioncorr_runner.cpp` |
 | P1b | A later fatal error could be discarded because the session kept only the first failure, so a recoverable code recorded earlier masked it while the consuming handler had already cleared the pending slot | `cuda_failure_state.h`, `cuda_movie_session.{h,cu}`, `cuda_error_class.h` |
 | P2 | Per-patch `std::vector` cleanup registries performed host heap allocation on every healthy alignment | `cuda_scoped_resources.h`, `cuda_alignpatch.cu` |
 | P1 | The retry decided context health from a later `cudaGetLastError()`, which the failing stage had already consumed and reset — so a fatal, consumed failure was retried as recoverable | `motioncorr_runner.cpp`, `cuda_movie_session.{h,cu}`, `cuda_error_class.h` |

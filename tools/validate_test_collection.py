@@ -30,6 +30,7 @@ DEFAULT_REQUIRED_TESTS = [
     "TiffRead",
     "DamagedMovie",
     "RunnerModelParser",
+    "CiFailClosedControls",
 ]
 
 
@@ -100,8 +101,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=1,
-                        help="Minimum number of tests that must be collected (default: 1)")
+    parser.add_argument("--min-count", type=int, default=14,
+                        help="Minimum number of tests that must be collected (default: 14)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",
@@ -127,7 +128,7 @@ def main() -> int:
         opts.dump_json.write_text(json.dumps(report, indent=2) + "\n")
 
     if not opts.quiet:
-        print(f"=== CTest Collection Validation: {report['status']} ===")
+        print(f"=== CTest Collection Validation: {report['status']} === ")
         print(f"  Collected tests: {report['collected_count']}")
         for t in report["collected_tests"]:
             mark = "REQUIRED" if t in report["required_tests"] else "ADDITIVE"

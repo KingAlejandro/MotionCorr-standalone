@@ -283,7 +283,8 @@ def git_commit(repo_root: Path) -> str:
 
 def generate_case(name: str, outdir: Path, repo_root: Path,
                   noise_rel: float | None = None, noise_seed_offset: int = 0,
-                  label: str | None = None, write_manifest: bool = False) -> dict:
+                  label: str | None = None, write_manifest: bool = False,
+                  canonical: bool = False, refuse_conflicting: bool = False) -> dict:
     """Generate one case.
 
     ``noise_rel`` and ``noise_seed_offset`` exist for the noise response curve and the
@@ -435,8 +436,32 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
         "expected_applied_field": np.round(-grid_field, 12).tolist(),
     }
     gt_path = outdir / f"{out_name}_ground_truth.json"
-    if not gt_path.exists() or write_manifest:
+
+    if canonical:
+        if not gt_path.is_file():
+            raise RuntimeError(f"Canonical mode: missing required ground-truth JSON {gt_path}")
+        existing_gt = json.loads(gt_path.read_text())
+        if existing_gt.get("movie_sha256") != gt["movie_sha256"]:
+            raise RuntimeError(
+                f"Canonical mode disagreement for {out_name}: generated movie sha256 {gt['movie_sha256']} "
+                f"!= expected canonical {existing_gt.get('movie_sha256')}"
+            )
+        # Canonical mode verified; preserve pristine canonical truth file
+    else:
+        if gt_path.is_file() and refuse_conflicting:
+            try:
+                existing_gt = json.loads(gt_path.read_text())
+                if (existing_gt.get("noise", {}).get("relative_sigma") != cfg["noise_rel"] or
+                    existing_gt.get("noise_seed_offset") != noise_seed_offset or
+                    existing_gt.get("seed") != seed):
+                    raise RuntimeError(
+                        f"Refusing to overwrite {gt_path.name}: conflicting parameters with existing ground truth"
+                    )
+            except json.JSONDecodeError:
+                pass
+        # Normal generation: always write matching truth for newly generated movie
         gt_path.write_text(json.dumps(gt, indent=2) + "\n")
+
     return {
         "case": out_name, "mrcs": str(mrcs), "star": str(star), "ground_truth": str(gt_path),
         "sha256": gt["movie_sha256"], "bytes": mrcs.stat().st_size,
@@ -456,6 +481,10 @@ def main() -> None:
     ap.add_argument("--noise-seed-offset", type=int, default=0,
                     help="change only the detector-noise stream; for replicate studies")
     ap.add_argument("--label", default=None, help="output file stem (defaults to the case name)")
+    ap.add_argument("--canonical", action="store_true", default=False,
+                    help="canonical mode: verify generated movie matches canonical truth and refuse disagreement")
+    ap.add_argument("--refuse-conflicting", action="store_true", default=False,
+                    help="refuse to overwrite existing ground truth if parameters conflict")
     ap.add_argument("--write-manifest", action="store_true", default=False,
                     help="write/update MANIFEST.json in the output directory (explicit maintenance operation)")
     ap.add_argument("--include-heavy", action="store_true",
@@ -465,6 +494,8 @@ def main() -> None:
 
     if (args.noise_rel is not None or args.noise_seed_offset) and args.case == "all":
         ap.error("--noise-rel / --noise-seed-offset require an explicit --case")
+    if args.canonical and (args.noise_rel is not None or args.noise_seed_offset != 0):
+        ap.error("--canonical cannot be combined with noise overrides")
 
     if args.case == "all":
         names = [n for n in sorted(CASES) if args.include_heavy or n not in HEAVY]
@@ -473,7 +504,9 @@ def main() -> None:
     infos = []
     for name in names:
         info = generate_case(name, args.outdir, repo_root, noise_rel=args.noise_rel,
-                             noise_seed_offset=args.noise_seed_offset, label=args.label, write_manifest=args.write_manifest)
+                             noise_seed_offset=args.noise_seed_offset, label=args.label,
+                             write_manifest=args.write_manifest, canonical=args.canonical,
+                             refuse_conflicting=args.refuse_conflicting)
         infos.append(info)
         print(f"{info['case']}: {info['mrcs']} ({info['bytes']} bytes, "
               f"sha256 {info['sha256'][:16]}...)")

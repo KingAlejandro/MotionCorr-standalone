@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install Linux system dependencies
         run: |
@@ -40,7 +40,7 @@ jobs:
             ghostscript
 
       - name: Install required numerical validation dependencies
-        run: python3 -m pip install 'numpy>=1.24,<3'
+        run: python3 -m pip install 'numpy>=2.4.0,<3'
 
       - name: Comparator failure controls
         run: python3 tools/test_compare_motioncorr.py -v
@@ -51,6 +51,7 @@ jobs:
           cmake --version
           gcc --version
           python3 --version
+          python3 -c "import numpy; print('NumPy version:', numpy.__version__)"
           echo "=== Library Versions via pkg-config ==="
           for pkg in fftw3 fftw3f libtiff-4 libpng libjpeg zlib; do
             echo -n "$pkg: "
@@ -80,19 +81,17 @@ jobs:
       - name: Known-motion validation and canonical fixture preflight
         shell: bash
         run: |
-          for req in tools/run_known_motion_gates.py tools/verify_fixtures.py \
-                     tools/validate_test_collection.py tools/test_ci_fail_closed.py \
-                     tools/test_known_motion.py tools/test_known_motion_verdicts.py \
-                     tools/test_known_motion_runner.py; do
-            if [[ ! -f "$req" ]]; then
-              echo "ERROR: Required validation script '$req' is absent; failing closed."
-              exit 1
-            fi
-          done
-
-          python3 tools/run_known_motion_gates.py --binary "$PWD/build/motioncorr" \
-            --outdir "$PWD/ci_known_motion" --json "$PWD/ci_known_motion/summary.json"
-          python3 tools/verify_fixtures.py --fixtures-dir "$PWD/test-data/known_motion"
+          python3 tools/ci_preflight.py
+          python3 test-data/generate_known_motion_fixture.py \
+            --outdir "$PWD/test-data/known_motion" --canonical
+          python3 tools/verify_fixtures.py \
+            --fixtures-dir "$PWD/test-data/known_motion"
+          python3 tools/run_known_motion_gates.py \
+            --binary "$PWD/build/motioncorr" \
+            --fixtures "$PWD/test-data/known_motion" \
+            --outdir "$PWD/ci_known_motion" \
+            --no-regenerate \
+            --json "$PWD/ci_known_motion/summary.json"
           python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
           python3 tools/test_known_motion_verdicts.py -v
           python3 tools/test_known_motion_runner.py -v
@@ -180,7 +179,7 @@ jobs:
       image: nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
     steps:
       - name: Install build dependencies
-        run: |
+        run: |\
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             git cmake build-essential pkg-config libfftw3-dev libtiff-dev \

@@ -5,7 +5,7 @@
 | issue | #95 — Design and prototype bounded frame/chunk loading without retaining every host frame |
 | model | `claude-opus-5` (high effort), routed as `claude-opus-5[1m]` |
 | task class | architecture (ADR + one bounded component prototype) |
-| phase | 5/5 — three review rounds plus a Codex capacity-accounting correction, re-verified at final head |
+| phase | 5/5 — four code passes, two spec passes, Codex corrections applied and re-verified at final head `8e374ec` |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
 | head | see `git log`; 4 commits on top of base |
 | branch | `round96/95-claude-opus-5` |
@@ -48,14 +48,19 @@ and raw logs in `docs/issue95_staging_evidence/`.
 | --- | --- |
 | `cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON` | exit 0 |
 | `cmake --build build-cpu -j8` | exit 0 |
-| `./build-cpu/frame_staging` | exit 0 — **283 checks, 0 failures** |
+| `./build-cpu/frame_staging` | exit 0 — **287 checks, 0 failures** |
 | `ctest --output-on-failure` | exit 0 — **14/14 passed** |
-| old-model control, 3 mutants reverting each Codex fix | all 3 caught (exit 1), 6/6/4 failures; baseline and restore both 283/0; hashes restored |
+| mutation control, 4 mutants | all 4 caught (exit 1), 6/6/4/1 failures; baseline and restore both 287/0; hashes restored |
 
-Counts across rounds are **235 → 256 → 248 → 283 and are not comparable**:
-assertions were replaced as well as added. The drop to 248 was the second
-review finding four assertions that could not fail; they were replaced, not
-supplemented. Do not read the sequence as growing coverage.
+Counts across rounds are **235 / 242 / 248 / 256 / 283 / 287 and are not
+comparable**: assertions were replaced as well as added, and one round's total
+*fell* because four unfailable assertions were removed. Do not read the
+sequence as growing coverage.
+
+`raw/10` is a **retained failed control run**: the `reserve` mutant survived
+because nothing observed vector capacity, and the alias mutant failed to build
+from an escaping bug in the mutation script so was never evaluated. Both were
+found by reading the output rather than the exit status, not by a reviewer.
 
 **Earlier runs used `/tmp/motioncorr-issue96-cpu.lock`, which did not serialise
 against the other workers in this round.** They are retained in
@@ -120,8 +125,8 @@ replaced, for the second pass, so no third reviewer was spawned.
 | code, pass 2 | `90a50c9` | `CHANGES_REQUESTED` | First independent review of `largestChunkWithin`, which was added after pass 1. Found it **correct** — monotonicity verified term by term, search sound, overflow-safe midpoint, `out_chunk` contract holds. Four items fixed (A, D, E, F); B, C, G, H, I, J carried as documented notes. |
 | code, pass 3 | **`d2b75e0`** | **`READY_TO_MERGE`** | Bounded confirmation of the A/D/E/F fixes. All four confirmed correct and complete, no new defect in the delta. Independently re-derived the in-loop "overflow, not malformed" argument and the `out_error`/`out_chunk` contracts, and verified the mutation log's four source hashes against the tree rather than taking the claim. Two accepted limitations recorded, neither blocking. |
 
-| code, pass 4 | `d3a1632` | in flight | bounded review of the Codex capacity-accounting delta |
-| spec, pass 2 | `d3a1632` | in flight | bounded audit of the corrected accounting and supersession discipline |
+| code, pass 4 | `d3a1632` | `READY_TO_MERGE` | Both Codex fixes correct. Proved the stronger result that `one_fits ⟹ whole_fits` for aliasing policies, so the search branch is entered only by non-aliasing ones. 4 LOW items — **all fixed**, not accepted. |
+| spec, pass 2 | `d3a1632` | `SPEC_CONFORMANCE_FAILED` | 3 documentation misattributions, all mine, all fixed. Source, tests and scope clean; arithmetic independently re-verified. |
 
 Both existing reviewers were **resumed**, never replaced. **Two direct
 reviewers total** across the whole task; no third agent was ever spawned.

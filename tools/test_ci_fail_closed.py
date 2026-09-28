@@ -586,6 +586,11 @@ exec "{sys.executable}" "$@"
                     # check is blind to this mutation and that the STAR check is the detector.
                     self.assertIn("STAR disagreement", combined,
                                   f"{label} must be rejected by the STAR check specifically")
+                    # Implied by the assertion below under the current check order, and kept
+                    # deliberately: it guards a future reordering of the movie and STAR
+                    # checks. The DETECTOR is assertNotIn("Canonical mode disagreement")
+                    # below -- do not delete that as "redundant with this one" (delta review
+                    # P3-1).
                     self.assertIn(canonical_movie_sha, combined,
                                   f"{label} must report the generated movie digest as EQUAL to "
                                   f"canonical, or it is not a test of metadata-only drift")

@@ -39,7 +39,12 @@ def normalise(text: str, ref_root: Path, test_root: Path) -> str:
     text = re.sub(r"\d+\.\d+/\d+\.\d+ (min|sec)", "<TIME>", text)
     text = re.sub(r"\b\d+(\.\d+)? (seconds|sec|minutes|min)\b", "<ELAPSED>", text)
     text = re.sub(r"\b\d+/\s*\d+ sec\b", "<PROGRESS>", text)
-    text = re.sub(r"(?i)(elapsed|wall|time)[^\n]*?\d+[.:]\d+", r"\1 <T>", text)
+    # Anchored, and the swallowed span may not contain digits. The unanchored
+    # earlier form let "[^\n]*?" eat arbitrary text, so a line like
+    # "Elapsed 5 s, final RMSD 0.0123" collapsed to "Elapsed <T>" and the RMSD
+    # went with it. Raised as P3-2 by the independent delta review.
+    text = re.sub(r"(?i)\b(elapsed|wall[- ]?clock|time)\b[^\n\d]{0,20}\d+[.:]\d+",
+                  r"\1 <T>", text)
     text = re.sub(r"\d{2}:\d{2}:\d{2}", "<CLOCK>", text)
     text = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", "<DATE>", text)
     return text

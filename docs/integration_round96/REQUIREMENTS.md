@@ -300,3 +300,36 @@ claim, or a scientific-equivalence claim. The VM run in particular shares a box
 and is correctness-only. `km_local_noisy` still FAILs and is still excluded from
 aggregate acceptance. The default CUDA configure failure (§E1) and the numpy
 build dependency (§E2) are unchanged and still open.
+
+
+## K. Residual decision raised by the delta audit: `generator_sha256`
+
+`test-data/known_motion/MANIFEST.json` records
+`generator_sha256: cf4f2aeb…`, which is the generator as of base `4c952b3`. The
+file has since changed twice — once by PR102's staging restructure and once by
+this branch's STAR-immutability fix — so it is now `16b26f86…`.
+
+**Deliberately not changed here.** The field is ambiguous and the two readings
+point opposite ways:
+
+- *"the generator that produced these recorded digests"* — then `cf4f2aeb…` is
+  **correct** and updating it would falsely claim the current script produced
+  the committed fixture bytes;
+- *"the generator currently in the tree"* — then it is stale.
+
+Rewriting a trust-anchor field on a guess is the kind of quiet alteration this
+branch exists to prevent, so the reading is left to #72, which owns the file.
+
+**It is not a correctness hole either way**, and this is the substantive point:
+nothing reads `generator_sha256` (`grep` over `tools/` and `.github/workflows/`
+finds no consumer), and the property it gestures at is already established
+empirically on every CI run. `--canonical` re-derives each movie from the
+current generator and compares against the recorded `movie_sha256`, so a
+generator that no longer reproduces the canonical bytes fails the run outright.
+The digest field is documentation; the regeneration check is the gate.
+
+The delta auditor was right to flag it as *"an unchecked provenance field
+drifting silently … the shape of a guard that cannot observe what it asserts."*
+The options for #72 are: validate it, drop it, or document its meaning. Any of
+the three is better than leaving it undefined, and none belongs in an
+integration branch.

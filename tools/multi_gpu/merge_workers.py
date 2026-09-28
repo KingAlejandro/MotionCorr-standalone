@@ -158,7 +158,12 @@ def main(argv: list[str] | None = None) -> int:
     root_owner = {star_io.worker_relative_root(star_io.output_root(m)): k
                   for m, k in owner.items()}
 
-    out = Path(a.out)
+    # Resolve before use. PR55's shell merge built a relative destination and
+    # then ran cp from inside each worker directory, so the copies landed under
+    # the worker (or failed silently) and the later --only_do_unfinished pass saw
+    # an empty tree and reprocessed the whole dataset. Nothing here chdirs, but
+    # resolving removes the question entirely.
+    out = Path(a.out).resolve()
     if out.exists() and any(out.iterdir()):
         print(f"FAIL: refusing to merge into non-empty {out}", file=sys.stderr)
         return 2
@@ -242,8 +247,8 @@ def main(argv: list[str] | None = None) -> int:
             print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
             return 2
         extra = shlex.split(a.aggregate_args)
-        cmd = [a.aggregate_with, "--i", str(a.input_star), "--o", str(out) + os.sep,
-               "--only_do_unfinished"] + extra
+        cmd = [a.aggregate_with, "--i", str(Path(a.input_star).resolve()),
+               "--o", str(out) + os.sep, "--only_do_unfinished"] + extra
         proc = subprocess.run(cmd, capture_output=True, text=True)
         (out / "_workers" / "merge.log").parent.mkdir(parents=True, exist_ok=True)
         (out / "_workers" / "merge.log").write_text(proc.stdout + proc.stderr)

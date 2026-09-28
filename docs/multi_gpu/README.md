@@ -175,3 +175,24 @@ unpatched-main binary, which produces a different message for the same input.
 - **One worker per GPU is the first experiment**, not a claimed optimum, and
   whole-movie granularity is a scheduling decision, not a proof that intra-movie
   multi-GPU is impossible. That is deferred.
+
+## Disposition of PR55's prototype and its review
+
+PR55 (`t3code/issue53-movie-scheduling` @ `377cb30`) received its own Codex
+review. That branch, its history and its evidence are untouched by this PR; the
+four files here are a fresh port onto current main, not a rebase of it. Its
+three findings map as follows.
+
+| PR55 finding | Status here |
+|---|---|
+| [`r4119254841`](https://github.com/KingAlejandro/MotionCorr-standalone/pull/55#discussion_r4119254841) — `compare24.py` writes one report path for two movies sharing a basename, so `--reuse` can turn a failed comparison into a false 24/24 pass | **Fixed.** The same defect was raised on this PR as `r4119223242`. Reports are keyed by the complete output root; `case_compare24_report_identity` orders a fail-then-pass pair so a basename collision would launder the failure, and checks the normal pass and `--reuse`. |
+| [`r4119254846`](https://github.com/KingAlejandro/MotionCorr-standalone/pull/55#discussion_r4119254846) — `run_multi_gpu.sh` builds a relative merge destination and then copies from inside each worker directory, so copies fail while `find` exits zero, and the following `--only_do_unfinished` pass reprocesses the whole dataset and presents it as a merge | **Superseded, and the class is now tested.** `run_multi_gpu.sh` does not exist here; `merge_workers.py` never chdirs and resolves `--out`. The guarantee that matters is that the aggregate step cannot run once staging has failed, so `case_failed_staging_never_reprocesses` asserts the binary is not invoked at all, and `case_merge_out_is_resolved` runs the merge from a different cwd with a relative `--out`. |
+| [`r4119254855`](https://github.com/KingAlejandro/MotionCorr-standalone/pull/55#discussion_r4119254855) — undeclared `bc` dependency aborts every otherwise successful run under `set -e` | **Superseded.** The shell launcher is replaced by `run_multi_gpu.py`, which measures elapsed time with `time.time()`. No tool shipped here shells out to `bc`. |
+
+**PR55's own limitations, unchanged by this PR.** Its four files remain on the
+obsolete `feat/issue-50-cuda-end-to-end-residency` lineage; its `--merge-star`
+path produces a degraded `logfile.pdf` by its own admission; and the four-GPU
+SCARF figures associated with it are on source `0c7d68f` with their timed output
+arrays deleted, so they are not a current-main scaling curve and no arm of them
+can be certified by a separate parity run. Nothing in this PR revives, imports
+or re-owns that branch.

@@ -1037,6 +1037,74 @@ def case_devices_with_no_witness_refused(tmp: Path) -> None:
     assert "nvidia-smi" not in cp.stderr, cp.stderr
 
 
+def case_failed_staging_never_reprocesses(tmp: Path) -> None:
+    """A failed merge must not hand an incomplete tree to --only_do_unfinished.
+
+    PR55's shell merge resolved its destination relative to each worker
+    directory it had cd'd into, so the copies failed while `find` still exited
+    zero; the following --only_do_unfinished pass then saw an empty tree and
+    silently reprocessed the entire collection, presenting a from-scratch rerun
+    as a merge of the worker results. Nothing here chdirs, but the guarantee
+    that matters is that the aggregate step cannot run at all once staging has
+    failed -- so it is asserted rather than assumed.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    lost = DEFAULT_ROWS[0][0]
+    dirs, codes = run_workers(tmp, shards, 2, per_worker={0: ["--fake_skip", lost]})
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_note=aggregate-should-not-have-run"])
+    assert cp.returncode == 3, f"incomplete staging was merged (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert rep["aggregate_star"] == "not attempted: staging failed", rep["aggregate_star"]
+    assert any(p.startswith("lost:") for p in rep["problems"]), rep["problems"]
+    assert not (tmp / "merged" / "note.txt").exists(), \
+        "the aggregate binary ran despite staging having failed"
+    assert not (tmp / "merged" / "corrected_micrographs.star").exists(), \
+        "an aggregate STAR was published from an incomplete tree"
+
+    # positive control: with the movie present, the aggregate does run
+    dirs2, codes2 = run_workers(tmp, shards, 2)
+    cp = merge(shards / "shard_manifest.json", dirs2, tmp / "merged_ok",
+               fake_status(tmp, codes2, name="status_ok.json"), tmp / "report_ok.json",
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_note=ran"])
+    assert cp.returncode == 0, cp.stderr
+    assert (tmp / "merged_ok" / "note.txt").read_text().strip() == "ran"
+
+
+def case_merge_out_is_resolved(tmp: Path) -> None:
+    """A relative --out resolves to the caller's cwd, not somewhere else."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    workdir = tmp / "cwd"
+    workdir.mkdir()
+    cp = subprocess.run(
+        [str(PY), str(TOOLS / "merge_workers.py"),
+         "--manifest", str(shards / "shard_manifest.json"),
+         "--workers", *[str(d) for d in dirs],
+         "--status", str(status), "--out", "relative_merged",
+         "--report", str(tmp / "rel_report.json")],
+        capture_output=True, text=True, cwd=workdir)
+    assert cp.returncode == 0, cp.stderr
+    rep = json.loads((tmp / "rel_report.json").read_text())
+    assert rep["verdict"] == "PASS", rep["problems"]
+    assert Path(rep["merged_into"]).is_absolute(), rep["merged_into"]
+    assert (workdir / "relative_merged").is_dir(), "merged tree is not under the cwd"
+    for name, _, _ in DEFAULT_ROWS:
+        root = star_io.worker_relative_root(star_io.output_root(name))
+        assert (workdir / "relative_merged" / (root + ".mrc")).exists(), root
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -1062,6 +1130,8 @@ CASES = [
     case_killed_worker_then_nonprefix_resume,
     case_aggregate_star_canonical_order,
     case_aggregate_wrong_order_rejected,
+    case_failed_staging_never_reprocesses,
+    case_merge_out_is_resolved,
     case_launcher_refuses_cpu_gpu_confusion,
     case_per_worker_cpu_masks,
     case_devices_with_no_witness_refused,

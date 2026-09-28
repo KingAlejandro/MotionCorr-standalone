@@ -220,6 +220,18 @@ MUTATIONS = [
      "        root = star_io.output_root(movie)  # MUTATED",
      ["case_absolute_movie_roots_attributed"]),
 
+    ("aggregate step runs even when staging failed",
+     "tools/multi_gpu/merge_workers.py",
+     '        report["aggregate_star"] = "not attempted: staging failed"\n    elif a.aggregate_with:',
+     '        pass  # MUTATED\n    if a.aggregate_with:',
+     ["case_failed_staging_never_reprocesses"]),
+
+    ("merge --out no longer resolved",
+     "tools/multi_gpu/merge_workers.py",
+     "    out = Path(a.out).resolve()",
+     "    out = Path(a.out)  # MUTATED",
+     ["case_merge_out_is_resolved"]),
+
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",
      "    if out.exists():",

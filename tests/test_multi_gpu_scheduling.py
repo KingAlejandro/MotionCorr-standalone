@@ -1822,7 +1822,17 @@ def case_per_worker_timing_and_rss_recorded(tmp: Path) -> None:
             f"worker wall exceeds run wall: {w}"
         assert "rss_note" in w, w
         if sys.platform.startswith("linux"):
-            assert w["rss_hwm_kib"] is None or w["rss_hwm_kib"] > 0, w
+            # A positive figure, not "None or positive". Tolerating None here made
+            # this assertion unable to observe a sampler that records nothing:
+            # /proc exists, so .unavailable stays unset, rss_note keeps its normal
+            # text, and a null figure satisfied the disjunction. The mutation
+            # control for the recording path survived on Linux for exactly that
+            # reason while passing on macOS, where the branch below catches it.
+            # If a host hides VmHWM, this fails loudly and someone decides -- which
+            # is the right outcome for a figure the scaling work depends on.
+            assert w["rss_hwm_kib"] and w["rss_hwm_kib"] > 0, (
+                "no resident-set high-water was recorded on a host with /proc; "
+                "a scaling comparison cannot reconstruct it afterwards", w)
         else:
             # No /proc: the absence must be stated, not silently reported as 0.
             assert w["rss_hwm_kib"] is None, w

@@ -261,11 +261,30 @@ MUTATIONS = [
      "        if False:  # MUTATED",
      ["case_duplicate_coverage_and_zero_pairs_rejected"]),
 
-    ("zero-pair and duplicate-root manifests accepted by the comparator",
+    ("zero-pair manifest accepted by the comparator",
      "tools/multi_gpu/compare24.py",
      "        if expect == 0:",
      "        if False:  # MUTATED",
      ["case_duplicate_coverage_and_zero_pairs_rejected"]),
+
+    ("duplicate normalized roots accepted by the comparator",
+     "tools/multi_gpu/compare24.py",
+     "        if len(set(normalized)) != len(normalized):",
+     "        if False:  # MUTATED",
+     ["case_duplicate_coverage_and_zero_pairs_rejected"]),
+
+    ("empty manifest accepted by the merge",
+     "tools/multi_gpu/merge_workers.py",
+     '    if not manifest.get("canonical_movies"):',
+     "    if False:  # MUTATED",
+     ["case_duplicate_coverage_and_zero_pairs_rejected"]),
+
+    ("manifest publishes raw rather than canonical output roots",
+     "tools/multi_gpu/partition_star.py",
+     '        "canonical_output_roots": [\n'
+     "            star_io.worker_relative_root(star_io.output_root(m)) for m in canonical],",
+     '        "canonical_output_roots": [star_io.output_root(m) for m in canonical],  # MUTATED',
+     ["case_normalized_root_collision_refused"]),
 
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",

@@ -23,7 +23,7 @@ against, not as an outstanding ask.
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
 | `tests/test_multi_gpu_scheduling.py` | 36 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 39 mutations, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 42 mutation entries, each required to break its case |
 
 ## Usage
 
@@ -70,7 +70,7 @@ unpatched-main control binary `de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec
 | Layer | Result |
 |---|---|
 | `tests/test_multi_gpu_scheduling.py --binary <built>` | **37/37 passed** |
-| `docs/multi_gpu/negative_controls.py` | **39/39 mutations detected**, no survivors |
+| `docs/multi_gpu/negative_controls.py` | **all attempted mutations detected**, no survivors (see note below) |
 | `ctest --output-on-failure -j 4` | **14/14 passed** — the 13 pre-existing CPU tests plus `MultiGpuScheduling` |
 | end-to-end: real binary, serial vs 3-way sharded | **6/6 movies exact**, merge `PASS`, aggregate STAR identical |
 
@@ -155,8 +155,12 @@ markers.
 
 ## Negative controls
 
-`negative_controls.py` applies 39 mutations, one at a time, to a scratch copy and
-requires the corresponding cases to fail; all 39 are detected
+`negative_controls.py` holds 42 mutation entries. It applies them one at a time
+to a scratch copy and requires the corresponding cases to fail. An entry whose
+case needs a tool the host lacks is reported SKIPPED and explicitly not counted
+as detected, so the printed figure is detected-over-attempted, not
+detected-over-entries: **41/41 on Linux with `taskset`**, 41/42 attempted on
+macOS. No mutation survives
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list
 rejection, because mutating it needs a rebuild; its control is the recorded

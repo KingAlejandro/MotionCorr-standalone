@@ -67,6 +67,34 @@ pid 1211780 -> GPU-eddb42fe-4f9a-adde-76d3-b924e14add54   (mask 96-103)
 pid 1211782 -> GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d   (mask 104-111)
 ```
 
+## Tooling changed after this evidence was produced
+
+These arms were produced at source **`f433662`**. Two review findings on the
+comparison and partition tooling were fixed afterwards
+(`f16d46d`): the per-movie report identifier became a digest of the complete
+root rather than a separator substitution, and collision/decoration preflight
+moved onto canonical worker-relative roots.
+
+What that does and does not change here:
+
+- The **24/24 exact result stands.** It is a per-pair verdict from
+  `tools/compare_motioncorr.py`, which is unchanged; the fixes are to how
+  `compare24.py` names and reuses report files and how `partition_star.py`
+  preflights roots, not to any comparison.
+- The archived [`gpu_evidence/shard_manifest.json`](gpu_evidence/shard_manifest.json)
+  contains only relative roots under `Movies/`, for which canonicalization is
+  the identity, so the recorded manifest is unaffected by the partition fix.
+- The one observation that **no longer corresponds to the code at head** is
+  "24/24 unique report names" in the C2 row: those names came from the
+  superseded encoding. Uniqueness held for this manifest, whose roots share no
+  basename and contain no `__`, but the statement should not be read as
+  evidence about the current identifier. The current one is covered by its own
+  regressions and mutations on CPU.
+- `--reuse` was not used in any arm here, so the reuse cross-read the fixes
+  address could not have affected these results.
+
+None of these arms has been re-run at head, and none is claimed to have been.
+
 ## What this does and does not establish
 
 **Establishes.** Splitting the 24 tutorial movies across two physical GPUs as

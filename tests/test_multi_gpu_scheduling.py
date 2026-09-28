@@ -36,7 +36,6 @@ TOOLS = ROOT / "tools" / "multi_gpu"
 FAKE = ROOT / "tests" / "fake_worker.py"
 sys.path.insert(0, str(TOOLS))
 import star_io  # noqa: E402
-sys.path.insert(0, str(TOOLS))
 
 PY = sys.executable
 

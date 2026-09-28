@@ -8,7 +8,7 @@
 | Model routing | `claude-opus-5[1m]` as assigned; no routing error, no substitution |
 | Phase | 6 — PR A reviewable; Codex PR105 review (`RLIMIT_FSIZE` hard limit) fixed, controlled and re-validated |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (current main) |
-| Head | `5f32cd1` |
+| Head | `33e2431` |
 | Branch | `round96/99-claude-opus-5` (pushed) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-a01709b1` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/105 (draft) |
@@ -90,27 +90,41 @@ Python test adds phase 4 driving MotionCorr through a `preexec_fn` that lowers t
 hard limit, asserting on MotionCorr's own short-write text rather than an exit code, since
 a failed spawn is also nonzero.
 
+Both independent reviewers flagged the same blocking defect in the first revision, in the
+exact environment class the delta exists for: the Python precheck demanded the literal
+`FINITE_HARD_LIMIT`, so a host whose inherited hard limit was already finite but below
+8 MiB failed with the self-contradicting *"the control did not actually get a finite hard
+limit: 4194304"*. Fixed in `e96ba8c`, along with the C++ `(finite hard limit)` label being
+env-derived rather than limit-derived, `execl` → `execlp`, `setenv` moved before the fork,
+`waitpid` EINTR retry, the guard constant derived from `BIG_BYTES`, a matching Python
+environment guard, and single-message regex matching of the writer's error. `57ba661`
+makes phase 4 report the limit applied rather than the one requested.
+
 | Run (cpu64, `taskset -c 32-63`, under the validation lock) | Result |
 |---|---|
-| Full CPU CTest, candidate `1084269` | **15/15 passed** |
-| Candidate, `ulimit -f 8192` → `(8388608, 8388608)` | **both fault tests pass**; phase 4 reached real MotionCorr |
-| Pre-delta tests on the **same fixed writer**, same finite limit (`33dee9e`) | **exit 8** — `preexec_fn` exception and `setrlimit(RLIMIT_FSIZE) failed`, after phase 1 had written a healthy product, so they die in the plumbing |
+| Full CPU CTest, candidate `57ba661` | **15/15 passed** |
+| Candidate, `ulimit -f 8192` → `(8388608, 8388608)` | **both pass**; phase 4 reached real MotionCorr |
+| Candidate, `ulimit -f 4096` → `(4194304, 4194304)` | **both pass** — the mid-band case the reviewers flagged is not a spurious failure |
+| Pre-delta tests on the **same fixed writer**, `ulimit -f 8192` (`fb2fab8`) | **exit 8** — `Exception occurred in preexec_fn.` and `setrlimit(RLIMIT_FSIZE) failed`, after phase 1 wrote a healthy product, so they die in the plumbing |
 | Same pre-delta tests, **no** finite hard limit | **pass** — isolates the cause |
-| Negative control, pre-fix main + new tests (`28727aa`) | **exit 8, writer reason** — `a failed image write was treated as success`, `terminate called…` |
+| Negative control, pre-fix main + new tests (`2101c3c`) | **exit 8, writer reason** — `a failed image write was treated as success`, `terminate called…` |
+| Vacuity guard: stray `MC_WRITE_FAULTS_IN_CHILD`, no finite limit | **exit 1** — refuses to report a control that did not run |
 | Healthy payload | `1a424122f6fd8f9b…`, 1 049 600 bytes — unchanged |
 
-Provenance recorded: `Cpus_allowed_list: 32-63`, `Mems_allowed_list: 0-1`,
-`numactl --show` → `policy: default`, `cpubind: 1`; load 8.35 → 4.85; binary and input
-hashes. No GPU, no timing.
+Payload-level provenance recorded: cpuset witnessed inside the build under `taskset` as
+`Cpus_allowed_list: 32-63`, `Mems_allowed_list: 0-1`; two-node NUMA (node 0 = cpus 0-31,
+115 839 MB; node 1 = cpus 32-63); `numactl --show` → `policy: default`, `cpubind: 1`; load
+6.75 → 9.81 on the shared host; binary and input hashes. No GPU, no timing.
 
 **The first attempt at the external control was void and is recorded as such.**
 `ulimit -H -f N` fails with `EINVAL` — bash sets only the hard limit and leaves the soft
 limit at infinity — so no limit was applied and *both* arms passed, which reads exactly
 like "the delta was unnecessary". `ulimit -f N` sets both.
 
-Integration mapping for PR110: `docs/issue99_write_faults/PR110_COMMIT_MAP.md`. One
-tests-only commit; cherry-pick verified clean on a throwaway branch off
-`refs/pull/110/head`, discarded, **PR110's tree not modified and nothing pushed**.
+Integration mapping for PR110: `docs/issue99_write_faults/PR110_COMMIT_MAP.md`. Three
+tests-only commits (`1084269`, `e96ba8c`, `57ba661`), same two files; all three replayed
+onto a detached `refs/pull/110/head` and the resulting blobs are identical to this
+branch's head. **PR110's tree was not modified and nothing was pushed there.**
 
 ## Independent review (COMMON.md requirement), both read-only
 

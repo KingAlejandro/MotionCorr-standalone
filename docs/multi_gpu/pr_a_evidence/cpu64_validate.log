@@ -1,8 +1,8 @@
-WAITING_FOR_VALIDATION_LOCK 2026-09-28T07:47:59+00:00
+WAITING_FOR_VALIDATION_LOCK 2026-09-28T07:59:02+00:00
 + echo '=== PROVENANCE ==='
 === PROVENANCE ===
 + cat /home/ubuntu/mc-issue53-round96/src_head.txt
-source_head=f16d46d36f873c26e034fccec2e674575f620fe3
+source_head=bceb30e058238aa51c7edd0eb597fbabb8cfc6b0
 base=4c952b3f54479653512c4d208e09c9a8c02f3726
 staged_via=git archive of committed tree, COPYFILE_DISABLE=1
 porcelain:
@@ -18,7 +18,7 @@ applefile_count=0
 + echo '=== PAYLOAD / TOPOLOGY / LOAD ==='
 === PAYLOAD / TOPOLOGY / LOAD ===
 + date -Is
-2026-09-28T07:51:16+00:00
+2026-09-28T07:59:02+00:00
 + hostname
 small-refmac-machine
 + grep Cpus_allowed_list /proc/self/status
@@ -34,7 +34,7 @@ cpubind: 0 1
 available: 2 nodes (0-1)
 node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
 + cat /proc/loadavg
-4.02 4.72 6.88 3/8007 3377101
+2.10 3.31 5.49 3/7984 3385637
 + echo '--- concurrent MotionCorr work (recorded, not altered) ---'
 --- concurrent MotionCorr work (recorded, not altered) ---
 + pgrep -alf motioncorr
@@ -77,22 +77,22 @@ node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
 -- Generating done (0.0s)
 -- Build files have been written to: /home/ubuntu/mc-issue53-round96/build
 + taskset -c 32-63 /home/ubuntu/.mc-venv/bin/cmake --build /home/ubuntu/mc-issue53-round96/build -j 16
-[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
-[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
 [  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
-[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
-[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
 [  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
-[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
-[  9%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
+[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
 [ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
-[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
-[ 12%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
-[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
-[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
-[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
-[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
-[ 18%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
+[ 13%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 16%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
+[ 18%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
 [ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
 [ 20%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/t_complex.cpp.o
 [ 21%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/damage.cpp.o
@@ -108,11 +108,11 @@ node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
 [ 33%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevq3.c.o
 [ 34%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsytrd3.c.o
 [ 35%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/image_log.cpp.o
-[ 36%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
-[ 37%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
 [ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/interpolation.cpp.o
-[ 40%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
-[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 40%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
 [ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/new_ft.cpp.o
 [ 43%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/obs_model.cpp.o
 [ 44%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/parallel_ft.cpp.o
@@ -151,14 +151,6 @@ node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
 [ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
 [ 83%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
 [ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
-[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
-[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
-[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
-[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
-[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
-[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
-[ 93%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
-[ 94%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
 In file included from /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.h:48,
                  from /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:49:
 In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
@@ -197,10 +189,18 @@ In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
 /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:703:13: note: declared here
   703 |     RFLOAT *pt, *ptt, *xit;
       |             ^~
+[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 93%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
 /home/ubuntu/mc-issue53-round96/src/src/time.cpp: In function ‘void progress_bar(long int)’:
 /home/ubuntu/mc-issue53-round96/src/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
   191 |             fprintf(stdout, cheese);
       |             ~~~~~~~^~~~~~~~~~~~~~~~
+[ 94%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
 [ 95%] Linking CXX static library libmotioncorr_core.a
 [ 95%] Built target motioncorr_core
 [ 96%] Building CXX object CMakeFiles/runner_numerics.dir/tests/test_runner_numerics.cpp.o
@@ -260,13 +260,15 @@ ok   case_devices_with_no_witness_refused
 ok   case_compare24_report_identity
 ok   case_compare24_injective_report_identity
 ok   case_normalized_root_collision_refused
+ok   case_interior_double_slash_is_the_same_product
+ok   case_reuse_pins_the_trees_not_just_the_root
 ok   case_duplicate_coverage_and_zero_pairs_rejected
 ok   case_absolute_movie_roots_attributed
 ok   case_gpu_witness_logic
 ok   case_sampler_lifecycle
 ok   case_device_list_rejected
 
-37/37 passed
+39/39 passed
 + echo SCHED_RC=0
 SCHED_RC=0
 + echo '=== NEGATIVE CONTROLS ==='
@@ -351,12 +353,24 @@ SCHED_RC=0
                      detected  case_normalized_root_collision_refused
           detected  merge drops the duplicate-coverage guard
                      detected  case_duplicate_coverage_and_zero_pairs_rejected
-          detected  zero-pair and duplicate-root manifests accepted by the comparator
+          detected  zero-pair manifest accepted by the comparator
                      detected  case_duplicate_coverage_and_zero_pairs_rejected
+          detected  duplicate normalized roots accepted by the comparator
+                     detected  case_duplicate_coverage_and_zero_pairs_rejected
+          detected  empty manifest accepted by the merge
+                     detected  case_duplicate_coverage_and_zero_pairs_rejected
+          detected  manifest publishes raw rather than canonical output roots
+                     detected  case_normalized_root_collision_refused
+          detected  worker-relative root stops collapsing interior separators
+                     detected  case_interior_double_slash_is_the_same_product
+          detected  duplicate coverage overwrites the owner and invents misroutes
+                     detected  case_interior_double_slash_is_the_same_product
+          detected  reuse sidecar records only the root again
+                     detected  case_reuse_pins_the_trees_not_just_the_root
           detected  launcher no longer refuses an existing --out
                      detected  case_launcher_refuses_cpu_gpu_confusion
 
-39/39 mutations detected
+45/45 mutations detected
 + echo NEGCTL_RC=0
 NEGCTL_RC=0
 + echo '=== FULL CTEST ==='
@@ -368,39 +382,39 @@ Test project /home/ubuntu/mc-issue53-round96/build
       Start  2: HotPixelRngDeterminism
       Start  3: RunnerExposure
       Start  4: Runner_failure
- 1/14 Test  #4: Runner_failure ...................   Passed    0.17 sec
+ 1/14 Test  #4: Runner_failure ...................   Passed    0.18 sec
       Start  5: Runner_invalid
- 2/14 Test  #5: Runner_invalid ...................   Passed    0.12 sec
+ 2/14 Test  #5: Runner_invalid ...................   Passed    0.11 sec
       Start  6: Runner_resume
- 3/14 Test  #3: RunnerExposure ...................   Passed    0.54 sec
+ 3/14 Test  #3: RunnerExposure ...................   Passed    0.55 sec
       Start  7: Runner_tomography
- 4/14 Test  #2: HotPixelRngDeterminism ...........   Passed    0.61 sec
+ 4/14 Test  #2: HotPixelRngDeterminism ...........   Passed    0.65 sec
       Start  8: RunnerLateBin
- 5/14 Test  #7: Runner_tomography ................   Passed    0.41 sec
+ 5/14 Test  #7: Runner_tomography ................   Passed    0.42 sec
       Start  9: RunnerExportedUnits
  6/14 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
       Start 10: GainCache
  7/14 Test  #1: SyntheticRegression ..............   Passed    1.14 sec
       Start 11: TiffRead
- 8/14 Test  #8: RunnerLateBin ....................   Passed    0.73 sec
+ 8/14 Test  #8: RunnerLateBin ....................   Passed    0.65 sec
       Start 12: DamagedMovie
- 9/14 Test #12: DamagedMovie .....................   Passed    0.10 sec
+ 9/14 Test #12: DamagedMovie .....................   Passed    0.09 sec
       Start 13: RunnerModelParser
 10/14 Test #13: RunnerModelParser ................   Passed    0.14 sec
       Start 14: MultiGpuScheduling
-11/14 Test #11: TiffRead .........................   Passed    0.53 sec
-12/14 Test #10: GainCache ........................   Passed    1.34 sec
-13/14 Test  #6: Runner_resume ....................   Passed    2.17 sec
-14/14 Test #14: MultiGpuScheduling ...............   Passed    6.76 sec
+11/14 Test #11: TiffRead .........................   Passed    0.55 sec
+12/14 Test  #6: Runner_resume ....................   Passed    2.07 sec
+13/14 Test #10: GainCache ........................   Passed    1.33 sec
+14/14 Test #14: MultiGpuScheduling ...............   Passed    7.15 sec
 
 100% tests passed out of 14
 
-Total Test time (real) =   8.33 sec
+Total Test time (real) =   8.68 sec
 + echo CTEST_RC=0
 CTEST_RC=0
 ++ date -Is
-+ echo '=== END 2026-09-28T07:51:59+00:00 ==='
-=== END 2026-09-28T07:51:59+00:00 ===
++ echo '=== END 2026-09-28T07:59:48+00:00 ==='
+=== END 2026-09-28T07:59:48+00:00 ===
 + cat /proc/loadavg
-4.91 4.96 6.87 4/8005 3378992
+4.08 3.75 5.54 3/7981 3387178
 CTL_FINAL_OUTER_RC=0

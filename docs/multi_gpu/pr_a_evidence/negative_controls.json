@@ -1,8 +1,8 @@
 {
-  "n_mutations": 39,
-  "n_attempted": 39,
+  "n_mutations": 45,
+  "n_attempted": 45,
   "n_skipped": 0,
-  "n_detected": 39,
+  "n_detected": 45,
   "survivors": [],
   "results": [
     {
@@ -307,10 +307,58 @@
       "status": "detected"
     },
     {
-      "mutation": "zero-pair and duplicate-root manifests accepted by the comparator",
+      "mutation": "zero-pair manifest accepted by the comparator",
       "file": "tools/multi_gpu/compare24.py",
       "cases": {
         "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate normalized roots accepted by the comparator",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "empty manifest accepted by the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "manifest publishes raw rather than canonical output roots",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_normalized_root_collision_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "worker-relative root stops collapsing interior separators",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_interior_double_slash_is_the_same_product": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate coverage overwrites the owner and invents misroutes",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_interior_double_slash_is_the_same_product": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reuse sidecar records only the root again",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_reuse_pins_the_trees_not_just_the_root": "detected"
       },
       "status": "detected"
     },

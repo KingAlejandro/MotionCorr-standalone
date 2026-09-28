@@ -21,9 +21,9 @@ against, not as an outstanding ask.
 | `tools/multi_gpu/merge_workers.py` | staging plus lost/duplicate/misrouted/failed detection, deterministic order |
 | `tools/multi_gpu/gpu_witness.py` | UUID selection and `nvidia-smi` compute-apps witnesses |
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
-| `tests/test_multi_gpu_scheduling.py` | 36 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
+| `tests/test_multi_gpu_scheduling.py` | 38 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 42 mutation entries, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 45 mutation entries, each required to break its case |
 
 ## Usage
 
@@ -53,7 +53,7 @@ Everything below comes from one run, recorded in
 
 **Provenance** ([`pr_a_evidence/source_provenance.txt`](pr_a_evidence/source_provenance.txt),
 echoed at the top of the validation log): source head
-`f16d46d36f873c26e034fccec2e674575f620fe3`, base
+`bceb30e058238aa51c7edd0eb597fbabb8cfc6b0`, base
 `4c952b3f54479653512c4d208e09c9a8c02f3726`, staged by `git archive` of the
 **committed** tree with `COPYFILE_DISABLE=1`. The harness asserts the staged
 tree contains zero macOS AppleDouble `._*` files and aborts otherwise
@@ -69,7 +69,7 @@ unpatched-main control binary `de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec
 
 | Layer | Result |
 |---|---|
-| `tests/test_multi_gpu_scheduling.py --binary <built>` | **37/37 passed** |
+| `tests/test_multi_gpu_scheduling.py --binary <built>` | **39/39 passed** |
 | `docs/multi_gpu/negative_controls.py` | **all attempted mutations detected**, no survivors (see note below) |
 | `ctest --output-on-failure -j 4` | **14/14 passed** — the 13 pre-existing CPU tests plus `MultiGpuScheduling` |
 | end-to-end: real binary, serial vs 3-way sharded | **6/6 movies exact**, merge `PASS`, aggregate STAR identical |
@@ -155,11 +155,11 @@ markers.
 
 ## Negative controls
 
-`negative_controls.py` holds 42 mutation entries. It applies them one at a time
+`negative_controls.py` holds 45 mutation entries. It applies them one at a time
 to a scratch copy and requires the corresponding cases to fail. An entry whose
 case needs a tool the host lacks is reported SKIPPED and explicitly not counted
 as detected, so the printed figure is detected-over-attempted, not
-detected-over-entries: **41/41 on Linux with `taskset`**, 41/42 attempted on
+detected-over-entries: **45/45 on Linux with `taskset`**, 44/45 attempted on
 macOS. No mutation survives
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list

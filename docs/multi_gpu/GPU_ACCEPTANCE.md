@@ -93,7 +93,31 @@ What that does and does not change here:
 - `--reuse` was not used in any arm here, so the reuse cross-read the fixes
   address could not have affected these results.
 
-None of these arms has been re-run at head, and none is claimed to have been.
+### The changed tooling was re-run at head over these same outputs
+
+Rather than predict that the fixes leave these results intact, the partition,
+merge and comparison stages were re-run at head `bceb30e` over the **same**
+`serialG` and two-worker outputs, under the same allocation and mutex. The C++
+is unchanged since `f433662`, so no GPU compute was repeated and the run
+products are the originals.
+[`gpu_evidence/head_revalidation.log`](gpu_evidence/head_revalidation.log),
+[`head_merge_report.json`](gpu_evidence/head_merge_report.json),
+[`head_exact_summary.json`](gpu_evidence/head_exact_summary.json).
+
+| Check at head `bceb30e` | Result |
+|---|---|
+| Partition vs the arm's own manifest | identical assignment, canonical movies, roots **and shard SHA-256** |
+| Merge | `PASS`, 96 files staged, no problems, aggregate canonical over 24 rows |
+| Exact comparison, 24 pairs | **24/24 PASS**, 24/24 unique report ids, 24 origin sidecars |
+| `--reuse` | reproduces `PASS` |
+| `--reuse` with a tampered origin sidecar | **refused**, rc 1 |
+
+So the 24/24 holds under the current identifier and canonicalization, and the
+"unique report names" observation is now true of the code at head as well. The
+`--reuse` path, which the original arms never exercised, is exercised here on
+real data in both directions.
+
+No GPU arm was re-executed, and none is claimed to have been.
 
 ## What this does and does not establish
 

@@ -7,7 +7,7 @@
 | Task class | implementation |
 | Phase | COMPLETE — implemented, reviewed, fixed, CPU/GPU-validated, **evidence corrected**. Verdict: **no-go on promotion**, prefetch stays opt-in. |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| Head | `fbad90a` + CI commit (evidence corrections; `src/` frozen since `08c87bb`) |
+| Head | `0680705` (evidence corrections 1-7; `src/` frozen since `08c87bb`) |
 | Branch | `round96/94-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-967d9ef6` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/108 (draft) |
@@ -170,10 +170,11 @@ Findings and fixes posted on #94 (issuecomment-5861326352) and PR #108
 - #94 evidence corrections: issuecomment-5866418028 (PR: 5866417735)
 - #66 correction: issuecomment-5866423164
 - #94 correction 6: issuecomment-5866508040 (PR: 5866507790)
+- #94 correction 7: issuecomment-5866642577 (PR: 5866642303)
 
 ## Evidence corrections (2026-09-28)
 
-Six appended in `docs/issue94_prefetch/CORRECTIONS.md`; raw tables, manifests and logs
+Seven appended in `docs/issue94_prefetch/CORRECTIONS.md`; raw tables, manifests and logs
 preserved unedited. (1) 0/9 → **1/9**. (2) header comparison re-done over the whole file with a
 justified whitelist and a ten-mutation negative control. (3) the cpu16 manifest's topology
 counters were an awk range-parsing bug; corrected from the retained `lscpu` witness, helper
@@ -186,6 +187,17 @@ completed series, the `scarf_gpu` §2 heading still said "never faster", §4 sti
 accounting "explains the null directly", and a per-pair result block was labelled as a total.
 All struck in place.
 
+(7) the **evidence tooling itself** had eight defects, found by the code review: an unbounded
+`nsymbt` that defeated the vacuity guard and reported a negative byte count; a glob missing
+`*.mrcs`; three control branches nothing reached (including a dead `strptime` block); an empty
+mask that reproduced the exact "0 physical cores" symptom correction 3 replaced; unhandled
+stride syntax; a truncated-witness path producing a plausible wrong count; a false "this is a
+control" docstring; and — most important for provenance — a dead `--root /dev/null` call in the
+harness, whose real in-run comparison was still the 224-byte one, so the
+`*_correctness_compare_*` artifacts back only the old claim. All fixed; the whole-file
+verification was **re-run with the corrected tool: 12/12 pairs clean**, now driven by the
+committed `scripts/verify_retained_arms.sh` which records tool hash, host, date and command.
+
 **Scope audit verdicts:** `SPEC_CONFORMANCE_PASSED` (source frozen; every raw manifest, TSV,
 per-arm dump, slurm log and `superseded/` entry byte-identical to its introducing commit; the
 two new tool files added to ADR §12 rather than left out of scope; licence convention matched).
@@ -193,9 +205,11 @@ two new tool files added to ADR §12 rather than left out of scope; licence conv
 correction 6. The audit independently re-derived every number in corrections 1-5 from the
 artifacts and found nothing overstated.
 
-**Final CI at the corrected head** (cpu64 lane 32-47, validation lock, `-j16`, `ctffind`
-untouched): ctest **15/15**, MRC negative control **PASS**, range-mask control **PASS**.
-`motioncorr` sha256 `ec3bf772bdd73a8a030871632d9cf6c8954a76d9bd6aeb6394f01cd60406d29d`.
+**Final CI** (cpu64 lane 32-47, validation lock, `-j16`, `ctffind` untouched), at head
+`b5977dc8be28`: ctest **15/15**, MRC negative control (**18 cases**) **PASS**, extended mask
+control **PASS**. `motioncorr` sha256
+`1966681a871e1b3d7e3bb060d0ebc8b3cb7cd82e9d2e1207190c1af8ac8055c3`. The earlier CI at
+`fbad90a97ce5` is retained as superseded.
 
 **Review source coverage:** `git diff 08c87bb..HEAD -- src/` is **empty** — production source is
 frozen and already carries both independent read-only reviews plus the Codex review. The delta
@@ -210,8 +224,8 @@ opt-in and off by default on every backend.
 
 ## Next step
 
-Scope audit complete (verdicts above, correction 6 filed). Awaiting the code reviewer's report
-on the tooling delta, and `@codex` re-review of PR #108. No merge, no closure.
+Both reviewers reported and both sets of findings are closed (corrections 6 and 7). Awaiting
+`@codex` re-review of PR #108. No merge, no closure, no default promotion.
 No merges, no closures, no default promotion.
 
 Still UNRUN and stated as such: the composed PR103/PR110 integrity work (a merge this task is

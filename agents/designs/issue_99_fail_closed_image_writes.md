@@ -184,6 +184,13 @@ a real test of D2 and it fails if only D1 is implemented.
 Nothing under `src/motioncorr_runner.cpp` is touched: the per-movie failure contract it
 needs already exists from #91, and #97/#98/#69 hold the other locks on that file.
 
+Correction from the independent spec review: `src/micrograph_model.cpp` is *not* free of
+sibling overlap. #98's SerialEM defect-text detection runs from
+`Micrograph::fillDefectAndHotpixels` in that same file. The D3 edit is +7 lines at the
+end of `Micrograph::write`, roughly 50 lines away and semantically unrelated, so the
+collision risk is textual rather than semantic — but the file is shared and should be
+merged in that knowledge.
+
 ## 7. PR B (deferred, designed but not implemented here)
 
 PR A leaves a truncated `.mrc` on disk after a failed write. That is safe *today* only

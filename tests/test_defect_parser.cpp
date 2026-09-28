@@ -5,15 +5,31 @@
 // inspects the resulting mask or the thrown RelionError.
 #include "src/motioncorr_runner.h"
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 static int failures = 0, passed = 0;
 
+// Per-process scratch directory, so concurrent ctest jobs and repeat runs on a
+// shared build host cannot collide or inherit a stale fixture.
+static const std::filesystem::path &scratch_dir()
+{
+    static const std::filesystem::path dir = [] {
+        std::filesystem::path d = std::filesystem::temp_directory_path() /
+            ("motioncorr_defect_test_" + std::to_string(static_cast<long>(::getpid())));
+        std::filesystem::remove_all(d);
+        std::filesystem::create_directories(d);
+        return d;
+    }();
+    return dir;
+}
+
 static std::string tmpfile_with(const std::string &body, const std::string &tag)
 {
-    std::string p = "/tmp/i98_defect_" + tag + ".txt";
+    const std::string p = (scratch_dir() / (tag + ".txt")).string();
     std::ofstream o(p, std::ios::binary);
     o << body;
     o.close();
@@ -160,6 +176,9 @@ int main()
     rc = run(m, ny, nx, "9223372036854775807 0 9223372036854775807 5\n", "o2", &msg);
     check(rc == 0 && count_set(m) == 0,
           "LLONG_MAX x+w does not overflow or crash, paints 0 px");
+
+    std::error_code ec;
+    std::filesystem::remove_all(scratch_dir(), ec);
 
     std::cout << "\n" << passed << " passed, " << failures << " failed\n";
     return failures ? 1 : 0;

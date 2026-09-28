@@ -135,6 +135,10 @@ if(BUILD_TESTING AND CUDA)
         target_link_options(cuda_fault_matrix PRIVATE
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaMemset" "LINKER:--wrap=cudaDeviceSynchronize"
+            # Tracked as well as faulted: the leak in cudaAlignPatchDevice is mostly
+            # events and a cuFFT plan, neither of which passes through cudaMalloc.
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftDestroy"
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
             "LINKER:--wrap=cufftSetWorkArea" "LINKER:--wrap=cufftPlanMany"
             "LINKER:--wrap=cufftExecR2C" "LINKER:--wrap=cufftExecC2R")

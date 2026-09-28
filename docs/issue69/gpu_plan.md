@@ -93,7 +93,25 @@ accumulates, which is the premise of the fix, but the production retry is inside
 Step 4 is the load-bearing one. Step 3 changes behaviour on purpose, so an
 identical-output assertion there would be the wrong test.
 
-### 5. Healthy same-backend 24-movie control
+### 5. Early-binning streaming path — pass criterion 4's second half
+
+Issue #69's pass criteria require that "the early-binning streaming path remains
+supported where previously valid", and an earlier version of this plan did not mention
+it. `CudaMovieSession` is only constructed when `use_gpu && !early_binning`
+(`motioncorr_runner.cpp`), so with `--early_binning` the resident path -- and therefore
+every line F3, F4, F5 and F6 touch -- is never entered, and F1/F2 are reached only
+through the non-resident `cudaAlignPatch` wrapper. The control is correspondingly
+simple and must still be run:
+
+```
+<build>/motioncorr --i <movie> --o <out> --use_own --gpu 0 --bin_factor 2 --early_binning ...
+```
+
+base versus candidate, outputs compared byte for byte with
+`docs/issue69/harness/compare_cpu_arms.py`. Expected: identical, because the candidate
+adds no statement that path executes. If it is not identical, that is a finding.
+
+### 6. Healthy same-backend 24-movie control
 
 Base versus candidate, `-DCUDA=ON`, default options, all 24 tutorial movies. Compare
 ordered pixels, literal MRC payloads, normalised full headers and the STAR artifacts,
@@ -101,6 +119,27 @@ with the four PDF differences and the MRC label timestamp preserved as known
 non-reproducible items. Reuse the comparison logic in
 `docs/issue69/harness/compare_cpu_arms.py`, which already carries its own negative
 control.
+
+### 7. Relocation-level check that the interposition actually took effect
+
+`nm` showing `__wrap_*` defined in the binary proves only that the test translation
+unit defines them. To show the linker actually redirected `motioncorr_core`'s calls:
+
+```
+objdump -d --demangle <build>/cuda_fault_matrix \
+  | awk '/<cudaAlignPatchDevice.*>:/{f=1} f&&/call/{print} /^$/{f=0}' \
+  | grep -E "cudaMalloc|cufft" | head
+```
+
+Every such call must target `__wrap_...`, not the bare symbol. This is a read-only
+disassembly, needs no device, and can be done at build time.
+
+## Pass criterion 3 is not this task's
+
+"Retry reprocesses partial even/odd/DW products; prior complete artifacts are
+preserved" is a completion/resume property. It belongs to #99/#53's publication
+contract, and this branch neither implements nor claims it. Recorded so it is visibly
+deferred rather than silently missing.
 
 ## What will not be claimed
 

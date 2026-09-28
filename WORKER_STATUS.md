@@ -29,9 +29,34 @@ gates, defaults, compiler flags, dependencies, any other issue's files.
 ## Coordination
 
 `src/motioncorr_runner.cpp` is shared with #97/#98/#99. My edits are confined to the
-local-patch block around `:2072-2155`. #99/#53 own completion/resume publication
-semantics; I rely on the existing per-movie failure contract at `:626-645` rather than
-changing it.
+local-patch block and one include. #99/#53 own completion/resume publication semantics;
+I rely on the existing per-movie failure contract at `:626-645` rather than changing it.
+
+### PR93 (#77) is a hard conflict, and it is not just textual
+
+Flagged by the independent spec review; I under-reported it in the first version of
+this file. PR93 `fix/issue77-reviewed-kernels` head `4998599` touches three of my four
+production files, and against main `4c952b3f` its diff is
+`cuda_alignpatch.cu +523/-…`, `cuda_movie_session.cu +130/-…`,
+`motioncorr_runner.cpp +195/-…`.
+
+The overlap is substantive, not incidental:
+
+- PR93 rewrites `cudaAlignPatchDevice` by hoisting **the same eight device buffers and
+  the cuFFT plan** I convert to per-call scoped ownership into a process-static
+  `PatchAlignCache` with its own `release()`, plus an `AlignCacheFailureCleanup` guard
+  and a `FrameStagingCleanup` for the wrapper's `d_Fframes`. That is an **independent
+  and mutually exclusive fix for F1 and F2.** Whichever lands first, the other's
+  version of those two fixes becomes dead code and must be redone against the survivor.
+- PR93 `#undef`s and redefines `HANDLE_ERROR` and `CUFFT_CHECK` in that file. My ADR's
+  rationale is phrased around the fact that at `4c952b3f` the file does *not* do this;
+  that sentence needs rewording if PR93 lands first.
+- PR93's `preparePatchInVram` hunk overlaps my F3 hunk in the same function.
+
+**Recommended order:** F3, F4, F5, F6 and both new tests are independent of PR93 and
+can land either way. F1 and F2 should be reconciled with whichever of the two is
+merged first, not stacked blindly. I have not rebased onto PR93 and am not requesting
+a merge.
 
 ## Changed files
 

@@ -80,6 +80,21 @@ Already conforms after #82: every wrapper allocation is registered with
 events/plans use `CudaEventCleanup`/`CufftPlanCleanup`. This ADR uses that file as the
 reference pattern rather than inventing a new one.
 
+### `cuda_fft_prep.cu`
+
+Named in Deliverable 1, audited, and **no change required** — recorded here rather than
+left as an unexplained omission.
+
+| Function | Owned | Borrowed | Verdict |
+|---|---|---|---|
+| `cudaForwardFFT2D` | `d_real`, `d_comp`, `plan_r2c` | `Iframes`, `Fframes` | Conforms. Each allocation is registered with `CudaMemoryCleanup` on the statement after it succeeds; the two early `return false` paths (`d_comp` allocation, `cufftPlanMany`) exit before the failing resource exists, and the already-registered `d_real` unwinds |
+| `cudaInverseFFT2D` | `d_comp`, `d_real`, plan, and the module-static frame cache | caller images | Conforms; the static cache is released through its own cleanup |
+| `cudaPreparePatch` | `d_Ipatches`, `d_Fpatches`, `d_group_start`, `d_group_size`, `plan_batched` | `Iframes`, `Fpatches`, the module-static cached frames | Conforms; all four buffers registered immediately, plan taken immediately after creation |
+
+Unlike `cuda_alignpatch.cu`, this file **does** define its own returning-`false`
+`HANDLE_ERROR`, so its error paths do not leave by exception — which is why the same
+defect class did not arise here.
+
 ---
 
 ## 3. Shift-state contract, and what the retry actually does
@@ -150,17 +165,30 @@ verdict, matching upstream. It is out of scope here and is left alone.
 
 ### Sticky error set used by F6
 
-`cudaErrorIllegalAddress`, `cudaErrorLaunchFailure`, `cudaErrorLaunchTimeout`,
-`cudaErrorHardwareStackError`, `cudaErrorIllegalInstruction`, `cudaErrorMisalignedAddress`,
-`cudaErrorInvalidAddressSpace`, `cudaErrorInvalidPc`, `cudaErrorECCUncorrectable`,
-`cudaErrorContextIsDestroyed`, `cudaErrorDeviceUninitialized`, `cudaErrorAssert`,
-`cudaErrorUnsupportedPtxVersion`, `cudaErrorExternalDevice`.
+The authoritative list is the `switch` in
+[`src/acc/cuda/cuda_error_class.h`](../../src/acc/cuda/cuda_error_class.h), which also
+records why `cudaErrorUnsupportedPtxVersion` is *excluded* — it is a deterministic
+toolchain mismatch that will fail the alternative path too, but it does not make
+unrelated calls fail, which is what "poisoned" means here. An earlier draft of this ADR
+listed a set that did not match the code; the list now lives in exactly one place, is
+`inline` in a header rather than in an anonymous namespace so it can be unit tested, and
+is covered by `tests/cuda_error_class.cpp`.
 
-These are the CUDA runtime codes documented as leaving the context unusable for the
-remainder of the process. Everything else — notably `cudaErrorMemoryAllocation` — is
-treated as recoverable and keeps today's behaviour. The classifier **reads** the pending
-error with `cudaGetLastError()`; it does not clear device state belonging to anyone else
-and never calls `cudaDeviceReset()`.
+Everything else — notably `cudaErrorMemoryAllocation` — is treated as recoverable and
+keeps today's behaviour. The classifier is a pure predicate over an error code: it makes
+no CUDA call, never calls `cudaDeviceReset()`, and never touches state belonging to
+another process or another device.
+
+**Known weakness, deliberately accepted for now.** The call site obtains the code with
+`cudaGetLastError()`, which reports the last error recorded on this thread rather than
+the one the failing stage hit — the session's own file-local `HANDLE_ERROR` may already
+have consumed it, and the host-side buffer guard records none at all. The *decision* is
+still sound, because the question being asked is "is this context usable", and a sticky
+code pending from anywhere answers it. But the *attribution* is not reliable, so the
+message says where the state was observed rather than what caused it, and prints
+explicitly when nothing is pending instead of "no error". The robust fix is to return
+the failing code out of `preparePatchInVram`; that widens an interface shared with
+other in-flight work, so it is recorded here as a follow-up rather than taken now.
 
 ---
 

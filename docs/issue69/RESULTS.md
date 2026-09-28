@@ -11,8 +11,9 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | CPU build, base and candidate, Release `-O3 -DNDEBUG` | ran, both clean |
 | CPU CTest, base 13/13, candidate 14/14 | ran, all passed |
 | Patch-retry shift-state contract control | ran, passed |
-| Same-backend CPU output, base vs candidate, with negative control | ran, identical |
+| Same-backend CPU output, base vs candidate, with negative control | ran, identical — but see §3: this is a build-hygiene control, not a behavioural one |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
+| CUDA error classifier unit test | ran under the CUDA build |
 | CUDA compile of the changed `.cu` and the new fault matrix | ran, clean, zero warnings in changed files |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
 | Forced-nonconvergence end-to-end witness | **NEEDS_GPU, not run** |
@@ -48,6 +49,19 @@ Fixture `test-data/synthetic/synthetic_movie.tiff`
 
 Base: 13/13 passed. Candidate: 14/14 passed — the same 13 plus the new `PatchRetryState`.
 Both configured and built with exit 0.
+
+`evidence/cpu-build-and-ctest.log` also preserves an **earlier candidate run that
+failed**, at `2026-09-28T00:01:06`, `ctest exit=8`, `1 - PatchRetryState (Failed)`. That
+was the first version of the control, whose setup assertion wrongly expected a single
+iteration to recover the applied displacement. The assertion was replaced with a
+converged truth anchor (commit `cbeaf99`) and the run at `00:04:49` passed 14/14. The
+failing run is kept rather than overwritten; the `WORKER_STATUS.md` model-comparison
+record counts it as one of two self-corrections.
+
+After the independent reviews, the whole CPU suite was rebuilt from scratch and re-run
+at `2026-09-28T00:29:54`: configure 0, build 0, **14/14 passed**, same-backend control
+passed with its negative control reporting exactly two files, and the retry-state
+control passed.
 
 ## 2. Patch-retry shift-state contract
 
@@ -96,6 +110,15 @@ perturbed in a copy of the candidate output and the comparator is required to re
 **exactly** those two files. It reported exactly two. A comparison that cannot fail
 would prove nothing.
 
+**What this control is, and is not.** §4 below shows that in a CPU-only build the two
+trees differ by no executable statement at all, so "0 differing" was *entailed* before
+the run. It is therefore a **build-hygiene control**, not a behavioural one: it would
+catch an edit that accidentally escaped an `#ifdef _CUDA_ENABLED` guard and leaked into
+the CPU path, which is a real risk given how much of this change lives inside those
+guards. It is **not** evidence about F1-F6, none of which can execute in a CPU-only
+build. The behavioural control for the CUDA path is the 24-movie same-backend run,
+which has not been done.
+
 ## 4. Why the CPU binaries differ, and why that is not a behaviour change
 
 `motioncorr` base `cb1e1cb1…`, candidate `9dd05f93…`. Every change in this branch to
@@ -132,8 +155,7 @@ All four CUDA objects built and all four binaries linked, including the new
 `cuda_fault_matrix`. **Zero warnings in any changed file**; the five warnings in the
 build are pre-existing, in `src/memory.h` and `src/time.cpp`.
 
-The fault matrix's link-time interposition resolved: `nm` shows all eleven
-`__wrap_` symbols defined in the binary —
+The fault matrix's `__wrap_` symbols are defined in the binary; `nm` shows all eleven —
 
 ```
 __wrap_cudaMalloc  __wrap_cudaFree  __wrap_cudaMemcpy  __wrap_cudaMemset
@@ -141,8 +163,12 @@ __wrap_cudaDeviceSynchronize  __wrap_cufftCreate  __wrap_cufftMakePlanMany
 __wrap_cufftSetWorkArea  __wrap_cufftPlanMany  __wrap_cufftExecR2C  __wrap_cufftExecC2R
 ```
 
-so the harness is wired to the production call sites rather than silently no-opping.
-It has still **not been run**; that needs an assigned GPU slot.
+**That shows the test translation unit defines the wrappers. On its own it does not
+show the linker redirected `motioncorr_core`'s calls to them** — a defined `__wrap_`
+symbol looks the same whether or not the interposition took effect. An earlier version
+of this document asserted the stronger claim on this evidence, which it does not
+support. The relocation-level check is in `evidence/cuda-interposition.log`. Even with
+that, the harness has **not been run**; that needs an assigned GPU slot.
 
 Source hashes on the GPU host match the `cpu64` hashes exactly, so both validations ran
 against the same tree.

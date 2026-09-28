@@ -1,0 +1,92 @@
+##### PROVENANCE #####
+UTC 2026-09-28T02:23:27Z
+4-gpu-vm
+Cpus_allowed_list:	96-111
+Mems_allowed_list:	0-1
+physcpubind: 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 
+nodebind: 1 
+membind: 0 1 
+--- lscpu node/socket/core for the 96-111 lane ---
+96,1,96,96
+97,1,97,97
+98,1,98,98
+99,1,99,99
+100,1,100,100
+101,1,101,101
+102,1,102,102
+103,1,103,103
+104,1,104,104
+105,1,105,105
+106,1,106,106
+107,1,107,107
+108,1,108,108
+109,1,109,109
+110,1,110,110
+111,1,111,111
+Thread(s) per core: 1
+--- devices present (NOT used: compile only) ---
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+--- compute apps at start ---
+(empty = none)
+--- toolchain ---
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+--- load ---
+0.23 0.61 0.43 1/2735 1182015
+
+##### SOURCE #####
+6a5bd460b58b3325a02e68014370cf567e02e27eeefad8339193fcf967f1e850  /home/alex/mc-i96-integration.bundle
+candidate head: 6f2965962c92daffd05b1198a6bae7b9b9fb8fc6
+tree: ac93820e81a8e4ae013d032acbf46e4cd6411e8e
+
+##### ARM 1: DEFAULT CUDA CONFIGURE (no -DCMAKE_CUDA_ARCHITECTURES) #####
+Tests the #26-reported CMakeLists.txt:59 fallback guard on this exact tree.
+arm1 configure exit=1
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /usr/local/cuda-12.8/targets/x86_64-linux/include (found version "12.8.61") 
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done (5.9s)
+CMake Error in CMakeLists.txt:
+  CUDA_ARCHITECTURES is empty for target "motioncorr_core".
+
+
+-- Generating done (0.0s)
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+arm1 build: NOT ATTEMPTED (configure failed)
+
+##### ARM 2: EXPLICIT sm80 #####
+arm2 configure exit=1
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+CMake Error at CMakeLists.txt:89 (message):
+  BUILD_TESTING=ON requires Python 3 with 'numpy' installed.
+
+
+-- Configuring incomplete, errors occurred!
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CUDA:BOOL=ON
+arm2 build exit=2
+arm2 compile errors: 0
+arm2 warnings in integrated files:
+  (none in src/image.h, src/rwMRC.h, src/rwTIFF.h, src/micrograph_model.cpp, src/motioncorr_runner.cpp)
+--- binaries ---
+--- CUDA actually linked in? ---
+  (no CUDA runtime linked -- would mean CUDA=ON did not take effect)
+--- device code architectures embedded ---
+  (cuobjdump unavailable)
+
+##### NO GPU EXECUTION PERFORMED #####
+compute apps at end:
+(empty = nothing ran on a device)
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+UTC 2026-09-28T02:23:40Z

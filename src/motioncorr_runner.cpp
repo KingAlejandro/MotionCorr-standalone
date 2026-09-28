@@ -2143,17 +2143,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					// exactly the lost-error contract this branch was pulled up on.
 					//
 					// So the session preserves the status of the stage that actually
-					// failed, and the verdict comes from that. The pending slot is
-					// consulted only as a fallback, for the case where no handler ran
-					// at all -- the unchecked cudaMalloc for the patch scratch above.
+					// failed, and BOTH that and the pending slot are consulted: either
+					// can independently prove the context is dead. Preferring only the
+					// recorded status would reintroduce the same bug from the other
+					// side, because the session keeps the FIRST failure -- a benign
+					// early allocation miss would then mask a fatal fault on a later
+					// patch of the same movie.
 					const cudaError_t recorded = movie_session->getFirstError();
 					const cufftResult recorded_cufft = movie_session->getFirstCufftError();
 					const cudaError_t pending = cudaGetLastError();
-					const CudaRetryVerdict verdict =
-						cudaRetryVerdictFor(recorded, recorded_cufft, pending);
+					const CudaRetryDecision decision =
+						cudaRetryDecisionFor(recorded, recorded_cufft, pending);
 
-					if (verdict == CUDA_RETRY_FATAL) {
-						const cudaError_t decisive = (recorded != cudaSuccess) ? recorded : pending;
+					if (decision.verdict == CUDA_RETRY_FATAL) {
+						const cudaError_t decisive = decision.decisive;
 						REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
 						                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
 						                 << cudaGetErrorString(decisive)

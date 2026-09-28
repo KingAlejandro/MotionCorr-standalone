@@ -3,7 +3,7 @@
 
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
-// cudaRetryVerdictFor takes a cufftResult. Including cufft.h here rather than relying
+// cudaRetryDecisionFor takes a cufftResult. Including cufft.h here rather than relying
 // on a transitive one: motioncorr_runner.cpp already pulls it in via the other acc/cuda
 // headers, so the omission only surfaced when tests/cuda_error_class.cpp included this
 // header on its own.
@@ -74,14 +74,20 @@ inline bool cudaErrorPoisonsContext(cudaError_t err)
  * nothing has been recorded since. Deciding recoverability from a later last-error read
  * therefore turns a fatal, already-consumed failure into a permitted retry.
  *
- * So the decision is made from the status the failing stage RECORDED, and the pending
- * slot is consulted only when nothing was recorded -- for example when the caller's own
- * unchecked allocation declined without going through a handler.
+ * So BOTH sources are consulted, and either can independently prove the context is
+ * dead. An earlier version preferred the recorded status and fell back to the pending
+ * slot only when nothing was recorded -- which reintroduced the same class of bug from
+ * the other side: the session keeps the *first* failure, so a benign early
+ * `cudaErrorMemoryAllocation` on one patch would mask a fatal fault on a later patch of
+ * the same movie for the rest of that movie. Poisoning is monotonic -- a context does
+ * not recover -- so a fatal code from either source is decisive, and only when neither
+ * is fatal does the preference between them matter, and then only for the message.
  *
  * A cuFFT failure is passed separately because `cufftResult` is not a `cudaError_t`.
  * cuFFT reports library-level failures that do not themselves imply a dead CUDA
- * context, so a cuFFT error alone does not force a fatal verdict; if it corrupted the
- * context, the accompanying CUDA code says so.
+ * context, so a cuFFT error alone does not force a fatal verdict; if the context did
+ * die, the accompanying sticky CUDA code says so and is seen through one of the two
+ * sources above.
  *
  * Pure predicate: performs no CUDA call, resets nothing, touches no other process.
  */
@@ -90,14 +96,36 @@ enum CudaRetryVerdict {
     CUDA_RETRY_FATAL        // context unusable; fail this movie cleanly, do not retry
 };
 
-inline CudaRetryVerdict cudaRetryVerdictFor(cudaError_t recorded_by_stage,
-                                            cufftResult recorded_cufft,
-                                            cudaError_t pending_on_thread)
+struct CudaRetryDecision {
+    CudaRetryVerdict verdict;
+    // The code that actually drove the verdict, so the caller's message names the same
+    // thing the decision was made on instead of re-deriving it and possibly disagreeing.
+    cudaError_t decisive;
+};
+
+inline CudaRetryDecision cudaRetryDecisionFor(cudaError_t recorded_by_stage,
+                                              cufftResult recorded_cufft,
+                                              cudaError_t pending_on_thread)
 {
-    const cudaError_t decisive = (recorded_by_stage != cudaSuccess) ? recorded_by_stage
-                                                                    : pending_on_thread;
+    CudaRetryDecision decision;
     (void)recorded_cufft;
-    return cudaErrorPoisonsContext(decisive) ? CUDA_RETRY_FATAL : CUDA_RETRY_PERMITTED;
+
+    // Either source alone is sufficient evidence of a dead context.
+    if (cudaErrorPoisonsContext(recorded_by_stage)) {
+        decision.verdict = CUDA_RETRY_FATAL;
+        decision.decisive = recorded_by_stage;
+        return decision;
+    }
+    if (cudaErrorPoisonsContext(pending_on_thread)) {
+        decision.verdict = CUDA_RETRY_FATAL;
+        decision.decisive = pending_on_thread;
+        return decision;
+    }
+
+    decision.verdict = CUDA_RETRY_PERMITTED;
+    decision.decisive = (recorded_by_stage != cudaSuccess) ? recorded_by_stage
+                                                           : pending_on_thread;
+    return decision;
 }
 
 #endif // _CUDA_ENABLED

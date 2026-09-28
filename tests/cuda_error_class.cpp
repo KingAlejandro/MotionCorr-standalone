@@ -1,7 +1,7 @@
 // Issue #69 -- unit tests for the two predicates behind the poisoned-context and
 // retry decisions in motioncorr_runner.cpp:
 //   cudaErrorPoisonsContext()  -- is this error code one that kills the context?
-//   cudaRetryVerdictFor()      -- given what the failing stage RECORDED and what the
+//   cudaRetryDecisionFor()     -- given what the failing stage RECORDED and what the
 //                                 last-error slot reports now, is a retry permitted?
 //
 // The second exists because absence of a pending error is not proof of a usable
@@ -115,6 +115,17 @@ const RetryCase RETRY_CASES[] = {
     {cudaErrorIllegalAddress, CUFFT_SUCCESS, cudaErrorMemoryAllocation, CUDA_RETRY_FATAL,
      "recorded fatal must not be masked by a benign later code"},
 
+    // The mirror image, and the one that caught a regression introduced by the first
+    // version of this fix. The session records the FIRST failure, so a benign early
+    // allocation miss on one patch stays recorded for the rest of the movie. If the
+    // recorded status were preferred unconditionally, a fatal fault on a LATER patch --
+    // still sticky in the pending slot -- would be invisible and retried. Either source
+    // alone must be able to force FATAL.
+    {cudaErrorMemoryAllocation, CUFFT_SUCCESS, cudaErrorIllegalAddress, CUDA_RETRY_FATAL,
+     "a benign recorded failure must not mask a fatal code still pending"},
+    {cudaErrorMemoryAllocation, CUFFT_SUCCESS, cudaErrorLaunchFailure, CUDA_RETRY_FATAL,
+     "same, for a launch failure pending behind a recorded allocation miss"},
+
     // cuFFT reports library-level failures that do not themselves imply a dead CUDA
     // context, so a cuFFT error alone does not force a fatal verdict.
     {cudaSuccess, CUFFT_EXEC_FAILED, cudaSuccess, CUDA_RETRY_PERMITTED,
@@ -126,7 +137,15 @@ const RetryCase RETRY_CASES[] = {
 int runRetryCases() {
     int failures = 0, fatal = 0, permitted = 0;
     for (const RetryCase &c : RETRY_CASES) {
-        const CudaRetryVerdict got = cudaRetryVerdictFor(c.recorded, c.recorded_cufft, c.pending);
+        const CudaRetryDecision d = cudaRetryDecisionFor(c.recorded, c.recorded_cufft, c.pending);
+        const CudaRetryVerdict got = d.verdict;
+        // The decisive code must be one the caller can meaningfully report, and on a
+        // fatal verdict it must be the code that actually forced it.
+        if (got == CUDA_RETRY_FATAL && !cudaErrorPoisonsContext(d.decisive)) {
+            std::printf("FAIL decisive code %s does not itself poison the context (%s)\n",
+                        cudaGetErrorName(d.decisive), c.why);
+            ++failures;
+        }
         if (c.expect == CUDA_RETRY_FATAL) ++fatal; else ++permitted;
         if (got != c.expect) {
             std::printf("FAIL retry verdict: recorded=%s pending=%s -> %s, expected %s  (%s)\n",

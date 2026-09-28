@@ -165,9 +165,9 @@ to resolve, and what it fixed, is in
 [`docs/integration_round96/worker_status/pr106-issue53-multi-gpu-scheduling.md`](../integration_round96/worker_status/pr106-issue53-multi-gpu-scheduling.md).
 Commands: [`port_validation/`](port_validation/).
 
-**cpu64**, source head `0b329b4`, cores 32-63, build `-j 16`, Release
+**cpu64**, source head `f28a5ff`, cores 32-63, build `-j 16`, Release
 `-O3 -DNDEBUG`, g++ 13.3.0, cmake 4.4.3, Python 3.12 + numpy 2.5.3, binary
-`5c5b194466655d1522e925e98e5e7041d2de5c4b441b83349a3e7ddd369365a0`, under
+`b8fa10a90f2117204f3349e396211e7943ed9d8da0388019080011b052ad6cd8`, under
 `flock /tmp/motioncorr-issue96-cpu-validation.lock`, on a git-backed tree with
 `applefile_count=0` and clean porcelain. Full log:
 [`port_evidence/cpu64_port_validation.log`](port_evidence/cpu64_port_validation.log).
@@ -183,7 +183,7 @@ is detected.
 | Layer | Result |
 |---|---|
 | `tests/test_multi_gpu_scheduling.py --binary <built>` | **48/48 passed** |
-| `docs/multi_gpu/negative_controls.py` | **68/68 mutations detected**, no survivors |
+| `docs/multi_gpu/negative_controls.py` | **69/69 mutations detected**, no survivors |
 | `tools/validate_test_collection.py --test-dir build` | **PASS**, 18 collected, 18 required |
 | `ctest --output-on-failure -j 4` | **18/18 passed** |
 | end-to-end, real binary: serial vs 3-way sharded | **6/6 exact**, merge `PASS`, aggregate STAR identical, `DISTINCT_PAYLOADS=6/6` |
@@ -241,7 +241,7 @@ owned compute apps, mutex unheld. Evidence:
 to a scratch copy and requires the corresponding cases to fail. An entry whose
 case needs a tool the host lacks is reported SKIPPED and explicitly not counted
 as detected, so the printed figure is detected-over-attempted, not
-detected-over-entries: **68/68 on Linux with `taskset`**, 67/69 attempted on
+detected-over-entries: **69/69 on Linux with `taskset`**, 67/69 attempted on
 macOS. No mutation survives
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list

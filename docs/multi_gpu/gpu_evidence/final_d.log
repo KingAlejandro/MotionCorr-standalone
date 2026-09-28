@@ -1,0 +1,79 @@
++ cd /home/alex/mc-i53-gpu/run
++ date -Is
+2026-09-28T07:05:44+00:00
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ echo my_device_compute_apps=0
+my_device_compute_apps=0
++ echo '=== concurrent occupancy ==='
+=== concurrent occupancy ===
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
++ cat /proc/loadavg
+2.33 3.14 2.89 1/2744 1216749
++ for k in 0 1
++ mv itr/w0/resume.log itr/resume_w0.log
++ for k in 0 1
++ mv itr/w1/resume.log itr/resume_w1.log
++ ls itr/resume_w0.log itr/resume_w1.log
+itr/resume_w0.log
+itr/resume_w1.log
++ rm -rf m_res2 exact_res2
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/merge_workers.py --manifest itr/shards/shard_manifest.json --workers itr/w0 itr/w1 --status itr/status_resumed.json --out m_res2 --report merge_res2.json --aggregate-with /home/alex/mc-i53-gpu/build-final/motioncorr --input-star movies.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 96,
+  "verdict": "PASS"
+}
++ echo MERGE_RESUMED2_RC=0
+MERGE_RESUMED2_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''merge_res2.json'\''))
+print('\''RES_MERGE=%s'\''%{k:d[k] for k in ('\''n_movies_expected'\'','\''n_files_staged'\'','\''launcher_verdict'\'','\''verdict'\'')})
+print('\''RES_AGG=%s'\''%d['\''aggregate_star'\''].get('\''row_order'\''), d['\''aggregate_star'\''].get('\''n_rows'\''))
+print('\''RES_PROBLEMS=%s'\''%d['\''problems'\''])'
+RES_MERGE={'n_movies_expected': 24, 'n_files_staged': 96, 'launcher_verdict': 'PASS', 'verdict': 'PASS'}
+RES_AGG=canonical 24
+RES_PROBLEMS=[]
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialG --test m_res2 --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest itr/shards/shard_manifest.json --out exact_res2 --python /home/alex/mc-env/bin/python
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo COMPARE_RESUMED2_RC=0
+COMPARE_RESUMED2_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''exact_res2/exact_summary.json'\''))
+print('\''RES_EXACT=%s'\''%{k:d[k] for k in ('\''n_expected'\'','\''n_compared'\'','\''passed'\'','\''failed'\'','\''verdict'\'')})
+print('\''RES_reports_unique=%d/%d'\''%(len({r.get('\''report'\'') for r in d['\''results'\'']}),len(d['\''results'\''])))'
+RES_EXACT={'n_expected': 24, 'n_compared': 24, 'passed': 24, 'failed': 0, 'verdict': 'PASS'}
+RES_reports_unique=24/24
++ /home/alex/mc-env/bin/python -
+RES_AGGREGATE_STAR_IDENTICAL=1
++ echo '=== RELEASE CHECKS ==='
+=== RELEASE CHECKS ===
++ date -Is
+2026-09-28T07:06:05+00:00
+++ pgrep -f mc-i53-gpu/build
+++ wc -l
++ echo final_strays=0
+final_strays=0
++ pgrep -af mc-i53-gpu/build
++ grep -v pgrep
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ echo final_my_compute_apps=0
+final_my_compute_apps=0
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
++ nvidia-smi --query-gpu=index,uuid,memory.used --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
++ cat /proc/loadavg
+2.09 3.02 2.85 2/2748 1217435
+FINAL_D_OUTER_RC=0

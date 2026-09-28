@@ -107,6 +107,18 @@ which shells out to ghostscript three times. The `TIMING` stages above put
 final reporting is a real but minority part of that residual. No TIFF cost anywhere in this
 document is derived by subtracting GPU kernel timers from wall time.
 
+**SMT, and why the lane's 16 CPUs may not be 16 cores.** `lscpu` inside this guest reports
+`Thread(s) per core: 1`, `Core(s) per socket: 1` and `Socket(s): 124` — a flattened topology
+in which every logical CPU is its own socket and its own core. That is a virtualisation
+artifact, not the host's real geometry, and it means **the physical-core versus SMT-sibling
+distinction the round requires cannot be read from inside this VM at all.** Prior work on
+this same host found positive evidence of hidden SMT: a stage running 68% slower at `j=2`
+while user time nearly doubled, which is the signature of two threads sharing one physical
+core. Every "16 CPUs" in this document therefore means 16 *logical* CPUs on NUMA node 1, and
+any statement that would require them to be 16 independent cores is not supported. This is
+also a live alternative explanation for part of section 5's small `j16` margin, and it is not
+separated here.
+
 **NUMA placement.** The lane pins CPUs to node 1 but `Mems_allowed_list` stays `0-1` — memory
 is not bound. `numastat -p` sampled mid-run nonetheless shows **1.43 GB of 1.45 GB resident on
 node 1**, 98.6% node-local, and `numa_maps` shows `N1=` for heap and anonymous mappings. So
@@ -191,12 +203,28 @@ obtainable on this host rather than a defect in the gate.
 #53/PR55 owns executable workers; this task does not write a competing scheduler. The
 protocol is specified here so it can be run against that implementation without redesign.
 
-Hold the aggregate CPU budget fixed at the 16-logical-CPU lane and compare one worker at
-`--j 8`, two at `--j 4`, four at `--j 2`, each worker's **entire process tree** pinned inside a
-disjoint sub-range of `96-111`, with explicit IO caps. These are hypotheses, not measured
-optima. Given section 4, the first quantity to record is each layout's aggregate effective IO
-thread count, since that — not the worker count — is what the single-process data predicts
-will move the throughput.
+Hold the aggregate CPU budget fixed at the 16-logical-CPU lane and compare, with each
+worker's **entire process tree** pinned inside a disjoint sub-range of `96-111`:
+
+| layout | per-worker lane | `--j` | aggregate effective IO threads |
+| :-- | :-- | --: | --: |
+| 1 worker | `96-111` | 8 | 8 |
+| 1 worker | `96-111` | 16 | 16 |
+| 2 workers | `96-103`, `104-111` | 4 | 8 |
+| 2 workers | `96-103`, `104-111` | 8 | 16 |
+| 4 workers | `96-99`, `100-103`, `104-107`, `108-111` | 2 | 8 |
+| 4 workers | `96-99`, `100-103`, `104-107`, `108-111` | 4 | 16 |
+
+These are hypotheses, not measured optima. The layout deliberately crosses worker count with
+aggregate IO threads, because section 4 predicts that **aggregate IO threads, not worker
+count, is what moves throughput** — and a 1/2/4-worker series run only at fixed per-worker
+`--j` confounds the two. Rows sharing an aggregate IO count are the informative comparison:
+if they land together, the worker count is not the variable.
+
+Each worker needs its own GPU or an explicit statement that they share one; sharing is a
+different experiment from the scaled-resource series below. Device memory budgeting starts
+from the measured 3134 MiB traced peak per process at this geometry, which is what bounds how
+many workers fit, not the device's 80 GiB.
 
 Thread binding must not be applied blindly to a multi-process layout. The prior audit measured
 `spread`+`cores` turning an 84.2 s four-process arm into 255.0 s, a 3x pessimisation, because

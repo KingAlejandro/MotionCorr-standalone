@@ -402,9 +402,21 @@ common signal-to-noise roll-off cancels and only the incremental envelope
 change survives. That it works is checkable on the X5 arm, where the applied
 value is known: 1, 2, 5, 10, 25 and 50 Å² are recovered as 1.004, 2.008, 5.019,
 10.038, 25.095 and 50.190 despite individual truth-side R² as low as 0.0003.
-The direction is also what the weighting algebra predicts — normalised
-critical-exposure weights concentrate on early frames as dose rises, so the
-coherent sum Σ𝑤 falls and high-frequency signal is lost.
+The direction is also what the weighting algebra predicts, checked
+independently of the simulation. Normalised critical-exposure weights
+concentrate on early frames as dose rises, so the coherent signal transfer
+Σ𝑤 falls. Evaluated directly from `dose_weight_map` at 3 Å, relative to the
+correct dose:
+
+| dose scale | 0.50 | 0.80 | 1.25 | 2.00 |
+|:---|---:|---:|---:|---:|
+| Σ𝑤 at 3 Å, relative to correct dose | 1.280 | 1.098 | 0.902 | **0.719** |
+
+A 0.719 amplitude ratio at 3 Å is an equivalent Δ*B* of about 12 Å², against a
+fitted absolute harm of +24 Å². Same sign, same order; they do not agree
+closely because the fit is a slope over 20–3 Å and the underlying change is not
+Gaussian — which is the point of this subsection. The direction is solid; the
+magnitude should be read as "tens of Å²", not as a calibrated value.
 
 **Scope of the §6 harm bridge, restated.** Reference-measured Δ*B* tracks
 absolute harm for the faults whose spectral signature *is* an envelope —

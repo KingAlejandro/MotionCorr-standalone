@@ -32,7 +32,9 @@ import hashlib
 import difflib
 import json
 import struct
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -307,6 +309,29 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     # hash randomisation, and unchanged when other cases are added or renamed. An index into
     # sorted(CASES) would silently re-roll every existing fixture the moment a case is added.
     seed = BASE_SEED + int(hashlib.sha256(name.encode()).hexdigest()[:8], 16) % 100000
+
+    gt_path = outdir / f"{out_name}_ground_truth.json"
+    mrcs = outdir / f"{out_name}.mrcs"
+    star = outdir / f"{out_name}.star"
+
+    # Preflight 1: canonical mode requires existing ground truth
+    if canonical and not gt_path.is_file():
+        raise RuntimeError(f"Canonical mode: missing required ground-truth JSON {gt_path}")
+
+    # Preflight 2: refuse_conflicting checks parameters before writing or staging any files
+    if gt_path.is_file() and refuse_conflicting:
+        try:
+            existing_gt = json.loads(gt_path.read_text())
+        except Exception as exc:
+            raise RuntimeError(
+                f"Refusing to overwrite {gt_path.name}: malformed or unreadable existing ground truth: {exc}"
+            ) from exc
+        if (existing_gt.get("noise", {}).get("relative_sigma") != cfg["noise_rel"] or
+            existing_gt.get("noise_seed_offset") != noise_seed_offset or
+            existing_gt.get("seed") != seed):
+            raise RuntimeError(
+                f"Refusing to overwrite {gt_path.name}: conflicting parameters with existing ground truth"
+            )
     rng = np.random.default_rng(seed)
 
     cx, cy, sig, amp = make_particles(rng, nx, ny)
@@ -343,39 +368,6 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
             warped[hy, hx] = hot_val
         stack[f] = warped.astype(np.float32)
 
-    outdir.mkdir(parents=True, exist_ok=True)
-    mrcs = outdir / f"{out_name}.mrcs"
-    write_mrc_stack(mrcs, stack, PIXEL_SIZE)
-    star = outdir / f"{out_name}.star"
-    star_text = STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
-                                     movie=mrcs.name)
-    if canonical:
-        # The committed .star is a trusted gate INPUT, not a regenerable artifact, so canonical
-        # mode compares and refuses rather than rewriting it.
-        #
-        # Rewriting it here is not benign. A STAR_TEMPLATE edit that changes the optics -- a
-        # different _rlnMicrographOriginalPixelSize, _rlnVoltage or _rlnMicrographMovieName --
-        # leaves the generated pixels untouched, so the movie_sha256 check below still passes
-        # and verify_fixtures.py, which hashes the movie and the truth JSON, still reports
-        # VERIFIED. run_known_motion_gates.py would then consume freshly generated metadata
-        # under a green canonical verification, which is exactly the bit-exact parity gate
-        # this fixture set exists to provide.
-        if not star.is_file():
-            raise RuntimeError(f"Canonical mode: missing required committed STAR input {star}")
-        existing_star = star.read_text()
-        if existing_star != star_text:
-            diff = "\n".join(difflib.unified_diff(
-                existing_star.splitlines(), star_text.splitlines(),
-                fromfile=f"committed {star.name}", tofile="generated", lineterm="", n=1))
-            raise RuntimeError(
-                f"Canonical mode STAR disagreement for {out_name}: the committed STAR input does "
-                f"not match what this generator would write. The committed file was NOT modified. "
-                f"If the change is intended, update the fixture and its manifest digest as an "
-                f"explicit maintenance step.\n{diff}"
-            )
-        # Canonical mode verified; committed STAR left untouched on disk.
-    else:
-        star.write_text(star_text)
 
     # Declared evaluation grid: endpoint-inclusive, so the four corners and all four edges are
     # sampled. Corners are where the local polynomial is largest and where a sign or axis defect
@@ -388,108 +380,110 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     grid_y = gyy.ravel()
     grid_field = injected_motion(frames, grid_x, grid_y, nx, ny, n_frames, local_scale)
 
-    gt = {
-        "schema": SCHEMA_VERSION,
-        "case": out_name,
-        "base_case": name,
-        "movie_file": mrcs.name,
-        "input_star": star.name,
-        "movie_sha256": sha256(mrcs),
-        "source_commit": git_commit(repo_root),
-        "generator": Path(__file__).name,
-        "seed": seed,
-        "noise_seed_offset": noise_seed_offset,
-        "geometry": {
-            "nx": nx, "ny": ny, "n_frames": n_frames,
-            "pixel_size_angstrom": PIXEL_SIZE,
-            "voltage_kv": VOLTAGE,
-            "dose_per_frame": DOSE_PER_FRAME,
-        },
-        "recommended_run": {
-            "patch_x": cfg["patch_x"], "patch_y": cfg["patch_y"],
-            "bin_factor": 1, "first_frame_sum": 1,
-            # Hot-pixel replacement draws from rand(); on the defect-free cases it would only
-            # mangle bright particle centres, so it is switched off there. km_local_noisy keeps
-            # it on so the defect path is exercised against six known injected hot pixels.
-            "skip_defect": bool(cfg["skip_defect"]),
-            "heavy": bool(cfg.get("heavy", False)),
-            "role": cfg.get("role", "gate"),
-            "expected_hot_pixels_detected": 0 if cfg["skip_defect"] else int(cfg["n_hot"]),
-        },
-        "conventions": {
-            "frame_index": "0-based z in this file; the output STAR uses 1-based "
-                           "rlnMicrographFrameNumber, z = frame - rlnMicrographStartFrame",
-            "axes": "x = column = fast axis, y = row = slow axis, origin at pixel (0,0)",
-            "normalised_position": "u = ix/nx - 0.5, v = iy/ny - 0.5",
-            "units": "pixels of the unbinned grid; angstrom = pixel * pixel_size_angstrom",
-            "injected_motion": "displacement of specimen content in frame f relative to frame 0",
-            "expected_applied_field": "-injected_motion; equals MotionCorr's "
-                                      "globalShift[f] + ThirdOrderPolynomialModel(z,u,v)",
-        },
-        "motion_spec": {
-            "global": GLOBAL_SPEC,
-            "local_terms_x": LOCAL_TERMS_X,
-            "local_terms_y": LOCAL_TERMS_Y,
-            "local_scale": local_scale,
-            "tau": "z / (n_frames - 1)",
-            "term_form": "coeff * tau**p_tau * u**p_u * v**p_v",
-        },
-        "noise": {
-            "relative_sigma": cfg["noise_rel"],
-            "absolute_sigma": noise_sigma,
-            "noise_free_image_std": base_std,
-            "per_pixel_snr": (1.0 / cfg["noise_rel"]) if cfg["noise_rel"] > 0 else None,
-            "model": "i.i.d. Gaussian in detector coordinates, not warped",
-        },
-        "periodicity": {
-            "base_image_periodic": True,
-            "why": "a Fourier shift is cyclic; non-wrapping content puts a mismatched band of "
-                   "width |shift| along two edges and biases any full-frame cross-correlation "
-                   "toward zero shift (measured at 1.2 % on a non-periodic build of this "
-                   "fixture)",
-        },
-        "defects": {
-            "n_hot_pixels": int(cfg["n_hot"]),
-            "hot_pixels_xy": [[int(a), int(b)] for a, b in zip(hot_x, hot_y)],
-            "hot_pixel_value": hot_val,
-        },
-        "grid": {
-            "n_per_axis": GRID_N,
-            "layout": "endpoint-inclusive: linspace(0, n-1, GRID_N) on each axis",
-            "x": grid_x.tolist(),
-            "y": grid_y.tolist(),
-        },
-        # [frame][position][x,y], in pixels
-        "injected_motion_field": np.round(grid_field, 12).tolist(),
-        "expected_applied_field": np.round(-grid_field, 12).tolist(),
-    }
-    gt_path = outdir / f"{out_name}_ground_truth.json"
+    outdir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=outdir, prefix=f".stage_{out_name}_") as tmpdir_str:
+        stage_dir = Path(tmpdir_str)
+        staged_mrcs = stage_dir / f"{out_name}.mrcs"
+        staged_star = stage_dir / f"{out_name}.star"
+        staged_gt = stage_dir / f"{out_name}_ground_truth.json"
 
-    if canonical:
-        if not gt_path.is_file():
-            raise RuntimeError(f"Canonical mode: missing required ground-truth JSON {gt_path}")
-        existing_gt = json.loads(gt_path.read_text())
-        if existing_gt.get("movie_sha256") != gt["movie_sha256"]:
-            raise RuntimeError(
-                f"Canonical mode disagreement for {out_name}: generated movie sha256 {gt['movie_sha256']} "
-                f"!= expected canonical {existing_gt.get('movie_sha256')}"
-            )
-        # Canonical mode verified; preserve pristine canonical truth file
-    else:
-        if gt_path.is_file() and refuse_conflicting:
-            try:
-                existing_gt = json.loads(gt_path.read_text())
-                if (existing_gt.get("noise", {}).get("relative_sigma") != cfg["noise_rel"] or
-                    existing_gt.get("noise_seed_offset") != noise_seed_offset or
-                    existing_gt.get("seed") != seed):
-                    raise RuntimeError(
-                        f"Refusing to overwrite {gt_path.name}: conflicting parameters with existing ground truth"
-                    )
-            except json.JSONDecodeError:
-                pass
-        # Normal generation: always write matching truth for newly generated movie
-        gt_path.write_text(json.dumps(gt, indent=2) + "\n")
+        write_mrc_stack(staged_mrcs, stack, PIXEL_SIZE)
+        staged_star.write_text(STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
+                                                    movie=mrcs.name))
+        movie_hash = sha256(staged_mrcs)
+        movie_bytes = staged_mrcs.stat().st_size
+        gt = {
+            "schema": SCHEMA_VERSION,
+            "case": out_name,
+            "base_case": name,
+            "movie_file": mrcs.name,
+            "input_star": star.name,
+            "movie_sha256": movie_hash,
+            "source_commit": git_commit(repo_root),
+            "generator": Path(__file__).name,
+            "seed": seed,
+            "noise_seed_offset": noise_seed_offset,
+            "geometry": {
+                "nx": nx, "ny": ny, "n_frames": n_frames,
+                "pixel_size_angstrom": PIXEL_SIZE,
+                "voltage_kv": VOLTAGE,
+                "dose_per_frame": DOSE_PER_FRAME,
+            },
+            "recommended_run": {
+                "patch_x": cfg["patch_x"], "patch_y": cfg["patch_y"],
+                "bin_factor": 1, "first_frame_sum": 1,
+                # Hot-pixel replacement draws from rand(); on the defect-free cases it would only
+                # mangle bright particle centres, so it is switched off there. km_local_noisy keeps
+                # it on so the defect path is exercised against six known injected hot pixels.
+                "skip_defect": bool(cfg["skip_defect"]),
+                "heavy": bool(cfg.get("heavy", False)),
+                "role": cfg.get("role", "gate"),
+                "expected_hot_pixels_detected": 0 if cfg["skip_defect"] else int(cfg["n_hot"]),
+            },
+            "conventions": {
+                "frame_index": "0-based z in this file; the output STAR uses 1-based "
+                               "rlnMicrographFrameNumber, z = frame - rlnMicrographStartFrame",
+                "axes": "x = column = fast axis, y = row = slow axis, origin at pixel (0,0)",
+                "normalised_position": "u = ix/nx - 0.5, v = iy/ny - 0.5",
+                "units": "pixels of the unbinned grid; angstrom = pixel * pixel_size_angstrom",
+                "injected_motion": "displacement of specimen content in frame f relative to frame 0",
+                "expected_applied_field": "-injected_motion; equals MotionCorr's "
+                                          "globalShift[f] + ThirdOrderPolynomialModel(z,u,v)",
+            },
+            "motion_spec": {
+                "global": GLOBAL_SPEC,
+                "local_terms_x": LOCAL_TERMS_X,
+                "local_terms_y": LOCAL_TERMS_Y,
+                "local_scale": local_scale,
+                "tau": "z / (n_frames - 1)",
+                "term_form": "coeff * tau**p_tau * u**p_u * v**p_v",
+            },
+            "noise": {
+                "relative_sigma": cfg["noise_rel"],
+                "absolute_sigma": noise_sigma,
+                "noise_free_image_std": base_std,
+                "per_pixel_snr": (1.0 / cfg["noise_rel"]) if cfg["noise_rel"] > 0 else None,
+                "model": "i.i.d. Gaussian in detector coordinates, not warped",
+            },
+            "periodicity": {
+                "base_image_periodic": True,
+                "why": "a Fourier shift is cyclic; non-wrapping content puts a mismatched band of "
+                       "width |shift| along two edges and biases any full-frame cross-correlation "
+                       "toward zero shift (measured at 1.2 % on a non-periodic build of this "
+                       "fixture)",
+            },
+            "defects": {
+                "n_hot_pixels": int(cfg["n_hot"]),
+                "hot_pixels_xy": [[int(a), int(b)] for a, b in zip(hot_x, hot_y)],
+                "hot_pixel_value": hot_val,
+            },
+            "grid": {
+                "n_per_axis": GRID_N,
+                "layout": "endpoint-inclusive: linspace(0, n-1, GRID_N) on each axis",
+                "x": grid_x.tolist(),
+                "y": grid_y.tolist(),
+            },
+            # [frame][position][x,y], in pixels
+            "injected_motion_field": np.round(grid_field, 12).tolist(),
+            "expected_applied_field": np.round(-grid_field, 12).tolist(),
+        }
 
+        if canonical:
+            existing_gt = json.loads(gt_path.read_text())
+            if existing_gt.get("movie_sha256") != movie_hash:
+                raise RuntimeError(
+                    f"Canonical mode disagreement for {out_name}: generated movie sha256 {movie_hash} "
+                    f"!= expected canonical {existing_gt.get('movie_sha256')}"
+                )
+            # Canonical mode verified; atomically replace movie and star, preserving pristine truth
+            os.replace(staged_mrcs, mrcs)
+            os.replace(staged_star, star)
+        else:
+            # Normal generation: stage matching truth and atomically replace all files
+            staged_gt.write_text(json.dumps(gt, indent=2) + "\n")
+            os.replace(staged_mrcs, mrcs)
+            os.replace(staged_star, star)
+            os.replace(staged_gt, gt_path)
     return {
         "case": out_name, "mrcs": str(mrcs), "star": str(star), "ground_truth": str(gt_path),
         "sha256": gt["movie_sha256"], "bytes": mrcs.stat().st_size,
@@ -564,7 +558,10 @@ def main() -> None:
         existing["note"] = ("regenerate with: python3 test-data/generate_known_motion_fixture.py "
                             "[--include-heavy]; hashes must match on any platform with the same "
                             "NumPy IEEE-754 double arithmetic")
-        manifest.write_text(json.dumps(existing, indent=2, sort_keys=True) + "\n")
+        with tempfile.NamedTemporaryFile("w", dir=args.outdir, delete=False) as tmp:
+            tmp.write(json.dumps(existing, indent=2, sort_keys=True) + "\n")
+            tmp_path = Path(tmp.name)
+        os.replace(tmp_path, manifest)
         print(f"manifest: {manifest}")
 
 

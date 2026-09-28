@@ -82,6 +82,40 @@ class TestCiFailClosedControls(unittest.TestCase):
         self.assertEqual(res_runner.returncode, 2, "Runner must exit 2 when binary is not found")
         self.assertIn("ERROR: binary not found:", res_runner.stderr)
 
+        # 1C: Gate runner fails closed on malformed, truncated, or unreadable MANIFEST.json
+        runner_fixtures = self.sandbox / "runner_fixtures"
+        runner_fixtures.mkdir()
+        shutil.copy(REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json",
+                    runner_fixtures / "km_global_hisnr_ground_truth.json")
+
+        # Write truncated/malformed MANIFEST.json
+        truncated_manifest = runner_fixtures / "MANIFEST.json"
+        truncated_manifest.write_text('{"cases": {"km_global_hisnr": ')  # unclosed JSON
+
+        res_truncated = subprocess.run(
+            [sys.executable, str(RUNNER),
+             "--binary", str(sys.executable),
+             "--outdir", str(self.sandbox / "outdir1"),
+             "--fixtures", str(runner_fixtures),
+             "--no-regenerate"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_truncated.returncode, 2, "Runner must fail closed on malformed manifest")
+        self.assertIn("malformed or unreadable fixture manifest", res_truncated.stderr)
+
+        # Empty cases in manifest must also fail closed
+        truncated_manifest.write_text(json.dumps({"cases": {}}))
+        res_empty = subprocess.run(
+            [sys.executable, str(RUNNER),
+             "--binary", str(sys.executable),
+             "--outdir", str(self.sandbox / "outdir2"),
+             "--fixtures", str(runner_fixtures),
+             "--no-regenerate"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_empty.returncode, 2, "Runner must fail closed on empty cases manifest")
+        self.assertIn("cases' inventory is empty or malformed", res_empty.stderr)
+
     def test_2_absent_dependency_fails_cmake(self) -> None:
         """Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt."""
         # Create a python stub wrapper with properly quoted sys.executable
@@ -352,6 +386,60 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_invalid_ref.returncode, 2, "Invalid git ref must fail closed")
         self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
 
+        # 6C: In a source archive with proven absence of .git, fallback to trusted disk manifest is permitted
+        archive_root = self.sandbox / "source_archive"
+        archive_root.mkdir()
+        archive_km = archive_root / "test-data" / "known_motion"
+        archive_km.mkdir(parents=True)
+
+        # Missing disk manifest in archive fails closed
+        res_archive_missing = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES),
+             "--fixtures-dir", str(archive_km),
+             "--repo", str(archive_root)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_archive_missing.returncode, 2, "Archive without manifest must fail closed")
+        self.assertIn("Source archive contains no git metadata and trusted disk manifest is missing", res_archive_missing.stderr)
+
+        # When disk manifest is present in archive, verification succeeds and reports archive provenance
+        shutil.copy(CANONICAL_MANIFEST, archive_km / "MANIFEST.json")
+        shutil.copy(REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json",
+                    archive_km / "km_global_hisnr_ground_truth.json")
+        res_archive_gen = subprocess.run(
+            [sys.executable, str(GENERATOR),
+             "--case", "km_global_hisnr",
+             "--canonical",
+             "--outdir", str(archive_km)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_archive_gen.returncode, 0)
+
+        res_archive_verify = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES),
+             "--fixtures-dir", str(archive_km),
+             "--repo", str(archive_root),
+             "--cases", "km_global_hisnr"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_archive_verify.returncode, 0, f"Archive verification should pass: {res_archive_verify.stderr}")
+        self.assertIn("archive:", res_archive_verify.stdout)
+
+        # Corrupted fixture in archive fails closed
+        archive_movie = archive_km / "km_global_hisnr.mrcs"
+        corrupted = bytearray(archive_movie.read_bytes())
+        corrupted[100] ^= 0x01
+        archive_movie.write_bytes(corrupted)
+        res_archive_corrupt = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES),
+             "--fixtures-dir", str(archive_km),
+             "--repo", str(archive_root),
+             "--cases", "km_global_hisnr"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res_archive_corrupt.returncode, 1, "Corrupted fixture in archive must fail verification")
+        self.assertIn("MISMATCH", res_archive_corrupt.stdout)
+
     def test_7_reused_stem_and_canonical_generator_protection(self) -> None:
         """Control 7: Generator protects canonical truth and refuses conflicting stem overwrite."""
         fix_dir = self.sandbox / "fixtures"
@@ -366,7 +454,15 @@ exec "{sys.executable}" "$@"
         )
         self.assertEqual(res_init.returncode, 0)
 
+        movie_path = fix_dir / "km_global_hisnr.mrcs"
+        star_path = fix_dir / "km_global_hisnr.star"
+        truth_path = fix_dir / "km_global_hisnr_ground_truth.json"
+        init_movie_bytes = movie_path.read_bytes()
+        init_star_bytes = star_path.read_bytes()
+        init_truth_bytes = truth_path.read_bytes()
+
         # Step 2: Regenerating with --refuse-conflicting and conflicting noise-rel must refuse
+        # and preserve every prior byte of movie, star, and truth files
         res_conflict = subprocess.run(
             [sys.executable, str(GENERATOR),
              "--case", "km_global_hisnr",
@@ -378,14 +474,15 @@ exec "{sys.executable}" "$@"
         self.assertNotEqual(res_conflict.returncode, 0, "Generator must refuse conflicting parameters")
         self.assertIn("conflicting parameters with existing ground truth", res_conflict.stderr)
 
-        # Step 3: Canonical mode on modified movie bytes must refuse disagreement
-        movie_path = fix_dir / "km_global_hisnr.mrcs"
-        corrupt_bytes = bytearray(movie_path.read_bytes())
-        corrupt_bytes[500] ^= 0x01
-        truth_path = fix_dir / "km_global_hisnr_ground_truth.json"
+        self.assertEqual(movie_path.read_bytes(), init_movie_bytes, "Movie bytes must be preserved on refusal")
+        self.assertEqual(star_path.read_bytes(), init_star_bytes, "STAR bytes must be preserved on refusal")
+        self.assertEqual(truth_path.read_bytes(), init_truth_bytes, "Truth bytes must be preserved on refusal")
+
+        # Step 3: Canonical mode on modified movie sha in truth must refuse disagreement and preserve files
         truth_data = json.loads(truth_path.read_text())
         truth_data["movie_sha256"] = "0" * 64
         truth_path.write_text(json.dumps(truth_data))
+        tampered_truth_bytes = truth_path.read_bytes()
 
         res_canonical = subprocess.run(
             [sys.executable, str(GENERATOR),
@@ -396,6 +493,10 @@ exec "{sys.executable}" "$@"
         )
         self.assertNotEqual(res_canonical.returncode, 0, "Canonical mode must fail on disagreement")
         self.assertIn("Canonical mode disagreement", res_canonical.stderr)
+
+        self.assertEqual(movie_path.read_bytes(), init_movie_bytes, "Movie bytes must be preserved on canonical disagreement")
+        self.assertEqual(star_path.read_bytes(), init_star_bytes, "STAR bytes must be preserved on canonical disagreement")
+        self.assertEqual(truth_path.read_bytes(), tampered_truth_bytes, "Truth bytes must be preserved on canonical disagreement")
 
 
     def test_8_canonical_star_input_is_immutable(self) -> None:

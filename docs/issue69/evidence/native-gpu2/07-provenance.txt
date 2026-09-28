@@ -1,0 +1,35 @@
+=== GPU2 native run provenance ===
+4-gpu-vm
+2026-09-28T07:17:18+00:00
+
+--- device (selected by UUID, never by ordinal) ---
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe, 1 MiB
+CUDA_VISIBLE_DEVICES used: GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
+
+--- concurrent MotionCorr work on the other devices (#53), untouched ---
+
+--- my lane ---
+taskset -c 112-119, node1, all descendants; j4 io2; lock /tmp/motioncorr-gpu2-correctness.lock
+bash: line 1: nvcc: command not found
+
+--- binaries ---
+1d9cf8def269d77d3e627df64ae8c6fbf2ce62bca7cc6866645f92e677f121d9  /home/alex/MotionCorr-i69-gpu2/build/motioncorr
+12554e40d05524524278a4dd828eb13315c1831f5bd17152f846107c4bffbe57  /home/alex/MotionCorr-i69-gpu2/build/cuda_fault_matrix
+f2b7e2338510767d4ff063ec7737f4cbff92457eb1bacbde4ef85b230abf913b  /home/alex/MotionCorr-i69-gpu2/build/cuda_error_class
+d18ec48d7f1afc870262e21e9fd12e690279fec4727f166b2e5fcb38ddc608dc  /home/alex/MotionCorr-i69-gpu2-base/build/motioncorr
+
+--- source (candidate) ---
+ac4ff0baf5b435fa4c7912f0455f07893a29c901a543604105c721177a27780d  src/acc/cuda/cuda_failure_state.h
+f16ea4a2f90a38ac5e66ec819e3d35b6e8f0a728c2aa47a0fdc6e05860fe54d1  src/acc/cuda/cuda_scoped_resources.h
+fdc999b43d96cad5213745a6b8f58ce62a66f0e2fa188d3f042eb6f352e14211  src/acc/cuda/cuda_error_class.h
+2bd253689131f336a1c8a41a77e9100c42e8e5e29e780160e106ffa69674b200  src/acc/cuda/cuda_alignpatch.cu
+ce5b2585c1afed19f78e8df046be174553e6aaf37edfb202892c93781cd51521  src/acc/cuda/cuda_movie_session.cu
+6affaadb3560f03b6921b5221611c3ee77c0176a4cc52b8568ff7c4e1ef0ef00  src/motioncorr_runner.cpp
+
+--- inputs: 24 tutorial movies + gain ---
+24
+aggregate-of-25: aa3da3fc62cdcc20bcff6648702f66c46dad4bf3e64b64972605f97f1f091cea
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc

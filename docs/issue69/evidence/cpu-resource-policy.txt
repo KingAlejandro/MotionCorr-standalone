@@ -1,0 +1,32 @@
+=== cpu64 topology and policy ===
+CPU(s):                               64
+Thread(s) per core:                   1
+Core(s) per socket:                   32
+Socket(s):                            2
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+node 0 size: 115839 MB
+node 0 free: 24669 MB
+node 1 cpus: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+node 1 size: 115862 MB
+node 1 free: 29153 MB
+node distances:
+node   0   1 
+  0:  10  20 
+  1:  20  10 
+
+=== recorded interference: pre-existing unrestricted processes, NOT altered ===
+    PID USER     %CPU     ELAPSED COMMAND
+3063113 ubuntu    200       00:00 ps
+3063044 ubuntu    187       00:00 motioncorr
+3062971 ubuntu    100       00:03 find
+1156942 ubuntu   99.9 49-00:46:23 ctffind
+1635429 ubuntu   99.9 47-22:22:42 ctffind
+3062720 ubuntu    1.7       00:10 sshd
+3063052 root      1.5       00:00 sshd
+
+=== validation lane used by issue69: cores 32-63 = node1/socket1, node-local ===

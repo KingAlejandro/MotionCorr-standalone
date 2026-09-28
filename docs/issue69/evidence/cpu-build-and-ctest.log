@@ -1,0 +1,43 @@
+START 2026-09-28T00:01:06+00:00 host=small-refmac-machine nproc=8
+pid 3035180's current affinity list: 32-63
+=== base configure ===
+configure exit=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== base build ===
+build exit=0
+=== base ctest ===
+ctest exit=0
+13/13 Test #10: GainCache ........................   Passed    1.28 sec
+
+100% tests passed out of 13
+
+Total Test time (real) =   2.35 sec
+cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
+=== cand configure ===
+configure exit=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+=== cand build ===
+build exit=0
+=== cand ctest ===
+ctest exit=8
+Total Test time (real) =   2.36 sec
+
+The following tests FAILED:
+	  1 - PatchRetryState (Failed)
+Errors while running CTest
+9dd05f93c68035ee2a3234e9f176c7472ac37393704577b6d619da1d0ca16b40  /home/ubuntu/mc-i69/build-cand/motioncorr
+DONE 2026-09-28T00:01:48+00:00
+START 2026-09-28T00:04:49+00:00
+configure=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+build=0
+ctest=0
+13/14 Test #11: GainCache ........................   Passed    1.26 sec
+14/14 Test  #7: Runner_resume ....................   Passed    2.07 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   2.39 sec
+9dd05f93c68035ee2a3234e9f176c7472ac37393704577b6d619da1d0ca16b40  /home/ubuntu/mc-i69/build-cand/motioncorr
+c22f192e9e0b5f4a1d775334b62839d7921dc119d4368e742b7081f096c55d6e  /home/ubuntu/mc-i69/build-cand/patch_retry_state
+DONE 2026-09-28T00:05:17+00:00

@@ -1,0 +1,25 @@
+START 2026-09-28T06:51:41+00:00 host=4-gpu-vm
+--- placement witness: this shell and all descendants ---
+pid 1206694's current affinity list: 112-119
+/user.slice
+policy: default
+preferred node: current
+physcpubind: 112 113 114 115 116 117 118 119 
+cpubind: 1 
+--- device identity at launch ---
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+--- compute occupancy at launch ---
+--- build (j4) under a short shared build lock, aggregate<=8 ---
+configure=0
+build=0
+compile errors=0
+NA
+(no warnings in changed files)
+/home/alex/MotionCorr-i69-gpu2/build/cuda_error_class
+/home/alex/MotionCorr-i69-gpu2/build/cuda_fault_matrix
+/home/alex/MotionCorr-i69-gpu2/build/motioncorr
+/home/alex/MotionCorr-i69-gpu2/build/patch_retry_state
+DONE 2026-09-28T06:52:49+00:00

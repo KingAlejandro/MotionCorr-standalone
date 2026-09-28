@@ -1,0 +1,69 @@
+START 2026-09-28T07:47:31+00:00 host=small-refmac-machine
+pid 3368866's current affinity list: 32-63
+/user.slice
+policy: default
+preferred node: current
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 1 
+nodebind: 1 
+               total        used        free      shared  buff/cache   available
+Mem:             226          11          62           0         154         215
+ 07:47:31 up 299 days, 21:45, 23 users,  load average: 4.58, 4.19, 7.28
+--- payload ---
+16M	/home/ubuntu/mc-i69/cand
+686
+--- interference, recorded and NOT altered ---
+USER         PID %CPU     ELAPSED COMMAND
+ubuntu   1156942 99.9 49-08:17:37 ctffind
+ubuntu   1635429 99.9 48-05:53:55 ctffind
+ubuntu   2722253  0.8 43-16:10:21 node
+root     1519128  0.1  6-01:20:34 rsyslogd
+configure=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+build=0
+ctest=0
+100% tests passed out of 14
+same_backend=0
+PASS same-backend CPU output identical, and the comparison is able to fail
+patch_retry=0
+tu=0
+  anything else            : 0   <- must be 0
+PASS CPU-only translation unit differs only by a no-code friend declaration and __LINE__ metadata
+99cf2ba954605619902a1f07118cc5fb8e91f1ca740f3d240ec18bb35c233c0c  src/acc/cuda/cuda_fft_prep.h
+0dcf707f909b7217078430d98ada79641815aa170d6d713456e59932b8094bce  src/acc/cuda/cuda_fft_prep.cu
+090e3d50d8237bedd8fd4eef894f23f89b89bdc10f7a4530a3f0d1387c3726c3  src/motioncorr_runner.cpp
+5c74bd07922e5db51dda1dca20c93b967ae0f787bad9e7b17d9c46877913e8eb  tests/cuda_error_class.cpp
+DONE 2026-09-28T07:48:00+00:00
+Test project /home/ubuntu/mc-i69/build-cand
+      Start  1: PatchRetryState
+      Start  2: SyntheticRegression
+      Start  3: HotPixelRngDeterminism
+      Start  4: RunnerExposure
+ 1/14 Test  #1: PatchRetryState ..................   Passed    0.04 sec
+      Start  5: Runner_failure
+ 2/14 Test  #5: Runner_failure ...................   Passed    0.15 sec
+      Start  6: Runner_invalid
+ 3/14 Test  #6: Runner_invalid ...................   Passed    0.12 sec
+      Start  7: Runner_resume
+ 4/14 Test  #3: HotPixelRngDeterminism ...........   Passed    0.66 sec
+      Start  8: Runner_tomography
+ 5/14 Test  #4: RunnerExposure ...................   Passed    0.66 sec
+      Start  9: RunnerLateBin
+ 6/14 Test  #8: Runner_tomography ................   Passed    0.41 sec
+      Start 10: RunnerExportedUnits
+ 7/14 Test  #2: SyntheticRegression ..............   Passed    1.16 sec
+      Start 11: GainCache
+ 8/14 Test #10: RunnerExportedUnits ..............   Passed    0.15 sec
+      Start 12: TiffRead
+ 9/14 Test  #9: RunnerLateBin ....................   Passed    0.75 sec
+      Start 13: DamagedMovie
+10/14 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: RunnerModelParser
+11/14 Test #14: RunnerModelParser ................   Passed    0.14 sec
+12/14 Test #12: TiffRead .........................   Passed    0.55 sec
+13/14 Test  #7: Runner_resume ....................   Passed    2.09 sec
+14/14 Test #11: GainCache ........................   Passed    1.30 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   2.47 sec

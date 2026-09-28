@@ -11,12 +11,19 @@
 #include <algorithm>
 #include <climits>
 
+// Issue #69. These handlers CONSUME the error: they read it, log it, and return false.
+// By the time the caller regains control, cudaGetLastError() has been reset and reports
+// cudaSuccess, which is not a certificate that the context is healthy -- it only means
+// nobody has recorded anything since. So each handler also records the code and the
+// stage on the session, and the caller decides from that recorded status rather than
+// from a later last-error read.
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
     cudaError_t err = (cmd); \
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        recordFailure(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -27,6 +34,7 @@
     if (res != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << res << std::endl; \
+        recordCufftFailure(res, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -218,6 +226,18 @@ CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, 
 
 CudaMovieSession::~CudaMovieSession() {
     release();
+}
+
+// Delegates to CudaFailureState, which keeps the first failure for diagnostics AND
+// latches any poisoning code monotonically. An earlier version of this function kept
+// only the first failure, so a recoverable allocation miss on one patch suppressed the
+// recording of a fatal fault on a later one -- PR107 review P1.
+void CudaMovieSession::recordFailure(cudaError_t err, const char *stage, int line) {
+    failure_state.record(err, stage, line);
+}
+
+void CudaMovieSession::recordCufftFailure(cufftResult res, const char *stage, int line) {
+    failure_state.recordCufft(res, stage, line);
 }
 
 bool CudaMovieSession::initialize() {
@@ -593,14 +613,23 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     if (!is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaDeviceSynchronize());
+    // Issue #69: clear the member before the free, not after. HANDLE_ERROR returns on a
+    // failing cudaFree, and leaving the pointer set would have release() free it a
+    // second time at the end of the movie. A free that fails here means the context is
+    // already unusable; freeing the same pointer again cannot repair that.
+    cudaError_t free_error = cudaSuccess;
     if (d_gain) {
-        HANDLE_ERROR(cudaFree(d_gain));
+        float *owned_gain = d_gain;
         d_gain = nullptr;
+        free_error = cudaFree(owned_gain);
     }
     if (d_Isum) {
-        HANDLE_ERROR(cudaFree(d_Isum));
+        float *owned_sum = d_Isum;
         d_Isum = nullptr;
+        const cudaError_t sum_error = cudaFree(owned_sum);
+        if (free_error == cudaSuccess) free_error = sum_error;
     }
+    HANDLE_ERROR(free_error);
     return true;
 }
 
@@ -659,17 +688,39 @@ bool CudaMovieSession::preparePatchInVram(
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    // Reuse or allocate cached scratch buffers
+    // Reuse or allocate cached scratch buffers.
+    //
+    // Issue #69. These members outlive the call: release() frees whatever they point at
+    // when the movie ends. So the cache must never describe a buffer that does not
+    // exist. Drop the claim (pointer and its size/count) before freeing, allocate into
+    // a local, and publish only after the allocation succeeded. A failure exit then
+    // leaves "no buffer, no claim" instead of a freed pointer release() would free a
+    // second time, or a stale size that makes the next patch in this movie skip the
+    // reallocation and copy into a null pointer.
     if (!d_Ipatches || sz_cached_Ipatches < sz_all_patch_real) {
-        if (d_Ipatches) cudaFree(d_Ipatches);
-        HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
+        float *stale_patches = d_Ipatches;
+        d_Ipatches = nullptr;
+        sz_cached_Ipatches = 0;
+        if (stale_patches) cudaFree(stale_patches);
+        float *fresh_patches = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_patches, sz_all_patch_real));
+        d_Ipatches = fresh_patches;
         sz_cached_Ipatches = sz_all_patch_real;
     }
-    if (!d_group_start || cached_ngroups_alloc < n_groups) {
-        if (d_group_start) cudaFree(d_group_start);
-        if (d_group_size) cudaFree(d_group_size);
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
+    if (!d_group_start || !d_group_size || cached_ngroups_alloc < n_groups) {
+        int *stale_start = d_group_start;
+        int *stale_size = d_group_size;
+        d_group_start = nullptr;
+        d_group_size = nullptr;
+        cached_ngroups_alloc = 0;
+        if (stale_start) cudaFree(stale_start);
+        if (stale_size) cudaFree(stale_size);
+        int *fresh_start = nullptr;
+        int *fresh_size = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_start, n_groups * sizeof(int)));
+        d_group_start = fresh_start;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_size, n_groups * sizeof(int)));
+        d_group_size = fresh_size;
         cached_ngroups_alloc = n_groups;
     }
 
@@ -691,13 +742,21 @@ bool CudaMovieSession::preparePatchInVram(
 
     // Reuse cached batched cuFFT plan for patch transforms
     if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
+        // Same rule as the buffers above: drop the geometry the cache claims before
+        // destroying the plan, and publish the new one only once it exists.
         if (has_plan_patch_r2c) {
-            cufftDestroy(plan_patch_r2c);
             has_plan_patch_r2c = false;
+            cufftDestroy(plan_patch_r2c);
+            plan_patch_r2c = 0;
         }
+        cached_patch_w = 0;
+        cached_patch_h = 0;
+        cached_patch_ngroups = 0;
+        cufftHandle fresh_plan = 0;
         int n[2] = {patch_h, patch_w};
-        CUFFT_CHECK(cufftPlanMany(&plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
+        CUFFT_CHECK(cufftPlanMany(&fresh_plan, 2, n, NULL, 1, patch_h * patch_w,
                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups));
+        plan_patch_r2c = fresh_plan;
         has_plan_patch_r2c = true;
         cached_patch_w = patch_w;
         cached_patch_h = patch_h;

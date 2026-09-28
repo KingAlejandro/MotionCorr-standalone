@@ -1,0 +1,40 @@
+=== host / lane / cpuset / NUMA / memory / load / payload ===
+small-refmac-machine
+pid 3376752's current affinity list: 0-63
+/user.slice
+policy: default
+preferred node: current
+physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 0 1 
+nodebind: 0 1 
+               total        used        free      shared  buff/cache   available
+Mem:             226           9          63           0         154         216
+ 07:51:03 up 299 days, 21:48, 26 users,  load average: 4.31, 4.81, 6.94
+16M	/home/ubuntu/mc-i69/cand
+687
+
+=== interference, recorded and NOT altered ===
+USER         PID %CPU     ELAPSED COMMAND
+ubuntu   3376766  400       00:00 ps
+ubuntu   3373900  100       01:46 defect_parser
+ubuntu   1156942 99.9 49-08:21:09 ctffind
+ubuntu   1635429 99.9 48-05:57:27 ctffind
+root     3376649  2.5       00:00 sshd
+
+=== toolchain ===
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 4.4.3
+
+=== source hashes ===
+ac4ff0baf5b435fa4c7912f0455f07893a29c901a543604105c721177a27780d  src/acc/cuda/cuda_failure_state.h
+f16ea4a2f90a38ac5e66ec819e3d35b6e8f0a728c2aa47a0fdc6e05860fe54d1  src/acc/cuda/cuda_scoped_resources.h
+fdc999b43d96cad5213745a6b8f58ce62a66f0e2fa188d3f042eb6f352e14211  src/acc/cuda/cuda_error_class.h
+99cf2ba954605619902a1f07118cc5fb8e91f1ca740f3d240ec18bb35c233c0c  src/acc/cuda/cuda_fft_prep.h
+0dcf707f909b7217078430d98ada79641815aa170d6d713456e59932b8094bce  src/acc/cuda/cuda_fft_prep.cu
+ce5b2585c1afed19f78e8df046be174553e6aaf37edfb202892c93781cd51521  src/acc/cuda/cuda_movie_session.cu
+090e3d50d8237bedd8fd4eef894f23f89b89bdc10f7a4530a3f0d1387c3726c3  src/motioncorr_runner.cpp
+5c74bd07922e5db51dda1dca20c93b967ae0f787bad9e7b17d9c46877913e8eb  tests/cuda_error_class.cpp
+
+=== binaries ===
+cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
+4a6abab10c0291738b296fddf8b179afbf45c95cb7e7e9a538afcdffe04e2339  /home/ubuntu/mc-i69/build-cand/motioncorr

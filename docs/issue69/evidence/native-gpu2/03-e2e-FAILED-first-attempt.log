@@ -1,0 +1,45 @@
+START 2026-09-28T06:55:43+00:00 host=4-gpu-vm
+pid 1209375's current affinity list: 112-119
+/user.slice
+CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+-- compute apps on my device before launch --
+ 06:55:44 up 69 days, 20:23, 11 users,  load average: 3.96, 3.52, 2.51
+
+### build the BASE arm (main 4c952b3f) with CUDA, under the short build lock ###
+base_configure=0
+base_build=0
+-- binary hashes --
+d18ec48d7f1afc870262e21e9fd12e690279fec4727f166b2e5fcb38ddc608dc  /home/alex/MotionCorr-i69-gpu2-base/build/motioncorr
+1d9cf8def269d77d3e627df64ae8c6fbf2ce62bca7cc6866645f92e677f121d9  /home/alex/MotionCorr-i69-gpu2/build/motioncorr
+-- input hashes (24 movies + gain) --
+  aggregate-of-25-input-hashes: aa3da3fc62cdcc20bcff6648702f66c46dad4bf3e64b64972605f97f1f091cea
+  movie count: 24
+
+### CONTROL A: healthy all-24 same-backend, base vs candidate ###
+base exit=0
+cand exit=0
+-- device-backend witnesses in the candidate log --
+0
+-- product counts --
+  a_base: mrc=0 star=1
+  a_cand: mrc=0 star=1
+
+### CONTROL B: early-binning streaming path, base vs candidate ###
+base exit=1
+cand exit=1
+
+### CONTROL C: forced nonconvergence -> retry path, base vs candidate ###
+    (--max_iter 1 makes patches report nonconverged, which is what drives the retry)
+base exit=0
+cand exit=0
+
+-- device state after all controls --
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
+DONE 2026-09-28T06:57:09+00:00

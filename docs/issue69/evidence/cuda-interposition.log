@@ -1,0 +1,75 @@
+=== provenance ===
+4-gpu-vm
+pid 1181732's current affinity list: 96-111
+/user.slice
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+NOTE: compilation and device-free unit tests only. No CUDA context is created; nothing runs on a GPU.
+
+=== device-free predicate controls ===
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+exit=0
+
+=== relocation-level interposition check ===
+disassembled /home/alex/MotionCorr-i69/build/cuda_fault_matrix -> 144066 lines
+cudaAlignPatchDevice  (the F1 site):
+  in cudaAlignPatchDevice(float2*, int, int, int, double, std::vector<double, std::allocator<double> >&, std::vector<double, std::allocator<double> >&, int, double, int, std::ostream&, bool)
+       8 x __wrap_cudaEventCreate
+       1 x __wrap_cudaEventDestroy
+       1 x __wrap_cudaFree
+       8 x __wrap_cudaMalloc
+       4 x __wrap_cudaMemcpy
+       1 x __wrap_cufftDestroy
+       1 x __wrap_cufftExecC2R
+       1 x __wrap_cufftPlanMany
+  in cudaAlignPatchDevice(float2*, int, int, int, double, std::vector<double, std::allocator<double> >&, std::vector<double, std::allocator<double> >&, int, double, int, std::ostream&, bool) [clone .cold]
+       1 x __wrap_cudaEventDestroy
+       1 x __wrap_cufftDestroy
+
+cudaAlignPatch  (the F2 wrapper):
+  in cudaAlignPatch(std::vector<MultidimArray<tComplex<float> >, std::allocator<MultidimArray<tComplex<float> > > >&, int, int, double, std::vector<double, std::allocator<double> >&, std::vector<double, std::allocator<double> >&, int, double, int, std::ostream&, bool)
+       1 x __wrap_cudaFree
+       1 x __wrap_cudaMalloc
+       2 x __wrap_cudaMemcpy
+
+CudaMovieSession::preparePatchInVram  (the F3 site):
+  in CudaMovieSession::preparePatchInVram(int, int, int, int, int, int const*, int const*, float2*)
+       4 x __wrap_cudaFree
+       3 x __wrap_cudaMalloc
+       2 x __wrap_cudaMemcpy
+       1 x __wrap_cufftDestroy
+       1 x __wrap_cufftExecR2C
+       1 x __wrap_cufftPlanMany
+
+motioncorr_core call sites routed through __wrap_*: 179
+motioncorr_core call sites still reaching a bare interposed symbol
+  (direct call/jmp to a @plt entry) -- must be 0: 0
+
+negative control -- same filter with the test-own exemption removed, must be >0: 14
+  __wrap_cudaDeviceSynchronize       1 x cudaDeviceSynchronize@plt  (__real_ forward)
+  __wrap_cudaEventCreate             1 x cudaEventCreate@plt  (__real_ forward)
+  __wrap_cudaEventDestroy            1 x cudaEventDestroy@plt  (__real_ forward)
+  __wrap_cudaFree                    1 x cudaFree@plt  (__real_ forward)
+  __wrap_cudaMalloc                  1 x cudaMalloc@plt  (__real_ forward)
+  __wrap_cudaMemcpy                  1 x cudaMemcpy@plt  (__real_ forward)
+  __wrap_cudaMemset                  1 x cudaMemset@plt  (__real_ forward)
+  __wrap_cufftCreate                 1 x cufftCreate@plt  (__real_ forward)
+  __wrap_cufftDestroy                1 x cufftDestroy@plt  (__real_ forward)
+  __wrap_cufftExecC2R                1 x cufftExecC2R@plt  (__real_ forward)
+  __wrap_cufftExecR2C                1 x cufftExecR2C@plt  (__real_ forward)
+  __wrap_cufftMakePlanMany           1 x cufftMakePlanMany@plt  (__real_ forward)
+  __wrap_cufftPlanMany               1 x cufftPlanMany@plt  (__real_ forward)
+  __wrap_cufftSetWorkArea            1 x cufftSetWorkArea@plt  (__real_ forward)
+
+PASS interposition reaches every matched production call site, and the check demonstrably can fail
+exit=0
+
+817f17e3d4346ef9190b070fd0dd904e7f98e3bf53ae3fd573aac898697be916  /home/alex/MotionCorr-i69/build/cuda_fault_matrix
+a6f8af4938fd93697c9b6f94405c88741a8141775d29c6e45ffb368338e5fc7e  /home/alex/MotionCorr-i69/build/cuda_error_class

@@ -1,0 +1,58 @@
+START 2026-09-28T07:47:52+00:00 host=4-gpu-vm
+pid 1230200's current affinity list: 112-119
+/user.slice
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+ 07:47:52 up 69 days, 21:15, 10 users,  load average: 0.01, 0.17, 0.63
+
+### rebuild corrected source (j4, short build lock) ###
+configure=0
+build=0
+compile errors=0
+
+### helper-fault boundary + predicate + capacity controls ###
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+13 retry cases (8 fatal, 5 permitted), 0 failures
+8 session-state sequences, 0 failures
+3 capacity controls, 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     A later fatal error is latched monotonically by the production
+     session state even when an earlier recoverable one was recorded
+     and the last-error slot has since been cleared. A fatal error
+     consumed by the FALLBACK preparation, after a permitted
+     pre-fallback check and with the slot cleared, also refuses the
+     CUDA re-dispatch.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+exit=0
+
+### bounded fault matrix on the corrected source ###
+exit=0
+Issue #69 CUDA fault matrix. Clean run uses: cudaMalloc=42 cudaMemcpy H2D=19 cudaMemcpy D2H=16 cudaMemcpy D2D=8 cudaMemset=5 cudaDeviceSynchronize=12 cufftCreate=2 cufftMakePlanMany=2 cufftSetWorkArea=2 cufftPlanMany=4 cufftExec=17
+132 trials, 0 failures
+FAIL rows: 0
+
+### healthy all-24 on the corrected source ###
+all24_exit=0
+movies processed: 24
+products: mrc=24 star=25
+-- compared against the SAME base tree used at source f3fdcfb --
+106 files compared, 24 MRC images, 341735520 pixels, 0 differing
+=== negative control: perturb one pixel and one STAR character ===
+negative control reported 2 differing files (expected 2 = 0 already differing + 2 perturbed)
+PASS outputs identical over 24 images / 341735520 pixels, and the comparison is able to fail
+
+### hashes ###
+e9f345886a71ede2e848587c085346d49e1b6c9b710dd7e3b14471ec46037165  /home/alex/MotionCorr-i69-gpu2/build/motioncorr
+376917e716b7dc58b136da44e9c672c1b50505b448b25e864712082d0602a490  /home/alex/MotionCorr-i69-gpu2/build/cuda_error_class
+99cf2ba954605619902a1f07118cc5fb8e91f1ca740f3d240ec18bb35c233c0c  src/acc/cuda/cuda_fft_prep.h
+0dcf707f909b7217078430d98ada79641815aa170d6d713456e59932b8094bce  src/acc/cuda/cuda_fft_prep.cu
+090e3d50d8237bedd8fd4eef894f23f89b89bdc10f7a4530a3f0d1387c3726c3  src/motioncorr_runner.cpp
+5c74bd07922e5db51dda1dca20c93b967ae0f787bad9e7b17d9c46877913e8eb  tests/cuda_error_class.cpp
+DONE 2026-09-28T07:49:43+00:00
+=== fault matrix on corrected source: full table ===
+trial rows: 132
+132 trials, 0 failures
+FAIL rows: 0

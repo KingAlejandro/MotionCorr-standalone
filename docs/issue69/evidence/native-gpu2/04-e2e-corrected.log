@@ -1,0 +1,35 @@
+START 2026-09-28T06:59:11+00:00 host=4-gpu-vm
+pid 1212003's current affinity list: 112-119
+/user.slice
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1211780, 426 MiB
+GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1211782, 426 MiB
+ 06:59:11 up 69 days, 20:26, 11 users,  load average: 3.77, 3.91, 2.90
+d18ec48d7f1afc870262e21e9fd12e690279fec4727f166b2e5fcb38ddc608dc  /home/alex/MotionCorr-i69-gpu2-base/build/motioncorr
+1d9cf8def269d77d3e627df64ae8c6fbf2ce62bca7cc6866645f92e677f121d9  /home/alex/MotionCorr-i69-gpu2/build/motioncorr
+
+### CONTROL A: healthy all-24 same-backend, base vs candidate ###
+base exit=0  mrc=24 star=25 log=25
+cand exit=0  mrc=24 star=25 log=25
+-- movies the candidate actually processed --
+24
+-- device-backend witnesses (resident CUDA execution, candidate) --
+     24 [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+     24 [CUDA Global Alignment Profile]
+    600 [CUDA Patch Alignment Profile]
+  Resident VRAM mentions: 648
+
+### CONTROL C: forced nonconvergence -> retry path (--max_iter 1) ###
+base exit=0  mrc=24 star=25 log=25
+cand exit=0  mrc=24 star=25 log=25
+
+### CONTROL B: early-binning -- probing a bin factor with even output dims ###
+  bin_factor=1.855 -> exit 1: The dimensions of the image after binning must be even
+  bin_factor=2.5 -> exit 1: The dimensions of the image after binning must be even
+  bin_factor=3.71 -> exit 1: The dimensions of the image after binning must be even
+  bin_factor=1.9175 -> exit 1: The dimensions of the image after binning must be even
+  NO usable bin factor found on this geometry; early-bin control remains UNRUN as a successful-run comparison.
+
+-- device state after all controls --
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+DONE 2026-09-28T07:05:07+00:00

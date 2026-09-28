@@ -79,6 +79,10 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    # Device-free control for the issue #69 patch-retry shift-state contract.
+    add_executable(patch_retry_state tests/test_patch_retry_state.cpp)
+    target_link_libraries(patch_retry_state PRIVATE motioncorr_core)
+    add_test(NAME PatchRetryState COMMAND patch_retry_state)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression
@@ -123,5 +127,37 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
         add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
         set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
+        # Issue #69 bounded fault matrix. The fault switches live in the test
+        # translation unit only; nothing in src/ knows they exist, so there is no
+        # production fault switch and none can be active during a timed run.
+        add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
+        target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
+        target_link_options(cuda_fault_matrix PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaMemset" "LINKER:--wrap=cudaDeviceSynchronize"
+            # Tracked as well as faulted: the leak in cudaAlignPatchDevice is mostly
+            # events and a cuFFT plan, neither of which passes through cudaMalloc.
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftSetWorkArea" "LINKER:--wrap=cufftPlanMany"
+            "LINKER:--wrap=cufftExecR2C" "LINKER:--wrap=cufftExecC2R")
+        add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
+        set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
+        # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
+        # are exercised in production code rather than simulated by a predicate test.
+        # The shim is linked only here; src/ contains no fault switch.
+        add_executable(motioncorr_faultinject
+            src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
+        target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
+        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc")
+        # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
+        # movie, so it is not registered as a bare ctest case.
+        # Pure predicate over cudaError_t: needs the CUDA headers, needs no device.
+        add_executable(cuda_error_class tests/cuda_error_class.cpp)
+        target_link_libraries(cuda_error_class PRIVATE motioncorr_core)
+        add_test(NAME CudaErrorClass COMMAND cuda_error_class)
+        set_tests_properties(CudaErrorClass PROPERTIES LABELS "cuda")
     endif()
 endif()

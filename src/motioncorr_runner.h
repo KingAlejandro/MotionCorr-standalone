@@ -244,6 +244,12 @@ public:
 	// Check if fn_defect is Serial EM's defect file
 	static bool detectSerialEMDefectText(FileName fn_defect);
 
+	// Test-only access to the private alignment entry point. Used by
+	// tests/test_patch_retry_state.cpp to characterise the shift-accumulation
+	// contract behind issue #69 against the production function rather than a copy
+	// of it. A friend declaration emits no code and changes no behaviour.
+	friend struct MotioncorrRunnerTestAccess;
+
 private:
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);

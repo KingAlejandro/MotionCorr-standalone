@@ -30,11 +30,17 @@ private:
     bool owns_plan;
 };
 
+// Issue #69: this handler CONSUMES the error -- reads it, logs it, returns false --
+// which clears the thread's last-error slot. A caller that re-dispatches CUDA
+// afterwards therefore cannot learn from that slot whether the failure was fatal, so
+// the code is also recorded into the optional `failure` state every using function
+// keeps in scope (null where no caller asked for it).
 #define HANDLE_ERROR(err) do { \
     cudaError_t e = (err); \
     if (e != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(e) << std::endl; \
+        if (failure) failure->record(e, __func__, __LINE__); \
         return false; \
     } \
 } while(0)
@@ -44,6 +50,7 @@ private:
     if (r != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : code " \
                 << r << std::endl; \
+        if (failure) failure->recordCufft(r, __func__, __LINE__); \
         return false; \
     } \
 } while(0)
@@ -129,6 +136,8 @@ bool cudaForwardFFT2D(
     const int device_id,
     std::ostream &logfile
 ) {
+    // Issue #69: no caller of this entry point asks for the consumed status yet.
+    CudaFailureState *failure = nullptr;
     const int n_frames = (int)Iframes.size();
     if (n_frames == 0) return true;
 
@@ -196,6 +205,8 @@ bool cudaInverseFFT2D(
     std::ostream &logfile,
     bool keep_on_gpu
 ) {
+    // Issue #69: no caller of this entry point asks for the consumed status yet.
+    CudaFailureState *failure = nullptr;
     const int n_frames = (int)Fframes.size();
     if (n_frames == 0) return true;
 
@@ -282,8 +293,8 @@ bool cudaPreparePatch(
     const std::vector<int> &group_size,
     std::vector<MultidimArray<fComplex> > &Fpatches,
     const int device_id,
-    std::ostream &logfile
-) {
+    std::ostream &logfile,
+    CudaFailureState *failure) {
     if (n_groups == 0) return true;
     if (Iframes.empty() || group_start.size() < (size_t)n_groups ||
         group_size.size() < (size_t)n_groups) {

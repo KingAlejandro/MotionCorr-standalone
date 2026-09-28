@@ -1,0 +1,188 @@
+preprocessed lines: base=75615 cand=75616
+differing lines total      : 93
+  friend declaration lines : 1   (emits no code)
+  RelionError __LINE__ lines: 92
+  anything else            : 0   <- must be 0
+
+--- full diff ---
+72837a72838
+>  friend struct MotioncorrRunnerTestAccess;
+73388c73389
+<  if (ps_size % 2 != 0) throw RelionError(("--ps_size must be an even number."), "<SRCROOT>/src/motioncorr_runner.cpp", 100);
+---
+>  if (ps_size % 2 != 0) throw RelionError(("--ps_size must be an even number."), "<SRCROOT>/src/motioncorr_runner.cpp", 108);
+73424c73425
+<   throw RelionError(("--max_iter is valid only with --do_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 139);
+---
+>   throw RelionError(("--max_iter is valid only with --do_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 147);
+73433c73434
+<   throw RelionError(("You have to choose either UCSF MotionCor2 or RELION's own implementation."), "<SRCROOT>/src/motioncorr_runner.cpp", 150);
+---
+>   throw RelionError(("You have to choose either UCSF MotionCor2 or RELION's own implementation."), "<SRCROOT>/src/motioncorr_runner.cpp", 158);
+73435c73436
+<   throw RelionError(("UCSF MotionCor2 cannot write in float16."), "<SRCROOT>/src/motioncorr_runner.cpp", 152);
+---
+>   throw RelionError(("UCSF MotionCor2 cannot write in float16."), "<SRCROOT>/src/motioncorr_runner.cpp", 160);
+73437c73438
+<   throw RelionError(("When writing in float16, you have to write power spectra for CTFFIND."), "<SRCROOT>/src/motioncorr_runner.cpp", 154);
+---
+>   throw RelionError(("When writing in float16, you have to write power spectra for CTFFIND."), "<SRCROOT>/src/motioncorr_runner.cpp", 162);
+73439,73443c73440,73444
+<  if (ccf_downsample > 1) throw RelionError(("--ccf_downsample cannot exceed 1."), "<SRCROOT>/src/motioncorr_runner.cpp", 157);
+<  if (skip_defect && !do_own) throw RelionError(("--skip_decet is valid only for --use_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 158);
+<  if (group <= 0) throw RelionError(("--group_frames must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 159);
+<  if (eer_grouping <= 0) throw RelionError(("--eer_grouping must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 160);
+<  if (n_threads <= 0) throw RelionError(("--j must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 161);
+---
+>  if (ccf_downsample > 1) throw RelionError(("--ccf_downsample cannot exceed 1."), "<SRCROOT>/src/motioncorr_runner.cpp", 165);
+>  if (skip_defect && !do_own) throw RelionError(("--skip_decet is valid only for --use_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 166);
+>  if (group <= 0) throw RelionError(("--group_frames must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 167);
+>  if (eer_grouping <= 0) throw RelionError(("--eer_grouping must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 168);
+>  if (n_threads <= 0) throw RelionError(("--j must be positive."), "<SRCROOT>/src/motioncorr_runner.cpp", 169);
+73445c73446
+<   throw RelionError(("--max_io_threads must be positive or -1 (no limit)."), "<SRCROOT>/src/motioncorr_runner.cpp", 163);
+---
+>   throw RelionError(("--max_io_threads must be positive or -1 (no limit)."), "<SRCROOT>/src/motioncorr_runner.cpp", 171);
+73448c73449
+<   throw RelionError(("Errors encountered on the command line (see above), exiting..."), "<SRCROOT>/src/motioncorr_runner.cpp", 169);
+---
+>   throw RelionError(("Errors encountered on the command line (see above), exiting..."), "<SRCROOT>/src/motioncorr_runner.cpp", 177);
+73461c73462
+<   throw RelionError(("The defect file is in the SerialEM format, not MotionCor2's format (x y w h). See above for details."), "<SRCROOT>/src/motioncorr_runner.cpp", 184);
+---
+>   throw RelionError(("The defect file is in the SerialEM format, not MotionCor2's format (x y w h). See above for details."), "<SRCROOT>/src/motioncorr_runner.cpp", 192);
+73474c73475
+<     throw RelionError(("ERROR: You have to specify the path to MotionCor2 as --motioncor2_exe or the RELION_MOTIONCOR2_EXECUTABLE variable"), "<SRCROOT>/src/motioncorr_runner.cpp", 197);
+---
+>     throw RelionError(("ERROR: You have to specify the path to MotionCor2 as --motioncor2_exe or the RELION_MOTIONCOR2_EXECUTABLE variable"), "<SRCROOT>/src/motioncorr_runner.cpp", 205);
+73478c73479
+<    throw RelionError(("You supplied -RotGain and/or -FlipGain to MotionCor2. Please use --gain_rot and--gain_flip instead."), "<SRCROOT>/src/motioncorr_runner.cpp", 202);
+---
+>    throw RelionError(("You supplied -RotGain and/or -FlipGain to MotionCor2. Please use --gain_rot and--gain_flip instead."), "<SRCROOT>/src/motioncorr_runner.cpp", 210);
+73482c73483
+<    throw RelionError(("Save sum of power spectra (--grouping_for_ps) is not available with UCSF MotionCor2."), "<SRCROOT>/src/motioncorr_runner.cpp", 207);
+---
+>    throw RelionError(("Save sum of power spectra (--grouping_for_ps) is not available with UCSF MotionCor2."), "<SRCROOT>/src/motioncorr_runner.cpp", 215);
+73494c73495
+<    throw RelionError(("The number of patches must be a positive integer."), "<SRCROOT>/src/motioncorr_runner.cpp", 221);
+---
+>    throw RelionError(("The number of patches must be a positive integer."), "<SRCROOT>/src/motioncorr_runner.cpp", 229);
+73502c73503
+<   throw RelionError((" ERROR: You have to specify which programme to use through either --use_motioncor2 or --use_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 230);
+---
+>   throw RelionError((" ERROR: You have to specify which programme to use through either --use_motioncor2 or --use_own"), "<SRCROOT>/src/motioncorr_runner.cpp", 238);
+73506c73507
+<   throw RelionError(("ERROR: when not providing an input STAR file, it is mandatory to provide the pixel size in Angstroms through --angpix."), "<SRCROOT>/src/motioncorr_runner.cpp", 235);
+---
+>   throw RelionError(("ERROR: when not providing an input STAR file, it is mandatory to provide the pixel size in Angstroms through --angpix."), "<SRCROOT>/src/motioncorr_runner.cpp", 243);
+73510c73511
+<   throw RelionError(("ERROR: when not providing an input STAR file, it is mandatory to provide the voltage in kV through --voltage."), "<SRCROOT>/src/motioncorr_runner.cpp", 239);
+---
+>   throw RelionError(("ERROR: when not providing an input STAR file, it is mandatory to provide the voltage in kV through --voltage."), "<SRCROOT>/src/motioncorr_runner.cpp", 247);
+73516c73517
+<   throw RelionError(("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON)."), "<SRCROOT>/src/motioncorr_runner.cpp", 273);
+---
+>   throw RelionError(("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON)."), "<SRCROOT>/src/motioncorr_runner.cpp", 281);
+73533c73534
+<             throw RelionError(("ERROR: no input movies to work on."), "<SRCROOT>/src/motioncorr_runner.cpp", 295);
+---
+>             throw RelionError(("ERROR: no input movies to work on."), "<SRCROOT>/src/motioncorr_runner.cpp", 303);
+73536c73537
+<    throw RelionError(("The input STAR file does not contain the rlnMicrographMovieName column. Are you sure you imported files as movies, not single frame images?"), "<SRCROOT>/src/motioncorr_runner.cpp", 299);
+---
+>    throw RelionError(("The input STAR file does not contain the rlnMicrographMovieName column. Are you sure you imported files as movies, not single frame images?"), "<SRCROOT>/src/motioncorr_runner.cpp", 307);
+73571c73572
+<    throw RelionError(("ERROR: the input STAR file does not contain the acceleration voltage, and no voltage is given through --voltage."), "<SRCROOT>/src/motioncorr_runner.cpp", 340);
+---
+>    throw RelionError(("ERROR: the input STAR file does not contain the acceleration voltage, and no voltage is given through --voltage."), "<SRCROOT>/src/motioncorr_runner.cpp", 348);
+73582c73583
+<    throw RelionError(("ERROR: the input STAR file does not contain the pixel size, and no pixel size is given through --angpix."), "<SRCROOT>/src/motioncorr_runner.cpp", 351);
+---
+>    throw RelionError(("ERROR: the input STAR file does not contain the pixel size, and no pixel size is given through --angpix."), "<SRCROOT>/src/motioncorr_runner.cpp", 359);
+73661c73662
+<   throw RelionError(("Gain reference in Digital Micrograph format is not supported in RELION. Although UCSF MotionCor2 accepts it, you cannot run Bayesian Polishing afterwards. Please convert the gain reference to MRC format by other programs, for example, dm2mrc in IMOD or e2proc2d.py in EMAN2."), "<SRCROOT>/src/motioncorr_runner.cpp", 450);
+---
+>   throw RelionError(("Gain reference in Digital Micrograph format is not supported in RELION. Although UCSF MotionCor2 accepts it, you cannot run Bayesian Polishing afterwards. Please convert the gain reference to MRC format by other programs, for example, dm2mrc in IMOD or e2proc2d.py in EMAN2."), "<SRCROOT>/src/motioncorr_runner.cpp", 458);
+73677c73678
+<    throw RelionError(("--gain_rotation must be 0, 1, 2 or 3."), "<SRCROOT>/src/motioncorr_runner.cpp", 471);
+---
+>    throw RelionError(("--gain_rotation must be 0, 1, 2 or 3."), "<SRCROOT>/src/motioncorr_runner.cpp", 479);
+73686c73687
+<    throw RelionError(("--gain_flip must be 0, 1 or 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 481);
+---
+>    throw RelionError(("--gain_flip must be 0, 1 or 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 489);
+73781c73782
+<    throw RelionError(("Bug: by now it should be clear whether to use UCSF MotionCor2 or RELION's own implementation..."), "<SRCROOT>/src/motioncorr_runner.cpp", 590);
+---
+>    throw RelionError(("Bug: by now it should be clear whether to use UCSF MotionCor2 or RELION's own implementation..."), "<SRCROOT>/src/motioncorr_runner.cpp", 598);
+73795c73796
+<    throw RelionError(("Bug: by now it should be clear whether to use MotionCor2 or own implementation ..."), "<SRCROOT>/src/motioncorr_runner.cpp", 609);
+---
+>    throw RelionError(("Bug: by now it should be clear whether to use MotionCor2 or own implementation ..."), "<SRCROOT>/src/motioncorr_runner.cpp", 617);
+73826c73827
+<   throw RelionError((message + ". Successful per-movie outputs were retained; joint output was not generated."), "<SRCROOT>/src/motioncorr_runner.cpp", 645);
+---
+>   throw RelionError((message + ". Successful per-movie outputs were retained; joint output was not generated."), "<SRCROOT>/src/motioncorr_runner.cpp", 653);
+73864c73865
+<    throw RelionError(("ERROR: movie " + fn_mic + " does not have enough frames."), "<SRCROOT>/src/motioncorr_runner.cpp", 708);
+---
+>    throw RelionError(("ERROR: movie " + fn_mic + " does not have enough frames."), "<SRCROOT>/src/motioncorr_runner.cpp", 716);
+73897c73898
+<    throw RelionError(("ERROR: not enough MPI nodes specified for the GPU IDs."), "<SRCROOT>/src/motioncorr_runner.cpp", 749);
+---
+>    throw RelionError(("ERROR: not enough MPI nodes specified for the GPU IDs."), "<SRCROOT>/src/motioncorr_runner.cpp", 757);
+73981c73982
+<          throw RelionError(("ERROR: unexpected number of words on line from MOTIONCORR logfile: " + line), "<SRCROOT>/src/motioncorr_runner.cpp", 846);
+---
+>          throw RelionError(("ERROR: unexpected number of words on line from MOTIONCORR logfile: " + line), "<SRCROOT>/src/motioncorr_runner.cpp", 854);
+74008c74009
+<       throw RelionError(("Error: Unexpected line format in 1.6 global shifts: " + line), "<SRCROOT>/src/motioncorr_runner.cpp", 878);
+---
+>       throw RelionError(("Error: Unexpected line format in 1.6 global shifts: " + line), "<SRCROOT>/src/motioncorr_runner.cpp", 886);
+74308c74309
+<    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1249);
+---
+>    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1257);
+74424c74425
+<    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1387);
+---
+>    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1395);
+74642c74643
+<    throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 1814);
+---
+>    throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 1822);
+75022c75023
+<    throw RelionError(("Sorry, dose weighting is supported only for 300, 200 or 100 kV"), "<SRCROOT>/src/motioncorr_runner.cpp", 2467);
+---
+>    throw RelionError(("Sorry, dose weighting is supported only for 300, 200 or 100 kV"), "<SRCROOT>/src/motioncorr_runner.cpp", 2626);
+75079c75080
+<  if (n_groups < 2) throw RelionError(("Assert failed for n_groups >= 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 2569);
+---
+>  if (n_groups < 2) throw RelionError(("Assert failed for n_groups >= 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 2728);
+75339c75340
+<   throw RelionError(("Patch size must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 2972);
+---
+>   throw RelionError(("Patch size must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3131);
+75509c75510
+<     throw RelionError(("Shouldn't happen."), "<SRCROOT>/src/motioncorr_runner.cpp", 3207);
+---
+>     throw RelionError(("Shouldn't happen."), "<SRCROOT>/src/motioncorr_runner.cpp", 3366);
+75550c75551
+<   throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3281);
+---
+>   throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3440);
+75562c75563
+<   throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3299);
+---
+>   throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3458);
+75587c75588
+<    throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3330);
+---
+>    throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3489);
+75608c75609
+<    throw RelionError(("The size of the defect map is not the same as that of the movie."), "<SRCROOT>/src/motioncorr_runner.cpp", 3355);
+---
+>    throw RelionError(("The size of the defect map is not the same as that of the movie."), "<SRCROOT>/src/motioncorr_runner.cpp", 3514);
+
+negative control OK: an injected line is detected
+PASS CPU-only translation unit differs only by a no-code friend declaration and __LINE__ metadata

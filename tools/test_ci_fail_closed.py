@@ -35,6 +35,7 @@ PREFLIGHT = REPO_ROOT / "tools" / "ci_preflight.py"
 RUNNER = REPO_ROOT / "tools" / "run_known_motion_gates.py"
 GENERATOR = REPO_ROOT / "test-data" / "generate_known_motion_fixture.py"
 CANONICAL_MANIFEST = REPO_ROOT / "test-data" / "known_motion" / "MANIFEST.json"
+CANONICAL_STAR = REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr.star"
 
 
 class TestCiFailClosedControls(unittest.TestCase):
@@ -244,6 +245,9 @@ exec "{sys.executable}" "$@"
         # Copy canonical truth to sandbox fixtures dir
         canon_truth = REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json"
         shutil.copy(canon_truth, fix_dir / "km_global_hisnr_ground_truth.json")
+        # Canonical mode treats the .star as a trusted input and refuses to write it, so it
+        # must be staged like the truth JSON.
+        shutil.copy(CANONICAL_STAR, fix_dir / "km_global_hisnr.star")
 
         # Generate canonical movie in the sandbox
         res_gen = subprocess.run(
@@ -290,6 +294,9 @@ exec "{sys.executable}" "$@"
         # Copy canonical truth
         canon_truth = REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json"
         shutil.copy(canon_truth, fix_dir / "km_global_hisnr_ground_truth.json")
+        # Canonical mode treats the .star as a trusted input and refuses to write it, so it
+        # must be staged like the truth JSON.
+        shutil.copy(CANONICAL_STAR, fix_dir / "km_global_hisnr.star")
 
         # Generate clean case
         res_gen = subprocess.run(
@@ -389,6 +396,105 @@ exec "{sys.executable}" "$@"
         )
         self.assertNotEqual(res_canonical.returncode, 0, "Canonical mode must fail on disagreement")
         self.assertIn("Canonical mode disagreement", res_canonical.stderr)
+
+
+    def test_8_canonical_star_input_is_immutable(self) -> None:
+        """Control 8: STAR metadata drift that leaves the pixels untouched must fail closed.
+
+        A change to the optics template -- pixel size, voltage, or the movie reference --
+        does not move a single pixel, so the movie digest cannot see it. Before this control
+        the canonical run rewrote the committed .star in place and the manifest carried no
+        STAR digest, so the known-motion gates could consume freshly generated metadata under
+        a green verification. Both halves are covered here: the generator must refuse and
+        leave the committed file alone, and the verifier must reject a STAR tampered on disk.
+        """
+        def staged_fixture_dir(name: str) -> Path:
+            d = self.sandbox / name
+            d.mkdir()
+            shutil.copy(REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json",
+                        d / "km_global_hisnr_ground_truth.json")
+            shutil.copy(CANONICAL_STAR, d / "km_global_hisnr.star")
+            return d
+
+        def run_generator(generator: Path, outdir: Path):
+            return subprocess.run(
+                [sys.executable, str(generator), "--case", "km_global_hisnr",
+                 "--canonical", "--outdir", str(outdir)],
+                capture_output=True, text=True)
+
+        committed_star_bytes = CANONICAL_STAR.read_bytes()
+
+        # 8A baseline: the unmutated maintained generator accepts the committed STAR, and
+        # leaves it byte-identical. Without this, the mutation cases below could pass against
+        # a generator that refuses everything.
+        base_dir = staged_fixture_dir("star_base")
+        res_base = run_generator(GENERATOR, base_dir)
+        self.assertEqual(res_base.returncode, 0,
+                         f"Unmutated canonical run must succeed: {res_base.stderr}")
+        self.assertEqual((base_dir / "km_global_hisnr.star").read_bytes(), committed_star_bytes,
+                         "Canonical mode must leave the committed STAR byte-identical")
+
+        # 8B: each optics mutation is applied to a copy of the maintained generator, not to a
+        # stub, so reverting the production policy makes these cases fail.
+        mutations = {
+            "pixel_size": ("PIXEL_SIZE = 0.885", "PIXEL_SIZE = 1.000"),
+            "voltage": ("VOLTAGE = 300.0", "VOLTAGE = 200.0"),
+            "movie_reference": ("{movie} 1", "unrelated_movie.mrcs 1"),
+        }
+        for label, (needle, replacement) in mutations.items():
+            with self.subTest(mutation=label):
+                src = GENERATOR.read_text()
+                self.assertIn(needle, src, f"mutation anchor {needle!r} no longer present")
+                mutated = self.sandbox / f"generator_{label}.py"
+                mutated.write_text(src.replace(needle, replacement, 1))
+
+                out_dir = staged_fixture_dir(f"star_{label}")
+                res = run_generator(mutated, out_dir)
+
+                self.assertNotEqual(res.returncode, 0,
+                                    f"{label} mutation must fail canonical generation")
+                self.assertIn("STAR disagreement", res.stderr + res.stdout,
+                              f"{label} must be rejected for the STAR, not incidentally")
+                # The pixels are unaffected, so the movie digest cannot be what caught it.
+                self.assertNotIn("generated movie sha256", res.stderr + res.stdout,
+                                 f"{label} changes no pixel; the movie check must not be the detector")
+                self.assertEqual((out_dir / "km_global_hisnr.star").read_bytes(),
+                                 committed_star_bytes,
+                                 f"{label} must leave the committed STAR unmodified on disk")
+
+        # 8C: the generator can be bypassed entirely (CI runs the gates with --no-regenerate),
+        # so the verifier must independently reject a STAR altered on disk.
+        res_clean = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES), "--fixtures-dir", str(base_dir),
+             "--manifest", str(CANONICAL_MANIFEST), "--cases", "km_global_hisnr"],
+            capture_output=True, text=True)
+        self.assertEqual(res_clean.returncode, 0,
+                         f"Baseline must verify before tampering: {res_clean.stdout}")
+
+        tampered = base_dir / "km_global_hisnr.star"
+        tampered.write_text(tampered.read_text().replace("0.885000", "1.000000"))
+        res_tampered = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES), "--fixtures-dir", str(base_dir),
+             "--manifest", str(CANONICAL_MANIFEST), "--cases", "km_global_hisnr"],
+            capture_output=True, text=True)
+        self.assertEqual(res_tampered.returncode, 1, "Tampered STAR must fail verification")
+        self.assertIn("STAR input hash MISMATCH", res_tampered.stdout,
+                      "must be rejected for the STAR digest specifically")
+
+        # 8D: a manifest with no star_sha256 must be rejected as malformed rather than
+        # silently skipping the STAR check.
+        legacy = json.loads(CANONICAL_MANIFEST.read_text())
+        for spec in legacy["cases"].values():
+            spec.pop("star_sha256", None)
+        legacy_path = self.sandbox / "legacy_manifest.json"
+        legacy_path.write_text(json.dumps(legacy))
+        res_legacy = subprocess.run(
+            [sys.executable, str(VERIFY_FIXTURES), "--fixtures-dir", str(base_dir),
+             "--manifest", str(legacy_path), "--cases", "km_global_hisnr"],
+            capture_output=True, text=True)
+        self.assertEqual(res_legacy.returncode, 2,
+                         "A manifest without star_sha256 must fail schema validation")
+        self.assertIn("star_sha256", res_legacy.stderr)
 
 
 if __name__ == "__main__":

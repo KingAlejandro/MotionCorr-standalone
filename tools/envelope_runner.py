@@ -63,20 +63,29 @@ def mrc_split_digests(path: Path) -> Optional[Dict[str, Any]]:
     try:
         raw = path.read_bytes()
         if len(raw) < 1024:
-            return None
+            return {"error": f"shorter than an MRC header ({len(raw)} bytes)"}
+        nx, ny, nz, mode = (int.from_bytes(raw[i:i + 4], "little", signed=True)
+                            for i in (0, 4, 8, 12))
         nsymbt = int.from_bytes(raw[92:96], "little", signed=True)
         if nsymbt < 0 or 1024 + nsymbt > len(raw):
-            return None
+            return {"error": f"implausible nsymbt {nsymbt} for {len(raw)} bytes"}
         off = 1024 + nsymbt
+        itemsize = {0: 1, 1: 2, 2: 4, 6: 2, 12: 2}.get(mode)
+        expected = off + nx * ny * nz * itemsize if itemsize else None
+        if expected is not None and len(raw) != expected:
+            # A truncated file would otherwise yield a short payload digest that looks like
+            # a confident result. compare_motioncorr.py:62-66 raises on the same condition.
+            return {"error": f"size {len(raw)} != expected {expected} "
+                             f"(nx={nx} ny={ny} nz={nz} mode={mode} nsymbt={nsymbt})"}
         return {
             "core_header_sha256": hashlib.sha256(raw[:224]).hexdigest(),
             "labels_sha256": hashlib.sha256(raw[224:1024]).hexdigest(),
             "payload_sha256": hashlib.sha256(raw[off:]).hexdigest(),
             "payload_bytes": len(raw) - off,
-            "nsymbt": nsymbt,
+            "nsymbt": nsymbt, "nx": nx, "ny": ny, "nz": nz, "mode": mode,
         }
-    except Exception:
-        return None
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
 
 
 def sha256_file(path: Path) -> Optional[str]:
@@ -511,7 +520,7 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
             entry = {"path": str(f.relative_to(rundir / "out")),
                      "bytes": f.stat().st_size,
                      "sha256": sha256_file(f)}
-            if f.suffix == ".mrc":
+            if f.suffix in (".mrc", ".mrcs"):
                 entry["mrc"] = mrc_split_digests(f)
             products.append(entry)
 

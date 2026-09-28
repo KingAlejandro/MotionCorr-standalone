@@ -7,42 +7,142 @@ lost a movie, or produced different pixels, is not a faster arm.
 
 Products are compared as MRC payload and core header separately. The label block at offset
 224 carries an `strftime` timestamp and is expected to differ between any two runs; a
-whole-file digest would therefore report every arm as mismatched and prove nothing. PDFs are
-excluded from the equality claim for the same reason — ghostscript embeds creation dates —
-and their presence and byte count are checked instead.
+whole-file digest would therefore report every arm as mismatched and prove nothing.
+
+Three other product types carry per-run content that is not a numerical result. They are
+**normalised and then compared**, not dropped, so they stay inside the equality claim:
+
+- `_shifts.eps` embeds its own absolute output path in the plot title, which necessarily
+  differs between two arms because they write to different directories. The path is
+  substituted out and the rest of the PostScript — including every plotted shift — is
+  compared.
+- `.log` embeds the measured GPU profile in milliseconds, which differs between any two runs
+  by construction. Numeric timings are substituted out and the remaining text is compared.
+- `.pdf` is the one exception: ghostscript embeds a creation date and an ID derived from it,
+  so only presence and byte count are checked. This is stated as a limitation, not hidden.
+
+Arms are compared only against a reference that consumed the same input set. A 4-movie
+screening arm and a 24-movie baseline arm do not have comparable product sets, and scoring
+one against the other would report a difference that means nothing.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 import statistics
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 TIMESTAMPED = (".pdf",)
+TIMING_VALUE = re.compile(rb"[0-9]+\.[0-9]+(?=\s*(?:ms|sec|s)\b)")
+# Lines in a per-movie log that echo the configuration under test. They are removed from the
+# parity digest and checked separately -- they are the witness that the requested settings
+# actually took effect, which is worth more than treating them as noise.
+CONFIG_ECHO = re.compile(
+    rb"^(?:Working on .* with \d+ thread\(s\)\.|"
+    rb"Limitted the number of IO threads per movie to \d+ thread\(s\)\.)[ \t]*\r?\n", re.M)
+EFFECTIVE_J = re.compile(rb"Working on .* with (\d+) thread\(s\)\.")
+EFFECTIVE_IO = re.compile(rb"Limitted the number of IO threads per movie to (\d+) thread\(s\)\.")
+# The project's exact gate enforces MRC labels 224-1023 with only RELION's clock stamp in the
+# first 80-byte label masked (docs/gate_contract.md, "MRC labels 224-1023, run timestamp
+# masked | enforced"; tools/compare_motioncorr.py:161-166). Dropping the label block instead
+# would make this report strictly weaker than the gate the project already publishes. The
+# rule is reimplemented rather than imported because compare_motioncorr.py needs NumPy, which
+# is not installed on the GPU benchmark host.
+MRC_TIMESTAMP = re.compile(rb"\b\d{2}-[A-Za-z]{3}-\d{2}\s+\d{2}:\d{2}:\d{2}\b")
 
 
-def product_key(run: Dict[str, Any]) -> Dict[str, Any]:
+def normalized_mrc_labels(path: Path) -> Optional[str]:
+    try:
+        labels = bytearray(path.read_bytes()[224:1024])
+    except Exception:
+        return None
+    if len(labels) < 800:
+        return None
+    labels[:80] = MRC_TIMESTAMP.sub(lambda m: b"0" * len(m.group()), bytes(labels[:80]))
+    return hashlib.sha256(bytes(labels)).hexdigest()
+
+
+def normalized_bytes(path: Path, out_root: Path) -> bytes:
+    """Content with per-run, non-result artefacts substituted out.
+
+    Every arm writes to its own directory and MotionCorr embeds the absolute output path in
+    its text products -- the EPS plot title, `corrected_micrographs.star`, and the `.pdf.lst`
+    file lists. Substituting the run's own output root is therefore the general rule, not an
+    EPS special case; without it every text product differs between any two arms for a reason
+    that has nothing to do with the computation.
+    """
+    raw = path.read_bytes()
+    if path.suffix == ".mrc":
+        return raw
+    raw = raw.replace(str(out_root).encode(), b"<OUTDIR>")
+    if path.suffix == ".log":
+        raw = CONFIG_ECHO.sub(b"", TIMING_VALUE.sub(b"<T>", raw))
+    return raw
+
+
+def effective_settings_from_logs(out_root: Path) -> Dict[str, Any]:
+    """Read back what the binary says it actually used, per movie."""
+    js, ios, n = set(), set(), 0
+    for lg in sorted(out_root.rglob("*.log")):
+        raw = lg.read_bytes()
+        n += 1
+        m = EFFECTIVE_J.search(raw)
+        if m:
+            js.add(int(m.group(1)))
+        m = EFFECTIVE_IO.search(raw)
+        ios.add(int(m.group(1)) if m else None)
+    return {"movies_with_logs": n,
+            "reported_j": sorted(js),
+            "reported_io_cap": sorted(x for x in ios if x is not None),
+            "movies_without_io_cap_line": sum(1 for x in ios if x is None)}
+
+
+def product_key(run: Dict[str, Any], results_dir: Optional[Path]) -> Dict[str, Any]:
     """Comparable fingerprint of one arm's output set."""
-    payloads, headers, others, stamped = {}, {}, {}, {}
+    payloads, headers, labels, others, stamped = {}, {}, {}, {}, {}
+    unnormalised, unparseable = [], []
+    out_root = (results_dir / run["tag"] / "out") if results_dir else None
     for p in run["products"]:
         path = p["path"]
         if path.endswith(TIMESTAMPED):
             stamped[path] = p["bytes"]
-        elif p.get("mrc"):
+        elif p.get("mrc") and not p["mrc"].get("error"):
             payloads[path] = p["mrc"]["payload_sha256"]
             headers[path] = p["mrc"]["core_header_sha256"]
+            f = out_root / path if out_root else None
+            nl = normalized_mrc_labels(f) if f and f.is_file() else None
+            if nl:
+                labels[path] = nl
+            else:
+                unnormalised.append(path + " (labels)")
+        elif path.endswith((".mrc", ".mrcs")):
+            # Never fall through to a whole-file digest here. That digest includes the
+            # timestamped label block, so it is guaranteed to differ and would report a
+            # parse failure as an ordinary pixel mismatch.
+            unparseable.append(f"{path}: {(p.get('mrc') or {}).get('error', 'not digested')}")
         else:
-            others[path] = p["sha256"]
-    return {"payloads": payloads, "core_headers": headers,
-            "others": others, "timestamped_bytes": stamped}
+            # All remaining products are text that may embed the run's own output path.
+            f = out_root / path if out_root else None
+            if f is not None and f.is_file():
+                others[path] = hashlib.sha256(normalized_bytes(f, out_root)).hexdigest()
+            else:
+                # Without the files we cannot normalise, and an un-normalised digest would
+                # report a difference that is only the embedded path or timing. Record the
+                # gap rather than scoring a comparison that cannot mean anything.
+                unnormalised.append(path)
+    return {"payloads": payloads, "core_headers": headers, "labels": labels,
+            "others": others, "timestamped_bytes": stamped,
+            "not_normalisable": unnormalised, "unparseable": unparseable}
 
 
 def compare_products(ref: Dict[str, Any], test: Dict[str, Any]) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
-    for field in ("payloads", "core_headers", "others"):
+    for field in ("payloads", "core_headers", "labels", "others"):
         r, t = ref[field], test[field]
         missing = sorted(set(r) - set(t))
         extra = sorted(set(t) - set(r))
@@ -56,8 +156,17 @@ def compare_products(ref: Dict[str, Any], test: Dict[str, Any]) -> Dict[str, Any
         "missing": sorted(set(rs) - set(ts)), "extra": sorted(set(ts) - set(rs)),
         "note": "content not compared: these embed a generation date by construction",
     }
+    out["not_normalisable"] = sorted(set(ref.get("not_normalisable", []))
+                                     | set(test.get("not_normalisable", [])))
+    out["unparseable"] = sorted(set(ref.get("unparseable", []))
+                                | set(test.get("unparseable", [])))
     out["verdict"] = "EQUAL" if all(out[f]["equal"] for f in
-                                    ("payloads", "core_headers", "others")) else "DIFFERS"
+                                    ("payloads", "core_headers", "labels", "others")) \
+        else "DIFFERS"
+    if out["unparseable"]:
+        out["verdict"] = "UNPARSEABLE"      # not a pixel mismatch; do not report it as one
+    elif out["not_normalisable"]:
+        out["verdict"] += "+UNVERIFIED"
     return out
 
 
@@ -69,8 +178,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--series", type=Path, required=True, help="series.json from the runner")
-    ap.add_argument("--reference-arm", required=True,
-                    help="arm id whose products define the same-backend baseline")
+    ap.add_argument("--reference-arm", action="append", required=True,
+                    help="arm id whose products define the same-backend baseline for its own "
+                         "input set; repeat once per distinct input set")
+    ap.add_argument("--results-dir", type=lambda x: Path(x).resolve(),
+                    help="directory holding the per-run output trees, so .eps/.log can be "
+                         "normalised before comparison instead of excluded")
     ap.add_argument("--json-out", type=Path)
     args = ap.parse_args()
 
@@ -81,27 +194,67 @@ def main() -> int:
     failed = [r["tag"] for r in runs if r["exit_code"] != 0]
 
     # ---------------------------------------------------- product equality, computed first
-    ref_runs = [r for r in data["runs"] if r["arm_id"] == args.reference_arm]
-    if not ref_runs:
-        print(f"ERROR: reference arm {args.reference_arm} not in series")
-        return 2
-    ref = product_key(ref_runs[0])
+    # Each arm is scored against the reference that consumed the SAME input set. Scoring a
+    # 4-movie screening arm against a 24-movie baseline would report 20 missing movies, which
+    # is a property of the plan, not of the configuration under test.
+    arm_input = {a["id"]: a["input_star"] for a in data.get("arms", [])} \
+        if data.get("arms") else {}
+    if not arm_input:
+        arm_input = {r["arm_id"]: r["command"][r["command"].index("--i") + 1]
+                     for r in data["runs"] if "--i" in r["command"]}
+
+    refs: Dict[str, Dict[str, Any]] = {}
+    for rid in args.reference_arm:
+        rr = [r for r in data["runs"] if r["arm_id"] == rid]
+        if not rr:
+            print(f"ERROR: reference arm {rid} not in series")
+            return 2
+        refs[arm_input.get(rid, "?")] = {"tag": rr[0]["tag"],
+                                         "key": product_key(rr[0], args.results_dir)}
+
     by_arm: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for r in runs:
         by_arm[r["arm_id"]].append(r)
 
     prod: Dict[str, Any] = {}
+    unscored: List[str] = []
     for arm, rs in by_arm.items():
+        iset = arm_input.get(arm, "?")
+        if iset not in refs:
+            unscored.append(f"{arm} (input {iset})")
+            continue
+        ref = refs[iset]["key"]
         # Compare every run, not one per arm: a product difference that appears in only one
         # repeat is exactly the kind that a one-run-per-arm check would miss.
-        per_run = {r["tag"]: compare_products(ref, product_key(r)) for r in rs}
-        prod[arm] = {"runs": per_run,
+        per_run = {r["tag"]: compare_products(ref, product_key(r, args.results_dir))
+                   for r in rs}
+        eff = {}
+        if args.results_dir:
+            for r in rs:
+                o = args.results_dir / r["tag"] / "out"
+                if o.is_dir():
+                    got = effective_settings_from_logs(o)
+                    want_j, want_io = r["effective"]["j"], r["effective"]["io_threads"]
+                    got["requested_j"] = want_j
+                    got["requested_effective_io"] = want_io
+                    # The binary only prints the IO line when it actually clamps, so an
+                    # uncapped arm correctly has no line and its effective IO equals j.
+                    io_ok = (got["reported_io_cap"] == [want_io]
+                             if want_io != want_j else not got["reported_io_cap"])
+                    got["matches_request"] = (got["reported_j"] == [want_j]) and io_ok
+                    eff[r["tag"]] = got
+        prod[arm] = {"runs": per_run, "input_set": iset, "effective_settings_witness": eff,
+                     "reference": refs[iset]["tag"],
                      "all_equal": all(v["verdict"] == "EQUAL" for v in per_run.values()),
                      "product_counts": sorted({r["product_count"] for r in rs})}
 
     print("=" * 78)
-    print(f"PRODUCT EQUALITY vs reference arm '{args.reference_arm}'"
-          f"  (run {ref_runs[0]['tag']})")
+    print("PRODUCT EQUALITY, each arm vs the reference for its own input set")
+    for iset, r in sorted(refs.items()):
+        print(f"  input '{iset}' -> reference run {r['tag']}")
+    if not args.results_dir:
+        print("  WARNING: --results-dir not given, so .eps/.log cannot be normalised and are "
+              "reported as UNVERIFIED rather than compared")
     print("=" * 78)
     n_bad = 0
     for arm in sorted(prod):
@@ -109,17 +262,29 @@ def main() -> int:
         flag = "EQUAL" if v["all_equal"] else "DIFFERS"
         if not v["all_equal"]:
             n_bad += 1
-        print(f"  {arm:<28} {flag:<8} products={v['product_counts']}")
+        wit = v.get("effective_settings_witness") or {}
+        ok = all(w.get("matches_request") for w in wit.values()) if wit else None
+        eff_flag = {True: "settings-confirmed", False: "SETTINGS-MISMATCH",
+                    None: "settings-unchecked"}[ok]
+        print(f"  {arm:<28} {flag:<8} products={v['product_counts']}  {eff_flag}")
+        if ok is False:
+            for tag, w in wit.items():
+                if not w.get("matches_request"):
+                    print(f"      {tag}: requested j={w['requested_j']} "
+                          f"io={w['requested_effective_io']} but logs report "
+                          f"j={w['reported_j']} io_cap={w['reported_io_cap']}")
         if not v["all_equal"]:
             for tag, c in v["runs"].items():
                 if c["verdict"] == "EQUAL":
                     continue
-                for f in ("payloads", "core_headers", "others"):
+                for f in ("payloads", "core_headers", "labels", "others"):
                     d = c[f]
                     if not d["equal"]:
                         print(f"      {tag} {f}: differing={d['differing'][:4]} "
                               f"missing={d['missing'][:4]} extra={d['extra'][:4]}")
     print(f"\n  arms with differing products: {n_bad} of {len(prod)}")
+    if unscored:
+        print(f"  arms with no same-input reference, NOT scored: {unscored}")
     print(f"  non-zero exits: {failed if failed else 'none'}")
     if warmups:
         print(f"  declared warm-up runs excluded from tables: "

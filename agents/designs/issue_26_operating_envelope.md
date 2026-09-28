@@ -45,8 +45,13 @@ retains, in its own record:
 - **Interference.** 1 Hz sampling of non-own CPU usage for the whole run, reported as
   mean/max/n, not a probe before and after.
 - **Products.** The complete output set, compared against the same-backend baseline as
-  ordered pixels, normalised header and STAR fields. An arm that lost or failed a movie is
-  not a faster arm.
+  ordered pixels, core header, and MRC labels with only RELION's clock stamp masked — the
+  same decomposition `docs/gate_contract.md` publishes as `--gate exact`. Text products are
+  compared after substituting the run's own absolute output path, which MotionCorr embeds in
+  the EPS plot title, `corrected_micrographs.star` and the `.pdf.lst` lists; PDFs are checked
+  for presence and size only, because ghostscript stamps a creation date. An arm that lost or
+  failed a movie is not a faster arm, and an output that cannot be parsed is reported as
+  unparseable rather than as a pixel mismatch.
 
 Two exclusions are load-bearing. TIFF cost is never derived as wall minus GPU kernel timers,
 because those timers do not cover the whole run. And profiled and unprofiled binaries are
@@ -136,6 +141,7 @@ this issue.
 | `WORKER_STATUS.md` | round handoff status |
 | `tools/envelope_runner.py` | measurement runner |
 | `tools/envelope_report.py` | series analyser and product-equality verdict |
+| `tools/test_envelope_report.py` | positive and negative controls for that verdict |
 | `docs/operating_envelope_issue26.md` | report and operating guide |
 | `docs/benchmark_logs/issue26_envelope_*/**` | raw per-run records |
 

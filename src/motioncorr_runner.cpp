@@ -3365,10 +3365,25 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 			return " (record " + std::to_string(record_num + 1) +
 			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
 		};
+		// A path can open and still fail to be read -- a directory whose name ends
+		// .txt is the reachable case. peek() returns EOF for that too, so end of
+		// input is only "clean" when the stream really did reach end of file
+		// without an error. Treating a read failure as an empty file would mask
+		// nothing and let the movie publish as if correction had succeeded.
+		// Platforms differ in how much they expose: libstdc++ sets badbit for a
+		// directory, libc++ reports an ordinary EOF and the distinction is simply
+		// not observable there.
+		auto fail_if_unreadable = [&]() {
+			if (f_defect.bad() || !f_defect.eof()) {
+				REPORT_ERROR("Failed to read the defect file " + fn_defect +
+				             ": the path opened but could not be read. If it is a "
+				             "directory, pass the defect file itself.");
+			}
+		};
 
 		while (true) {
 			skip_ws();
-			if (f_defect.peek() == EOF) break;
+			if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
 			const long long record_line = line;
 
 			// Read each field as a token and convert it explicitly. Streaming
@@ -3381,6 +3396,8 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 				if (i > 0) skip_ws();
 				std::string token;
 				if (f_defect.peek() == EOF || !(f_defect >> token)) {
+					// A read error mid-record must not be reported as truncation.
+					fail_if_unreadable();
 					REPORT_ERROR("Truncated defect record" + where(record_line) +
 					             ": expected four integers 'x y w h', but the file ended "
 					             "after " + std::to_string(i) + " of 4 fields.");

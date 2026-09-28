@@ -9,22 +9,24 @@ initial GPU benchmark slot, so the screening script is prepared and unrun.
 | item | value |
 |---|---|
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (main after #90/#91) |
-| Validated source | `eb022aff151c11d939e2c39a5fc0b56da31ad431` |
+| Validated source | `08c87bb653a3970639dd0699eaa479eb2fc795a9` (Codex review fixes) |
 | Branch | `round96/94-claude-opus-5` |
 | Host | `small-refmac-machine` (ssh alias `cpu64`), 2026-09-28T00:33Z |
 | Build | GCC 13.3.0, CMake 4.4.3, `-DCMAKE_BUILD_TYPE=Release` → `CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp` |
-| `motioncorr` sha256 | `9fda7ac231cc780ff1d2df68dd0ac6f60fae2d86d52c8a717cd3222be180873a` |
-| `prefetch_lifecycle` sha256 | `0d045b864a1162781b5db8e6fb4e8399b42fa4e10ad4174977d661666dadb36b` |
+| `motioncorr` sha256 | `c28c023a3b826c5312b5f1e10be09d6e043d32d8a0c5fe41dde8d79b3be05782` |
+| `prefetch_lifecycle` sha256 | `a2d8c8315ae7fd0a756698cbccc7af016a353272b63ee122ff38bfc60be0f702` |
 
-Per-file source and fixture hashes are in `cpu_validation_eb022aff151c.log`. The build type is
+Per-file source and fixture hashes are in `cpu_validation_08c87bb653a3.log`. The build type is
 recorded because this project's `CMakeLists.txt` sets no default: an unqualified configure
 produces `-O0` and inflates every host-side number.
 
 | file | what it is |
 |---|---|
-| `cpu_validation_eb022aff151c.log` | the run: topology, hashes, build, full `ctest`, ThreadSanitizer |
-| `prefetch_equivalence_stdout_eb022aff151c.txt` | per-case output of `PrefetchEquivalence` |
-| `prefetch_lifecycle_stdout_eb022aff151c.txt` | output of `PrefetchLifecycle` |
+| `cpu_validation_08c87bb653a3.log` | current head: topology, hashes, build, full `ctest` |
+| `prefetch_equivalence_stdout_08c87bb653a3.txt` | per-case output of `PrefetchEquivalence` |
+| `prefetch_lifecycle_stdout_08c87bb653a3.txt` | output of `PrefetchLifecycle` |
+| `negative_controls_08c87bb653a3.log` | each Codex fix reverted in turn; the test must fail |
+| `cpu_validation_eb022aff151c.log` | previous head, retained: it carries the ThreadSanitizer run |
 | `tsan_*_eb022aff151c.txt` | stdout of the three sanitizer runs |
 | `cli_contract_eb022aff151c.txt` | option documentation and validation exit codes |
 | `cuda_syntax_check/` | parse-only check of the `_CUDA_ENABLED` branches, with stubs |
@@ -83,6 +85,8 @@ metadata and identical frame selection:
 normal:  4/4 movies identical; budget=466944 B, peak_reserved=466944 B, peak_queue=1
 control: a changed option does change the pixels (the checks can fail)
 mixed:   4/4 identical across differing geometry and frame counts (decoded=4, inline=0)
+queue2:  4/4 identical, automatic budget still 466944 B, peak_reserved=466944 B
+queue8:  4/4 identical, automatic budget still 466944 B, peak_reserved=466944 B
 tight:   3/3 identical with a 9 MiB budget holding one movie (unit=8413184 B,
          peak_reserved=8413184 B)
 starved: 3/3 identical with a 8 MiB budget, all via the counted in-line fallback
@@ -114,9 +118,29 @@ Four cases — `gain`, `frames` and both damaged ones — additionally assert th
 failed counts, because without that they would all have passed unchanged had prefetch silently
 degraded to loading every movie in line.
 
+## Negative controls for the three Codex review fixes
+
+A control that passes whether or not the defect is present is not evidence. Each fix was
+therefore **reverted in turn**, in a fresh copy of the tree with a fresh build directory (a
+copied CMake build dir caches the original absolute source path and would silently rebuild the
+unmutated sources), and the suite re-run. Every revert must fail.
+`negative_controls_08c87bb653a3.log`:
+
+| reverted fix | `prefetch_lifecycle` | failures |
+|---|---|---|
+| positive format whitelist → old negative check | exit 1 | **11** — `spi`, `stk`, `xmp`, `vol`, `img`, `hed`, `st`, `map`, `dm4`, no-extension and raw all wrongly admitted to the producer |
+| automatic budget → `queue_capacity + 2` estimates | exit 1 | **8** — capacities 2, 3, 8 and 64 each give a different ceiling where the CLI promises `3 x` |
+| explicit move assignment → `= default` | exit 1 | **2** — old frames still live when their bytes were returned, *and* self-move destroys the frames |
+
+The third revert surfaced something the review did not mention: a defaulted move assignment is
+also **not self-move safe** here, so `record = std::move(record)` loses the frames. The
+explicit operator returns early on self-assignment.
+
 ## ThreadSanitizer
 
-`-fsanitize=thread`, `OMP_NUM_THREADS=1` throughout: GCC's libgomp is not TSan-annotated, so
+Run at the previous head `eb022aff`, whose `src/` differs from the current head only by the
+three review fixes above; **not** re-run at `08c87bb6`. `-fsanitize=thread`,
+`OMP_NUM_THREADS=1` throughout: GCC's libgomp is not TSan-annotated, so
 OpenMP workers generate false positives that would bury a real finding, and with one OpenMP
 thread the only concurrency left is exactly what this PR adds — the producer running alongside
 the consumer.
@@ -153,3 +177,9 @@ error, so the harness really does reach the CUDA-only branches. **It is not a CU
   nothing here exercises it at a size where it would be informative.
 - TSan with OpenMP decode threads (`OMP_NUM_THREADS > 1`), which needs a TSan-annotated OpenMP
   runtime to be readable.
+- ThreadSanitizer **at the current head**. It was run at `eb022aff`; the three review fixes
+  since then change admission, a constant and a move assignment, none of which adds
+  synchronisation, but that is an argument, not a measurement.
+- An end-to-end unsupported-format case. The whitelist control is unit-level because the
+  repository has no SPIDER or IMAGIC movie fixture, and inventing one that the inline path
+  then fails to decode would test nothing useful.

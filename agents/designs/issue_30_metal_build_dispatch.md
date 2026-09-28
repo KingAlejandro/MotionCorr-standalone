@@ -7,8 +7,14 @@
 - **Priority**: P1
 - **Architect**: MotionCorr Architecture Agent
 - **Estimated Difficulty**: Medium (2.5/5)
-- **Status**: Implemented / Ready for Review
+- **Status**: Historical design; current build/interface status is described below
 - **Target Release / Milestone**: v1.0.0
+
+> **Historical design record.** This document predates the current-main Issue
+> #32 prototype. Its old “ready for review” label and smoke-only verification
+> matrix are not current scientific acceptance evidence. The current prototype
+> and its Gate 2 failures are recorded in
+> [`docs/metal_issue32_prototype.md`](../../docs/metal_issue32_prototype.md).
 
 ---
 
@@ -16,10 +22,10 @@
 
 To modernise MotionCorr on Apple Silicon Macs while eliminating proprietary CUDA dependencies on macOS, this specification establishes an opt-in Apple Metal compilation path (`-DMETAL=ON`) and a narrow C++ dispatch interface for global frame alignment (`metalAlignPatch`).
 
-### Invariants Satisfied:
+### Intended interface invariants (not a scientific acceptance claim):
 1. **Zero Silent Fallback**: When `--metal` is requested, execution runs strictly on the specified Metal GPU device or aborts clearly; it never silently falls back to CPU.
 2. **Platform & Build Isolation**: Linux and macOS CPU-only builds remain 100% free of Metal framework links and Objective-C++ compilation.
-3. **CPU Output Preservation**: CPU runs on both `-DMETAL=OFF` and `-DMETAL=ON` binaries preserve bit-exact numerical parity against the RELION 5.1 reference baseline.
+3. **CPU Output Preservation**: CPU-only build isolation and CPU-output behavior must be checked on current source; this historical document does not establish current-main parity.
 4. **Unambiguous Backend Selection**: CLI options `--metal` and `--metal_device <id>` explicitly select the Metal backend and conflict with `--gpu` (CUDA).
 
 ---
@@ -122,4 +128,4 @@ Verification performed on:
 | **Metal (`-DMETAL=ON`)** | `motioncorr ... --use_own --metal --metal_device 99` | Immediate exit code 1 on out-of-bounds device | `ERROR: Invalid Metal device ID 99. Found 1 Metal device(s).` | **PASS** |
 | **Metal (`-DMETAL=ON`)** | `motioncorr ... --use_own --metal --gpu 0` | Immediate exit code 1 on backend conflict | `ERROR: Cannot specify both CUDA (--gpu) and Metal (--metal) backends simultaneously.` | **PASS** |
 | **Metal (`-DMETAL=ON`)** | `motioncorr ... --use_motioncor2 --metal` | Immediate exit code 1 on incompatible engine | `ERROR: --metal is valid only with --use_own.` | **PASS** |
-| **Metal (`-DMETAL=ON`)** | `motioncorr ... --use_own --metal --metal_device 0` | Device identification on stdout, smoke execution, profile marker in `.log` | Stdout: `Using Metal acceleration on device 0 (Apple M4 Pro)...`, Log: `[Metal Global Alignment Profile]` | **PASS** |
+| **Metal (`-DMETAL=ON`)** | `motioncorr ... --use_own --metal --metal_device 0` | Historical smoke-only check; does not establish current #32 stage completion or Gate 2 | Superseded by [`docs/metal_issue32_prototype.md`](../../docs/metal_issue32_prototype.md), which requires all-stage completion and records two image-RMSE failures | **HISTORICAL ONLY** |

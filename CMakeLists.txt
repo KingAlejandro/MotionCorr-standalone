@@ -152,6 +152,8 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+        add_test(NAME MetalCompletionWitness
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_metal_completion_witness.py)
     # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
     # so it needs POSIX resource limits and an ignorable SIGXFSZ.
     if(UNIX)

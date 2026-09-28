@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <cmath>
 #include <chrono>
+#include <cstring>
 #include <vector>
 
 static const char *metal_kernel_source = R"(
@@ -211,6 +212,22 @@ kernel void fourierShiftKernel(
 }
 )";
 
+static void waitForMetalCommandBuffer(id<MTLCommandBuffer> command_buffer, const char *stage)
+{
+    if (!command_buffer) {
+        REPORT_ERROR(std::string("Metal execution failed: Could not create command buffer for ") + stage);
+    }
+
+    [command_buffer commit];
+    [command_buffer waitUntilCompleted];
+    if ([command_buffer status] != MTLCommandBufferStatusCompleted) {
+        NSError *error = [command_buffer error];
+        const char *detail = error ? [[error localizedDescription] UTF8String] : nullptr;
+        REPORT_ERROR(std::string("Metal execution failed during ") + stage +
+                     (detail ? std::string(": ") + detail : ": command buffer did not complete"));
+    }
+}
+
 static int findGoodSizeMetal(int request) {
     const int good_numbers[] = {192, 216, 256, 288, 324,
                                 384, 432, 486, 512, 576, 648,
@@ -269,9 +286,24 @@ bool metalAlignPatch(
             REPORT_ERROR("Metal execution failed: Empty frame vector provided to metalAlignPatch");
         }
 
+        if (pnx <= 0 || pny <= 0 || !std::isfinite((double)scaled_B) || scaled_B <= 0) {
+            REPORT_ERROR("Metal execution failed: Invalid alignment dimensions or B-factor");
+        }
+        if (max_iter <= 0) {
+            REPORT_ERROR("Metal execution failed: max_iter must be positive");
+        }
+
         const int n_frames = static_cast<int>(xshifts.size());
         if (n_frames <= 0) {
             REPORT_ERROR("Metal execution failed: Trajectory size is zero");
+        }
+        if (yshifts.size() != xshifts.size() || Fframes.size() != xshifts.size()) {
+            REPORT_ERROR("Metal execution failed: Frame and X/Y trajectory counts differ");
+        }
+        for (size_t i = 0; i < Fframes.size(); ++i) {
+            if (XSIZE(Fframes[i]) != XSIZE(Fframes[0]) || YSIZE(Fframes[i]) != YSIZE(Fframes[0])) {
+                REPORT_ERROR("Metal execution failed: Fourier frame dimensions differ");
+            }
         }
 
         NSArray<id<MTLDevice>> *devices = MTLCopyAllDevices();
@@ -300,6 +332,10 @@ bool metalAlignPatch(
         id<MTLFunction> fnCCF = [library newFunctionWithName:@"computeCCFKernel"];
         id<MTLFunction> fnPeak = [library newFunctionWithName:@"findPeakAndInterpolateKernel"];
         id<MTLFunction> fnShift = [library newFunctionWithName:@"fourierShiftKernel"];
+
+        if (!fnWeight || !fnRef || !fnCCF || !fnPeak || !fnShift) {
+            REPORT_ERROR("Metal execution failed: A required alignment kernel is missing");
+        }
 
         id<MTLComputePipelineState> psoWeight = [device newComputePipelineStateWithFunction:fnWeight error:&error];
         id<MTLComputePipelineState> psoRef = [device newComputePipelineStateWithFunction:fnRef error:&error];
@@ -396,6 +432,9 @@ bool metalAlignPatch(
         {
             id<MTLCommandBuffer> cb = [queue commandBuffer];
             id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
+            if (!enc) {
+                REPORT_ERROR("Metal execution failed: Could not create frequency-weighting encoder");
+            }
             [enc setComputePipelineState:psoWeight];
             [enc setBuffer:d_weight offset:0 atIndex:0];
             [enc setBytes:&ccf_nfx length:sizeof(int) atIndex:1];
@@ -408,8 +447,7 @@ bool metalAlignPatch(
             MTLSize grid = MTLSizeMake((ccf_nfx + 15) / 16 * 16, (ccf_nfy + 15) / 16 * 16, 1);
             [enc dispatchThreads:grid threadsPerThreadgroup:tg];
             [enc endEncoding];
-            [cb commit];
-            [cb waitUntilCompleted];
+            waitForMetalCommandBuffer(cb, "frequency weighting");
         }
         auto t_k_end = std::chrono::high_resolution_clock::now();
         float accumulated_kernel_ms = std::chrono::duration<float, std::milli>(t_k_end - t_k_start).count();
@@ -420,16 +458,21 @@ bool metalAlignPatch(
         std::vector<float> h_shifty(n_frames, 0.0f);
 
         bool converged = false;
+        int iterations_completed = 0;
         float accumulated_ifft_ms = 0.0f;
         float accumulated_d2h_ms = 0.0f;
         const float tolerance = 0.5f;
 
         for (int iter = 1; iter <= max_iter; iter++) {
+            iterations_completed = iter;
             // Stage 1b: Reference computation
             auto t_k0 = std::chrono::high_resolution_clock::now();
             {
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
                 id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
+                if (!enc) {
+                    REPORT_ERROR("Metal execution failed: Could not create reference-accumulation encoder");
+                }
                 [enc setComputePipelineState:psoRef];
                 [enc setBuffer:d_Fframes offset:0 atIndex:0];
                 [enc setBuffer:d_Fref offset:0 atIndex:1];
@@ -443,14 +486,16 @@ bool metalAlignPatch(
                 MTLSize grid = MTLSizeMake((ccf_nfx + 15) / 16 * 16, (ccf_nfy + 15) / 16 * 16, 1);
                 [enc dispatchThreads:grid threadsPerThreadgroup:tg];
                 [enc endEncoding];
-                [cb commit];
-                [cb waitUntilCompleted];
+                waitForMetalCommandBuffer(cb, "reference accumulation");
             }
 
             // Stage 1c: CCF computation
             {
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
                 id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
+                if (!enc) {
+                    REPORT_ERROR("Metal execution failed: Could not create cross-correlation encoder");
+                }
                 [enc setComputePipelineState:psoCCF];
                 [enc setBuffer:d_Fframes offset:0 atIndex:0];
                 [enc setBuffer:d_Fref offset:0 atIndex:1];
@@ -466,8 +511,7 @@ bool metalAlignPatch(
                 MTLSize grid = MTLSizeMake((ccf_nfx + 15) / 16 * 16, (ccf_nfy + 15) / 16 * 16, n_frames);
                 [enc dispatchThreads:grid threadsPerThreadgroup:tg];
                 [enc endEncoding];
-                [cb commit];
-                [cb waitUntilCompleted];
+                waitForMetalCommandBuffer(cb, "cross-correlation");
             }
             auto t_k1 = std::chrono::high_resolution_clock::now();
             accumulated_kernel_ms += std::chrono::duration<float, std::milli>(t_k1 - t_k0).count();
@@ -484,15 +528,20 @@ bool metalAlignPatch(
                                                         targetTensors:@[outTensor]
                                                      targetOperations:nil];
                 MPSGraphTensorData *outData = results[outTensor];
+                if (!outData) {
+                    REPORT_ERROR("Metal execution failed: MPSGraph did not return inverse-FFT output");
+                }
                 MPSNDArray *arr = [outData mpsndarray];
+                if (!arr) {
+                    REPORT_ERROR("Metal execution failed: MPSGraph inverse-FFT output has no array storage");
+                }
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
                 [arr exportDataWithCommandBuffer:cb
                                         toBuffer:d_Iccs
                              destinationDataType:MPSDataTypeFloat32
                                           offset:0
                                       rowStrides:nil];
-                [cb commit];
-                [cb waitUntilCompleted];
+                waitForMetalCommandBuffer(cb, "MPSGraph inverse FFT");
             }
             auto t_i1 = std::chrono::high_resolution_clock::now();
             accumulated_ifft_ms += std::chrono::duration<float, std::milli>(t_i1 - t_i0).count();
@@ -502,6 +551,9 @@ bool metalAlignPatch(
             {
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
                 id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
+                if (!enc) {
+                    REPORT_ERROR("Metal execution failed: Could not create peak-finding encoder");
+                }
                 [enc setComputePipelineState:psoPeak];
                 [enc setBuffer:d_Iccs offset:0 atIndex:0];
                 [enc setBuffer:d_cur_xshifts offset:0 atIndex:1];
@@ -519,8 +571,7 @@ bool metalAlignPatch(
                 MTLSize grid = MTLSizeMake(256 * n_frames, 1, 1);
                 [enc dispatchThreads:grid threadsPerThreadgroup:tg];
                 [enc endEncoding];
-                [cb commit];
-                [cb waitUntilCompleted];
+                waitForMetalCommandBuffer(cb, "peak finding and subpixel interpolation");
             }
             auto t_pk1 = std::chrono::high_resolution_clock::now();
             accumulated_kernel_ms += std::chrono::duration<float, std::milli>(t_pk1 - t_pk0).count();
@@ -564,9 +615,12 @@ bool metalAlignPatch(
                 }
                 auto t_sh0 = std::chrono::high_resolution_clock::now();
                 {
-                    id<MTLCommandBuffer> cb = [queue commandBuffer];
-                    id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
-                    [enc setComputePipelineState:psoShift];
+                id<MTLCommandBuffer> cb = [queue commandBuffer];
+                id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
+                if (!enc) {
+                    REPORT_ERROR("Metal execution failed: Could not create Fourier phase-shift encoder");
+                }
+                [enc setComputePipelineState:psoShift];
                     [enc setBuffer:d_Fframes offset:0 atIndex:0];
                     [enc setBuffer:d_shiftx offset:0 atIndex:1];
                     [enc setBuffer:d_shifty offset:0 atIndex:2];
@@ -578,8 +632,7 @@ bool metalAlignPatch(
                     MTLSize grid = MTLSizeMake((nfx + 15) / 16 * 16, (nfy + 15) / 16 * 16, n_frames - 1);
                     [enc dispatchThreads:grid threadsPerThreadgroup:tg];
                     [enc endEncoding];
-                    [cb commit];
-                    [cb waitUntilCompleted];
+                    waitForMetalCommandBuffer(cb, "Fourier phase shifting");
                 }
                 auto t_sh1 = std::chrono::high_resolution_clock::now();
                 accumulated_kernel_ms += std::chrono::duration<float, std::milli>(t_sh1 - t_sh0).count();
@@ -595,6 +648,11 @@ bool metalAlignPatch(
             }
         }
 
+        if (!converged) {
+            REPORT_ERROR("Metal execution failed: Global alignment did not converge within " +
+                         integerToString(max_iter) + " iterations; no Metal completion marker will be written");
+        }
+
         // Final transfer: copy shifted Fframes back to host
         auto t_final_0 = std::chrono::high_resolution_clock::now();
         for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -608,14 +666,17 @@ bool metalAlignPatch(
 
         // Emit profile markers adhering to regression test contract
         logfile << " [Metal Global Alignment Profile]" << std::endl;
-        logfile << "   Host-to-Device transfer time: " << std::fixed << std::setprecision(2) << h2d_ms << " ms" << std::endl;
+        logfile << "   Input shared-buffer copy time: " << std::fixed << std::setprecision(2) << h2d_ms << " ms" << std::endl;
         logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
         logfile << "   MPSGraph FFT execution time:  " << std::fixed << std::setprecision(2) << accumulated_ifft_ms << " ms" << std::endl;
-        logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+        logfile << "   Output shared-buffer copy time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
         logfile << "   Total Metal alignment time:   " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
         logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (peak_memory_bytes / (1024.0 * 1024.0)) << " MiB" << std::endl;
+        logfile << "[Metal Global Alignment Completed] device_id=" << device_id
+                << " iterations=" << iterations_completed
+                << " stages=weights,reference,ccf,ifft,peak,fourier_shift converged=true" << std::endl;
 
-        return converged;
+        return true;
     }
 }
 

@@ -70,7 +70,7 @@ cmake --build build-metal --parallel
 ./build-metal/motioncorr --i movies.star --o MotionCorr --use_own --metal --metal_device 0 --j 1
 ```
 
-**Metal status:** Issue #30 establishes the opt-in macOS build, device discovery, CLI backend selection (`--metal`, `--metal_device <id>`), and fail-closed dispatch interface. The full iterative alignment loop and FFT kernels on Metal are implemented in Issue #32; see the [Metal backend contract](docs/metal_backend_contract.md). CPU-only builds remain default and free of Metal frameworks.
+**Metal status:** The opt-in build and device dispatch are followed by a current-main global-alignment prototype for [Issue #32](https://github.com/KingAlejandro/MotionCorr-standalone/issues/32). It executes the Metal weighting, reference, CCF, MPSGraph inverse-FFT, peak/subpixel, and Fourier-shift stages on Apple Silicon. The current prototype still **fails the relaxed Gate 2 absolute image-RMSE check** on both seeded fixtures; the measured values and remaining checks are recorded in the [Issue #32 prototype report](docs/metal_issue32_prototype.md). It is not an accepted or default backend. CPU-only builds remain the default and free of Metal frameworks; see the [Metal backend contract](docs/metal_backend_contract.md).
 
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 

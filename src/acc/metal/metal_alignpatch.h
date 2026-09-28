@@ -25,7 +25,7 @@ std::string metalGetDeviceName(int device_id);
  *
  * Backend Interface Contract for Issue #32:
  * - Fframes: vector of 2D complex Fourier-transformed frames (input/output).
- *            Issue #32 will upload frame Fourier data to Metal buffers.
+ *            Frames are copied to shared Metal buffers and shifted in place.
  * - pnx, pny: patch dimensions in X and Y (even integers).
  * - scaled_B: B-factor scaling factor for CCF weighting filter.
  * - xshifts, yshifts: output frame drift trajectories (populated by alignment).
@@ -34,18 +34,13 @@ std::string metalGetDeviceName(int device_id);
  * - device_id: selected zero-based Metal device index.
  * - logfile: output stream for logging device profile and progress markers.
  *
- * Smoke Dispatch Behavior (Issue #30):
- * - Validates device_id and acquires MTLDevice.
- * - Creates MTLCommandQueue and allocates test MTLBuffer to verify device operation.
- * - Dispatches a command buffer and waits for completion to prove device execution.
- * - Emits startup and profile markers:
- *     stdout: "[Metal] Executed Metal dispatch smoke on device: <name>"
- *     logfile: "[Metal Global Alignment Profile]"
- *              "Device: <name>"
- *              "Stage: Dispatch smoke verification (Issue #30 interface contract for Issue #32)"
- *              "Total Metal Alignment Time: 0.000 s"
- * - Throws RelionError on device/command queue failure. Never falls back to CPU.
- * - Returns true on success.
+ * - Executes weighting, reference accumulation, cross-correlation, MPSGraph
+ *   inverse FFT, peak/subpixel interpolation and Fourier phase-shift stages.
+ * - Throws RelionError for invalid inputs, command-buffer errors, missing FFT
+ *   results, or failure to converge. It never falls back to CPU.
+ * - Writes the exact `[Metal Global Alignment Completed]` marker only after
+ *   convergence and host output copy; availability/profile markers alone are
+ *   not completion evidence.
  */
 bool metalAlignPatch(
     std::vector<MultidimArray<fComplex> > &Fframes,

@@ -144,6 +144,14 @@ if(BUILD_TESTING)
 endif()
 if(BUILD_TESTING AND CUDA)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # Issue #85 lane C: uint16 staging must reproduce the float path's device
+        # state exactly, including the no-gain case where the float path never
+        # writes d_Iframes. Needs a real device.
+        add_executable(cuda_u16_staging_equivalence tests/cuda_u16_staging_equivalence.cpp)
+        target_link_libraries(cuda_u16_staging_equivalence PRIVATE motioncorr_core)
+        add_test(NAME CudaU16StagingEquivalence COMMAND cuda_u16_staging_equivalence)
+        set_tests_properties(CudaU16StagingEquivalence PROPERTIES LABELS "cuda;hardware")
+
         add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
         target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)
         target_link_options(cuda_wrapper_upload_failure PRIVATE

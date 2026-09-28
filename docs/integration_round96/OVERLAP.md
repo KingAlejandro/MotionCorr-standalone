@@ -45,7 +45,12 @@ required names / `--min-count 17`**. This is a tightening, not a relaxation.
 claimed to prove that a missing required *name* is rejected, but fed a 13-name
 collection to a validator whose count minimum was 14 — so the count gate always
 fired first and the missing-name branch was never reached, while the asserted
-substring appeared anyway because the report echoes the required-test list.
+substring appeared anyway. **Corrected attribution** (independent code review,
+P3-3): the substring comes from the `MISSING REQUIRED TESTS:` block at
+`tools/validate_test_collection.py:143-144`, which prints whenever `missing` is
+non-empty — and `missing` is computed unconditionally at `:73`, before either
+gate returns. So the block prints even when the rejection reason was the count.
+The substance of the finding is unchanged.
 Verified against a copy of the validator with the missing-name branch deleted:
 
 ```

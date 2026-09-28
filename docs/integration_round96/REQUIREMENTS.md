@@ -79,7 +79,7 @@ gate relaxation this task forbids.
 |---|---|---|---|
 | E1 | **Default CUDA configure fails** on this tree: `CMakeLists.txt:59` guards the `CMAKE_CUDA_ARCHITECTURES` fallback with `if(NOT DEFINED …)`, but `enable_language(CUDA)` has already defined it, so the fallback never fires. Reproduced fresh at head `d3c04f7`, configure exit 1. Pre-existing on main, **not** introduced here. README:53, `ci.yml` and both sbatch harnesses all pass `-DCMAKE_CUDA_ARCHITECTURES=80`, which is why it stays hidden | P2 | **Scoped build fix requested under #72/#18.** Deliberately NOT fixed on this branch — `CMakeLists.txt` is already carrying a four-way test-registration union here and a build-system change does not belong in the same reviewable unit. No broad CMake redesign proposed |
 | E2 | **PR102's numpy requirement is a new hard build dependency on GPU hosts.** `BUILD_TESTING=ON` now `FATAL_ERROR`s without numpy. The 4-GPU VM has no numpy at all, so a CUDA `BUILD_TESTING=ON` configure that succeeded on main now fails. Measured: system `python3` has no numpy; the #69 thread's `BUILD_TESTING=ON` CUDA build succeeded on main minutes earlier | P2 | Arguably correct fail-closed behaviour — those tests genuinely need numpy — but it is a real new environment requirement that GPU-host workflows must satisfy. Worked around here with a local venv (`/home/alex/.mc-i96-venv`, numpy 2.5.3); recorded so the next GPU worker is not surprised. Not changed on this branch |
-| E3 | **PR102's Control 3 Case B could not observe what it asserted** (count gate fired before the missing-name branch; the asserted substring came from the report's echo of the required list) | P2 | **Fixed on this branch**, commit `32620aa`, with an out-of-tree mutation control proving the repaired case detects a deleted missing-name check and the original does not |
+| E3 | **PR102's Control 3 Case B could not observe what it asserted** (count gate fired before the missing-name branch; the asserted substring came from the `MISSING REQUIRED TESTS:` block, which prints whenever `missing` is non-empty — and `missing` is computed unconditionally at `validate_test_collection.py:73`, before either gate returns. Attribution corrected per independent code review P3-3; the finding itself is unchanged) | P2 | **Fixed on this branch**, commit `32620aa`, with an out-of-tree mutation control proving the repaired case detects a deleted missing-name check and the original does not |
 | E4 | `tools/test_ci_fail_closed.py` Control 2 raises `FileNotFoundError` when `cmake` is absent from `PATH`, rather than failing with a diagnostic | P3 | Not changed — out of this integration's scope and it is a test-environment issue, not a product one. Recorded: the suite requires `cmake` on `PATH`, which GitHub CI provides and a bare cpu64 shell does not |
 | E5 | C1/C2 (de-registering a required test at the CMake level) are dominated by the count gate: removing a test lowers the count, so the inventory rejects on count even though it also names the missing test | P3 | Accurate reporting only. The name check is isolated and proven by the repaired in-suite Control 3, not by C1/C2 |
 
@@ -106,3 +106,66 @@ gate relaxation this task forbids.
 | #97 / PR100 recenter fix | **CONDITIONAL — not integrated** | The fix is right about the inherited upstream defect, and its option-off controls preserve outputs exactly. But option-on changes 14,236,598 of 14,238,980 output pixels with max absolute difference 22.56. That is a deliberate divergence from the RELION `ad0b230` parity invariant this project holds itself to. Integrating it silently would convert a documented parity baseline into an undocumented one. Requires: (a) explicit recorded acceptance of the upstream-parity divergence; (b) option-on controls; (c) non-one `selected frames` coverage; (d) native CUDA option-on/off validation. **No scientific-quality improvement is claimed or implied by this row** — changed pixels are not better pixels |
 | GPU integration claim for this candidate | **NO-GO for now** | F1–F3. CPU simulation is not a substitute and none was run as one |
 | Default-CUDA-configure fix | **DEFER to #72/#18** | E1 |
+
+
+## H. Independent review of the integration surface
+
+Two bounded read-only reviewers, run against the final source head. Neither
+compiled or ran anything; all execution evidence in this document is the
+integrator's.
+
+### H1. Code and specification — `READY_TO_MERGE`
+
+No P1 and no P2 findings. Verified independently: the `src/image.h` merge
+preserves both contracts with no swallowed error, no double-close and no leak;
+`TiffErrorScope` save/restore is LIFO-safe because all four instances are
+function-local automatics; `src/motioncorr_runner.cpp` is a true union with the
+`expected_frames_*` vectors confirmed in lockstep with `fn_micrographs`;
+`CMakeLists.txt` nesting is balanced and no registration was dropped; and the
+Control 3 Case B defect claim was confirmed against PR102's own head `cf049ef`.
+The reviewer also independently confirmed that `CMakeLists.txt:58`'s
+`if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)` fallback is character-for-character
+identical to base, so E1 is genuinely pre-existing and correctly deferred.
+
+Two useful additions from that review:
+
+- the widened `ftiff != NULL` case is in fact *unreachable* when `!isTiff`,
+  because `ftiff` is only ever assigned on the `isTiff` branch. The widening
+  therefore changes no diagnostic behaviour; it only closes the reuse leak;
+- `releaseHandles()` also fixes a latent pre-existing UB in the base
+  `closeFile()`, which could reach `fclose(fimg)` with `fimg == NULL` when
+  `fhed != NULL && !isTiff`.
+
+| finding | severity | disposition |
+|---|---|---|
+| P3-1 `INTEGRATED_SUITE` duplicates `DEFAULT_REQUIRED_TESTS` across two files | P3 | **Accepted, not fixed.** The reviewer traced all four drift permutations and every one fails loudly, so this is a maintenance burden and not a silent-green risk. Changing source after the review would invalidate the reviewed head for a nit. Recommended fix recorded for whoever adds test 18: import `DEFAULT_REQUIRED_TESTS` and derive the filler count from it |
+| P3-2 `ImageWriteFaults` required unconditionally but registered under `if(UNIX)` | P3 | **Accepted, not fixed.** Linux and macOS both set `UNIX`; already flagged by an inline comment. Revisit only if Windows becomes a target |
+| P3-3 attribution of the Control 3 defect was imprecise | P3 | **Fixed in the docs** above. The commit message of `32620aa` is immutable history and keeps the original wording |
+
+### H2. License and scope — `LICENSE_COMPLIANCE_PASSED` + `SPEC_CONFORMANCE_PASSED`
+
+`audit_licenses.py` exits 0 with verdict `LICENSE_WARNING` and 6 findings, **all
+six pre-existing on base and untouched here** — confirmed by blob-OID identity
+rather than by absence from the diff (`src/CPlot2D.{cpp,h}`, four AMD HIP
+headers, `automation/requirements.txt`). No proprietary code, no ungranted
+"All rights reserved", no non-commercial restriction, no new dependency surface.
+numpy is BSD-3-Clause and already used by 10+ scripts at base.
+
+Provenance: **43 cherry-picks, zero authorship rewrites**, verified on author
+name, email *and* author date against each `(cherry picked from commit ...)`
+original. The referenced originals are exactly the 43 commits on the four source
+branches — bidirectionally complete, nothing dropped, nothing invented. PR103's
+three `MotionCorr AI Assistant` commits retain their authorship with the
+integrator as committer only.
+
+All four worker handoffs are archived **byte-identically by blob OID**, and the
+branch deletes nothing (`git diff --diff-filter=D 4c952b3..HEAD` is empty).
+`docs/issue92_review_evidence/` (16 files) and `docs/issue99_write_faults/`
+(6 files) match their source branches exactly.
+
+That reviewer also flagged a methodology hazard worth repeating: a scripted
+`git show pr/105:WORKER_STATUS.md | shasum` inside a loop with stderr suppressed
+once returned the SHA-256 of the empty string, which would have read as a
+spurious mismatch. It switched to blob-OID comparison, which cannot degrade that
+way. A hash-of-nothing is exactly the shape of a green-looking check that
+observed nothing.

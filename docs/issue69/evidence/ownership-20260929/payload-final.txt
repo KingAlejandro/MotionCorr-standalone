@@ -1,0 +1,36 @@
+2026-09-28T23:41:37+00:00
+actual_payload_pid=1788658
+/home/alex/mc-pr115-ownership-20260929/build/motioncorr
+    PID                  STARTED COMMAND
+1788658 Mon Sep 28 23:41:36 2026 build/motioncorr --i /home/alex/mc-pr115-ownership-20260929/src/test-data/synthetic/synthetic_movie.tiff --use_own --gpu 0 --j 4 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1 --dose_weighting --dose_per_frame 1 --voltage 300 --angpix 1 --bin_factor 2 --save_noDW --even_odd_split --o /home/alex/mc-pr115-ownership-20260929/payload-healthy/
+1788658 (motioncorr) R 1788655 1788652 1788652 0 -1 4194304 1945 0 0 0 0 11 0 0 20 0 2 0 609534359 560062464 4960 18446744073709551615 99761607892992 99761609884257 140725622599760 0 0 0 0 6 0 0 0 0 17 115 0 0 0 0 0 99761610352240 99761610359088 99762013274112 140725622606755 140725622607096 140725622607096 140725622607847 0
+build/motioncorr --i /home/alex/mc-pr115-ownership-20260929/src/test-data/synthetic/synthetic_movie.tiff --use_own --gpu 0 --j 4 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1 --dose_weighting --dose_per_frame 1 --voltage 300 --angpix 1 --bin_factor 2 --save_noDW --even_odd_split --o /home/alex/mc-pr115-ownership-20260929/payload-healthy/ 
+Cpus_allowed_list:	112-119
+Mems_allowed_list:	0-1
+policy: default
+preferred node: current
+physcpubind: 112 113 114 115 116 117 118 119 
+cpubind: 1 
+nodebind: 1 
+membind: 0 1 
+preferred: 
+CPU CORE SOCKET NODE
+112  112    112    1
+113  113    113    1
+114  114    114    1
+115  115    115    1
+116  116    116    1
+117  117    117    1
+118  118    118    1
+119  119    119    1
+0.00 0.15 0.36 2/2752 1788679
+078ec5461119b8a51802debc8f2621b3c304a5bc
+4722032c4ae132a95c0291d131c39eeabd3246d73b094901483ba6c95c17f9dd  build/motioncorr
+f58826cf54f030478439c40a84d2474fefe3b33a22457d2df3a9977c354b8367  build/cuda_fault_matrix
+760cd9e0c750c27f1b2e52717b23e070a4ec20e6f96571c714a28c2fbe033f86  build/motioncorr_faultinject
+dbc0585c6e2a0e4b1dded2c9c83d732b26de1062d86e401751531f6b67be8a94  build/motioncorr_retry_caller
+4722032c4ae132a95c0291d131c39eeabd3246d73b094901483ba6c95c17f9dd  build/motioncorr
+f58826cf54f030478439c40a84d2474fefe3b33a22457d2df3a9977c354b8367  build/cuda_fault_matrix
+760cd9e0c750c27f1b2e52717b23e070a4ec20e6f96571c714a28c2fbe033f86  build/motioncorr_faultinject
+dbc0585c6e2a0e4b1dded2c9c83d732b26de1062d86e401751531f6b67be8a94  build/motioncorr_retry_caller
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  src/test-data/synthetic/synthetic_movie.tiff

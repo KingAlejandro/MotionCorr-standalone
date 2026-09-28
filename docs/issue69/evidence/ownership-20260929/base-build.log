@@ -1,0 +1,21 @@
+-- motioncorr_core CUDA architectures: 80
+-- Configuring done (0.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/alex/mc-pr115-ownership-20260929/build
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/micrograph_model.cpp.o
+[  2%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_alignpatch.cu.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[  4%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_realspace_dw.cu.o
+[  5%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+[  6%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_movie_session.cu.o
+/home/alex/mc-pr115-ownership-20260929/src/src/acc/cuda/cuda_fft_prep.cu(52): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[  7%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr

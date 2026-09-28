@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import shutil
 import struct
 import subprocess
@@ -87,13 +88,33 @@ def control_ground_truth_mutation(tmp: Path, fixtures_dir: Optional[Path]) -> Di
     targets = sorted(bad.glob("*_ground_truth.json"))
     require(bool(targets), "no *_ground_truth.json present to mutate")
     target = targets[0]
-    raw = bytearray(target.read_bytes())
-    # Flip one character inside the JSON body, keeping it the same length.
-    index = max(raw.rfind(b"0"), raw.rfind(b"1"))
-    require(index > 0, f"no digit to flip in {target.name}")
-    original = raw[index]
-    raw[index] = ord("9") if original != ord("9") else ord("8")
-    target.write_bytes(bytes(raw))
+    raw = target.read_text()
+
+    # One character, but a deliberately chosen one. A blind byte flip could
+    # land in the commit stamp or in the 17th significant digit of a float --
+    # both of which the verifier now excuses on purpose, so the control would
+    # be asserting the opposite of what it means to. Pick a float leaf that is
+    # neither, and flip its leading significant digit.
+    candidates = [(leaf, value) for leaf, value in vf.flatten(json.loads(raw)).items()
+                  if type(value) is float and value
+                  and leaf.rsplit("/", 1)[-1] not in vf.TRUTH_PROVENANCE_KEYS
+                  and raw.count(json.dumps(value)) == 1]
+    require(bool(candidates),
+            f"no uniquely locatable float leaf to mutate in {target.name}")
+    leaf, value = candidates[0]
+    rendered = json.dumps(value)
+    position = next((i for i, ch in enumerate(rendered) if ch in "123456789"), None)
+    require(position is not None, f"no significant digit in {rendered}")
+    mutated_text = (rendered[:position]
+                    + ("9" if rendered[position] != "9" else "1")
+                    + rendered[position + 1:])
+    mutated_value = json.loads(mutated_text)
+    require(len(mutated_text) == len(rendered),
+            "the mutation changed the file length; it is meant to be one byte")
+    require(not vf.within_ulps(value, mutated_value),
+            f"the chosen mutation {value} -> {mutated_value} is inside the "
+            f"rounding tolerance, so detecting it would prove nothing")
+    target.write_text(raw.replace(rendered, mutated_text))
     after = verify(bad)
 
     require(after["report"] is not None, "verifier produced no report after mutation")
@@ -108,8 +129,8 @@ def control_ground_truth_mutation(tmp: Path, fixtures_dir: Optional[Path]) -> Di
             "the movie was also reported as mismatched; the mutation should "
             f"have touched the truth file alone: {after['report']['mismatched']}")
     return {"status": "pass", "mutated_file": target.name,
-            "byte_offset": index, "detected_as": flagged,
-            "clean_run_verified": True}
+            "mutated_leaf": leaf, "from": value, "to": mutated_value,
+            "detected_as": flagged, "clean_run_verified": True}
 
 
 # ------------------------------------------------------------- power spectrum
@@ -496,14 +517,18 @@ def control_cross_row_consumed(_tmp: Path, _fixtures: Optional[Path]) -> Dict[st
 
 
 def control_truth_provenance(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, Any]:
-    """A regenerated truth is excused only for the stamp, never for the motion.
+    """A regenerated truth is excused for the stamp and the last bit, nothing more.
 
-    The generator writes the current commit into every truth file, so a
-    regenerated fixture cannot match a digest recorded at another commit even
-    when the motion is bit-identical -- observed on cpu64 at 93d427e for all
-    four present cases, differing in exactly one leaf of 4132. Excusing that is
-    correct. Excusing a changed motion value would make the digest check
-    ornamental, so this asserts the allowance cannot stretch that far.
+    Two excuses, both measured. The generator writes the current commit into
+    every truth file, so a regenerated fixture cannot match a digest recorded at
+    another commit even when the motion is bit-identical -- cpu64 at 93d427e,
+    four cases, exactly one differing leaf of 4132. And a derived float can
+    round differently between NumPy builds -- cpu64 at 8298158, km_local_hisnr,
+    two noise statistics 1 ULP apart while the movie digest matched exactly.
+
+    Excusing either is correct. Excusing a changed motion value would make the
+    digest check ornamental, so this asserts neither allowance stretches: not
+    by name, not by magnitude, and not at the boundary.
     """
     base = {"case": "km_x", "source_commit": "a" * 40,
             "injected_motion_field": [[0.5, -1.25], [2.0, 3.5]],
@@ -518,17 +543,19 @@ def control_truth_provenance(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, 
     moved = json.loads(committed)
     moved["source_commit"] = "b" * 40
     got = vf.truth_difference(committed, observed(moved))
-    require(got["provenance_only"],
+    require(got["content_equivalent"],
             f"a truth differing only in source_commit was called drift: {got}")
     require(got["differing_leaves"] == ["/source_commit"],
             f"the allowance named the wrong leaf: {got['differing_leaves']}")
+    require(not got["float_rounding_leaves"],
+            "a changed commit stamp was attributed to float rounding")
 
     drifted = json.loads(committed)
     drifted["injected_motion_field"][1][0] = 2.0000001
     got = vf.truth_difference(committed, observed(drifted))
-    require(not got["provenance_only"],
+    require(not got["content_equivalent"],
             "MUTATED MOTION EXCUSED: a changed motion value was treated as a "
-            "provenance-only difference")
+            "content-equivalent difference")
     require(any("injected_motion_field" in leaf for leaf in got["unexpected_leaves"]),
             f"the drifted motion leaf was not named: {got['unexpected_leaves']}")
 
@@ -536,33 +563,108 @@ def control_truth_provenance(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, 
     both["source_commit"] = "b" * 40
     both["injected_motion_field"][0][0] = 0.6
     got = vf.truth_difference(committed, observed(both))
-    require(not got["provenance_only"],
+    require(not got["content_equivalent"],
             "a changed motion value was excused because the commit also changed")
 
     added = json.loads(committed)
     added["source_commit"] = "b" * 40
     added["extra_key"] = 1
-    require(not vf.truth_difference(committed, observed(added))["provenance_only"],
+    require(not vf.truth_difference(committed, observed(added))["content_equivalent"],
             "an added leaf was excused as provenance")
 
     removed = json.loads(committed)
     del removed["geometry"]
-    require(not vf.truth_difference(committed, observed(removed))["provenance_only"],
+    require(not vf.truth_difference(committed, observed(removed))["content_equivalent"],
             "a removed leaf was excused as provenance")
 
     identical = vf.truth_difference(committed, observed(json.loads(committed)))
-    require(not identical["provenance_only"],
-            "an identical pair was reported as a provenance difference")
+    require(not identical["content_equivalent"],
+            "an identical pair was reported as a difference")
 
     (tmp / "bad.json").write_text("{not json")
-    require(not vf.truth_difference(committed, tmp / "bad.json")["provenance_only"],
+    require(not vf.truth_difference(committed, tmp / "bad.json")["content_equivalent"],
             "an unparseable truth file was excused as provenance")
+
+    # --- the rounding allowance, at and past its boundary -------------------
+    motion = 2.0
+    one_ulp = math.nextafter(motion, math.inf)
+    nudged = json.loads(committed)
+    nudged["injected_motion_field"][1][0] = one_ulp
+    got = vf.truth_difference(committed, observed(nudged))
+    require(got["content_equivalent"],
+            f"a float one ULP away ({motion} vs {one_ulp}) was called drift")
+    require(got["float_rounding_leaves"] == ["/injected_motion_field[1][0]"],
+            f"the rounding allowance named the wrong leaf: "
+            f"{got['float_rounding_leaves']}")
+    require(got["float_rounding_max_relative"] < 1e-15,
+            f"a difference of {got['float_rounding_max_relative']:.2e} relative "
+            f"was accepted as rounding")
+
+    far = motion
+    for _ in range(vf.TRUTH_FLOAT_ULPS + 1):
+        far = math.nextafter(far, math.inf)
+    beyond = json.loads(committed)
+    beyond["injected_motion_field"][1][0] = far
+    require(not vf.truth_difference(committed, observed(beyond))["content_equivalent"],
+            f"a float {vf.TRUTH_FLOAT_ULPS + 1} ULP away was excused; the "
+            f"tolerance does not actually end where it says it does")
+
+    # The step above is expressed in ULP, so it moves with the constant and
+    # would still pass if the constant were raised to something absurd. This
+    # one does not: 1e-12 relative is thousands of ULP and must never be
+    # rounding, whatever TRUTH_FLOAT_ULPS says.
+    absolute = json.loads(committed)
+    absolute["injected_motion_field"][1][0] = motion * (1 + 1e-12)
+    require(not vf.truth_difference(committed,
+                                    observed(absolute))["content_equivalent"],
+            "a difference of 1e-12 relative was accepted as rounding; that is "
+            "a numerical tolerance, not a rendering artefact")
+
+    # A tolerance that only ever sees tiny numbers is easy to get wrong in the
+    # other direction: at 1e9 a "small" absolute slop of 1e-6 is still ~8 ULP.
+    scaled = json.loads(committed)
+    scaled["geometry"] = {"nx": 1e9, "ny": 512}
+    scaled_committed = json.dumps(scaled)
+    slipped = json.loads(scaled_committed)
+    slipped["geometry"]["nx"] = 1e9 + 1e-6
+    require(not vf.truth_difference(scaled_committed,
+                                    observed(slipped))["content_equivalent"],
+            "an absolute slop was accepted at large magnitude; the tolerance "
+            "must be relative to the value")
+
+    integral = json.loads(committed)
+    integral["geometry"]["nx"] = 513
+    require(not vf.truth_difference(committed, observed(integral))["content_equivalent"],
+            "an integer that changed by one was excused as float rounding")
+
+    retyped = json.loads(committed)
+    retyped["geometry"]["nx"] = 512.0
+    require(not vf.truth_difference(committed, observed(retyped))["content_equivalent"],
+            "an int retyped as a float was excused; the truth file's types are "
+            "part of what the digest covers")
+
+    # Two denormals of opposite sign are a handful of ULP apart in absolute
+    # terms, but a motion that reversed direction is drift at any magnitude.
+    tiny = json.loads(committed)
+    tiny["injected_motion_field"][0][1] = 5e-324
+    tiny_committed = json.dumps(tiny)
+    crossed = json.loads(tiny_committed)
+    crossed["injected_motion_field"][0][1] = -5e-324
+    require(not vf.truth_difference(tiny_committed,
+                                    observed(crossed))["content_equivalent"],
+            "a value that changed sign was excused as float rounding")
 
     require(vf.TRUTH_PROVENANCE_KEYS == ("source_commit",),
             f"the allowance widened beyond the single stamp it was measured "
             f"for: {vf.TRUTH_PROVENANCE_KEYS}")
+    require(vf.TRUTH_FLOAT_ULPS <= 8,
+            f"the rounding tolerance widened to {vf.TRUTH_FLOAT_ULPS} ULP, well "
+            f"past the 1 ULP actually observed")
     return {"status": "pass", "allowance": list(vf.TRUTH_PROVENANCE_KEYS),
-            "observed_on": "cpu64 93d427e, 4 cases, 1 differing leaf of 4132"}
+            "float_tolerance_ulps": vf.TRUTH_FLOAT_ULPS,
+            "observed_on": ["cpu64 93d427e, 4 cases, 1 differing leaf of 4132",
+                            "cpu64 8298158, km_local_hisnr, 2 noise leaves 1 ULP "
+                            "apart with the movie digest matching"]}
 
 
 def _verdict(image=True, trajectory=True, star=True, star_diffs=(),

@@ -453,6 +453,92 @@ def control_report_states_input_coverage(_tmp: Path,
                    "counted separately and the excused cases are named"}
 
 
+def control_report_attributes_each_section(_tmp: Path,
+                                           _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """Sections from different runs must not render under one provenance block.
+
+    The first native allocation (SCARF job 3511139) generated its fixtures with
+    the wrong interpreter, so its fixture-dependent legs are not attributable to
+    the committed manifest and had to be re-run in a second job. A report
+    assembled from both is legitimate -- the integrated screen reads the
+    tutorial runroot, not those fixtures -- but the header names one run, and
+    without per-section attribution the reader has no way to tell which numbers
+    came from where.
+    """
+    matrix = {"provenance": {"hostname": "gn3000.scarf.rl.ac.uk", "gpu": 0,
+                             "binary_sha256": "0c5246675175ba4d" + "0" * 48,
+                             "started_utc": "2026-09-28T08:04:42Z"},
+              "counts": {"declared": 25, "attempted": 25, "pass": 25,
+                         "fail": 0, "error": 0},
+              "matrix_complete": True, "unrun_rows": [], "results": {}}
+    same = {"provenance": dict(matrix["provenance"],
+                               started_utc="2026-09-28T09:10:00Z"),
+            "movies_in_star": 24, "expected_movies": 24, "all24_equal": True,
+            "schedules": {}, "errors": []}
+    text = "\n".join(rep.render_all24(same, matrix))
+    require("Source record:" in text and "gn3000" in text,
+            f"the integrated screen did not name the run it came from: {text}")
+    require("Not the run named in the provenance block" not in text,
+            f"two sections from the same host, device and binary were reported "
+            f"as different runs: {text}")
+
+    other = json.loads(json.dumps(same))
+    other["provenance"]["hostname"] = "gn0005.scarf.rl.ac.uk"
+    other["provenance"]["binary_sha256"] = "3860bce6165974b9" + "0" * 48
+    text = "\n".join(rep.render_all24(other, matrix))
+    require("Not the run named in the provenance block" in text,
+            f"a screen from another host and another binary rendered as though "
+            f"it were part of the matrix run: {text}")
+    require("hostname" in text and "binary_sha256" in text,
+            f"the divergence was announced without naming which fields differ: "
+            f"{text}")
+
+    # A device difference matters as much as a host difference: the same node
+    # can hold four GPUs and a section run on device 2 is not evidence about
+    # device 0.
+    dev = json.loads(json.dumps(same))
+    dev["provenance"]["gpu"] = 2
+    require("Not the run named in the provenance block"
+            in "\n".join(rep.render_all24(dev, matrix)),
+            "a screen from a different device was folded into the header's run")
+
+    # The merged truth tool names its binary and device at the top level, not
+    # in a provenance block; reading only `provenance` would silently drop it.
+    truth = {"tool": "run_known_motion_gates.py", "gpu": 0,
+             "binary": "/work4/.../build-cuda/motioncorr",
+             "results": [{"case": "km_global_hisnr", "role": "gate",
+                          "status": "PASS"}]}
+    text = "\n".join(rep.render_numerical(truth, None, matrix))
+    require("Source record:" in text and "device 0" in text,
+            f"the motion-truth section did not name its own source: {text}")
+
+    # A CPU record is a source too, and differs from a GPU header.
+    cpu = {"provenance": {"hostname": "small-refmac-machine", "gpu": None},
+           "movies_in_star": 24, "expected_movies": 24, "schedules": {},
+           "errors": []}
+    text = "\n".join(rep.render_all24(cpu, matrix))
+    require("CPU" in text and "Not the run named in the provenance block" in text,
+            f"a CPU screen under a GPU header was not flagged: {text}")
+
+    # Nothing to attribute must not invent an attribution.
+    require(not rep.source_attribution({"schedules": {}}, matrix),
+            "a record with no provenance at all was given a source line")
+
+    # The capacity measurement names a device but no host and no binary, so
+    # "device 0" there is not the header's device 0 and must not read as it.
+    capacity = {"schema": "issue83-capacity/1", "row_id": "realscale_local",
+                "device": 0, "device_total_mib": 40960, "peak_used_mib": 1266,
+                "sample_interval_sec": 0.5, "samples": 32, "returncode": 1}
+    text = "\n".join(rep.render_capacity(capacity, matrix))
+    require("host and binary not recorded" in text,
+            f"an unattributable capacity datapoint was rendered under the "
+            f"header's provenance as though it belonged to that run: {text}")
+    return {"status": "pass",
+            "reproduced": "one header over sections from two different jobs",
+            "now": "each section names its host, device and binary, and a "
+                   "divergence from the header is stated"}
+
+
 # ------------------------------------------------------- schedule completeness
 
 def _all24_report(schedules: Dict[str, Any]) -> Dict[str, Any]:
@@ -824,6 +910,7 @@ CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "witness_is_consumed": control_witness_is_consumed,
     "report_renders_witness": control_report_renders_witness,
     "report_states_input_coverage": control_report_states_input_coverage,
+    "report_attributes_each_section": control_report_attributes_each_section,
     "partial_schedules": control_partial_schedules,
     "input_hashes": control_input_hashes,
     "cross_row_consumed": control_cross_row_consumed,

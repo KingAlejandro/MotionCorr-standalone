@@ -138,7 +138,57 @@ def witness_coverage_gap(entry: Dict[str, Any]) -> bool:
     return len(entry.get("runs", []) or []) > 1
 
 
-def render_all24(report: Optional[Dict[str, Any]]) -> List[str]:
+def record_source(record: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Where one section's numbers came from, whatever shape the record has.
+
+    ``run_known_motion_gates.py`` is a merged tool and is not modified here; it
+    names its binary and device at the top level rather than in a provenance
+    block, so both shapes are read.
+    """
+    if not record:
+        return {}
+    prov = record.get("provenance") or {}
+    return {"hostname": prov.get("hostname"),
+            "gpu": prov.get("gpu", record.get("gpu")),
+            "binary_sha256": prov.get("binary_sha256"),
+            "started_utc": prov.get("started_utc")}
+
+
+def source_attribution(record: Optional[Dict[str, Any]],
+                       reference: Optional[Dict[str, Any]] = None) -> List[str]:
+    """Name the run a section came from, and say when it is not the same run.
+
+    The provenance block at the top of the report is the matrix record's. A
+    report may legitimately be assembled from more than one job -- the first
+    native allocation generated its fixtures with the wrong interpreter, so its
+    integrated screen and its fixture-dependent legs come from different jobs --
+    and a single header would then present two measurements as one. Each
+    section states its own host, device and binary, and any divergence from the
+    header is named rather than left for the reader to notice.
+    """
+    src = record_source(record)
+    if not any(v is not None for v in src.values()):
+        return []
+    bits = [f"`{src['hostname']}`" if src.get("hostname") else "host not recorded",
+            "CPU" if src.get("gpu") is None else f"device {src['gpu']}"]
+    if src.get("binary_sha256"):
+        bits.append(f"binary `{src['binary_sha256'][:12]}…`")
+    if src.get("started_utc"):
+        bits.append(f"started {src['started_utc']}")
+    lines = ["- Source record: " + ", ".join(bits)]
+    ref = record_source(reference)
+    differs = [key for key in ("hostname", "gpu", "binary_sha256")
+               if ref.get(key) is not None and src.get(key) is not None
+               and ref[key] != src[key]]
+    if differs:
+        lines.append("- **Not the run named in the provenance block above** — "
+                     + ", ".join(differs)
+                     + " differ, so these two sections are not one measurement.")
+    return lines
+
+
+def render_all24(report: Optional[Dict[str, Any]],
+                 reference: Optional[Dict[str, Any]] = None) -> List[str]:
     """Render the integrated screen with the native witness on every row.
 
     The witness used to be printed for ``base`` only, so a schedule could be
@@ -164,6 +214,7 @@ def render_all24(report: Optional[Dict[str, Any]]) -> List[str]:
                      "dataset does not certify schedule equality")
     native = ("established for every schedule" if all24_witness_holds(report)
               else "**NOT established** -- see the witness column")
+    lines += source_attribution(report, reference)
     lines += [f"- Movies in STAR: {report.get('movies_in_star')} "
               f"(expected {report.get('expected_movies')})",
               f"- Aggregate pixel equality across schedules: {aggregate}",
@@ -276,13 +327,20 @@ def render_fixture_verification(verify: Optional[Dict[str, Any]]) -> List[str]:
     return lines
 
 
-def render_capacity(capacity: Optional[Dict[str, Any]]) -> List[str]:
+def render_capacity(capacity: Optional[Dict[str, Any]],
+                    reference: Optional[Dict[str, Any]] = None) -> List[str]:
     """One measured capacity datapoint, stated only for what was measured."""
     lines = ["", "### Memory capacity (measured, single datapoint)", ""]
     if capacity is None:
         lines += ["_unrun_: no capacity measurement was taken. No capacity "
                   "claim is made.", ""]
         return lines
+    # The measurement names a device index but no host and no binary, so
+    # "device 0" here cannot be tied to the device 0 of the run in the header.
+    lines += source_attribution(capacity, reference) or [
+        "- Source record: **host and binary not recorded in this "
+        "measurement**, so the device index below cannot be attributed to the "
+        "run named in the provenance block."]
     lines += [f"- Configuration: `{capacity.get('row_id')}` — "
               f"{capacity.get('note') or 'no description recorded'}",
               f"- Device: {capacity.get('device')} "
@@ -313,12 +371,14 @@ def render_deferred() -> List[str]:
 
 
 def render_numerical(truth: Optional[Dict[str, Any]],
-                     cpu_diag: Optional[Dict[str, Any]]) -> List[str]:
+                     cpu_diag: Optional[Dict[str, Any]],
+                     reference: Optional[Dict[str, Any]] = None) -> List[str]:
     lines = ["", "### Numerical gates (separate verdicts)", "",
              "These are not implied by any implementation row above.", ""]
     if truth is None:
         lines.append("- Motion truth (`run_known_motion_gates.py`): _unrun_.")
     else:
+        lines += source_attribution(truth, reference)
         results = truth.get("results", {})
         items = results.items() if isinstance(results, dict) else \
             ((r.get("case"), r) for r in results)
@@ -369,6 +429,9 @@ def main() -> int:
     if matrix_report:
         prov = matrix_report.get("provenance", {})
         lines += ["## Provenance", "",
+                  "This block describes the **declared-matrix** run. Sections "
+                  "below name their own source record, and say so when it is a "
+                  "different run.", "",
                   f"- Host: `{prov.get('hostname')}`, device `{prov.get('gpu')}`",
                   f"- Binary: `{prov.get('binary')}`",
                   f"- Binary SHA256: `{prov.get('binary_sha256')}`",
@@ -386,9 +449,9 @@ def main() -> int:
 
     lines += render_fixture_verification(fixture_verify)
     lines += render_matrix(matrix_report)
-    lines += render_all24(all24)
-    lines += render_capacity(capacity)
-    lines += render_numerical(truth, cpu_diag)
+    lines += render_all24(all24, matrix_report)
+    lines += render_capacity(capacity, matrix_report)
+    lines += render_numerical(truth, cpu_diag, matrix_report)
     lines += render_deferred()
 
     inputs_ok = bool(fixture_verify and fixture_verify.get("verified"))

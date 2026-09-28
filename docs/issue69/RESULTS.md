@@ -131,9 +131,11 @@ which has not been done.
 
 ## 4. Why the CPU binaries differ, and why that is not a behaviour change
 
-`motioncorr` base `cb1e1cb1…`, candidate `b750e237…` (measured at this head; see
-[`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt), whose five source hashes
-were verified identical to the pinned head before the binaries were quoted). Every change in this branch to
+`motioncorr` base and candidate hashes are in the `=== binaries ===` block of
+[`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt), whose source hashes are
+verified identical to the pinned head before the binaries are quoted. **Read them
+there, not here** — a hand-typed copy of the candidate hash has gone stale twice. At
+the time of writing: base `cb1e1cb1…`, candidate `4e55739c…`. Every change in this branch to
 `motioncorr_runner.cpp` is inside `#ifdef _CUDA_ENABLED`, so a CPU-only build should
 contain no new code — but the binaries are not identical, and a hash difference left
 unexplained is exactly the kind of thing that later gets waved away.
@@ -281,7 +283,7 @@ still usable". Absence of a pending error is not a certificate of context health
 | Piece | What it does |
 |---|---|
 | `CudaMovieSession::recordFailure` / `recordCufftFailure` | Two calls added inside the existing `HANDLE_ERROR` / `CUFFT_CHECK` macros. Record the **first** failure with its stage and line, sticky for the session's life |
-| `getFirstError` / `getFirstCufftError` / `getFirstErrorStage` / `getFirstErrorLine` / `hasFailed` | Expose that preserved status across the helper boundary |
+| `getFailureState()` | Exposes the preserved status across the helper boundary. (This originally listed five separate accessors; §5c replaced them with a single `CudaFailureState` handle, and this row went stale until a review caught it.) |
 | `cudaRetryDecisionFor(recorded, recorded_cufft, pending)` → `CudaRetryDecision` | A pure predicate. Consults **both** sources: either the recorded status or the pending slot can independently force a fatal verdict. Only when neither poisons does the preference between them matter, and then only for which code the message names. It also returns that deciding code, so the caller's message cannot disagree with the verdict |
 
 A cuFFT failure alone does not force a fatal verdict: `cufftResult` reports
@@ -357,13 +359,34 @@ last-error read was clean as well — and both sources the §5b fix consults wer
 therefore blind. `cudaRetryDecisionFor(old_oom, …, cudaSuccess)` permitted another
 dispatch on a poisoned context.
 
-**This falsifies an explicit earlier source-review claim, which is reconciled here
-rather than left contradictory.** The round-4 code review enumerated all 26
-`return false` sites in `cuda_movie_session.cu` and concluded *"No gap. The P1 defect is
-genuinely fixed in its primary form."* The enumeration was correct about the sites and
-wrong about the outcome: it asked whether each path *records*, not whether the record
-*survives an earlier recoverable one*. It does not. The Codex review found the case that
-survived.
+**This falsifies an explicit earlier source-review claim. The reconciliation below was
+itself corrected by that reviewer for being too generous to it**, and the corrected
+version is the one that matters.
+
+The round-4 code review enumerated all 26 `return false` sites in
+`cuda_movie_session.cu` and concluded *"No gap. The P1 defect is genuinely fixed in its
+primary form."* My first write-up of this said the enumeration "asked whether each path
+records, not whether the record survives an earlier recoverable one" — true, but it
+reads as a scoping slip, and the reviewer pointed out the failure was worse and more
+interesting than that.
+
+What actually happened: the round-4 review **did** find the masking — it was that
+round's blocking finding, with this exact trace. The error was in the **remedy**. It
+argued that under the then-current code "the old code read `pending`, and a sticky
+`cudaErrorIllegalAddress` is still pending there, so it would have returned FATAL", and
+proposed the OR form on that basis. That premise was false, because
+`preparePatchInVram` calls `HANDLE_ERROR(cudaGetLastError())` at `cuda_movie_session.cu`
+`:741` and `:773`, which **reads and clears** the slot — a consuming read the same
+review had already catalogued. The reviewer had even hedged the underlying sticky-error
+assumption in an earlier round, then confirmed the OR form in round 5 without
+re-testing it against its own catalogue. So the §5b fix was proposed and signed off by
+the same party that found the defect, on an assumption that party had previously
+flagged as unverified, and it did not close the trace it described.
+
+The design lesson is the one the current code embodies: **do not make a safety decision
+depend on whether an error is still sitting in a slot that somebody else may already
+have read.** Hence a latched state that no read can clear, rather than a better rule for
+interrogating the slot.
 
 `CudaFailureState` now tracks two independent facts:
 

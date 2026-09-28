@@ -18,6 +18,10 @@
 - `src/acc/cuda/cuda_movie_session.cu` (F3, F4)
 - `src/motioncorr_runner.cpp` (F5, F6, F7 — **shared file**, see coordination)
 - `src/motioncorr_runner.h` (test access only; one `friend` line, emits no code)
+- `src/acc/cuda/cuda_failure_state.h` (**new production header**, the monotonic
+  poisoning latch and diagnostic provenance for the Codex P1 fix)
+- `src/acc/cuda/cuda_scoped_resources.h` (**new production header**, fixed-capacity
+  scoped owners for the Codex P2 fix)
 - `src/acc/cuda/cuda_error_class.h` (**new production header**, added mid-round so the
   F6 predicate could be unit tested; `#ifdef _CUDA_ENABLED`-guarded, no new logic. It
   was not on the original whitelist and should have been added when it was created —
@@ -91,6 +95,12 @@ Production:
   F7 scoped owner for the patch Fourier scratch
 - `src/motioncorr_runner.h` — one `friend` declaration for the test control (emits no code)
 - `src/acc/cuda/cuda_error_class.h` — new, the F6 predicate, extracted so it is testable
+- `src/acc/cuda/cuda_failure_state.h` — new, monotonic poisoning latch (Codex P1)
+- `src/acc/cuda/cuda_scoped_resources.h` — new, fixed-capacity owners (Codex P2)
+
+The whitelist failed to catch these two new `src/` files when they were created, for
+the second round running, and the spec review caught it again. The list above is now
+seven production files, not five.
 
 Tests and build:
 - `tests/test_patch_retry_state.cpp` (new, CPU), `tests/cuda_error_class.cpp` (new,

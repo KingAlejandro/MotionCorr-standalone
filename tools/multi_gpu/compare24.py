@@ -197,11 +197,28 @@ def main(argv: list[str] | None = None) -> int:
                  "--gate", "exact", "--json-out", str(j)],
                 capture_output=True, text=True)
             rc = cp.returncode
-            if not j.exists():
+            if not j.exists() or j.stat().st_size == 0:
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
                                 "returncode": rc,
-                                "reason": f"comparator produced no report at {j} "
+                                "reason": f"comparator produced no usable report at {j} "
                                           f"(exit {rc}); no sidecar published"})
+                continue
+            # The exit code and the report must agree before either is trusted.
+            # A comparator that writes a passing report and then exits non-zero
+            # fails this pass correctly -- but publishing a sidecar would make
+            # the report reusable, and --reuse substitutes rc = 0, so the same
+            # comparison comes back PASS. Refuse to publish reusable evidence
+            # the comparator itself contradicted.
+            try:
+                status = (json.loads(j.read_text()) or {}).get("overall_status")
+            except Exception:  # noqa: BLE001
+                status = None
+            if status not in ("PASS", "FAIL") or rc != (0 if status == "PASS" else 1):
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "returncode": rc,
+                                "reason": f"comparator exit {rc} contradicts its report "
+                                          f"status {status!r}; no sidecar published, so "
+                                          "this comparison cannot be reused"})
                 continue
             root_sidecar(j).write_text(
                 json.dumps(origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts]),

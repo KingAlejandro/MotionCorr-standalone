@@ -1647,7 +1647,8 @@ def case_stale_comparison_report_is_not_republished(tmp: Path) -> None:
     cp = run24(silent)
     assert cp.returncode == 1, "a comparator that produced nothing was accepted"
     s = json.loads((out / "exact_summary.json").read_text())
-    assert any("produced no report" in (r.get("reason") or "") for r in s["results"]), s
+    assert any("produced no usable report" in (r.get("reason") or "")
+               for r in s["results"]), s
 
     # and the stale report must not have been republished as fresh evidence
     cp = run24(silent, reuse=True)
@@ -1858,6 +1859,118 @@ def case_per_worker_timing_and_rss_recorded(tmp: Path) -> None:
     assert abs(spread - tail) < 0.05, f"tail {tail} vs end spread {spread}"
 
 
+def case_aggregate_staging_namespace_reserved(tmp: Path) -> None:
+    """A movie may not write into the namespace the merge stages aggregates in.
+
+    merge_workers stages each worker's fixed-name aggregates under
+    <out>/_workers/w<k>/. A movie whose output root is
+    '_workers/w0/corrected_micrographs' is staged to the exact path worker 0's
+    own aggregate is copied to, and the aggregate -- copied later -- wins. The
+    per-movie metadata is destroyed while `produced` still records the path, so
+    the merge reports PASS over corrupted output.
+
+    Such a name cannot be written unquoted: the STAR reader takes a leading '_'
+    as a label. Quoted, it is a legal movie name and was accepted.
+    """
+    star = tmp / "movies.star"
+    star.write_text(OPTICS.lstrip("\n")
+                    + "'_workers/w0/corrected_micrographs.tif' 1 0.000000\n"
+                    + "Movies/b.tiff 1 1.400000\n\n")
+    cp = partition(star, 1, tmp / "shards")
+    assert cp.returncode == 3, f"_workers namespace accepted (rc={cp.returncode})"
+    assert "reserved-namespace collision" in cp.stderr, cp.stderr
+
+    # and the merge refuses it from a manifest it did not produce
+    man = tmp / "man.json"
+    man.write_text(json.dumps({
+        "canonical_movies": ["_workers/w0/corrected_micrographs.tif"],
+        "canonical_output_roots": ["_workers/w0/corrected_micrographs"],
+        "shards": [{"index": 0, "movies": ["_workers/w0/corrected_micrographs.tif"],
+                    "n_movies": 1}]}))
+    w = tmp / "w0"
+    w.mkdir()
+    cp = merge(man, [w], tmp / "merged",
+               fake_status(tmp, [0], manifest=man, workers=[w]))
+    assert cp.returncode == 2, f"merge accepted the namespace (rc={cp.returncode})"
+    assert "_workers" in cp.stderr, cp.stderr
+
+    # positive control: '_workers' only as a leading path component is the
+    # hazard, so a movie merely containing the word is still accepted
+    star2 = tmp / "ok.star"
+    star2.write_text(OPTICS.lstrip("\n")
+                     + "Movies/_workers_notes.tif 1 0.000000\n"
+                     + "Movies/b.tiff 1 1.400000\n\n")
+    assert partition(star2, 1, tmp / "shards_ok").returncode == 0
+
+
+def case_comparator_exit_must_match_its_report(tmp: Path) -> None:
+    """A comparator that contradicts itself may not leave reusable evidence.
+
+    If the comparator writes a syntactically passing report and then exits
+    non-zero, the first pass fails on the return code -- correctly -- but
+    publishing the origin sidecar makes that report reusable, and --reuse
+    substitutes rc = 0. The same comparison then satisfies every gate and comes
+    back PASS.
+    """
+    liar = tmp / "liar.py"
+    liar.write_text(
+        "import argparse, json, pathlib, sys\n"
+        "ap = argparse.ArgumentParser()\n"
+        "for f in ('--ref-mrc','--test-mrc','--ref-star','--test-star','--gate','--json-out'):\n"
+        "    ap.add_argument(f)\n"
+        "a = ap.parse_args()\n"
+        "pathlib.Path(a.json_out).write_text(json.dumps({\n"
+        "  'overall_status':'PASS','coverage':{'complete':True},'checks':{\n"
+        "   'corrected_image':{'pixel_identical':True,'rmse':0.0,'passed':True},\n"
+        "   'motion_trajectory':{'max_shift_error':0.0,'passed':True},\n"
+        "   'star_fields':{'num_differences':0,'passed':True}}}))\n"
+        "sys.exit(3)\n")
+    roots = ["Movies/a"]
+    manifest = tmp / "manifest.json"
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": ["Movies/a.tiff"]}))
+    ref, test = tmp / "ref", tmp / "test"
+    _tree(ref, roots, failing=set())
+    _tree(test, roots, failing=set())
+    out = tmp / "exact"
+
+    def run24(tool, reuse=False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", tool, "--manifest", manifest, "--out", out]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    cp = run24(liar)
+    assert cp.returncode == 1, "a self-contradicting comparator was accepted"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("contradicts its report" in (r.get("reason") or "")
+               for r in s["results"]), s
+
+    # no reusable evidence may have been left behind
+    assert not list(out.glob("*.origin.json")), \
+        "a sidecar was published for a comparison the comparator contradicted"
+    cp = run24(liar, reuse=True)
+    assert cp.returncode == 1, "the contradicted report was reused as a pass"
+
+    # positive control: an honest comparator still publishes and still reuses,
+    # so the refusals above are about the contradiction and not about the gate
+    honest = tmp / "honest.py"
+    honest.write_text(STUB_COMPARATOR)
+    out2 = tmp / "exact_ok"
+
+    def run_ok(reuse=False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", honest, "--manifest", manifest, "--out", out2]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    assert run_ok().returncode == 0, "the honest comparator should pass"
+    assert list(out2.glob("*.origin.json")), "no sidecar published for a clean run"
+    assert run_ok(reuse=True).returncode == 0, "a clean report should reuse"
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -1904,6 +2017,8 @@ CASES = [
     case_stale_comparison_report_is_not_republished,
     case_launcher_verdict_follows_the_device_witness,
     case_per_worker_timing_and_rss_recorded,
+    case_aggregate_staging_namespace_reserved,
+    case_comparator_exit_must_match_its_report,
 ]
 
 

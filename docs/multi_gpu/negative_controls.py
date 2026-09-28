@@ -380,7 +380,7 @@ MUTATIONS = [
 
     ("a missing fresh report no longer blocks publishing the origin sidecar",
      "tools/multi_gpu/compare24.py",
-     "            rc = cp.returncode\n            if not j.exists():",
+     "            rc = cp.returncode\n            if not j.exists() or j.stat().st_size == 0:",
      "            rc = cp.returncode\n            if False:  # MUTATED",
      ["case_stale_comparison_report_is_not_republished"]),
 
@@ -464,6 +464,24 @@ MUTATIONS = [
      "                            if False:  # MUTATED",
      ["case_per_worker_timing_and_rss_recorded"],
      "taskset"),
+
+    ("partition stops reserving the aggregate staging namespace",
+     "tools/multi_gpu/partition_star.py",
+     '        if root == "_workers" or root.startswith("_workers/"):',
+     "        if False:  # MUTATED",
+     ["case_aggregate_staging_namespace_reserved"]),
+
+    ("merge stops refusing a movie in the aggregate staging namespace",
+     "tools/multi_gpu/merge_workers.py",
+     '        if root == "_workers" or root.startswith("_workers/"):',
+     "        if False:  # MUTATED",
+     ["case_aggregate_staging_namespace_reserved"]),
+
+    ("comparator exit code no longer has to match its own report",
+     "tools/multi_gpu/compare24.py",
+     '            if status not in ("PASS", "FAIL") or rc != (0 if status == "PASS" else 1):',
+     "            if False:  # MUTATED",
+     ["case_comparator_exit_must_match_its_report"]),
 ]
 
 

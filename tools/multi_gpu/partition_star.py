@@ -83,6 +83,21 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
             )
         roots.setdefault(root, name)
 
+    # merge_workers.py stages each worker's fixed-name aggregates under
+    # <out>/_workers/w<k>/. A movie whose output root enters that namespace --
+    # '_workers/w0/corrected_micrographs' -- is staged to the exact path worker
+    # 0's own aggregate is copied to, and the aggregate wins, destroying the
+    # per-movie metadata while `produced` still records the path and the merge
+    # reports PASS. Such a name cannot be written unquoted, because the STAR
+    # reader treats a leading '_' as a label, but a quoted one is accepted.
+    for root, name in roots.items():
+        if root == "_workers" or root.startswith("_workers/"):
+            problems.append(
+                f"reserved-namespace collision: {name!r} writes {root}.* into "
+                "_workers/, which is where the merge stages each worker's "
+                "fixed-name aggregates; the aggregate would overwrite it"
+            )
+
     for root, name in roots.items():
         for decoration in star_io.OUTPUT_DECORATIONS:
             if (root + decoration) in reserved:

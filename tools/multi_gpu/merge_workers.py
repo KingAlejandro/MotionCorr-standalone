@@ -148,6 +148,19 @@ def main(argv: list[str] | None = None) -> int:
                   f"{dupe_shard}", file=sys.stderr)
             return 2
 
+    # Defence in depth, on the same principle as the duplicate check above: the
+    # merge stages worker aggregates under _workers/, so a movie whose root is
+    # in that namespace would be overwritten by an aggregate while still
+    # counting as covered. The partitioner refuses such a manifest; the merge
+    # must not depend on having produced it.
+    for movie in manifest["canonical_movies"]:
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        if root == "_workers" or root.startswith("_workers/"):
+            print(f"FAIL: {movie!r} writes {root}.* into _workers/, the namespace "
+                  "this tool stages worker aggregates into; its per-movie products "
+                  "would be overwritten by an aggregate", file=sys.stderr)
+            return 2
+
     exits: dict[str, int] = {}
     launcher_verdict = None
     if a.status:

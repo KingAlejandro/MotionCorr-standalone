@@ -21,9 +21,9 @@ against, not as an outstanding ask.
 | `tools/multi_gpu/merge_workers.py` | staging plus lost/duplicate/misrouted/failed detection, deterministic order |
 | `tools/multi_gpu/gpu_witness.py` | UUID selection and `nvidia-smi` compute-apps witnesses |
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
-| `tests/test_multi_gpu_scheduling.py` | 46 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
+| `tests/test_multi_gpu_scheduling.py` | 48 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 66 mutation entries, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 69 mutation entries, each required to break its case |
 
 ## Usage
 
@@ -182,8 +182,8 @@ is detected.
 
 | Layer | Result |
 |---|---|
-| `tests/test_multi_gpu_scheduling.py --binary <built>` | **46/46 passed** |
-| `docs/multi_gpu/negative_controls.py` | **66/66 mutations detected**, no survivors |
+| `tests/test_multi_gpu_scheduling.py --binary <built>` | **48/48 passed** |
+| `docs/multi_gpu/negative_controls.py` | **68/68 mutations detected**, no survivors |
 | `tools/validate_test_collection.py --test-dir build` | **PASS**, 18 collected, 18 required |
 | `ctest --output-on-failure -j 4` | **18/18 passed** |
 | end-to-end, real binary: serial vs 3-way sharded | **6/6 exact**, merge `PASS`, aggregate STAR identical, `DISTINCT_PAYLOADS=6/6` |
@@ -237,11 +237,11 @@ owned compute apps, mutex unheld. Evidence:
 
 ## Negative controls
 
-`negative_controls.py` holds 66 mutation entries. It applies them one at a time
+`negative_controls.py` holds 69 mutation entries. It applies them one at a time
 to a scratch copy and requires the corresponding cases to fail. An entry whose
 case needs a tool the host lacks is reported SKIPPED and explicitly not counted
 as detected, so the printed figure is detected-over-attempted, not
-detected-over-entries: **66/66 on Linux with `taskset`**, 64/66 attempted on
+detected-over-entries: **68/68 on Linux with `taskset`**, 67/69 attempted on
 macOS. No mutation survives
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list

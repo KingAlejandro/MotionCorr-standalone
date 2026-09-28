@@ -153,7 +153,27 @@ On the negative-control build the same two new tests fail (`ctest` exit 8), one 
 assertion and one by `SIGABRT`, as shown in §1. Nothing else in the suite was run against
 the negative control.
 
-## 6. What is not claimed
+## 6. Coverage limit: the header write, measured not assumed
+
+The issue's plan lists a failed/short **header** write as its own injection. The check for
+it exists (`mrcWriteBlock(fimg, header, MRCSIZE, "MRC header")`), but on this host a fault
+cannot be made to land on that `fwrite`'s return, and that was measured rather than
+assumed. Probe log: [`header-stage-probe.log`](header-stage-probe.log).
+
+```
+st_blksize(/tmp)=4096  BUFSIZ=8192
+limit 0, 512x512:  rwMRC.h:600  Failed to write image data (1048576 bytes) … File too large
+limit 0, 16x16:    image.h:441  Failed to flush and close image file …     File too large
+```
+
+Even with `RLIMIT_FSIZE = 0` the 1024-byte header always fits the stream buffer, so it
+never reaches `write(2)` inside its own `fwrite`; the identical fault surfaces at the next
+flush point instead, and both of those points are asserted above. On a filesystem
+reporting `st_blksize <= 1024` the header `fwrite` would flush in place and the
+`MRC header` stage label would appear. This sub-case is therefore **covered in code and
+unrun as a distinct observation**, and is recorded as unrun rather than claimed.
+
+## 7. What is not claimed
 
 - **Not claimed: crash durability.** No `fsync` was added. The claim is that an error
   *reported* by the C library or the kernel for any write, seek, flush or close this

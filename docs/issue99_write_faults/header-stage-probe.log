@@ -1,0 +1,12 @@
+=== which stage does a limit-0 fault land on, and what is the stream buffer? ===
+2026-09-28T00:05:43+00:00
+st_blksize(/tmp)=4096 BUFSIZ=8192
+in: ./src/rwMRC.h, line 600
+ERROR: 
+Failed to write image data (1048576 bytes) to /tmp/i99hdr_512.mrc: File too large
+512: Failed to write image data (1048576 bytes) to /tmp/i99hdr_512.mrc: File too large
+in: ./src/image.h, line 441
+ERROR: 
+Failed to flush and close image file /tmp/i99hdr_16.mrc: File too large
+16: Failed to flush and close image file /tmp/i99hdr_16.mrc: File too large
+=== HDR DONE ===

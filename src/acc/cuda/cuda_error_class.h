@@ -39,7 +39,12 @@ inline bool cudaErrorPoisonsContext(cudaError_t err)
     case cudaErrorContextIsDestroyed:
     case cudaErrorDeviceUninitialized:
     case cudaErrorAssert:
+#if CUDART_VERSION >= 11060
+    // Added in CUDA 11.6. CMakeLists sets no CUDA version floor, and this header is
+    // included from motioncorr_runner.cpp, so an unguarded reference would break the
+    // *production* build on an older toolkit, not just the test.
     case cudaErrorExternalDevice:
+#endif
         return true;
     default:
         // Deliberately excluded, though both are sometimes described as fatal:

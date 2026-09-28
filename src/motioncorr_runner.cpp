@@ -21,7 +21,6 @@
 #include <cmath>
 #include <exception>
 #include <limits>
-#include <sstream>   // REPORT_ERROR_STR expands to a std::stringstream
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -30,6 +29,12 @@
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
 #include "src/acc/cuda/cuda_error_class.h"
+// REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
+// in the CUDA-guarded patch block below. Keeping the include inside the guard too
+// preserves the invariant that a CPU-only build sees no change from this branch
+// except a friend declaration that emits no code -- which is what the preprocessed
+// translation-unit control in docs/issue69 measures.
+#include <sstream>
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif

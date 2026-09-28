@@ -37,7 +37,9 @@ const Case CASES[] = {
     {cudaErrorContextIsDestroyed,   true,  "context already destroyed"},
     {cudaErrorDeviceUninitialized,  true,  "context invalid or not initialised"},
     {cudaErrorAssert,               true,  "device-side assert tripped"},
+#if CUDART_VERSION >= 11060
     {cudaErrorExternalDevice,       true,  "external device reported a fatal error"},
+#endif
 
     // Recoverable: the context survives, so an alternative path may legitimately run.
     // cudaErrorMemoryAllocation is the one that matters -- classifying it as poisoning
@@ -50,7 +52,9 @@ const Case CASES[] = {
     {cudaErrorNotSupported,         false, "unsupported operation, context not poisoned"},
     {cudaErrorInsufficientDriver,   false, "environmental, not a property of this context"},
     {cudaErrorNoDevice,             false, "environmental, not a property of this context"},
+#if CUDART_VERSION >= 11010
     {cudaErrorUnsupportedPtxVersion, false, "toolchain mismatch; deterministic, not sticky"},
+#endif
 };
 
 } // namespace
@@ -77,8 +81,9 @@ int main() {
         ++failures;
     }
 
-    std::printf("%d cases (%d poisoning, %d recoverable), %d failures\n",
-                (int)(sizeof(CASES) / sizeof(CASES[0])), poisoning, recoverable, failures);
+    std::printf("%d cases (%d poisoning, %d recoverable), %d failures  [CUDART_VERSION %d]\n",
+                (int)(sizeof(CASES) / sizeof(CASES[0])), poisoning, recoverable, failures,
+                (int)CUDART_VERSION);
     if (failures) return 1;
     std::printf("PASS classifier separates poisoned-context codes from recoverable ones.\n"
                 "     This covers the predicate only; no real poisoned context is\n"

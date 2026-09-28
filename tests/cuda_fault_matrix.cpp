@@ -182,6 +182,11 @@ cudaError_t __wrap_cudaEventCreate(cudaEvent_t *event) {
     return result;
 }
 
+// Both destroy wrappers erase only on success, which is the right default -- a failed
+// destroy has not released anything. Known undercount: if a destroy fails and the
+// runtime later recycles the same cudaEvent_t pointer or cufftHandle value, the
+// re-insert collapses two lifetimes into one set entry and hides a leak. Neither
+// destroy is faulted here, so it needs a genuine runtime failure to reach.
 cudaError_t __wrap_cudaEventDestroy(cudaEvent_t event) {
     const cudaError_t result = __real_cudaEventDestroy(event);
     if (result == cudaSuccess) g_outstanding_events.erase(event);
@@ -427,7 +432,11 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     TrialResult movie_result;
     try {
         for (int movie = 0; movie < n_movies; movie++) {
+            // Reset both, not just the exit: a movie that throws before its first
+            // STAGE -- in the CudaMovieSession constructor, say -- would otherwise
+            // report the previous movie's stage.
             movie_result.exit_mechanism = "";
+            movie_result.last_stage = "";
             g_in_teardown = false;
             runOneMovie(in, log, movie_result);
             g_in_teardown = false;
@@ -439,7 +448,6 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     }
     out.last_stage = movie_result.last_stage;
     out.exit_mechanism = movie_result.exit_mechanism;
-    out.products_ok = movie_result.products_ok;
 
     g_in_teardown = false;
     g_active = false;

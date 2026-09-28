@@ -80,6 +80,9 @@ public:
     void take(cufftHandle handle) {
         // Releasing first keeps a second take() from silently dropping the previous
         // plan. There is one call site today; this stops that from being load-bearing.
+        // Re-taking the handle already held would otherwise destroy it and then mark
+        // the dangling value owned, so that case is skipped rather than released.
+        if (owns_plan && plan == handle) return;
         (void)releaseAll();
         plan = handle;
         owns_plan = true;

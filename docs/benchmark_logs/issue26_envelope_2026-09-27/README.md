@@ -12,7 +12,8 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 | `cpu64/cpu_series.json`, `cpu64/cpu_report.json` | cpu64 scaling, **instrument v1** | timings valid; interference fields limited, see below |
 | `tooling_controls/controls_cpu64_2026-09-28.log` | tooling controls round 1, runner sha256 `b05260db…` | **superseded — two controls were defective**, see below |
 | `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | superseded — reviewer found the residuals below |
-| `tooling_controls/controls_cpu64_round3_2026-09-28.log` | tooling controls round 3, runner sha256 `fbe01390…`, **26 controls, 0 skipped** | current |
+| `tooling_controls/controls_cpu64_round3_2026-09-28.log` | tooling controls round 3, runner sha256 `fbe01390…`, 26 controls | superseded — see round 4 |
+| `tooling_controls/controls_cpu64_round4_2026-09-28.log` | tooling controls round 4, runner sha256 `e3fffa45…`, **28 controls, 0 skipped** | current |
 | `gpu/*`, `cpu64/*` build and topology witnesses | build scripts | current |
 
 ## Known artifacts inside the retained records
@@ -87,6 +88,34 @@ paths and did **not** confirm the payload control. Round 3 closes them:
 - **Skips counted as passes.** Four `check(..., True, "SKIP")` sites meant the suite printed
   "all controls passed" on a host where only one ran. Skips are now tracked separately and
   exit non-zero.
+
+## Why round 3 is superseded
+
+The second delta pass confirmed R1's detect-and-kill, R2, R3, R4, R5 and the reworked
+payload control, and found one sub-item still open plus three new defects:
+
+- **A reaped residual was published as clean.** Quarantine keyed only on cleanup *failing*,
+  so a residual that was successfully killed left `quarantined=False`. But a process that
+  outlived the payload was running **during the timed interval**, sharing the cpuset — and
+  being session-adopted, it never appeared in the interference figures either. Reaping
+  cleans the host, not the measurement. Quarantine now also triggers on a reaped residual,
+  and `control_6` asserts it.
+- **The `control_3` handshake read the wrong `/proc` field** — index 29 after dropping comm
+  is field 32 `blocked`, which `signal.signal` never touches, so it stayed 0 and the loop
+  ran all 200 iterations: a 15 s fixed delay wearing a handshake's name. Fixing the index
+  alone would have been worse, because field 33 `sigignore` is already non-zero (CPython
+  ignores SIGPIPE at init), so a `!= 0` test would break immediately and silently restore
+  the race. Both the index and a SIGTERM-bit mask were needed. Suite runtime fell to 18 s,
+  which is the corroboration that it now exits early.
+- **An uncancelled `threading.Timer`** could fire after `execute_arm` returned and mutate a
+  `placement` dict already embedded in `series`, aborting a completed series inside
+  `json.dumps`. Now held and cancelled.
+- **`resolve_payload` iterated a set**, so a payload that forks without exec gave an
+  arbitrary identity. Now lowest-pid deterministic.
+
+Also corrected: the comment justifying the residual check cited ghostscript, but
+`CPlot2D.cpp:57` calls `gs` through blocking `system()`, which reaps it. The mechanism is
+generic; that particular instance cannot occur here, and the comment now says so.
 
 ## What is unaffected
 

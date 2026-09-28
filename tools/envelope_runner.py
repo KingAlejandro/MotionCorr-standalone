@@ -44,6 +44,7 @@ from pathlib import Path
 from pathlib import Path as pathlib_Path
 from typing import Any, Dict, List, Optional
 
+RESIDUAL_AFTER_NORMAL_EXIT = "residual group members after normal exit"
 COMPILER_NAMES = ("cc1plus", "nvcc", "cicc", "ptxas")
 
 
@@ -442,7 +443,10 @@ def resolve_payload(launcher_pid: int, binary: Path, deadline_s: float = 20.0
     want = os.path.realpath(str(binary))
     t0 = time.time()
     while time.time() - t0 < deadline_s:
-        for pid in _descendants(launcher_pid) | {launcher_pid}:
+        # Sorted, not set order: a payload that forks without exec gives parent and child
+        # the same /proc/<pid>/exe, and an arbitrary pick would make the identity witness
+        # non-deterministic. Lowest pid prefers the process the launcher started.
+        for pid in sorted(_descendants(launcher_pid) | {launcher_pid}):
             try:
                 exe = os.path.realpath(f"/proc/{pid}/exe")
             except OSError:
@@ -942,6 +946,7 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
                             stdout=(rundir / "stdout.log").open("w"),
                             stderr=(rundir / "time_stderr.log").open("w"),
                             start_new_session=True)
+    numa_timer: Optional[threading.Timer] = None
     # Everything from here to the wait is inside a guard: any exception in setup --
     # most plausibly "can't start new thread" from a sampler under a cgroup pids.max cap
     # with several round workers active -- would otherwise escape with the payload running
@@ -1008,19 +1013,22 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     sid = pgid                                   # launcher is the session leader
     try:
         rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
-        # The normal-exit path must verify the group too. `/usr/bin/time` reaps MotionCorr
-        # and exits while its ghostscript child from joinMultipleEPSIntoSinglePDF can still
-        # be rendering logfile.pdf; that child is reparented to init, keeps the pgid, and
-        # would burn the cpuset underneath the next arm -- and because it inherits the
-        # payload's session the interference sampler adopts it, so it would be neither
-        # killed, nor reported, nor quarantined. Checking only the abnormal paths left a
-        # hole of exactly the shape this function exists to close.
+        # The normal-exit path must verify the group too: any process the payload spawns
+        # and does not reap outlives it, is reparented to init, keeps the pgid, and burns
+        # the cpuset underneath the next arm. Because it inherits the payload's session the
+        # interference sampler adopts it, so it would be neither killed, nor reported, nor
+        # quarantined. Checking only the abnormal paths left a hole of the same shape this
+        # function exists to close.
+        #
+        # Not currently reachable via ghostscript, despite the obvious guess: CPlot2D.cpp:57
+        # invokes gs through system(), which blocks and reaps. The mechanism is generic, and
+        # control_6 drives it with a payload that forks and returns.
         residual = group_members(pgid, sid)
         if residual is None or residual:
             log.append(f"run exited {rc} but the owned group is not empty: "
                        f"{'<enumeration failed>' if residual is None else sorted(residual)}")
             cleanup = _kill_group(proc, pgid, log, sid=sid)
-            cleanup["triggered_by"] = "residual group members after normal exit"
+            cleanup["triggered_by"] = RESIDUAL_AFTER_NORMAL_EXIT
     except subprocess.TimeoutExpired:
         timed_out = True
         log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; "
@@ -1039,6 +1047,8 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
             cleanup["triggered_by"] = "exception during run"
         raise
     finally:
+        if numa_timer is not None:
+            numa_timer.cancel()
         wall = time.time() - t0
         samp.stop(); rss.stop()
         samp.join(timeout=15); rss.join(timeout=15)
@@ -1117,8 +1127,23 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         # arm is worse -- while stopping the report from counting it as clean evidence.
         "quarantined": bool(settle_info.get("timed_out")
                             or settle_info.get("lane_intruders_at_start")
-                            or (cleanup and not cleanup.get("cleanup_confirmed"))),
+                            or (cleanup and not cleanup.get("cleanup_confirmed"))
+                            # A residual group member at normal exit was, by construction,
+                            # running *during* the timed interval: the payload spawned it
+                            # and it outlived the payload. It shared the cpuset while the
+                            # arm was measured, and because it inherits the payload's
+                            # session the interference sampler adopted it, so it is absent
+                            # from foreign_cpu_pct too. Killing it afterwards cleans the
+                            # host; it does not clean the measurement.
+                            or (cleanup and cleanup.get("triggered_by")
+                                == RESIDUAL_AFTER_NORMAL_EXIT)),
         "quarantine_reason": (
+            "a process spawned by the payload outlived it and shared the cpuset during the "
+            "timed interval; it was reaped afterwards but the timing is contaminated: "
+            + str((cleanup or {}).get("surviving_group_members")
+                  or (cleanup or {}).get("triggered_by"))
+            if (cleanup and cleanup.get("cleanup_confirmed")
+                and cleanup.get("triggered_by") == RESIDUAL_AFTER_NORMAL_EXIT) else
             "owned process group could not be confirmed dead: "
             + str((cleanup or {}).get("surviving_group_members"))
             if (cleanup and not cleanup.get("cleanup_confirmed")) else

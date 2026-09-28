@@ -189,11 +189,14 @@ def control_3_child_ignoring_sigterm_is_still_reaped():
         # signals before the handler exists. A fixed sleep raced cold-start CPython on a
         # loaded host and produced a flaky FAIL that reads like a runner regression.
         "import time as _t\n"
+        "TERMBIT = 1 << (signal.SIGTERM - 1)\n"
         "for _ in range(200):\n"
         "    try:\n"
         "        st = open('/proc/%d/stat' % child.pid).read()\n"
-        "        if st.rsplit(')',1)[1].split()[29] != '0': break\n"
-        "    except OSError: pass\n"
+        # field 33 sigignore, and the SIGTERM bit specifically: sigignore is already
+        # non-zero (CPython ignores SIGPIPE), so a plain != 0 test breaks immediately.
+        "        if int(st.rsplit(')',1)[1].split()[30]) & TERMBIT: break\n"
+        "    except (OSError, ValueError): pass\n"
         "    _t.sleep(0.05)\n"
         "sys.stderr.write(str(child.pid)+'\\n'); sys.stderr.flush()\n"
         "time.sleep(120)\n")
@@ -268,7 +271,12 @@ def _sigign_mask(pid: int) -> bool:
     """True once the process has SIGTERM in its ignored-signal mask (field 32 of stat)."""
     try:
         raw = open(f"/proc/{pid}/stat").read()
-        return int(raw.rsplit(")", 1)[1].split()[29]) & (1 << (signal.SIGTERM - 1)) != 0
+        # index k == field k+3 here (comm dropped), so 30 -> field 33 `sigignore`.
+        # Index 29 is field 32 `blocked`, which signal.signal() never touches: it stayed 0
+        # for the whole test, so the previous handshake never fired and was a fixed delay
+        # wearing a handshake's name.
+        sigignore = int(raw.rsplit(")", 1)[1].split()[30])
+        return bool(sigignore & (1 << (signal.SIGTERM - 1)))
     except (OSError, ValueError, IndexError):
         return False
 
@@ -349,6 +357,9 @@ def control_5_execute_arm_records_the_payload_not_the_launcher():
     check(f"recorded mid-run residency is the payload's (> {big_mib // 2} MiB)",
           got > big_mib * 0.5,
           f"recorded={got} MiB  (a launcher-sampling record would be ~1.5 MiB)")
+    pcpus = (rec.get("placement") or {}).get("payload_Cpus_allowed_list")
+    check("payload cpuset was read from the payload, and matches the requested mask",
+          pcpus == arm["cpu_mask"], f"payload_Cpus_allowed_list={pcpus} requested={arm['cpu_mask']}")
     check("recorded cleanup is confirmed on the normal-exit path",
           not rec.get("cleanup_unconfirmed"),
           f"cleanup={rec.get('cleanup')}")
@@ -415,6 +426,13 @@ def control_6_normal_exit_with_a_leaked_child_is_caught():
         check("R1: the leaked child was reaped and cleanup confirmed",
               cl.get("cleanup_confirmed") is True,
               f"confirmed={cl.get('cleanup_confirmed')} survivors={cl.get('surviving_group_members')}")
+    # Reaping cleans the host, not the measurement: the leaked child shared the cpuset
+    # during the timed interval and was session-adopted, so it never appeared in the
+    # interference figures either. A successfully reaped residual must still quarantine the
+    # arm, or a contaminated wall time is published as clean evidence.
+    check("R1: the arm is quarantined even though cleanup succeeded",
+          rec.get("quarantined") is True,
+          f"quarantined={rec.get('quarantined')} reason={str(rec.get('quarantine_reason'))[:90]}")
     if leaked_pid:
         alive = er._alive(leaked_pid) and not _is_zombie(leaked_pid)
         check("R1: the leaked child is actually dead afterwards", not alive,

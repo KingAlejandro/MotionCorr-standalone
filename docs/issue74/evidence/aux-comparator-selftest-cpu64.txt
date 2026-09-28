@@ -1,48 +1,36 @@
-=== provenance ===
-start_utc      : 2026-09-28T07:01:37Z
-start_local    : 2026-09-28T07:01:37+0000
-host           : small-refmac-machine
-kernel         : Linux 6.8.0-86-generic x86_64
-nproc_total    : 64
-loadavg_before : 13.71 13.66 9.16
-requested_cpus : 32-63 (single-process Python; concurrency 1, well under the 16 cap)
-lock           : /tmp/motioncorr-issue96-cpu-validation.lock
-executable     : /usr/bin/python3.12
-python_version : Python 3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0] 
-payload:
-  1379e80863c7b26c05cdda161aa013314c90baeb3c59107b59019d2f422bba3e  /home/ubuntu/mc-i74-auxtest/docs/issue74/compare_aux_outputs.py
-  e692619f87a659b25f26da6d7437b436d4dd7df3c5e11191d8903ee2d3b8c995  /home/ubuntu/mc-i74-auxtest/docs/issue74/placement_probe.py
-  b0f9d43a23254f450d43ab50eef6ccfd0d804749d72ca9d97d05719c73aa3727  /home/ubuntu/mc-i74-auxtest/docs/issue74/pre_fix_comparator.py
-  cea872122e4cdb824e25942455540406c64210d0df0c0bea4c5fa8a21550cbe9  /home/ubuntu/mc-i74-auxtest/docs/issue74/test_compare_aux_outputs.py
-lock_acquired  : 2026-09-28T07:01:37Z (fd 9, exclusive flock)
+========================================================================
+Issue #74 aux comparator self-test - cpu64 validation
+========================================================================
+host              : small-refmac-machine
+kernel            : 6.8.0-86-generic
+start (UTC)       : 2026-09-28T07:17:38Z
+load before       : 3.54 5.92 7.46 3/7993 3329623
+executable        : /usr/bin/python3
+python            : 3.12.3
+pid               : 3329619
+nproc (visible)   : 64
 
-=== placement actually in force, measured inside the pinned process ===
-pid                 : 3291700
-executable          : /usr/bin/python3.12
-sched_getaffinity   : 32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
-Cpus_allowed_list   : 32-63
-Mems_allowed_list   : 0-1
-numa_maps_policy    : default
---- numactl --show (rc=0)
-policy: default
-preferred node: current
-physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
-cpubind: 1 
-nodebind: 1 
-membind: 0 1 
-preferred:
---- numastat -p 3291700 (rc=0)
-Per-node process memory usage (in MBs) for PID 3291700 (python3)
-                           Node 0          Node 1           Total
-                  --------------- --------------- ---------------
-Huge                         0.00            0.00            0.00
-Heap                         0.00            1.30            1.30
-Stack                        0.00            0.08            0.08
-Private                      4.27            5.99           10.26
-----------------  --------------- --------------- ---------------
-Total                        4.27            7.37           11.64
+-- placement, measured inside this process ---------------------------
+sched_getaffinity : [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+Cpus_allowed_list : 32-63
+Mems_allowed_list : 0-1
+numa_maps policy  : default
+numactl --show    :
+    policy: default
+    preferred node: current
+    physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+    cpubind: 1 
+    nodebind: 1 
+    membind: 0 1 
+    preferred:
 
-=== self-test under taskset -c 32-63 ===
+-- payload -----------------------------------------------------------
+    41107584df4832a67552804a7c1f58600e80412c70a6ce8fe49986d9f201d564  compare_aux_outputs.py
+    b0f9d43a23254f450d43ab50eef6ccfd0d804749d72ca9d97d05719c73aa3727  pre_fix_comparator.py
+    7b41c02a092f9ca3057a57414d04e3d5bd69bf696e1328133f83bd631aa79b7f  run_validation.py
+    a4ab7158ba308e6a356897718b1916298810a05c6b505a488c438a8b4820cc1d  test_compare_aux_outputs.py
+
+-- self-test ---------------------------------------------------------
 ok   identical trees: rc=0 expected=PASS
 ok   extra .log in test: rc=1 expected=FAIL
      ok  old-source control: pre-fix comparator accepted this (rc=0) -- case discriminates
@@ -59,6 +47,10 @@ ok   missing .pdf in test: rc=1 expected=FAIL
      ok  old-source control: pre-fix comparator accepted this (rc=0) -- case discriminates
 ok   missing per-movie .star in test: rc=1 expected=FAIL
      ok  old-source control: pre-fix comparator accepted this (rc=0) -- case discriminates
+ok   directory in test where reference has a file: rc=1 expected=FAIL
+ok   nothing actually compared (all entries presence-only): rc=1 expected=FAIL
+ok   dangling symlink present only in test: rc=1 expected=FAIL
+ok   file replaced by a symlink to identical content: rc=1 expected=FAIL
 ok   timing-only difference: rc=0 expected=PASS
 ok   profiling mode difference: rc=0 expected=PASS
 ok   eps creation date difference: rc=0 expected=PASS
@@ -71,6 +63,7 @@ ok   label change, allowed: rc=0 expected=PASS
 discriminating old-source controls: 7 proven, 0 skipped
 AUX COMPARATOR SELF-TEST: PASS
 
-exit_code      : 0
-end_utc        : 2026-09-28T07:01:38Z
-loadavg_after  : 13.71 13.66 9.16
+-- after -------------------------------------------------------------
+exit code         : 0
+load after        : 3.58 5.89 7.44 3/7993 3329659
+end (UTC)         : 2026-09-28T07:17:39Z

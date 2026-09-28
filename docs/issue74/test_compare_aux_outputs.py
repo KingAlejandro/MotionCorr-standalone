@@ -92,21 +92,31 @@ def main():
     else:
         old, old_why = fetch_pre_fix(tmp / "pre_fix_comparator.py")
 
-    def case(label, mutate, want_pass, old_should_accept=False):
+    def case(label, mutate, want_pass, old_should_accept=False, expect=None,
+             build=make_tree):
         """Build ref/test, mutate test, assert the new comparator's verdict.
 
         old_should_accept marks a case that the pre-fix source got wrong; we
         assert it really did, so the test is proven to discriminate.
+
+        expect is a substring the report must contain. Checking the exit code
+        alone would credit a case that failed for an unrelated reason -- and
+        would not notice a failure reported under the wrong label, which is
+        exactly the class of defect this suite exists to catch.
         """
         nonlocal fails, discriminating, skipped
         d = Path(tempfile.mkdtemp(dir=tmp))
-        ref, test = make_tree(d / "ref"), make_tree(d / "test")
+        ref, test = build(d / "ref"), build(d / "test")
         # write_text returns a char count, so only an explicit tuple is taken
         # as extra CLI flags.
         mutated = mutate(test)
         extra = mutated if isinstance(mutated, tuple) else ()
         rc, out = run(COMPARATOR, ref, test, *extra)
         ok = (rc == 0) if want_pass else (rc != 0)
+        if ok and expect is not None and expect not in out:
+            ok = False
+            print(f"FAIL {label}: right verdict, wrong reason - "
+                  f"report does not contain {expect!r}")
         print(f"{'ok  ' if ok else 'FAIL'} {label}: rc={rc} expected={'PASS' if want_pass else 'FAIL'}")
         if not ok:
             fails += 1
@@ -132,25 +142,66 @@ def main():
     # The reviewed defect, in its two shapes: a comparable file and a file whose
     # content is deliberately excluded. The second matters because excluding
     # content must not excuse a file from existing.
+    EXTRA, MISSING = "unexpected file in test tree", "missing in test tree"
+
     case("extra .log in test", lambda t: (t / "Movies" / "b.log").write_text(LOG), False,
-         old_should_accept=True)
+         old_should_accept=True, expect=EXTRA)
     case("extra .mrc in test (content covered by Gate C)",
-         lambda t: (t / "Movies" / "b.mrc").write_bytes(b"\x01"), False, old_should_accept=True)
+         lambda t: (t / "Movies" / "b.mrc").write_bytes(b"\x01"), False,
+         old_should_accept=True, expect=EXTRA)
     case("extra .pdf in test (content excluded)",
-         lambda t: (t / "extra.pdf").write_bytes(b"%PDF-1.4\n"), False, old_should_accept=True)
+         lambda t: (t / "extra.pdf").write_bytes(b"%PDF-1.4\n"), False,
+         old_should_accept=True, expect=EXTRA)
     case("extra directory in test", lambda t: (t / "Unexpected").mkdir(), False,
-         old_should_accept=True)
+         old_should_accept=True, expect=EXTRA)
 
     # The old source checked existence only *after* skipping excluded content,
     # so it missed disappearances too, not just the extra files the review
     # named. Only the plain .log direction actually worked before.
-    case("missing .log in test", lambda t: (t / "Movies" / "a.log").unlink(), False)
+    case("missing .log in test", lambda t: (t / "Movies" / "a.log").unlink(), False,
+         expect=MISSING)
     case("missing .mrc in test", lambda t: (t / "Movies" / "a.mrc").unlink(), False,
-         old_should_accept=True)
+         old_should_accept=True, expect=MISSING)
     case("missing .pdf in test", lambda t: (t / "logfile.pdf").unlink(), False,
-         old_should_accept=True)
+         old_should_accept=True, expect=MISSING)
     case("missing per-movie .star in test", lambda t: (t / "Movies" / "a.star").unlink(), False,
-         old_should_accept=True)
+         old_should_accept=True, expect=MISSING)
+
+    # Branches added by the union fix that no case previously exercised.
+    def dir_where_file_expected(t):
+        (t / "Movies" / "a.log").unlink()
+        (t / "Movies" / "a.log").mkdir()
+
+    case("directory in test where reference has a file", dir_where_file_expected, False,
+         expect="directory on one side, file on the other")
+
+    def only_skipped_types(root):
+        """A tree whose every entry is presence-only: nothing to compare."""
+        (root / "Movies").mkdir(parents=True)
+        (root / "Movies" / "a.mrc").write_bytes(b"\x01\x02pixels")
+        (root / "logfile.pdf").write_bytes(b"%PDF-1.4\n")
+        return root
+
+    case("nothing actually compared (all entries presence-only)", lambda t: None, False,
+         expect="nothing was actually compared", build=only_skipped_types)
+
+    # Symlinks: presence is about the link, not its target. A dangling link is
+    # present, and replacing a real file with a link to identical bytes is a
+    # change to the output tree even though the bytes match.
+    def dangling_only_in_test(t):
+        (t / "ghost").symlink_to("nowhere")
+
+    case("dangling symlink present only in test", dangling_only_in_test, False,
+         expect=EXTRA)
+
+    def file_replaced_by_symlink(t):
+        target = t.parent / "outside.log"
+        target.write_text(LOG)
+        (t / "Movies" / "a.log").unlink()
+        (t / "Movies" / "a.log").symlink_to(target)
+
+    case("file replaced by a symlink to identical content", file_replaced_by_symlink, False,
+         expect="symlink on one side, regular path on the other")
 
     # Normalisation must survive the rewrite: volatile lines still tolerated,
     # real differences still caught.

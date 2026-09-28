@@ -89,8 +89,11 @@ dropped and nothing else ignored:
 
 > **Caveat on those two reports, added after review — read §7.** They were
 > produced by the pre-fix comparator, which walked only the reference tree. They
-> are valid for the files they compared, but they could not have detected a file
-> present in one tree and absent from the other. The output trees were
+> are valid for the files they compared, but they could not have detected **any
+> extra file in the candidate tree**, nor a *missing* `.mrc`, `.star`, `.pdf` or
+> `.lst` — for those types the existence check sat after the content-policy
+> `continue`. A missing `.log`, `.eps` or `corrected_micrographs.star` *was*
+> caught, so the blind spot is specific, not total. The output trees were
 > node-local and are gone, so this cannot be re-checked without a new GPU run,
 > which is out of scope here. Treat the aux verdict as "the compared files
 > matched", not as "the file sets were identical".
@@ -292,15 +295,27 @@ mode-dependent lines, and the opt-in `--allow-label-changes` all behave exactly
 as before, and PDF content stays excluded for the same ghostscript-timestamp
 reason — but a PDF that appears or vanishes is now caught.
 
-**Test, with controls that discriminate.** `test_compare_aux_outputs.py` runs 19
-cases. A fix is worth little if its test would also have passed on the broken
-source, so every extra/missing case is additionally run against the pre-fix
-comparator recovered by `git show 735523a:…`. **7 cases are proven
-discriminating** — the old source returned 0 on each, the new one returns 1.
-If the old source cannot be recovered the controls report SKIP and the suite
-exits `INCONCLUSIVE` rather than claiming a win it did not earn. The test is
-also wired into the harness next to the ctests, so the instrument is checked in
-the same run as the thing it measures.
+**Test, with controls that discriminate.** `test_compare_aux_outputs.py` runs
+**21 cases**. A fix is worth little if its test would also have passed on the
+broken source, so every extra/missing case is additionally run against the
+pre-fix comparator recovered by `git show 735523a:…`. **7 of the 21 are proven
+discriminating** — the old source returned 0 on each, the new one returns 1 —
+so the run makes 28 assertions in total. If the old source cannot be recovered
+the controls report SKIP and the suite exits `INCONCLUSIVE` rather than claiming
+a win it did not earn. The test is also wired into the harness next to the
+ctests, so the instrument is checked in the same run as the thing it measures.
+
+Two limits of that wiring, stated rather than discovered later:
+
+* `PRE_FIX_SHA` is a literal. If this branch is squash-merged or rebased the SHA
+  becomes unreachable, the controls SKIP, the suite exits `2` and the harness
+  gate reads FAIL on a tree where nothing is wrong. `--old-source FILE` is the
+  escape hatch; the harness does not currently pass it. Fail-closed is the right
+  default for a gate, but a maintainer merging this should know it.
+* `.github/workflows/ci.yml` runs only the `SyntheticRegression` ctests, so this
+  self-test does **not** run in PR CI. It runs in the GPU harness, and it was
+  run on cpu64 below. Wiring it into CI means editing a workflow file that the
+  active #85/#53 threads also touch, so it is flagged here, not done.
 
 **Validation** ([`evidence/aux-comparator-selftest-cpu64.txt`](evidence/aux-comparator-selftest-cpu64.txt)):
 CPU-only on `small-refmac-machine`, single process under
@@ -308,8 +323,93 @@ CPU-only on `small-refmac-machine`, single process under
 placement recorded from **inside** the pinned process rather than from a
 launcher wrapper — `sched_getaffinity` 32–63, `Cpus_allowed_list 32-63`,
 `Mems_allowed_list 0-1`, policy `default`, `cpubind 1` / `membind 0 1`. Payload
-SHA-256s, executable path, start/end times and load (13.71 before and after) are
-in the report. **PASS**, 19/19, 7 discriminating controls, 0 skipped.
+SHA-256s, executable path (`/usr/bin/python3`, 3.12.3), pid, start/end times and
+load (`3.54` before, `3.58` after, on 64 cores) are in the report.
+**PASS**, 21/21, 7 discriminating controls, 0 skipped, exit 0.
+
+The run was re-done at this commit rather than reused: the archived artifact
+described the 17-case suite and would have understated what now runs. It uses
+`--old-source` with a transferred copy of the pre-fix comparator, because cpu64
+holds no clone and `git show` cannot resolve there — that copy hashes to
+`b0f9d43a…3727`, the same digest the reviewer independently derived from
+`735523a`, so the controls are the reviewed source and not a stand-in.
+
+Two labels in that artifact need a gloss, since neither is self-explanatory to a
+reader of this directory. The lock file is the **shared** CPU-coordination lock
+for this host, named after the thread that introduced it and used by all
+MotionCorr threads on it — holding it is what keeps this run off another
+thread's cores, and the issue96 name is not a scope leak. "Well under the 16
+cap" refers to the instructed per-thread build/runtime concurrency limit for
+this machine; this run was a single Python process, so it was nowhere near it.
+`placement_probe.py` in the payload manifest is a throwaway probe transferred
+for this run and not tracked in the repository, so its hash is a record of what
+ran, not something a reader can re-derive.
+
+### 7.1 Second review round, on the fix itself
+
+Two bounded read-only reviewers were run over `735523a..a675e20` (source/spec,
+and licence/conventions). Both independently found the same blocking item, and
+it was mine: **§7 claimed the suite ran 19 cases when the code defined 17 and
+the cited artifact printed 17.** An inflated count in the section whose whole
+purpose is correcting an inflated claim. Corrected throughout.
+
+Three further defects were reproduced and are now fixed:
+
+* **A dangling symlink was reported in the wrong direction.** `exists()`
+  follows links, so a dangling link read as absent on *both* sides and the
+  `missing in test tree` branch always won — an extra file was reported as a
+  missing one, corrupting the `missing_in_test` / `unexpected_in_test` split
+  the new summary line advertises. Presence is now `exists() or is_symlink()`.
+  Verified against the previous commit: `a675e20` labelled an extra dangling
+  symlink `missing in test tree`; the current code labels it
+  `unexpected file in test tree`.
+* **A file replaced by a symlink to identical bytes passed.** Symlinks are now
+  compared *as links* — link-vs-regular is a FAIL, differing targets are a
+  FAIL, identical targets are recorded present without following them (`rglob`
+  does not descend a symlinked directory, so following one would compare a
+  target the walk never enumerated).
+* **An unreadable file produced a traceback and no report**, costing the
+  harness the artifact §6 links to. It is now recorded as a FAIL row.
+
+And the test weakness that let the first of those through: every case asserted
+the **exit code only**, so a failure reported under the wrong label was
+invisible. Presence cases now assert the expected reason text, which is what
+makes the symlink direction testable at all. Two branches added by the union
+fix that had no coverage — directory-where-a-file-is-expected, and the
+"nothing was actually compared" guard — now have cases. 17 cases became **21**.
+
+**Limitations left in place, stated rather than fixed.** All are pre-existing,
+none is a regression, and none reopens the reviewed finding:
+
+* Text paths end in `splitlines()`, so CRLF-vs-LF, a stripped trailing newline,
+  and exotic line separators (`\x0c`, ` `) compare equal.
+* `errors="replace"` means two *different* invalid byte sequences both collapse
+  to U+FFFD and compare equal.
+* On a **case-insensitive filesystem** (macOS dev machines, not the Linux nodes
+  this gate runs on) `a.log` renamed to `A.LOG` still passes, because the
+  presence test case-folds even though the walk does not.
+* File modes are not compared.
+
+The gate therefore establishes that the two trees hold the same set of path
+*names* and that the compared files' *decoded lines* match — not that they are
+byte-identical. For same-node, same-binary arms that is the right scope, but it
+is narrower than "identical trees" and should not be read as more.
+
+### 7.2 What the reviewers confirmed
+
+Worth recording, because it is the part a reader should be able to rely on:
+the union fix could not be broken for the defect it targets (extras, missings,
+nested extra directories, empty directories, file-vs-directory collisions and
+all-skipped trees all fail closed); no normalisation was weakened; the counters
+cannot yield a false PASS, since every failure branch increments `nfail` and
+directories land in `nskip` rather than `npass`; and the `INCONCLUSIVE` path
+really does deny a win, because `gate()` records FAIL on exit 2.
+
+The discriminating controls were checked cryptographically rather than taken on
+trust: `git show 735523a:docs/issue74/compare_aux_outputs.py` hashes to
+`b0f9d43a…3727`, which is exactly the `pre_fix_comparator.py` SHA-256 recorded
+in the cpu64 payload manifest. The controls ran against the reviewed source,
+not a hand-rolled stand-in.
 
 No production code was touched by this fix: it is confined to
 `docs/issue74/`. No new benchmark was run, and the numbers in §6 are unchanged.
@@ -326,7 +426,7 @@ No production code was touched by this fix: it is confined to
 | Pixel equality, all 5 comparisons, all24 | **PASS** | 24/24 each |
 | Auxiliary outputs, compared files | **PASS** | both reports |
 | Auxiliary outputs, *file-set* equality | **not established** | pre-fix comparator did not check it; trees are gone (§7) |
-| Aux comparator self-test, incl. old-source controls | **PASS** | 19/19, 7 discriminating, cpu64 under lock (§7) |
+| Aux comparator self-test, incl. old-source controls | **PASS** | 21/21 cases + 7 discriminating controls, cpu64 under lock (§7) |
 | Switch demonstrably switched | **PASS** | 27 sites × 24 logs, uniform |
 | Native CUDA witness incl. profiling-off | **PASS** | runtime markers |
 | CPU masquerade rejection | **PASS** | 15/15 negative control |

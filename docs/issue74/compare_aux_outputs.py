@@ -33,6 +33,7 @@ of paths.
 """
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -123,7 +124,11 @@ def main():
 
     for rel in sorted(walk(ref) | walk(test)):
         rp, tp = ref / rel, test / rel
-        in_ref, in_test = rp.exists(), tp.exists()
+        # A dangling symlink is *present* - `exists()` follows the link and
+        # would call it absent on both sides, which inverts the missing/extra
+        # split the summary line reports.
+        in_ref = rp.exists() or rp.is_symlink()
+        in_test = tp.exists() or tp.is_symlink()
         name = rp.name
 
         # Presence first, and for every entry. Content policy below decides
@@ -140,6 +145,25 @@ def main():
             results.append((str(rel), "FAIL",
                             "unexpected file in test tree (absent from reference) "
                             "- an unintended output is exactly what this gate is for"))
+            continue
+
+        # Symlinks are compared as links, not through them: rglob does not
+        # descend a symlinked directory, so following one would compare a
+        # target this walk never enumerated.
+        if rp.is_symlink() or tp.is_symlink():
+            if rp.is_symlink() != tp.is_symlink():
+                nfail += 1
+                results.append((str(rel), "FAIL",
+                                "symlink on one side, regular path on the other"))
+            elif os.readlink(rp) != os.readlink(tp):
+                nfail += 1
+                results.append((str(rel), "FAIL",
+                                f"symlink targets differ: ref={os.readlink(rp)!r} "
+                                f"test={os.readlink(tp)!r}"))
+            else:
+                nskip += 1
+                results.append((str(rel), "PRESENT_BOTH",
+                                "symlink with identical target (target not followed)"))
             continue
 
         if rp.is_dir() != tp.is_dir():
@@ -161,21 +185,28 @@ def main():
             results.append((str(rel), "EXCLUDED", "present in both; content not compared (ghostscript embeds a creation timestamp)"))
             continue
 
-        if name.endswith(".eps"):
-            diff = first_difference(eps_lines(rp, ref, test), eps_lines(tp, ref, test))
-            kind = "eps (date-normalised)"
-        elif name.endswith(".log"):
-            diff = first_difference(filtered_lines(rp, drop, ref, test),
-                                    filtered_lines(tp, drop, ref, test))
-            kind = "log (timing/profile lines dropped)"
-        elif name == "corrected_micrographs.star":
-            diff = first_difference(
-                normalise_paths(rp.read_text(), ref, test).splitlines(),
-                normalise_paths(tp.read_text(), ref, test).splitlines())
-            kind = "star (path-normalised)"
-        else:
-            diff = None if rp.read_bytes() == tp.read_bytes() else "bytes differ"
-            kind = "bytes"
+        # An unreadable file must not cost us the report file the harness
+        # links; record it as the failure it is and keep going.
+        try:
+            if name.endswith(".eps"):
+                diff = first_difference(eps_lines(rp, ref, test), eps_lines(tp, ref, test))
+                kind = "eps (date-normalised)"
+            elif name.endswith(".log"):
+                diff = first_difference(filtered_lines(rp, drop, ref, test),
+                                        filtered_lines(tp, drop, ref, test))
+                kind = "log (timing/profile lines dropped)"
+            elif name == "corrected_micrographs.star":
+                diff = first_difference(
+                    normalise_paths(rp.read_text(), ref, test).splitlines(),
+                    normalise_paths(tp.read_text(), ref, test).splitlines())
+                kind = "star (path-normalised)"
+            else:
+                diff = None if rp.read_bytes() == tp.read_bytes() else "bytes differ"
+                kind = "bytes"
+        except (OSError, ValueError) as exc:
+            nfail += 1
+            results.append((str(rel), "FAIL", f"could not be read: {exc}"))
+            continue
 
         if diff is None:
             npass += 1

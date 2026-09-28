@@ -6,9 +6,9 @@
 | Model | `claude-opus-5` (high effort), Claude Code / T3 Code |
 | Task class | correctness |
 | Model routing | `claude-opus-5[1m]` as assigned; no routing error, no substitution |
-| Phase | 5 — PR A implemented, independently reviewed, review findings applied, re-validated on cpu64; draft PR open and reviewable |
+| Phase | 6 — PR A reviewable; Codex PR105 review (`RLIMIT_FSIZE` hard limit) fixed, controlled and re-validated |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (current main) |
-| Head | `095f137` |
+| Head | `5f32cd1` |
 | Branch | `round96/99-claude-opus-5` (pushed) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-a01709b1` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/105 (draft) |
@@ -72,6 +72,46 @@ input `synthetic_movie.tiff` `95b5f0d3…`.
 - PR A leaves a truncated file on disk; safe today only via `completeMrc` resume
   validation, which the retry phase demonstrates.
 
+## Bounded delta: inherited `RLIMIT_FSIZE` hard limit (Codex PR105 review)
+
+[`discussion_r4119251206`](https://github.com/KingAlejandro/MotionCorr-standalone/pull/105#discussion_r4119251206)
+at `910fcf43`. Both fault tests wrote `RLIM_INFINITY` as the **hard** limit. An
+unprivileged process cannot raise a hard limit, so under the finite inherited hard
+`RLIMIT_FSIZE` that CI and HPC systems set, the C++ suite died at `setrlimit` while
+restoring and the Python `preexec_fn` failed in the forked child — MotionCorr never
+`exec`'d. The harness dies before the fault is injected, which presents as "the fault did
+not fire".
+
+**Tests only; `1084269` changes no production source.** Both paths now read the inherited
+`(soft, hard)`, lower only the soft limit, clamp the request to the hard limit, and restore
+exactly what was inherited. Both also re-run the same injection under a hard limit they
+lower themselves (unprivileged): the C++ suite forks and re-execs with `hard = 8 MiB`; the
+Python test adds phase 4 driving MotionCorr through a `preexec_fn` that lowers the child's
+hard limit, asserting on MotionCorr's own short-write text rather than an exit code, since
+a failed spawn is also nonzero.
+
+| Run (cpu64, `taskset -c 32-63`, under the validation lock) | Result |
+|---|---|
+| Full CPU CTest, candidate `1084269` | **15/15 passed** |
+| Candidate, `ulimit -f 8192` → `(8388608, 8388608)` | **both fault tests pass**; phase 4 reached real MotionCorr |
+| Pre-delta tests on the **same fixed writer**, same finite limit (`33dee9e`) | **exit 8** — `preexec_fn` exception and `setrlimit(RLIMIT_FSIZE) failed`, after phase 1 had written a healthy product, so they die in the plumbing |
+| Same pre-delta tests, **no** finite hard limit | **pass** — isolates the cause |
+| Negative control, pre-fix main + new tests (`28727aa`) | **exit 8, writer reason** — `a failed image write was treated as success`, `terminate called…` |
+| Healthy payload | `1a424122f6fd8f9b…`, 1 049 600 bytes — unchanged |
+
+Provenance recorded: `Cpus_allowed_list: 32-63`, `Mems_allowed_list: 0-1`,
+`numactl --show` → `policy: default`, `cpubind: 1`; load 8.35 → 4.85; binary and input
+hashes. No GPU, no timing.
+
+**The first attempt at the external control was void and is recorded as such.**
+`ulimit -H -f N` fails with `EINVAL` — bash sets only the hard limit and leaves the soft
+limit at infinity — so no limit was applied and *both* arms passed, which reads exactly
+like "the delta was unnecessary". `ulimit -f N` sets both.
+
+Integration mapping for PR110: `docs/issue99_write_faults/PR110_COMMIT_MAP.md`. One
+tests-only commit; cherry-pick verified clean on a throwaway branch off
+`refs/pull/110/head`, discarded, **PR110's tree not modified and nothing pushed**.
+
 ## Independent review (COMMON.md requirement), both read-only
 
 Two bounded read-only reviewers, run concurrently, neither able to modify anything.
@@ -121,5 +161,6 @@ unchanged and was not re-run. #26 owns this round's GPU slot.
 
 ## Next step
 
-Hand the draft PR to integration for a maintainer decision. Do not merge. PR B stays
-designed-and-unstarted in ADR §7.
+Hand the draft PR to integration for a maintainer decision. Do not merge, do not close.
+PR B stays designed-and-unstarted in ADR §7. Existing limitations preserved: the
+ghostscript PDF nondeterminism and the measured-unreachable MRC header-write injection.

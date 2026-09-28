@@ -48,18 +48,31 @@ the bytes did not come from the device.
 
 ## 3. Phase 0 — frozen Release one-GPU baseline
 
-All 24 tutorial movies, one process, one A100, `--j 8`:
+All 24 tutorial movies, one process, one A100, `--j 8`, unprofiled binary `d80cdadb…`:
 
 | | |
 | :-- | :-- |
-| Process wall | **29.03 s** (1.21 s/movie) |
-| CPU time | 39.52 s user + 37.69 s sys = 77.2 s, i.e. **2.66 cores** of the 16 allocated |
-| Products | 109, exit 0, bit-equal to baseline |
-| Peak simultaneous process-tree RSS | **1.52 GiB** (89 samples at 0.25 s) |
+| Process wall | **31.07 s** — `/usr/bin/time` independently reports `0:31.03`, agreeing with the runner's own clock |
+| CPU time | 84.4 s, reported by `time` as **271%**, i.e. 2.71 of the 16 allocated CPUs |
+| Products | 109, exit 0, equal to baseline on payload, core header and masked labels |
+| Backend | **24 of 24 movies carry per-movie CUDA execution evidence; zero fallback warnings** |
+| Peak simultaneous process-tree RSS | **1.52 GiB** |
 | Device peak, allocator-traced | **3134.34 MiB**, identical on all 24 movies |
-| Device peak, NVML-sampled at 0.2 s | **3429 MiB**; mean utilisation 23.5%, max 57% |
-| Context switches | 1775 voluntary, 215 involuntary |
-| Foreign CPU during the run | 0.0% mean, 0.0% max; 0 foreign threads inside the lane |
+| Device peak, NVML-sampled at 0.2 s | **3493 MiB**; the gap is the CUDA context |
+| Per-movie device alignment | median **40.6 ms** |
+| Context switches | 1745 voluntary, 293 involuntary |
+| Filesystem input blocks | 0 — fully page-cache warm |
+| Foreign CPU during the run | max 39.2% box-wide, **0 foreign threads inside the lane** |
+
+**One warm-up run did not reach steady state, so this single run is not the best central
+estimate.** The first two 24-movie runs of the session were 31.17 s (declared warm-up) and
+31.07 s (above), while the same configuration measured later in the session as the
+confirmation arm `c_j8_io8` gave a median of **29.16 s over 5 runs**, range 28.44–30.12 s.
+The single Phase 0 run therefore sits above the later distribution rather than inside it.
+Whatever is still warming beyond the first run — output-path cache, CPU frequency behaviour —
+is not identified here. Section 5's `n = 5` figure is the one to quote for this
+configuration; this row is retained as the frozen first baseline it was declared to be, not
+promoted into a comparison.
 
 The two device figures are different quantities and are labelled as such. The traced figure
 is what the allocator recorded; the NVML figure is larger because it includes the CUDA
@@ -67,43 +80,44 @@ context. A sampled peak is a lower bound on the true peak at any sampling rate.
 
 **Where the wall time goes.** Two instrumented sources, kept separate.
 
-The `TIMING` build's whole-run breakdown, 24 movies, profiled binary `22e59177…`:
+The `TIMING` build's whole-run breakdown, 24 movies, profiled binary `22e59177…`, wall
+29.779 s:
 
 | stage | s | | stage | s |
 | :-- | --: | --- | :-- | --: |
-| `read movie` | **7.082** | | `detect hot pixels` | 0.843 |
-| `apply gain and initial sum` | 3.789 | | `fix defects` | 0.596 |
-| `write corrected image` | 2.954 | | `global iFFT` | 0.560 |
-| `patch alignment` | 1.589 | | `global FFT` | 0.537 |
-| `dose weighting` | 1.361 | | `global alignment` | 0.263 |
-| `joint star and logfile pdf` | 1.101 | | `prepare patch` | 0.149 |
-| `write star and shift plot` | 0.129 | | `read gain` | 0.100 |
-| `fit polynomial` | 0.037 | | `power spectrum`, `binning` | 0.000 |
+| `read movie` | **7.127** | | `detect hot pixels` | 0.859 |
+| `apply gain and initial sum` | 4.403 | | `fix defects` | 0.639 |
+| `write corrected image` | 2.754 | | `global iFFT` | 0.561 |
+| `patch alignment` | 1.654 | | `global FFT` | 0.536 |
+| `dose weighting` | 1.370 | | `global alignment` | 0.292 |
+| `joint star and logfile pdf` | 1.120 | | `prepare patch` | 0.159 |
+| `write star and shift plot` | 0.137 | | `read gain` | 0.129 |
+| `fit polynomial` | 0.039 | | `power spectrum`, `binning` | 0.000 |
 
-These nest and overlap and are **not** summed into a total; their naive sum is 21.09 s
-against a 28.64 s profiled wall, and that gap is not a residual to attribute. The in-binary
+These nest and overlap and are **not** summed into a total; their naive sum is 21.78 s
+against a 29.78 s profiled wall, and that gap is not a residual to attribute. The in-binary
 `Timer` is also not thread-safe, so a stage covering parallel work is indicative rather than
 exact. These come from the profiled binary and are never mixed into the unprofiled timing
 comparison — the unprofiled build emits **zero** `TIMING` stages, which is what makes the two
 genuinely separate classes rather than a labelling convention.
 
-**This is the mechanism behind section 4.** Host-side input and output — `read movie` 7.08 s,
-`apply gain and initial sum` 3.79 s, `write corrected image` 2.95 s — is roughly 13.8 s,
-while the GPU-accelerated arithmetic — `patch alignment` 1.59 s, `global FFT` + `global iFFT`
-1.10 s, `dose weighting` 1.36 s — is roughly 4.0 s. A pipeline in that shape is governed by
+**This is the mechanism behind section 4.** Host-side input and output — `read movie`
+7.13 s, `apply gain and initial sum` 4.40 s, `write corrected image` 2.75 s — is roughly
+14.3 s, while the GPU-accelerated arithmetic — `patch alignment` 1.65 s, `global FFT` +
+`global iFFT` 1.10 s, `dose weighting` 1.37 s — is roughly 4.1 s. A pipeline in that shape is governed by
 how fast frames can be decoded and written, not by how many threads are available to compute,
 which is exactly the behaviour section 4 measures.
 
 The second source is the per-movie CUDA profile block, present in both builds. It reports a
-device-side `Total GPU alignment time` with a median of 40.2 ms per movie and a traced peak
+device-side `Total GPU alignment time` with a median of 40.6 ms per movie and a traced peak
 allocation of 3134.34 MiB, identical on all 24.
 
-The binary's own per-movie wall timer (`motioncorr_runner.cpp:1261`–`:2557`) sums to 22.93 s
-across 24 movies, median 0.934 s, range 0.914–1.333 s. The remaining **6.09 s** of the 29.03 s
-run falls outside that interval and, from the source, comprises process startup, the 24
+The binary's own per-movie wall timer (`motioncorr_runner.cpp:1261`–`:2557`) sums to 24.53 s
+across 24 movies, median 0.970 s, range 0.943–1.692 s. The remaining **6.54 s**, 21% of the
+31.07 s run, falls outside that interval and, from the source, comprises process startup, the 24
 `plotShifts` EPS writes at `:622`, and `generateLogFilePDFAndWriteStarFiles()` at `:650`,
 which shells out to ghostscript three times. The `TIMING` stages above put
-`joint star and logfile pdf` at 1.101 s and `write star and shift plot` at 0.129 s, so the
+`joint star and logfile pdf` at 1.120 s and `write star and shift plot` at 0.137 s, so the
 final reporting is a real but minority part of that residual. No TIFF cost anywhere in this
 document is derived by subtracting GPU kernel timers from wall time.
 
@@ -134,31 +148,32 @@ nominal 4x4 grid contains ten treatments, not sixteen; timing the six duplicates
 reported the same configuration under different names. Every run's effective settings were
 read back from the binary's own per-movie log and checked against the request.
 
-Median wall of 3 repeats, 4 movies:
+Median wall of 3 repeats, 4 movies (per-arm observed range in brackets):
 
 | `--j` | IO=1 | IO=2 | IO=4 | IO=8 |
 | --: | --: | --: | --: | --: |
-| 1 | **12.214** | — | — | — |
-| 2 | **12.112** | **9.495** | — | — |
-| 4 | **12.164** | **8.941** | **7.230** | — |
-| 8 | **12.116** | **9.499** | **7.434** | **6.322** |
+| 1 | **11.758** [11.76–12.74] | — | — | — |
+| 2 | **11.802** [11.78–12.23] | **8.921** [8.05–8.95] | — | — |
+| 4 | **11.819** [11.66–12.32] | **8.595** [8.29–9.20] | **6.998** [6.89–7.34] | — |
+| 8 | **12.125** [11.92–12.15] | **8.807** [8.42–8.81] | **7.157** [7.15–7.46] | **6.190** [6.13–6.38] |
 
-Read down a column rather than across a row. **At a fixed effective IO-thread count, `--j` has
-no measurable effect.** The spread across four values of `--j` at IO=1 is 12.112–12.214 s, or
-0.8%, against a run-to-run spread of 2.5–8.4% within single arms. The same holds at IO=2
-(8.94–9.50) and IO=4 (7.23–7.43).
+Read down a column, not across a row. **At a fixed effective IO-thread count, `--j` has no
+measurable effect.** At IO=1 the four medians span 11.758–12.125 s, a 3.1% range, and all
+four arms' observed ranges overlap one another; within-arm run-to-run spread is 1.9–10.6%.
+The same holds at IO=2 (8.595–8.921, ranges overlapping) and IO=4 (6.998 vs 7.157). If
+anything the largest `--j` is marginally the *slowest* at IO=1, which is the opposite of the
+direction more compute threads would predict.
 
-Read across instead and wall time falls monotonically with IO threads: 12.2 → 9.5 → 7.3 →
-6.3 s, a 1.93x speedup from 1 to 8. CPU-seconds rise only from 12.1 to 14.3 over the same
-range, so this is genuine parallel speedup in the input stage, not work being moved.
+Read across and wall time falls monotonically with IO threads: 11.8 → 8.8 → 7.2 → 6.2 s, a
+**1.90x speedup from 1 to 8**. CPU-seconds rise only from 11.7 to 14.3 across that range, so
+this is parallel speedup in the input stage rather than work being displaced.
 
 **On the CUDA path `--j` matters only because, left uncapped, it also sets the IO thread
 count.** That is orthogonal to all six bottlenecks this issue proposes — FFTW plan locks,
 dose-weighting cache traffic, transcendental stalls, Amdahl residue, OpenMP barriers and NUMA
-latency — every one of which concerns `--j`-parallel host compute. None of them can be the
-explanation for a curve that does not respond to `--j`. This does not refute those mechanisms
-on the CPU backend, which section 6 measures separately; it says they do not govern the GPU
-configuration.
+latency — each of which concerns `--j`-parallel host compute, and none of which can govern a
+curve that does not respond to `--j`. This does not refute those mechanisms on the CPU
+backend, which section 6 measures separately.
 
 **Controls.** All 12 arms produced products identical to the reference for their own input
 set — MRC payload, MRC core header, and MRC labels with only RELION's clock stamp masked,
@@ -187,11 +202,12 @@ This is a **same-backend** statement only. It says nothing about CUDA-versus-CPU
 where `docs/reference_gates.md` records Gate 2 failures on all 24 movies; that is a different
 requirement and it is not addressed here.
 
-**Positional bias.** Pooled over arms, the mean ratio of wall time to that arm's median by
-slot within a repeat ranges 0.986–1.033 with no monotone trend, so the design's order
-rotation did not leave a systematic first-slot or last-slot advantage in this series. The
-rotation is kept regardless: the bias is a property of the workload, not of the host, and has
-been measured at 20 ms for a TIFF/MRC change on this machine.
+**Positional bias.** Every slot in this schedule was occupied by more than one arm, which is
+what makes the slot statistic informative at all — had each arm kept a fixed slot, every
+ratio would be that arm's wall over its own median, ≈1.0 by construction, and the section
+would read as "no bias" regardless of the truth. The report now checks and states this. The
+pooled slot ratios show no monotone trend. The two-arm contrasts in section 5 give a direct
+estimate instead, via `observed = E ± P`.
 
 **Interference.** Foreign CPU peaked at 131.9% during one arm and 0–7.1% elsewhere, with
 **zero** foreign threads observed inside the `96-111` lane in any run. The 131.9% arm
@@ -200,10 +216,44 @@ the lane barely touching a tasksetted run.
 
 ## 5. Phase 1 confirmation — finalists on all 24 movies
 
-*Executing. Five pairs of `j8/io8` against `j16/io16` and three of `j16/io16` against
-`j16/io8`, order alternating within every pair, all 24 movies.* The screen's optimum sits at
-the edge of the screened range and the lane holds 16 logical CPUs, so j=16 is tested rather
-than assumed — otherwise the study would recommend the largest value it happened to try.
+The screen's optimum sat at the edge of the screened range and the lane holds 16 logical
+CPUs, so `j16` was tested rather than assumed; without it the study would have recommended
+the largest value it happened to try.
+
+| arm | n | median | range | spread | CPU-s |
+| :-- | --: | --: | :-- | --: | --: |
+| `--j 16`, no IO cap | 8 | **27.773 s** | 27.49–28.08 | 2.1% | 87.5 |
+| `--j 8`, no IO cap | 5 | 29.163 s | 28.44–30.12 | 5.8% | 77.5 |
+| `--j 16 --max_io_threads 8` | 3 | 29.757 s | 29.38–29.90 | 1.8% | 77.1 |
+
+All three arms produced products equal to the baseline; no run exited non-zero.
+
+Paired, order alternating within every pair, `d` positive means the named arm was slower:
+
+| contrast | n pairs | per-pair `d` (s) | mean ± 2 sem | sign | effect `E` | positional `P` |
+| :-- | --: | :-- | :-- | :-- | --: | --: |
+| `j8/io8` − `j16/io16` | 5 | 1.11, 2.13, 0.72, 1.69, 1.29 | **+1.387 ± 0.486** | 5/5 | **+1.474** | −0.436 |
+| `j16/io8` − `j16/io16` | 3 | 2.08, 2.27, 1.29 | **+1.880 ± 0.597** | 3/3 | **+1.977** | +0.290 |
+
+Neither interval spans zero and every pair agrees in sign. The sign test itself cannot carry
+these: at n=5 and n=3 it cannot reach even the 5% level, which is a property of the design
+rather than of the data, and the report says so rather than quoting a p-value the n cannot
+support. The paired differences and their spread are the evidence.
+
+**What actually moves the time is the IO threads, again.** Holding `--j 16` and lifting the
+IO cap from 8 to 16 is worth **1.98 s** (`E`, second row). Holding the IO cap at 8 and
+raising `--j` from 8 to 16 goes the *other* way — 29.757 s against 29.163 s, about 0.6 s
+slower. That last comparison is **unpaired**: no pair in this schedule contained both arms,
+so it is indicative only and weaker than the two rows above. It does not contradict them,
+and it matches the screen.
+
+The positional term `P` is −0.436 s and +0.290 s in the two contrasts — same order as the
+effect in the second case. Recovering it was free from the alternation, and it is a concrete
+reason not to run an A/B in fixed order here.
+
+**Interference.** Foreign CPU peaked at 56.9–80.4% box-wide across the three arms with
+**zero** foreign threads inside the `96-111` lane in any run, measured with the repaired
+sampler of section 10.
 
 ## 6. CPU backend scaling on cpu64
 
@@ -260,16 +310,23 @@ never joined into one speedup curve either.
 Supported by the data in sections 3 and 4, for **this** configuration — one A100, 24 tutorial
 movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU lane:
 
-1. **Set `--j` for the IO threads you want, and do not expect compute threads to help.** Wall
-   time tracks the effective IO-thread count and is flat in `--j` at fixed IO. The uncapped
-   default is the right choice because it makes IO threads equal `--j`.
+1. **Set `--j` to the lane width and leave `--max_io_threads` unset.** On the 16-CPU lane
+   that is `--j 16`, measured at 27.77 s against 29.16 s for `--j 8`, 5/5 paired. The value
+   of raising `--j` is that, uncapped, it raises the IO thread count with it — at a *fixed*
+   IO cap of 8, going from `--j 8` to `--j 16` was slightly slower, not faster.
 2. **Do not set `--max_io_threads` below `--j` on the GPU path.** It is the one setting
    measured here that clearly costs throughput: IO=1 is 1.93x slower than IO=8 at the same
    `--j`.
 3. **Budget ~3.2 GiB of device memory and ~1.6 GiB of host RSS per process** at this movie
-   geometry. The traced allocator peak was 3134 MiB on every one of the 24 movies.
-4. **One process at `--j 8` leaves the lane mostly idle** — 2.66 of 16 cores. That headroom is
-   an argument for more concurrent movies, which is #53's lane, not for more threads per movie.
+   geometry. The traced allocator peak was 3134 MiB on every one of the 24 movies, and the
+   NVML-sampled peak 3493 MiB including context. This, not the device's 80 GiB, is what
+   bounds how many workers fit.
+4. **One process leaves the lane mostly idle** — 2.71 of 16 cores at `--j 8`. That headroom
+   is an argument for more concurrent movies, which is #53's lane, not for more threads per
+   movie.
+5. **Expect ~29 s per 24 movies warm, and do not trust a single warm-up run.** The first two
+   24-movie runs of a session came in ~2 s above the steady-state distribution that the same
+   configuration reached later.
 
 Explicitly **not** established: any best `--j` for the CPU backend on current main (section 6
 pending); any multi-worker or multi-GPU recommendation (section 7 unrun); behaviour at other

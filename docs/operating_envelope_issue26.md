@@ -230,7 +230,32 @@ frame counts, geometries, formats or heterogeneous movie costs (Phase 3, out of 
 anything about cold-cache or networked storage, since every number here is warm-cache local
 disk.
 
-## 9. Reproducing
+## 9. Instrument corrections, and what they changed
+
+The first pass of this study was measured with an instrument that had four witnesses which
+could not observe what they asserted. An independent read-only review found them; each was
+checked against retained artifacts or a purpose-built control before being accepted, and the
+GPU series was then **re-run** on the repaired instrument rather than published with caveats.
+They are recorded here because a measurement study that hides its own instrument failures is
+not worth more than the failures.
+
+| Witness | Defect | Consequence | Resolution |
+| :-- | :-- | :-- | :-- |
+| `TIMING` stage intervals | parsed only the per-movie logs, but the profiled build writes its breakdown to **stdout** | the profiled arm recorded nothing the unprofiled arm did not; separately, prose such as `Frames to be used: 1 2 3 …` was stored as a 1.0-second stage that does not exist | both formats now matched strictly and kept in separate namespaces; a control asserts prose is rejected and `dw - iFFT` survives. **This is how the section 3 breakdown was obtained at all.** |
+| CUDA execution | a startup banner printed in `initialise()` before any movie is read | a run in which all 24 movies fell back to the CPU would have been indistinguishable from a GPU run, while looking several times slower for no recorded reason | per-movie evidence plus fallback-warning capture. Re-checked on the retained first-pass run: **24/24 movies carry CUDA execution evidence, zero fallback warnings**, so the first-pass numbers were not affected |
+| Interference | `ps pcpu` is cputime ÷ lifetime, and ownership came from a walked `ps` snapshot | a lifetime average sampled at 1 Hz is not a time series; and the walk raced with the sampler's own children, recording `foreign_cpu_max = 2750%` against its own `ps` and MotionCorr's own `gs` | `/proc` `utime+stime` deltas, threads in state `R` only, ownership by session id. Same host, same lane, after: **39.2% box-wide max, 0 threads inside the lane** |
+| Process wall | the `/usr/bin/time` line is `Elapsed (wall clock) time (h:mm:ss or m:ss): 0:31.03`, split on the first colon | the field was never captured on any run | split on the last colon; now recorded alongside the runner's own measurement as a cross-check |
+
+Of these, only the interference figures from the first pass were actually wrong. The product
+equality, the wall times and the stage structure all survived re-measurement, and the
+conclusions in sections 4 and 5 are unchanged.
+
+The `cpu64` series in section 6 was allowed to finish on the earlier instrument rather than
+restarted. Its conclusion is a paired unbound-versus-bound contrast inside one lane, where
+self-contamination is present identically in both arms of every pair and cancels in the
+difference. Its interference figures are labelled instrument v1 and are an upper bound.
+
+## 10. Reproducing
 
 ```bash
 cmake -S . -B build-cuda -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \
@@ -241,6 +266,10 @@ taskset -c 96-111 flock -w 7200 /tmp/motioncorr-bench.lock \
 python3 tools/envelope_report.py --series results/p0p1/series.json \
   --results-dir results/p0p1 --reference-arm p0_base_24_j8 --reference-arm p1_j8_io8
 python3 tools/test_envelope_report.py      # controls for the equality verdict itself
+```
+
+```bash
+python3 tools/test_envelope_interference.py --lane 96-111   # Linux only; skips elsewhere
 ```
 
 `-DCMAKE_CUDA_ARCHITECTURES=80` is required. `CMakeLists.txt:59` guards its own fallback with

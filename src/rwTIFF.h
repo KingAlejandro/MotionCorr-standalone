@@ -221,7 +221,9 @@ void readTIFFFrameFromHandle(TIFF* ftiff, const TiffMovieLayout &layout, long in
 */
 int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack=false, const FileName &name="", TiffErrorContext* err_ctx=nullptr)
 {
-//#define DEBUG_TIFF
+// DEBUG_TIFF is defined (commented out) at the top of src/rwTIFF_layout.h,
+// which is included before this file, so that one switch reaches every
+// guarded block in both.
 #ifdef DEBUG_TIFF
 	printf("DEBUG readTIFF: Reading TIFF file. img_select %d\n", img_select);
 #endif

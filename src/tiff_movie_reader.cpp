@@ -57,6 +57,13 @@ void TiffMovieReader::readFrames(const std::vector<int> &frames, std::vector<Ima
 	if (out.size() != frames.size())
 		REPORT_ERROR("BUG: TiffMovieReader::readFrames was given a mismatched destination.");
 
+	// A handle that failed to reopen after an earlier frame error is closed,
+	// and fImageHandler leaves isTiff set, so nothing downstream would notice.
+	// Fail here rather than pass a null TIFF* to LibTIFF.
+	for (size_t i = 0; i < workers_.size(); i++)
+		if (workers_[i]->handle.ftiff == nullptr)
+			REPORT_ERROR(name_ + ": TiffMovieReader was reused after a reader handle failed to reopen.");
+
 	const double t0 = monotonicSeconds();
 
 	const int n_frames = (int)frames.size();
@@ -68,10 +75,17 @@ void TiffMovieReader::readFrames(const std::vector<int> &frames, std::vector<Ima
 	// The shared bounded scheduler: a worker takes the next unclaimed position
 	// whenever it goes idle, so a slow frame does not stall the others.
 	std::atomic<int> next_slot(0);
+	// Two counters, three atomics per frame against a decode of milliseconds.
+	// They are what makes "N readers" an observable property rather than an
+	// assumption: see Stages.
+	std::atomic<int> in_flight(0);
+	std::atomic<int> peak_in_flight(0);
+	std::atomic<int> team_size(0);
 
 	#pragma omp parallel num_threads(n_workers)
 	{
 		const int tid = omp_get_thread_num();
+		if (tid == 0) team_size.store(omp_get_num_threads());
 		// A thread beyond the pool would share a handle; num_threads can be
 		// reduced by the runtime, never raised, but guard it explicitly since
 		// sharing a mutable TIFF* is the one thing this design must not do.
@@ -88,13 +102,21 @@ void TiffMovieReader::readFrames(const std::vector<int> &frames, std::vector<Ima
 			{
 				const int slot = next_slot.fetch_add(1);
 				if (slot >= n_frames) break;
+				// A worker whose handle is gone must not decode with it.
+				if (w.handle.ftiff == nullptr) break;
+				const int now_in_flight = in_flight.fetch_add(1) + 1;
+				for (int seen = peak_in_flight.load();
+				     now_in_flight > seen &&
+				     !peak_in_flight.compare_exchange_weak(seen, now_in_flight); ) {}
 				// An exception must not leave an OpenMP structured block:
 				// the runtime calls std::terminate. Capture per frame and
 				// rethrow below, on the serial path.
 				try {
 					out[slot].readTIFFFrameFromHandle(w.handle.ftiff, layout_, frames[slot],
 					                                  w.scratch, name_, w.handle.tiff_err_ctx.get());
+					in_flight.fetch_sub(1);
 				} catch (...) {
+					in_flight.fetch_sub(1);
 					errors[slot] = std::current_exception();
 					// The reference path gives every frame a fresh handle, so a
 					// frame never inherits LibTIFF state left behind by a failed
@@ -112,6 +134,8 @@ void TiffMovieReader::readFrames(const std::vector<int> &frames, std::vector<Ima
 	}
 
 	stages_.read_frames = monotonicSeconds() - t0;
+	stages_.omp_team_size = team_size.load();
+	stages_.peak_concurrent_readers = peak_in_flight.load();
 
 	for (int slot = 0; slot < n_frames; slot++)
 		if (errors[slot]) std::rethrow_exception(errors[slot]);

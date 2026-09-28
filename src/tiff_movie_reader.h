@@ -84,6 +84,10 @@ public:
 
 	/** Decode `frames` (0-indexed directory numbers) into out[0..frames.size()).
 	 *
+	 * Callable more than once on the same reader. If a handle failed to reopen
+	 * after an earlier frame error the pool is dead and this throws rather
+	 * than handing a closed handle to LibTIFF.
+	 *
 	 * `out` must already hold frames.size() images; each is left exactly as a
 	 * single-frame Image::read would leave it. Destinations are disjoint, so
 	 * `frames` must not repeat an index.
@@ -99,6 +103,12 @@ public:
 	{
 		double open_and_layout = 0; // constructor: opening handles, resolving the layout
 		double read_frames = 0;     // readFrames wall clock, pool start to join
+		// Achieved concurrency of the last readFrames. Without these a caller
+		// cannot tell a pool of N handles used at once from one handle used N
+		// times in a row: the decoded pixels are identical either way, so the
+		// reader-count axis of any test over them observes nothing.
+		int omp_team_size = 0;            // threads the runtime actually gave
+		int peak_concurrent_readers = 0;  // most frames decoding simultaneously
 	};
 	const Stages &stages() const { return stages_; }
 

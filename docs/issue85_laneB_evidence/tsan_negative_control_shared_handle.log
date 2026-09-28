@@ -1,0 +1,592 @@
+  negative controls: every oracle property is falsifiable
+  u16_deflate_rps1 all readers=1: 8 frame(s) exact
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbd8 by thread T1:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbd8 by main thread:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000187e4)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:140 (tiff_persistent_reader:arm64+0x1000187e4)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #6 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #7 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race image.h:90 in TiffErrorContext::clear()
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Read of size 1 at 0x00010bc0bbf7 by thread T1:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220106]() const string:2153 (tiff_persistent_reader:arm64+0x1000185b4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3400 (tiff_persistent_reader:arm64+0x1000185b4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185b4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185b4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbf7 by main thread:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220106](unsigned long) string:2221 (tiff_persistent_reader:arm64+0x1000185d0)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3407 (tiff_persistent_reader:arm64+0x1000185d0)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185d0)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185d0)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #8 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #9 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race string:2153 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220106]() const
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbe0 by thread T1:
+    #0 std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&) char_traits.h:193 (tiff_persistent_reader:arm64+0x1000185c4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3406 (tiff_persistent_reader:arm64+0x1000185c4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185c4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185c4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbe0 by main thread:
+    #0 std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&) char_traits.h:193 (tiff_persistent_reader:arm64+0x1000185c4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3406 (tiff_persistent_reader:arm64+0x1000185c4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185c4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185c4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #8 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #9 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race char_traits.h:193 in std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&)
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Read of size 8 at 0x00010c401aa0 by thread T1:
+    #0 TiffStripScratch::ensure(long long) rwTIFF_layout.h:49 (tiff_persistent_reader:arm64+0x10001873c)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:130 (tiff_persistent_reader:arm64+0x10001873c)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 8 at 0x00010c401aa0 by main thread:
+    #0 TiffStripScratch::ensure(long long) rwTIFF_layout.h:51 (tiff_persistent_reader:arm64+0x100018774)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:130 (tiff_persistent_reader:arm64+0x100018774)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #6 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #7 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 112 at 0x00010c401a40 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38b8)
+    #2 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #3 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #4 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race rwTIFF_layout.h:49 in TiffStripScratch::ensure(long long)
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Read of size 8 at 0x00010c401aa8 by thread T1:
+    #0 TiffStripScratch::ensure(long long) rwTIFF_layout.h:49 (tiff_persistent_reader:arm64+0x10001874c)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:130 (tiff_persistent_reader:arm64+0x10001874c)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 8 at 0x00010c401aa8 by main thread:
+    #0 TiffStripScratch::ensure(long long) rwTIFF_layout.h:52 (tiff_persistent_reader:arm64+0x100018788)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:130 (tiff_persistent_reader:arm64+0x100018788)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #6 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #7 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 112 at 0x00010c401a40 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38b8)
+    #2 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #3 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #4 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race rwTIFF_layout.h:49 in TiffStripScratch::ensure(long long)
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbd8 by thread T1:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000187e4)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:140 (tiff_persistent_reader:arm64+0x1000187e4)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbd8 by main thread:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #6 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #7 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race image.h:90 in TiffErrorContext::clear()
+==================
+  u16_deflate_rps1 all readers=2: 8 frame(s) exact
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbd8 by thread T2:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbd8 by thread T3:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T2 (tid=18130710, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T3 (tid=18130711, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race image.h:90 in TiffErrorContext::clear()
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbd8 by main thread:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #6 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #7 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Previous write of size 1 at 0x00010bc0bbd8 by thread T3:
+    #0 TiffErrorContext::clear() image.h:90 (tiff_persistent_reader:arm64+0x1000185a8)
+    #1 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185a8)
+    #2 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T3 (tid=18130711, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race image.h:90 in TiffErrorContext::clear()
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbe0 by thread T2:
+    #0 std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&) char_traits.h:193 (tiff_persistent_reader:arm64+0x1000185c4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3406 (tiff_persistent_reader:arm64+0x1000185c4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185c4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185c4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbe0 by thread T3:
+    #0 std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&) char_traits.h:193 (tiff_persistent_reader:arm64+0x1000185c4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3406 (tiff_persistent_reader:arm64+0x1000185c4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185c4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185c4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T2 (tid=18130710, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T3 (tid=18130711, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race char_traits.h:193 in std::__1::char_traits<char>::assign[abi:nqe220106](char&, char const&)
+==================
+in: /Users/alex.konstantinov/Documents/MotionCorr-issue85-laneB/src/rwTIFF.h, line 105
+ERROR: 
+/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc_laneB_u16_deflate_rps1.tif: Failed to select TIFF frame 1: 
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Read of size 1 at 0x00010bc0bbf7 by thread T1:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220106]() const string:2153 (tiff_persistent_reader:arm64+0x1000185b4)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3400 (tiff_persistent_reader:arm64+0x1000185b4)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185b4)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185b4)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbf7 by thread T3:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220106](unsigned long) string:2221 (tiff_persistent_reader:arm64+0x1000185d0)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3407 (tiff_persistent_reader:arm64+0x1000185d0)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185d0)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185d0)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T3 (tid=18130711, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race string:2153 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220106]() const
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 1 at 0x00010bc0bbf7 by thread T2:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220106](unsigned long) string:2221 (tiff_persistent_reader:arm64+0x1000185d0)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3407 (tiff_persistent_reader:arm64+0x1000185d0)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x1000185d0)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:101 (tiff_persistent_reader:arm64+0x1000185d0)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous write of size 1 at 0x00010bc0bbf7 by main thread:
+    #0 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220106](unsigned long) string:2221 (tiff_persistent_reader:arm64+0x10001880c)
+    #1 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::clear[abi:nqe220106]() string:3407 (tiff_persistent_reader:arm64+0x10001880c)
+    #2 TiffErrorContext::clear() image.h:91 (tiff_persistent_reader:arm64+0x10001880c)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:140 (tiff_persistent_reader:arm64+0x10001880c)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #8 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #9 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Location is heap block of size 56 at 0x00010bc0bbc0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>* std::__1::__libcpp_allocate[abi:nqe220106]<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>(std::__1::__element_count, unsigned long) allocate.h:60 (tiff_persistent_reader:arm64+0x1000103ac)
+    #2 std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>::allocate[abi:nqe220106](unsigned long) allocator.h:92 (tiff_persistent_reader:arm64+0x1000103ac)
+    #3 std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::allocate[abi:nqe220106](std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>&, unsigned long) allocator_traits.h:259 (tiff_persistent_reader:arm64+0x1000103ac)
+    #4 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:55 (tiff_persistent_reader:arm64+0x1000103ac)
+    #5 std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<TiffErrorContext, std::__1::allocator<TiffErrorContext>>>>::__allocation_guard[abi:nqe220106]<std::__1::allocator<TiffErrorContext>>(std::__1::allocator<TiffErrorContext>, unsigned long) allocation_guard.h:56 (tiff_persistent_reader:arm64+0x1000103ac)
+    #6 std::__1::shared_ptr<TiffErrorContext> std::__1::allocate_shared[abi:nqe220106]<TiffErrorContext, std::__1::allocator<TiffErrorContext>, 0>(std::__1::allocator<TiffErrorContext> const&) shared_ptr.h:683 (tiff_persistent_reader:arm64+0x1000103ac)
+    #7 std::__1::shared_ptr<TiffErrorContext> std::__1::make_shared[abi:nqe220106]<TiffErrorContext, 0>() shared_ptr.h:692 (tiff_persistent_reader:arm64+0x1000103ac)
+    #8 fImageHandler::fImageHandler() image.h:326 (tiff_persistent_reader:arm64+0x1000103ac)
+    #9 fImageHandler::fImageHandler() image.h:317 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #10 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #11 TiffMovieReader::Worker::Worker() tiff_movie_reader.h:108 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #12 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38c0)
+    #13 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #14 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #15 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T2 (tid=18130710, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race string:2221 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220106](unsigned long)
+==================
+ThreadSanitizer:DEADLYSIGNAL
+ThreadSanitizer:DEADLYSIGNAL
+in: /Users/alex.konstantinov/Documents/MotionCorr-issue85-laneB/src/rwTIFF.h, line 146
+==================
+ERROR: 
+/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc_laneB_u16_deflate_rps1.tif: Invalid decoded TIFF strip size (TIFFScanlineSize64: Computed scanline size is zero).
+WARNING: ThreadSanitizer: data race (pid=42924)
+  Write of size 8 at 0x00010c401a50 by thread T3:
+    #0 fImageHandler::releaseHandles() image.h:531 (tiff_persistent_reader:arm64+0x100010f2c)
+    #1 fImageHandler::closeFile(FileName const&) image.h:578 (tiff_persistent_reader:arm64+0x100010910)
+    #2 fImageHandler::openFile(FileName const&, int) image.h:358 (tiff_persistent_reader:arm64+0x10000d8f0)
+    #3 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:105 (tiff_persistent_reader:arm64+0x1000c4478)
+    #4 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4478)
+    #5 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Previous read of size 8 at 0x00010c401a50 by thread T1:
+    #0 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c43b8)
+    #1 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c43b8)
+    #2 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+
+  Location is heap block of size 112 at 0x00010c401a40 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x91ad0)
+    #1 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:40 (tiff_persistent_reader:arm64+0x1000c38b8)
+    #2 TiffMovieReader::TiffMovieReader(FileName const&, int) tiff_movie_reader.cpp:30 (tiff_persistent_reader:arm64+0x1000c3e60)
+    #3 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:228 (tiff_persistent_reader:arm64+0x100009d18)
+    #4 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T3 (tid=18130711, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+  Thread T1 (tid=18130652, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 __kmp_create_worker <null> (libomp.dylib:arm64+0x50efc)
+    #2 (anonymous namespace)::runCase(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<int, std::__1::allocator<int>> const&) test_tiff_persistent_reader.cpp:229 (tiff_persistent_reader:arm64+0x100009d4c)
+    #3 main test_tiff_persistent_reader.cpp:372 (tiff_persistent_reader:arm64+0x100004684)
+
+SUMMARY: ThreadSanitizer: data race image.h:531 in fImageHandler::releaseHandles()
+==================
+==42924==ERROR: ThreadSanitizer: SEGV on unknown address 0x000102fe0fd8 (pc 0x00018106d51c bp 0x00016dd6e8c0 sp 0x00016dd6e880 T18130652)
+==42924==The signal is caused by a READ memory access.
+    #0 _platform_memmove <null> (libsystem_platform.dylib:arm64e+0x351c)
+    #1 TIFFAdvanceDirectory <null> (libtiff.6.dylib:arm64+0x64e4)
+    #2 TIFFSetDirectory <null> (libtiff.6.dylib:arm64+0x6788)
+    #3 Image<float>::readTIFFDirectory(tiff*, TiffMovieLayout const&, long, float*, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:102 (tiff_persistent_reader:arm64+0x10001861c)
+    #4 Image<float>::readTIFFFrameFromHandle(tiff*, TiffMovieLayout const&, long, TiffStripScratch&, FileName const&, TiffErrorContext*) rwTIFF.h:216 (tiff_persistent_reader:arm64+0x1000c4610)
+    #5 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined_debug__) tiff_movie_reader.cpp:95 (tiff_persistent_reader:arm64+0x1000c4400)
+    #6 TiffMovieReader::readFrames(std::__1::vector<int, std::__1::allocator<int>> const&, std::__1::vector<Image<float>, std::__1::allocator<Image<float>>>&) (.omp_outlined) tiff_movie_reader.cpp:72 (tiff_persistent_reader:arm64+0x1000c4400)
+    #7 __kmp_invoke_microtask <null> (libomp.dylib:arm64+0x6b138)
+    #8 __kmp_invoke_task_func <null> (libomp.dylib:arm64+0x1f254)
+    #9 __kmp_launch_thread <null> (libomp.dylib:arm64+0x1e070)
+    #10 __kmp_launch_worker(void*) <null> (libomp.dylib:arm64+0x512d4)
+    #11 __tsan_thread_start_func <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33b18)
+    #12 _pthread_start <null> (libsystem_pthread.dylib:arm64e+0x6c54)
+    #13 thread_start <null> (libsystem_pthread.dylib:arm64e+0x1c18)
+
+==42924==Register values:
+ x[0] = 0x000000016dd6e8fe   x[1] = 0x0000000102fe0fd8   x[2] = 0x0000000000000002   x[3] = 0x000000016dd6e8fe  
+ x[4] = 0x00000001033a8f38   x[5] = 0x0000000000000000   x[6] = 0x0000000085845dd1   x[7] = 0x00000000eb101ab2  
+ x[8] = 0x00000001033a8eb8   x[9] = 0x00000000800a0100  x[10] = 0x0000000040000000  x[11] = 0x0000000000000000  
+x[12] = 0x0000000053f3910d  x[13] = 0x00000000702fe53a  x[14] = 0x000000006111ecff  x[15] = 0x000000004a860c0f  
+x[16] = 0x000000018106d360  x[17] = 0x000000010342d878  x[18] = 0x0000000000000000  x[19] = 0x0000000000000002  
+x[20] = 0x0000000102fe0fd8  x[21] = 0x000000016dd6e8fe  x[22] = 0x00000001030d0000  x[23] = 0x00000001033a8eb8  
+x[24] = 0x0000000000004fda  x[25] = 0x000000010c401aa0  x[26] = 0x0000000000000003  x[27] = 0x000000010bc0bbd8  
+x[28] = 0x000000010d2015b8     fp = 0x000000016dd6e8c0     lr = 0x00000001033a8f48     sp = 0x000000016dd6e880  
+ThreadSanitizer can not provide additional info.
+SUMMARY: ThreadSanitizer: SEGV (libsystem_platform.dylib:arm64e+0x351c) in _platform_memmove+0x1bc
+==42924==ABORTING

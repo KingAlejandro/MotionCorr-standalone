@@ -21,6 +21,10 @@
 #ifndef RWTIFF_LAYOUT_H
 #define RWTIFF_LAYOUT_H
 
+// Uncomment to trace TIFF reads. This header is included before src/rwTIFF.h,
+// so the define has to live here to reach the guarded blocks in both files.
+//#define DEBUG_TIFF
+
 // The directory-0 properties of a TIFF movie, and the strip scratch a reader
 // decodes through. Split out of readTIFF() so the file-level metadata can be
 // resolved once and then shared, read-only, by several independent TIFF
@@ -187,6 +191,11 @@ inline void readTiffLayout(TIFF* ftiff, TiffMovieLayout &layout,
 
 	layout.has_sampling_rate = false;
 	layout.sampling_rate = 0;
+#ifdef DEBUG_TIFF
+	std::cout << "TIFF width " << width << ", length " << length << ", nDim " << nDim
+	          << ", sample format " << sampleFormat << ", bits per sample " << bitsPerSample
+	          << ", packed_4bit " << packed_4bit << std::endl;
+#endif
 	uint16_t resolutionUnit;
 	float xResolution;
 	if (TIFFGetField(ftiff, TIFFTAG_RESOLUTIONUNIT, &resolutionUnit) == 1 &&
@@ -203,6 +212,10 @@ inline void readTiffLayout(TIFF* ftiff, TiffMovieLayout &layout,
 			layout.has_sampling_rate = true;
 			layout.sampling_rate = RFLOAT(1.00E8 / xResolution);
 		}
+#ifdef DEBUG_TIFF
+		std::cout << "resolutionUnit = " << resolutionUnit << " xResolution = " << xResolution
+		          << " pixel size = " << layout.sampling_rate << std::endl;
+#endif
 	}
 }
 

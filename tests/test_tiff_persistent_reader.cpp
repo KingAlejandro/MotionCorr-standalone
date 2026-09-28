@@ -23,6 +23,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <vector>
 #include <zlib.h>
 
@@ -61,7 +62,7 @@ struct FrameSpec
  * per-frame geometry so a heterogeneous-directory file can be built. */
 void writeTiff(const std::string &path, const std::vector<FrameSpec> &frames,
                uint16_t bits_in_file, uint16_t compression, uint32_t rows_per_strip,
-               uint16_t sample_format)
+               uint16_t sample_format, bool with_resolution = false)
 {
 	std::string buf;
 	buf += "II"; put16(buf, 42); put32(buf, 0); // first-IFD offset patched below
@@ -106,8 +107,22 @@ void writeTiff(const std::string &path, const std::vector<FrameSpec> &frames,
 		}
 		else { off_pos = offs[f][0]; cnt_pos = counts[f][0]; }
 
+		// XResolution is a RATIONAL, so it lives out of line; write it before
+		// the IFD and point at it. Without it the reader never sets the
+		// sampling rate and that half of the oracle can never fire.
+		uint32_t res_pos = 0;
+		if (with_resolution)
+		{
+			res_pos = (uint32_t)buf.size();
+			// 5.08e8/3 dpi -> readTIFF computes 2.54e8/xRes = 1.5 A/px, which is
+			// distinguishable from samplingRateX()'s 1.0 default, so a reader
+			// that never read the tag is not mistaken for one that did.
+			put32(buf, 508000000u); put32(buf, 3u);
+		}
+
 		struct Entry { uint16_t tag, type; uint32_t count, value; };
-		const Entry entries[] = {
+		std::vector<Entry> entries_v;
+		const Entry base_entries[] = {
 			{256, 4, 1, frames[f].file_width},
 			{257, 4, 1, height},
 			{258, 3, 1, bits_in_file},
@@ -120,14 +135,22 @@ void writeTiff(const std::string &path, const std::vector<FrameSpec> &frames,
 			{284, 3, 1, 1},
 			{339, 3, 1, sample_format},
 		};
-		const uint32_t ifd_pos = (uint32_t)buf.size();
-		put16(buf, (uint16_t)(sizeof(entries) / sizeof(entries[0])));
-		for (size_t i = 0; i < sizeof(entries) / sizeof(entries[0]); i++)
+		entries_v.assign(base_entries, base_entries + sizeof(base_entries) / sizeof(base_entries[0]));
+		if (with_resolution)
 		{
-			put16(buf, entries[i].tag); put16(buf, entries[i].type); put32(buf, entries[i].count);
-			if (entries[i].type == 3 && entries[i].count == 1)
-			{ put16(buf, (uint16_t)entries[i].value); put16(buf, 0); }
-			else put32(buf, entries[i].value);
+			entries_v.push_back(Entry{282, 5, 1, res_pos});  // XResolution
+			entries_v.push_back(Entry{296, 3, 1, RESUNIT_INCH});
+			std::sort(entries_v.begin(), entries_v.end(),
+			          [](const Entry &a, const Entry &b) { return a.tag < b.tag; });
+		}
+		const uint32_t ifd_pos = (uint32_t)buf.size();
+		put16(buf, (uint16_t)entries_v.size());
+		for (size_t i = 0; i < entries_v.size(); i++)
+		{
+			put16(buf, entries_v[i].tag); put16(buf, entries_v[i].type); put32(buf, entries_v[i].count);
+			if (entries_v[i].type == 3 && entries_v[i].count == 1)
+			{ put16(buf, (uint16_t)entries_v[i].value); put16(buf, 0); }
+			else put32(buf, entries_v[i].value);
 		}
 		const uint32_t next_field = (uint32_t)buf.size();
 		put32(buf, 0);
@@ -227,6 +250,17 @@ void runCase(const std::string &label, const std::string &path,
 		std::vector<Image<float> > got(frames.size());
 		TiffMovieReader reader(path, n_readers);
 		reader.readFrames(frames, got);
+		// Identical pixels are produced whether the pool ran on N handles at
+		// once or on one handle N times, so the reader-count axis is only
+		// meaningful if the team size is checked. Without this the whole
+		// matrix passes under OMP_NUM_THREADS=1.
+		record(reader.nReaders() == n_readers,
+		       tag + ": pool holds " + std::to_string(reader.nReaders()) +
+		       " handles, expected " + std::to_string(n_readers));
+		record(reader.stages().omp_team_size == n_readers,
+		       tag + ": OpenMP gave " + std::to_string(reader.stages().omp_team_size) +
+		       " threads, expected " + std::to_string(n_readers) +
+		       " (is the build missing OpenMP, or OMP_THREAD_LIMIT set?)");
 		bool ok = true;
 		for (size_t i = 0; i < frames.size(); i++)
 		{
@@ -241,7 +275,8 @@ void runCase(const std::string &label, const std::string &path,
 
 // Both paths must reject the same file, with the same message.
 void expectSameFailure(const std::string &label, const std::string &path,
-                       const std::vector<int> &frames, int n_readers)
+                       const std::vector<int> &frames, int n_readers,
+                       const std::string &must_contain = "")
 {
 	std::string ref_msg, got_msg;
 	try {
@@ -268,14 +303,21 @@ void expectSameFailure(const std::string &label, const std::string &path,
 		failures++;
 		return;
 	}
-	// The libtiff detail string must be present in both or absent in both:
-	// a reader wired to the wrong error context still returns correct pixels
-	// and still throws, it just loses the has_error arm of the checks.
-	const bool ref_detail = ref_msg.find('(') != std::string::npos || ref_msg.find(": ") != std::string::npos;
-	const bool got_detail = got_msg.find('(') != std::string::npos || got_msg.find(": ") != std::string::npos;
-	if (ref_detail != got_detail)
-	{ std::cerr << "FAIL: " << label << ": LibTIFF detail present in only one path" << std::endl; failures++; return; }
-	std::cout << "  " << label << ": both readers reject with the same message" << std::endl;
+	// ref_msg == got_msg already covers the LibTIFF detail: a reader wired to
+	// the wrong error context loses the has_error arm of the checks, which
+	// removes the detail from its message and makes the strings differ. An
+	// extra "is a detail present in both" predicate would be satisfied by
+	// almost any message and would assert nothing; see the note in
+	// docs/issue85_laneB_evidence/thread_safety.md.
+	if (!must_contain.empty() && ref_msg.find(must_contain) == std::string::npos)
+	{
+		std::cerr << "FAIL: " << label << ": rejected, but not for the reason this fixture targets.\n"
+		          << "  wanted a message containing: " << must_contain << "\n"
+		          << "  got: " << ref_msg << std::endl;
+		failures++;
+		return;
+	}
+	std::cout << "  " << label << ": both reject identically: " << ref_msg.substr(0, 90) << std::endl;
 }
 
 std::string slurp(const std::string &p)
@@ -302,7 +344,9 @@ void negativeControls()
 {
 	const uint32_t w = 12, h = 9;
 	const std::string p = tmpPath("neg_control.tif");
-	writeTiff(p, makeFrames(3, w, h, 16, SAMPLEFORMAT_UINT), 16, 8, 1, SAMPLEFORMAT_UINT);
+	// With resolution tags, so the sampling-rate half of compareFrames is
+	// exercised by something other than "both sides are the 1.0 default".
+	writeTiff(p, makeFrames(3, w, h, 16, SAMPLEFORMAT_UINT), 16, 8, 1, SAMPLEFORMAT_UINT, true);
 
 	std::vector<Image<float> > a(3), b(3);
 	for (int i = 0; i < 3; i++) { a[i].read(p, true, i, false, true); b[i].read(p, true, i, false, true); }
@@ -343,6 +387,24 @@ void negativeControls()
 		m[0]().reshape(1, 1, h, w - 1);
 		record(!compareFrames(a[0], m[0]).empty(), "negative control: a shape change must be detected");
 	}
+	// The sampling rate must actually have been read off the file, or the
+	// oracle is comparing two copies of the same default.
+	record(a[0].samplingRateX() > 1.4 && a[0].samplingRateX() < 1.6 &&
+	       a[0].samplingRateX() == a[0].samplingRateY(),
+	       "negative controls: the fixture's resolution tags must reach samplingRateX/Y (got " +
+	       std::to_string(a[0].samplingRateX()) + ")");
+	{
+		std::vector<Image<float> > m = b;
+		m[0].MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, RFLOAT(0.5));
+		record(!compareFrames(a[0], m[0]).empty(),
+		       "negative control: a sampling-rate change must be detected");
+	}
+	{
+		std::vector<Image<float> > m = b;
+		m[1].MDMainHeader.setValue(EMDL_IMAGE_DATATYPE, (int)Float);
+		record(!compareFrames(a[1], m[1]).empty(),
+		       "negative control: a datatype change must be detected");
+	}
 	// The failure comparator must be able to fail: a file both readers accept
 	// must not be reported as "both reject with the same message".
 	{
@@ -356,11 +418,45 @@ void negativeControls()
 
 } // namespace
 
+/* The runner only routes a movie to the pool when this says so, and it has to
+ * agree with Image::_read's ordered dispatch chain -- which tries SPIDER, the
+ * compressed-MRC guard, and mrcs/mrc/st before it ever reaches the TIFF
+ * branch. Matching on "tif" alone would claim ".stif". */
+void eligibilityPredicate()
+{
+	struct Case { const char *name; bool expected; };
+	const Case cases[] = {
+		{"movie.tiff", true},
+		{"movie.tif", true},
+		{"dir.with.dots/movie.tiff", true},
+		{"reference.gain", true},     // openFile rewrites .gain to tif
+		{"movie.stif", false},        // _read's contains("st") branch wins
+		{"movie.mrcs", false},
+		{"movie.mrc", false},
+		{"movie.st", false},
+		{"movie.stk", false},
+		{"movie.spi", false},
+		{"movie.vol", false},
+		{"movie.eer", false},
+		{"movie.mrc.bz2", false},
+		{"movie.tiff:mrc", false},    // explicit format override
+		{"movie", false},
+		{"", false},
+	};
+	for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++)
+		record(tiffMovieReaderApplies(FileName(cases[i].name)) == cases[i].expected,
+		       std::string("eligibility: ") + cases[i].name + " should " +
+		       (cases[i].expected ? "" : "not ") + "use the pool");
+	std::cout << "  eligibility predicate: " << sizeof(cases) / sizeof(cases[0])
+	          << " names agree with Image::_read's dispatch order" << std::endl;
+}
+
 int main()
 {
 	const std::vector<int> counts = {1, 2, 4, 8, 16, 24};
 
 	try {
+		eligibilityPredicate();
 		negativeControls();
 
 		// The tutorial movies' layout: 16-bit unsigned, Deflate, one row per strip.
@@ -451,7 +547,33 @@ int main()
 			writeTiff(p, f, 16, 8, 1, SAMPLEFORMAT_UINT);
 			for (size_t k = 0; k < counts.size(); k++)
 				expectSameFailure("heterogeneous directories readers=" + std::to_string(counts[k]),
-				                  p, std::vector<int>{0, 1, 2, 3}, counts[k]);
+				                  p, std::vector<int>{0, 1, 2, 3}, counts[k],
+				                  "All frames in a TIFF should have same width");
+			remove(p.c_str());
+		}
+
+		// Enough decode work per frame that two readers are genuinely in flight
+		// at once. The small fixtures above finish a frame in microseconds, so
+		// one worker can drain the queue before the others start and the
+		// reader-count axis degenerates.
+		{
+			const uint32_t w = 700, h = 700; const int nf = 12;
+			const std::string p = tmpPath("concurrency.tif");
+			writeTiff(p, makeFrames(nf, w, h, 16, SAMPLEFORMAT_UINT), 16, 8, 1, SAMPLEFORMAT_UINT);
+			std::vector<int> all; for (int i = 0; i < nf; i++) all.push_back(i);
+			runCase("concurrency 700x700x12", p, all, std::vector<int>{1, 2, 4, 8});
+			for (int r : {2, 4, 8})
+			{
+				std::vector<Image<float> > got(all.size());
+				TiffMovieReader reader(p, r);
+				reader.readFrames(all, got);
+				const int peak = reader.stages().peak_concurrent_readers;
+				record(peak >= 2, "concurrency 700x700x12 readers=" + std::to_string(r) +
+				       ": peak concurrent readers was " + std::to_string(peak) +
+				       ", so the pool never actually overlapped two frames");
+				std::cout << "  concurrency 700x700x12 readers=" << r
+				          << ": peak concurrent readers " << peak << std::endl;
+			}
 			remove(p.c_str());
 		}
 
@@ -463,9 +585,19 @@ int main()
 			std::vector<int> all; for (int i = 0; i < nf; i++) all.push_back(i);
 			const std::string whole = slurp(p);
 
+			// The IFDs are written after all the pixel data, so a cut anywhere
+			// in the first half removes the whole chain and is the same case as
+			// a hard truncation. To reach the chain walk, keep everything up to
+			// the middle of the IFD block: directory 0 parses, and
+			// TIFFNumberOfDirectories then fails partway along.
+			const size_t first_ifd = [&]() {
+				uint32_t off = 0; memcpy(&off, whole.data() + 4, 4); return (size_t)off; }();
+			record(first_ifd > 0 && first_ifd < whole.size(),
+			       "damaged fixtures: could not locate the first IFD");
 			const std::string cut = tmpPath("damage_truncated.tif");
-			spit(cut, whole.substr(0, whole.size() / 2)); // cuts the IFD chain
-			expectSameFailure("truncated IFD chain", cut, all, 4);
+			spit(cut, whole.substr(0, first_ifd + (whole.size() - first_ifd) / 2));
+			expectSameFailure("truncated IFD chain", cut, all, 4,
+			                  "Corrupted TIFF directory structure");
 
 			const std::string hard = tmpPath("damage_hard.tif");
 			spit(hard, whole.substr(0, 64));
@@ -477,9 +609,58 @@ int main()
 			for (size_t i = 8; i < 8 + 16 && i < bad_bytes.size(); i++) bad_bytes[i] = (char)~bad_bytes[i];
 			const std::string bad = tmpPath("damage_strip.tif");
 			spit(bad, bad_bytes);
-			expectSameFailure("corrupt strip payload", bad, all, 4);
+			expectSameFailure("corrupt strip payload", bad, all, 4,
+			                  "Invalid decoded TIFF strip size");
 
-			expectSameFailure("frame index past the stack", p, std::vector<int>{0, nf + 3}, 2);
+			expectSameFailure("frame index past the stack", p, std::vector<int>{0, nf + 3}, 2,
+			                  "exceeds stack size");
+
+			// Two frames damaged at once: the error the caller sees must be the
+			// one belonging to the lowest position in `frames`, whichever
+			// worker happened to fail first. That ordering is what the runner's
+			// serial rethrow loop guarantees today, and it is schedule
+			// dependent unless the pool reproduces it explicitly.
+			{
+				std::string two = whole;
+				// Corrupt the payload of the first strip of directories 2 and 4
+				// by flipping bytes at their recorded strip offsets.
+				const std::vector<int> victims = {2, 4};
+				for (size_t vi = 0; vi < victims.size(); vi++)
+				{
+					// Strips are written frame-major, one row per strip here,
+					// so directory k's first strip is strip k*h in write order.
+					// Locate it by decoding the file with the reference reader
+					// instead of re-deriving offsets: corrupt a byte range that
+					// belongs to that frame's payload region.
+					const size_t region = (two.size() - 8) / (size_t)nf;
+					const size_t at = 8 + (size_t)victims[vi] * region;
+					for (size_t i = at; i < at + 32 && i < two.size(); i++) two[i] = (char)~two[i];
+				}
+				const std::string p2 = tmpPath("damage_two_frames.tif");
+				spit(p2, two);
+				std::string ref_msg, got_msg;
+				try {
+					std::vector<Image<float> > r(all.size());
+					for (size_t i = 0; i < all.size(); i++) r[i].read(p2, true, all[i], false, true);
+				} catch (RelionError &e) { ref_msg = e.msg; }
+				for (int readers : {1, 2, 4, 8})
+				{
+					got_msg.clear();
+					try {
+						std::vector<Image<float> > g(all.size());
+						TiffMovieReader rd(p2, readers);
+						rd.readFrames(all, g);
+					} catch (RelionError &e) { got_msg = e.msg; }
+					record(!ref_msg.empty() && ref_msg == got_msg,
+					       "two damaged frames, readers=" + std::to_string(readers) +
+					       ": the lowest failing slot must win.\n    reference:  " + ref_msg +
+					       "\n    persistent: " + got_msg);
+				}
+				if (!ref_msg.empty())
+					std::cout << "  two damaged frames: lowest failing slot wins at 1/2/4/8 readers"
+					          << std::endl;
+				remove(p2.c_str());
+			}
 
 			remove(p.c_str()); remove(cut.c_str()); remove(hard.c_str()); remove(bad.c_str());
 		}

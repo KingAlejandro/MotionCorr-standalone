@@ -2,7 +2,7 @@
 
 - **Issue**: #85, lane B of the [TIFF ingest optimization program](https://github.com/KingAlejandro/MotionCorr-standalone/issues/85#issuecomment-5876206372)
 - **Status**: experiment, opt-in, default off
-- **Base**: `origin/main` `5ada983`
+- **Base**: `origin/main` `8323c55`
 - **Branch**: `feat/issue-85-laneB-persistent-tiff`
 - **Independent of**: lane C (`feat/issue-85-laneC-uint16-staging`)
 
@@ -32,10 +32,12 @@ movie. Each worker owns
 - its own `TiffErrorContext`, bound to that handle;
 - its own strip scratch, grown on demand and kept for the movie.
 
-The only shared mutable object is an `std::atomic<int>` frame-index counter:
-a worker takes the next unclaimed slot whenever it goes idle, so a slow frame
-does not stall the others. The movie layout is resolved once, before any
-worker starts, and is read-only afterwards.
+The shared state is the frame-index counter and two concurrency counters, all
+`std::atomic<int>`, plus the destination vector and the per-slot error vector,
+which are written only at each worker's own disjoint slot. A worker takes the
+next unclaimed slot whenever it goes idle, so a slow frame does not stall the
+others. The movie layout is resolved once, before any worker starts, and is
+read-only afterwards. No TIFF handle, error context or scratch is shared.
 
 Handles are created through `fImageHandler::openFile`, so the experiment
 inherits the existence check, the `.gain`→`tif` rewrite, read-only
@@ -60,10 +62,14 @@ the same OpenMP runtime.
 | `applyTiffLayout` | `src/rwTIFF.h` | header metadata, stack bounds, dimensions, allocation |
 | `readTIFFDirectory` | `src/rwTIFF.h` | directory selection, per-frame consistency check, strip validation, Y placement |
 
-The pool calls the same three pieces through `readTIFFFrameFromHandle`. There
-is one copy of the strip validation and the row placement, not two, and no
-`if (cached)` branch inside either — a later edit cannot add a check to one
-arm and miss the other, because there is only one arm.
+The pool calls the same three pieces through `readTIFFFrameFromHandle`. On the
+production path there is one copy of the strip validation and the row
+placement, not two, and no `if (cached)` branch inside either — a later edit
+cannot add a check to one arm and miss the other, because there is only one
+arm. The benchmark's stage-attribution routine does contain its own stripped
+placement loop, deliberately: it exists to time the pieces separately and is
+not on any product path. Its independence is what lets the benchmark's
+whole-movie digest check catch a placement error in either copy.
 
 `readTIFF` itself is unchanged from the outside, and `readTiffInMemory`
 (`src/image.h`) still goes through it untouched.
@@ -104,6 +110,17 @@ git checkout origin/main -- src/rwTIFF.h src/image.h
 
 `git diff origin/main -- src/ CMakeLists.txt` must then be empty.
 
+### Thread budget
+
+The pool size is the flag's value, deliberately not clamped to
+`--max_io_threads`, so the sweep can test counts above the compute-thread
+count. That means it can oversubscribe: the per-movie log records the pool
+size alongside `--j` and the `--max_io_threads`-derived count, so a run that
+oversubscribed is visible in its own log rather than only in the timings. If
+this ever moved past an experiment it would have to be folded into one
+aggregate host budget, as the multi-GPU section of issue #85 requires, not
+multiplied independently by every GPU worker.
+
 ## What the parity matrix covers
 
 `tests/test_tiff_persistent_reader.cpp` compares the two readers element by
@@ -120,8 +137,8 @@ Layouts: RowsPerStrip=1 Deflate (the tutorial movies), multi-row strips with a
 short final strip both raw and Deflate, 8-bit UChar, 16-bit UShort, 16-bit
 SShort, 32-bit Float, IMOD packed 4-bit, a non-contiguous selected subset, and
 out-of-order frame indices — the only case that separates "decoded the wrong
-directory" from "wrote it into the wrong slot", and the first coverage anywhere
-in the suite of the `img_select != -1` path.
+directory" from "wrote it into the wrong slot". `tests/test_tiff_read.py`
+already covers `img_select == -1`; nothing covered a non-monotonic selection.
 
 Damaged inputs must fail with the reference's exact message: truncated IFD
 chain, hard truncation, corrupt strip payload, frame index past the stack, and
@@ -130,8 +147,24 @@ reused handle is parked on the previous frame: every frame must still be
 validated against directory 0, never against frame k-1.
 
 Negative controls assert the comparator can fail, one per property it claims
-to cover: a 1 ULP change, a frame swap, a row reversal, an intra-row swap and a
-shape change.
+to cover: a 1 ULP change, a frame swap, a row reversal, an intra-row swap, a
+shape change, a sampling-rate change and a datatype change. One fixture
+carries resolution tags so the sampling-rate comparison is not two copies of
+the same default.
+
+The reader-count axis is only meaningful if the pool really ran on several
+handles at once — identical pixels come out either way. `readFrames` therefore
+reports the OpenMP team size it actually got and the peak number of frames
+decoding simultaneously, and the test asserts both. Before that was added the
+whole matrix passed under `OMP_NUM_THREADS=1`; it now fails there, which is
+the point. A 700x700x12 fixture gives each frame enough decode work for the
+peak to reach the pool size rather than one worker draining the queue.
+
+A two-damaged-frame fixture checks that the error the caller sees belongs to
+the lowest position in `frames` at 1/2/4/8 readers, not to whichever worker
+failed first. `tiffMovieReaderApplies` has its own table of 16 names checked
+against `Image::_read`'s dispatch order, including `.stif`, `.gain` and an
+explicit `:mrc` override.
 
 ## Limitations
 

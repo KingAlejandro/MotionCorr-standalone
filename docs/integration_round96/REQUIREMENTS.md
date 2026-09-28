@@ -207,3 +207,96 @@ base, and base's manifest predates `star_sha256`. Committing the candidate
 tooling onto the detached HEAD fixed the harness; the count returned to 4. It
 also pins a real constraint — `verify_fixtures.py` and `MANIFEST.json` must land
 in one commit, which they do.
+
+
+## J. Native CUDA baseline — RUN (supersedes the F1–F3 unrun rows)
+
+Alex authorized parallel GPU acceptance on 28 Sep. Two independent native
+executions were performed; neither is a compile.
+
+### J1. Dedicated SCARF allocation — job `3511135`
+
+Partition `gpu-devel`, exclusive node `gn3001`, A100-SXM4-40GB, own dataset copy
+under `pr110-baseline/data`. Head `07a6a777`.
+
+> Partition `gpu` carries QoS `limitgpunodes` with `MaxJobsPU=1`, held by #94, so
+> the first submission (`3511126`) sat on `QOSMaxJobsPerUserLimit`. `gpu-devel` is
+> a separate QOS with idle nodes — a genuinely distinct allocation, not a share of
+> #94's. Job `3511126` was cancelled by me; no other task's job was touched.
+
+**Execution witness, sampled while the run was on the device:**
+
+```
+pid 410748  .../cand/build/motioncorr  428 MiB  GPU-c7b9c523-f18f-6873-d6d1-d080c2489e8f
+GPU-c7b9c523...  30 % util, 439 MiB      other three devices: 0 %, 4 MiB
+```
+
+| arm | exit | wall | peak RSS | products |
+|---|---|---|---|---|
+| main `4c952b3` | 0 | 28.14 s | 1 610 960 kB | 24 |
+| candidate | 0 | 27.92 s | 1 609 476 kB | 24 |
+
+### J2. Shared VM GPU3 — second platform
+
+Previously unallocated GPU3, selected by UUID, CPUs 120-123, own device lock,
+pre-flight abort if GPU3 has any compute app. #53's GPU0/1 and #69's GPU2 not
+touched. Extends the published 24-CPU / 3-device collective envelope, recorded.
+Correctness only; the benchmark mutex was not taken and no timing is claimed
+from a shared box.
+
+```
+pid 1228552  .../cand/build/motioncorr  3206 MiB  GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+GPU-b2cb2c39...  20 % util, 3271 MiB     other three: 0 %, 1 MiB
+```
+
+### J3. Result — the two platforms agree exactly
+
+| | SCARF gn3001 | VM GPU3 |
+|---|---|---|
+| images pixel-identical | **24/24** | **24/24** |
+| total pixels compared | **341,735,520** | **341,735,520** |
+| per-image RMSE / max abs | 0.0 / 0.0 | 0.0 / 0.0 |
+| core header diff bytes | 0 | 0 |
+| normalized label diff bytes | 0 | 0 |
+| STAR artifacts identical | **25/25** | **25/25** |
+| differing | 21 `.log` + 4 PDFs | 24 `.log` + 4 PDFs |
+
+The pixel count equals the cpu64 lane's exactly, so native and CPU cover the
+same complete product surface. The `.log` differences are measured GPU timing
+only — e.g. `Total GPU alignment time: 114.33 ms` vs `9.21 ms`, `cuFFT execution
+time: 1.05 ms` vs `1.04 ms` — with the per-movie STAR beside them byte-identical.
+**The four PDF differences remain, and the overall verdict is still not green on
+them.**
+
+### J4. Native controls — job `3511136`
+
+| control | result |
+|---|---|
+| C1 decoded-reader, `--j 1` vs `--j 8`, same device | **24/24 pixel-identical**, rmse 0.0, normalized label diff 0 |
+| C2 truncated TIFF | exit 1; *"failed for 1 movie"* — exactly the damaged one, named 5×; healthy `.mrc` retained; **joint STAR withheld** |
+| C3 resume after repair | exit 0; 2 of 2 products; joint STAR now present; healthy movie **pixel-identical** (untouched by the resume); repaired movie **pixel-identical** to the full healthy run |
+
+### J5. Three harness defects found and fixed, none a product defect
+
+Recorded because each produced a confident-looking wrong answer:
+
+1. The first comparison reported **78 failing artifacts**. It hashed `.mrc`
+   whole-file, and the MRC label is timestamped —
+   `label_header_diff_bytes=3`, `normalized_label_diff_bytes=0`. It also passed
+   `--require-complete-coverage` without the STAR pair, so the comparator failed
+   on missing `motion_and_star` coverage and returned 1 for a pair whose image
+   parity was exact.
+2. `total_pixels_compared: 0` — the JSON keys were guessed. The real schema is
+   `checks.corrected_image.*`; the 341.7 M figure exists only because that was
+   fixed.
+3. The damaged-movie sandbox filtered `movies.star` with a rule that never
+   matched (data rows carry a trailing optics-group column), so 22 movies were
+   legitimately absent and "resume failed" was the sandbox, not the product.
+
+### J6. Still not claimed
+
+Neither run is a timing study, a CPU/CUDA agreement claim, a RELION parity
+claim, or a scientific-equivalence claim. The VM run in particular shares a box
+and is correctness-only. `km_local_noisy` still FAILs and is still excluded from
+aggregate acceptance. The default CUDA configure failure (§E1) and the numpy
+build dependency (§E2) are unchanged and still open.

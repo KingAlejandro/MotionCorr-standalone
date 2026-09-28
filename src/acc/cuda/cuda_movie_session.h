@@ -20,6 +20,8 @@
  */
 class CudaMovieSession {
 public:
+    CudaMovieSession(const CudaMovieSession&) = delete;
+    CudaMovieSession& operator=(const CudaMovieSession&) = delete;
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
 
@@ -134,6 +136,9 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    cudaError_t releaseBuffer(void *&slot) noexcept;
+    template<class T> cudaError_t releaseBuffer(T *&slot) noexcept;
+    cufftResult releasePlan(cufftHandle &slot, bool &owned) noexcept;
     void recordFailure(cudaError_t err, const char *stage, int line);
     void recordCufftFailure(cufftResult res, const char *stage, int line);
 

@@ -1,34 +1,10 @@
 #include "cuda_fft_prep.h"
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_scoped_resources.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
-
-class CudaMemoryCleanup {
-public:
-    ~CudaMemoryCleanup() {
-        for (size_t i = 0; i < allocations.size(); ++i) {
-            if (allocations[i] != nullptr) cudaFree(allocations[i]);
-        }
-    }
-
-    void add(void *allocation) { allocations.push_back(allocation); }
-
-private:
-    std::vector<void *> allocations;
-};
-
-class CufftPlanCleanup {
-public:
-    CufftPlanCleanup() : owns_plan(false) {}
-    ~CufftPlanCleanup() { if (owns_plan) cufftDestroy(plan); }
-    void take(cufftHandle handle) { plan = handle; owns_plan = true; }
-
-private:
-    cufftHandle plan;
-    bool owns_plan;
-};
 
 // Issue #69: this handler CONSUMES the error -- reads it, logs it, returns false --
 // which clears the thread's last-error slot. A caller that re-dispatches CUDA
@@ -159,7 +135,7 @@ bool cudaForwardFFT2D(
 
     float *d_real = nullptr;
     cufftComplex *d_comp = nullptr;
-    CudaMemoryCleanup memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     HANDLE_ERROR(cudaMalloc((void**)&d_real, sz_real));
     memory_cleanup.add(d_real);
     cudaError_t comp_err = cudaMalloc((void**)&d_comp, sz_comp);
@@ -170,14 +146,12 @@ bool cudaForwardFFT2D(
     memory_cleanup.add(d_comp);
 
     cufftHandle plan_r2c;
-    CufftPlanCleanup plan_cleanup;
+    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
     int n[2] = {ny, nx};
-    cufftResult plan_res = cufftPlanMany(&plan_r2c, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_R2C, 1);
-    if (plan_res != CUFFT_SUCCESS) {
-        logfile << "ERROR: cufftPlanMany R2C failed" << std::endl;
-        return false;
-    }
+    CUFFT_CHECK(cufftCreate(&plan_r2c));
     plan_cleanup.take(plan_r2c);
+    size_t plan_work_bytes = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan_r2c, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_R2C, 1, &plan_work_bytes));
 
     const float inv_size = 1.0f / ((float)nx * ny);
     const size_t n_comp_elems = (size_t)ny * nfx;
@@ -194,6 +168,10 @@ bool cudaForwardFFT2D(
         HANDLE_ERROR(cudaMemcpy(MULTIDIM_ARRAY(Fframes[iframe]), d_comp, sz_comp, cudaMemcpyDeviceToHost));
     }
 
+    const cufftResult plan_release = plan_cleanup.releaseAll();
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    CUFFT_CHECK(plan_release);
+    HANDLE_ERROR(memory_release);
     return true;
 }
 
@@ -249,7 +227,7 @@ bool cudaInverseFFT2D(
 
     cufftComplex *d_comp = nullptr;
     float *d_real_single = nullptr;
-    CudaMemoryCleanup memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     HANDLE_ERROR(cudaMalloc((void**)&d_comp, sz_comp));
     memory_cleanup.add(d_comp);
     if (s_d_cached_Iframes == nullptr) {
@@ -258,14 +236,12 @@ bool cudaInverseFFT2D(
     }
 
     cufftHandle plan_c2r;
-    CufftPlanCleanup plan_cleanup;
+    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
     int n[2] = {ny, nx};
-    cufftResult plan_res = cufftPlanMany(&plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1);
-    if (plan_res != CUFFT_SUCCESS) {
-        logfile << "ERROR: cufftPlanMany C2R failed" << std::endl;
-        return false;
-    }
+    CUFFT_CHECK(cufftCreate(&plan_c2r));
     plan_cleanup.take(plan_c2r);
+    size_t plan_work_bytes = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
 
     Iframes.resize(n_frames);
     for (int iframe = 0; iframe < n_frames; iframe++) {
@@ -281,6 +257,10 @@ bool cudaInverseFFT2D(
     }
 
     if (s_d_cached_Iframes != nullptr) cached_frames_cleanup.keep();
+    const cufftResult plan_release = plan_cleanup.releaseAll();
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    CUFFT_CHECK(plan_release);
+    HANDLE_ERROR(memory_release);
     return true;
 }
 
@@ -340,7 +320,7 @@ bool cudaPreparePatch(
 
     float *d_Ipatches = nullptr;
     cufftComplex *d_Fpatches = nullptr;
-    CudaMemoryCleanup memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
     memory_cleanup.add(d_Ipatches);
     HANDLE_ERROR(cudaMalloc((void**)&d_Fpatches, sz_all_patch_comp));
@@ -392,11 +372,13 @@ bool cudaPreparePatch(
 
     // Batched cuFFT 2D R2C across n_groups
     cufftHandle plan_batched;
-    CufftPlanCleanup plan_cleanup;
+    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
     int n[2] = {patch_h, patch_w};
-    CUFFT_CHECK(cufftPlanMany(&plan_batched, 2, n, NULL, 1, patch_h * patch_w,
-                              NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups));
+    CUFFT_CHECK(cufftCreate(&plan_batched));
     plan_cleanup.take(plan_batched);
+    size_t plan_work_bytes = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan_batched, 2, n, NULL, 1, patch_h * patch_w,
+                              NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups, &plan_work_bytes));
 
     CUFFT_CHECK(cufftExecR2C(plan_batched, (cufftReal*)d_Ipatches, d_Fpatches));
 
@@ -416,5 +398,9 @@ bool cudaPreparePatch(
         HANDLE_ERROR(cudaMemcpy(MULTIDIM_ARRAY(Fpatches[igroup]), src_ptr, sz_patch_comp, cudaMemcpyDeviceToHost));
     }
 
+    const cufftResult plan_release = plan_cleanup.releaseAll();
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    CUFFT_CHECK(plan_release);
+    HANDLE_ERROR(memory_release);
     return true;
 }

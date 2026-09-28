@@ -2131,22 +2131,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #ifdef _CUDA_ENABLED
 		cufftComplex *d_patch_fcomplex_buffer = nullptr;
 		size_t sz_cached_patch_fcomplex = 0;
-		// Issue #69. This scratch outlives the patch loop but is freed at the bottom of
-		// it, and several statements inside the loop leave by exception:
-		// alignPatchDevice() throws on any CUDA error (every error macro in
-		// cuda_alignpatch.cu throws), the resident-frame download reports a hard error,
-		// and the poisoned-context check fails the movie deliberately. run() catches
-		// RelionError per movie and continues, so without this guard the buffer is
-		// leaked once per failing movie for the lifetime of the process. NOTE: this
-		// guard covers only the caller's buffer. cudaAlignPatchDevice's own eight
-		// buffers, eight events and cuFFT plan STILL leak on its throwing paths --
-		// that is issue #69 F1/F2, deliberately left to PR #93, which rewrites the
-		// same ownership. The explicit free below stays and nulls, so this is a
-		// backstop, not a second free.
+		// Movie-local scratch is borrowed by alignment. The guard owns only this
+		// allocation; alignment owns its separate per-call resources.
+
 		struct PatchFourierScratchGuard {
 			cufftComplex **slot;
 			~PatchFourierScratchGuard() {
-				if (*slot) { cudaFree(*slot); *slot = nullptr; }
+				cufftComplex *owned = *slot; *slot = nullptr;
+				if (owned) cudaFree(owned);
 			}
 		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
@@ -2191,8 +2183,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTIC(TIMING_PREP_PATCH);
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
-						if (d_patch_fcomplex_buffer) cudaFree(d_patch_fcomplex_buffer);
-						if (cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches) != cudaSuccess) {
+						cufftComplex *stale = d_patch_fcomplex_buffer;
+                        d_patch_fcomplex_buffer = nullptr;
+                        sz_cached_patch_fcomplex = 0;
+                        if (stale && cudaFree(stale) != cudaSuccess)
+                            REPORT_ERROR("Failed to release patch Fourier scratch");
+						const cudaError_t patch_alloc_error = cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches);
+                        if (cudaErrorPoisonsContext(patch_alloc_error))
+                            REPORT_ERROR("Fatal CUDA allocation failure preparing patch Fourier scratch");
+                        if (patch_alloc_error != cudaSuccess) {
 							d_patch_fcomplex_buffer = nullptr;
 							sz_cached_patch_fcomplex = 0;
 						} else {

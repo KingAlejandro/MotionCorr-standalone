@@ -166,6 +166,19 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
         add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
         set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
+        add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
+        target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
+        target_link_options(cuda_fault_matrix PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaMemset"
+            "LINKER:--wrap=cudaDeviceSynchronize"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftSetWorkArea"
+            "LINKER:--wrap=cufftPlanMany" "LINKER:--wrap=cufftExecR2C"
+            "LINKER:--wrap=cufftExecC2R")
+        add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
+        set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
         # are exercised in production code rather than simulated by a predicate test.

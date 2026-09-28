@@ -3394,48 +3394,63 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		}
 
 		long long record_num = 0, line = 1;
-		while (true) {
-			// Skip whitespace by hand so diagnostics can name a line number.
+
+		// Consume whitespace by hand, counting newlines, so a diagnostic can name
+		// the line the offending field is actually on. Doing this before every
+		// field -- not just before each record -- keeps the count exact even when
+		// a record's fields straddle a line break, which this format permits.
+		auto skip_ws = [&]() {
 			int c;
 			while ((c = f_defect.peek()) != EOF && isspace(c)) {
 				if (c == '\n') line++;
 				f_defect.get();
 			}
+		};
+		// Built only on an error path; the happy path never pays for it.
+		auto where = [&]() {
+			return " (record " + std::to_string(record_num + 1) +
+			       ", line " + std::to_string(line) + ") of " + fn_defect;
+		};
+
+		while (true) {
+			skip_ws();
 			if (f_defect.peek() == EOF) break;
 
-			const std::string where = " (record " + std::to_string(record_num + 1) +
-			                          ", line " + std::to_string(line) +
-			                          ") of " + fn_defect;
-
-			// Read the four fields as tokens and convert each explicitly. Streaming
-			// straight into integers cannot report the offending field: an
-			// out-of-range value sets failbit *after* consuming its digits, so a
-			// recovery read would name the following token instead.
+			// Read each field as a token and convert it explicitly. Streaming
+			// straight into integers cannot attribute a failure: an out-of-range
+			// value sets failbit *after* consuming its digits, so a recovery read
+			// would name the following field.
 			static const char *const FIELD[4] = { "x", "y", "w", "h" };
 			long long field[4] = { 0, 0, 0, 0 };
 			for (int i = 0; i < 4; i++) {
+				if (i > 0) skip_ws();
 				std::string token;
-				if (!(f_defect >> token)) {
-					REPORT_ERROR("Truncated defect record" + where +
+				if (f_defect.peek() == EOF || !(f_defect >> token)) {
+					REPORT_ERROR("Truncated defect record" + where() +
 					             ": expected four integers 'x y w h', but the file ended "
 					             "after " + std::to_string(i) + " of 4 fields.");
 				}
-				size_t used = 0;
-				try {
-					field[i] = std::stoll(token, &used);
-				} catch (const std::out_of_range &) {
-					REPORT_ERROR("Out-of-range defect field" + where + ": '" +
-					             std::string(FIELD[i]) + "' is \"" + token +
-					             "\", which does not fit in a 64-bit integer.");
-				} catch (const std::invalid_argument &) {
-					used = 0;
+
+				// Classify syntax before range, so a token that is both malformed
+				// and huge is reported as malformed rather than out-of-range.
+				size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
+				bool integral = (d < token.size());
+				for (size_t j = d; j < token.size(); j++) {
+					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
 				}
-				if (used != token.size()) {
-					REPORT_ERROR("Malformed defect record" + where + ": field '" +
+				if (!integral) {
+					REPORT_ERROR("Malformed defect record" + where() + ": field '" +
 					             std::string(FIELD[i]) + "' is \"" + token +
 					             "\", which is not an integer. The MotionCor2 txt defect "
 					             "format does not support comments, headers or "
 					             "non-integer fields.");
+				}
+				try {
+					field[i] = std::stoll(token);
+				} catch (const std::out_of_range &) {
+					REPORT_ERROR("Out-of-range defect field" + where() + ": '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which does not fit in a 64-bit integer.");
 				}
 			}
 			const long long x = field[0], y = field[1], w = field[2], h = field[3];

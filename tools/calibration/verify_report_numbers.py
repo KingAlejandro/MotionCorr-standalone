@@ -167,7 +167,29 @@ def main() -> int:
         l3cell("mov_shift2_gplus", "traj_max_shift_error"), 0.0, 1e-12)
     chk("L3 gain 1 ppm relative RMSE", l3cell("gain_1e-06",
                                               "image_relative_rmse"), 2.037e-3, 0.01)
-    chk("L3 dose 0.5 delta-B", l3cell("dose_0.5", "std_delta_b_a2"), 3.551, 0.01)
+    chk("L3 dose 0.5 delta-B", l3cell("dose_0.5", "std_delta_b_a2"), 3.560, 0.002)
+
+    print("\n--- section 10.4.1: boundary sensitivity and the three disclosures ---")
+    hold = [r for r in allr if A.joint_split(r) == "holdout"]
+    s10 = A.separation(sel, "std_delta_b_a2", "harm_delta_b_a2", 10.0, floors)
+    chk("separable at the 10 A^2 boundary", 1.0 if s10.get("separable") else 0.0, 1.0, 0)
+    chk("theta at the 10 A^2 boundary", s10["threshold"], 5.722, 0.01)
+    h10 = A.apply_threshold(hold, "std_delta_b_a2", s10["threshold"],
+                            "harm_delta_b_a2", 10.0, floors)
+    chk("hold-out FN rate at the 10 A^2 boundary", h10["fn_rate"], 0.112, 0.02)
+    chk("frozen rule verdict at 10 A^2 is warning, not blocking",
+        1.0 if A.classify(s10, h10, floors.get("std_delta_b_a2", 0.0) or 0.0) == "warning"
+        else 0.0, 1.0, 0)
+    chk("cells tiered from a rejected fit",
+        sum(1 for r in allr if A.harm_tiered_from_rejected_fit(r, "harm_delta_b_a2")), 301, 0)
+    chk("Layer 1 cells in the joint hold-out (structurally zero)",
+        sum(1 for r in l1 if A.joint_split(r) == "holdout"), 0, 0)
+    chk("rejected fits over the whole corpus",
+        sum(1 for r in allr if A.get(r, "std_delta_b_a2") is not None
+            and not A.envelope_measurable(r)), 757, 0)
+    x6 = [r for r in l2 if A.fault_of(r) == "X6_dose_scale"]
+    chk("gate-side R^2 maximum on the dose arm",
+        max(r["std_fit_r2"] for r in x6), 0.8361, 0.001)
 
     print(f"\n{sum(OK)}/{len(OK)} checks passed")
     return 0 if all(OK) else 1

@@ -200,6 +200,22 @@ RESPONSIBILITY: Dict[str, Tuple[str, ...]] = {
 ALL_SUBTYPES = ("envelope", "geometry", "scale")
 
 
+def harm_tiered_from_rejected_fit(rec: Dict[str, Any], harm_key: str) -> bool:
+    """True when a cell's harm label rests on an envelope fit the instrument rejected.
+
+    Layer 1 and Layer 3 have no noiseless object, so ``harm_of`` falls back to
+    the gate-side ``std_delta_b_a2`` -- the very quantity ``envelope_measurable``
+    may declare unusable. 301 cells (78 Layer-1, 223 Layer-3) are tiered that
+    way. The counterfactual in ``separation`` removes rejected fits from the
+    DIAGNOSTIC side only, so those cells keep a ground-truth label derived from
+    a rejected fit. Reported so the asymmetry is visible.
+    """
+    v = rec.get(harm_key)
+    has_truth = isinstance(v, (int, float)) and math.isfinite(float(v))
+    return (not has_truth) and (get(rec, "std_delta_b_a2") is not None) \
+        and not rec.get("std_envelope_used", False)
+
+
 def harm_of(rec: Dict[str, Any], harm_key: str) -> float:
     """Absolute envelope harm for a cell, in A^2.
 
@@ -213,7 +229,16 @@ def harm_of(rec: Dict[str, Any], harm_key: str) -> float:
         v = rec.get("std_delta_b_a2")
     if v is None or not isinstance(v, (int, float)) or not math.isfinite(float(v)):
         return 0.0
-    # Envelope HARM is loss, so only a positive delta-B counts. A negative value
+    # Envelope HARM is loss, so only a positive delta-B counts.
+    #
+    # CONSEQUENCE, disclosed rather than buried: a cell whose envelope change is
+    # NEGATIVE -- it retained more high-frequency amplitude than the reference,
+    # which is what incoherent additive damage and under-dose-weighting both do
+    # -- is scored as zero harm and lands in the negligible tier. Two such cells
+    # set the headline separation bands in section 10.4 (X6 rho=0.5 with raw
+    # harm -16.0 A^2, and X7 n=10000 with raw harm -0.87 A^2). "No diagnostic
+    # separates" is therefore partly a statement about this harm model, not only
+    # about the diagnostics. See report section 10.4.1. A negative value
     # means the test carries more high-frequency power than the reference, which
     # is what an incoherent additive fault such as hot pixels produces: it
     # flattens the spectrum. Taking the absolute value would score added noise
@@ -261,9 +286,9 @@ def envelope_measurable(rec: Dict[str, Any]) -> bool:
 
     This matters because the fault class it matters for is the one the review
     found missing. A dose-weighting difference is not Gaussian in k^2: across
-    the layer-2 dose arm the fit is accepted in 5 of 90 cells, R^2 runs 0.16 to
-    0.82, and the resulting estimate reads about zero on cells whose absolute
-    harm is +24 A^2. Excluding those cells would restore the diagnostic's
+    the layer-2 dose arm the fit is accepted in 0 of 90 cells, gate-side R^2
+    runs 0.0000 to 0.8361, and the resulting estimate reads about zero on cells
+    whose absolute harm is +24 A^2. Excluding those cells would restore the diagnostic's
     separation by deleting the evidence against it, so they are kept and the
     unmeasurable count is reported instead.
     """

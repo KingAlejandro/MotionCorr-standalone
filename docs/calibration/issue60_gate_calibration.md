@@ -23,7 +23,10 @@ All four are real. Each is reproduced against the pre-review code by
 **No threshold was changed and no gate was relaxed to resolve them.** All three
 proposed blocking checks are withdrawn as inconclusive as a result — including
 the one that initially survived the split and tiering corrections, because the
-Layer-2 dose arm restored by finding 4 is the arm it fails on (§6.1).
+Layer-2 dose arm restored by finding 4 is the arm it fails on (§6.1). The
+withdrawal of the *blocking* status holds at all three declared harm boundaries;
+at the loosest of them the envelope diagnostic does earn a **warning**-tier
+limit, which §10.4.1 reports rather than suppresses.
 
 | # | Finding | Status | Effect |
 |:--|:---|:---|:---|
@@ -390,7 +393,7 @@ attenuation, not more.
 The instrument had already flagged this and the analysis ignored it. A
 dose-weighting difference is not a Gaussian in k², so
 `spectral_transfer_decomposition` rejects the B-factor fit — `envelope_used` is
-false in **all 90** dose cells, with R² from 0.16 to 0.82 — and the published
+false in **all 90** dose cells, with gate-side R² from 0.0000 to 0.8361 — and the published
 analysis consumed `std_delta_b_a2` anyway. `analyze.envelope_measurable` now
 makes that visible; the cells are kept rather than excluded, because dropping
 them would restore the diagnostic's separation by deleting the evidence against
@@ -659,7 +662,7 @@ is one.
 
 | Published proposal | Disposition | Reason |
 |:---|:---|:---|
-| `std_delta_b_a2 ≤ 2 Å²` blocking | **withdrawn, inconclusive** | the prespecified dose arm that was missing from the published analysis is the one it fails on. Including it, the highest value on a negligible cell (3.296) is **27x larger** than the lowest on an unacceptable one (0.121): separation ratio 0.037, no value of the limit works. §6.1. |
+| `std_delta_b_a2 ≤ 2 Å²` blocking | **withdrawn, inconclusive** | the prespecified dose arm that was missing from the published analysis is the one it fails on. Including it, the highest value on a negligible cell (3.296) is **27x larger** than the lowest on an unacceptable one (0.121): separation ratio 0.037, no value of the limit works at the declared 5 Å² boundary. §6.1. At a 10 Å² boundary it does separate and the frozen rule rates it **warning**, not blocking — §10.4.1. |
 | `std_shift_px ≤ 0.05 px` blocking | **withdrawn, inconclusive** | its entire positive class was the accounted-for translation, which the frozen `FAULT_CLASS` labels benign. With that corrected the class is empty. Under the alternative reading of the clause it separates only at exactly 0.1 px, the clause value itself — a tautology, not a measurement. §10.2. |
 | `std_scale_dev ≤ 0.01` blocking (already demoted to warning pre-review) | **withdrawn, inconclusive** | its positive class was the uniform gain error, which the prespecification's own clause excludes. The new C2 control supplies the frame-dependent error the clause actually names, and shows the diagnostic **cannot see it**. §10.3. |
 | exact equality, same-platform CPU regression | **retained** | the one blocking check with measured support, and it needs no calibration: 176 harmless cells over twelve movies are bit-identical. §5. |
@@ -737,16 +740,85 @@ used for neither), movie-axis hold-out 120, severity-axis hold-out 471.
 | `std_scale_dev` | — | — | — | no positive class |
 
 For `std_delta_b_a2` the analysis also reports what the separation would be if
-the 353 cells whose Gaussian fit the instrument rejected were dropped: max
-negligible 0.713, min unacceptable 5.004, band **7.02**. That is quoted only to
-show how much of the published result depended on silently consuming rejected
-fits. It is **not** the recommended reading: the excluded set is the entire dose
-arm plus every harmless cell, and a gate cannot condition on whether its own fit
-converged.
+the **353 of 619** selection-bucket cells whose Gaussian fit the instrument
+rejected were dropped (757 of 1279 over the whole corpus): max negligible 0.713,
+min unacceptable 5.004, band **7.02**. That is quoted only to show how much of
+the published result depended on silently consuming rejected fits. It is **not**
+the recommended reading: the excluded set covers 51 of the 63 dose cells in the
+selection bucket and every harmless cell, and a gate cannot condition on whether
+its own fit converged.
 
 **These hold-out figures are a consistency check, not a blind validation** (§0.2),
 and the hold-out movies contain no unacceptable cells at all, so detection has
 never been tested on an unseen micrograph (§0.3).
+
+### 10.4.1 Sensitivity to the harm boundary, and three properties of the negative result
+
+The published §3.3 promised every conclusion re-reported at Δ*B* boundaries of
+2, 5 and 10 Å². The first revision of this section did not do that and asserted
+boundary-independence instead. It is not independent, and the omitted boundary
+is the one where the result is least negative. Corrected, for
+`std_delta_b_a2` on the joint-selection bucket:
+
+| Harm boundary | Separable | θ | band | hold-out FP | hold-out FN | frozen rule's verdict |
+|:---|:---:|---:|---:|---:|---:|:---|
+| 2 Å² | no | — | 2.7e-16 | — | — | not recommended |
+| **5 Å² (declared)** | **no** | — | **0.037** | — | — | **not recommended** |
+| 10 Å² | **yes** | 5.72 | 3.01 | 0/228 (0.000) | 15/134 (**0.112**) | **warning** |
+
+At the loosest of the three boundaries the diagnostic does separate, and the
+frozen decision rule rates it **warning** — not blocking, because 11.2 % of
+unacceptable hold-out cells slip under the threshold. So the accurate statement
+is narrower than "inconclusive at every boundary":
+
+> **The withdrawal of the *blocking* recommendation holds at all three declared
+> boundaries. The claim that the outcome is boundary-independent does not: at
+> 10 Å² the diagnostic earns a warning-tier limit.**
+
+Since 10 Å² corresponds to 24 % amplitude loss at 3 Å, a reader who considers
+that an acceptable harm ceiling should read this result as "a warning-tier
+limit near 5.7 Å² is defensible", not as "nothing works". This report does not
+recommend that boundary — 5 Å² was the declared one — but hiding the result
+would have made the negative conclusion look stronger than the data supports.
+
+Three further properties of the negative result, none of which were visible in
+the first revision:
+
+**1. Two cells set the headline bands, and both have *negative* measured harm.**
+The declared currency counts only envelope *loss*, so a cell that retained
+*more* high-frequency amplitude than its reference scores zero harm and lands in
+the negligible tier. The cells that cap the negligible side are exactly those:
+
+| Diagnostic | max-negligible cell | value | raw harm before clamping |
+|:---|:---|---:|---:|
+| `std_delta_b_a2` | X6 dose ρ=0.5 | 3.296 | **−16.0 Å²** |
+| `image_relative_rmse` | X7 hot pixels n=10⁴ | 4.885 | **−0.87 Å²** |
+
+So "no diagnostic separates" is partly a statement about the harm model and not
+only about the diagnostics: under-dose-weighting and incoherent additive damage
+are both real faults that this currency prices at zero. §11 already records that
+Δ*B* cannot price incoherent damage; the dose arm shows it also cannot price a
+re-weighting of frames in the direction that *retains* amplitude.
+
+**2. 301 cells are tiered from a fit the instrument rejected.** Layers 1 and 3
+have no noiseless object, so `harm_of` falls back to the gate-side
+`std_delta_b_a2` — the quantity `envelope_measurable` may declare unusable. 78
+Layer-1 and 223 Layer-3 cells get their ground-truth label that way. The
+counterfactual above removes rejected fits from the *diagnostic* side only, so
+those cells keep a label derived from a rejected fit. `analyze.
+harm_tiered_from_rejected_fit` exposes this; it is not repaired here, because
+repairing it means measuring absolute harm on real micrographs, which requires a
+noiseless object that does not exist for them.
+
+**3. Layer 1 can never appear in the joint hold-out, by construction.** Layer 1
+runs only on selection movies, so every Layer-1 hold-out-severity cell is
+`{movie: selection, severity: hold-out}` → mixed → used for neither bucket:
+132 selection, 120 mixed, **0 hold-out**. The corrected split traded one
+systematic absence (Layer 3, which the leak excluded) for another (Layer 1,
+which the strict two-axis rule excludes). The `severity_axis_holdout` view (471
+cells) is what recovers Layer-1 generalisation evidence, and it is reported
+alongside the joint view for that reason.
+
 
 ### 10.5 What the calibration does still establish
 

@@ -157,6 +157,45 @@ def test_split_axes_are_independent(data: Dict[str, List[Dict[str, Any]]]) -> No
           f"{len(joint_hold)} cells")
 
 
+def test_unsplit_cells_are_reported(data) -> None:
+    """A cell that falls off the frozen grids must be counted, not silently dropped.
+
+    ``_severity_axis`` returns None for a fault or severity the frozen grids do
+    not contain, and Layer-2 records have no movie, so such a cell becomes
+    "unsplit" and enters neither bucket nor any panel-coverage subset. That is
+    the right behaviour -- a post-hoc control must not influence a threshold --
+    but it must be visible, because a future Layer-2 arm added off-grid would
+    otherwise vanish with nothing but a count to show for it.
+    """
+    print("\nContract 6: off-grid cells are counted, not silently dropped")
+    allr = data["L1"] + data["L2"] + data["L3"]
+    unsplit = [r for r in allr if A.joint_split(r) == "unsplit"]
+    check("unsplit cells are all post-hoc controls or nulls",
+          all(A.fault_of(r).startswith(("C2_", "H4_null")) for r in unsplit),
+          f"{len(unsplit)} unsplit: "
+          f"{sorted({A.fault_of(r) for r in unsplit})}")
+    check("no in-grid fault is unsplit",
+          not [r for r in unsplit if A.fault_of(r) in SEVERITY_GRIDS],
+          "an in-grid fault falling off the split would be invisible to the analysis")
+
+
+def test_harm_label_provenance(data) -> None:
+    """Cells whose harm label rests on a rejected envelope fit must be countable."""
+    print("\nContract 7: harm labels derived from a rejected fit are countable")
+    allr = data["L1"] + data["L2"] + data["L3"]
+    n = sum(1 for r in allr if A.harm_tiered_from_rejected_fit(r, "harm_delta_b_a2"))
+    check("the count is exposed rather than hidden", n > 0,
+          f"{n} cells tiered from a fit the instrument rejected "
+          f"({sum(1 for r in data['L1'] if A.harm_tiered_from_rejected_fit(r, 'harm_delta_b_a2'))}"
+          f" Layer-1, "
+          f"{sum(1 for r in data['L3'] if A.harm_tiered_from_rejected_fit(r, 'harm_delta_b_a2'))}"
+          f" Layer-3)")
+    # Layer 2 has a noiseless object, so it must never need the fallback.
+    check("Layer 2 never falls back to the gate-side estimate",
+          sum(1 for r in data["L2"]
+              if A.harm_tiered_from_rejected_fit(r, "harm_delta_b_a2")) == 0)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data", type=Path, default=Path("docs/calibration/data"))
@@ -171,6 +210,8 @@ def main() -> int:
     test_accounted_translation_is_not_harmful(data)
     test_uniform_scale_is_not_frame_dependent_harm(data)
     test_split_axes_are_independent(data)
+    test_unsplit_cells_are_reported(data)
+    test_harm_label_provenance(data)
     print("\n" + "=" * 74)
     if FAILURES:
         print(f" {len(FAILURES)} CONTRACT(S) FAILED: {', '.join(FAILURES)}")

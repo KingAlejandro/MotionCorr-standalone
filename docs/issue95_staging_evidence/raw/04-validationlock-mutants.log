@@ -1,0 +1,33 @@
+=== VALIDATION LOCK ACQUIRED 2026-09-28T00:15:21Z ===
+2
+########## MUTANT: replacement buffer transposed back to bad-pixel-major
+build exit 0
+FAIL: sparse-24f chunk=1: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: sparse-24f chunk=2: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: sparse-24f chunk=3: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: sparse-24f chunk=5: recorded sparse replacements match the reference, in the runner's frame-major layout
+test exit 1
+########## MUTANT: gain multiply dropped on neighbour gather
+build exit 0
+FAIL: raw-gain-11f chunk=1: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: raw-gain-11f chunk=2: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: raw-gain-11f chunk=3: recorded sparse replacements match the reference, in the runner's frame-major layout
+FAIL: raw-gain-11f chunk=11: recorded sparse replacements match the reference, in the runner's frame-major layout
+test exit 1
+########## MUTANT: write_in_place ignored; raw host frames clobbered
+build exit 0
+FAIL: raw-gain-11f chunk=1: every repaired pixel is bit-identical to the reference loop
+FAIL: raw-gain-11f chunk=2: every repaired pixel is bit-identical to the reference loop
+FAIL: raw-gain-11f chunk=3: every repaired pixel is bit-identical to the reference loop
+FAIL: raw-gain-11f chunk=11: every repaired pixel is bit-identical to the reference loop
+test exit 1
+########## MUTANT: d_max bound removed
+build exit 0
+FAIL: buildSchedule rejects d_max above the runner's maximum of 4
+FAIL: a rejected buildSchedule leaves nothing half-populated
+247 checks, 2 failures
+test exit 1
+########## RESTORED
+247 checks, 0 failures
+restored test exit 0
+50445f60df06ce745d2bc0fee307534c18a1495e3da5df277833e2004eef1e3d  src/frame_staging_plan.cpp

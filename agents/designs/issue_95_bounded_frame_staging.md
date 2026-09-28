@@ -28,6 +28,13 @@ Out of scope, deliberately: any generic allocator framework, any pipeline
 rewrite, any arithmetic/FFT/precision change, any default promotion, and any
 second movie loader. Runner integration stays with #94.
 
+Precisely what this branch does to the build: `src/frame_staging_plan.cpp` is
+picked up by the existing `GLOB_RECURSE` in `CMakeLists.txt`, so it compiles
+into `motioncorr_core` and is linked into the `motioncorr` executable. It has
+**zero call sites** and no namespace-scope dynamic initialisers, so no existing
+target changes behaviour — but "does not modify the production pipeline" should
+be read as "adds an unreferenced object file", not "does not touch the binary".
+
 ---
 
 ## 2. What the pipeline actually does with frame data
@@ -158,7 +165,7 @@ this ADR and it is what drives [§8](#8-decision-and-gono-go).
 ### 5.1 A third full-movie host stack is uncharged
 
 The `real`/`r2c` arithmetic in the #95 task comment covers `Iframes` and
-`Fframes`. The CPU reconstruction branch also allocates `Irefframes` at `:2385`
+`Fframes`. The CPU reconstruction branch also allocates `Irefframes` at `:2394`
 via `Irefframes[iframe]().initZeros(Iframes[iframe]())`, while `Iframes` is live
 and `Fframes` is explicitly retained. Calculated high-water for that branch is
 `2·real + r2c` = **3.820 GiB**, not 2.547 GiB.
@@ -170,8 +177,9 @@ reduces the stack into `Iref` and, for the even/odd split, into `Iref_even` /
 gives `0 + val` then the same ascending accumulation — arithmetically identical,
 bit for bit — and removes `4·F·W·H`.
 
-That is a **33% reduction of the CPU high-water with no streaming, no chunking
-and no re-decode.** It is not implemented here: it edits the shared runner that
+That is a **calculated 33% reduction of the CPU high-water with no streaming, no
+chunking and no re-decode** — an argument from the source, not a measurement and
+not a run. It is not implemented here: it edits the shared runner that
 #94 and #53 are working in, and it is a different change from staging. It is
 recorded so it is not double-implemented, and so no future "staging saves X"
 claim credits staging for it.
@@ -192,6 +200,16 @@ masked pixel `n_ok` is **identical for every frame**, and therefore:
 - the entire draw schedule can be materialised in the original order with zero
   frame data, and then applied to frames in any chunking.
 
+**Scope of that statement, stated precisely.** The schedule can be built before
+the *second* residency pass, not "before any frame is decoded". Both of its
+inputs come out of the completed first pass: `bad_mask` is `bBad`, thresholded
+from the unaligned sum over every frame, and `frame_std` is `std / n_frames`
+from the same statistics. Since `rnd_gaus` consumes zero draws when
+`sigma == 0`, even the draw *count* is only fixed once that pass is done. What
+Claim 2 buys is that the second pass may then be chunked — which is exactly the
+pass a staged design wants to chunk. An earlier draft of this ADR overstated
+this; the implementation was always correct, the prose was not.
+
 Repair also writes only masked pixels and reads only non-masked neighbours, so
 no repair ever reads another repair's output: the (pixel, frame) decisions are
 mutually independent given the schedule.
@@ -208,7 +226,7 @@ rejected.
 
 `buildSchedule` calls the real `rnd_gaus` rather than reimplementing Box–Muller,
 because `rnd_gaus` caches its second deviate in a file-static across calls
-(`src/funcs.cpp:574`) and short-circuits on `sigma == 0`. A reimplementation
+(`src/funcs.cpp:575-576`) and short-circuits on `sigma == 0`. A reimplementation
 would have to reproduce both to stay in step; calling it does so by construction.
 
 ### 5.3 On the resident CUDA path the host frame stack is a pure mirror
@@ -300,6 +318,91 @@ a change to #69's failure matrix and must be agreed there before implementation.
 
 ---
 
+## 7a. Index mapping, aggregate budgets, and cancellation
+
+An independent spec audit found these three required by the issue body and
+absent from an earlier draft of this ADR. Two are designed below; the third is
+declared undesigned, with an owner.
+
+### 7a.1 Frame index, exposure and grouping mapping
+
+There are three index spaces and a staged chunk must carry the map between
+them, or exposure and STAR rows silently shift.
+
+| space | definition | consumers |
+| --- | --- | --- |
+| original | 0-indexed position in the file, `0 .. nn-1` | readers |
+| selected | `frames[]`, built at `:1326` by filtering on `first_frame_sum` / `last_frame_sum` | everything below |
+| group | `group_start[]` / `group_size[]` over the **selected** space, `:1347` | local patch alignment |
+
+`frames[iframe]` maps selected → original and is *not* generally `iframe`. It is
+read by: dose weighting, `doses[iframe] = pre_exposure + dose_per_frame *
+(frames[iframe] + 1)` (`:2475`); the global trajectory,
+`mic.setGlobalShift(frames[i] + 1, ...)` (`:1992`); and `mic.first_frame =
+frames[0] + 1` (`:2553`). Local trajectories use a different origin again:
+`mic.patchZ.push_back(z + first_frame_sum)` (`:2304`).
+
+Therefore a staged chunk is a contiguous range **in the selected space**, and
+the staging record must carry `frames[]` for its range, not just a start and a
+count. A chunk that carries only `[first, first+C)` and lets the consumer assume
+`original == selected` produces correct pixels with wrong exposures whenever
+`--first_frame_sum > 1`, which no pixel comparison would catch.
+
+Grouping is a second, independent partition of the selected space, and the group
+boundaries do **not** align with staging chunk boundaries in general. Groups are
+consumed only after the forward FFT, from `Fframes`/`d_Fframes`, so a staged
+input chunk never has to respect them — but a design that tried to stage the
+*patch* stage would, and that is a different change.
+
+EER multiplies the mapping: selected frame `f` renders original EER frames
+`[f*eer_grouping + 1, (f+1)*eer_grouping]` (`:1405`), so one staged frame is
+`eer_grouping` decode units. Compressed MRC uses `readFrameInto(.., frames[i])`
+directly. Both are **unrun** here; only the mapping is stated.
+
+### 7a.2 Multi-GPU aggregate host-staging budget
+
+`staging::computeBudget` is **per process**. The issue's requirement that "one
+reader per GPU must not multiply memory without a bound" is a property of the
+caller, not of this calculator, and must be written down as such:
+
+```
+host_total_across_workers = n_workers · (staged_host + resident_host + extra_host)
+```
+
+with `n_workers` the number of concurrent MotionCorr processes on the host, not
+the number of GPUs — they differ whenever a GPU is idle or oversubscribed. The
+bound that matters is `host_total_across_workers ≤ host_budget`, so the
+per-process staged bound must be derived by **dividing** the host budget by
+`n_workers` before calling `largestChunkWithin()`, not by sizing each worker
+independently against the whole host. Charging each worker the full host budget
+is the failure mode this requirement exists to prevent, and nothing in the
+calculator stops a caller doing it — hence this paragraph.
+
+This interacts with #53's admission and #66's aggregate CPU budget. It is
+**stated, not enforced and not tested**: there is no multi-process test here,
+because there is no staged pipeline to run in multiple processes.
+
+### 7a.3 Cancellation, producer/consumer abort and resume
+
+**Declared undesigned in this ADR, with an owner.**
+
+The delivered component has no cancellation surface: `buildSchedule` and
+`applyChunk` are synchronous, own no memory beyond their outputs, start no
+threads and hold no file handles, so there is nothing to cancel, join or leak.
+That is a property of the component, not an answer to the requirement.
+
+A staged *pipeline* would need: waking a producer blocked on staging capacity,
+joining before destroying shared state, not freeing a buffer still referenced by
+a pending upload, and preserving #91's per-movie failure isolation and the
+existing non-prefix resume contract. All four are the same contracts #94 is
+already building for the prefetch producer, and #69 owns the failure matrix.
+Designing a second, competing set here is exactly the duplication #66 forbids.
+Under the §8 no-go there is no staged pipeline to attach them to; if the compact
+upload variant is ever built, it inherits #94's contracts rather than defining
+new ones.
+
+---
+
 ## 8. Decision and go/no-go
 
 **No-go on bounded frame/chunk input staging as a peak-memory measure, on
@@ -329,10 +432,12 @@ calculated evidence, for both paths — for different reasons.**
    prerequisite for every design above, and it is worth landing on its own
    because it converts "the RNG order forbids chunking" from an assumption into
    a tested fact.
-2. **`Irefframes` fusion** (§5.1) — 1.273 GiB, 33% of the CPU high-water,
-   bit-exact, no streaming. Not in this PR: it belongs to whoever holds the
-   runner integration slot. Recommended as the next memory change, ahead of any
-   staging work.
+2. **`Irefframes` fusion** (§5.1) — calculated 1.273 GiB, 33% of the calculated
+   CPU high-water, **argued bit-exact from the source but not built and not
+   run**, no streaming. Not in this PR: it belongs to whoever holds the runner
+   integration slot, and it needs its own test and its own 24-movie evidence
+   before the bit-exactness claim is more than an argument. Recommended as the
+   next memory change, ahead of any staging work.
 
 **Not proposed:** any generic allocator, any staging in the runner, any default
 change, any second loader, any precision or gate change.
@@ -356,6 +461,22 @@ that staging remains possible later, at zero cost today:
 
 Nothing else is required. `staging::computeBudget` is a calculator, not an
 allocator, and #94 is free to ignore it.
+
+**Confirmed with #94 on 2026-09-28** (branch `round96/94-claude-opus-5`, ADR
+`agents/designs/issue_94_bounded_prefetch.md`): both properties already hold.
+`MoviePrefetchRecord` carries an explicit `std::vector<int> frames` rather than
+an implicit whole-movie range, and reservations are taken before allocation,
+transferred on move and released exactly once. #94 independently reproduced both
+memory findings in §5.1 and §5.3.
+
+#94 also raised a point this ADR should adopt. Their `movieio::ByteBudget`
+distinguishes **three** outcomes, not two: "cannot ever be admitted, fall back",
+"must wait for capacity", and "granted over budget but counted". A capacity
+calculator that only answers "how many bytes" can recommend a chunk that can
+never fit, and an evidence trail that only records success cannot tell "the
+bound held" from "the bound was overridden N times". `largestChunkWithin()` in
+the component returns the first of those three explicitly, so a caller cannot
+silently proceed with an inadmissible chunk.
 
 ---
 
@@ -387,3 +508,14 @@ GPU slot. M2 and M3 need the device.
 - The device-side repair gather of §5.3 is analysed, not implemented or tested.
 - `Irefframes` fusion is argued to be bit-exact from the source; it is **not**
   built or run. That claim needs its own PR and its own 24-movie evidence.
+- The multi-GPU aggregate host budget of §7a.2 is **stated, not enforced and not
+  tested**. The calculator is per-process and cannot see its siblings.
+- The index mapping of §7a.1 is **stated, not implemented**. No staged record
+  type exists to carry `frames[]`, and the EER and compressed-MRC mappings are
+  written down but unrun.
+- Cancellation, producer/consumer abort and resume are **undesigned here** by
+  the deliberate choice in §7a.3, not overlooked.
+- The intentional-bug control injected bugs into the component only, never into
+  the test's transcription of the production loop. It therefore cannot detect
+  drift between that transcription and `motioncorr_runner.cpp:1732`; that was
+  checked by reading, twice, not by execution.

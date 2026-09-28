@@ -188,6 +188,24 @@ def compare_products(ref: Dict[str, Any], test: Dict[str, Any]) -> Dict[str, Any
     return out
 
 
+# Two-sided 95% Student t critical values by degrees of freedom. At n=3 (df=2) the factor is
+# 4.303, not 2 -- so a "mean +/- 2 SEM" band is far narrower than a 95% interval and treating
+# its exclusion of zero as significance overstates the evidence at these sample sizes.
+_T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306,
+        9: 2.262, 10: 2.228, 12: 2.179, 15: 2.131, 20: 2.086, 30: 2.042}
+
+
+def t95(df: int) -> float:
+    if df <= 0:
+        return float("nan")
+    if df in _T95:
+        return _T95[df]
+    for k in sorted(_T95):
+        if df < k:
+            return _T95[k]
+    return 1.960
+
+
 def fmt(x: Optional[float], nd: int = 3) -> str:
     return "n/a" if x is None else f"{x:.{nd}f}"
 
@@ -210,6 +228,8 @@ def main() -> int:
     warmups = [r for r in data["runs"] if r["rep"] == 0]
 
     failed = [r["tag"] for r in runs if r["exit_code"] != 0]
+    quarantined = [r["tag"] for r in runs if r.get("quarantined")]
+    timed_out = [r["tag"] for r in runs if r.get("timed_out")]
 
     # ---------------------------------------------------- product equality, computed first
     # Each arm is scored against the reference that consumed the SAME input set. Scoring a
@@ -317,6 +337,15 @@ def main() -> int:
     if unscored:
         print(f"  arms with no same-input reference, NOT scored: {unscored}")
     print(f"  non-zero exits: {failed if failed else 'none'}")
+    print(f"  timed out: {timed_out if timed_out else 'none'}")
+    if quarantined:
+        print(f"  QUARANTINED ({len(quarantined)}): settle gate not satisfied — these arms "
+              f"are included in the tables below but must not be read as clean evidence:")
+        for t in quarantined:
+            why = next((r.get("quarantine_reason") for r in runs if r["tag"] == t), None)
+            print(f"      {t}: {why}")
+    else:
+        print("  quarantined: none")
     if warmups:
         print(f"  declared warm-up runs excluded from tables: "
               f"{[w['tag'] + ' ' + str(w['wall_s']) + 's' for w in warmups]}")
@@ -341,7 +370,9 @@ def main() -> int:
         rss = [r["memory"].get("peak_simultaneous_tree_rss_kib", 0) for r in rs]
         vram = [r["sampling"]["device_vram_mib_sampled"].get("max", 0) for r in rs
                 if r["sampling"]["device_vram_mib_sampled"].get("n")]
-        table[arm] = {"input_set": arm_input.get(arm, "?"), "n": len(w), "median_s": med, "min_s": min(w), "max_s": max(w),
+        n_q = sum(1 for r in rs if r.get("quarantined"))
+        table[arm] = {"input_set": arm_input.get(arm, "?"), "n": len(w),
+                      "n_quarantined": n_q, "median_s": med, "min_s": min(w), "max_s": max(w),
                       "spread_pct": spread, "walls": w,
                       "median_cpu_s": statistics.median(cpu) if cpu else None,
                       "peak_rss_mib": max(rss) // 1024 if rss and max(rss) else None,
@@ -389,14 +420,21 @@ def main() -> int:
         if len(d_all) > 1:
             sd = statistics.stdev(d_all)
             sem = sd / len(d_all) ** 0.5
+            mean = statistics.fmean(d_all)
+            tc = t95(len(d_all) - 1)
+            lo, hi = mean - tc * sem, mean + tc * sem
             print(f"    sd / sem              : {sd:.3f} / {sem:.3f} s")
-            print(f"    mean d +/- 2 sem      : {statistics.fmean(d_all):+.3f} "
-                  f"+/- {2 * sem:.3f} s")
-            crosses = abs(statistics.fmean(d_all)) < 2 * sem
-            print(f"    interval spans zero   : {'YES - no effect resolved at this n'
-                                                 if crosses else 'no'}")
+            print(f"    descriptive 95% t CI  : [{lo:+.3f}, {hi:+.3f}] s "
+                  f"(t={tc:.3f}, df={len(d_all) - 1})")
+            print(f"    (2 sem band, narrower): {mean:+.3f} +/- {2 * sem:.3f} s")
+            print(f"    t95 interval spans 0  : "
+                  f"{'YES - not resolved at this n' if lo <= 0 <= hi else 'no'}")
+            print("    not order-adjusted, not multiplicity-adjusted; descriptive under a "
+                  "small-sample\n    normal-difference assumption, not a significance "
+                  "decision")
         print(f"    pairs where {b_name} faster: {n_b_faster}/{len(d_all)}"
-              f"   (two-sided sign test needs {len(d_all)} >= 6 to reach even the 5% level)")
+              f"   (a TWO-SIDED sign test needs n >= 6 to reach even the 5% level; "
+              f"n={len(d_all)} here)")
         if d_a_first and d_b_first:
             E = (statistics.fmean(d_a_first) + statistics.fmean(d_b_first)) / 2
             P = (statistics.fmean(d_b_first) - statistics.fmean(d_a_first)) / 2

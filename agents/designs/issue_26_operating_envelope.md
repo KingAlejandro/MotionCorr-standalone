@@ -31,9 +31,18 @@ retains, in its own record:
   `-O0` and inflates every host-side stage; the recorded build type is what makes the arm
   comparable, not an assumption.
 - **Placement.** The requested CPU list, the *actually inherited* `Cpus_allowed_list` and
-  `Mems_allowed_list` read from the running process, the `lscpu -p=CPU,NODE,SOCKET,CORE`
-  mapping for that list, the memory policy, and `numa_maps`/`numastat` placement where
-  available. A mask is an admission lane, not a locality claim.
+  `Mems_allowed_list`, the `lscpu -p=CPU,NODE,SOCKET,CORE` mapping for that list, and
+  per-node residency. A mask is an admission lane, not a locality claim.
+
+  **The memory witness must follow the payload, identified by `/proc/<pid>/exe`, with its
+  pid, session and start time recorded.** The runner spawns
+  `taskset … /usr/bin/time -v <binary>`, so the pid it holds is the launcher and `taskset`
+  execs into `/usr/bin/time`, not into the payload. Sampling the launcher produced a
+  published claim about `/usr/bin/time`'s few megabytes. Residency is aggregated from
+  `numa_maps` page counts times each mapping's own `kernelpagesize_kB`, in **bytes**:
+  `numastat -p` reports MB, and its "Total 1.45" was read as 1.45 GB. Cpuset inheritance,
+  process-tree RSS and per-node residency are three different witnesses and are never
+  merged.
 - **Device.** GPU UUID and the visible ordinal it was addressed by, plus a per-movie witness
   from the run log that a CUDA path actually executed. Device index alone is not identity.
 - **Intervals.** Process wall and CPU (user+sys) from `/usr/bin/time -v`, plus the binary's
@@ -41,7 +50,13 @@ retains, in its own record:
   nest and overlap, so they are reported as a labelled tree and never summed into a total.
 - **Memory.** Simultaneously sampled process-tree RSS, and device memory from an explicitly
   labelled NVML sampler. A sampled peak is a lower bound on the true peak and is never
-  reported as the traced allocator peak.
+  reported as an allocator-traced peak. **The CUDA profile's `Peak GPU memory allocated` is
+  neither**: it is per-call buffer-size accounting (`cuda_alignpatch.cu:310-318`), emitted
+  once per global/local call, so no statistic over it is a process high-water mark and its
+  sum across calls has no physical meaning. Repeated instrumented keys are never collapsed
+  by addition; each keeps its occurrences with explicit `n`/`max`, and size-like tags
+  withhold `sum` outright. A real per-process device high-water mark requires live
+  allocation accounting or an allocator trace, and this study has neither.
 - **Interference.** 1 Hz sampling of non-own CPU usage for the whole run, reported as
   mean/max/n, not a probe before and after.
 - **Products.** The complete output set, compared against the same-backend baseline as
@@ -118,6 +133,15 @@ permanently at ~100% each and are **unpinned** (`Cpus_allowed_list: 0-63`), so t
 enter the measurement lane. They are not altered and not waited out; they are sampled per run
 and reported as interference.
 
+**Cancellation must stop the owned tree, and a failed gate must not pass as clean.** The
+payload runs in its own session so the whole group can be terminated and joined; signalling
+the launcher pid alone leaves MotionCorr or its ghostscript child running, burning the cpuset
+and the GPU into the next arm — possibly someone else's, after the lock is released. Because
+the payload then has its own session, the interference sampler must **adopt** it, or it will
+report the process under measurement as foreign load in its own lane. An arm whose settle
+gate timed out, or that started with foreign threads in the lane, is recorded as
+**quarantined**: kept in the record, excluded from clean-evidence claims.
+
 **Interference evidence must be retained at per-sample and PID level.** The 2026-09-27
 `cpu64` series retained only per-arm aggregates — a max over samples, and per-command
 *accumulated* thread-sample hits — which is enough to show that foreign work entered the
@@ -152,6 +176,7 @@ this issue.
 | `tools/envelope_report.py` | series analyser and product-equality verdict |
 | `tools/test_envelope_report.py` | positive and negative controls for that verdict |
 | `tools/test_envelope_interference.py` | controls for the interference witness (Linux only) |
+| `tools/test_envelope_runner.py` | negative controls: sequential sizes are not a peak, the witness follows the payload not the launcher, cancellation reaps a child that outlives its parent, the payload is not its own interference |
 | `docs/operating_envelope_issue26.md` | report and operating guide |
 | `docs/benchmark_logs/issue26_envelope_*/**` | raw per-run records |
 

@@ -33,12 +33,14 @@ import json
 import os
 import re
 import shutil
+import signal
 import statistics
 import subprocess
 import sys
 import threading
 import time
 from pathlib import Path
+from pathlib import Path as pathlib_Path
 from typing import Any, Dict, List, Optional
 
 COMPILER_NAMES = ("cc1plus", "nvcc", "cicc", "ptxas")
@@ -137,7 +139,7 @@ class Sampler(threading.Thread):
         self.foreign_detail: Dict[str, int] = {}
         self._prev_snap: Optional[Dict[int, Any]] = None
         self._prev_t = 0.0
-        self._own_sid = own_session()
+        self._own_sids = {own_session()}
         self.gpu_index = gpu_index
         self.mask_cpus = parse_cpu_list(mask) if mask else None
         self.period = period
@@ -153,6 +155,13 @@ class Sampler(threading.Thread):
     def stop(self) -> None:
         self._halt.set()
 
+    def own_also(self, sid: Optional[int]) -> None:
+        """Adopt the payload's session. It runs in its own session so that cancellation can
+        target the whole group; without this the sampler would report the very process being
+        measured as foreign load inside its own lane."""
+        if sid:
+            self._own_sids.add(sid)
+
     def _sample_foreign(self) -> None:
         now = time.time()
         snap = cpu_snapshot()
@@ -162,7 +171,7 @@ class Sampler(threading.Thread):
         dt = max(now - self._prev_t, 1e-3)
         total, in_mask = 0.0, 0
         for pid, (comm, ticks, psid) in snap.items():
-            if psid == self._own_sid or pid not in self._prev_snap:
+            if psid in self._own_sids or pid not in self._prev_snap:
                 continue
             pct = (ticks - self._prev_snap[pid][1]) / CLK_TCK / dt * 100.0
             if pct <= 1.0:
@@ -215,6 +224,7 @@ class Sampler(threading.Thread):
             "foreign_threads_inside_mask": stats(self.foreign_in_mask),
             "foreign_in_mask_by_command": dict(sorted(self.foreign_detail.items(),
                                                       key=lambda kv: -kv[1])[:10]),
+            "owned_sessions": sorted(self._own_sids),
             "foreign_definition": "CPU actually consumed between consecutive samples by "
                                   "processes outside this run's own subtree, from "
                                   "/proc/<pid>/stat utime+stime deltas. Username cannot be "
@@ -305,6 +315,9 @@ def own_subtree(root_pid: int) -> set:
 
 
 CLK_TCK = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+# _stat_fields returns [comm] + fields 3.. , so returned[k] == /proc stat field (k + 2).
+F_STATE, F_PPID, F_PGRP, F_SESSION = 1, 2, 3, 4          # fields 3, 4, 5, 6
+F_UTIME, F_STIME, F_STARTTIME, F_PROCESSOR = 12, 13, 20, 37   # fields 14, 15, 22, 39
 
 
 def _stat_fields(path: str) -> Optional[List[str]]:
@@ -333,7 +346,7 @@ def own_session() -> int:
     """
     f = _stat_fields(f"/proc/{os.getpid()}/stat")
     try:
-        return int(f[3])            # field 6 (session), shifted by the comm split
+        return int(f[F_SESSION])
     except (TypeError, ValueError, IndexError):
         return -1
 
@@ -358,7 +371,7 @@ def cpu_snapshot() -> Dict[int, Any]:
         if not f or len(f) < 15:
             continue
         try:
-            snap[pid] = (f[0], int(f[12]) + int(f[13]), int(f[3]))   # comm, utime+stime, sid
+            snap[pid] = (f[0], int(f[F_UTIME]) + int(f[F_STIME]), int(f[F_SESSION]))
         except (ValueError, IndexError):
             continue
     return snap
@@ -378,10 +391,10 @@ def running_threads_on(mask_cpus: set, pid: int) -> List[int]:
         # State R only: `psr` is populated for sleeping threads too, so counting every thread
         # whose last CPU happened to fall in the lane would flag idle sleepers as intruders
         # and keep a lane gate permanently non-clear on a quiet host.
-        if f[1] != "R":
+        if f[F_STATE] != "R":
             continue
         try:
-            cpu = int(f[37])
+            cpu = int(f[F_PROCESSOR])
         except (ValueError, IndexError):
             continue
         if cpu in mask_cpus:
@@ -411,6 +424,105 @@ def lane_foreign_threads(mask_cpus: set, own: set, min_pct: float = 20.0,
     return hits
 
 
+def resolve_payload(launcher_pid: int, binary: Path, deadline_s: float = 20.0
+                    ) -> Optional[Dict[str, Any]]:
+    """Find the live process actually executing `binary` beneath the launcher.
+
+    `execute_arm` spawns `taskset -c <mask> /usr/bin/time -v <binary> ...`, so `proc.pid` is
+    the launcher, and `taskset` execs into `/usr/bin/time` rather than into the payload. A
+    witness sampled on `proc.pid` therefore describes `/usr/bin/time` -- which is what
+    happened: a retained `numa_maps` mapped `file=/usr/bin/time`, and its `numastat` total of
+    1.45 was MB of launcher memory, not GB of movie arrays.
+
+    Identity is confirmed by resolving `/proc/<pid>/exe`, not by matching a command line,
+    and the process start time is recorded so a later sample can prove it is still the same
+    process rather than a recycled pid.
+    """
+    want = os.path.realpath(str(binary))
+    t0 = time.time()
+    while time.time() - t0 < deadline_s:
+        for pid in _descendants(launcher_pid) | {launcher_pid}:
+            try:
+                exe = os.path.realpath(f"/proc/{pid}/exe")
+            except OSError:
+                continue
+            if exe != want:
+                continue
+            f = _stat_fields(f"/proc/{pid}/stat")
+            return {"pid": pid, "exe": exe,
+                    "starttime_ticks": int(f[F_STARTTIME]) if f and len(f) > F_STARTTIME else None,
+                    "session": int(f[F_SESSION]) if f and len(f) > F_SESSION else None,
+                    "launcher_pid": launcher_pid,
+                    "resolved_after_s": round(time.time() - t0, 3)}
+        time.sleep(0.05)
+    return None
+
+
+def _descendants(root: int) -> set:
+    try:
+        out = subprocess.run(["ps", "-eo", "pid=,ppid="], capture_output=True, text=True,
+                             timeout=10).stdout
+    except Exception:
+        return set()
+    kids: Dict[int, List[int]] = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) == 2:
+            try:
+                kids.setdefault(int(parts[1]), []).append(int(parts[0]))
+            except ValueError:
+                pass
+    seen, stack = set(), list(kids.get(root, []))
+    while stack:
+        pid = stack.pop()
+        if pid in seen:
+            continue
+        seen.add(pid)
+        stack.extend(kids.get(pid, []))
+    return seen
+
+
+def numa_residency(pid: int) -> Optional[Dict[str, Any]]:
+    """Per-node resident bytes for one pid, aggregated from /proc/<pid>/numa_maps.
+
+    Read in pages and converted with each mapping's own `kernelpagesize_kB`, so the unit is
+    explicit. `numastat -p` was used before and reports **MB**; its "Total 1.45" was read as
+    1.45 GB, which inflated a launcher's few megabytes into a claim about movie arrays.
+    """
+    per_node: Dict[str, int] = {}
+    total = 0
+    try:
+        lines = pathlib_Path(f"/proc/{pid}/numa_maps").read_text().splitlines()
+    except OSError:
+        return None
+    for line in lines:
+        toks = line.split()
+        pagesize_kb = 4
+        for t in toks:
+            if t.startswith("kernelpagesize_kB="):
+                try:
+                    pagesize_kb = int(t.split("=", 1)[1])
+                except ValueError:
+                    pass
+        for t in toks:
+            if t.startswith("N") and "=" in t and t[1:2].isdigit():
+                node, _, cnt = t.partition("=")
+                try:
+                    b = int(cnt) * pagesize_kb * 1024
+                except ValueError:
+                    continue
+                per_node[node] = per_node.get(node, 0) + b
+                total += b
+    if not total:
+        return None
+    return {"resident_bytes_by_node": per_node,
+            "resident_bytes_total": total,
+            "resident_MiB_total": round(total / 1048576.0, 2),
+            "node_local_fraction_note": "fraction is only meaningful once the sampled pid is "
+                                        "confirmed to be the payload; see payload_identity",
+            "unit": "bytes, from numa_maps page counts x that mapping's kernelpagesize_kB"}
+
+
 def parse_cpu_list(spec: str) -> set:
     cpus = set()
     for part in spec.split(","):
@@ -423,6 +535,38 @@ def parse_cpu_list(spec: str) -> set:
         else:
             cpus.add(int(part))
     return cpus
+
+
+def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str]) -> int:
+    """Terminate the whole owned group and confirm it is gone before returning."""
+    for sig, name in ((signal.SIGTERM, "SIGTERM"), (signal.SIGKILL, "SIGKILL")):
+        try:
+            os.killpg(pgid, sig)
+        except ProcessLookupError:
+            break
+        except Exception as exc:
+            log.append(f"killpg {name} failed: {exc}")
+        try:
+            proc.wait(timeout=20)
+        except subprocess.TimeoutExpired:
+            continue
+        break
+    survivors = [pid for pid in _descendants(proc.pid) if _alive(pid)]
+    try:
+        os.killpg(pgid, 0)
+        group_alive = True
+    except OSError:
+        group_alive = False
+    log.append(f"after termination: group_alive={group_alive} survivors={survivors}")
+    return proc.returncode if proc.returncode is not None else -9
+
+
+def _alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
 
 
 def settle(load_max: float, timeout_s: int, log: List[str], mode: str = "global_load",
@@ -492,26 +636,61 @@ CUDA_FALLBACK = re.compile(
 CUDA_EXECUTED = re.compile(r"Total GPU alignment time|\(CUDA in-VRAM\)")
 
 
-def parse_stage_timers(text: str) -> Dict[str, Dict[str, float]]:
+def parse_stage_timers(text: str) -> Dict[str, Any]:
     """Parse both instrumented formats, keeping them in separate namespaces.
 
     `TIMING=ON` writes its whole-run breakdown to **stdout** (`src/time.cpp` via
-    `motioncorr_runner.cpp:654`), not into the per-movie logfile. Parsing only the per-movie
-    logs therefore yields no `TIMING` stage at all, and the profiled arm contributes nothing
-    that the unprofiled arm does not already have.
+    `motioncorr_runner.cpp:654`), not into the per-movie logfile.
+
+    Repeated keys are **never collapsed by addition**. Each tag keeps its occurrence list
+    plus an explicit `n`, `sum` and `max`, and the caller must choose which is meaningful for
+    that tag. Blind summation produced a concrete false result here: the CUDA profile prints
+    `Peak GPU memory allocated` once per global/local call -- 25 patch calls at 62.59 MiB and
+    one global call at 1569.59 MiB in a 5x5 movie -- and summing them yielded 3134.34 MiB,
+    which was then reported as a process peak. Adding size-accounting values from successive
+    calls does not produce a simultaneous peak, and for size-like tags the sum has no
+    physical meaning at all.
+
+    Note what these values are at the measured source: `cuda_alignpatch.cu:310-318` builds
+    `total_vram_allocated` by adding buffer-size expressions and the cuFFT workspace for one
+    function call. It is size accounting, not an allocator trace, whichever statistic is
+    taken from it.
     """
-    timing: Dict[str, float] = {}
-    cuda: Dict[str, float] = {}
+    timing: Dict[str, Any] = {}
+    cuda: Dict[str, Any] = {}
     for line in text.splitlines():
         m = TIMER_LINE.match(line)
         if m:
-            timing[m.group(1).strip()] = float(m.group(2))
+            timing.setdefault(m.group(1).strip(), []).append(float(m.group(2)))
             continue
         m = CUDA_PROFILE_LINE.match(line)
         if m:
             tag = m.group(1).strip() + (f" [{m.group(3)}]" if m.group(3) != "s" else "")
-            cuda[tag] = cuda.get(tag, 0.0) + float(m.group(2))
-    return {"timing_stdout": timing, "cuda_profile": cuda}
+            cuda.setdefault(tag, []).append(float(m.group(2)))
+    return {"timing_stdout": _collapse(timing), "cuda_profile": _collapse(cuda)}
+
+
+def _collapse(d: Dict[str, List[float]]) -> Dict[str, Any]:
+    """Keep every occurrence; expose n/sum/max without choosing one for the caller."""
+    out: Dict[str, Any] = {}
+    for tag, vals in d.items():
+        entry: Dict[str, Any] = {"n": len(vals), "sum": round(sum(vals), 6),
+                                 "max": max(vals), "values": vals if len(vals) <= 64
+                                 else vals[:64] + ["...truncated"]}
+        if _is_size_tag(tag):
+            # A sum of per-call size accounting is not a quantity; refuse to publish one.
+            entry["sum"] = None
+            entry["sum_withheld_reason"] = (
+                "per-call size accounting; the sum across calls is not a peak and has no "
+                "physical meaning. Use 'max' as the largest single reported accounting "
+                "value, and note that even that is buffer-size accounting, not an "
+                "allocator trace.")
+        out[tag] = entry
+    return out
+
+
+def _is_size_tag(tag: str) -> bool:
+    return "[MiB]" in tag or "VRAM" in tag or "memory" in tag.lower()
 
 
 def time_v_fields(text: str) -> Dict[str, Any]:
@@ -614,44 +793,71 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     samp.start()
 
     t0 = time.time()
+    # start_new_session puts the launcher and every descendant in one process group we own,
+    # so cancellation can reach the payload. proc.kill() alone signals only the
+    # taskset/time launcher, and MotionCorr (or its ghostscript child) can outlive it,
+    # keep burning the cpuset and the GPU, and contaminate whichever arm runs next --
+    # including someone else's, after the flock is released.
     proc = subprocess.Popen(cmd, cwd=arm["cwd"], env=env,
                             stdout=(rundir / "stdout.log").open("w"),
-                            stderr=(rundir / "time_stderr.log").open("w"))
+                            stderr=(rundir / "time_stderr.log").open("w"),
+                            start_new_session=True)
+    pgid = os.getpgid(proc.pid)
+    # start_new_session makes the launcher a session leader, so its sid equals its pid.
+    # Adopt it here rather than waiting for resolve_payload, otherwise every sample taken in
+    # the interval between spawning and resolving would count our own payload as foreign.
+    samp.own_also(proc.pid)
     rss = RssSampler(proc.pid, period=cfg.get("rss_period_s", 0.25))
     rss.start()
 
-    # Placement is read from the live process, not assumed from the requested mask.
+    # Placement. Two distinct witnesses, never merged: the launcher's inherited cpuset
+    # (which the payload inherits across exec) and the payload's own residency.
     placement: Dict[str, Any] = {"requested_cpu_mask": cpu_mask}
     for _ in range(40):
         try:
             st = Path(f"/proc/{proc.pid}/status").read_text()
-            placement["inherited_Cpus_allowed_list"] = re.search(
+            placement["launcher_Cpus_allowed_list"] = re.search(
                 r"Cpus_allowed_list:\s*(\S+)", st).group(1)
-            placement["inherited_Mems_allowed_list"] = re.search(
+            placement["launcher_Mems_allowed_list"] = re.search(
                 r"Mems_allowed_list:\s*(\S+)", st).group(1)
-            nm = Path(f"/proc/{proc.pid}/numa_maps")
-            if nm.exists():
-                placement["numa_maps_head"] = "\n".join(nm.read_text().splitlines()[:6])
-            placement["numa_policy"] = sh(f"numastat -p {proc.pid} 2>/dev/null | tail -4")
             break
         except Exception:
             time.sleep(0.25)
+
+    payload = resolve_payload(proc.pid, Path(arm["binary"]))
+    placement["payload_identity"] = payload or {
+        "resolved": False,
+        "note": "the process executing the binary was not found beneath the launcher; no "
+                "payload-level memory or cpuset witness is claimed for this run"}
+    if payload:
+        pid = payload["pid"]
+        samp.own_also(payload.get("session"))
+        try:
+            st = Path(f"/proc/{pid}/status").read_text()
+            placement["payload_Cpus_allowed_list"] = re.search(
+                r"Cpus_allowed_list:\s*(\S+)", st).group(1)
+            placement["payload_Mems_allowed_list"] = re.search(
+                r"Mems_allowed_list:\s*(\S+)", st).group(1)
+        except Exception:
+            pass
+        # Sample residency mid-run rather than at startup: an early sample catches the
+        # process before it has allocated the arrays the witness is supposed to describe.
+        placement["payload_numa_early"] = numa_residency(pid)
+        threading.Timer(
+            max(1.0, cfg.get("numa_sample_at_s", 5.0)),
+            lambda: placement.__setitem__("payload_numa_midrun", numa_residency(pid))
+        ).start()
 
     timed_out = False
     try:
         rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
     except subprocess.TimeoutExpired:
         timed_out = True
-        log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; killing payload")
-        proc.kill()
-        try:
-            rc = proc.wait(timeout=60)
-        except subprocess.TimeoutExpired:
-            log.append("payload did not die after SIGKILL")
-            rc = -9
+        log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; "
+                   f"terminating owned process group {pgid}")
+        rc = _kill_group(proc, pgid, log)
     except BaseException:
-        proc.kill()
-        proc.wait(timeout=60)
+        _kill_group(proc, pgid, log)
         raise
     finally:
         wall = time.time() - t0
@@ -664,7 +870,10 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     stdout_txt = (rundir / "stdout.log").read_text(errors="replace")
 
     stage = {"whole_run_stdout": parse_stage_timers(stdout_txt)["timing_stdout"],
-             "per_movie": {}}
+             "per_movie": {},
+             "semantics": "each tag carries n/sum/max/values. 'sum' is withheld for size-like "
+                          "tags because adding per-call size accounting does not yield a "
+                          "peak. No tag here is an allocator trace."}
     executed, fell_back, movie_logs = 0, [], 0
     for lg in sorted((rundir / "out").rglob("*.log")):
         txt = lg.read_text(errors="replace")
@@ -719,6 +928,16 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
                       "io_threads": min(arm["j"], arm["max_io_threads"])
                       if (arm.get("max_io_threads") or -1) > 0 else arm["j"]},
         "settle": settle_info,
+        # A gate that recorded a timeout or a lane intruder and then ran anyway has not been
+        # satisfied. Marking the arm quarantined keeps it in the record -- deleting a timed
+        # arm is worse -- while stopping the report from counting it as clean evidence.
+        "quarantined": bool(settle_info.get("timed_out")
+                            or settle_info.get("lane_intruders_at_start")),
+        "quarantine_reason": (
+            "settle gate timed out" if settle_info.get("timed_out") else
+            ("foreign threads were in the lane at start: "
+             + "; ".join(settle_info.get("lane_intruders_at_start") or [])[:300])
+            if settle_info.get("lane_intruders_at_start") else None),
         "cache_regime": {
             "declared": arm.get("cache_regime", "warm-unless-first"),
             "host_cached_kib": _as_int(sh("awk '/^Cached:/{print $2}' /proc/meminfo")),

@@ -57,8 +57,8 @@ All 24 tutorial movies, one process, one A100, `--j 8`, unprofiled binary `d80cd
 | Products | 109, exit 0, equal to baseline on payload, core header and masked labels |
 | Backend | **24 of 24 movies carry per-movie CUDA execution evidence; zero fallback warnings** |
 | Peak simultaneous process-tree RSS | **1.52 GiB** |
-| Device peak, allocator-traced | **3134.34 MiB**, identical on all 24 movies |
-| Device peak, NVML-sampled at 0.2 s | **3493 MiB**; the gap is the CUDA context |
+| Device memory, per-call size accounting | largest single reported value **1569.59 MiB** (global call); 25 patch calls report 62.59 MiB each. **Not a peak and not an allocator trace** — see below |
+| Device memory, NVML sampled at 0.2 s | **3493 MiB** whole-device, a distinct sampled observation. Not a capacity bound and not reconcilable with the accounting figure |
 | Per-movie device alignment | median **40.6 ms** |
 | Context switches | 1745 voluntary, 293 involuntary |
 | Filesystem input blocks | 0 — fully page-cache warm |
@@ -74,9 +74,28 @@ is not identified here. Section 5's `n = 5` figure is the one to quote for this
 configuration; this row is retained as the frozen first baseline it was declared to be, not
 promoted into a comparison.
 
-The two device figures are different quantities and are labelled as such. The traced figure
-is what the allocator recorded; the NVML figure is larger because it includes the CUDA
-context. A sampled peak is a lower bound on the true peak at any sampling rate.
+**Correction: there is no allocator-traced peak in this study.** An earlier revision reported
+"3134.34 MiB, allocator-traced, identical on all 24 movies" and explained the gap to the NVML
+figure as the CUDA context. Both statements are withdrawn.
+
+`Peak GPU memory allocated` is printed once per global or local CUDA call. In a 5x5 movie
+that is 26 lines: 25 patch calls at 62.59 MiB and one global call at 1569.59 MiB. The runner
+summed repeated keys, so 25 x 62.59 + 1569.59 = **3134.34** — an artifact of the parser, not a
+measurement. Worse, the number landed close to the real 3493 MiB NVML sample, which is
+exactly why the invented "gap is the CUDA context" story looked plausible.
+
+The underlying value is also not a trace. At the measured source,
+`cuda_alignpatch.cu:310-318` builds `total_vram_allocated` by adding buffer-size expressions
+plus the cuFFT workspace for **one function call**; `cuda_realspace_dw.cu` does the same
+independently for the reconstruction path. It is function-level size accounting. No statistic
+taken from it — sum, max or median — is a process high-water mark.
+
+The parser now refuses to publish a sum for size-like tags and keeps every occurrence
+separately (`tools/test_envelope_runner.py` pins that two sequential 100 MiB stages must not
+become a 200 MiB peak). What can honestly be said: the largest single accounting value is
+1569.59 MiB, the NVML whole-device sample peaked at 3493 MiB, and **these are not the same
+quantity and neither is a capacity bound.** Establishing a real per-process high-water mark
+needs live allocation accounting or an actual allocator trace, which this study did not do.
 
 **Where the wall time goes.** Two instrumented sources, kept separate.
 
@@ -109,8 +128,10 @@ how fast frames can be decoded and written, not by how many threads are availabl
 which is exactly the behaviour section 4 measures.
 
 The second source is the per-movie CUDA profile block, present in both builds. It reports a
-device-side `Total GPU alignment time` with a median of 40.6 ms per movie and a traced peak
-allocation of 3134.34 MiB, identical on all 24.
+device-side `Total GPU alignment time` with a median of 40.6 ms per movie. Its memory lines
+are per-call size accounting and are handled in the correction above, not treated as a peak.
+Its kernel-stage timings are also kept separate from end-to-end wall throughout: in
+particular the gain/sum wrapper includes H2D transfer and is not pure host computation.
 
 The binary's own per-movie wall timer (`motioncorr_runner.cpp:1261`–`:2557`) sums to 24.53 s
 across 24 movies, median 0.970 s, range 0.943–1.692 s. The remaining **6.54 s**, 21% of the
@@ -133,12 +154,31 @@ any statement that would require them to be 16 independent cores is not supporte
 also a live alternative explanation for part of section 5's small `j16` margin, and it is not
 separated here.
 
-**NUMA placement.** The lane pins CPUs to node 1 but `Mems_allowed_list` stays `0-1` — memory
-is not bound. `numastat -p` sampled mid-run nonetheless shows **1.43 GB of 1.45 GB resident on
-node 1**, 98.6% node-local, and `numa_maps` shows `N1=` for heap and anonymous mappings. So
-first-touch placement achieves locality here without an explicit memory policy. This is a
-point-in-time sample taken early in the run, not a peak, and it is a statement about this
-lane, not a general claim.
+**NUMA placement — withdrawn for this dataset.** An earlier revision reported "1.43 GB of
+1.45 GB resident on node 1, 98.6% node-local" for the payload. That is withdrawn in full.
+
+The runner spawned `taskset -c <mask> /usr/bin/time -v motioncorr` and sampled `proc.pid`,
+which is the launcher: `taskset` execs into `/usr/bin/time`, not into MotionCorr. The
+retained `numa_maps` proves it — every mapping in the captured head reads
+`file=/usr/bin/time`. And `numastat -p` reports **MB**, so its "Total 1.45" was 1.45 **MB** of
+launcher memory, read as 1.45 GB of movie arrays. The witness described the wrong process in
+the wrong units, and the 98.6% figure characterises `/usr/bin/time`.
+
+So this study establishes **no** payload NUMA residency, and no node-locality or first-touch
+claim survives. Two neighbouring witnesses are unaffected and stand:
+
+- **cpuset inheritance** — `Cpus_allowed_list: 96-111`, `Mems_allowed_list: 0-1`, read from
+  the launcher. `taskset` sets the mask before exec and it is inherited across exec and fork,
+  so it does apply to the payload. It is now additionally read from the resolved payload pid.
+- **Process-tree RSS** — 1.52 GiB peak, sampled over the launcher and its children, which
+  does include MotionCorr. This is a residency total, not a per-node breakdown.
+
+The runner now resolves the live payload through `/proc/<pid>/exe`, records its pid, session
+and start time, and aggregates per-node residency from `numa_maps` page counts times each
+mapping's own `kernelpagesize_kB` — bytes, with the unit stated. `tools/test_envelope_runner.py`
+pins it with a tiny launcher in front of a child holding a known 256 MiB allocation: the
+witness must identify the child and report its residency, not the parent's. Re-measuring
+payload NUMA is listed as an unrun case; it needs a GPU slot this task no longer holds.
 
 ## 4. Phase 1 — thread and I/O screen
 
@@ -164,16 +204,18 @@ The same holds at IO=2 (8.595–8.921, ranges overlapping) and IO=4 (6.998 vs 7.
 anything the largest `--j` is marginally the *slowest* at IO=1, which is the opposite of the
 direction more compute threads would predict.
 
-Read across and wall time falls monotonically with IO threads: 11.8 → 8.8 → 7.2 → 6.2 s, a
-**1.90x speedup from 1 to 8**. CPU-seconds rise only from 11.7 to 14.3 across that range, so
-this is parallel speedup in the input stage rather than work being displaced.
+Read across **at fixed `--j 8`**, the only row where all four IO settings were measured:
+12.125 → 8.807 → 7.157 → 6.190 s, a **1.959x** speedup from IO=1 to IO=8. An earlier revision
+quoted 1.90x, which compared `j1/io1` against `j8/io8` and therefore changed both variables
+at once; that figure is corrected. CPU-seconds rise only from 12.1 to 14.3 across the fixed-j
+row, so this is parallel speedup in the input stage rather than work being displaced.
 
-**On the CUDA path `--j` matters only because, left uncapped, it also sets the IO thread
-count.** That is orthogonal to all six bottlenecks this issue proposes — FFTW plan locks,
-dose-weighting cache traffic, transcendental stalls, Amdahl residue, OpenMP barriers and NUMA
-latency — each of which concerns `--j`-parallel host compute, and none of which can govern a
-curve that does not respond to `--j`. This does not refute those mechanisms on the CPU
-backend, which section 6 measures separately.
+**What is supported: no material `--j` effect was detected at fixed effective IO in this
+screen.** The stronger reading — that `--j` matters *only* through IO — is **not** supported
+and is withdrawn: this is one movie geometry, one backend, one patch configuration, warm
+cache, `--j` ≤ 8 in the screen, and a null within this noise is not a universal law. Nor does
+it refute the six bottlenecks the issue proposes on the CPU backend; it says they do not
+govern *this* configuration, and section 6 measures that backend separately.
 
 **Controls.** All 12 arms produced products identical to the reference for their own input
 set — MRC payload, MRC core header, and MRC labels with only RELION's clock stamp masked,
@@ -230,18 +272,25 @@ All three arms produced products equal to the baseline; no run exited non-zero.
 
 Paired, order alternating within every pair, `d` positive means the named arm was slower:
 
-| contrast | n pairs | per-pair `d` (s) | mean ± 2 sem | sign | effect `E` | positional `P` |
-| :-- | --: | :-- | :-- | :-- | --: | --: |
-| `j8/io8` − `j16/io16` | 5 | 1.11, 2.13, 0.72, 1.69, 1.29 | **+1.387 ± 0.486** | 5/5 | **+1.474** | −0.436 |
-| `j16/io8` − `j16/io16` | 3 | 2.08, 2.27, 1.29 | **+1.880 ± 0.597** | 3/3 | **+1.977** | +0.290 |
+| contrast | n | per-pair `d` (s) | mean | descriptive 95% t CI | sign | `E` | `P` |
+| :-- | --: | :-- | --: | :-- | :-- | --: | --: |
+| `j8/io8` − `j16/io16` | 5 | 1.11, 2.13, 0.72, 1.69, 1.29 | +1.387 | **[+0.712, +2.062]** | 5/5 | +1.474 | −0.436 |
+| `j16/io8` − `j16/io16` | 3 | 2.08, 2.27, 1.29 | +1.880 | **[+0.596, +3.165]** | 3/3 | +1.977 | +0.290 |
 
-Neither interval spans zero and every pair agrees in sign. The sign test itself cannot carry
-these: at n=5 and n=3 it cannot reach even the 5% level, which is a property of the design
-rather than of the data, and the report says so rather than quoting a p-value the n cannot
-support. The paired differences and their spread are the evidence.
+**Correction to an earlier revision.** It quoted `mean ± 2 sem` and then treated exclusion of
+zero as a significance decision. At these sample sizes that is not a 95% interval: the
+two-sided *t* factor is 2.776 at n=5 and **4.303** at n=3, not 2. The intervals above are
+descriptive 95% *t* intervals recomputed from the exact paired JSON. Both still exclude zero,
+so the direction of this result is unchanged — but they are **not order-adjusted, not
+multiplicity-adjusted**, and they rest on a small-sample normal-difference assumption. They
+are a description of the spread, not a significance test.
 
-**What actually moves the time is the IO threads, again.** Holding `--j 16` and lifting the
-IO cap from 8 to 16 is worth **1.98 s** (`E`, second row). Holding the IO cap at 8 and
+The sign counts are likewise descriptive: a **two-sided** sign test needs n ≥ 6 to reach even
+the 5% level, so at n=5 and n=3 no sign result here can be significant. That is fixed by the
+design before any data exists.
+
+**What moves the time in this experiment is the IO threads.** Holding `--j 16` and lifting
+the IO cap from 8 to 16 is worth **1.98 s** (`E`, second row). Holding the IO cap at 8 and
 raising `--j` from 8 to 16 goes the *other* way — 29.757 s against 29.163 s, about 0.6 s
 slower. That last comparison is **unpaired**: no pair in this schedule contained both arms,
 so it is indicative only and weaker than the two rows above. It does not contradict them,
@@ -275,24 +324,33 @@ Medians of 3; **read this section with section 6.3 in hand, the lane was not cle
 Unbound parallel efficiency at `j=4` is **57.4%**, against the **55.8–56.0%** this issue
 reports on the 4-gpu-vm and the **57.1%** the 2026-09-25 audit measured on this host at
 source `3e3a1967`. So the phenomenon is real, it is not an artifact of the old hardware or
-of the old source, and **#82/#90/#91 did not remove it**.
+of the old source, and **#82/#90/#91 did not remove it**. These are medians of 3 on a
+contaminated lane (§6.3); the agreement across three independent studies is what carries the
+claim, not the precision of this table.
 
 ### 6.2 Thread placement, paired
 
-| `--j` | mean `d` (unbound − bound) | ± 2 sem | pairs bound faster | effect `E` | positional `P` |
-| --: | --: | --: | :-- | --: | --: |
-| 1 | −21.57 s | ±29.08 | 0/3 | −17.22 | −13.05 |
-| 2 | +9.60 s | ±42.43 | 2/3 | +19.73 | −30.39 |
-| 4 | **+17.89 s** | **±11.04** | **3/3** | +20.65 | −8.26 |
-| 8 | **+11.69 s** | **±5.14** | **3/3** | +12.45 | −2.27 |
-| 16 | **+7.43 s** | **±2.17** | **3/3** | +6.91 | +1.54 |
-| 32 | +2.50 s | ±3.73 | 3/3 | +2.04 | +1.38 |
+| `--j` | mean `d` (unbound − bound) | descriptive 95% t CI | pairs bound faster | `E` | `P` |
+| --: | --: | :-- | :-- | --: | --: |
+| 1 | −21.57 s | [−84.15, +41.01] | 0/3 | −17.22 | −13.05 |
+| 2 | +9.60 s | [−81.71, +100.90] | 2/3 | +19.73 | −30.39 |
+| 4 | +17.89 s | [−5.85, +41.64] | 3/3 | +20.65 | −8.26 |
+| 8 | **+11.69 s** | **[+0.63, +22.75]** | 3/3 | +12.45 | −2.27 |
+| 16 | **+7.43 s** | **[+2.76, +12.10]** | 3/3 | +6.91 | +1.54 |
+| 32 | +2.50 s | [−5.51, +10.51] | 3/3 | +2.04 | +1.38 |
 
-`OMP_PROC_BIND=spread OMP_PLACES=cores` is resolved as **faster at `j` = 4, 8 and 16** —
-every pair agrees in sign and the interval excludes zero. At `j` = 1, 2 and 32 the interval
-spans zero and **no effect is resolved at this n**; the table says so rather than reporting
-the point estimate as a result. This reproduces the direction and rough magnitude of the
-2026-09-25 audit (−29.7% at j=4, −28.8% at j=8, −26.1% at j=16) on current main.
+**Correction to an earlier revision, which used `± 2 sem` and claimed `j=4` as resolved.**
+Under a descriptive 95% *t* interval (factor 4.303 at n=3, not 2), `j=4` **spans zero** and is
+**not** resolved. `OMP_PROC_BIND=spread OMP_PLACES=cores` is resolved as faster only at
+**`j` = 8 and `j` = 16**; at `j` = 1, 2, 4 and 32 the interval spans zero. All six point
+estimates at `j` ≥ 4 favour binding and 3/3 pairs agree in sign at each, which is suggestive,
+but suggestive is what it is.
+
+Even that survives only as **provisional**, because §6.3 shows the lane was contaminated —
+these intervals do not include that contamination. The direction still matches the
+2026-09-25 audit (−29.7% at j=4, −28.8% at j=8, −26.1% at j=16) on current main, which is the
+independent support the point estimates lean on. Recommendations from this section stay
+provisional pending a re-measurement on a controlled lane.
 
 Note `P` at `j=2` is −30.4 s against an effect of +19.7 s: the positional term is *larger
 than the effect*. An unpaired, fixed-order A/B at that point would have reported the wrong
@@ -374,9 +432,9 @@ count, is what moves throughput** — and a 1/2/4-worker series run only at fixe
 if they land together, the worker count is not the variable.
 
 Each worker needs its own GPU or an explicit statement that they share one; sharing is a
-different experiment from the scaled-resource series below. Device memory budgeting starts
-from the measured 3134 MiB traced peak per process at this geometry, which is what bounds how
-many workers fit, not the device's 80 GiB.
+different experiment from the scaled-resource series below. Device-memory budgeting for concurrent workers **cannot** be derived from this study: it has
+no per-process high-water mark, only per-call size accounting and a whole-device NVML sample.
+Obtain a real allocator trace before sizing worker counts against device capacity.
 
 Thread binding must not be applied blindly to a multi-process layout. The prior audit measured
 `spread`+`cores` turning an 84.2 s four-process arm into 255.0 s, a 3x pessimisation, because
@@ -398,12 +456,14 @@ movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU
    of raising `--j` is that, uncapped, it raises the IO thread count with it — at a *fixed*
    IO cap of 8, going from `--j 8` to `--j 16` was slightly slower, not faster.
 2. **Do not set `--max_io_threads` below `--j` on the GPU path.** It is the one setting
-   measured here that clearly costs throughput: IO=1 is **1.90x** slower than IO=8 at the
-   same `--j`.
-3. **Budget ~3.2 GiB of device memory and ~1.6 GiB of host RSS per process** at this movie
-   geometry. The traced allocator peak was 3134 MiB on every one of the 24 movies, and the
-   NVML-sampled peak 3493 MiB including context. This, not the device's 80 GiB, is what
-   bounds how many workers fit.
+   measured here that clearly costs throughput: at fixed `--j 8`, IO=1 is **1.959x** slower
+   than IO=8.
+3. **Host RSS is ~1.52 GiB per process** at this movie geometry (peak of simultaneously
+   sampled process-tree totals). **No device-memory budget is recommended here.** The earlier
+   "~3.2 GiB traced peak, so that is what bounds worker count" guidance was built on a parser
+   artifact and is withdrawn; the per-call accounting maximum (1569.59 MiB) and the NVML
+   whole-device sample (3493 MiB) are different quantities and neither is a per-process
+   high-water mark. Sizing concurrent workers needs a real allocator trace first.
 4. **One process leaves the lane mostly idle** — 2.71 of 16 cores at `--j 8`. That headroom
    is an argument for more concurrent movies, which is #53's lane, not for more threads per
    movie.
@@ -411,8 +471,10 @@ movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU
    24-movie runs of a session came in ~2 s above the steady-state distribution that the same
    configuration reached later.
 
-Explicitly **not** established: a load-bearing best `--j` for the CPU backend, because the
-`cpu64` lane was not exclusive during section 6; any multi-worker or multi-GPU recommendation (section 7 unrun); behaviour at other
+Explicitly **not** established: any per-process device-memory high-water mark, and therefore
+any device-capacity worker-sizing rule (§3 correction); any payload NUMA residency or
+node-locality claim (§3 correction); a load-bearing best `--j` for the CPU backend, because
+the `cpu64` lane was not exclusive during section 6; any multi-worker or multi-GPU recommendation (section 7 unrun); behaviour at other
 frame counts, geometries, formats or heterogeneous movie costs (Phase 3, out of scope); and
 anything about cold-cache or networked storage, since every number here is warm-cache local
 disk.

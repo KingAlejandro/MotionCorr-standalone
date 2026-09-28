@@ -57,6 +57,10 @@ public:
 	int n_threads;
 	int max_io_threads;
 
+	// Issue #85 lane B experiment: size of the persistent TIFF reader pool.
+	// 0 keeps the one-open-per-frame path. Opt-in only.
+	int persistent_tiff_readers;
+
 	// Output rootname
 	FileName fn_in, fn_out, fn_movie;
 

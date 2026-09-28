@@ -200,3 +200,40 @@ The composition nonetheless remains **UNRUN**, for a different and better reason
 verdict on prefetch, launching a composition and new benchmarks to support prose would spend
 shared GPU capacity on a feature that is not going to be promoted. It stays UNRUN by choice,
 not by permission.
+
+---
+
+## Final CI at the corrected head
+
+`cpu64` (`small-refmac-machine`), 2026-09-28T08:35Z, source `fbad90a97ce5…`, lane
+`taskset -c 32-47` (inside the 32-63 validation range) under
+`flock /tmp/motioncorr-issue96-cpu-validation.lock`, build and runtime `-j16`. The two
+long-running `ctffind` processes were present with `Cpus_allowed_list=0-63` and were not
+altered. Log: `cpu_validation_fbad90a97ce5.log`.
+
+| check | result |
+|---|---|
+| `ctest` (Release `-O3`, GCC 13.3.0) | **15/15 passed**, 21.65 s |
+| MRC comparison negative control, 10 mutations | **PASS** |
+| CPU-mask range control (incl. reproducing the old bug) | **PASS** |
+| Full header verification over 12 retained SCARF pairs | **12/12, 0 problems** |
+
+`motioncorr` sha256 `ec3bf772bdd73a8a030871632d9cf6c8954a76d9bd6aeb6394f01cd60406d29d`.
+
+### Review source coverage
+
+`src/` is **unchanged** by these corrections — `git diff 08c87bb..HEAD -- src/` is empty. The
+delta is `tools/compare_prefetch_arms.py`, `tools/cpu_mask_topology.py` (new),
+`scripts/prefetch_scarf_series.sbatch` (new, the executed SCARF harness) and documentation.
+The production source already carries both independent read-only reviews and the Codex
+review; only the evidence tooling is new and it is covered by the two controls above.
+
+### Remaining limitations, unchanged by these corrections
+
+- No new GPU run, timing or benchmark was performed for these corrections.
+- PR103/PR110 composition: **UNRUN**, by choice rather than by permission (correction 5).
+- Multi-worker schedules, EER and compressed-MRC through the prefetch path, CPU budgets wider
+  than 16 logical CPUs, NUMA memory pinning, `nsys` transfer counts, and ThreadSanitizer at the
+  current head: all **UNRUN**.
+- n=3 per budget. 1/9 favourable blocks is a direction, not a confidence interval.
+- The mechanism behind the null is a **hypothesis** (correction 4).

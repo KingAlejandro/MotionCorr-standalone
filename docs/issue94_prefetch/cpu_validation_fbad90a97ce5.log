@@ -1,0 +1,84 @@
+##### issue94 final CI at the corrected head
+date_utc: 2026-09-28T08:33:16Z  host: small-refmac-machine (ssh alias cpu64)
+source_sha: fbad90a97ce58c2fdc20fd0329bc232bcfbb447d
+lane: taskset -c 32-47 (within validation range 32-63); build/runtime -j16
+lock: /tmp/motioncorr-issue96-cpu-validation.lock
+##### interference, not altered
+    PID USER     %CPU     ELAPSED PSR COMMAND
+3404437 ubuntu    133       00:00  43 cc1plus
+3404439 ubuntu    125       00:00  48 cc1plus
+3404430 ubuntu    120       00:00  60 cc1plus
+3404417 ubuntu    109       00:00  56 cc1plus
+3404399 ubuntu    108       00:00  53 cc1plus
+ctffind 1156942 Cpus_allowed_list=0-63
+ctffind 1635429 Cpus_allowed_list=0-63
+loadavg: 3.36 2.77 3.26 19/8016 3404515
+##### payload identity
+e64dfd82f73bf906eee3d7e38bb0b0028dcef3e98cca61af66a18888d79fffac  src/movie_prefetch.h
+889a31e6a84c2070a99988b274ee764b87e6262c150d98d6f998ac6d2d4057ee  src/movie_prefetch.cpp
+19ec5be4508dff0c9cfb8a2df2c4ac56cd502b7fa35122d37b8e2b7af55a7678  src/motioncorr_runner.h
+8474ccb1f44cf6a62be563aa8f8f11ad67a8cc50ee568a3bf0441d44c55b04e8  src/motioncorr_runner.cpp
+f686a91905ecbb8733de7b11c0b2335e5e6454ca4bb880d6f785f6fe2106a6b1  CMakeLists.txt
+ed0d06e3c1a674ba76706f9a5096203b34ee4c499aa71c97b33fde21541bed80  tests/test_prefetch_lifecycle.cpp
+d50ab301af54fcb6e2fe63bce8e8cbb71f415c357d810d46677c480cf9e7fef9  tests/test_prefetch_equivalence.py
+068ded4e98adcfa4df471217f39a73f485286877a4edd34e8d21d786103d145c  tools/compare_prefetch_arms.py
+32e351e070cfc26203bf73d79e2628122d182107af60e888e6e8ff1690493b27  tools/cpu_mask_topology.py
+d6df4da18ab9c885c32ae3317d279bfc4be5a0647896eeda500c2ef38cf3dbe3  scripts/prefetch_gpu_screen.sh
+92d89a945cdd86654ce93de4096bb3ba537c094965206cdc2df13bde63b7fa72  scripts/prefetch_scarf_series.sbatch
+##### lock acquired 2026-09-28T08:34:38Z
+inherited Cpus_allowed_list: 32-47
+numactl --show: policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+configure rc=0
+build rc=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+motioncorr sha256: ec3bf772bdd73a8a030871632d9cf6c8954a76d9bd6aeb6394f01cd60406d29d
+##### full ctest
+      Start 13: DamagedMovie
+13/15 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: PrefetchEquivalence
+14/15 Test #14: PrefetchEquivalence ..............   Passed    8.94 sec
+      Start 15: RunnerModelParser
+15/15 Test #15: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 15
+
+Total Test time (real) =  21.65 sec
+ctest rc=0
+
+##### negative control: MRC comparison (10 mutations)
+negative control for the MRC comparison
+  mutation                                        result    verdict
+  timestamp changes to another valid timestamp    accepted  OK
+  one pixel byte flips                            caught    OK   [probe: PIXELS DIFFER]
+  main header byte flips (nx)                     caught    OK   [probe: main header bytes 0..224 differ]
+  label prefix byte flips (Relion -> Reliom)      caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [229] (count 1)]
+  unused label record 1 gains content             caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [304, 305, 306, 307] (count 4)]
+  timestamp replaced by same-length garbage       caught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  timestamp replaced by an impossible date        caught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  nsymbt claims an extended header                caught    OK   [probe: nsymbt differs, 0 vs 16]
+  nlabl changes                                   caught    OK   [probe: main header bytes 0..224 differ]
+  file truncated                                  caught    OK   [probe: file sizes differ, 1088 vs 1040]
+  self-test: PASS
+rc=0
+
+##### range-mask control: CPU topology helper
+cpu mask topology self-test
+  check                                               got                         want                        verdict
+  expand '0-7,32-39'                                  [0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39][0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39]OK
+  expand '0,1,2,3,32,33,34,35'                        [0, 1, 2, 3, 32, 33, 34, 35][0, 1, 2, 3, 32, 33, 34, 35]OK
+  expand '0'                                          [0]                         [0]                         OK
+  expand '0-63' length                                64                          64                          OK
+  range mask: logical cpus                            16                          16                          OK
+  range mask: physical cores                          8                           8                           OK
+  range mask: numa nodes                              [0, 1]                      [0, 1]                      OK
+  range mask: full SMT pairs                          8                           8                           OK
+  list mask: physical cores                           4                           4                           OK
+  list mask: numa nodes                               [0]                         [0]                         OK
+  single cpu: physical cores                          1                           1                           OK
+  OLD comma-only helper on a RANGE mask (must be 0)   0                           0                           OK
+  OLD comma-only helper on an EXPLICIT list (was fine)4                           4                           OK
+  self-test: PASS
+rc=0
+##### loadavg at end: 6.94 4.74 3.95 3/7981 3407788
+##### series rc=0 at 2026-09-28T08:35:22Z
+##### ALL DONE

@@ -3,6 +3,9 @@
 set -u
 ROOT=/home/alex/mc-issue61
 BIN=/home/alex/relion-container-tests/bin/relion-container-bin-r2
+# Review finding 4111302893: with `set -u` an unset ARMS aborted before any arm was
+# processed, so the documented reproduction step could not be run as written.
+ARMS=${ARMS:-"cpu default allfftw ctrl_noise_f005 ctrl_noise_f020 ctrl_envelope_b20"}
 for arm in $ARMS; do
   P=$ROOT/proj/$arm; cd "$P" || exit 1
   rm -rf Extract61; mkdir -p Extract61

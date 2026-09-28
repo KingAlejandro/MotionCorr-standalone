@@ -65,7 +65,10 @@ manifest = {"movies": MOVIES, "arms": {}, "angpix": ANGPIX,
             "control_definitions": {k: {"kind": v[0], "param": v[1], "seed_base": v[2]}
                                     for k, v in CTRL.items()}}
 
-os.makedirs(f"{ROOT}/arms", exist_ok=True)
+# Review finding 4111302943: results/ and logs/ were assumed to pre-exist, so stage 0
+# failed on a fresh ROOT and every later stage redirected into a missing directory.
+for _d in ("arms", "proj", "results", "logs", "stars", "rec", "pp"):
+    os.makedirs(f"{ROOT}/{_d}", exist_ok=True)
 for name, (kind, param, seedb) in CTRL.items():
     d = f"{ROOT}/arms/{name}"
     os.makedirs(d, exist_ok=True)

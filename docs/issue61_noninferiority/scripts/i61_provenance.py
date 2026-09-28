@@ -60,12 +60,31 @@ for arm in ARMS:
         geom.add((d["nx"], d["ny"], d["nz"], d["mode"], round(d["angpix"], 6)))
 out["geometry_unique"] = sorted(str(g) for g in geom)
 
+# Completeness must be established BEFORE any identity claim.  Review finding 4111302920:
+# the original used .get() on both sides, so two missing files compared equal (None == None)
+# and were counted as "identical payload", letting absent inputs masquerade as evidence.
+missing = [(a, m) for a in ARMS for m in MOVIES if "MISSING" in out["arms"][a][m]]
+out["missing_inputs"] = [{"arm": a, "movie": m} for a, m in missing]
+out["coverage_complete"] = not missing
+
 # payload identity check between arms (expected: all different)
 ident = {}
 for a in ("default", "allfftw"):
-    same = sum(1 for m in MOVIES
-               if out["arms"][a][m].get("pixel_payload_sha256")
-               == out["arms"]["cpu"][m].get("pixel_payload_sha256"))
+    same = 0
+    for m in MOVIES:
+        ha = out["arms"][a][m].get("pixel_payload_sha256")
+        hc = out["arms"]["cpu"][m].get("pixel_payload_sha256")
+        if ha is None or hc is None:
+            continue          # absent input is never evidence of anything
+        same += (ha == hc)
     ident[f"{a}_payload_identical_to_cpu"] = same
+    ident[f"{a}_payload_pairs_compared"] = sum(
+        1 for m in MOVIES
+        if out["arms"][a][m].get("pixel_payload_sha256")
+        and out["arms"]["cpu"][m].get("pixel_payload_sha256"))
 out["payload_identity_vs_cpu"] = ident
+if missing:
+    print(f"ABORT: {len(missing)} corrected micrograph(s) absent; provenance is incomplete "
+          f"and no identity claim may be derived from it: {missing[:5]}", file=sys.stderr)
 json.dump(out, sys.stdout, indent=1, sort_keys=True)
+sys.exit(0 if out["coverage_complete"] else 1)

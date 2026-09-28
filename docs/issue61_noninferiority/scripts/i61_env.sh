@@ -6,7 +6,11 @@ PY=/home/alex/relion-container-tests/venvs/pipeliner-onedep-adapter/bin/python
 {
 echo "generated_utc: $(date -u +%FT%TZ)"
 echo "host: $(hostname)  kernel: $(uname -r)"
-echo "cpu_affinity_policy: taskset -c 96-103 on the top-level shell; bench mutex /tmp/motioncorr-bench.lock"
+echo "study_cpu_policy: 4GPUs work under top-level taskset -c 96-103 behind /tmp/motioncorr-bench.lock;"
+echo "                  cpu64 follow-up work under taskset -c 32-63 (NUMA node 1) behind /tmp/motioncorr-issue96-cpu-validation.lock"
+# observed, not asserted: what this regeneration actually ran under
+echo "observed_affinity_of_this_run: $(taskset -cp $$ 2>/dev/null | sed 's/.*: //')"
+echo "observed_numa_of_this_run: $(numactl --show 2>/dev/null | tr '\n' ' ' || echo numactl-absent)"
 echo "mem_total_GB: $(free -g|awk 'NR==2{print $2}')"
 echo
 echo "## Tool versions"
@@ -18,8 +22,14 @@ echo "## Container / binary digests"
 for f in $BIN/relion_reconstruct $BIN/relion_postprocess $BIN/relion_preprocess $BIN/relion_run_ctffind $BIN/ctffind; do
   echo "$(sha256sum $f)"
 done
-IMG=$(grep -m1 -oE '/[^" ]*\.sif' $BIN/relion-container-wrapper-diagnose 2>/dev/null | head -1)
 echo "wrapper_dir: $BIN"
+# Review finding 4111302990: the container image was resolved into IMG and then never
+# emitted or hashed, so the section claimed container provenance it did not contain.
+for W in $BIN/relion_reconstruct $BIN/relion_run_ctffind; do
+  IMG=$(grep -m1 -oE '/[^"} ]*\.sif' "$W" 2>/dev/null | head -1)
+  [ -n "${IMG:-}" ] && [ -f "$IMG" ] && { echo "container_image: $IMG"; sha256sum "$IMG"; break; }
+done
+[ -n "${IMG:-}" ] && [ -f "${IMG:-}" ] || echo "container_image: UNRESOLVED from the wrapper scripts"
 echo
 echo "## Motion-correction arm provenance (consumed from Issue #36)"
 cat /home/alex/MotionCorr-issue36-full24/provenance.md

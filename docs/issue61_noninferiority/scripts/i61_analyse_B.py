@@ -5,15 +5,35 @@ B1 (primary): rho = median over qualifying shells of SSNR_arm/SSNR_cpu.
 B2          : resolution at FSC = 0.143 (RELION's reported value).
 B3          : auto sharpening B-factor.
 Uncertainty : delete-one-movie jackknife over the 22 held-out movies.
+
+VALIDITY GATE (added after PR #65 review findings r4119264405 / r4119264412).
+PROTOCOL.md requires that if the sensitivity control fails, every Stage B verdict becomes
+INCONCLUSIVE.  The shipped version only stated that in prose and assigned real-arm verdicts
+from each arm's own bound, so a rerun with an absent or insensitive control would still have
+emitted PASS.  It is now enforced in code, and enforced against the right condition: a
+control must be *rejected at the harm margin*, not merely be distinguishable from 1.
+
+Concretely, a positive control certifies B1 only if BOTH
+    point estimate rho_ctrl <= MARGIN          (the control really is at or beyond harm)
+    upper one-sided 95% bound < MARGIN         (and the test actually rejects it)
+hold.  A control that is displaced from 1 but still passes the margin -- which is what
+`ctrl_noise_f005` did at rho = 0.9666, bound 0.9567 -- certifies nothing, because it never
+exercises the decision the endpoint has to make.  Controls may come from this tree or from a
+separate certificate produced by an equivalent run (see --sensitivity), in which case the
+certificate must carry its own proof that the two pipelines agree.
 """
 import glob, json, math, os, sys
 import numpy as np
 from scipy.stats import t as tdist
 
-ROOT = "/home/alex/mc-issue61"
-REAL = ["cpu", "default", "allfftw"]
-CTRL = ["ctrl_noise_f005", "ctrl_noise_f020", "ctrl_envelope_b20"]
+ROOT = os.environ.get("I61_ROOT", "/home/alex/mc-issue61")
+REAL = os.environ.get("I61_REAL", "cpu default allfftw").split()
+CTRL = os.environ.get("I61_CTRL",
+                      "ctrl_noise_f005 ctrl_noise_f020 ctrl_envelope_b20").split()
 ALL = REAL + CTRL
+# optional path to a sensitivity certificate from an equivalent run
+SENSITIVITY_CERT = os.environ.get("I61_SENSITIVITY_CERT", "")
+OUT_NAME = os.environ.get("I61_OUT", "stageB_reconstruction.json")
 BAND = (8.0, 3.0)          # Angstrom, inclusive
 FSC_FLOOR = 0.143          # qualifying shells need FSC_cpu >= this
 MIN_SHELLS = 20
@@ -94,8 +114,22 @@ def jk_bounds(theta_full, theta_reps):
                                theta_full + float(tdist.ppf(0.975, n - 1)) * se]}
 
 
-held = sorted({os.path.basename(p)[3:-5]
-               for p in glob.glob(f"{ROOT}/pp/cpu/jk_*.star")})
+# The analysis set is FIXED by the protocol, not discovered from the filesystem.
+# Review finding 4111302870: globbing pp/cpu/jk_*.star let a missing output silently shrink
+# the jackknife (narrowing the bounds) and a stale file silently add a replicate.
+ALL24 = ["00021", "00022", "00023", "00024", "00025", "00026", "00027", "00028",
+         "00029", "00030", "00031", "00035", "00036", "00037", "00039", "00040",
+         "00042", "00043", "00044", "00045", "00046", "00047", "00048", "00049"]
+DEV = ["00021", "00046"]          # development movies, excluded from every primary result
+held = [m for m in ALL24 if m not in DEV]
+assert len(ALL24) == 24 and len(held) == 22, (len(ALL24), len(held))
+_found = sorted(os.path.basename(p)[3:-5] for p in glob.glob(f"{ROOT}/pp/cpu/jk_*.star"))
+if _found != held:
+    raise SystemExit(
+        "ABORT: the jackknife replicate set on disk does not match the preregistered 22 "
+        f"held-out movies.\n  missing: {sorted(set(held) - set(_found))}\n"
+        f"  unexpected: {sorted(set(_found) - set(held))}\n"
+        "Refusing to compute confidence bounds from a different sample than the protocol fixes.")
 res = {"band_A": BAND, "fsc_floor": FSC_FLOOR, "min_shells": MIN_SHELLS,
        "margins": MARGIN, "held_out_movies": held,
        "fsc_column_primary": FSC_COL_PRIMARY, "fsc_column_alt": FSC_COL_ALT,
@@ -132,8 +166,15 @@ for a in ALL:
                                         - res["point_estimates"]["cpu"][s]["bfactor_A2"])
         res["arms"][a][s] = entry
 
-    # delete-one-movie jackknife, held-out set only, real arms only
-    if all(pp[a].get(f"jk_{m}") for m in held) and all(pp["cpu"].get(f"jk_{m}") for m in held):
+    # delete-one-movie jackknife, held-out set only.  Incompleteness is recorded, never
+    # silently absorbed into a narrower interval (review finding 4111302870).
+    _miss = ([m for m in held if not pp[a].get(f"jk_{m}")]
+             + [m for m in held if not pp["cpu"].get(f"jk_{m}")])
+    if _miss:
+        res["arms"][a]["held22_jackknife_unavailable"] = {
+            "reason": "missing post-processing output for some replicates",
+            "missing_replicates": sorted(set(_miss))}
+    if not _miss:
         reps = {"B1_rho_primary_corrected": [], "B1_rho_alt_unmasked": [],
                 "B2_d143_delta_A": [], "B3_bfactor_delta_A2": []}
         for m in held:
@@ -172,9 +213,94 @@ for a in ALL:
             jk[key] = b
         res["arms"][a]["held22_jackknife"] = jk
 
-json.dump(res, open(f"{ROOT}/results/stageB_reconstruction.json", "w"), indent=1, sort_keys=True,
+# --------------------------------------------------------------------------------------
+# Validity precondition, enforced (not merely documented) -- see module docstring.
+# --------------------------------------------------------------------------------------
+def sensitivity_candidates(res, margin, cert_path):
+    """Every positive control that could certify B1, with whether it actually does."""
+    out = []
+    for a, entry in res["arms"].items():
+        jk = entry.get("held22_jackknife", {}).get("B1_rho_primary_corrected")
+        src = "this run"
+        if not jk or "error" in jk:
+            pt = entry.get("held22", {}).get("B1_rho_primary_corrected", {}).get("value")
+            out.append({"control": a, "source": src, "rho": pt, "upper95": None,
+                        "at_or_beyond_harm": (pt is not None and pt <= margin),
+                        "rejected_at_margin": False,
+                        "why": "no jackknife interval, so the endpoint cannot be shown to reject it"})
+            continue
+        pt, ub = jk["point_estimate"], jk["upper95_one_sided"]
+        at_harm = pt <= margin
+        rejected = ub < margin
+        out.append({"control": a, "source": src, "rho": pt, "upper95": ub,
+                    "at_or_beyond_harm": at_harm, "rejected_at_margin": bool(at_harm and rejected),
+                    "why": ("certifies B1" if (at_harm and rejected) else
+                            "degradation is milder than the harm margin, so it never exercises the decision"
+                            if not at_harm else
+                            "at or beyond harm but the interval does not exclude the margin")})
+    if cert_path and os.path.exists(cert_path):
+        cert = json.load(open(cert_path))
+        for c in cert.get("controls", []):
+            pt, ub = c.get("rho"), c.get("upper95")
+            at_harm = pt is not None and pt <= margin
+            rejected = ub is not None and ub < margin
+            out.append({"control": c.get("control"), "source": cert.get("source", cert_path),
+                        "rho": pt, "upper95": ub, "at_or_beyond_harm": at_harm,
+                        "rejected_at_margin": bool(at_harm and rejected),
+                        "equivalence_proof": cert.get("equivalence_proof"),
+                        "why": c.get("why", "")})
+    return out
+
+
+MARGIN_B1 = MARGIN["B1_rho"]
+cands = sensitivity_candidates(res, MARGIN_B1, SENSITIVITY_CERT)
+certifying = [c for c in cands if c["rejected_at_margin"]]
+# the tightest certifying control is the demonstrated detection boundary
+boundary = max((c for c in certifying), key=lambda c: c["rho"], default=None)
+res["validity"] = {
+    "rule": ("a Stage B verdict for a real arm may stand only if some positive control with "
+             f"rho <= {MARGIN_B1} also has an upper one-sided 95% bound < {MARGIN_B1}"),
+    "margin": MARGIN_B1,
+    "candidates": cands,
+    "sensitivity_demonstrated": bool(certifying),
+    "demonstrated_detection_boundary_rho": (boundary["rho"] if boundary else None),
+    "certifying_controls": [c["control"] for c in certifying],
+    "certificate_path": SENSITIVITY_CERT or None,
+}
+
+if not certifying:
+    reason = ("validity precondition FAILED: no positive control was both at or beyond the "
+              f"{MARGIN_B1} harm margin and rejected by the test, so B1 has not been shown to "
+              "resolve its own margin")
+    res["validity"]["forced_inconclusive"] = True
+    res["validity"]["reason"] = reason
+    for a in REAL:
+        if a == "cpu" or a not in res["arms"]:
+            continue
+        jk = res["arms"][a].get("held22_jackknife", {})
+        for key, b in jk.items():
+            if isinstance(b, dict) and "verdict" in b:
+                b["verdict_before_validity_gate"] = b["verdict"]
+                b["verdict"] = "INCONCLUSIVE"
+                b["validity_override"] = reason
+else:
+    res["validity"]["forced_inconclusive"] = False
+
+json.dump(res, open(f"{ROOT}/results/{OUT_NAME}", "w"), indent=1, sort_keys=True,
           default=lambda o: None if o is None else float(o))
 
+v = res["validity"]
+print("validity precondition:", "SATISFIED" if v["sensitivity_demonstrated"] else "FAILED")
+for c in v["candidates"]:
+    print(f"   control {c['control']:20s} rho={c['rho'] if c['rho'] is None else round(c['rho'],5)!s:>8s}"
+          f" upper95={c['upper95'] if c['upper95'] is None else round(c['upper95'],5)!s:>8s}"
+          f" certifies={c['rejected_at_margin']}  [{c['source']}] {c['why']}")
+if v["sensitivity_demonstrated"]:
+    print(f"   demonstrated detection boundary: rho = {v['demonstrated_detection_boundary_rho']:.5f}"
+          f" (tightest control the test rejects)")
+else:
+    print("   -> every real-arm Stage B verdict forced to INCONCLUSIVE")
+print()
 print("point estimates (matched-orientation reconstruction)")
 print(f"{'arm':18s} {'set':7s} {'d143 A':>8s} {'Bsharp':>9s}")
 for a in ALL:

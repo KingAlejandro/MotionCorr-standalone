@@ -15,6 +15,11 @@ for seed in ${SEEDS:-61 62 63}; do
     P=$ROOT/proj/$arm; cd "$P" || exit 1
     D=Refine61_${SET}_s${seed}
     rm -rf $D; mkdir -p $D
+    # Review finding 4111302949 notes that this invocation omits --allow-run-as-root,
+    # which i61_stageC.sh passes.  That flag is required only when MPI runs as root; these
+    # runs execute as the unprivileged user `alex`, and all 9 refinements completed
+    # (see logs/stageC2_driver.log).  The flag is deliberately not reintroduced here,
+    # because this file records the command that was actually executed.
     /usr/bin/time -v apptainer exec --nv $SIF mpirun -n 3 \
       /opt/relion/bin/relion_refine_mpi \
       --o $D/run --auto_refine --split_random_halves --random_seed $seed \

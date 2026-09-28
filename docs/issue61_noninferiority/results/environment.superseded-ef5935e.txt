@@ -1,15 +1,23 @@
-generated_utc: 2026-09-28T07:17:35Z
+SUPERSEDED. This artifact was committed in PR #65 up to ef5935e and is retained unchanged as
+the historical record. PR #65 review finding r4119264427 established that it could not have
+been produced by the committed scripts/i61_env.sh: it records a shell-quoting SyntaxError in
+place of the Python/NumPy/SciPy versions, because the script was corrected after this output
+was generated and never re-run. Replaced by environment.txt, regenerated from the committed
+command. No historical value in this file has been edited.
+----------------------------------------------------------------------------------------
+generated_utc: 2026-09-25T03:00:19Z
 host: 4-gpu-vm  kernel: 6.8.0-136-generic
-study_cpu_policy: 4GPUs work under top-level taskset -c 96-103 behind /tmp/motioncorr-bench.lock;
-                  cpu64 follow-up work under taskset -c 32-63 (NUMA node 1) behind /tmp/motioncorr-issue96-cpu-validation.lock
-observed_affinity_of_this_run: 120-123
-observed_numa_of_this_run: policy: default preferred node: current physcpubind: 120 121 122 123  cpubind: 1  nodebind: 1  membind: 0 1  preferred:  
+cpu_affinity_policy: taskset -c 96-103 on the top-level shell; bench mutex /tmp/motioncorr-bench.lock
 mem_total_GB: 432
 
 ## Tool versions
 relion: RELION version: 5.1.0-commit-cb2683 
 ctffind_help_line1: Usage: ctffind [--old-school-input] [--old-school-input-ctffind4] [--amplitude-spectrum-input] [--filtered-amplitude-spectrum-input] [--fast] [-j <num>] [controller_address] [controller_port] [job_code]
-python/numpy/scipy: 3.12.3 2.4.6 1.17.1
+  File "<string>", line 1
+    import sys,numpy,scipy;print(sys.version.split()[0],\"numpy\",numpy.__version__,\"scipy\",scipy.__version__)
+                                                         ^
+SyntaxError: unexpected character after line continuation character
+python: 
 
 ## Container / binary digests
 f8fe0e90056d656e286e58d946117275bc07aac3683168041733875dd39b46fd  /home/alex/relion-container-tests/bin/relion-container-bin-r2/relion_reconstruct

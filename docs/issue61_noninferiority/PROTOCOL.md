@@ -190,9 +190,11 @@ between image agreement and downstream signal can be inspected by #58 and #60.
   separate claim rather than contributing to one omnibus claim. B1 is the single primary endpoint
   per arm; A1-A3 are a prespecified screen; B2, B3, C1, C2 are secondary or supportive. This is
   stated so that readers can discount the secondary family appropriately.
-- **Validity precondition.** If `ctrl_noise_f005` does not yield a `rho` whose interval contains a
+- **Validity precondition.** ~~If `ctrl_noise_f005` does not yield a `rho` whose interval contains a
   detectable loss distinguishable from 1.0, the primary endpoint is declared unable to resolve its
-  own margin, and every Stage B verdict is reported as INCONCLUSIVE regardless of the arm values.
+  own margin, and every Stage B verdict is reported as INCONCLUSIVE regardless of the arm values.~~
+  **Superseded by Amendment 1 (section 10); the original wording is retained above and in git
+  history.** The operative criterion is now rejection at the harm margin, not displacement from 1.0.
 
 ## 8. What this design cannot establish (declared in advance)
 
@@ -224,3 +226,64 @@ SHA-256 verified identical on both hosts; per-arm corrected-MRC **pixel-payload*
 `strftime` timestamp and whole-file hashes give false mismatches; exact commands for every stage;
 host, lock and CPU-affinity discipline for every run; RELION and CTFFIND versions and container
 digests; all machine-readable endpoint values as JSON under `docs/issue61_noninferiority/results/`.
+
+
+---
+
+## 10. Amendments
+
+### Amendment 1 (2026-09-28) — the validity precondition must require rejection *at the margin*
+
+**Status: tightening. No margin, threshold, endpoint or analysis set is relaxed or changed.** The
+harm margin for B1 remains `rho >= 0.95`, B2 remains `+0.05 A`, B3 remains `-10 A^2`, the
+development/held-out split is unchanged, and no existing result is reclassified as a pass.
+
+**Defect.** Section 7's original validity precondition asked only that the sensitivity control be
+*distinguishable from 1.0*. That is strictly weaker than the property it was meant to guarantee.
+A control can sit many standard errors away from 1.0 and still lie comfortably inside the harm
+margin, in which case it never exercises the decision the endpoint actually has to make, and the
+precondition is satisfiable by a test that could not reject a harmful arm. This is exactly what
+happened: `ctrl_noise_f005` measured `rho = 0.9666` with a lower bound of `0.9567`, i.e. it was
+5.8 SE from 1.0 and simultaneously a clean **PASS** against the 0.95 margin. Raised as PR #65
+review finding [r4119264405](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264405);
+the same gap in the code was raised as
+[r4119264412](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264412)
+and Copilot finding 4111302884.
+
+**Amended criterion.** A positive control certifies the B1 endpoint only if **both**
+
+1. its point estimate satisfies `rho_ctrl <= 0.95` — the control genuinely is at or beyond the
+   harm margin, so it is a degradation the study has declared unacceptable; **and**
+2. its upper one-sided 95% bound satisfies `upper95 < 0.95` — the test actually rejects it.
+
+If no control satisfies both, the primary endpoint is declared unable to resolve its own margin
+and **every Stage B verdict for every real arm is reported INCONCLUSIVE**, whatever that arm's own
+bound says. This is now enforced in `scripts/i61_analyse_B.py` rather than asserted in prose, and
+the pre-override verdict is retained in the results JSON as `verdict_before_validity_gate` so the
+override is auditable.
+
+The tightest certifying control — the largest `rho` the test still rejects — is reported as the
+**demonstrated detection boundary**. A PASS for a real arm means only that the arm was not
+rejected by a test shown to reject degradation at that boundary.
+
+**Controls added to satisfy the amended criterion.** The existing controls fit
+`rho = 1/(1 + k*f)` with `k = 0.694` (`f = 0.05 -> 0.9666`, `f = 0.20 -> 0.8775`), so the noise
+level for a true loss `L` is `f = L / (k(1-L))`. Two levels bracket the margin, plus one gap
+closure:
+
+| Control | `f` | Predicted `rho` | Role |
+| --- | ---: | ---: | --- |
+| `ctrl_noise_f0076` | 0.076 | ~0.950 | **at** the margin — locates the detection boundary |
+| `ctrl_noise_f011` | 0.110 | ~0.929 | **beyond** the margin — must be rejected, or B1 is not fit for purpose |
+| `ctrl_noise_f020` | 0.200 | 0.8775 | jackknife interval completed; PR #65 reported a point estimate only |
+
+Predictions are recorded here **before** the corresponding reconstructions were analysed. This
+amendment was committed while the control run was still executing and before any new `rho` value
+had been computed.
+
+**Execution.** These controls run on `cpu64` under `taskset -c 32-63` (NUMA node 1) behind
+`/tmp/motioncorr-issue96-cpu-validation.lock`, at most 12 concurrent, with `ctffind` untouched.
+Because they are derived from the CPU arm, the CPU baseline is recomputed on `cpu64` and the
+comparison is self-contained on that host. The transfer of the resulting sensitivity statement to
+the `4GPUs` real-arm comparison requires that the two pipelines be the same computation, which is
+established by digest equality of the CPU baseline half-maps rather than assumed.

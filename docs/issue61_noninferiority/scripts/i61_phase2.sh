@@ -3,6 +3,10 @@
 ROOT=/home/alex/mc-issue61
 {
   echo "PHASE2_LOCK $(date -u +%FT%TZ)"
+  # Review finding 4111302903: this phase consumed jobs_reconstruct_ctrl.txt but never
+  # generated it, so a clean run could not produce the control jackknife it reports.
+  /home/alex/relion-container-tests/venvs/pipeliner-onedep-adapter/bin/python \
+      $ROOT/scripts/i61_ctrl_jk.py || exit 1
   nice -n 5 xargs -P 8 -I{} -d '\n' bash -c '{}' < $ROOT/jobs_reconstruct_ctrl.txt
   echo "CTRL_JK_DONE $(date -u +%FT%TZ) maps=$(ls $ROOT/rec/*/*.mrc|wc -l)"
   /home/alex/relion-container-tests/venvs/pipeliner-onedep-adapter/bin/python \

@@ -41,13 +41,31 @@ MUTATIONS = [
      "        return prefix + \"\".join(r.raw for r in rows) + suffix",
      "        return prefix + \"\".join(\" \".join(r.values) + \"\\n\" for r in rows) + suffix"
      "  # MUTATED",
-     ["case_roundtrip_and_metadata"]),
+     ["case_roundtrip_and_metadata", "case_clean_merge"]),
 
     ("C++-reader refusals removed from the STAR parser",
      "tools/multi_gpu/star_io.py",
      "    for n, raw in enumerate(lines, start=1):",
      "    for n, raw in []:  # MUTATED",
      ["case_star_parser_refusals"]),
+
+    ("decorated-output collision preflight removed",
+     "tools/multi_gpu/partition_star.py",
+     "        for decoration in star_io.OUTPUT_DECORATIONS:",
+     "        for decoration in []:  # MUTATED",
+     ["case_decorated_output_collision"]),
+
+    ("output attribution falls back to naive suffix stripping",
+     "tools/multi_gpu/merge_workers.py",
+     "            attribution = star_io.split_output_path(str(rel), root_owner)",
+     "            attribution = (str(rel).rsplit('.', 1)[0], '', '')  # MUTATED",
+     ["case_real_output_suffixes_attributed"]),
+
+    ("per-worker aggregates published into the merged tree",
+     "tools/multi_gpu/merge_workers.py",
+     '                dst = out / "_workers" / f"w{k}" / rel',
+     "                dst = out / rel  # MUTATED",
+     ["case_clean_merge"]),
 
     ("lost-output check removed from the merge",
      "tools/multi_gpu/merge_workers.py",
@@ -61,11 +79,17 @@ MUTATIONS = [
      "            if False:  # MUTATED",
      ["case_duplicate_and_misrouted_output"]),
 
-    ("misrouted / unassigned checks removed from the merge",
+    ("misrouted check removed from the merge",
      "tools/multi_gpu/merge_workers.py",
-     "            assigned = root_owner.get(base)",
-     "            assigned = k  # MUTATED",
-     ["case_duplicate_and_misrouted_output", "case_unassigned_movie_output"]),
+     "                if assigned != k:",
+     "                if False:  # MUTATED",
+     ["case_duplicate_and_misrouted_output", "case_real_output_suffixes_attributed"]),
+
+    ("unassigned-output check removed from the merge",
+     "tools/multi_gpu/merge_workers.py",
+     '                problems.append(f"worker {k}: produced {rel}, which belongs to no movie "',
+     '                _unused = (f"worker {k}: produced {rel}, which belongs to no movie "  # MUTATED',
+     ["case_unassigned_movie_output"]),
 
     ("worker exit codes no longer gate the merge",
      "tools/multi_gpu/merge_workers.py",
@@ -90,6 +114,18 @@ MUTATIONS = [
      "            unwitnessed.append(pid)\n            continue",
      "            continue  # MUTATED",
      ["case_gpu_witness_logic"]),
+
+    ("aggregate row-order check removed from the merge",
+     "tools/multi_gpu/merge_workers.py",
+     "                if got != want:",
+     "                if False:  # MUTATED",
+     ["case_aggregate_wrong_order_rejected"]),
+
+    ("aggregate extra arguments dropped instead of forwarded",
+     "tools/multi_gpu/merge_workers.py",
+     "        extra = shlex.split(a.aggregate_args)",
+     "        extra = []  # MUTATED",
+     ["case_aggregate_star_canonical_order"]),
 
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",

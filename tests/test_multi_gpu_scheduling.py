@@ -7,9 +7,13 @@ fixed-name aggregates a real process writes. The point is to catch dropped,
 duplicated or misrouted movies and mangled metadata before any hardware time is
 spent.
 
-Every guard is paired with a negative control: the same scenario with the fault
-injected, asserted to fail. A guard that is never shown to fire is a check that
-cannot observe what it asserts.
+Faults are injected rather than assumed: most cases here *are* the negative
+control for a guard. The Python-side guards are additionally covered by
+docs/multi_gpu/negative_controls.py, which removes each one in a scratch copy
+and requires the corresponding case to fail. The one guard that harness cannot
+reach is the C++ device-list rejection, because mutating it needs a rebuild;
+its control is the recorded unpatched-main binary, which produces a different
+message for the same input (docs/multi_gpu/pr_a_evidence/device_list_witness.txt).
 
 With --binary pointing at a built motioncorr, the --gpu device-list rejection is
 also exercised against the real argument parser.
@@ -502,12 +506,126 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
     assert "not a non-negative" not in combined, combined[:400]
 
 
+def case_aggregate_star_canonical_order(tmp: Path) -> None:
+    """The regenerated dataset STAR must be in canonical input order."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 3, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 3)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--only_do_unfinished "
+                      "--fake_note=args-were-forwarded"])
+    assert cp.returncode == 0, cp.stderr + cp.stdout
+    rep = json.loads(report.read_text())
+    assert rep["verdict"] == "PASS", rep["problems"]
+    agg = rep["aggregate_star"]
+    assert agg["returncode"] == 0, agg
+    assert agg["n_rows"] == len(DEFAULT_ROWS), agg
+    assert agg["row_order"] == "canonical", agg
+    # The extra arguments really reached the process. Asserting on the recorded
+    # command alone would be vacuous -- --only_do_unfinished is added
+    # unconditionally -- so this checks a side effect only a forwarded argument
+    # could produce. argparse.REMAINDER after a named option silently captures
+    # nothing, which is the failure this case exists to catch.
+    note = tmp / "merged" / "note.txt"
+    assert note.exists() and note.read_text().strip() == "args-were-forwarded", \
+        f"extra aggregate arguments were dropped; command was {agg['command']}"
+
+    merged_star = (tmp / "merged" / "corrected_micrographs.star").read_text()
+    for name, _, _ in DEFAULT_ROWS:
+        assert star_io.output_root(name) + ".mrc" in merged_star, name
+
+
+def case_aggregate_wrong_order_rejected(tmp: Path) -> None:
+    """An aggregate STAR in completion order rather than input order fails."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 3, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 3)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--only_do_unfinished "
+                      "--fake_reverse_aggregate"])
+    assert cp.returncode == 3, f"reversed aggregate order accepted (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert any("canonical input order" in p for p in rep["problems"]), rep["problems"]
+
+
+def case_decorated_output_collision(tmp: Path) -> None:
+    """A movie whose root is another movie's decorated output is refused."""
+    rows = [("Movies/a.tiff", 1, 0.0), ("Movies/a_PS.tiff", 1, 1.4),
+            ("Movies/b.tiff", 1, 2.8)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    cp = partition(star, 2, tmp / "shards")
+    assert cp.returncode == 3, (
+        f"a_PS.mrc is both movie 'a_PS''s image and movie 'a''s power spectrum "
+        f"under --grouping_for_ps, yet the pair was accepted (rc={cp.returncode})")
+    assert "decorated-output collision" in cp.stderr, cp.stderr
+    # positive control: rename the second movie and the same input partitions
+    build_star(star, [("Movies/a.tiff", 1, 0.0), ("Movies/aPS.tiff", 1, 1.4),
+                      ("Movies/b.tiff", 1, 2.8)])
+    assert partition(star, 2, tmp / "shards_ok").returncode == 0
+
+
+def case_real_output_suffixes_attributed(tmp: Path) -> None:
+    """Every suffix the real binary emits is attributed to the right movie."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 3, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 3)
+
+    man = json.loads((shards / "shard_manifest.json").read_text())
+    owners = {r: s["index"] for s in man["shards"]
+              for r in s["output_roots"]}
+    # The decorations the runner actually writes: _shifts.eps (:950), .log,
+    # _noDW/_DW/_DWS/_PS/_EVN/_ODD.mrc, _frames.mrcs. Drop them into the worker
+    # that owns each movie, then require a clean merge.
+    for root, k in owners.items():
+        for extra in ("_shifts.eps", ".log", "_noDW.mrc", "_PS.mrc", "_EVN.mrc",
+                      "_ODD.mrc", "_DW.mrc", "_DWS.mrc", "_frames.mrcs"):
+            f = dirs[k] / (root + extra)
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("x")
+    # run_multi_gpu.py drops these into each worker directory
+    for d in dirs:
+        (d / "command.json").write_text("{}")
+
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report)
+    assert cp.returncode == 0, cp.stderr
+    rep = json.loads(report.read_text())
+    assert rep["verdict"] == "PASS", rep["problems"]
+
+    # ...and the same file under the WRONG worker is still caught.
+    wrong = dirs[(owners[man["shards"][0]["output_roots"][0]] + 1) % 3] / (
+        man["shards"][0]["output_roots"][0] + "_shifts.eps")
+    wrong.parent.mkdir(parents=True, exist_ok=True)
+    wrong.write_text("x")
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged2", status,
+               tmp / "report2.json")
+    assert cp.returncode == 3, "a misrouted _shifts.eps was accepted"
+    rep2 = json.loads((tmp / "report2.json").read_text())
+    assert any(p.startswith("misrouted:") for p in rep2["problems"]), rep2["problems"]
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
     case_output_name_collision,
     case_duplicate_movie_in_input,
     case_collapsed_spaces_are_a_collision,
+    case_decorated_output_collision,
+    case_real_output_suffixes_attributed,
     case_star_parser_refusals,
     case_clean_merge,
     case_lost_output,
@@ -516,6 +634,8 @@ CASES = [
     case_failed_worker_blocks_merge,
     case_missing_status_blocks_merge,
     case_killed_worker_then_nonprefix_resume,
+    case_aggregate_star_canonical_order,
+    case_aggregate_wrong_order_rejected,
     case_launcher_refuses_cpu_gpu_confusion,
     case_gpu_witness_logic,
 ]

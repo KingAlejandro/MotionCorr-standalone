@@ -69,6 +69,21 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
                 "(getOutputFileNames replaces '.' with '_', src/motioncorr_runner.cpp:491)"
             )
         roots.setdefault(root, name)
+
+    # One movie's decorated output can be another movie's main output: with
+    # --grouping_for_ps, movie 'a' writes a_PS.mrc, which is exactly movie
+    # 'a_PS''s corrected image. Whichever runs second wins, silently.
+    for root, name in roots.items():
+        for decoration in star_io.OUTPUT_DECORATIONS:
+            if not decoration:
+                continue
+            other = roots.get(root + decoration)
+            if other is not None and other != name:
+                problems.append(
+                    f"decorated-output collision: {name!r} writes "
+                    f"{root + decoration}.mrc under some options, which is "
+                    f"{other!r}'s own output root"
+                )
     return problems
 
 

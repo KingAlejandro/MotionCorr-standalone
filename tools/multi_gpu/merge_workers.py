@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -45,6 +46,8 @@ import star_io  # noqa: E402
 AGGREGATE_NAMES = {
     "corrected_micrographs.star", "logfile.pdf", "header.pdf", "batch.pdf",
     "all_batches.pdf", "gain.mrc", "run.log", "time.txt", "note.txt",
+    # written by run_multi_gpu.py itself, not by the worker
+    "command.json", "status.json",
 }
 AGGREGATE_PREFIXES = ("corrected_micrographs_",)
 AGGREGATE_SUFFIXES = (".lst",)
@@ -84,8 +87,14 @@ def main(argv: list[str] | None = None) -> int:
                          "full input STAR with --only_do_unfinished against the merged tree")
     ap.add_argument("--input-star", default=None,
                     help="full input STAR, required with --aggregate-with")
-    ap.add_argument("--aggregate-args", nargs=argparse.REMAINDER, default=[],
-                    help="everything after this flag is passed to BINARY verbatim")
+    ap.add_argument("--aggregate-args", default="",
+                    help="one shell-quoted string of extra arguments for BINARY. Use "
+                         "the = form so argparse does not read a leading dash as the "
+                         "next option: --aggregate-args='--use_own --j 8'. A single "
+                         "string rather than a trailing argparse.REMAINDER, because "
+                         "REMAINDER after a named option silently captures nothing and "
+                         "the arguments come back as 'unrecognized' -- which reads as a "
+                         "usage error rather than as a dropped option list.")
     a = ap.parse_args(argv)
 
     manifest = json.loads(Path(a.manifest).read_text())
@@ -143,24 +152,15 @@ def main(argv: list[str] | None = None) -> int:
                 per_worker_aggregates.append(str(Path("_workers") / f"w{k}" / rel))
                 continue
 
-            stem = str(rel)
-            for suffix in (".mrc", ".star", ".eps", ".log"):
-                if stem.endswith(suffix):
-                    stem = stem[: -len(suffix)]
-                    break
-            base = stem
-            for tail in ("_noDW", "_PS", "_EVN", "_ODD"):
-                if base.endswith(tail):
-                    base = base[: -len(tail)]
-                    break
-
-            assigned = root_owner.get(base)
-            if assigned is None:
+            attribution = star_io.split_output_path(str(rel), root_owner)
+            if attribution is None:
                 problems.append(f"worker {k}: produced {rel}, which belongs to no movie "
                                 "in the manifest")
-            elif assigned != k:
-                problems.append(f"misrouted: worker {k} produced {rel}, assigned to "
-                                f"shard {assigned}")
+            else:
+                assigned = root_owner[attribution[0]]
+                if assigned != k:
+                    problems.append(f"misrouted: worker {k} produced {rel}, assigned to "
+                                    f"shard {assigned}")
 
             if rel in produced:
                 problems.append(f"duplicate: {rel} produced by workers "
@@ -202,7 +202,7 @@ def main(argv: list[str] | None = None) -> int:
         if not a.input_star:
             print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
             return 2
-        extra = [x for x in a.aggregate_args if x != "--"]
+        extra = shlex.split(a.aggregate_args)
         cmd = [a.aggregate_with, "--i", str(a.input_star), "--o", str(out) + os.sep,
                "--only_do_unfinished"] + extra
         proc = subprocess.run(cmd, capture_output=True, text=True)

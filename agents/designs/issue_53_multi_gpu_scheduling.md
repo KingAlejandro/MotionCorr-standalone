@@ -140,14 +140,17 @@ Production:
 
 - `src/motioncorr_runner.cpp` — device-list rejection and help text only.
 
-Tooling:
+Tooling. `tools/multi_gpu/` does not exist at `4c952b3f`, so every file below is an
+addition to main; the parenthetical says how each relates to PR55's prototype, which
+lives on a different branch and is not modified or deleted by this PR.
 
-- `tools/multi_gpu/star_io.py` (new)
-- `tools/multi_gpu/partition_star.py` (rewritten)
-- `tools/multi_gpu/merge_workers.py` (rewritten)
-- `tools/multi_gpu/gpu_witness.py` (new)
-- `tools/multi_gpu/run_multi_gpu.py` (new; replaces `run_multi_gpu.sh`)
-- `tools/multi_gpu/compare24.py` (salvaged, retargeted)
+- `tools/multi_gpu/star_io.py` (no PR55 counterpart)
+- `tools/multi_gpu/partition_star.py` (rewritten from PR55's)
+- `tools/multi_gpu/merge_workers.py` (rewritten from PR55's)
+- `tools/multi_gpu/gpu_witness.py` (no PR55 counterpart)
+- `tools/multi_gpu/run_multi_gpu.py` (supersedes PR55's `run_multi_gpu.sh`, which
+  remains on PR55's branch and is not deleted here)
+- `tools/multi_gpu/compare24.py` (salvaged from PR55's, retargeted)
 
 Tests:
 
@@ -168,8 +171,11 @@ Nothing else. Any file outside this list appearing in the PR diff is a scope vio
 PR A is reviewable when, and only when:
 
 - The device-list rejection compiles and its behaviour is witnessed by a run, not asserted.
-- All cheap CPU fixtures pass and each one is shown to fail when its guard is removed
-  (negative controls), so no fixture is a check that cannot observe what it asserts.
+- All cheap CPU fixtures pass, and every Python-side guard is shown to fail when it
+  is removed, by the mutation harness in `docs/multi_gpu/negative_controls.py`. The
+  C++ device-list rejection is outside that harness's reach — mutating it needs a
+  rebuild — so its control is the recorded unpatched-main binary producing a
+  different message for the same input.
 - The changed-file diff equals the whitelist.
 - Independent read-only code, spec-conformance and license review are recorded.
 

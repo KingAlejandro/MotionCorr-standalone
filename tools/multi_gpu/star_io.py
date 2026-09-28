@@ -300,6 +300,44 @@ def movie_block(star: StarFile) -> Block:
     return star.block_with_label(MOVIE_LABEL)
 
 
+# Per-movie output decorations appended to the output root, from
+# src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _shifts (:950), _noDW (:798),
+# _DW / _DWS (:818, :823), _PS (:1081), _EVN / _ODD (:1087-1088) and _frames
+# (:1830). Two movies whose roots differ only by one of these can overwrite each
+# other, which is why partition_star.py preflights for it.
+OUTPUT_DECORATIONS = ("", "_shifts", "_noDW", "_DW", "_DWS", "_PS", "_EVN",
+                      "_ODD", "_frames")
+
+# Extensions those decorated roots carry.
+OUTPUT_EXTENSIONS = (".mrc", ".mrcs", ".star", ".eps", ".log", ".out", ".err",
+                     ".com")
+
+
+def split_output_path(relpath: str, roots) -> tuple[str, str, str] | None:
+    """Attribute an output file to the movie root that produced it.
+
+    Returns (root, decoration, extension), or None if no known root explains it.
+
+    Longest match wins, and the remainder must be a known decoration. A naive
+    "strip a trailing _PS" would attribute movie `a_PS`'s own `a_PS.mrc` to
+    movie `a`, reporting a misroute that never happened -- or, worse, hiding a
+    real one.
+    """
+    stem, ext = relpath, ""
+    for candidate in OUTPUT_EXTENSIONS:
+        if stem.endswith(candidate):
+            stem, ext = stem[: -len(candidate)], candidate
+            break
+    best = None
+    for root in roots:
+        if not stem.startswith(root):
+            continue
+        remainder = stem[len(root):]
+        if remainder in OUTPUT_DECORATIONS and (best is None or len(root) > len(best[0])):
+            best = (root, remainder, ext)
+    return best
+
+
 def output_root(movie_name: str) -> str:
     """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:491.
 

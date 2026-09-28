@@ -36,6 +36,21 @@ import star_io  # noqa: E402
 PRODUCTS = (".mrc", ".star")
 
 
+def star_quote(value: str) -> str:
+    """The subset of escapeStringForSTAR (src/strings.cpp:87) these fixtures need.
+
+    A path containing whitespace must be quoted, or the reader sees extra
+    columns. Embedded quotes are not produced by any fixture here, and the \a
+    escaping the C++ writer would emit for them does not survive its own reader
+    (see tools/multi_gpu/star_io.py), so it is deliberately not imitated.
+    """
+    if value == "":
+        return '""'
+    if value[0] in ('"', "'") or any(c in value for c in " \t"):
+        return '"' + value + '"'
+    return value
+
+
 def write_products(outdir: Path, movie: str, optics: str, pre_exposure: str,
                    truncate_mrc: bool = False) -> None:
     root = star_io.output_root(movie)
@@ -66,6 +81,12 @@ def main(argv: list[str] | None = None) -> int:
                     help="SIGKILL self after producing this many movies")
     ap.add_argument("--fake_truncate", default=None,
                     help="comma-separated movie names whose .mrc is written short")
+    ap.add_argument("--fake_reverse_aggregate", action="store_true",
+                    help="emit the aggregate STAR rows in reverse order")
+    ap.add_argument("--fake_note", default=None,
+                    help="write this text to <out>/note.txt; used to prove that extra "
+                         "arguments actually reached the process rather than being "
+                         "silently dropped by the caller's argument handling")
     a, _unknown = ap.parse_known_args(argv)
 
     outdir = Path(a.out)
@@ -113,13 +134,17 @@ def main(argv: list[str] | None = None) -> int:
              if (outdir / (star_io.output_root(m) + ".mrc")).exists()]
     lines = ["\n", "data_micrographs\n", "\n", "loop_\n",
              "_rlnMicrographName #1\n", "_rlnMicrographMetadata #2\n"]
-    for root in roots:
-        lines.append(f"{outdir / (root + '.mrc')} {outdir / (root + '.star')}\n")
+    for root in (reversed(roots) if a.fake_reverse_aggregate else roots):
+        lines.append(f"{star_quote(str(outdir / (root + '.mrc')))} "
+                     f"{star_quote(str(outdir / (root + '.star')))}\n")
     lines.append("\n")
     (outdir / "corrected_micrographs.star").write_text("".join(lines))
     (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n")
     (outdir / "logfile.pdf.lst").write_text("fake\n")
     (outdir / "corrected_micrographs_all_accum.eps").write_text("%!PS fake\n")
+
+    if a.fake_note is not None:
+        (outdir / "note.txt").write_text(a.fake_note + "\n")
 
     print(f"fake_worker processed {len(processed)} movie(s) into {outdir}")
     return a.fake_fail_rc

@@ -39,6 +39,17 @@ Per the resource update of 28 Sep 2026 and `COMMON.md`:
 - `nvidia-smi` idle baseline for every device touched, and host load average at
   start.
 
+## What the CPU evidence already covers, and what it does not
+
+The whole pipeline -- partition, launcher, merge, aggregate regeneration,
+per-movie exact comparison -- has been run end to end with the real binary on
+CPU, serial against 3-way sharded, 6/6 exact (see `README.md`). What remains
+genuinely unrun is the **CUDA backend** under that pipeline, at dataset scale,
+with real device identity. Specifically: whether a CUDA worker's result depends
+on which device or process ran it, whether N workers hold contexts on N
+distinct physical GPUs, and whether the killed-worker and resume paths behave
+the same when the failure is a device error rather than a SIGKILL.
+
 ## Arms
 
 ### A0 — argument-parser witness on a CUDA build
@@ -93,7 +104,7 @@ python3 tools/multi_gpu/merge_workers.py \
     --workers sharded/w0 sharded/w1 --status sharded/status.json \
     --out merged/ --report merge_report.json \
     --aggregate-with <head-bin> --input-star movies.star \
-    --aggregate-args -- --use_own --j 8 <same dataset options>
+    --aggregate-args='--use_own --j 8 <same dataset options>'
 ```
 
 Required: `verdict: PASS`, 24 movies, no lost/duplicate/misrouted/unassigned

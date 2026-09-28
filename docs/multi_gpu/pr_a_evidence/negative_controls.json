@@ -1,6 +1,6 @@
 {
-  "n_mutations": 12,
-  "n_detected": 12,
+  "n_mutations": 25,
+  "n_detected": 25,
   "survivors": [],
   "results": [
     {
@@ -25,7 +25,8 @@
       "mutation": "shards re-serialized from parsed values instead of original bytes",
       "file": "tools/multi_gpu/star_io.py",
       "cases": {
-        "case_roundtrip_and_metadata": "detected"
+        "case_roundtrip_and_metadata": "detected",
+        "case_clean_merge": "detected"
       },
       "status": "detected"
     },
@@ -34,6 +35,30 @@
       "file": "tools/multi_gpu/star_io.py",
       "cases": {
         "case_star_parser_refusals": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "decorated-output collision preflight removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_decorated_output_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "output attribution falls back to naive suffix stripping",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_real_output_suffixes_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "per-worker aggregates published into the merged tree",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_clean_merge": "detected"
       },
       "status": "detected"
     },
@@ -54,10 +79,18 @@
       "status": "detected"
     },
     {
-      "mutation": "misrouted / unassigned checks removed from the merge",
+      "mutation": "misrouted check removed from the merge",
       "file": "tools/multi_gpu/merge_workers.py",
       "cases": {
         "case_duplicate_and_misrouted_output": "detected",
+        "case_real_output_suffixes_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "unassigned-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
         "case_unassigned_movie_output": "detected"
       },
       "status": "detected"
@@ -92,6 +125,78 @@
       "file": "tools/multi_gpu/gpu_witness.py",
       "cases": {
         "case_gpu_witness_logic": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate row-order check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_wrong_order_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate extra arguments dropped instead of forwarded",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_star_canonical_order": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "launcher verdict no longer gates the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_device_witness_blocks_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate-name match moved back ahead of attribution",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_aggregate_name_shadowing": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reserved-name preflight removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_reserved_name_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "short rows silently accepted",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_short_row_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "output_root strips the extension only within the basename",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_output_root_matches_withoutextension": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "--link no longer refused alongside --aggregate-with",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_link_with_aggregate_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "missing worker directory no longer reported",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_missing_worker_directory": "detected"
       },
       "status": "detected"
     },

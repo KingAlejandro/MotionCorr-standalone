@@ -4,8 +4,8 @@ Design and changed-file whitelist: [`agents/designs/issue_53_multi_gpu_schedulin
 
 PR A refreshes the #53 launcher concept onto current main, makes the native
 device-list behaviour honest, and proves the scheduling failure modes on CPU.
-**It makes no throughput, memory or numerical claim**, and the native GPU
-equality layer is prepared but unrun — see [`NEEDS_GPU.md`](NEEDS_GPU.md).
+**It makes no throughput, memory or numerical claim.** The native CUDA arm is
+prepared but unrun — see [`NEEDS_GPU.md`](NEEDS_GPU.md).
 
 ## What is here
 
@@ -17,9 +17,9 @@ equality layer is prepared but unrun — see [`NEEDS_GPU.md`](NEEDS_GPU.md).
 | `tools/multi_gpu/merge_workers.py` | staging plus lost/duplicate/misrouted/failed detection, deterministic order |
 | `tools/multi_gpu/gpu_witness.py` | UUID selection and `nvidia-smi` compute-apps witnesses |
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
-| `tests/test_multi_gpu_scheduling.py` | 16 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
+| `tests/test_multi_gpu_scheduling.py` | 27 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 12 mutations, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 25 mutations, each required to break its case |
 
 ## Usage
 
@@ -36,58 +36,127 @@ python3 tools/multi_gpu/merge_workers.py \
     --workers run/w0 run/w1 --status run/status.json \
     --out run/merged --report run/merge_report.json \
     --aggregate-with build/motioncorr --input-star movies.star \
-    --aggregate-args -- --use_own --j 8 --dose_weighting --angpix 0.885
+    --aggregate-args='--use_own --j 8 --dose_weighting --angpix 0.885'
 ```
+
+Note the `=` form on `--aggregate-args`: without it argparse reads the leading
+dash as the next option.
 
 ## Verified on CPU, 2026-09-28
 
-Host `small-refmac-machine` (cpu64), cores 32-63 (NUMA node 1), under
-`flock /tmp/motioncorr-issue96-cpu-validation.lock`. Raw logs in
-[`pr_a_evidence/`](pr_a_evidence/).
+Everything below comes from one run, recorded in
+[`pr_a_evidence/cpu64_validate.log`](pr_a_evidence/cpu64_validate.log).
 
-- Build: `cmake -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF`, `-O3 -DNDEBUG -std=gnu++17 -fopenmp`,
-  g++ 13.3.0, cmake 4.4.3, Python 3.12.3.
-- Source head `3eece28`; base `4c952b3f54479653512c4d208e09c9a8c02f3726`.
-- Patched binary SHA-256 `f4748106a1a296efd961b655fce675c9336cda42ca63f7b4bf4488d12ef9e8f2`.
-- Unpatched-main control binary SHA-256 `de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec568815c71645f8a`.
-- `tests/test_multi_gpu_scheduling.py --binary <built>`: **16/16 passed**.
-- `docs/multi_gpu/negative_controls.py`: **12/12 mutations detected**, no survivors.
-- `ctest --output-on-failure -j 4`: **14/14 passed** — the 13 pre-existing CPU tests
-  plus `MultiGpuScheduling`. No pre-existing test changed.
+**Provenance** ([`pr_a_evidence/source_provenance.txt`](pr_a_evidence/source_provenance.txt),
+echoed at the top of the validation log): source head
+`2353876f18398918d0849ca5327978c9c679cd1c`, base
+`4c952b3f54479653512c4d208e09c9a8c02f3726`, staged by `git archive` of the
+**committed** tree with `COPYFILE_DISABLE=1`. The harness asserts the staged
+tree contains zero macOS AppleDouble `._*` files and aborts otherwise
+(`applefile_count=0`), and it aborts on a failed configure or build rather than
+proceeding to test a stale artifact. `BUILD_RC=0` with zero compiler `error:`
+lines.
 
-**Recorded interference.** Two unrestricted `ctffind` process trees were running
-throughout (PIDs 1156938/1156942 and 1635423/1635428/1635429, each
-`OMP_NUM_THREADS=1 -j:1`), and host load average was 6.95–7.60. These are
-correctness checks with no timing content, so the interference does not affect
-any claim made here; it is recorded because the round requires it and because
-nothing in this document may later be reused as a timing baseline.
+Host `small-refmac-machine` (cpu64), `taskset -c 32-63` (NUMA node 1), under
+`flock /tmp/motioncorr-issue96-cpu-validation.lock`. Release,
+`-O3 -DNDEBUG -std=gnu++17 -fopenmp`; g++ 13.3.0, cmake 4.4.3, Python 3.12.3.
+Patched binary SHA-256 `f4748106a1a296efd961b655fce675c9336cda42ca63f7b4bf4488d12ef9e8f2`;
+unpatched-main control binary `de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec568815c71645f8a`.
+
+| Layer | Result |
+|---|---|
+| `tests/test_multi_gpu_scheduling.py --binary <built>` | **27/27 passed** |
+| `docs/multi_gpu/negative_controls.py` | **25/25 mutations detected**, no survivors |
+| `ctest --output-on-failure -j 4` | **14/14 passed** — the 13 pre-existing CPU tests plus `MultiGpuScheduling` |
+| end-to-end: real binary, serial vs 3-way sharded | **6/6 movies exact**, merge `PASS`, aggregate STAR identical |
+
+### The end-to-end arm
+
+This is the CPU analogue of the unrun CUDA arm, run with the real binary rather
+than the fake worker. Six movies over three worker processes with distinct
+output directories, then merge, then per-movie comparison against a serial run
+of the same six. Artifacts:
+[`e2e_shard_manifest.json`](pr_a_evidence/e2e_shard_manifest.json),
+[`e2e_launcher_status.json`](pr_a_evidence/e2e_launcher_status.json),
+[`e2e_merge_report.json`](pr_a_evidence/e2e_merge_report.json),
+[`e2e_exact_summary.json`](pr_a_evidence/e2e_exact_summary.json).
+
+- `tools/compare_motioncorr.py --gate exact`, one invocation per movie: **6/6**
+  pixel-identical with complete coverage and the trajectory and STAR checks each
+  passed. A `PASS` overall status alone is not accepted.
+- Merge `verdict: PASS`, `launcher_verdict: PASS`, 24 files staged, no lost,
+  duplicate, misrouted or unassigned entry.
+- The aggregate `corrected_micrographs.star` regenerated over the merged tree is
+  **byte-identical** to the serial run's once the output directory prefix is
+  normalised (`AGGREGATE_STAR_IDENTICAL=1`), in canonical input row order.
+
+**Why this comparison is not vacuous.** The six movies are one synthetic TIFF
+symlinked six times, so identical metadata handling would make all six outputs
+byte-identical and an exact comparison would prove nothing. The fixture gives
+each movie a distinct pre-exposure and splits them across two optics groups with
+different pixel sizes and voltages, and the run records
+`DISTINCT_PAYLOADS=6/6` — all six corrected images differ. Per-movie optics and
+exposure therefore demonstrably reach each movie, and the serial-versus-sharded
+equality is a real check on the partitioning.
+
+**What it does not cover.** One movie shape, one frame count, CPU backend only,
+`--j 4`, no gain reference, no `--only_do_unfinished` across a real interrupted
+run. The killed-worker and non-prefix-resume cases are exercised against the
+fake worker, not the real binary.
+
+### Recorded interference
+
+`cpu64` was busy throughout: load average `40.52 22.97 13.09` at start and
+`51.49 29.74 16.02` at end, with a concurrent `python` at 5656% CPU, another
+round's `motioncorr` at 373%, and two `ctffind` process trees (PIDs
+1156938/1156942 and 1635423/1635428/1635429, each `OMP_NUM_THREADS=1 -j:1`) —
+all captured in the `INTERFERENCE AT START` / `AT END` sections of the
+validation log. This run holds the validation lock and is confined to cores
+32-63.
+
+None of this affects any claim here, because **nothing in PR A is timed**. It is
+recorded because the round requires it, and so that none of this evidence is
+ever reused as a timing baseline.
 
 ## Device-list behaviour, before and after
 
-Full transcript: [`pr_a_evidence/device_list_witness.txt`](pr_a_evidence/device_list_witness.txt).
+Transcript in the `DEVICE LIST` section of the validation log.
 
 | `--gpu` | unpatched main `4c952b3f` | this branch |
 |---|---|---|
-| `0:1:2:3` | generic "built without CUDA support" | names the 4 requested entries and refuses |
-| `0,1` | generic | names the 2 requested entries and refuses |
-| `0:1` | generic | names the 2 requested entries and refuses |
+| `0:1:2:3` | generic "built without CUDA support" | echoes the spec, reports 4 requested entries, refuses |
+| `0,1` | generic | echoes the spec, reports 2 requested entries, refuses |
+| `0:1` | generic | echoes the spec, reports 2 requested entries, refuses |
 | `0abc` | generic | "not a non-negative device id" |
 | `-1` | generic | "not a non-negative device id" |
 | `0` | generic | generic — unchanged, correctly |
 
+A trailing colon (`--gpu 0:`) is reported as two device entries, the second
+empty. That is deliberate: it is two colon-separated fields, and `--use_own`
+accepts one.
+
 ### What this evidence does and does not show
 
-It shows that on a **CPU-only** build the list syntax is now rejected *as a list*,
-with the requested count quoted back, where before it produced only the generic
-missing-CUDA message. The syntax check was deliberately moved outside
-`#if defined _CUDA_ENABLED` so this is observable without a GPU.
+It shows that on a **CPU-only** build the list syntax is now rejected *as a
+list*, with the spec echoed and the count named, where before it produced only
+the generic missing-CUDA message. The syntax check was deliberately placed
+outside `#if defined _CUDA_ENABLED` so this is observable without a GPU.
 
-It does **not** show the behaviour this change actually exists to stop: on a
-**CUDA** build, unpatched `--gpu 0:1:2:3` proceeds to `gpu_id = 0` and prints
+It does **not** show the behaviour the change exists to stop: on a **CUDA**
+build, unpatched `--gpu 0:1:2:3` proceeds to `gpu_id = 0` and prints
 `Using CUDA acceleration on GPU device 0`, running the whole dataset on one
 device while the user asked for four. That is a code-reading claim
 (`src/motioncorr_runner.cpp:257-259` at `4c952b3f`) plus an **unrun** witness
 listed in [`NEEDS_GPU.md`](NEEDS_GPU.md). No CUDA build was made or run for PR A.
+
+## Negative controls
+
+`negative_controls.py` applies 25 mutations, one at a time, to a scratch copy and
+requires the corresponding cases to fail; all 25 are detected
+([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
+every Python-side guard. The one guard outside its reach is the C++ device-list
+rejection, because mutating it needs a rebuild; its control is the recorded
+unpatched-main binary, which produces a different message for the same input.
 
 ## Deliberate non-claims
 
@@ -97,7 +166,9 @@ listed in [`NEEDS_GPU.md`](NEEDS_GPU.md). No CUDA build was made or run for PR A
   `0c7d68f` are not a current-main scaling curve and are not repeated here.
 - **No `logfile.pdf` equivalence.** The PDF batch loop globs only the current
   pending list, so a partitioned or resumed run's PDF differs from a serial
-  run's by construction. Nothing here produces one or compares one.
+  run's by construction. Nothing here produces one or compares one. The
+  end-to-end run also reproduced the known ghostscript `batch.pdf` failure,
+  which is a pre-existing, separately tracked observation.
 - **No numerical claim.** PR A changes no numerical result. The historical
   CPU/RELION Gate 2 failures and the noisy-truth characterisation failures are
   untouched and remain separate verdicts.

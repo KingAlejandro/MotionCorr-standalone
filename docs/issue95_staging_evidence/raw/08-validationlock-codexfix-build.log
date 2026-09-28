@@ -1,0 +1,44 @@
+=== START 2026-09-28T06:50:36Z ===
+=== VALIDATION LOCK ACQUIRED 2026-09-28T06:55:15Z ===
+--- payload ---
+c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4  src/frame_staging_plan.h
+fe7ea1e89094dcb5dbd67e5ace9f1623c626a02875365c2fa97aa54350860578  src/frame_staging_plan.cpp
+6de82d07d0e588ec126781e7434edf839d300620eb3f4550d62c09fc95985a10  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+--- inherited cpuset ---
+/proc/self/status:Cpus_allowed_list:	0-63
+0-63
+--- topology ---
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+node 0 size: 115839 MB
+node 0 free: 17923 MB
+node 1 cpus: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+node 1 size: 115862 MB
+node 1 free: 16277 MB
+--- effective policy of the test process ---
+policy: bind;preferred node: 1;physcpubind: 48 49 50 51 52 53 54 55 ;cpubind: 1 ;nodebind: 1 ;membind: 1 ;preferred: 1 ;
+--- load and interference at start ---
+ 06:55:15 up 299 days, 20:52, 25 users,  load average: 4.25, 8.22, 6.35
+USER     %CPU COMMAND
+ubuntu   99.9 ctffind
+ubuntu   99.9 ctffind
+ubuntu    0.8 node
+root      0.3 fwupd
+root      0.1 rsyslogd
+=== CONFIGURE EXIT 0 ===
+[ 98%] Linking CXX executable frame_staging
+[ 98%] Built target frame_staging
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
+=== BUILD EXIT 0 ===
+283 checks, 0 failures
+=== COMPONENT EXIT 0 ===
+
+100% tests passed out of 14
+
+Total Test time (real) =   6.96 sec
+--- load at end ---
+ 06:55:51 up 299 days, 20:53, 25 users,  load average: 5.36, 8.11, 6.39
+5120dc26de047310c32545a01df3cac08053cf9ccff59df520ca6fe49652eb29  /home/ubuntu/mc-issue95/src-95c/build-cpu/frame_staging
+=== END 2026-09-28T06:55:51Z ===

@@ -1,0 +1,53 @@
+=== VALIDATION LOCK ACQUIRED 2026-09-28T06:56:17Z ===
+--- placement ---
+/proc/self/status:Cpus_allowed_list:	0-63
+policy: bind;preferred node: 1;physcpubind: 48 49 50 51 52 53 54 55 ;cpubind: 1 ;nodebind: 1 ;membind: 1 ;preferred: 1 ;
+--- load / interference ---
+ 06:56:17 up 299 days, 20:54, 21 users,  load average: 4.41, 7.66, 6.29
+USER     %CPU COMMAND
+ubuntu   99.9 ctffind
+ubuntu   99.9 ctffind
+root      2.3 sshd
+########## BASELINE
+283 checks, 0 failures
+########## MUTANT: OLD MODEL: repair schedule omitted from the host budget
+build exit 0
+FAIL: the schedule charge is independent of the chunk
+FAIL: the schedule charge is 3 ints per defect plus one Draw per (defect, frame)
+FAIL: with a dense mask the schedule dwarfs the staged chunk it was omitted beside
+FAIL: corrected model: the dense job is Inadmissible against the same budget
+FAIL: the rejected dense job leaves the caller's chunk untouched
+FAIL: recording replacements adds exactly one float per (defect, frame)
+test exit 1
+########## MUTANT: OLD MODEL: no-staging double-counts Iframes (alias disabled)
+build exit 0
+FAIL: the whole-movie float policy aliases the retained real stack
+FAIL: default policy charges Iframes once, not twice
+FAIL: the alias is visible: the parts deliberately over-sum the whole
+FAIL: the alias appears only at the full frame count
+FAIL: host_bytes DROPS at chunk == n_frames for an aliasing policy
+FAIL: no-staging policy aliases
+test exit 1
+########## MUTANT: OLD SEARCH: whole-movie probe removed, alias drop unreachable
+build exit 0
+FAIL: a huge budget clamps to the frame count
+FAIL: the search finds the aliased whole-movie point a monotone search would miss
+FAIL: corrected model: the same budget admits the whole movie
+FAIL: and admits it at the full frame count
+283 checks, 4 failures
+test exit 1
+########## RESTORED
+restored build exit 0
+283 checks, 0 failures
+restored test exit 0
+100% tests passed out of 14
+
+Total Test time (real) =   7.00 sec
+c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4  src/frame_staging_plan.h
+fe7ea1e89094dcb5dbd67e5ace9f1623c626a02875365c2fa97aa54350860578  src/frame_staging_plan.cpp
+6de82d07d0e588ec126781e7434edf839d300620eb3f4550d62c09fc95985a10  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+5120dc26de047310c32545a01df3cac08053cf9ccff59df520ca6fe49652eb29  build-cpu/frame_staging
+--- load at end ---
+ 06:56:30 up 299 days, 20:54, 22 users,  load average: 4.17, 7.45, 6.24
+=== END 2026-09-28T06:56:30Z ===

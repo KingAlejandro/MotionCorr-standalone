@@ -1,0 +1,31 @@
+########## CASE: kNumMinOk 6 -> 5 (wrong branch boundary)
+build exit 0
+FAIL: corners-9f chunk=1: every repaired pixel is bit-identical to the reference loop
+FAIL: corners-9f chunk=1: process RNG left in the same state
+FAIL: corners-9f chunk=1: exercised the Gaussian branch
+FAIL: corners-9f chunk=2: every repaired pixel is bit-identical to the reference loop
+FAIL: corners-9f chunk=2: process RNG left in the same state
+FAIL: corners-9f chunk=2: exercised the Gaussian branch
+test exit 1
+########## CASE: schedule built frame-major (RNG stream reordered)
+build exit 0
+FAIL: sparse-24f chunk=1: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=2: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=3: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=5: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=24: every repaired pixel is bit-identical to the reference loop
+FAIL: block5x5-13f chunk=1: every repaired pixel is bit-identical to the reference loop
+test exit 1
+########## CASE: neighbour slots enumerated dx-major (pbuf order transposed)
+build exit 0
+FAIL: sparse-24f chunk=1: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=2: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=3: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=5: every repaired pixel is bit-identical to the reference loop
+FAIL: sparse-24f chunk=24: every repaired pixel is bit-identical to the reference loop
+FAIL: block5x5-13f chunk=1: every repaired pixel is bit-identical to the reference loop
+test exit 1
+########## RESTORED
+235 checks, 0 failures
+restored test exit 0
+636021bb65152b486c91f99144eadb9321c1f6313f54d20f7f928d6c17cb8369  src/frame_staging_plan.cpp

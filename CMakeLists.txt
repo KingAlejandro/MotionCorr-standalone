@@ -79,6 +79,11 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    # Issue #95 bounded frame-staging components. src/frame_staging_plan.cpp is
+    # already picked up by the MOTIONCORR_SOURCES glob above.
+    add_executable(frame_staging tests/test_frame_staging.cpp)
+    target_link_libraries(frame_staging PRIVATE motioncorr_core)
+    add_test(NAME FrameStaging COMMAND frame_staging)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression

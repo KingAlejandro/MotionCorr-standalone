@@ -1,0 +1,75 @@
++ export PATH=/home/ubuntu/.mc-venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ PATH=/home/ubuntu/.mc-venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ CORES=48-55
++ cd /home/ubuntu/mc-issue95/src-95b
+++ date -u +%FT%TZ
++ echo '=== START 2026-09-28T00:51:42Z ==='
+=== START 2026-09-28T00:51:42Z ===
++ flock 9
+++ date -u +%FT%TZ
++ echo '=== VALIDATION LOCK ACQUIRED 2026-09-28T00:51:42Z ==='
+=== VALIDATION LOCK ACQUIRED 2026-09-28T00:51:42Z ===
++ echo '--- inherited cpuset ---'
+--- inherited cpuset ---
++ grep -H Cpus_allowed_list /proc/self/status
+/proc/self/status:Cpus_allowed_list:	0-63
++ cat /sys/fs/cgroup/cpuset.cpus.effective
+0-63
++ echo '--- numa policy ---'
+--- numa policy ---
++ numactl --show
+policy: default
+preferred node: current
+physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 0 1 
+nodebind: 0 1 
+membind: 0 1 
+preferred: 
++ echo '--- chosen cores: 48-55 (node1, 8 of the 32-63 range; #26 has 0-31) ---'
+--- chosen cores: 48-55 (node1, 8 of the 32-63 range; #26 has 0-31) ---
++ taskset -c 48-55 numactl --membind=1 cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
++ echo '=== CONFIGURE EXIT 0 ==='
+=== CONFIGURE EXIT 0 ===
++ taskset -c 48-55 numactl --membind=1 cmake --build build-cpu -j8
++ tail -6
+[ 97%] Linking CXX executable motioncorr
+[ 97%] Built target motioncorr
+[ 98%] Linking CXX executable frame_staging
+[ 98%] Built target frame_staging
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
++ echo '=== BUILD EXIT 0 ==='
+=== BUILD EXIT 0 ===
++ echo '--- effective policy of the test process ---'
+--- effective policy of the test process ---
++ taskset -c 48-55 numactl --membind=1 numactl --show
++ tr '\n' '; '
+policy: bind;preferred node: 1;physcpubind: 48 49 50 51 52 53 54 55 ;cpubind: 1 ;nodebind: 1 ;membind: 1 ;preferred: 1 ;+ echo
+
++ taskset -c 48-55 numactl --membind=1 ./build-cpu/frame_staging
+242 checks, 0 failures
++ echo '=== COMPONENT EXIT 0 ==='
+=== COMPONENT EXIT 0 ===
++ cd build-cpu
++ taskset -c 48-55 numactl --membind=1 ctest --output-on-failure
++ tail -8
+      Start 13: DamagedMovie
+13/14 Test #13: DamagedMovie .....................   Passed    0.09 sec
+      Start 14: RunnerModelParser
+14/14 Test #14: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   7.14 sec
++ echo '=== CTEST EXIT 0 ==='
+=== CTEST EXIT 0 ===
++ cd ..
++ sha256sum src/frame_staging_plan.h src/frame_staging_plan.cpp tests/test_frame_staging.cpp CMakeLists.txt build-cpu/frame_staging
+f36e65bd5688a5374132236c3f9024a77950caf1efa7aabbd3f9cf1e45c23bb7  src/frame_staging_plan.h
+fe08848af4d9b9ee415e1ce98b796439de863fdf66d1144e123f1e7fd9b387e7  src/frame_staging_plan.cpp
+b28b6e131c612fc0504540bd719d84ea72636cd76c62f38afc39afb2e19e18d2  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+1163caf569ab4107aac59c0141a4966ea79f3c52e37f56af8915278565ef5062  build-cpu/frame_staging
+++ date -u +%FT%TZ
++ echo '=== END 2026-09-28T00:52:20Z ==='
+=== END 2026-09-28T00:52:20Z ===

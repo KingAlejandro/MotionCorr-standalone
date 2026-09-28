@@ -1,0 +1,57 @@
+=== VALIDATION LOCK ACQUIRED 2026-09-28T00:55:27Z ===
+--- placement ---
+/proc/self/status:Cpus_allowed_list:	0-63
+0-63
+policy: bind;preferred node: 1;physcpubind: 48 49 50 51 52 53 54 55 ;cpubind: 1 ;nodebind: 1 ;membind: 1 ;preferred: 1 ;
+--- cores 48-55, node1, -j8 ---
+configure exit 0
+########## BASELINE
+baseline build exit 0
+248 checks, 0 failures
+baseline test exit 0
+########## MUTANT: InvalidInput collapsed into Inadmissible (finding A)
+build exit 0
+FAIL: a malformed policy is InvalidInput, not Inadmissible
+FAIL: a negative chunk_frames is rejected even though the field is ignored
+FAIL: a malformed geometry is InvalidInput
+248 checks, 3 failures
+test exit 1
+########## MUTANT: buildSchedule reset deleted (finding F)
+build exit 0
+FAIL: a rejected buildSchedule clears a previously populated result
+248 checks, 1 failures
+test exit 1
+########## MUTANT: Movie self-assignment guard removed (finding D)
+build exit 0
+FAIL: self-assignment preserves the defect mask
+FAIL: the schedule sees exactly the defects the mask had before
+FAIL: Movie copy is deep, not aliased
+248 checks, 3 failures
+test exit 1
+########## MUTANT: raw host frames written despite write_in_place=false (finding E)
+build exit 0
+FAIL: raw-gain-11f chunk=1: raw host frames are left untouched
+FAIL: raw-gain-11f chunk=2: raw host frames are left untouched
+FAIL: raw-gain-11f chunk=3: raw host frames are left untouched
+FAIL: raw-gain-11f chunk=11: raw host frames are left untouched
+test exit 1
+########## MUTANT: largestChunkWithin off-by-one (best = mid - 1)
+build exit 0
+FAIL: largest admissible chunk is exactly 10 frames
+FAIL: a part-frame surplus does not buy another frame
+FAIL: a huge budget clamps to the frame count
+FAIL: extra host terms reduce the admissible chunk
+test exit 1
+########## RESTORED
+restored build exit 0
+248 checks, 0 failures
+restored test exit 0
+100% tests passed out of 14
+
+Total Test time (real) =   7.16 sec
+f36e65bd5688a5374132236c3f9024a77950caf1efa7aabbd3f9cf1e45c23bb7  src/frame_staging_plan.h
+fe08848af4d9b9ee415e1ce98b796439de863fdf66d1144e123f1e7fd9b387e7  src/frame_staging_plan.cpp
+8143190085a69c9a74db58fa408058b7dccac88d0b8d0d04b7ec2d4712ebdd56  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+d115bf10c52c7995ce37d6042e8430d6f76379c1496c01f7cdf936ebcb051149  build-cpu/frame_staging
+=== END 2026-09-28T00:56:20Z ===

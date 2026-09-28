@@ -1,0 +1,42 @@
+=== START 2026-09-28T00:00:13Z ===
+[ 97%] Built target frame_staging
+[ 98%] Linking CXX executable motioncorr
+[ 98%] Built target motioncorr
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
+=== FULLBUILD EXIT 0 ===
+Test project /home/ubuntu/mc-issue95/src-95/build-cpu
+      Start  1: FrameStaging
+ 1/14 Test  #1: FrameStaging .....................   Passed    0.00 sec
+      Start  2: SyntheticRegression
+ 2/14 Test  #2: SyntheticRegression ..............   Passed    1.12 sec
+      Start  3: HotPixelRngDeterminism
+ 3/14 Test  #3: HotPixelRngDeterminism ...........   Passed    0.56 sec
+      Start  4: RunnerExposure
+ 4/14 Test  #4: RunnerExposure ...................   Passed    0.47 sec
+      Start  5: Runner_failure
+ 5/14 Test  #5: Runner_failure ...................   Passed    0.12 sec
+      Start  6: Runner_invalid
+ 6/14 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+      Start  7: Runner_resume
+ 7/14 Test  #7: Runner_resume ....................   Passed    2.11 sec
+      Start  8: Runner_tomography
+ 8/14 Test  #8: Runner_tomography ................   Passed    0.39 sec
+      Start  9: RunnerLateBin
+ 9/14 Test  #9: RunnerLateBin ....................   Passed    0.62 sec
+      Start 10: RunnerExportedUnits
+10/14 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 11: GainCache
+11/14 Test #11: GainCache ........................   Passed    1.25 sec
+      Start 12: TiffRead
+12/14 Test #12: TiffRead .........................   Passed    0.55 sec
+      Start 13: DamagedMovie
+13/14 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: RunnerModelParser
+14/14 Test #14: RunnerModelParser ................   Passed    0.18 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   7.67 sec
+=== CTEST EXIT 0 ===
+=== END 2026-09-28T00:00:24Z ===

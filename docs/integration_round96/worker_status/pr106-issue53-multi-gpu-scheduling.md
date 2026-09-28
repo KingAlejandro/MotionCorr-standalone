@@ -76,6 +76,35 @@ subsetter looked for a column this dataset does not have and silently wrote the 
 back unchanged. The expected-count assertion caught it, and the subsetter now uses
 `star_io.render_with_rows` with the row count asserted.
 
+## Final-source review, and one thing it says about review method
+
+Two independent lenses over the final diff produced 10 findings; each was put to
+three adversarial refuters, 29 votes cast. Three findings were real:
+
+1. **The Linux resident-set assertion could not observe a missing figure.** It
+   asserted `rss_hwm_kib is None or > 0`, and a sampler that records nothing
+   leaves /proc present and `.unavailable` unset, so a null satisfied it.
+2. **Fourteen src citations were off by one**, two of them introduced by this
+   port's own re-anchoring, and one substantively wrong: `metadata_table.cpp:1256`
+   was cited as the "otherwise a list" branch and is the `loop_` return.
+3. **A retained artifact contradicted the claim beside it.** The exact-comparison
+   summary for the retained-output arm recorded 23/1 `FAIL`, because the
+   deliberate `--reuse` tamper control runs last into the same `--out`.
+
+Finding 1 was **refuted 3-0 and was nonetheless correct.** Every refuter ran on
+macOS, where the no-/proc branch of the same assertion catches a different
+symptom, so each independently reproduced "the case detects it" and concluded the
+finding was unfounded. A three-vote panel sharing a platform is not three
+independent checks. What settled it was the Linux mutation control: at `fbfd8c5`
+the suite returned `NEGCTL_RC=1` with `resident-set high-water is never recorded`
+SURVIVED. The control existed only because the refuters, while refuting, conceded
+no mutation targeted that path.
+
+The other seven were refuted with reproductions rather than argument. The
+sharpest: a reviewer demonstrated that the RSS assertion could not fail, but the
+demonstration required two edits, one of which disabled the detecting branch; a
+refuter re-ran it with only the product mutation and the case failed.
+
 ## Superseding the round-96 integration counts
 
 `docs/integration_round96/OVERLAP.md:44-46` and `MERGE_EVIDENCE.md:24` are PR110's

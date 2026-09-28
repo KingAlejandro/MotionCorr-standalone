@@ -165,10 +165,20 @@ to resolve, and what it fixed, is in
 [`docs/integration_round96/worker_status/pr106-issue53-multi-gpu-scheduling.md`](../integration_round96/worker_status/pr106-issue53-multi-gpu-scheduling.md).
 Commands: [`port_validation/`](port_validation/).
 
-**cpu64**, cores 32-63, build `-j 16`, Release `-O3 -DNDEBUG`, g++ 13.3.0,
-cmake 4.4.3, Python 3.12 + numpy 2.5.3, under
+**cpu64**, source head `0b329b4`, cores 32-63, build `-j 16`, Release
+`-O3 -DNDEBUG`, g++ 13.3.0, cmake 4.4.3, Python 3.12 + numpy 2.5.3, binary
+`5c5b194466655d1522e925e98e5e7041d2de5c4b441b83349a3e7ddd369365a0`, under
 `flock /tmp/motioncorr-issue96-cpu-validation.lock`, on a git-backed tree with
-`applefile_count=0` and clean porcelain.
+`applefile_count=0` and clean porcelain. Full log:
+[`port_evidence/cpu64_port_validation.log`](port_evidence/cpu64_port_validation.log).
+
+The preceding run at `fbfd8c5` is superseded, and why is worth recording: it
+returned `NEGCTL_RC=1` because the newly added resident-set mutation **survived
+on Linux**. The Linux assertion tolerated a null figure, so a sampler that
+records nothing satisfied it; macOS caught the same mutation through a different
+branch, which is why three independent refuters had judged the reviewer's
+finding unfounded. The assertion now requires a positive figure and the mutation
+is detected.
 
 | Layer | Result |
 |---|---|

@@ -4,10 +4,10 @@
 - **Task Class**: Correctness & Reliability
 - **Assigned Issue**: #92 ("Damaged movie partial-read can pass corrupted/short movie as successful")
 - **Base Commit**: `4c952b3f54479653512c4d208e09c9a8c02f3726` (PR #91 merge on `origin/main`)
-- **Head Commit**: `e5907a414fdeb87fa1d72bb733d212771e8e403e`
+- **Original worker test revision (historical)**: `e5907a414fdeb87fa1d72bb733d212771e8e403e`
 - **Working Branch**: `round96/92-gemini-3-8-flash`
 - **Draft PR**: [#103](https://github.com/KingAlejandro/MotionCorr-standalone/pull/103)
-- **Phase**: Complete (Draft PR Opened & Linked; Local and Remote Validation Passed)
+- **Phase**: PR103 review corrections applied by Codex; final CPU verification published; draft retained
 
 ## Progress Summary
 
@@ -21,7 +21,7 @@
 3. **Expected-Frame Count Validation Implemented (`src/motioncorr_runner.h`, `src/motioncorr_runner.cpp`)**:
    - Added CLI option `--expected_frames <N>` (default `-1`).
    - Parsed per-movie expected frame counts from STAR metadata columns:
-     - `EMDL_MICROGRAPH_FRAME_NUMBER` (`_rlnMicrographFrameNumber`)
+     - ~~`EMDL_MICROGRAPH_FRAME_NUMBER` (`_rlnMicrographFrameNumber`)~~ — removed by review: a frame index is not a total count
      - `EMDL_PARTICLE_NR_FRAMES` (`_rlnNrOfFrames`)
      - `EMDL_TOMO_TILT_MOVIE_FRAMECOUNT` (`_rlnTomoTiltMovieFrameCount`)
    - Validated decoded `mic.getNframes()` and `nn` against expected frames, throwing `RelionError` on mismatch, cleanly isolating failed movies while retaining valid outputs.
@@ -38,7 +38,7 @@
      9. `test_resume_isolation`: Resuming with `--only_do_unfinished` after replacing damaged movie succeeds and writes joint STAR.
    - All 9 test cases PASSED locally in `ctest -R DamagedMovie` (0.90s).
 
-## Hardware & Environment Witnesses
+## Original worker hardware & environment witnesses (historical; not final-fix evidence)
 
 - **Linux Validation Host (`cpu64` - small-refmac-machine)**:
   - OS: Ubuntu 24.04.2 LTS, Linux 6.8.0-86-generic x86_64
@@ -64,3 +64,14 @@
   - `8cf2b60` docs(design): document TIFF integrity and expected-frame validation (#92)
   - `7c70fea` fix(io): intercept LibTIFF directory errors and validate expected frame counts (#92)
   - `e5907a4` test(io): expand damaged movie and expected frame validation test suite (#92)
+
+## Codex review correction, 2026-09-28
+
+User asked Codex to fix PR103 and comment on PR103/#92. Existing Gemini/Antigravity assignment remains attributed to that model; the following corrections are a Codex intervention, not a new Gemini result.
+
+- Fix `433f04e`: genuine positive count labels only, conflict rejection, STAR-over-CLI fallback, tomography global fallback, filtered/resume count alignment, saved-count validation, consistent execution expectation.
+- Modern handle-local TIFF error capture, preserved warnings, fail-closed open-option allocation/open errors, no global-handler changes. Legacy thread-safe installer with safe previous-handler forwarding. Error capture is noexcept and bounded to the latest message.
+- `3037c4b`: reviewed ADR and real two-tomogram controls. This tested source/tests revision passed native full CTest13/13 and direct11/11 suite functions on CPU64 node1 cores32-47. Forced compatibility path also passed13/13 using installed LibTIFF4.5.1; this is not an actual old-library runtime claim.
+- Concurrent handler controls and all three current tutorial prefixes passed in both paths. Exact commands, source/binary/input hashes, raw diagnostics and allocation are in [docs/issue92_review_evidence](docs/issue92_review_evidence/README.md).
+- Independent read-only source/spec/license audit passed conditionally on final runtime. No merge, issue closure, CUDA/scientific-equivalence or speedup claim.
+- Remaining limits: actual older LibTIFF and grouped EER unrun; inherited in-memory callback defects; clean shortened input requires authoritative metadata.

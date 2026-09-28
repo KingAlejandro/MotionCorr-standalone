@@ -94,6 +94,7 @@ TIFFSetDirectory(ftiff, 0);
 | `tests/test_damaged_movie.py` | Unit tests for partial truncation (43.7 MB, 8 MB, 40 MB), corrupt directory, invalid offsets, expected count mismatch, valid short controls |
 | `agents/designs/issue_92_tiff_integrity.md` | This ADR |
 | `WORKER_STATUS.md` | Execution status and coordination tracking |
+| `docs/issue92_review_evidence/` | Bounded review-fix execution logs, provenance and original control harness |
 
 ---
 

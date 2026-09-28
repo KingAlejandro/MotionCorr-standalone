@@ -55,10 +55,22 @@ endif()
 
 option(CUDA "Build with CUDA acceleration" OFF)
 if(CUDA)
-    enable_language(CUDA)
-    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES 80)
+    # Establish the project default before enable_language(CUDA), which has
+    # cached nvcc's own default architecture since CMake 3.18 and so would leave
+    # any later fallback unreachable. sm80 is the architecture this project
+    # builds and validates on: a deliberate default, not a claim of support for
+    # every device. $ENV{CUDAARCHS} keeps its usual meaning, so stand down for it
+    # on the same non-empty test CMakeDetermineCUDACompiler itself applies.
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES AND "$ENV{CUDAARCHS}" STREQUAL "")
+        set(CMAKE_CUDA_ARCHITECTURES 80 CACHE STRING "CUDA architectures")
     endif()
+    enable_language(CUDA)
+    # motioncorr_core is created above, before CUDA is enabled, and CMake copies
+    # CUDA_ARCHITECTURES from the variable only at target creation, so the
+    # target would otherwise keep an unset property and generation would fail.
+    set_property(TARGET motioncorr_core PROPERTY
+                 CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}")
+    message(STATUS "motioncorr_core CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
     set(CMAKE_CUDA_STANDARD 17)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
     find_package(CUDAToolkit REQUIRED)
@@ -126,6 +138,9 @@ if(BUILD_TESTING)
                 --helper $<TARGET_FILE:runner_numerics>)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME GlobalIfftElision
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py

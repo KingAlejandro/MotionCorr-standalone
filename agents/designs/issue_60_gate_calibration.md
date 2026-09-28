@@ -309,3 +309,78 @@ For diagnostic $d$ with limit $\theta$:
 ## 10. Verdict
 
 `SPEC_PROPOSED` — the design is self-contained, touches no other owner's files, changes no gate, and defines in advance both the faults and the rule by which any future limit would be judged.
+
+---
+
+## 11. Addendum, 28 September 2026 — defects found in this specification
+
+Added after the PR #64 review round. The sections above are left as written on
+2026-09-25 so the frozen specification and the commit that froze it
+(`2946770`) stay auditable. This addendum records where the specification
+itself was wrong, separately from where the implementation was.
+
+### 11.1 Two internal contradictions in the harm tiers
+
+**Translation.** §3.3 declares "a translation not recorded in the STAR
+metadata" unacceptable, while §3.1's consequence table gives a rigid
+translation's cost as "none — particle coordinates move with the micrograph",
+and `FAULT_CLASS["X1_translation_px"]` is `"benign_but_alarming"`. The X1
+operator as specified is an *accounted* translation, so the frozen matrix
+contains no example of the unrecorded case. The specification therefore
+declares a harm class it never instantiates, and the two statements cannot both
+govern the same cells.
+
+This is not resolved here. `analyze.GEOMETRY_READINGS` carries both readings and
+every result is reported under each. Resolving it is a scientific decision about
+whether a cross-backend origin offset is a signal-loss question or a
+workflow-integration question, and it belongs to #58.
+
+**Scale.** `SCALE_ERROR_HARM` is documented as applying to a *frame-dependent*
+scale error, but the only scale fault in the matrix (`X8_gain_error`) is
+uniform, and `FAULT_CLASS` labels it `"harmful"` while §3.1 says a uniform scale
+costs nothing. Same structure: a declared harm class with no instance.
+
+The post-hoc `C2_frame_dependent_scale` control added in the review round
+supplies the missing instance and shows that the diagnostic named for scale
+cannot detect it (1.7e-4 at a 50 % frame ramp). Both the clause and the
+diagnostic are withdrawn as inconclusive.
+
+**Lesson for the next prespecification of this kind:** every declared harm class
+needs at least one cell in the matrix that instantiates it, and the check that
+it does should be mechanical. `tools/calibration/test_contracts.py` now asserts
+the weaker version of this — that every fault `FAULT_LAYERS` declares reachable
+in a layer is actually generated there — which is what would have caught the
+missing X6 arm.
+
+### 11.2 The harm currency is narrower than §3.3 assumed
+
+§3.3 adopts Δ*B* as "the currency" without bounding which faults it can price.
+The dose arm added in the review round shows it cannot price a dose-weighting
+fault at all: the spectral change is not Gaussian in k², the estimator rejects
+its own fit in all 90 dose cells, and the reference-measured value is
+anti-correlated with the absolute harm.
+
+Δ*B* prices faults whose spectral signature *is* an envelope — applied
+attenuation, residual jitter, drift, local deformation. It does not price
+incoherent additive damage (§3.2 already anticipated this, which is why
+`eps_incoherent` exists) and it does not price a re-weighting of frames. A
+specification that names a single harm currency should state the fault classes
+it covers.
+
+### 11.3 The decision rule assumed a one-dimensional fault space
+
+§6.3 searches for a single diagnostic separating negligible from unacceptable
+cells. A rigid translation has zero envelope loss by construction and a uniform
+scale is invisible to both the envelope and translation terms, so no single
+diagnostic can span the matrix. The implementation now scores each diagnostic
+against the fault class it owns while measuring its false-positive rate against
+every negligible cell; that revision is recorded in `analyze.py` rather than
+back-fitted into §6.3.
+
+### 11.4 A validity gate belongs in the decision rule
+
+`spectral_transfer_decomposition` already decides whether its Gaussian fit is
+usable and records it as `envelope_used`. §6.3 does not say what to do with a
+cell whose fit was rejected, and the first implementation silently consumed the
+number anyway. A decision rule that consumes a derived quantity must state the
+validity condition under which that quantity is a measurement at all.

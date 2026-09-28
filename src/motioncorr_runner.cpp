@@ -26,6 +26,9 @@
 #include <stdexcept>
 
 #include "src/motioncorr_runner.h"
+#if defined(__GLIBC__)
+#include <malloc.h>   // malloc_trim, see drop_u16_staging
+#endif
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -1526,6 +1529,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (!stage_u16) return;
 		Iframes_u16.clear();
 		stage_u16 = false;
+#if defined(__GLIBC__)
+		// Returning the pages matters here, not just freeing them. Each staged frame
+		// is a ~27 MiB fftw_malloc, which sits under glibc's dynamic mmap threshold
+		// once that threshold has ratcheted up, so the arena keeps the whole ~0.64 GiB.
+		// A non-converging patch then downloads the full float movie on top of it and
+		// peak RSS ends up above the float baseline instead of below it. Measured on
+		// the 24-movie no-gain arm: 2.06 GiB retained versus 1.52 GiB for main.
+		malloc_trim(0);
+#endif
 	};
 
 #ifdef _CUDA_ENABLED

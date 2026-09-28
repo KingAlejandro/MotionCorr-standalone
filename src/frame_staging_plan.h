@@ -82,7 +82,34 @@ struct Policy {
 	// (today). 2 = the compact unsigned-16 upload experiment. Only affects the
 	// staged term and the H2D volume, never the resident stacks.
 	int staged_bytes_per_sample = 4;
+
+	// Defect pixels the component's OWN repair schedule will hold. buildSchedule
+	// allocates bad_x, bad_y, slot_count and, dominating all of them,
+	// n_bad * n_frames Draw objects. That is a host allocation this component
+	// makes, so omitting it from this component's own budget is exactly the
+	// error the budget exists to prevent: with a dense mask n_bad approaches
+	// W*H, and a job admitted as O(C*W*H) then allocates O(F*W*H). Found by
+	// review; see ADR section 7a.4.
+	//
+	//   0                     no schedule is built. Today's runner has none,
+	//                         so this is the default and reproduces its numbers.
+	//   kAllPixelsDefective   worst case: every pixel is a defect.
+	//   n > 0                 a declared upper bound.
+	//
+	// n_bad is NOT knowable at admission: it comes out of hot-pixel detection,
+	// which needs the completed sum pass. A staged design must therefore either
+	// charge a bound here or re-check after detection. That is a real cost of
+	// staging and is argued in the ADR, not hidden.
+	long long schedule_defect_pixels = 0;
+
+	// Whether applyChunk's out_replacements buffer is allocated too
+	// (n_bad * n_frames floats). Required by the raw-host device path, which
+	// records rather than writes.
+	bool schedule_records_replacements = false;
 };
+
+// Sentinel for Policy::schedule_defect_pixels meaning "every pixel".
+const long long kAllPixelsDefective = -1;
 
 struct Budget {
 	bool valid = false;
@@ -100,6 +127,17 @@ struct Budget {
 	// Whole-movie host terms that survive the policy. Reported separately so a
 	// staging design cannot claim a saving that a still-resident stack cancels.
 	unsigned long long resident_host_bytes = 0;
+
+	// The component's own repair-schedule bookkeeping.
+	unsigned long long schedule_host_bytes = 0;
+
+	// True when the staged buffer and the retained real stack are the SAME
+	// allocation, so host_bytes charges them once. This happens exactly when
+	// the whole movie is staged as decoded floats and the real stack is kept:
+	// the runner decodes straight into Iframes (motioncorr_runner.cpp:1409) and
+	// never makes a separate staging copy. When this is true,
+	// staged_host_bytes + resident_host_bytes DELIBERATELY exceeds host_bytes.
+	bool staged_aliases_resident = false;
 
 	unsigned long long h2d_bytes = 0;
 	unsigned long long d2h_bytes = 0;
@@ -152,11 +190,15 @@ enum class Admission {
 // against the whole host is the failure mode the aggregate bound exists to
 // prevent, and nothing here can detect it.
 //
-// Precondition, checked by a test rather than left as prose: host_bytes must be
-// non-decreasing in chunk_frames, which is what makes the binary search sound.
-// It holds because the staged term is the only chunk-dependent one. Adding a
-// chunk-dependent term to Policy that is not monotone would silently break
-// this; MonotonicHostBytes in the test suite is there to notice.
+// Monotonicity, checked by a test rather than left as prose. host_bytes is
+// non-decreasing in chunk_frames on [1, n_frames-1], which is what makes the
+// binary search sound. It is NOT monotone across the whole range: when the
+// policy aliases (see Budget::staged_aliases_resident) host_bytes DROPS at
+// chunk == n_frames, because the staged ring and the retained stack collapse
+// into one allocation. This function therefore evaluates chunk == n_frames
+// first and only searches [1, n_frames-1]. MonotonicHostBytes asserts both
+// halves -- the monotone interval and the alias drop -- so neither can regress
+// unnoticed.
 Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
                              unsigned long long host_budget_bytes,
                              long long &out_chunk,

@@ -111,6 +111,11 @@ bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget)
 		budget.error = "invalid policy: extra byte terms must not be negative";
 		return false;
 	}
+	if (policy.schedule_defect_pixels < kAllPixelsDefective) {
+		budget.error = "invalid policy: schedule_defect_pixels must be >= 0 "
+		               "or kAllPixelsDefective";
+		return false;
+	}
 
 	// chunk_frames == 0, or any value at or above the frame count, means the
 	// whole movie is staged at once -- which is exactly today's behaviour and
@@ -137,6 +142,42 @@ bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget)
 		}
 	}
 
+	// The component's own repair-schedule bookkeeping. buildSchedule allocates
+	// bad_x, bad_y and slot_count (n_bad ints each) plus n_bad * n_frames Draw
+	// objects, and applyChunk's caller may allocate n_bad * n_frames floats for
+	// the recorded replacements. sizeof() is used directly so the charge cannot
+	// drift from the structures it is charging for.
+	{
+		u64 n_bad = 0;
+		if (policy.schedule_defect_pixels == kAllPixelsDefective) {
+			const u64 f[2] = {(u64)geom.nx, (u64)geom.ny};
+			if (!mulAll(f, 2, n_bad)) {
+				budget.error = "overflow computing worst-case defect count";
+				return false;
+			}
+		} else {
+			n_bad = (u64)policy.schedule_defect_pixels;
+		}
+
+		if (n_bad != 0) {
+			u64 per_pixel = 0, per_entry = 0, entries = 0, sched = 0;
+			// bad_x + bad_y + slot_count
+			if (!mulChecked(n_bad, 3ull * sizeof(int), per_pixel)) {
+				budget.error = "overflow computing repair-schedule index bytes";
+				return false;
+			}
+			per_entry = sizeof(Draw);
+			if (policy.schedule_records_replacements)
+				per_entry += sizeof(float);
+			if (!mulChecked(n_bad, (u64)geom.n_frames, entries) ||
+			    !mulChecked(entries, per_entry, sched) ||
+			    !addChecked(sched, per_pixel, budget.schedule_host_bytes)) {
+				budget.error = "overflow computing repair-schedule bytes";
+				return false;
+			}
+		}
+	}
+
 	// Whole-movie host terms that the policy keeps.
 	u64 resident = 0;
 	if (policy.retain_host_real_stack && !addInto(resident, real_stack)) {
@@ -153,9 +194,29 @@ bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget)
 	}
 	budget.resident_host_bytes = resident;
 
+	// When the whole movie is staged as decoded floats AND the real stack is
+	// retained, they are not two allocations: the runner decodes straight into
+	// Iframes (motioncorr_runner.cpp:1409) and never makes a staging copy.
+	// Charging both reported 2*real + r2c for a phase whose live set is
+	// real + r2c, which could reject a host budget that actually fits -- and
+	// contradicted this component's own ADR section 4.1 phase table. Found by
+	// review; an earlier test asserted the double count as correct.
+	//
+	// A partial chunk is a genuinely separate ring, and a compact upload is a
+	// genuinely separate narrower buffer that is converted into the real stack,
+	// so neither aliases.
+	budget.staged_aliases_resident =
+	    (chunk == (u64)geom.n_frames) &&
+	    policy.retain_host_real_stack &&
+	    policy.staged_bytes_per_sample == 4;
+
 	u64 host = 0;
-	if (!addInto(host, budget.staged_host_bytes) ||
-	    !addInto(host, resident) ||
+	if (!budget.staged_aliases_resident && !addInto(host, budget.staged_host_bytes)) {
+		budget.error = "overflow accumulating host bytes";
+		return false;
+	}
+	if (!addInto(host, resident) ||
+	    !addInto(host, budget.schedule_host_bytes) ||
 	    !addInto(host, (u64)policy.extra_host_bytes)) {
 		budget.error = "overflow accumulating host bytes";
 		return false;
@@ -255,7 +316,7 @@ Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
 	// because computeBudget owns the overflow checks and the term list, and a
 	// second copy of that arithmetic here is exactly how the two drift apart.
 	Policy probe = policy;
-	long long lo = 1, hi = geom.n_frames, best = 0;
+	long long lo = 1, hi = geom.n_frames - 1, best = 0;
 
 	// One staged frame. This separates the two failure meanings: if the policy
 	// itself is malformed, computeBudget says so and that is a caller bug; if
@@ -264,7 +325,23 @@ Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
 	Budget b;
 	if (!computeBudget(geom, probe, b))
 		return invalid(b.error ? b.error : "invalid policy");
-	if (b.host_bytes > host_budget_bytes)
+	const bool one_fits = (b.host_bytes <= host_budget_bytes);
+
+	// The whole movie, evaluated separately and FIRST, because host_bytes is
+	// not monotone across the full range: an aliasing policy collapses the
+	// staged ring into the retained stack at chunk == n_frames, so the cheapest
+	// point can be the largest one. n_frames is also the maximum, so if it fits
+	// nothing larger needs looking for.
+	probe.chunk_frames = geom.n_frames;
+	Budget whole;
+	if (computeBudget(geom, probe, whole) && whole.host_bytes <= host_budget_bytes) {
+		out_chunk = geom.n_frames;
+		return Admission::Fits;
+	}
+
+	// Only now can a chunk-1 failure be called inadmissible: the whole movie
+	// might have fitted where one frame did not.
+	if (!one_fits)
 		return Admission::Inadmissible;
 
 	while (lo <= hi) {
@@ -281,11 +358,12 @@ Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
 		}
 	}
 
-	// Unreachable: the chunk-1 probe above established that 1 fits, and the
-	// final iteration necessarily evaluates mid == 1 if everything larger
-	// failed. Retained as a guard rather than an assertion because returning
-	// Inadmissible is the safe answer if that reasoning is ever invalidated;
-	// a mutation-testing gate will report a permanent survivor on this line.
+	// Reachable now, unlike in the pre-alias version: n_frames == 1 makes the
+	// search interval [1, 0] empty, so a single-frame movie that failed the
+	// whole-movie probe but passed the chunk-1 probe lands here. For F == 1
+	// those two probes are the same policy, so it cannot actually happen -- but
+	// the guard no longer rests on that, and returning Inadmissible is correct
+	// either way.
 	if (best < 1) return Admission::Inadmissible;
 
 	out_chunk = best;

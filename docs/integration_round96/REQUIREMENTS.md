@@ -59,7 +59,7 @@ sha256 before comparing, so the A/B cannot be a build against itself.
 
 | # | requirement | observed | status |
 |---|---|---|---|
-| D1 | complete corrected-image pixels | **24/24 images identical, 341,735,520 pixels compared** | **PASS** |
+| D1 | complete corrected-image pixels | **24/24 images identical, 341,735,520 pixels compared** — run twice, at the three-group head `6f29659` and again at the final four-group head `d3c04f7`, with identical results | **PASS** |
 | D2 | full normalized MRC headers | included in the per-artifact comparison; no header difference outside the known auxiliary set | **PASS** |
 | D3 | STAR inventory | **25 STAR artifacts compared**, all identical | **PASS** |
 | D4 | per-movie exact gate | **24/24** | **PASS** |
@@ -67,6 +67,7 @@ sha256 before comparing, so the A/B cannot be a build against itself.
 | D6 | total artifacts | 109 compared, 105 pass, **4 fail** | see D7 |
 | D7 | the 4 failures are the known PDF nondeterminism, preserved not suppressed | `all_batches.pdf`, `batch.pdf`, `header.pdf`, `logfile.pdf` — `identical_bytes=false`, `identical_normalized=false`, `kind=auxiliary`. This is the pre-existing ghostscript date nondeterminism already recorded on #66/#90. It is reported, not masked, and the overall grade is therefore `overall: FAIL` with `overall_graded: PASS` | **known, preserved** |
 | D8 | ordered decoded-buffer control | serial decoded buffers compared between reference and candidate dumpers | see run log |
+| D9 | A/B repeated at the final head after group 4 | identical: 109 artifacts, 105 pass, same 4 PDFs, `per_movie_exact_gate 24/24`, `controls_all_detected: true` | **PASS** |
 
 The `overall: FAIL` line is retained deliberately. Downgrading it to PASS would
 require excluding the PDFs from the comparison, which is exactly the kind of

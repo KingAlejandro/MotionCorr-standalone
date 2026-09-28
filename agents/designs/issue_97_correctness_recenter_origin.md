@@ -34,13 +34,20 @@ Change is minimal, localized to the `if (interpolate_shifts)` block in motioncor
 - Option-on outputs change for movies where first interpolated offset !=0 (expected bugfix delta, recorded as such).
 - Option-off and non-interpolate paths: bit-exact no change.
 - No perf, noise, or peak-tie impact. **RELION parity IS affected** on the option-on path — see "Upstream provenance and parity" below.
-- NO committed regression test (see Verification status below). Verified out-of-tree against the real symbol instead.
+- Committed regression test `RunnerInterpolateRecenter`, plus executed CPU integration evidence (see below).
 
 ## Whitelist of allowed modifications (strict)
-1. `src/motioncorr_runner.cpp` — only the two-line save + use of `origin_x`, `origin_y` inside the `if (interpolate_shifts)` block (lines ~2159-2172).
-2. New regression test file under `tests/` or existing test harness (bounded, CPU-only initially).
-3. `WORKER_STATUS.md` updates, progress comments, this ADR.
-4. No other files, no CUDA changes yet (GPU waits #26 slot), no gate changes, no docs beyond status.
+1. `src/motioncorr_runner.cpp` — the recenter call site plus the extracted
+   `recenterShiftsToFirstFrame` definition.
+2. `src/motioncorr_runner.h` — declare that helper and widen `interpolateShifts` to public
+   static. Widened from the original whitelist on coordinator direction so the regression can
+   drive real production code; see `issue97-whitelist.md` Amendment 2026-09-28.
+3. `tests/test_runner_numerics.cpp` + `CMakeLists.txt` — the regression and its ctest entry.
+4. `docs/issue97_cpu_evidence/` — raw cpu64 logs, script, comparator.
+5. `SOURCE_MANIFEST.txt` — a `Local change:` entry for the deliberate upstream divergence.
+6. `WORKER_STATUS.md`, `issue97-whitelist.md`, progress comments, this ADR.
+7. Still excluded: CUDA/GPU code (deferred to #26), gate or tolerance changes, peak-tie/noise/
+   performance work, anything touching another issue.
 
 ## Verification gates (per issue-97.json)
 - Real-path regression fails on original, passes on fix.
@@ -92,33 +99,59 @@ It is not a silent change and must be approved as such. Mitigating scope:
 An alternative, if upstream parity must be preserved unconditionally, is to gate the
 corrected behaviour behind a separate flag. That is a maintainer decision, not taken here.
 
-## Verification status (executed 2026-09-28, CPU, darwin/arm64)
+## Verification status (executed 2026-09-28; unit locally on darwin/arm64, integration on cpu64 linux/x86_64)
 
-Build: out-of-tree `/tmp/issue97-build`, `CMAKE_BUILD_TYPE=Release` (`-O3 -DNDEBUG`),
-AppleClang, `RFLOAT` = 8 bytes. Release chosen deliberately: an unqualified CMake configure
-in this project builds `-O0`.
+Two independent verification layers now exist, both committed:
 
-`src/motioncorr_runner.cpp` sha256 `6620b8c6019c505d7c02a6418a6b9e6dcef1f66679f6f5c9b880021c3ddeb3cb`
-`libmotioncorr_core.a` sha256 `f407737ee792aed2c70d264a85e48d6cd18cdf39c30663bdb0d7b261d5fcb242`
+**1. Unit regression** `RunnerInterpolateRecenter` (`tests/test_runner_numerics.cpp`), registered
+in `CMakeLists.txt` outside the Python-interpreter guard so it cannot silently vanish. It drives
+the real `MotioncorrRunner::interpolateShifts` and `recenterShiftsToFirstFrame`; the only
+arithmetic reproduced locally is the OLD in-place loop, as the negative control.
 
-Verified by linking two throwaway harnesses (in `/tmp`, deliberately not committed) against
-the built `libmotioncorr_core.a`, calling the **real** `MotioncorrRunner::interpolateShifts`
-symbol. Access was opened with `#define private public`; member-function mangling does not
-encode access and `interpolateShifts` reads no member state, so the callee is genuine
-production code, not a retyped copy of the expression.
+Mutation-proven **per axis** — the earlier version of this test could not have caught a Y-only
+regression, because all of its bug-exposing witnesses had `yshifts` all-zero:
 
-| Check | Result |
+| mutation | result |
 |---|---|
-| Compiles (forced fresh rebuild of the TU) | PASS — 4 pre-existing `sprintf` deprecation warnings only |
-| W1 reproduces the archived control exactly | PASS — interpolated `-1 0 1 2 3 4`, old `0 0 1 2 3 4`, new `0 1 2 3 4 5` |
-| Fixed frame-0 offset is exactly 0 | PASS (all 4 witnesses, `== 0`, not a tolerance) |
-| Relative displacements preserved | Bit-exact in all 4 witnesses (`!=` on doubles, no tolerance) |
-| Zero-origin control: old == new bitwise | PASS — 3 cases incl. 2 non-trivial (`memcmp` identical) |
-| Nonzero-origin control: old != new | PASS (intended bug-change) |
+| X branch reverted to `-= xshifts[0]` | FAILS, exit 1: `corrected X at frame 1: got 0.000000 expected 1.000000` |
+| Y branch reverted to `-= yshifts[0]` | FAILS, exit 1: `corrected Y at frame 1: got 0.000000 expected -1.500000` |
+| fix intact | passes, exit 0 |
 
-Harness sources retained: `/tmp/issue97_verify.cpp`
-sha256 `e7d48b39484fa0a492f3342da8e9e7faf7d34a0ea1d25825f837ef73bce3fc40`;
-`/tmp/issue97_control.cpp` sha256 `619f499b338985500d63688047acb68316a5fbbe87aa78273d32750568e229cc`.
+**2. CPU integration on cpu64** — 8 arms, full provenance, raw logs retained in
+`docs/issue97_cpu_evidence/`. Headline: the default-off path is **byte-identical** between base
+`4c952b3` and fixed on a full-size real movie (56,955,920-byte MRC payload, 779-line STAR), while
+option-on differs as intended. See that directory's README for placement, NUMA policy, interference
+and the full product-by-product table.
+
+Current file hashes at the time of writing:
+
+```
+f1550193df79b540afc769c10b423d7ccdf94330b5f8b443d0086fa3cd39d2c2  src/motioncorr_runner.cpp
+cd9425306b0180b80dd085433b5f0dc9458e03e7944fd31e7d927ed0bce16894  src/motioncorr_runner.h
+043a2b1483063025e6107e8cd7395fa13e843a5aad46df56ce4848d3cc2f301d  tests/test_runner_numerics.cpp
+```
+
+Binary hashes for the two cpu64 builds are recorded in `docs/issue97_cpu_evidence/README.md`.
+The earlier `/tmp` harnesses referenced by a previous revision of this ADR were deliberately not
+committed and are superseded by the two layers above; their hashes have been removed rather than
+left pointing at a tree that no longer exists.
+
+| Check | Where | Result |
+|---|---|---|
+| Compiles, forced fresh rebuild of the TU | local + cpu64 | PASS (pre-existing `sprintf` warnings only) |
+| W1 reproduces the archived control exactly | unit | PASS — interpolated `-1 0 1 2 3 4`, old `0 0 1 2 3 4`, new `0 1 2 3 4 5` |
+| Frame-0 offset exactly 0 after fix, both axes | unit | PASS, `== 0`, no tolerance |
+| Expected values for all 4 witnesses | unit | PASS, each recomputed by hand from the source formula and confirmed by two independent reviewers |
+| Nonzero interpolated origin on BOTH axes | unit | PASS — cases 2 and 3; X and Y mutants each caught separately |
+| Relative displacements preserved | unit | Exact, `==` on doubles, no tolerance |
+| Zero-origin control: old == new, per axis | unit | PASS (biconditional, asserted per axis) |
+| Empty-input guard | unit | PASS |
+| `RunnerInterpolateRecenter` present/absent | cpu64 | passes on fixed tree; does not exist on base tree |
+| Full suite | cpu64 | 14/14 fixed, 13/13 base — exactly one test added, none regressed |
+| Default-off output unchanged, synthetic | cpu64 | MRC payload and STAR **byte-identical** base vs fixed |
+| Default-off output unchanged, real movie | cpu64 | MRC payload (56,955,920 B) and 779-line STAR **byte-identical** |
+| Option-on output changed, real movie | cpu64 | 14,236,598/14,238,980 px differ; 611/777 STAR value lines |
+| Recenter block actually reached | cpu64 | 9 patches (3x3) and 25 patches (5x5) converged, `interpolate_shifts = 1` |
 
 ### Tolerance honesty
 Relative displacement was bit-exact for every witness tested, including cases with
@@ -128,23 +161,34 @@ For realistic pixel-scale shifts the double-precision headroom makes the invaria
 and no tolerance was loosened anywhere to obtain these results.
 
 ### NOT verified — explicitly unrun
-- No end-to-end MotionCorr movie run, option-on or option-off.
-- No CUDA / GPU execution (deferred to the #26 coordinated slot).
-- No RELION downstream / FSC / B-factor comparison.
-- Frequency and magnitude of this defect on real experimental movies remain unmeasured.
-- No committed regression test in `tests/` (see below).
 
-### Withdrawn test — correction of an earlier claim
-Commit `f9c1754` added a regression to `tests/test_runner_numerics.cpp` and `db62593`
-reverted it. The stated reason (`interpolateShifts` is private, exposing it would touch the
-header and exceed the tiny-PR scope) was true but incomplete. Executing the real path now
-shows **two of its three witnesses asserted wrong expected values** and would have failed:
+- **No CUDA / GPU execution.** Deferred to the #26 coordinated slot. The CUDA option-on path
+  is unverified. Note `src/acc/cuda/cuda_alignpatch.cu:393-398` contains an independent,
+  already-correct descending-loop recentering; it was not touched.
+- **No downstream scientific claim.** No RELION refinement, FSC, B-factor or resolution
+  comparison. Nothing here says the corrected option-on output is scientifically better,
+  only that it matches the code's stated intent.
+- **One real movie only** (`20170629_00026`) and one synthetic fixture. Defect frequency and
+  magnitude across the 24-movie set are unmeasured; a single movie is not representative for
+  any load-bearing quantitative claim.
+- **No timing claim** from the cpu64 runs — `ctffind` ran concurrently on the same NUMA node.
+- **Non-one first selected frame** (`--first_frame_sum > 1`) is not covered by any arm.
+- Only two patch geometries were run (3x3 synthetic, 5x5 real movie). No unequal-patch or
+  other local-mode geometry.
+- **No general-case floating-point witness.** Every committed witness is exactly representable
+  and compared with `==`. The relative-displacement invariant is therefore demonstrated only on
+  exact inputs; see "Tolerance honesty" above for why it is not claimed in general.
+- The test covers the helper directly. Nothing asserts that the call site at
+  `motioncorr_runner.cpp` still calls it, so reverting the call alone would keep the unit test
+  green — that wiring is covered only by the integration arms.
 
-- W2 asserted `fixed[5] == 3.0`; the real path yields `5.0`. It was also labelled a
-  "zero-origin" control while its actual frame-0 offset is `3.5` — it did not test the
-  condition its name asserted.
-- W3 asserted `fixed[6] == 5.0`; the real path yields `8.0` (the comment even said
-  "rough check").
+### History — the withdrawn first attempt
 
-Only W1 was correct. Reverting was the right outcome for the wrong reason; a future test
-must be validated against executed output before being committed.
+Commit `f9c1754` added a regression that `db62593` reverted. The stated reason (`interpolateShifts`
+was private) was true but incomplete: executing the real path showed two of its three witnesses
+asserted wrong values (W2 expected 3.0, real 5.0; W3 expected 5.0, real 8.0) and its "zero-origin
+control" had a frame-0 offset of 3.5, so it did not test the condition its name claimed.
+
+The regression committed in `792f1e6` and extended in the review pass supersedes it. Every
+expected value was recomputed from the interpolation formula and confirmed by two independent
+read-only reviewers, and each witness is exactly representable so `==` is used with no tolerance.

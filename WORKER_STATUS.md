@@ -5,11 +5,11 @@
 **Task class**: correctness (scoped fix + CPU validation evidence)  
 **Branch**: round96/97-grok-4-3 (isolated origin/main worktree)  
 **Base commit**: 4c952b3f54479653512c4d208e09c9a8c02f3726 (main)  
-**Phase**: CPU validation complete on cpu64. Unit regression committed and passing; default-off exactness proven on a real movie; option-on divergence quantified. Two read-only reviews requested. Draft PR #100 retained.
-**Changed files**: `src/motioncorr_runner.cpp`, `src/motioncorr_runner.h`, `tests/test_runner_numerics.cpp`, `CMakeLists.txt`, `docs/issue97_cpu_evidence/*`, ADR, whitelist, this file.
+**Phase**: Review pass complete. Two independent read-only reviews received and their valid findings applied (both-axes witness, ctest un-gated from Python, ADR reconciled, SOURCE_MANIFEST provenance entry, symmetric guard). Draft PR #100 retained.
+**Changed files**: `src/motioncorr_runner.cpp`, `src/motioncorr_runner.h`, `tests/test_runner_numerics.cpp`, `CMakeLists.txt`, `SOURCE_MANIFEST.txt`, `docs/issue97_cpu_evidence/*`, ADR, whitelist, this file.
 **Blockers**: none blocking. The option-on path deliberately diverges from pinned RELION `ad0b230`; documented for the maintainer rather than gated on a second approval. GPU remains deferred to the #26 slot.
 **NEEDS_GPU**: Yes, deferred — CUDA option-on path unverified. Request: one GPU slot to run the same 4-arm option-off/on comparison with `_CUDA_ENABLED`. Waiting on the #26 coordinated slot; no GPU submitted.
-**Next step**: fold in the two read-only review verdicts, then hand to the maintainer. PR stays draft.
+**Next step**: maintainer decision on the documented option-on divergence from pinned RELION `ad0b230`. PR stays draft; GPU still deferred to #26.
 
 ## Scoped plan (per issue-97.json + task-97.md + COMMON.md)
 - Own ONLY the saved-first-frame-origin recentering fix.
@@ -61,3 +61,38 @@ Full evidence: `docs/issue97_cpu_evidence/` (raw logs, script, comparator).
   (max abs 22.56 on range 51.42), 611/777 STAR value lines. Joint
   `corrected_micrographs.star` accumulated motion is **equal** in both arms.
 - Not established: any scientific/downstream claim, timings, CUDA, >1 real movie.
+
+## Independent review (2026-09-28)
+
+Two bounded read-only reviewers, run concurrently, no recursion.
+
+Code/correctness reviewer: **CHANGES_REQUESTED**. Found no fault in `src/` — confirmed the
+extracted method is semantically identical (the `size_t` bound provably equals `n_frames` at the
+only call site), and independently recomputed all four witnesses from the source formula. It also
+found corroboration I had missed: `motioncorr_runner.cpp:3122-3128` and
+`acc/cuda/cuda_alignpatch.cu:393-398` already implement this same recentering as *descending*
+loops with the comment `// do frame 0 last!`, so the intended semantics are unambiguous and the
+ascending loop was the outlier.
+
+Spec/license reviewer: **SPEC_CONFORMANCE_FAILED**, **LICENSE_COMPLIANCE_PASSED** (advisory).
+Two of its findings were already resolved in `092b796` before it reported (whitelist amendment,
+executed option-off control).
+
+Applied from both:
+- Added nonzero-origin-on-both-axes witnesses. This was the substantive one: every bug-exposing
+  witness previously had `yshifts` all-zero, so the `origin_y` half of the fix was untested and a
+  Y-only regression would have kept the suite green. Now mutation-proven per axis.
+- Added negative X slope and unequal-last-group witnesses, and an empty-input case.
+- Moved `RunnerInterpolateRecenter` out of the `if(Python3_Interpreter_FOUND)` block and switched
+  to `$<TARGET_FILE:>`; it was a pure C++ test that would have silently vanished on a
+  Python-less host.
+- Reconciled the ADR, which still claimed at HEAD that no test was committed, and removed hashes
+  pointing at a tree that no longer exists.
+- Added the `Local change:` entry to `SOURCE_MANIFEST.txt` for the deliberate upstream divergence.
+- Made `interpolateShifts` static and added a symmetric length guard to the now-public helper.
+
+Not applied, with reasons:
+- *Drop `WORKER_STATUS.md` / `issue97-whitelist.md` from the merge (no precedent at repo root).*
+  Kept: COMMON.md mandates WORKER_STATUS for this round. Flagged for the maintainer to drop at
+  merge if unwanted — they are process artifacts, not product.
+- *`--first_frame_sum > 1` arm.* Not run; declared unrun in the ADR instead.

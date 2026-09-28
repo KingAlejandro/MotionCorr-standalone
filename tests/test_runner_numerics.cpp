@@ -21,42 +21,49 @@ int main(int argc, char **argv)
             // later iterations still needed. Frames 1..n-1 kept their un-recentered absolute
             // values while frame 0 was forced to zero.
             //
-            // This exercises the real production methods MotioncorrRunner::interpolateShifts
-            // and MotioncorrRunner::recenterShiftsToFirstFrame -- not a retyped copy of their
+            // Exercises the real production methods MotioncorrRunner::interpolateShifts and
+            // MotioncorrRunner::recenterShiftsToFirstFrame -- not a retyped copy of their
             // arithmetic. The only arithmetic reproduced locally is the OLD buggy loop, which
             // is the negative control, not the code under test.
             //
-            // Every witness is chosen so that interpolation is exactly representable in
-            // binary floating point, so expected values are compared with == and no tolerance
-            // is needed or used. With equally spaced group centres the interpolation collapses
-            // to a straight line, value(f) = x0 + (f - c0) * (x1 - x0) / (c1 - c0), and
-            // recentering to frame 0 leaves exactly (f - 0) * slope.
-            MotioncorrRunner runner;
-
+            // Every witness is exactly representable in binary floating point, so expected
+            // values are compared with == and no tolerance is needed or used. With equally
+            // spaced group centres the interpolation collapses to a straight line,
+            // value(f) = x0 + (f - c0)*(x1 - x0)/(c1 - c0), and recentering leaves f*slope.
+            // Cases 2 and 3 carry a nonzero interpolated origin on BOTH axes, so the
+            // origin_y half of the fix is exercised and not merely implied.
             struct Case {
                 const char *name;
                 std::vector<int> group_start, group_size;
                 std::vector<RFLOAT> xshifts, yshifts;
                 int n_frames;
-                std::vector<RFLOAT> expect_fixed_x;   // after the corrected recentering
-                std::vector<RFLOAT> expect_buggy_x;   // what the original in-place loop produced
+                std::vector<RFLOAT> expect_fixed_x, expect_buggy_x;
+                std::vector<RFLOAT> expect_fixed_y, expect_buggy_y;
             };
 
             const std::vector<Case> cases = {
-                // Collinear 3 groups, centres {1,3,5}, slope 1 -> value(f) = f - 1, origin -1.
-                // This is the archived reproducer from the issue.
-                {"archived witness (slope 1)", {0,2,4}, {2,2,2}, {0,2,4}, {0,0,0}, 6,
-                 {0,1,2,3,4,5}, {0,0,1,2,3,4}},
-                // Two groups, centres {1,3}, slope 2 -> value(f) = 2f - 2, origin -2.
-                {"slope 2, nonzero origin", {0,2}, {2,2}, {0,4}, {0,0}, 6,
-                 {0,2,4,6,8,10}, {0,0,2,4,6,8}},
-                // Piecewise: centres {1,3,5}, slope 1 then slope 2. value = f-1, then 2f-4.
-                {"piecewise slopes 1 then 2", {0,2,4}, {2,2,2}, {0,2,6}, {0,0,0}, 6,
-                 {0,1,2,3,5,7}, {0,0,1,2,4,6}},
-                // Zero-origin control: centres {1,3}, x1 = 3*x0 makes value(0) exactly 0,
-                // so the corrected and original loops MUST agree bit for bit.
+                // The archived reproducer from the issue. Centres {1,3,5}, collinear slope 1,
+                // so value(f) = f - 1 and the origin is -1. Y is deliberately all-zero here so
+                // this case reproduces the archived stdout exactly; Y is covered by cases 2-3.
+                {"archived witness, slope 1 (X only)", {0,2,4}, {2,2,2}, {0,2,4}, {0,0,0}, 6,
+                 {0,1,2,3,4,5}, {0,0,1,2,3,4},
+                 {0,0,0,0,0,0}, {0,0,0,0,0,0}},
+                // Centres {1,3}. X slope +2 -> value 2f-2, origin -2.
+                // Y slope -1.5 -> value -1.5f+1.5, origin +1.5. Nonzero origin on both axes,
+                // opposite signs, and -1.5/-4.5/-7.5 are dyadic so still exact.
+                {"slope +2 X / -1.5 Y, nonzero origin both axes", {0,2}, {2,2}, {0,4}, {0,-3}, 6,
+                 {0,2,4,6,8,10},        {0,0,2,4,6,8},
+                 {0,-1.5,-3,-4.5,-6,-7.5}, {0,0,-1.5,-3,-4.5,-6}},
+                // Unequal last group (sizes 2,2,4 -> centres {1,3,6}), negative X slopes
+                // -1 then -2, and a Y that goes slope +1 then flat. Origins -> X +1, Y -1.
+                {"unequal last group, negative X slope, piecewise", {0,2,4}, {2,2,4}, {0,-2,-8}, {0,2,2}, 8,
+                 {0,-1,-2,-3,-5,-7,-9,-11}, {0,0,-1,-2,-4,-6,-8,-10},
+                 {0,1,2,3,3,3,3,3},         {0,0,1,2,2,2,2,2}},
+                // Zero-origin control: centres {1,3} with x1 = 3*x0 makes value(0) exactly 0
+                // on both axes, so the corrected and original loops MUST agree bit for bit.
                 {"zero-origin control (no-op)", {0,2}, {2,2}, {1,3}, {2,6}, 6,
-                 {0,1,2,3,4,5}, {0,1,2,3,4,5}},
+                 {0,1,2,3,4,5},  {0,1,2,3,4,5},
+                 {0,2,4,6,8,10}, {0,2,4,6,8,10}},
             };
 
             for (const Case &c : cases) {
@@ -64,7 +71,7 @@ int main(int argc, char **argv)
                 std::vector<int> gstart = c.group_start, gsize = c.group_size;
                 std::vector<RFLOAT> xs = c.xshifts, ys = c.yshifts;
                 std::vector<RFLOAT> ix(c.n_frames), iy(c.n_frames);
-                runner.interpolateShifts(gstart, gsize, xs, ys, c.n_frames, ix, iy);
+                MotioncorrRunner::interpolateShifts(gstart, gsize, xs, ys, c.n_frames, ix, iy);
 
                 // Negative control: the ORIGINAL in-place loop, reproduced verbatim.
                 std::vector<RFLOAT> buggy_x = ix, buggy_y = iy;
@@ -80,13 +87,21 @@ int main(int argc, char **argv)
                 require(fixed_x[0] == 0 && fixed_y[0] == 0, tag + "frame 0 must be exactly the origin");
                 for (int f = 0; f < c.n_frames; f++) {
                     require(fixed_x[f] == c.expect_fixed_x[f],
-                            tag + "corrected X differs at frame " + std::to_string(f) +
-                            ": got " + std::to_string((double)fixed_x[f]) +
-                            " expected " + std::to_string((double)c.expect_fixed_x[f]));
+                            tag + "corrected X at frame " + std::to_string(f) + ": got " +
+                            std::to_string((double)fixed_x[f]) + " expected " +
+                            std::to_string((double)c.expect_fixed_x[f]));
+                    require(fixed_y[f] == c.expect_fixed_y[f],
+                            tag + "corrected Y at frame " + std::to_string(f) + ": got " +
+                            std::to_string((double)fixed_y[f]) + " expected " +
+                            std::to_string((double)c.expect_fixed_y[f]));
                     require(buggy_x[f] == c.expect_buggy_x[f],
-                            tag + "old-code control X differs at frame " + std::to_string(f) +
-                            ": got " + std::to_string((double)buggy_x[f]) +
-                            " expected " + std::to_string((double)c.expect_buggy_x[f]));
+                            tag + "old-code control X at frame " + std::to_string(f) + ": got " +
+                            std::to_string((double)buggy_x[f]) + " expected " +
+                            std::to_string((double)c.expect_buggy_x[f]));
+                    require(buggy_y[f] == c.expect_buggy_y[f],
+                            tag + "old-code control Y at frame " + std::to_string(f) + ": got " +
+                            std::to_string((double)buggy_y[f]) + " expected " +
+                            std::to_string((double)c.expect_buggy_y[f]));
                 }
 
                 // Recentering subtracts one constant from every element, so every relative
@@ -96,11 +111,19 @@ int main(int argc, char **argv)
                     require(fixed_y[f] - fixed_y[f-1] == iy[f] - iy[f-1], tag + "relative Y displacement changed");
                 }
 
-                const bool origin_was_zero = (ix[0] == 0 && iy[0] == 0);
-                const bool identical = (buggy_x == fixed_x && buggy_y == fixed_y);
-                require(origin_was_zero == identical,
-                        tag + "old and new output must agree exactly iff the interpolated origin was already zero");
-                std::cout << "PASS " << c.name << (origin_was_zero ? " (no-op control)" : " (bug reproduced and fixed)") << "\n";
+                // Pins both the intended change and the no-op case, per axis.
+                require((ix[0] == 0) == (buggy_x == fixed_x), tag + "X: old==new iff X origin was already zero");
+                require((iy[0] == 0) == (buggy_y == fixed_y), tag + "Y: old==new iff Y origin was already zero");
+                const bool noop = (ix[0] == 0 && iy[0] == 0);
+                std::cout << "PASS " << c.name << (noop ? " (no-op control)" : " (bug reproduced and fixed)") << "\n";
+            }
+
+            // Degenerate input must not read element zero of an empty vector.
+            {
+                std::vector<RFLOAT> ex, ey;
+                MotioncorrRunner::recenterShiftsToFirstFrame(ex, ey);
+                require(ex.empty() && ey.empty(), "empty input must stay empty");
+                std::cout << "PASS empty-input guard\n";
             }
             std::cout << "PASS issue97 interpolate_recenter\n";
             return 0;

@@ -2559,6 +2559,8 @@ skip_fitting:
 }
 
 void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
+	if (xshifts.size() != yshifts.size())
+		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
 	if (xshifts.empty()) return;
 
 	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while

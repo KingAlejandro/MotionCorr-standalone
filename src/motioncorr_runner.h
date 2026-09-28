@@ -245,9 +245,9 @@ public:
 	static bool detectSerialEMDefectText(FileName fn_defect);
 
 	// Inter-/extrapolate per-group local shifts onto every frame.
-	// Pure function of its arguments (reads no member state); public so the
-	// motion-model arithmetic can be unit tested directly.
-	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+	// Pure function of its arguments (reads no member state), hence static; public
+	// so the motion-model arithmetic can be unit tested directly.
+	static void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
 	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
 	                       int n_frames,
 	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);

@@ -62,7 +62,12 @@ size_t roundUpToPage(size_t bytes)
 
 size_t estimateDecodedMovieBytes(int nx, int ny, int n_frames, int n_io_threads)
 {
-	if (nx <= 0 || ny <= 0 || n_frames <= 0) return 0;
+	// No selected frames means nothing is allocated, and zero is the honest
+	// charge. A nonpositive geometry with frames to read is different: the
+	// allocation size is unknowable, and returning zero would admit the movie
+	// entirely off-budget, so charge the maximum and let the caller fall back.
+	if (n_frames <= 0) return 0;
+	if (nx <= 0 || ny <= 0) return std::numeric_limits<size_t>::max();
 	if (n_io_threads < 1) n_io_threads = 1;
 
 	const size_t frame_bytes = roundUpToPage(
@@ -133,9 +138,12 @@ ByteBudget::Reservation ByteBudget::reserve(size_t bytes)
 ByteBudget::Reservation ByteBudget::reserveForced(size_t bytes)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
+	// Count only grants that genuinely break the bound. An in-line load of an
+	// EER movie that fits comfortably is not an override, and counting it as
+	// one would make the field useless for the question it exists to answer.
+	if (reserved_ + bytes > limit_) over_budget_grants_++;
 	reserved_ += bytes;
 	if (reserved_ > peak_) peak_ = reserved_;
-	forced_grants_++;
 	return Reservation(this, bytes);
 }
 
@@ -178,10 +186,10 @@ size_t ByteBudget::peakReservedBytes() const
 	return peak_;
 }
 
-size_t ByteBudget::forcedGrants() const
+size_t ByteBudget::overBudgetGrants() const
 {
 	std::lock_guard<std::mutex> lock(mutex_);
-	return forced_grants_;
+	return over_budget_grants_;
 }
 
 double ByteBudget::blockedSeconds() const
@@ -340,6 +348,35 @@ void MoviePrefetcher::loadOne(const FileName &fn, MoviePrefetchRecord &record)
 
 void MoviePrefetcher::producerLoop()
 {
+	try
+	{
+		producerLoopBody();
+	}
+	catch (...)
+	{
+		// Not a decode error -- those are caught per movie and published as a
+		// tagged record. This is the bookkeeping itself failing (an allocation
+		// inside the queue, a lock_guard, a FileName copy). Letting it leave a
+		// std::thread function calls std::terminate, killing the process with
+		// no diagnostic and no exit code, which is precisely the failure mode
+		// the OpenMP capture above exists to prevent. Capture it so the
+		// consumer can report it as a run failure instead.
+		std::lock_guard<std::mutex> lock(stats_mutex_);
+		producer_fatal_ = std::current_exception();
+	}
+	// Always: a consumer waiting on an empty queue must be released even when
+	// the producer died.
+	queue_.finish();
+}
+
+std::exception_ptr MoviePrefetcher::producerFatalError() const
+{
+	std::lock_guard<std::mutex> lock(stats_mutex_);
+	return producer_fatal_;
+}
+
+void MoviePrefetcher::producerLoopBody()
+{
 	for (size_t imic = 0; imic < movies_.size(); imic++)
 	{
 		if (budget_.cancelled()) break;
@@ -412,7 +449,6 @@ void MoviePrefetcher::producerLoop()
 		}
 		if (!pushed) break; // cancelled; `record` still owns its reservation
 	}
-	queue_.finish();
 }
 
 bool MoviePrefetcher::next(MoviePrefetchRecord &out)
@@ -437,7 +473,7 @@ PrefetchStats MoviePrefetcher::stats() const
 	s.budget_bytes = budget_.limitBytes();
 	s.peak_reserved_bytes = budget_.peakReservedBytes();
 	s.peak_queue_occupancy = queue_.peakOccupancy();
-	s.forced_grants = budget_.forcedGrants();
+	s.over_budget_grants = budget_.overBudgetGrants();
 	s.producer_budget_blocked_s = budget_.blockedSeconds();
 	std::lock_guard<std::mutex> lock(stats_mutex_);
 	s.decoded = decoded_;

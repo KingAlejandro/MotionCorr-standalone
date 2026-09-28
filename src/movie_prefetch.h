@@ -124,8 +124,11 @@ public:
 	// reservation when cancelled, or when the request can never fit.
 	Reservation reserve(size_t bytes);
 
-	// Grants `bytes` immediately even if that exceeds the limit, and counts the
-	// grant. This is the documented escape hatch for a movie too large for the
+	// Grants `bytes` immediately, even if that exceeds the limit. A grant that
+	// really does exceed it is counted; one that happens to fit is not, so the
+	// counter answers "was the bound overridden" rather than "how many in-line
+	// loads happened", which `inline_loaded` already answers.
+	// This is the documented escape hatch for a movie too large for the
 	// whole budget: the serial baseline also holds one such movie resident, so
 	// refusing it would be a functional regression. It is counted so that
 	// "the bound held" and "the bound was overridden N times" stay
@@ -138,7 +141,7 @@ public:
 	size_t limitBytes() const { return limit_; }
 	size_t reservedBytes() const;
 	size_t peakReservedBytes() const;
-	size_t forcedGrants() const;
+	size_t overBudgetGrants() const;
 	// Accumulated time callers spent blocked inside reserve().
 	double blockedSeconds() const;
 
@@ -150,7 +153,7 @@ private:
 	const size_t limit_;
 	size_t reserved_ = 0;
 	size_t peak_ = 0;
-	size_t forced_grants_ = 0;
+	size_t over_budget_grants_ = 0;
 	double blocked_seconds_ = 0.0;
 	bool cancelled_ = false;
 };
@@ -182,12 +185,20 @@ public:
 	// has finished and the queue has drained.
 	bool pop(T &out)
 	{
-		std::unique_lock<std::mutex> lock(mutex_);
-		not_empty_.wait(lock, [this] { return cancelled_ || finished_ || !items_.empty(); });
-		if (cancelled_ || items_.empty()) return false;
-		out = std::move(items_.front());
-		items_.pop_front();
+		T taken;
+		{
+			std::unique_lock<std::mutex> lock(mutex_);
+			not_empty_.wait(lock, [this] { return cancelled_ || finished_ || !items_.empty(); });
+			if (cancelled_ || items_.empty()) return false;
+			taken = std::move(items_.front());
+			items_.pop_front();
+		}
 		not_full_.notify_one();
+		// Assigning to `out` releases whatever `out` held, which takes the
+		// budget mutex. Doing that outside the queue mutex keeps the two locks
+		// strictly un-nested, matching cancel() and removing a lock inversion
+		// that is harmless today only by accident.
+		out = std::move(taken);
 		return true;
 	}
 
@@ -280,6 +291,14 @@ struct MoviePrefetchRecord
 		Failed      // probe/decode threw; `error` is the movie-tagged outcome
 	};
 
+	// The reservation is declared FIRST so it is destroyed LAST, and the
+	// destructor below frees the frames before returning the bytes anyway.
+	// Both, because either alone is fragile: a defaulted destructor returns
+	// the budget in reverse declaration order, which would wake a blocked
+	// producer while this record's frames are still being freed -- real
+	// resident memory would then transiently reach limit + one movie on a host
+	// sized to limit, and no counter would ever show it.
+	ByteBudget::Reservation reservation;
 	long index = -1;
 	FileName filename;
 	Mode mode = Mode::LoadInline;
@@ -287,13 +306,20 @@ struct MoviePrefetchRecord
 	std::vector<int> frames;
 	std::vector<Image<float> > Iframes;
 	std::exception_ptr error;
-	ByteBudget::Reservation reservation;
 
 	MoviePrefetchRecord() = default;
 	MoviePrefetchRecord(MoviePrefetchRecord &&) = default;
 	MoviePrefetchRecord &operator=(MoviePrefetchRecord &&) = default;
 	MoviePrefetchRecord(const MoviePrefetchRecord &) = delete;
 	MoviePrefetchRecord &operator=(const MoviePrefetchRecord &) = delete;
+	~MoviePrefetchRecord()
+	{
+		// Order is the whole point: the allocation must be gone before its
+		// bytes are handed back to anyone waiting for them.
+		Iframes.clear();
+		Iframes.shrink_to_fit();
+		reservation.release();
+	}
 };
 
 struct PrefetchStats
@@ -304,7 +330,10 @@ struct PrefetchStats
 	size_t decoded = 0;
 	size_t inline_loaded = 0;
 	size_t failed = 0;
-	size_t forced_grants = 0;
+	// Grants that actually pushed the reserved total above the limit. NOT the
+	// number of in-line loads: a movie can be loaded in line because its format
+	// is unsupported while still fitting comfortably in the budget.
+	size_t over_budget_grants = 0;
 	double producer_budget_blocked_s = 0.0;
 	double producer_queue_blocked_s = 0.0;
 	double consumer_wait_s = 0.0;
@@ -354,6 +383,14 @@ public:
 	PrefetchStats stats() const;
 	const ByteBudget &budget() const { return budget_; }
 
+	// Non-null when the producer thread died of something other than a
+	// per-movie decode error -- an allocation failure in the queue or in the
+	// bookkeeping itself. Letting that escape the thread function would be
+	// std::terminate with no diagnostic, which is exactly the failure this
+	// code eliminates for OpenMP regions, so it is captured and reported here
+	// instead.
+	std::exception_ptr producerFatalError() const;
+
 	// Test seams: replace the header probe and the decode so the lifecycle
 	// tests can drive every ownership state, including blocked budget and
 	// cancellation, without touching the filesystem. Both must be set before
@@ -365,6 +402,7 @@ public:
 
 private:
 	void producerLoop();
+	void producerLoopBody();
 	void loadOne(const FileName &fn, MoviePrefetchRecord &record);
 
 	std::vector<FileName> movies_;
@@ -381,6 +419,7 @@ private:
 	size_t decoded_ = 0, inline_loaded_ = 0, failed_ = 0;
 	double producer_queue_blocked_s_ = 0.0;
 	double consumer_wait_s_ = 0.0;
+	std::exception_ptr producer_fatal_;
 };
 
 // Monotonic seconds, for the blocked/wait accounting above.

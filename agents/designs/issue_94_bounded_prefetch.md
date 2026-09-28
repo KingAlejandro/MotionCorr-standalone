@@ -85,11 +85,17 @@ Two further routes to serial loading, both by design:
 1. **Oversized movie.** If the conservative byte estimate for a movie exceeds the whole prefetch
    budget, it can never be admitted. The producer publishes a `LoadInline` marker and the
    consumer loads it itself, through the same loader, under a *forced* grant that is recorded
-   and counted (`forced_grants`) rather than silently untracked. Refusing the movie instead
+   and counted rather than silently untracked. Refusing the movie instead
    would be a functional regression against the serial baseline, which always holds one movie
    resident regardless of size. The forced grant is the documented, counted exception to the
    bound.
-2. **Prefetch disabled**, which is the default everywhere including CUDA mode.
+2. **Unsupported format** (EER, compressed MRC), which is in-line by format, not by size.
+3. **Prefetch disabled**, which is the default everywhere including CUDA mode.
+
+`over_budget_grants` counts only grants that genuinely pushed the reserved total above the
+limit. An in-line load that happens to fit is not an override; `inline_loaded` already answers
+"how many movies bypassed the producer", and conflating the two would make the override field
+unreadable on, say, an all-EER dataset.
 
 ## 5. Byte estimation
 
@@ -153,6 +159,28 @@ outlier takes route (1) above instead of silently growing the high-water.
 - Reservations are released by a move-only RAII handle. Double release is unrepresentable, and
   the one early release -- the producer's error path -- runs only after the partial frames have
   actually been dropped.
+- **Order matters as much as count.** `MoviePrefetchRecord` has an explicit destructor that
+  frees `Iframes` and only then releases the reservation, and the reservation is additionally
+  declared first so even a defaulted destructor would run last. Either alone is fragile: a
+  defaulted destructor destroys members in reverse declaration order, so returning the bytes
+  before freeing the buffers would wake a producer blocked on the budget while this movie's
+  frames are still being released -- real resident memory would transiently reach
+  `limit + one movie` on a host sized to `limit`, and no counter would show it, because the
+  accounting is already back to zero. The consumer's in-line reservation is declared before
+  every buffer it accounts for, for the same reason.
+- The producer thread has a top-level `catch (...)`. A decode error is a per-movie outcome, but
+  an allocation failure in the bookkeeping itself is not, and letting it leave a `std::thread`
+  function is `std::terminate` with no diagnostic -- exactly the failure the OpenMP capture
+  exists to prevent. It is captured and rethrown on the consumer, which reports it as a run
+  failure.
+- **Two things the prefetch path does not preserve, and should not be claimed to.** Abort is no
+  longer immediate: `cancelAndJoin()` waits for the producer to finish decoding whatever movie
+  it is inside, because cancellation is not polled within a decode, so abort can take up to one
+  movie decode. And the *stderr transcript* of a damaged movie is interleaved differently:
+  `RelionError`'s constructor writes at throw time, which is now on the producer thread during
+  a different movie's correction, so the two halves of one movie's report can be separated. The
+  exit code, the failed-movie list, the retained healthy outputs and the withheld joint output
+  are identical; the transcript ordering is not.
 
 ## 7. CPU budget
 
@@ -193,7 +221,8 @@ range without changing the type; #95 asked for that property to be kept, and it 
 
 Cheap CPU checks are the gate for merging the prototype; timing is a separate, later step.
 
-- Lifecycle unit tests: exact-fit / just-below / oversized budgets, blocked-then-woken reserve,
+- Lifecycle unit tests: record destruction order, degenerate geometry, override counting,
+  exact-fit / just-below / oversized budgets, blocked-then-woken reserve,
   transfer-on-move, release-once, cancellation at every ownership state, producer error,
   ordering, and an accounting stress check asserting that
   `active + queued + producer-current` never exceeds the limit. Every blocking test runs under a

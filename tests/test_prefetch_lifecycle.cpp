@@ -228,10 +228,79 @@ void testForcedGrant()
 		ByteBudget::Reservation forced = budget.reserveForced(4000);
 		check(forced.held(), "a forced grant is always granted");
 		check(budget.reservedBytes() == 4000, "the forced grant is charged, not hidden");
-		check(budget.forcedGrants() == 1, "the override is counted");
+		check(budget.overBudgetGrants() == 1, "an override that really exceeds is counted");
 		check(budget.peakReservedBytes() >= 4000, "the peak shows the override");
 	}
 	check(budget.reservedBytes() == 0, "a forced grant is returned like any other");
+
+	// A forced grant that fits is NOT an override. An in-line load happens for
+	// unsupported formats too, and counting those would make the field answer
+	// "how many in-line loads" instead of "was the bound broken".
+	{
+		ByteBudget::Reservation fits = budget.reserveForced(100);
+		check(fits.held(), "a small forced grant is granted");
+		check(budget.overBudgetGrants() == 1, "a grant that fits does not count as an override");
+	}
+	// And one that fits only because nothing else is held still counts when it
+	// is taken on top of an existing charge.
+	{
+		ByteBudget::Reservation held = budget.reserve(900);
+		ByteBudget::Reservation tips = budget.reserveForced(200); // 1100 > 1000
+		check(budget.overBudgetGrants() == 2, "a grant that tips the total over is counted");
+	}
+	check(budget.reservedBytes() == 0, "everything returns");
+}
+
+// The record must free its frames BEFORE returning their bytes. A defaulted
+// destructor returns the budget in reverse declaration order, which would wake
+// a blocked producer while these buffers are still being freed: real resident
+// memory then transiently reaches limit + one movie on a host sized to limit,
+// and no counter ever shows it because the accounting is already back to zero.
+void testRecordFreesFramesBeforeReturningBytes()
+{
+	Watchdog dog(10.0, "record destruction order");
+	ByteBudget budget(unitBytes() * 2);
+	{
+		MoviePrefetchRecord record;
+		record.reservation = budget.reserve(unitBytes());
+		record.Iframes.resize(kNFrames);
+		for (int i = 0; i < kNFrames; i++) record.Iframes[i]().resize(kNy, kNx);
+		check(record.reservation.held(), "the record holds its reservation");
+		check(budget.reservedBytes() == unitBytes(), "and the bytes are charged");
+	}
+	check(budget.reservedBytes() == 0, "destruction returns the bytes exactly once");
+
+	// The ordering itself is enforced by the explicit destructor rather than by
+	// member order, so that reordering members cannot silently reintroduce the
+	// overshoot. Check the destructor really is the thing doing it: after an
+	// explicit release the frames must still be intact and freeable.
+	{
+		MoviePrefetchRecord record;
+		record.reservation = budget.reserve(unitBytes());
+		record.Iframes.resize(kNFrames);
+		record.reservation.release();
+		check(budget.reservedBytes() == 0, "an explicit release still returns once");
+		check(record.Iframes.size() == (size_t)kNFrames,
+		      "releasing the budget does not touch the buffers");
+	}
+	check(budget.reservedBytes() == 0, "no double return from the destructor afterwards");
+}
+
+// A movie whose header reports a nonpositive geometry must not be admitted for
+// free. Returning a zero estimate would let it decode entirely off-budget.
+void testDegenerateGeometryIsNotFree()
+{
+	const size_t max = (size_t)-1;
+	check(movieio::estimateDecodedMovieBytes(0, kNy, kNFrames, 1) == max,
+	      "a zero width with frames to read is charged the maximum, not zero");
+	check(movieio::estimateDecodedMovieBytes(kNx, -1, kNFrames, 1) == max,
+	      "a negative height with frames to read is charged the maximum, not zero");
+	check(movieio::estimateDecodedMovieBytes(0, 0, 0, 1) == 0,
+	      "but no selected frames really does allocate nothing");
+
+	ByteBudget budget(unitBytes());
+	check(budget.tooLargeForBudget(movieio::estimateDecodedMovieBytes(0, kNy, kNFrames, 1)),
+	      "so such a movie falls back instead of being admitted");
 }
 
 void testBoundedQueue()
@@ -388,7 +457,7 @@ void testAccountingBound()
 	// movie, the bound above would be satisfied trivially and prove nothing.
 	check(observed_peak > unitBytes(),
 	      "CONTROL: more than one movie really was in flight, so the bound is not vacuous");
-	check(prefetcher.budget().forcedGrants() == 0, "no override was needed");
+	check(prefetcher.budget().overBudgetGrants() == 0, "no override was needed");
 }
 
 void testBlockedBudgetStillCompletes()
@@ -436,6 +505,8 @@ void testOversizedMovieFallsBackInline()
 	}
 	check(loader.decodes.load() == 0, "the producer never decoded an inadmissible movie");
 	check(prefetcher.stats().inline_loaded == 3, "the fallbacks are counted");
+	check(prefetcher.stats().over_budget_grants == 0,
+	      "and no override has happened yet: the producer reserved nothing");
 
 	// The consumer's own in-line load is charged through a counted forced grant.
 	{
@@ -444,7 +515,7 @@ void testOversizedMovieFallsBackInline()
 		check(prefetcher.budget().reservedBytes() > prefetcher.budget().limitBytes(),
 		      "and is visible as an over-budget grant rather than untracked");
 	}
-	check(prefetcher.stats().forced_grants == 1, "the override is reported");
+	check(prefetcher.stats().over_budget_grants == 1, "the override is reported");
 }
 
 void testUnsupportedFormatFallsBackInline()
@@ -688,6 +759,8 @@ int main()
 	testBudgetBlocksAndWakes();
 	testBudgetCancelWakesWaiter();
 	testForcedGrant();
+	testRecordFreesFramesBeforeReturningBytes();
+	testDegenerateGeometryIsNotFree();
 	testBoundedQueue();
 	testOrderingAndCompletion();
 	testAccountingBound();

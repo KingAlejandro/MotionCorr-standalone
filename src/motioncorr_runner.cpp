@@ -616,6 +616,15 @@ void MotioncorrRunner::run()
 			? XMIPP_MIN(n_threads, max_io_threads) : n_threads;
 		prefetch_options.first_frame_sum = first_frame_sum;
 		prefetch_options.last_frame_sum = last_frame_sum;
+		// EERRenderer::silenceTIFFWarnings() writes libtiff's process-global
+		// warning handler on first use. In a mixed EER/TIFF dataset that first
+		// use would land on the consumer while the producer is inside libtiff
+		// for the next movie. Doing it here, before any second thread exists,
+		// makes the write single-threaded; the function is a no-op afterwards.
+		for (const FileName &movie : fn_micrographs)
+		{
+			if (EERRenderer::isEER(movie)) { EERRenderer::silenceTIFFWarnings(); break; }
+		}
 		prefetcher.reset(new movieio::MoviePrefetcher(fn_micrographs, prefetch_options));
 		prefetcher->start();
 		if (verb > 0)
@@ -650,7 +659,14 @@ void MotioncorrRunner::run()
 		{
 			have_record = prefetcher->next(record);
 			if (!have_record || record.index != imic)
+			{
+				// A producer that died of something other than a decode error
+				// stops publishing. Report that cause rather than the
+				// misleading ordering message.
+				std::exception_ptr fatal = prefetcher->producerFatalError();
+				if (fatal) std::rethrow_exception(fatal);
 				REPORT_ERROR("Bug: the movie prefetcher published records out of order.");
+			}
 		}
 
 		bool result = false;
@@ -695,10 +711,12 @@ void MotioncorrRunner::run()
 
 	if (prefetcher)
 	{
-		// Reported before the failed-movie check so the accounting survives a
-		// run that ends in failure.
-		reportPrefetchStats(prefetcher->stats());
+		// Join first: the producer updates its blocked-time counters after the
+		// push that hands over the last movie, so sampling before the join can
+		// silently drop that interval from the report. Then report, before the
+		// failed-movie check, so the accounting survives a failing run.
 		prefetcher->cancelAndJoin();
+		reportPrefetchStats(prefetcher->stats());
 	}
 
 	if (!failed_movies.empty())
@@ -743,7 +761,7 @@ void MotioncorrRunner::reportPrefetchStats(const movieio::PrefetchStats &stats) 
 	std::cout << " prefetch: decoded = " << stats.decoded
 	          << ", inline_loaded = " << stats.inline_loaded
 	          << ", failed = " << stats.failed
-	          << ", forced_grants = " << stats.forced_grants << std::endl;
+	          << ", over_budget_grants = " << stats.over_budget_grants << std::endl;
 	std::cout << " prefetch: producer_budget_blocked_s = " << stats.producer_budget_blocked_s
 	          << ", producer_queue_blocked_s = " << stats.producer_queue_blocked_s
 	          << ", consumer_wait_s = " << stats.consumer_wait_s << std::endl;
@@ -1378,6 +1396,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic,
 		logfile << "Limitted the number of IO threads per movie to " << n_io_threads << " thread(s)." << std::endl;
 	}
 
+	// Declared before every buffer it accounts for, so it is destroyed after
+	// them. Returning the bytes first would wake a producer blocked on the
+	// budget while this movie's frames are still being freed, and real
+	// resident memory would transiently exceed the limit with no counter
+	// showing it. Filled in below, once the geometry is known.
+	movieio::ByteBudget::Reservation inline_reservation;
+
 	Image<float> Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	// When the producer handed over a decoded movie, its frames stay inside the
@@ -1506,8 +1531,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic,
 	// An in-line load inside a prefetching run still charges its bytes, so the
 	// reported peak covers the serial-fallback movies too. The grant is forced
 	// and non-blocking by construction: a consumer that could wait here could
-	// wait on a producer holding the very capacity it needs.
-	movieio::ByteBudget::Reservation inline_reservation;
+	// wait on a producer holding the very capacity it needs. It counts as an
+	// override only if it really does exceed the limit.
 	if (prefetched == nullptr && prefetcher != nullptr) {
 		inline_reservation = prefetcher->reserveInline(
 			movieio::estimateDecodedMovieBytes(nx, ny, n_frames, n_io_threads));

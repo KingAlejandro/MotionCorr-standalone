@@ -233,7 +233,7 @@ def main():
         assert stats.get("decoded") == 4, f"prefetch did not decode all movies: {stats}"
         assert stats.get("inline_loaded") == 0, f"unexpected in-line fallback: {stats}"
         assert stats.get("failed") == 0, f"unexpected failure: {stats}"
-        assert stats.get("forced_grants") == 0, f"unexpected budget override: {stats}"
+        assert stats.get("over_budget_grants") == 0, f"unexpected budget override: {stats}"
         assert stats.get("peak_reserved_bytes", 0) <= stats.get("budget_bytes", 0), \
             f"the declared byte bound was exceeded: {stats}"
         expected_budget = 3 * estimate_bytes(NX, NY, NFRAMES, IO_THREADS)
@@ -301,7 +301,7 @@ def main():
             ["--prefetch", "--prefetch_mem_mb", str(above_mb)], "big.star", "tight")
         assert count == 3, f"expected 3 corrected images, got {count}"
         assert stats.get("decoded") == 3, f"a movie was refused despite fitting: {stats}"
-        assert stats.get("forced_grants") == 0, f"an override was needed but should not be: {stats}"
+        assert stats.get("over_budget_grants") == 0, f"an override was needed but should not be: {stats}"
         assert stats.get("peak_reserved_bytes", 0) <= stats.get("budget_bytes", 0), \
             f"the tight bound was exceeded: {stats}"
         assert stats.get("peak_reserved_bytes", 0) < 2 * unit, (
@@ -317,10 +317,13 @@ def main():
         assert stats.get("inline_loaded") == 3, \
             f"CONTROL: the starved budget did not actually force the fallback: {stats}"
         assert stats.get("decoded") == 0, f"a movie was admitted despite the budget: {stats}"
-        assert stats.get("forced_grants") == 3, \
+        assert stats.get("over_budget_grants") == 3, \
             f"in-line loads were not charged to the budget: {stats}"
+        assert stats.get("peak_reserved_bytes", 0) > stats.get("budget_bytes", 0), (
+            f"CONTROL: the overrides are supposed to be visible as a reserved total "
+            f"above the limit, not hidden: {stats}")
         print(f"  starved: 3/3 identical with a {below_mb} MiB budget, all via the counted "
-              f"in-line fallback (forced_grants={stats['forced_grants']})")
+              f"in-line fallback (over_budget_grants={stats['over_budget_grants']})")
 
         # --- gain reference -------------------------------------------------
         write_mrc(tmp / "gain2.mrc", [[2.0] * (NX * NY)], NX, NY)

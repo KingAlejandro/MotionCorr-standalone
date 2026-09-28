@@ -62,7 +62,7 @@ All 24 tutorial movies, one process, one A100, `--j 8`, unprofiled binary `d80cd
 | Per-movie device alignment | median **40.6 ms** |
 | Context switches | 1745 voluntary, 293 involuntary |
 | Filesystem input blocks | 0 — fully page-cache warm |
-| Foreign CPU during the run | max 39.2% box-wide, **0 foreign threads inside the lane** |
+| Foreign CPU during the run | max 39.2% box-wide, **0 foreign threads inside the lane** — repaired instrument: `/proc` interval deltas, state `R` only, session-id ownership. Not comparable to §6.3's v1 figure |
 
 **One warm-up run did not reach steady state, so this single run is not the best central
 estimate.** The first two 24-movie runs of the session were 31.17 s (declared warm-up) and
@@ -298,31 +298,54 @@ Note `P` at `j=2` is −30.4 s against an effect of +19.7 s: the positional term
 than the effect*. An unpaired, fixed-order A/B at that point would have reported the wrong
 sign with confidence. This is the concrete case the alternation exists for.
 
-### 6.3 The lane was not clean, and that is most of the spread
+### 6.3 The lane was not exclusive, and the CPU numbers are correspondingly weaker
 
-The repaired interference witness makes the noise explicable instead of mysterious. Foreign
-threads were observed **inside the 0-31 measurement lane in every arm**:
+The interference record shows foreign work inside the 0-31 lane, but it supports a narrower
+statement than a first reading suggests. Three quantities in the artifact must not be
+conflated:
 
-- `ctffind` — the two permanent unpinned jobs, as expected and documented.
-- `python` / `python3` — **another round worker's job, up to 63 simultaneous threads inside
-  the lane** during `c1_j2_spread`. The lane agreement puts other workers on 32-63; this one
-  was not confined.
-- `tar`, `find`, `sshd`, `gs` — transient.
+- **`foreign_threads_inside_mask.max = 63`** (arm `c1_j2_spread`, 70 samples) is the
+  **aggregate over all commands at the single worst sample**. It is not any one command's
+  count.
+- **`foreign_in_mask_by_command`** for that arm — `python` 1321, `ctffind` 114, `ps` 27,
+  `sshd` 1 — is **accumulated thread-sample hits across the whole arm**, not simultaneous
+  threads. Dividing by the sample count would give an average, not a maximum.
+- **No per-sample series was retained, and no PID, session id or command line was recorded
+  for foreign processes.** So per-command simultaneity is **not recoverable** from this
+  record, and ownership **cannot be attributed**.
 
-The consequence is visible in the ranges: `j2_unbound` spans 92.1–155.2 s (67%),
-`j1_spread` 181.1–230.7 s (26%), `j4_spread` 50.6–66.8 s (26%). Compare the GPU series on a
-lane where **zero** foreign threads were ever seen: 1.8–5.8% on the confirmation arms.
+What the artifact does support: at the worst of 70 samples in `c1_j2_spread`, **63 foreign
+threads in total** had a last-run CPU inside 0-31; and across that arm the dominant in-mask
+command label was an **unidentified Python workload**, ahead of `ctffind`. That workload is
+deliberately **not attributed to any task, worker or checkout**, because nothing was retained
+that could attribute it. The `ps` entries are this run's own sampler (see below). `ctffind`
+is the known permanent unpinned pair, untouched.
 
-**So section 6.1 and 6.2 are weaker evidence than sections 4 and 5, and should not be
-treated as interchangeable with them.** The direction of both results is supported —
-independently by two prior studies for 6.1, and by 3/3 sign agreement at three consecutive
-`j` values for 6.2 — but the magnitudes carry the contamination. A load-bearing CPU
-recommendation needs a re-measurement on a lane that is actually exclusive.
+**The GPU and CPU in-mask figures are different measurements and are not a like-for-like
+contrast.** The CPU arms ran on **instrument v1**, whose own recorded definition is *"any
+thread outside this run's own process subtree using >1% CPU"* — that is, `psr`, the last-run
+CPU, for any thread regardless of run state, gated on a **lifetime-average** `pcpu`. It
+therefore counts sleeping threads, cannot resolve activity during the run, and its ownership
+test is a process-tree walk that races with the sampler's own children, which is why `ps`
+appears in its own foreign list. The GPU arms ran on the **repaired instrument**: CPU
+actually consumed between consecutive samples from `/proc` `utime+stime` deltas, threads in
+state `R` only, ownership by session id. A `0` from the second and a `63` from the first are
+not the same quantity and must not be subtracted or ranked against each other.
 
-Two further limits. These arms ran on the **earlier instrument** (section 10), so their
-`ps`/`gs` interference entries are self-contamination and the totals are an upper bound; the
-`ctffind` and `python` in-lane observations are genuine. And this is a 4-movie subset on one
-host, not a dataset-scale CPU throughput result.
+What *is* comparable, because it does not involve the sampler at all, is the **wall-time
+spread**: `j2_unbound` spans 92.1–155.2 s (67%) and `j1_spread` 181.1–230.7 s (26%) on
+cpu64, against 1.8–5.8% on the GPU confirmation arms. That contrast stands on the timing
+data alone.
+
+**So sections 6.1 and 6.2 are weaker evidence than sections 4 and 5 and are not
+interchangeable with them.** The direction of both is supported — 6.1 independently by two
+prior studies, 6.2 by 3/3 sign agreement at three consecutive `j` values — but the
+magnitudes carry contamination whose size this record cannot bound. A load-bearing CPU
+recommendation needs a re-measurement on a lane that is actually exclusive, with per-sample
+and PID-level interference retained.
+
+One further limit: this is a 4-movie subset on one host, not a dataset-scale CPU throughput
+result.
 
 All 12 arms produced products equal to the reference on payload, core header and masked
 labels; no run exited non-zero.
@@ -446,10 +469,27 @@ Of these, only the interference figures from the first pass were actually wrong.
 equality, the wall times and the stage structure all survived re-measurement, and the
 conclusions in sections 4 and 5 are unchanged.
 
-The `cpu64` series in section 6 was allowed to finish on the earlier instrument rather than
-restarted. Its conclusion is a paired unbound-versus-bound contrast inside one lane, where
-self-contamination is present identically in both arms of every pair and cancels in the
-difference. Its interference figures are labelled instrument v1 and are an upper bound.
+### Which series ran on which instrument
+
+| series | instrument | interference metric in force |
+| :-- | :-- | :-- |
+| GPU Phase 0, screen, confirmation (§3–§5) | **repaired** | `/proc` `utime+stime` deltas between samples; threads in state `R` only; ownership by session id |
+| cpu64 scaling (§6) | **v1** | `ps` `pcpu`, a **lifetime average**; any thread by `psr` regardless of run state; ownership by a process-tree walk that races with the sampler's own children |
+
+Every record self-documents which applied, in its `sampling.foreign_definition` field.
+
+The `cpu64` series was allowed to finish on v1 rather than restarted, because its conclusion
+is a paired unbound-versus-bound contrast inside one lane, where self-contamination is
+present identically in both arms of every pair and largely cancels in the difference. Three
+consequences follow and are applied throughout §6:
+
+1. Its foreign-CPU totals include the sampler's own `ps` and MotionCorr's own `gs`, so they
+   are an **upper bound**, not a measurement.
+2. Its in-mask thread counts include **sleeping** threads and are gated on a lifetime
+   average, so they cannot resolve activity during the run.
+3. Its figures are therefore **not comparable** to the GPU figures and are never contrasted
+   with them numerically. Where §6 compares lane cleanliness across hosts it uses wall-time
+   spread, which does not involve the sampler.
 
 ## 11. Reproducing
 

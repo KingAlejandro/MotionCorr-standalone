@@ -112,31 +112,18 @@ both arms and cancels. Its interference figures will be labelled as instrument v
 
 None open. Two cleared, one raised for someone else.
 
-**Raised:** during the `cpu64` series, another round worker's `python` ran up to **63
-simultaneous threads inside cores 0-31**, which the round assigns to #26; the shared lane is
-32-63. It contaminated that series (arm ranges up to 67%, against 1.8-5.8% on the GPU lane).
-Not altered, not attributed to anyone, recorded in `docs/operating_envelope_issue26.md` §6.3.
+**Raised (not attributed):** the `cpu64` 0-31 lane was **not exclusive** during the series.
+The retained record shows, at the worst single sample of arm `c1_j2_spread` (70 samples),
+**63 foreign threads in total** with a last-run CPU inside the lane, and an **unidentified
+Python workload** as the dominant in-mask command label across that arm, ahead of `ctffind`.
 
-## Findings so far
-
-1. **`/tmp/motioncorr-bench.lock` was held for 2d 2h by a dead job.** Two orphaned `matrix.sh`
-   sampler subshells (PIDs 17903/17904, `ppid=1`) from the issue-53 run held the box-wide
-   mutex on inherited fd 3 while their driver was gone; `matrix.txt` never got past its header
-   line. Archived to `/home/alex/orphaned-i53-sampler-archive-20260928` and cleared with
-   Alex's explicit authorisation. No issue-53 result was lost — none had been produced.
-2. **A fresh CUDA configure fails on current main with CMake 3.28.** `CMakeLists.txt:59`
-   guards its `CMAKE_CUDA_ARCHITECTURES 80` fallback with `if(NOT DEFINED ...)`, but
-   `enable_language(CUDA)` already defines the variable, so the fallback never fires and
-   generation fails with `CUDA_ARCHITECTURES is empty`. Every caller in the repo — README, CI,
-   both sbatch harnesses — passes `-DCMAKE_CUDA_ARCHITECTURES=80` explicitly, which is why it
-   has stayed hidden. Reported, not fixed: `src/` and `CMakeLists.txt` are outside this
-   issue's whitelist.
-3. **`--max_io_threads` above `--j` is silently clamped** (`motioncorr_runner.cpp:1280`), so the
-   nominal 4x4 j/IO grid contains only **10** distinct effective treatments, not 16.
-
-## NEEDS_GPU
-
-Not applicable — this task holds the slot.
+Precision limits on that statement: 63 is the aggregate over all commands at one sample, not
+any one command's count; `foreign_in_mask_by_command` values are accumulated thread-sample
+hits, not simultaneous threads; and **no per-sample series, PID, session id or command line
+was retained**, so per-command simultaneity is not recoverable and the workload is **not
+attributed to any task**. These arms used instrument v1, whose in-mask metric counts sleeping
+threads on a lifetime-average filter and is **not comparable** to the repaired GPU figure.
+Nothing was altered. Full statement in `docs/operating_envelope_issue26.md` §6.3.
 
 ## Verified gates
 

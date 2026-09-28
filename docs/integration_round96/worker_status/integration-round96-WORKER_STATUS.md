@@ -27,7 +27,7 @@
 | 1 | #102 | #72 fail-closed CI / canonical fixtures | `cf049ef4dab6278d18fc8c02754151ac717f85cb` | 6 | applied, tree identical to `pr/102` at that point |
 | 2 | #105 | #99 fail-closed MRC/STAR writes | `910fcf431c038b3930cfd6919cebaeb02fc2295d` | 11 | applied; one CMake test-registration conflict resolved as a union |
 | 3 | #103 | #92 TIFF integrity / expected frame count | `78621d318a89765d636827df7b9147d5cfd6f096` | 7 | applied; one genuine `src/image.h` semantic merge with group 2 |
-| 4 | #101 | #98 malformed defect rectangles | `482c75ac32d659329d18098c5f0b58ddf2c552bc` | 21 | applied after its owner published the final reviewed head; `src/motioncorr_runner.cpp` auto-merged with group 3 and verified as an exact union |
+| 4 | #101 | #98 malformed defect rectangles | `482c75ac32d659329d18098c5f0b58ddf2c552bc` | 19 | applied after its owner published the final reviewed head; `src/motioncorr_runner.cpp` auto-merged with group 3 and verified as an exact union |
 
 ## Deliberately NOT on this branch
 

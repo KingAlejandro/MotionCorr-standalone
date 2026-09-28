@@ -2,7 +2,7 @@
 
 Candidate source head: `d3c04f7f2a40637e8666ccfb4fb43a6e9540d316`
 Base: `4c952b3f54479653512c4d208e09c9a8c02f3726`
-Commits over base: 49 (45 cherry-picked with original authorship + 4 integration commits at that point)
+Commits over base at that head: 49. Across the whole branch: **43 cherry-picked commits, every one retaining its original author** (40 by Alex Konstantinov, 3 by MotionCorr AI Assistant from PR103) each carrying an `(cherry picked from commit ...)` line, plus integration-authored commits prefixed `integrate(round96):` / `docs(integration):` / `evidence(integration):` / `docs(status):`. **No file present on base is deleted by this branch.**
 
 Status vocabulary: **PASS** = executed on the combined candidate and observed.
 **PASS (inherited)** = executed by the source branch on its own head, carried

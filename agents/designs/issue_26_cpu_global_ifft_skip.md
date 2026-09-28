@@ -1,8 +1,10 @@
 # Architectural Design Specification: skipping the unused global inverse FFT (Issue #26)
 
-Status: **specification only — the implementation this governs is not yet written.**
-PR #57 is the prototype; it is superseded by the port described in §7 and must not
-be merged as it stands (§3.2).
+Status: **specification; the implementation it governs is not yet written.**
+PR #57 is the prototype. Its branch now also carries the one-disjunct correction
+described in §3.2 and §5.3, so the head is no longer in the corrupting state, but
+it is still not the port: it lacks the shared predicate (§3.1), the regression
+test (§5.4) and the §6 controls. It is superseded by the port in §7.
 
 This document exists because a review of PR #57 found no Issue 26 architecture
 artifact under `agents/designs`, which [AGENTS.md §1.1](../../AGENTS.md) requires
@@ -26,8 +28,11 @@ because a source trace or an executed control settled a question they left open.
 
 After global alignment, `MotioncorrRunner::executeOwnMotionCorrection` inverse
 transforms every frame into real space. In some option combinations no consumer
-reads those frames before the post-dose-weighting inverse transform overwrites
-them, so the transform is dead work. On the measured hardware it was ~24% of a
+reads those frames at all before they are replaced, so the transform is dead
+work. (On main with `use_gpu` and a successful `cudaDoseWeightAndInterpolate`
+at `:2501` there is no post-dose-weighting inverse transform either — the frames
+are simply never read again. The elision is safe for the same reason in both
+cases: absence of a reader, not a later overwrite.) On the measured hardware it was ~24% of a
 global-only dose-weighted run.
 
 **In scope:** eliding that one transform, on the CPU path, when provably unread.
@@ -59,10 +64,13 @@ where `do_local = (patch_x > 2) && (patch_y > 2)` (`:2034`) and the guard at
 
 Two consumers the 2026-09-27 note asked to check specifically, both resolved:
 
-* **Binning** is *not* an independent consumer. `binNonSquareImage` (`:2436–2437`)
-  operates on `Iref`, `Iref_odd`, `Iref_even` — products of the `:2340` block, so
-  it is covered transitively. `early_binning` acts before the forward FFT
-  (`cropInFourierSpace`) and never reads post-global-iFFT frames.
+* **Binning** is *not* an independent consumer. Both call sites take products of
+  the `:2340` block, never `Iframes`: `binNonSquareImage(Iref, …)` at `:2434`
+  with `Iref_odd`/`Iref_even` at `:2436–2437`, and the post-dose-weighting
+  `binNonSquareImage(Iref, …)` at `:2539–2540`. So binning is covered
+  transitively. `early_binning` crops at `:1863`, inside the forward-FFT loop —
+  i.e. *after* `NewFFT::FourierTransform` at `:1861` but at the forward-FFT
+  stage, well before global alignment — and never reads post-global-iFFT frames.
 * **Resume/recovery** is not a pixel consumer but *is* a behavioural constraint.
   `:543` treats a movie as complete only if `_EVN.mrc`/`_ODD.mrc` are complete
   when `even_odd_split` is set. The optimization must therefore never change
@@ -87,11 +95,13 @@ mirrored the guard *as it stood at its base commit `3e3a196`*. Commit `0f508e0`
 and nothing in the build or test suite connected the two. Binding both sites to
 one `const bool` makes that drift impossible to reintroduce.
 
-### 3.2 PR #57 as it stands is incorrect against main
+### 3.2 PR #57 as originally written is incorrect against main
 
 Measured, not inferred (§5): with `--dose_weighting --even_odd_split --patch_x 1`
-on current main, PR #57's predicate elides a transform that the `:2340` block
-then reads, corrupting `_EVN.mrc` and `_ODD.mrc`. The dose-weighted micrograph is
+on current main, the predicate as written at `13845fb` elides a transform that
+the `:2340` block then reads, corrupting `_EVN.mrc` and `_ODD.mrc`. (The branch
+head now carries the correction — §5.3 — so this describes the prototype as
+authored, not the current head.) The dose-weighted micrograph is
 unaffected, because the post-dose-weighting transform recomputes it — which is
 exactly why single-configuration testing missed this.
 
@@ -136,12 +146,23 @@ is on the MRC pixel payload (bytes 1024+) and core header (bytes 0–223),
 excluding the label area at offset 224, which carries a `strftime` timestamp and
 is never reproducible between runs.
 
+**I5 — Memory.** Eliding the transform does not increase peak RSS. Measured
+(§5.6), it *reduces* it by 7.46% in the configuration where the elision fires,
+and leaves it unchanged (−0.00%) where it does not. The earlier draft of this
+document asserted "peak RSS unchanged"; that was unmeasured and is wrong in the
+eliding case. No allocation is added: the `reshape` is retained, so the frame
+buffers are still allocated at the same point (see §7.3 for a caveat that
+follows from retaining it).
+
 **I4 — Fail closed.** If liveness cannot be established for a configuration, the
 transform runs. The predicate is a disjunction of *reasons to keep* the work.
 
 ---
 
 ## 5. Evidence executed
+
+Raw record, including the commands' own output and the digests below:
+[`logs/issue_26_cpu64_2026-09-28_evidence.md`](logs/issue_26_cpu64_2026-09-28_evidence.md).
 
 Host `small-refmac-machine` (`cpu64`), AMD EPYC 7763, cpuset `32-63` (NUMA node 1),
 build and runtime parallelism ≤ 16, serialised on
@@ -179,7 +200,9 @@ digest differed again between runs, confirming §3.2's non-determinism.
 
 ### 5.2 The existing test suite has no power against this defect
 
-All **13** CTests pass on the `pr57` build. `tests/test_runner_contract.py:105`
+All **13** CTests were executed and pass on the `pr57` build — that is the point:
+they run, and they do not see the corruption. (This is a statement about the
+CTests, not about the §6 configuration controls, none of which were run.) `tests/test_runner_contract.py:105`
 does invoke the exact failing combination (`--dose_weighting --even_odd_split`)
 but asserts only that the output files *exist*, never their content, so it cannot
 observe the corruption. This is the gap the 2026-09-27 note means by "a test must
@@ -213,7 +236,38 @@ the defect — needing no new fixture:
 
 ---
 
-### 5.5 The merge into main auto-resolves — which is the hazard
+### 5.5 The control where the optimization actually fires
+
+§5.1 demonstrates the *defect*; it does not demonstrate the *correctness* of the
+corrected predicate, because with `even_odd_split` set the predicate is true and
+nothing is elided. The configuration where the corrected predicate actually
+elides is `--dose_weighting --patch_x 1` with neither `--even_odd_split` nor
+`--save_noDW`. Same host and payload as §5.1, `--j 8`:
+
+| config | elision? | output | main | `pr57` | `fixed` |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| `--dose_weighting`, patch 1×1 | **yes** | `…_frameImage.mrc` | `ed33b6299dfc54782aa7f44c` | same | same |
+| `+ --save_noDW` (control) | no | `…_frameImage.mrc` | `ed33b6299dfc54782aa7f44c` | same | same |
+| `+ --save_noDW` (control) | no | `…_frameImage_noDW.mrc` | `40361e827e571d3d5966a7dd` | same | same |
+
+Bit-identical on pixel payload **and** core header (bytes 0–223) in both
+configurations. This is the run that shows the optimization is output-preserving
+when it fires.
+
+### 5.6 Peak RSS
+
+Measured in the same runs via `/usr/bin/time -f %M`:
+
+| config | elision? | main | `fixed` | change |
+| :-- | :-- | --: | --: | --: |
+| `--dose_weighting`, patch 1×1 | yes | 3267840 kB | 3023924 kB | **−243916 kB (−7.46%)** |
+| `+ --save_noDW` | no | 4714344 kB | 4714164 kB | −180 kB (−0.00%) |
+
+So eliding the transform *reduces* peak RSS rather than leaving it unchanged.
+Single run per cell; treat the −7.46% as an observation, not a characterised
+figure. No wall-time claim is made from these runs.
+
+### 5.7 The merge into main auto-resolves — which is the hazard
 
 `git merge-tree origin/main <head>` on this branch:
 
@@ -238,23 +292,41 @@ and is listed in §6.
 
 Not executed here. None of these may be described as passing.
 
+Executed on main and therefore **not** listed here: the global-only
+dose-weighted elision control and the `--save_noDW` control (§5.5), the
+even/odd defect control (§5.1), and peak RSS (§5.6).
+
 | gap | why it matters |
 | :-- | :-- |
 | local 5×5 exact-output control **on main** | run at base `3e3a196` only; main's patch path now has CUDA branches |
-| `--save_noDW` exact-output control **on main** | run at `3e3a196` only |
 | non-square dimensions | required by the 2026-09-27 note; not run |
 | binning modes (`--bin_factor`, `--no_early_binning`) | traced as transitively covered (§2), **not** executed |
 | CUDA resident and `cudaInverseFFT2D` paths | no GPU in this task; declared unoptimized (§3.3), unverified |
-| tomography / pre-exposure even-odd path (`test_runner_contract` exposure case) | not run |
+| tomography pre-exposure even/odd path as an **exact-output** control | the `tomography` case (`test_runner_contract.py:141`) runs as part of the 13 CTests, but it carries `--save_noDW`, so the predicate is true and nothing is elided; it is not a control on this change. (The `exposure` case at `:31` has no `--even_odd_split` at all.) |
 | paired CPU benchmark on current main | deliberately excluded — no new benchmark series in this task |
 | the ported implementation itself | does not exist yet (§7) |
-| CI on the PR #57 head | cannot run while the PR conflicts (§5.5); build + CTests were run directly on cpu64 instead |
+| CI on the PR #57 head | cannot run while the PR conflicts (§5.7); build + CTests were run directly on cpu64 instead |
 
 The ~24% figure for global-only dose-weighted runs comes from base `3e3a196`
 measurements. It is **not** a current-main performance result and must not be
 quoted as one.
 
 ---
+
+## 6a. Changed-file whitelist
+
+This specification authorises changes to exactly these paths. Anything else in a
+commit claiming to implement it is out of scope.
+
+| path | permitted change |
+| :-- | :-- |
+| `src/motioncorr_runner.cpp` | the shared `pre_dw_sum_needed` declaration, its use at the `:2340` guard, the `need_real_space_before_dw` predicate, the guarded call in the CPU inverse-FFT loop, and the comments at that call site |
+| `tests/test_runner_contract.py` *or* a new `tests/test_*.py` | the §5.4 content check |
+| `CMakeLists.txt` | registration of a new test, if one is added as a new file |
+| `agents/designs/issue_26_cpu_global_ifft_skip.md`, `agents/designs/logs/issue_26_*` | this specification and its evidence |
+
+No change to FFT engine or precision, plan lifetime, scheduling, the set of
+output products, or any CUDA source file is authorised here.
 
 ## 7. Implementation contract
 
@@ -265,8 +337,13 @@ filled in.
    prototype and evidence record.
 2. Introduce one `const bool pre_dw_sum_needed` before the global inverse FFT and
    use it **both** in `need_real_space_before_dw` and at the `:2340` guard.
-3. Gate only the CPU loop inside `if (!cuda_global_ifft_done)`. Keep the
-   `reshape` so allocation behaviour and peak RSS are unchanged.
+3. Gate only the CPU loop inside `if (!cuda_global_ifft_done)`, and keep the
+   `reshape`. Two consequences to carry deliberately rather than inherit:
+   allocation stays at the same point (§I5), **and** keeping the reshape means
+   `main:2388`'s `Iframes.empty() || Iframes[0]().nzyxdim == 0` test still
+   passes over an elided, uninitialised buffer — so the one existing runtime
+   sanity check on that buffer cannot detect the elided case. That check must
+   not be relied on as a backstop; the predicate is the only guard.
 4. Add a content-checking regression test for `--dose_weighting --even_odd_split`
    using the §5.4 invariant, and verify it **fails** against a build with the
    `even_odd_split` disjunct removed. A guard whose power has not been

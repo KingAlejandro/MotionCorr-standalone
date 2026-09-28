@@ -53,8 +53,21 @@ def compare_mrc(a, b):
     return False, detail
 
 
-# Lines that legitimately differ between arms without being a numerical result.
-NOISE = re.compile(r'(/home/|/tmp/|\d{4}-\d{2}-\d{2}|MicrographName|MovieName|\.mrcs?\b|\.tiff\b)')
+# Path tokens legitimately differ between arms (the synthetic input lives under src-base/
+# vs src-fixed/). Earlier revisions dropped any LINE containing a path -- which silently
+# discarded the single STAR data row, because rlnAccumMotion* values sit on the same row as
+# the micrograph path. That made the joint-STAR comparison structurally unable to see the
+# numbers it was supposed to compare. Normalise path TOKENS instead, so numeric fields on a
+# path-bearing row are still compared.
+PATH_TOKEN = re.compile(r'(^/|/.*/|\.mrcs?$|\.star$|\.tiffs?$|\.tif$)')
+DATE_LINE = re.compile(r'\d{4}-\d{2}-\d{2}')
+
+
+def normalize(line):
+    out = []
+    for tok in line.split():
+        out.append('<PATH>' if PATH_TOKEN.search(tok) else tok)
+    return ' '.join(out)
 
 
 def compare_star(a, b):
@@ -62,13 +75,13 @@ def compare_star(a, b):
     lb = [l.rstrip() for l in b.read_text(errors='replace').splitlines()]
     if la == lb:
         return True, f'STAR byte-identical ({len(la)} lines)'
-    ka = [l for l in la if not NOISE.search(l)]
-    kb = [l for l in lb if not NOISE.search(l)]
+    ka = [normalize(l) for l in la if not DATE_LINE.search(l)]
+    kb = [normalize(l) for l in lb if not DATE_LINE.search(l)]
     if ka == kb:
-        return True, f'STAR identical ignoring path lines ({len(ka)} value lines)'
+        return True, f'STAR identical after normalising path tokens ({len(ka)} lines compared, values included)'
     diffs = [(i, x, y) for i, (x, y) in enumerate(zip(ka, kb)) if x != y]
     head = ' | '.join(f'{x.strip()[:40]} -> {y.strip()[:40]}' for _, x, y in diffs[:4])
-    return False, f'STAR DIFFERS in {len(diffs)}/{len(ka)} value lines. e.g. {head}'
+    return False, f'STAR DIFFERS in {len(diffs)}/{len(ka)} compared lines. e.g. {head}'
 
 
 def products(d):

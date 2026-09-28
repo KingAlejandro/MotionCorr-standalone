@@ -22,7 +22,9 @@ This is a latent bug in option-on path only; option-off path and all default tut
 ## Decision
 Save original first-frame offset *before* any mutation, then subtract the saved value. Preserve all other arithmetic, group centres, frame numbering, interpolation formula, and polynomial fit.
 
-Change is minimal, localized to the `if (interpolate_shifts)` block in motioncorr_runner.cpp:2160-2172.
+The behavioural change is confined to the `if (interpolate_shifts)` block; the surrounding
+changes are the extraction, its declaration, the regression and its evidence, all enumerated in
+the whitelist section below.
 
 ## Rationale
 - Correctness: first frame must retain its interpolated offset after recentering to first-frame origin (by definition of "recenter").
@@ -46,7 +48,7 @@ Change is minimal, localized to the `if (interpolate_shifts)` block in motioncor
 4. `docs/issue97_cpu_evidence/` — raw cpu64 logs, script, comparator.
 5. `SOURCE_MANIFEST.txt` — a `Local change:` entry for the deliberate upstream divergence.
 6. `WORKER_STATUS.md`, `issue97-whitelist.md`, progress comments, this ADR.
-7. Still excluded: CUDA/GPU code (deferred to #26), gate or tolerance changes, peak-tie/noise/
+7. Still excluded: CUDA/GPU code (deferred to the shared-GPU slot owned by #53), gate or tolerance changes, peak-tie/noise/
    performance work, anything touching another issue.
 
 ## Verification gates (per issue-97.json)
@@ -70,9 +72,9 @@ Change is minimal, localized to the `if (interpolate_shifts)` block in motioncor
 ## Upstream provenance and parity (checked 2026-09-28)
 
 `SOURCE_MANIFEST.txt` pins upstream `https://github.com/3dem/relion` branch `ver5.1`
-commit `ad0b230ca22095700f6392479326836efb1c911d`, and records only two local deltas
-(per-movie metadata init in this file; `rnd_gaus` re-seed in `funcs.cpp`) — neither
-touches this block.
+commit `ad0b230ca22095700f6392479326836efb1c911d`. At the time of this check it recorded two
+local deltas (per-movie metadata init in this file; `rnd_gaus` re-seed in `funcs.cpp`), neither
+touching this block. A third entry for this fix has since been added by this branch.
 
 Fetched the pinned upstream file and diffed the block directly:
 
@@ -150,19 +152,25 @@ left pointing at a tree that no longer exists.
 | Full suite | cpu64 | 14/14 fixed, 13/13 base — exactly one test added, none regressed |
 | Default-off output unchanged, synthetic | cpu64 | MRC payload and STAR **byte-identical** base vs fixed |
 | Default-off output unchanged, real movie | cpu64 | MRC payload (56,955,920 B) and 779-line STAR **byte-identical** |
-| Option-on output changed, real movie | cpu64 | 14,236,598/14,238,980 px differ; 611/777 STAR value lines |
-| Recenter block actually reached | cpu64 | 9 patches (3x3) and 25 patches (5x5) converged, `interpolate_shifts = 1` |
+| Option-on output changed, real movie | cpu64 | 14,236,598/14,238,980 px differ; 611/779 STAR lines |
+| Joint STAR accumulated motion equal | cpu64 | measured in `followup_measurements.log`; the original comparator could not see these values (see the evidence README correction) |
+| Recenter block actually reached | cpu64 | 9 patch blocks (3x3) and 25 (5x5), `interpolate_shifts` 0/1 per arm, zero "Too few patches" — captured from the nested per-movie logs in `followup_measurements.log` |
 
 ### Tolerance honesty
-Relative displacement was bit-exact for every witness tested, including cases with
-non-representable values (1/3). This is **not** claimed as a general guarantee:
+Relative displacement is bit-exact for every committed witness. Note what that does and does
+not rest on: all committed witnesses are exactly representable, and where the interpolation
+divides by 3 (the unequal-last-group case, centres {1,3,6}) every numerator happens to be an
+exact multiple of 3, so each quotient is a small integer. Exactness there is a property of the
+chosen values, not of the formula — editing a group size or a shift in that case could break it
+without tripping this rationale. Bit-exactness is **not** claimed as a general guarantee:
 `(a−c)−(b−c)` need not equal `a−b` in floating point for extreme magnitude ratios.
 For realistic pixel-scale shifts the double-precision headroom makes the invariant hold,
 and no tolerance was loosened anywhere to obtain these results.
 
 ### NOT verified — explicitly unrun
 
-- **No CUDA / GPU execution.** Deferred to the #26 coordinated slot. The CUDA option-on path
+- **No CUDA / GPU execution.** Deferred to the coordinated shared-GPU slot, now owned by #53
+  (previously #26). The CUDA option-on path
   is unverified. Note `src/acc/cuda/cuda_alignpatch.cu:393-398` contains an independent,
   already-correct descending-loop recentering; it was not touched.
 - **No downstream scientific claim.** No RELION refinement, FSC, B-factor or resolution

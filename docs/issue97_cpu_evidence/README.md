@@ -12,6 +12,10 @@ Raw artifacts in this directory:
 | `cpu64_product_comparison.log` | raw output of the product comparison (`compare_products.py`) |
 | `run_validation.sh` | the exact script that produced the run |
 | `compare_products.py` | the comparator actually relied on |
+| `followup_measurements.log` | follow-up capture of the joint-STAR values and patch-convergence evidence |
+| `followup.sh` | the script that produced it (read-only over the retained outputs) |
+| `followup_measurements.log` | follow-up capture of the joint-STAR values and patch-convergence evidence |
+| `followup.sh` | the script that produced it (read-only over retained outputs) |
 
 **Read the raw log's own `GATE:` line with care.** `run_validation.sh` ends by invoking an
 earlier comparator that only inspected the top level of each arm directory. motioncorr mirrors
@@ -48,19 +52,24 @@ CPU and memory policy were held constant across every arm
 (`taskset -c 40-55 numactl --membind=1`), applied top-level so descendants inherit.
 Build parallelism 16, runtime threads 16.
 
-**Interference (recorded, not eliminated):** `ctffind` ran at ~100% CPU on CPU 58
-throughout. CPU 58 is on node1, the same NUMA node as this lane, so it shares L3 and
-memory bandwidth. It is outside the 40-55 cpuset, so it does not contend for these
-cores. An earlier probe also saw `ctffind` on CPU 32 and a colleague `motioncorr` on
-CPU 12 (node0). None were touched. Host load average was 4.92/7.28/10.53 at probe and
-7.81/7.15/8.85 at completion — **cpu64 was not idle**.
+**Interference (recorded, not eliminated):** the retained interference probe
+(`cpu64_validation_run.log`) shows two `ctffind` processes at 99.9% CPU on **CPUs 32 and 33**.
+Both are on node1, the same NUMA node as this lane, so they share L3 and memory bandwidth;
+both are outside the 40-55 cpuset, so they do not contend for these cores. None were touched.
+Host load average was **16.36 / 11.00 / 9.42** at start and **11.38 / 10.77 / 9.48** at
+completion — **cpu64 was not idle**. A follow-up probe later saw one `ctffind` on CPU 50,
+which IS inside the lane; that probe ran only the read-only re-comparison described below, no
+build and no motioncorr execution, so it affects nothing measured here.
 
-Because of that interference these runs are **not usable as timing evidence** and no
-timing claim is made from them. Wall times appear in the raw log for provenance only.
+Because of that interference these runs are **not usable as timing evidence** and no timing
+claim is made from them. Note the raw log records `Elapsed (wall clock)` for the two **builds
+only**; the per-arm `/usr/bin/time -v` output was written but the script's `tail -3 | grep`
+never matched the Elapsed line, so no per-arm wall time was captured. Nothing here depends on
+one.
 
 Serialization: the run blocked on `flock /tmp/motioncorr-issue96-cpu-validation.lock`
-and acquired it before doing any work (`[lock] acquired after 0s`). A probe shortly
-before the launch found the lock held by another worker, so the wait path is real.
+and acquired it before doing any work — `[lock] acquired after 30s`, i.e. it genuinely waited
+behind another worker rather than finding the lock free.
 
 ## Build provenance
 
@@ -116,9 +125,18 @@ All witnesses are exactly representable, so expected values are compared with `=
 Eight arms: {base, fixed} x {option-off, option-on} x {synthetic 128x128 8 frames @ 3x3
 patches, real movie 20170629_00026 @ 5x5 patches}. `do_local` requires patch_x > 2 and
 patch_y > 2, so 1x1 patches would skip local alignment entirely and the recenter block
-would never execute. Both geometries were confirmed to actually reach it: 9 patches
-(synthetic) and 25 patches (real movie) all converged, with `interpolate_shifts = 1`
-echoed in the option-on logs.
+would never execute. That the block is reached is therefore load-bearing, and an earlier
+revision asserted it without having captured it: the run script grepped `"$out"/*.log`, which
+matches only the top-level `stdout.log`/`time.log`, while motioncorr writes its per-movie
+logfile into the mirrored nested path. Captured from the nested logs in
+`followup_measurements.log`:
+
+```
+syn-*-off   Patches: X = 3 Y = 3   interpolate_shifts = 0   patch_blocks=9    too_few_patches=0
+syn-*-on    Patches: X = 3 Y = 3   interpolate_shifts = 1   patch_blocks=9    too_few_patches=0
+mov-*-off   Patches: X = 5 Y = 5   interpolate_shifts = 0   patch_blocks=25   too_few_patches=0
+mov-*-on    Patches: X = 5 Y = 5   interpolate_shifts = 1   patch_blocks=25   too_few_patches=0
+```
 
 Whole-file hashes are not used: the MRC header carries a creation timestamp, so
 byte-identical results still hash differently. Comparison is on the MRC pixel payload
@@ -140,11 +158,32 @@ The default path is provably untouched, on a real movie, at full size.
 |---|---|---|
 | output `.mrc` pixel payload | DIFFERS: 16,243/16,384 px (99.14%), max abs 11.93 on data range 428.70 (rel 2.78e-02) | DIFFERS: 14,236,598/14,238,980 px (99.98%), max abs 22.56 on data range 51.42 (rel 4.39e-01) |
 | per-movie `.star` motion model | DIFFERS in 99/163 value lines | DIFFERS in 611/777 value lines |
-| joint `corrected_micrographs.star` | **EQUAL** | **EQUAL** |
+| joint `corrected_micrographs.star` | **EQUAL** (measured, see below) | **EQUAL** (measured, see below) |
 
-The changed values are the per-patch local motion model and the resulting interpolated
-image. The joint accumulated-motion summary (`rlnAccumMotion*`) is **equal** in both
-arms, so the reported global/accumulated motion is not what moves here.
+The changed values are the per-patch local motion model and the resulting interpolated image.
+
+**Correction, and how the joint-STAR claim is now supported.** An earlier revision asserted the
+accumulated-motion summary was equal while citing a comparator that *could not see those
+numbers*: its filter dropped any line containing a path, and in `corrected_micrographs.star` the
+`rlnAccumMotion*` values sit on the same data row as the micrograph path. That row was discarded
+from both sides, so only headers and labels were ever compared. It was a vacuous comparison and
+should not have been published as a measured result.
+
+`compare_products.py` now normalises path *tokens* rather than dropping rows, so the data row is
+compared, and the values were additionally extracted directly. Both are in
+`followup_measurements.log`:
+
+```
+syn-{base,fixed}-{off,on}   opticsGroup 1   Total  4.323048   Early 1.386941   Late  2.936107
+mov-{base,fixed}-{off,on}   opticsGroup 1   Total 13.167835   Early 1.829223   Late 11.338612
+```
+
+Identical across all four arms for each input. The corrected comparator reports
+`STAR identical after normalising path tokens (25 lines compared, values included)` for every
+pair, while still reporting the per-movie products as DIFFER on the option-on arms — so the
+filter fix did not blunt the comparison. The claim holds, but it is now measured rather than
+assumed. This is consistent with the code: accumulated motion is computed from
+`mic.getShiftAt(frame, 0., 0., ...)`, the global trajectory, not the local patch model.
 
 ## Limits — what this does NOT establish
 
@@ -157,7 +196,7 @@ arms, so the reported global/accumulated motion is not what moves here.
   magnitude of the defect across the 24-movie set are unmeasured; a single movie is not
   representative for any load-bearing quantitative claim.
 - **No timing claim** — concurrent `ctffind` on the same NUMA node.
-- **No GPU/CUDA execution.** Deferred to the #26 coordinated slot. The CUDA option-on
+- **No GPU/CUDA execution.** Deferred to the coordinated shared-GPU slot, now owned by #53. The CUDA option-on
   path is unverified.
 - Two patch geometries only (3x3 and 5x5); no unequal-last-group or non-one
   first-selected-frame integration arm was run.

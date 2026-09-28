@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * Author: "MotionCorr Standalone contributors"
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * This complete copyright notice must be included in any revised version of the
+ * source code. Additional authorship citations may be added, but existing
+ * author citations must be preserved.
+ ***************************************************************************/
 #ifndef FRAME_STAGING_PLAN_H_
 #define FRAME_STAGING_PLAN_H_
 
@@ -94,6 +112,27 @@ struct Budget {
 // All products are checked; nothing is computed in a type that could wrap.
 bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget);
 
+// Three-way admission, not two. Adopted from #94's movieio::ByteBudget: a
+// calculator that only answers "how many bytes" will happily recommend a chunk
+// that can never fit, and evidence that only records success cannot tell "the
+// bound held" from "the bound was overridden". This answers the first of the
+// three outcomes -- inadmissible -- explicitly; waiting for capacity and
+// granting over budget belong to the caller's allocator, not here.
+//
+// Finds the largest chunk_frames in [1, n_frames] whose resulting host_bytes
+// fits within host_budget_bytes, using `policy` for every other term.
+// Returns false, leaving out_chunk untouched, when even a single staged frame
+// does not fit: that movie can never be admitted under this budget and the
+// caller must fall back or fail, not stage it.
+//
+// For multiple concurrent workers the caller must divide the host budget by the
+// worker count BEFORE calling this. See ADR section 7a.2: sizing each worker
+// against the whole host is the failure mode the aggregate bound exists to
+// prevent, and nothing here can detect it.
+bool largestChunkWithin(const Geometry &geom, const Policy &policy,
+                        unsigned long long host_budget_bytes,
+                        long long &out_chunk);
+
 // Real and R2C whole-movie array sizes, as published in the #95 task comment:
 //   real = 4*F*W*H,  r2c = 8*F*H*(floor(W/2)+1)
 // Exposed so the ADR's numbers and the tests share one implementation.
@@ -113,14 +152,26 @@ bool fourierStackBytes(const Geometry &geom, unsigned long long &out);
 //       for (dy = -D_MAX .. D_MAX)
 //         for (dx = -D_MAX .. D_MAX)
 //           skip out of bounds; skip bBad(y, x);
-//           pbuf[n_ok++] = Iframes[iframe](y, x);
+//           neighbor = Iframes[iframe](y, x);
+//           if (host_frames_are_raw && gain) neighbor *= Igain(y, x);   // :1752
+//           pbuf[n_ok++] = neighbor;
 //       replacement = (n_ok > NUM_MIN_OK) ? pbuf[rand() % n_ok]
 //                                         : rnd_gaus(frame_mean, frame_std);
+//       if (host_frames_are_raw)                                        // :1769
+//           resident_bad_replacements[iframe * n_bad + bad_idx] = replacement;
+//       else
+//           Iframes[iframe](i, j) = replacement;
+//
+// The gain multiply and the record-instead-of-write branch are reproduced above
+// deliberately: an earlier draft of this comment omitted them, and a mirror
+// checked against an abridged transcription proves nothing. applyChunk() takes
+// both as explicit parameters.
 //
 // n_ok counts in-bounds, non-masked neighbours. It reads bBad and the image
-// bounds only -- never a pixel value -- so it is identical for every frame, and
-// therefore both the branch taken and the number of random draws consumed are
-// fixed before any frame is decoded.
+// bounds only -- never a pixel value -- so it is identical for every frame. The
+// gain multiply happens after n_ok is incremented and cannot reach the branch or
+// the draw count. Both the branch taken and the number of random draws consumed
+// are therefore fixed by (bad_mask, frame_std) alone.
 
 enum class DrawKind : unsigned char {
 	NeighborSlot = 0,  // take slot `slot` of this pixel's geometric neighbour list
@@ -146,7 +197,8 @@ struct Schedule {
 	std::vector<int> slot_count;
 
 	// Size bad_x.size() * n_frames, indexed [ibad * n_frames + iframe] -- the
-	// order in which the runner consumes the stream.
+	// order in which the runner *draws* from the RNG. Note this is NOT the
+	// layout of the replacement buffer, which is frame-major; see applyChunk.
 	std::vector<Draw> draws;
 
 	// Observability: how many (pixel, frame) decisions took each branch. A test
@@ -161,7 +213,11 @@ struct Schedule {
 // already called init_random_generator() at the point the runner does; this
 // function does not seed.
 //
-// NUM_MIN_OK is fixed at 6 to match the runner. d_max is 2, or 4 for EER.
+// NUM_MIN_OK is fixed at 6 to match the runner. d_max is 2, or 4 for EER; a
+// larger value is rejected, because the runner's D_MAX is `isEER ? 4 : 2` and
+// its pbuf is a fixed 100 entries.
+//
+// Returns false without leaving a partially populated Schedule.
 bool buildSchedule(const bool *bad_mask, int nx, int ny, int n_frames, int d_max,
                    float frame_mean, float frame_std, Schedule &out);
 
@@ -178,11 +234,28 @@ void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j
 // independent given the schedule, and any chunking of frames yields identical
 // values. That property, not the loop order, is what makes staging admissible.
 //
+// `gain`, when non-null, is a nx*ny gain reference applied to each neighbour
+// value as it is gathered, reproducing motioncorr_runner.cpp:1752. Pass it
+// exactly when the caller's frames are raw and a gain reference is in use --
+// i.e. the runner's `host_frames_are_raw && fn_gain_reference != ""`. Pass null
+// when the frames are already gain-corrected. Getting this wrong changes every
+// replacement value by a factor of Igain(y, x) and nothing will complain.
+//
+// `write_in_place` writes the replacement into the masked pixel. Pass false to
+// reproduce the runner's raw-host path, which records the value and leaves the
+// raw frame untouched so a later whole-frame gain pass is still valid
+// (motioncorr_runner.cpp:1769). With false, out_replacements must be non-null.
+//
 // When out_replacements is non-null it must be sized bad.size() * n_frames and
-// is filled at [ibad * n_frames + iframe] for the frames in this chunk.
+// is filled at **[iframe * n_bad + ibad]** -- frame-major, matching
+// `resident_bad_replacements` and every one of its consumers
+// (motioncorr_runner.cpp:1770 and :1456, cuda_movie_session.cu:166). This is
+// deliberately NOT the same layout as Schedule::draws.
 bool applyChunk(const Schedule &sched, const bool *bad_mask,
                 int first_frame, int n_chunk_frames,
                 float *const *frame_data,
+                const float *gain,
+                bool write_in_place,
                 std::vector<float> *out_replacements);
 
 } // namespace staging

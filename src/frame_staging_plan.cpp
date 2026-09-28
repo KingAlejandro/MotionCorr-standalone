@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * Author: "MotionCorr Standalone contributors"
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * This complete copyright notice must be included in any revised version of the
+ * source code. Additional authorship citations may be added, but existing
+ * author citations must be preserved.
+ ***************************************************************************/
 #include "src/frame_staging_plan.h"
 
 #include "src/funcs.h"
@@ -180,12 +198,16 @@ bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget)
 	return true;
 }
 
-void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j,
-                   std::vector<int> &slot_y, std::vector<int> &slot_x)
+namespace {
+
+// The single definition of the runner's neighbour scan: (dy, dx) ascending,
+// skipping out-of-bounds and masked cells. Slot k emitted here is pbuf[k] in
+// motioncorr_runner.cpp:1741. Both the count and the coordinate list go through
+// this, so the two cannot drift apart.
+template <typename Visit>
+inline void forEachSlot(const bool *bad_mask, int nx, int ny, int d_max,
+                        int i, int j, Visit visit)
 {
-	slot_y.clear();
-	slot_x.clear();
-	// Same (dy, dx) scan order as the runner, so slot k here is pbuf[k] there.
 	for (int dy = -d_max; dy <= d_max; dy++) {
 		const int y = i + dy;
 		if (y < 0 || y >= ny) continue;
@@ -193,38 +215,75 @@ void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j
 			const int x = j + dx;
 			if (x < 0 || x >= nx) continue;
 			if (bad_mask[(size_t)y * nx + x]) continue;
-			slot_y.push_back(y);
-			slot_x.push_back(x);
+			visit(y, x);
 		}
 	}
 }
-
-namespace {
 
 // n_ok for one bad pixel, without materialising the slot list.
 int countSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j)
 {
 	int n_ok = 0;
-	for (int dy = -d_max; dy <= d_max; dy++) {
-		const int y = i + dy;
-		if (y < 0 || y >= ny) continue;
-		for (int dx = -d_max; dx <= d_max; dx++) {
-			const int x = j + dx;
-			if (x < 0 || x >= nx) continue;
-			if (bad_mask[(size_t)y * nx + x]) continue;
-			n_ok++;
-		}
-	}
+	forEachSlot(bad_mask, nx, ny, d_max, i, j, [&](int, int) { n_ok++; });
 	return n_ok;
 }
 
 } // namespace
+
+bool largestChunkWithin(const Geometry &geom, const Policy &policy,
+                        unsigned long long host_budget_bytes,
+                        long long &out_chunk)
+{
+	if (!geometryOk(geom)) return false;
+
+	// The staged term is linear in the chunk and every other term is constant,
+	// so binary search is sound. It is used rather than a closed-form divide
+	// because computeBudget owns the overflow checks and the term list, and a
+	// second copy of that arithmetic here is exactly how the two drift apart.
+	Policy probe = policy;
+	long long lo = 1, hi = geom.n_frames, best = 0;
+
+	probe.chunk_frames = 1;
+	Budget b;
+	if (!computeBudget(geom, probe, b) || b.host_bytes > host_budget_bytes)
+		return false; // inadmissible: not even one staged frame fits
+
+	while (lo <= hi) {
+		const long long mid = lo + (hi - lo) / 2;
+		probe.chunk_frames = mid;
+		if (computeBudget(geom, probe, b) && b.host_bytes <= host_budget_bytes) {
+			best = mid;
+			lo = mid + 1;
+		} else {
+			hi = mid - 1;
+		}
+	}
+
+	if (best < 1) return false;
+	out_chunk = best;
+	return true;
+}
+
+void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j,
+                   std::vector<int> &slot_y, std::vector<int> &slot_x)
+{
+	slot_y.clear();
+	slot_x.clear();
+	forEachSlot(bad_mask, nx, ny, d_max, i, j, [&](int y, int x) {
+		slot_y.push_back(y);
+		slot_x.push_back(x);
+	});
+}
 
 bool buildSchedule(const bool *bad_mask, int nx, int ny, int n_frames, int d_max,
                    float frame_mean, float frame_std, Schedule &out)
 {
 	out = Schedule();
 	if (!bad_mask || nx <= 0 || ny <= 0 || n_frames <= 0 || d_max < 0) return false;
+	// The runner's D_MAX is `isEER ? 4 : 2` and its pbuf is a fixed 100 entries
+	// (motioncorr_runner.cpp:1525, :1737). Refuse anything the runner could not
+	// itself produce rather than silently modelling a wider neighbourhood.
+	if (d_max > 4) return false;
 
 	out.nx = nx;
 	out.ny = ny;
@@ -245,8 +304,12 @@ bool buildSchedule(const bool *bad_mask, int nx, int ny, int n_frames, int d_max
 	// Guard the product before reserving; a pathological mask on a large movie
 	// would otherwise overflow size_t on 32-bit or allocate silently here.
 	if (n_bad != 0 &&
-	    (size_t)n_frames > std::numeric_limits<size_t>::max() / n_bad / sizeof(Draw))
+	    (size_t)n_frames > std::numeric_limits<size_t>::max() / n_bad / sizeof(Draw)) {
+		// Leave nothing half-populated behind: a caller that ignores the return
+		// value must not find a Schedule with a plausible geometry and no draws.
+		out = Schedule();
 		return false;
+	}
 	out.draws.resize(n_bad * (size_t)n_frames);
 
 	// One pass in exactly the runner's (bad pixel, frame) order. Every rand()
@@ -283,13 +346,20 @@ bool buildSchedule(const bool *bad_mask, int nx, int ny, int n_frames, int d_max
 bool applyChunk(const Schedule &sched, const bool *bad_mask,
                 int first_frame, int n_chunk_frames,
                 float *const *frame_data,
+                const float *gain,
+                bool write_in_place,
                 std::vector<float> *out_replacements)
 {
 	if (!bad_mask || !frame_data) return false;
 	if (first_frame < 0 || n_chunk_frames < 0) return false;
 	if (first_frame > sched.n_frames - n_chunk_frames) return false;
+	// Recording is the only effect when the frames are left raw; a caller that
+	// asks for neither has asked for nothing and is more likely mistaken than
+	// deliberate.
+	if (!write_in_place && !out_replacements) return false;
 
 	const size_t n_bad = sched.bad_x.size();
+	if (sched.bad_y.size() != n_bad) return false;
 	if (sched.slot_count.size() != n_bad) return false;
 	if (sched.draws.size() != n_bad * (size_t)sched.n_frames) return false;
 	if (out_replacements && out_replacements->size() != n_bad * (size_t)sched.n_frames)
@@ -319,14 +389,21 @@ bool applyChunk(const Schedule &sched, const bool *bad_mask,
 			float replacement;
 			if (d.kind == DrawKind::NeighborSlot) {
 				if (d.slot < 0 || d.slot >= n_ok) return false;
-				replacement = frame_data[k][(size_t)slot_y[d.slot] * nx + slot_x[d.slot]];
+				const size_t off = (size_t)slot_y[d.slot] * nx + slot_x[d.slot];
+				replacement = frame_data[k][off];
+				// motioncorr_runner.cpp:1752: raw host frames are multiplied by
+				// the gain as each neighbour is gathered, one float multiply,
+				// after n_ok has already been incremented.
+				if (gain) replacement *= gain[off];
 			} else {
 				replacement = d.value;
 			}
 
-			frame_data[k][(size_t)i * nx + j] = replacement;
+			if (write_in_place) frame_data[k][(size_t)i * nx + j] = replacement;
+			// Frame-major, matching resident_bad_replacements and all three of
+			// its consumers. Not the layout of Schedule::draws.
 			if (out_replacements)
-				(*out_replacements)[ibad * (size_t)sched.n_frames + iframe] = replacement;
+				(*out_replacements)[(size_t)iframe * n_bad + ibad] = replacement;
 		}
 	}
 

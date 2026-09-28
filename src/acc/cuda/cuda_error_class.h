@@ -3,6 +3,11 @@
 
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
+// cudaRetryVerdictFor takes a cufftResult. Including cufft.h here rather than relying
+// on a transitive one: motioncorr_runner.cpp already pulls it in via the other acc/cuda
+// headers, so the omission only surfaced when tests/cuda_error_class.cpp included this
+// header on its own.
+#include <cufft.h>
 
 /**
  * Issue #69: separates a recoverable resource failure from a fatal device execution

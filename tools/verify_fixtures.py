@@ -33,11 +33,26 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_manifest(repo: Path, ref: str = "HEAD", explicit_path: Optional[Path] = None) -> Tuple[Dict[str, Any], str]:
-    """Load manifest strictly from git ref, or explicit manifest path if specified.
+def has_git_metadata(repo: Path) -> bool:
+    """Check if repository path contains or is governed by git metadata."""
+    if (repo / ".git").exists():
+        return True
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "rev-parse", "--git-dir"],
+            capture_output=True, text=True
+        )
+        return proc.returncode == 0
+    except (FileNotFoundError, OSError):
+        return False
 
-    Fails closed if the git ref cannot be resolved or if git is unavailable.
-    Does not fall back to an adjacent disk file when ref lookup fails.
+
+def load_manifest(repo: Path, ref: str = "HEAD", explicit_path: Optional[Path] = None) -> Tuple[Dict[str, Any], str]:
+    """Load manifest strictly from git ref, explicit manifest path, or archive fallback.
+
+    In a Git repository, loads strictly from git ref. Lookup failures or Git corruption
+    fail closed and NEVER fall back to disk.
+    In a source archive with proven absence of Git metadata, falls back to the trusted disk manifest.
     """
     if explicit_path is not None:
         if not explicit_path.is_file():
@@ -48,21 +63,36 @@ def load_manifest(repo: Path, ref: str = "HEAD", explicit_path: Optional[Path] =
             raise ValueError(f"Failed to parse manifest JSON from {explicit_path}: {exc}") from exc
         return data, f"file:{explicit_path}"
 
-    proc = subprocess.run(
-        ["git", "-C", str(repo), "show", f"{ref}:{MANIFEST_REL_PATH}"],
-        capture_output=True, text=True
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"Failed to load trusted manifest from git ref '{ref}:{MANIFEST_REL_PATH}' (exit {proc.returncode}): "
-            f"{proc.stderr.strip()}"
+    if has_git_metadata(repo):
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "show", f"{ref}:{MANIFEST_REL_PATH}"],
+            capture_output=True, text=True
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"Failed to load trusted manifest from git ref '{ref}:{MANIFEST_REL_PATH}' (exit {proc.returncode}): "
+                f"{proc.stderr.strip()}"
+            )
+        try:
+            data = json.loads(proc.stdout)
+        except Exception as exc:
+            raise ValueError(f"Failed to parse git manifest JSON from {ref}:{MANIFEST_REL_PATH}: {exc}") from exc
+        return data, f"git:{ref}:{MANIFEST_REL_PATH}"
+
+    # Proven absence of Git metadata: source archive fallback
+    if ref != "HEAD":
+        raise RuntimeError(f"Cannot resolve git ref '{ref}' in source archive without git metadata")
+
+    archive_manifest = repo / MANIFEST_REL_PATH
+    if not archive_manifest.is_file():
+        raise FileNotFoundError(
+            f"Source archive contains no git metadata and trusted disk manifest is missing: {archive_manifest}"
         )
     try:
-        data = json.loads(proc.stdout)
+        data = json.loads(archive_manifest.read_text())
     except Exception as exc:
-        raise ValueError(f"Failed to parse git manifest JSON from {ref}:{MANIFEST_REL_PATH}: {exc}") from exc
-    return data, f"git:{ref}:{MANIFEST_REL_PATH}"
-
+        raise ValueError(f"Failed to parse archive manifest JSON from {archive_manifest}: {exc}") from exc
+    return data, f"archive:{archive_manifest}"
 
 def validate_manifest_schema(manifest: Any) -> Dict[str, Any]:
     """Validate that manifest contains a nonempty, schema-valid cases dictionary."""

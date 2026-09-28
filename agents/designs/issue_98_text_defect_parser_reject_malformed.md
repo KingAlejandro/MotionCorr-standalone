@@ -91,15 +91,31 @@ sources; only the format name is referenced.
 
 ## Known limitations
 
-A read error that is not end of file cannot be distinguished from a clean end of file
-through this API: `std::istream::peek()` returns `EOF` whenever `good()` is false for any
-reason, and libstdc++ reports a failed `read()` as end of file rather than setting
-`badbit`. A path that opens but cannot be read therefore terminates the parse as if the
-file had simply ended, leaving a silently empty or partial mask and a job that appears to
-succeed. A directory passed as `--defect_file` is the reachable case: `std::ifstream` opens
-it successfully on Linux and macOS. This behaviour predates issue #98 and is unchanged by
-it; it is recorded here as an accepted limitation rather than fixed, because no cheap
-detection exists at this layer.
+A path can open and still fail to be read; a directory whose name ends `.txt` is the
+reachable case, since `std::ifstream` opens a directory successfully on both Linux and
+macOS. `peek()` returns `EOF` for that as well as for a genuine end of file, so treating
+`peek() == EOF` as normal completion would mask nothing and let the movie publish as if
+defect correction had succeeded.
+
+The parser therefore treats end of input as clean only when the stream actually reached
+end of file without an error, and otherwise reports a named read failure. How much the
+platform exposes was measured rather than assumed, with a directory opened and a single
+`peek()`:
+
+| platform | `eofbit` | `failbit` | `badbit` | distinguishable |
+|---|---|---|---|---|
+| Linux, g++ 13.3, libstdc++ | false | true | **true** | yes |
+| macOS, Apple clang, libc++ | true | false | false | **no** |
+
+The check is therefore effective on the deployment target and inert on libc++, where the
+condition is genuinely unobservable at this layer. The regression test probes the running
+platform and asserts rejection only where the distinction exists, reporting explicitly
+when it does not, so it cannot pass silently on a platform that cannot see the fault.
+An earlier revision of this document claimed libstdc++ reports a failed read as end of
+file; that was wrong, and the table above supersedes it.
+
+A read error arising mid-record is reported as a read failure rather than as a truncated
+record, for the same reason.
 
 The strict parser runs on the `--use_own` path only. The external-binary path at
 `src/motioncorr_runner.cpp:725-730` passes `-DefectFile` through to MotionCor2 unvalidated,

@@ -1,0 +1,37 @@
+=== base vs candidate ===
+  all_batches.pdf                                 14281 bytes  not compared (ghostscript creation date)
+  batch.pdf                                       14431 bytes  not compared (ghostscript creation date)
+  batch.pdf.lst                                     101 bytes  =  sha=662ade79355e2506
+  corrected_micrographs.star                        591 bytes  =  sha=9625c9f77c5a4be1
+  corrected_micrographs_all_rlnAccumMotionEarly.eps    75689 bytes  =  sha=296b2bc9b3e5ef1a
+  corrected_micrographs_all_rlnAccumMotionLate.eps    75687 bytes  =  sha=2752abbccd6a6452
+  corrected_micrographs_all_rlnAccumMotionTotal.eps    75689 bytes  =  sha=8818bb37503d4788
+  header.pdf                                      24831 bytes  not compared (ghostscript creation date)
+  header.pdf.lst                                    236 bytes  =  sha=bb0071187826873d
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.log     1909 bytes  =  sha=c24e57933ddbe900
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.mrc 512x512x1 mode2 header== labels=differ(timestamp) payload== sha=04c2a1d9349b3c09
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.star    17785 bytes  =  sha=a65c2cc980367ff7
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie_shifts.eps    72918 bytes  =  sha=70a89a333c22660a
+  logfile.pdf                                     37071 bytes  not compared (ghostscript creation date)
+
+10 files compared, 1 MRC images, 262144 pixels, 0 differing
+
+=== negative control: perturb one pixel and one STAR character ===
+  all_batches.pdf                                 14281 bytes  not compared (ghostscript creation date)
+  batch.pdf                                       14431 bytes  not compared (ghostscript creation date)
+  batch.pdf.lst                                     101 bytes  =  sha=662ade79355e2506
+  corrected_micrographs.star                        591 bytes  DIFF  sha=9625c9f77c5a4be1
+  corrected_micrographs_all_rlnAccumMotionEarly.eps    75689 bytes  =  sha=296b2bc9b3e5ef1a
+  corrected_micrographs_all_rlnAccumMotionLate.eps    75687 bytes  =  sha=2752abbccd6a6452
+  corrected_micrographs_all_rlnAccumMotionTotal.eps    75689 bytes  =  sha=8818bb37503d4788
+  header.pdf                                      24831 bytes  not compared (ghostscript creation date)
+  header.pdf.lst                                    236 bytes  =  sha=bb0071187826873d
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.log     1909 bytes  =  sha=c24e57933ddbe900
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.mrc 512x512x1 mode2 header== labels=differ(timestamp) payload=DIFF sha=04c2a1d9349b3c09
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.star    17785 bytes  =  sha=a65c2cc980367ff7
+  home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie_shifts.eps    72918 bytes  =  sha=70a89a333c22660a
+  logfile.pdf                                     37071 bytes  not compared (ghostscript creation date)
+
+negative control reported 2 differing files (expected exactly 2)
+
+PASS same-backend CPU output identical, and the comparison is able to fail

@@ -1,0 +1,49 @@
+lines: base=75615 cand=75616
+5c25d823c8d1c2bf381325a41b6dabfd14a71838eb5d20a80d6be63e02ffe452  /tmp/ppn-base.ii
+36778ca408eb83f7ec7eea5f44bb7d22d32fded1356ab9ad97e6ffb1d819c511  /tmp/ppn-cand.ii
+diff exit=1  differing lines=21
+--- remaining differences (all of them) ---
+72837a72838
+>  friend struct MotioncorrRunnerTestAccess;
+74424c74425
+<    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1387);
+---
+>    throw RelionError(("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary."), "<SRCROOT>/src/motioncorr_runner.cpp", 1428);
+74642c74643
+<    throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 1814);
+---
+>    throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 1855);
+75022c75023
+<    throw RelionError(("Sorry, dose weighting is supported only for 300, 200 or 100 kV"), "<SRCROOT>/src/motioncorr_runner.cpp", 2467);
+---
+>    throw RelionError(("Sorry, dose weighting is supported only for 300, 200 or 100 kV"), "<SRCROOT>/src/motioncorr_runner.cpp", 2561);
+75079c75080
+<  if (n_groups < 2) throw RelionError(("Assert failed for n_groups >= 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 2569);
+---
+>  if (n_groups < 2) throw RelionError(("Assert failed for n_groups >= 2"), "<SRCROOT>/src/motioncorr_runner.cpp", 2663);
+75339c75340
+<   throw RelionError(("Patch size must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 2972);
+---
+>   throw RelionError(("Patch size must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3066);
+75509c75510
+<     throw RelionError(("Shouldn't happen."), "<SRCROOT>/src/motioncorr_runner.cpp", 3207);
+---
+>     throw RelionError(("Shouldn't happen."), "<SRCROOT>/src/motioncorr_runner.cpp", 3301);
+75550c75551
+<   throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3281);
+---
+>   throw RelionError(("The dimensions of the image after binning must be even"), "<SRCROOT>/src/motioncorr_runner.cpp", 3375);
+75562c75563
+<   throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3299);
+---
+>   throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3393);
+75587c75588
+<    throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3330);
+---
+>    throw RelionError(("Failed to open a defect file: " + fn_defect), "<SRCROOT>/src/motioncorr_runner.cpp", 3424);
+75608c75609
+<    throw RelionError(("The size of the defect map is not the same as that of the movie."), "<SRCROOT>/src/motioncorr_runner.cpp", 3355);
+---
+>    throw RelionError(("The size of the defect map is not the same as that of the movie."), "<SRCROOT>/src/motioncorr_runner.cpp", 3449);
+--- negative control ---
+negative control OK: an injected line is detected

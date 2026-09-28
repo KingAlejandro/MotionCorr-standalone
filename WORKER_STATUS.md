@@ -5,11 +5,11 @@
 **Task class**: correctness (tiny scoped fix)  
 **Branch**: round96/97-grok-4-3 (isolated origin/main worktree)  
 **Base commit**: 4c952b3f54479653512c4d208e09c9a8c02f3726 (main)  
-**Phase**: Draft PR #100 ready for independent review (https://github.com/KingAlejandro/MotionCorr-standalone/pull/100); core fix complete and pushed; test addition reverted to obey strict private-API / tiny-PR boundary; milestone comment posted on #97.  
-**Changed files**: src/motioncorr_runner.cpp (5 lines net), planning docs; test addition reverted (private method would require header change — out of tiny scope)  
-**Blockers**: None (CPU-only; GPU waits for #26 coordinated slot)  
+**Phase**: Fix verified by execution against the real production symbol (see ADR "Verification status"). Upstream parity divergence identified — needs maintainer sign-off. PR #100 open as draft.
+**Changed files**: `src/motioncorr_runner.cpp` (+5/-3), ADR, whitelist, this file. Test addition reverted — private method AND two of its three witnesses had wrong expected values (see ADR "Withdrawn test").
+**Blockers**: Maintainer sign-off needed — the fix is a deliberate divergence from pinned RELION `ad0b230`, which AGENTS.md declares the parity baseline. GPU still waits on the #26 slot.
 **NEEDS_GPU**: No — prepare only; wait for issue26 slot per COMMON.md  
-**Next step**: Await independent review of PR #100. If approved, maintainer merges. GPU work remains blocked until #26 slot. All other tasks preserved.
+**Next step**: Maintainer decision on the deliberate RELION-parity divergence (fix outright vs. gate behind a flag). Then independent review. GPU still blocked on #26 slot.
 
 ## Scoped plan (per issue-97.json + task-97.md + COMMON.md)
 - Own ONLY the saved-first-frame-origin recentering fix.
@@ -32,7 +32,11 @@
 - None yet.
 
 ## Latest test commands / results
-- (to be populated after implementation)
+- `make -j8 motioncorr_core` (Release, forced fresh TU rebuild) — PASS, pre-existing warnings only.
+- `/tmp/issue97_verify` — 4 witnesses against real `interpolateShifts`; W1 reproduces the archived control exactly; frame0==0 exact; relative displacements bit-exact. EXIT=0.
+- `/tmp/issue97_control` — zero-origin control old==new bitwise (3 cases, 2 non-trivial); nonzero-origin control differs. EXIT=0.
+- Upstream `ad0b230` fetched and diffed: defect inherited verbatim.
+- NOT run: end-to-end movie, CUDA, RELION downstream. See ADR.
 
 ---
 *Published at session start per task-97.md directive. Model kept as grok-4.3.*

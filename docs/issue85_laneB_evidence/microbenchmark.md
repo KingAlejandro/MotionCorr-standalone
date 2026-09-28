@@ -35,8 +35,12 @@ list of loosely related numbers.
 | **directory selection** | **0.0007** | **0.1%** |
 | **total the persistent pool can remove** | **0.0239** | **1.7%** |
 
-(`raw_pread`, a separate whole-file read of the compressed bytes, is 0.0885 s.
-It is not part of `Image::read` and is listed in the JSON separately.)
+(`raw_pread`, a separate whole-file `read()` of the compressed bytes, is
+0.0885 s. It is **not** part of `Image::read`, is listed separately in the
+JSON, and must not be added to the decode stage to form a "storage floor":
+LibTIFF memory-maps the file rather than issuing the same reads, so the two do
+not compose. On PanFS the gap is worse still — per-strip `pread` has been
+measured at 42x the mmap path on this project's shared storage.)
 
 Two things follow.
 
@@ -44,12 +48,26 @@ Two things follow.
 the 92,112 inflate calls, the page faults, the conversion — happens in both
 arms.
 
-**Allocation and first touch is as expensive as the decode itself**, 45% of a
-single-threaded movie read. That is 1.37 GiB of fresh pages per movie: 24
-`Image<float>` frames at 57 MB each, reallocated for every movie because the
-runner rebuilds `Iframes` per movie. No lane in the current issue #85 program
-targets it. It is measured here only because the attribution had to close;
-this is a pointer for a future lane, not a result of this one.
+**On this host, allocation and first touch is as expensive as the decode
+itself** — 45% of a single-threaded movie read. That is 1.37 GiB of fresh
+pages per movie: 24 `Image<float>` frames at 57 MB each, reallocated for every
+movie because the runner rebuilds `Iframes` per movie.
+
+That number is **not portable**. `small-refmac-machine` runs
+`transparent_hugepage/enabled = always [madvise] never`, i.e. madvise, so each
+57 MB frame faults in 4 KiB pages. Under `always` the same allocation is
+served by hugepages and the fault cost collapses; the difference has been
+measured at around 40x on this project's hosts, which is far larger than
+anything lane B does. So this is a host-configuration-dependent cost, and
+"45%" is a property of this machine's THP setting, not of the code. It is
+still worth someone's attention — the runner reallocating 1.37 GiB per movie
+is real on any setting — but the size of the prize has to be re-measured per
+host before it is quoted.
+
+Lane B's own verdict does not depend on it: the 1.7% lifecycle share is
+computed against a total that includes this stage, so on an `always`-THP host
+the lifecycle share would be *larger* in percentage terms while the absolute
+0.024 s stays the same.
 
 ## Whole-movie read, both arms
 
@@ -94,7 +112,10 @@ all of it and would need no change to `src/rwTIFF.h` at all.
   all 24, not by repeating this.
 - Local disk (`/dev/vda1`), not PanFS. Open cost is storage-dependent, and 24
   opens per movie would cost more on a shared filesystem than the 0.0188 s
-  measured here.
+  measured here. That is the one term that could make lane B look better
+  elsewhere.
+- `transparent_hugepage = madvise` on this host. See the note on the
+  allocation stage above.
 - `small-refmac-machine` is shared. Two long-running `ctffind` processes held
   two cores throughout; runs were gated on 1-minute load average below 6.0 and
   serialised against other MotionCorr work through

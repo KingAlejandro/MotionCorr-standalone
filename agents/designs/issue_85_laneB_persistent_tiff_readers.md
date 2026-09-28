@@ -24,8 +24,12 @@ If a future lane revisits this, two results from here should carry over:
    reopening the file. The simpler variant needs no change to `src/rwTIFF.h`
    at all.
 2. **Allocation and first touch of the decoded frames is 45% of a
-   single-threaded movie read**, as expensive as the 92,112 inflate calls, and
-   no lane in the current issue #85 program targets it.
+   single-threaded movie read on a madvise-THP host**, as expensive as the
+   92,112 inflate calls, and no lane in the current issue #85 program targets
+   it. The percentage is host-dependent — THP `always` versus `madvise` is
+   worth about 40x on frame allocation here — so re-measure before quoting it
+   anywhere else. The underlying fact, that the runner reallocates 1.37 GiB
+   per movie, is not host-dependent.
 
 ## Question
 

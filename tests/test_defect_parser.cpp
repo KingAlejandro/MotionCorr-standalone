@@ -5,23 +5,26 @@
 // inspects the resulting mask or the thrown RelionError.
 #include "src/motioncorr_runner.h"
 #include <chrono>
-#include <filesystem>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <sys/stat.h>
 #include <unistd.h>
 
 static int failures = 0, passed = 0;
 
 // Per-process scratch directory, so concurrent ctest jobs and repeat runs on a
-// shared build host cannot collide or inherit a stale fixture.
-static const std::filesystem::path &scratch_dir()
+// shared build host cannot collide or inherit a stale fixture. Uses POSIX
+// mkdir rather than <filesystem>, which would need -lstdc++fs on GCC <= 8 and
+// is otherwise unused in this project.
+static const std::string &scratch_dir()
 {
-    static const std::filesystem::path dir = [] {
-        std::filesystem::path d = std::filesystem::temp_directory_path() /
-            ("motioncorr_defect_test_" + std::to_string(static_cast<long>(::getpid())));
-        std::filesystem::remove_all(d);
-        std::filesystem::create_directories(d);
+    static const std::string dir = [] {
+        const char *base = getenv("TMPDIR");
+        std::string d = std::string(base && *base ? base : "/tmp") +
+            "/motioncorr_defect_test_" + std::to_string(static_cast<long>(::getpid()));
+        ::mkdir(d.c_str(), 0700);
         return d;
     }();
     return dir;
@@ -29,7 +32,7 @@ static const std::filesystem::path &scratch_dir()
 
 static std::string tmpfile_with(const std::string &body, const std::string &tag)
 {
-    const std::string p = (scratch_dir() / (tag + ".txt")).string();
+    const std::string p = scratch_dir() + "/" + tag + ".txt";
     std::ofstream o(p, std::ios::binary);
     o << body;
     o.close();
@@ -121,6 +124,23 @@ int main()
     run(m, ny, nx, "0 0 1\n", "d5", &msg);
     check(msg.find("Truncated") != std::string::npos,
           "partial record distinguished as 'Truncated', not 'Malformed'");
+    // A record may straddle a line break. The line counter must keep counting
+    // newlines consumed *between fields*, or it desynchronizes for the rest of
+    // the file and every later diagnostic names the wrong line.
+    check(run(m, ny, nx, "0 0\n1 1\n2 2 2 2\nBAD\n", "d6", &msg) == 1 &&
+              msg.find("line 4") != std::string::npos,
+          "line stays correct after a record split across lines");
+
+    // Issue #98 Plan bullet 5: the SerialEM detector must keep rejecting
+    // SerialEM-style input. Both call sites consult it before fillDefectMask,
+    // so the strict parser must not have displaced it.
+    std::cout << "== SerialEM detector still discriminates ==\n";
+    check(MotioncorrRunner::detectSerialEMDefectText(
+              tmpfile_with("CameraSize 4096 4096 1\nBadColumns 1 2\n", "s1")),
+          "SerialEM-style file still detected");
+    check(!MotioncorrRunner::detectSerialEMDefectText(
+              tmpfile_with("0 0 2 3\n10 10 4 4\n", "v5")),
+          "valid MotionCor2 file not misdetected as SerialEM");
 
     std::cout << "== zero / negative size ==\n";
     check(run(m, ny, nx, "5 5 0 4\n", "z1") == 0 && count_set(m) == 0, "w=0 -> skipped, 0 px");
@@ -177,8 +197,13 @@ int main()
     check(rc == 0 && count_set(m) == 0,
           "LLONG_MAX x+w does not overflow or crash, paints 0 px");
 
-    std::error_code ec;
-    std::filesystem::remove_all(scratch_dir(), ec);
+    // Remove the fixtures we created, then the directory.
+    for (const char *tag : {"v1","v2","v3","v4","v5","e1","e2","m1","m2","m3","m4","m5","m6",
+                            "c1","c2","c3","d1","d2","d3","d4","d5","d6","z1","z2","z3",
+                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1"}) {
+        std::remove((scratch_dir() + "/" + tag + ".txt").c_str());
+    }
+    ::rmdir(scratch_dir().c_str());
 
     std::cout << "\n" << passed << " passed, " << failures << " failed\n";
     return failures ? 1 : 0;

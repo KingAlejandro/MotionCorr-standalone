@@ -28,6 +28,7 @@ otherwise be timed twice as two distinct treatments.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -537,7 +538,7 @@ def parse_cpu_list(spec: str) -> set:
     return cpus
 
 
-def group_members(pgid: int) -> Dict[int, Any]:
+def group_members(pgid: int, sid: Optional[int] = None) -> Optional[Dict[int, Any]]:
     """Live, non-zombie members of process group `pgid`, keyed by pid -> (comm, starttime).
 
     Enumerated by scanning `/proc` for the group id rather than by walking descendants.
@@ -556,17 +557,25 @@ def group_members(pgid: int) -> Dict[int, Any]:
     try:
         pids = [int(d) for d in os.listdir("/proc") if d.isdigit()]
     except OSError:
-        return out
+        # Returning {} here would make "I could not enumerate" indistinguishable from
+        # "the group is empty", and the caller would report cleanup confirmed having
+        # observed nothing -- the same vacuity class as the defect this function fixes.
+        return None
     for pid in pids:
         f = _stat_fields(f"/proc/{pid}/stat")
         if not f or len(f) <= F_STARTTIME:
             continue
         try:
-            if int(f[F_PGRP]) != pgid:
+            in_group = int(f[F_PGRP]) == pgid
+            # A child that calls setpgid() leaves the group and is invisible to killpg, but
+            # setpgid does not change the session, so the session catches it. Only setsid()
+            # escapes both, and nothing in this codebase calls it.
+            in_session = sid is not None and int(f[F_SESSION]) == sid
+            if not (in_group or in_session):
                 continue
             if f[F_STATE] == "Z":                 # zombie: not running, not a survivor
                 continue
-            out[pid] = (f[0], int(f[F_STARTTIME]))
+            out[pid] = (f[0], int(f[F_STARTTIME]), in_group)
         except (ValueError, IndexError):
             continue
     return out
@@ -574,7 +583,7 @@ def group_members(pgid: int) -> Dict[int, Any]:
 
 def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str],
                 grace_s: float = 10.0, kill_s: float = 10.0,
-                hold_s: float = 60.0) -> Dict[str, Any]:
+                hold_s: float = 60.0, sid: Optional[int] = None) -> Dict[str, Any]:
     """Terminate the owned process group and *verify* it is gone before returning.
 
     Escalation is driven by surviving owned-group members, never by the launcher's exit. The
@@ -588,11 +597,20 @@ def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str],
     an unconfirmed survivor would then run underneath whoever measures next. Holding the lock
     is the safe direction. The outcome is returned so the caller can abort the series.
     """
-    own_start = {pid: st for pid, (_, st) in group_members(pgid).items()}
+    sid = sid if sid is not None else pgid          # session leader: sid == launcher pid
+    first = group_members(pgid, sid) or {}
+    own_start = {pid: meta[1] for pid, meta in first.items()}
+    enum_failed = {"v": False}
 
     def survivors() -> Dict[int, Any]:
+        m = group_members(pgid, sid)
+        if m is None:
+            enum_failed["v"] = True
+            # Cannot observe -> must not be read as empty. Report a sentinel survivor so
+            # every caller path treats this as unconfirmed.
+            return {-1: ("<enumeration-failed>", 0, False)}
         # Reject recycled pids: same pid, different start time is a different process.
-        return {pid: meta for pid, meta in group_members(pgid).items()
+        return {pid: meta for pid, meta in m.items()
                 if pid not in own_start or own_start[pid] == meta[1]}
 
     def signal_group(sig: int, name: str) -> None:
@@ -603,6 +621,15 @@ def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str],
             log.append(f"group {pgid} already gone at {name}")
         except Exception as exc:
             log.append(f"killpg {name} failed: {exc}")
+        # killpg cannot reach a member that left the group via setpgid; signal those by pid.
+        cur = group_members(pgid, sid)
+        for pid, meta in (cur or {}).items():
+            if pid > 0 and not meta[2]:
+                try:
+                    os.kill(pid, sig)
+                    log.append(f"sent {name} directly to out-of-group session member {pid}")
+                except OSError:
+                    pass
 
     def wait_clear(deadline_s: float) -> Dict[int, Any]:
         t0 = time.time()
@@ -638,15 +665,40 @@ def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str],
         proc.wait(timeout=5)
     except Exception:
         pass
-    confirmed = not left
-    log.append(f"cleanup_confirmed={confirmed} escalated={escalated} "
+    confirmed = (not left) and not enum_failed["v"]
+    log.append(f"cleanup_confirmed={confirmed} enumeration_failed={enum_failed['v']} "
+               f"escalated={escalated} "
                f"held_for_s={held_s} survivors={[(p, m[0]) for p, m in left.items()]}")
     return {"cleanup_confirmed": confirmed,
+            "enumeration_failed": enum_failed["v"],
             "escalated_to_sigkill": escalated,
             "blocked_seconds_holding_lock": held_s,
             "surviving_group_members": [{"pid": p, "comm": m[0], "starttime": m[1]}
                                         for p, m in left.items()],
             "returncode": proc.returncode if proc.returncode is not None else -9}
+
+
+@contextlib.contextmanager
+def _deferred_interrupts(log: List[str]):
+    """Hold SIGINT/SIGTERM until cleanup finishes, then re-raise the first one seen."""
+    caught: List[int] = []
+    try:
+        prev = {sig: signal.signal(sig, lambda s, f: caught.append(s))
+                for sig in (signal.SIGINT, signal.SIGTERM)}
+    except (ValueError, OSError):
+        yield                                    # not on the main thread; nothing to shield
+        return
+    try:
+        yield
+    finally:
+        for sig, handler in prev.items():
+            try:
+                signal.signal(sig, handler)
+            except (ValueError, OSError):
+                pass
+        if caught:
+            log.append(f"deferred signals during cleanup: {caught}; re-raising")
+            os.kill(os.getpid(), caught[0])
 
 
 def _alive(pid: int) -> bool:
@@ -890,64 +942,101 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
                             stdout=(rundir / "stdout.log").open("w"),
                             stderr=(rundir / "time_stderr.log").open("w"),
                             start_new_session=True)
-    pgid = os.getpgid(proc.pid)
-    # start_new_session makes the launcher a session leader, so its sid equals its pid.
-    # Adopt it here rather than waiting for resolve_payload, otherwise every sample taken in
-    # the interval between spawning and resolving would count our own payload as foreign.
-    samp.own_also(proc.pid)
-    rss = RssSampler(proc.pid, period=cfg.get("rss_period_s", 0.25))
-    rss.start()
+    # Everything from here to the wait is inside a guard: any exception in setup --
+    # most plausibly "can't start new thread" from a sampler under a cgroup pids.max cap
+    # with several round workers active -- would otherwise escape with the payload running
+    # and no cleanup, which is the original defect by another route.
+    try:
+        pgid = os.getpgid(proc.pid)
+        # start_new_session makes the launcher a session leader, so its sid equals its pid.
+        # Adopt it here rather than waiting for resolve_payload, otherwise every sample taken in
+        # the interval between spawning and resolving would count our own payload as foreign.
+        samp.own_also(proc.pid)
+        rss = RssSampler(proc.pid, period=cfg.get("rss_period_s", 0.25))
+        rss.start()
 
-    # Placement. Two distinct witnesses, never merged: the launcher's inherited cpuset
-    # (which the payload inherits across exec) and the payload's own residency.
-    placement: Dict[str, Any] = {"requested_cpu_mask": cpu_mask}
-    for _ in range(40):
-        try:
-            st = Path(f"/proc/{proc.pid}/status").read_text()
-            placement["launcher_Cpus_allowed_list"] = re.search(
-                r"Cpus_allowed_list:\s*(\S+)", st).group(1)
-            placement["launcher_Mems_allowed_list"] = re.search(
-                r"Mems_allowed_list:\s*(\S+)", st).group(1)
-            break
-        except Exception:
-            time.sleep(0.25)
+        # Placement. Two distinct witnesses, never merged: the launcher's inherited cpuset
+        # (which the payload inherits across exec) and the payload's own residency.
+        placement: Dict[str, Any] = {"requested_cpu_mask": cpu_mask}
+        for _ in range(40):
+            try:
+                st = Path(f"/proc/{proc.pid}/status").read_text()
+                placement["launcher_Cpus_allowed_list"] = re.search(
+                    r"Cpus_allowed_list:\s*(\S+)", st).group(1)
+                placement["launcher_Mems_allowed_list"] = re.search(
+                    r"Mems_allowed_list:\s*(\S+)", st).group(1)
+                break
+            except Exception:
+                time.sleep(0.25)
 
-    payload = resolve_payload(proc.pid, Path(arm["binary"]))
-    placement["payload_identity"] = payload or {
-        "resolved": False,
-        "note": "the process executing the binary was not found beneath the launcher; no "
-                "payload-level memory or cpuset witness is claimed for this run"}
-    if payload:
-        pid = payload["pid"]
-        samp.own_also(payload.get("session"))
+        payload = resolve_payload(proc.pid, Path(arm["binary"]))
+        placement["payload_identity"] = payload or {
+            "resolved": False,
+            "note": "the process executing the binary was not found beneath the launcher; no "
+                    "payload-level memory or cpuset witness is claimed for this run"}
+        if payload:
+            pid = payload["pid"]
+            samp.own_also(payload.get("session"))
+            try:
+                st = Path(f"/proc/{pid}/status").read_text()
+                placement["payload_Cpus_allowed_list"] = re.search(
+                    r"Cpus_allowed_list:\s*(\S+)", st).group(1)
+                placement["payload_Mems_allowed_list"] = re.search(
+                    r"Mems_allowed_list:\s*(\S+)", st).group(1)
+            except Exception:
+                pass
+            # Sample residency mid-run rather than at startup: an early sample catches the
+            # process before it has allocated the arrays the witness is supposed to describe.
+            placement["payload_numa_early"] = numa_residency(pid)
+            threading.Timer(
+                max(1.0, cfg.get("numa_sample_at_s", 5.0)),
+                lambda: placement.__setitem__("payload_numa_midrun", numa_residency(pid))
+            ).start()
+    except BaseException:                        # re-raised below, after cleanup
+        _pgid = None
         try:
-            st = Path(f"/proc/{pid}/status").read_text()
-            placement["payload_Cpus_allowed_list"] = re.search(
-                r"Cpus_allowed_list:\s*(\S+)", st).group(1)
-            placement["payload_Mems_allowed_list"] = re.search(
-                r"Mems_allowed_list:\s*(\S+)", st).group(1)
-        except Exception:
+            _pgid = os.getpgid(proc.pid)
+        except OSError:
             pass
-        # Sample residency mid-run rather than at startup: an early sample catches the
-        # process before it has allocated the arrays the witness is supposed to describe.
-        placement["payload_numa_early"] = numa_residency(pid)
-        threading.Timer(
-            max(1.0, cfg.get("numa_sample_at_s", 5.0)),
-            lambda: placement.__setitem__("payload_numa_midrun", numa_residency(pid))
-        ).start()
+        if _pgid is not None:
+            with _deferred_interrupts(log):
+                _kill_group(proc, _pgid, log, sid=_pgid)
+        raise
 
     timed_out = False
     cleanup: Optional[Dict[str, Any]] = None
+    sid = pgid                                   # launcher is the session leader
     try:
         rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
+        # The normal-exit path must verify the group too. `/usr/bin/time` reaps MotionCorr
+        # and exits while its ghostscript child from joinMultipleEPSIntoSinglePDF can still
+        # be rendering logfile.pdf; that child is reparented to init, keeps the pgid, and
+        # would burn the cpuset underneath the next arm -- and because it inherits the
+        # payload's session the interference sampler adopts it, so it would be neither
+        # killed, nor reported, nor quarantined. Checking only the abnormal paths left a
+        # hole of exactly the shape this function exists to close.
+        residual = group_members(pgid, sid)
+        if residual is None or residual:
+            log.append(f"run exited {rc} but the owned group is not empty: "
+                       f"{'<enumeration failed>' if residual is None else sorted(residual)}")
+            cleanup = _kill_group(proc, pgid, log, sid=sid)
+            cleanup["triggered_by"] = "residual group members after normal exit"
     except subprocess.TimeoutExpired:
         timed_out = True
         log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; "
                    f"terminating owned process group {pgid}")
-        cleanup = _kill_group(proc, pgid, log)
+        cleanup = _kill_group(proc, pgid, log, sid=sid)
+        cleanup["triggered_by"] = "run timeout"
         rc = cleanup["returncode"]
     except BaseException:
-        cleanup = _kill_group(proc, pgid, log)
+        # Shield cleanup from a second interrupt. The block below can run for up to
+        # grace+kill+hold seconds entirely inside time.sleep(), and a second Ctrl-C there
+        # would propagate out with the group unverified. That matters more since
+        # start_new_session took the payload out of the terminal's foreground group, so it
+        # no longer receives the operator's SIGINT directly and depends on this handler.
+        with _deferred_interrupts(log):
+            cleanup = _kill_group(proc, pgid, log, sid=sid)
+            cleanup["triggered_by"] = "exception during run"
         raise
     finally:
         wall = time.time() - t0

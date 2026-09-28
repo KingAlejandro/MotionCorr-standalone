@@ -11,7 +11,8 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 | `gpu/conf_series.json`, `gpu/conf_report.json` | 24-movie confirmation, repaired instrument | timings and product digests **valid** |
 | `cpu64/cpu_series.json`, `cpu64/cpu_report.json` | cpu64 scaling, **instrument v1** | timings valid; interference fields limited, see below |
 | `tooling_controls/controls_cpu64_2026-09-28.log` | tooling controls round 1, runner sha256 `b05260db…` | **superseded — two controls were defective**, see below |
-| `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | current |
+| `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | superseded — reviewer found the residuals below |
+| `tooling_controls/controls_cpu64_round3_2026-09-28.log` | tooling controls round 3, runner sha256 `fbe01390…`, **26 controls, 0 skipped** | current |
 | `gpu/*`, `cpu64/*` build and topology witnesses | build scripts | current |
 
 ## Known artifacts inside the retained records
@@ -60,6 +61,32 @@ process-control results stand. Both were defective:
   returns, and the helper stops escalating while an owned child keeps running. Round 2 adds
   that case and shows both halves: launcher-exit escalation leaves the child alive and
   reparented to init where a descendant walk cannot see it, while pgid enumeration can.
+
+## Why round 2 is superseded
+
+The delta review confirmed the reported cancellation defect fixed but found four residual
+paths and did **not** confirm the payload control. Round 3 closes them:
+
+- **R1 (material).** Only the abnormal exit paths verified the group. A payload that exits 0
+  while leaking a child — MotionCorr finishing while its ghostscript child still renders —
+  left that child reparented, still in the group, burning the cpuset under the next arm, and
+  adopted by the interference sampler so it was not even reported. Now every exit path
+  verifies. `control_6` proves it fires: exit 0, residual detected, child reaped, confirmed.
+- **R2.** A second Ctrl-C during the up-to-80 s cleanup escaped with the group unverified —
+  worse since `start_new_session` removed the payload from the terminal's foreground group.
+  Cleanup now defers SIGINT/SIGTERM and re-raises after.
+- **R3.** The window between `Popen` and the `try` was uncovered; a `can't start new thread`
+  under a `pids.max` cap would escape with the payload running. Now guarded.
+- **R4.** `group_members` returned `{}` when `/proc` could not be enumerated, so "could not
+  look" read as "group is empty" and cleanup reported confirmed. It now returns `None` and
+  the caller treats that as unconfirmed.
+- **FIX 2 not confirmed.** The mutation half mutated the *test's* argument, not production:
+  reverting `execute_arm` to sample `proc.pid` would have left it green. `control_5` now
+  runs `execute_arm` against a real compiled ELF stub and asserts on the emitted record —
+  193.38 MiB for the payload where a launcher-sampling record would read ~1.5 MiB.
+- **Skips counted as passes.** Four `check(..., True, "SKIP")` sites meant the suite printed
+  "all controls passed" on a host where only one ran. Skips are now tracked separately and
+  exit non-zero.
 
 ## What is unaffected
 

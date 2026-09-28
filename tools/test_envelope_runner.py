@@ -43,11 +43,24 @@ spec.loader.exec_module(er)
 
 LINUX = os.path.isdir("/proc")
 results = []
+skipped = []
 
 
 def check(name, ok, detail=""):
-    results.append((name, ok, detail))
+    results.append((name, bool(ok), detail))
     print(f"  {'PASS' if ok else 'FAIL'}  {name}" + (f"  {detail}" if detail else ""))
+
+
+def skip(name, why=""):
+    """A control that did not run is NOT a pass.
+
+    These previously went through `check(name, True, "SKIP: ...")`, so on a host without
+    /proc the suite executed one control out of five and printed "all runner controls
+    passed" -- the same false-green shape as the `if pid != launcher` guard these controls
+    exist to remove. Skips are tracked separately and named in the summary.
+    """
+    skipped.append((name, why))
+    print(f"  SKIP  {name}" + (f"  ({why})" if why else ""))
 
 
 def control_1_sequential_sizes_are_not_a_peak():
@@ -81,7 +94,7 @@ def control_2_witness_follows_the_payload():
     parent must FAIL the allocation assertion that sampling the child passes.
     """
     if not LINUX:
-        check("payload witness follows the child, not the launcher", True, "SKIP: no /proc")
+        skip("payload witness follows the child, not the launcher", "no /proc".strip())
         return
     big_mib = 256
     child = HERE / ".control_child.py"
@@ -93,8 +106,7 @@ def control_2_witness_follows_the_payload():
         "time.sleep(8)\n")
     timev = "/usr/bin/time"
     if not os.path.exists(timev):
-        check("payload witness follows the child, not the launcher", True,
-              "SKIP: /usr/bin/time absent")
+        skip("payload witness follows the child, not the launcher", "/usr/bin/time absent".strip())
         child.unlink(missing_ok=True)
         return
     proc = None
@@ -163,7 +175,7 @@ def control_3_child_ignoring_sigterm_is_still_reaped():
       (b) the shipped helper reaps it and reports cleanup_confirmed.
     """
     if not LINUX:
-        check("child ignoring SIGTERM is reaped", True, "SKIP")
+        skip("child ignoring SIGTERM is reaped", "".strip())
         return
 
     src = HERE / ".control_parent.py"
@@ -173,14 +185,31 @@ def control_3_child_ignoring_sigterm_is_still_reaped():
         "\"import signal,time;signal.signal(signal.SIGTERM,signal.SIG_IGN);"
         "time.sleep(120)\"])\n"
         "signal.signal(signal.SIGTERM, lambda *a: os._exit(0))\n"
+        # The child reports readiness only AFTER installing SIG_IGN, so the test never
+        # signals before the handler exists. A fixed sleep raced cold-start CPython on a
+        # loaded host and produced a flaky FAIL that reads like a runner regression.
+        "import time as _t\n"
+        "for _ in range(200):\n"
+        "    try:\n"
+        "        st = open('/proc/%d/stat' % child.pid).read()\n"
+        "        if st.rsplit(')',1)[1].split()[29] != '0': break\n"
+        "    except OSError: pass\n"
+        "    _t.sleep(0.05)\n"
         "sys.stderr.write(str(child.pid)+'\\n'); sys.stderr.flush()\n"
         "time.sleep(120)\n")
+
+    spawned = []
 
     def spawn():
         pr = subprocess.Popen([sys.executable, str(src)], start_new_session=True,
                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        spawned.append(pr)
         kid = int(pr.stderr.readline().strip())
-        time.sleep(0.4)
+        # Confirm the ignore-handler really is installed before signalling.
+        for _ in range(100):
+            if _sigign_mask(kid):
+                break
+            time.sleep(0.05)
         return pr, kid
 
     try:
@@ -198,8 +227,14 @@ def control_3_child_ignoring_sigterm_is_still_reaped():
               f"child={kid} alive={leaked} ppid_now={_ppid(kid)} "
               f"descendants_of_launcher={sorted(er._descendants(pr.pid))}")
         members = er.group_members(pgid)
-        check("pgid enumeration sees the reparented child (descent does not)",
-              kid in members, f"group_members={sorted(members)}")
+        check("pgid enumeration sees the reparented child",
+              bool(members) and kid in members, f"group_members={sorted(members or {})}")
+        # Assert the contrast the whole fix rests on, rather than only naming it: a change
+        # that made the descendant walk see the child would otherwise leave this green
+        # under a now-false label.
+        check("a descendant walk CANNOT see it (this is why pgid is used)",
+              kid not in er._descendants(pr.pid),
+              f"descendants_of_launcher={sorted(er._descendants(pr.pid))}")
         try:
             os.killpg(pgid, signal.SIGKILL)
         except OSError:
@@ -220,7 +255,22 @@ def control_3_child_ignoring_sigterm_is_still_reaped():
         check("cleanup escalated to SIGKILL rather than trusting SIGTERM",
               res["escalated_to_sigkill"] is True, f"escalated={res['escalated_to_sigkill']}")
     finally:
+        # A control about not leaking processes must not leak processes.
+        for pr in spawned:
+            try:
+                os.killpg(os.getpgid(pr.pid), signal.SIGKILL)
+            except OSError:
+                pass
         src.unlink(missing_ok=True)
+
+
+def _sigign_mask(pid: int) -> bool:
+    """True once the process has SIGTERM in its ignored-signal mask (field 32 of stat)."""
+    try:
+        raw = open(f"/proc/{pid}/stat").read()
+        return int(raw.rsplit(")", 1)[1].split()[29]) & (1 << (signal.SIGTERM - 1)) != 0
+    except (OSError, ValueError, IndexError):
+        return False
 
 
 def _ppid(pid: int):
@@ -233,13 +283,171 @@ def _is_zombie(pid: int) -> bool:
     return bool(f and len(f) > er.F_STATE and f[er.F_STATE] == "Z")
 
 
+def control_5_execute_arm_records_the_payload_not_the_launcher():
+    """End-to-end: assert the witness `execute_arm` actually writes.
+
+    control_2 proves `resolve_payload` and `numa_residency` can tell a payload from its
+    launcher, but it calls both itself with pids of its own choosing. That cannot reject the
+    bug it exists for: reverting `execute_arm` to sample `proc.pid` leaves every control_2
+    assertion passing. This control runs `execute_arm` against a stub binary and asserts on
+    the emitted record, so the production wiring is what is under test.
+    """
+    if not LINUX:
+        skip("execute_arm records the payload, not the launcher", "no /proc")
+        return
+    import shutil, tempfile
+    cc = shutil.which("cc") or shutil.which("gcc")
+    if not cc:
+        skip("execute_arm records the payload, not the launcher", "no C compiler")
+        return
+    big_mib = 192
+    stub_dir = pathlib.Path(tempfile.mkdtemp(prefix="envelope-stub-"))
+    # A real ELF, because resolve_payload identifies the payload by /proc/<pid>/exe -- the
+    # strong check. A shebang script's exe is its interpreter, so it could never match, and
+    # production's payload (motioncorr) is a compiled binary. The stub ignores the runner's
+    # arguments the way a real payload would accept them.
+    src = stub_dir / "stub.c"
+    src.write_text(
+        "#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n"
+        "int main(int argc, char **argv){ (void)argc; (void)argv;\n"
+        f"  size_t n = (size_t){big_mib} * 1024UL * 1024UL;\n"
+        "  char *b = malloc(n); if(!b) return 1;\n"
+        "  memset(b, 1, n);\n"
+        "  sleep(4); return 0; }\n")
+    stub = stub_dir / "stub_payload"
+    rc = subprocess.run([cc, "-O0", "-o", str(stub), str(src)],
+                        capture_output=True, text=True)
+    if rc.returncode != 0:
+        skip("execute_arm records the payload, not the launcher",
+             f"stub build failed: {rc.stderr.strip()[:80]}")
+        return
+    out = stub_dir / "out"
+    arm = {"id": "ctl5", "binary": str(stub), "cwd": str(stub_dir), "input_star": "x.star",
+           "j": 1, "gpu": None, "cpu_mask": _own_mask(), "extra_opts": []}
+    cfg = {"own_user": os.environ.get("USER", "?"), "settle_full_gate": False,
+           "inter_run_quiet_s": 0.0, "run_timeout_s": 120, "numa_sample_at_s": 1.5,
+           "rss_period_s": 0.25, "device_sample_period_s": 0.5,
+           "foreign_sample_period_s": 1.0, "_first_run_done": True}
+    try:
+        rec = er.execute_arm(arm, cfg, out, pair_index=0, order_in_pair=0, rep=1)
+    except Exception as exc:
+        check("execute_arm completed against the stub", False, f"{type(exc).__name__}: {exc}")
+        return
+    pl = (rec.get("placement") or {}).get("payload_identity") or {}
+    check("execute_arm resolved a payload identity", bool(pl.get("pid")), f"{pl}")
+    if not pl.get("pid"):
+        return
+    check("recorded payload PID differs from the launcher PID",
+          pl["pid"] != pl.get("launcher_pid"),
+          f"payload={pl['pid']} launcher={pl.get('launcher_pid')}")
+    check("recorded payload exe is the stub binary, not /usr/bin/time",
+          os.path.basename(pl.get("exe", "")) == "stub_payload", f"exe={pl.get('exe')}")
+    mid = (rec.get("placement") or {}).get("payload_numa_midrun") or {}
+    got = mid.get("resident_MiB_total", 0.0)
+    # The launcher is ~1.5 MiB; the payload ~200 MiB. A record produced by sampling the
+    # launcher cannot clear this.
+    check(f"recorded mid-run residency is the payload's (> {big_mib // 2} MiB)",
+          got > big_mib * 0.5,
+          f"recorded={got} MiB  (a launcher-sampling record would be ~1.5 MiB)")
+    check("recorded cleanup is confirmed on the normal-exit path",
+          not rec.get("cleanup_unconfirmed"),
+          f"cleanup={rec.get('cleanup')}")
+    print(f"        record: pid={pl['pid']} launcher={pl.get('launcher_pid')} "
+          f"exe={pl.get('exe')} midrun={got} MiB nodes={mid.get('resident_bytes_by_node')}")
+
+
+def control_6_normal_exit_with_a_leaked_child_is_caught():
+    """R1: the NORMAL-exit path must verify the group, not only the timeout path.
+
+    Production shape: MotionCorr exits 0 while its ghostscript child from
+    joinMultipleEPSIntoSinglePDF is still rendering. `/usr/bin/time` reaps the payload and
+    exits, `proc.wait()` returns 0, and the child -- reparented to init but still in the
+    group -- keeps burning the cpuset underneath the next arm. Because it inherits the
+    payload's session the interference sampler adopts it, so without this check it would be
+    neither killed, nor reported as interference, nor quarantined.
+    """
+    if not LINUX:
+        skip("normal exit with a leaked child is caught", "no /proc")
+        return
+    import shutil, tempfile
+    cc = shutil.which("cc") or shutil.which("gcc")
+    if not cc:
+        skip("normal exit with a leaked child is caught", "no C compiler")
+        return
+    d = pathlib.Path(tempfile.mkdtemp(prefix="envelope-leak-"))
+    (d / "leak.c").write_text(
+        "#include <unistd.h>\n#include <stdio.h>\n"
+        "int main(int argc, char **argv){ (void)argc; (void)argv;\n"
+        "  pid_t p = fork();\n"
+        "  if (p == 0) { sleep(120); _exit(0); }\n"      # child outlives the parent
+        "  printf(\"%d\\n\", (int)p); fflush(stdout);\n"
+        "  sleep(1); return 0; }\n")                      # parent exits 0, normally
+    stub = d / "leaky_payload"
+    rc = subprocess.run([cc, "-O0", "-o", str(stub), str(d / "leak.c")],
+                        capture_output=True, text=True)
+    if rc.returncode != 0:
+        skip("normal exit with a leaked child is caught", "stub build failed")
+        return
+    arm = {"id": "ctl6", "binary": str(stub), "cwd": str(d), "input_star": "x.star",
+           "j": 1, "gpu": None, "cpu_mask": _own_mask(), "extra_opts": []}
+    cfg = {"own_user": os.environ.get("USER", "?"), "settle_full_gate": False,
+           "inter_run_quiet_s": 0.0, "run_timeout_s": 60, "numa_sample_at_s": 0.5,
+           "rss_period_s": 0.25, "device_sample_period_s": 0.5,
+           "foreign_sample_period_s": 1.0, "_first_run_done": True}
+    rec = er.execute_arm(arm, cfg, d / "out", pair_index=0, order_in_pair=0, rep=1)
+    leaked_pid = None
+    stdout_log = d / "out" / "ctl6_pair0_ord0_rep1" / "stdout.log"
+    try:
+        leaked_pid = int(stdout_log.read_text().split()[0])
+    except Exception as exc:
+        leaked_pid = None
+        check("read the leaked child's pid from the stub's stdout", False,
+              f"{stdout_log}: {type(exc).__name__}")
+    check("payload exited normally (this is the normal-exit path)", rec["exit_code"] == 0,
+          f"exit_code={rec['exit_code']} timed_out={rec.get('timed_out')}")
+    cl = rec.get("cleanup")
+    check("R1: the normal-exit path detected the residual group member", bool(cl),
+          f"cleanup={cl if not cl else cl.get('triggered_by')}")
+    if cl:
+        check("R1: it was triggered by residual members, not a timeout",
+              cl.get("triggered_by") == "residual group members after normal exit",
+              f"triggered_by={cl.get('triggered_by')}")
+        check("R1: the leaked child was reaped and cleanup confirmed",
+              cl.get("cleanup_confirmed") is True,
+              f"confirmed={cl.get('cleanup_confirmed')} survivors={cl.get('surviving_group_members')}")
+    if leaked_pid:
+        alive = er._alive(leaked_pid) and not _is_zombie(leaked_pid)
+        check("R1: the leaked child is actually dead afterwards", not alive,
+              f"leaked_pid={leaked_pid} alive={alive}")
+        if alive:                                # never leave it behind
+            try:
+                os.kill(leaked_pid, signal.SIGKILL)
+            except OSError:
+                pass
+
+
+def _reap(proc) -> None:
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except OSError:
+        pass
+
+
+def _own_mask() -> str:
+    try:
+        return open(f"/proc/{os.getpid()}/status").read().split(
+            "Cpus_allowed_list:")[1].split()[0]
+    except Exception:
+        return "0"
+
+
 def control_4_payload_is_not_its_own_interference():
     """The payload runs in its own session so cancellation can target the whole group.
     A sampler that owns only the runner's session would then report the very process being
     measured as foreign load inside its own lane -- a self-inflicted contamination reading
     that looks exactly like a real neighbour."""
     if not LINUX:
-        check("payload is not counted as its own interference", True, "SKIP")
+        skip("payload is not counted as its own interference", "".strip())
         return
     mask = open(f"/proc/{os.getpid()}/status").read().split("Cpus_allowed_list:")[1].split()[0]
     cpus = sorted(er.parse_cpu_list(mask))
@@ -251,10 +459,13 @@ def control_4_payload_is_not_its_own_interference():
     proc = subprocess.Popen(["taskset", "-c", str(cpus[0]), sys.executable, "-c", burn],
                             start_new_session=True,
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    s1.own_also(proc.pid)                      # sid == pid for a session leader
-    time.sleep(2.5)
-    proc.wait()
-    s1.stop(); s1.join(timeout=5)
+    try:
+        s1.own_also(proc.pid)                  # sid == pid for a session leader
+        time.sleep(2.5)
+        proc.wait()
+    finally:
+        _reap(proc)
+        s1.stop(); s1.join(timeout=5)
     # Assert on the payload's own command, not on a global zero: this host has permanent
     # unpinned ctffind, so "no foreign threads at all" is not achievable and asserting it
     # would make the control fail for a reason unrelated to what it tests.
@@ -273,9 +484,12 @@ def control_4_payload_is_not_its_own_interference():
     p2 = subprocess.Popen(["taskset", "-c", str(cpus[0]), sys.executable, "-c", burn],
                           start_new_session=True,
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(2.5)
-    p2.wait()
-    s2.stop(); s2.join(timeout=5)
+    try:
+        time.sleep(2.5)
+        p2.wait()
+    finally:
+        _reap(p2)
+        s2.stop(); s2.join(timeout=5)
     unadopted_hits = s2.foreign_detail.get(me, 0)
     check("without adoption the same payload IS seen (control is not vacuous)",
           unadopted_hits >= 1, f"{me} hits={unadopted_hits}")
@@ -287,9 +501,21 @@ def main():
     control_2_witness_follows_the_payload()
     control_3_child_ignoring_sigterm_is_still_reaped()
     control_4_payload_is_not_its_own_interference()
+    control_5_execute_arm_records_the_payload_not_the_launcher()
+    control_6_normal_exit_with_a_leaked_child_is_caught()
     bad = [n for n, ok, _ in results if not ok]
-    print(("\nFAILED: " + ", ".join(bad)) if bad else "\nall runner controls passed")
-    return 1 if bad else 0
+    if bad:
+        print("\nFAILED: " + ", ".join(bad))
+    elif skipped:
+        print(f"\n{len(results)} control(s) passed, {len(skipped)} SKIPPED and therefore "
+              f"NOT verified here:")
+        for n, why in skipped:
+            print(f"  - {n}" + (f" ({why})" if why else ""))
+        print("this is NOT a green run; re-run on a host where the skipped controls execute")
+    else:
+        print(f"\nall {len(results)} runner controls passed, 0 skipped")
+    # A skip is not a pass: exit non-zero so CI or an operator cannot read it as green.
+    return 1 if bad else (2 if skipped else 0)
 
 
 if __name__ == "__main__":

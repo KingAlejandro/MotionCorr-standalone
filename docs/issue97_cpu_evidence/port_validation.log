@@ -1,6 +1,6 @@
-############ START 2026-09-28T15:32:20+00:00 ############
+############ START 2026-09-28T15:36:57+00:00 ############
 [lock] waiting
-[lock] acquired after 0s at 2026-09-28T15:32:20+00:00
+[lock] acquired after 0s at 2026-09-28T15:36:57+00:00
 ===== PROVENANCE =====
 
 $ hostname
@@ -18,11 +18,11 @@ NUMA node1 CPU(s):                    32-63
 Cpus_allowed_list:	40-55
 Mems_allowed_list:	0-1
 --- load at start ---
-4.70 6.56 4.84 4/8001 3537057
+3.75 5.54 4.95 4/7993 3542074
 --- other users of cores 32-63 ---
     PID USER     %CPU PSR ELAPSED COMMAND
-3527719 ubuntu    108  48     423 tiff_reader_ben
-3536950 root      1.1  47       1 sshd
+3542075 ubuntu    400  54       0 ps
+3527719 ubuntu    125  59     700 tiff_reader_ben
 
 $ /home/ubuntu/.mc-venv/bin/cmake --version
 cmake version 4.4.3
@@ -44,13 +44,14 @@ exit=0
 
 ===== SOURCE (two independent clones, checked out from the remote) =====
 [base] HEAD=8323c55faf1c4ddbe35dd36c5cd1266d48f25c38  tree=9f5dd916441a6965675acd4b900d91fa43db0e49  dirty=0
-[fixed] HEAD=b8505dde04cfea68e78f8bee9d6d12210f19ce5e  tree=59836c09c3c08ec0cf4cf3824e8ec040b3625884  dirty=0
+[fixed] HEAD=4b25d35a6a885d087e295564e660ad3af59b70ba  tree=36eceaf90013578bbacff0f73c1f33096c71b6b7  dirty=0
 --- every file that differs between the two trees ---
 
 $ git -C /home/ubuntu/mc-issue97-port/src-fixed diff --stat 8323c55 HEAD
  CMakeLists.txt                                     |   7 +
  SOURCE_MANIFEST.txt                                |   8 +
  agents/designs/issue_97_recenter_origin.md         |  71 +++
+ docs/issue97_cpu_evidence/PORT.md                  |  88 ++++
  docs/issue97_cpu_evidence/README.md                | 215 +++++++++
  docs/issue97_cpu_evidence/compare_products.py      | 143 ++++++
  .../cpu64_product_comparison.log                   |  44 ++
@@ -59,6 +60,7 @@ $ git -C /home/ubuntu/mc-issue97-port/src-fixed diff --stat 8323c55 HEAD
  .../issue97_cpu_evidence/followup_measurements.log |  86 ++++
  .../issue97_cpu_evidence/port_assertion_margins.py |  83 ++++
  .../port_option_off_control.py                     |  44 ++
+ docs/issue97_cpu_evidence/port_validation.log      | 292 ++++++++++++
  docs/issue97_cpu_evidence/port_validation.sh       | 108 +++++
  docs/issue97_cpu_evidence/run_validation.sh        | 144 ++++++
  src/motioncorr_runner.cpp                          |  22 +-
@@ -67,7 +69,7 @@ $ git -C /home/ubuntu/mc-issue97-port/src-fixed diff --stat 8323c55 HEAD
  tests/test_runner_numerics.cpp                     | 114 +++++
  tools/test_ci_fail_closed.py                       |  10 +-
  tools/validate_test_collection.py                  |  10 +-
- 19 files changed, 1790 insertions(+), 14 deletions(-)
+ 21 files changed, 2170 insertions(+), 14 deletions(-)
 exit=0
 --- production delta, whole of src/ ---
 
@@ -126,8 +128,8 @@ a1a071b8ac4bdbb0e01feed7c0f85f079987307a2e6700d803a3f0b7646b38d4  /home/ubuntu/m
 c2e3135e1f17788fbeac11224cae6d8c1fc90ecc60f83275905f84e73894d41d  /home/ubuntu/mc-issue97-port/src-fixed/src/motioncorr_runner.h
 cd525fb35f461676fda2cf6391872848b00cb726aaff149ffcbf6191744ec2d7  /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py
 043a2b1483063025e6107e8cd7395fa13e843a5aad46df56ce4848d3cc2f301d  /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_numerics.cpp
-c535b9df391e04e1ee432b799d92d1d4d806557241a32157eba6d24d309d05fa  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_assertion_margins.py
-691e1c98ea53dbe2e59599bf2c33a2893cd3e6530f05bd66eb172bb3b8394af2  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_option_off_control.py
+101dd8d8a3ec698e97d55083f2751f7b6e56bcab7aa1ab2697f116f6673ab730  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_assertion_margins.py
+284953231b5d177b24ff8dd628f19effc43747a25f763ccbe2c6f899f64bf174  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_option_off_control.py
 
 ===== BUILD (Release, -j16, pinned, out of tree) =====
 [base] configure exit=0
@@ -202,12 +204,12 @@ exit=1
 
 100% tests passed out of 20
 
-Total Test time (real) =  15.23 sec
+Total Test time (real) =  14.56 sec
 [base] ctest exit=0
 
 100% tests passed out of 18
 
-Total Test time (real) =  14.62 sec
+Total Test time (real) =  13.87 sec
 --- the two new cases must not exist on base ---
 
 $ taskset -c 40-55 numactl --membind=1 ctest --test-dir /home/ubuntu/mc-issue97-port/build-base -R RunnerInterpolate -N
@@ -287,6 +289,6 @@ option-on   MRC pixel payload (65536 B): DIFFERS   per-movie STAR: 90/155 lines 
 exit=0
 
 --- load at end ---
-7.06 7.14 5.22 4/8005 3540891
+7.21 6.41 5.32 20/7997 3545765
 STATUS=DONE
-############ END 2026-09-28T15:33:49+00:00 ############
+############ END 2026-09-28T15:38:26+00:00 ############

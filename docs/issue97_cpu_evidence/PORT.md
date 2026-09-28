@@ -2,7 +2,9 @@
 
 Raw log: `port_validation.log`. Harness: `port_validation.sh`, which runs
 `port_assertion_margins.py` and `port_option_off_control.py` from the candidate tree and
-hashes both before running them. Second platform: `port_validation_darwin.log`.
+hashes both before running them. Second platform: `port_validation_darwin.log` — clean clones and an independent toolchain,
+corroborating only. `SyntheticRegression` fails there on **both** trees against a
+Linux-generated baseline; no file on this branch can reach it.
 
 ## Identity
 
@@ -15,7 +17,7 @@ rebuild the original sources.
 | | |
 |---|---|
 | base | `8323c55faf1c4ddbe35dd36c5cd1266d48f25c38`, tree `9f5dd916…`, clean |
-| candidate | `b8505dde04cfea68e78f8bee9d6d12210f19ce5e`, tree `59836c09…`, clean |
+| candidate | `4b25d35a6a885d087e295564e660ad3af59b70ba`, tree `36eceaf9…`, clean |
 | binaries | base `ce9b97d1…`, candidate `789171c3…` |
 | host | cpu64 (`small-refmac-machine`), CPUs 40-55 on NUMA node 1, `membind=1`, `flock /tmp/motioncorr-issue96-cpu-validation.lock`, `-j16` |
 
@@ -23,8 +25,9 @@ The log prints `git diff --stat` over the whole tree and `diff -r` over the whol
 The only production delta is the fix. No timing is measured or claimed: `ctffind` was
 running on the same box throughout.
 
-The prose in this file and in the PR body was written after the run; nothing else in the
-candidate tree changed, so the validated tree is the PR head minus those edits.
+The validated candidate tree is `36eceaf9…` at commit `4b25d35`. Everything committed after
+it is this file and the two logs it summarises — `git diff 4b25d35..HEAD` touches no source,
+test, build or tooling file.
 
 ## Results
 
@@ -64,8 +67,10 @@ original code manufactures.
 
 **The margin is a range, and the weak end is the one that matters.** Each detector is
 violated by between **0.000444 px and 0.068627 px**, which is **15× to 2288×** the 3e-5
-tolerance. The 15× observation is the weakest thing the detectors are asked to resolve; it
-is a Y-axis patch whose local motion is nearly flat. On the candidate the cross-arm anchors
+tolerance. The 15× observation is the weakest thing the detectors are asked to resolve — a
+Y-axis patch whose local motion is nearly flat — and it is the figure to quote, not the
+maximum. On darwin the same span is 44× to 2282×, so 15× is the binding observation across
+both platforms rather than a property of one. On the candidate the cross-arm anchors
 agree to 0.000000 and the linearity residual is at most 0.000010, inside the 2e-5 analytic
 rounding bound (four values, each `%12.5f`/`%12.6f`, so 5e-6 apiece —
 `src/metadata_table.cpp`).

@@ -141,9 +141,22 @@ int main()
     check(ms2 < 1000, "rect exceeding INT32 range completes in <1s");
 
     std::cout << "== integer overflow boundary ==\n";
+    // Regression: an out-of-range value sets failbit only AFTER consuming its
+    // digits, so a recovery read names the FOLLOWING token. This asserted the
+    // wrong token ("5") until the parser switched to token-wise conversion.
     int rc = run(m, ny, nx, "0 0 99999999999999999999999 5\n", "o1", &msg);
-    std::cout << "  INFO  >LLONG_MAX width -> "
-              << (rc ? "REJECTED: " + msg : "accepted") << "\n";
+    check(rc == 1 && msg.find("99999999999999999999999") != std::string::npos,
+          ">LLONG_MAX width names the offending value, not the next field");
+    check(msg.find("Out-of-range") != std::string::npos && msg.find("'w'") != std::string::npos,
+          ">LLONG_MAX width reported as out-of-range on field 'w'");
+    run(m, ny, nx, "0 -99999999999999999999999 5 5\n", "o3", &msg);
+    check(msg.find("'y'") != std::string::npos, "out-of-range negative names field 'y'");
+    run(m, ny, nx, "0 0 5abc 5\n", "o4", &msg);
+    check(msg.find("\"5abc\"") != std::string::npos && msg.find("'w'") != std::string::npos,
+          "trailing garbage after digits rejected, whole token quoted");
+    run(m, ny, nx, "0 0\n", "o5", &msg);
+    check(msg.find("after 2 of 4 fields") != std::string::npos,
+          "truncated record reports how many fields were read");
     rc = run(m, ny, nx, "9223372036854775807 0 9223372036854775807 5\n", "o2", &msg);
     check(rc == 0 && count_set(m) == 0,
           "LLONG_MAX x+w does not overflow or crash, paints 0 px");

@@ -1,13 +1,13 @@
 #!/bin/bash
 set -uo pipefail
 source ~/.mc-venv/bin/activate
-R=$HOME/mc-i99r2
+R=$HOME/mc-i99f
 rm -rf "$R"; mkdir -p "$R"
 exec > >(tee "$R/run.log") 2>&1
 
-NEW_SHA=10842690b48aacdcd1c6404ba021ad8ce7676e5d   # fixed writer + fixed tests
-OLDT_SHA=33dee9e25568bb64bcfff018a9b79bf66b77a28c  # fixed writer + PRE-delta tests
-NEG_SHA=28727aa1eab62b6f34417ec465785cc4b3a65455   # pre-fix main + fixed tests
+NEW_SHA=57ba66180e1e9fe64a48551364985d49d2853a1b
+OLDT_SHA=fb2fab8e6b91356e796d10f38a7891459b212428
+NEG_SHA=2101c3c3a1c1fd1a41b2ac7ad62c48097c4eba41
 
 echo "=== provenance: host, payload, cpuset, NUMA, memory policy, load ==="
 date -Is; hostname; uname -r
@@ -23,13 +23,13 @@ python3 -c "import resource;print(resource.getrlimit(resource.RLIMIT_FSIZE))"
 echo "-- filesystem:"; df -T /tmp "$HOME" | tail -3
 echo "-- heaviest processes right now:"; ps -eo user,pid,pcpu,pmem,comm --sort=-pcpu | head -6
 echo "-- toolchain:"; cmake --version|head -1; g++ --version|head -1; python3 --version
-sha256sum "$HOME/mc-i99r2.bundle"
+sha256sum "$HOME/mc-i99f.bundle"
 
 stage () {
   local name=$1 sha=$2
   echo "--- stage $name @ $sha ---"
   rm -rf "$R/src-$name"; git init --quiet "$R/src-$name"
-  git -C "$R/src-$name" fetch "$HOME/mc-i99r2.bundle" '+refs/heads/*:refs/remotes/bundle/*' >/dev/null 2>&1 \
+  git -C "$R/src-$name" fetch "$HOME/mc-i99f.bundle" '+refs/heads/*:refs/remotes/bundle/*' >/dev/null 2>&1 \
     || { echo "FETCH FAILED $name"; return 1; }
   git -C "$R/src-$name" checkout --quiet --detach "$sha" || { echo "CHECKOUT FAILED $name"; return 1; }
   local got; got=$(git -C "$R/src-$name" rev-parse HEAD)
@@ -55,6 +55,22 @@ build () {
   taskset -c 32-63 grep -E 'Cpus_allowed_list|Mems_allowed_list' /proc/self/status
 }
 
+run_under () {  # name builddir blocks
+  local name=$1 bd=$2 blocks=$3
+  echo "----- $name under ulimit -f $blocks -----"
+  ( cd "$bd" && taskset -c 32-63 bash -c "
+      ulimit -f $blocks || { echo 'ULIMIT FAILED'; exit 90; }
+      python3 -c \"
+import resource, sys
+p = resource.getrlimit(resource.RLIMIT_FSIZE)
+print('inherited by ctest:', p)
+sys.exit(1 if p[1] == resource.RLIM_INFINITY else 0)
+\" || { echo 'CONTROL VOID: hard limit still infinity; nothing was applied'; exit 91; }
+      ctest -V -R 'ImageWriteFaults|WriteFaults'" ) > "$R/hl-$name.log" 2>&1
+  echo "exit=$?"
+  grep -E "CONTROL VOID|ULIMIT FAILED|inherited by ctest|inherited RLIMIT|precheck|setrlimit|SubprocessError|what\\(\\):|phase [0-9]|finite-hard|Passed|[*][*][*]|tests passed|tests failed" "$R/hl-$name.log" | head -28
+}
+
 body () {
 echo "### lock acquired"; date -Is
 
@@ -69,23 +85,14 @@ taskset -c 32-63 ctest --output-on-failure -j 4 > "$R/ctest-new.log" 2>&1
 echo "exit=$?"; grep -E 'Test +#|tests passed|tests failed' "$R/ctest-new.log" | tail -20
 
 echo
-echo "########## 2. CANDIDATE: the two fault tests under a FINITE hard RLIMIT_FSIZE ##########"
-echo "(ulimit -H -f 8192 => hard limit 8388608 bytes, lowered irreversibly, unprivileged)"
-cd "$R/src-new/build-cpu"
-taskset -c 32-63 bash -c 'ulimit -H -f 8192; echo "shell RLIMIT_FSIZE: $(python3 -c "import resource;print(resource.getrlimit(resource.RLIMIT_FSIZE))")"; ctest -V -R "ImageWriteFaults|WriteFaults"' > "$R/ctest-new-hardlimit.log" 2>&1
-echo "exit=$?"
-grep -E 'shell RLIMIT|^1[0-9]*:|Passed|Failed|tests passed|tests failed' "$R/ctest-new-hardlimit.log" | tail -30
-
-echo
-echo "########## 3. HARNESS CONTROL: PRE-DELTA tests, same fixed writer, same finite hard limit ##########"
-echo "########## these MUST fail, and must fail at the rlimit plumbing, not at a writer assertion ##########"
-cd "$R/src-oldt/build-cpu"
-taskset -c 32-63 bash -c 'ulimit -H -f 8192; ctest -V -R "ImageWriteFaults|WriteFaults"' > "$R/ctest-oldt-hardlimit.log" 2>&1
-echo "exit=$? (nonzero is the expected result)"
-grep -E 'setrlimit|ValueError|OSError|Traceback|preexec|unexpected exception|Passed|Failed|tests passed|tests failed' "$R/ctest-oldt-hardlimit.log" | head -25
-echo "-- and the same PRE-DELTA tests WITHOUT the finite hard limit (must pass: isolates the cause) --"
-taskset -c 32-63 ctest -R "ImageWriteFaults|WriteFaults" > "$R/ctest-oldt-nolimit.log" 2>&1
-echo "exit=$? (zero expected)"; grep -E 'tests passed|tests failed' "$R/ctest-oldt-nolimit.log"
+echo "########## 2-3. FINITE HARD RLIMIT_FSIZE: candidate and pre-delta tests ##########"
+echo "########## 'ulimit -f N' sets BOTH; 'ulimit -H -f N' leaves soft=infinity and is rejected by the kernel ##########"
+run_under candidate-8Mi "$R/src-new/build-cpu"  8192
+run_under candidate-4Mi "$R/src-new/build-cpu"  4096
+run_under predelta-8Mi  "$R/src-oldt/build-cpu" 8192
+echo "----- predelta with NO finite hard limit (isolates the cause) -----"
+( cd "$R/src-oldt/build-cpu" && taskset -c 32-63 ctest -R "ImageWriteFaults|WriteFaults" ) > "$R/hl-predelta-nolimit.log" 2>&1
+echo "exit=$?"; grep -E "tests passed|tests failed" "$R/hl-predelta-nolimit.log"
 
 echo
 echo "########## 4. NEGATIVE CONTROL: pre-fix main + the new tests (writer defect must still be detected) ##########"
@@ -129,6 +136,13 @@ echo -n "mov/p.mrc payload sha256: "; tail -c +1025 "$W/out/mov/p.mrc" | sha256s
 echo -n "mov/p.mrc bytes: "; stat -c %s "$W/out/mov/p.mrc"
 echo "(expected payload 1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3, 1049600 bytes)"
 
+echo
+echo "########## 7. VACUITY GUARD: stray MC_WRITE_FAULTS_IN_CHILD with no finite hard limit ##########"
+echo "########## must FAIL rather than print a control it never ran ##########"
+cd "$R/src-new/build-cpu"
+taskset -c 32-63 env MC_WRITE_FAULTS_IN_CHILD=1 ./image_write_faults > "$R/vacuity.log" 2>&1
+echo "exit=$? (nonzero expected)"; cat "$R/vacuity.log"
+
 echo "### load at end:"; uptime
 echo "### done"; date -Is
 }
@@ -136,6 +150,6 @@ echo "### done"; date -Is
 echo "### acquiring /tmp/motioncorr-issue96-cpu-validation.lock"
 flock /tmp/motioncorr-issue96-cpu-validation.lock bash -c "
   R=$R; NEW_SHA=$NEW_SHA; OLDT_SHA=$OLDT_SHA; NEG_SHA=$NEG_SHA
-  $(declare -f stage); $(declare -f build); $(declare -f body); body
+  $(declare -f stage); $(declare -f build); $(declare -f run_under); $(declare -f body); body
 "
 echo "=== ALL DONE rc=$? ==="; date -Is

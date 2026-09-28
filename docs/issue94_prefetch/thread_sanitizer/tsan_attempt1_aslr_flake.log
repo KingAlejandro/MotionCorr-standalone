@@ -1,0 +1,46 @@
+##### ThreadSanitizer check, issue94
+date_utc: 2026-09-28T00:21:31Z  host: small-refmac-machine  source_sha: c699a52db4a6465403e48f3c888327dd5b4aa839
+lane: taskset -c 32-47 under flock /tmp/motioncorr-issue96-cpu-validation.lock
+
+Rationale: OMP_NUM_THREADS=1 throughout. GCC's libgomp is not TSan-annotated,
+so OpenMP worker threads produce false positives that would bury a real finding.
+With one OpenMP thread the ONLY concurrency left is exactly what this PR adds:
+the producer thread running alongside the consumer.
+
+inherited Cpus_allowed_list: 32-47
+##### configure + build (TSan)
+configure rc=0
+build rc=0  (tail)
+[100%] Linking CXX executable prefetch_lifecycle
+[100%] Built target prefetch_lifecycle
+[100%] Built target runner_numerics
+CXX_FLAGS = -fsanitize=thread -g -O1 -O2 -g -DNDEBUG -std=gnu++17 -fopenmp
+
+##### 1. PrefetchLifecycle under TSan (no OpenMP at all: synthetic loader)
+exit=0
+WARNING count: 0
+  (the two RelionError reports below are expected: this case probes deliberately absent files)
+prefetch lifecycle: all checks passed
+
+##### 2. real prefetched run under TSan (real TIFF + MRC readers on the producer thread)
+fixtures: ['Movies/mov0.mrcs', 'Movies/mov1.mrcs', 'Movies/mov2.mrcs', 'Movies/mov3.mrcs', 'Movies/real0.tiff', 'Movies/real1.tiff']
+serial exit=66
+prefetch exit=0
+serial   WARNING count: 0
+prefetch WARNING count: 0
+prefetch accounting:
+ prefetch: budget_bytes = 430080, peak_reserved_bytes = 9469952, peak_queue_occupancy = 1
+ prefetch: decoded = 4, inline_loaded = 2, failed = 0, forced_grants = 2
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 0.0782624, consumer_wait_s = 0.00140549
+ prefetch: process_peak_rss_bytes = 130179072 (whole process, kernel high-water)
+find: 'serial': No such file or directory
+outputs: serial=0 prefetch=6
+pixel comparison (excluding the 1024-byte header, which carries a timestamp):
+Traceback (most recent call last):
+  File "<stdin>", line 9, in <module>
+AssertionError: ([], ['mov0.mrc', 'mov1.mrc', 'mov2.mrc', 'mov3.mrc', 'real0.mrc', 'real1.mrc'])
+comparison exit=1
+
+##### distinct TSan reports (if any)
+##### series rc=0 at 2026-09-28T00:22:35Z
+##### ALL DONE

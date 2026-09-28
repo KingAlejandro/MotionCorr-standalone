@@ -2074,6 +2074,26 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Iref_even().reshape(ny, nx);
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
+
+	// The real-space frames reconstructed below have exactly two readers:
+	// patch clipping (do_local) and the "before dose weighting" sum further
+	// down (pre_dw_sum_needed). When neither runs, nothing reads them before
+	// they are replaced, so the inverse transform is dead work and eliding it
+	// is bit-exact rather than an approximation.
+	//
+	// Both predicates are declared once, here, and used at every site that
+	// depends on them. Restating either condition at its consumer lets the two
+	// drift apart silently, and that is not hypothetical: the prototype in
+	// PR #57 held a copy of this guard, 0f508e0 widened the original with
+	// even_odd_split, and the copy did not follow. Compiling that prototype
+	// predicate against current main corrupts EVN/ODD -- measured, on a
+	// deliberately built control, not something that shipped -- and it does so
+	// with no merge conflict, no warning and no failing test.
+	// See agents/designs/issue_26_cpu_global_ifft_skip.md.
+	const bool do_local = (patch_x > 2) && (patch_y > 2);
+	const bool pre_dw_sum_needed = !do_dose_weighting || save_noDW || even_odd_split;
+	const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;
+
 	RCTIC(TIMING_GLOBAL_IFFT);
 	bool cuda_global_ifft_done = false;
 #ifdef _CUDA_ENABLED
@@ -2100,7 +2120,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+		// The reshape is kept unconditionally as the conservative choice, not
+		// because anything downstream requires it: the post-dose-weighting
+		// transform would resize on its own, and every site that sizes a buffer
+		// from Iframes[0]() sits inside pre_dw_sum_needed, i.e. a case where
+		// this transform ran. Keeping it does mean the emptiness test further
+		// down cannot detect an elided buffer, so need_real_space_before_dw is
+		// the only guard.
+		if (need_real_space_before_dw)
+			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	}
@@ -2109,7 +2137,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Patch based alignment
 	logfile << std::endl << "Local alignments:" << std::endl;
 	logfile << "Patches: X = " << patch_x << " Y = " << patch_y << std::endl;
-	bool do_local = (patch_x > 2) && (patch_y > 2);
 	if (!do_local) {
 		logfile << "Too few patches to do local alignments. Local alignment is skipped." << std::endl;
 	}
@@ -2415,7 +2442,7 @@ skip_fitting:
 	// The retained full-frame cache is only needed while preparing local patches.
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif
-	if (!do_dose_weighting || save_noDW || even_odd_split) {
+	if (pre_dw_sum_needed) {
 		Iref().reshape(ny, nx);
 		Iref().initZeros();
 		Iref_odd().reshape(ny, nx);
@@ -2519,6 +2546,12 @@ skip_fitting:
 
 		// Final output
 		RCTIC(TIMING_WRITE_RESULT);
+		// NOT pre_dw_sum_needed. This decides whether an unweighted micrograph
+		// is written, and it must exclude even_odd_split: with --even_odd_split
+		// --dose_weighting the unweighted sum is computed for EVN/ODD only, and
+		// writing a _noDW.mrc here would add an output the run never requested.
+		// Same three variables, different question -- do not unify with the
+		// shared predicate above.
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);

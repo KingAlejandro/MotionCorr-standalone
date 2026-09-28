@@ -40,6 +40,12 @@ DEFAULT_REQUIRED_TESTS = [
     "DefectParser",
     # Added by the #53 static multi-GPU worker group (PR106 port).
     "MultiGpuScheduling",
+    # Added by the #26 global inverse-FFT elision (PR111). This is the only
+    # test in the suite that can observe a wrong elision predicate: both parity
+    # comparators skip _EVN/_ODD, so without this entry the guard could be
+    # dropped from CMakeLists.txt with the collected count still at the
+    # minimum and CI still green.
+    "GlobalIfftElision",
 ]
 
 

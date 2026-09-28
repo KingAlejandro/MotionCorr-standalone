@@ -169,17 +169,29 @@ Findings and fixes posted on #94 (issuecomment-5861326352) and PR #108
 - #66 roadmap report: issuecomment-5865947621
 - #94 evidence corrections: issuecomment-5866418028 (PR: 5866417735)
 - #66 correction: issuecomment-5866423164
+- #94 correction 6: issuecomment-5866508040 (PR: 5866507790)
 
 ## Evidence corrections (2026-09-28)
 
-Five appended in `docs/issue94_prefetch/CORRECTIONS.md`; raw tables, manifests and logs
+Six appended in `docs/issue94_prefetch/CORRECTIONS.md`; raw tables, manifests and logs
 preserved unedited. (1) 0/9 → **1/9**. (2) header comparison re-done over the whole file with a
 justified whitelist and a ten-mutation negative control. (3) the cpu16 manifest's topology
 counters were an awk range-parsing bug; corrected from the retained `lscpu` witness, helper
 fixed with a range-mask control that reproduces the old failure. (4) the mechanism demoted to a
 hypothesis; RSS statistic and limits restated. (5) my own claim that PR103/PR110 composition
 needed an unauthorised merge was an over-restriction — composition is authorized, it stays
-UNRUN by choice.
+UNRUN by choice. (6) the corrections were themselves incomplete — the top-level evidence README
+still declared "no timing, no GPU run" while `scarf_gpu/` in the same directory held three
+completed series, the `scarf_gpu` §2 heading still said "never faster", §4 still asserted the
+accounting "explains the null directly", and a per-pair result block was labelled as a total.
+All struck in place.
+
+**Scope audit verdicts:** `SPEC_CONFORMANCE_PASSED` (source frozen; every raw manifest, TSV,
+per-arm dump, slurm log and `superseded/` entry byte-identical to its introducing commit; the
+two new tool files added to ADR §12 rather than left out of scope; licence convention matched).
+`CORRECTIONS_INCOMPLETE` was returned for the two surviving contradictions, now closed by
+correction 6. The audit independently re-derived every number in corrections 1-5 from the
+artifacts and found nothing overstated.
 
 **Final CI at the corrected head** (cpu64 lane 32-47, validation lock, `-j16`, `ctffind`
 untouched): ctest **15/15**, MRC negative control **PASS**, range-mask control **PASS**.
@@ -198,7 +210,8 @@ opt-in and off by default on every backend.
 
 ## Next step
 
-Awaiting the two reviewers' reports on the evidence delta, and `@codex` re-review of PR #108.
+Scope audit complete (verdicts above, correction 6 filed). Awaiting the code reviewer's report
+on the tooling delta, and `@codex` re-review of PR #108. No merge, no closure.
 No merges, no closures, no default promotion.
 
 Still UNRUN and stated as such: the composed PR103/PR110 integrity work (a merge this task is

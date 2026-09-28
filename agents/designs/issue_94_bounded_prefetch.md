@@ -108,6 +108,27 @@ are live at once. All products are computed with overflow-checked arithmetic bef
 allocation. The estimate deliberately ignores nothing it can charge for and over-charges where
 it cannot measure; over-charging only causes earlier backpressure.
 
+### 5.1 What the budget does and does not cover
+
+The budget bounds **decoded host movie frames** -- the buffers the producer, the queue and the
+consumer own -- and nothing else. It is the *prefetch-extra* budget, not the process budget,
+and two traced facts make that distinction load-bearing rather than pedantic:
+
+- On the resident CUDA path the consumer's host `Iframes` are **never released mid-movie**: the
+  `Iframes[iframe].clear()` loop in `executeOwnMotionCorrection` is guarded by
+  `if (!movie_session)`. So holding the reservation for the whole consumer stage is not merely
+  conservative there, it is *exact* -- the buffers really are live until the record dies.
+- The non-dose-weighted / `--save_noDW` / `--even_odd_split` reconstruction branch allocates a
+  third full-movie float stack (`Irefframes[iframe]().initZeros(Iframes[iframe]())`) alongside
+  the deliberately retained `Fframes`. That is a genuine process high-water contributor and it
+  is **outside** this budget. Anyone sizing `--prefetch_mem_mb` from a "real + R2C" array
+  calculation is under-counting the process by a full real stack. (Traced independently by the
+  #95 agent, confirmed here against the same head; both are calculated array sizes, not
+  measured RSS.)
+
+The reported `process_peak_rss_bytes` exists precisely so that the budget number is never
+mistaken for the process high-water.
+
 `--prefetch_mem_mb 0` (the default when prefetch is on) sets the budget to `3 x` the first
 movie's estimate — exactly producer-current + one queued + consumer-active — and then holds it
 fixed for the run. Heterogeneous datasets therefore degrade gracefully: a larger-than-budget
@@ -129,8 +150,9 @@ outlier takes route (1) above instead of silently growing the high-water.
   joins before shared state dies.
 - The consumer never acquires budget on the blocking path, so it cannot deadlock against a
   producer holding the capacity it needs. Progress is structurally guaranteed, not scheduled.
-- Reservations are released by a move-only RAII handle. Double release is unrepresentable;
-  early release only happens where the memory is genuinely already freed.
+- Reservations are released by a move-only RAII handle. Double release is unrepresentable, and
+  the one early release -- the producer's error path -- runs only after the partial frames have
+  actually been dropped.
 
 ## 7. CPU budget
 
@@ -163,7 +185,9 @@ half without inheriting the whole-movie half:
 
 `MoviePrefetchRecord` and `MoviePrefetcher` are whole-movie specific and are **not** proposed as
 #95's interface. If #95 needs sub-movie admission it should take `ByteBudget` and leave the
-record type alone.
+record type alone. The record does carry an explicit `std::vector<int> frames` rather than an
+implicit "all frames of this movie", so a later chunked producer can describe a partial frame
+range without changing the type; #95 asked for that property to be kept, and it is.
 
 ## 10. Acceptance for this PR
 
@@ -201,6 +225,7 @@ no third-party code is added; the implementation uses only C++17 standard-librar
 - `tests/test_prefetch_lifecycle.cpp`
 - `tests/test_prefetch_equivalence.py`
 - `scripts/prefetch_gpu_screen.sh`
+- `tools/compare_prefetch_arms.py`
 - `agents/designs/issue_94_bounded_prefetch.md`
 - `WORKER_STATUS.md`
 - `docs/issue94_prefetch/` (evidence only)

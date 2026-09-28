@@ -5,7 +5,7 @@
 | Issue / role | #96 integration and correctness owner (lane A of the #96 next-round plan) |
 | Model | claude-opus-5, high effort, 1M context |
 | Task class | integration of reviewed round96 correctness PRs; CPU validation; CUDA compile |
-| Phase | all four groups integrated; CPU validation and CUDA compile executed; draft PR and independent review in progress |
+| Phase | **complete.** Four groups integrated, CPU validation and CUDA compile executed, draft PR #110 published, both independent reviews returned |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main, refetched and pinned) |
 | Branch | `integrate/round96-correctness-foundation` |
 | Candidate source head | `d3c04f7f2a40637e8666ccfb4fb43a6e9540d316` (later commits are docs/evidence only) |
@@ -66,8 +66,27 @@ from `6f29659` and PR101's own handoff (added by `d26617a`, deleted by
 `a3cc983` within its own branch) is archived alongside the other three, so no
 worker record is lost either way.
 
-## Next step
+## Independent review
 
-1. Two bounded independent read-only reviewers on the integration surface (running).
-2. Publish the draft PR and comment on #96 / #66.
-3. Await a coordinator GPU slot for the published `NEEDS_GPU` plan.
+| reviewer | verdict |
+|---|---|
+| code / spec, bounded read-only | **READY_TO_MERGE** — no P1, no P2 on the integration surface; three P3, one fixed (docs attribution), two accepted and recorded |
+| license / scope, bounded read-only | **LICENSE_COMPLIANCE_PASSED** + **SPEC_CONFORMANCE_PASSED** — 6 pre-existing warnings untouched, 43 cherry-picks with zero authorship rewrites, all handoffs archived byte-identically, zero deletions |
+
+Neither reviewer compiled or ran anything; all execution evidence is this job's.
+
+## CI
+
+Run 36371119141 at head `6b4a950b`: Build & Smoke Check (Ubuntu Linux) **success**, CUDA compile only (no GPU execution) **success**.
+
+## Published
+
+- draft PR **#110**
+- coordination comments on **#96** and **#66**
+- integration notes on **#101**, **#102**, **#103**, **#105**; conditional/no-go note on **#100**
+
+## Next step — not this job
+
+1. Maintainer rulings on the five residual decisions in the PR body.
+2. A coordinator GPU slot for the published `NEEDS_GPU` plan. **Unrun; no CPU run was substituted for it.**
+3. Scoped `CMAKE_CUDA_ARCHITECTURES` build fix under #72/#18.

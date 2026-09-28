@@ -1,0 +1,86 @@
+##### CUDA COMPILE AT FINAL HEAD #####
+UTC 2026-09-28T02:31:49Z
+4-gpu-vm
+Cpus_allowed_list:	96-111
+Mems_allowed_list:	0-1
+physcpubind: 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 
+nodebind: 1 
+membind: 0 1 
+lane node/socket/core:
+96,1,96,96
+97,1,97,97
+98,1,98,98
+99,1,99,99
+SMT thread(s)/core: 1
+devices (not used):
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
+compute apps at start:
+(empty = none)
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+e448a71d55775479d8eea8d91c82f6fcad5d429e0a9d1d55748cd16382eb6c79  /home/alex/mc-i96-final.bundle
+head: d3c04f7f2a40637e8666ccfb4fb43a6e9540d316
+tree: 1c6d1efd8410866b5e0bc8d31e1043ee45bc9d82
+
+##### ARM 1: DEFAULT CUDA CONFIGURE (no -DCMAKE_CUDA_ARCHITECTURES) #####
+arm1 configure exit=1
+CMake Error in CMakeLists.txt:
+  CUDA_ARCHITECTURES is empty for target "motioncorr_core".
+
+
+##### ARM 2: explicit sm80, BUILD_TESTING=OFF #####
+configure exit=0
+build exit=0  compile errors=0
+no warnings in the five integrated source files
+8f4c98881d8157a780c13c0b3118ff1a4d86596c99053867c09a34706a1efd06  build-sm80/motioncorr
+	libcudart.so.12 => /usr/local/cuda-12.8/lib64/libcudart.so.12 (0x00007dd4e7e00000)
+	libcufft.so.11 => /usr/local/cuda-12.8/lib64/libcufft.so.11 (0x00007dd4d6c00000)
+ELF file    1: motioncorr.1.sm_80.cubin
+ELF file    2: motioncorr.2.sm_80.cubin
+ELF file    3: motioncorr.3.sm_80.cubin
+ELF file    4: motioncorr.4.sm_80.cubin
+
+##### ARM 3: explicit sm80, BUILD_TESTING=ON #####
+configure exit=0
+build exit=0  compile errors=0
+collected tests under CUDA=ON:
+18
+   DefectParser
+   SyntheticRegression
+   HotPixelRngDeterminism
+   RunnerExposure
+   Runner_failure
+   Runner_invalid
+   Runner_resume
+   Runner_tomography
+   RunnerLateBin
+   RunnerExportedUnits
+   GainCache
+   TiffRead
+   DamagedMovie
+   RunnerModelParser
+   WriteFaults
+   CiFailClosedControls
+   ImageWriteFaults
+   CudaWrapperUploadFailure
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+validate exit=0
+device-free CTests only (no GPU execution attempted here):
+-rwxrwxr-x 1 alex alex  731696 Sep 28 02:33 build-tests/cuda_wrapper_upload_failure
+-rwxrwxr-x 1 alex alex 2700936 Sep 28 02:33 build-tests/defect_parser
+-rwxrwxr-x 1 alex alex  923096 Sep 28 02:33 build-tests/image_write_faults
+
+##### NO GPU EXECUTION #####
+(empty = nothing ran on a device)
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+UTC 2026-09-28T02:33:10Z

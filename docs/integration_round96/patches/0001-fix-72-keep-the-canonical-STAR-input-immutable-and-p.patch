@@ -1,0 +1,241 @@
+From b0a70d610edff6999edd59307f8c28035dde8021 Mon Sep 17 00:00:00 2001
+From: Alex Konstantinov <alex.konstantinov@stfc.ac.uk>
+Date: Mon, 28 Sep 2026 07:43:59 +0100
+Subject: [PATCH 1/2] fix(#72): keep the canonical STAR input immutable and pin
+ its trusted digest
+
+Codex review finding on PR110 (discussion r4119221898, P2) at f9650704,
+confirmed by inspection and fixed once here as the integration owner.
+
+The defect. test-data/generate_known_motion_fixture.py wrote each case's .star
+unconditionally, before the canonical block, and the canonical block validated
+only movie_sha256. MANIFEST.json carried no STAR digest and verify_fixtures.py
+hashed only the movie and the ground-truth JSON. So a STAR_TEMPLATE change that
+alters _rlnMicrographOriginalPixelSize, _rlnVoltage or _rlnMicrographMovieName
+moves no pixel: the CI order (preflight -> generate --canonical ->
+verify_fixtures -> run_known_motion_gates --no-regenerate) rewrote the committed
+STAR, then passed canonical verification, then ran the known-motion gates on
+freshly generated metadata. That is precisely the bit-exact parity gate this
+fixture set exists to provide.
+
+Two independent halves, because either one alone leaves a hole:
+
+1. Generator. Canonical mode now compares the generated STAR against the
+   committed file and refuses on disagreement with a unified diff, instead of
+   writing it -- symmetric with how it already treats the ground-truth JSON, and
+   the committed file is left byte-identical on disk. A missing STAR in
+   canonical mode is an error, as a missing truth JSON already is. Normal
+   (non-canonical) generation is unchanged and still writes.
+
+2. Manifest and verifier. Every case gains star_sha256, required by
+   validate_manifest_schema and verified per case alongside the movie and truth
+   digests. This covers the path that bypasses the generator entirely: CI runs
+   the gates with --no-regenerate, so a STAR altered on disk would otherwise
+   never be hashed by anything.
+
+MANIFEST.json changes are additive only -- every existing movie_sha256,
+movie_bytes and ground_truth_sha256 is untouched, and the new digests are
+computed from the STAR files as already committed. No hash was loosened and no
+gate or tolerance was relaxed; requiring star_sha256 is a tightening that fails
+closed on a manifest that lacks it.
+
+Ownership: #72/PR102 owns these three files. Fixed once here to avoid a
+duplicate implementation; reusable patch mapping is published for PR102 rather
+than applied there.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+---
+ test-data/generate_known_motion_fixture.py | 35 +++++++++++++++-
+ test-data/known_motion/MANIFEST.json       | 15 ++++---
+ tools/verify_fixtures.py                   | 48 +++++++++++++++++++++-
+ 3 files changed, 89 insertions(+), 9 deletions(-)
+
+diff --git a/test-data/generate_known_motion_fixture.py b/test-data/generate_known_motion_fixture.py
+index c0b0a7a..975ebbd 100755
+--- a/test-data/generate_known_motion_fixture.py
++++ b/test-data/generate_known_motion_fixture.py
+@@ -29,6 +29,7 @@ from __future__ import annotations
+ 
+ import argparse
+ import hashlib
++import difflib
+ import json
+ import struct
+ import subprocess
+@@ -346,8 +347,35 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
+     mrcs = outdir / f"{out_name}.mrcs"
+     write_mrc_stack(mrcs, stack, PIXEL_SIZE)
+     star = outdir / f"{out_name}.star"
+-    star.write_text(STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
+-                                         movie=mrcs.name))
++    star_text = STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
++                                     movie=mrcs.name)
++    if canonical:
++        # The committed .star is a trusted gate INPUT, not a regenerable artifact, so canonical
++        # mode compares and refuses rather than rewriting it.
++        #
++        # Rewriting it here is not benign. A STAR_TEMPLATE edit that changes the optics -- a
++        # different _rlnMicrographOriginalPixelSize, _rlnVoltage or _rlnMicrographMovieName --
++        # leaves the generated pixels untouched, so the movie_sha256 check below still passes
++        # and verify_fixtures.py, which hashes the movie and the truth JSON, still reports
++        # VERIFIED. run_known_motion_gates.py would then consume freshly generated metadata
++        # under a green canonical verification, which is exactly the bit-exact parity gate
++        # this fixture set exists to provide.
++        if not star.is_file():
++            raise RuntimeError(f"Canonical mode: missing required committed STAR input {star}")
++        existing_star = star.read_text()
++        if existing_star != star_text:
++            diff = "\n".join(difflib.unified_diff(
++                existing_star.splitlines(), star_text.splitlines(),
++                fromfile=f"committed {star.name}", tofile="generated", lineterm="", n=1))
++            raise RuntimeError(
++                f"Canonical mode STAR disagreement for {out_name}: the committed STAR input does "
++                f"not match what this generator would write. The committed file was NOT modified. "
++                f"If the change is intended, update the fixture and its manifest digest as an "
++                f"explicit maintenance step.\n{diff}"
++            )
++        # Canonical mode verified; committed STAR left untouched on disk.
++    else:
++        star.write_text(star_text)
+ 
+     # Declared evaluation grid: endpoint-inclusive, so the four corners and all four edges are
+     # sampled. Corners are where the local polynomial is largest and where a sign or axis defect
+@@ -526,6 +554,9 @@ def main() -> None:
+                 "movie_bytes": info["bytes"],
+                 "ground_truth_sha256": hashlib.sha256(
+                     Path(info["ground_truth"]).read_bytes()).hexdigest(),
++                # The STAR is a gate input, so it is digested like the movie and the truth.
++                "star_sha256": hashlib.sha256(
++                    Path(info["star"]).read_bytes()).hexdigest(),
+             }
+         existing["generator"] = Path(__file__).name
+         existing["generator_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+diff --git a/test-data/known_motion/MANIFEST.json b/test-data/known_motion/MANIFEST.json
+index b7ae572..af4b79b 100644
+--- a/test-data/known_motion/MANIFEST.json
++++ b/test-data/known_motion/MANIFEST.json
+@@ -3,27 +3,32 @@
+     "km_global_hisnr": {
+       "ground_truth_sha256": "ce4a8df71201c933e340b458ea4a81adeae45a787181e88aea86303a5493b2a3",
+       "movie_bytes": 12583936,
+-      "movie_sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
++      "movie_sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990",
++      "star_sha256": "f0e1a4875bd94f84e4703320604da970109cb6458e5161ea22ca1b7a21c18f9e"
+     },
+     "km_local_hisnr": {
+       "ground_truth_sha256": "e76efb9e009aa89cead2620db99a945e59c17a70550e8ddb83543d9b78e0174c",
+       "movie_bytes": 12583936,
+-      "movie_sha256": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092"
++      "movie_sha256": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092",
++      "star_sha256": "c19f39e164518693b711e173d52d6d49ddfd783b237904716c794615f46f8832"
+     },
+     "km_local_noisy": {
+       "ground_truth_sha256": "bd4cf8ebe1dfbb6ba41aab47bc5a77230f50b45f9dd04d53af71933f4a70c4c7",
+       "movie_bytes": 12583936,
+-      "movie_sha256": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668"
++      "movie_sha256": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668",
++      "star_sha256": "3c07223e2c712a120de51f69dd866825b97b79f99ad23ce6a74f2e4eaf6ab307"
+     },
+     "km_local_nonsquare": {
+       "ground_truth_sha256": "88d04b9dc4ee99e3764fc6d7c286c2a4e3ad17c1da84ba6e78e46e8139f50f59",
+       "movie_bytes": 18875392,
+-      "movie_sha256": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8"
++      "movie_sha256": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8",
++      "star_sha256": "9bb41b34a9804a7be86f6c7d0e2e223fe482df4f600d7f4816632506e75daf92"
+     },
+     "km_local_realscale": {
+       "ground_truth_sha256": "3482147587e020ccaf36e8274d939cce87a9a7fb4f58d8f3aea5fc979491d242",
+       "movie_bytes": 402654208,
+-      "movie_sha256": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7"
++      "movie_sha256": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7",
++      "star_sha256": "359d8fb170d253c0d56e2f5989de817122f8a8db77a079bd9a030889dbb739f5"
+     }
+   },
+   "generator": "generate_known_motion_fixture.py",
+diff --git a/tools/verify_fixtures.py b/tools/verify_fixtures.py
+index 1b99000..04a1f2d 100644
+--- a/tools/verify_fixtures.py
++++ b/tools/verify_fixtures.py
+@@ -2,8 +2,14 @@
+ """Check generated fixtures against the committed known-motion manifest.
+ 
+ Ensures fixture files match the trusted, committed MANIFEST.json byte-for-byte
+-and digest-for-digest. Rejects missing fixtures, missing truth files, corrupted/
+-byte-flipped fixtures, malformed inventories, and undeclared fixtures.
++and digest-for-digest. Rejects missing fixtures, missing truth files, missing or
++altered STAR inputs, corrupted/byte-flipped fixtures, malformed inventories, and
++undeclared fixtures.
++
++All three per-case artifacts are digested: the movie, the ground-truth JSON and
++the .star gate input. The STAR is checked separately because optics metadata --
++pixel size, voltage, movie reference -- can change without moving a pixel, so the
++movie digest alone cannot detect it.
+ 
+ By default, reads the manifest strictly from git (HEAD) to prevent generator-adjacent
+ overwrites from self-verifying noncanonical fixture data.
+@@ -84,6 +90,12 @@ def validate_manifest_schema(manifest: Any) -> Dict[str, Any]:
+         gt_sha = spec.get("ground_truth_sha256")
+         if not gt_sha or not HEX_64_PATTERN.match(str(gt_sha)):
+             raise ValueError(f"Case '{name}' missing valid 64-hex 'ground_truth_sha256'")
++        # The .star is a gate input: run_known_motion_gates.py reads its optics group for
++        # pixel size and voltage and its movie reference. A manifest that does not pin it
++        # cannot detect metadata drift that leaves the movie pixels untouched.
++        star_sha = spec.get("star_sha256")
++        if not star_sha or not HEX_64_PATTERN.match(str(star_sha)):
++            raise ValueError(f"Case '{name}' missing valid 64-hex 'star_sha256'")
+ 
+     return manifest
+ 
+@@ -130,6 +142,8 @@ def verify_fixtures(
+         want_sha = spec["movie_sha256"]
+         want_bytes = spec["movie_bytes"]
+         want_gt_sha = spec["ground_truth_sha256"]
++        want_star_sha = spec["star_sha256"]
++        star_path = fixtures_dir / f"{case}.star"
+         is_heavy = case in HEAVY_CASES or bool(spec.get("heavy", False))
+ 
+         if not path.exists():
+@@ -196,6 +210,30 @@ def verify_fixtures(
+ 
+         case_entry["ground_truth_status"] = "PASS"
+ 
++        # STAR input check: REQUIRED for every verified case, and deliberately independent of
++        # the movie digest -- a pixel-size, voltage or movie-reference change does not move a
++        # single pixel, so the movie hash cannot see it.
++        if not star_path.is_file():
++            case_entry["star_status"] = "MISSING"
++            case_entry["error"] = f"Required STAR input {star_path.name} is missing"
++            case_entry["status"] = "MISSING"
++            report["cases"][case] = case_entry
++            report["missing"].append(f"{case}_star")
++            continue
++
++        got_star_sha = sha256_file(star_path)
++        case_entry["star_sha256"] = got_star_sha
++        case_entry["expected_star_sha256"] = want_star_sha
++
++        if got_star_sha != want_star_sha:
++            case_entry["star_status"] = "MISMATCH"
++            case_entry["status"] = "MISMATCH"
++            report["cases"][case] = case_entry
++            report["mismatched"].append(f"{case}_star")
++            continue
++
++        case_entry["star_status"] = "PASS"
++
+         if not (sha_ok and bytes_ok):
+             report["mismatched"].append(case)
+         else:
+@@ -283,6 +321,12 @@ def main() -> int:
+                 print(f"        observed: {entry.get('ground_truth_sha256')}")
+             elif entry.get("ground_truth_status") == "MISSING":
+                 print(f"      ground-truth JSON MISSING: {entry.get('error')}")
++            if entry.get("star_status") == "MISMATCH":
++                print(f"      STAR input hash MISMATCH:")
++                print(f"        expected: {entry.get('expected_star_sha256')}")
++                print(f"        observed: {entry.get('star_sha256')}")
++            elif entry.get("star_status") == "MISSING":
++                print(f"      STAR input MISSING: {entry.get('error')}")
+         if report["undeclared"]:
+             print(f"  UNDECLARED FIXTURES: {', '.join(report['undeclared'])}")
+         if report.get("reason"):

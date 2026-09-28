@@ -1,0 +1,162 @@
+=== provenance ===
+2026-09-28T00:12:55+00:00
+small-refmac-machine
+64
+ 00:12:55 up 299 days, 14:10, 24 users,  load average: 6.80, 5.65, 6.26
+Cpus_allowed_list:	0-63
+96e782c76e77f085f424e9b587565f5f80c6a929a45e2272ac7488ff85c70eb0  /home/ubuntu/mc-i99.bundle
+cmake version 4.4.3
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Python 3.12.3
+filesystem for TMPDIR:
+Filesystem     Type  1K-blocks       Used Available Use% Mounted on
+/dev/vda1      ext4 1319365344 1150052920 169296040  88% /
+### acquiring /tmp/motioncorr-issue96-cpu-validation.lock
+### lock acquired
+2026-09-28T00:13:25+00:00
+--- stage head @ f83a4669e3b37108def1e8ce147b2291c44c4a6a ---
+HEAD=f83a4669e3b37108def1e8ce147b2291c44c4a6a expected=f83a4669e3b37108def1e8ce147b2291c44c4a6a
+TREE=8b4de0b50eb71baeb72633cb9bfb56b795189efe
+STATUS: 0 modified files (must be 0)
+SOURCE HASHES:
+a9f117ca2f4893bfd2327c030c64ece7d6f9f502df6f3d02aa53656b20896ff9  src/rwMRC.h
+50da3a65c1454066cb916d1b787b613d466a0a8eee8aaaddf6bc473f3ac53d9e  src/image.h
+f89b642ae34039816613b775b4e7280aa26f6f7d5265675d63d5a97e2c1fc16a  src/micrograph_model.cpp
+a82e160595b13e3a69dae034796a0761289addacde4ae8d587906cffaec778b7  tests/test_image_write_faults.cpp
+048cb5559ce9df7123640938e32415048a34a601707003dde96cb022a60a5989  tests/test_write_faults.py
+9267593a8e7b07f0f5d39275fea7f1927e11d42631b886958ce1c4435319ae19  CMakeLists.txt
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  test-data/synthetic/synthetic_movie.tiff
+=== build head (Release, CUDA=OFF, BUILD_TESTING=ON, j16, taskset 32-63) ===
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+build head OK
+59936bbec5d13105f54fe52a5c5d7221126923593a7edd3593c6aaf291e0a1d1  build-cpu/motioncorr
+946773da3da641ba0bcdfcba7642d0836a6b1c614967f7ec8a96e5d27da0a637  build-cpu/image_write_faults
+=== ctest head  ===
+ctest head exit=0
+ 1/15 Test  #4: Runner_failure ...................   Passed    0.13 sec
+ 2/15 Test  #5: Runner_invalid ...................   Passed    0.12 sec
+ 3/15 Test  #3: RunnerExposure ...................   Passed    0.60 sec
+ 4/15 Test  #2: HotPixelRngDeterminism ...........   Passed    0.68 sec
+ 5/15 Test  #7: Runner_tomography ................   Passed    0.48 sec
+ 6/15 Test  #1: SyntheticRegression ..............   Passed    1.15 sec
+ 7/15 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
+ 8/15 Test  #8: RunnerLateBin ....................   Passed    0.68 sec
+ 9/15 Test #12: DamagedMovie .....................   Passed    0.09 sec
+100% tests passed out of 15
+
+=== NEGATIVE CONTROL: pre-fix main 4c952b3 with the new tests only ===
+=== these two tests MUST fail here, or they do not detect the defect ===
+--- stage neg @ dddc6763b03e33a114dbbf9ea21e31de1549129c ---
+HEAD=dddc6763b03e33a114dbbf9ea21e31de1549129c expected=dddc6763b03e33a114dbbf9ea21e31de1549129c
+TREE=fd41415b84d0dd02cabff308933188d4f0d494af
+STATUS: 0 modified files (must be 0)
+SOURCE HASHES:
+79c5ef3b64f10f8807ba35cf2af189eeedf162e0b270aff347c8a447fa923511  src/rwMRC.h
+4b953f05d2bd3a72c2be4be0e11d91e7de60ecdbcd3724600b44b63054b207d3  src/image.h
+d3c8d2772c761f877eac4ca3d61e21083e767a16cd3e2b49ab2dc8a8e2410917  src/micrograph_model.cpp
+a82e160595b13e3a69dae034796a0761289addacde4ae8d587906cffaec778b7  tests/test_image_write_faults.cpp
+048cb5559ce9df7123640938e32415048a34a601707003dde96cb022a60a5989  tests/test_write_faults.py
+9267593a8e7b07f0f5d39275fea7f1927e11d42631b886958ce1c4435319ae19  CMakeLists.txt
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  test-data/synthetic/synthetic_movie.tiff
+=== build neg (Release, CUDA=OFF, BUILD_TESTING=ON, j16, taskset 32-63) ===
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+build neg OK
+b9d16a2d8a69500c8ba8671382716a9cf79e851c2fa8264ed6735f2e3e5c82d8  build-cpu/motioncorr
+0f6226cadedc3bffc47d15c2a282c5171e2f84338375ee086cc0637b6f0be025  build-cpu/image_write_faults
+negative-control ctest exit=8 (nonzero is the expected result)
+Test project /home/ubuntu/mc-i99/src-neg/build-cpu
+    Start 14: WriteFaults
+1/2 Test #14: WriteFaults ......................***Failed    0.35 sec
+  phase 1: a.mrc 1049600 B, sha256 169c59016783b33c
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-i99/src-neg/tests/test_write_faults.py", line 173, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/ubuntu/mc-i99/src-neg/tests/test_write_faults.py", line 125, in main
+    assert res.returncode != 0, (
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: a failed image write was treated as success:
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+ (skipping all micrographs for which a corrected movie already exists) 
+  * Movies/b.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /tmp/tmpvhejxve4/out/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /tmp/tmpvhejxve4/out/logfile.pdf
+
+
+    Start 15: ImageWriteFaults
+2/2 Test #15: ImageWriteFaults .................Subprocess aborted***Exception:   1.13 sec
+FAIL: a short payload write must throw, not report success
+FAIL: the failure must name the output path, got: 
+FAIL: the failure must name the stage, got: 
+in: /home/ubuntu/mc-i99/src-neg/src/image.h, line 374
+ERROR: 
+Can not close image file 
+terminate called after throwing an instance of 'RelionError'
+
+
+0% tests passed, 2 tests failed out of 2
+
+Total Test time (real) =   1.47 sec
+
+The following tests FAILED:
+	 14 - WriteFaults (Failed)
+	 15 - ImageWriteFaults (Subprocess aborted)
+Errors while running CTest
+
+=== healthy-output byte parity: pre-fix vs post-fix, same input ===
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  /home/ubuntu/mc-i99/parity/mov/p.tiff
+arm neg exit=0
+arm head exit=0
+--- produced files ---
+-rw-rw-r-- 1 ubuntu ubuntu     591 Sep 28 00:14 out-head/corrected_micrographs.star
+-rw-rw-r-- 1 ubuntu ubuntu   75689 Sep 28 00:14 out-head/corrected_micrographs_all_rlnAccumMotionEarly.eps
+-rw-rw-r-- 1 ubuntu ubuntu   75687 Sep 28 00:14 out-head/corrected_micrographs_all_rlnAccumMotionLate.eps
+-rw-rw-r-- 1 ubuntu ubuntu   75689 Sep 28 00:14 out-head/corrected_micrographs_all_rlnAccumMotionTotal.eps
+-rw-rw-r-- 1 ubuntu ubuntu   24826 Sep 28 00:14 out-head/logfile.pdf
+-rw-rw-r-- 1 ubuntu ubuntu     176 Sep 28 00:14 out-head/logfile.pdf.lst
+-rw-rw-r-- 1 ubuntu ubuntu     596 Sep 28 00:14 out-head/mov/p.log
+-rw-rw-r-- 1 ubuntu ubuntu 1049600 Sep 28 00:14 out-head/mov/p.mrc
+-rw-rw-r-- 1 ubuntu ubuntu    1094 Sep 28 00:14 out-head/mov/p.star
+-rw-rw-r-- 1 ubuntu ubuntu   55847 Sep 28 00:14 out-head/mov/p_shifts.eps
+-rw-rw-r-- 1 ubuntu ubuntu     589 Sep 28 00:14 out-neg/corrected_micrographs.star
+-rw-rw-r-- 1 ubuntu ubuntu   75689 Sep 28 00:14 out-neg/corrected_micrographs_all_rlnAccumMotionEarly.eps
+-rw-rw-r-- 1 ubuntu ubuntu   75687 Sep 28 00:14 out-neg/corrected_micrographs_all_rlnAccumMotionLate.eps
+-rw-rw-r-- 1 ubuntu ubuntu   75689 Sep 28 00:14 out-neg/corrected_micrographs_all_rlnAccumMotionTotal.eps
+-rw-rw-r-- 1 ubuntu ubuntu   24826 Sep 28 00:14 out-neg/logfile.pdf
+-rw-rw-r-- 1 ubuntu ubuntu     173 Sep 28 00:14 out-neg/logfile.pdf.lst
+-rw-rw-r-- 1 ubuntu ubuntu     595 Sep 28 00:14 out-neg/mov/p.log
+-rw-rw-r-- 1 ubuntu ubuntu 1049600 Sep 28 00:14 out-neg/mov/p.mrc
+-rw-rw-r-- 1 ubuntu ubuntu    1094 Sep 28 00:14 out-neg/mov/p.star
+-rw-rw-r-- 1 ubuntu ubuntu   55846 Sep 28 00:14 out-neg/mov/p_shifts.eps
+--- MRC payload hashes (skip the 1024-byte header: it carries a timestamp) ---
+neg mov/p.mrc payload: 1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3  -
+neg mov/p.mrc whole:   a18c39c95d71c33776ae1493b3134b535c635ae15e1bc9fbd5b3a6bf6016d768
+neg mov/p.mrc bytes:   1049600
+head mov/p.mrc payload: 1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3  -
+head mov/p.mrc whole:   a18c39c95d71c33776ae1493b3134b535c635ae15e1bc9fbd5b3a6bf6016d768
+head mov/p.mrc bytes:   1049600
+--- header field diff (bytes 0..1023, excluding the 80-char label at 224) ---
+first 224 header bytes identical
+--- per-movie STAR diff ---
+per-movie STAR identical
+--- joint STAR diff ---
+28c28
+< out-neg/mov/p.mrc out-neg/mov/p.star            1     6.099077     4.164012     1.935065 
+---
+> out-head/mov/p.mrc out-head/mov/p.star            1     6.099077     4.164012     1.935065 
+### done
+2026-09-28T00:14:08+00:00
+=== ALL DONE rc=0 ===
+2026-09-28T00:14:08+00:00

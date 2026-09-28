@@ -33,6 +33,7 @@ bookkeeping only; #26 owns this round's benchmark matrix.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -66,8 +67,14 @@ class Sampler(threading.Thread):
         while not self._stop_event.is_set():
             try:
                 self.samples.append({"t": time.time(), "apps": gpu_witness.compute_apps()})
-            except gpu_witness.WitnessError as exc:
-                self.errors.append(str(exc))
+            except Exception as exc:  # noqa: BLE001
+                # Deliberately not just WitnessError. Anything else -- an OSError
+                # from subprocess under fork pressure, a MemoryError -- would
+                # otherwise kill the thread through threading.excepthook, leave
+                # self.errors empty and let join() succeed, so a sampler that died
+                # two seconds into a three-minute run would certify the whole run
+                # on the samples it happened to collect first.
+                self.errors.append(f"{type(exc).__name__}: {exc}")
                 return
             self._stop_event.wait(self.interval)
 
@@ -170,6 +177,22 @@ def main(argv: list[str] | None = None) -> int:
     if extra and extra[0] == "--":
         extra = extra[1:]
 
+    # The launcher owns --i, --o and --gpu, and appends worker_args AFTER them.
+    # IOParser::getOption returns the LAST occurrence (src/args.cpp), so a copied
+    # command line carrying its own --i or --o silently redirects every worker to
+    # one input and one shared output directory -- the exact collision distinct
+    # worker directories exist to prevent -- while the children still exit zero
+    # and the launcher still writes verdict PASS. Refuse before anything starts.
+    OWNED = {"--i", "--o", "--gpu"}
+    clashes = sorted({t for t in extra if t in OWNED})
+    if clashes:
+        print(f"FAIL: {', '.join(clashes)} is set by this launcher and must not appear "
+              "in the worker arguments. The binary takes the last occurrence of a "
+              "repeated option, so these would override the per-worker shard, output "
+              "directory and device while the run still reported PASS.",
+              file=sys.stderr)
+        return 2
+
     sampler = None
     if devices and not a.no_witness:
         sampler = Sampler(a.sample_interval)
@@ -209,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
         for k, p, wdir in procs:
             rc = p.wait()
             results.append({"index": k, "pid": p.pid, "returncode": rc,
-                            "log": str(wdir / "run.log")})
+                            "log": str((wdir / "run.log").resolve())})
     except BaseException:
         # Terminate only the children this launcher started, by their own process
         # group, so nothing else on a shared box is touched.
@@ -246,6 +269,12 @@ def main(argv: list[str] | None = None) -> int:
                                       "incomplete and cannot witness anything")
 
     wall = time.time() - started
+    # Resolved paths and the manifest digest, so merge_workers.py can prove this
+    # status describes the run it is merging rather than another one that happened
+    # to have the same worker count. Two runs over the same input produce
+    # byte-identical manifests, so the digest alone cannot separate them and the
+    # resolved paths do the rest.
+    manifest_path = (shard_dir / "shard_manifest.json").resolve()
     status: dict[str, object] = {
         "input_star": a.star,
         "binary": a.binary,
@@ -256,7 +285,8 @@ def main(argv: list[str] | None = None) -> int:
         "wall_seconds": round(wall, 3),
         "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and "
                              "is not a benchmark. #26 owns the measurement matrix.",
-        "manifest": str(shard_dir / "shard_manifest.json"),
+        "manifest": str(manifest_path),
+        "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "workers": results,
         "devices": devices or None,
     }

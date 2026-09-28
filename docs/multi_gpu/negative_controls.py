@@ -132,8 +132,8 @@ MUTATIONS = [
 
     ("launcher verdict no longer gates the merge",
      "tools/multi_gpu/merge_workers.py",
-     '        elif launcher_verdict != "PASS":',
-     "        elif False:  # MUTATED",
+     '            problems.append(f"launcher verdict is {launcher_verdict}, not PASS{detail}")',
+     "            pass  # MUTATED",
      ["case_failed_device_witness_blocks_merge"]),
 
     ("aggregate-name match moved back ahead of attribution",
@@ -191,9 +191,10 @@ MUTATIONS = [
 
     ("sampler backend errors no longer recorded",
      "tools/multi_gpu/run_multi_gpu.py",
-     "                self.errors.append(str(exc))",
+     '                self.errors.append(f"{type(exc).__name__}: {exc}")',
      "                pass  # MUTATED",
-     ["case_sampler_lifecycle"]),
+     ["case_sampler_lifecycle",
+      "case_launcher_verdict_follows_the_device_witness"]),
 
     ("--devices with --no-witness accepted again",
      "tools/multi_gpu/run_multi_gpu.py",
@@ -300,8 +301,8 @@ MUTATIONS = [
 
     ("reuse sidecar records only the root again",
      "tools/multi_gpu/compare24.py",
-     '    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool),\n'
-     '            "inputs": stat}',
+     '    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool_path),\n'
+     '            "tool_sha256": tool_sha, "inputs": stat}',
      '    return {"root": rel}  # MUTATED',
      ["case_reuse_pins_the_trees_not_just_the_root"]),
 
@@ -310,6 +311,125 @@ MUTATIONS = [
      "    if out.exists():",
      "    if False:  # MUTATED",
      ["case_launcher_refuses_cpu_gpu_confusion"]),
+
+    # --- guards added by the current-main port (#53 integration) -------------
+
+    ("merge stops binding the status file to the manifest being merged",
+     "tools/multi_gpu/merge_workers.py",
+     "        if Path(status_manifest).resolve() != Path(a.manifest).resolve():",
+     "        if False:  # MUTATED",
+     ["case_stale_status_is_refused"]),
+
+    ("merge accepts a status that names no manifest",
+     "tools/multi_gpu/merge_workers.py",
+     "        if status_manifest is None:",
+     "        if False:  # MUTATED",
+     ["case_stale_status_is_refused"]),
+
+    ("merge stops checking the status manifest digest",
+     "tools/multi_gpu/merge_workers.py",
+     "        if status_digest != actual_digest:",
+     "        if False:  # MUTATED",
+     ["case_stale_status_is_refused"]),
+
+    ("merge stops checking that each recorded worker log is under its directory",
+     "tools/multi_gpu/merge_workers.py",
+     "            if not str(Path(log).resolve()).startswith(str(wdir) + os.sep):",
+     "            if False:  # MUTATED",
+     ["case_stale_status_is_refused"]),
+
+    ("merge collapses a movie named twice in the canonical list",
+     "tools/multi_gpu/merge_workers.py",
+     "    dupe_canonical = duplicates(list(manifest[\"canonical_movies\"]))",
+     "    dupe_canonical = []  # MUTATED",
+     ["case_duplicate_movie_name_refused"]),
+
+    ("merge collapses a movie named twice inside one shard",
+     "tools/multi_gpu/merge_workers.py",
+     "        dupe_shard = duplicates(list(s[\"movies\"]))",
+     "        dupe_shard = []  # MUTATED",
+     ["case_duplicate_movie_name_refused"]),
+
+    ("launcher stops refusing worker arguments that override its own options",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "    clashes = sorted({t for t in extra if t in OWNED})",
+     "    clashes = []  # MUTATED",
+     ["case_worker_args_may_not_override_launcher_options"]),
+
+    ("merge stops noticing that the aggregate pass rewrote staged products",
+     "tools/multi_gpu/merge_workers.py",
+     "        if rewritten:",
+     "        if False:  # MUTATED",
+     ["case_aggregate_may_not_rewrite_staged_products"]),
+
+    ("comparator report is no longer removed before a fresh comparison",
+     "tools/multi_gpu/compare24.py",
+     "            j.unlink(missing_ok=True)",
+     "            pass  # MUTATED",
+     ["case_stale_comparison_report_is_not_republished"]),
+
+    ("a missing fresh report no longer blocks publishing the origin sidecar",
+     "tools/multi_gpu/compare24.py",
+     "            rc = cp.returncode\n            if not j.exists():",
+     "            rc = cp.returncode\n            if False:  # MUTATED",
+     ["case_stale_comparison_report_is_not_republished"]),
+
+    ("reuse provenance stops pinning the comparator's contents",
+     "tools/multi_gpu/compare24.py",
+     "        tool_sha = hashlib.sha256(tool_path.read_bytes()).hexdigest()",
+     "        tool_sha = None  # MUTATED",
+     ["case_stale_comparison_report_is_not_republished"]),
+
+    # --- the launcher's witness-to-verdict wiring, and the witness oracles ---
+    # Before case_launcher_verdict_follows_the_device_witness existed, every one
+    # of these mutations left the whole suite green: no test executed the code.
+
+    ("launcher verdict ignores the device witness entirely",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '    status["verdict"] = "PASS" if verdict_ok else "FAIL"',
+     '    status["verdict"] = "PASS"  # MUTATED',
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("a failed device witness no longer fails the run",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '        if not witness["all_pids_witnessed_on_intended_distinct_devices"]:\n'
+     "            verdict_ok = False",
+     '        if not witness["all_pids_witnessed_on_intended_distinct_devices"]:\n'
+     "            pass  # MUTATED",
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("a sampler that died partway no longer fails the run",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "        if sampler.errors:",
+     "        if False:  # MUTATED",
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("the sampler only records nvidia-smi errors, not any other death",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "            except Exception as exc:  # noqa: BLE001",
+     "            except gpu_witness.WitnessError as exc:  # MUTATED",
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("two workers on one physical device stop counting as shared",
+     "tools/multi_gpu/gpu_witness.py",
+     "        if len(pids) > 1:",
+     "        if False:  # MUTATED",
+     ["case_gpu_witness_logic",
+      "case_launcher_verdict_follows_the_device_witness"]),
+
+    ("the witness verdict no longer composes its own findings",
+     "tools/multi_gpu/gpu_witness.py",
+     '        "all_pids_witnessed_on_intended_distinct_devices":',
+     '        "all_pids_witnessed_on_intended_distinct_devices": True or  # MUTATED',
+     ["case_gpu_witness_logic",
+      "case_launcher_verdict_follows_the_device_witness"]),
+
+    ("merge accepts a PASS its own witness record contradicts",
+     "tools/multi_gpu/merge_workers.py",
+     '            if isinstance(witness, dict) and not witness.get(\n'
+     '                    "all_pids_witnessed_on_intended_distinct_devices"):',
+     "            if False:  # MUTATED",
+     ["case_launcher_verdict_follows_the_device_witness"]),
 ]
 
 
@@ -320,6 +440,19 @@ def run_case(tree: Path, case: str) -> subprocess.CompletedProcess:
         capture_output=True, text=True, cwd=tree)
 
 
+def defined_cases() -> set[str]:
+    """Case names the suite actually defines.
+
+    --only is substring-matched and a zero-match run exits 0, so a mutation
+    naming a case that does not exist would be reported as a survivor -- "guard
+    does not observe what it asserts" -- when the real cause is a typo. The two
+    need different names to be actionable.
+    """
+    text = (ROOT / "tests" / "test_multi_gpu_scheduling.py").read_text()
+    return {line.split("(")[0][4:].strip()
+            for line in text.splitlines() if line.startswith("def case_")}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json-out", default=None)
@@ -328,8 +461,15 @@ def main(argv: list[str] | None = None) -> int:
     results = []
     survivors = []
     skipped = 0
+    known = defined_cases()
     for entry in MUTATIONS:
         label, relpath, old, new, cases = entry[:5]
+        unknown = [c for c in cases if c not in known]
+        if unknown:
+            results.append({"mutation": label, "file": relpath,
+                            "status": "CASE_NOT_FOUND", "cases_missing": unknown})
+            survivors.append(f"{label} -> names no such case: {unknown}")
+            continue
         requires = entry[5] if len(entry) > 5 else None
         if requires and shutil.which(requires) is None:
             skipped += 1

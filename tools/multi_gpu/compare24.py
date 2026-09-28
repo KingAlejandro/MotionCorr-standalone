@@ -79,8 +79,17 @@ def origin_record(rel: str, ref: Path, test: Path, tool: str,
             stat[str(f)] = [st.st_size, int(st.st_mtime_ns)]
         except OSError:
             stat[str(f)] = None
-    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool),
-            "inputs": stat}
+    # The comparator's path is not its identity. Replacing tools/compare_motioncorr.py
+    # in place, or resolving the same relative string to a different file, leaves the
+    # recorded string unchanged, so --reuse would certify checks the current
+    # comparator never performed. Pin the resolved path and its contents.
+    tool_path = Path(tool).resolve()
+    try:
+        tool_sha = hashlib.sha256(tool_path.read_bytes()).hexdigest()
+    except OSError:
+        tool_sha = None
+    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool_path),
+            "tool_sha256": tool_sha, "inputs": stat}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -175,12 +184,25 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             rc = 0
         else:
+            # Remove any earlier report and its sidecar FIRST. A comparator that
+            # exits before writing --json-out leaves the previous run's report in
+            # place; writing the sidecar unconditionally afterwards would bind that
+            # stale verdict to the new inputs, and a later --reuse -- whose rc is 0
+            # by construction -- would accept it as a pass for inputs it never saw.
+            j.unlink(missing_ok=True)
+            root_sidecar(j).unlink(missing_ok=True)
             cp = subprocess.run(
                 [a.python, a.tool, "--ref-mrc", str(rm), "--test-mrc", str(tm),
                  "--ref-star", str(rs), "--test-star", str(ts),
                  "--gate", "exact", "--json-out", str(j)],
                 capture_output=True, text=True)
             rc = cp.returncode
+            if not j.exists():
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "returncode": rc,
+                                "reason": f"comparator produced no report at {j} "
+                                          f"(exit {rc}); no sidecar published"})
+                continue
             root_sidecar(j).write_text(
                 json.dumps(origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts]),
                            indent=2, sort_keys=True) + "\n")
@@ -201,9 +223,12 @@ def main(argv: list[str] | None = None) -> int:
         rec.update({
             "overall_status": d.get("overall_status"),
             "pixel_identical": img.get("pixel_identical"),
-            "image_rmse": img.get("image_rmse"),
+            # compare_motioncorr.py emits these as "rmse" (tools/compare_motioncorr.py:279)
+            # and "num_differences" (:398). Reading the wrong name records None,
+            # which reads as "no differences" in the summary.
+            "image_rmse": img.get("rmse"),
             "coverage_complete": (d.get("coverage", {}) or {}).get("complete"),
-            "star_diffs": stars.get("difference_count"),
+            "star_diffs": stars.get("num_differences"),
             "max_shift_error": traj.get("max_shift_error"),
         })
         rec["gate_c_pass"] = (

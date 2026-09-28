@@ -7,7 +7,7 @@ output-naming and fixed-name-aggregate behaviour the scheduler has to cope with:
 
   * per movie, <out>/<root>.mrc and <out>/<root>.star, where <root> is the movie
     path with its extension dropped and every remaining '.' turned into '_',
-    matching getOutputFileNames() (src/motioncorr_runner.cpp:491);
+    matching getOutputFileNames() (src/motioncorr_runner.cpp:552);
   * the per-movie STAR carries the movie name, optics group and pre-exposure it
     was given, so a test can prove metadata survived partitioning rather than
     only that a file appeared;
@@ -52,13 +52,18 @@ def star_quote(value: str) -> str:
 
 
 def write_products(outdir: Path, movie: str, optics: str, pre_exposure: str,
-                   truncate_mrc: bool = False) -> None:
-    root = star_io.output_root(movie)
+                   truncate_mrc: bool = False, marker: str = "") -> None:
+    # getOutputFileNames is plain string concatenation, fn_out + fn_root
+    # (src/motioncorr_runner.cpp:552-572), so an absolute movie name lands at
+    # <out>//abs/path.mrc -- i.e. worker-relative abs/path.mrc. Joining an
+    # absolute root with pathlib would instead escape --o entirely and write
+    # outside the worker directory.
+    root = star_io.worker_relative_root(star_io.output_root(movie))
     mrc = outdir / (root + ".mrc")
     mrc.parent.mkdir(parents=True, exist_ok=True)
     # Not a real MRC; the CPU fixtures never read pixels. Content is a stable
     # function of the movie so a duplicate or a swap is detectable by bytes.
-    mrc.write_text(f"FAKEMRC {movie}\n" if not truncate_mrc else "FAKEMRC")
+    mrc.write_text(f"FAKEMRC {movie}{marker}\n" if not truncate_mrc else "FAKEMRC")
     (outdir / (root + ".star")).write_text(json.dumps({
         "rlnMicrographMovieName": movie,
         "rlnOpticsGroup": optics,
@@ -83,6 +88,13 @@ def main(argv: list[str] | None = None) -> int:
                     help="comma-separated movie names whose .mrc is written short")
     ap.add_argument("--fake_reverse_aggregate", action="store_true",
                     help="emit the aggregate STAR rows in reverse order")
+    ap.add_argument("--fake_reprocess", action="store_true",
+                    help="ignore --only_do_unfinished and rewrite every movie with "
+                         "different bytes. Stands in for the real binary judging a "
+                         "staged product incomplete because the option set it was "
+                         "given does not match the one the workers ran under "
+                         "(isMovieComplete is option-dependent, and since PR110 also "
+                         "frame-count dependent).")
     ap.add_argument("--fake_note", default=None,
                     help="write this text to <out>/note.txt; used to prove that extra "
                          "arguments actually reached the process rather than being "
@@ -111,13 +123,15 @@ def main(argv: list[str] | None = None) -> int:
         movie = row.values[name_col]
         if movie in skip:
             continue
-        root = star_io.output_root(movie)
-        if a.only_do_unfinished and all((outdir / (root + s)).exists() for s in PRODUCTS):
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        if (a.only_do_unfinished and not a.fake_reprocess
+                and all((outdir / (root + s)).exists() for s in PRODUCTS)):
             continue
         write_products(outdir, movie,
                        row.values[optics_col] if optics_col is not None else "",
                        row.values[pre_col] if pre_col is not None else "",
-                       truncate_mrc=movie in truncate)
+                       truncate_mrc=movie in truncate,
+                       marker=" REPROCESSED" if a.fake_reprocess else "")
         processed.append(movie)
         done += 1
         if a.fake_die_after is not None and done >= a.fake_die_after:
@@ -131,12 +145,16 @@ def main(argv: list[str] | None = None) -> int:
     # The fixed-name aggregates every real process writes into its --o.
     roots = [star_io.output_root(m) for m in
              (r.values[name_col] for r in block.rows)
-             if (outdir / (star_io.output_root(m) + ".mrc")).exists()]
+             if (outdir / (star_io.worker_relative_root(
+                 star_io.output_root(m)) + ".mrc")).exists()]
     lines = ["\n", "data_micrographs\n", "\n", "loop_\n",
              "_rlnMicrographName #1\n", "_rlnMicrographMetadata #2\n"]
+    # The aggregate rows carry what the binary serializes: fn_out + fn_root,
+    # concatenated, leading slash and all (src/motioncorr_runner.cpp:571).
     for root in (reversed(roots) if a.fake_reverse_aggregate else roots):
-        lines.append(f"{star_quote(str(outdir / (root + '.mrc')))} "
-                     f"{star_quote(str(outdir / (root + '.star')))}\n")
+        prefix = str(outdir) if str(outdir).endswith(os.sep) else str(outdir) + os.sep
+        lines.append(f"{star_quote(prefix + root + '.mrc')} "
+                     f"{star_quote(prefix + root + '.star')}\n")
     lines.append("\n")
     (outdir / "corrected_micrographs.star").write_text("".join(lines))
     (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n")

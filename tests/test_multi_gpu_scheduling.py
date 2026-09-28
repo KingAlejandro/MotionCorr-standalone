@@ -13,7 +13,7 @@ docs/multi_gpu/negative_controls.py, which removes each one in a scratch copy
 and requires the corresponding case to fail. The one guard that harness cannot
 reach is the C++ device-list rejection, because mutating it needs a rebuild;
 its control is the recorded unpatched-main binary, which produces a different
-message for the same input (docs/multi_gpu/pr_a_evidence/device_list_witness.txt).
+message for the same input (docs/multi_gpu/gpu_evidence/a0_device_list_witness.log).
 
 With --binary pointing at a built motioncorr, the --gpu device-list rejection is
 also exercised against the real argument parser.
@@ -22,6 +22,9 @@ also exercised against the real argument parser.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import hashlib
+import io
 import json
 import os
 import shutil
@@ -103,10 +106,25 @@ def merge(manifest: Path, workers: list[Path], out: Path, status: Path | None,
 
 
 def fake_status(tmp: Path, codes: list[int], verdict: str = "PASS",
-                witness: dict | None = None, name: str = "status.json") -> Path:
+                witness: dict | None = None, name: str = "status.json",
+                manifest: Path | None = None,
+                workers: list[Path] | None = None) -> Path:
+    """A launcher status bound to the run it describes.
+
+    merge_workers.py refuses a status that cannot be shown to describe the
+    manifest and worker directories being merged, so this mirrors exactly what
+    run_multi_gpu.py records: the resolved manifest path, its digest, and each
+    worker's log path under its own directory. Defaults match run_workers().
+    """
     p = tmp / name
-    body: dict = {"workers": [{"index": k, "returncode": rc}
+    man = Path(manifest) if manifest is not None else tmp / "shards" / "shard_manifest.json"
+    wdirs = workers if workers is not None else [tmp / f"w{k}" for k in range(len(codes))]
+    body: dict = {"workers": [{"index": k, "returncode": rc,
+                               "log": str((Path(wdirs[k]) / "run.log").resolve())}
                               for k, rc in enumerate(codes)],
+                  "manifest": str(man.resolve()),
+                  "manifest_sha256": hashlib.sha256(man.read_bytes()).hexdigest()
+                                     if man.exists() else "",
                   "verdict": verdict}
     if witness is not None:
         body["gpu_witness"] = witness
@@ -505,12 +523,24 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
         assert needle in combined, f"--gpu {spec}: {combined[:400]}"
         assert spec in combined, f"--gpu {spec} not quoted back: {combined[:400]}"
 
-    # A single valid id must not hit the list error. On a CPU-only build it
-    # reaches the missing-CUDA error instead, which is the correct next check.
+    # A single valid id must not hit either new error, and must reach the check
+    # that comes next. Asserting only the ABSENCE of the two strings would pass
+    # for any failure mode at all -- including the binary crashing before it
+    # parsed --gpu -- so the positive half decides this.
     cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", "0"])
     combined = cp.stdout + cp.stderr
     assert "device entries" not in combined, combined[:400]
     assert "not a non-negative" not in combined, combined[:400]
+    assert cp.returncode != 0, "--gpu 0 with a missing input must still fail"
+    # On a CPU-only build the next check is the missing-CUDA error. On a CUDA
+    # build the device id is accepted and the run proceeds to the input, which
+    # does not exist. Exactly one of the two must be what happened.
+    cpu_only = "built without CUDA support" in combined
+    cuda_build = ("Using CUDA acceleration on GPU device 0" in combined
+                  or "Invalid GPU device ID" in combined
+                  or "no_such_input.star" in combined)
+    assert cpu_only or cuda_build, \
+        f"--gpu 0 failed for an unrecognised reason: {combined[:400]}"
 
 
 def case_aggregate_star_canonical_order(tmp: Path) -> None:
@@ -682,7 +712,10 @@ def case_missing_worker_directory(tmp: Path) -> None:
     shards = tmp / "shards"
     assert partition(star, 2, shards).returncode == 0
     dirs, codes = run_workers(tmp, shards, 2)
-    status = fake_status(tmp, codes)
+    # The status must describe the directories actually merged, or the merge
+    # rejects it for that instead and this case would never reach the
+    # missing-directory check it exists to exercise.
+    status = fake_status(tmp, codes, workers=[dirs[0], tmp / "no_such_worker"])
     report = tmp / "report.json"
     cp = merge(shards / "shard_manifest.json", [dirs[0], tmp / "no_such_worker"],
                tmp / "merged", status, report)
@@ -1216,7 +1249,8 @@ def case_duplicate_coverage_and_zero_pairs_rejected(tmp: Path) -> None:
     (w / "a" / "x.mrc").write_text("one")
     (w / "a" / "x.star").write_text("one")
     report = tmp / "dup_report.json"
-    cp = merge(man, [w], tmp / "merged", fake_status(tmp, [0]), report)
+    cp = merge(man, [w], tmp / "merged",
+               fake_status(tmp, [0], manifest=man, workers=[w]), report)
     assert cp.returncode == 3, f"one pair satisfied two movies (rc={cp.returncode})"
     rep = json.loads(report.read_text())
     assert any("duplicate coverage" in p for p in rep["problems"]), rep["problems"]
@@ -1225,7 +1259,9 @@ def case_duplicate_coverage_and_zero_pairs_rejected(tmp: Path) -> None:
     empty = tmp / "empty_manifest.json"
     empty.write_text(json.dumps({"canonical_movies": [], "canonical_output_roots": [],
                                  "shards": []}))
-    cp = merge(empty, [w], tmp / "merged_empty", fake_status(tmp, [0]))
+    cp = merge(empty, [w], tmp / "merged_empty",
+               fake_status(tmp, [0], name="status_empty.json",
+                           manifest=empty, workers=[w]))
     assert cp.returncode == 2 and "nothing to verify" in cp.stderr, cp.stderr
 
     # compare24: zero pairs is a FAIL, not a vacuous PASS
@@ -1320,7 +1356,8 @@ def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
     (w0 / "Movies" / "a.star").write_text("one")
     w1.mkdir()
     report = tmp / "rep.json"
-    cp = merge(man, [w0, w1], tmp / "merged", fake_status(tmp, [0, 0]), report)
+    cp = merge(man, [w0, w1], tmp / "merged",
+               fake_status(tmp, [0, 0], manifest=man, workers=[w0, w1]), report)
     assert cp.returncode == 3, f"one pair satisfied two movies (rc={cp.returncode})"
     rep = json.loads(report.read_text())
     assert any("duplicate coverage" in p for p in rep["problems"]), rep["problems"]
@@ -1335,6 +1372,408 @@ def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
               "--tool", tool, "--manifest", man, "--out", tmp / "z"])
     assert cp.returncode == 2, f"duplicate normalized roots accepted (rc={cp.returncode})"
     assert "not distinct after normalization" in cp.stderr, cp.stderr
+
+
+
+def case_stale_status_is_refused(tmp: Path) -> None:
+    """A launcher status may only be believed about the run it describes.
+
+    Nothing else in the merge checks that --status belongs to this run, so a
+    status left over from -- or copied out of -- a passing run supplies clean
+    exit codes for workers that actually failed, and the merge reports PASS
+    having never seen the current run's result.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    # Two runs with genuinely separate trees. run_workers() names its
+    # directories w0..wN under the base it is given, so sharing one base
+    # would make both runs write the same directories and the "other run"
+    # in this case would not be another run at all.
+    a_root, b_root = tmp / "A", tmp / "B"
+    a_root.mkdir()
+    b_root.mkdir()
+
+    # run A: healthy
+    shards_a = a_root / "shards"
+    assert partition(star, 2, shards_a).returncode == 0
+    dirs_a, codes_a = run_workers(a_root, shards_a, 2)
+    good = fake_status(a_root, codes_a, name="status_a.json",
+                       manifest=shards_a / "shard_manifest.json", workers=dirs_a)
+
+    # positive control: the matching status merges cleanly, so the refusals
+    # below cannot be a merge that rejects everything.
+    rep_ok = tmp / "report_ok.json"
+    assert merge(shards_a / "shard_manifest.json", dirs_a, tmp / "merged_ok",
+                 good, rep_ok).returncode == 0
+    assert json.loads(rep_ok.read_text())["verdict"] == "PASS"
+
+    # run B: worker 0 exits non-zero. Its own status records that.
+    shards_b = b_root / "shards"
+    assert partition(star, 2, shards_b).returncode == 0
+    dirs_b, codes_b = run_workers(b_root, shards_b, 2,
+                                  per_worker={0: ["--fake_fail_rc", "9"]})
+    assert codes_b[0] == 9, codes_b
+    own = fake_status(b_root, codes_b, verdict="FAIL", name="status_b.json",
+                      manifest=shards_b / "shard_manifest.json", workers=dirs_b)
+    rep_own = tmp / "report_own.json"
+    assert merge(shards_b / "shard_manifest.json", dirs_b, tmp / "merged_own",
+                 own, rep_own).returncode == 3, "run B's own status must fail the merge"
+
+    # the hazard: run A's passing status handed to run B's merge
+    cp = merge(shards_b / "shard_manifest.json", dirs_b, tmp / "merged_stale", good,
+               tmp / "report_stale.json")
+    assert cp.returncode == 2, \
+        f"a status from another run was accepted (rc={cp.returncode})"
+    assert "manifest" in cp.stderr, cp.stderr
+
+    # a status carrying no manifest at all is refused, not skipped
+    bare = tmp / "bare.json"
+    bare.write_text(json.dumps({"workers": [{"index": k, "returncode": 0}
+                                            for k in range(2)], "verdict": "PASS"}))
+    cp = merge(shards_b / "shard_manifest.json", dirs_b, tmp / "merged_bare", bare)
+    assert cp.returncode == 2 and "records no manifest" in cp.stderr, cp.stderr
+
+    # a status naming this manifest but another run's worker directories
+    crossed = fake_status(b_root, [0, 0], name="status_crossed.json",
+                          manifest=shards_b / "shard_manifest.json", workers=dirs_a)
+    cp = merge(shards_b / "shard_manifest.json", dirs_b, tmp / "merged_crossed", crossed)
+    assert cp.returncode == 2 and "worker directory" in cp.stderr, cp.stderr
+
+    # A copy of this manifest at another path: the digest matches and the
+    # worker logs are this run's, so the path check is the only thing that can
+    # reject it. Without a case like this the digest and worker-log checks would
+    # cover for it and its own mutation would survive.
+    twin = b_root / "manifest_copy.json"
+    twin.write_bytes((shards_b / "shard_manifest.json").read_bytes())
+    twinned = fake_status(b_root, [0, 0], name="status_twin.json",
+                          manifest=twin, workers=dirs_b)
+    cp = merge(shards_b / "shard_manifest.json", dirs_b, tmp / "merged_twin", twinned)
+    assert cp.returncode == 2 and "describes manifest" in cp.stderr, cp.stderr
+
+    # a manifest edited after the run is refused by digest
+    edited = shards_b / "shard_manifest.json"
+    body = json.loads(edited.read_text())
+    body["note"] = "tampered"
+    edited.write_text(json.dumps(body))
+    cp = merge(edited, dirs_b, tmp / "merged_tampered", own)
+    assert cp.returncode == 2 and "has changed since" in cp.stderr, cp.stderr
+
+
+def case_duplicate_movie_name_refused(tmp: Path) -> None:
+    """A movie named twice is not a movie processed twice.
+
+    canonical_movies and each shard are keyed by movie name into the owner map,
+    so a repeated name collapses to one entry while n_movies_expected still
+    counts it twice. One product pair then satisfies both and the merge reports
+    PASS on half the coverage. The cross-shard spelling is caught by
+    attribution; the same-shard spelling is invisible without an explicit check.
+    """
+    def one_pair(w: Path) -> None:
+        (w / "Movies").mkdir(parents=True, exist_ok=True)
+        (w / "Movies" / "a.mrc").write_text("one")
+        (w / "Movies" / "a.star").write_text("one")
+
+    # same shard: the spelling that used to pass
+    man = tmp / "same_shard.json"
+    man.write_text(json.dumps({
+        "canonical_movies": ["Movies/a.tif", "Movies/a.tif"],
+        "canonical_output_roots": ["Movies/a", "Movies/a"],
+        "shards": [{"index": 0, "movies": ["Movies/a.tif", "Movies/a.tif"],
+                    "n_movies": 2}]}))
+    w = tmp / "w0"
+    w.mkdir()
+    one_pair(w)
+    cp = merge(man, [w], tmp / "merged_same",
+               fake_status(tmp, [0], manifest=man, workers=[w]))
+    assert cp.returncode == 2, \
+        f"one movie satisfied two expected movies (rc={cp.returncode})"
+    assert "same movie more than once" in cp.stderr, cp.stderr
+
+    # across shards: also refused, and for the same reason rather than by luck
+    man2 = tmp / "cross_shard.json"
+    man2.write_text(json.dumps({
+        "canonical_movies": ["Movies/a.tif", "Movies/a.tif"],
+        "canonical_output_roots": ["Movies/a", "Movies/a"],
+        "shards": [{"index": 0, "movies": ["Movies/a.tif"], "n_movies": 1},
+                   {"index": 1, "movies": ["Movies/a.tif"], "n_movies": 1}]}))
+    w1 = tmp / "w1"
+    w1.mkdir()
+    cp = merge(man2, [w, w1], tmp / "merged_cross",
+               fake_status(tmp, [0, 0], name="s2.json", manifest=man2, workers=[w, w1]))
+    assert cp.returncode == 2 and "same movie more than once" in cp.stderr, cp.stderr
+
+    # A shard that names a movie twice while the canonical list does not: the
+    # canonical check cannot see this, so the per-shard check is its only
+    # detector. Without this the per-shard mutation survives behind the
+    # canonical one.
+    man_shard = tmp / "shard_only_dupe.json"
+    man_shard.write_text(json.dumps({
+        "canonical_movies": ["Movies/a.tif", "Movies/b.tif"],
+        "canonical_output_roots": ["Movies/a", "Movies/b"],
+        "shards": [{"index": 0, "movies": ["Movies/a.tif", "Movies/a.tif",
+                                           "Movies/b.tif"], "n_movies": 3}]}))
+    (w / "Movies" / "b.mrc").write_text("two")
+    (w / "Movies" / "b.star").write_text("two")
+    cp = merge(man_shard, [w], tmp / "merged_shard_dupe",
+               fake_status(tmp, [0], name="s4.json", manifest=man_shard, workers=[w]))
+    assert cp.returncode == 2, \
+        f"a shard naming one movie twice was accepted (rc={cp.returncode})"
+    assert "same movie more than once" in cp.stderr, cp.stderr
+
+    # positive control: distinct names over the same shape merge cleanly, so the
+    # refusals above are about the duplication and not about the fixture.
+    man3 = tmp / "distinct.json"
+    man3.write_text(json.dumps({
+        "canonical_movies": ["Movies/a.tif", "Movies/b.tif"],
+        "canonical_output_roots": ["Movies/a", "Movies/b"],
+        "shards": [{"index": 0, "movies": ["Movies/a.tif", "Movies/b.tif"],
+                    "n_movies": 2}]}))
+    (w / "Movies" / "b.mrc").write_text("two")
+    (w / "Movies" / "b.star").write_text("two")
+    rep = tmp / "rep_ok.json"
+    cp = merge(man3, [w], tmp / "merged_distinct",
+               fake_status(tmp, [0], name="s3.json", manifest=man3, workers=[w]), rep)
+    assert cp.returncode == 0, cp.stderr
+    assert json.loads(rep.read_text())["n_movies_expected"] == 2
+
+
+def case_worker_args_may_not_override_launcher_options(tmp: Path) -> None:
+    """--i, --o and --gpu belong to the launcher and cannot be overridden.
+
+    The launcher appends worker arguments after its own, and IOParser::getOption
+    returns the last occurrence (src/args.cpp), so a copied command line
+    carrying --o sends every worker into one shared directory -- the collision
+    distinct worker directories exist to prevent -- while the children still
+    exit zero and the launcher still writes verdict PASS.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    for clash in (["--o", str(tmp / "shared")], ["--i", str(star)], ["--gpu", "0"]):
+        out = tmp / ("run_" + clash[0].strip("-"))
+        cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", out,
+                  "--binary", FAKE, "--workers", "2", "--no-witness", "--",
+                  "--use_own"] + clash)
+        assert cp.returncode == 2, \
+            f"{clash[0]} in worker arguments was accepted (rc={cp.returncode})"
+        assert clash[0] in cp.stderr and "launcher" in cp.stderr, cp.stderr
+        assert not (out / "w0").exists(), "workers started before the refusal"
+
+    # positive control: the same command without the clash runs and passes, so
+    # the refusals are about the option and not about the launcher being broken.
+    out = tmp / "run_ok"
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", out,
+              "--binary", FAKE, "--workers", "2", "--no-witness", "--", "--use_own"])
+    assert cp.returncode == 0, cp.stderr
+    assert json.loads((out / "status.json").read_text())["verdict"] == "PASS"
+
+
+def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
+    """The aggregate pass regenerates the dataset STAR, not the movie products.
+
+    --aggregate-with is a full --only_do_unfinished run, and isMovieComplete is
+    option-dependent -- do_dose_weighting/save_noDW, even_odd_split,
+    grouping_for_ps, and since PR110 the per-movie expected frame count. If
+    --aggregate-args does not match what the workers ran, a movie the merge just
+    certified is judged incomplete and reprocessed on top of the staged product,
+    and the report then describes bytes the workers never wrote.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_reprocess"])
+    assert cp.returncode == 3, \
+        ("the aggregate pass rewrote staged products and still passed "
+         f"(rc={cp.returncode})")
+    rep = json.loads(report.read_text())
+    assert any("rewrote" in p and "staged worker product" in p
+               for p in rep["problems"]), rep["problems"]
+    # every movie was rewritten, so the count must say so rather than reporting
+    # a single incidental file
+    assert any(f"rewrote {len(DEFAULT_ROWS)} staged" in p
+               for p in rep["problems"]), rep["problems"]
+
+
+def case_stale_comparison_report_is_not_republished(tmp: Path) -> None:
+    """A report the current comparator did not produce may not be reused.
+
+    Writing the origin sidecar unconditionally after the comparator subprocess
+    binds whatever report happens to be on disk to the new inputs. A comparator
+    that exits without writing --json-out therefore leaves the previous run's
+    verdict looking freshly produced, and --reuse -- whose return code is zero
+    by construction -- accepts it.
+    """
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    roots = ["Movies/a"]
+    manifest = tmp / "manifest.json"
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": ["Movies/a.tiff"]}))
+    ref, test = tmp / "ref", tmp / "test"
+    _tree(ref, roots, failing=set())
+    _tree(test, roots, failing=set())
+    out = tmp / "exact"
+
+    def run24(tool_path, reuse=False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", tool_path, "--manifest", manifest, "--out", out]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    assert run24(tool).returncode == 0, "baseline comparison should pass"
+
+    # the comparator now exits without producing a report; the stale PASS is
+    # still on disk from the run above
+    silent = tmp / "silent_compare.py"
+    silent.write_text("import sys\nsys.exit(7)\n")
+    cp = run24(silent)
+    assert cp.returncode == 1, "a comparator that produced nothing was accepted"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("produced no report" in (r.get("reason") or "") for r in s["results"]), s
+
+    # and the stale report must not have been republished as fresh evidence
+    cp = run24(silent, reuse=True)
+    assert cp.returncode == 1, "a stale report was reused after a silent comparator"
+
+    # swapping the comparator in place also invalidates reuse: the recorded path
+    # is unchanged, so only its contents can tell the two apart
+    assert run24(tool).returncode == 0
+    tool.write_text(STUB_COMPARATOR + "\n# edited in place\n")
+    cp = run24(tool, reuse=True)
+    assert cp.returncode == 1, "a report was reused after the comparator changed"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
+
+
+def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
+    """The launcher's verdict must be decided by what was observed.
+
+    Every other device case stops at an argparse refusal or reads a hand-written
+    status dict, so nothing executes run_multi_gpu's witness-to-verdict wiring.
+    Without this case, replacing that wiring with an unconditional
+    status["verdict"] = "PASS" leaves the whole suite green -- a device claim
+    certified by code no test runs.
+
+    nvidia-smi is replaced at the gpu_witness seam: host_devices supplies the
+    two UUIDs and compute_apps supplies what the sampler would have seen. The
+    workers are real child processes running fake_worker.py.
+    """
+    import importlib.util
+
+    def load(name: str, path: Path):
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+        return mod
+
+    gw = load("gpu_witness", TOOLS / "gpu_witness.py")
+    rmg = load("run_multi_gpu", TOOLS / "run_multi_gpu.py")
+
+    UUID_A, UUID_B = "GPU-aaaaaaaa-0000-0000-0000-000000000001", \
+                     "GPU-bbbbbbbb-0000-0000-0000-000000000002"
+    gw.host_devices = lambda: [
+        {"smi_index": "0", "uuid": UUID_A, "name": "Fake A", "memory_total": "80 MiB"},
+        {"smi_index": "1", "uuid": UUID_B, "name": "Fake B", "memory_total": "80 MiB"}]
+
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    def launch(apps_for, out_name: str):
+        """Run two 'GPU' workers; apps_for(pids) supplies each sample."""
+        state = {"pids": []}
+
+        def compute_apps():
+            if not state["pids"]:
+                # The launcher starts the sampler before the children exist, so
+                # the first samples legitimately see nothing.
+                return []
+            return apps_for(state["pids"])
+
+        gw.compute_apps = compute_apps
+        real_popen = rmg.subprocess.Popen
+
+        def popen(cmd, **kw):
+            p = real_popen(cmd, **kw)
+            state["pids"].append(p.pid)
+            return p
+
+        rmg.subprocess.Popen = popen
+        # Most scenarios here are meant to fail, and the launcher reports that
+        # on stderr; leaving it on the terminal makes a passing case look like
+        # five failures.
+        try:
+            with contextlib.redirect_stderr(io.StringIO()), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                rc = rmg.main(["--star", str(star), "--out", str(tmp / out_name),
+                               "--binary", str(FAKE), "--devices", "0,1",
+                               "--sample-interval", "0.01", "--", "--use_own"])
+        finally:
+            rmg.subprocess.Popen = real_popen
+        status = json.loads((tmp / out_name / "status.json").read_text())
+        return rc, status
+
+    def apps(pid_to_uuid):
+        return lambda pids: [{"pid": str(p), "gpu_uuid": pid_to_uuid(i, p)}
+                             for i, p in enumerate(pids)]
+
+    # correct: each worker on its own device
+    rc, st = launch(apps(lambda i, p: (UUID_A, UUID_B)[i]), "ok")
+    assert rc == 0 and st["verdict"] == "PASS", st
+    assert st["gpu_witness"]["all_pids_witnessed_on_intended_distinct_devices"], st
+    assert [w["returncode"] for w in st["workers"]] == [0, 0], st
+
+    # both workers observed on ONE physical device
+    rc, st = launch(apps(lambda i, p: UUID_A), "shared")
+    assert rc == 3 and st["verdict"] == "FAIL", st
+    assert st["gpu_witness"]["shared_devices"], st
+
+    # each worker observed on the other's device
+    rc, st = launch(apps(lambda i, p: (UUID_B, UUID_A)[i]), "swapped")
+    assert rc == 3 and st["verdict"] == "FAIL", st
+    assert st["gpu_witness"]["wrong_device"], st
+    assert not st["gpu_witness"]["shared_devices"], st
+
+    # nothing ever observed, although the workers exited zero
+    rc, st = launch(lambda pids: [], "unwitnessed")
+    assert rc == 3 and st["verdict"] == "FAIL", st
+    assert st["gpu_witness"]["unwitnessed_pids"], st
+    assert [w["returncode"] for w in st["workers"]] == [0, 0], \
+        "the run must fail on the witness, not on an exit code"
+
+    # the sampler dies after witnessing everything correctly: an incomplete
+    # observation is not a pass, whatever it managed to see first
+    for exc in (gw.WitnessError("nvidia-smi exploded"), RuntimeError("thread died")):
+        calls = {"n": 0}
+        correct = apps(lambda i, p: (UUID_A, UUID_B)[i])
+
+        def dying(pids, _exc=exc, _c=calls, _ok=correct):
+            _c["n"] += 1
+            if _c["n"] > 2:
+                raise _exc
+            return _ok(pids)
+
+        rc, st = launch(dying, "dying_" + type(exc).__name__)
+        assert rc == 3 and st["verdict"] == "FAIL", (type(exc).__name__, st)
+        assert st["gpu_witness"]["sampler_errors"], st
+
+    # a merge must not launder any of those launcher FAILs into a PASS, nor
+    # accept a PASS its own witness record contradicts
+    rc, st = launch(apps(lambda i, p: UUID_A), "shared2")
+    out = tmp / "shared2"
+    (out / "status.json").write_text(json.dumps({**st, "verdict": "PASS"}))
+    cp = merge(out / "shards" / "shard_manifest.json", [out / "w0", out / "w1"],
+               tmp / "merged_forced", out / "status.json", tmp / "rep_forced.json")
+    assert cp.returncode == 3, "a PASS contradicted by its own witness was merged"
+    rep = json.loads((tmp / "rep_forced.json").read_text())
+    assert any("does not support it" in p for p in rep["problems"]), rep["problems"]
 
 
 CASES = [
@@ -1376,6 +1815,12 @@ CASES = [
     case_absolute_movie_roots_attributed,
     case_gpu_witness_logic,
     case_sampler_lifecycle,
+    case_stale_status_is_refused,
+    case_duplicate_movie_name_refused,
+    case_worker_args_may_not_override_launcher_options,
+    case_aggregate_may_not_rewrite_staged_products,
+    case_stale_comparison_report_is_not_republished,
+    case_launcher_verdict_follows_the_device_witness,
 ]
 
 

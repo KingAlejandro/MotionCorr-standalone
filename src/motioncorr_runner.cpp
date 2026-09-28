@@ -263,8 +263,9 @@ void MotioncorrRunner::initialise()
 		// build rejects an unsupported list for the reason it is unsupported instead of
 		// reporting only the missing CUDA support.
 		//
-		// untangleDeviceIDs() erases the string it is handed, so parse a copy: gpu_ids must
-		// still hold what the user typed if anything re-reads or reports it.
+		// untangleDeviceIDs() consumes the string it is handed up to the last ':'
+		// (src/args.cpp:437-443), so "0:1:2:3" comes back as "3". Parse a copy: gpu_ids
+		// must still hold what the user typed when the error below quotes it.
 		std::string gpu_ids_to_parse = gpu_ids;
 		untangleDeviceIDs(gpu_ids_to_parse, allThreadIDs);
 

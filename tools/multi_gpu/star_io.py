@@ -319,9 +319,9 @@ def movie_block(star: StarFile) -> Block:
 
 
 # Per-movie output decorations appended to the output root, from
-# src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _shifts (:950), _noDW (:798),
-# _DW / _DWS (:818, :823), _PS (:1081), _EVN / _ODD (:1087-1088) and _frames
-# (:1830). Two movies whose roots differ only by one of these can overwrite each
+# src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _shifts (:994), _noDW (:842),
+# _DW / _DWS (:867, :862), _PS (:1336), _EVN / _ODD (:2532-2533) and _frames
+# (:1882). Two movies whose roots differ only by one of these can overwrite each
 # other, which is why partition_star.py preflights for it.
 OUTPUT_DECORATIONS = ("", "_shifts", "_noDW", "_DW", "_DWS", "_PS", "_EVN",
                       "_ODD", "_frames")
@@ -363,7 +363,7 @@ def worker_relative_root(root: str) -> str:
     """Where an output root actually lands beneath a worker's --o directory.
 
     getOutputFileNames() is `fn_out + fn_root` -- plain string concatenation
-    (src/motioncorr_runner.cpp:491-511). For an absolute movie name the result is
+    (src/motioncorr_runner.cpp:552-572). For an absolute movie name the result is
     `<out>//abs/path/x.mrc`, which the filesystem collapses to `<out>/abs/path`.
     So relative to the worker directory the root is the absolute root with its
     leading slashes absorbed. Matching worker files against the unmodified
@@ -388,7 +388,7 @@ def worker_relative_root(root: str) -> str:
 
 
 def output_root(movie_name: str) -> str:
-    """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:491.
+    """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:552.
 
     Strips the extension and replaces every remaining '.' with '_'. Two distinct
     movies can therefore share one output root, which is a silent overwrite; the

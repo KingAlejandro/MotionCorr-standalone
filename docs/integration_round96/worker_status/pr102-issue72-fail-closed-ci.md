@@ -7,7 +7,7 @@
 | task class | validation |
 | phase | 5/5 — Review findings addressed, validated on cpu64, committed & pushed |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| head | `8fc088c53b4fc4706039d5eb078e1aa164c7a3ac` |
+| head | `95249090666016e16f39baae54d24f0c4ee758d4` |
 | branch | `round96/72-gemini-3-8-flash` |
 | worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-1d15fa94` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/102 |
@@ -50,6 +50,23 @@ A bit-for-bit byte, header, and pixel comparison between GitHub Actions run 3636
 6. **[P2] Generator protection**: Added `--canonical` mode to verify against canonical truth and refuse drift, added `--refuse-conflicting` to prevent parameter collision, and ensured ordinary generation always pairs matching truth with newly generated movie bytes. Added negative control 7.
 7. **Baseline assertion and quoting**: Control 5 asserts passing baseline before corrupting movie byte; interpreter paths quoted in stub wrappers. Reconciled commit references in `WORKER_STATUS.md`.
 
+## Codex Review Findings Reconciliation (PR #102 cf049ef4)
+
+1. **discussion_r4119257398 (run_known_motion_gates malformed manifest)**:
+   - **Root Cause**: `tools/run_known_motion_gates.py:select_cases()` caught `(json.JSONDecodeError, OSError)` and silently ignored exceptions with `pass`, falling back to whatever `*_ground_truth.json` files existed and reporting `PASS` even if required cases were omitted.
+   - **Fix**: Propagated error immediately: raises `ValueError("malformed or unreadable fixture manifest ...")` if parsing fails; enforces that manifest root and `"cases"` are valid non-empty dictionaries; checks that all non-heavy cases in the manifest are present in discovered cases; requires `MANIFEST.json` when inspecting canonical repo fixtures directory. Wrapped in `main()` to exit status 2 with clear error message.
+   - **Control**: Added control 1C in `tools/test_ci_fail_closed.py` testing unclosed JSON and empty cases inventory; both fail closed with exit 2.
+
+2. **discussion_r4119257404 (--refuse-conflicting overwriting before check)**:
+   - **Root Cause**: In `test-data/generate_known_motion_fixture.py`, `write_mrc_stack(mrcs, stack, ...)` and `star.write_text(...)` occurred at line 346, before checking `--refuse-conflicting` and `--canonical` at lines 448-460. A conflicting parameter set therefore overwrote the `.mrcs` movie on disk before raising `RuntimeError`.
+   - **Fix**: (a) Preflight validation: checks `--canonical` (requires existing truth) and `--refuse-conflicting` against `existing_gt` parameters before generating or writing any files. (b) Atomic staging: writes new movie and STAR into a temporary directory (`.stage_<name>_XXXXXX`), hashes the staged movie, verifies canonical match, and uses `os.replace` to atomically install files only after full validation. If refused or mismatched, the temporary directory is discarded and every prior disk byte is 100% untouched.
+   - **Control**: Updated control 7 in `tools/test_ci_fail_closed.py` to record initial bytes of movie, STAR, and truth, asserting bit-for-bit identity (`movie_path.read_bytes() == init_movie_bytes`) following refused parameter changes and canonical disagreements.
+
+3. **discussion_r4119257409 (source archive with no .git needs disk-manifest fallback)**:
+   - **Root Cause**: In `tools/verify_fixtures.py`, `load_manifest()` unconditionally ran `git show HEAD:test-data/known_motion/MANIFEST.json`. In a release source archive without `.git`, this failed with exit 2 even though `test-data/known_motion/MANIFEST.json` was present.
+   - **Fix**: Added `has_git_metadata(repo)` to verify whether git metadata exists. In a git checkout, Git lookup remains strictly required (lookup failures or git corruption fail closed with exit 2 and NEVER fall back to disk). In a source archive with proven absence of git metadata, falls back to the committed disk manifest, returning provenance `archive:<path>`. Fails closed if the disk manifest is missing or invalid.
+   - **Control**: Added control 6C in `tools/test_ci_fail_closed.py` verifying source archive fallback with `archive:` provenance, confirming missing/corrupt manifest in archive fails closed, and verifying that a Git repo with invalid ref fails closed without disk fallback.
+
 ## Tests & Validation
 
 All tests executed and verified on both local macOS (arm64) and remote Linux (`cpu64` / `small-refmac-machine`, x86_64, Ubuntu 24.04, node 1 / cores 32-47, under `flock /tmp/motioncorr-issue96-cpu-validation.lock`):
@@ -69,10 +86,12 @@ All tests executed and verified on both local macOS (arm64) and remote Linux (`c
 
 ## Compute & Resource Adherence
 
-- Host: `cpu64` (`small-refmac-machine`).
-- Lock: `/tmp/motioncorr-issue96-cpu-validation.lock` strictly acquired via `flock`.
-- CPU topology & binding: socket 1 / node 1, `taskset`/`numactl --physcpubind=32-47 --membind=1`. Parallelism <= 8 (well within <= 16 limit).
-- Background interference recorded: two long-running ctffind processes preserved untouched.
+- Host: `cpu64` (`small-refmac-machine`, Ubuntu 24.04, Linux 6.8.0-86-generic).
+- Lock: `/tmp/motioncorr-issue96-cpu-validation.lock` strictly acquired via `flock` (PID 3274640 at 2026-09-28T06:55:04+00:00).
+- CPU topology & binding: socket 1 / node 1, cores 32-47 (`taskset -c 32-47`, `numactl --physcpubind=32-47 --membind=1`). Parallelism <= 8 (well within <= 16 limit).
+- Verified topology: `Cpus_allowed_list: 32-47`, `Mems_allowed_list: 1`, node 1 memory 115862 MB.
+- Background interference recorded: two long-running ctffind processes preserved untouched; system load ~9.87.
+- Validation Suite: 14/14 CTests PASS (100%), CI preflight PASS, Canonical fixture verification PASS (`git:HEAD:test-data/known_motion/MANIFEST.json`), Fail-closed controls 7/7 PASS (including 1C, 6C, 7), Runner tests 8/8 PASS.
 - **NEEDS_GPU: no.** GPU execution strictly avoided; preserved for issue #26 coordinated slot. CUDA compilation tested in CI via Docker container `nvidia/cuda:12.8.0-devel-ubuntu24.04` with package dependencies including `python3-numpy`.
 
 ## Final Independent Code / Spec / License Audit

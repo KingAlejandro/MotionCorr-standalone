@@ -113,9 +113,11 @@ class Sampler(threading.Thread):
     """1 Hz background sampling. Daemon, so it cannot outlive the interpreter."""
 
     def __init__(self, own_user: str, gpu_index: Optional[int], mask: Optional[str],
-                 period: float = 0.2, ps_period: float = 1.0):
+                 period: float = 0.2, ps_period: float = 1.0, own_root_pid: Optional[int] = None):
         super().__init__(daemon=True)
         self.own_user = own_user
+        self.own_root_pid = own_root_pid
+        self.foreign_detail: Dict[str, int] = {}
         self.gpu_index = gpu_index
         self.mask_cpus = parse_cpu_list(mask) if mask else None
         self.period = period
@@ -132,25 +134,25 @@ class Sampler(threading.Thread):
         self._halt.set()
 
     def _sample_foreign(self) -> None:
-        out = subprocess.run(["ps", "-eLo", "user=,pcpu=,psr="],
+        own = own_subtree(self.own_root_pid) if self.own_root_pid else set()
+        out = subprocess.run(["ps", "-eLo", "pid=,user=,pcpu=,psr=,comm="],
                              capture_output=True, text=True, timeout=10).stdout
         total, in_mask = 0.0, 0
         for line in out.splitlines():
-            parts = line.split()
-            if len(parts) != 3:
-                continue
-            user, pcpu, psr = parts
-            if user == self.own_user:
+            parts = line.split(None, 4)
+            if len(parts) != 5:
                 continue
             try:
-                pc, pr = float(pcpu), int(psr)
+                pid, pc, pr = int(parts[0]), float(parts[2]), int(parts[3])
             except ValueError:
                 continue
-            if pc <= 1.0:
+            if pid in own or pc <= 1.0:
                 continue
             total += pc
             if self.mask_cpus is not None and pr in self.mask_cpus:
                 in_mask += 1
+                comm = parts[4].strip()
+                self.foreign_detail[comm] = self.foreign_detail.get(comm, 0) + 1
         self.foreign_pct.append(total)
         self.foreign_in_mask.append(in_mask)
 
@@ -190,6 +192,11 @@ class Sampler(threading.Thread):
             "samples_attempted": self.samples,
             "foreign_cpu_pct": stats(self.foreign_pct),
             "foreign_threads_inside_mask": stats(self.foreign_in_mask),
+            "foreign_in_mask_by_command": dict(sorted(self.foreign_detail.items(),
+                                                      key=lambda kv: -kv[1])[:10]),
+            "foreign_definition": "any thread outside this run's own process subtree using "
+                                  ">1% CPU; username is not usable here because concurrent "
+                                  "round workers and ctffind all run as the same user",
             "device_vram_mib_sampled": stats(self.vram_mib),
             "device_util_pct_sampled": stats(self.gpu_util),
             "vram_note": "NVML sampled at this period; a sampled peak is a lower bound on the "
@@ -236,6 +243,62 @@ class RssSampler(threading.Thread):
         }
 
 
+def own_subtree(root_pid: int) -> set:
+    """PIDs of `root_pid` and all its descendants.
+
+    Interference cannot be identified by username on these hosts: every concurrent round
+    worker on cpu64 runs as `ubuntu`, and so do the two long-running `ctffind` jobs. A
+    user-based filter there reports zero foreign load no matter what else is running, which
+    is a check that structurally cannot observe the thing it asserts. Subtree membership is
+    the property that actually distinguishes this run's work from everyone else's.
+    """
+    try:
+        out = subprocess.run(["ps", "-eo", "pid=,ppid="], capture_output=True, text=True,
+                             timeout=10).stdout
+    except Exception:
+        return {root_pid}
+    children: Dict[int, List[int]] = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) != 2:
+            continue
+        try:
+            pid, ppid = int(parts[0]), int(parts[1])
+        except ValueError:
+            continue
+        children.setdefault(ppid, []).append(pid)
+    seen, stack = set(), [root_pid]
+    while stack:
+        pid = stack.pop()
+        if pid in seen:
+            continue
+        seen.add(pid)
+        stack.extend(children.get(pid, []))
+    return seen
+
+
+def lane_foreign_threads(mask_cpus: set, own: set, min_pcpu: float = 20.0) -> List[str]:
+    """Busy threads sitting inside our cpuset that are not ours."""
+    try:
+        out = subprocess.run(["ps", "-eLo", "pid=,psr=,pcpu=,comm="], capture_output=True,
+                             text=True, timeout=10).stdout
+    except Exception:
+        return []
+    hits = []
+    for line in out.splitlines():
+        parts = line.split(None, 3)
+        if len(parts) != 4:
+            continue
+        try:
+            pid, psr, pcpu = int(parts[0]), int(parts[1]), float(parts[2])
+        except ValueError:
+            continue
+        if pid in own or pcpu < min_pcpu or psr not in mask_cpus:
+            continue
+        hits.append(f"pid={pid} cpu={psr} pcpu={pcpu} comm={parts[3].strip()}")
+    return hits
+
+
 def parse_cpu_list(spec: str) -> set:
     cpus = set()
     for part in spec.split(","):
@@ -250,25 +313,47 @@ def parse_cpu_list(spec: str) -> set:
     return cpus
 
 
-def settle(load_max: float, timeout_s: int, log: List[str]) -> Dict[str, Any]:
-    """Wait for the previous mutex holder's decay tail. Runs after acquisition, by contract."""
+def settle(load_max: float, timeout_s: int, log: List[str], mode: str = "global_load",
+           lane_mask: Optional[str] = None) -> Dict[str, Any]:
+    """Wait for the previous mutex holder's decay tail. Runs after acquisition, by contract.
+
+    Two modes, because the right gate depends on who else is legitimately on the box.
+
+    `global_load` waits for system `load1` to fall below a threshold. That is correct when
+    the mutex is expected to give exclusive use of the whole machine.
+
+    `lane` waits instead for this run's own cpuset to be free of busy foreign threads, and
+    records `load1` as a witness without gating on it. On a host where other workers hold a
+    different lock and are pinned to a disjoint lane, a global-load gate would time out on
+    every run while measuring nothing about our own cores -- and a timeout that fires every
+    time degrades silently to "wait the whole budget, then run anyway".
+
+    Compiler detection uses exact process names. `pgrep -f` matches the probe's own command
+    line, so it is permanently non-zero and the guard never fires.
+    """
     t0 = time.time()
-    waited, load1, comps = 0.0, None, None
+    lane_cpus = parse_cpu_list(lane_mask) if lane_mask else set()
+    own = own_subtree(os.getpid())
+    waited, load1, comps, intruders = 0.0, None, 0, []
     while True:
         load1 = float(open("/proc/loadavg").read().split()[0])
         comps = 0
         for name in COMPILER_NAMES:
             r = subprocess.run(["pgrep", "-x", name], capture_output=True, text=True)
             comps += len([x for x in r.stdout.split() if x.strip()])
+        intruders = lane_foreign_threads(lane_cpus, own) if lane_cpus else []
         waited = time.time() - t0
-        if load1 < load_max and comps == 0:
+        clear = (not intruders) if mode == "lane" else (load1 < load_max)
+        if clear and comps == 0:
             break
         if waited >= timeout_s:
-            log.append(f"SETTLE_TIMEOUT after {waited:.0f}s load1={load1} compilers={comps}")
+            log.append(f"SETTLE_TIMEOUT after {waited:.0f}s mode={mode} load1={load1} "
+                       f"compilers={comps} lane_intruders={len(intruders)}")
             break
         time.sleep(3.0)
-    return {"waited_s": round(waited, 1), "load1_at_start": load1,
+    return {"mode": mode, "waited_s": round(waited, 1), "load1_at_start": load1,
             "compilers_running": comps, "load_max_threshold": load_max,
+            "lane_mask": lane_mask, "lane_intruders_at_start": intruders,
             "timed_out": waited >= timeout_s}
 
 
@@ -331,6 +416,7 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     (rundir / "out").mkdir(parents=True)
     log: List[str] = []
 
+    cpu_mask = arm["cpu_mask"]
     # Settle policy. The full gate exists to avoid the *previous mutex holder's* load decay
     # tail, so it is worth its cost once, before the first run. Applying it between every run
     # of one series would instead wait out this series' own tail: after a 16-thread arm,
@@ -340,16 +426,19 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     # of a pair, and each record states which regime applied.
     if cfg.get("settle_full_gate", True) and not cfg.get("_first_run_done"):
         settle_info = settle(cfg.get("settle_load_max", 2.0),
-                             cfg.get("settle_timeout_s", 300), log)
+                             cfg.get("settle_timeout_s", 300), log,
+                             mode=cfg.get("settle_mode", "global_load"),
+                             lane_mask=cpu_mask)
         settle_info["regime"] = "full_gate_first_run_of_series"
         cfg["_first_run_done"] = True
     else:
         quiet = float(cfg.get("inter_run_quiet_s", 5.0))
         time.sleep(quiet)
         settle_info = {"regime": "fixed_inter_run_quiet", "waited_s": quiet,
-                       "load1_at_start": float(open("/proc/loadavg").read().split()[0])}
+                       "load1_at_start": float(open("/proc/loadavg").read().split()[0]),
+                       "lane_intruders_at_start":
+                           lane_foreign_threads(parse_cpu_list(cpu_mask), own_subtree(os.getpid()))}
 
-    cpu_mask = arm["cpu_mask"]
     cmd = ["taskset", "-c", cpu_mask, "/usr/bin/time", "-v", arm["binary"],
            "--i", arm["input_star"], "--o", str(rundir / "out") + "/",
            "--j", str(arm["j"])]
@@ -376,7 +465,8 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
 
     samp = Sampler(own_user=cfg["own_user"], gpu_index=gpu_index, mask=cpu_mask,
                    period=cfg.get("device_sample_period_s", 0.2),
-                   ps_period=cfg.get("foreign_sample_period_s", 1.0))
+                   ps_period=cfg.get("foreign_sample_period_s", 1.0),
+                   own_root_pid=os.getpid())
     samp.start()
 
     t0 = time.time()

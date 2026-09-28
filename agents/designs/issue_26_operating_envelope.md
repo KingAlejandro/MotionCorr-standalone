@@ -112,6 +112,19 @@ permanently at ~100% each and are **unpinned** (`Cpus_allowed_list: 0-63`), so t
 enter the measurement lane. They are not altered and not waited out; they are sampled per run
 and reported as interference.
 
+Interference is identified by process subtree, not by username. Every concurrent round worker
+on `cpu64` runs as `ubuntu`, and so do both `ctffind` jobs, so a user-based filter reports zero
+foreign load there regardless of what is actually running — a check that structurally cannot
+observe what it asserts.
+
+For the same reason the settle gate has two modes. Waiting for global `load1` is right when
+the mutex confers exclusive use of the machine, as on `4-gpu-vm`. On `cpu64`, where other
+workers hold a different lock in a disjoint lane, the gate instead waits for *this run's own
+cpuset* to be free of busy foreign threads and records `load1` as a witness. Because `ctffind`
+is unpinned and permanent, that gate is expected to time out at the start of a `cpu64` series;
+the timeout is logged, and it is the evidence that a clean lane is not obtainable on that host
+rather than a defect in the gate.
+
 ## 6. Whitelist
 
 Documentation, measurement tooling and evidence only. No file under `src/` is modified by
@@ -122,6 +135,7 @@ this issue.
 | `agents/designs/issue_26_operating_envelope.md` | this ADR |
 | `WORKER_STATUS.md` | round handoff status |
 | `tools/envelope_runner.py` | measurement runner |
+| `tools/envelope_report.py` | series analyser and product-equality verdict |
 | `docs/operating_envelope_issue26.md` | report and operating guide |
 | `docs/benchmark_logs/issue26_envelope_*/**` | raw per-run records |
 

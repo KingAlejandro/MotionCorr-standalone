@@ -429,8 +429,19 @@ void runCapacityChecks()
 		unsigned long long real = 0, r2c = 0;
 		realStackBytes(g, real); fourierStackBytes(g, r2c);
 		check(b.staged_host_bytes == real, "chunk 0 stages the whole movie");
-		check(b.host_bytes == real + r2c + real,
-		      "default policy charges the staged movie and both resident stacks");
+		// The previous revision asserted `real + r2c + real` here and called it
+		// "today's numbers". It was not: the runner decodes straight into
+		// Iframes, so the staged movie and the retained real stack are one
+		// allocation. The old expectation enshrined a double count that
+		// contradicted this component's own ADR phase table.
+		check(b.staged_aliases_resident,
+		      "the whole-movie float policy aliases the retained real stack");
+		check(b.host_bytes == real + r2c,
+		      "default policy charges Iframes once, not twice");
+		check(b.staged_host_bytes + b.resident_host_bytes > b.host_bytes,
+		      "the alias is visible: the parts deliberately over-sum the whole");
+		check(b.schedule_host_bytes == 0,
+		      "today's runner builds no repair schedule, so none is charged");
 		check(b.input_passes == 1, "default policy decodes the input once");
 	}
 
@@ -581,23 +592,26 @@ void runCapacityChecks()
 		      && chunk == 10, "device residency does not consume the host budget");
 	}
 
-	// The binary search in largestChunkWithin is only sound if host_bytes is
-	// non-decreasing in chunk_frames. That precondition is currently a property
-	// of the term list, not something the type system enforces, so check it
-	// directly: a future chunk-dependent term that is not monotone would break
-	// the search silently and no other test would notice.
+	// The binary search is only sound if host_bytes is non-decreasing in
+	// chunk_frames on [1, n_frames-1]. It is NOT monotone across the whole
+	// range: an aliasing policy drops at chunk == n_frames. Assert both halves,
+	// so neither the monotone interval nor the alias can regress unnoticed.
 	{
 		Geometry g; g.nx = 97; g.ny = 61; g.n_frames = 64;
-		Policy policies[4];
+		Policy policies[6];
 		policies[1].staged_bytes_per_sample = 2;
 		policies[2].retain_host_aligned_stack = true;
 		policies[2].device_resident = true;
 		policies[3].extra_host_bytes = 1234567;
 		policies[3].input_passes = 2;
+		policies[4].schedule_defect_pixels = 4096;          // schedule charged
+		policies[5].schedule_defect_pixels = kAllPixelsDefective;
+		policies[5].retain_host_real_stack = false;
+
 		bool monotone = true;
-		for (int k = 0; k < 4 && monotone; k++) {
+		for (int k = 0; k < 6 && monotone; k++) {
 			unsigned long long prev = 0;
-			for (long long c = 1; c <= g.n_frames; c++) {
+			for (long long c = 1; c <= g.n_frames - 1; c++) {
 				Policy p = policies[k];
 				p.chunk_frames = c;
 				Budget b;
@@ -605,7 +619,170 @@ void runCapacityChecks()
 				prev = b.host_bytes;
 			}
 		}
-		check(monotone, "host_bytes is non-decreasing in chunk_frames for every policy shape");
+		check(monotone,
+		      "host_bytes is non-decreasing in chunk_frames on [1, n_frames-1] "
+		      "for every policy shape");
+
+		// The schedule term must not depend on the chunk at all -- it is sized
+		// by the defect count and the frame count, both chunk-independent.
+		{
+			Policy p = policies[4];
+			unsigned long long first = 0;
+			bool flat = true;
+			for (long long c = 1; c <= g.n_frames; c++) {
+				p.chunk_frames = c;
+				Budget b;
+				if (!computeBudget(g, p, b)) { flat = false; break; }
+				if (c == 1) first = b.schedule_host_bytes;
+				else if (b.schedule_host_bytes != first) flat = false;
+			}
+			check(flat && first > 0, "the schedule charge is independent of the chunk");
+		}
+
+		// The alias drop at the top of the range, which is why the search
+		// evaluates n_frames separately instead of binary-searching through it.
+		{
+			Policy p; // default: aliases
+			Budget last_partial, whole;
+			p.chunk_frames = g.n_frames - 1;
+			check(computeBudget(g, p, last_partial), "penultimate chunk budget computed");
+			p.chunk_frames = g.n_frames;
+			check(computeBudget(g, p, whole), "whole-movie budget computed");
+			check(!last_partial.staged_aliases_resident && whole.staged_aliases_resident,
+			      "the alias appears only at the full frame count");
+			check(whole.host_bytes < last_partial.host_bytes,
+			      "host_bytes DROPS at chunk == n_frames for an aliasing policy");
+		}
+
+		// And the search must still find that drop rather than walk past it.
+		{
+			Policy p;
+			Budget whole;
+			p.chunk_frames = g.n_frames;
+			computeBudget(g, p, whole);
+			long long chunk = -1;
+			check(largestChunkWithin(g, p, whole.host_bytes, chunk) == Admission::Fits
+			      && chunk == g.n_frames,
+			      "the search finds the aliased whole-movie point a monotone search would miss");
+		}
+	}
+
+	// --- Review finding: the repair schedule is a host allocation this
+	// component makes, and was omitted from its own budget. A dense mask makes
+	// it dominate. Each control below also computes what the OLD model said,
+	// and asserts the two disagree -- otherwise the control proves nothing.
+	{
+		Geometry g; g.nx = 256; g.ny = 256; g.n_frames = 64;
+		const unsigned long long frame_bytes = 4ull * 256 * 256;
+
+		Policy staged;               // the staged shape: no resident stacks
+		staged.chunk_frames = 2;
+		staged.retain_host_real_stack = false;
+		staged.retain_host_fourier_stack = false;
+
+		Policy dense = staged;       // same, but a fully defective mask
+		dense.schedule_defect_pixels = kAllPixelsDefective;
+
+		Budget without_sched, with_sched;
+		check(computeBudget(g, staged, without_sched), "staged budget computed");
+		check(computeBudget(g, dense, with_sched), "dense-defect budget computed");
+
+		check(without_sched.schedule_host_bytes == 0,
+		      "no declared defects means no schedule charge");
+		const unsigned long long n_bad = 256ull * 256ull;
+		const unsigned long long expect =
+		    n_bad * 3ull * sizeof(int) + n_bad * 64ull * sizeof(Draw);
+		check(with_sched.schedule_host_bytes == expect,
+		      "the schedule charge is 3 ints per defect plus one Draw per (defect, frame)");
+
+		// The whole point: the omitted term dwarfs the staged term it was
+		// omitted next to. O(C*W*H) admitted, O(F*W*H) allocated.
+		check(with_sched.schedule_host_bytes > 10 * without_sched.host_bytes,
+		      "with a dense mask the schedule dwarfs the staged chunk it was omitted beside");
+
+		// Discrimination: a budget sized for the staged chunk admits under the
+		// old model and must be REJECTED under the corrected one.
+		const unsigned long long small = without_sched.host_bytes + frame_bytes;
+		check(without_sched.host_bytes <= small,
+		      "old model: the dense job fits this budget (it ignored the schedule)");
+		long long chunk = -1;
+		check(largestChunkWithin(g, dense, small, chunk) == Admission::Inadmissible,
+		      "corrected model: the dense job is Inadmissible against the same budget");
+		check(chunk == -1, "the rejected dense job leaves the caller's chunk untouched");
+
+		// And it is admitted again once the budget genuinely covers the schedule.
+		chunk = -1;
+		check(largestChunkWithin(g, dense, with_sched.host_bytes + 8 * frame_bytes, chunk)
+		      == Admission::Fits && chunk >= 2,
+		      "a budget that does cover the schedule admits the dense job");
+
+		// Recording the replacements costs a float per entry on top.
+		Policy rec = dense; rec.schedule_records_replacements = true;
+		Budget with_rec;
+		check(computeBudget(g, rec, with_rec), "recording budget computed");
+		check(with_rec.schedule_host_bytes - with_sched.schedule_host_bytes
+		      == n_bad * 64ull * sizeof(float),
+		      "recording replacements adds exactly one float per (defect, frame)");
+
+		// A declared bound is charged proportionally, not rounded to worst case.
+		Policy bounded = staged; bounded.schedule_defect_pixels = 1024;
+		Budget bb;
+		check(computeBudget(g, bounded, bb), "bounded-defect budget computed");
+		check(bb.schedule_host_bytes
+		      == 1024ull * 3ull * sizeof(int) + 1024ull * 64ull * sizeof(Draw),
+		      "a declared defect bound is charged exactly, not rounded up");
+		check(bb.schedule_host_bytes < with_sched.schedule_host_bytes,
+		      "a bound below worst case costs less than worst case");
+	}
+
+	// --- Review finding: the no-staging policy double-counted Iframes, so a
+	// budget that actually fits could be rejected.
+	{
+		Geometry g; g.nx = 512; g.ny = 512; g.n_frames = 32;
+		unsigned long long real = 0, r2c = 0;
+		realStackBytes(g, real); fourierStackBytes(g, r2c);
+
+		Policy nostage; // defaults: whole movie, real + Fourier retained
+		Budget b;
+		check(computeBudget(g, nostage, b), "no-staging budget computed");
+		check(b.staged_aliases_resident, "no-staging policy aliases");
+		check(b.host_bytes == real + r2c, "no-staging host bytes are real + r2c");
+
+		// A budget that fits the true live set but NOT the old double count.
+		const unsigned long long fits = real + r2c;
+		const unsigned long long old_model = real + r2c + real;
+		check(old_model > fits,
+		      "old model: this budget was reported as too small");
+		long long chunk = -1;
+		check(largestChunkWithin(g, nostage, fits, chunk) == Admission::Fits,
+		      "corrected model: the same budget admits the whole movie");
+		check(chunk == g.n_frames, "and admits it at the full frame count");
+
+		// One byte short must still be rejected, so the fix is not just slack.
+		chunk = -1;
+		check(largestChunkWithin(g, nostage, fits - 1, chunk) == Admission::Inadmissible,
+		      "one byte below the true live set is still Inadmissible");
+
+		// The alias is specific: a partial chunk is a genuinely separate ring,
+		// and a compact upload is a genuinely separate narrower buffer.
+		Policy partial = nostage; partial.chunk_frames = 4;
+		Budget pb;
+		check(computeBudget(g, partial, pb) && !pb.staged_aliases_resident,
+		      "a partial chunk does not alias the retained stack");
+		check(pb.host_bytes == 4ull * 4 * 512 * 512 + real + r2c,
+		      "a partial ring is charged on top of the retained stack");
+
+		Policy compact = nostage; compact.staged_bytes_per_sample = 2;
+		Budget cb;
+		check(computeBudget(g, compact, cb) && !cb.staged_aliases_resident,
+		      "a compact uint16 staging buffer does not alias the float stack");
+
+		Policy nostack = nostage; nostack.retain_host_real_stack = false;
+		Budget nb;
+		check(computeBudget(g, nostack, nb) && !nb.staged_aliases_resident,
+		      "with no retained real stack there is nothing to alias");
+		check(nb.host_bytes == real + r2c,
+		      "staging the whole movie without retaining it costs the same one stack");
 	}
 
 	// Overflow and invalid input must be rejected, not wrapped.

@@ -28,6 +28,7 @@ import json
 import os
 import signal
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools" / "multi_gpu"))
@@ -95,6 +96,10 @@ def main(argv: list[str] | None = None) -> int:
                          "given does not match the one the workers ran under "
                          "(isMovieComplete is option-dependent, and since PR110 also "
                          "frame-count dependent).")
+    ap.add_argument("--fake_sleep_per_movie", type=float, default=0.0,
+                    help="sleep this long after each movie. With uneven shards the "
+                         "workers then finish at genuinely different times, which is "
+                         "what makes the launcher's final-worker tail observable.")
     ap.add_argument("--fake_note", default=None,
                     help="write this text to <out>/note.txt; used to prove that extra "
                          "arguments actually reached the process rather than being "
@@ -134,6 +139,8 @@ def main(argv: list[str] | None = None) -> int:
                        marker=" REPROCESSED" if a.fake_reprocess else "")
         processed.append(movie)
         done += 1
+        if a.fake_sleep_per_movie:
+            time.sleep(a.fake_sleep_per_movie)
         if a.fake_die_after is not None and done >= a.fake_die_after:
             sys.stdout.flush()
             os.kill(os.getpid(), signal.SIGKILL)

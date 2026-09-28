@@ -33,6 +33,7 @@ bookkeeping only; #26 owns this round's benchmark matrix.
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -47,6 +48,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gpu_witness  # noqa: E402
 import partition_star  # noqa: E402
+
+
+def _iso(epoch: float) -> str:
+    """UTC ISO-8601, so two arms recorded in different sessions are comparable."""
+    return datetime.datetime.fromtimestamp(
+        epoch, datetime.timezone.utc).isoformat(timespec="milliseconds")
 
 
 class Sampler(threading.Thread):
@@ -86,6 +93,54 @@ class Sampler(threading.Thread):
         for s in self.samples:
             flat.extend(s["apps"])  # type: ignore[arg-type]
         return flat
+
+
+class ResourceSampler(threading.Thread):
+    """Poll /proc/<pid>/status for each worker while it runs.
+
+    VmHWM is the kernel's own peak-resident counter, so a single successful read
+    after the peak reports the true peak -- polling is only needed because the
+    entry disappears when the process exits. A worker that peaks and exits
+    between two polls is reported with whatever was last seen, which is a lower
+    bound; the sampled interval is recorded so that is checkable rather than
+    implied.
+
+    Scope: the worker process only. MotionCorr spawns ghostscript children for
+    the EPS/PDF output, and those are NOT included. This is a per-process
+    figure, not a per-run host footprint.
+    """
+
+    def __init__(self, interval: float):
+        super().__init__(daemon=True)
+        self.interval = interval
+        self.pids: dict[int, int] = {}
+        self.hwm_kib: dict[int, int] = {}
+        self.unavailable: str | None = None
+        self._stop_event = threading.Event()
+
+    def watch(self, pid: int, index: int) -> None:
+        self.pids[pid] = index
+
+    def run(self) -> None:
+        if not Path("/proc").is_dir():
+            self.unavailable = ("no /proc on this platform, so no resident-set "
+                                "figure was sampled and none is claimed")
+            return
+        while not self._stop_event.is_set():
+            for pid in list(self.pids):
+                try:
+                    for line in Path(f"/proc/{pid}/status").read_text().splitlines():
+                        if line.startswith("VmHWM:"):
+                            kib = int(line.split()[1])
+                            if kib > self.hwm_kib.get(pid, 0):
+                                self.hwm_kib[pid] = kib
+                            break
+                except (OSError, ValueError):
+                    pass  # exited between listing and reading, or not readable
+            self._stop_event.wait(self.interval)
+
+    def stop(self) -> None:
+        self._stop_event.set()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -198,7 +253,16 @@ def main(argv: list[str] | None = None) -> int:
         sampler = Sampler(a.sample_interval)
         sampler.start()
 
+    # Per-worker timing and resident set. These are the quantities a scaling
+    # comparison needs and cannot reconstruct afterwards; recording them costs
+    # nothing and changes no production source. This is bookkeeping, not a
+    # benchmark: see docs/multi_gpu/SCALING_EXPERIMENT.md for what an
+    # interpretable measurement additionally requires.
+    resources = ResourceSampler(a.sample_interval)
+    resources.start()
+
     procs: list[tuple[int, subprocess.Popen, Path]] = []
+    stamps: dict[int, dict[str, float]] = {}
     started = time.time()
     try:
         for k in range(n):
@@ -220,6 +284,8 @@ def main(argv: list[str] | None = None) -> int:
             # no already-initialized context is ever inherited.
             p = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
                                  start_new_session=True)
+            stamps[k] = {"started": time.time()}
+            resources.watch(p.pid, k)
             procs.append((k, p, wdir))
             (wdir / "command.json").write_text(json.dumps({
                 "index": k, "command": cmd, "pid": p.pid,
@@ -228,11 +294,36 @@ def main(argv: list[str] | None = None) -> int:
                 "cpu_mask": masks[k],
             }, indent=2) + "\n")
 
+        # One waiter per child. Waiting sequentially would record worker 1's end
+        # as the moment worker 0 was reaped, so the final-worker tail -- the whole
+        # point of recording ends -- would read as zero whenever the workers are
+        # reaped in finishing order.
+        codes: dict[int, int] = {}
+
+        def reap(index: int, proc: subprocess.Popen) -> None:
+            rc = proc.wait()
+            stamps[index]["ended"] = time.time()
+            codes[index] = rc
+
+        waiters = [threading.Thread(target=reap, args=(k, p), daemon=True)
+                   for k, p, _ in procs]
+        for w in waiters:
+            w.start()
+        for w in waiters:
+            w.join()
+
         results = []
         for k, p, wdir in procs:
-            rc = p.wait()
-            results.append({"index": k, "pid": p.pid, "returncode": rc,
-                            "log": str((wdir / "run.log").resolve())})
+            s = stamps[k]
+            results.append({"index": k, "pid": p.pid, "returncode": codes[k],
+                            "log": str((wdir / "run.log").resolve()),
+                            "started_at": _iso(s["started"]),
+                            "ended_at": _iso(s["ended"]),
+                            "wall_seconds": round(s["ended"] - s["started"], 3),
+                            "rss_hwm_kib": resources.hwm_kib.get(p.pid),
+                            "rss_note": resources.unavailable or
+                                        ("worker process only; ghostscript children "
+                                         f"excluded; sampled every {a.sample_interval}s")})
     except BaseException:
         # Terminate only the children this launcher started, by their own process
         # group, so nothing else on a shared box is touched.
@@ -258,6 +349,8 @@ def main(argv: list[str] | None = None) -> int:
                     pass
         raise
     finally:
+        resources.stop()
+        resources.join(timeout=10)
         if sampler is not None:
             sampler.stop()
             # nvidia-smi calls are bounded at 30 s, so a join that still times
@@ -282,9 +375,18 @@ def main(argv: list[str] | None = None) -> int:
         "worker_args": extra,
         "cpus": a.cpus,
         "cpu_masks": masks,
+        "started_at": _iso(started),
+        "ended_at": _iso(started + wall),
         "wall_seconds": round(wall, 3),
         "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and "
                              "is not a benchmark. #26 owns the measurement matrix.",
+        "final_worker_tail_seconds": round(
+            max(s["ended"] for s in stamps.values())
+            - min(s["ended"] for s in stamps.values()), 3) if stamps else None,
+        "final_worker_tail_note": "spread between the first and last worker to exit. "
+                                  "Load imbalance is one of the candidate limits on "
+                                  "static workers; this makes it observable, it does "
+                                  "not attribute it.",
         "manifest": str(manifest_path),
         "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "workers": results,

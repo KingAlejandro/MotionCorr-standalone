@@ -45,24 +45,32 @@ different occupancy are not comparable and must not be pooled.
 | GPU UUID | yes | `status.json` → `devices[k].uuid`; witnessed against `nvidia-smi --query-compute-apps=pid,gpu_uuid` samples |
 | CPU mask | yes | `status.json` → `cpu_masks[k]`, and `command.json` per worker |
 | movie ownership | yes | `shards/shard_manifest.json` → `shards[k].movies` |
-| worker start/end | **no** | launcher records only aggregate `wall_seconds`; needs per-child start/end timestamps in `status.json` |
+| worker start/end | **yes** | `status.json` -> `workers[k].started_at` / `ended_at` / `wall_seconds`, stamped by a waiter thread per child |
+| final-worker tail / imbalance | **yes** | `status.json` -> `final_worker_tail_seconds`, the spread between the first and last worker to exit |
+| RSS | **yes**, per process | `status.json` -> `workers[k].rss_hwm_kib`, from `/proc/<pid>/status` `VmHWM` sampled at `--sample-interval`. **Worker process only** -- ghostscript children are excluded, so this is not a host footprint |
 | per-movie start/end | **no** | needs a timestamped per-movie marker in the worker log, or `profile_cuda_movie.py` semantics extended to a multi-movie run |
 | read/decode time | partial | per-movie stage lines exist in the worker log; `tools/profile_cuda_movie.py` parses them for a single-movie run only |
-| H2D bytes / time | partial | CUDA build emits per-movie GPU markers; bytes are calculated from geometry, not measured — label accordingly |
+| H2D bytes / time | partial | CUDA build emits per-movie GPU markers; bytes are calculated from geometry, not measured -- label accordingly |
 | GPU compute intervals | partial | `cudaEvent` kernel totals exist (`src/acc/cuda/cuda_alignpatch.cu:339-441`); these are accumulated durations, not intervals, so they cannot show overlap or idle gaps |
 | output / drain time | **no** | the per-movie tail (EPS/PDF/STAR writing, ghostscript spawns) is not separately attributed |
-| final-worker tail / imbalance | derived | computable once per-worker start/end exist: `max(end) - min(end)` over workers, plus per-worker busy fraction |
-| RSS | **no** | needs sampling of each worker PID's `/proc/<pid>/status` `VmHWM`; a shared-host `ps pcpu` average cannot see a burst |
 | device memory | partial | `nvidia-smi` device-wide samples are supplementary, not per-process high-water marks; label as sampled |
 
-Six of these are missing. **Do not run the matrix before they exist** — an arm that
-cannot report per-worker start/end cannot report imbalance, which is one of the
-five candidate explanations the experiment is meant to discriminate between.
+The three the launcher owns are now recorded: it already owns the child processes, so
+this changed no production source. **Imbalance is therefore measurable.** Attribution
+is not -- per-movie start/end, decode time and the output/drain tail are still
+missing, so an arm can show *that* one worker finished late without showing *why*.
 
-The launcher is the right place for worker start/end, exit time and RSS sampling:
-they are properties of the child processes it already owns, and adding them
-changes no production source. Per-movie decode/compute/drain attribution belongs
-with #74's profiling work, not here.
+Per-movie decode/compute/drain attribution belongs with #74's profiling work. Run the
+matrix only if a wall-clock-plus-imbalance answer is worth having before that lands;
+if the question is "what is the limit", it is not.
+
+Two traps in the figures above, both handled rather than assumed. Per-worker
+`wall_seconds` is stamped by a dedicated waiter thread: reaping the children in index
+order would record the second worker's end as the moment the first was reaped,
+collapsing the tail to zero exactly when the workers are reaped in finishing order.
+And `VmHWM` is the kernel's own peak counter, so one read after the peak is the true
+peak -- but a worker that peaks and exits between two polls reports a lower bound,
+which is why the sampling interval is recorded beside the figure.
 
 ## What the result has to distinguish
 

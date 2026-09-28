@@ -185,7 +185,17 @@ MUTATIONS = [
 
     ("sampler stop flag shadows threading.Thread._stop again",
      "tools/multi_gpu/run_multi_gpu.py",
+     '        # "\'Event\' object is not callable" after the workers have already run.\n'
      "        self._stop_event = threading.Event()",
+     '        # "\'Event\' object is not callable" after the workers have already run.\n'
+     "        self._stop = self._stop_event = threading.Event()  # MUTATED",
+     ["case_sampler_lifecycle"]),
+
+    ("resource sampler stop flag shadows threading.Thread._stop",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "        self.unavailable: str | None = None\n"
+     "        self._stop_event = threading.Event()",
+     "        self.unavailable: str | None = None\n"
      "        self._stop = self._stop_event = threading.Event()  # MUTATED",
      ["case_sampler_lifecycle"]),
 
@@ -430,6 +440,18 @@ MUTATIONS = [
      '                    "all_pids_witnessed_on_intended_distinct_devices"):',
      "            if False:  # MUTATED",
      ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("launcher waits on its children sequentially again",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "        waiters = [threading.Thread(target=reap, args=(k, p), daemon=True)\n"
+     "                   for k, p, _ in procs]\n"
+     "        for w in waiters:\n"
+     "            w.start()\n"
+     "        for w in waiters:\n"
+     "            w.join()",
+     "        for k, p, _ in procs:  # MUTATED\n"
+     "            reap(k, p)",
+     ["case_per_worker_timing_and_rss_recorded"]),
 ]
 
 

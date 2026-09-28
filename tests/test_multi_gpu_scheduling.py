@@ -875,13 +875,24 @@ def case_sampler_lifecycle(tmp: Path) -> None:
     # _wait_for_tstate_lock() calls self._stop(); 3.14's does not, so exercising
     # join() alone catches this on the validation host and silently misses it on
     # a newer interpreter.
+    import inspect as _inspect
     import threading as _threading
-    probe = run_multi_gpu.Sampler(0.01)
-    assert not isinstance(getattr(probe, "_stop", None), _threading.Event), (
-        "Sampler shadows threading.Thread._stop with an Event; join() raises "
-        "\"'Event' object is not callable\" on CPython 3.12")
-    # (CPython 3.14 removed Thread._stop entirely, so absent is fine; an Event
-    # in its place is the defect, on every version.)
+    threads = [c for _, c in _inspect.getmembers(run_multi_gpu, _inspect.isclass)
+               if issubclass(c, _threading.Thread) and c is not _threading.Thread
+               and c.__module__ == run_multi_gpu.__name__]
+    assert threads, "no Thread subclass found in run_multi_gpu"
+    for cls in threads:
+        probe = cls(0.01)
+        assert not isinstance(getattr(probe, "_stop", None), _threading.Event), (
+            f"{cls.__name__} shadows threading.Thread._stop with an Event; join() "
+            "raises \"'Event' object is not callable\" on CPython 3.12")
+    # Every Thread subclass in the module, not just the one that had the bug: a
+    # later sampler would otherwise reintroduce it uncovered. Asserted
+    # structurally rather than through join(), because CPython 3.12's
+    # _wait_for_tstate_lock() calls self._stop() and 3.13's does not -- so
+    # exercising join() alone catches this on the validation host and silently
+    # misses it on a newer interpreter. Absent is fine; an Event in its place is
+    # the defect, on every version.
 
     real = gpu_witness.compute_apps
     gpu_witness.compute_apps = fake_compute_apps
@@ -1776,6 +1787,67 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
     assert any("does not support it" in p for p in rep["problems"]), rep["problems"]
 
 
+def case_per_worker_timing_and_rss_recorded(tmp: Path) -> None:
+    """Every worker gets its own start, end and resident-set figure.
+
+    A scaling comparison cannot reconstruct these afterwards, and the launcher
+    is the only thing that owns the child processes. The tail figure in
+    particular has a trap: waiting on the children sequentially records
+    worker 1's end as the moment worker 0 was reaped, so the tail reads as zero
+    whenever the workers happen to be reaped in finishing order. This case makes
+    one worker outlive the other and requires the tail to see it.
+    """
+    # Five movies over two shards is 3 + 2, and a per-movie delay makes worker 0
+    # -- the one reaped FIRST -- also the one that finishes LAST. That ordering is
+    # what discriminates: a launcher that waits on its children sequentially
+    # stamps worker 1's end at the moment worker 0 was reaped, so its tail
+    # collapses to zero here while the real spread is ~0.4 s.
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:5])
+    out = tmp / "run"
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", out,
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--sample-interval", "0.05", "--", "--use_own",
+              "--fake_sleep_per_movie", "0.4"])
+    assert cp.returncode == 0, cp.stderr
+    st = json.loads((out / "status.json").read_text())
+
+    assert st["started_at"] and st["ended_at"], st
+    assert st["final_worker_tail_seconds"] is not None, st
+    for w in st["workers"]:
+        assert w["started_at"] and w["ended_at"], w
+        assert w["ended_at"] >= w["started_at"], w
+        assert w["wall_seconds"] >= 0, w
+        assert w["wall_seconds"] <= st["wall_seconds"] + 0.5, \
+            f"worker wall exceeds run wall: {w}"
+        assert "rss_note" in w, w
+        if sys.platform.startswith("linux"):
+            assert w["rss_hwm_kib"] is None or w["rss_hwm_kib"] > 0, w
+        else:
+            # No /proc: the absence must be stated, not silently reported as 0.
+            assert w["rss_hwm_kib"] is None, w
+            assert "no /proc" in w["rss_note"], w
+
+    import datetime as _dt
+    ends = [_dt.datetime.fromisoformat(w["ended_at"]) for w in st["workers"]]
+    assert len(ends) == 2, st
+
+    # worker 0 owns three movies and worker 1 owns two, so worker 0 must be the
+    # later of the two -- and it is the one reaped first
+    assert ends[0] > ends[1], \
+        f"the worker with the larger shard did not finish last: {st['workers']}"
+
+    # a materially non-zero tail. Comparing the reported tail against the spread
+    # of the reported ends would be tautological -- both come from the same
+    # stamps -- so the discriminating assertion is the absolute magnitude.
+    tail = st["final_worker_tail_seconds"]
+    assert tail > 0.25, \
+        (f"final-worker tail {tail}s is ~0 although the shards differ by one "
+         "movie at 0.4s each; the launcher is not stamping each child's own exit")
+    spread = (max(ends) - min(ends)).total_seconds()
+    assert abs(spread - tail) < 0.05, f"tail {tail} vs end spread {spread}"
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -1821,6 +1893,7 @@ CASES = [
     case_aggregate_may_not_rewrite_staged_products,
     case_stale_comparison_report_is_not_republished,
     case_launcher_verdict_follows_the_device_witness,
+    case_per_worker_timing_and_rss_recorded,
 ]
 
 

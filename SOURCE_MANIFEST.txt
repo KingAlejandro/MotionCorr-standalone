@@ -4,6 +4,12 @@ Commit: ad0b230ca22095700f6392479326836efb1c911d
 Local change: src/motioncorr_runner.cpp initializes per-movie metadata for direct file or wildcard input.
 Local change: src/funcs.cpp clears the cached rnd_gaus() Box-Muller deviate on re-seed, so
               init_random_generator() restores a reproducible Gaussian sequence.
+Local change: src/motioncorr_runner.cpp rejects a --gpu device list under --use_own instead of
+              silently running everything on the first entry. Upstream has an MPI runner that
+              gives the ':'-separated syntax a meaning; this repository does not. Also rejects
+              a non-integer or negative id, which textToInteger's sscanf("%d") previously
+              coerced ("0abc" resolved to device 0). --use_motioncor2 passes the list through
+              unchanged.
 
 src/CPlot2D.cpp
 src/CPlot2D.h

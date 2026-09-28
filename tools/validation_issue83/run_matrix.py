@@ -34,7 +34,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import matrix as declared  # noqa: E402
@@ -243,6 +243,12 @@ def compare_pair(compare_tool: Path, ref_dir: Path, test_dir: Path, stem: str,
         entry["overall_status"] = report.get("overall_status")
         entry["checks"] = {name: check.get("passed")
                            for name, check in report.get("checks", {}).items()}
+        # Keep the comparator's own list of what differed, so a caller can tell
+        # an expected provenance difference from a numerical one without
+        # re-deciding anything the comparator already decided.
+        entry["differences"] = {name: list(check.get("differences") or [])
+                                for name, check in report.get("checks", {}).items()
+                                if check.get("passed") is False}
         entry["coverage_complete"] = report.get("coverage", {}).get("complete")
     else:
         entry["error"] = "comparator produced no report"
@@ -529,6 +535,63 @@ def _row_base_dir(work: Path, row_id: str) -> Path:
     return work / row_id / "base"
 
 
+NUMERICAL_CHECKS = ("corrected_image", "motion_trajectory")
+
+
+def numerically_equal(entry: Dict[str, Any],
+                      allowed_fields: Sequence[str]) -> Tuple[bool, List[str]]:
+    """Identical science, differing at most in named provenance fields.
+
+    A full ``exact`` pass is accepted outright. Otherwise every numerical check
+    must pass on its own, and the only tolerated STAR differences are those
+    naming a field in ``allowed_fields`` -- so an empty allowance tolerates
+    nothing, and a metadata regression in any other field still fails.
+
+    Returns the verdict and the differences that were *not* tolerated, so a
+    caller can say why a pair failed rather than only that it did.
+    """
+    if entry.get("passed"):
+        return True, []
+    checks = entry.get("checks") or {}
+    if entry.get("overall_status") is None:
+        return False, ["comparator gave no verdict"]
+    if not entry.get("coverage_complete"):
+        return False, ["comparator coverage incomplete"]
+    missing = [name for name in NUMERICAL_CHECKS if name not in checks]
+    if missing:
+        return False, [f"comparator did not report {', '.join(missing)}"]
+    failed_numerical = [name for name in NUMERICAL_CHECKS if checks.get(name) is False]
+    if failed_numerical:
+        return False, [f"{name} differs" for name in failed_numerical]
+    unexpected: List[str] = []
+    for name, ok in checks.items():
+        if ok is not False or name in NUMERICAL_CHECKS:
+            continue
+        diffs = (entry.get("differences") or {}).get(name) or []
+        if not diffs:
+            unexpected.append(f"{name} differs but the comparator named no field")
+            continue
+        unexpected += [d for d in diffs
+                       if not any(field in d for field in allowed_fields)]
+    return (not unexpected), unexpected
+
+
+def numerically_differs(entry: Dict[str, Any]) -> bool:
+    """The corrected pixels or the trajectory actually differ.
+
+    A must-differ control has to be satisfied by the science, not by metadata:
+    two rows differing only in the field that names the gain reference have
+    identical pixels, and accepting that as "differs" would let the control
+    pass against a build that ignores ``--gainref`` entirely -- the exact
+    regression the control exists to exclude.
+    """
+    checks = entry.get("checks") or {}
+    if entry.get("overall_status") is None or any(name not in checks
+                                                  for name in NUMERICAL_CHECKS):
+        return False
+    return any(checks.get(name) is False for name in NUMERICAL_CHECKS)
+
+
 def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
                                compare_tool: Path) -> Dict[str, Any]:
     """Compare rows that must agree, and rows that must not.
@@ -546,8 +609,10 @@ def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
     by_id = {r["row_id"]: r for r in results}
     out: Dict[str, Any] = {"equal": [], "differ": [], "errors": []}
 
-    def compare_rows(a: str, b: str, tag: str) -> Optional[Dict[str, Any]]:
-        entry: Dict[str, Any] = {"rows": [a, b], "control": tag}
+    def compare_rows(a: str, b: str, tag: str,
+                     allowed: Sequence[str] = ()) -> Optional[Dict[str, Any]]:
+        entry: Dict[str, Any] = {"rows": [a, b], "control": tag,
+                                 "allowed_provenance_fields": list(allowed)}
         for row_id in (a, b):
             if row_id not in by_id:
                 entry["status"] = "unrun"
@@ -573,7 +638,18 @@ def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
                 reports / report_name(stem, f"{a}__vs__{b}"))
         entry["per_movie"] = per_movie
         entry["movies_compared"] = len(per_movie)
-        entry["movies_equal"] = sum(1 for c in per_movie.values() if c["passed"])
+        verdicts = {stem: numerically_equal(c, allowed)
+                    for stem, c in per_movie.items()}
+        entry["movies_equal"] = sum(1 for ok, _ in verdicts.values() if ok)
+        entry["movies_exact"] = sum(1 for c in per_movie.values() if c["passed"])
+        entry["unexpected_differences"] = {stem: why for stem, (ok, why)
+                                           in verdicts.items() if not ok}
+        # Record what the allowance actually absorbed, so a pair that passes
+        # only because of it is visible rather than indistinguishable from an
+        # exact match.
+        entry["tolerated_provenance_differences"] = sorted(
+            {d for stem, c in per_movie.items() if not c["passed"] and verdicts[stem][0]
+             for diffs in (c.get("differences") or {}).values() for d in diffs})
         # A comparator that could not produce a verdict is neither "equal" nor
         # "differs"; it is an unusable control and must not be read as either.
         unusable = sorted(s for s, c in per_movie.items()
@@ -581,18 +657,28 @@ def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
         entry["unusable_comparisons"] = unusable
         entry["all_equal"] = (bool(per_movie) and not unusable
                               and entry["movies_equal"] == entry["movies_compared"])
+        entry["movies_differing_numerically"] = sum(
+            1 for c in per_movie.values() if numerically_differs(c))
+        entry["all_differ"] = (bool(per_movie) and not unusable
+                               and entry["movies_differing_numerically"]
+                               == entry["movies_compared"])
         entry["status"] = "ran"
         return entry
 
-    for a, b in declared.NEUTRAL_EQUIVALENCES:
-        entry = compare_rows(a, b, "must-be-equal")
+    for a, b, allowed, rationale in declared.NEUTRAL_EQUIVALENCES:
+        entry = compare_rows(a, b, "must-be-equal", allowed)
+        entry["rationale"] = rationale
         out["equal"].append(entry)
         if entry["status"] != "ran":
             out["errors"].append(f"neutral equivalence {a} == {b}: {entry['reason']}")
         elif not entry["all_equal"]:
+            named = sorted({d for why in entry["unexpected_differences"].values()
+                            for d in why})
             out["errors"].append(
                 f"{a} is declared numerically neutral but differs from {b}: "
-                f"{entry['movies_equal']}/{entry['movies_compared']} movies equal")
+                f"{entry['movies_equal']}/{entry['movies_compared']} movies equal"
+                + (f"; differences not covered by the declared allowance "
+                   f"{list(allowed)}: {'; '.join(named[:5])}" if named else ""))
 
     for a, b, why in declared.NEUTRAL_NEGATIVE_CONTROLS:
         entry = compare_rows(a, b, "must-differ")
@@ -604,10 +690,18 @@ def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
             out["errors"].append(
                 f"negative control {a} != {b} is unusable: the comparator gave "
                 f"no verdict for {', '.join(entry['unusable_comparisons'])}")
-        elif entry["all_equal"]:
+        elif not entry["all_differ"]:
+            # Demanding a *numerical* difference, not merely a failed exact
+            # comparison: two rows differing only in the field that names the
+            # gain reference have identical pixels, and treating that as
+            # "differs" would satisfy this control against a build that ignores
+            # --gainref -- the very regression it exists to exclude.
             out["errors"].append(
-                f"negative control failed: {a} is identical to {b}, so the "
-                f"gain reference is not being applied at all. {why}")
+                f"negative control failed: {a} and {b} have identical corrected "
+                f"pixels and trajectories for "
+                f"{entry['movies_compared'] - entry['movies_differing_numerically']}"
+                f"/{entry['movies_compared']} movies, so the gain reference is "
+                f"not changing the science. {why}")
 
     out["holds"] = not out["errors"]
     return out

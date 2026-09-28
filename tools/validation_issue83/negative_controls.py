@@ -32,6 +32,7 @@ import matrix as declared  # noqa: E402
 import products as prod  # noqa: E402
 import report as rep  # noqa: E402
 import run_matrix as rm  # noqa: E402
+import verify_fixtures as vf  # noqa: E402
 import run_all24_schedules as all24  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -460,8 +461,13 @@ def control_cross_row_consumed(_tmp: Path, _fixtures: Optional[Path]) -> Dict[st
             "no negative control is declared, so the equivalence cannot fail")
 
     known = set(declared.rows_by_id())
-    for a, b in declared.NEUTRAL_EQUIVALENCES:
+    for a, b, allowed, rationale in declared.NEUTRAL_EQUIVALENCES:
         require({a, b} <= known, f"equivalence names an undeclared row: {a}, {b}")
+        require(bool(rationale),
+                f"equivalence {a} == {b} states no reason for its allowance")
+        require(all(f.startswith("_rln") for f in allowed),
+                f"equivalence {a} == {b} allows something that is not a STAR "
+                f"field: {list(allowed)}")
     for a, b, _why in declared.NEUTRAL_NEGATIVE_CONTROLS:
         require({a, b} <= known, f"negative control names an undeclared row: {a}, {b}")
 
@@ -483,9 +489,162 @@ def control_cross_row_consumed(_tmp: Path, _fixtures: Optional[Path]) -> Dict[st
                                          Path("/nonexistent"))
     require(not out2["holds"], "a failed row was silently treated as comparable")
     return {"status": "pass",
-            "declared_equalities": [list(p) for p in declared.NEUTRAL_EQUIVALENCES],
+            "declared_equalities": [[a, b, list(allowed)] for a, b, allowed, _
+                                    in declared.NEUTRAL_EQUIVALENCES],
             "declared_negative_controls": [[a, b] for a, b, _ in
                                            declared.NEUTRAL_NEGATIVE_CONTROLS]}
+
+
+def control_truth_provenance(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """A regenerated truth is excused only for the stamp, never for the motion.
+
+    The generator writes the current commit into every truth file, so a
+    regenerated fixture cannot match a digest recorded at another commit even
+    when the motion is bit-identical -- observed on cpu64 at 93d427e for all
+    four present cases, differing in exactly one leaf of 4132. Excusing that is
+    correct. Excusing a changed motion value would make the digest check
+    ornamental, so this asserts the allowance cannot stretch that far.
+    """
+    base = {"case": "km_x", "source_commit": "a" * 40,
+            "injected_motion_field": [[0.5, -1.25], [2.0, 3.5]],
+            "geometry": {"nx": 512, "ny": 512}}
+    committed = json.dumps(base)
+
+    def observed(doc: Dict[str, Any]) -> Path:
+        path = tmp / "truth.json"
+        path.write_text(json.dumps(doc))
+        return path
+
+    moved = json.loads(committed)
+    moved["source_commit"] = "b" * 40
+    got = vf.truth_difference(committed, observed(moved))
+    require(got["provenance_only"],
+            f"a truth differing only in source_commit was called drift: {got}")
+    require(got["differing_leaves"] == ["/source_commit"],
+            f"the allowance named the wrong leaf: {got['differing_leaves']}")
+
+    drifted = json.loads(committed)
+    drifted["injected_motion_field"][1][0] = 2.0000001
+    got = vf.truth_difference(committed, observed(drifted))
+    require(not got["provenance_only"],
+            "MUTATED MOTION EXCUSED: a changed motion value was treated as a "
+            "provenance-only difference")
+    require(any("injected_motion_field" in leaf for leaf in got["unexpected_leaves"]),
+            f"the drifted motion leaf was not named: {got['unexpected_leaves']}")
+
+    both = json.loads(committed)
+    both["source_commit"] = "b" * 40
+    both["injected_motion_field"][0][0] = 0.6
+    got = vf.truth_difference(committed, observed(both))
+    require(not got["provenance_only"],
+            "a changed motion value was excused because the commit also changed")
+
+    added = json.loads(committed)
+    added["source_commit"] = "b" * 40
+    added["extra_key"] = 1
+    require(not vf.truth_difference(committed, observed(added))["provenance_only"],
+            "an added leaf was excused as provenance")
+
+    removed = json.loads(committed)
+    del removed["geometry"]
+    require(not vf.truth_difference(committed, observed(removed))["provenance_only"],
+            "a removed leaf was excused as provenance")
+
+    identical = vf.truth_difference(committed, observed(json.loads(committed)))
+    require(not identical["provenance_only"],
+            "an identical pair was reported as a provenance difference")
+
+    (tmp / "bad.json").write_text("{not json")
+    require(not vf.truth_difference(committed, tmp / "bad.json")["provenance_only"],
+            "an unparseable truth file was excused as provenance")
+
+    require(vf.TRUTH_PROVENANCE_KEYS == ("source_commit",),
+            f"the allowance widened beyond the single stamp it was measured "
+            f"for: {vf.TRUTH_PROVENANCE_KEYS}")
+    return {"status": "pass", "allowance": list(vf.TRUTH_PROVENANCE_KEYS),
+            "observed_on": "cpu64 93d427e, 4 cases, 1 differing leaf of 4132"}
+
+
+def _verdict(image=True, trajectory=True, star=True, star_diffs=(),
+             status="PASS", coverage=True) -> Dict[str, Any]:
+    """A comparator result in the shape ``compare_pair`` produces."""
+    checks = {"corrected_image": image, "motion_trajectory": trajectory,
+              "star_fields": star}
+    entry: Dict[str, Any] = {
+        "checks": checks, "overall_status": status,
+        "coverage_complete": coverage,
+        "differences": {"star_fields": list(star_diffs)} if star is False else {},
+        "passed": status == "PASS" and all(checks.values())}
+    return entry
+
+
+def control_provenance_allowance(_tmp: Path, _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """The neutral-equivalence allowance absorbs exactly what it declares.
+
+    Measured on cpu64 at 93d427e, ``gain_unity`` and ``gain_none`` agree on the
+    corrected image and the motion trajectory and differ in exactly one STAR
+    field, ``_rlnMicrographGainName``, which is present only when a gain
+    reference was supplied. Tolerating that is correct; tolerating STAR
+    differences as a class would be a gate that cannot fail, so this asserts the
+    allowance is narrow, and that the must-differ control still demands a
+    numerical difference rather than a metadata one.
+    """
+    allowed = ("_rlnMicrographGainName",)
+    gain_name = "Field '_rlnMicrographGainName' presence mismatch in block 'general'"
+    other = "Field '_rlnMicrographDoseRate' value mismatch in block 'general'"
+
+    ok, why = rm.numerically_equal(_verdict(), allowed)
+    require(ok and not why, "positive control failed: an exact match was not equal")
+
+    ok, why = rm.numerically_equal(
+        _verdict(star=False, star_diffs=[gain_name], status="FAIL"), allowed)
+    require(ok, f"the declared provenance difference was not tolerated: {why}")
+
+    ok, why = rm.numerically_equal(
+        _verdict(star=False, star_diffs=[gain_name, other], status="FAIL"), allowed)
+    require(not ok and any("DoseRate" in w for w in why),
+            "an undeclared STAR difference was absorbed by the allowance")
+
+    ok, _ = rm.numerically_equal(
+        _verdict(star=False, star_diffs=[gain_name], status="FAIL"), ())
+    require(not ok, "an empty allowance still tolerated a STAR difference")
+
+    for bad in (_verdict(image=False, star=False, star_diffs=[gain_name],
+                         status="FAIL"),
+                _verdict(trajectory=False, star=False, star_diffs=[gain_name],
+                         status="FAIL")):
+        ok, _ = rm.numerically_equal(bad, allowed)
+        require(not ok, "a numerical difference was excused as provenance")
+
+    # A comparator that named nothing, gave no verdict, or covered nothing is
+    # not a basis for calling two rows equal.
+    for broken, label in (
+            (_verdict(star=False, star_diffs=[], status="FAIL"), "named no field"),
+            (_verdict(status=None), "gave no verdict"),
+            (_verdict(coverage=False, status="FAIL"), "incomplete coverage")):
+        ok, _ = rm.numerically_equal(broken, allowed)
+        require(not ok, f"a comparator that {label} was read as equal")
+    incomplete = {"checks": {"corrected_image": True}, "overall_status": "FAIL",
+                  "coverage_complete": True, "differences": {}}
+    ok, _ = rm.numerically_equal(incomplete, allowed)
+    require(not ok, "a comparator that never reported the trajectory was read as equal")
+
+    # must-differ must bite on the science, not on metadata.
+    require(rm.numerically_differs(_verdict(image=False, status="FAIL")),
+            "a differing corrected image was not counted as a numerical difference")
+    require(rm.numerically_differs(_verdict(trajectory=False, status="FAIL")),
+            "a differing trajectory was not counted as a numerical difference")
+    require(not rm.numerically_differs(
+        _verdict(star=False, star_diffs=[gain_name], status="FAIL")),
+        "VACUOUS CONTROL: two rows with identical pixels differing only in the "
+        "gain-name field counted as a numerical difference, so the must-differ "
+        "control would pass against a build that ignores --gainref")
+    require(not rm.numerically_differs(_verdict()),
+            "an exact match was counted as differing")
+    require(not rm.numerically_differs({"checks": {}, "overall_status": None}),
+            "a missing verdict was counted as differing")
+    return {"status": "pass", "allowance": list(allowed),
+            "observed_on": "cpu64 93d427e, gain_unity vs gain_none, 3/3 movies"}
 
 
 CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
@@ -497,6 +656,8 @@ CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "partial_schedules": control_partial_schedules,
     "input_hashes": control_input_hashes,
     "cross_row_consumed": control_cross_row_consumed,
+    "provenance_allowance": control_provenance_allowance,
+    "truth_provenance": control_truth_provenance,
 }
 
 

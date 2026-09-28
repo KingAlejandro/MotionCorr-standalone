@@ -52,6 +52,70 @@ def committed_manifest(repo: Path, ref: str) -> Dict[str, Any]:
     return json.loads(out)
 
 
+#: Keys of a ground-truth file that record *which checkout generated it* rather
+#: than any part of the injected motion. The generator stamps the current commit
+#: into every truth file, so a truth regenerated from a different commit can
+#: never match a digest recorded at another one even when every motion value is
+#: identical -- measured on cpu64 at 93d427e, where all four regenerated truths
+#: differed from the committed ones in exactly this one key and in none of the
+#: 4131 other leaves.
+#:
+#: Narrow and named on purpose. Anything outside this tuple is a real drift.
+TRUTH_PROVENANCE_KEYS = ("source_commit",)
+
+
+def committed_blob(repo: Path, ref: str, path: str) -> Optional[str]:
+    out = subprocess.run(["git", "-C", str(repo), "show", f"{ref}:{path}"],
+                         capture_output=True, text=True)
+    return out.stdout if out.returncode == 0 else None
+
+
+def truth_difference(committed: str, observed: Path) -> Dict[str, Any]:
+    """Classify a truth-file digest mismatch as provenance-only or real.
+
+    Compares the parsed documents leaf by leaf. A mismatch confined to
+    :data:`TRUTH_PROVENANCE_KEYS` means the fixture was regenerated from a
+    different checkout and carries identical motion; anything else -- a changed
+    value, an added or removed leaf, an unparseable file -- is drift and stays a
+    MISMATCH. A mutated digit in a motion value is not in the allowed set and is
+    still caught, which is what the ``ground_truth_mutation`` control asserts.
+    """
+    try:
+        want = json.loads(committed)
+        got = json.loads(observed.read_text())
+    except (json.JSONDecodeError, OSError) as exc:
+        return {"provenance_only": False, "why": f"unparseable: {exc}"}
+
+    def leaves(node: Any, prefix: str = "") -> Dict[str, Any]:
+        if isinstance(node, dict):
+            out: Dict[str, Any] = {}
+            for key, value in node.items():
+                out.update(leaves(value, f"{prefix}/{key}"))
+            return out
+        if isinstance(node, list):
+            out = {}
+            for index, value in enumerate(node):
+                out.update(leaves(value, f"{prefix}[{index}]"))
+            return out
+        return {prefix: node}
+
+    want_leaves, got_leaves = leaves(want), leaves(got)
+    differing = sorted(set(want_leaves) ^ set(got_leaves))
+    differing += sorted(k for k in want_leaves.keys() & got_leaves.keys()
+                        if want_leaves[k] != got_leaves[k])
+    allowed = {f"/{key}" for key in TRUTH_PROVENANCE_KEYS}
+    unexpected = [k for k in differing if k not in allowed]
+    return {
+        "provenance_only": bool(differing) and not unexpected,
+        "differing_leaves": differing[:20],
+        "differing_leaf_count": len(differing),
+        "unexpected_leaves": unexpected[:20],
+        "leaves_compared": len(want_leaves),
+        "generated_at": {k: got_leaves.get(f"/{k}") for k in TRUTH_PROVENANCE_KEYS},
+        "declared_at": {k: want_leaves.get(f"/{k}") for k in TRUTH_PROVENANCE_KEYS},
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -73,13 +137,14 @@ def main() -> int:
 
     cases = manifest.get("cases", {})
     result: Dict[str, Any] = {
-        "schema": "issue83-fixture-verify/2",
+        "schema": "issue83-fixture-verify/3",
         "manifest_ref": opts.ref,
         "manifest_source_commit": manifest.get("source_commit"),
         "fixtures_dir": str(opts.fixtures_dir),
         "verifier_numpy_version": None,
         "cases": {},
         "mismatched": [],
+        "provenance_only": [],
         "missing": [],
         "undeclared": [],
     }
@@ -113,18 +178,39 @@ def main() -> int:
                 continue
             got = sha256_file(path)
             ok = (got == want)
-            entry[kind] = {
-                "status": "match" if ok else "MISMATCH", "file": filename,
+            status = "match" if ok else "MISMATCH"
+            detail: Dict[str, Any] = {
+                "status": status, "file": filename,
                 "expected": want, "observed": got,
                 "observed_bytes": path.stat().st_size,
             }
             if kind == "movie":
-                entry[kind]["expected_bytes"] = spec.get("movie_bytes")
-            statuses.append("match" if ok else "MISMATCH")
-            if not ok:
+                detail["expected_bytes"] = spec.get("movie_bytes")
+            elif not ok:
+                # The truth file embeds the commit it was generated from, so a
+                # byte mismatch is not yet evidence that the motion drifted.
+                # Compare the content before deciding which it is.
+                blob = committed_blob(opts.repo, opts.ref,
+                                      f"test-data/known_motion/{filename}")
+                if blob is None:
+                    detail["content_comparison"] = {
+                        "provenance_only": False,
+                        "why": "no committed copy of this truth file to compare"}
+                else:
+                    detail["content_comparison"] = truth_difference(blob, path)
+                if detail["content_comparison"]["provenance_only"]:
+                    status = "provenance_only"
+                    detail["status"] = status
+            entry[kind] = detail
+            statuses.append(status)
+            if status == "MISMATCH":
                 result["mismatched"].append(f"{case} ({kind})")
+            elif status == "provenance_only":
+                result["provenance_only"].append(f"{case} ({kind})")
         if "MISMATCH" in statuses:
             entry["status"] = "MISMATCH"
+        elif "provenance_only" in statuses:
+            entry["status"] = "provenance_only"
         elif "missing" in statuses:
             entry["status"] = "missing"
         else:
@@ -154,11 +240,31 @@ def main() -> int:
             if part.get("status") == "MISMATCH":
                 print(f"                    expected {part['expected']}")
                 print(f"                    observed {part['observed']}")
+                comparison = part.get("content_comparison")
+                if comparison and comparison.get("unexpected_leaves"):
+                    print(f"                    drifted: "
+                          f"{', '.join(comparison['unexpected_leaves'][:4])}")
+                elif comparison and comparison.get("why"):
+                    print(f"                    {comparison['why']}")
+            elif part.get("status") == "provenance_only":
+                comparison = part["content_comparison"]
+                print(f"                    content identical across "
+                      f"{comparison['leaves_compared']} leaves; differs only in "
+                      f"{', '.join(comparison['differing_leaves'])}")
+                print(f"                    declared at "
+                      f"{comparison['declared_at'].get('source_commit')}, "
+                      f"regenerated at "
+                      f"{comparison['generated_at'].get('source_commit')}")
     if result["undeclared"]:
         print(f"undeclared fixtures: {', '.join(result['undeclared'])}")
     print(f"verifier numpy {result['verifier_numpy_version']}; "
           f"manifest from {opts.ref} ({result['manifest_source_commit']})")
-    print("VERIFIED" if result["verified"] else "NOT VERIFIED")
+    if result["verified"] and result["provenance_only"]:
+        print(f"VERIFIED (content) -- {len(result['provenance_only'])} truth "
+              f"file(s) regenerated from a different commit; every motion value "
+              f"identical: {', '.join(result['provenance_only'])}")
+    else:
+        print("VERIFIED" if result["verified"] else "NOT VERIFIED")
     return 0 if result["verified"] else 1
 
 

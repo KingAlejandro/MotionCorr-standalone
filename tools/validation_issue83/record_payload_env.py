@@ -135,7 +135,11 @@ def main() -> int:
     parser.add_argument("--match", required=True,
                         help="Substring the payload's executable path must contain")
     parser.add_argument("--json", type=Path, required=True)
-    parser.add_argument("--interval", type=float, default=0.5)
+    # Short enough to land inside a sub-second payload. At 0.5s the correction
+    # runs for the small fixtures started and exited between polls, and the
+    # only samples kept were taken before any mapping existed -- an empty
+    # numa_maps, which looks identical to "no policy" but means "not observed".
+    parser.add_argument("--interval", type=float, default=0.05)
     parser.add_argument("--timeout", type=float, default=3600)
     parser.add_argument("--stop-file", type=Path,
                         help="Stop as soon as this file appears")
@@ -204,6 +208,21 @@ def main() -> int:
     record["cpus_allowed_observed"] = cpusets
     record["mems_allowed_observed"] = sorted({e["mems_allowed_list"] for e in best.values()
                                               if e["mems_allowed_list"]})
+    # The memory *policy* (bind:1, default, prefer:N) lives in numa_maps, not in
+    # Mems_allowed_list -- numactl --membind sets the policy and leaves
+    # Mems_allowed at the cpuset's nodes, so reporting the latter as the policy
+    # would describe the cpuset and call it a binding.
+    record["memory_policies_observed"] = sorted(
+        {p for e in best.values() for p in e["numa"]["policies_seen"]})
+    unobserved = sorted(str(pid) for pid, e in best.items()
+                        if not e["numa"]["mappings_counted"])
+    record["payloads_without_numa_sample"] = unobserved
+    record["memory_policy_observed"] = bool(record["memory_policies_observed"])
+    if unobserved:
+        record.setdefault("warnings", []).append(
+            f"{len(unobserved)} of {len(best)} payload processes exited between "
+            f"polls before any mapping was sampled; their memory policy is not "
+            f"recorded here and must not be read off the others")
 
     opts.json.parent.mkdir(parents=True, exist_ok=True)
     opts.json.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")

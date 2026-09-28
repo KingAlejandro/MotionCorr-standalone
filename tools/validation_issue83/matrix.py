@@ -191,7 +191,26 @@ ROWS: List[Row] = [
 #: ``run_matrix.check_cross_row_equalities``; a declared pair with no consumer
 #: is itself a harness defect, since each row would then only ever be compared
 #: against its own repeats and a uniformly wrong gain would look reproducible.
-NEUTRAL_EQUIVALENCES = [("gain_unity", "gain_none")]
+#:
+#: Each entry also names the STAR provenance fields whose difference is
+#: *expected* for that pair. Neutrality is a claim about the science -- the
+#: corrected pixels and the motion trajectory -- not about the metadata that
+#: records how the run was configured. Measured on cpu64 at 93d427e, the two
+#: gain rows agree exactly on ``corrected_image`` and ``motion_trajectory`` and
+#: differ in one field, ``_rlnMicrographGainName``, which is present only when a
+#: gain reference was given. That difference is correct product behaviour.
+#:
+#: The allowance is a named list rather than "ignore STAR fields", so any other
+#: metadata regression still fails the pair, and an empty allowance tolerates
+#: nothing.
+NEUTRAL_EQUIVALENCES = [
+    ("gain_unity", "gain_none",
+     ("_rlnMicrographGainName",),
+     "A unity gain multiplies every pixel by exactly 1.0, so the corrected "
+     "image and the motion trajectory must be bit-identical. Only the field "
+     "naming the gain reference may differ, because only one of the two runs "
+     "was given one."),
+]
 
 #: Pairs that must *differ*. Without these the equality above is satisfied by a
 #: build that ignores ``--gainref`` entirely, which is exactly the regression

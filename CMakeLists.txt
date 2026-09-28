@@ -79,6 +79,11 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    add_executable(prefetch_lifecycle tests/test_prefetch_lifecycle.cpp)
+    target_link_libraries(prefetch_lifecycle PRIVATE motioncorr_core)
+    add_test(NAME PrefetchLifecycle COMMAND prefetch_lifecycle)
+    # Every blocking case carries its own watchdog; this is the outer backstop.
+    set_tests_properties(PrefetchLifecycle PROPERTIES TIMEOUT 300)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression
@@ -110,6 +115,10 @@ if(BUILD_TESTING)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME PrefetchEquivalence
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_prefetch_equivalence.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(PrefetchEquivalence PROPERTIES TIMEOUT 1800)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)

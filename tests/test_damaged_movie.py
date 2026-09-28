@@ -20,31 +20,24 @@ import tempfile
 from pathlib import Path
 
 
-def write_star(path: Path, movies, expected_frames_col=None):
-    if expected_frames_col:
-        header = (
-            "# version 30001\n\ndata_optics\n\nloop_\n"
-            "_rlnOpticsGroupName #1\n_rlnOpticsGroup #2\n"
-            "_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n"
-            "_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n"
-            "opticsGroup1 1 1.000 300.0 2.7 0.1\n\n"
-            "# version 30001\n\ndata_movies\n\nloop_\n"
-            "_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n_rlnNrOfFrames #3\n"
-        )
-        lines = [f"{m} 1 {ef}" for m, ef in zip(movies, expected_frames_col)]
-        path.write_text(header + "\n".join(lines) + "\n")
-    else:
-        header = (
-            "# version 30001\n\ndata_optics\n\nloop_\n"
-            "_rlnOpticsGroupName #1\n_rlnOpticsGroup #2\n"
-            "_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n"
-            "_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n"
-            "opticsGroup1 1 1.000 300.0 2.7 0.1\n\n"
-            "# version 30001\n\ndata_movies\n\nloop_\n"
-            "_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n"
-        )
-        lines = [f"{m} 1" for m in movies]
-        path.write_text(header + "\n".join(lines) + "\n")
+def write_star(path: Path, movies, expected_frames_col=None, extra_columns=None):
+    columns = dict(extra_columns or {})
+    if expected_frames_col is not None:
+        columns["_rlnNrOfFrames"] = expected_frames_col
+    assert all(len(values) == len(movies) for values in columns.values())
+    header = (
+        "# version 30001\n\ndata_optics\n\nloop_\n"
+        "_rlnOpticsGroupName #1\n_rlnOpticsGroup #2\n"
+        "_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n"
+        "_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n"
+        "opticsGroup1 1 1.000 300.0 2.7 0.1\n\n"
+        "# version 30001\n\ndata_movies\n\nloop_\n"
+        "_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n"
+    )
+    header += "".join(f"{label} #{i}\n" for i, label in enumerate(columns, 3))
+    lines = [" ".join([str(movie), "1"] + [str(values[i]) for values in columns.values()])
+             for i, movie in enumerate(movies)]
+    path.write_text(header + "\n".join(lines) + "\n")
 
 
 def run_motioncorr(binary: Path, cwd: Path, args_list):
@@ -58,7 +51,7 @@ def run_motioncorr(binary: Path, cwd: Path, args_list):
         "--patch_y", "1",
         "--bfactor", "150",
     ] + args_list
-    return subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
+    return subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, timeout=60)
 
 
 def test_strip_truncation(binary: Path, source: Path):
@@ -319,6 +312,54 @@ def test_resume_isolation(binary: Path, source: Path):
     print("  [PASS] test_resume_isolation")
 
 
+
+def test_expected_frame_contract(binary: Path, source: Path):
+    """Exercise real runner precedence, label semantics, invalid counts and resume mapping."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        (tmp / "Movies").mkdir()
+        shutil.copy(source, tmp / "Movies/eight.tiff")
+        create_clean_truncated_tiff(source, tmp / "Movies/four.tiff", 4)
+        names = ["Movies/eight.tiff", "Movies/four.tiff"]
+
+        def run_case(name, counts=None, extra=None, options=(), success=True, message=None):
+            write_star(tmp / "m.star", names, counts, extra)
+            result = run_motioncorr(binary, tmp, ["--i", "m.star", "--o", f"{name}/", "--j", "4", *options])
+            assert (result.returncode == 0) == success, result.stdout + result.stderr
+            assert result.returncode >= 0, "process died from signal"
+            if message:
+                assert message in result.stdout + result.stderr, result.stdout + result.stderr
+            return result
+
+        # Row counts override a conflicting CLI fallback at BOTH header boundaries.
+        run_case("override", [8, 4], options=["--expected_frames", "24"])
+        # Frame index metadata must never constrain movie length.
+        run_case("index", extra={"_rlnMicrographFrameNumber": [1, 1]})
+        run_case("tilt", extra={"_rlnTomoTiltMovieFrameCount": [8, 4]})
+        run_case("conflict", [8, 4], {"_rlnTomoTiltMovieFrameCount": [9, 4]},
+                 success=False, message="conflicting STAR expected frame counts")
+        for value in [0, -2]:
+            run_case(f"invalid_star_{value}", [8, value], success=False,
+                     message="STAR expected frame count must be positive")
+            run_case(f"invalid_cli_{value}", options=["--expected_frames", str(value)], success=False,
+                     message="--expected_frames must be positive or -1")
+
+        # Resume skipping the first completed movie must preserve the second row's count.
+        run_case("resume", [8, 4], options=["--do_at_most", "1"])
+        first_output = tmp / "resume/Movies/eight.mrc"
+        before = first_output.stat().st_mtime_ns
+        run_case("resume", [8, 4], options=["--only_do_unfinished", "--expected_frames", "24"])
+        assert first_output.stat().st_mtime_ns == before, "healthy completed movie was rerun"
+        assert (tmp / "resume/Movies/four.mrc").is_file()
+
+        # A previously complete short result cannot bypass a newly authoritative count.
+        result = run_case("resume", [8, 5], options=["--only_do_unfinished"], success=False,
+                          message="expected 5 frames, but decoded 4 frames")
+        assert "Movies/four.tiff" in result.stdout + result.stderr
+        assert first_output.stat().st_mtime_ns == before
+    print("  [PASS] test_expected_frame_contract")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--binary", type=Path, required=True)
@@ -338,6 +379,7 @@ def main():
     test_positive_control_short_valid_movie(args.binary, source)
     test_batch_permutations(args.binary, source)
     test_resume_isolation(args.binary, source)
+    test_expected_frame_contract(args.binary, source)
 
     print("All TIFF integrity and expected-frame validation tests PASSED.")
     return 0

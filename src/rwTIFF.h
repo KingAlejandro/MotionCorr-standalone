@@ -82,7 +82,7 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	}
 	// and go back to the start
 	if (err_ctx) err_ctx->clear();
-	if (TIFFSetDirectory(ftiff, 0) == 0)
+	if (TIFFSetDirectory(ftiff, 0) == 0 || (err_ctx && err_ctx->has_error))
 	{
 		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
 		REPORT_ERROR(name + ": Failed to set TIFF directory 0" + detail);
@@ -210,7 +210,7 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 		for (int i = 0; i < _nDim; i++)
 		{
 			if (err_ctx) err_ctx->clear();
-			if (TIFFSetDirectory(ftiff, img_select) == 0)
+			if (TIFFSetDirectory(ftiff, img_select) == 0 || (err_ctx && err_ctx->has_error))
 			{
 				std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
 				REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select) + detail);

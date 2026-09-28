@@ -58,6 +58,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
+#include <atomic>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -78,18 +80,10 @@
 struct TiffErrorContext {
 	bool has_error = false;
 	std::string last_error;
-	std::vector<std::string> errors;
 
 	void clear() {
 		has_error = false;
 		last_error.clear();
-		errors.clear();
-	}
-
-	void add_error(const std::string& err) {
-		has_error = true;
-		last_error = err;
-		errors.push_back(err);
 	}
 };
 
@@ -97,63 +91,58 @@ inline thread_local TiffErrorContext* g_tls_tiff_error_context = nullptr;
 
 struct TiffErrorScope {
 	TiffErrorContext* prev;
-	TiffErrorScope(TiffErrorContext* ctx) {
-		prev = g_tls_tiff_error_context;
+	TiffErrorScope(TiffErrorContext* ctx) : prev(g_tls_tiff_error_context) {
 		g_tls_tiff_error_context = ctx;
 	}
-	~TiffErrorScope() {
-		g_tls_tiff_error_context = prev;
-	}
+	~TiffErrorScope() { g_tls_tiff_error_context = prev; }
 };
 
+// LibTIFF invokes these through C: even allocation failure must not throw.
+inline void captureTiffError(TiffErrorContext* ctx, const char* module,
+                             const char* fmt, va_list ap) noexcept
+{
+	ctx->has_error = true;
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	try {
+		ctx->last_error = module ? (std::string(module) + ": " + buf) : std::string(buf);
+	} catch (...) {
+		// The error flag still makes the caller fail closed without a message.
+	}
+}
+
 #if defined(MOTIONCORR_USE_TIFF_EXTR)
-inline int motioncorr_tiff_error_ext_r(TIFF* tif, void* user_data, const char* module, const char* fmt, va_list ap)
+inline int motioncorr_tiff_error_ext_r(TIFF*, void* user_data, const char* module,
+                                      const char* fmt, va_list ap) noexcept
 {
-	char buf[1024];
-	vsnprintf(buf, sizeof(buf), fmt, ap);
-	std::string msg = module ? (std::string(module) + ": " + buf) : std::string(buf);
-	while (!msg.empty() && (msg.back() == '\n' || msg.back() == '\r'))
-		msg.pop_back();
-
-	if (user_data)
-		static_cast<TiffErrorContext*>(user_data)->add_error(msg);
-	else if (g_tls_tiff_error_context)
-		g_tls_tiff_error_context->add_error(msg);
+	captureTiffError(static_cast<TiffErrorContext*>(user_data), module, fmt, ap);
 	return 1;
 }
+#else
+inline std::atomic<TIFFErrorHandler> previous_tiff_error_handler{nullptr};
 
-inline int motioncorr_tiff_warning_ext_r(TIFF* tif, void* user_data, const char* module, const char* fmt, va_list ap)
+inline void motioncorr_tiff_error_compat(const char* module, const char* fmt, va_list ap) noexcept
 {
-	return 1;
-}
-#endif
-
-inline void motioncorr_tiff_error_compat(const char* module, const char* fmt, va_list ap)
-{
-	char buf[1024];
-	vsnprintf(buf, sizeof(buf), fmt, ap);
-	std::string msg = module ? (std::string(module) + ": " + buf) : std::string(buf);
-	while (!msg.empty() && (msg.back() == '\n' || msg.back() == '\r'))
-		msg.pop_back();
-
-	if (g_tls_tiff_error_context)
-		g_tls_tiff_error_context->add_error(msg);
-}
-
-inline void motioncorr_tiff_warning_compat(const char* module, const char* fmt, va_list ap)
-{
-	// Non-fatal warnings ignored
+	if (g_tls_tiff_error_context) {
+		captureTiffError(g_tls_tiff_error_context, module, fmt, ap);
+	} else if (TIFFErrorHandler previous = previous_tiff_error_handler.load()) {
+		previous(module, fmt, ap);
+	} else {
+		// Preserve diagnostics while the previous handler is being published.
+		if (module) fprintf(stderr, "%s: ", module);
+		vfprintf(stderr, fmt, ap);
+		fprintf(stderr, "\n");
+	}
 }
 
 inline void initTiffErrorHandlersOnce()
 {
-	static bool initialized = false;
-	if (!initialized) {
-		TIFFSetErrorHandler(motioncorr_tiff_error_compat);
-		TIFFSetWarningHandler(motioncorr_tiff_warning_compat);
-		initialized = true;
-	}
+	static std::once_flag initialized;
+	std::call_once(initialized, [] {
+		previous_tiff_error_handler.store(TIFFSetErrorHandler(motioncorr_tiff_error_compat));
+	});
 }
+#endif
 
 #include "src/funcs.h"
 #include "src/memory.h"
@@ -442,7 +431,9 @@ public:
 			if (mode != WRITE_READONLY)
 				REPORT_ERROR((std::string)"TIFF is supported only for reading");
 
+#if !defined(MOTIONCORR_USE_TIFF_EXTR)
 			initTiffErrorHandlersOnce();
+#endif
 			if (!tiff_err_ctx)
 				tiff_err_ctx = std::make_shared<TiffErrorContext>();
 			tiff_err_ctx->clear();
@@ -450,20 +441,17 @@ public:
 
 #if defined(MOTIONCORR_USE_TIFF_EXTR)
 			TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
-			if (opts) {
-				TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, tiff_err_ctx.get());
-				TIFFOpenOptionsSetWarningHandlerExtR(opts, motioncorr_tiff_warning_ext_r, tiff_err_ctx.get());
-			}
+			if (!opts) REPORT_ERROR("Cannot allocate TIFF open options for " + name);
+			TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, tiff_err_ctx.get());
 			ftiff = TIFFOpenExt(fileName.c_str(), "r", opts);
-			if (opts) {
-				TIFFOpenOptionsFree(opts);
-			}
+			TIFFOpenOptionsFree(opts);
 #else
 			ftiff = TIFFOpen(fileName.c_str(), "r");
 #endif
 
-			if (ftiff == NULL)
+			if (ftiff == NULL || tiff_err_ctx->has_error)
 			{
+				if (ftiff) { TIFFClose(ftiff); ftiff = nullptr; }
 				std::string detail = tiff_err_ctx->has_error ? (": " + tiff_err_ctx->last_error) : "";
 				REPORT_ERROR((std::string)"Image::openFile cannot open: " + name + detail);
 			}
@@ -1588,30 +1576,30 @@ public:
 		MDMainHeader.clear();
 		MDMainHeader.addObject();
 
+#if !defined(MOTIONCORR_USE_TIFF_EXTR)
 		initTiffErrorHandlersOnce();
+#endif
 		TiffErrorContext mem_tiff_ctx;
 		TiffErrorScope scope(&mem_tiff_ctx);
 
 #if defined(MOTIONCORR_USE_TIFF_EXTR)
 		TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
-		if (opts) {
-			TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, &mem_tiff_ctx);
-			TIFFOpenOptionsSetWarningHandlerExtR(opts, motioncorr_tiff_warning_ext_r, &mem_tiff_ctx);
-		}
+		if (!opts) REPORT_ERROR("Cannot allocate in-memory TIFF open options");
+		TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, &mem_tiff_ctx);
 		TIFF* ftiff = TIFFClientOpenExt("in-memory-tiff", "r", (thandle_t)&handle,
 		                                TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
 		                                TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
 		                                TiffInMemoryUnmapFileProc, opts);
-		if (opts)
-			TIFFOpenOptionsFree(opts);
+		TIFFOpenOptionsFree(opts);
 #else
 		TIFF* ftiff = TIFFClientOpen("in-memory-tiff", "r", (thandle_t)&handle,
 		                             TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
 		                             TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
 		                             TiffInMemoryUnmapFileProc);
 #endif
-		if (!ftiff)
+		if (!ftiff || mem_tiff_ctx.has_error)
 		{
+			if (ftiff) TIFFClose(ftiff);
 			std::string detail = mem_tiff_ctx.has_error ? (": " + mem_tiff_ctx.last_error) : "";
 			REPORT_ERROR("readFromMemory cannot open in-memory TIFF" + detail);
 		}

@@ -101,7 +101,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	first_frame_sum =  textToInteger(parser.getOption("--first_frame_sum", "First movie frame used in output sum (start at 1)", "1"));
 	if (first_frame_sum < 1) first_frame_sum = 1;
 	last_frame_sum =  textToInteger(parser.getOption("--last_frame_sum", "Last movie frame used in output sum (0 or negative: use all)", "-1"));
-	expected_frames = textToInteger(parser.getOption("--expected_frames", "Expected number of frames per movie (optional; validates frame count against authoritative expectation)", "-1"));
+	expected_frames = textToInteger(parser.getOption("--expected_frames", "Expected decoded frames per movie (-1: unchecked; per-movie STAR count overrides this fallback)", "-1"));
+	if (expected_frames != -1 && expected_frames <= 0)
+		REPORT_ERROR("--expected_frames must be positive or -1 (unchecked).");
 	eer_grouping = textToInteger(parser.getOption("--eer_grouping", "EER grouping", "40"));
 	eer_upsampling = textToInteger(parser.getOption("--eer_upsampling", "EER upsampling (1 = physical or 2 = 2x super-resolution)", "1"));
 
@@ -301,6 +303,7 @@ void MotioncorrRunner::initialise()
 
 		fn_micrographs.clear();
         pre_exposure_micrographs.clear();
+        expected_frames_micrographs.clear();
 		optics_group_micrographs.clear();
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDin)
 		{
@@ -322,17 +325,30 @@ void MotioncorrRunner::initialise()
                 pre_exposure_micrographs.push_back(0.0);
             }
 
-            int my_expected_frames;
-            if (MDin.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, my_expected_frames) ||
-                MDin.getValue(EMDL_PARTICLE_NR_FRAMES, my_expected_frames) ||
-                MDin.getValue(EMDL_TOMO_TILT_MOVIE_FRAMECOUNT, my_expected_frames))
+            // Frame indices (rlnMicrographFrameNumber) are not total counts.
+            int row_count = -1;
+            for (EMDLabel label : {EMDL_PARTICLE_NR_FRAMES, EMDL_TOMO_TILT_MOVIE_FRAMECOUNT})
             {
-                expected_frames_micrographs.push_back(my_expected_frames);
+                int count;
+                if (!MDin.getValue(label, count)) continue;
+                if (count <= 0)
+                    REPORT_ERROR("Movie " + fn_mic + ": STAR expected frame count must be positive.");
+                if (row_count > 0 && row_count != count)
+                    REPORT_ERROR("Movie " + fn_mic + ": conflicting STAR expected frame counts.");
+                row_count = count;
             }
-            else
+            // TomogramSet assigns one optics group per original global row.
+            if (row_count == -1 && is_tomo)
             {
-                expected_frames_micrographs.push_back(expected_frames);
+                int count;
+                if (tomogramSet.globalTable.getValue(EMDL_TOMO_TILT_MOVIE_FRAMECOUNT, count, optics_group - 1))
+                {
+                    if (count <= 0)
+                        REPORT_ERROR("Movie " + fn_mic + ": global STAR expected frame count must be positive.");
+                    row_count = count;
+                }
             }
+            expected_frames_micrographs.push_back(row_count > 0 ? row_count : expected_frames);
 
 		}
 	}
@@ -375,6 +391,7 @@ void MotioncorrRunner::initialise()
 		fn_out += "/";
 
 	// First backup the given list of all micrographs
+	std::vector<int> expected_frames_given_all = expected_frames_micrographs;
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
 	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
@@ -383,6 +400,7 @@ void MotioncorrRunner::initialise()
 	optics_group_ori_micrographs.clear();
 	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
+	expected_frames_micrographs.clear();
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
 	pre_exposure_micrographs.clear();
@@ -394,7 +412,7 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic], expected_frames_given_all[imic]))
 			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
@@ -414,6 +432,7 @@ void MotioncorrRunner::initialise()
 
 		if (process_this)
 		{
+			expected_frames_micrographs.push_back(expected_frames_given_all[imic]);
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
 			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
@@ -546,7 +565,7 @@ bool completeMrc(const FileName &filename)
 }
 }
 
-bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expected_frames)
 {
 	const FileName average = getOutputFileNames(movie);
 	const FileName root = average.withoutExtension();
@@ -569,7 +588,8 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie)
 		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
 		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
 		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
-		    shifts.numberOfObjects() != nframes) return false;
+		    shifts.numberOfObjects() != nframes ||
+		    (effective_expected_frames > 0 && nframes != effective_expected_frames)) return false;
 		std::vector<bool> seen(nframes, false);
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
 		{
@@ -636,7 +656,7 @@ void MotioncorrRunner::run()
 			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
-			result = do_own ? executeOwnMotionCorrection(mic) : executeMotioncor2(mic);
+			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
 				saveModel(mic);
@@ -1278,7 +1298,7 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 	return gain_cache();
 }
 
-bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
@@ -1334,12 +1354,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	{
 		Ihead.read(fn_mic, false, -1, false, true); // select_img -1, mmap false, is_2D true
 		nx = XSIZE(Ihead()); ny = YSIZE(Ihead()); nn = NSIZE(Ihead());
-		if (expected_frames > 0 && nn != expected_frames)
-		{
-			REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " +
-			             integerToString(expected_frames) + " frames, but decoded " +
-			             integerToString(nn) + " frames.");
-		}
+
+	}
+
+	if (effective_expected_frames > 0 && nn != effective_expected_frames)
+	{
+		REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " +
+		             integerToString(effective_expected_frames) + " frames, but decoded " +
+		             integerToString(nn) + " frames.");
 	}
 
 	// Which frame to use?

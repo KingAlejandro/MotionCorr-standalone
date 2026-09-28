@@ -2243,12 +2243,44 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					RCTIC(TIMING_PREP_PATCH);
 					bool cuda_patch_prep_done = false;
 #ifdef _CUDA_ENABLED
+					// Issue #69, second boundary. The health check above runs BEFORE
+					// this preparation, so it cannot see a fatal error raised HERE --
+					// and cudaPreparePatch's own handler consumes the code and returns
+					// false, clearing the last-error slot. alignPatch() below then
+					// re-dispatches CUDA whenever use_gpu is set, so without this the
+					// retry can land on a context this very stage just killed.
+					// Peeking at the cleared slot afterwards is not sufficient; the
+					// status has to be carried out of the helper.
+					CudaFailureState fallback_prep_failure;
 					if (use_gpu) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,
-							gpu_id, logfile
+							gpu_id, logfile, &fallback_prep_failure
 						);
+						if (!cuda_patch_prep_done) {
+							const CudaRetryDecision after_prep = cudaRetryDecisionFor(
+								fallback_prep_failure, cudaGetLastError());
+							if (after_prep.verdict == CUDA_RETRY_FATAL) {
+								std::string origin;
+								if (fallback_prep_failure.isPoisoned()) {
+									origin = std::string(", recorded at ")
+									       + fallback_prep_failure.fatalStage() + ":"
+									       + integerToString(fallback_prep_failure.fatalLine());
+								} else {
+									origin = ", pending on this thread; no stage recorded it";
+								}
+								REPORT_ERROR_STR("CUDA device context is unusable after fallback patch "
+								                 "preparation for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(after_prep.decisive) << origin
+								                 << ". Refusing to re-dispatch alignment on a poisoned "
+								                    "context; the host path would return to the same device.");
+							}
+							logfile << "WARNING: CUDA patch preparation declined for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "continuing with host patch preparation." << std::endl;
+						}
 					}
 #endif
 					if (!cuda_patch_prep_done) {

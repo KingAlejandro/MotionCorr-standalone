@@ -8,6 +8,7 @@
 #include "src/complex.h"
 
 #ifdef _CUDA_ENABLED
+#include "src/acc/cuda/cuda_failure_state.h"
 
 /**
  * CUDA 2D forward Real-to-Complex FFT for full-resolution movie frames.
@@ -40,6 +41,14 @@ bool cudaInverseFFT2D(
  * If d_Iframes is retained in device memory from cudaInverseFFT2D, extracts and groups
  * directly on device with zero host memory copies, then executes batched cuFFT R2C.
  */
+/**
+ * Issue #69: `failure` is optional and, when supplied, receives the CUDA/cuFFT status
+ * of the first failure this helper hits. It is needed because the helper's own error
+ * handler CONSUMES the code -- it reads it, logs it, returns false -- which clears the
+ * thread's last-error slot. A caller that then re-dispatches CUDA (alignPatch does,
+ * whenever use_gpu is set) cannot tell a recoverable miss from a fatal fault by
+ * inspecting that slot afterwards, because there is nothing left in it to inspect.
+ */
 bool cudaPreparePatch(
     const std::vector<Image<float> > &Iframes,
     const int x_start, const int x_end,
@@ -49,7 +58,8 @@ bool cudaPreparePatch(
     const std::vector<int> &group_size,
     std::vector<MultidimArray<fComplex> > &Fpatches,
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    CudaFailureState *failure = nullptr
 );
 
 /**

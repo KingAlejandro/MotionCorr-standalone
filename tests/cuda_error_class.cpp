@@ -254,13 +254,59 @@ int runSessionStateSequences() {
         check(!state.hasFailed() && !state.isPoisoned(), "clean state must report clean");
     }
     {
+        // THE fallback-boundary case (PR107 discussion_r4119570895). Ordered exactly as
+        // the production path orders it:
+        //   1. the resident attempt is nonconverged, or fails recoverably, so the
+        //      session state holds at most a non-fatal code;
+        //   2. the health check at that point therefore PERMITS the fallback -- and it
+        //      must, because nothing fatal has happened yet;
+        //   3. the fallback cudaPreparePatch then hits a fatal fault, consumes it, and
+        //      returns false, leaving the thread's last-error slot CLEARED;
+        //   4. alignPatch() would re-dispatch CUDA because use_gpu is set.
+        // The check after step 3 must refuse, using the status carried out of the
+        // helper. A session-state or last-error check alone cannot see it: the session
+        // never saw this failure, and the slot is empty.
+        CudaFailureState resident;                       // step 1
+        resident.record(cudaErrorMemoryAllocation, "preparePatchInVram", 700);
+        const CudaRetryDecision before = cudaRetryDecisionFor(resident, cudaSuccess);
+        check(before.verdict == CUDA_RETRY_PERMITTED,
+              "the pre-fallback check must permit; nothing fatal has happened yet");   // step 2
+
+        CudaFailureState fallback;                       // step 3, a SEPARATE state
+        fallback.record(cudaErrorIllegalAddress, "cudaPreparePatch", 361);
+        const CudaRetryDecision after = cudaRetryDecisionFor(fallback, cudaSuccess);
+        check(after.verdict == CUDA_RETRY_FATAL,
+              "the post-fallback check must refuse the CUDA re-dispatch");             // step 4
+        check(after.decisive == cudaErrorIllegalAddress,
+              "the refusal must name the code the fallback consumed");
+        check(fallback.fatalStage() != nullptr && fallback.fatalLine() == 361,
+              "the consumed failure's own provenance must be preserved, not the resident one");
+
+        // Discrimination: the resident state must NOT be what drives this, and a
+        // last-error read must not be either -- both are clean at this point.
+        check(cudaRetryDecisionFor(resident, cudaSuccess).verdict == CUDA_RETRY_PERMITTED,
+              "the resident state alone must still read permitted, proving the refusal "
+              "came from the carried fallback status and not from the session");
+        check(cudaErrorPoisonsContext(cudaSuccess) == false,
+              "a cleared last-error slot alone must never justify a fatal verdict");
+    }
+    {
+        // The mirror: a fallback preparation that fails RECOVERABLY must still permit
+        // the host path, or an ordinary allocation miss during fallback would start
+        // aborting movies.
+        CudaFailureState fallback;
+        fallback.record(cudaErrorMemoryAllocation, "cudaPreparePatch", 361);
+        check(cudaRetryDecisionFor(fallback, cudaSuccess).verdict == CUDA_RETRY_PERMITTED,
+              "a recoverable fallback-preparation failure must still permit the host path");
+    }
+    {
         // Nothing recorded, fatal still pending: the slot is then the only evidence.
         CudaFailureState state;
         const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaErrorIllegalAddress);
         check(d.verdict == CUDA_RETRY_FATAL, "pending fatal with no record must be FATAL");
     }
 
-    std::printf("6 session-state sequences, %d failures\n", failures);
+    std::printf("8 session-state sequences, %d failures\n", failures);
     return failures;
 }
 
@@ -341,7 +387,10 @@ int main() {
                 "     recoverable allocation failure still permits the supported path.\n"
                 "     A later fatal error is latched monotonically by the production\n"
                 "     session state even when an earlier recoverable one was recorded\n"
-                "     and the last-error slot has since been cleared.\n"
+                "     and the last-error slot has since been cleared. A fatal error\n"
+                "     consumed by the FALLBACK preparation, after a permitted\n"
+                "     pre-fallback check and with the slot cleared, also refuses the\n"
+                "     CUDA re-dispatch.\n"
                 "     These cover the predicates only; no real poisoned context is\n"
                 "     synthesised anywhere in this suite, and no device is used.\n");
     return 0;

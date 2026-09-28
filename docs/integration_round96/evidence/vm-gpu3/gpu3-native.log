@@ -1,0 +1,99 @@
+################ PRE-FLIGHT OCCUPANCY (abort on conflict) ################
+UTC 2026-09-28T07:31:04Z
+4-gpu-vm
+index, uuid, memory.used [MiB], utilization.gpu [%]
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+GPU3 GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d has no compute apps -- claiming it
+other devices left alone: GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 
+--- inherited cpuset (must be 120-123) ---
+Cpus_allowed_list:	120-123
+Mems_allowed_list:	0-1
+120,1,120,120
+121,1,121,121
+122,1,122,122
+123,1,123,123
+Thread(s) per core: 1
+policy: default
+physcpubind: 120 121 122 123 
+membind: 0 1 
+               total        used        free      shared  buff/cache   available
+Mem:             432           8           2           0         426         424
+0.00 0.11 0.84 1/2742 1226803
+--- colleague / llama processes (recorded, untouched) ---
+  (no llama)
+USER     %CPU COMMAND
+root      0.8 rsyslogd
+root      0.3 sshd
+root      0.1 wazuh-syscheckd
+root      0.1 kcompactd0
+wazuh     0.1 wazuh-agentd
+
+################ SOURCE / INPUT ################
+1cbcb9b339ca23370fbf3245d787c84670664c1cd732cec396f4350dec05420e  /home/alex/mc-pr110.bundle
+candidate 04bfc6f71ceff0ef6e2d3ca31ba3af6a366c5ec0
+main      4c952b3f54479653512c4d208e09c9a8c02f3726
+candidate dirty=0 main dirty=0
+fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041  /home/alex/MotionCorr-standalone/relion30_tutorial/movies.star
+movie digest-of-digests: 240fefa2297e0c5622931f8f5574b1eccb8892fc9d66ae2fbf39ad2a995ef452  -
+movies: 24
+-rw-rw-r-- 1 alex alex 56956944 Sep 23 13:32 /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+
+################ BUILDS (CUDA=ON sm80, -j4) ################
+cmake: /usr/bin/cmake cmake version 3.28.3
+nvcc: /usr/local/cuda/bin/nvcc
+[main]
+  configure exit=0
+  build exit=0  errors=0
+eda75c8e469606008856105cde494c3a1f4ac8f2ec58bcc15f02e256e5bc64bc  /home/alex/mc-pr110-gpu3/main/build/motioncorr
+  	libcudart.so.12 => /usr/local/cuda-12.8/lib64/libcudart.so.12 (0x000074be32200000)
+  	libcufft.so.11 => /usr/local/cuda-12.8/lib64/libcufft.so.11 (0x000074be21000000)
+[cand]
+  configure exit=0
+  build exit=0  errors=0
+fc35dc3b9cb91619081bcf54c590b4e10161e6ca57ff7e6a2e3ef8897303919c  /home/alex/mc-pr110-gpu3/cand/build/motioncorr
+  	libcudart.so.12 => /usr/local/cuda-12.8/lib64/libcudart.so.12 (0x000073aa04a00000)
+  	libcufft.so.11 => /usr/local/cuda-12.8/lib64/libcufft.so.11 (0x000073a9f3800000)
+
+################ NATIVE CUDA ALL-24 ON GPU3 ################
+CUDA_VISIBLE_DEVICES=GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+--- main ---
+  exit=0  products=24
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:39.33
+  	Maximum resident set size (kbytes): 1593924
+--- cand ---
+  exit=0  products=24
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:40.18
+  	Maximum resident set size (kbytes): 1594588
+--- device witness sampled while the run was on GPU3 ---
+--- compute-app witness DURING the run ---
+pid, process_name, used_gpu_memory [MiB], gpu_uuid
+1228552, /home/alex/mc-pr110-gpu3/cand/build/motioncorr, 3206 MiB, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 0 %, 1 MiB
+GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 0 %, 1 MiB
+GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 0 %, 1 MiB
+GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 20 %, 3271 MiB
+
+################ COMPARISON (trusted comparator, correct invocation) ################
+{
+  "artifacts_total": 109,
+  "artifacts_fail": 28,
+  "images_compared": 24,
+  "images_pixel_identical": 0,
+  "total_pixels_compared": 0,
+  "star_compared": 25,
+  "auxiliary_compared": 60
+}
+FAILING: ['Movies/20170629_00021_frameImage.log', 'Movies/20170629_00022_frameImage.log', 'Movies/20170629_00023_frameImage.log', 'Movies/20170629_00024_frameImage.log', 'Movies/20170629_00025_frameImage.log', 'Movies/20170629_00026_frameImage.log', 'Movies/20170629_00027_frameImage.log', 'Movies/20170629_00028_frameImage.log', 'Movies/20170629_00029_frameImage.log', 'Movies/20170629_00030_frameImage.log', 'Movies/20170629_00031_frameImage.log', 'Movies/20170629_00035_frameImage.log', 'Movies/20170629_00036_frameImage.log', 'Movies/20170629_00037_frameImage.log', 'Movies/20170629_00039_frameImage.log', 'Movies/20170629_00040_frameImage.log', 'Movies/20170629_00042_frameImage.log', 'Movies/20170629_00043_frameImage.log', 'Movies/20170629_00044_frameImage.log', 'Movies/20170629_00045_frameImage.log', 'Movies/20170629_00046_frameImage.log', 'Movies/20170629_00047_frameImage.log', 'Movies/20170629_00048_frameImage.log', 'Movies/20170629_00049_frameImage.log', 'all_batches.pdf', 'batch.pdf', 'header.pdf', 'logfile.pdf']
+comparison exit=1
+
+################ CLOSE-OUT ################
+(empty = nothing left running)
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
+UTC 2026-09-28T07:35:57Z
+DONE pr110 GPU3 native

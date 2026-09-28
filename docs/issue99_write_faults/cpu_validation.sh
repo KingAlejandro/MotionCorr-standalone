@@ -5,8 +5,8 @@ R=$HOME/mc-i99
 rm -rf "$R"; mkdir -p "$R"
 exec > >(tee "$R/run.log") 2>&1
 
-HEAD_SHA=239320f61c43576ebff97e378ab1cc0835ce8eae   # fix + tests
-NEG_SHA=39220eac57ecb4b0228d5e3f9152d7984363b045    # base 4c952b3 + tests ONLY (must fail)
+HEAD_SHA=f83a4669e3b37108def1e8ce147b2291c44c4a6a   # fix + tests
+NEG_SHA=dddc6763b03e33a114dbbf9ea21e31de1549129c    # base 4c952b3 + tests ONLY (must fail)
 
 echo "=== provenance ==="
 date -Is; hostname; nproc; uptime
@@ -68,7 +68,7 @@ body () {
   echo
   echo "=== NEGATIVE CONTROL: pre-fix main 4c952b3 with the new tests only ==="
   echo "=== these two tests MUST fail here, or they do not detect the defect ==="
-  stage neg "$NEG_SHA" && build neg
+  stage neg "$NEG_SHA" && build neg || { echo "NEGATIVE CONTROL BUILD FAILED -- the control is invalid, not passing"; return 1; }
   cd "$R/src-neg/build-cpu" || return 1
   taskset -c 32-63 ctest --output-on-failure -R 'ImageWriteFaults|WriteFaults' \
       > "$R/ctest-neg.log" 2>&1

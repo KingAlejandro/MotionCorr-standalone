@@ -1,8 +1,8 @@
 === provenance ===
-2026-09-28T00:01:05+00:00
+2026-09-28T00:14:30+00:00
 small-refmac-machine
 Cpus_allowed_list:	0-63
-head  motioncorr: 0d957e853f4c290aaa2dd098f36ff3c483096433c45c76a239fbdb76fec45215  /home/ubuntu/mc-i99/src-head/build-cpu/motioncorr
+head  motioncorr: 59936bbec5d13105f54fe52a5c5d7221126923593a7edd3593c6aaf291e0a1d1  /home/ubuntu/mc-i99/src-head/build-cpu/motioncorr
 neg   motioncorr: b9d16a2d8a69500c8ba8671382716a9cf79e851c2fa8264ed6735f2e3e5c82d8  /home/ubuntu/mc-i99/src-neg/build-cpu/motioncorr
 ### acquiring validation lock
 
@@ -14,7 +14,7 @@ input movie: 95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  /
 Files par-neg/out/logfile.pdf and par-head/out/logfile.pdf differ
 Files par-neg/out/mov/p.log and par-head/out/mov/p.log differ
 --- explicit hashes ---
-mov/p.mrc                        neg=649e92e14f65ac35 head=649e92e14f65ac35
+mov/p.mrc                        neg=beb91c2ff74aaa98 head=beb91c2ff74aaa98
 mov/p.star                       neg=18add2f32fe1708b head=18add2f32fe1708b
 corrected_micrographs.star       neg=89d486d7ebaa72ed head=89d486d7ebaa72ed
 mov/p.mrc size: 1049600
@@ -68,24 +68,24 @@ test 14
 14: Test command: /home/ubuntu/.mc-venv/bin/python3.12 "/home/ubuntu/mc-i99/src-head/tests/test_write_faults.py" "--binary" "/home/ubuntu/mc-i99/src-head/build-cpu/motioncorr"
 14: Working Directory: /home/ubuntu/mc-i99/src-head/build-cpu
 14: Test timeout computed to be: 1500
-14:   phase 1: a.mrc 1049600 B, sha256 a2fdbc5fa2b7b845
+14:   phase 1: a.mrc 1049600 B, sha256 31fdde8b43d943a1
 14:   phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
-14:   phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 a2fdbc5fa2b7b845
+14:   phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 31fdde8b43d943a1
 14: fail-closed image writes: ok
-1/2 Test #14: WriteFaults ......................   Passed    0.41 sec
+1/2 Test #14: WriteFaults ......................   Passed    0.56 sec
 test 15
     Start 15: ImageWriteFaults
 
 15: Test command: /home/ubuntu/mc-i99/src-head/build-cpu/image_write_faults
 15: Working Directory: /home/ubuntu/mc-i99/src-head/build-cpu
 15: Test timeout computed to be: 1500
-15: in: /home/ubuntu/mc-i99/src-head/src/rwMRC.h, line 600
+15: in: /home/ubuntu/mc-i99/src-head/src/rwMRC.h, line 609
 15: ERROR: 
-15: Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3037664/big.mrc: File too large
-15: in: /home/ubuntu/mc-i99/src-head/src/image.h, line 441
+15: Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3060334/big.mrc: File too large
+15: in: /home/ubuntu/mc-i99/src-head/src/image.h, line 455
 15: ERROR: 
-15: Failed to flush and close image file /tmp/mc_write_faults_3037664/small.mrc: File too large
-15:   destructor with an unflushable stream did not terminate
+15: Failed to flush and close image file /tmp/mc_write_faults_3060334/small.mrc: File too large
+15:   destructor dropped 1464 unflushable bytes without terminating
 15: image write faults: ok
 2/2 Test #15: ImageWriteFaults .................   Passed    0.01 sec
 
@@ -95,6 +95,6 @@ The following tests passed:
 
 100% tests passed out of 2
 
-Total Test time (real) =   0.43 sec
+Total Test time (real) =   0.57 sec
 === EVIDENCE DONE ===
-2026-09-28T00:01:50+00:00
+2026-09-28T00:14:31+00:00

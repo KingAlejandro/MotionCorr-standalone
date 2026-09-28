@@ -8,8 +8,8 @@ Everything below was run. Where a layer was not run, it says so.
 | Date | 2026-09-27T23:58Z (build/CTest), 2026-09-28T00:01Z (evidence) |
 | Toolchain | cmake 4.4.3, g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, Python 3.12.3 |
 | Build | `-DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=ON`, `CMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG`, `--parallel 16` |
-| Candidate | `239320f61c43576ebff97e378ab1cc0835ce8eae` (fix + tests), tree `19a5b36bb973f1df84b818c760b0d69c640a35ec` |
-| Negative control | `39220eac57ecb4b0228d5e3f9152d7984363b045` = pre-fix main `4c952b3f` **plus the new tests only** |
+| Candidate | `f83a4669e3b37108def1e8ce147b2291c44c4a6a` (fix + tests, after independent review) |
+| Negative control | `dddc6763b03e33a114dbbf9ea21e31de1549129c` = pre-fix main `4c952b3f` **plus the new tests only** |
 | GPU | **not run.** Every fault is injected at the host stdio layer and is backend-independent; no CUDA arithmetic, gate or output default is touched. |
 
 Raw logs: [`cpu-validation.log`](cpu-validation.log), [`cpu-evidence.log`](cpu-evidence.log).
@@ -18,10 +18,8 @@ Scripts as executed: [`cpu_validation.sh`](cpu_validation.sh), [`cpu_evidence.sh
 ## Binary and input provenance
 
 ```
-candidate  motioncorr          0d957e853f4c290aaa2dd098f36ff3c483096433c45c76a239fbdb76fec45215
-candidate  image_write_faults  c7cde971ed9cac62e4704c5e5b466cc3a84504dbf1819d667d88c3fa91894b53
+candidate  motioncorr          59936bbec5d13105f54fe52a5c5d7221126923593a7edd3593c6aaf291e0a1d1
 pre-fix    motioncorr          b9d16a2d8a69500c8ba8671382716a9cf79e851c2fa8264ed6735f2e3e5c82d8
-pre-fix    image_write_faults  b01abcd4b01eea735ec10f64a30a5f49a6fcf11bce309b004ad4ae118111166a
 input      synthetic_movie.tiff 95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4
 ```
 
@@ -97,9 +95,9 @@ byte-for-byte; and `--only_do_unfinished` retries the incomplete product and rep
 Verbose `ImageWriteFaults` on the fixed build:
 
 ```
-in: src/rwMRC.h,  line 600  Failed to write image data (1048576 bytes) to …/big.mrc: File too large
-in: src/image.h,  line 441  Failed to flush and close image file …/small.mrc: File too large
-  destructor with an unflushable stream did not terminate
+in: src/rwMRC.h,  line 609  Failed to write image data (1048576 bytes) to …/big.mrc: File too large
+in: src/image.h,  line 455  Failed to flush and close image file …/small.mrc: File too large
+  destructor dropped 1464 unflushable bytes without terminating
 image write faults: ok
 ```
 
@@ -111,7 +109,10 @@ Two different files and two different detection points, by construction:
   buffer when the last `fwrite` returns full success. Nothing has reached the fd. Only the
   **checked close** in `image.h` can see it. This is the case the issue singled out, and it
   fails if write counts alone are checked.
-- The third line is the regression guard for the abort shown in §1.
+- The third line is the regression guard for the abort shown in §1. It proves its own
+  precondition rather than merely surviving: 3000 bytes were buffered under a 1536-byte
+  limit and 1464 of them could not be flushed, so "did not terminate" is a statement about
+  a stream that really did fail.
 
 The test also runs a healthy control that round-trips the payload, and a negative control
 that repeats each fault with the limit lifted, so a passing assertion cannot be some
@@ -122,14 +123,16 @@ unrelated error being mistaken for the injected one.
 Same input, same arguments, same relative paths, pre-fix versus post-fix binaries:
 
 ```
-mov/p.mrc                   neg=649e92e14f65ac35…  head=649e92e14f65ac35…   1049600 bytes
+mov/p.mrc                   neg=beb91c2ff74aaa98…  head=beb91c2ff74aaa98…   1049600 bytes
 mov/p.star                  neg=18add2f32fe1708b…  head=18add2f32fe1708b…
 corrected_micrographs.star  neg=89d486d7ebaa72ed…  head=89d486d7ebaa72ed…
 ```
 
 Whole-file SHA-256, header included, not just the payload. A separate run under differing
 output paths gave the same payload hash
-`1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3`.
+`1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3`, which is also the
+payload hash the pre-review revision of this branch produced — the review follow-up
+commits changed no output byte.
 
 Two files in that comparison are **not** identical, and neither is a content difference:
 
@@ -153,6 +156,14 @@ On the negative-control build the same two new tests fail (`ctest` exit 8), one 
 assertion and one by `SIGABRT`, as shown in §1. Nothing else in the suite was run against
 the negative control.
 
+The negative control must *build* to be a control. An earlier revision of
+`tests/test_image_write_faults.cpp` used an API that exists only after the fix, so it did
+not compile on the pre-fix tree and `ctest` recorded `ImageWriteFaults` as `Not Run` —
+which the harness counted as a failure and which could have been read as the defect being
+detected. The test was rewritten to use only the pre-fix `fImageHandler` interface, the
+harness now aborts the run outright if the control fails to build, and the result above is
+from a control that compiled and ran.
+
 ## 6. Coverage limit: the header write, measured not assumed
 
 The issue's plan lists a failed/short **header** write as its own injection. The check for
@@ -162,8 +173,8 @@ assumed. Probe log: [`header-stage-probe.log`](header-stage-probe.log).
 
 ```
 st_blksize(/tmp)=4096  BUFSIZ=8192
-limit 0, 512x512:  rwMRC.h:600  Failed to write image data (1048576 bytes) … File too large
-limit 0, 16x16:    image.h:441  Failed to flush and close image file …     File too large
+limit 0, 512x512:  rwMRC.h:609  Failed to write image data (1048576 bytes) … File too large
+limit 0, 16x16:    image.h:455  Failed to flush and close image file …     File too large
 ```
 
 Even with `RLIMIT_FSIZE = 0` the 1024-byte header always fits the stream buffer, so it

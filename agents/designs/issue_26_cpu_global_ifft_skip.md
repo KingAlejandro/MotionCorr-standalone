@@ -409,6 +409,7 @@ four negative controls.
 | tomography pre-exposure even/odd path as an **exact-output** control | the `tomography` case (`test_runner_contract.py:141`) runs as part of the 13 CTests, but it carries `--save_noDW`, so the predicate is true and nothing is elided; it is not a control on this change. (The `exposure` case at `:31` has no `--even_odd_split` at all.) |
 | paired CPU benchmark on current main | deliberately excluded — no new benchmark series in this task |
 | oracle B (determinism) | present in the test, power **not** demonstrated — every negative control trips A, C or D first (§5.8) |
+| that the optimisation still *exists* | nothing in the test observes whether the transform was skipped, so reverting the elision to an unconditional call leaves every oracle green. `GlobalIfftElision` guards the predicate's correctness, not the saving. Deliberate: no timing claim is made here |
 | GPU execution of any kind | no GPU used anywhere in this work |
 
 The ~24% figure for global-only dose-weighted runs comes from base `3e3a196`

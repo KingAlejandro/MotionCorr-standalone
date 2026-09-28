@@ -2004,10 +2004,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// is bit-exact rather than an approximation.
 	//
 	// Both predicates are declared once, here, and used at every site that
-	// depends on them. Restating either condition at its consumer would let
-	// the two drift apart silently: a copy of this guard was widened upstream
-	// with even_odd_split, the copy did not follow, and the result corrupted
-	// EVN/ODD with no conflict, no warning and no failing test.
+	// depends on them. Restating either condition at its consumer lets the two
+	// drift apart silently, and that is not hypothetical: the prototype in
+	// PR #57 held a copy of this guard, 0f508e0 widened the original with
+	// even_odd_split, and the copy did not follow. Compiling that prototype
+	// predicate against current main corrupts EVN/ODD -- measured, on a
+	// deliberately built control, not something that shipped -- and it does so
+	// with no merge conflict, no warning and no failing test.
 	// See agents/designs/issue_26_cpu_global_ifft_skip.md.
 	const bool do_local = (patch_x > 2) && (patch_y > 2);
 	const bool pre_dw_sum_needed = !do_dose_weighting || save_noDW || even_odd_split;
@@ -2039,10 +2042,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		// The reshape is kept unconditionally: later code sizes buffers from
-		// Iframes[0]() and the post-dose-weighting transform writes into these.
-		// Note this also means the emptiness test further down cannot detect an
-		// elided buffer -- need_real_space_before_dw is the only guard.
+		// The reshape is kept unconditionally as the conservative choice, not
+		// because anything downstream requires it: the post-dose-weighting
+		// transform would resize on its own, and every site that sizes a buffer
+		// from Iframes[0]() sits inside pre_dw_sum_needed, i.e. a case where
+		// this transform ran. Keeping it does mean the emptiness test further
+		// down cannot detect an elided buffer, so need_real_space_before_dw is
+		// the only guard.
 		if (need_real_space_before_dw)
 			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting

@@ -5,8 +5,13 @@
 // It runs the production MotioncorrRunner::alignPatch on a synthetic patch with an
 // exactly known displacement, forces nonconvergence, and re-enters it the way the
 // resident CUDA path's fallback does. It shows that re-entering WITHOUT resetting the
-// caller's shift vectors publishes the sum of two independent estimates -- roughly
-// twice the true shift -- and that resetting them publishes the true shift once.
+// caller's shift vectors publishes the sum of two independent estimates, and that
+// resetting them publishes a single estimate.
+//
+// Note what a single unconverged estimate is NOT: it is not the true shift. At
+// max_iter=1 the estimator aligns each frame to the mean of the other frames, so one
+// iteration overshoots -- 8.96 against a converged truth of 6.25 in the recorded run.
+// The separate converged reference arm is what ties the fixture to known truth.
 //
 // That is the premise of the production fix in motioncorr_runner.cpp, established on
 // production code with no device involved. It is NOT an end-to-end validation of the
@@ -143,6 +148,12 @@ void report(const char *label, const std::vector<RFLOAT> &xs, const std::vector<
 int main() {
     try {
         MotioncorrRunner runner;
+        // MotioncorrRunner has no default member initialisers for these two, and
+        // alignPatch() branches on use_gpu before doing anything else -- an
+        // indeterminate value would dispatch this "device-free" control onto a GPU
+        // with an indeterminate device id in any -DCUDA=ON build. Set them explicitly.
+        runner.use_gpu = false;
+        runner.gpu_id = 0;
         runner.n_threads = 1;
         runner.ccf_downsample = 1.0;  // no CCF downsampling, so shifts are recovered directly
         runner.interpolate_shifts = false;

@@ -21,6 +21,7 @@
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <sstream>   // REPORT_ERROR_STR expands to a std::stringstream
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -28,6 +29,7 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
+#include "src/acc/cuda/cuda_error_class.h"
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -1257,47 +1259,6 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 	return gain_cache();
 }
 
-#ifdef _CUDA_ENABLED
-namespace {
-
-// Issue #69. Separates a recoverable resource failure from a fatal device execution
-// error.
-//
-// A recoverable failure -- an allocation that did not fit, a plan that could not be
-// created -- leaves the CUDA context usable, so an alternative path may legitimately
-// run. A fatal execution error poisons the context: the CUDA runtime keeps returning
-// the same sticky error for every subsequent call in this process. Retrying on a
-// poisoned context is not a fallback, it is a second failure reported from whichever
-// unrelated call happens to touch CUDA next, which hides both the stage and the movie
-// that actually failed.
-//
-// This only reads the pending error. It never calls cudaDeviceReset() and never touches
-// state belonging to another process or another device; the GPU may be shared.
-bool cudaErrorPoisonsContext(cudaError_t err) {
-	switch (err) {
-	case cudaErrorIllegalAddress:
-	case cudaErrorLaunchFailure:
-	case cudaErrorLaunchTimeout:
-	case cudaErrorHardwareStackError:
-	case cudaErrorIllegalInstruction:
-	case cudaErrorMisalignedAddress:
-	case cudaErrorInvalidAddressSpace:
-	case cudaErrorInvalidPc:
-	case cudaErrorECCUncorrectable:
-	case cudaErrorContextIsDestroyed:
-	case cudaErrorDeviceUninitialized:
-	case cudaErrorAssert:
-		return true;
-	default:
-		// Everything else, cudaErrorMemoryAllocation in particular, is treated as
-		// recoverable and keeps the existing behaviour.
-		return false;
-	}
-}
-
-} // namespace
-#endif
-
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
@@ -2085,6 +2046,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 		cufftComplex *d_patch_fcomplex_buffer = nullptr;
 		size_t sz_cached_patch_fcomplex = 0;
+		// Issue #69. This scratch outlives the patch loop but is freed at the bottom of
+		// it, and several statements inside the loop leave by exception:
+		// alignPatchDevice() throws on any CUDA error (every error macro in
+		// cuda_alignpatch.cu throws), the resident-frame download reports a hard error,
+		// and the poisoned-context check fails the movie deliberately. run() catches
+		// RelionError per movie and continues, so without this guard the buffer is
+		// leaked once per failing movie for the lifetime of the process -- the same
+		// defect class this issue is closing inside the .cu files. The explicit free
+		// below stays: it releases the buffer at the normal end of the loop, and it
+		// nulls, so the guard is a backstop rather than a second free.
+		struct PatchFourierScratchGuard {
+			cufftComplex **slot;
+			~PatchFourierScratchGuard() {
+				if (*slot) { cudaFree(*slot); *slot = nullptr; }
+			}
+		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
 		int ipatch = 1;
@@ -2154,20 +2131,38 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					// allocation that did not fit, and wrong after a fatal execution
 					// error: the context is poisoned and the retry can only fail
 					// again, from whichever later call happens to touch CUDA first.
-					// Fail the movie here instead, naming the stage and the movie.
-					// run() records it in failed_movies, withholds the joint output
-					// and exits nonzero, and the remaining movies still run.
+					// Fail the movie here instead. run() records it in failed_movies,
+					// withholds the joint output and exits nonzero, and the remaining
+					// movies still run.
+					//
+					// cudaGetLastError() reports the last error recorded on this
+					// thread, which is not necessarily the one this stage hit: the
+					// session's own file-local HANDLE_ERROR may already have consumed
+					// it, and the host-side buffer guard above records none at all.
+					// That is acceptable for this decision, because the question is
+					// not "what failed here" but "is this context still usable", and a
+					// sticky code pending from anywhere answers it. The message
+					// therefore says where the state was observed, not what caused it.
+					// Reading it also clears any non-sticky code, which is what we want
+					// before handing this patch to the fallback.
 					const cudaError_t pending = cudaGetLastError();
 					if (cudaErrorPoisonsContext(pending)) {
-						REPORT_ERROR_STR("CUDA device context is unusable after resident patch preparation for "
+						REPORT_ERROR_STR("CUDA device context observed unusable at resident patch preparation for "
 						                 << fn_mic << " (patch " << iy + 1 << ", " << ix + 1 << "): "
 						                 << cudaGetErrorString(pending)
 						                 << ". Refusing to retry alignment on a poisoned context.");
 					}
-					logfile << "WARNING: resident patch preparation failed for patch ("
-					        << iy + 1 << ", " << ix + 1 << "): "
-					        << cudaGetErrorString(pending)
-					        << ". Context is still usable; retrying this patch through the host path."
+					logfile << "WARNING: resident patch preparation did not complete for patch ("
+					        << iy + 1 << ", " << ix + 1 << ")";
+					if (pending == cudaSuccess) {
+						// Not "no error": the failing call reported and consumed it, or
+						// the host-side buffer allocation declined without recording one.
+						logfile << "; no CUDA error is pending, so the cause is in this"
+						           " movie's log above";
+					} else {
+						logfile << "; last pending CUDA error: " << cudaGetErrorString(pending);
+					}
+					logfile << ". Context is usable; retrying this patch through the host path."
 					        << std::endl;
 				}
 				if (!converged)

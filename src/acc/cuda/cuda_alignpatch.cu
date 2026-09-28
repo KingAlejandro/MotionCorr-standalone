@@ -77,7 +77,13 @@ class ScopedCufftPlan {
 public:
     ScopedCufftPlan() : plan(0), owns_plan(false) {}
     ~ScopedCufftPlan() { (void)releaseAll(); }
-    void take(cufftHandle handle) { plan = handle; owns_plan = true; }
+    void take(cufftHandle handle) {
+        // Releasing first keeps a second take() from silently dropping the previous
+        // plan. There is one call site today; this stops that from being load-bearing.
+        (void)releaseAll();
+        plan = handle;
+        owns_plan = true;
+    }
     cufftResult releaseAll() {
         if (!owns_plan) return CUFFT_SUCCESS;
         owns_plan = false;

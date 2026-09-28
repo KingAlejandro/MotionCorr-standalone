@@ -12,10 +12,17 @@
 //
 // Requires a real CUDA device. It is registered with the "cuda;hardware" label.
 //
-// WHAT IT DOES NOT COVER: it cannot synthesise a genuinely poisoned context (an
-// illegal address or an ECC fault), so the poisoned-context branch added for #69 is
-// exercised only by the classifier's unit behaviour, not by a real fault. That gap is
-// stated rather than papered over.
+// WHAT IT DOES NOT COVER, stated rather than papered over:
+//   * It cannot synthesise a genuinely poisoned context -- an illegal address or an
+//     ECC fault. The predicate that drives the poisoned-context branch is unit tested
+//     in tests/cuda_error_class.cpp, but the production branch itself is exercised by
+//     argument only, never by a real fault.
+//   * It drives CudaMovieSession and cudaAlignPatchDevice directly, not
+//     motioncorr_runner.cpp, so the two behaviour-changing fixes (the retry shift
+//     reset and the poisoned-context refusal) get nothing from it. The retry fix's
+//     end-to-end witness is item 4 of docs/issue69/gpu_plan.md.
+//   * cuFFT allocates its own workspace inside libcufft, below the interposed
+//     cudaMalloc, so that memory is outside the leak accounting here.
 
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -75,11 +82,29 @@ long        g_fault_at   = 0;       // 1-based ordinal of the call to fail; 0 = 
 long        g_counts[FAULT_KIND_COUNT];
 bool        g_fault_fired = false;
 
-std::set<void *> g_outstanding;     // device allocations made while armed
+// Set while the session destructor runs. CudaMovieSession::release() performs a
+// deliberately non-fatal cudaDeviceSynchronize and only logs on failure, so a fault
+// injected there is expected to be survived, not to abort. Scoring it as a failure
+// would report a test-oracle artefact as a production defect.
+bool        g_in_teardown       = false;
+bool        g_fault_in_teardown = false;
+
+// Outstanding owned resources. Device memory alone is not enough: the leak this issue
+// is mostly about in cudaAlignPatchDevice is eight cudaEvent_t and one cufftHandle,
+// none of which pass through cudaMalloc. cuFFT's *internal* workspace still allocates
+// inside libcufft and is not visible here -- stated, not papered over.
+std::set<void *>      g_outstanding;         // cudaMalloc
+std::set<cudaEvent_t> g_outstanding_events;  // cudaEventCreate
+std::set<int>         g_outstanding_plans;   // cufftCreate / cufftPlanMany
+
+size_t totalOutstanding() {
+    return g_outstanding.size() + g_outstanding_events.size() + g_outstanding_plans.size();
+}
 
 void resetCounters() {
     for (int i = 0; i < FAULT_KIND_COUNT; i++) g_counts[i] = 0;
     g_fault_fired = false;
+    g_fault_in_teardown = false;
 }
 
 // Returns true when this call is the one to fail.
@@ -88,6 +113,7 @@ bool shouldFail(FaultKind kind) {
     const long n = ++g_counts[kind];
     if (g_fault_kind != kind || g_fault_at == 0 || n != g_fault_at) return false;
     g_fault_fired = true;
+    if (g_in_teardown) g_fault_in_teardown = true;
     return true;
 }
 
@@ -100,6 +126,9 @@ cudaError_t __real_cudaFree(void *ptr);
 cudaError_t __real_cudaMemcpy(void *dst, const void *src, size_t size, cudaMemcpyKind kind);
 cudaError_t __real_cudaMemset(void *ptr, int value, size_t size);
 cudaError_t __real_cudaDeviceSynchronize(void);
+cudaError_t __real_cudaEventCreate(cudaEvent_t *event);
+cudaError_t __real_cudaEventDestroy(cudaEvent_t event);
+cufftResult __real_cufftDestroy(cufftHandle plan);
 cufftResult __real_cufftCreate(cufftHandle *plan);
 cufftResult __real_cufftMakePlanMany(cufftHandle plan, int rank, int *n,
                                      int *inembed, int istride, int idist,
@@ -147,9 +176,29 @@ cudaError_t __wrap_cudaDeviceSynchronize(void) {
     return __real_cudaDeviceSynchronize();
 }
 
+cudaError_t __wrap_cudaEventCreate(cudaEvent_t *event) {
+    const cudaError_t result = __real_cudaEventCreate(event);
+    if (g_active && result == cudaSuccess) g_outstanding_events.insert(*event);
+    return result;
+}
+
+cudaError_t __wrap_cudaEventDestroy(cudaEvent_t event) {
+    const cudaError_t result = __real_cudaEventDestroy(event);
+    if (result == cudaSuccess) g_outstanding_events.erase(event);
+    return result;
+}
+
+cufftResult __wrap_cufftDestroy(cufftHandle plan) {
+    const cufftResult result = __real_cufftDestroy(plan);
+    if (result == CUFFT_SUCCESS) g_outstanding_plans.erase((int)plan);
+    return result;
+}
+
 cufftResult __wrap_cufftCreate(cufftHandle *plan) {
     if (shouldFail(FAULT_CUFFT_CREATE)) return CUFFT_ALLOC_FAILED;
-    return __real_cufftCreate(plan);
+    const cufftResult result = __real_cufftCreate(plan);
+    if (g_active && result == CUFFT_SUCCESS) g_outstanding_plans.insert((int)*plan);
+    return result;
 }
 
 cufftResult __wrap_cufftMakePlanMany(cufftHandle plan, int rank, int *n,
@@ -171,8 +220,10 @@ cufftResult __wrap_cufftPlanMany(cufftHandle *plan, int rank, int *n,
                                  int *onembed, int ostride, int odist,
                                  cufftType type, int batch) {
     if (shouldFail(FAULT_CUFFT_PLANMANY)) return CUFFT_ALLOC_FAILED;
-    return __real_cufftPlanMany(plan, rank, n, inembed, istride, idist,
-                                onembed, ostride, odist, type, batch);
+    const cufftResult result = __real_cufftPlanMany(plan, rank, n, inembed, istride, idist,
+                                                    onembed, ostride, odist, type, batch);
+    if (g_active && result == CUFFT_SUCCESS) g_outstanding_plans.insert((int)*plan);
+    return result;
 }
 
 cufftResult __wrap_cufftExecR2C(cufftHandle plan, cufftReal *idata, cufftComplex *odata) {
@@ -198,6 +249,7 @@ struct TrialResult {
     std::string last_stage;     // last stage the scenario entered
     std::string exit_mechanism; // "returned false", "threw RelionError", "completed"
     bool        fault_fired = false;
+    bool        fault_in_teardown = false;
     bool        products_ok = true;
     size_t      leaked = 0;
 };
@@ -205,14 +257,24 @@ struct TrialResult {
 struct HostInputs {
     std::vector<Image<float> > frames;
     MultidimArray<float> gain;
-    std::vector<double> frame_checksums;
-    double gain_checksum = 0.0;
+    // Element-wise reference copies. A single scalar checksum standing in for
+    // NFRAMES*NY*NX elements is a weaker claim than an exact compare that costs the
+    // same at this size.
+    std::vector<std::vector<float> > frame_reference;
+    std::vector<float> gain_reference;
 };
 
-double checksum(const MultidimArray<float> &a) {
-    double acc = 0.0;
-    FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(a) acc += (double)DIRECT_MULTIDIM_ELEM(a, n) * (n % 97 + 1);
-    return acc;
+bool sameAs(const MultidimArray<float> &a, const std::vector<float> &reference) {
+    if (a.nzyxdim != (long)reference.size()) return false;
+    for (size_t n = 0; n < reference.size(); n++)
+        if (DIRECT_MULTIDIM_ELEM(a, n) != reference[n]) return false;
+    return true;
+}
+
+std::vector<float> snapshot(const MultidimArray<float> &a) {
+    std::vector<float> out((size_t)a.nzyxdim);
+    for (size_t n = 0; n < out.size(); n++) out[n] = DIRECT_MULTIDIM_ELEM(a, n);
+    return out;
 }
 
 void buildHostInputs(HostInputs &in) {
@@ -226,15 +288,19 @@ void buildHostInputs(HostInputs &in) {
     }
     in.gain.initZeros(NY, NX);
     FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(in.gain) DIRECT_MULTIDIM_ELEM(in.gain, n) = 1.0f;
-    in.frame_checksums.resize(NFRAMES);
-    for (int k = 0; k < NFRAMES; k++) in.frame_checksums[k] = checksum(in.frames[k]());
-    in.gain_checksum = checksum(in.gain);
+    in.frame_reference.resize(NFRAMES);
+    for (int k = 0; k < NFRAMES; k++) in.frame_reference[k] = snapshot(in.frames[k]());
+    in.gain_reference = snapshot(in.gain);
 }
 
+// Note honestly what this is worth: the production signatures take these as
+// const references, so the compiler already forbids mutation. This is a cheap standing
+// guard against a future const_cast or a stray D2H into a borrowed buffer -- not a
+// demonstration that the code could have corrupted them and did not.
 bool hostInputsIntact(const HostInputs &in) {
     for (int k = 0; k < NFRAMES; k++)
-        if (checksum(in.frames[k]()) != in.frame_checksums[k]) return false;
-    return checksum(in.gain) == in.gain_checksum;
+        if (!sameAs(in.frames[k](), in.frame_reference[k])) return false;
+    return sameAs(in.gain, in.gain_reference);
 }
 
 // One full movie through the resident stack. Stops at the first failure, exactly as
@@ -247,12 +313,12 @@ void runOneMovie(HostInputs &in, std::ostream &log, TrialResult &out) {
     recon_even().initZeros(NY, NX);
     recon_odd().initZeros(NY, NX);
 
-    // Product written before the later stages, so a later fault can be checked against
-    // an earlier completed product.
-    Image<float> early_product;
-    early_product().initZeros(NY, NX);
-    double early_checksum = 0.0;
-    bool early_written = false;
+    // There is deliberately no "an earlier in-memory product survived" check here.
+    // An Image<float> local to this function cannot be reached by anything downstream,
+    // so such a check could not fail and would be a green guard for a property it
+    // cannot observe. Survival of *prior on-disk artifacts across movies* is a real
+    // requirement, and it belongs to the end-to-end runs in docs/issue69/gpu_plan.md
+    // and to #99/#53's completion contract, not to this harness.
 
     CudaMovieSession session(NX, NY, NFRAMES, 0, log);
     float *d_patch_fourier = nullptr;
@@ -261,6 +327,16 @@ void runOneMovie(HostInputs &in, std::ostream &log, TrialResult &out) {
         float **p;
         ~PatchBufferGuard() { if (*p) { cudaFree(*p); *p = nullptr; } }
     } guard{&d_patch_fourier};
+
+    // Declared after the session, so it is destroyed *before* it: ~CudaMovieSession
+    // then runs with g_in_teardown set, on the normal path and during unwinding alike.
+    // release() performs a deliberately non-fatal cudaDeviceSynchronize that only
+    // logs on failure, so a fault landing there is expected to be survived; without
+    // this the last cudaDeviceSynchronize ordinal of a clean run would be scored as a
+    // production failure when it is a documented best-effort path.
+    struct MarkTeardown {
+        ~MarkTeardown() { g_in_teardown = true; }
+    } mark_teardown;
 
 #define STAGE(name, expr)                                                  \
     do {                                                                   \
@@ -300,11 +376,7 @@ void runOneMovie(HostInputs &in, std::ostream &log, TrialResult &out) {
 
     STAGE("global inverse FFT", session.computeGlobalInverseFFT());
 
-    // An earlier completed product, written before the remaining stages can fail.
     STAGE("unweighted reconstruction", session.reconstructUnweighted(recon, &recon_even, &recon_odd, nullptr));
-    early_product() = recon();
-    early_checksum = checksum(early_product());
-    early_written = true;
 
     {
         out.last_stage = "patch scratch allocation";
@@ -331,7 +403,6 @@ void runOneMovie(HostInputs &in, std::ostream &log, TrialResult &out) {
 #undef STAGE
 
     out.exit_mechanism = "completed";
-    if (early_written && checksum(early_product()) != early_checksum) out.products_ok = false;
 }
 
 TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
@@ -344,29 +415,49 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     g_fault_kind = kind;
     g_fault_at = ordinal;
     g_outstanding.clear();
+    g_outstanding_events.clear();
+    g_outstanding_plans.clear();
+    g_in_teardown = false;
     g_active = true;
 
+    // Declared outside the try. Faults inside cuda_alignpatch.cu leave by exception --
+    // that is the whole premise of F1 -- and a result object scoped inside the try
+    // would be destroyed by the unwind, blanking the stage column for exactly the
+    // trials that matter most.
+    TrialResult movie_result;
     try {
         for (int movie = 0; movie < n_movies; movie++) {
-            TrialResult movie_result;
+            movie_result.exit_mechanism = "";
+            g_in_teardown = false;
             runOneMovie(in, log, movie_result);
-            out.last_stage = movie_result.last_stage;
-            out.exit_mechanism = movie_result.exit_mechanism;
-            out.products_ok = out.products_ok && movie_result.products_ok;
+            g_in_teardown = false;
         }
     } catch (RelionError &) {
-        out.exit_mechanism = "threw RelionError";
+        movie_result.exit_mechanism = "threw RelionError";
     } catch (...) {
-        out.exit_mechanism = "threw unexpected exception";
+        movie_result.exit_mechanism = "threw unexpected exception";
     }
+    out.last_stage = movie_result.last_stage;
+    out.exit_mechanism = movie_result.exit_mechanism;
+    out.products_ok = movie_result.products_ok;
 
+    g_in_teardown = false;
     g_active = false;
     out.fault_fired = g_fault_fired;
-    out.leaked = g_outstanding.size();
+    out.fault_in_teardown = g_fault_in_teardown;
+    out.leaked = totalOutstanding();
     // Do not let one trial's leak contaminate the next one's verdict.
     for (std::set<void *>::iterator it = g_outstanding.begin(); it != g_outstanding.end(); ++it)
         __real_cudaFree(*it);
+    for (std::set<cudaEvent_t>::iterator it = g_outstanding_events.begin();
+         it != g_outstanding_events.end(); ++it)
+        __real_cudaEventDestroy(*it);
+    for (std::set<int>::iterator it = g_outstanding_plans.begin();
+         it != g_outstanding_plans.end(); ++it)
+        __real_cufftDestroy((cufftHandle)*it);
     g_outstanding.clear();
+    g_outstanding_events.clear();
+    g_outstanding_plans.clear();
 
     if (!hostInputsIntact(in)) out.products_ok = false;
     return out;
@@ -396,44 +487,86 @@ int main() {
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++)
         std::printf(" %s=%ld", faultName((FaultKind)k), budget[k]);
     std::printf("\n\n%-24s %-4s %-34s %-22s %-7s %-8s\n",
-                "primitive", "n", "stage reached", "exit", "leaked", "products");
+                "primitive", "n", "stage reached", "exit", "owned", "inputs");
+
+    // One oracle for both sweeps.
+    //
+    // Normal case: the fault must have fired, the scenario must NOT have completed, it
+    // must not have escaped as an unexpected exception type, nothing owned may be
+    // outstanding, and borrowed inputs must be unchanged.
+    //
+    // Teardown case: the fault landed in CudaMovieSession::release()'s deliberately
+    // non-fatal synchronise. Production documents that as survivable, so completing is
+    // the correct outcome there -- but nothing may leak.
+    struct Oracle {
+        static bool ok(const TrialResult &r, std::string &why) {
+            if (!r.fault_fired)                              { why = "site not reached"; return false; }
+            if (r.exit_mechanism == "threw unexpected exception") { why = "unexpected exception type"; return false; }
+            if (r.leaked != 0)                               { why = "leaked owned resources"; return false; }
+            if (!r.products_ok)                              { why = "borrowed inputs changed"; return false; }
+            if (r.fault_in_teardown) {
+                if (r.exit_mechanism != "completed") { why = "best-effort teardown fault was not survived"; return false; }
+                why = "teardown (best-effort, survived)";
+                return true;
+            }
+            if (r.exit_mechanism == "completed")             { why = "fault fired but the run completed"; return false; }
+            why = "";
+            return true;
+        }
+    };
 
     int failures = 0, trials = 0;
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++) {
         for (long n = 1; n <= budget[k]; n++) {
             const TrialResult r = runTrial((FaultKind)k, n, 1);
             trials++;
-            const bool ok = r.fault_fired && r.exit_mechanism != "completed" &&
-                            r.exit_mechanism != "threw unexpected exception" &&
-                            r.leaked == 0 && r.products_ok;
-            std::printf("%-24s %-4ld %-34s %-22s %-7zu %-8s %s\n",
-                        faultName((FaultKind)k), n, r.last_stage.c_str(),
-                        r.exit_mechanism.c_str(), r.leaked,
-                        r.products_ok ? "intact" : "DAMAGED", ok ? "" : "  <-- FAIL");
+            std::string why;
+            const bool ok = Oracle::ok(r, why);
+            std::printf("%-24s %-4ld %-34s %-22s %-7zu %-8s %s%s\n",
+                        faultName((FaultKind)k), n,
+                        r.last_stage.empty() ? "(not entered)" : r.last_stage.c_str(),
+                        r.exit_mechanism.empty() ? "(none)" : r.exit_mechanism.c_str(),
+                        r.leaked, r.products_ok ? "intact" : "DAMAGED",
+                        ok ? "" : "  <-- FAIL: ", why.c_str());
             if (!ok) failures++;
         }
     }
 
     // Successive movies with the fault on the last one: exposes cross-movie leaks and
     // stale cache state that a single-movie trial cannot see.
-    std::printf("\nSuccessive-movie trials (3 movies, fault on the third pass):\n");
+    // Counters are cumulative across the three movies in a trial, so ordinal
+    // budget[k]*3 is the LAST call of that kind in the third movie -- late enough that
+    // two whole movies have already completed, which is what exposes cross-movie leaks
+    // and stale cache state. If a movie ever issues a different number of calls than
+    // the baseline the site is simply not reached, and the oracle says so rather than
+    // failing for an unexplained reason.
+    std::printf("\nSuccessive-movie trials (3 movies, fault on the last call of that\n"
+                "kind in the third movie):\n");
     for (int k = FAULT_MALLOC; k <= FAULT_D2H; k++) {
         const long n = budget[k] * 3;
         if (n == 0) continue;
         const TrialResult r = runTrial((FaultKind)k, n, 3);
         trials++;
-        const bool ok = r.fault_fired && r.exit_mechanism != "completed" &&
-                        r.leaked == 0 && r.products_ok;
-        std::printf("%-24s %-4ld %-34s %-22s %-7zu %-8s %s\n",
-                    faultName((FaultKind)k), n, r.last_stage.c_str(),
-                    r.exit_mechanism.c_str(), r.leaked,
-                    r.products_ok ? "intact" : "DAMAGED", ok ? "" : "  <-- FAIL");
+        std::string why;
+        const bool ok = Oracle::ok(r, why);
+        std::printf("%-24s %-4ld %-34s %-22s %-7zu %-8s %s%s\n",
+                    faultName((FaultKind)k), n,
+                    r.last_stage.empty() ? "(not entered)" : r.last_stage.c_str(),
+                    r.exit_mechanism.empty() ? "(none)" : r.exit_mechanism.c_str(),
+                    r.leaked, r.products_ok ? "intact" : "DAMAGED",
+                    ok ? "" : "  <-- FAIL: ", why.c_str());
         if (!ok) failures++;
     }
 
     std::printf("\n%d trials, %d failures\n", trials, failures);
     if (failures) return 1;
-    std::printf("PASS every injected fault exited without completing, released every "
-                "owned allocation and preserved borrowed inputs and earlier products\n");
+    std::printf("PASS every injected fault left the scenario without completing (or was\n"
+                "     survived, where production documents the path as best-effort), and\n"
+                "     released every tracked device allocation, cuFFT plan and CUDA event.\n"
+                "     NOT covered: cuFFT's internal workspace allocations happen inside\n"
+                "     libcufft and never reach the interposed cudaMalloc, so they are\n"
+                "     outside this leak accounting. Borrowed-input immutability is\n"
+                "     already enforced by const in the production signatures; the check\n"
+                "     here is a standing guard, not a demonstration.\n");
     return 0;
 }

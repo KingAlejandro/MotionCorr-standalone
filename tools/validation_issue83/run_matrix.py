@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -182,6 +183,66 @@ def backend_witness(stdout: str, out_dir: Path, stems: List[str],
         "per_movie": per_movie,
         "native_cuda_proven": bool(startup and all_stages),
     }
+
+
+def schedule_witness(stdouts: List[str], sched_dir: Path,
+                     executed_stems: List[str], gpu: Optional[int]) -> Dict[str, Any]:
+    """Native-CUDA witness over exactly the movies this schedule executed.
+
+    A seeded resume deliberately skips the movies it was handed, so demanding a
+    kernel marker for all 24 fails on movies that were correctly left alone --
+    which is why the published resume entry recorded no witness yet still
+    passed. Restricting the check to the executed set makes it answerable, but
+    an empty executed set would then make it vacuously true, so that is rejected
+    outright. Every invocation must also announce the device: for a batch
+    schedule only the last invocation's stdout was previously inspected, so the
+    preceding 23 could have run on any backend.
+
+    Lives here rather than beside the integrated screen because the declared
+    matrix runs the same three schedules and had the weaker witness: it kept
+    the last invocation's stdout only, and then consumed none of it.
+    """
+    witness = backend_witness("\n".join(stdouts), sched_dir, executed_stems, gpu)
+    witness["executed_movies"] = sorted(executed_stems)
+    witness["invocations"] = len(stdouts)
+    witness["vacuous"] = not executed_stems or not stdouts
+    if gpu is None:
+        return witness
+    per_invocation = [f"{CUDA_STARTUP}{gpu} for global alignment." in text
+                      for text in stdouts]
+    witness["startup_marker_per_invocation"] = per_invocation
+    witness["startup_marker_all_invocations"] = (bool(per_invocation)
+                                                 and all(per_invocation))
+    witness["movies_with_stage_marker"] = sum(
+        1 for m in witness["per_movie"].values() if m["cuda_stage_marker"])
+    witness["native_cuda_proven"] = bool(
+        not witness["vacuous"]
+        and all(per_invocation)
+        and witness["per_movie"]
+        and all(m["cuda_stage_marker"] for m in witness["per_movie"].values()))
+    return witness
+
+
+def rejection_names_option(output: str,
+                           option: str) -> Tuple[bool, Optional[str]]:
+    """Did the run refuse *and* say which option it refused?
+
+    The option must appear in its ``--name`` form, delimited, on a line that
+    is not part of the backtrace the binary prints after an error. A bare
+    substring test over the whole output is not an assertion: the declared
+    token ``j`` occurs in build paths, in ``json`` and in hex addresses, so a
+    crash for an unrelated reason satisfied it. Returns the matching line as
+    well, so the record carries the evidence rather than only the verdict.
+    """
+    pattern = re.compile(r"(?<![0-9A-Za-z_-])" + re.escape(option)
+                         + r"(?![0-9A-Za-z_-])")
+    for raw in output.splitlines():
+        line = raw.strip()
+        if line.startswith("/") or line.startswith("==="):
+            continue  # backtrace frame or banner, not a diagnostic
+        if pattern.search(line):
+            return True, line
+    return False, None
 
 
 def run_binary(binary: Path, cwd: Path, star: Path, out_dir: Path,
@@ -349,7 +410,7 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
     aux = build_aux_fixtures(work / "aux", int(geometry["nx"]), int(geometry["ny"]))
     args = [aux.get(token, token) for token in row.args]
     common = list(declared.COMMON_ARGS)
-    if row.expect_reject == "j":
+    if row.expect_reject == "--j":
         common[common.index("8")] = "0"
     args = common + args
 
@@ -361,10 +422,15 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
     if row.expect_reject:
         run = run_binary(opts.binary, work, dataset["star"], work / "reject",
                          args, opts.gpu)
-        message = (run["stdout"] + run["stderr"]).lower()
-        named = row.expect_reject.lower() in message
+        named, line = rejection_names_option(run["stdout"] + run["stderr"],
+                                             row.expect_reject)
         result["schedules"]["reject"] = {
             "returncode": run["returncode"], "option_named": named,
+            "expected_option": row.expect_reject,
+            # The matched line is preserved so the assertion can be rechecked
+            # from the record. ``option_named: true`` on its own is the
+            # harness asking to be believed.
+            "option_named_line": line,
             "message_tail": (run["stdout"] + run["stderr"])[-600:],
         }
         ok = run["returncode"] != 0 and named
@@ -411,12 +477,18 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
         sched_dir = work / schedule
         entry: Dict[str, Any] = {"runs": []}
 
+        # One stdout per invocation, not the last one only: a batch schedule
+        # that announced the device once and then ran 23 invocations on any
+        # backend would otherwise be indistinguishable from a native one.
+        stdouts: List[str] = []
+
         if schedule == "repeat":
             run = run_binary(opts.binary, work, dataset["star"], sched_dir, args, opts.gpu)
             entry["runs"].append({"returncode": run["returncode"],
                                   "elapsed_sec": run["elapsed_sec"]})
-            entry["backend_evidence"] = backend_witness(
-                run["stdout"], sched_dir, dataset["stems"], opts.gpu)
+            stdouts.append(run["stdout"])
+            entry["backend_evidence"] = schedule_witness(
+                stdouts, sched_dir, dataset["stems"], opts.gpu)
 
         elif schedule == "batch":
             for _ in dataset["stems"]:
@@ -424,10 +496,11 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
                                  opts.gpu, ["--do_at_most", "1", "--only_do_unfinished"])
                 entry["runs"].append({"returncode": run["returncode"],
                                       "elapsed_sec": run["elapsed_sec"]})
+                stdouts.append(run["stdout"])
                 if run["returncode"] != 0:
                     break
-            entry["backend_evidence"] = backend_witness(
-                run["stdout"], sched_dir, dataset["stems"], opts.gpu)
+            entry["backend_evidence"] = schedule_witness(
+                stdouts, sched_dir, dataset["stems"], opts.gpu)
 
         elif schedule == "resume":
             # Non-prefix completion: finish the middle movie first, then resume
@@ -454,8 +527,16 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
                 result["errors"].append(
                     f"{schedule}: previously completed movie "
                     f"{dataset['nonprefix_stem']} was not preserved across resume")
-            entry["backend_evidence"] = backend_witness(
-                second["stdout"], sched_dir, dataset["stems"], opts.gpu)
+            stdouts.append(second["stdout"])
+            # The seeded movie is deliberately skipped by the resume, so a
+            # kernel marker for it would be evidence of the wrong thing. The
+            # witness covers exactly the movies the resume executed, and an
+            # empty executed set is rejected rather than passing vacuously.
+            executed = [s for s in dataset["stems"]
+                        if s != dataset["nonprefix_stem"]]
+            entry["seeded_movies"] = [dataset["nonprefix_stem"]]
+            entry["backend_evidence"] = schedule_witness(
+                stdouts, sched_dir, executed, opts.gpu)
         else:
             result["errors"].append(f"unknown schedule {schedule}")
             continue
@@ -507,12 +588,34 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
                 f"{schedule}: auxiliary products differ from base: "
                 f"{', '.join(extra_failed)}")
 
+        # The schedule's own witness is part of the condition, not a field
+        # printed beside it. Equal pixels across schedules say nothing about
+        # which backend produced them, and this record used to collect the
+        # witness for every schedule and then consume none of it -- so a
+        # repeat, batch or resume executed entirely on the CPU would have been
+        # published as a native row.
+        evidence = entry["backend_evidence"]
+        entry["native_cuda_required"] = opts.gpu is not None
+        native_schedule = (opts.gpu is None or evidence.get("native_cuda_proven"))
+        if opts.gpu is not None and not evidence.get("native_cuda_proven"):
+            result["errors"].append(
+                f"{schedule}: no native CUDA witness for the movies it executed "
+                f"({evidence.get('movies_with_stage_marker')}/"
+                f"{len(evidence.get('executed_movies') or [])} with a kernel "
+                f"marker, device announced in "
+                f"{sum(evidence.get('startup_marker_per_invocation') or [])}/"
+                f"{evidence.get('invocations')} invocations)")
+        if evidence.get("unexpected_cuda_marker"):
+            result["errors"].append(f"{schedule}: CPU run produced a CUDA marker")
+
         entry["passed"] = (
             entry["movies_compared"] == len(dataset["stems"])
             and entry["movies_passed"] == entry["movies_compared"]
             and entry["inventory"]["inventory_complete"]
             and not extra_failed
             and entry.get("preserved_seeded_outputs", True)
+            and native_schedule
+            and not evidence.get("unexpected_cuda_marker")
         )
         if not entry["passed"]:
             result["errors"].append(
@@ -550,13 +653,18 @@ def numerically_equal(entry: Dict[str, Any],
     Returns the verdict and the differences that were *not* tolerated, so a
     caller can say why a pair failed rather than only that it did.
     """
-    if entry.get("passed"):
-        return True, []
     checks = entry.get("checks") or {}
     if entry.get("overall_status") is None:
         return False, ["comparator gave no verdict"]
+    # Checked before the ``passed`` shortcut below, not after it. A PASS from a
+    # comparator that did not cover every check is an aggregate over a subset,
+    # and accepting it here would make this guard unreachable on exactly the
+    # records it exists to catch -- the same "exit status and counts are not
+    # pixels" rule the rest of this harness applies.
     if not entry.get("coverage_complete"):
         return False, ["comparator coverage incomplete"]
+    if entry.get("passed"):
+        return True, []
     missing = [name for name in NUMERICAL_CHECKS if name not in checks]
     if missing:
         return False, [f"comparator did not report {', '.join(missing)}"]

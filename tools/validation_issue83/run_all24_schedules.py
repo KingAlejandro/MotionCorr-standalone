@@ -39,7 +39,8 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from run_matrix import (CUDA_STARTUP, backend_witness, compare_pair,  # noqa: E402
-                        product_hashes, report_name, run_binary, sha256)
+                        product_hashes, report_name, run_binary,
+                        schedule_witness, sha256)
 import products as prod  # noqa: E402
 from products import output_stem  # noqa: E402
 
@@ -112,38 +113,29 @@ def source_provenance(repo: Path) -> Dict[str, Any]:
             "dirty_paths": dirty.splitlines() if dirty else []}
 
 
-def schedule_witness(stdouts: List[str], sched_dir: Path,
-                     executed_stems: List[str], gpu: Optional[int]) -> Dict[str, Any]:
-    """Native-CUDA witness over exactly the movies this schedule executed.
+def expected_star_metadata(args: List[str]) -> Dict[str, Any]:
+    """Metadata the integrated screen's invocation entails, field by field.
 
-    A seeded resume deliberately skips the movies it was handed, so demanding a
-    kernel marker for all 24 fails on movies that were correctly left alone --
-    which is why the published resume entry recorded no witness yet still
-    passed. Restricting the check to the executed set makes it answerable, but
-    an empty executed set would then make it vacuously true, so that is rejected
-    outright. Every invocation must also announce the device: for a batch
-    schedule only the last invocation's stdout was previously inspected, so the
-    preceding 23 could have run on any backend.
+    The screen used to pass ``{}`` here, so it asserted presence and
+    cross-schedule equality and nothing else: a build that ignored
+    ``--dose_per_frame`` outright would have produced 24 movies that were
+    equal under every schedule and passed.
+
+    Only what the invocation determines is asserted. The original pixel size
+    and the image dimensions come from the movies, which this harness does not
+    parse -- the tutorial movies are not MRC -- so they are recorded as not
+    asserted rather than guessed at.
     """
-    witness = backend_witness("\n".join(stdouts), sched_dir, executed_stems, gpu)
-    witness["executed_movies"] = sorted(executed_stems)
-    witness["invocations"] = len(stdouts)
-    witness["vacuous"] = not executed_stems or not stdouts
-    if gpu is None:
-        return witness
-    per_invocation = [f"{CUDA_STARTUP}{gpu} for global alignment." in text
-                      for text in stdouts]
-    witness["startup_marker_per_invocation"] = per_invocation
-    witness["startup_marker_all_invocations"] = (bool(per_invocation)
-                                                 and all(per_invocation))
-    witness["movies_with_stage_marker"] = sum(
-        1 for m in witness["per_movie"].values() if m["cuda_stage_marker"])
-    witness["native_cuda_proven"] = bool(
-        not witness["vacuous"]
-        and all(per_invocation)
-        and witness["per_movie"]
-        and all(m["cuda_stage_marker"] for m in witness["per_movie"].values()))
-    return witness
+    def value_of(flag: str, default: Any) -> Any:
+        return args[args.index(flag) + 1] if flag in args else default
+
+    return {
+        "binning": float(value_of("--bin_factor", 1)),
+        "first_frame": int(value_of("--first_frame_sum", 1)),
+        "dose_per_frame": (float(value_of("--dose_per_frame", 0))
+                           if "--dose_weighting" in args else None),
+        "pre_exposure": float(value_of("--preexposure", 0)),
+    }
 
 
 def schedule_passed(entry: Dict[str, Any], evidence: Dict[str, Any],
@@ -230,10 +222,11 @@ def main() -> int:
             "--patch_x", "5", "--patch_y", "5", "--bfactor", "150",
             "--gainref", opts.gainref, "--skip_logfile"]
     suffixes = [".mrc", ".star"]
+    star_expect = expected_star_metadata(args)
 
     opts.outdir.mkdir(parents=True, exist_ok=True)
     report: Dict[str, Any] = {
-        "schema": "issue83-all24-schedules/1",
+        "schema": "issue83-all24-schedules/2",
         "provenance": {
             "binary": str(opts.binary.resolve()),
             "binary_sha256": sha256(opts.binary),
@@ -247,6 +240,12 @@ def main() -> int:
         },
         "expected_movies": EXPECTED_MOVIES,
         "movies_in_star": len(stems),
+        "star_metadata_asserted": star_expect,
+        # Said plainly rather than left as an empty expectation. The tutorial
+        # movies are not MRC, so this harness cannot read their pixel size or
+        # dimensions, and asserting a guess would be worse than asserting
+        # nothing.
+        "metadata_not_asserted": ["original_pixel_size", "image_geometry"],
         "schedules_requested": [s.strip() for s in opts.schedules.split(",") if s.strip()],
         "required_schedules": list(REQUIRED_SCHEDULES),
         "schedules": {},
@@ -265,7 +264,7 @@ def main() -> int:
     (base_dir / "run-stdout.txt").write_text(base["stdout"])
     (base_dir / "run-stderr.txt").write_text(base["stderr"])
     witness = schedule_witness([base["stdout"]], base_dir, stems, opts.gpu)
-    inventory = prod.check_products(base_dir, stems, suffixes, {}, None)
+    inventory = prod.check_products(base_dir, stems, suffixes, star_expect, None)
     report["schedules"]["base"] = {
         "returncode": base["returncode"], "elapsed_sec": base["elapsed_sec"],
         "command": base["command"], "backend_evidence": witness,

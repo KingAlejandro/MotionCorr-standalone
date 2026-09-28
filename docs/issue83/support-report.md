@@ -21,6 +21,7 @@ This block describes the **declared-matrix** run. Sections below name their own 
 
 - Fixtures checked against `test-data/known_motion/MANIFEST.json` as tracked in git (ref `HEAD`, source commit `e07fdec235d38f152356b136fb7038394eb8c919`)
 - Result: **VERIFIED** over 5 declared case(s)
+- Digests actually compared: 5 movie, 5 ground truth
   - Movies (`movie_sha256`): 5 match
   - Ground truths (`ground_truth_sha256`): 5 content equal
 - Content-equal (digest differs, every value the same number — commit stamp and/or last-bit float rendering): km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth), km_local_realscale (ground_truth)
@@ -32,33 +33,35 @@ The manifest is read from git, never from the copy the generator writes beside i
 
 Exact = every movie identical to the uninterrupted run under `compare_motioncorr.py --gate exact`.
 
-| Row | Axes | Native witness | Products | Repeat | Batch | Resume (non-prefix) | Verdict |
+| Row | Axes | Native witness (base) | Products | Repeat | Batch | Resume (non-prefix) | Verdict |
 |---|---|---|---|---|---|---|---|
-| `global_square` | alignment=global, geometry=square | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `local_square` | alignment=local 4x4, geometry=square | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `global_nonsquare` | alignment=global, geometry=non-square 768x512 | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `local_nonsquare` | alignment=local 4x4, geometry=non-square 768x512 | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `gain_none` | gain=absent | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `gain_unity` | gain=unity MRC | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `gain_nonunity` | gain=non-unity MRC | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `defect_skip` | defect=--skip_defect | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `defect_detect` | defect=hot-pixel detection on | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `defect_file` | defect=MotionCor2 defect file | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `dose_off` | dose=off | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `dose_on` | dose=on | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `dose_on_savenoDW` | dose=on, products=saved noDW | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `dose_on_preexposure` | dose=on + pre-exposure | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `evenodd` | products=even/odd split | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `evenodd_dose_noDW` | products=even/odd + saved noDW, dose=on | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `frames_subset` | frames=first 3 last 10 | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `group_frames_2` | frames=--group_frames 2 | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
+| `global_square` | alignment=global, geometry=square | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `local_square` | alignment=local 4x4, geometry=square | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `global_nonsquare` | alignment=global, geometry=non-square 768x512 | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `local_nonsquare` | alignment=local 4x4, geometry=non-square 768x512 | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `gain_none` | gain=absent | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `gain_unity` | gain=unity MRC | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `gain_nonunity` | gain=non-unity MRC | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `defect_skip` | defect=--skip_defect | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `defect_detect` | defect=hot-pixel detection on | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `defect_file` | defect=MotionCor2 defect file | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `dose_off` | dose=off | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `dose_on` | dose=on | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `dose_on_savenoDW` | dose=on, products=saved noDW | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `dose_on_preexposure` | dose=on + pre-exposure | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `evenodd` | products=even/odd split | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `evenodd_dose_noDW` | products=even/odd + saved noDW, dose=on | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `frames_subset` | frames=first 3 last 10 | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `group_frames_2` | frames=--group_frames 2 | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
 | `group_frames_invalid` | frames=--group_frames 0 | n/a (rejected) | rc=1, named=True | n/a | n/a | n/a | pass |
 | `threads_invalid` | options=--j 0 | n/a (rejected) | rc=1, named=True | n/a | n/a | n/a | pass |
-| `bin1` | binning=bin 1 | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `early_bin2` | binning=early bin 2 (default) | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `late_bin2` | binning=late bin 2 (--no_early_binning) | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `power_spectrum` | products=power spectrum | yes | complete | exact 3/3 | exact 3/3 | exact 3/3 | pass |
-| `realscale_local` | geometry=2048x2048 real scale, alignment=local 5x5 | yes | complete | exact 2/2 | exact 2/2 | exact 2/2 | pass |
+| `bin1` | binning=bin 1 | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `early_bin2` | binning=early bin 2 (default) | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `late_bin2` | binning=late bin 2 (--no_early_binning) | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `power_spectrum` | products=power spectrum | yes | complete | exact 3/3, witness **not covered** | exact 3/3, witness **not covered** (1 of 3 invocations examined) | exact 3/3, witness **not covered** (1 of 2 invocations examined) | pass |
+| `realscale_local` | geometry=2048x2048 real scale, alignment=local 5x5 | yes | complete | exact 2/2, witness **not covered** | exact 2/2, witness **not covered** (1 of 2 invocations examined) | exact 2/2, witness **not covered** (1 of 2 invocations examined) | pass |
+
+**Per-schedule native execution is not established for 23 of these rows.** The `Verdict` column is the verdict the harness that produced this record wrote, and that harness collected a witness for each schedule without reading it. The evidence for the repeat, batch and resume cells above is not in the record and cannot be recovered from it; only a fresh run of the fixed harness can supply it. Rows affected: `global_square`, `local_square`, `global_nonsquare`, `local_nonsquare`, `gain_none`, `gain_unity`, `gain_nonunity`, `defect_skip`, `defect_detect`, `defect_file`, `dose_off`, `dose_on`, `dose_on_savenoDW`, `dose_on_preexposure`, `evenodd`, `evenodd_dose_noDW`, `frames_subset`, `group_frames_2`, `bin1`, `early_bin2`, `late_bin2`, `power_spectrum`, `realscale_local`.
 
 ### Integrated candidate: all 24 tutorial movies
 
@@ -67,6 +70,7 @@ Exact = every movie identical to the uninterrupted run under `compare_motioncorr
 - Movies in STAR: 24 (expected 24)
 - Aggregate pixel equality across schedules: pass
 - Native CUDA execution: established for every schedule
+- **This record asserted no STAR metadata.** It checked product presence and cross-schedule equality only, so a field wrong in the same way under every schedule would not have been caught.
 
 Pixel equality and native execution are separate claims: equal pixels across schedules say nothing about which backend produced them.
 
@@ -79,7 +83,8 @@ Pixel equality and native execution are separate claims: equal pixels across sch
 
 ### Memory capacity (measured, single datapoint)
 
-- Source record: **host and binary not recorded in this measurement**, so the device index below cannot be attributed to the run named in the provenance block.
+- Source record: **no host, no start time and no binary digest are recorded in this measurement**, so the device index below cannot be attributed to the run named in the provenance block.
+- The sampled command names binary `/scratch/scarf1415/mc-i83-tree/build-cuda/motioncorr`, which is **not** the binary in the provenance block (`/work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr`) — a different build.
 - Configuration: `realscale_local` — 2048x2048, 24 frames, local 5x5 patches, native CUDA
 - Device: 0 (40960 MiB total)
 - **Peak device memory observed: 1266 MiB**, sampled every 0.5 s over 32 samples
@@ -92,12 +97,14 @@ This is a measurement of one configuration on one device, not a capacity claim f
 
 These are not implied by any implementation row above.
 
-- Source record: host not recorded, device 0
+- Source record for the motion-truth gates: host not recorded, device 0, binary path `/work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr` (no digest recorded)
 - Motion truth `km_global_hisnr` (gate): **PASS**
 - Motion truth `km_local_hisnr` (gate): **PASS**
 - Motion truth `km_local_noisy` (characterization): **FAIL**
 - Motion truth `km_local_nonsquare` (gate): **PASS**
 - Motion truth `km_local_realscale` (gate): **PASS**
+- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-27T13:41:25Z
+- **Not the run named in the provenance block above** — hostname, binary_sha256, binary_path differ, so these two sections are not one measurement.
 - CPU-backend diagnostic (`small-refmac-machine`): 24 pass, 0 fail, 0 error of 24 attempted; unrun: realscale_local. This is a separate verdict: it neither establishes nor overrides any native CUDA result above.
 
 Historical CPU/RELION Gate 2 failures remain failures. An exact schedule comparison never converts one into a pass.
@@ -119,5 +126,7 @@ Named rather than implied, so the table is not read as broader than it is.
 
 The declared matrix is complete, every attempted row passed, and the inputs were verified against the committed manifest.
 
-This aggregate is assembled from more than one run: the integrated all-24 screen did not come from the run named in the provenance block. Each section says so above.
+**Withheld:** for 23 of the declared rows this report does not claim that the repeat, batch and resume schedules ran natively on the GPU. Those runs happened, and their pixels are equal; the record that survives them does not say which backend produced them, so the claim is unrun until the fixed harness runs on a dedicated allocation.
+
+This aggregate is assembled from more than one run: the integrated all-24 screen and the CPU-backend diagnostic did not come from the run named in the provenance block. Each section says so above.
 

@@ -56,7 +56,10 @@ class Row:
     schedules: List[str] = field(default_factory=lambda: ["repeat", "batch", "resume"])
     #: Number of movies in the generated dataset for this row.
     n_movies: int = 3
-    #: Set when the row is expected to fail the option validator instead of running.
+    #: Set when the row is expected to fail the option validator instead of
+    #: running. The value is the option in its ``--name`` form and is matched
+    #: delimited, not as a bare substring: ``j`` occurs in almost any output,
+    #: including build paths, so it would be satisfied by a crash.
     expect_reject: Optional[str] = None
     notes: str = ""
 
@@ -148,12 +151,12 @@ ROWS: List[Row] = [
     Row("group_frames_invalid", "km_local_hisnr",
         {"frames": "--group_frames 0"},
         ["--patch_x", "4", "--patch_y", "4", "--skip_defect", "--group_frames", "0"],
-        schedules=[], expect_reject="group",
+        schedules=[], expect_reject="--group_frames",
         notes="ADR66 sec.2 requires nonpositive grouping to be rejected by name."),
     Row("threads_invalid", "km_local_hisnr",
         {"options": "--j 0"},
         ["--patch_x", "4", "--patch_y", "4", "--skip_defect"],
-        schedules=[], expect_reject="j",
+        schedules=[], expect_reject="--j",
         notes="Thread count 0; replaces --j in the common arguments."),
 
     # ----------------------------------------------------------------- binning

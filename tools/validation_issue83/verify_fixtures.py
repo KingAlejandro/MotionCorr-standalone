@@ -204,16 +204,21 @@ def main() -> int:
 
     cases = manifest.get("cases", {})
     result: Dict[str, Any] = {
-        "schema": "issue83-fixture-verify/4",
+        "schema": "issue83-fixture-verify/5",
         "manifest_ref": opts.ref,
         "manifest_source_commit": manifest.get("source_commit"),
         "fixtures_dir": str(opts.fixtures_dir),
         "verifier_numpy_version": None,
+        "declared_cases": len(cases),
         "cases": {},
         "mismatched": [],
         "content_equal": [],
         "missing": [],
         "undeclared": [],
+        # How many digests were actually computed and compared, per artefact
+        # kind. Without this the verdict below cannot tell "everything matched"
+        # apart from "nothing was looked at".
+        "compared": {"movie": 0, "ground_truth": 0},
     }
     try:
         import numpy  # noqa: WPS433 -- the checking process, not the generator
@@ -271,6 +276,7 @@ def main() -> int:
                     detail["status"] = status
             entry[kind] = detail
             statuses.append(status)
+            result["compared"][kind] += 1
             if status == "MISMATCH":
                 result["mismatched"].append(f"{case} ({kind})")
             elif status == "content_equal":
@@ -292,9 +298,22 @@ def main() -> int:
         if path.name[:-len("_ground_truth.json")] not in cases:
             result["undeclared"].append(path.name)
 
+    # "Nothing mismatched" is not "the inputs are the declared ones" when
+    # nothing was compared. An empty fixtures directory under --allow-missing,
+    # or a manifest with no cases, produces no mismatch and no undeclared file,
+    # so the verdict below would have been a vacuous pass -- the same empty-set
+    # quantification that made a resume certify native CUDA without executing a
+    # movie. Both declared artefacts must have been compared at least once.
+    compared = result["compared"]
+    result["vacuous"] = not (compared["movie"] and compared["ground_truth"])
     failed = bool(result["mismatched"]) or bool(result["undeclared"]) \
+        or result["vacuous"] \
         or (bool(result["missing"]) and not opts.allow_missing)
     result["verified"] = not failed
+    if result["vacuous"]:
+        print(f"NOT VERIFIED: no digests were compared "
+              f"({compared['movie']} movie, {compared['ground_truth']} ground "
+              f"truth, over {len(cases)} declared case(s))", file=sys.stderr)
 
     if opts.json:
         opts.json.parent.mkdir(parents=True, exist_ok=True)

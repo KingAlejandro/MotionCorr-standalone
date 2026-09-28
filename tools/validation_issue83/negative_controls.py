@@ -237,14 +237,26 @@ def control_resume_witness(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, An
             "VACUOUS WITNESS: no invocation output certified native CUDA")
     cases["no_invocations"] = {"native_cuda_proven": False, "vacuous": True}
 
-    # One batch invocation that never announced the device must not certify:
-    # previously only the last invocation's stdout was inspected.
+    # One batch invocation whose stdout does not carry the startup banner.
+    # Every invocation's stdout is inspected -- previously only the last was --
+    # and the gap is recorded per invocation. It is not, however, what the
+    # native claim rests on: the banner is redundant where the kernel's own
+    # per-movie stage markers are present, and it is routinely unrecoverable
+    # because callers keep only the final invocation's stdout. Conjoining it
+    # denied a native witness to schedules whose every executed movie was
+    # demonstrably produced by the CUDA path, which is withdrawn as W8a.
     w_batch = all24.schedule_witness([startup, "no device here", startup],
                                      good, executed, 0)
-    require(not w_batch["native_cuda_proven"],
-            "an invocation with no device announcement was accepted anyway")
+    require(w_batch["startup_marker_per_invocation"] == [True, False, True],
+            "the banner gap was not recorded one entry per invocation")
+    require(w_batch["startup_marker_all_invocations"] is False,
+            "a schedule with a silent invocation claimed full banner coverage")
+    require(w_batch["native_cuda_proven"],
+            "WITHHELD A MEASURED CLAIM: every executed movie carries a kernel "
+            "stage marker and the witness was refused over a missing banner")
     cases["one_silent_invocation"] = {
-        "native_cuda_proven": False,
+        "native_cuda_proven": True,
+        "startup_marker_all_invocations": False,
         "startup_marker_per_invocation": w_batch["startup_marker_per_invocation"]}
 
     # A movie that ran without a kernel marker must not certify.
@@ -340,8 +352,10 @@ def control_report_renders_witness(_tmp: Path, _fixtures: Optional[Path]) -> Dic
     table = "\n".join(rep.render_all24(historical))
     require("native execution NOT established" in table,
             "the rendered table still shows resume as a plain pass")
-    require("| resume | 1 | 24/24 | 0 | **no** |" in table,
-            "the rendered table does not carry resume's own witness cell")
+    require("| resume | 1 | 24/24 | 0 | **not covered** (16 of 24 movies "
+            "marked) |" in table,
+            f"the rendered table does not carry resume's own witness cell, "
+            f"saying what the record actually holds: {table}")
 
     # batch ran 24 invocations but the old witness read only the last stdout,
     # so 23 startup *banners* are simply not in the record. That is a real gap
@@ -392,17 +406,42 @@ def control_report_renders_witness(_tmp: Path, _fixtures: Optional[Path]) -> Dic
     require(rep.banner_coverage(good["schedules"]["batch"]) == (1, 24),
             "the banner gap disappeared once the aggregate was satisfied")
 
-    # A CPU screen proves nothing and is not asked to -- unless it masquerades.
-    # It must still have run every required schedule: "nothing to prove" is a
-    # statement about the backend, not a licence to skip legs.
+    # A CPU screen is not asked to prove CUDA execution. It *is* asked to have
+    # looked: the required result is the absence of a marker, and an absence
+    # nobody looked for is not a measurement. This control previously asserted
+    # the opposite -- it required a screen carrying no per-movie evidence at
+    # all to be accepted, pinning the vacuous answer in place.
+    blind = {"provenance": {"gpu": None},
+             "schedules": {name: {"backend_evidence": {}}
+                           for name in rep.REQUIRED_SCHEDULES}}
+    require(not rep.all24_witness_holds(blind),
+            "a CPU screen that inspected no logs certified that no log named "
+            "CUDA")
     cpu = {"provenance": {"gpu": None},
-           "schedules": {name: {"backend_evidence": {}}
-                         for name in rep.REQUIRED_SCHEDULES}}
+           "schedules": {name: {"backend_evidence": {
+               "per_movie": {"m1": {"log_present": True,
+                                    "cuda_stage_marker": False}}}}
+               for name in rep.REQUIRED_SCHEDULES}}
     require(rep.all24_witness_holds(cpu),
             "a CPU screen was required to prove native CUDA execution")
-    cpu["schedules"]["repeat"]["backend_evidence"] = {"unexpected_cuda_marker": True}
+    cpu["schedules"]["repeat"]["backend_evidence"]["unexpected_cuda_marker"] = True
     require(not rep.all24_witness_holds(cpu),
             "a CPU screen emitting CUDA markers was accepted")
+
+    # A record that does not say which device it used gets neither answer.
+    # ``gpu: null`` is the measurement "CPU"; a provenance block with no
+    # ``gpu`` key at all is silence, and reading silence as the measurement
+    # published a GPU record with lost provenance as a clean CPU diagnostic.
+    silent = json.loads(json.dumps(cpu))
+    silent["schedules"]["repeat"]["backend_evidence"].pop("unexpected_cuda_marker")
+    require(rep.all24_witness_holds(silent),
+            "positive control failed: a clean CPU screen was rejected")
+    silent["provenance"] = {}
+    require(not rep.device_recorded(silent),
+            "a provenance block with no gpu key was read as recording a device")
+    require(not rep.all24_witness_holds(silent),
+            "a screen that does not say which device it used was given the "
+            "CPU answer")
 
     # An absent record, or one with no schedules at all, is not a pass.
     require(not rep.all24_witness_holds(None), "a missing screen was accepted")
@@ -759,7 +798,7 @@ def control_partial_schedules(_tmp: Path, _fixtures: Optional[Path]) -> Dict[str
 
 
 def control_matrix_schedule_witness(_tmp: Path,
-                                    _fixtures: Optional[Path]) -> Dict[str, Any]:
+                                    _fixtures: Optional[Path]) -> Dict[str, Any]:  # noqa: C901
     """The declared matrix must consume its own per-schedule witness too.
 
     ``run_matrix.py`` collected ``backend_evidence`` for repeat, batch and
@@ -785,15 +824,37 @@ def control_matrix_schedule_witness(_tmp: Path,
             "native CUDA execution")
     cases["empty_executed_set"] = {"vacuous": True, "native_cuda_proven": False}
 
+    unmarked = rm.schedule_witness(
+        ["Using CUDA acceleration on GPU device 0 for global alignment."] * 2,
+        Path("/nonexistent"), ["m1"], 0)
+    require(not unmarked["native_cuda_proven"],
+            "a schedule whose executed movie carries no kernel stage marker "
+            "was credited with a native witness on the strength of its "
+            "startup banner")
+    cases["banner_without_stage_marker"] = {"native_cuda_proven": False}
+
+    # The banner is the weaker and redundant witness, and it is frequently
+    # unrecoverable: a caller that keeps only the final invocation's stdout
+    # loses the earlier banners without losing a single stage marker. It must
+    # still be *recorded* per invocation -- the gap is disclosed -- but it no
+    # longer decides the verdict, because conjoining it wrote `false` for
+    # schedules whose every executed movie was demonstrably native (W8a).
+    logs = _tmp / "witness-logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    (logs / "m1.log").write_text("[CUDA global] completed; converged=1\n")
     silent = rm.schedule_witness(
         ["Using CUDA acceleration on GPU device 0 for global alignment.", ""],
-        Path("/nonexistent"), ["m1"], 0)
+        logs, ["m1"], 0)
     require(silent["startup_marker_per_invocation"] == [True, False],
             "the per-invocation markers were not recorded one per invocation")
-    require(not silent["native_cuda_proven"],
-            "a schedule with an invocation that never announced the device "
-            "was still credited with a native witness")
-    cases["one_silent_invocation"] = {"native_cuda_proven": False}
+    require(silent["startup_marker_all_invocations"] is False,
+            "the banner gap was not recorded as such")
+    require(silent["native_cuda_proven"],
+            "WITHHELD A MEASURED CLAIM: a schedule whose executed movie "
+            "carries a kernel stage marker was denied a native witness "
+            "because one invocation's stdout did not carry the banner")
+    cases["one_silent_invocation"] = {"native_cuda_proven": True,
+                                      "startup_marker_all_invocations": False}
 
     # The renderer must print it, and must not print "exact" alone.
     for name, witness, want in (
@@ -893,14 +954,30 @@ def control_matrix_schedule_witness(_tmp: Path,
                                              provenance={"gpu": None})),
             "a CPU matrix was asked to prove native execution")
 
-    # On a CPU diagnostic there is no native claim to make, so the cell stays
-    # as it was rather than acquiring an empty one.
-    cpu_cell = rep.schedule_cell(
-        {"schedules": {"repeat": dict(row, passed=True, runs=[{}],
-                                      backend_evidence={})}}, "repeat", False)
-    require(cpu_cell == "exact 3/3",
-            f"a CPU schedule cell gained a native-witness claim: {cpu_cell!r}")
-    cases["cpu"] = cpu_cell
+    # On a CPU diagnostic there is no native claim to make. The required
+    # result is the *absence* of a CUDA marker -- and an absence nobody looked
+    # for is not a measurement. A record carrying no per-movie evidence must
+    # say so rather than render as a clean cell.
+    def cpu_cell(evidence):
+        return rep.schedule_cell(
+            {"schedules": {"repeat": dict(row, passed=True, runs=[{}],
+                                          backend_evidence=evidence)}},
+            "repeat", False)
+
+    blind = cpu_cell({})
+    require("not recorded" in blind,
+            f"a CPU schedule that inspected no log rendered as though the "
+            f"absence of a CUDA marker had been established: {blind!r}")
+    clean = cpu_cell({"per_movie": {"m1": {"log_present": True,
+                                           "cuda_stage_marker": False}}})
+    require("no CUDA marker" in clean and "exact 3/3" in clean,
+            f"a CPU schedule that did inspect its logs did not report the "
+            f"absence it measured: {clean!r}")
+    masq = cpu_cell({"per_movie": {"m1": {"cuda_stage_marker": True}},
+                     "unexpected_cuda_marker": True})
+    require("masquerade" in masq,
+            f"a CPU schedule emitting CUDA markers rendered clean: {masq!r}")
+    cases["cpu"] = {"no_evidence": blind, "clean": clean, "masquerade": masq}
     return {"status": "pass",
             "reproduced": "matrix repeat/batch/resume witnesses written at "
                           "7098a6f and consumed nowhere",
@@ -1094,6 +1171,59 @@ def control_aggregate_needs_every_leg(_tmp: Path,
     require(rep.inputs_verified(allowed),
             "positive control failed: a record that did compare both digests "
             "was rejected")
+    # ``verified: true`` beside a per-artefact MISMATCH is the exact shape the
+    # SCARF fixture divergence produced before the checker was fixed. A
+    # consumer that reads only the summary republishes it.
+    require(not rep.inputs_verified(
+        dict(allowed, cases={"km_a": {"movie": {"status": "MISMATCH"},
+                                      "ground_truth": {"status": "match"}}})),
+            "a fixture record carrying a MISMATCH was accepted because its own "
+            "summary said verified")
+
+    # The matrix's completeness, recomputed against the declared row list. A
+    # record can pass every row it holds and hold four of twenty-five.
+    truncated = {"matrix_complete": True, "unrun_rows": [],
+                 "results": [{"row_id": declared.ROWS[0].row_id,
+                              "status": "pass"}]}
+    require(not rep.matrix_complete(truncated),
+            f"a record holding 1 of {len(declared.ROWS)} declared rows "
+            f"certified the matrix complete on the strength of its own summary")
+    everything = {"results": [{"row_id": row.row_id, "status": "pass"}
+                              for row in declared.ROWS]}
+    require(rep.matrix_complete(everything),
+            "positive control failed: a record holding every declared row, all "
+            "passing, was called incomplete")
+    require(not rep.matrix_complete(
+        {"results": [{"row_id": row.row_id,
+                      "status": "fail" if i == 3 else "pass"}
+                     for i, row in enumerate(declared.ROWS)]}),
+            "a matrix with a failing row was called complete")
+
+    # And the screen's equality, recomputed from the per-movie numbers. A
+    # schedule that compared zero movies has nothing that can differ, so every
+    # ``all()`` beneath ``all24_equal`` is true of it.
+    def _screen(**over):
+        entry = {"passed": True, "movies_compared": 24, "movies_passed": 24,
+                 "missing_pairs": []}
+        screen = {"all24_equal": True,
+                  "schedules": {name: dict(entry) for name in
+                                ("base",) + rep.REQUIRED_SCHEDULES}}
+        screen["schedules"]["repeat"].update(over)
+        return screen
+
+    require(rep.all24_equality_holds(_screen()),
+            "positive control failed: a screen whose every schedule compared "
+            "all 24 movies exactly was called unequal")
+    require(not rep.all24_equality_holds(_screen(movies_compared=0,
+                                                 movies_passed=0)),
+            "VACUOUS EQUALITY: a schedule that compared no movie certified "
+            "cross-schedule equality")
+    require(not rep.all24_equality_holds(_screen(movies_passed=23)),
+            "a schedule with a differing movie certified equality")
+    require(not rep.all24_equality_holds(_screen(missing_pairs=["mov_01"])),
+            "a schedule missing an image/metadata pair certified equality")
+    require(not rep.all24_equality_holds(_screen(passed=False)),
+            "a failing schedule certified equality")
 
     # ...and the motion-truth leg. A record with no cases rendered a heading, a
     # source line and the closing "historical failures remain failures"
@@ -1587,7 +1717,65 @@ def control_suite_selects_something(tmp: Path,
             "now": "an empty selection is a usage error"}
 
 
+def control_fixture_verdict_vacuous(tmp: Path,
+                                    _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """A fixture check that compared nothing must not report VERIFIED.
+
+    The consumer side of this is covered by
+    :func:`control_aggregate_needs_every_leg`, which refuses to build an
+    aggregate on such a record. That control can only refuse a record the
+    *producer* was willing to write. This one pins the producer: the gate that
+    decides ``verified`` is called directly on a record that compared no
+    digest, and end to end on an empty fixtures directory, where
+    ``--allow-missing`` makes every other failure condition false.
+    """
+    empty = {"compared": {"movie": 0, "ground_truth": 0}, "mismatched": [],
+             "undeclared": [], "missing": []}
+    got = vf.verdict(dict(empty), allow_missing=True)
+    require(got["vacuous"], "a record comparing no digest was not called vacuous")
+    require(not got["verified"],
+            "VACUOUS PASS: a fixture record that compared nothing was verified")
+
+    # One kind compared and the other not is the shape the published W3
+    # overclaim had: five movie digests, zero truth digests, VERIFIED 5/5.
+    half = dict(empty, compared={"movie": 5, "ground_truth": 0})
+    require(not vf.verdict(half, allow_missing=True)["verified"],
+            "a record that checked no truth file was verified on its movies")
+
+    # A mismatch must still fail even when both kinds were compared, so the
+    # gate above is not the only thing standing between a bad fixture set and
+    # a VERIFIED verdict.
+    full = dict(empty, compared={"movie": 5, "ground_truth": 5})
+    require(vf.verdict(dict(full), allow_missing=True)["verified"],
+            "positive control failed: a clean, fully compared record was "
+            "rejected")
+    require(not vf.verdict(dict(full, mismatched=["km_a (movie)"]),
+                           allow_missing=True)["verified"],
+            "a record carrying a MISMATCH was verified")
+
+    # End to end: an empty directory, --allow-missing, exit status and record.
+    fixtures = tmp / "no-fixtures"
+    fixtures.mkdir(parents=True, exist_ok=True)
+    out = tmp / "verify-empty.json"
+    proc = subprocess.run(
+        [sys.executable, str(HERE / "verify_fixtures.py"),
+         "--fixtures-dir", str(fixtures), "--repo", str(REPO_ROOT),
+         "--json", str(out), "--allow-missing"],
+        capture_output=True, text=True)
+    require(proc.returncode == 1,
+            f"an empty fixtures directory exited {proc.returncode}, not 1: "
+            f"{proc.stderr[-300:]}")
+    record = json.loads(out.read_text())
+    require(record["vacuous"] and not record["verified"],
+            "the preserved record of an empty run does not say it compared "
+            "nothing")
+    return {"status": "pass",
+            "reproduced": "compared nothing, reported VERIFIED",
+            "now": "vacuous is a failure at the producer and exits 1"}
+
+
 CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
+    "fixture_verdict_vacuous": control_fixture_verdict_vacuous,
     "ground_truth_mutation": control_ground_truth_mutation,
     "ps_wrong_dimension": control_ps_wrong_dimension,
     "resume_native_witness": control_resume_witness,

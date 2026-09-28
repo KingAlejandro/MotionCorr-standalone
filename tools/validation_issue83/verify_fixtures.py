@@ -183,6 +183,30 @@ def truth_difference(committed: str, observed: Path) -> Dict[str, Any]:
     }
 
 
+def verdict(result: Dict[str, Any], allow_missing: bool) -> Dict[str, Any]:
+    """Set ``vacuous`` and ``verified`` on a finished comparison record.
+
+    "Nothing mismatched" is not "the inputs are the declared ones" when
+    nothing was compared. An empty fixtures directory under ``--allow-missing``,
+    or a manifest with no cases, produces no mismatch and no undeclared file,
+    so the verdict would be a vacuous pass -- the same empty-set quantification
+    that let a resume certify native CUDA without executing a movie. Both
+    declared artefact kinds must have been compared at least once.
+
+    A module-level function rather than four lines inside ``main`` so that the
+    gate has an address: a negative control can call it on a record that
+    compared nothing, and a meta-check can revert it and require that control
+    to fail.
+    """
+    compared = result["compared"]
+    result["vacuous"] = not (compared["movie"] and compared["ground_truth"])
+    result["verified"] = not (bool(result["mismatched"])
+                              or bool(result["undeclared"])
+                              or result["vacuous"]
+                              or (bool(result["missing"]) and not allow_missing))
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -298,19 +322,9 @@ def main() -> int:
         if path.name[:-len("_ground_truth.json")] not in cases:
             result["undeclared"].append(path.name)
 
-    # "Nothing mismatched" is not "the inputs are the declared ones" when
-    # nothing was compared. An empty fixtures directory under --allow-missing,
-    # or a manifest with no cases, produces no mismatch and no undeclared file,
-    # so the verdict below would have been a vacuous pass -- the same empty-set
-    # quantification that made a resume certify native CUDA without executing a
-    # movie. Both declared artefacts must have been compared at least once.
-    compared = result["compared"]
-    result["vacuous"] = not (compared["movie"] and compared["ground_truth"])
-    failed = bool(result["mismatched"]) or bool(result["undeclared"]) \
-        or result["vacuous"] \
-        or (bool(result["missing"]) and not opts.allow_missing)
-    result["verified"] = not failed
+    verdict(result, opts.allow_missing)
     if result["vacuous"]:
+        compared = result["compared"]
         print(f"NOT VERIFIED: no digests were compared "
               f"({compared['movie']} movie, {compared['ground_truth']} ground "
               f"truth, over {len(cases)} declared case(s))", file=sys.stderr)

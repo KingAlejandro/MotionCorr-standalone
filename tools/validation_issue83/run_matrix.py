@@ -194,9 +194,23 @@ def schedule_witness(stdouts: List[str], sched_dir: Path,
     which is why the published resume entry recorded no witness yet still
     passed. Restricting the check to the executed set makes it answerable, but
     an empty executed set would then make it vacuously true, so that is rejected
-    outright. Every invocation must also announce the device: for a batch
-    schedule only the last invocation's stdout was previously inspected, so the
-    preceding 23 could have run on any backend.
+    outright.
+
+    There are two witnesses and only one of them is load-bearing. The *kernel
+    stage marker* is written into each movie's own log by the CUDA code path
+    itself, in this schedule's own output directory, and it is recorded for
+    every executed movie. The *startup banner* is printed once per invocation
+    on stdout; it is redundant where the stage markers are present, and it is
+    frequently unrecoverable -- a caller that keeps only the final
+    invocation's stdout loses the earlier banners without losing a single
+    stage marker.
+
+    Conjoining the banner into ``native_cuda_proven`` therefore wrote ``false``
+    for schedules whose every executed movie was demonstrably produced by the
+    CUDA path, and the report withheld a measured claim on the strength of it.
+    Banner coverage is still recorded, in
+    ``startup_marker_per_invocation`` and ``startup_marker_all_invocations``,
+    and consumers disclose it; it no longer decides the verdict.
 
     Lives here rather than beside the integrated screen because the declared
     matrix runs the same three schedules and had the weaker witness: it kept
@@ -217,9 +231,9 @@ def schedule_witness(stdouts: List[str], sched_dir: Path,
         1 for m in witness["per_movie"].values() if m["cuda_stage_marker"])
     witness["native_cuda_proven"] = bool(
         not witness["vacuous"]
-        and all(per_invocation)
         and witness["per_movie"]
-        and all(m["cuda_stage_marker"] for m in witness["per_movie"].values()))
+        and all(m["log_present"] and m["cuda_stage_marker"]
+                for m in witness["per_movie"].values()))
     return witness
 
 
@@ -623,8 +637,20 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
                 "movies exact")
         result["schedules"][schedule] = entry
 
-    schedules_ok = all(result["schedules"][s].get("passed") for s in row.schedules) \
-        if row.schedules else True
+    if row.schedules:
+        schedules_ok = all(result["schedules"][s].get("passed")
+                           for s in row.schedules)
+    else:
+        # ``all()`` over no schedules is true. A rejection row legitimately
+        # declares none -- it runs no payload at all -- but a *payload* row
+        # that declared none would have passed on the strength of having run
+        # nothing, which is the empty quantification this harness exists to
+        # refuse. Only the rejection case is allowed to be schedule-free.
+        schedules_ok = bool(row.expect_reject)
+        if not schedules_ok:
+            result["errors"].append(
+                "row declares no schedules and is not a rejection row, so "
+                "nothing was compared and no verdict can be given")
     native_ok = (opts.gpu is None) or witness["native_cuda_proven"]
     result["status"] = "pass" if (schedules_ok and native_ok
                                   and inventory["inventory_complete"]

@@ -45,24 +45,21 @@ def schedule_cell(entry: Dict[str, Any], schedule: str, on_gpu: bool) -> str:
         return "**FAIL**"
     moved, total = sched.get("movies_passed"), sched.get("movies_compared")
     cell = f"exact {moved}/{total}" if total else "exact"
-    if not on_gpu:
-        return cell
     witness = sched.get("backend_evidence", {})
+    if not on_gpu:
+        # The CPU run collects the same per-schedule witness and the required
+        # result is its *absence*. Printing the equality alone dropped it: a
+        # repeat schedule that emitted CUDA markers during a CPU run rendered
+        # as a plain `exact 3/3`, which is W1 in the CPU direction.
+        if witness.get("unexpected_cuda_marker"):
+            return f"{cell}, **masquerade** (CUDA marker on a CPU run)"
+        if not witness.get("per_movie"):
+            return f"{cell}, marker absence **not recorded**"
+        return f"{cell}, no CUDA marker"
     if witness.get("vacuous"):
         return f"{cell}, witness **vacuous**"
-    if not witness.get("native_cuda_proven"):
-        # An explicit negative in the record outranks an inferred gap: the
-        # record says this schedule did not run natively, which is a stronger
-        # and more useful statement than "not enough was recorded".
-        return f"{cell}, native execution **NOT established**"
-    if witness_coverage_gap(sched):
-        # Some product this schedule wrote carries no kernel stage marker, or
-        # the record cannot say which movies were executed at all.
-        per_movie = witness.get("per_movie") or {}
-        marked = sum(1 for m in per_movie.values() if m.get("cuda_stage_marker"))
-        return (f"{cell}, witness **not covered**"
-                + (f" ({marked} of {len(per_movie)} movies marked)"
-                   if per_movie else " (no per-movie record)"))
+    if not native_established(sched):
+        return f"{cell}, witness {unwitnessed_reason(sched)}"
     per_movie = witness.get("per_movie") or {}
     executed = witness.get("executed_movies")
     scope = (f"{len(executed)} executed" if executed is not None
@@ -78,19 +75,33 @@ def render_matrix(report: Optional[Dict[str, Any]]) -> List[str]:
     # On a CPU run the absence of a CUDA marker is the required result, not a
     # failure, so the witness column is labelled by the backend that was used.
     device = (report or {}).get("provenance", {}).get("gpu")
-    on_gpu = device is not None
-    heading = (f"### Implementation coverage (native CUDA, device {device})" if on_gpu
-               else "### Implementation coverage (CPU backend — separate diagnostic)")
+    recorded = device_recorded(report)
+    on_gpu = recorded and device is not None
+    on_cpu = recorded and device is None
+    if on_gpu:
+        heading = f"### Implementation coverage (native CUDA, device {device})"
+    elif on_cpu:
+        heading = "### Implementation coverage (CPU backend — separate diagnostic)"
+    else:
+        heading = "### Implementation coverage (**device not recorded**)"
     # Named for the run it describes. The schedule columns carry their own
     # witness, because the base run's says nothing about them.
-    witness_column = "Native witness (base)" if on_gpu else "CUDA marker absent"
+    witness_column = ("Native witness (base)" if on_gpu
+                      else "CUDA marker absent" if on_cpu
+                      else "Backend (**not recorded**)")
     lines = [heading, "",
              "Exact = every movie identical to the uninterrupted run under "
              "`compare_motioncorr.py --gate exact`.", ""]
-    if not on_gpu:
+    if on_cpu:
         lines += ["This run used the CPU backend. A CUDA marker here would mean "
                   "a masquerading run, so the column below requires its "
                   "**absence**.", ""]
+    elif not on_gpu:
+        lines += ["**This record does not say which device it used.** Its "
+                  "provenance block carries no `gpu` field at all, which is "
+                  "silence, not the measurement `gpu: null`. Neither the "
+                  "native-execution claim nor the CPU marker-absence claim is "
+                  "available from it.", ""]
     lines += [f"| Row | Axes | {witness_column} | Products | Repeat | Batch "
               "| Resume (non-prefix) | Verdict |",
               "|---|---|---|---|---|---|---|---|"]
@@ -114,10 +125,20 @@ def render_matrix(report: Optional[Dict[str, Any]]) -> List[str]:
             repeat = batch = resume = "n/a"
         else:
             if on_gpu:
-                native = "yes" if witness.get("native_cuda_proven") else "**no**"
+                native = "yes" if native_established(base) else "**no**"
+            elif on_cpu:
+                # "Confirmed absent" is a claim about what was looked at. A
+                # record carrying no per-movie evidence looked at nothing, and
+                # printing the required answer from no evidence is the vacuity
+                # this whole document exists to refuse.
+                if witness.get("unexpected_cuda_marker"):
+                    native = "**masquerade**"
+                elif not witness.get("per_movie"):
+                    native = "**not recorded**"
+                else:
+                    native = "confirmed absent"
             else:
-                native = ("**masquerade**" if witness.get("unexpected_cuda_marker")
-                          else "confirmed absent")
+                native = "**not recorded**"
             inventory = base.get("inventory", {})
             productcell = ("complete" if inventory.get("inventory_complete")
                            else "**incomplete**")
@@ -181,6 +202,26 @@ def rejection_coverage_gaps(report: Optional[Dict[str, Any]]) -> List[str]:
             and "option_named_line" not in entry["schedules"]["reject"]]
 
 
+def matrix_complete(report: Optional[Dict[str, Any]]) -> bool:
+    """Every declared row was attempted and passed, recomputed from the rows.
+
+    ``matrix_complete`` and ``unrun_rows`` are the producing harness's summary
+    of itself. A record listing four results, all passing, with
+    ``matrix_complete: true`` and ``unrun_rows: []`` describes a complete
+    matrix only if the declared set has four rows. The declared set is read
+    from :mod:`declared`, which is the same list the runner works from, so the
+    renderer answers the question the summary is a claim about.
+    """
+    if not report:
+        return False
+    by_id = {r.get("row_id"): r for r in report.get("results", [])}
+    for row in declared.ROWS:
+        entry = by_id.get(row.row_id)
+        if entry is None or entry.get("status") != "pass":
+            return False
+    return True
+
+
 def matrix_witness_gaps(report: Optional[Dict[str, Any]]) -> List[str]:
     """Rows of a GPU matrix whose per-schedule native execution is unproven.
 
@@ -196,23 +237,21 @@ def matrix_witness_gaps(report: Optional[Dict[str, Any]]) -> List[str]:
     ``base`` produced no gap at all, and its ``pass`` then carried the native
     claim for three schedules with no record whatsoever.
 
-    The per-schedule test is :func:`witness_coverage_gap`, which asks whether
-    every product that schedule wrote carries a kernel stage marker. It used to
-    demand ``startup_marker_per_invocation``, a field only the fixed runner
-    writes -- which made every row of an otherwise fully witnessed record a
-    gap and withheld a measured claim.
+    The per-schedule test is :func:`native_established`, which asks whether
+    every movie that schedule executed carries a kernel stage marker. It used
+    to also demand the producer's ``native_cuda_proven``, and before that
+    ``startup_marker_per_invocation`` -- field names only the newer runners
+    write, which made every row of an otherwise fully witnessed record a gap
+    and withheld a measured claim.
     """
-    if not report or report.get("provenance", {}).get("gpu") is None:
+    if not device_recorded(report) or report.get("provenance", {}).get("gpu") is None:
         return []
     gaps = []
     for entry in report.get("results", []):
         schedules = entry.get("schedules", {})
         if "reject" in schedules:
             continue
-        if any(name not in schedules
-               or witness_coverage_gap(schedules[name])
-               or not schedules[name].get("backend_evidence", {})
-               .get("native_cuda_proven")
+        if any(name not in schedules or not native_established(schedules[name])
                for name in REQUIRED_SCHEDULES):
             gaps.append(entry["row_id"])
     return gaps
@@ -250,6 +289,37 @@ def missing_schedules(report: Optional[Dict[str, Any]]) -> List[str]:
     return sorted(set(named) | set(recomputed))
 
 
+def all24_equality_holds(report: Optional[Dict[str, Any]]) -> bool:
+    """Cross-schedule pixel equality, recomputed from the per-movie numbers.
+
+    ``all24_equal`` is the producing harness's own summary. Reading it as the
+    measurement is how a screen certifies equality it never established: a
+    record whose ``repeat`` compared zero movies has nothing that can differ,
+    and every ``all()`` in the producer over that empty set is true. The
+    summary is honoured only where the numbers underneath it agree, so the
+    claim is conjoined with a recomputation rather than replaced by one.
+
+    Each required schedule must be present, be marked passed, have compared at
+    least one movie, have every compared movie exact, and be missing no
+    image/metadata pair.
+    """
+    if not report or not report.get("all24_equal"):
+        return False
+    schedules = report.get("schedules", {})
+    if missing_schedules(report):
+        return False
+    for name in REQUIRED_SCHEDULES:
+        entry = schedules.get(name) or {}
+        compared = entry.get("movies_compared")
+        if not entry.get("passed") or not compared:
+            return False
+        if entry.get("movies_passed") != compared:
+            return False
+        if entry.get("missing_pairs"):
+            return False
+    return True
+
+
 def all24_witness_holds(report: Optional[Dict[str, Any]]) -> bool:
     """Every schedule of a GPU integrated screen proved native execution.
 
@@ -257,16 +327,23 @@ def all24_witness_holds(report: Optional[Dict[str, Any]]) -> bool:
     record's own ``all24_equal``, because a report written by an older harness
     can carry ``all24_equal: true`` alongside a schedule whose
     ``native_cuda_proven`` is false -- the contradiction this generator
-    published once already. On a CPU record there is nothing to prove and the
-    absence of a CUDA marker is the expected result, so this is vacuously true;
-    a masquerading CUDA marker is not, and fails here.
+    published once already.
 
-    The missing-schedule gate is applied to CPU records too. It used to sit
-    below the CPU branch, so a CPU screen holding only ``base`` rendered
-    "Native CPU execution: established for every schedule" -- every schedule
-    being the one that ran.
+    On a CPU record the required result is the *absence* of a CUDA marker, and
+    that absence still has to have been looked for. Asking only "did nothing
+    report a masquerade" was true of a record carrying no per-movie evidence at
+    all, which is the same empty quantification in the CPU direction: a screen
+    that inspected no logs cannot certify that no log named CUDA. Every
+    schedule must therefore carry per-movie evidence, and none of it may show a
+    marker.
+
+    A record that does not say which device it used gets neither answer. The
+    missing-schedule gate applies to every record. It used to sit below the CPU
+    branch, so a CPU screen holding only ``base`` rendered "Native CPU
+    execution: established for every schedule" -- every schedule being the one
+    that ran.
     """
-    if not report:
+    if not report or not device_recorded(report):
         return False
     schedules = report.get("schedules", {})
     if not schedules:
@@ -274,11 +351,10 @@ def all24_witness_holds(report: Optional[Dict[str, Any]]) -> bool:
     if missing_schedules(report):
         return False
     if report.get("provenance", {}).get("gpu") is None:
-        return not any(e.get("backend_evidence", {}).get("unexpected_cuda_marker")
-                       for e in schedules.values())
-    return all(e.get("backend_evidence", {}).get("native_cuda_proven")
-               and not witness_coverage_gap(e)
-               for e in schedules.values())
+        return all(e.get("backend_evidence", {}).get("per_movie")
+                   and not e.get("backend_evidence", {}).get("unexpected_cuda_marker")
+                   for e in schedules.values())
+    return all(native_established(e) for e in schedules.values())
 
 
 def witness_coverage_gap(entry: Dict[str, Any]) -> bool:
@@ -338,6 +414,86 @@ def banner_coverage(entry: Dict[str, Any]) -> Tuple[int, int]:
     return (1 if evidence.get("startup_marker_found") else 0), max(total, 1)
 
 
+def stage_witness_holds(entry: Dict[str, Any]) -> bool:
+    """The kernel's own per-movie markers establish native execution here.
+
+    This is the witness the claim rests on: ``[CUDA <stage>] completed;`` is
+    written into each movie's log by the CUDA code path itself, in this
+    schedule's own output directory. It is not the startup banner.
+    """
+    evidence = entry.get("backend_evidence", {})
+    if evidence.get("requested") == "cpu" or evidence.get("vacuous"):
+        return False
+    return bool(evidence.get("per_movie")) and not witness_coverage_gap(entry)
+
+
+def native_established(entry: Dict[str, Any]) -> bool:
+    """Did this schedule run natively, on the strongest witness available?
+
+    The claim rests on this schedule's own per-movie kernel markers, and on
+    nothing else. Two failure modes are being avoided at once, and they pull
+    in opposite directions.
+
+    Requiring the producer's ``native_cuda_proven`` withholds a measured
+    claim: a producer that conjoined the *startup banner* into that field
+    writes ``false`` for a schedule whose every executed movie carries a stage
+    marker, because the banner of a non-final invocation is frequently not in
+    the record at all -- only the last invocation's stdout was kept. Reading
+    that ``false`` as "did not run natively" is the conflation withdrawn as
+    W8a.
+
+    Accepting the producer's ``true`` on its own is the opposite fault: a
+    record can carry ``native_cuda_proven: true`` beside sixteen marked movies
+    of twenty-four, and honouring the summary over the evidence beneath it is
+    the whole failure this harness documents. So the field is consulted for
+    neither verdict; the per-movie markers decide, and the banner's absence
+    stays visible through :func:`banner_coverage`, disclosed in the cell
+    rather than used to withhold the row.
+    """
+    evidence = entry.get("backend_evidence", {})
+    if evidence.get("unexpected_cuda_marker"):
+        return False
+    return stage_witness_holds(entry)
+
+
+def unwitnessed_reason(entry: Dict[str, Any]) -> str:
+    """Why this schedule's native execution is not established, specifically.
+
+    One phrasing, used by both the matrix cell and the integrated screen's
+    cell, so the same record cannot be described two ways in one document.
+
+    The per-movie account comes first where there is one: "16 of 24 movies
+    marked" tells the reader what the record holds, while the producer's
+    ``native_cuda_proven: false`` only tells them what it concluded -- and
+    that conclusion is unreliable in the direction W8a withdraws, since a
+    producer conjoining the startup banner writes false for a fully marked
+    schedule. Only when there is no per-movie evidence at all does the
+    explicit negative become the most informative thing available.
+    """
+    evidence = entry.get("backend_evidence", {})
+    if evidence.get("unexpected_cuda_marker"):
+        return "**masquerade** (CUDA marker where none was requested)"
+    per_movie = evidence.get("per_movie") or {}
+    if per_movie:
+        marked = sum(1 for m in per_movie.values() if m.get("cuda_stage_marker"))
+        return f"**not covered** ({marked} of {len(per_movie)} movies marked)"
+    if evidence.get("native_cuda_proven") is False:
+        return "**no** — native execution **NOT established**"
+    return "**not covered** (no per-movie record)"
+
+
+def device_recorded(report: Optional[Dict[str, Any]]) -> bool:
+    """Does this record say which device it used, at all?
+
+    ``gpu: null`` is a measurement -- the run used the CPU backend. A
+    provenance block with **no** ``gpu`` key is not that statement; it is
+    silence. Reading silence as ``null`` published a GPU record whose
+    provenance was lost as a clean CPU diagnostic, with every row's missing
+    CUDA marker rendered as the required absence.
+    """
+    return "gpu" in (report or {}).get("provenance", {})
+
+
 def record_source(record: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Where one section's numbers came from, whatever shape the record has.
 
@@ -392,10 +548,12 @@ def source_attribution(record: Optional[Dict[str, Any]],
                for k in ("hostname", "gpu", "binary_sha256", "binary_path",
                          "started_utc")):
         return [unattributable or
-                f"- {label}: **unattributable** — this record names no host, "
-                f"no device, no binary and no start time. It cannot be shown "
-                f"to be the run in the provenance block above, and that block "
-                f"must not be read as describing it."]
+                f"- {label}: **unattributable** — this record carries no field "
+                f"in its provenance block that could tie it to a run: no host, "
+                f"no start time and no binary digest. (A record may still name "
+                f"a bare device index elsewhere; an index is not an identity.) "
+                f"It cannot be shown to be the run in the provenance block "
+                f"above, and that block must not be read as describing it."]
     bits = [f"`{src['hostname']}`" if src.get("hostname") else "host not recorded",
             "CPU" if src.get("gpu") is None else f"device {src['gpu']}"]
     if src.get("binary_sha256"):
@@ -484,23 +642,26 @@ def render_all24(report: Optional[Dict[str, Any]],
     if report is None:
         lines += ["_unrun_: no all-24 schedule-equality report was produced.", ""]
         return lines
-    on_gpu = report.get("provenance", {}).get("gpu") is not None
+    recorded = device_recorded(report)
+    on_gpu = recorded and report.get("provenance", {}).get("gpu") is not None
+    on_cpu = recorded and report.get("provenance", {}).get("gpu") is None
     schedules = report.get("schedules", {})
     absent = missing_schedules(report)
-    aggregate = "pass" if report.get("all24_equal") else "**FAIL**"
+    aggregate = "pass" if all24_equality_holds(report) else "**FAIL**"
     if absent:
         aggregate = ("**PARTIAL** -- required schedule(s) "
                      + ", ".join(sorted(absent)) + " did not run, so this "
                      "dataset does not certify schedule equality")
     native = ("established for every schedule" if all24_witness_holds(report)
               else "**NOT established** -- see the witness column")
+    backend = "CUDA" if on_gpu else "CPU" if on_cpu else "(device not recorded)"
     lines += source_attribution(report, reference)
     asserted = report.get("star_metadata_asserted")
     unasserted = report.get("metadata_not_asserted")
     lines += [f"- Movies in STAR: {report.get('movies_in_star')} "
               f"(expected {report.get('expected_movies')})",
               f"- Aggregate pixel equality across schedules: {aggregate}",
-              f"- Native {'CUDA' if on_gpu else 'CPU'} execution: {native}"]
+              f"- Native {backend} execution: {native}"]
     # What the screen checked about the metadata, rather than leaving the
     # reader to assume it checked the same fields the declared matrix does.
     if asserted:
@@ -528,18 +689,19 @@ def render_all24(report: Optional[Dict[str, Any]],
               "|---|---:|---|---|---|---|"]
     for name, entry in schedules.items():
         witness = entry.get("backend_evidence", {})
-        if not on_gpu:
-            cell = ("**masquerade**" if witness.get("unexpected_cuda_marker")
-                    else "n/a (CPU)")
+        if on_cpu:
+            if witness.get("unexpected_cuda_marker"):
+                cell = "**masquerade**"
+            elif not witness.get("per_movie"):
+                cell = "**marker absence not recorded**"
+            else:
+                cell = "n/a (CPU), no marker"
+        elif not on_gpu:
+            cell = "**device not recorded**"
         elif witness.get("vacuous"):
             cell = "**vacuous**"
-        elif not witness.get("native_cuda_proven"):
-            cell = "**no**"
-        elif witness_coverage_gap(entry):
-            per_movie = witness.get("per_movie") or {}
-            marked = sum(1 for m in per_movie.values() if m.get("cuda_stage_marker"))
-            cell = (f"**not covered** ({marked} of {len(per_movie)} movies marked)"
-                    if per_movie else "**not covered** (no per-movie record)")
+        elif not native_established(entry):
+            cell = unwitnessed_reason(entry)
         else:
             executed = witness.get("executed_movies")
             cell = f"yes ({len(executed)} executed)" if executed else "yes"
@@ -549,9 +711,24 @@ def render_all24(report: Optional[Dict[str, Any]],
                 # earlier invocations is not in the record. Say which.
                 cell += f", banner {seen}/{total}"
         if name == "base":
-            lines.append(f"| base (uninterrupted) | 1 | "
+            # Both of these used to be literals. "1" was printed whatever the
+            # base entry recorded, and the "Missing pairs" column was filled
+            # from the *inventory* error list, which is a different
+            # measurement -- a base record that compared no pairs at all read
+            # as a base record that was missing none. Both are now read from
+            # the record: a base entry recording one invocation command is one
+            # run, and a record holding neither a run list nor a command says
+            # so.
+            if entry.get("runs"):
+                runs = str(len(entry["runs"]))
+            elif entry.get("command"):
+                runs = "1"
+            else:
+                runs = "**not recorded**"
+            errs = entry.get("inventory_errors")
+            lines.append(f"| base (uninterrupted) | {runs} | "
                          f"{entry.get('movies_present')} present | "
-                         f"{'0' if not entry.get('inventory_errors') else 'see raw'} | "
+                         f"{'n/a (inventory: 0 errors)' if errs == [] else 'see raw'} | "
                          f"{cell} | n/a |")
             continue
         missing = entry.get("missing_pairs") or []
@@ -559,8 +736,7 @@ def render_all24(report: Optional[Dict[str, Any]],
         # A row is never published as a pass on a GPU run whose witness did not
         # prove native execution: equal pixels across schedules say nothing
         # about which backend produced them.
-        if entry.get("passed") and on_gpu and (not witness.get("native_cuda_proven")
-                                               or witness_coverage_gap(entry)):
+        if entry.get("passed") and on_gpu and not native_established(entry):
             verdict = "**pass (pixels) / native execution NOT established**"
         lines.append(f"| {name} | {len(entry.get('runs', []))} | "
                      f"{entry.get('movies_passed')}/{entry.get('movies_compared')} | "
@@ -603,11 +779,37 @@ def fixture_coverage(verify: Optional[Dict[str, Any]]) -> Dict[str, int]:
 
 
 def inputs_verified(verify: Optional[Dict[str, Any]]) -> bool:
-    """The declared inputs were used, and that was established by comparison."""
+    """The declared inputs were used, and that was established by comparison.
+
+    ``verified`` is the checker's own verdict; the mismatch dimension is
+    recomputed here rather than taken from it, because a record can carry
+    ``verified: true`` beside a per-artefact ``MISMATCH`` -- that is exactly
+    the shape the fixture defect on SCARF produced before the checker was
+    fixed, and a consumer that only reads the summary republishes it.
+    """
     if not (verify and verify.get("verified")):
         return False
+    if verify.get("vacuous"):
+        return False
     coverage = fixture_coverage(verify)
-    return bool(coverage["movie"] and coverage["ground_truth"])
+    if not (coverage["movie"] and coverage["ground_truth"]):
+        return False
+    return not fixture_mismatches(verify)
+
+
+def fixture_mismatches(verify: Optional[Dict[str, Any]]) -> List[str]:
+    """Per-artefact statuses in this record that are not a clean comparison."""
+    bad = []
+    for case, body in ((verify or {}).get("cases") or {}).items():
+        for kind in ("movie", "ground_truth"):
+            entry = body.get(kind)
+            if entry is None and kind == "movie" and "movie" not in body \
+                    and "ground_truth" not in body:
+                entry = body
+            status = (entry or {}).get("status")
+            if status is not None and status not in ("match", "content_equal"):
+                bad.append(f"{case}/{kind}={status}")
+    return sorted(bad)
 
 
 def render_fixture_verification(verify: Optional[Dict[str, Any]]) -> List[str]:
@@ -865,7 +1067,8 @@ def main() -> int:
     inputs_ok = inputs_verified(fixture_verify)
     complete = bool(matrix_report and matrix_report.get("matrix_complete")
                     and not matrix_report.get("unrun_rows")
-                    and all24 and all24.get("all24_equal") and inputs_ok
+                    and matrix_complete(matrix_report)
+                    and all24 and all24_equality_holds(all24) and inputs_ok
                     and not missing_schedules(all24)
                     and all24_witness_holds(all24))
     lines += ["", "## Aggregate", "",
@@ -907,12 +1110,18 @@ def main() -> int:
                                 for k in ("hostname", "gpu", "binary_sha256",
                                           "binary_path", "started_utc"))]
     if unattributed:
+        # Do not enumerate the missing fields here. This summary once read
+        # "names no host, device, binary or start time" of a record that does
+        # record a device index and whose sampled command does name a binary
+        # path -- understating a record in a summary is the same fault as
+        # overstating it. Each such section states exactly what it holds.
         lines += ["Not attributable to any run: the "
                   + ", the ".join(unattributed)
-                  + (" names" if len(unattributed) == 1 else " name")
-                  + " no host, device, binary or start time, so neither this "
-                    "provenance block nor any other can be shown to describe "
-                    "it.", ""]
+                  + (" carries" if len(unattributed) == 1 else " carry")
+                  + " no field that ties it to a run in this report, so "
+                    "neither this provenance block nor any other can be shown "
+                    "to describe it. Each such section states above exactly "
+                    "what it does and does not record.", ""]
     if assembled:
         named = (assembled[0] if len(assembled) == 1
                  else ", the ".join(assembled[:-1]) + " and the " + assembled[-1])

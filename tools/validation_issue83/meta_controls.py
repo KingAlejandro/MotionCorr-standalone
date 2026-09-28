@@ -56,9 +56,27 @@ def reverted(name, control, patches, why):
 
 
 # --- 1. vacuous fixture verification -----------------------------------------
-# Before: `verified = not (mismatched or undeclared or missing)`, which is true
-# of a record that compared nothing at all.
+# The gate itself, in the producer: before the fix,
+# `verified = not (mismatched or undeclared or missing)`, which is true of a
+# record that compared nothing at all. Reverting only the report's consumer
+# (below) leaves this one untested -- a checker willing to write VERIFIED over
+# nothing is a defect whether or not a downstream reader catches it.
 reverted("vacuous_fixture_verification",
+         nc.control_fixture_verdict_vacuous,
+         [(vf, "verdict",
+           lambda result, allow_missing: dict(
+               result,
+               vacuous=not (result["compared"]["movie"]
+                            and result["compared"]["ground_truth"]),
+               verified=not (bool(result["mismatched"])
+                             or bool(result["undeclared"])
+                             or (bool(result["missing"])
+                                 and not allow_missing))))],
+         "a fixture record that compared no digest was verified")
+
+# And the consumer: the report must not build an aggregate on such a record
+# even when the producer hands it one.
+reverted("aggregate_trusts_fixture_summary",
          nc.control_aggregate_needs_every_leg,
          [(rep, "inputs_verified", lambda v: bool((v or {}).get("verified")))],
          "a fixture record that compared no digest was accepted")
@@ -93,11 +111,21 @@ reverted("matrix_witness_unrendered",
 # Before: the witness was computed from one stdout, so a 24-invocation batch
 # had 23 markers nobody looked at. Same shape, one invocation of evidence.
 _real_witness = rm.schedule_witness
+
+
+def _last_invocation_only(stdouts, d, stems, gpu):
+    return _real_witness(stdouts[-1:], d, stems, gpu)
+
+
+# Patched in *both* modules. ``run_all24_schedules`` does
+# ``from run_matrix import schedule_witness``, which binds the function object
+# into its own namespace at import time; rebinding ``rm.schedule_witness``
+# alone leaves the integrated screen calling the real one, and a revert that
+# reaches only half its callers is not a revert.
 reverted("matrix_witness_last_invocation_only",
          nc.control_matrix_schedule_witness,
-         [(rm, "schedule_witness",
-           lambda stdouts, d, stems, gpu: _real_witness(
-               stdouts[-1:], d, stems, gpu))],
+         [(rm, "schedule_witness", _last_invocation_only),
+          (all24, "schedule_witness", _last_invocation_only)],
          "a witness over the last invocation only was accepted")
 
 # Before: the row verdict carried the native claim for all four schedules.
@@ -156,13 +184,25 @@ reverted("identityless_section_inherits_header",
          "a section naming no host, device or binary was published under the "
          "header's provenance")
 
-# The record's own missing-schedule summary, trusted instead of recomputed.
-reverted("schedule_completeness_taken_on_trust",
+# The matrix's own completeness summary, trusted instead of recomputed against
+# the declared row list. (This slot previously reverted ``missing_schedules``
+# for a second time, with `sorted` where check 5 used `list` -- two names over
+# one gate, which counts the same revert twice and leaves this one untested.)
+reverted("matrix_completeness_taken_on_trust",
          nc.control_aggregate_needs_every_leg,
-         [(rep, "missing_schedules",
-           lambda r: sorted((r or {}).get("missing_required_schedules") or []))],
-         "a screen claiming nothing was missing while holding one schedule was "
-         "certified complete")
+         [(rep, "matrix_complete",
+           lambda r: bool((r or {}).get("matrix_complete")
+                          and not (r or {}).get("unrun_rows")))],
+         "a record holding one of twenty-five declared rows certified the "
+         "matrix complete")
+
+# The screen's own ``all24_equal``, trusted instead of recomputed from the
+# per-movie numbers underneath it.
+reverted("all24_equality_taken_on_trust",
+         nc.control_aggregate_needs_every_leg,
+         [(rep, "all24_equality_holds", lambda r: bool((r or {}).get("all24_equal")))],
+         "a screen whose repeat compared no movie certified cross-schedule "
+         "equality")
 
 # The correction in the other direction: keying coverage on a field name that
 # only the fixed runner writes withheld a claim the record does support.

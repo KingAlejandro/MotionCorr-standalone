@@ -5,13 +5,13 @@
 | Issue | #99 — fail-closed MRC image writes and completion |
 | Model | `claude-opus-5` (high effort), Claude Code / T3 Code |
 | Task class | correctness |
-| Phase | 4 — PR A implemented, validated on cpu64, draft PR open; independent read-only review in flight |
+| Phase | 5 — PR A implemented, independently reviewed, review findings applied, re-validated on cpu64; draft PR open and reviewable |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (current main) |
-| Head | `eda0350` |
+| Head | `1143da8` |
 | Branch | `round96/99-claude-opus-5` (pushed) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-a01709b1` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/105 (draft) |
-| Progress comments | [issue #99 plan](https://github.com/KingAlejandro/MotionCorr-standalone/issues/99#issuecomment-5860981003) |
+| Progress comments | [plan](https://github.com/KingAlejandro/MotionCorr-standalone/issues/99#issuecomment-5860981003), [executed results](https://github.com/KingAlejandro/MotionCorr-standalone/issues/99#issuecomment-5861082448) |
 
 ## Scope delivered (PR A)
 
@@ -48,8 +48,8 @@ Host `small-refmac-machine` (cpu64), `taskset -c 32-63`, under
 
 | Run | Result |
 |---|---|
-| `ctest --output-on-failure -j 4`, candidate `239320f` | **15/15 passed**, including the two new tests |
-| `ctest -R 'ImageWriteFaults\|WriteFaults'`, negative control `39220ea` (pre-fix main + tests only) | **both fail**, exit 8 — one by assertion, one by `SIGABRT` from the destructor throw |
+| `ctest --output-on-failure -j 4`, candidate `f83a466` | **15/15 passed**, including the two new tests |
+| `ctest -R 'ImageWriteFaults\|WriteFaults'`, negative control `dddc676` (pre-fix main + tests only) | **both fail**, exit 8 — one by assertion, one by `SIGABRT` from the destructor throw |
 | Pre-fix end-to-end fault run | exit **0**, `b.mrc` truncated to 599040 B, `b.star` written, joint STAR and `logfile.pdf` published — the false completion, reproduced |
 | Post-fix, same fault | exit **1** (status, not signal), names product/stage/movie, no `b.star`, healthy movie byte-identical, joint STAR withheld; repaired retry exit 0 |
 | Healthy parity, pre- vs post-fix | `mov/p.mrc`, `mov/p.star`, `corrected_micrographs.star` byte-identical by whole-file SHA-256 |
@@ -58,7 +58,7 @@ Two files differ in the parity comparison and both are recorded rather than omit
 line of measured wall time in the per-movie `.log`, and the pre-existing ghostscript PDF
 nondeterminism in `logfile.pdf`, which is preserved.
 
-Binary hashes: candidate `motioncorr` `0d957e85…`, pre-fix `motioncorr` `b9d16a2d…`;
+Binary hashes: candidate `motioncorr` `59936bbe…`, pre-fix `motioncorr` `b9d16a2d…`;
 input `synthetic_movie.tiff` `95b5f0d3…`.
 
 ## Unrun / not claimed
@@ -70,6 +70,38 @@ input `synthetic_movie.tiff` `95b5f0d3…`.
 - **No GPU run, no timing of any kind.**
 - PR A leaves a truncated file on disk; safe today only via `completeMrc` resume
   validation, which the retry phase demonstrates.
+
+## Independent review (COMMON.md requirement), both read-only
+
+Two bounded read-only reviewers, run concurrently, neither able to modify anything.
+
+**Code/correctness review.** Clean on leaks, double-frees, double-close, success-path and
+read-path behaviour, `errno` handling, and — checked by brace nesting over all thirteen
+`write(` sites in `src/` — on throws inside OpenMP structured blocks. Applied its
+findings in `b0e10f5`: `strerror`'s static buffer replaced with
+`std::generic_category().message()` (the only new shared state); the sticky `ferror`
+check dropped from `mrcWriteBlock`; the handler-reuse close taught to name its file; the
+reuse guard extended to `ftiff` (a pre-existing fd leak the rewritten `releaseHandles`
+would otherwise have fixed); the per-slice label made lazy. Declined one: `writeIMAGIC`'s
+unchecked return, because that function is a stub that unconditionally throws.
+
+**Spec-conformance and license review.** `SPEC_CONFORMANCE_PASSED`, `LICENSE_PASSED`
+(GPL-2.0, no vendored code, no new dependency, POSIX libc only). All eight changed files
+inside the ADR §6 whitelist, nothing outside it, no CUDA/gate/default/perf change. Found
+that the destructor test case was vacuous — fixed in `f83a466`, and fixing it exposed a
+second fault the review had not seen: the paired form used a post-fix API, so the
+negative control silently degraded to `Not Run` rather than failing. Both are now
+corrected and the control demonstrably compiles and runs on the pre-fix tree.
+It also corrected the ADR's claim that `micrograph_model.cpp` is collision-free with
+respect to #98 (#98's defect-text detection lives in the same file, ~50 lines away).
+
+## Observation for #66/#69, not fixed here
+
+`src/motioncorr_runner.cpp:3207` — `REPORT_ERROR("Shouldn't happen.")` sits inside the
+`#pragma omp parallel for` opened at `:3183`. An exception leaving an OpenMP structured
+block is undefined behaviour and calls `std::terminate`, the same class of defect #91
+fixed for the frame-read region. Pre-existing and untouched by this branch; that file is
+out of this issue's whitelist and is held by sibling tasks.
 
 ## Active jobs / allocations
 
@@ -88,5 +120,5 @@ unchanged and was not re-run. #26 owns this round's GPU slot.
 
 ## Next step
 
-Fold in the independent read-only code/spec/license review findings, then hand the draft
-PR to integration. Do not merge.
+Hand the draft PR to integration for a maintainer decision. Do not merge. PR B stays
+designed-and-unstarted in ADR §7.

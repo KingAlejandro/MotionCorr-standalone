@@ -13,7 +13,7 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Patch-retry shift-state contract control | ran, passed |
 | Same-backend CPU output, base vs candidate, with negative control | ran, identical |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
-| CUDA compile of the changed `.cu` and the new fault matrix | **queued behind `/tmp/motioncorr-bench.lock`, not yet finished** |
+| CUDA compile of the changed `.cu` and the new fault matrix | ran, clean, zero warnings in changed files |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
 | Forced-nonconvergence end-to-end witness | **NEEDS_GPU, not run** |
 | Healthy same-backend 24-movie CUDA control | **NEEDS_GPU, not run** |
@@ -115,7 +115,39 @@ no CUDA, stripping line directives and normalising the source root, leaves a
 No executable statement changed. That accounts for the binary difference completely,
 and the comparison has its own negative control: an injected line is detected.
 
-## 5. Findings fixed
+## 5. CUDA compile
+
+[`evidence/cuda-compile.log`](evidence/cuda-compile.log). Host `4GPUs` / `4-gpu-vm`,
+`taskset -c 96-103` (affinity read back from `/proc`), `-j8`, under
+`flock -w 2400 /tmp/motioncorr-bench.lock`. Compile only; **nothing was executed on a
+device**, and no timing was produced.
+
+```
+Cuda compilation tools, release 12.8, V12.8.61
+configure=0   build=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+```
+
+All four CUDA objects built and all four binaries linked, including the new
+`cuda_fault_matrix`. **Zero warnings in any changed file**; the five warnings in the
+build are pre-existing, in `src/memory.h` and `src/time.cpp`.
+
+The fault matrix's link-time interposition resolved: `nm` shows all eleven
+`__wrap_` symbols defined in the binary —
+
+```
+__wrap_cudaMalloc  __wrap_cudaFree  __wrap_cudaMemcpy  __wrap_cudaMemset
+__wrap_cudaDeviceSynchronize  __wrap_cufftCreate  __wrap_cufftMakePlanMany
+__wrap_cufftSetWorkArea  __wrap_cufftPlanMany  __wrap_cufftExecR2C  __wrap_cufftExecC2R
+```
+
+so the harness is wired to the production call sites rather than silently no-opping.
+It has still **not been run**; that needs an assigned GPU slot.
+
+Source hashes on the GPU host match the `cpu64` hashes exactly, so both validations ran
+against the same tree.
+
+## 6. Findings fixed
 
 Against `4c952b3f`; full detail in the ADR.
 
@@ -128,13 +160,10 @@ Against `4c952b3f`; full detail in the ADR.
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
 
-## 6. Limitations, stated rather than worked around
+## 7. Limitations, stated rather than worked around
 
 - The fault matrix, the end-to-end retry witness and the 24-movie CUDA control have not
   run. Nothing here should be read as evidence about them.
-- The CUDA sources in this branch had not finished compiling when this was written; the
-  compile is queued behind the bench lock. Until it completes, the `.cu` changes are
-  reviewed but not built.
 - The fault matrix cannot synthesise a genuinely poisoned context, so F6's branch will
   not be exercised by a real fault even once a slot is assigned.
 - F5 changes behaviour on purpose when a device patch attempt does not converge.

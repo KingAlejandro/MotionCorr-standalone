@@ -537,28 +537,116 @@ def parse_cpu_list(spec: str) -> set:
     return cpus
 
 
-def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str]) -> int:
-    """Terminate the whole owned group and confirm it is gone before returning."""
-    for sig, name in ((signal.SIGTERM, "SIGTERM"), (signal.SIGKILL, "SIGKILL")):
+def group_members(pgid: int) -> Dict[int, Any]:
+    """Live, non-zombie members of process group `pgid`, keyed by pid -> (comm, starttime).
+
+    Enumerated by scanning `/proc` for the group id rather than by walking descendants.
+    Reparenting is exactly the case that matters here: when the launcher dies, its children
+    are reparented to init and a descendant walk from the launcher pid finds nothing, while
+    the processes keep running. **A process group survives reparenting**, so pgid membership
+    still sees them.
+
+    Zombies are excluded: a reaped-but-not-collected process answers `kill(pid, 0)` yet
+    consumes nothing, so counting it as a survivor would make cleanup impossible to confirm.
+
+    The start time is returned so a later check can reject a recycled pid: on a busy host a
+    pid can be reused between polls, and killing it would target an unrelated process.
+    """
+    out: Dict[int, Any] = {}
+    try:
+        pids = [int(d) for d in os.listdir("/proc") if d.isdigit()]
+    except OSError:
+        return out
+    for pid in pids:
+        f = _stat_fields(f"/proc/{pid}/stat")
+        if not f or len(f) <= F_STARTTIME:
+            continue
+        try:
+            if int(f[F_PGRP]) != pgid:
+                continue
+            if f[F_STATE] == "Z":                 # zombie: not running, not a survivor
+                continue
+            out[pid] = (f[0], int(f[F_STARTTIME]))
+        except (ValueError, IndexError):
+            continue
+    return out
+
+
+def _kill_group(proc: "subprocess.Popen", pgid: int, log: List[str],
+                grace_s: float = 10.0, kill_s: float = 10.0,
+                hold_s: float = 60.0) -> Dict[str, Any]:
+    """Terminate the owned process group and *verify* it is gone before returning.
+
+    Escalation is driven by surviving owned-group members, never by the launcher's exit. The
+    previous version broke out of its signal loop as soon as `proc.wait()` returned, so a
+    cooperative parent that exits on SIGTERM satisfied it while a child ignoring SIGTERM kept
+    running; it then looked for survivors by descending from a dead launcher, found none
+    because they had been reparented, logged `group_alive=True`, and returned anyway.
+
+    Fails closed: if the group cannot be confirmed dead, this **blocks** for up to `hold_s`
+    rather than returning, because the caller's flock is released when the runner exits and
+    an unconfirmed survivor would then run underneath whoever measures next. Holding the lock
+    is the safe direction. The outcome is returned so the caller can abort the series.
+    """
+    own_start = {pid: st for pid, (_, st) in group_members(pgid).items()}
+
+    def survivors() -> Dict[int, Any]:
+        # Reject recycled pids: same pid, different start time is a different process.
+        return {pid: meta for pid, meta in group_members(pgid).items()
+                if pid not in own_start or own_start[pid] == meta[1]}
+
+    def signal_group(sig: int, name: str) -> None:
         try:
             os.killpg(pgid, sig)
+            log.append(f"sent {name} to group {pgid}")
         except ProcessLookupError:
-            break
+            log.append(f"group {pgid} already gone at {name}")
         except Exception as exc:
             log.append(f"killpg {name} failed: {exc}")
-        try:
-            proc.wait(timeout=20)
-        except subprocess.TimeoutExpired:
-            continue
-        break
-    survivors = [pid for pid in _descendants(proc.pid) if _alive(pid)]
+
+    def wait_clear(deadline_s: float) -> Dict[int, Any]:
+        t0 = time.time()
+        while time.time() - t0 < deadline_s:
+            left = survivors()
+            if not left:
+                return {}
+            time.sleep(0.2)
+        return survivors()
+
+    signal_group(signal.SIGTERM, "SIGTERM")
+    left = wait_clear(grace_s)
+    escalated = bool(left)
+    if left:
+        log.append(f"SIGTERM left {len(left)} owned member(s) alive: "
+                   f"{[(pid, meta[0]) for pid, meta in left.items()]}; escalating")
+        signal_group(signal.SIGKILL, "SIGKILL")
+        left = wait_clear(kill_s)
+
+    held_s = 0.0
+    if left:
+        # Fail closed. Keep re-signalling and keep the caller's lock held while an owned
+        # process is demonstrably still running.
+        t0 = time.time()
+        while time.time() - t0 < hold_s:
+            signal_group(signal.SIGKILL, "SIGKILL(retry)")
+            left = wait_clear(2.0)
+            if not left:
+                break
+        held_s = round(time.time() - t0, 1)
+
     try:
-        os.killpg(pgid, 0)
-        group_alive = True
-    except OSError:
-        group_alive = False
-    log.append(f"after termination: group_alive={group_alive} survivors={survivors}")
-    return proc.returncode if proc.returncode is not None else -9
+        proc.wait(timeout=5)
+    except Exception:
+        pass
+    confirmed = not left
+    log.append(f"cleanup_confirmed={confirmed} escalated={escalated} "
+               f"held_for_s={held_s} survivors={[(p, m[0]) for p, m in left.items()]}")
+    return {"cleanup_confirmed": confirmed,
+            "escalated_to_sigkill": escalated,
+            "blocked_seconds_holding_lock": held_s,
+            "surviving_group_members": [{"pid": p, "comm": m[0], "starttime": m[1]}
+                                        for p, m in left.items()],
+            "returncode": proc.returncode if proc.returncode is not None else -9}
 
 
 def _alive(pid: int) -> bool:
@@ -849,15 +937,17 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         ).start()
 
     timed_out = False
+    cleanup: Optional[Dict[str, Any]] = None
     try:
         rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
     except subprocess.TimeoutExpired:
         timed_out = True
         log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; "
                    f"terminating owned process group {pgid}")
-        rc = _kill_group(proc, pgid, log)
+        cleanup = _kill_group(proc, pgid, log)
+        rc = cleanup["returncode"]
     except BaseException:
-        _kill_group(proc, pgid, log)
+        cleanup = _kill_group(proc, pgid, log)
         raise
     finally:
         wall = time.time() - t0
@@ -920,6 +1010,11 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         "env_overrides": arm.get("env") or {},
         "exit_code": rc,
         "timed_out": timed_out,
+        "cleanup": cleanup,
+        # An arm whose owned group could not be confirmed dead has left something running
+        # that will contaminate whatever measures next, including another task after the
+        # lock is released. It is never clean evidence.
+        "cleanup_unconfirmed": bool(cleanup and not cleanup.get("cleanup_confirmed")),
         "wall_s": round(wall, 3),
         "requested": {"j": arm["j"], "max_io_threads": arm.get("max_io_threads"),
                       "gpu_ordinal": gpu_index},
@@ -932,8 +1027,12 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         # satisfied. Marking the arm quarantined keeps it in the record -- deleting a timed
         # arm is worse -- while stopping the report from counting it as clean evidence.
         "quarantined": bool(settle_info.get("timed_out")
-                            or settle_info.get("lane_intruders_at_start")),
+                            or settle_info.get("lane_intruders_at_start")
+                            or (cleanup and not cleanup.get("cleanup_confirmed"))),
         "quarantine_reason": (
+            "owned process group could not be confirmed dead: "
+            + str((cleanup or {}).get("surviving_group_members"))
+            if (cleanup and not cleanup.get("cleanup_confirmed")) else
             "settle gate timed out" if settle_info.get("timed_out") else
             ("foreign threads were in the lane at start: "
              + "; ".join(settle_info.get("lane_intruders_at_start") or [])[:300])
@@ -997,6 +1096,14 @@ def main() -> int:
         (args.out / "series.json").write_text(json.dumps(series, indent=2))
         print(f"{rec['tag']}: exit={rec['exit_code']} wall={rec['wall_s']}s "
               f"products={rec['product_count']}", flush=True)
+        if rec.get("cleanup_unconfirmed"):
+            # Abort rather than run the next arm beside a process we could not kill.
+            print("SERIES_ABORTED_UNCONFIRMED_CLEANUP "
+                  f"{rec['cleanup']['surviving_group_members']}", flush=True)
+            series["aborted"] = {"after": rec["tag"], "reason": "cleanup unconfirmed",
+                                 "survivors": rec["cleanup"]["surviving_group_members"]}
+            (args.out / "series.json").write_text(json.dumps(series, indent=2))
+            return 3
 
     print("SERIES_COMPLETE", flush=True)
     return 0

@@ -10,7 +10,8 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 | `gpu/p0p1_series.json`, `gpu/p0p1_report.json` | GPU screen + Phase 0, repaired instrument | timings and product digests **valid** |
 | `gpu/conf_series.json`, `gpu/conf_report.json` | 24-movie confirmation, repaired instrument | timings and product digests **valid** |
 | `cpu64/cpu_series.json`, `cpu64/cpu_report.json` | cpu64 scaling, **instrument v1** | timings valid; interference fields limited, see below |
-| `tooling_controls/controls_cpu64_2026-09-28.log` | tooling controls, cpu64 cores 32-63 under the validation lock | current |
+| `tooling_controls/controls_cpu64_2026-09-28.log` | tooling controls round 1, runner sha256 `b05260db…` | **superseded — two controls were defective**, see below |
+| `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | current |
 | `gpu/*`, `cpu64/*` build and topology witnesses | build scripts | current |
 
 ## Known artifacts inside the retained records
@@ -40,6 +41,25 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 
 Each record self-documents which interference instrument produced it, in
 `sampling.foreign_definition`.
+
+## Why the round-1 control log is superseded
+
+It is retained because it is the artifact the defects were found in, not because its two
+process-control results stand. Both were defective:
+
+- **The payload-versus-launcher control was vacuous.** It launched `/usr/bin/env python`,
+  and `env` *execs* Python, so `pid == launcher_pid == 3166638` in that log. The assertion
+  that distinguishes payload sampling from launcher sampling was conditional on the pids
+  differing and therefore never ran. Round 2 uses `/usr/bin/time -v` — production's own
+  shape, which forks and stays alive — asserts differing pids unconditionally, and
+  mutation-proves the discrimination: sampling the parent yields **1.45 MiB** and *fails*
+  the same assertion the child passes at 266.07 MiB. That 1.45 MiB is exactly the figure
+  earlier mis-published as "1.45 GB of node-local movie arrays".
+- **The cancellation control did not exercise the failing case.** Its child did not ignore
+  SIGTERM, so it never reached the path where a cooperative parent exits, `proc.wait()`
+  returns, and the helper stops escalating while an owned child keeps running. Round 2 adds
+  that case and shows both halves: launcher-exit escalation leaves the child alive and
+  reparented to init where a descendant walk cannot see it, while pgid enumeration can.
 
 ## What is unaffected
 

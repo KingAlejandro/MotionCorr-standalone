@@ -5,7 +5,7 @@
 | Issue | [#26](https://github.com/KingAlejandro/MotionCorr-standalone/issues/26) — current-main CPU/CUDA operating envelope |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort |
 | Task class | measurement |
-| Phase | **complete** — all series finished, report written, draft PR reviewable |
+| Phase | measurement-integrity follow-up applied after the PR109 results review; no reruns |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (= `origin/main` at start) |
 | Branch | `round96/26-claude-opus-5` |
 | Head | see `git rev-parse HEAD` on `round96/26-claude-opus-5` |
@@ -125,6 +125,23 @@ attributed to any task**. These arms used instrument v1, whose in-mask metric co
 threads on a lifetime-average filter and is **not comparable** to the repaired GPU figure.
 Nothing was altered. Full statement in `docs/operating_envelope_issue26.md` §6.3.
 
+## Corrections applied after the PR109 results review (head `fca95d76`)
+
+Three published claims withdrawn, each verified before acting, each fixed with a negative
+control that has a non-vacuous half. No GPU work rerun; no retained record edited.
+
+| withdrawn | cause | now |
+| :-- | :-- | :-- |
+| 3134.34 MiB "allocator-traced peak"; "gap is CUDA context"; device worker-sizing rule | parser summed 26 per-call size-accounting values (25x62.59 + 1569.59); the value is not a trace either | parser withholds `sum` for size-like tags; **no per-process device bound claimed** |
+| "1.43 GB of 1.45 GB, 98.6% node-local" | witness sampled the `taskset`/`time` launcher, and `numastat` units are MB | payload resolved via `/proc/<pid>/exe`; residency in bytes from `numa_maps`; **no NUMA claim** |
+| CPU binding "resolved at j=4, 8, 16" | `±2 sem` read as significance; t factor is 4.303 at n=3 | descriptive 95% t CI; resolved at **j=8, 16 only**, provisional |
+
+Also: fixed-`j8` IO speedup is **1.959x** not 1.90x; "`--j` only matters via I/O" withdrawn
+as too universal. Cancellation now terminates the owned process group; settle failures are
+**quarantined**. Two `/proc` field-index bugs fixed (session read as pgrp, starttime as
+field 21). New controls in `tools/test_envelope_runner.py`, run CPU-only on cpu64 cores
+32-63 under the validation lock with `ctffind` recorded and untouched.
+
 ## Verified gates
 
 | gate | scope | result |
@@ -146,4 +163,6 @@ before any CPU `--j` recommendation is load-bearing.
 
 ## Next step
 
-None outstanding. Draft PR #109 is reviewable.
+None outstanding. Draft PR #109 carries the corrections. Unrun and stated: payload
+NUMA/memory re-measurement, controlled-lane CPU rerun, the 1/2-worker matrix against PR106,
+Phase 2 multi-GPU, Phase 3 geometry/frame counts. Each needs a slot this task does not hold.

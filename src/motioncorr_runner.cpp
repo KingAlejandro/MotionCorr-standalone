@@ -1483,6 +1483,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		if (!movie_session->initialize()) {
+            if (movie_session->getFailureState().isPoisoned())
+                REPORT_ERROR("Fatal CUDA session initialization failure for " + fn_mic);
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
 			movie_session.reset();
 		}

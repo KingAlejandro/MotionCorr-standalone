@@ -527,6 +527,12 @@ int runOwnershipControls() {
                     session.getFailureState().firstError() == cudaErrorInvalidValue &&
                     session.getFailureState().fatalError() == cudaErrorIllegalAddress &&
                     cudaGetLastError() == cudaSuccess;
+                const long calls_before = g_counts[FAULT_MALLOC];
+                const int start[1] = {0}, size[1] = {1};
+                ok = ok && !session.computeGlobalForwardFFT() &&
+                    !session.preparePatchInVram(0,0,32,32,1,start,size,
+                                              session.getDeviceFourierFrames()) &&
+                    g_counts[FAULT_MALLOC] == calls_before;
                 session.release(); session.release();
                 ok = ok && !session.initialize(); // poison is sticky after release
             } else {

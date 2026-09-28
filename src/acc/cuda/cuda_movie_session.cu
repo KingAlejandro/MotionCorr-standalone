@@ -405,7 +405,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     MultidimArray<float> &unaligned_sum,
     bool download_sum
 ) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t num_pixels = (size_t)ny * nx;
@@ -448,7 +448,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
 }
 
 bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     unaligned_sum.reshape(ny, nx);
     HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum,
@@ -465,7 +465,7 @@ struct StatsScratch {
 } // namespace
 
 bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
@@ -489,7 +489,7 @@ bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
 }
 
 bool CudaMovieSession::reduceUnalignedSumSqDev(double mean, double &sum2) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
@@ -513,7 +513,7 @@ bool CudaMovieSession::collectAboveThreshold(
     std::vector<int> &indices_ascending,
     size_t &guard_band_count
 ) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
 
@@ -570,7 +570,7 @@ bool CudaMovieSession::updateDefectPixels(
     const std::vector<int> &bad_ys,
     const std::vector<float> &replacements
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     const int n_bad = (int)bad_xs.size();
     if (n_bad == 0) return true;
 
@@ -605,7 +605,7 @@ bool CudaMovieSession::updateDefectPixels(
 }
 
 bool CudaMovieSession::releasePreprocessingBuffers() {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaDeviceSynchronize());
     // Issue #69: clear the member before the free, not after. HANDLE_ERROR returns on a
@@ -629,7 +629,7 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
 }
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
-    if (!is_initialized || !has_plan_r2c) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t real_stride = (size_t)nx * ny;
@@ -653,7 +653,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
 }
 
 bool CudaMovieSession::computeGlobalInverseFFT() {
-    if (!is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
@@ -677,7 +677,7 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (!is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
@@ -773,7 +773,7 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile);
 }
 
@@ -783,12 +783,12 @@ bool CudaMovieSession::reconstructUnweighted(
     Image<float> *Isum_odd,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile);
 }
 
 bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {
-    if (!is_initialized || !d_Fframes) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Fframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_comp_frame = (size_t)ny * nfx * sizeof(cufftComplex);
     Fframes.resize(n_frames);
@@ -801,7 +801,7 @@ bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex>
 }
 
 bool CudaMovieSession::downloadRealFrames(std::vector<Image<float> > &Iframes) {
-    if (!is_initialized || !d_Iframes) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_real_frame = (size_t)ny * nx * sizeof(float);
     Iframes.resize(n_frames);

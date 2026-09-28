@@ -99,12 +99,19 @@ B `E=−9.71, P=−1.33`; C `E=−3.16, P=+2.31`.
 **The three series are not combined into one curve** — different CPU budgets and, for B, a
 different regime entirely. Within-series scatter is large in A and C (off-arm spread 16.6 s and
 11.5 s), so neither resolves a ~3 s effect on its own. What is not ambiguous is the direction:
-**0 of 9 pairs across all budgets show prefetch faster**, and the two tightest arms (B's off
-arm, spread 0.94 s) are unambiguous.
+~~**0 of 9 pairs across all budgets show prefetch faster**~~ — **CORRECTED: 1 of 9.** Series A
+pair 1 (+5.273 s) is in prefetch's favour, as the table directly above records; the aggregate
+sentence was wrong. See [`../CORRECTIONS.md`](../CORRECTIONS.md) §1. The direction across the
+other eight blocks, and the two tightest arms (B's off arm, spread 0.94 s), are unaffected.
 
 ## 3. Host memory — the one large, perfectly reproducible effect
 
 Peak RSS of the **owned process tree**, sampled at 200 ms (not one pid, not the node):
+
+Statistic: **peak over time of the sum of `VmRSS` across the owned process tree**, KiB from
+`/proc/<pid>/status`, sampled every 200 ms — a sampled maximum and therefore a **lower bound**
+on the true peak; resident set, not an allocator trace, not virtual size, not the node, and not
+device memory.
 
 | series | prefetch off | prefetch on | delta |
 |---|---|---|---|
@@ -129,7 +136,7 @@ And `peak_reserved_bytes == budget_bytes` in every prefetched run: producer-curr
 consumer-active were all charged simultaneously, so the pipeline really did run three movies
 deep. The declared bound was never exceeded and no override was ever needed.
 
-## 4. Why it does not pay — the overlap witness
+## 4. Why it does not pay — the overlap witness (**HYPOTHESIS**, see `../CORRECTIONS.md` §4)
 
 The prefetch accounting explains the null directly, and more convincingly than the noisy walls:
 
@@ -139,12 +146,15 @@ The prefetch accounting explains the null directly, and more convincingly than t
 | B | 5.39 | 94.56 | 0 |
 | C | 0.337 | 81.10 | 0 |
 
-The consumer waited **0.3-5 seconds out of a ~100-180 second run**, while the producer spent
-81-95 seconds blocked on a full queue. So prefetch *works*: the decode is almost entirely
-hidden and the producer is always ahead. It simply does not help, because the decode was never
-what the wall clock was waiting for — and the producer's concurrent CPU use and 2.5 GiB of
-extra resident memory cost at least as much as the hidden decode saves. Under a fixed CPU
-budget this is close to zero-sum, which is what all three series show.
+**Measured:** in the prefetch-ON arm the consumer waited **0.3-5.4 s out of a ~100-180 s run**
+while the producer spent 81-95 s blocked on a full queue. These counters exist only in the ON
+arm.
+
+**Hypothesis, not established:** that the decode was therefore never what the wall clock was
+waiting for in the OFF arm, and that the producer's concurrent CPU use and extra residency cost
+at least as much as the hidden decode saves. The OFF arm was never instrumented for decode time
+(`TIMING=ON` was not used), and nothing varied contention or residency independently, so this
+is an untested explanation for a difference that is inside the noise in two of three series.
 
 ## 5. Verdict
 
@@ -165,8 +175,9 @@ waits for input.
   design, and still **unrun** rather than supported.
 - Any CPU budget wider than 16 logical CPUs, and any NUMA memory pinning. Series C spans two
   NUMA nodes with `membind` unrestricted; no memory-locality claim is made.
-- A sample size that could resolve a ~3 s effect. n=3 per series is a screen; 0/9 pairs
-  favouring prefetch is a direction, not a confidence interval.
+- A sample size that could resolve a ~3 s effect. n=3 per series is a screen; ~~0/9~~
+  **1/9** pairs favouring prefetch (CORRECTED, see `../CORRECTIONS.md` §1) is a direction, not
+  a confidence interval.
 - `nsys` transfer-byte counts and per-stage `TIMING=ON` timers, which would resolve finer
   effects than process wall.
 

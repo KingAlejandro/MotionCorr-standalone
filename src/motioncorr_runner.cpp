@@ -1551,19 +1551,21 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
 
-	// The real-space frames produced here are read again in only two places:
-	// patch clipping (needs do_local) and the "before dose weighting" sum
-	// below (needs !do_dose_weighting || save_noDW). When neither applies,
-	// every value written here is overwritten by the post-dose-weighting
-	// inverse transform before anything reads it, so the transform is dead
-	// work. Skipping it is bit-exact, not an approximation.
+	// The real-space frames produced here have exactly two readers: patch
+	// clipping (do_local) and the "before dose weighting" sum below. When
+	// neither runs, nothing reads them before they are replaced, so the
+	// transform is dead work and eliding it is bit-exact, not an approximation.
+	//
+	// The predicate must carry every disjunct of that sum's guard. A predicate
+	// that merely restates the guard goes stale silently: upstream 0f508e0
+	// (#67) widens it with even_odd_split, and omitting the term there
+	// corrupts EVN/ODD with no conflict, no warning and no failing test.
+	// At this commit the guard is still (!do_dose_weighting || save_noDW), so
+	// even_odd_split is output-inert here -- but it is not free: it disables
+	// the optimization for --dose_weighting --even_odd_split, which is the
+	// price of the predicate surviving a rebase or merge onto main.
+	// See agents/designs/issue_26_cpu_global_ifft_skip.md.
 	const bool do_local = (patch_x > 2) && (patch_y > 2);
-	// even_odd_split is inert at this commit: the block below is guarded by
-	// (!do_dose_weighting || save_noDW), so a dose-weighted even/odd run writes
-	// no EVN/ODD here and reads nothing. Upstream commit 0f508e0 (#67) widens
-	// that guard to include even_odd_split, at which point omitting the term
-	// silently corrupts EVN/ODD. Carried now so this predicate cannot become
-	// wrong under a rebase or merge. See agents/designs/issue_26_cpu_global_ifft_skip.md.
 	const bool need_real_space_before_dw =
 			do_local || !do_dose_weighting || save_noDW || even_odd_split;
 

@@ -110,12 +110,21 @@ no longer existed. The flock serialises ownership but not the previous holder's 
 tail, so a settle gate — `load1` below threshold and no `cc1plus`/`nvcc`/`cicc`/`ptxas` by
 exact name — runs *after* acquisition, with the observed wait logged.
 
-`cpu64` CPU work runs in lane `taskset -c 0-31` (exactly NUMA node 0) behind
-`flock /tmp/motioncorr-issue96-cpu-measure.lock`; a whole-host run would additionally take
-`/tmp/motioncorr-issue96-cpu-validation.lock`. Two foreign `ctffind` processes run there
+`cpu64` lanes and locks, in full: this issue's measured runs use `taskset -c 0-31` (exactly
+NUMA node 0) behind `flock /tmp/motioncorr-issue96-cpu-measure.lock`; other workers' heavy
+work uses `32-63` behind `/tmp/motioncorr-issue96-cpu-validation.lock`; a whole-host 64-core
+run requires **both** locks. `ctffind` is never altered. Two foreign `ctffind` processes run there
 permanently at ~100% each and are **unpinned** (`Cpus_allowed_list: 0-63`), so they can and do
 enter the measurement lane. They are not altered and not waited out; they are sampled per run
 and reported as interference.
+
+**Interference evidence must be retained at per-sample and PID level.** The 2026-09-27
+`cpu64` series retained only per-arm aggregates — a max over samples, and per-command
+*accumulated* thread-sample hits — which is enough to show that foreign work entered the
+lane but not enough to say how many threads any one command ran simultaneously, nor to
+attribute the work to anything. Any re-measurement must keep the per-sample series and the
+PID, session id and command line of foreign processes, or it will again be able to observe
+contamination without being able to characterise or attribute it.
 
 Interference is identified by process subtree, not by username. Every concurrent round worker
 on `cpu64` runs as `ubuntu`, and so do both `ctffind` jobs, so a user-based filter reports zero

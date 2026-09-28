@@ -14,7 +14,8 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Same-backend CPU output, base vs candidate, with negative control | ran, identical — but see §3: this is a build-hygiene control, not a behavioural one |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
 | CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures, CUDART 12080 |
-| Retry-verdict controls, incl. cleared-last-error fatal (device-free) | ran, 11 cases, 0 failures |
+| Retry-verdict controls, incl. cleared-last-error fatal (device-free) | 13 cases, 0 failures — **at the previous head; NOT re-run, see §5c** |
+| P1/P2 fixes from the Codex PR107 review (`cuda_failure_state.h`, `cuda_scoped_resources.h`) | **NOT BUILT and NOT RUN — no GPU slot; #53 holds it** |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
@@ -341,6 +342,78 @@ Noted because the same commit passed **14/14 on cpu64** — none of this code co
 a CPU-only build, so the CPU suite cannot stand in for the CUDA one on any change that
 touches these files.
 
+## 5c. Codex PR107 review: monotonic poisoning, and fixed-capacity registries
+
+Two demonstrated findings, both fixed. **Neither is compiled.** See the limitation at
+the end of this section before reading anything else here as verified.
+
+### P1 — a later fatal error could still be discarded (`discussion_r4119217930`)
+
+`recordFailure` kept only the **first** failure. So a recoverable
+`cudaErrorMemoryAllocation` recorded on an early patch suppressed the recording of a
+later `cudaErrorIllegalAddress` on another. Because `HANDLE_ERROR(cudaGetLastError())`
+*consumes* that fatal code before the record is attempted, the runner's own later
+last-error read was clean as well — and both sources the §5b fix consults were
+therefore blind. `cudaRetryDecisionFor(old_oom, …, cudaSuccess)` permitted another
+dispatch on a poisoned context.
+
+**This falsifies an explicit earlier source-review claim, which is reconciled here
+rather than left contradictory.** The round-4 code review enumerated all 26
+`return false` sites in `cuda_movie_session.cu` and concluded *"No gap. The P1 defect is
+genuinely fixed in its primary form."* The enumeration was correct about the sites and
+wrong about the outcome: it asked whether each path *records*, not whether the record
+*survives an earlier recoverable one*. It does not. The Codex review found the case that
+survived.
+
+`CudaFailureState` now tracks two independent facts:
+
+| Field group | Semantics |
+|---|---|
+| `firstError` / `firstCufftError` / `firstStage` / `firstLine` | Diagnostic provenance. First-wins, so the cause a human reads is the earliest failure |
+| `fatalError` / `fatalStage` / `fatalLine` | Poisoning, latched **monotonically**. The first poisoning code is recorded and never afterwards discarded, whatever was recorded before or after. A context does not recover, so this may only go clean → poisoned |
+
+The predicate consults the sticky state first, then the recorded status, then the
+pending slot. The fatal message also stops misattributing: it names the stage that
+recorded the poisoning code, or states that the code was pending with no stage, instead
+of always printing the first failure's location.
+
+### P2 — per-patch heap allocation in the cleanup registries (`discussion_r4119217937`)
+
+The registries were `std::vector`, rebuilt for every global and local-patch alignment,
+so a *healthy* patch loop paid host heap allocations for them. The maxima are proved by
+counting call sites — **8 buffers, 8 events, 1 plan** in `cudaAlignPatchDevice` and
+**1 staging buffer** in the wrapper, with **no `add()` inside any loop** — so they are
+now fixed-capacity arrays plus counters in `cuda_scoped_resources.h`.
+
+RAII and error behaviour are unchanged: `releaseAll()` still continues past the first
+failure, still reports the first error, is still idempotent, and now also skips null
+slots. Capacity is a **hard error, not a silent drop**: `add()` refuses and sets an
+overflow flag, and both call sites check it, so a future ninth resource fails loudly
+instead of leaking on a throwing path.
+
+### Controls written — and not executed
+
+Six **production session-state sequences** driving the real `CudaFailureState` through
+recoverable → consumed-fatal → cleared-slot, fatal-then-noise, recoverable-only,
+cuFFT-then-fatal, clean, and pending-only; plus three capacity controls for counting,
+refusal, overflow reporting and idempotency. The sequences drive the production object
+rather than feeding synthetic inputs to the predicate, because the defect was never in
+the predicate.
+
+### Limitation: none of §5c is built
+
+**#53 holds the shared GPU slot, so no CUDA compilation was queued and none of this
+code has been compiled or executed.** Every file involved is CUDA-only and invisible to
+the `cpu64` build — the CPU run at this head records
+`grep -c cuda_error_class <build log>` = **0** as an explicit witness that nothing new
+was compiled there. The control counts quoted in §5b (`13 retry cases`) are from the
+**previous** head and were not re-run.
+
+Accessors and call sites were cross-checked against their declarations by hand. Hand
+checking is not a compiler, and on this branch an unbuilt CUDA change has already
+shipped once with 14 compile errors while the CPU suite was green (§5b). **Nothing in
+§5c should be treated as validated until it builds.**
+
 ## 6. Findings fixed
 
 Against `4c952b3f`; full detail in the ADR. Seven, not six: F7 was found while acting
@@ -354,6 +427,8 @@ on a review finding.
 | F4 | Pointer cleared after the free, so a failing `cudaFree` left it set for `release()` to free again | `cuda_movie_session.cu` `releasePreprocessingBuffers` |
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
+| P1b | A later fatal error could be discarded because the session kept only the first failure, so a recoverable code recorded earlier masked it while the consuming handler had already cleared the pending slot | `cuda_failure_state.h`, `cuda_movie_session.{h,cu}`, `cuda_error_class.h` |
+| P2 | Per-patch `std::vector` cleanup registries performed host heap allocation on every healthy alignment | `cuda_scoped_resources.h`, `cuda_alignpatch.cu` |
 | P1 | The retry decided context health from a later `cudaGetLastError()`, which the failing stage had already consumed and reset — so a fatal, consumed failure was retried as recoverable | `motioncorr_runner.cpp`, `cuda_movie_session.{h,cu}`, `cuda_error_class.h` |
 | F7 | `d_patch_fcomplex_buffer` leaked on every throwing exit from the patch loop, including `alignPatchDevice`'s own throw on any CUDA error — so it leaked once per failing movie. Found while fixing a review finding against F6, but the `alignPatchDevice` path makes it pre-existing, not introduced here | `motioncorr_runner.cpp` local-patch block |
 

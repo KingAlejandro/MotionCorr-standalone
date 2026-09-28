@@ -1,5 +1,6 @@
-START 2026-09-28T02:20:05+00:00 host=small-refmac-machine
-pid 3169918's current affinity list: 32-63
+START 2026-09-28T06:42:44+00:00 host=small-refmac-machine
+--- cores / cpuset / NUMA / memory / load ---
+pid 3249591's current affinity list: 32-63
 /user.slice
 policy: default
 preferred node: current
@@ -7,14 +8,18 @@ physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 5
 cpubind: 1 
 nodebind: 1 
                total        used        free      shared  buff/cache   available
-Mem:             226          11          43           0         174         215
- 02:20:05 up 299 days, 16:17, 21 users,  load average: 5.03, 3.34, 3.49
---- interference, recorded and NOT altered ---
-USER     %CPU     ELAPSED COMMAND
-ubuntu   99.9 49-02:50:10 ctffind
-ubuntu   99.9 48-00:26:29 ctffind
-ubuntu    0.8 43-10:42:55 node
-root      0.1  5-19:53:07 rsyslogd
+Mem:             226          10          33           0         184         215
+ 06:42:44 up 299 days, 20:40, 21 users,  load average: 2.20, 2.15, 2.10
+--- payload ---
+16M	/home/ubuntu/mc-i69/cand
+676
+--- interference, recorded and NOT altered (ctffind untouched) ---
+USER         PID %CPU     ELAPSED COMMAND
+ubuntu   1156942 99.9 49-07:12:50 ctffind
+ubuntu   1635429 99.9 48-04:49:08 ctffind
+ubuntu   2722253  0.8 43-15:05:34 node
+root     1519128  0.1  6-00:15:46 rsyslogd
+root      292988  0.1 153-17:53:01 dockerd
 configure=0
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
 build=0
@@ -25,52 +30,54 @@ same_backend=0
 PASS same-backend CPU output identical, and the comparison is able to fail
 patch_retry=0
 tu_control=0
-differing lines total      : 93
-  friend declaration lines : 1   (emits no code)
-  RelionError __LINE__ lines: 92
   anything else            : 0   <- must be 0
 negative control OK: an injected line is detected
 PASS CPU-only translation unit differs only by a no-code friend declaration and __LINE__ metadata
-=== source hashes (must match the pinned head) ===
-b38a5634fee21d6920163083d621a66b6d30e2ce47ec907582f09ae8290bb2fd  src/acc/cuda/cuda_error_class.h
-b265c7840b0110ce50c068c38c9ca8d481a11548bb2eefffc301a31a25b99cfc  src/acc/cuda/cuda_movie_session.h
-c10818ef9c240a464ddee20c788863888912a52a0b75a7e4b652ddb8c19444f5  src/acc/cuda/cuda_movie_session.cu
-283f55b13bc432a5b90f9ad9f912139c7115ec0b0a656216c5cb225b8792f94d  src/motioncorr_runner.cpp
-fd1e5f3775c5cb3ba02cf3d8d46daefc26584c7cdb833149bab87a0c47a4d9f0  tests/cuda_error_class.cpp
+--- confirm the new CUDA sources are NOT compiled here ---
+0
+=== source hashes ===
+ac4ff0baf5b435fa4c7912f0455f07893a29c901a543604105c721177a27780d  src/acc/cuda/cuda_failure_state.h
+f16ea4a2f90a38ac5e66ec819e3d35b6e8f0a728c2aa47a0fdc6e05860fe54d1  src/acc/cuda/cuda_scoped_resources.h
+fdc999b43d96cad5213745a6b8f58ce62a66f0e2fa188d3f042eb6f352e14211  src/acc/cuda/cuda_error_class.h
+2bd253689131f336a1c8a41a77e9100c42e8e5e29e780160e106ffa69674b200  src/acc/cuda/cuda_alignpatch.cu
+c5216db124258e992a271696bf0a1fe98abe5c8d7cc84003e3613aa8054f91db  src/acc/cuda/cuda_movie_session.h
+ce5b2585c1afed19f78e8df046be174553e6aaf37edfb202892c93781cd51521  src/acc/cuda/cuda_movie_session.cu
+6affaadb3560f03b6921b5221611c3ee77c0176a4cc52b8568ff7c4e1ef0ef00  src/motioncorr_runner.cpp
+a621fbfc35d416f955d40ce30076e6063ba7a000333c04d93979c26fbf5778e2  tests/cuda_error_class.cpp
 === binaries ===
 cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
-b750e237b5ed24db8e70caf366dd4fdf19c1509995a8eb69ad9af87313378f42  /home/ubuntu/mc-i69/build-cand/motioncorr
-DONE 2026-09-28T02:20:32+00:00
+4e55739cc854e755e02aa6802fd4aff4e75682157d28b818d333e924ca6aa428  /home/ubuntu/mc-i69/build-cand/motioncorr
+DONE 2026-09-28T06:43:11+00:00
 Test project /home/ubuntu/mc-i69/build-cand
       Start  1: PatchRetryState
       Start  2: SyntheticRegression
       Start  3: HotPixelRngDeterminism
       Start  4: RunnerExposure
- 1/14 Test  #1: PatchRetryState ..................   Passed    0.04 sec
+ 1/14 Test  #1: PatchRetryState ..................   Passed    0.03 sec
       Start  5: Runner_failure
- 2/14 Test  #5: Runner_failure ...................   Passed    0.14 sec
+ 2/14 Test  #5: Runner_failure ...................   Passed    0.15 sec
       Start  6: Runner_invalid
- 3/14 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+ 3/14 Test  #6: Runner_invalid ...................   Passed    0.12 sec
       Start  7: Runner_resume
- 4/14 Test  #4: RunnerExposure ...................   Passed    0.59 sec
+ 4/14 Test  #4: RunnerExposure ...................   Passed    0.62 sec
       Start  8: Runner_tomography
  5/14 Test  #3: HotPixelRngDeterminism ...........   Passed    0.64 sec
       Start  9: RunnerLateBin
- 6/14 Test  #8: Runner_tomography ................   Passed    0.44 sec
+ 6/14 Test  #8: Runner_tomography ................   Passed    0.43 sec
       Start 10: RunnerExportedUnits
- 7/14 Test #10: RunnerExportedUnits ..............   Passed    0.12 sec
+ 7/14 Test  #2: SyntheticRegression ..............   Passed    1.10 sec
       Start 11: GainCache
- 8/14 Test  #2: SyntheticRegression ..............   Passed    1.16 sec
+ 8/14 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
       Start 12: TiffRead
- 9/14 Test  #9: RunnerLateBin ....................   Passed    0.72 sec
+ 9/14 Test  #9: RunnerLateBin ....................   Passed    0.68 sec
       Start 13: DamagedMovie
 10/14 Test #13: DamagedMovie .....................   Passed    0.10 sec
       Start 14: RunnerModelParser
-11/14 Test #14: RunnerModelParser ................   Passed    0.14 sec
-12/14 Test #12: TiffRead .........................   Passed    0.58 sec
-13/14 Test  #7: Runner_resume ....................   Passed    2.13 sec
-14/14 Test #11: GainCache ........................   Passed    1.27 sec
+11/14 Test #14: RunnerModelParser ................   Passed    0.18 sec
+12/14 Test #12: TiffRead .........................   Passed    0.54 sec
+13/14 Test  #7: Runner_resume ....................   Passed    2.07 sec
+14/14 Test #11: GainCache ........................   Passed    1.28 sec
 
 100% tests passed out of 14
 
-Total Test time (real) =   2.42 sec
+Total Test time (real) =   2.38 sec

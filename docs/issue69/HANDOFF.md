@@ -16,6 +16,7 @@ Source frozen at `e191aab`. Latest head is docs-only on top of it.
 | Early-binning streaming control (pass criterion 4) | **unrun**; `gpu_plan.md` item 5 |
 | Healthy same-backend all-24 CUDA control | **unrun**; `gpu_plan.md` item 6 |
 | Any build on a CUDA toolkit older than 12.8 | **unrun** — the `CUDART_VERSION` guards are reasoned, not exercised |
+| **Any CUDA build at all of the P1b/P2 fixes** | **NOT BUILT** — #53 holds the shared GPU slot. `cuda_failure_state.h`, `cuda_scoped_resources.h` and their controls have never been compiled. This is the single highest-risk item on this list: an unbuilt CUDA change has already shipped once on this branch with 14 compile errors while cpu64 was green |
 | Pass criterion 3 (retry reprocesses partial even/odd/DW products) | not this task's; #99/#53's completion contract |
 
 No GPU slot was ever assigned to this task and no GPU execution occurred. The bench
@@ -47,7 +48,9 @@ lock being free and the devices idle is availability, not authorization.
 
 ## C. Code items, unfixed
 
-8. **Fatal message can misattribute the location.** `motioncorr_runner.cpp` appends
+8. ~~**Fatal message can misattribute the location.**~~ **Fixed** in the P1b change: the
+   message now names the stage that latched the poisoning code, or says the code was
+   pending with no stage. Original text retained for traceability: `motioncorr_runner.cpp` appends
    `", recorded at <stage>:<line>"` unconditionally. When the *pending* code forced the
    verdict — the exact compound path the P1 fix addresses — it prints the fatal code
    with the location of the earlier benign failure, and `recorded at :0` when nothing

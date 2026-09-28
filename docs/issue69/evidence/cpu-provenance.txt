@@ -1,35 +1,38 @@
-=== host / lane / cpuset / NUMA / memory / load ===
-small-refmac-machine
-pid 3171700's current affinity list: 0-63
+START 2026-09-28T06:42:44+00:00 host=small-refmac-machine
+--- cores / cpuset / NUMA / memory / load ---
+pid 3249591's current affinity list: 32-63
 /user.slice
 policy: default
 preferred node: current
-physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
-cpubind: 0 1 
-nodebind: 0 1 
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 1 
+nodebind: 1 
                total        used        free      shared  buff/cache   available
-Mem:             226          10          43           0         174         215
- 02:21:39 up 299 days, 16:19, 21 users,  load average: 3.39, 3.39, 3.50
-
-=== interference, recorded and NOT altered ===
-USER     %CPU     ELAPSED COMMAND
-ubuntu    300       00:00 ps
-ubuntu   99.9 49-02:51:45 ctffind
-ubuntu   99.9 48-00:28:03 ctffind
-ubuntu    0.8 43-10:44:29 node
-root      0.1  5-19:54:42 rsyslogd
+Mem:             226          10          33           0         184         215
+ 06:42:44 up 299 days, 20:40, 21 users,  load average: 2.20, 2.15, 2.10
+--- payload ---
+16M	/home/ubuntu/mc-i69/cand
+676
+--- interference, recorded and NOT altered (ctffind untouched) ---
+USER         PID %CPU     ELAPSED COMMAND
+ubuntu   1156942 99.9 49-07:12:50 ctffind
+ubuntu   1635429 99.9 48-04:49:08 ctffind
+ubuntu   2722253  0.8 43-15:05:34 node
 
 === toolchain ===
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 cmake version 4.4.3
 
-=== source hashes (verified identical to the pinned head) ===
-b38a5634fee21d6920163083d621a66b6d30e2ce47ec907582f09ae8290bb2fd  src/acc/cuda/cuda_error_class.h
-b265c7840b0110ce50c068c38c9ca8d481a11548bb2eefffc301a31a25b99cfc  src/acc/cuda/cuda_movie_session.h
-c10818ef9c240a464ddee20c788863888912a52a0b75a7e4b652ddb8c19444f5  src/acc/cuda/cuda_movie_session.cu
-283f55b13bc432a5b90f9ad9f912139c7115ec0b0a656216c5cb225b8792f94d  src/motioncorr_runner.cpp
-fd1e5f3775c5cb3ba02cf3d8d46daefc26584c7cdb833149bab87a0c47a4d9f0  tests/cuda_error_class.cpp
+=== source hashes, verified identical to the pinned head ===
+ac4ff0baf5b435fa4c7912f0455f07893a29c901a543604105c721177a27780d  src/acc/cuda/cuda_failure_state.h
+f16ea4a2f90a38ac5e66ec819e3d35b6e8f0a728c2aa47a0fdc6e05860fe54d1  src/acc/cuda/cuda_scoped_resources.h
+fdc999b43d96cad5213745a6b8f58ce62a66f0e2fa188d3f042eb6f352e14211  src/acc/cuda/cuda_error_class.h
+2bd253689131f336a1c8a41a77e9100c42e8e5e29e780160e106ffa69674b200  src/acc/cuda/cuda_alignpatch.cu
+c5216db124258e992a271696bf0a1fe98abe5c8d7cc84003e3613aa8054f91db  src/acc/cuda/cuda_movie_session.h
+ce5b2585c1afed19f78e8df046be174553e6aaf37edfb202892c93781cd51521  src/acc/cuda/cuda_movie_session.cu
+6affaadb3560f03b6921b5221611c3ee77c0176a4cc52b8568ff7c4e1ef0ef00  src/motioncorr_runner.cpp
+a621fbfc35d416f955d40ce30076e6063ba7a000333c04d93979c26fbf5778e2  tests/cuda_error_class.cpp
 
 === binaries ===
 cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
-b750e237b5ed24db8e70caf366dd4fdf19c1509995a8eb69ad9af87313378f42  /home/ubuntu/mc-i69/build-cand/motioncorr
+4e55739cc854e755e02aa6802fd4aff4e75682157d28b818d333e924ca6aa428  /home/ubuntu/mc-i69/build-cand/motioncorr

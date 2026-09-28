@@ -20,7 +20,16 @@ patch geometry, polynomial fit RMSD, the FFT plan sizes, and the
 `[CUDA ...] completed; converged=` execution marker - must be byte-identical.
 Wall-clock lines are dropped because they are timings, not results.
 
-Exit status is 0 only if every file matched. Missing files are failures.
+The walk is over the **union** of both trees, not the reference alone. A file the
+candidate emits that the reference does not is precisely the unintended side
+effect this gate exists to catch, so it is a failure, and so is the reverse.
+Presence is checked for *every* entry, including the ones whose content is not
+comparable: excluding `.pdf` content because ghostscript stamps it with a
+creation date is not a reason to stop noticing that the file appeared or
+vanished. Directories are presence-checked too, so an extra empty one is caught.
+
+Exit status is 0 only if every file matched and the two trees hold the same set
+of paths.
 """
 
 import argparse
@@ -61,6 +70,11 @@ EPS_VOLATILE = re.compile(r"^%%(CreationDate|Creator|Title|For|BoundingBox\s*:\s
 
 def compile_drop(patterns):
     return re.compile("|".join(patterns))
+
+
+def walk(root):
+    """Every path under `root`, relative, directories included."""
+    return {p.relative_to(root) for p in root.rglob("*")}
 
 
 def normalise_paths(text, ref_dir, test_dir):
@@ -105,26 +119,46 @@ def main():
 
     results = []
     npass = nfail = nskip = 0
+    nmissing = nextra = 0
 
-    for rp in sorted(ref.rglob("*")):
-        if rp.is_dir():
-            continue
-        rel = rp.relative_to(ref)
-        tp = test / rel
+    for rel in sorted(walk(ref) | walk(test)):
+        rp, tp = ref / rel, test / rel
+        in_ref, in_test = rp.exists(), tp.exists()
         name = rp.name
+
+        # Presence first, and for every entry. Content policy below decides
+        # whether the *bytes* are comparable; it never excuses a file from
+        # having to exist on both sides.
+        if not in_test:
+            nfail += 1
+            nmissing += 1
+            results.append((str(rel), "FAIL", "missing in test tree"))
+            continue
+        if not in_ref:
+            nfail += 1
+            nextra += 1
+            results.append((str(rel), "FAIL",
+                            "unexpected file in test tree (absent from reference) "
+                            "- an unintended output is exactly what this gate is for"))
+            continue
+
+        if rp.is_dir() != tp.is_dir():
+            nfail += 1
+            results.append((str(rel), "FAIL",
+                            "directory on one side, file on the other"))
+            continue
+        if tp.is_dir():
+            nskip += 1
+            results.append((str(rel), "PRESENT_BOTH", "directory"))
+            continue
 
         if name.endswith(".mrc") or (name.endswith(".star") and name != "corrected_micrographs.star"):
             nskip += 1
-            results.append((str(rel), "COVERED_BY_GATE_C", "pixels/headers/trajectory compared by compare_motioncorr.py --gate exact"))
+            results.append((str(rel), "COVERED_BY_GATE_C", "present in both; pixels/headers/trajectory compared by compare_motioncorr.py --gate exact"))
             continue
         if name.endswith((".pdf", ".lst")):
             nskip += 1
-            results.append((str(rel), "EXCLUDED", "ghostscript embeds a creation timestamp"))
-            continue
-
-        if not tp.exists():
-            nfail += 1
-            results.append((str(rel), "FAIL", "missing in test tree"))
+            results.append((str(rel), "EXCLUDED", "present in both; content not compared (ghostscript embeds a creation timestamp)"))
             continue
 
         if name.endswith(".eps"):
@@ -155,7 +189,8 @@ def main():
              f"allow_label_changes = {a.allow_label_changes}", ""]
     for rel, status, detail in results:
         lines.append(f"{status:<18} {rel:<{width}}  {detail}")
-    lines += ["", f"compared={npass} failed={nfail} skipped={nskip}"]
+    lines += ["", f"compared={npass} failed={nfail} skipped={nskip} "
+                  f"(of which missing_in_test={nmissing} unexpected_in_test={nextra})"]
     verdict = "PASS" if nfail == 0 and npass > 0 else "FAIL"
     if npass == 0:
         verdict, lines[-1] = "FAIL", lines[-1] + "  (nothing was actually compared)"

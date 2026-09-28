@@ -140,6 +140,10 @@ gate "ctest CudaWrapperUploadFailure (candidate)" \
     ctest --test-dir "$CAND/build-cuda" -R CudaWrapperUploadFailure --output-on-failure
 gate "ctest CudaWrapperUploadFailure (baseline)" \
     ctest --test-dir "$BASE/build-cuda" -R CudaWrapperUploadFailure --output-on-failure
+# The aux comparator is itself a gate, so it needs its own test in the same run;
+# an instrument that silently accepts everything would make section 6 look good.
+gate "aux comparator self-test (incl. old-source negative controls)" \
+    python3 "$CAND/docs/issue74/test_compare_aux_outputs.py"
 # The policy test does not exist on the baseline tree; that is expected, not a failure.
 ctest --test-dir "$BASE/build-cuda" -N | tee "$E/ctest-baseline-list.txt" | tail -5
 

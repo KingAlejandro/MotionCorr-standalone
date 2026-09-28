@@ -87,6 +87,14 @@ dropped and nothing else ignored:
   `--allow-label-changes`, which is exactly the three honesty corrections listed
   in §5.
 
+> **Caveat on those two reports, added after review — read §7.** They were
+> produced by the pre-fix comparator, which walked only the reference tree. They
+> are valid for the files they compared, but they could not have detected a file
+> present in one tree and absent from the other. The output trees were
+> node-local and are gone, so this cannot be re-checked without a new GPU run,
+> which is out of scope here. Treat the aux verdict as "the compared files
+> matched", not as "the file sets were identical".
+
 **The switch actually switched.** A pass here would be worthless if the env var
 had silently done nothing. The harness reads the emitted `Detailed event
 profiling:` value from every movie log and requires it to be uniformly `on` or
@@ -259,6 +267,55 @@ is above. **I am not merging this.**
 
 ---
 
+## 7. Post-review correction: the aux comparator accepted extra outputs
+
+Raised on PR #88 at `735523a`
+([discussion r4119254472](https://github.com/KingAlejandro/MotionCorr-standalone/pull/88#discussion_r4119254472)):
+`compare_aux_outputs.py` iterated `ref.rglob("*")` only, so a file the candidate
+emitted that the reference did not was never looked at, and the gate passed. The
+finding is correct — an unintended extra output is precisely what this gate
+exists to catch — and it is reproduced by the negative controls below.
+
+Reproducing it turned up a second defect the review did not name. The old code
+checked `tp.exists()` *after* the `.mrc` / `.star` / `.pdf` / `.lst` early
+`continue`s, so for those types it missed **disappearances** as well as
+additions. Excluding a file's *content* from comparison had silently excluded
+its *existence* too.
+
+**Fix.** The walk is now over the union of both trees, directories included.
+Presence is checked first and for every entry; the content policy
+(`COVERED_BY_GATE_C`, `EXCLUDED`) decides only whether the bytes are compared.
+A file on one side only is a FAIL in either direction, and the summary line
+reports `missing_in_test` and `unexpected_in_test` separately. The existing
+normalisations are unchanged: EPS creation dates, path prefixes, timing lines,
+mode-dependent lines, and the opt-in `--allow-label-changes` all behave exactly
+as before, and PDF content stays excluded for the same ghostscript-timestamp
+reason — but a PDF that appears or vanishes is now caught.
+
+**Test, with controls that discriminate.** `test_compare_aux_outputs.py` runs 19
+cases. A fix is worth little if its test would also have passed on the broken
+source, so every extra/missing case is additionally run against the pre-fix
+comparator recovered by `git show 735523a:…`. **7 cases are proven
+discriminating** — the old source returned 0 on each, the new one returns 1.
+If the old source cannot be recovered the controls report SKIP and the suite
+exits `INCONCLUSIVE` rather than claiming a win it did not earn. The test is
+also wired into the harness next to the ctests, so the instrument is checked in
+the same run as the thing it measures.
+
+**Validation** ([`evidence/aux-comparator-selftest-cpu64.txt`](evidence/aux-comparator-selftest-cpu64.txt)):
+CPU-only on `small-refmac-machine`, single process under
+`flock /tmp/motioncorr-issue96-cpu-validation.lock` and `taskset -c 32-63`, with
+placement recorded from **inside** the pinned process rather than from a
+launcher wrapper — `sched_getaffinity` 32–63, `Cpus_allowed_list 32-63`,
+`Mems_allowed_list 0-1`, policy `default`, `cpubind 1` / `membind 0 1`. Payload
+SHA-256s, executable path, start/end times and load (13.71 before and after) are
+in the report. **PASS**, 19/19, 7 discriminating controls, 0 skipped.
+
+No production code was touched by this fix: it is confined to
+`docs/issue74/`. No new benchmark was run, and the numbers in §6 are unchanged.
+
+---
+
 ## Verdict table
 
 | question | verdict | basis |
@@ -267,7 +324,9 @@ is above. **I am not merging this.**
 | `CudaProfilePolicyDefault` ctest | **PASS** | default pinned |
 | `CudaWrapperUploadFailure` ctest, both arms | **PASS** | error boundaries intact |
 | Pixel equality, all 5 comparisons, all24 | **PASS** | 24/24 each |
-| Auxiliary outputs | **PASS** | both reports |
+| Auxiliary outputs, compared files | **PASS** | both reports |
+| Auxiliary outputs, *file-set* equality | **not established** | pre-fix comparator did not check it; trees are gone (§7) |
+| Aux comparator self-test, incl. old-source controls | **PASS** | 19/19, 7 discriminating, cpu64 under lock (§7) |
 | Switch demonstrably switched | **PASS** | 27 sites × 24 logs, uniform |
 | Native CUDA witness incl. profiling-off | **PASS** | runtime markers |
 | CPU masquerade rejection | **PASS** | 15/15 negative control |

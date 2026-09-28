@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
         expect = len(roots)
     else:
         roots = sorted(
-            str(p.relative_to(ref).with_suffix(""))
+            str(p.relative_to(ref).with_suffix(""))  # already worker-relative
             for p in ref.rglob("*.mrc")
             if not p.name.endswith(("_PS.mrc", "_EVN.mrc", "_ODD.mrc", "_noDW.mrc"))
             and p.name != "gain.mrc")
@@ -75,19 +75,26 @@ def main(argv: list[str] | None = None) -> int:
 
     results, npass = [], 0
     for root in roots:
-        rm, tm = ref / (root + ".mrc"), test / (root + ".mrc")
-        rs, ts = ref / (root + ".star"), test / (root + ".star")
-        name = Path(root).name
+        rel = star_io.worker_relative_root(root)
+        rm, tm = ref / (rel + ".mrc"), test / (rel + ".mrc")
+        rs, ts = ref / (rel + ".star"), test / (rel + ".star")
+        name = Path(rel).name
+        # Key the report by the COMPLETE root, not the basename. Movies/set1/a and
+        # Movies/set2/a both end in "a": keying on the basename makes the second
+        # comparison overwrite the first report, and a later --reuse then reads one
+        # movie's report for both -- turning a real fail-then-pass pair into a
+        # false 2/2 exact PASS.
+        report_id = rel.replace("/", "__").replace("\\", "__")
         missing = [str(p) for p in (rm, tm, rs, ts) if not p.exists()]
         if missing:
-            results.append({"movie": name, "gate_c_pass": False,
+            results.append({"movie": name, "root": root, "gate_c_pass": False,
                             "reason": "missing: " + ", ".join(missing)})
             continue
 
-        j = out / (name + "_exact.json")
+        j = out / (report_id + "_exact.json")
         if a.reuse:
             if not j.exists():
-                results.append({"movie": name, "gate_c_pass": False,
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
                                 "reason": f"--reuse but no report at {j}"})
                 continue
             rc = 0
@@ -99,7 +106,8 @@ def main(argv: list[str] | None = None) -> int:
                 capture_output=True, text=True)
             rc = cp.returncode
 
-        rec: dict[str, object] = {"movie": name, "returncode": rc}
+        rec: dict[str, object] = {"movie": name, "root": root, "report": j.name,
+                                  "returncode": rc}
         try:
             d = json.loads(j.read_text())
         except Exception as exc:  # noqa: BLE001

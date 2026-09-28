@@ -887,6 +887,156 @@ def case_sampler_lifecycle(tmp: Path) -> None:
         gpu_witness.compute_apps = real
 
 
+STUB_COMPARATOR = """#!/usr/bin/env python3
+# Minimal stand-in for tools/compare_motioncorr.py. Emits a FAIL report for any
+# movie whose reference MRC contains the token FAILME, a PASS report otherwise.
+import argparse, json, pathlib, sys
+ap = argparse.ArgumentParser()
+for f in ("--ref-mrc", "--test-mrc", "--ref-star", "--test-star", "--gate", "--json-out"):
+    ap.add_argument(f)
+a = ap.parse_args()
+bad = "FAILME" in pathlib.Path(a.ref_mrc).read_text()
+ok = not bad
+report = {
+    "overall_status": "PASS" if ok else "FAIL",
+    "coverage": {"complete": True},
+    "checks": {
+        "corrected_image": {"pixel_identical": ok, "image_rmse": 0.0, "passed": ok},
+        "motion_trajectory": {"max_shift_error": 0.0, "passed": ok},
+        "star_fields": {"difference_count": 0, "passed": ok},
+    },
+}
+pathlib.Path(a.json_out).write_text(json.dumps(report))
+sys.exit(0 if ok else 1)
+"""
+
+
+def _tree(base: Path, roots: list[str], failing: set[str]) -> None:
+    for r in roots:
+        for suffix in (".mrc", ".star"):
+            f = base / (r + suffix)
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("FAILME" if (r in failing and suffix == ".mrc") else "ok")
+
+
+def case_compare24_report_identity(tmp: Path) -> None:
+    """Reports are keyed by the complete root, so shared basenames cannot alias.
+
+    Movies/set1/a and Movies/set2/a both end in 'a'. Keying reports on the
+    basename makes the second comparison overwrite the first, and a later
+    --reuse then reads one movie's report for both entries -- turning a genuine
+    fail-then-pass pair into a false 2/2 exact PASS.
+    """
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    roots = ["Movies/set1/a", "Movies/set2/a"]
+    manifest = tmp / "manifest.json"
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": [r + ".tiff" for r in roots]}))
+    ref, test = tmp / "ref", tmp / "test"
+    # set1/a fails, set2/a passes -- ordered so a basename collision would let
+    # the passing report stand in for the failing one.
+    _tree(ref, roots, failing={"Movies/set1/a"})
+    _tree(test, roots, failing=set())
+
+    def run24(out: Path, reuse: bool = False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", tool, "--manifest", manifest, "--out", out]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    out = tmp / "exact"
+    cp = run24(out)
+    assert cp.returncode == 1, f"the failing movie was not reported (rc={cp.returncode})"
+    summary = json.loads((out / "exact_summary.json").read_text())
+    assert summary["verdict"] == "FAIL", summary
+    assert summary["passed"] == 1 and summary["failed"] == 1, summary
+
+    reports = sorted(p.name for p in out.glob("*_exact.json"))
+    assert len(reports) == 2, f"two movies produced {len(reports)} report(s): {reports}"
+    assert len(set(reports)) == 2, reports
+    for r in reports:
+        assert "set1" in r or "set2" in r, f"report name loses the directory: {r}"
+
+    # --reuse must reach the same verdict, not launder the fail into a pass
+    cp = run24(out, reuse=True)
+    assert cp.returncode == 1, f"--reuse turned a FAIL into rc={cp.returncode}"
+    summary = json.loads((out / "exact_summary.json").read_text())
+    assert summary["verdict"] == "FAIL", summary
+    assert summary["passed"] == 1 and summary["failed"] == 1, summary
+
+    # positive control: with both movies passing, both verdicts are PASS
+    _tree(ref, roots, failing=set())
+    out2 = tmp / "exact_ok"
+    assert run24(out2).returncode == 0
+    assert json.loads((out2 / "exact_summary.json").read_text())["verdict"] == "PASS"
+    assert run24(out2, reuse=True).returncode == 0
+
+
+def case_absolute_movie_roots_attributed(tmp: Path) -> None:
+    """Absolute movie names are matched where the runner actually writes them.
+
+    getOutputFileNames is `fn_out + fn_root`, so an absolute name lands at
+    <out>//abs/path.mrc, i.e. worker-relative `abs/path.mrc`. Matching against
+    the unnormalized absolute root attributes nothing and reports every product
+    lost even though the runner wrote it.
+    """
+    assert star_io.worker_relative_root(star_io.output_root("/data/Movies/a.tiff")) \
+        == "data/Movies/a"
+
+    rows = [("/data/Movies/m1.tiff", 1, 0.0), ("/data/Movies/m2.tiff", 2, 1.4),
+            ("/data/Movies/m3.tiff", 1, 2.8), ("/data/Movies/m4.tiff", 2, 4.2)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0, "absolute names were refused"
+
+    man = json.loads((shards / "shard_manifest.json").read_text())
+    dirs = []
+    for k, s in enumerate(man["shards"]):
+        wdir = tmp / f"w{k}"
+        dirs.append(wdir)
+        for movie in s["movies"]:
+            rel = star_io.worker_relative_root(star_io.output_root(movie))
+            for suffix in (".mrc", ".star", "_shifts.eps"):
+                f = wdir / (rel + suffix)
+                f.parent.mkdir(parents=True, exist_ok=True)
+                f.write_text("x")
+    status = fake_status(tmp, [0, 0])
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report)
+    assert cp.returncode == 0, cp.stderr
+    rep = json.loads(report.read_text())
+    assert rep["verdict"] == "PASS", rep["problems"]
+    assert rep["n_files_staged"] == 12, rep
+    for movie, _, _ in rows:
+        rel = star_io.worker_relative_root(star_io.output_root(movie))
+        assert (tmp / "merged" / (rel + ".mrc")).exists(), rel
+
+    # completeness still fails closed when one absolute-rooted movie is absent
+    (dirs[0] / (star_io.worker_relative_root(
+        star_io.output_root(man["shards"][0]["movies"][0])) + ".mrc")).unlink()
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged2", status,
+               tmp / "report2.json")
+    assert cp.returncode == 3, "a missing absolute-rooted product was not reported lost"
+    rep2 = json.loads((tmp / "report2.json").read_text())
+    assert any(p.startswith("lost:") for p in rep2["problems"]), rep2["problems"]
+
+
+def case_devices_with_no_witness_refused(tmp: Path) -> None:
+    """A real GPU launch cannot opt out of the device witness and still PASS."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r",
+              "--binary", FAKE, "--devices", "0,1", "--no-witness"])
+    assert cp.returncode == 2, f"--devices with --no-witness accepted (rc={cp.returncode})"
+    assert "certifying a device claim nothing" in cp.stderr, cp.stderr
+    # The rejection must happen before any device is selected, so it also holds
+    # on a host with no GPU at all.
+    assert "nvidia-smi" not in cp.stderr, cp.stderr
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -914,6 +1064,9 @@ CASES = [
     case_aggregate_wrong_order_rejected,
     case_launcher_refuses_cpu_gpu_confusion,
     case_per_worker_cpu_masks,
+    case_devices_with_no_witness_refused,
+    case_compare24_report_identity,
+    case_absolute_movie_roots_attributed,
     case_gpu_witness_logic,
     case_sampler_lifecycle,
 ]

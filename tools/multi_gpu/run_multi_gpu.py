@@ -110,6 +110,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"FAIL: refusing to reuse existing --out {out}", file=sys.stderr)
         return 2
 
+    if a.devices and a.no_witness:
+        # Before touching nvidia-smi, so the combination is refused on any host.
+        print("FAIL: --no-witness with --devices would launch real GPU workers and "
+              "still report PASS on exit codes alone, and merge_workers trusts that "
+              "verdict -- certifying a device claim nothing observed. Drop "
+              "--no-witness, or drop --devices to run on CPU.", file=sys.stderr)
+        return 2
+
     devices: list[dict[str, str]] = []
     if a.devices:
         try:
@@ -268,8 +276,9 @@ def main(argv: list[str] | None = None) -> int:
             # it failed. That is still an incomplete observation, and calling
             # it a pass would be asserting more than was seen.
             verdict_ok = False
-    elif devices:
+    elif devices:  # unreachable: --devices with --no-witness is rejected above
         status["gpu_witness"] = "skipped by --no-witness; no device claim is supported"
+        verdict_ok = False
 
     status["verdict"] = "PASS" if verdict_ok else "FAIL"
     (out / "status.json").write_text(json.dumps(status, indent=2) + "\n")

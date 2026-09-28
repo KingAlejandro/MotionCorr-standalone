@@ -195,6 +195,31 @@ MUTATIONS = [
      "                pass  # MUTATED",
      ["case_sampler_lifecycle"]),
 
+    ("--devices with --no-witness accepted again",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "    if a.devices and a.no_witness:",
+     "    if False:  # MUTATED",
+     ["case_devices_with_no_witness_refused"]),
+
+    ("compare24 keys reports by basename again",
+     "tools/multi_gpu/compare24.py",
+     '        report_id = rel.replace("/", "__").replace("\\\\", "__")',
+     "        report_id = Path(rel).name  # MUTATED",
+     ["case_compare24_report_identity"]),
+
+    ("merge matches absolute roots without normalizing",
+     "tools/multi_gpu/merge_workers.py",
+     "    root_owner = {star_io.worker_relative_root(star_io.output_root(m)): k\n"
+     "                  for m, k in owner.items()}",
+     "    root_owner = {star_io.output_root(m): k for m, k in owner.items()}  # MUTATED",
+     ["case_absolute_movie_roots_attributed"]),
+
+    ("merge completeness check un-normalizes the root",
+     "tools/multi_gpu/merge_workers.py",
+     "        root = star_io.worker_relative_root(star_io.output_root(movie))",
+     "        root = star_io.output_root(movie)  # MUTATED",
+     ["case_absolute_movie_roots_attributed"]),
+
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",
      "    if out.exists():",

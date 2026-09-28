@@ -355,6 +355,24 @@ def split_output_path(relpath: str, roots) -> tuple[str, str, str] | None:
     return best
 
 
+def worker_relative_root(root: str) -> str:
+    """Where an output root actually lands beneath a worker's --o directory.
+
+    getOutputFileNames() is `fn_out + fn_root` -- plain string concatenation
+    (src/motioncorr_runner.cpp:491-511). For an absolute movie name the result is
+    `<out>//abs/path/x.mrc`, which the filesystem collapses to `<out>/abs/path`.
+    So relative to the worker directory the root is the absolute root with its
+    leading slashes absorbed. Matching worker files against the unmodified
+    absolute root can never succeed, and every product then reads as lost even
+    though the runner wrote it exactly where it said it would.
+
+    A '..' component cannot escape the output directory: getOutputFileNames
+    replaces every '.' with '_' first, so '../x' becomes '__/x'. There is
+    deliberately no guard for it here -- one could never fire.
+    """
+    return root.lstrip("/")
+
+
 def output_root(movie_name: str) -> str:
     """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:491.
 

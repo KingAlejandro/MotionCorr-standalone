@@ -153,7 +153,10 @@ def main(argv: list[str] | None = None) -> int:
     for s in shards:
         for m in s["movies"]:
             owner[m] = s["index"]
-    root_owner = {star_io.output_root(m): k for m, k in owner.items()}
+    # Normalize to where the runner actually writes beneath each worker's --o,
+    # so absolute movie names are attributed instead of reading as lost.
+    root_owner = {star_io.worker_relative_root(star_io.output_root(m)): k
+                  for m, k in owner.items()}
 
     out = Path(a.out)
     if out.exists() and any(out.iterdir()):
@@ -211,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
 
     canonical = manifest["canonical_movies"]
     for movie in canonical:
-        root = star_io.output_root(movie)
+        root = star_io.worker_relative_root(star_io.output_root(movie))
         for suffix in products:
             rel = Path(root + suffix)
             if rel not in produced:
@@ -257,7 +260,8 @@ def main(argv: list[str] | None = None) -> int:
                 block = merged.block_with_label("rlnMicrographName")
                 col = block.column("rlnMicrographName")
                 got = [r.values[col] for r in block.rows]
-                want = [str(out / (star_io.output_root(m) + ".mrc")) for m in canonical]
+                want = [str(out / (star_io.worker_relative_root(
+                    star_io.output_root(m)) + ".mrc")) for m in canonical]
                 agg["n_rows"] = len(got)
                 if got != want:
                     problems.append(

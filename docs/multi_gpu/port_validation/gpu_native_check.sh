@@ -9,7 +9,7 @@
 # 2. ONE SMALL NATIVE RUN. No real launcher run has ever produced a status.json in
 #    the new format (resolved paths + manifest_sha256), so the merge's accept path
 #    on real GPU output has only been exercised against a status re-recorded by
-#    hand. Four movies across two workers on two devices closes that, and
+#    hand. A two-worker, two-device run closes that, and
 #    exercises real nvidia-smi witnessing and the new per-worker timing/RSS fields
 #    at the same time.
 #
@@ -19,7 +19,7 @@
 # Devices are selected BY UUID. nvidia-smi ignores CUDA_VISIBLE_DEVICES, so an
 # ordinal is never treated as device identity.
 #
-# Usage: gpu_native_check.sh <src> <out> <uuid_a> <uuid_b>
+# Usage: gpu_native_check.sh <src> <out> <uuid_a> <uuid_b> [n_movies, 0=all]
 set -euo pipefail
 set -x
 
@@ -27,6 +27,7 @@ SRC="${1:?ported source tree}"
 OUT="${2:?scratch dir}"
 UUID_A="${3:?first device UUID}"
 UUID_B="${4:?second device UUID}"
+NMOVIES="${5:-0}"   # 0 = the full dataset, which is what was run
 PY="${MC_PYTHON:-$HOME/.mc-venv/bin/python3}"
 CUDA=/usr/local/cuda-12.8
 BUILD="$OUT/build-cuda"
@@ -79,30 +80,35 @@ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"; do
     set -e
 done
 
-echo "=== 2. SMALL NATIVE RUN: 4 MOVIES, 2 WORKERS, 2 DEVICES ==="
+echo "=== 2. NATIVE RUN: 2 WORKERS, 2 DEVICES ==="
 cd "$OUT"
-"$PY" - "$SRC" <<'PYEOF'
-import pathlib, sys, shutil
-src = pathlib.Path(sys.argv[1])
-run = pathlib.Path("/home/alex/mc-i53-gpu/run")
-full = (run / "movies.star").read_text().splitlines(keepends=True)
-head, rows = [], []
-seen_loop = False
-for line in full:
-    if line.startswith("_rlnMicrograph") or not seen_loop:
-        head.append(line)
-        if line.strip().startswith("_rlnMicrographPreExposure"):
-            seen_loop = True
-        continue
-    if line.strip():
-        rows.append(line)
-pathlib.Path("movies4.star").write_text("".join(head) + "".join(rows[:4]) + "\n")
-print("rows kept:", [r.split()[0] for r in rows[:4]])
+# Slice with the project's own reader and its own row-preserving renderer.
+# The first version of this hand-parsed the file looking for a
+# _rlnMicrographPreExposure sentinel that this dataset's STAR does not have,
+# kept zero rows, and silently wrote the input back unchanged -- so a run
+# labelled "4 movies" processed all 24. The row count is now asserted.
+"$PY" - "$SRC" "$NMOVIES" <<'PYEOF'
+import pathlib, sys
+sys.path.insert(0, str(pathlib.Path(sys.argv[1]) / "tools" / "multi_gpu"))
+import star_io
+
+want = int(sys.argv[2])
+star = star_io.parse("/home/alex/mc-i53-gpu/run/movies.star")
+block = star_io.movie_block(star)
+total = len(block.rows)
+keep = total if want <= 0 else min(want, total)
+
+out = pathlib.Path("movies_subset.star")
+out.write_text(star.render_with_rows(block, block.rows[:keep]))
+
+check = star_io.movie_block(star_io.parse(out))
+print(f"rows kept: {len(check.rows)} of {total}")
+assert len(check.rows) == keep, f"asked for {keep} rows, wrote {len(check.rows)}"
 PYEOF
 ln -sfn /home/alex/mc-i53-gpu/run/Movies Movies
 
 taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/run_multi_gpu.py" \
-    --star movies4.star --out native --binary "$BUILD/motioncorr" \
+    --star movies_subset.star --out native --binary "$BUILD/motioncorr" \
     --devices "$UUID_A,$UUID_B" --cpus "96-103;104-111" --sample-interval 0.25 \
     -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 \
        --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
@@ -131,18 +137,18 @@ taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/merge_workers.py" \
     --manifest native/shards/shard_manifest.json \
     --workers native/w0 native/w1 --status native/status.json \
     --out merged --report merge_report.json \
-    --aggregate-with "$BUILD/motioncorr" --input-star movies4.star \
+    --aggregate-with "$BUILD/motioncorr" --input-star movies_subset.star \
     --aggregate-args='--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
 "$PY" -c "
 import json
 r = json.load(open('merge_report.json'))
 print('verdict', r['verdict'], 'staged', r['n_files_staged'], 'expected', r['n_movies_expected'])
 print('problems', r['problems'])
-assert r['verdict'] == 'PASS' and r['n_movies_expected'] == 4
+assert r['verdict'] == 'PASS'
 assert r['aggregate_star']['row_order'] == 'canonical'
 "
 
-echo "=== 4. THE FOUR MOVIES MATCH THE RETAINED SERIAL CUDA BASELINE ==="
+echo "=== 4. THE MOVIES MATCH THE RETAINED SERIAL CUDA BASELINE ==="
 taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/compare24.py" \
     --ref /home/alex/mc-i53-gpu/run/serialG --test merged \
     --tool "$SRC/tools/compare_motioncorr.py" \
@@ -151,7 +157,7 @@ taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/compare24.py" \
 import json
 s = json.load(open('exact/exact_summary.json'))
 print('expected', s['n_expected'], 'passed', s['passed'], 'failed', s['failed'], s['verdict'])
-assert s['verdict'] == 'PASS' and s['passed'] == 4 and s['failed'] == 0
+assert s['verdict'] == 'PASS' and s['failed'] == 0 and s['passed'] == s['n_expected']
 "
 
 echo "=== RELEASE ==="

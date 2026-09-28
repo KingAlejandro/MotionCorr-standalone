@@ -178,10 +178,38 @@ cmake 4.4.3, Python 3.12 + numpy 2.5.3, under
 | `ctest --output-on-failure -j 4` | **18/18 passed** |
 | end-to-end, real binary: serial vs 3-way sharded | **6/6 exact**, merge `PASS`, aggregate STAR identical, `DISTINCT_PAYLOADS=6/6` |
 
-**4GPUs**, tooling revalidated over the **retained** native two-GPU outputs, cores
-96-111, under `flock /tmp/motioncorr-bench.lock`. **No GPU compute was run**: the
-C++ change is byte-identical to the one witnessed natively at `f433662` apart
-from one reworded comment, so the tooling is what was re-run.
+**4GPUs**, native. A CUDA build was required and is not optional evidence: the
+ported `--gpu` hunk splits on `#if defined _CUDA_ENABLED`, and every CPU build
+compiles the other side, so the live path had never been through a compiler on
+this branch. nvcc 12.8.61, sm80, driver 570.86.10, build on cores 96-103,
+`CUDA_BUILD_RC=0`, binary `0be8e28e3a01a6e094c30359fc50e82bc2caf2e06046a942c1ada8832a16f53d`.
+
+Devices **GPU2** `GPU-063e5232-…` and **GPU3** `GPU-b2cb2c39-…`, selected by UUID
+and asserted idle before the run; GPU0 and GPU1 were a colleague's and were left
+alone. Workers on disjoint masks `96-103` / `104-111`, under
+`flock /tmp/motioncorr-bench.lock`.
+
+| Check, native at `a48c7f5` | Result |
+|---|---|
+| Device-list behaviour on a CUDA build | `0:1:2:3` and `0,1` refused by count; `0abc` and `-1` refused as non-integers; **`99` still reports `Invalid GPU device ID 99`**, so the new digit check does not shadow the existing range check |
+| Two-worker two-GPU run, 24 movies | **`verdict: PASS`**, rcs `[0, 0]`, 69 witness samples, **2 distinct physical UUIDs**, 0 unwitnessed / wrong-device / shared |
+| Per-worker record | w0 21.65 s / 1.52 GiB, w1 21.73 s / 1.52 GiB, final-worker tail **0.082 s** |
+| Merge, real new-format `status.json` | **PASS**, 96 files, 24 movies, no problem, aggregate row order canonical, no staged product rewritten |
+| Exact comparison vs the retained serial CUDA baseline | **24/24 PASS** |
+
+The 0.082 s tail is the expected result for 24 equal-sized tutorial movies and is
+**not** evidence that static workers balance well in general — #73's mixed corpus
+is what would test that.
+
+This run was intended as a four-movie smoke check. The STAR subsetter looked for
+a `_rlnMicrographPreExposure` sentinel this dataset's STAR does not carry, kept
+zero rows and wrote the input back unchanged, so all 24 ran. The assertion on the
+expected movie count caught it; the subsetter now uses `star_io.render_with_rows`
+and asserts the row count. Recorded because the arm is larger than it was
+budgeted to be, not because the result is in doubt.
+
+**Retained-output revalidation**, separately, over the earlier native two-GPU
+outputs with **no GPU compute at all**:
 
 | Check | Result |
 |---|---|
@@ -192,8 +220,9 @@ from one reworded comment, so the tooling is what was re-run.
 | `--reuse`, then `--reuse` with a tampered origin sidecar | reproduces `PASS`; **refused**, rc 1 |
 | Device identity, read from the retained witness | **2 distinct physical UUIDs**, 36 samples, 0 unwitnessed / wrong / shared |
 
-Released: all four GPUs 1 MiB / 0 %, no compute apps, mutex unheld. GPU2/GPU3 and
-colleagues untouched throughout.
+Released after each arm: no process with an executable under the run tree, no
+owned compute apps, mutex unheld. Evidence:
+[`port_evidence/`](port_evidence/).
 
 
 ## Negative controls

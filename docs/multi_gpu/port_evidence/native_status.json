@@ -1,0 +1,98 @@
+{
+  "input_star": "movies4.star",
+  "binary": "/home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr",
+  "n_workers": 2,
+  "worker_args": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--j",
+    "4",
+    "--max_io_threads",
+    "4"
+  ],
+  "cpus": "96-103;104-111",
+  "cpu_masks": [
+    "96-103",
+    "104-111"
+  ],
+  "started_at": "2026-09-28T15:43:37.173+00:00",
+  "ended_at": "2026-09-28T15:43:58.951+00:00",
+  "wall_seconds": 21.778,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "final_worker_tail_seconds": 0.082,
+  "final_worker_tail_note": "spread between the first and last worker to exit. Load imbalance is one of the candidate limits on static workers; this makes it observable, it does not attribute it.",
+  "manifest": "/home/alex/mc-i53-native-20260928/work/native/shards/shard_manifest.json",
+  "manifest_sha256": "db8bcd2cb9749f94b1c6b2fd616f3c3606b7f4ab4780dd9189784c8199b2654d",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 1729638,
+      "returncode": 0,
+      "log": "/home/alex/mc-i53-native-20260928/work/native/w0/run.log",
+      "started_at": "2026-09-28T15:43:37.175+00:00",
+      "ended_at": "2026-09-28T15:43:58.828+00:00",
+      "wall_seconds": 21.652,
+      "rss_hwm_kib": 1594016,
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.25s"
+    },
+    {
+      "index": 1,
+      "pid": 1729639,
+      "returncode": 0,
+      "log": "/home/alex/mc-i53-native-20260928/work/native/w1/run.log",
+      "started_at": "2026-09-28T15:43:37.177+00:00",
+      "ended_at": "2026-09-28T15:43:58.910+00:00",
+      "wall_seconds": 21.733,
+      "rss_hwm_kib": 1593824,
+      "rss_note": "worker process only; ghostscript children excluded; sampled every 0.25s"
+    }
+  ],
+  "devices": [
+    {
+      "smi_index": "2",
+      "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+    },
+    {
+      "smi_index": "3",
+      "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total": "81920 MiB",
+      "selector": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+    }
+  ],
+  "gpu_witness": {
+    "expected": {
+      "1729638": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "1729639": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+    },
+    "witnessed": {
+      "1729638": [
+        "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598"
+      ],
+      "1729639": [
+        "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+      ]
+    },
+    "unwitnessed_pids": [],
+    "wrong_device": [],
+    "shared_devices": [],
+    "distinct_devices_witnessed": 2,
+    "all_pids_witnessed_on_intended_distinct_devices": true,
+    "sampler_errors": [],
+    "n_samples": 69
+  },
+  "verdict": "PASS"
+}

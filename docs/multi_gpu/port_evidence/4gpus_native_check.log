@@ -1,0 +1,392 @@
++ SRC=/home/alex/mc-i53-native-20260928/src
++ OUT=/home/alex/mc-i53-native-20260928/work
++ UUID_A=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ UUID_B=GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
++ PY=/home/alex/.mc-venv/bin/python3
++ CUDA=/usr/local/cuda-12.8
++ BUILD=/home/alex/mc-i53-native-20260928/work/build-cuda
++ MASK=96-111
++ BUILD_MASK=96-103
++ export PATH=/usr/local/cuda-12.8/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ PATH=/usr/local/cuda-12.8/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
++ mkdir -p /home/alex/mc-i53-native-20260928/work
+=== PROVENANCE ===
++ echo '=== PROVENANCE ==='
++ git -C /home/alex/mc-i53-native-20260928/src rev-parse HEAD
+a48c7f501bc116394830bcbeda10d9c2b4a3f9f9
++ git -C /home/alex/mc-i53-native-20260928/src status --porcelain
+++ git -C /home/alex/mc-i53-native-20260928/src status --porcelain
++ '[' -z '' ']'
++ date -Is
+2026-09-28T15:42:49+00:00
++ hostname
+4-gpu-vm
++ nvcc --version
++ tail -2
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
++ nvidia-smi --query-gpu=driver_version --format=csv,noheader
++ head -1
+570.86.10
++ /home/alex/.mc-venv/bin/python3 -c 'import numpy; print("numpy", numpy.__version__)'
+numpy 2.5.3
+=== OCCUPANCY BEFORE (owned devices only) ===
++ echo '=== OCCUPANCY BEFORE (owned devices only) ==='
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 61311 MiB, 7 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 61311 MiB, 33 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv,noheader
+1687477, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 61302 MiB
+1687495, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 61302 MiB
++ for u in "$UUID_A" "$UUID_B"
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -c GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
+owned device GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 has 0 compute app(s)
+++ true
++ used=0
++ echo 'owned device GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 has 0 compute app(s)'
++ '[' 0 -eq 0 ']'
++ for u in "$UUID_A" "$UUID_B"
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -c GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
+++ true
+owned device GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d has 0 compute app(s)
+=== 1. CUDA BUILD (nvcc; no device is opened) ===
++ used=0
++ echo 'owned device GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d has 0 compute app(s)'
++ '[' 0 -eq 0 ']'
++ echo '=== 1. CUDA BUILD (nvcc; no device is opened) ==='
++ rm -rf /home/alex/mc-i53-native-20260928/work/build-cuda
++ taskset -c 96-103 cmake -S /home/alex/mc-i53-native-20260928/src -B /home/alex/mc-i53-native-20260928/work/build-cuda -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DBUILD_TESTING=OFF -DCMAKE_CUDA_ARCHITECTURES=80 -DPython3_EXECUTABLE=/home/alex/.mc-venv/bin/python3
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+-- The CUDA compiler identification is NVIDIA 12.8.61
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda-12.8/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /usr/local/cuda-12.8/targets/x86_64-linux/include (found version "12.8.61") 
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done (7.5s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    Python3_EXECUTABLE
+
+
+-- Build files have been written to: /home/alex/mc-i53-native-20260928/work/build-cuda
++ set +e
++ taskset -c 96-103 cmake --build /home/alex/mc-i53-native-20260928/work/build-cuda -j 8
++ tee /home/alex/mc-i53-native-20260928/work/cuda_build.log
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  5%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
+[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
+[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+[ 13%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 15%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
+[ 16%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
+[ 20%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/t_complex.cpp.o
+[ 21%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/damage.cpp.o
+[ 22%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/optics_data.cpp.o
+[ 23%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/nelder_mead.cpp.o
+[ 24%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/optimization.cpp.o
+[ 25%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/Fourier_helper.cpp.o
+[ 26%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/complex_io.cpp.o
+[ 28%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/ctf/tilt_helper.cpp.o
+[ 29%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyev2.c.o
+[ 30%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevc3.c.o
+[ 31%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevh3.c.o
+[ 32%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevq3.c.o
+[ 33%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsytrd3.c.o
+[ 34%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/image_log.cpp.o
+[ 35%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
+[ 37%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 38%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/interpolation.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
+[ 40%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/new_ft.cpp.o
+[ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/obs_model.cpp.o
+[ 43%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/parallel_ft.cpp.o
+[ 44%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/resampling_helper.cpp.o
+[ 46%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/slice_helper.cpp.o
+[ 47%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/stack_helper.cpp.o
+[ 48%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/t_complex.cpp.o
+[ 49%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/vtk_helper.cpp.o
+[ 50%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/Fourier_2D_deformation.cpp.o
+[ 51%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/linear_2D_deformation.cpp.o
+[ 52%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/Fourier_2D_deformation_model.cpp.o
+[ 53%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/linear_2D_deformation_model.cpp.o
+[ 55%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/spline_2D_deformation_model.cpp.o
+[ 56%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/spline_2D_deformation.cpp.o
+[ 57%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory.cpp.o
+[ 58%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory_set.cpp.o
+[ 59%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/particle_set.cpp.o
+[ 60%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/projection_IO.cpp.o
+[ 61%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomo_ctf_helper.cpp.o
+[ 62%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram.cpp.o
+[ 64%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram_set.cpp.o
+[ 65%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/ansi_codes.cpp.o
+[ 66%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/image_file_helper.cpp.o
+[ 67%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/log.cpp.o
+[ 68%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/zio.cpp.o
+[ 69%] Building CXX object CMakeFiles/motioncorr_core.dir/src/mask.cpp.o
+[ 70%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix1d.cpp.o
+[ 71%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix2d.cpp.o
+[ 73%] Building CXX object CMakeFiles/motioncorr_core.dir/src/memory.cpp.o
+[ 74%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_container.cpp.o
+[ 75%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_label.cpp.o
+[ 76%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_table.cpp.o
+[ 77%] Building CXX object CMakeFiles/motioncorr_core.dir/src/micrograph_model.cpp.o
+[ 78%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[ 79%] Building CXX object CMakeFiles/motioncorr_core.dir/src/multidim_array.cpp.o
+[ 80%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
+[ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
+[ 83%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
+In file included from /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.h:48,
+                 from /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:49:
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’ at /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:594:25:
+/home/alex/mc-i53-native-20260928/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp: In function ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’:
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:579:13: note: declared here
+  579 |     RFLOAT *xt=NULL;
+      |             ^~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:767:25:
+/home/alex/mc-i53-native-20260928/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:703:24: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                        ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:768:25:
+/home/alex/mc-i53-native-20260928/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:703:18: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                  ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:769:25:
+/home/alex/mc-i53-native-20260928/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-native-20260928/src/src/numerical_recipes.cpp:703:13: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |             ^~
+[ 84%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
+/home/alex/mc-i53-native-20260928/src/src/time.cpp: In function ‘void progress_bar(long int)’:
+/home/alex/mc-i53-native-20260928/src/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+  191 |             fprintf(stdout, cheese);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~
+[ 92%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
+[ 93%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_alignpatch.cu.o
+[ 94%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_realspace_dw.cu.o
+[ 95%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+[ 96%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_movie_session.cu.o
+/home/alex/mc-i53-native-20260928/src/src/acc/cuda/cuda_fft_prep.cu(52): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 97%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr
+CUDA_BUILD_RC=0
++ BUILD_RC=0
++ set -e
++ echo CUDA_BUILD_RC=0
++ '[' 0 -eq 0 ']'
++ grep -c error: /home/alex/mc-i53-native-20260928/work/cuda_build.log
+0
++ true
++ sha256sum /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr
+0be8e28e3a01a6e094c30359fc50e82bc2caf2e06046a942c1ada8832a16f53d  /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr
++ strings /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr
++ grep -c 'Using CUDA acceleration on GPU device'
+1
+=== 1b. DEVICE-LIST BEHAVIOUR ON A CUDA BUILD ===
+--- --gpu 0:1:2:3 ---
++ echo '=== 1b. DEVICE-LIST BEHAVIOUR ON A CUDA BUILD ==='
++ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"
++ echo '--- --gpu 0:1:2:3 ---'
++ set +e
++ CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --use_own --i /nonexistent.star --o /home/alex/mc-i53-native-20260928/work/none --gpu 0:1:2:3
++ tail -3
+==================
+ERROR: 
+ERROR: --gpu 0:1:2:3 requests 4 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+rc=1
+--- --gpu 0,1 ---
++ echo rc=1
++ set -e
++ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"
++ echo '--- --gpu 0,1 ---'
++ set +e
++ CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --use_own --i /nonexistent.star --o /home/alex/mc-i53-native-20260928/work/none --gpu 0,1
++ tail -3
+==================
+ERROR: 
+ERROR: --gpu 0,1 requests 2 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+rc=1
+--- --gpu 0abc ---
++ echo rc=1
++ set -e
++ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"
++ echo '--- --gpu 0abc ---'
++ set +e
++ CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --use_own --i /nonexistent.star --o /home/alex/mc-i53-native-20260928/work/none --gpu 0abc
++ tail -3
+==================
+ERROR: 
+ERROR: --gpu 0abc is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
+rc=1
+--- --gpu -1 ---
++ echo rc=1
++ set -e
++ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"
++ echo '--- --gpu -1 ---'
++ set +e
++ CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --use_own --i /nonexistent.star --o /home/alex/mc-i53-native-20260928/work/none --gpu -1
++ tail -3
+==================
+ERROR: 
+ERROR: --gpu -1 is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
+rc=1
+--- --gpu 99 ---
++ echo rc=1
++ set -e
++ for spec in "0:1:2:3" "0,1" "0abc" "-1" "99"
++ echo '--- --gpu 99 ---'
++ set +e
++ CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598
++ /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --use_own --i /nonexistent.star --o /home/alex/mc-i53-native-20260928/work/none --gpu 99
++ tail -3
+==================
+ERROR: 
+Invalid GPU device ID 99. Found 1 CUDA device(s).
+rc=1
+=== 2. SMALL NATIVE RUN: 4 MOVIES, 2 WORKERS, 2 DEVICES ===
++ echo rc=1
++ set -e
++ echo '=== 2. SMALL NATIVE RUN: 4 MOVIES, 2 WORKERS, 2 DEVICES ==='
++ cd /home/alex/mc-i53-native-20260928/work
++ /home/alex/.mc-venv/bin/python3 - /home/alex/mc-i53-native-20260928/src
+rows kept: []
++ ln -sfn /home/alex/mc-i53-gpu/run/Movies Movies
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-native-20260928/src/tools/multi_gpu/run_multi_gpu.py --star movies4.star --out native --binary /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --devices GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598,GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d --cpus '96-103;104-111' --sample-interval 0.25 -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
+TOTAL	24
+native/shards/shard_2way_0.star	12
+native/shards/shard_2way_1.star	12
+manifest	native/shards/shard_manifest.json
+{
+  "n_workers": 2,
+  "wall_seconds": 21.778,
+  "returncodes": [
+    0,
+    0
+  ],
+  "verdict": "PASS"
+}
++ /home/alex/.mc-venv/bin/python3 -c '
+import json
+s = json.load(open('\''native/status.json'\''))
+w = s['\''gpu_witness'\'']
+print('\''verdict'\'', s['\''verdict'\''])
+print('\''distinct UUIDs'\'', sorted(set(w['\''expected'\''].values())))
+print('\''unwitnessed'\'', w['\''unwitnessed_pids'\''], '\''wrong'\'', w['\''wrong_device'\''], '\''shared'\'', w['\''shared_devices'\''])
+print('\''samples'\'', w['\''n_samples'\''], '\''sampler_errors'\'', w['\''sampler_errors'\''])
+print('\''tail_s'\'', s['\''final_worker_tail_seconds'\''])
+for x in s['\''workers'\'']:
+    print('\'' worker'\'', x['\''index'\''], '\''rc'\'', x['\''returncode'\''], '\''wall'\'', x['\''wall_seconds'\''],
+          '\''rss_hwm_kib'\'', x['\''rss_hwm_kib'\''], '\''mask'\'', s['\''cpu_masks'\''][x['\''index'\'']])
+assert s['\''verdict'\''] == '\''PASS'\''
+assert w['\''all_pids_witnessed_on_intended_distinct_devices'\'']
+assert len(set(w['\''expected'\''].values())) == 2
+assert s['\''manifest_sha256'\''] and s['\''final_worker_tail_seconds'\''] is not None
+assert all(x['\''rss_hwm_kib'\''] and x['\''rss_hwm_kib'\''] > 0 for x in s['\''workers'\''])
+'
+verdict PASS
+distinct UUIDs ['GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598', 'GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d']
+unwitnessed [] wrong [] shared []
+samples 69 sampler_errors []
+tail_s 0.082
+ worker 0 rc 0 wall 21.652 rss_hwm_kib 1594016 mask 96-103
+ worker 1 rc 0 wall 21.733 rss_hwm_kib 1593824 mask 104-111
+=== 3. MERGE ACCEPTS THE REAL NEW-FORMAT STATUS ===
++ echo '=== 3. MERGE ACCEPTS THE REAL NEW-FORMAT STATUS ==='
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-native-20260928/src/tools/multi_gpu/merge_workers.py --manifest native/shards/shard_manifest.json --workers native/w0 native/w1 --status native/status.json --out merged --report merge_report.json --aggregate-with /home/alex/mc-i53-native-20260928/work/build-cuda/motioncorr --input-star movies4.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 96,
+  "verdict": "PASS"
+}
++ /home/alex/.mc-venv/bin/python3 -c '
+import json
+r = json.load(open('\''merge_report.json'\''))
+print('\''verdict'\'', r['\''verdict'\''], '\''staged'\'', r['\''n_files_staged'\''], '\''expected'\'', r['\''n_movies_expected'\''])
+print('\''problems'\'', r['\''problems'\''])
+assert r['\''verdict'\''] == '\''PASS'\'' and r['\''n_movies_expected'\''] == 4
+assert r['\''aggregate_star'\'']['\''row_order'\''] == '\''canonical'\''
+'
+verdict PASS staged 96 expected 24
+problems []
+Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+AssertionError

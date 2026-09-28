@@ -62,11 +62,19 @@ g++ 13.3.0, cmake 4.4.3, Python 3.12 + numpy 2.5.3, under
 `flock /tmp/motioncorr-issue96-cpu-validation.lock`. Two colleague `ctffind` jobs left
 untouched. Commands and full log: `docs/multi_gpu/port_validation/`.
 
-**4GPUs** revalidation of the tooling over the **retained** native two-GPU outputs
-(`/home/alex/mc-i53-gpu/run`), under `flock /tmp/motioncorr-bench.lock`, cores 96-111.
-**No GPU compute was run.** The C++ change is byte-identical to the one already witnessed
-natively at PR106 `f433662` apart from one reworded comment, so re-running it would prove
-nothing new; the tooling is what changed, and the tooling is what was re-run.
+**4GPUs**, two arms. A CUDA build was required rather than optional: the ported hunk
+splits on `#if defined _CUDA_ENABLED` and every CPU build compiles the other side, so the
+live path had never been compiled on this branch. nvcc 12.8.61, sm80, `CUDA_BUILD_RC=0`.
+Then a native two-worker two-GPU run on GPU2/GPU3, selected by UUID and asserted idle
+first, on disjoint masks 96-103 / 104-111: `verdict: PASS`, two distinct physical UUIDs,
+69 witness samples, merge PASS over 96 files, and **24/24 exact** against the retained
+serial CUDA baseline. Separately, the tooling was revalidated over the retained outputs
+with no GPU compute at all.
+
+The native arm was budgeted as a four-movie smoke check and ran all 24: the STAR
+subsetter looked for a column this dataset does not have and silently wrote the input
+back unchanged. The expected-count assertion caught it, and the subsetter now uses
+`star_io.render_with_rows` with the row count asserted.
 
 ## Superseding the round-96 integration counts
 

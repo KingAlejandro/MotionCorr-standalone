@@ -9,7 +9,7 @@ here; `series.log` is the interleaved timing series; `compare_*.txt` are full co
 | | |
 |---|---|
 | base (control) | main `8323c55faf1c4ddbe35dd36c5cd1266d48f25c38`, binary sha256 `614c0090…99374` |
-| candidate | `05313811284c1c25825f3421eee8fe5fe0ef3817` (products/timings) — the later test-only commits do not touch `src/` |
+| candidate | `src/` tree `2c4f73bac053d17f7a1ca225126d0832009b3d1e`, which is the tree of every commit on this branch from `769f7c6` to HEAD — later commits change only tests and docs. Anchor on the tree and the binary sha256 below, not on a commit id: the branch was rebased to add the co-author trailer, so the commit actually built on the host (`0531381`) no longer exists upstream. |
 | candidate binary | sha256 `ee631181…41c6` |
 | build | `-DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80`, `-O3 -DNDEBUG`, no fast math, no FP flags |
 | toolchain | g++ 13.3.0, nvcc 12.8.61, cmake 3.28.3, driver 570.86.10 |

@@ -1558,7 +1558,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// inverse transform before anything reads it, so the transform is dead
 	// work. Skipping it is bit-exact, not an approximation.
 	const bool do_local = (patch_x > 2) && (patch_y > 2);
-	const bool need_real_space_before_dw = do_local || !do_dose_weighting || save_noDW;
+	// even_odd_split is inert at this commit: the block below is guarded by
+	// (!do_dose_weighting || save_noDW), so a dose-weighted even/odd run writes
+	// no EVN/ODD here and reads nothing. Upstream commit 0f508e0 (#67) widens
+	// that guard to include even_odd_split, at which point omitting the term
+	// silently corrupts EVN/ODD. Carried now so this predicate cannot become
+	// wrong under a rebase or merge. See agents/designs/issue_26_cpu_global_ifft_skip.md.
+	const bool need_real_space_before_dw =
+			do_local || !do_dose_weighting || save_noDW || even_odd_split;
 
 	RCTIC(TIMING_GLOBAL_IFFT);
 	#pragma omp parallel for num_threads(n_threads)

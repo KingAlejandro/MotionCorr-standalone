@@ -5,9 +5,9 @@
 | Issue | #94 bounded next-movie CUDA prefetch |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort — no routing errors, no model substitution |
 | Task class | implementation |
-| Phase | 5/5 — implemented, reviewed, fixed, re-validated; draft PR open and current |
+| Phase | 6/6 — review fixes landed and re-validated; dedicated SCARF GPU allocation running |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| Head | `c377404` (validated source `eb022aff151c11d939e2c39a5fc0b56da31ad431`) |
+| Head | `ab9cd6b` (validated source `08c87bb653a3970639dd0699eaa479eb2fc795a9`) |
 | Branch | `round96/94-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-967d9ef6` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/108 (draft) |
@@ -93,37 +93,47 @@ for re-checks.
 
 None for the CPU deliverable. The GPU screen is gated on a slot, not blocked on a defect.
 
-## NEEDS_GPU — prepared, **unrun**, awaiting explicit transfer
+## GPU allocation — DEDICATED SCARF, acquired 2026-09-28T06:58Z
 
-#26 remains the slot owner. `scripts/prefetch_gpu_screen.sh` **refuses to start** unless
-`MC94_SLOT_GRANTED` names the assigning reference, and that check runs *before* it would queue
-on the benchmark lock, so it cannot sit on the mutex by accident.
+Per Alex's 28 Sep authorisation (#96 issuecomment-5864906904, #66
+issuecomment-5864920453): threads no longer queue behind #53. This task took a **separate
+dedicated SCARF Slurm allocation** and touched **no** shared-VM resource — #53 keeps GPU0/1
+with CPUs 96-111, #69 has GPU2 with 112-119, GPU3 stays free for colleagues. No
+`/tmp/motioncorr-bench.lock` was taken or queued on.
 
-- **Purpose**: paired serial-vs-prefetch end-to-end screen on the 24 tutorial movies, plus
-  exact same-backend comparison of every corrected payload, normalized header and STAR.
-- **Resources**: shared `4GPUs`; top-level `taskset -c 96-111` (16 logical CPUs aggregate
-  across all MotionCorr work); **one** GPU first, at most 2 idle devices later; build `<= 8`
-  inside the lock; aggregate runtime/reader/helper threads `<= 16`; whole series under one
-  `flock /tmp/motioncorr-bench.lock`; no competing benchmark.
-- **Command** (the script re-execs itself under the lock; do not wrap it again):
+| field | value |
+|---|---|
+| Cluster | SCARF (`ui1.scarf.rl.ac.uk`), account `scd`, QOS `normal` |
+| Job | `3511123`, partition `gpu`, node `gn3000`, `--exclusive`, `--gres=gpu:a100:1` |
+| Earlier job | `3511120` FAILED in 10 s at preflight/configure (no `nvcc`: `module load` had been piped into a subshell). Allocation released immediately; recorded, not hidden. |
+| Scratch | `/work4/scd/scarf1415/motioncorr/mc-issue94/` — quota `pan_quota` reports **unlimited** soft/hard, 3.08 TB currently used |
+| Inputs | 24 tutorial movies + `gain.mrc` + `movies.star`, **copied into this task's own tree**, never read from or written to #53's `i53-scarf` tree during the run |
+| Input identity | `input_sha256.txt`, 26 files; verified byte-identical to the i53 tutorial inputs before use |
+| Source | `ab9cd6b9a3ee5c2f0de11a623d849dc921a71448` staged by `git archive` |
+| Toolchain | GCC 13.2.0, CMake 3.27.6, CUDA 12.8.0, FFTW 3.3.10, LibTIFF 4.6.0, libpng 1.6.40, libjpeg-turbo 3.0.1, zlib 1.2.13 (all EasyBuild modules) |
 
-  ```
-  MC94_SLOT_GRANTED=<reference> scripts/prefetch_gpu_screen.sh \
-      --binary <build-cuda>/motioncorr --star <tutorial>/movies.star \
-      --outdir <scratch>/issue94_screen --gpu <idle-device> --pairs 3 \
-      --threads 8 --cpus 96-111
-  python3 tools/compare_prefetch_arms.py --root <scratch>/issue94_screen
-  ```
+Design of the run, and why:
 
-- **Protocol built in**: settle gate *after* acquiring (`pgrep -x` by exact name, load1 < 2.0,
-  wait logged); arm order alternating within each pair with the order label retained; 1 Hz
-  continuous foreign-load sampling; 5 ms NVML VRAM sampling; per-run `Cpus_allowed_list`,
-  `lscpu` topology, NUMA policy and GPU UUID recorded; complete per-arm outputs retained.
-- **Separate arms, not merged**: a fixed-8 and a fixed-16 CPU-budget series are distinct runs.
-  Extra CPUs will not be attributed to the code change.
-- **Stop rule**: if 1-GPU screening shows no meaningful full-run improvement, the negative
-  result is the deliverable and the complexity is not promoted. 2/3/4-worker schedules are
-  attempted only if the 1-GPU screen is not negative.
+- **Correctness before timing.** Prefetch off vs on over all 24 movies, compared on every MRC
+  payload, every normalized header (bytes 0-224; 224-1024 is the label area and carries a
+  wall-clock timestamp) and every STAR artifact. If the arms disagree the job **exits without
+  producing any timing**, because a speed number from arms that differ is meaningless.
+- **Fixed CPU budget for both arms.** The allocation is exclusive, so the job's cpuset is the
+  whole node — that keeps other users off the host but is *not* a budget. Both arms are
+  `taskset`-pinned to the same 16 logical CPUs, chosen on one NUMA node and preferring distinct
+  physical cores before SMT siblings, with `--j 8` and `OMP_NUM_THREADS=8`. The prefetch arm's
+  reader threads therefore come out of the same budget and are counted, not treated as free.
+- **Paired, alternating, labelled.** Three pairs with the arm order flipped each time and the
+  order retained, so the positional bias comes out of the same data.
+- **RSS over the owned process tree**, sampled at 200 ms — not one pid, not the node.
+- 100 ms NVML sampling for device high-water, recorded as a lower bound.
+- Full provenance per run: inherited `Cpus_allowed_list`, `lscpu` topology, NUMA policy, GPU
+  **UUID** (ordinals never identify silicon), co-tenant compute apps, node occupancy.
+
+Not attempted, and still **UNRUN**: the composed PR103/PR110 integrity work — the standing
+instruction is that reader/error integration with PR110/103/105 is a *later* bounded
+composition, and composing another task's branch here would be a merge this task is not
+authorised to make.
 
 ## Subagents / reviewers — both complete, both acted on
 
@@ -155,9 +165,8 @@ Findings and fixes posted on #94 (issuecomment-5861326352) and PR #108
 
 ## Next step
 
-Hold. The CPU deliverable is complete and the draft PR is current at `c377404`. The only
-remaining work is the GPU screen, which waits on an explicit slot transfer from #26. No
-merges, no default promotion, no GPU submission before then.
+Wait on SCARF job `3511123`, then publish exact source/input/binary/harness/commands/results
+and the allocation release on #94, #108 and #66. No merges, no default promotion.
 
-If the screen is eventually run and shows no meaningful full-run improvement, the negative
-result is the deliverable: record it and do not promote the complexity.
+If the paired screen shows no meaningful full-run improvement, **the negative result is the
+deliverable**: record it, keep prefetch opt-in, and do not promote the complexity.

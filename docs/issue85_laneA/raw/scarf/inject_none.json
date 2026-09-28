@@ -1,0 +1,29 @@
+{
+  "tool": "tiff_ingest_bench",
+  "tag": "scarf_inject_none",
+  "regime": "warm",
+  "cpu_mask": "0-63",
+  "cpu_mask_count": 64,
+  "omp_max_threads": 64,
+  "repeats": 1,
+  "libtiff_version": "LIBTIFF, Version 4.4.0\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.",
+  "movies": [
+    {
+      "path": "/work4/cse/scarf1415/motioncorr/mc-issue94/data/Movies/20170629_00021_frameImage.tiff",
+      "file_bytes": 126550106,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1493,
+      "compressed_bytes": 125808249, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "production_image_read", "workers": 8, "wall_median_s": 0.289521, "wall_min_s": 0.289521, "wall_max_s": 0.289521, "cpu_median_s": 2.27764, "minor_faults_median": 42137, "major_faults_median": 5, "bytes_in": 125808249, "bytes_out": 1366942080, "in_MBps": 434.539, "out_MBps": 4721.39, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0}
+      ]
+    }
+  ],
+  "injected_mutation": "none",
+  "injected_arm": "",
+  "max_rss_kib": 5382740,
+  "sink": 0
+}

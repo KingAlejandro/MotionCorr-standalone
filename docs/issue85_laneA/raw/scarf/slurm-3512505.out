@@ -1,0 +1,70 @@
+cpu-bind=MASK - cn3121, task  0  0 [313056]: mask 0xffffffffffffffff set
+slurmstepd: error: Unable to create TMPDIR [/scratch/scarf1415/relion-container-tests/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+=== node ===
+cn3121.scarf.rl.ac.uk
+64
+AMD EPYC 7502P 32-Core Processor
+               total        used        free      shared  buff/cache   available
+Mem:             251           7         237           0           7         243
+slurm_job_id=3512505
+slurm_nodelist=cn3121
+=== source ===
+commit=fbf1ccb6d1e691bf61381ea70128b7718d6a8517
+dirty=[]
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+65710a1b7582bb11a232991b53f598347b37fe99f0b9cd4995ed6b9e3d8945c9  /work4/cse/scarf1415/motioncorr/mc85-laneA/build/tiff_ingest_bench
+date_utc=2026-09-28T15:37:57Z
+venue=SCARF Slurm, exclusive node, partition scarf, constraint scarf23
+slurm_job_id=3512505
+node=cn3121.scarf.rl.ac.uk
+kernel=Linux 5.14.0-687.42.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Aug 26 12:55:43 UTC 2026 x86_64 GNU/Linux
+nproc=64
+cpu_model=AMD EPYC 7502P 32-Core Processor
+numa=4
+mem_total_kb=263444256 kB
+source_revision=fbf1ccb6d1e691bf61381ea70128b7718d6a8517
+source_dirty_files=0
+bundle_sha256=a83351a09daeaea46ca2a028f2e7eaa2f6018d83739e399f02451cc137e8555b
+bench_sha256=65710a1b7582bb11a232991b53f598347b37fe99f0b9cd4995ed6b9e3d8945c9
+cmake=cmake version 3.31.8
+gcc=gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+libtiff_soname=/usr/lib64/libtiff.so.5
+fftw=3.3.8
+panfs_mount=panfs://130.246.139.193/scarf/work4/scd panfs 781250000000 520106708032 261143291968      67% /work4/scd
+local_scratch=/dev/sda8      xfs    829108692 5409392 823699300       1% /tmp
+omp_proc_bind=<unset, matches production>
+exclusive=yes (--exclusive), so no interference witness is needed
+=== input hashes (PanFS) ===
+24
+=== controls ===
+=== PanFS warm, representative movie, W=1,2,4,8,16,24,32,48,64 ===
+=== local /tmp warm, representative movie, W=1,2,4,8,16,24,32,48,64 ===
+=== PanFS warm, all 24 movies, W=8,24,64 ===
+=== PanFS cold-requested, all 24 movies, W=8,24 ===
+=== done ===
+total 1144
+drwxr-xr-x 2 scarf1415 cseg   4096 Sep 28 17:28 .
+drwxr-xr-x 3 scarf1415 cseg   4096 Sep 28 16:37 ..
+-rw-r--r-- 1 scarf1415 cseg   1441 Sep 28 16:39 inject_none.json
+-rw-r--r-- 1 scarf1415 cseg     67 Sep 28 16:39 inject_none.log
+-rw-r--r-- 1 scarf1415 cseg   1555 Sep 28 16:38 inject_swap_pixels_in_row.json
+-rw-r--r-- 1 scarf1415 cseg     69 Sep 28 16:38 inject_swap_pixels_in_row.log
+-rw-r--r-- 1 scarf1415 cseg   1559 Sep 28 16:39 inject_swap_rows_in_frame.json
+-rw-r--r-- 1 scarf1415 cseg     69 Sep 28 16:39 inject_swap_rows_in_frame.log
+-rw-r--r-- 1 scarf1415 cseg   1549 Sep 28 16:39 inject_swap_two_frames.json
+-rw-r--r-- 1 scarf1415 cseg     69 Sep 28 16:39 inject_swap_two_frames.log
+-rw-r--r-- 1 scarf1415 cseg   1541 Sep 28 16:38 inject_value_1ulp.json
+-rw-r--r-- 1 scarf1415 cseg     69 Sep 28 16:38 inject_value_1ulp.log
+-rw-r--r-- 1 scarf1415 cseg   1553 Sep 28 16:39 inject_yflip_one_frame.json
+-rw-r--r-- 1 scarf1415 cseg     68 Sep 28 16:39 inject_yflip_one_frame.log
+-rw-r--r-- 1 scarf1415 cseg  65551 Sep 28 16:47 local_warm_rep.json
+-rw-r--r-- 1 scarf1415 cseg  11773 Sep 28 16:47 local_warm_rep.log
+-rw-r--r-- 1 scarf1415 cseg 359659 Sep 28 17:28 panfs_cold_all24.json
+-rw-r--r-- 1 scarf1415 cseg  62416 Sep 28 17:28 panfs_cold_all24.log
+-rw-r--r-- 1 scarf1415 cseg 531898 Sep 28 17:08 panfs_warm_all24.json
+-rw-r--r-- 1 scarf1415 cseg  94013 Sep 28 17:08 panfs_warm_all24.log
+-rw-r--r-- 1 scarf1415 cseg  65648 Sep 28 16:43 panfs_warm_rep.json
+-rw-r--r-- 1 scarf1415 cseg  11732 Sep 28 16:43 panfs_warm_rep.log
+-rw-r--r-- 1 scarf1415 cseg   2478 Sep 28 16:38 selftest.json
+-rw-r--r-- 1 scarf1415 cseg     67 Sep 28 16:38 selftest.log

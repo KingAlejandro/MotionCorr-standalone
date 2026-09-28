@@ -17,19 +17,31 @@ import os
 import sys
 
 # The chain each link adds exactly one component to. Order matters.
+# The chain contains only arms that reach the compressed bytes the same way.
+#
+# LibTIFF's TIFFOpen(path, "r") leaves TIFFMapFileContents enabled, so every
+# libtiff arm -- and the production reader -- takes compressed bytes through
+# page faults on a MAP_SHARED mapping of the movie and issues no per-strip read
+# syscall. The pread arms go through read(2). Subtracting one from the other
+# would difference two different kernel paths, not isolate a component, which
+# is why that subtraction went negative at low worker counts. The pread arms
+# are therefore a syscall-path reference point, reported separately, and the
+# chain starts at the first libtiff arm.
 CHAIN = [
-    ("pread_strip_extents",         "storage read of compressed strips"),
-    ("tiff_read_raw_strip",         "+ LibTIFF strip bookkeeping"),
-    ("tiff_decode_only",            "+ Deflate decompression"),
-    ("decode_place_u16_natural",    "+ write decoded rows to destination"),
-    ("persistent_handle_to_u16",    "+ Y-flipped placement"),
-    ("persistent_handle_to_f32",    "+ uint16 to float conversion"),
-    ("openperframe_handle_to_f32",  "+ one TIFFOpen per frame"),
-    ("production_image_read",       "+ Image/fImageHandler lifecycle and allocation"),
+    ("tiff_read_raw_strip",      "storage access + LibTIFF strip bookkeeping "
+                                 "(through libtiff's file mapping)"),
+    ("tiff_decode_only",         "+ Deflate decompression"),
+    ("decode_place_u16_natural", "+ write decoded rows to destination"),
+    ("persistent_handle_to_u16", "+ Y-flipped placement"),
+    ("persistent_handle_to_f32", "+ uint16 to float conversion"),
+    ("production_image_read",    "+ per-frame TIFFOpen, Image/fImageHandler "
+                                 "lifecycle and frame allocation"),
 ]
 
+# Reported on their own, never differenced into the chain.
 CONTEXT_ARMS = [
     "pread_whole_file",
+    "pread_strip_extents",
     "tiff_dirscan_persistent",
     "tiff_open_per_frame_meta",
     "convert_u16_to_f32_resident",
@@ -38,6 +50,24 @@ CONTEXT_ARMS = [
     "alloc_first_touch_f32_perframe",
     "alloc_first_touch_u16",
     "omp_dispatch_only",
+]
+
+# Direct A/B pairs: same work, one structural difference. Reported as a ratio,
+# not as a chain component, because the difference can legitimately be zero or
+# negative and a chain cannot express that.
+AB_PAIRS = [
+    ("persistent_handle_to_f32", "openperframe_handle_to_f32",
+     "one TIFF* per worker vs one per frame (the PR B question)"),
+    ("persistent_handle_to_f32", "persistent_handle_to_f32_dynamic",
+     "frames static vs frames dynamic (scheduling policy alone)"),
+    ("persistent_handle_to_f32_dynamic", "strip_batch_to_f32_b64",
+     "dynamic frames vs 64-strip batches (granularity alone -- the PR E question)"),
+    ("persistent_handle_to_f32_dynamic", "strip_batch_to_f32_b256",
+     "dynamic frames vs 256-strip batches (granularity alone)"),
+    ("persistent_handle_to_f32", "strip_batch_to_f32_b64",
+     "static frames vs 64-strip batches (confounds policy and granularity)"),
+    ("alloc_first_touch_f32", "alloc_first_touch_u16",
+     "float32 vs uint16 movie allocation (the PR C payload question)"),
 ]
 
 
@@ -137,6 +167,26 @@ def report(path, label):
         out.append(fmt_table(rows, ["component", "cumulative s", "adds s", "share of stage"]))
         out.append("")
 
+    # ---- direct A/B pairs
+    rows = []
+    for a, b, desc in AB_PAIRS:
+        for w in ws:
+            if (a, w) not in totals or (b, w) not in totals:
+                continue
+            va, vb = totals[(a, w)], totals[(b, w)]
+            if va <= 0:
+                continue
+            rows.append([desc, "W=%d" % w, "%.4f" % va, "%.4f" % vb,
+                         "%+.1f%%" % (100.0 * (vb - va) / va),
+                         "B faster" if vb < va else "A faster"])
+    if rows:
+        out.append("**Direct A/B comparisons.** Same work, one structural "
+                   "difference. A positive percentage means B costs more than A.")
+        out.append("")
+        out.append(fmt_table(rows, ["comparison (A vs B)", "workers", "A s", "B s",
+                                    "B vs A", "winner"]))
+        out.append("")
+
     # ---- exactness gate
     gated = sorted({a for (a, _) in exact})
     if gated:
@@ -229,8 +279,9 @@ def main():
     chunks.append(controls(args.evdir))
 
     for fn, label in [
-        ("warm_ext4_rep.json", "Regime 1a - warm page cache, local ext4, one representative movie"),
-        ("tmpfs_rep.json",     "Regime 2a - tmpfs (/dev/shm), one representative movie"),
+        ("warm_ext4_rep.json",   "Regime 1a - warm page cache, local ext4, one representative movie"),
+        ("warm_ext4_all24.json", "Regime 1b - warm page cache, local ext4, ALL 24 tutorial movies"),
+        ("tmpfs_rep.json",       "Regime 2a - tmpfs (/dev/shm), one representative movie"),
     ]:
         pp = os.path.join(raw, fn)
         if os.path.exists(pp):
@@ -357,6 +408,33 @@ def main():
                 for arm in arms]
         chunks.append(fmt_table(rows, ["arm"] + [f"W={w}" for w in ws]))
         chunks.append("")
+
+    # Anything not matched by the named phases above still gets reported, so a
+    # venue with a different phase layout (the SCARF job) is never silently
+    # dropped from the collation.
+    KNOWN = {"warm_ext4_rep.json", "tmpfs_rep.json", "h2d_tutorial.json",
+             "selftest.json", "warm_ext4_all24.json"}
+    LABELS = {
+        "panfs_warm_rep.json":    "PanFS (shared storage), warm, representative movie",
+        "local_warm_rep.json":    "Node-local /tmp (xfs), warm, representative movie",
+        "panfs_warm_all24.json":  "PanFS (shared storage), warm, ALL 24 movies",
+        "panfs_cold_all24.json":  "PanFS, cold-requested (fadvise DONTNEED), ALL 24 movies",
+        "warm_ext4_all24.json":   "Local ext4, warm, ALL 24 movies",
+    }
+    for fn in sorted(os.listdir(raw)):
+        if not fn.endswith(".json") or fn in KNOWN or fn.startswith("inject_"):
+            continue
+        if fn.startswith("cold_ext4_") or fn.startswith("warm_ext4_all24_") \
+           or fn.startswith("tmpfs_subset_"):
+            continue  # handled by the per-arm merge above
+        pp = os.path.join(raw, fn)
+        try:
+            d = load(pp)
+        except Exception:
+            continue
+        if "movies" not in d:
+            continue
+        chunks.append(report(pp, LABELS.get(fn, "Phase `%s`" % fn)))
 
     h2d = os.path.join(raw, "h2d_tutorial.json")
     if os.path.exists(h2d):

@@ -1,0 +1,29 @@
+{
+  "tool": "tiff_ingest_bench",
+  "tag": "inject_value_1ulp",
+  "regime": "warm",
+  "cpu_mask": "72-95",
+  "cpu_mask_count": 24,
+  "omp_max_threads": 24,
+  "repeats": 1,
+  "libtiff_version": "LIBTIFF, Version 4.5.1\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.",
+  "movies": [
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00021_frameImage.tiff",
+      "file_bytes": 126550106,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1493,
+      "compressed_bytes": 125808249, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "production_image_read", "workers": 8, "wall_median_s": 0.30594, "wall_min_s": 0.30594, "wall_max_s": 0.30594, "cpu_median_s": 2.24999, "bytes_in": 125808249, "bytes_out": 1366942080, "in_MBps": 411.218, "out_MBps": 4468, "produces_pixels": true, "exact_equal": false, "exact_all_repeats": false, "global_sum_equal": false, "row_sums_equal": false, "n_pixels_differing": 1, "first_diff_index": 177989105, "ref_value": 3, "got_value": 3}
+      ]
+    }
+  ],
+  "injected_mutation": "value_1ulp",
+  "injected_arm": "production_image_read",
+  "max_rss_kib": 5371964,
+  "sink": 0
+}

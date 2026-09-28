@@ -1,0 +1,114 @@
+  [pread_whole_file] W=1 wall=0.0262704s cpu=0.0262737s
+  [pread_strip_extents] W=1 wall=0.0824714s cpu=0.0825165s
+  [tiff_dirscan_persistent] W=1 wall=0.000981689s cpu=0.00098232s
+  [tiff_open_per_frame_meta] W=1 wall=0.00752079s cpu=0.00751887s
+  [tiff_read_raw_strip] W=1 wall=0.0401691s cpu=0.0401804s
+  [tiff_decode_only] W=1 wall=0.810627s cpu=0.810146s
+  [decode_place_u16_natural] W=1 wall=0.862797s cpu=0.862793s EXACT-OK
+  [persistent_handle_to_u16] W=1 wall=0.878213s cpu=0.877862s EXACT-OK
+  [persistent_handle_to_f32] W=1 wall=0.962414s cpu=0.962379s EXACT-OK
+  [openperframe_handle_to_f32] W=1 wall=0.961022s cpu=0.960714s EXACT-OK
+  [strip_batch_to_f32_b64] W=1 wall=0.931775s cpu=0.931227s EXACT-OK
+  [strip_batch_to_f32_b256] W=1 wall=0.931262s cpu=0.930993s EXACT-OK
+  [convert_u16_to_f32_resident] W=1 wall=0.117798s cpu=0.117893s
+  [alloc_first_touch_f32] W=1 wall=0.927975s cpu=0.927359s
+  [alloc_first_touch_f32_malloc] W=1 wall=0.928955s cpu=0.928526s
+  [alloc_first_touch_f32_perframe] W=1 wall=0.898601s cpu=0.898133s
+  [alloc_first_touch_u16] W=1 wall=0.467576s cpu=0.467299s
+  [production_image_read] W=1 wall=1.66573s cpu=1.66527s EXACT-OK
+  [omp_dispatch_only] W=1 wall=3.99491e-05s cpu=3.996e-05s
+  [pread_whole_file] W=2 wall=0.0206649s cpu=0.0206682s
+  [pread_strip_extents] W=2 wall=0.0560239s cpu=0.111615s
+  [tiff_dirscan_persistent] W=2 wall=0.00126608s cpu=0.00225763s
+  [tiff_open_per_frame_meta] W=2 wall=0.00625638s cpu=0.0112651s
+  [tiff_read_raw_strip] W=2 wall=0.0289752s cpu=0.0529857s
+  [tiff_decode_only] W=2 wall=0.523357s cpu=1.04142s
+  [decode_place_u16_natural] W=2 wall=0.571365s cpu=1.13525s EXACT-OK
+  [persistent_handle_to_u16] W=2 wall=0.582713s cpu=1.15746s EXACT-OK
+  [persistent_handle_to_f32] W=2 wall=0.648361s cpu=1.26716s EXACT-OK
+  [openperframe_handle_to_f32] W=2 wall=0.612062s cpu=1.22109s EXACT-OK
+  [strip_batch_to_f32_b64] W=2 wall=0.656927s cpu=1.30737s EXACT-OK
+  [strip_batch_to_f32_b256] W=2 wall=0.612877s cpu=1.2198s EXACT-OK
+  [convert_u16_to_f32_resident] W=2 wall=0.0968218s cpu=0.193847s
+  [alloc_first_touch_f32] W=2 wall=0.694403s cpu=1.23563s
+  [alloc_first_touch_f32_malloc] W=2 wall=0.693542s cpu=1.23293s
+  [alloc_first_touch_f32_perframe] W=2 wall=0.594732s cpu=1.1796s
+  [alloc_first_touch_u16] W=2 wall=0.308945s cpu=0.562439s
+  [production_image_read] W=2 wall=1.04088s cpu=2.0797s EXACT-OK
+  [omp_dispatch_only] W=2 wall=3.99491e-05s cpu=4.018e-05s
+  [pread_whole_file] W=4 wall=0.0208188s cpu=0.0208273s
+  [pread_strip_extents] W=4 wall=0.0280653s cpu=0.112062s
+  [tiff_dirscan_persistent] W=4 wall=0.00143733s cpu=0.00455621s
+  [tiff_open_per_frame_meta] W=4 wall=0.0069358s cpu=0.0171598s
+  [tiff_read_raw_strip] W=4 wall=0.0198307s cpu=0.0647436s
+  [tiff_decode_only] W=4 wall=0.271848s cpu=1.07229s
+  [decode_place_u16_natural] W=4 wall=0.28983s cpu=1.14097s EXACT-OK
+  [persistent_handle_to_u16] W=4 wall=0.299837s cpu=1.1805s EXACT-OK
+  [persistent_handle_to_f32] W=4 wall=0.31582s cpu=1.24513s EXACT-OK
+  [openperframe_handle_to_f32] W=4 wall=0.314812s cpu=1.24224s EXACT-OK
+  [strip_batch_to_f32_b64] W=4 wall=0.326773s cpu=1.2839s EXACT-OK
+  [strip_batch_to_f32_b256] W=4 wall=0.340614s cpu=1.34199s EXACT-OK
+  [convert_u16_to_f32_resident] W=4 wall=0.0522424s cpu=0.211168s
+  [alloc_first_touch_f32] W=4 wall=0.446943s cpu=1.32985s
+  [alloc_first_touch_f32_malloc] W=4 wall=0.439607s cpu=1.31673s
+  [alloc_first_touch_f32_perframe] W=4 wall=0.337433s cpu=1.28635s
+  [alloc_first_touch_u16] W=4 wall=0.202143s cpu=0.633848s
+  [production_image_read] W=4 wall=0.553478s cpu=2.18167s EXACT-OK
+  [omp_dispatch_only] W=4 wall=5.97844e-05s cpu=5.875e-05s
+  [pread_whole_file] W=8 wall=0.0205336s cpu=0.0205373s
+  [pread_strip_extents] W=8 wall=0.0146186s cpu=0.119415s
+  [tiff_dirscan_persistent] W=8 wall=0.00148203s cpu=0.0155701s
+  [tiff_open_per_frame_meta] W=8 wall=0.00692183s cpu=0.0289356s
+  [tiff_read_raw_strip] W=8 wall=0.0164309s cpu=0.0901202s
+  [tiff_decode_only] W=8 wall=0.148152s cpu=1.14685s
+  [decode_place_u16_natural] W=8 wall=0.154926s cpu=1.18676s EXACT-OK
+  [persistent_handle_to_u16] W=8 wall=0.157242s cpu=1.2072s EXACT-OK
+  [persistent_handle_to_f32] W=8 wall=0.168566s cpu=1.29996s EXACT-OK
+  [openperframe_handle_to_f32] W=8 wall=0.162608s cpu=1.26809s EXACT-OK
+  [strip_batch_to_f32_b64] W=8 wall=0.171712s cpu=1.30239s EXACT-OK
+  [strip_batch_to_f32_b256] W=8 wall=0.160947s cpu=1.23545s EXACT-OK
+  [convert_u16_to_f32_resident] W=8 wall=0.0499932s cpu=0.363765s
+  [alloc_first_touch_f32] W=8 wall=0.309908s cpu=1.42398s
+  [alloc_first_touch_f32_malloc] W=8 wall=0.312376s cpu=1.45418s
+  [alloc_first_touch_f32_perframe] W=8 wall=0.215822s cpu=1.37733s
+  [alloc_first_touch_u16] W=8 wall=0.146103s cpu=0.747416s
+  [production_image_read] W=8 wall=0.277274s cpu=2.05897s EXACT-OK
+  [omp_dispatch_only] W=8 wall=0.00012795s cpu=0.00034373s
+  [pread_whole_file] W=16 wall=0.0203255s cpu=0.0203293s
+  [pread_strip_extents] W=16 wall=0.0102664s cpu=0.161111s
+  [tiff_dirscan_persistent] W=16 wall=0.00168066s cpu=0.0313817s
+  [tiff_open_per_frame_meta] W=16 wall=0.00830664s cpu=0.0827804s
+  [tiff_read_raw_strip] W=16 wall=0.0176508s cpu=0.188033s
+  [tiff_decode_only] W=16 wall=0.11059s cpu=1.36578s
+  [decode_place_u16_natural] W=16 wall=0.116006s cpu=1.42263s EXACT-OK
+  [persistent_handle_to_u16] W=16 wall=0.11705s cpu=1.45297s EXACT-OK
+  [persistent_handle_to_f32] W=16 wall=0.123751s cpu=1.52249s EXACT-OK
+  [openperframe_handle_to_f32] W=16 wall=0.117572s cpu=1.44155s EXACT-OK
+  [strip_batch_to_f32_b64] W=16 wall=0.105523s cpu=1.48154s EXACT-OK
+  [strip_batch_to_f32_b256] W=16 wall=0.104384s cpu=1.517s EXACT-OK
+  [convert_u16_to_f32_resident] W=16 wall=0.0436801s cpu=0.632252s
+  [alloc_first_touch_f32] W=16 wall=0.272415s cpu=1.87734s
+  [alloc_first_touch_f32_malloc] W=16 wall=0.272435s cpu=1.88551s
+  [alloc_first_touch_f32_perframe] W=16 wall=0.216221s cpu=1.67478s
+  [alloc_first_touch_u16] W=16 wall=0.129073s cpu=1.09086s
+  [production_image_read] W=16 wall=0.207464s cpu=2.46469s EXACT-OK
+  [omp_dispatch_only] W=16 wall=2.29087e-05s cpu=2.333e-05s
+  [pread_whole_file] W=24 wall=0.0262229s cpu=0.0301778s
+  [pread_strip_extents] W=24 wall=0.0300088s cpu=0.541243s
+  [tiff_dirscan_persistent] W=24 wall=0.00489699s cpu=0.109101s
+  [tiff_open_per_frame_meta] W=24 wall=0.0156643s cpu=0.242615s
+  [tiff_read_raw_strip] W=24 wall=0.0285098s cpu=0.446798s
+  [tiff_decode_only] W=24 wall=0.112108s cpu=1.84293s
+  [decode_place_u16_natural] W=24 wall=0.126072s cpu=2.02421s EXACT-OK
+  [persistent_handle_to_u16] W=24 wall=0.077737s cpu=1.61651s EXACT-OK
+  [persistent_handle_to_f32] W=24 wall=0.0858562s cpu=1.8132s EXACT-OK
+  [openperframe_handle_to_f32] W=24 wall=0.0813726s cpu=1.75616s EXACT-OK
+  [strip_batch_to_f32_b64] W=24 wall=0.0938857s cpu=1.83426s EXACT-OK
+  [strip_batch_to_f32_b256] W=24 wall=0.088949s cpu=1.82687s EXACT-OK
+  [convert_u16_to_f32_resident] W=24 wall=0.0513532s cpu=1.13399s
+  [alloc_first_touch_f32] W=24 wall=0.268803s cpu=2.83533s
+  [alloc_first_touch_f32_malloc] W=24 wall=0.265808s cpu=2.83245s
+  [alloc_first_touch_f32_perframe] W=24 wall=0.242633s cpu=2.59954s
+  [alloc_first_touch_u16] W=24 wall=0.12811s cpu=1.6462s
+  [production_image_read] W=24 wall=0.13101s cpu=2.90532s EXACT-OK
+  [omp_dispatch_only] W=24 wall=0.00011007s cpu=0.00010929s

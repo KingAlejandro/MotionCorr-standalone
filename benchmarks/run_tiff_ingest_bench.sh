@@ -80,6 +80,11 @@ ID="$OUT/identity.txt"
   echo "libtiff=$(dpkg -s libtiff-dev 2>/dev/null | sed -n 's/^Version: //p' || echo unknown)"
   echo "zlib=$(dpkg -s zlib1g 2>/dev/null | sed -n 's/^Version: //p' || echo unknown)"
   echo "gcc=$(g++ --version | head -1)"
+  # Record the flags, not just the binary hash. This repo's known top benchmark
+  # trap is an unqualified cmake build silently producing -O0.
+  echo "cmake_build_type=$(sed -n 's/^CMAKE_BUILD_TYPE:STRING=//p' "$BUILD_DIR/CMakeCache.txt" 2>/dev/null)"
+  echo "cxx_flags=$(sed -n 's/^CXX_FLAGS = //p' "$BUILD_DIR/CMakeFiles/tiff_ingest_bench.dir/flags.make" 2>/dev/null)"
+  echo "build_dir=$BUILD_DIR"
   echo "loadavg_at_start=$(cat /proc/loadavg)"
   echo "omp_proc_bind=${OMP_PROC_BIND:-<unset, matches production>}"
   echo "omp_num_threads=${OMP_NUM_THREADS:-<unset>}"

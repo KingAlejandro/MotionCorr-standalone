@@ -35,6 +35,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include <fcntl.h>
 #include <sched.h>
@@ -123,6 +124,33 @@ std::string jsonEscape(const std::string &s)
 		else out += c;
 	}
 	return out;
+}
+
+// Fraction of a file currently resident in the page cache, via mincore() over
+// a temporary mapping. posix_fadvise(DONTNEED) returns 0 when the advice was
+// accepted, not when pages were actually dropped -- on tmpfs it drops nothing
+// and returns 0 -- so a cold arm that only checks the return value has no
+// evidence it was cold. This measures residency instead of asserting it.
+double residentFraction(const std::string &path)
+{
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0) return -1.0;
+	struct stat st;
+	if (fstat(fd, &st) != 0 || st.st_size <= 0) { close(fd); return -1.0; }
+	void *m = mmap(nullptr, (size_t)st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	close(fd);
+	if (m == MAP_FAILED) return -1.0;
+	const size_t pages = ((size_t)st.st_size + 4095) / 4096;
+	std::vector<unsigned char> vec(pages);
+	double frac = -1.0;
+	if (mincore(m, (size_t)st.st_size, vec.data()) == 0)
+	{
+		size_t n = 0;
+		for (unsigned char c : vec) n += (c & 1);
+		frac = (double)n / (double)pages;
+	}
+	munmap(m, (size_t)st.st_size);
+	return frac;
 }
 
 // Drop this file's clean page-cache pages. Only our file is affected, so a
@@ -415,6 +443,20 @@ void *freshPages(size_t bytes)
 // Keep decode results observable so nothing is optimised away.
 volatile uint64_t g_sink = 0;
 
+// Work witness. Arms that skip a frame on a failed open or a failed
+// TIFFSetDirectory `continue` silently, so an arm in which everything failed
+// would report a very fast time and no error. The non-pixel arms -- including
+// tiff_decode_only, which carries the Deflate attribution -- have no exact
+// gate to catch that. Each such arm counts the strips it genuinely processed
+// and the count is compared against the expected total.
+std::atomic<uint64_t> g_strips_done{0};
+
+// Negative control for the witness above. --fault-witness makes the counting
+// arms drop one strip from their count, which must turn the run red. A
+// witness that has never been observed to fail is not evidence that the arm
+// did its work.
+bool g_fault_witness = false;
+
 } // namespace
 
 // -------------------------------------------------------------------- main
@@ -445,6 +487,7 @@ int main(int argc, char **argv)
 		else if (a == "--selftest")   selftest = true;
 		else if (a == "--inject")     inject = parseMutation(next("--inject"));
 		else if (a == "--inject-arm") inject_arm = next("--inject-arm");
+		else if (a == "--fault-witness") g_fault_witness = true;
 		else if (a == "--workers") {
 			std::stringstream ss(next("--workers"));
 			std::string tok;
@@ -453,6 +496,7 @@ int main(int argc, char **argv)
 		else { std::cerr << "unknown option: " << a << "\n"; return 2; }
 	}
 	if (movies.empty()) { std::cerr << "need at least one --movie\n"; return 2; }
+	int gate_failures = 0;
 	if (workers.empty()) workers = {1, 2, 4, 8, 16, 24};
 	if (repeats < 1) { std::cerr << "--repeats must be >= 1\n"; return 2; }
 
@@ -653,6 +697,51 @@ int main(int argc, char **argv)
 				g_sink += acc;
 			});
 
+			// (2b) storage floor on the kernel path the decoder actually
+			//      takes. LibTIFF's TIFFOpen(path, "r") leaves
+			//      TIFFMapFileContents enabled, so every libtiff arm below --
+			//      and the production reader -- reaches compressed bytes
+			//      through page faults on a MAP_SHARED mapping and issues no
+			//      per-strip read syscall. Differencing the pread arms
+			//      against a libtiff arm would difference two kernel paths,
+			//      which is why that subtraction can go negative. This arm
+			//      touches the same strip extents through the same mapping,
+			//      so it is the floor the chain can legitimately stand on.
+			add("mmap_strip_extents", false, g.compressed_bytes, 0, [&] {
+				const int nf = (int)nn;
+				const size_t spf = (size_t)g.strips_per_frame;
+				uint64_t acc = 0;
+				#pragma omp parallel num_threads(W) reduction(+:acc)
+				{
+					int fd = open(path.c_str(), O_RDONLY);
+					unsigned char *base = nullptr;
+					if (fd >= 0)
+					{
+						void *m = mmap(nullptr, g.file_bytes, PROT_READ, MAP_SHARED, fd, 0);
+						base = (m == MAP_FAILED) ? nullptr : (unsigned char *)m;
+						close(fd);
+					}
+					#pragma omp for schedule(static)
+					for (int f = 0; f < nf; f++)
+					{
+						if (!base) continue;
+						for (size_t s = 0; s < spf; s++)
+						{
+							const size_t k = (size_t)f * spf + s;
+							if (k >= ext.bytes.size()) break;
+							const uint64_t off = ext.offset[k], len = ext.bytes[k];
+							if (off + len > g.file_bytes) continue;
+							// Touch one byte per 4 KiB page of the extent, which
+							// is what a memcpy out of the mapping would fault.
+							for (uint64_t o = 0; o < len; o += 4096) acc += base[off + o];
+							acc += base[off + len - 1];
+						}
+					}
+					if (base) munmap(base, g.file_bytes);
+				}
+				g_sink += acc;
+			});
+
 			// (3) TIFF directory handling with one persistent handle.
 			add("tiff_dirscan_persistent", false, 0, 0, [&] {
 				uint64_t acc = 0;
@@ -716,7 +805,7 @@ int main(int argc, char **argv)
 						for (tstrip_t s = 0; s < spf; s++)
 						{
 							const tsize_t r = TIFFReadRawStrip(t, s, buf.data(), (tsize_t)buf.size());
-							if (r > 0) acc += (uint64_t)buf[0];
+							if (r > 0) { acc += (uint64_t)buf[0]; g_strips_done++; }
 						}
 					}
 					if (t) TIFFClose(t);
@@ -741,7 +830,7 @@ int main(int argc, char **argv)
 						for (tstrip_t s = 0; s < spf; s++)
 						{
 							const tsize_t r = TIFFReadEncodedStrip(t, s, buf.data(), (tsize_t)buf.size());
-							if (r > 0) acc += (uint64_t)buf[0];
+							if (r > 0) { acc += (uint64_t)buf[0]; g_strips_done++; }
 						}
 					}
 					if (t) TIFFClose(t);
@@ -885,6 +974,44 @@ int main(int argc, char **argv)
 				}
 			});
 
+			// (9b) identical to (9) except for the OpenMP schedule. The
+			//      strip-batch arms below use schedule(dynamic,1), so
+			//      comparing them straight to (9) would change granularity
+			//      and scheduling policy at the same time and could not tell
+			//      which one paid. This arm isolates the policy: frames are
+			//      still the unit of work, but they are handed out
+			//      dynamically, which is what absorbs per-frame decode-time
+			//      variation when frames compress differently.
+			add("persistent_handle_to_f32_dynamic", true, g.compressed_bytes, g.decoded_bytes_f32, [&] {
+				const int nf = (int)nn;
+				const tstrip_t spf = g.strips_per_frame;
+				#pragma omp parallel num_threads(W)
+				{
+					TIFF *t = TIFFOpen(path.c_str(), "r");
+					std::vector<unsigned char> buf(g.strip_size);
+					Image<float> caster;
+					#pragma omp for schedule(dynamic, 1)
+					for (int f = 0; f < nf; f++)
+					{
+						if (!t || TIFFSetDirectory(t, (tdir_t)f) == 0) continue;
+						float *out = dst_f32.data() + (size_t)f * frame_px;
+						size_t rows_done = 0;
+						for (tstrip_t s = 0; s < spf; s++)
+						{
+							const tsize_t r = TIFFReadEncodedStrip(t, s, buf.data(), (tsize_t)buf.size());
+							if (r <= 0) break;
+							const size_t nr = (size_t)r / row_bytes;
+							for (size_t k = 0; k < nr; k++)
+								caster.castPage2T((char *)buf.data() + k * row_bytes,
+								                  out + (ny - 1 - (rows_done + k)) * nx,
+								                  UShort, nx);
+							rows_done += nr;
+						}
+					}
+					if (t) TIFFClose(t);
+				}
+			});
+
 			// (10b) strip-batch decode: the same total work as (9), but the
 			//       unit of scheduling is a batch of strips rather than a
 			//       whole frame. Frame-level parallelism is capped at the
@@ -975,13 +1102,21 @@ int main(int argc, char **argv)
 				g_sink += (uint64_t)((char *)p)[0];
 				munmap(p, bytes);
 			});
-			// The mmap arms above force cold pages every iteration, so they
-			// bound first touch from above. glibc raises its mmap threshold
-			// after a large free, so a malloc/free cycle of the same size
-			// often reuses already-faulted pages -- which is the regime the
-			// production reader is actually in, allocating 24 frame buffers
-			// per movie, movie after movie. Both bounds are reported; the
-			// truth for a given run is between them.
+			// These do NOT bracket the cost, and the earlier comment saying
+			// they did was wrong. glibc caps its dynamic mmap threshold at
+			// DEFAULT_MMAP_THRESHOLD_MAX (32 MiB on 64-bit). A frame buffer is
+			// 57 MB and a whole movie 1.37 GiB, so every one of these
+			// allocations is above the cap and is always serviced by mmap and
+			// always freed by munmap, in the malloc arms exactly as in the
+			// mmap arm. They therefore all measure the same always-cold-pages
+			// regime and agree with each other.
+			//
+			// That is not a defect in the measurement, it is the finding: the
+			// production reader allocates 24 x 57 MB per movie through the
+			// same path, so it really does fault in 1.273 GiB of fresh pages
+			// for every movie. The cost production actually pays is the
+			// production_image_read minus production_image_read_prealloc
+			// difference, which is measured directly rather than bracketed.
 			add("alloc_first_touch_f32_malloc", false, 0, g.decoded_bytes_f32, [&] {
 				const size_t bytes = npix * sizeof(float);
 				void *p = malloc(bytes);
@@ -1096,19 +1231,30 @@ int main(int argc, char **argv)
 				g_sink += acc;
 			});
 
+			const uint64_t expected_strips = (uint64_t)g.strips_per_frame * nn;
+
 			for (const Arm &arm : arms)
 			{
 				if (!only_arm.empty() && only_arm != arm.name) continue;
 
 				std::vector<double> walls, cpus;
 				std::vector<long> minflt, majflt;
+				std::vector<double> resident_before;
+				std::vector<uint64_t> strips;
 				CompareResult last_cmp;
 				bool exact_all_repeats = true;
 
 				for (int rep = 0; rep < repeats; rep++)
 				{
 					if (arm.pre) arm.pre();     // untimed
-					if (regime == "cold") evictFileCache(path);
+					if (regime == "cold")
+					{
+						evictFileCache(path);
+						// Witness, not assertion: what fraction of the file is
+						// still resident at the instant the timer starts.
+						const double f = residentFraction(path);
+						if (f >= 0.0) resident_before.push_back(f);
+					}
 					if (arm.produces_pixels)
 					{
 						// Poison both destinations so a partial write cannot
@@ -1117,6 +1263,7 @@ int main(int argc, char **argv)
 						std::fill(dst_u16.begin(), dst_u16.end(), 0);
 					}
 
+					g_strips_done = g_fault_witness ? (uint64_t)-1 : 0;
 					const Faults f0 = faultsNow();
 					const double w0 = wallNow(), c0 = cpuNow();
 					arm.run();
@@ -1124,6 +1271,7 @@ int main(int argc, char **argv)
 					const Faults f1 = faultsNow();
 					walls.push_back(w1 - w0);
 					cpus.push_back(c1 - c0);
+					strips.push_back(g_strips_done.load());
 					minflt.push_back(f1.minor - f0.minor);
 					majflt.push_back(f1.major - f0.major);
 
@@ -1158,6 +1306,14 @@ int main(int argc, char **argv)
 				  << ", \"cpu_median_s\": " << cmed
 				  << ", \"minor_faults_median\": " << (minflt.empty() ? 0 : *(minflt.begin() + minflt.size() / 2))
 				  << ", \"major_faults_median\": " << (majflt.empty() ? 0 : *(majflt.begin() + majflt.size() / 2))
+				  << ", \"strips_processed\": " << (strips.empty() ? 0 : strips.back())
+				  << ", \"strips_expected\": " << expected_strips
+				  << ", \"work_witness_ok\": "
+				  << ((strips.empty() || strips.back() == 0 ||
+				       strips.back() == expected_strips) ? "true" : "false")
+				  << ", \"resident_fraction_at_timer_start\": "
+				  << (resident_before.empty() ? -1.0
+				          : *std::max_element(resident_before.begin(), resident_before.end()))
 				  << ", \"bytes_in\": " << arm.bytes_in
 				  << ", \"bytes_out\": " << arm.bytes_out;
 				if (arm.bytes_in > 0 && wmed > 0)
@@ -1179,6 +1335,20 @@ int main(int argc, char **argv)
 				}
 				J << "}";
 
+				// A counting arm that ran but processed the wrong number of
+				// strips did not do the work its timing is attributed to.
+				if (!strips.empty() && strips.back() != 0 &&
+				    strips.back() != expected_strips)
+				{
+					gate_failures++;
+					std::cerr << "  WORK-WITNESS-FAIL [" << arm.name << "] W=" << W
+					          << " strips " << strips.back() << " != " << expected_strips
+					          << std::endl;
+				}
+				if (arm.produces_pixels && !exact_all_repeats &&
+				    inject == Mutation::None)
+					gate_failures++;
+
 				std::cerr << "  [" << arm.name << "] W=" << W
 				          << " wall=" << wmed << "s cpu=" << cmed << "s"
 				          << (arm.produces_pixels
@@ -1191,6 +1361,8 @@ int main(int argc, char **argv)
 	}
 
 	J << "\n  ],\n";
+	J << "  \"fault_witness_control\": " << (g_fault_witness ? "true" : "false") << ",\n";
+	J << "  \"gate_failures\": " << gate_failures << ",\n";
 	J << "  \"injected_mutation\": \"" << mutationName(inject) << "\",\n";
 	J << "  \"injected_arm\": \"" << jsonEscape(inject_arm) << "\",\n";
 	J << "  \"max_rss_kib\": " << maxRssKiB() << ",\n";
@@ -1199,5 +1371,16 @@ int main(int argc, char **argv)
 
 	if (!out_path.empty()) { std::ofstream f(out_path); f << J.str(); }
 	else std::cout << J.str();
+
+	// Exit status carries the verdict. Without this the gate is advisory: a
+	// run with EXACT-FAIL rows still exits 0 and a caller that checks only the
+	// exit code would record a clean run. Injection runs are expected to fail
+	// the exact gate, so they are excluded above.
+	if (gate_failures > 0)
+	{
+		std::cerr << "FAILED: " << gate_failures
+		          << " gate or work-witness failure(s); see the JSON" << std::endl;
+		return 1;
+	}
 	return 0;
 }

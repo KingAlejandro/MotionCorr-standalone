@@ -86,6 +86,26 @@ Two deliberately weaker oracles run alongside so their blind spots are on the
 record, and five mutation classes are injected into a live arm's real output so
 a PASS is falsifiable rather than structural. See `report.md`.
 
+## Venues
+
+Two, because they disagree about one large component and averaging them would
+have hidden it.
+
+| | 4-GPU VM | SCARF `cn3121` |
+| :-- | :-- | :-- |
+| role | where the 7.127 s figure was measured | shared storage, >24 workers, exclusivity |
+| CPU | EPYC 7452, 124 vCPU, `taskset -c 72-95` | EPYC 7502P, 32c/64t, whole node |
+| exclusive | no — shared with other users, including another #85 lane | yes (`--exclusive`) |
+| interference | witnessed per 30 s on the measurement mask | none possible |
+| storage | local ext4, tmpfs | **PanFS (shared)** and local xfs |
+| transparent hugepages | `madvise` | **`always`** |
+| LibTIFF | 4.5.1 | 4.4 |
+| provenance | content manifest (no `.git` in the transferred tree) | git revision, from a bundle |
+
+The THP row is not incidental. It accounts for roughly 40% of the VM's stage
+and 2.5% of SCARF's, so it changes which follow-on lane is worth doing. The
+LibTIFF row means Deflate timings are never compared across the two.
+
 ## Regimes
 
 Kept separate, never merged into one table:
@@ -97,11 +117,10 @@ Kept separate, never merged into one table:
    clear LibTIFF, allocator or CPU state, so it is a cold-*file* arm, not a cold
    machine, and it is named that way.
 
-Neither the GPU host nor cpu64 has a network or shared filesystem mounted
-(`/home` is local ext4 on both), so **no shared-storage regime was measured
-here**. The only shared-storage datapoint for this workload remains the
-historical #85 PanFS figure of 10.1 s cold for the 3.04 GB dataset (~306 MB/s),
-which this lane did not reproduce.
+Neither the GPU host nor cpu64 has a network filesystem mounted, so the
+shared-storage regime comes from SCARF instead, on PanFS `/work4`, contrasted
+against that node's local xfs `/tmp`. Inputs on both venues are byte-identical
+(sha256 of all 24 movies match).
 
 ## Files
 

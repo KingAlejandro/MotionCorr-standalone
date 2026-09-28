@@ -1,0 +1,352 @@
+{
+  "tool": "tiff_ingest_bench",
+  "tag": "warm_ext4_all24_tiff_decode_only",
+  "regime": "warm",
+  "cpu_mask": "72-95",
+  "cpu_mask_count": 24,
+  "omp_max_threads": 24,
+  "repeats": 3,
+  "libtiff_version": "LIBTIFF, Version 4.5.1\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.",
+  "movies": [
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00021_frameImage.tiff",
+      "file_bytes": 126550106,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1493,
+      "compressed_bytes": 125808249, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.158451, "wall_min_s": 0.155111, "wall_max_s": 0.159629, "cpu_median_s": 1.22801, "bytes_in": 125808249, "bytes_out": 0, "in_MBps": 793.989, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0763369, "wall_min_s": 0.0753345, "wall_max_s": 0.0856228, "cpu_median_s": 1.63803, "bytes_in": 125808249, "bytes_out": 0, "in_MBps": 1648.07, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00022_frameImage.tiff",
+      "file_bytes": 129567782,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1511,
+      "compressed_bytes": 128825925, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162396, "wall_min_s": 0.160919, "wall_max_s": 0.166811, "cpu_median_s": 1.25586, "bytes_in": 128825925, "bytes_out": 0, "in_MBps": 793.284, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0788643, "wall_min_s": 0.0782821, "wall_max_s": 0.0799879, "cpu_median_s": 1.65868, "bytes_in": 128825925, "bytes_out": 0, "in_MBps": 1633.51, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00023_frameImage.tiff",
+      "file_bytes": 131245904,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1532,
+      "compressed_bytes": 130504043, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162967, "wall_min_s": 0.162245, "wall_max_s": 0.173388, "cpu_median_s": 1.2644, "bytes_in": 130504043, "bytes_out": 0, "in_MBps": 800.801, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0782056, "wall_min_s": 0.0776776, "wall_max_s": 0.0830381, "cpu_median_s": 1.668, "bytes_in": 130504043, "bytes_out": 0, "in_MBps": 1668.73, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00024_frameImage.tiff",
+      "file_bytes": 131735614,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1547,
+      "compressed_bytes": 130993750, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162298, "wall_min_s": 0.160145, "wall_max_s": 0.16664, "cpu_median_s": 1.25723, "bytes_in": 130993750, "bytes_out": 0, "in_MBps": 807.12, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0820779, "wall_min_s": 0.0798927, "wall_max_s": 0.0836563, "cpu_median_s": 1.74328, "bytes_in": 130993750, "bytes_out": 0, "in_MBps": 1595.97, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00025_frameImage.tiff",
+      "file_bytes": 130134480,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1520,
+      "compressed_bytes": 129392624, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.15858, "wall_min_s": 0.157551, "wall_max_s": 0.163451, "cpu_median_s": 1.22692, "bytes_in": 129392624, "bytes_out": 0, "in_MBps": 815.945, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0778424, "wall_min_s": 0.0774409, "wall_max_s": 0.0812476, "cpu_median_s": 1.65505, "bytes_in": 129392624, "bytes_out": 0, "in_MBps": 1662.24, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00026_frameImage.tiff",
+      "file_bytes": 132754590,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1548,
+      "compressed_bytes": 132012729, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.16315, "wall_min_s": 0.162097, "wall_max_s": 0.16689, "cpu_median_s": 1.2647, "bytes_in": 132012729, "bytes_out": 0, "in_MBps": 809.148, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0790747, "wall_min_s": 0.079033, "wall_max_s": 0.0837736, "cpu_median_s": 1.6843, "bytes_in": 132012729, "bytes_out": 0, "in_MBps": 1669.47, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00027_frameImage.tiff",
+      "file_bytes": 133754728,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1561,
+      "compressed_bytes": 133012870, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162081, "wall_min_s": 0.161316, "wall_max_s": 0.166624, "cpu_median_s": 1.2579, "bytes_in": 133012870, "bytes_out": 0, "in_MBps": 820.658, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0800128, "wall_min_s": 0.0789917, "wall_max_s": 0.0819005, "cpu_median_s": 1.69145, "bytes_in": 133012870, "bytes_out": 0, "in_MBps": 1662.4, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00028_frameImage.tiff",
+      "file_bytes": 133960502,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1571,
+      "compressed_bytes": 133218643, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.166625, "wall_min_s": 0.163543, "wall_max_s": 0.187835, "cpu_median_s": 1.28903, "bytes_in": 133218643, "bytes_out": 0, "in_MBps": 799.51, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0830151, "wall_min_s": 0.0808632, "wall_max_s": 0.0842033, "cpu_median_s": 1.76206, "bytes_in": 133218643, "bytes_out": 0, "in_MBps": 1604.75, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00029_frameImage.tiff",
+      "file_bytes": 131961632,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1535,
+      "compressed_bytes": 131219769, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162734, "wall_min_s": 0.159737, "wall_max_s": 0.165839, "cpu_median_s": 1.25976, "bytes_in": 131219769, "bytes_out": 0, "in_MBps": 806.345, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0785458, "wall_min_s": 0.0774864, "wall_max_s": 0.0949659, "cpu_median_s": 1.66747, "bytes_in": 131219769, "bytes_out": 0, "in_MBps": 1670.61, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00030_frameImage.tiff",
+      "file_bytes": 131259748,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1530,
+      "compressed_bytes": 130517889, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.144696, "wall_min_s": 0.144086, "wall_max_s": 0.147445, "cpu_median_s": 1.12477, "bytes_in": 130517889, "bytes_out": 0, "in_MBps": 902.015, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0695496, "wall_min_s": 0.0688931, "wall_max_s": 0.0712498, "cpu_median_s": 1.48754, "bytes_in": 130517889, "bytes_out": 0, "in_MBps": 1876.62, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00031_frameImage.tiff",
+      "file_bytes": 132157138,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1534,
+      "compressed_bytes": 131415278, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.159679, "wall_min_s": 0.158649, "wall_max_s": 0.168616, "cpu_median_s": 1.24142, "bytes_in": 131415278, "bytes_out": 0, "in_MBps": 822.999, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0780094, "wall_min_s": 0.0775834, "wall_max_s": 0.0814696, "cpu_median_s": 1.66136, "bytes_in": 131415278, "bytes_out": 0, "in_MBps": 1684.61, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00035_frameImage.tiff",
+      "file_bytes": 134600552,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1567,
+      "compressed_bytes": 133858694, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.16681, "wall_min_s": 0.166771, "wall_max_s": 0.17213, "cpu_median_s": 1.29651, "bytes_in": 133858694, "bytes_out": 0, "in_MBps": 802.464, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0841471, "wall_min_s": 0.0840666, "wall_max_s": 0.090791, "cpu_median_s": 1.75812, "bytes_in": 133858694, "bytes_out": 0, "in_MBps": 1590.77, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00036_frameImage.tiff",
+      "file_bytes": 134642532,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1574,
+      "compressed_bytes": 133900671, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.162976, "wall_min_s": 0.161007, "wall_max_s": 0.170065, "cpu_median_s": 1.26468, "bytes_in": 133900671, "bytes_out": 0, "in_MBps": 821.597, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0825505, "wall_min_s": 0.0810039, "wall_max_s": 0.0830112, "cpu_median_s": 1.74533, "bytes_in": 133900671, "bytes_out": 0, "in_MBps": 1622.05, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00037_frameImage.tiff",
+      "file_bytes": 134726088,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1582,
+      "compressed_bytes": 133984227, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.173933, "wall_min_s": 0.173292, "wall_max_s": 0.176911, "cpu_median_s": 1.3535, "bytes_in": 133984227, "bytes_out": 0, "in_MBps": 770.321, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0811897, "wall_min_s": 0.0795213, "wall_max_s": 0.0827885, "cpu_median_s": 1.71989, "bytes_in": 133984227, "bytes_out": 0, "in_MBps": 1650.26, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00039_frameImage.tiff",
+      "file_bytes": 134190674,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1574,
+      "compressed_bytes": 133448810, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.174913, "wall_min_s": 0.166404, "wall_max_s": 0.180721, "cpu_median_s": 1.35522, "bytes_in": 133448810, "bytes_out": 0, "in_MBps": 762.944, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0850249, "wall_min_s": 0.0841373, "wall_max_s": 0.0935098, "cpu_median_s": 1.80183, "bytes_in": 133448810, "bytes_out": 0, "in_MBps": 1569.53, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00040_frameImage.tiff",
+      "file_bytes": 134017162,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1551,
+      "compressed_bytes": 133275306, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.165491, "wall_min_s": 0.161748, "wall_max_s": 0.169813, "cpu_median_s": 1.28141, "bytes_in": 133275306, "bytes_out": 0, "in_MBps": 805.331, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0802703, "wall_min_s": 0.0798001, "wall_max_s": 0.0839568, "cpu_median_s": 1.71047, "bytes_in": 133275306, "bytes_out": 0, "in_MBps": 1660.33, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00042_frameImage.tiff",
+      "file_bytes": 132281636,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1550,
+      "compressed_bytes": 131539778, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.161886, "wall_min_s": 0.161501, "wall_max_s": 0.167322, "cpu_median_s": 1.25657, "bytes_in": 131539778, "bytes_out": 0, "in_MBps": 812.544, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0789891, "wall_min_s": 0.0786086, "wall_max_s": 0.0800169, "cpu_median_s": 1.6804, "bytes_in": 131539778, "bytes_out": 0, "in_MBps": 1665.29, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00043_frameImage.tiff",
+      "file_bytes": 131963598,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1534,
+      "compressed_bytes": 131221737, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.175931, "wall_min_s": 0.166582, "wall_max_s": 0.178676, "cpu_median_s": 1.36775, "bytes_in": 131221737, "bytes_out": 0, "in_MBps": 745.871, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0829192, "wall_min_s": 0.0819571, "wall_max_s": 0.0853282, "cpu_median_s": 1.76785, "bytes_in": 131221737, "bytes_out": 0, "in_MBps": 1582.52, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00044_frameImage.tiff",
+      "file_bytes": 134677684,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1577,
+      "compressed_bytes": 133935821, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.168733, "wall_min_s": 0.167797, "wall_max_s": 0.172689, "cpu_median_s": 1.31169, "bytes_in": 133935821, "bytes_out": 0, "in_MBps": 793.774, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0869385, "wall_min_s": 0.0855282, "wall_max_s": 0.0923471, "cpu_median_s": 1.83468, "bytes_in": 133935821, "bytes_out": 0, "in_MBps": 1540.58, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00045_frameImage.tiff",
+      "file_bytes": 134666858,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1571,
+      "compressed_bytes": 133925000, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.168643, "wall_min_s": 0.166523, "wall_max_s": 0.177594, "cpu_median_s": 1.26561, "bytes_in": 133925000, "bytes_out": 0, "in_MBps": 794.132, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0810567, "wall_min_s": 0.0804971, "wall_max_s": 0.0814154, "cpu_median_s": 1.70652, "bytes_in": 133925000, "bytes_out": 0, "in_MBps": 1652.24, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00046_frameImage.tiff",
+      "file_bytes": 134394390,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1565,
+      "compressed_bytes": 133652529, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.171079, "wall_min_s": 0.162757, "wall_max_s": 0.180619, "cpu_median_s": 1.27533, "bytes_in": 133652529, "bytes_out": 0, "in_MBps": 781.235, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0839221, "wall_min_s": 0.082734, "wall_max_s": 0.104473, "cpu_median_s": 1.79697, "bytes_in": 133652529, "bytes_out": 0, "in_MBps": 1592.58, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00047_frameImage.tiff",
+      "file_bytes": 134471280,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1567,
+      "compressed_bytes": 133729419, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.165105, "wall_min_s": 0.162209, "wall_max_s": 0.168946, "cpu_median_s": 1.22992, "bytes_in": 133729419, "bytes_out": 0, "in_MBps": 809.964, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0819325, "wall_min_s": 0.0809835, "wall_max_s": 0.0845848, "cpu_median_s": 1.73918, "bytes_in": 133729419, "bytes_out": 0, "in_MBps": 1632.19, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00048_frameImage.tiff",
+      "file_bytes": 134412868,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1562,
+      "compressed_bytes": 133671016, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.1716, "wall_min_s": 0.169468, "wall_max_s": 0.196164, "cpu_median_s": 1.31106, "bytes_in": 133671016, "bytes_out": 0, "in_MBps": 778.967, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.0887468, "wall_min_s": 0.0870237, "wall_max_s": 0.0973293, "cpu_median_s": 1.87584, "bytes_in": 133671016, "bytes_out": 0, "in_MBps": 1506.21, "produces_pixels": false}
+      ]
+    },
+    {
+      "path": "/home/alex/relion-container-tests/data/spa-relion30-tutorial/Movies/20170629_00049_frameImage.tiff",
+      "file_bytes": 134103752,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1559,
+      "compressed_bytes": 133361891, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "tiff_decode_only", "workers": 8, "wall_median_s": 0.175169, "wall_min_s": 0.169744, "wall_max_s": 0.175196, "cpu_median_s": 1.35598, "bytes_in": 133361891, "bytes_out": 0, "in_MBps": 761.333, "produces_pixels": false},
+        {"arm": "tiff_decode_only", "workers": 24, "wall_median_s": 0.125689, "wall_min_s": 0.112314, "wall_max_s": 0.130757, "cpu_median_s": 2.06197, "bytes_in": 133361891, "bytes_out": 0, "in_MBps": 1061.04, "produces_pixels": false}
+      ]
+    }
+  ],
+  "injected_mutation": "none",
+  "injected_arm": "",
+  "max_rss_kib": 4155928,
+  "sink": 15799398
+}

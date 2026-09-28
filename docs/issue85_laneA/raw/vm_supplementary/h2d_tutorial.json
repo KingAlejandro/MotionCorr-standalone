@@ -1,0 +1,17 @@
+{
+  "tool": "h2d_stage_bench",
+  "tag": "h2d_tutorial",
+  "device_name": "NVIDIA A100 80GB PCIe",
+  "device_uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "device_ordinal": 3,
+  "nx": 3710, "ny": 3838, "frames": 24,
+  "bytes_f32": 1366942080, "bytes_u16": 683471040,
+  "repeats": 9,
+  "arms": [
+    {"arm": "h2d_f32_pageable", "bytes": 1366942080, "wall_median_s": 0.127591, "event_median_s": 0.127556, "wall_GBps": 10.7135, "event_GBps": 10.7164, "host_alloc_median_s": 0},
+    {"arm": "h2d_u16_pageable", "bytes": 683471040, "wall_median_s": 0.0637652, "event_median_s": 0.0637253, "wall_GBps": 10.7186, "event_GBps": 10.7253, "host_alloc_median_s": 0},
+    {"arm": "h2d_f32_pinned", "bytes": 1366942080, "wall_median_s": 0.0529347, "event_median_s": 0.0528838, "wall_GBps": 25.8232, "event_GBps": 25.848, "host_alloc_median_s": 1.25206},
+    {"arm": "h2d_u16_pinned", "bytes": 683471040, "wall_median_s": 0.026611, "event_median_s": 0.0265607, "wall_GBps": 25.6838, "event_GBps": 25.7324, "host_alloc_median_s": 0.627516},
+    {"arm": "device_widen_u16_to_f32", "bytes": 2050413120, "wall_median_s": 0.00152059, "event_median_s": 0.00149709, "wall_GBps": 1348.44, "event_GBps": 1369.6, "host_alloc_median_s": 0}
+  ]
+}

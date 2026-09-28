@@ -1,0 +1,72 @@
+{
+  "tool": "tiff_ingest_bench",
+  "tag": "tmpfs_subset_persistent_handle_to_f32",
+  "regime": "warm",
+  "cpu_mask": "72-95",
+  "cpu_mask_count": 24,
+  "omp_max_threads": 24,
+  "repeats": 3,
+  "libtiff_version": "LIBTIFF, Version 4.5.1\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.",
+  "movies": [
+    {
+      "path": "/dev/shm/mc85_1556319/20170629_00021_frameImage.tiff",
+      "file_bytes": 126550106,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1493,
+      "compressed_bytes": 125808249, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "persistent_handle_to_f32", "workers": 8, "wall_median_s": 0.167348, "wall_min_s": 0.166772, "wall_max_s": 0.16904, "cpu_median_s": 1.24596, "bytes_in": 125808249, "bytes_out": 1366942080, "in_MBps": 751.775, "out_MBps": 8168.25, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0},
+        {"arm": "persistent_handle_to_f32", "workers": 24, "wall_median_s": 0.116189, "wall_min_s": 0.091203, "wall_max_s": 0.157499, "cpu_median_s": 1.92388, "bytes_in": 125808249, "bytes_out": 1366942080, "in_MBps": 1082.79, "out_MBps": 11764.8, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0}
+      ]
+    },
+    {
+      "path": "/dev/shm/mc85_1556319/20170629_00022_frameImage.tiff",
+      "file_bytes": 129567782,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1511,
+      "compressed_bytes": 128825925, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "persistent_handle_to_f32", "workers": 8, "wall_median_s": 0.1721, "wall_min_s": 0.171897, "wall_max_s": 0.174405, "cpu_median_s": 1.19272, "bytes_in": 128825925, "bytes_out": 1366942080, "in_MBps": 748.552, "out_MBps": 7942.71, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0},
+        {"arm": "persistent_handle_to_f32", "workers": 24, "wall_median_s": 0.097598, "wall_min_s": 0.087443, "wall_max_s": 0.119521, "cpu_median_s": 1.84793, "bytes_in": 128825925, "bytes_out": 1366942080, "in_MBps": 1319.96, "out_MBps": 14005.8, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0}
+      ]
+    },
+    {
+      "path": "/dev/shm/mc85_1556319/20170629_00023_frameImage.tiff",
+      "file_bytes": 131245904,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1532,
+      "compressed_bytes": 130504043, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "persistent_handle_to_f32", "workers": 8, "wall_median_s": 0.175606, "wall_min_s": 0.175167, "wall_max_s": 0.180048, "cpu_median_s": 1.30635, "bytes_in": 130504043, "bytes_out": 1366942080, "in_MBps": 743.164, "out_MBps": 7784.14, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0},
+        {"arm": "persistent_handle_to_f32", "workers": 24, "wall_median_s": 0.107242, "wall_min_s": 0.0859166, "wall_max_s": 0.112417, "cpu_median_s": 2.00388, "bytes_in": 130504043, "bytes_out": 1366942080, "in_MBps": 1216.91, "out_MBps": 12746.3, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0}
+      ]
+    },
+    {
+      "path": "/dev/shm/mc85_1556319/20170629_00024_frameImage.tiff",
+      "file_bytes": 131735614,
+      "nx": 3710, "ny": 3838, "nframes": 24,
+      "bits_per_sample": 16, "sample_format": 1, "compression": 8, "predictor": 1,
+      "rows_per_strip": 1, "strips_per_frame": 3838, "strips_total": 92112,
+      "strip_size_bytes": 7420, "max_compressed_strip_bytes": 1547,
+      "compressed_bytes": 130993750, "decoded_bytes_u16": 683471040, "decoded_bytes_f32": 1366942080,
+      "uniform_directories": true,
+      "runs": [
+        {"arm": "persistent_handle_to_f32", "workers": 8, "wall_median_s": 0.175246, "wall_min_s": 0.175148, "wall_max_s": 0.176639, "cpu_median_s": 1.30298, "bytes_in": 130993750, "bytes_out": 1366942080, "in_MBps": 747.487, "out_MBps": 7800.15, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0},
+        {"arm": "persistent_handle_to_f32", "workers": 24, "wall_median_s": 0.116852, "wall_min_s": 0.113209, "wall_max_s": 0.12999, "cpu_median_s": 2.07301, "bytes_in": 130993750, "bytes_out": 1366942080, "in_MBps": 1121.02, "out_MBps": 11698, "produces_pixels": true, "exact_equal": true, "exact_all_repeats": true, "global_sum_equal": true, "row_sums_equal": true, "n_pixels_differing": 0}
+      ]
+    }
+  ],
+  "injected_mutation": "none",
+  "injected_arm": "",
+  "max_rss_kib": 4150640,
+  "sink": 0
+}

@@ -1,0 +1,66 @@
+  [pread_whole_file] W=8 wall=0.0200347s cpu=0.0200471s
+  [pread_strip_extents] W=8 wall=0.0146628s cpu=0.119702s
+  [mmap_strip_extents] W=8 wall=0.0099496s cpu=0.0526263s
+  [tiff_dirscan_persistent] W=8 wall=0.00108198s cpu=0.00804524s
+  [tiff_open_per_frame_meta] W=8 wall=0.00604994s cpu=0.0266844s
+  [tiff_read_raw_strip] W=8 wall=0.0162261s cpu=0.0952708s
+  [tiff_decode_only] W=8 wall=0.142384s cpu=1.06432s
+  [decode_place_u16_natural] W=8 wall=0.15259s cpu=1.13935s EXACT-OK
+  [persistent_handle_to_u16] W=8 wall=0.155595s cpu=1.14499s EXACT-OK
+  [persistent_handle_to_f32] W=8 wall=0.176594s cpu=1.24243s EXACT-OK
+  [openperframe_handle_to_f32] W=8 wall=0.162499s cpu=1.18833s EXACT-OK
+  [persistent_handle_to_f32_dynamic] W=8 wall=0.167508s cpu=1.21009s EXACT-OK
+  [strip_batch_to_f32_b64] W=8 wall=0.15383s cpu=1.17385s EXACT-OK
+  [strip_batch_to_f32_b256] W=8 wall=0.143587s cpu=1.10392s EXACT-OK
+  [convert_u16_to_f32_resident] W=8 wall=0.0471871s cpu=0.349256s
+  [alloc_first_touch_f32] W=8 wall=0.288423s cpu=1.36158s
+  [alloc_first_touch_f32_malloc] W=8 wall=0.287401s cpu=1.35516s
+  [alloc_first_touch_f32_perframe] W=8 wall=0.210306s cpu=1.28708s
+  [alloc_first_touch_u16] W=8 wall=0.145014s cpu=0.746005s
+  [production_image_read] W=8 wall=0.272614s cpu=1.96406s EXACT-OK
+  [production_image_read_prealloc] W=8 wall=0.161628s cpu=1.14542s EXACT-OK
+  [omp_dispatch_only] W=8 wall=2.84957e-05s cpu=2.839e-05s
+  [pread_whole_file] W=16 wall=0.0148885s cpu=0.014891s
+  [pread_strip_extents] W=16 wall=0.0126209s cpu=0.1677s
+  [mmap_strip_extents] W=16 wall=0.0124603s cpu=0.109717s
+  [tiff_dirscan_persistent] W=16 wall=0.00127195s cpu=0.0162813s
+  [tiff_open_per_frame_meta] W=16 wall=0.00786553s cpu=0.0738504s
+  [tiff_read_raw_strip] W=16 wall=0.0201165s cpu=0.216922s
+  [tiff_decode_only] W=16 wall=0.105308s cpu=1.32302s
+  [decode_place_u16_natural] W=16 wall=0.112982s cpu=1.40254s EXACT-OK
+  [persistent_handle_to_u16] W=16 wall=0.114896s cpu=1.43146s EXACT-OK
+  [persistent_handle_to_f32] W=16 wall=0.123806s cpu=1.53033s EXACT-OK
+  [openperframe_handle_to_f32] W=16 wall=0.117186s cpu=1.44017s EXACT-OK
+  [persistent_handle_to_f32_dynamic] W=16 wall=0.123601s cpu=1.53664s EXACT-OK
+  [strip_batch_to_f32_b64] W=16 wall=0.103318s cpu=1.48693s EXACT-OK
+  [strip_batch_to_f32_b256] W=16 wall=0.100767s cpu=1.48227s EXACT-OK
+  [convert_u16_to_f32_resident] W=16 wall=0.0516265s cpu=0.742683s
+  [alloc_first_touch_f32] W=16 wall=0.316006s cpu=2.0989s
+  [alloc_first_touch_f32_malloc] W=16 wall=0.311817s cpu=2.05856s
+  [alloc_first_touch_f32_perframe] W=16 wall=0.245172s cpu=1.73655s
+  [alloc_first_touch_u16] W=16 wall=0.136721s cpu=1.10808s
+  [production_image_read] W=16 wall=0.199454s cpu=2.3808s EXACT-OK
+  [production_image_read_prealloc] W=16 wall=0.117508s cpu=1.44545s EXACT-OK
+  [omp_dispatch_only] W=16 wall=3.52003e-05s cpu=3.5711e-05s
+  [pread_whole_file] W=24 wall=0.0151056s cpu=0.0151083s
+  [pread_strip_extents] W=24 wall=0.00570492s cpu=0.140291s
+  [mmap_strip_extents] W=24 wall=0.0161585s cpu=0.225407s
+  [tiff_dirscan_persistent] W=24 wall=0.00189857s cpu=0.0478134s
+  [tiff_open_per_frame_meta] W=24 wall=0.00990797s cpu=0.141709s
+  [tiff_read_raw_strip] W=24 wall=0.0229021s cpu=0.341285s
+  [tiff_decode_only] W=24 wall=0.0689024s cpu=1.46236s
+  [decode_place_u16_natural] W=24 wall=0.0751934s cpu=1.57559s EXACT-OK
+  [persistent_handle_to_u16] W=24 wall=0.075608s cpu=1.5879s EXACT-OK
+  [persistent_handle_to_f32] W=24 wall=0.0837898s cpu=1.7836s EXACT-OK
+  [openperframe_handle_to_f32] W=24 wall=0.0773602s cpu=1.68274s EXACT-OK
+  [persistent_handle_to_f32_dynamic] W=24 wall=0.0822784s cpu=1.74569s EXACT-OK
+  [strip_batch_to_f32_b64] W=24 wall=0.089481s cpu=1.793s EXACT-OK
+  [strip_batch_to_f32_b256] W=24 wall=0.0853643s cpu=1.78158s EXACT-OK
+  [convert_u16_to_f32_resident] W=24 wall=0.0506096s cpu=1.12053s
+  [alloc_first_touch_f32] W=24 wall=0.291538s cpu=2.96142s
+  [alloc_first_touch_f32_malloc] W=24 wall=0.2931s cpu=2.97533s
+  [alloc_first_touch_f32_perframe] W=24 wall=0.262249s cpu=2.62268s
+  [alloc_first_touch_u16] W=24 wall=0.134671s cpu=1.72273s
+  [production_image_read] W=24 wall=0.125568s cpu=2.80592s EXACT-OK
+  [production_image_read_prealloc] W=24 wall=0.0777784s cpu=1.68892s EXACT-OK
+  [omp_dispatch_only] W=24 wall=2.34656e-05s cpu=3.708e-05s

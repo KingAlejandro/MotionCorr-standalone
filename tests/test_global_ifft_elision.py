@@ -18,7 +18,10 @@ Three independent oracles, none of which needs a stored reference fixture:
      oracle A cannot carry the test.
   C. the predicate is not too broad -- `--patch_x 3` must not collapse onto the
      `--patch_x 1` result, which is what happens if the elision swallows the
-     frames that patch clipping needs.
+     frames that patch clipping needs. This one needs a movie that actually
+     contains motion, so it uses the repository's synthetic fixture rather than
+     the generated flat one, on which patch alignment legitimately finds
+     nothing and the two would agree even on correct code.
 
 Oracle A is also exercised in the configuration where the elision actually
 fires (no `--even_odd_split`, no `--save_noDW`), via oracle D: the dose-weighted
@@ -37,13 +40,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-from test_hotpixel_rng_determinism import read_mrc_pixels, write_movie, write_star
+from test_hotpixel_rng_determinism import NFRAMES, read_mrc_pixels, write_movie, write_star
 
 # Frame selection is pinned identically across every arm. Oracle A is only
 # valid for matched selected frames: changing the selection legitimately
 # changes the unweighted sums, which would look like a failure.
 SELECTION = ['--first_frame_sum', '1', '--last_frame_sum', '6']
-N_SELECTED = 6
+# Frame selection restricts which frames enter the sums; the global shift table
+# still covers every frame in the movie, so that is what the STAR must report.
+N_TRAJECTORY = NFRAMES
 
 
 def core_header(path: Path) -> bytes:
@@ -85,8 +90,8 @@ def check_star_association(star: Path, movie: str, tag: str):
             parts = s.split()
             if len(parts) == 3 and parts[0].isdigit():
                 rows += 1
-    assert rows == N_SELECTED, (
-        f'{tag}: STAR global shift table has {rows} frames, expected {N_SELECTED}')
+    assert rows == N_TRAJECTORY, (
+        f'{tag}: STAR global shift table has {rows} frames, expected {N_TRAJECTORY}')
 
 
 def invoke(binary, work, star, out, extra=()):
@@ -172,15 +177,36 @@ def test_global_ifft_elision(binary: Path = None):
         assert '_EVN.mrc' not in elide and '_EVN.mrc' not in keep, \
             'even/odd output appeared without --even_odd_split'
 
-        # --- Oracle C: the predicate is not too broad -----------------------
-        # If the elision also swallowed the frames patch clipping reads, every
-        # patch would report zero shift and --patch_x 3 would collapse onto the
-        # --patch_x 1 answer.
-        local = products(invoke(binary, work, star, 'local',
-                                ['--patch_x', '3', '--patch_y', '3'] + dw), 'local')
-        assert local['.mrc'][0] != elide['.mrc'][0], (
-            'patch 3x3 reproduced the patch 1x1 result exactly: local alignment '
-            'contributed nothing, which is what an over-broad elision looks like')
+    # --- Oracle C: the predicate is not too broad --------------------------
+    # If the elision also swallowed the frames patch clipping reads, every patch
+    # would report zero shift and --patch_x 3 would collapse onto the --patch_x 1
+    # answer. The generated fixture above is motionless, so patch alignment finds
+    # nothing there and the two agree even on correct code; this check therefore
+    # uses the repository's synthetic movie, which carries real motion.
+    movie = Path(__file__).resolve().parent.parent / 'test-data/synthetic/synthetic_movie.tiff'
+    if not movie.is_file():
+        raise FileNotFoundError(f'synthetic fixture not found at {movie}')
+    with tempfile.TemporaryDirectory(prefix='ifft_elision_local_') as tmp:
+        work = Path(tmp)
+        common = ['--use_own', '--j', '1', '--seed', '1', '--skip_logfile',
+                  '--voltage', '300', '--angpix', '1.0',
+                  '--dose_weighting', '--dose_per_frame', '1.0']
+        sums = {}
+        for patch in ('1', '3'):
+            out = work / f'p{patch}'
+            res = subprocess.run(
+                [str(binary), '--i', str(movie), '--o', str(out), *common,
+                 '--patch_x', patch, '--patch_y', patch],
+                cwd=work, text=True, capture_output=True, timeout=300)
+            assert res.returncode == 0, res.stdout + res.stderr
+            hits = list(out.glob('**/synthetic_movie.mrc'))
+            assert len(hits) == 1, f'patch {patch}: expected 1 micrograph, got {len(hits)}'
+            check_complete(hits[0], f'patch{patch}')
+            sums[patch] = read_mrc_pixels(hits[0])
+        assert sums['1'] != sums['3'], (
+            'patch 3x3 reproduced the patch 1x1 result exactly on a movie that '
+            'contains motion: local alignment contributed nothing, which is what '
+            'an over-broad elision looks like')
 
     print('PASS: global inverse FFT elision preserves every product')
     print('  A dose-weighting independence of EVN/ODD  ok')

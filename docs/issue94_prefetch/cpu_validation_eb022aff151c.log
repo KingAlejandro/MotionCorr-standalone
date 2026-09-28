@@ -1,0 +1,136 @@
+##### issue94 final CPU validation
+date_utc: 2026-09-28T00:33:28Z  host: small-refmac-machine (ssh alias cpu64)
+source_sha: eb022aff151c11d939e2c39a5fc0b56da31ad431
+lane: taskset -c 32-47 (node1), build -j16, runtime <=16
+lock: /tmp/motioncorr-issue96-cpu-validation.lock
+##### topology of the lane
+32,1,1,32,Y
+33,1,1,33,Y
+34,1,1,34,Y
+35,1,1,35,Y
+36,1,1,36,Y
+37,1,1,37,Y
+38,1,1,38,Y
+39,1,1,39,Y
+40,1,1,40,Y
+41,1,1,41,Y
+42,1,1,42,Y
+43,1,1,43,Y
+44,1,1,44,Y
+45,1,1,45,Y
+46,1,1,46,Y
+47,1,1,47,Y
+distinct physical CORE ids in lane: 16 for 16 logical CPUs
+##### interference present, not altered
+    PID USER     %CPU     ELAPSED PSR COMMAND
+3095573 ubuntu    197       00:33   0 motioncorr
+1156942 ubuntu   99.9 49-01:03:34  58 ctffind
+1635429 ubuntu   99.9 47-22:39:52  32 ctffind
+3096197 root      2.2       00:00  54 sshd
+3045757 ubuntu    1.4       27:01   7 python3
+2722253 ubuntu    0.8 43-08:56:18  53 node
+1519128 root      0.1  5-18:06:31  51 rsyslogd
+ctffind 1156942 Cpus_allowed_list=0-63
+ctffind 1635429 Cpus_allowed_list=0-63
+loadavg: 4.29 8.83 11.74 7/8005 3096281
+##### source hashes
+b2c58c352458a900e4148e25aa51727d65cce6309995232ca3584da706663bdd  src/movie_prefetch.h
+413b97261d73c2c3750de76f9d15b88c19f53ca065de4369998d0d6900f8330f  src/movie_prefetch.cpp
+19ec5be4508dff0c9cfb8a2df2c4ac56cd502b7fa35122d37b8e2b7af55a7678  src/motioncorr_runner.h
+8474ccb1f44cf6a62be563aa8f8f11ad67a8cc50ee568a3bf0441d44c55b04e8  src/motioncorr_runner.cpp
+f686a91905ecbb8733de7b11c0b2335e5e6454ca4bb880d6f785f6fe2106a6b1  CMakeLists.txt
+8353ecbc3da76d3d91c7113570216a1fb7c02e8a124f5bbeadfc3fdec301bf6d  tests/test_prefetch_lifecycle.cpp
+77bd6711e0d38509be4ab6228ea62b9761e0dc8df59f214e9a874abb4ebea74a  tests/test_prefetch_equivalence.py
+d6df4da18ab9c885c32ae3317d279bfc4be5a0647896eeda500c2ef38cf3dbe3  scripts/prefetch_gpu_screen.sh
+3df64f9ff38a8971f43c7b38a82a27b6ca26c5009745cd6d52ae52e053565ac2  tools/compare_prefetch_arms.py
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  test-data/synthetic/synthetic_movie.tiff
+##### lock acquired 2026-09-28T00:33:28Z
+inherited Cpus_allowed_list: 32-47
+numactl --show: policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+configure rc=0
+build rc=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+binary sha256: 9fda7ac231cc780ff1d2df68dd0ac6f60fae2d86d52c8a717cd3222be180873a
+lifecycle sha256: 0d045b864a1162781b5db8e6fb4e8399b42fa4e10ad4174977d661666dadb36b
+##### full ctest
+      Start  3: HotPixelRngDeterminism
+ 3/15 Test  #3: HotPixelRngDeterminism ...........   Passed    0.55 sec
+      Start  4: RunnerExposure
+ 4/15 Test  #4: RunnerExposure ...................   Passed    0.47 sec
+      Start  5: Runner_failure
+ 5/15 Test  #5: Runner_failure ...................   Passed    0.12 sec
+      Start  6: Runner_invalid
+ 6/15 Test  #6: Runner_invalid ...................   Passed    0.10 sec
+      Start  7: Runner_resume
+ 7/15 Test  #7: Runner_resume ....................   Passed    1.89 sec
+      Start  8: Runner_tomography
+ 8/15 Test  #8: Runner_tomography ................   Passed    0.37 sec
+      Start  9: RunnerLateBin
+ 9/15 Test  #9: RunnerLateBin ....................   Passed    0.60 sec
+      Start 10: RunnerExportedUnits
+10/15 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 11: GainCache
+11/15 Test #11: GainCache ........................   Passed    1.20 sec
+      Start 12: TiffRead
+12/15 Test #12: TiffRead .........................   Passed    0.50 sec
+      Start 13: DamagedMovie
+13/15 Test #13: DamagedMovie .....................   Passed    0.09 sec
+      Start 14: PrefetchEquivalence
+14/15 Test #14: PrefetchEquivalence ..............   Passed    8.15 sec
+      Start 15: RunnerModelParser
+15/15 Test #15: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 15
+
+Total Test time (real) =  20.92 sec
+ctest rc=0
+
+##### the two new tests rerun with FULL stdout captured (the per-case numbers)
+--- PrefetchLifecycle ---
+  (the RelionError reports below are expected: this case probes deliberately absent files)
+in: /home/ubuntu/mc-issue94/src-eb022aff151c/src/image.h, line 276
+ERROR: 
+Cannot read file movie0.mrcs It does not exist
+in: /home/ubuntu/mc-issue94/src-eb022aff151c/src/image.h, line 276
+ERROR: 
+Cannot read file movie1.mrcs It does not exist
+in: /home/ubuntu/mc-issue94/src-eb022aff151c/src/image.h, line 276
+ERROR: 
+Cannot read file movie0.mrcs It does not exist
+in: /home/ubuntu/mc-issue94/src-eb022aff151c/src/image.h, line 276
+ERROR: 
+Cannot read file movie1.mrcs It does not exist
+prefetch lifecycle: all checks passed
+exit=0
+--- PrefetchEquivalence ---
+  normal:  4/4 movies identical; budget=466944 B, peak_reserved=466944 B, peak_queue=1
+  control: a changed option does change the pixels (the checks can fail)
+  mixed:   4/4 identical across differing geometry and frame counts (decoded=4, inline=0)
+  tight:   3/3 identical with a 9 MiB budget holding one movie (unit=8413184 B, peak_reserved=8413184 B)
+  starved: 3/3 identical with a 8 MiB budget, all via the counted in-line fallback (over_budget_grants=3)
+  gain:    4/4 identical with a gain reference applied, all 4 prefetched
+  frames:  4/4 identical with --first_frame_sum 2 --last_frame_sum 7, all 4 prefetched, start frame recorded as 2
+  damaged-first: exit 1 matches serial, both healthy movies retained and identical
+  damaged-last: exit 1 matches serial, both healthy movies retained and identical
+  resume:  non-prefix resume identical, full 4/4 coverage, 3 movies prefetched
+prefetch equivalence: all cases identical to serial
+exit=0
+##### loadavg at end: 6.10 8.65 11.51 5/8007 3098576
+##### series rc=0 at 2026-09-28T00:34:24Z
+##### ThreadSanitizer (OMP_NUM_THREADS=1; libgomp is not TSan-annotated)
+tsan configure rc=0
+tsan build rc=0
+tsan lifecycle exit=0  warnings=0
+movies: Movies/mov0.mrcs Movies/mov1.mrcs Movies/mov2.mrcs Movies/mov3.mrcs Movies/real0.tiff Movies/real1.tiff
+tsan serial exit=0
+tsan prefetch exit=0
+tsan serial warnings=0  prefetch warnings=0
+ prefetch: budget_bytes = 430080, peak_reserved_bytes = 9469952, peak_queue_occupancy = 1
+ prefetch: decoded = 4, inline_loaded = 2, failed = 0, over_budget_grants = 2
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 0.0783207, consumer_wait_s = 0.00161413
+ prefetch: process_peak_rss_bytes = 130158592 (whole process, kernel high-water)
+  6 corrected images compared under TSan, 0 differ, 0 empty
+tsan pixel comparison exit=0
+##### TSAN DONE
+##### ALL DONE (release + tsan)

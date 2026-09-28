@@ -22,7 +22,7 @@ ones and are parsed normally.
 
 ## Commands and results
 
-macOS 25.6.0, AppleClang, 2026-09-28, source `412f2f98` (unchanged in `189ed1fc`; the diff between them touches tests and docs only):
+macOS 25.6.0, AppleClang, 2026-09-28, rechecked at head `eb022aff`:
 
 ```
 c++ -std=c++17 -fsyntax-only -w -D_CUDA_ENABLED -I<stubs> -I. \

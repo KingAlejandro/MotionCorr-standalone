@@ -5,10 +5,10 @@
 **Task class**: correctness (scoped fix + CPU validation evidence)  
 **Branch**: round96/97-grok-4-3 (isolated origin/main worktree)  
 **Base commit**: 4c952b3f54479653512c4d208e09c9a8c02f3726 (main)  
-**Phase**: Dual verification gate satisfied against the final source. Draft PR #100 retained; awaiting maintainer decision on the documented option-on divergence.
+**Phase**: main merged in (`95c0cfb`); CPU re-validated against the new base `8323c55`; native CUDA A/B complete on 4GPUs. Draft PR #100 retained.
 **Changed files**: `src/motioncorr_runner.cpp`, `src/motioncorr_runner.h`, `tests/test_runner_numerics.cpp`, `CMakeLists.txt`, `SOURCE_MANIFEST.txt`, `docs/issue97_cpu_evidence/*`, ADR, whitelist, this file.
 **Blockers**: none blocking. The option-on path deliberately diverges from pinned RELION `ad0b230`; documented for the maintainer rather than gated on a second approval. GPU remains deferred to the coordinated shared-GPU slot, now owned by #53.
-**NEEDS_GPU**: Yes, deferred — the CUDA option-on path is unverified. Request: one slot to run the same 4-arm option-off/on comparison with `_CUDA_ENABLED`. Not submitted; #53 owns the shared-GPU slot.
+**NEEDS_GPU**: No — satisfied. Native CUDA A/B run on 4GPUs (see `docs/issue97_gpu_evidence/`): default-off byte-identical, option-on changed, CUDA patch path confirmed engaged. Correctness only; no timing, no benchmark slot consumed.
 **Next step**: maintainer decision on the deliberate option-on divergence from pinned RELION `ad0b230` (fix as-is vs gate behind a separate flag). PR stays draft. GPU deferred; #53 owns the shared-GPU slot.
 
 ## Scoped plan (per issue-97.json + task-97.md + COMMON.md)
@@ -140,3 +140,27 @@ counts, proving no line is dropped any more.
 ### Still open, and not a conformance defect
 Maintainer decision on the deliberate divergence from pinned RELION `ad0b230`, on the
 experimental default-off `--interpolate_shifts` path only. Default-off is proven byte-identical.
+
+## Post-merge re-validation and GPU (2026-09-28)
+
+`origin/main` advanced `4c952b3` -> `8323c55` while this branch was open, so the earlier
+byte-exactness evidence no longer described the current baseline. Merged main in (one
+conflict, `CMakeLists.txt`, where main added `defect_parser` and a hard python+numpy gate at
+the same line as this branch's test registration) and re-ran everything.
+
+**CPU, cpu64, full machine (Alex authorised all 64 cores), new base `8323c55` vs `95c0cfb`:**
+- Production delta between the two trees is exactly the issue-97 fix and nothing else.
+- `RunnerInterpolateRecenter` passes on fixed, absent on base. Suite 19 vs 18 tests.
+- `CiFailClosedControls` **fails on both trees**, i.e. it is pre-existing on main and not
+  caused by this branch.
+- Default-off: MRC payload and per-movie STAR byte-identical on synthetic and full-size real
+  movie. Option-on differs as intended. `GATE: PASS`.
+- The option-on difference figures are unchanged from the pre-merge run, so main's changes
+  (incl. the #26 IFFT elision) did not perturb these outputs.
+- Cross-NUMA placement used; acceptable because this is bit-exactness, not timing.
+
+**GPU, 4GPUs, native CUDA:** see `docs/issue97_gpu_evidence/`. `GATE: PASS`.
+Two build findings recorded there that are defects in main, not this PR: the project's
+`CMAKE_CUDA_ARCHITECTURES` guard does not fire under CMake 3.28 + CUDA 12.8 (configure fails
+with "CUDA_ARCHITECTURES is empty" unless `-DCMAKE_CUDA_ARCHITECTURES=80` is passed), and
+`BUILD_TESTING=ON` is impossible on that host because main now hard-requires numpy.

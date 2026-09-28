@@ -1,0 +1,33 @@
+############ GPU BUILD START 2026-09-28T15:35:33+00:00 ############
+--- host / toolchain ---
+4-gpu-vm
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe
+--- lane ---
+Cpus_allowed_list:	96-103
+--- numpy present? (expect NO; why BUILD_TESTING is OFF) ---
+ModuleNotFoundError: No module named 'numpy'
+[base] HEAD=8323c55faf1c4ddbe35dd36c5cd1266d48f25c38 dirty=0
+7d458c27dc69adcc9b99162c756420092afeaa55b7f7221b92d60bec75948090  /home/alex/mc-issue97-gpu/src-base/src/motioncorr_runner.cpp
+[base] configure exit=0
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CUDA:BOOL=ON
+[base] build exit=0
+[base] binary: 4c79d6b1451c7a4689f9d722903e4a33b3ffcf54783286920355e4132a9d3b8b  /home/alex/mc-issue97-gpu/build-base/motioncorr
+[base] links cudart? 1
+[fixed] HEAD=95c0cfb86e967ed25bed3fdd7ea8e5cf882f5971 dirty=0
+a1a071b8ac4bdbb0e01feed7c0f85f079987307a2e6700d803a3f0b7646b38d4  /home/alex/mc-issue97-gpu/src-fixed/src/motioncorr_runner.cpp
+[fixed] configure exit=0
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CUDA:BOOL=ON
+[fixed] build exit=0
+[fixed] binary: 959f1b8b9f8a77ce5af543673780556a8c7ccc76e50859d4013ca55a339d8c68  /home/alex/mc-issue97-gpu/build-fixed/motioncorr
+[fixed] links cudart? 1
+STATUS=BUILD_DONE
+############ GPU BUILD END 2026-09-28T15:37:48+00:00 ############

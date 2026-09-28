@@ -152,6 +152,8 @@ left pointing at a tree that no longer exists.
 | Full suite | cpu64 | 14/14 fixed, 13/13 base — exactly one test added, none regressed |
 | Default-off output unchanged, synthetic | cpu64 | MRC payload and STAR **byte-identical** base vs fixed |
 | Default-off output unchanged, real movie | cpu64 | MRC payload (56,955,920 B) and 779-line STAR **byte-identical** |
+| Default-off unchanged, real movie, CUDA | 4GPUs | MRC payload (56,955,920 B) and 779-line STAR **byte-identical** on the native CUDA backend |
+| Option-on changed, real movie, CUDA | 4GPUs | 611/779 STAR lines differ; joint accumulated motion equal |
 | Option-on output changed, real movie | cpu64 | 14,236,598/14,238,980 px differ; 611/779 STAR lines |
 | Joint STAR accumulated motion equal | cpu64 | measured in `followup_measurements.log`; the original comparator could not see these values (see the evidence README correction) |
 | Recenter block actually reached | cpu64 | 9 patch blocks (3x3) and 25 (5x5), `interpolate_shifts` 0/1 per arm, zero "Too few patches" — captured from the nested per-movie logs in `followup_measurements.log` |
@@ -169,10 +171,13 @@ and no tolerance was loosened anywhere to obtain these results.
 
 ### NOT verified — explicitly unrun
 
-- **No CUDA / GPU execution.** Deferred to the coordinated shared-GPU slot, now owned by #53
-  (previously #26). The CUDA option-on path
-  is unverified. Note `src/acc/cuda/cuda_alignpatch.cu:393-398` contains an independent,
-  already-correct descending-loop recentering; it was not touched.
+- ~~No CUDA / GPU execution.~~ **Now run** on 4GPUs (A100, CUDA 12.8, sm_80): default-off
+  byte-identical and option-on changed on the native CUDA backend, with
+  `[CUDA Patch Alignment Profile]` confirming the local/patch path the fix touches ran on
+  device. See `docs/issue97_gpu_evidence/`. Still NOT run there: the ctest suite (the host
+  lacks numpy, which current main hard-requires for `BUILD_TESTING=ON`). No timing claim —
+  another user's job shared the device. Note `src/acc/cuda/cuda_alignpatch.cu` contains an
+  independent, already-correct descending-loop recentering; it was not touched.
 - **No downstream scientific claim.** No RELION refinement, FSC, B-factor or resolution
   comparison. Nothing here says the corrected option-on output is scientifically better,
   only that it matches the code's stated intent.

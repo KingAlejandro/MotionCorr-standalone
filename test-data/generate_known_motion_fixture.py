@@ -475,9 +475,40 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
                     f"Canonical mode disagreement for {out_name}: generated movie sha256 {movie_hash} "
                     f"!= expected canonical {existing_gt.get('movie_sha256')}"
                 )
-            # Canonical mode verified; atomically replace movie and star, preserving pristine truth
+            # The committed .star is a trusted gate INPUT, not a regenerable artifact, so
+            # canonical mode compares it and refuses rather than replacing it.
+            #
+            # Replacing it -- even atomically -- is not benign. A STAR_TEMPLATE edit that
+            # changes the optics (a different _rlnMicrographOriginalPixelSize, _rlnVoltage or
+            # _rlnMicrographMovieName) moves no pixel, so the movie check immediately above
+            # still passes and verify_fixtures.py still reports VERIFIED.
+            # run_known_motion_gates.py would then consume freshly generated metadata under a
+            # green canonical verification. Measured on cpu64 against the pre-fix generator:
+            # VOLTAGE 300.0 -> 200.0 rewrote the committed STAR, kept movie sha256
+            # f9da4668... unchanged, and verification still reported
+            # "VERIFIED: 1 canonical fixtures match trusted manifest".
+            if not star.is_file():
+                raise RuntimeError(f"Canonical mode: missing required committed STAR input {star}")
+            committed_star_text = star.read_text()
+            staged_star_text = staged_star.read_text()
+            if committed_star_text != staged_star_text:
+                diff = "\n".join(difflib.unified_diff(
+                    committed_star_text.splitlines(), staged_star_text.splitlines(),
+                    fromfile=f"committed {star.name}", tofile="generated", lineterm="", n=1))
+                raise RuntimeError(
+                    f"Canonical mode STAR disagreement for {out_name}: the committed STAR input "
+                    f"does not match what this generator would write. Nothing was modified: the "
+                    f"movie and the STAR were both left as committed. The generated movie digest "
+                    f"is {movie_hash}, which equals the canonical digest, so this drift is "
+                    f"invisible to the movie check and to verify_fixtures' movie hash -- it is "
+                    f"caught here and by the manifest's star_sha256. If the change is intended, "
+                    f"update the fixture and its manifest digest as an explicit maintenance "
+                    f"step.\n{diff}"
+                )
+            # Verified; the movie is regenerable and is replaced, the committed STAR stands.
+            # The replace happens only after BOTH checks pass, so their transactional
+            # property is preserved: a rejected run leaves the tree exactly as it was.
             os.replace(staged_mrcs, mrcs)
-            os.replace(staged_star, star)
         else:
             # Normal generation: stage matching truth and atomically replace all files
             staged_gt.write_text(json.dumps(gt, indent=2) + "\n")

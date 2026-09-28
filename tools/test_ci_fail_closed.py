@@ -573,35 +573,32 @@ exec "{sys.executable}" "$@"
                                  f"{label} must leave the committed STAR unmodified on disk")
 
                 if star_only:
-                    # The load-bearing assertion. The generator writes the movie before the
-                    # STAR check, so the movie exists and can be hashed: prove the pre-existing
-                    # movie digest is blind to this mutation, and that the STAR check is what
-                    # rejected it. Without this the case could pass for the wrong reason.
-                    produced = out_dir / "km_global_hisnr.mrcs"
-                    self.assertTrue(produced.is_file(),
-                                    f"{label}: movie must have been generated before the STAR check")
-                    produced_sha = hashlib.sha256(produced.read_bytes()).hexdigest()
-                    self.assertEqual(produced_sha, canonical_movie_sha,
-                                     f"{label} must not move a pixel, or it is not a test of "
-                                     f"metadata-only drift")
+                    # The load-bearing assertion. After the PR102 staging restructure the
+                    # movie check runs first and nothing is replaced when the STAR check
+                    # rejects, so the produced movie is not left in the output directory.
+                    # The generator therefore reports the digest it computed: require it to
+                    # EQUAL the canonical digest, which is what proves the pre-existing movie
+                    # check is blind to this mutation and that the STAR check is the detector.
                     self.assertIn("STAR disagreement", combined,
                                   f"{label} must be rejected by the STAR check specifically")
-                    self.assertNotIn("generated movie sha256", combined,
+                    self.assertIn(canonical_movie_sha, combined,
+                                  f"{label} must report the generated movie digest as EQUAL to "
+                                  f"canonical, or it is not a test of metadata-only drift")
+                    self.assertNotIn("Canonical mode disagreement", combined,
                                      f"{label} is invisible to the movie digest, so the movie "
                                      f"check must not be the detector")
+                    self.assertFalse((out_dir / "km_global_hisnr.mrcs").exists(),
+                                     f"{label}: a rejected canonical run must leave the tree "
+                                     f"as it was, replacing nothing")
                 else:
-                    # PIXEL_SIZE reaches the MRC header via write_mrc_stack(), so it is caught
-                    # by the movie digest too. Assert only that it is rejected, and pin the
-                    # header coupling so a future refactor that removes it is visible here.
-                    produced_sha = hashlib.sha256(
-                        (out_dir / "km_global_hisnr.mrcs").read_bytes()).hexdigest()
-                    self.assertNotEqual(produced_sha, canonical_movie_sha,
-                                        "PIXEL_SIZE is expected to reach the MRC header; if it no "
-                                        "longer does, it becomes metadata-only and must move to "
-                                        "the star_only group above")
-                    self.assertTrue(
-                        "STAR disagreement" in combined or "generated movie sha256" in combined,
-                        f"{label} must be rejected by one of the canonical checks")
+                    # PIXEL_SIZE reaches the MRC header via write_mrc_stack(), so the movie
+                    # check rejects it first. Assert that, and pin the header coupling so a
+                    # refactor that removes it surfaces here and moves the case above.
+                    self.assertIn("Canonical mode disagreement", combined,
+                                  "PIXEL_SIZE is expected to reach the MRC header and be caught "
+                                  "by the movie digest; if it no longer is, it becomes "
+                                  "metadata-only and must move to the star_only group above")
+                    self.assertNotIn(canonical_movie_sha + " !=", combined)
 
         # 8C: the generator can be bypassed entirely (CI runs the gates with --no-regenerate),
         # so the verifier must independently reject a STAR altered on disk.

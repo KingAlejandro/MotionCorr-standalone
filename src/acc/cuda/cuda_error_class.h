@@ -59,5 +59,41 @@ inline bool cudaErrorPoisonsContext(cudaError_t err)
     }
 }
 
+/**
+ * Issue #69: is a retry permitted after a device stage declined to produce a result?
+ *
+ * The hazard this exists to close: the stage's own error handler CONSUMES the CUDA
+ * error -- it reads it, logs it, and returns false. `cudaGetLastError()` is the host
+ * thread's last-error slot and is reset by that read, so afterwards it reports
+ * `cudaSuccess`. That is not a certificate that the context is healthy; it only means
+ * nothing has been recorded since. Deciding recoverability from a later last-error read
+ * therefore turns a fatal, already-consumed failure into a permitted retry.
+ *
+ * So the decision is made from the status the failing stage RECORDED, and the pending
+ * slot is consulted only when nothing was recorded -- for example when the caller's own
+ * unchecked allocation declined without going through a handler.
+ *
+ * A cuFFT failure is passed separately because `cufftResult` is not a `cudaError_t`.
+ * cuFFT reports library-level failures that do not themselves imply a dead CUDA
+ * context, so a cuFFT error alone does not force a fatal verdict; if it corrupted the
+ * context, the accompanying CUDA code says so.
+ *
+ * Pure predicate: performs no CUDA call, resets nothing, touches no other process.
+ */
+enum CudaRetryVerdict {
+    CUDA_RETRY_PERMITTED,   // context believed usable; the caller's existing path may run
+    CUDA_RETRY_FATAL        // context unusable; fail this movie cleanly, do not retry
+};
+
+inline CudaRetryVerdict cudaRetryVerdictFor(cudaError_t recorded_by_stage,
+                                            cufftResult recorded_cufft,
+                                            cudaError_t pending_on_thread)
+{
+    const cudaError_t decisive = (recorded_by_stage != cudaSuccess) ? recorded_by_stage
+                                                                    : pending_on_thread;
+    (void)recorded_cufft;
+    return cudaErrorPoisonsContext(decisive) ? CUDA_RETRY_FATAL : CUDA_RETRY_PERMITTED;
+}
+
 #endif // _CUDA_ENABLED
 #endif // CUDA_ERROR_CLASS_H_

@@ -11,12 +11,19 @@
 #include <algorithm>
 #include <climits>
 
+// Issue #69. These handlers CONSUME the error: they read it, log it, and return false.
+// By the time the caller regains control, cudaGetLastError() has been reset and reports
+// cudaSuccess, which is not a certificate that the context is healthy -- it only means
+// nobody has recorded anything since. So each handler also records the code and the
+// stage on the session, and the caller decides from that recorded status rather than
+// from a later last-error read.
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
     cudaError_t err = (cmd); \
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        recordFailure(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -27,6 +34,7 @@
     if (res != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << res << std::endl; \
+        recordCufftFailure(res, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -218,6 +226,22 @@ CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, 
 
 CudaMovieSession::~CudaMovieSession() {
     release();
+}
+
+// Keep the FIRST failure. A later, shallower error (or a later success) must not
+// overwrite the one that actually ended the stage.
+void CudaMovieSession::recordFailure(cudaError_t err, const char *stage, int line) {
+    if (first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS) return;
+    first_error = err;
+    first_error_stage = stage ? stage : "(unknown)";
+    first_error_line = line;
+}
+
+void CudaMovieSession::recordCufftFailure(cufftResult res, const char *stage, int line) {
+    if (first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS) return;
+    first_cufft_error = res;
+    first_error_stage = stage ? stage : "(unknown)";
+    first_error_line = line;
 }
 
 bool CudaMovieSession::initialize() {

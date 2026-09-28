@@ -112,6 +112,17 @@ public:
     // Download real frames to host (used e.g. for fallback)
     bool downloadRealFrames(std::vector<Image<float> > &Iframes);
 
+    // Issue #69: the first failure this session observed, preserved across the helper
+    // boundary. The internal error handlers consume the CUDA error when they return
+    // false, so a later cudaGetLastError() reports cudaSuccess and proves nothing about
+    // context health. A caller deciding whether a retry is safe must use these, not a
+    // fresh last-error read.
+    cudaError_t getFirstError() const { return first_error; }
+    cufftResult getFirstCufftError() const { return first_cufft_error; }
+    const char* getFirstErrorStage() const { return first_error_stage; }
+    int getFirstErrorLine() const { return first_error_line; }
+    bool hasFailed() const { return first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS; }
+
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
     cufftComplex* getDeviceFourierFrames() { return d_Fframes; }
@@ -124,6 +135,16 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    void recordFailure(cudaError_t err, const char *stage, int line);
+    void recordCufftFailure(cufftResult res, const char *stage, int line);
+
+    // First observed failure, sticky for the life of the session. Not reset by
+    // release(): a movie that failed stays failed for reporting purposes.
+    cudaError_t first_error = cudaSuccess;
+    cufftResult first_cufft_error = CUFFT_SUCCESS;
+    const char *first_error_stage = "";
+    int first_error_line = 0;
+
     int nx;
     int ny;
     int n_frames;

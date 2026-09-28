@@ -2129,46 +2129,66 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					}
 				}
 				if (movie_session && !device_prep_ok) {
-					// The host path below calls alignPatch(), which dispatches
-					// cudaAlignPatch() again while use_gpu is true. So the "fallback"
-					// is only a CPU fallback when the CPU backend is selected; on a
-					// GPU run it returns to the same device. That is fine after an
-					// allocation that did not fit, and wrong after a fatal execution
-					// error: the context is poisoned and the retry can only fail
-					// again, from whichever later call happens to touch CUDA first.
-					// Fail the movie here instead. run() records it in failed_movies,
-					// withholds the joint output and exits nonzero, and the remaining
-					// movies still run.
+					// Issue #69, corrected after review. The question here is whether a
+					// retry is safe, and it must NOT be answered from a later
+					// cudaGetLastError() read.
 					//
-					// cudaGetLastError() reports the last error recorded on this
-					// thread, which is not necessarily the one this stage hit: the
-					// session's own file-local HANDLE_ERROR may already have consumed
-					// it, and the host-side buffer guard above records none at all.
-					// That is acceptable for this decision, because the question is
-					// not "what failed here" but "is this context still usable", and a
-					// sticky code pending from anywhere answers it. The message
-					// therefore says where the state was observed, not what caused it.
-					// Reading it also clears any non-sticky code, which is what we want
-					// before handing this patch to the fallback.
+					// preparePatchInVram's own error handler consumes the code: it
+					// reads it, logs it, and returns false. cudaGetLastError() is the
+					// host thread's last-error slot and that read resets it, so by the
+					// time we get here it reports cudaSuccess. Absence of a pending
+					// error is not a certificate that the context is healthy -- it only
+					// means nothing has been recorded since. Treating it as one turns a
+					// fatal, already-consumed failure into a permitted retry, which is
+					// exactly the lost-error contract this branch was pulled up on.
+					//
+					// So the session preserves the status of the stage that actually
+					// failed, and the verdict comes from that. The pending slot is
+					// consulted only as a fallback, for the case where no handler ran
+					// at all -- the unchecked cudaMalloc for the patch scratch above.
+					const cudaError_t recorded = movie_session->getFirstError();
+					const cufftResult recorded_cufft = movie_session->getFirstCufftError();
 					const cudaError_t pending = cudaGetLastError();
-					if (cudaErrorPoisonsContext(pending)) {
-						REPORT_ERROR_STR("CUDA device context observed unusable at resident patch preparation for "
-						                 << fn_mic << " (patch " << iy + 1 << ", " << ix + 1 << "): "
-						                 << cudaGetErrorString(pending)
+					const CudaRetryVerdict verdict =
+						cudaRetryVerdictFor(recorded, recorded_cufft, pending);
+
+					if (verdict == CUDA_RETRY_FATAL) {
+						const cudaError_t decisive = (recorded != cudaSuccess) ? recorded : pending;
+						REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+						                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+						                 << cudaGetErrorString(decisive)
+						                 << ", recorded at " << movie_session->getFirstErrorStage()
+						                 << ":" << movie_session->getFirstErrorLine()
 						                 << ". Refusing to retry alignment on a poisoned context.");
 					}
+
+					// Permitted. Say precisely what is about to happen: alignPatch()
+					// dispatches cudaAlignPatch() again while use_gpu is true, so on a
+					// GPU run this is a CUDA re-dispatch on the same device, NOT a CPU
+					// fallback. It is only a CPU fallback when the CPU backend is
+					// selected. Reporting it as a fallback would overstate the recovery
+					// this branch supports.
 					logfile << "WARNING: resident patch preparation did not complete for patch ("
 					        << iy + 1 << ", " << ix + 1 << ")";
-					if (pending == cudaSuccess) {
-						// Not "no error": the failing call reported and consumed it, or
-						// the host-side buffer allocation declined without recording one.
-						logfile << "; no CUDA error is pending, so the cause is in this"
-						           " movie's log above";
+					if (recorded != cudaSuccess) {
+						logfile << "; recorded CUDA error " << cudaGetErrorString(recorded)
+						        << " at " << movie_session->getFirstErrorStage()
+						        << ":" << movie_session->getFirstErrorLine();
+					} else if (recorded_cufft != CUFFT_SUCCESS) {
+						logfile << "; recorded cuFFT error code " << recorded_cufft
+						        << " at " << movie_session->getFirstErrorStage()
+						        << ":" << movie_session->getFirstErrorLine();
+					} else if (pending != cudaSuccess) {
+						logfile << "; pending CUDA error " << cudaGetErrorString(pending)
+						        << " (no stage recorded one)";
 					} else {
-						logfile << "; last pending CUDA error: " << cudaGetErrorString(pending);
+						logfile << "; no CUDA or cuFFT error was recorded by any stage";
 					}
-					logfile << ". Context is usable; retrying this patch through the host path."
-					        << std::endl;
+					logfile << ". Classified recoverable, so this patch is re-attempted through "
+					        << (use_gpu ? "alignPatch(), which re-dispatches CUDA on the same "
+					                      "device -- this is not a CPU fallback"
+					                    : "the CPU path")
+					        << "." << std::endl;
 				}
 				if (!converged)
 #endif

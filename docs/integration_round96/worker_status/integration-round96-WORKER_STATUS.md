@@ -5,10 +5,10 @@
 | Issue / role | #96 integration and correctness owner (lane A of the #96 next-round plan) |
 | Model | claude-opus-5, high effort, 1M context |
 | Task class | integration of reviewed round96 correctness PRs; CPU validation; CUDA compile |
-| Phase | review follow-up complete. Codex P2 fixed, three owners' fixes composed, **native CUDA executed on two platforms**, licence/scope delta review returned; code/spec delta review outstanding |
+| Phase | **delivered.** Codex P2 fixed, three owners' fixes composed, native CUDA executed and reviewed, both delta reviews returned, final-head CI and confirmation suite green. Stopped as scoped. |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main, refetched and pinned) |
 | Branch | `integrate/round96-correctness-foundation` |
-| Candidate source head | `1c590ba0362fbf48b24b9509381d2e8d2eddebb0` (later commits are docs only) |
+| Candidate source head | `a0aa9032681af70f61a4cf95c39383a5fb807168` (later commits are docs only, verified) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-75781550` (T3-created, isolated) |
 | Merge authority | **none**. Draft PR only. No merges, no closures, no default promotion. |
 
@@ -105,7 +105,7 @@ Run 36371119141 at head `6b4a950b`: Build & Smoke Check (Ubuntu Linux) **success
 | native controls `3511136` | decoded-reader 24/24, failure exit 1 joint STAR withheld, resume exit 0 pixel-identical |
 | CI at source head | both jobs success |
 | licence / scope delta review | **LICENSE_COMPLIANCE_PASSED + SPEC_CONFORMANCE_PASSED** |
-| code / spec delta review | running |
+| code / spec delta review | **READY_TO_MERGE**, no P1, no P2; five P3, the one with a correctness consequence fixed |
 | `@codex` re-review | requested at `1c590ba0` |
 
 All locks released: cpu64 validation lock free, SCARF jobs finished (only #94's
@@ -120,3 +120,27 @@ remains, untouched), VM GPU3 released and its device lock free.
    `WORKER_STATUS.md` tracked or ignored; and whether the GPU3 use of the VM
    stands, since it extends the published 24-CPU / 3-device envelope.
 3. The #97 upstream-parity divergence ruling before #100 can join.
+
+
+## Final confirmation at the reviewed source head
+
+`a0aa9032`, cpu64 under the validation lock, `taskset -c 32-63`,
+`numactl --membind=1`, build/runtime 16:
+
+| | |
+|---|---|
+| combined suite | **17/17 pass** |
+| fail-closed controls | **8/8 OK** |
+| `--canonical` side effects | none; `test-data/known_motion` clean |
+| negative control vs BASE `src/` | builds, runs, **4/17 fail** — exactly `DefectParser`, `DamagedMovie`, `WriteFaults`, `ImageWriteFaults` |
+| CI at `a0aa9032` | Build & Smoke Check **success**, CUDA compile only **success** |
+
+Everything pushed after `a0aa9032` is documentation only — verified:
+`git diff --name-only a0aa9032 HEAD -- src/ tests/ tools/ CMakeLists.txt
+test-data/ .github/` is empty.
+
+## Delivered; stopping as scoped
+
+No merge, no closure, no new experiment. All resources released: cpu64
+validation lock free, SCARF jobs finished (only #94's own job remains,
+untouched), VM GPU3 released and returned to unallocated with its lock free.

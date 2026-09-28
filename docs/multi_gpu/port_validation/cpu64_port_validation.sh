@@ -14,6 +14,14 @@
 #   7. end-to-end: serial vs 3-way sharded over the real binary, merge, exact compare
 #
 # Usage: cpu64_port_validation.sh <root>   (root holds src/ and is writable scratch)
+#
+# `src` must be a GIT-BACKED working tree, not a `git archive` extract:
+# CiFailClosedControls control 6 verifies the canonical fixture manifest through
+# `--repo <src> --ref HEAD`, and an extract with no .git takes the source-archive
+# fallback path and fails on a different message. Control 2 shells out to `cmake`
+# by name, so the venv must be on PATH for the whole script, not just the steps
+# that call cmake directly. Both are properties of the harness; getting either
+# wrong produces a failure that looks like a source defect.
 set -euo pipefail
 set -x
 
@@ -25,12 +33,16 @@ PY="$VENV/bin/python3"
 CMAKE="$VENV/bin/cmake"
 CTEST="$VENV/bin/ctest"
 MASK="32-63"
+export PATH="$VENV/bin:$PATH"
 
 echo "=== PROVENANCE ==="
 cat "$ROOT/src_head.txt"
 applefile_count=$(find "$SRC" -name '._*' | wc -l)
 echo "applefile_count=$applefile_count"
 [ "$applefile_count" -eq 0 ]
+git -C "$SRC" rev-parse HEAD
+git -C "$SRC" status --porcelain
+[ -z "$(git -C "$SRC" status --porcelain)" ]
 
 echo "=== HOST / TOPOLOGY / LOAD AT START ==="
 date -Is; hostname; grep Cpus_allowed_list /proc/self/status; cat /proc/loadavg

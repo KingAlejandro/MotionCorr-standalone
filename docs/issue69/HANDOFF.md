@@ -54,7 +54,15 @@ No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throug
    set entry. Needs a real runtime failure to reach.
 6. **Deliverable 1's Fourier-input capture** on a forced-nonconverged patch is argued
    from source, not captured. Needs a device.
-7. **The `decisive`-code assertion in `cuda_error_class.cpp` cannot fail** against the
+7. **The P1c fallback-boundary plumbing has no automated coverage.** The `failure`
+   out-parameter, `cuda_fft_prep.cu`'s recording handlers and the runner's post-prep
+   check are covered by compilation and review only. The control added with them tests
+   the *predicate* given a correctly-carried status and would pass against the pre-fix
+   source; the fault matrix never touches `cudaPreparePatch`; the healthy run only takes
+   the success path. **Closing this needs a control that drives `cudaPreparePatch` with
+   an injected fault** — the `--wrap` harness could do it, since that helper's
+   allocations and copies already pass through the interposed primitives.
+8. **The `decisive`-code assertion in `cuda_error_class.cpp` cannot fail** against the
    current implementation — both fatal branches assign a code they have just proven
    poisons. It is a ratchet against a future refactor, not evidence about present
    behaviour, and should not be reported as the latter.

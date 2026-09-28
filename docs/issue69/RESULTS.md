@@ -17,6 +17,7 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Retry-verdict controls, incl. cleared-last-error fatal (device-free) | 13 cases, 0 failures — **at the previous head; NOT re-run, see §5c** |
 | P1/P2 fixes from the Codex PR107 review | built clean on GPU2 (0 compile errors) and exercised by the device-free suites |
 | Early-binning streaming control | **UNRUN** — no valid bin factor exists for this geometry, see §5d |
+| Fallback-boundary plumbing (P1c: out-parameter, recording handlers, post-prep check) | **NOT COVERED BY ANY CONTROL** — compile and review only; see §5e |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **ran natively on GPU2: 132 trials, 0 failures, 0 leaks** |
@@ -572,11 +573,29 @@ poisoning code, naming the stage and line **the fallback itself** recorded rathe
 the resident attempt's unrelated earlier failure. A recoverable fallback failure still
 permits the host path.
 
-The control is ordered as production orders it and is discriminating: it asserts the
-pre-fallback check permits, the post-fallback check refuses, the refusal names the code
-the fallback consumed, and — the part that makes it discriminating — that **the resident
-state alone still reads permitted** and **a cleared slot alone never justifies a fatal
-verdict**. A fix consulting only the session, or only peeking at the slot, fails it.
+The control is ordered as production orders it. It asserts the pre-fallback check
+permits, the post-fallback check refuses, the refusal names the code the fallback
+consumed, and that **the resident state alone still reads permitted** and **a cleared
+slot alone never justifies a fatal verdict** — so a *predicate* that consulted only the
+session, or only the slot, fails those assertions.
+
+**What it does not cover, corrected after review.** An earlier version of this paragraph
+said "a fix consulting only the session, or only peeking at the slot, fails it". That
+was false and I should not have written it. The control covers the **decision**, not the
+**plumbing**: it constructs a `CudaFailureState` and calls `record()` on it directly, it
+never calls `cudaPreparePatch`, never passes a `CudaFailureState*` to anything, and
+never executes the runner's post-prep check. Both components it does touch are unchanged
+by this delta, so **it compiles and passes against the pre-fix source**. A fix that
+consulted only the session would be a change in `motioncorr_runner.cpp` that this
+control never executes.
+
+So the three parts that actually close the boundary — the `failure` out-parameter, the
+recording handlers in `cuda_fft_prep.cu`, and the runner's post-prep check — have
+**compile and review coverage only**. The fault matrix does not reference
+`cudaPreparePatch` or `cuda_fft_prep` at all, so the 132-trial run does not touch them,
+and the healthy 24-movie run only ever takes the success path where `failure` is never
+written and the new check never fires. Closing that gap needs a control that drives
+`cudaPreparePatch` itself with an injected fault, which is not in this delta.
 
 ### Executed on the corrected source
 

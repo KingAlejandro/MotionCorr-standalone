@@ -257,11 +257,17 @@ were**, not on the launcher: the launcher shell is deliberately unpinned, so
 reading `/proc/self/status` there would have recorded `0-63` and said nothing
 about where the work ran. That confusion was itself a defect, fixed at
 `025908a` and re-checked in every run since
-(`raw/cpu64-2a8d13a/gate-child-placement.txt`).
+(`raw/cpu64-705d2c7/gate-child-placement.txt`).
 
-Run of record for the head commit: `raw/cpu64-2a8d13a/`, load at start
-5.99/3.59/3.64, `verify_fixtures` exit 0 and `negative_controls` exit 0 with
-**12 pass / 0 skipped / 0 failed**.
+Run of record for the head commit: `raw/cpu64-705d2c7/`, `verify_fixtures`
+exit 0 (**VERIFIED (content)**, 4 cases — `km_local_realscale` is not
+generated on this host) and `negative_controls` exit 0 with **12 pass /
+0 skipped / 0 failed**. The preceding commit's run is preserved beside it in
+`raw/cpu64-2a8d13a/`.
+
+| Bundle | Range | SHA256 |
+|---|---|---|
+| `i83-inc8` | `2a8d13a..705d2c7` | `a46c5334ce97782bd3c3aeca07317b6ceba33bb025e3e9ad571e116a04afadea` |
 
 ## Exact commands
 

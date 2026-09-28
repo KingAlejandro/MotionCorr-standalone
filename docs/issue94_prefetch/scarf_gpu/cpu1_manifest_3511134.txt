@@ -1,0 +1,114 @@
+job_id: 3511134
+series_label: cpu16
+requested_cpulist: 0
+date_utc: 2026-09-28T07:21:15Z
+node: gn3000.scarf.rl.ac.uk
+source_sha: ab9cd6b9a3ee5c2f0de11a623d849dc921a71448
+slurm_cpus_per_task: 16
+slurm_mem: 65536
+slurm_job_gpus: 0,1,2,3
+cuda_visible_devices: 0,1,2,3
+--- inherited cpuset (the allocation's real mask, not the request) ---
+Cpus_allowed_list:	0-63
+--- NUMA ---
+policy: default;preferred node: current;physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 ;cpubind: 0 1 2 3 4 5 6 7 ;nodebind: 0 1 2 3 4 5 6 7 ;membind: 0 1 2 3 4 5 6 7 ;preferred: ;
+available: 8 nodes (0-7)
+node 0 cpus: 0 1 2 3 32 33 34 35
+node 0 size: 31549 MB
+node 0 free: 1688 MB
+node 1 cpus: 4 5 6 7 36 37 38 39
+node 1 size: 32253 MB
+node 1 free: 437 MB
+node 2 cpus: 8 9 10 11 40 41 42 43
+node 2 size: 32253 MB
+node 2 free: 665 MB
+node 3 cpus: 12 13 14 15 44 45 46 47
+node 3 size: 32241 MB
+--- lscpu topology for the allowed CPUs ---
+allowed: 0-63
+--- devices: UUID is the only stable identity; ordinals are not ---
+index, uuid, name, memory.total [MiB], memory.used [MiB], utilization.gpu [%]
+0, GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+1, GPU-2e1b6776-2dce-cad6-5e4c-9d0d58849616, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+2, GPU-69bdbeb9-d502-8487-0f78-98e7d4b6c73a, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+3, GPU-0ade54fe-adbf-ca88-2135-90cbf33b2cbb, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB, 0 %
+--- who else is on these devices right now ---
+gpu_uuid, pid, used_gpu_memory [MiB]
+--- node occupancy ---
+ 08:21:15 up 17 days,  8:20,  0 users,  load average: 2.46, 2.58, 1.80
+     JOBID       USER    STATE   CPUS TRES_PER_N
+   3511134  scarf1415  RUNNING     64 gres:gpu:a
+--- input identity ---
+df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0  Movies/20170629_00021_frameImage.tiff
+cc55f13d606463acbad23a4d42f2e48e60ee9cd783eeca0f1957a103b748ac47  Movies/20170629_00022_frameImage.tiff
+87c2640f5c2200c2f8e62e7dd50f4aa2d694fac2238743560b7c705fb0e61f3f  Movies/20170629_00023_frameImage.tiff
+70e075416ee6b682600277b21bf626c51f2c0b98f0f23dafe6a3478ea1766595  Movies/20170629_00024_frameImage.tiff
+798cf7b0cd24aef070d69525543214bdd60a3900667d7d3a32dfe3bffe9fce1a  Movies/20170629_00025_frameImage.tiff
+f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  Movies/20170629_00026_frameImage.tiff
+adb4fbf597ca78387b22c4a2452c7351499f7b78fb2da67bc5fdd52e4bc58a39  Movies/20170629_00027_frameImage.tiff
+b990365a74752daecbf437aab4b6b235197bf9932f18541246ed1e72ea629e2c  Movies/20170629_00028_frameImage.tiff
+91a985fddf18a7388740d601d6909c6de3a28c7df98d2d263126c8dd90e9f234  Movies/20170629_00029_frameImage.tiff
+878ad41ae6ff95d902fe1c996ad2703285d538b610d3f108433a272d627c8e59  Movies/20170629_00030_frameImage.tiff
+fa2699a1203a2ee278a5973e10105ea3e56b18a1c1d5ee153482767cb7e71d8d  Movies/20170629_00031_frameImage.tiff
+407f435a5dec04e5425feb7ef34d014b047765a9fa07d25093035245fa56253c  Movies/20170629_00035_frameImage.tiff
+ed1dbbbf81cb83d232f442e6f00c0391780022d2231800f595248fa97bf677b0  Movies/20170629_00036_frameImage.tiff
+b90176a79afed2857c180bf272637b7b6e187e52202d8e132beff68a683a01b6  Movies/20170629_00037_frameImage.tiff
+c3e474564505dfe3095b08f0e1ae70b331387cdb66c3251637d879a461cc317c  Movies/20170629_00039_frameImage.tiff
+08d2b7f3d4375f73deb67e2131d92cb2d707fee7866f9dffba133f570fd4771a  Movies/20170629_00040_frameImage.tiff
+5acc8ae812df2cd5925f15db8dd6dd2db65b88df96402eb1eb04182970135083  Movies/20170629_00042_frameImage.tiff
+5e89d7afe604533ac1b264de77b1a7cefcc91ecaf1ba8175a08ffd7651abdc61  Movies/20170629_00043_frameImage.tiff
+e5476b46c5de02caddd446f20e6ddd81311dff3264ad173439da0200eb6271dc  Movies/20170629_00044_frameImage.tiff
+c0cab09118639dd3d38e39442df465fa7a352029a217184738747afb2cd4bc7a  Movies/20170629_00045_frameImage.tiff
+61094383ce6750976275b13227033dcdb154c8214ef3db402aa6440a505ad377  Movies/20170629_00046_frameImage.tiff
+4ebadc647bf112242e17d975e65a67aaaeaf8296f71cb99d10ca790a92a06192  Movies/20170629_00047_frameImage.tiff
+05348afd74991a20e09d10667268ab496b3a614a891a8f9954fce212f418d955  Movies/20170629_00048_frameImage.tiff
+78d0d2c96c03d13a97d12da7e7ae5e8878abea057a728b4fea239d0642090faf  Movies/20170629_00049_frameImage.tiff
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  Movies/gain.mrc
+fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041  movies.star
+--- module load rc: 0 ---
+--- module list ---
+
+Currently Loaded Modules:
+  1) binutils/2.40-GCCcore-13.2.0       (H)
+  2) GCC/13.2.0                         (H)
+  3) ncurses/6.4-GCCcore-13.2.0         (H)
+  4) bzip2/1.0.8-GCCcore-13.2.0         (H)
+  5) OpenSSL/1.1                        (H)
+  6) cURL/8.3.0-GCCcore-13.2.0          (H)
+  7) XZ/5.4.4-GCCcore-13.2.0            (H)
+  8) libarchive/3.7.2-GCCcore-13.2.0    (H)
+  9) CMake/3.27.6-GCCcore-13.2.0        (H)
+ 10) CUDA/12.8.0                        (H)
+ 11) FFTW/3.3.10-GCC-13.2.0             (H)
+ 12) jbigkit/2.1-GCCcore-13.2.0
+ 13) gzip/1.13-GCCcore-13.2.0           (H)
+ 14) lz4/1.9.4-GCCcore-13.2.0           (H)
+ 15) zstd/1.5.5-GCCcore-13.2.0          (H)
+ 16) libdeflate/1.19-GCCcore-13.2.0     (H)
+ 17) LibTIFF/4.6.0-GCCcore-13.2.0       (H)
+ 18) libpng/1.6.40-GCCcore-13.2.0       (H)
+ 19) NASM/2.16.01-GCCcore-13.2.0        (H)
+ 20) libjpeg-turbo/3.0.1-GCCcore-13.2.0 (H)
+ 21) GCCcore/13.2.0                     (H)
+ 22) zlib/1.2.13-GCCcore-13.2.0         (H)
+
+  Where:
+   H:  Hidden Module
+
+ 
+
+nvcc: /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/bin/nvcc
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+gcc: gcc (GCC) 13.2.0
+cmake: cmake version 3.27.6
+--- build flags actually used ---
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+motioncorr sha256: c0d7198ce1194737482676e32da6b01a0eb1892adfe296e0e39f43e9c7477c1b
+cuda symbols present: 66
+--- fixed CPU budget applied to BOTH arms ---
+taskset_cpulist: 0
+distinct_physical_cores: 1
+numa_nodes_spanned: 0 
+correctness_compare_rc: 0
+finished_utc: 2026-09-28T07:45:28Z

@@ -1,0 +1,148 @@
+=== correctness_off ===
+label: correctness_off
+args: 
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 104.413
+time_v_maxrss_kb: 3135416
+tree_peak_rss_kb: 3137376
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+prefetch_full:
+=== correctness_on ===
+label: correctness_on
+args: --prefetch
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 110.967
+time_v_maxrss_kb: 5780076
+tree_peak_rss_kb: 5780692
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 88.8848, consumer_wait_s = 0.355105
+ prefetch: process_peak_rss_bytes = 5918797824 (whole process, kernel high-water)
+stage_timers:
+prefetch_full:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 88.8848, consumer_wait_s = 0.355105
+ prefetch: process_peak_rss_bytes = 5918797824 (whole process, kernel high-water)
+=== pair1_first_off ===
+label: pair1_first_off
+args: 
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 107.555
+time_v_maxrss_kb: 3109100
+tree_peak_rss_kb: 3109312
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+prefetch_full:
+=== pair1_second_on ===
+label: pair1_second_on
+args: --prefetch
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 108.232
+time_v_maxrss_kb: 5780984
+tree_peak_rss_kb: 5782488
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 86.7589, consumer_wait_s = 0.350408
+ prefetch: process_peak_rss_bytes = 5919727616 (whole process, kernel high-water)
+stage_timers:
+prefetch_full:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 86.7589, consumer_wait_s = 0.350408
+ prefetch: process_peak_rss_bytes = 5919727616 (whole process, kernel high-water)
+=== pair2_first_on ===
+label: pair2_first_on
+args: --prefetch
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 101.555
+time_v_maxrss_kb: 5781624
+tree_peak_rss_kb: 5783328
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 81.1031, consumer_wait_s = 0.337047
+ prefetch: process_peak_rss_bytes = 5920382976 (whole process, kernel high-water)
+stage_timers:
+prefetch_full:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 81.1031, consumer_wait_s = 0.337047
+ prefetch: process_peak_rss_bytes = 5920382976 (whole process, kernel high-water)
+=== pair2_second_off ===
+label: pair2_second_off
+args: 
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 96.093
+time_v_maxrss_kb: 3111016
+tree_peak_rss_kb: 3113172
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+prefetch_full:
+=== pair3_first_off ===
+label: pair3_first_off
+args: 
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 97.333
+time_v_maxrss_kb: 3111352
+tree_peak_rss_kb: 3111648
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+prefetch_full:
+=== pair3_second_on ===
+label: pair3_second_on
+args: --prefetch
+cpulist: 0-7,32-39
+exit: 0
+wall_s: 98.351
+time_v_maxrss_kb: 5780632
+tree_peak_rss_kb: 5783660
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 80.0625, consumer_wait_s = 0.309846
+ prefetch: process_peak_rss_bytes = 5919367168 (whole process, kernel high-water)
+stage_timers:
+prefetch_full:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 80.0625, consumer_wait_s = 0.309846
+ prefetch: process_peak_rss_bytes = 5919367168 (whole process, kernel high-water)

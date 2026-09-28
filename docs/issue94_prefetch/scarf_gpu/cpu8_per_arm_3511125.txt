@@ -1,0 +1,124 @@
+=== correctness_off ===
+label: correctness_off
+args: 
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 130.806
+time_v_maxrss_kb: 3136480
+tree_peak_rss_kb: 3134496
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+=== correctness_on ===
+label: correctness_on
+args: --prefetch
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 112.696
+time_v_maxrss_kb: 5782672
+tree_peak_rss_kb: 5782548
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 88.2681, consumer_wait_s = 0.486617
+ prefetch: process_peak_rss_bytes = 5921456128 (whole process, kernel high-water)
+stage_timers:
+=== pair1_first_off ===
+label: pair1_first_off
+args: 
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 114.088
+time_v_maxrss_kb: 3112352
+tree_peak_rss_kb: 3113260
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+=== pair1_second_on ===
+label: pair1_second_on
+args: --prefetch
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 108.815
+time_v_maxrss_kb: 5782424
+tree_peak_rss_kb: 5782404
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 86.1658, consumer_wait_s = 0.3931
+ prefetch: process_peak_rss_bytes = 5921202176 (whole process, kernel high-water)
+stage_timers:
+=== pair2_first_on ===
+label: pair2_first_on
+args: --prefetch
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 103.040
+time_v_maxrss_kb: 5784572
+tree_peak_rss_kb: 5783000
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 81.0434, consumer_wait_s = 0.369611
+ prefetch: process_peak_rss_bytes = 5923401728 (whole process, kernel high-water)
+stage_timers:
+=== pair2_second_off ===
+label: pair2_second_off
+args: 
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 97.480
+time_v_maxrss_kb: 3113940
+tree_peak_rss_kb: 3113912
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+=== pair3_first_off ===
+label: pair3_first_off
+args: 
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 97.999
+time_v_maxrss_kb: 3112176
+tree_peak_rss_kb: 3100904
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+  (off)
+stage_timers:
+=== pair3_second_on ===
+label: pair3_second_on
+args: --prefetch
+cpulist: 0,1,2,3,32,33,34,35
+exit: 0
+wall_s: 108.030
+time_v_maxrss_kb: 5782752
+tree_peak_rss_kb: 5778216
+peak_vram_mib: 3497
+mrc_outputs: 72
+star_outputs: 25
+prefetch_lines:
+ prefetch: budget_bytes = 5468356608, peak_reserved_bytes = 5468356608, peak_queue_occupancy = 1
+ prefetch: decoded = 24, inline_loaded = 0, failed = 0, over_budget_grants = 0
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 86.0835, consumer_wait_s = 0.373333
+ prefetch: process_peak_rss_bytes = 5921538048 (whole process, kernel high-water)
+stage_timers:

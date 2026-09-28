@@ -99,53 +99,61 @@ def main() -> int:
 
 
 # ---------------------------------------------------------------- Codex review controls
-def _run(tag, arm_id, wall, exit_code=0, products=2, **kw):
-    r = {"tag": tag, "arm_id": arm_id, "rep": 1, "pair_index": 0, "order_in_pair": 0,
+#
+# These invoke envelope_report.main() on a synthetic series and assert on the JSON it
+# emits. An earlier version loaded the module and then re-implemented the predicate it
+# claimed to verify, so reverting the production code would have left them green -- the
+# same defect these controls exist to prevent.
+
+def _mk_run(tag, arm_id, wall, pair, order, exit_code=0, products=1, star="movies.star",
+            gpu=None, binary="/b/motioncorr", **kw):
+    r = {"tag": tag, "arm_id": arm_id, "rep": 1, "pair_index": pair, "order_in_pair": order,
          "wall_s": wall, "exit_code": exit_code, "product_count": products,
-         "resource_usage": {}, "memory": {}, "products": [],
+         "binary": binary, "resource_usage": {}, "memory": {},
+         "products": [{"path": "out.star", "bytes": 4, "sha256": "deadbeef"}],
          "sampling": {"foreign_cpu_pct": {"n": 1, "mean": 0, "max": 0},
-                      "foreign_threads_inside_mask": {"n": 1, "mean": 0, "max": 0}},
-         "command": ["x", "--i", "movies.star"], "effective": {"j": 8, "io_threads": 8}}
+                      "foreign_threads_inside_mask": {"n": 1, "mean": 0, "max": 0},
+                      "device_vram_mib_sampled": {"n": 0}},
+         "requested": {"gpu_ordinal": gpu},
+         "command": ["taskset", "-c", "0", "/usr/bin/time", "-v", binary, "--i", star],
+         "effective": {"j": 8, "io_threads": 8}}
     r.update(kw)
     return r
 
 
-def control_failed_runs_excluded_from_timing():
-    """A run that died early must not lower its arm's median.
+def _run_report(series, args_extra):
+    """Invoke the real main() and return its exit code plus the emitted JSON."""
+    import json, subprocess, sys, tempfile
+    d = pathlib.Path(tempfile.mkdtemp(prefix="envelope-report-ctl-"))
+    (d / "series.json").write_text(json.dumps(series))
+    out = d / "report.json"
+    rc = subprocess.run(
+        [sys.executable, str(HERE / "envelope_report.py"), "--series", str(d / "series.json"),
+         "--json-out", str(out)] + args_extra,
+        capture_output=True, text=True)
+    data = json.loads(out.read_text()) if out.exists() else None
+    return rc.returncode, data, rc.stdout
 
-    Every non-warm-up run used to enter the timing population, so a configuration that
-    crashed after two seconds could be published as the fastest one -- the exact inversion
-    the contract forbids. The audit must still see it.
-    """
-    import importlib.util, pathlib as _p
-    spec = importlib.util.spec_from_file_location("rp", _p.Path(__file__).with_name("envelope_report.py"))
-    rp = importlib.util.module_from_spec(spec); spec.loader.exec_module(rp)
-    cases = [
-        ("non-zero exit", _run("a", "arm", 2.0, exit_code=1)),
-        ("timed out", _run("b", "arm", 2.0, timed_out=True)),
-        ("quarantined", _run("c", "arm", 2.0, quarantined=True, quarantine_reason="x")),
-        ("cleanup unconfirmed", _run("d", "arm", 2.0, cleanup_unconfirmed=True)),
-        ("no products", _run("e", "arm", 2.0, products=0)),
-        ("healthy", _run("f", "arm", 30.0)),
-    ]
+
+def control_failed_runs_excluded_from_timing():
+    """A run that died early must not lower its arm's median, via main()'s own output."""
     bad = []
-    for name, r in cases:
-        why = None
-        # reproduce the predicate the report uses
-        if r.get("exit_code") != 0:
-            why = "exit"
-        elif r.get("timed_out"):
-            why = "timeout"
-        elif r.get("quarantined"):
-            why = "quarantined"
-        elif r.get("cleanup_unconfirmed"):
-            why = "cleanup"
-        elif not r.get("product_count"):
-            why = "no products"
-        should_exclude = name != "healthy"
-        ok = bool(why) == should_exclude
-        print(f"  {'PASS' if ok else 'FAIL'}  timing population excludes {name}: "
-              f"{'excluded' if why else 'kept'}")
+    healthy = _mk_run("ok1", "arm", 30.0, 1, 0)
+    for name, broken in (
+            ("non-zero exit", _mk_run("x", "arm", 2.0, 2, 0, exit_code=1)),
+            ("timed out", _mk_run("x", "arm", 2.0, 2, 0, timed_out=True)),
+            ("quarantined", _mk_run("x", "arm", 2.0, 2, 0, quarantined=True)),
+            ("cleanup unconfirmed", _mk_run("x", "arm", 2.0, 2, 0, cleanup_unconfirmed=True)),
+            ("no products", _mk_run("x", "arm", 2.0, 2, 0, products=0))):
+        series = {"plan_name": "ctl", "runs": [healthy, _mk_run("ok2", "arm", 30.0, 3, 0), broken],
+                  "arms": [{"id": "arm", "input_star": "movies.star", "gpu": None,
+                            "binary": "/b/motioncorr"}]}
+        rc, data, _ = _run_report(series, ["--reference-arm", "arm"])
+        med = (data or {}).get("timing", {}).get("arm", {}).get("median_s")
+        n = (data or {}).get("timing", {}).get("arm", {}).get("n")
+        ok = med is not None and abs(med - 30.0) < 1e-9 and n == 2
+        print(f"  {'PASS' if ok else 'FAIL'}  main() keeps a {name} run out of the median: "
+              f"median={med} n={n} (2.0s run must not appear)")
         if not ok:
             bad.append(name)
     return bad
@@ -153,24 +161,36 @@ def control_failed_runs_excluded_from_timing():
 
 def control_reference_keys_distinguish_backend():
     """Two references sharing an input STAR but differing in backend must not collide."""
-    import importlib.util, pathlib as _p
-    spec = importlib.util.spec_from_file_location("rp", _p.Path(__file__).with_name("envelope_report.py"))
-    rp = importlib.util.module_from_spec(spec); spec.loader.exec_module(rp)
-    arms = [{"id": "cpu_ref", "input_star": "movies.star", "gpu": None, "binary": "/b/cpu"},
-            {"id": "gpu_ref", "input_star": "movies.star", "gpu": 0, "binary": "/b/cuda"}]
-    inp = {a["id"]: a["input_star"] for a in arms}
-    backend = {a["id"]: ("cuda" if a.get("gpu") is not None else "cpu",
-                         a["binary"].rsplit("/", 1)[-1]) for a in arms}
-    k1 = (inp["cpu_ref"],) + backend["cpu_ref"]
-    k2 = (inp["gpu_ref"],) + backend["gpu_ref"]
-    ok = k1 != k2
-    print(f"  {'PASS' if ok else 'FAIL'}  same input, different backend -> distinct "
-          f"reference keys: {k1} vs {k2}")
-    dup = (inp["cpu_ref"],) + backend["cpu_ref"]
-    ok2 = dup == k1
-    print(f"  {'PASS' if ok2 else 'FAIL'}  an identical duplicate still collides and is "
-          f"rejected rather than overwriting")
-    return [] if (ok and ok2) else ["reference keying"]
+    bad = []
+    series = {"plan_name": "ctl",
+              "arms": [{"id": "cpu_a", "input_star": "movies.star", "gpu": None,
+                        "binary": "/b/cpu/motioncorr"},
+                       {"id": "gpu_a", "input_star": "movies.star", "gpu": 0,
+                        "binary": "/b/cuda/motioncorr"}],
+              "runs": [_mk_run("c", "cpu_a", 10.0, 1, 0, binary="/b/cpu/motioncorr"),
+                       _mk_run("g", "gpu_a", 10.0, 2, 0, gpu=0, binary="/b/cuda/motioncorr")]}
+    rc, data, out = _run_report(series, ["--reference-arm", "cpu_a", "--reference-arm", "gpu_a"])
+    ok = rc == 0 and data is not None
+    print(f"  {'PASS' if ok else 'FAIL'}  main() accepts two references that differ only by "
+          f"backend: rc={rc}")
+    bad += [] if ok else ["distinct backends rejected"]
+
+    rc2, _, out2 = _run_report(series, ["--reference-arm", "cpu_a", "--reference-arm", "cpu_a"])
+    ok2 = rc2 == 2 and "Ambiguous references are rejected" in out2
+    print(f"  {'PASS' if ok2 else 'FAIL'}  main() rejects a duplicate reference: rc={rc2} "
+          f"(expected 2)")
+    bad += [] if ok2 else ["duplicate not rejected"]
+
+    # Discriminating: with only the CPU reference named, the CUDA arm must be left unscored
+    # rather than silently scored against the CPU baseline.
+    rc3, _, out3 = _run_report(series, ["--reference-arm", "cpu_a"])
+    ok3 = "gpu_a" in out3 and "no same-input, same-backend reference" in out3
+    print(f"  {'PASS' if ok3 else 'FAIL'}  a CUDA arm is NOT scored against a CPU reference "
+          f"(left unscored)")
+    bad += [] if ok3 else ["cross-backend scoring"]
+    return bad
+
+
 
 if __name__ == "__main__":
     sys.exit(main())

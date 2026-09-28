@@ -162,10 +162,21 @@ that died early has a short wall time, and admitting it would make the configura
 failed look fastest, inverting the contract's own rule that a failed movie is not a faster
 arm.
 
+**A control that re-implements the logic it verifies is not a control.** Twice in this
+issue a check loaded the module under test and then reproduced its predicate inline, so
+reverting the production code left the check green — first the payload-versus-launcher
+control, then the timing-exclusion and reference-keying controls. Every control must invoke
+the production entry point and assert on what it emits, and must be mutation-tested by
+reverting the fix and observing the failure.
+
 **A same-backend baseline must be keyed by backend.** Reference arms are keyed on input set
 **and** backend/build class, and two references colliding on that key are rejected rather
 than silently overwriting one another; otherwise a combined CPU/CUDA series scores every arm
-against whichever reference was registered last.
+against whichever reference was registered last. The build class must survive a missing
+binary hash: a plan may declare the binary relative to the arm's cwd, and keying on the bare
+basename would collapse a Release and a Release+`TIMING` build in sibling directories into
+one class — which the product comparison cannot catch, because `TIMING` output goes to
+stdout rather than into a product.
 
 **Interference evidence must be retained at per-sample and PID level.** The 2026-09-27
 `cpu64` series retained only per-arm aggregates — a max over samples, and per-command

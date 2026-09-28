@@ -14,7 +14,8 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 | `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | superseded — reviewer found the residuals below |
 | `tooling_controls/controls_cpu64_round3_2026-09-28.log` | tooling controls round 3, runner sha256 `fbe01390…`, 26 controls | superseded — see round 4 |
 | `tooling_controls/controls_cpu64_round4_2026-09-28.log` | tooling controls round 4, runner sha256 `e3fffa45…`, 28 controls | superseded by the Codex review fixes |
-| `tooling_controls/controls_cpu64_round5_2026-09-28.log` | tooling controls round 5, **35 controls, 0 skipped** | current |
+| `tooling_controls/controls_cpu64_round5_2026-09-28.log` | tooling controls round 5, 35 controls | superseded by the final delta |
+| `tooling_controls/controls_cpu64_round6_2026-09-28.log` | tooling controls round 6, **37 controls, 0 skipped** | current |
 | `gpu/*`, `cpu64/*` build and topology witnesses | build scripts | current |
 
 ## Known artifacts inside the retained records
@@ -146,6 +147,30 @@ counters could not distinguish them. The per-sample records named the pid, sessi
 command line in one look, the control was re-keyed on session id, and the ambiguity
 disappeared. Aggregates alone would have left that failure unexplained — which is precisely
 the attribution gap the ADR faults in the original CPU evidence.
+
+## Stated limits of the repaired instrument
+
+Three properties are bounded rather than complete. Each is recorded here so a reader does
+not take the record for more than it is.
+
+- **Per-sample interference retention is first-N.** The cap is 4000 in-mask samples (~67 min
+  at 1 Hz) and both the cap and the drop count are in every record, so truncation announces
+  itself. What is dropped is always the *tail*, so an arm that is clean early and contended
+  late keeps identity for the clean part only. The unbounded aggregates still carry the
+  magnitude of the late contention; only its attribution is lost.
+- **Per-sample identity is recorded for in-lane processes only.** The host-wide
+  `foreign_cpu_pct` figure is an aggregate with no per-sample attribution. The ADR asks for
+  mean/max/n there, so this meets the contract, but the host-wide number cannot be traced to
+  a process the way the in-lane records can.
+- **Tree RSS is an upper bound.** Summing per-process resident sets double-counts pages
+  shared between them — copy-on-write, shared libraries, shared file mappings — so
+  `peak_simultaneous_tree_rss_kib` exceeds the tree's true physical footprint. It is also a
+  *lower* bound in the retained pre-fix series, which used a depth-1 selection. Those are two
+  different errors in opposite directions and should not be netted against each other.
+
+**Operational note:** the runner now calls `setsid()` at startup to obtain an isolated
+session, which detaches it from the controlling terminal. Ctrl-C at the launching terminal no
+longer reaches it; stop a run with an explicit `kill` to its process group.
 
 ## Timing population versus audit population
 

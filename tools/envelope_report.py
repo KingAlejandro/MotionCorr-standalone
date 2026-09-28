@@ -281,9 +281,14 @@ def main() -> int:
                 if str(c).endswith("/time") and i + 2 < len(cmd):
                     binid = cmd[i + 2]
                     break
+        if binid and not r.get("binary_sha256"):
+            # No hash: keep the parent directory too, so build-release/motioncorr and
+            # build-release-timing/motioncorr remain distinct build classes.
+            binid = os.path.join(os.path.basename(os.path.dirname(str(binid))),
+                                 os.path.basename(str(binid)))
         arm_backend.setdefault(
             r["arm_id"], ("cuda" if r.get("requested", {}).get("gpu_ordinal") is not None
-                          else "cpu", os.path.basename(str(binid))[:40] if binid else "?"))
+                          else "cpu", str(binid)[-60:] if binid else "?"))
 
     def ref_key(aid: str):
         """Input set AND backend/build class. Keying on the input alone let a second
@@ -435,12 +440,15 @@ def main() -> int:
         w = sorted(r["wall_s"] for r in rs)
         med = statistics.median(w)
         spread = (max(w) - min(w)) / med * 100 if med else 0.0
-        cpu = [r["resource_usage"].get("user_s", 0) + r["resource_usage"].get("sys_s", 0)
-               for r in rs]
-        rss = [r["memory"].get("peak_simultaneous_tree_rss_kib", 0) for r in rs]
-        vram = [r["sampling"]["device_vram_mib_sampled"].get("max", 0) for r in rs
-                if r["sampling"]["device_vram_mib_sampled"].get("n")]
-        n_q = sum(1 for r in rs if r.get("quarantined"))
+        cpu = [(r.get("resource_usage") or {}).get("user_s", 0)
+               + (r.get("resource_usage") or {}).get("sys_s", 0) for r in rs]
+        rss = [(r.get("memory") or {}).get("peak_simultaneous_tree_rss_kib", 0) for r in rs]
+        vram = [(r.get("sampling", {}).get("device_vram_mib_sampled") or {}).get("max", 0)
+                for r in rs
+                if (r.get("sampling", {}).get("device_vram_mib_sampled") or {}).get("n")]
+        # from the audit population: `rs` has already had quarantined runs removed, so
+        # counting there is structurally always zero and would read as "none quarantined".
+        n_q = sum(1 for r in audit_by_arm.get(arm, []) if r.get("quarantined"))
         table[arm] = {"input_set": arm_input.get(arm, "?"), "n": len(w),
                       "n_quarantined": n_q, "median_s": med, "min_s": min(w), "max_s": max(w),
                       "spread_pct": spread, "walls": w,
@@ -455,6 +463,11 @@ def main() -> int:
               f"{str(t['peak_vram_mib_sampled']):>6}")
 
     # ------------------------------------------- paired contrasts, with the positional split
+    dropped_arms = sorted(set(audit_by_arm) - set(by_arm))
+    if dropped_arms:
+        print(f"  arms with NO timing-eligible runs (absent from the table above, n=0): "
+              f"{dropped_arms}")
+
     print("\n" + "=" * 78)
     print("PAIRED CONTRASTS  (two-arm pairs only; d = t_second_named - t_first_named)")
     print("=" * 78)
@@ -556,14 +569,17 @@ def main() -> int:
     print("=" * 78)
     for arm in sorted(by_arm):
         rs = by_arm[arm]
-        nobs = sum(r["sampling"]["foreign_cpu_pct"].get("n", 0) for r in rs)
+        nobs = sum((r.get("sampling", {}).get("foreign_cpu_pct") or {}).get("n", 0)
+                   for r in rs)
         if nobs == 0:
             # stats([]) has no "max" key, so a .get(...,0) default would render a sampler
             # that raised on every tick as an arm with no interference.
             print(f"  {arm:<28} NOT OBSERVED: the foreign sampler produced no samples")
             continue
-        fmax = max(r["sampling"]["foreign_cpu_pct"].get("max", 0) for r in rs)
-        imax = max(r["sampling"]["foreign_threads_inside_mask"].get("max", 0) for r in rs)
+        fmax = max((r.get("sampling", {}).get("foreign_cpu_pct") or {}).get("max", 0)
+                   for r in rs)
+        imax = max((r.get("sampling", {}).get("foreign_threads_inside_mask") or {})
+                   .get("max", 0) for r in rs)
         cmds: Dict[str, int] = {}
         for r in rs:
             for k, v in (r["sampling"].get("foreign_in_mask_by_command") or {}).items():

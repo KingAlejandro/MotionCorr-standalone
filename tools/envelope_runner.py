@@ -329,7 +329,12 @@ class RssSampler(threading.Thread):
         return {
             "n": len(self.tree_rss_kib),
             "period_s": self.period,
-            "unit": "KiB (ps/proc VmRSS), summed across all owned descendants in one sweep",
+            "unit": "KiB, from /proc/<pid>/statm resident pages x SC_PAGE_SIZE, summed "
+                    "across all owned descendants in one sweep",
+            "upper_bound_note": "summing per-process resident sets double-counts pages "
+                                "shared between them (copy-on-write, shared libraries, "
+                                "shared file mappings), so this is an upper bound on the "
+                                "tree's true physical footprint",
             "peak_simultaneous_tree_rss_kib": max(self.tree_rss_kib),
             "mean_simultaneous_tree_rss_kib": int(statistics.fmean(self.tree_rss_kib)),
             "peak_utc": self._peak_utc,
@@ -1235,7 +1240,14 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)),
         "command": cmd,
         "binary": arm["binary"],
-        "binary_sha256": sha256_file(Path(arm["binary"])),
+        # Resolve against the arm's cwd, not the runner's: a plan may declare the binary
+        # relative to where the child runs. Hashing it from here would return None, the
+        # report would fall back to the path basename, and a Release and a Release+TIMING
+        # build in sibling directories would collapse to the same build-class key -- which
+        # the ADR forbids, and which the product comparison cannot catch because TIMING
+        # output goes to stdout rather than into a product.
+        "binary_sha256": (sha256_file(Path(arm["binary"]))
+                          or sha256_file(Path(arm["cwd"]) / arm["binary"])),
         "cwd": arm["cwd"],
         "env_overrides": arm.get("env") or {},
         "exit_code": rc,

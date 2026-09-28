@@ -116,8 +116,8 @@ both arms and cancels. Its interference figures will be labelled as instrument v
 - `TIMING` breakdown, 24 movies: `read movie` 7.082 s is the largest stage; host input and
   output total ~13.8 s against ~4.0 s of GPU-accelerated arithmetic.
 - cpu64, rep 1: `j=32` 25.15 s unbound vs 18.93 s with `OMP_PROC_BIND=spread`.
-- All controls pass: `tools/test_envelope_report.py`, and
-  `tools/test_envelope_interference.py` on the Linux host.
+- All controls pass: `tools/test_envelope_report.py`, `tools/test_envelope_runner.py`
+  and `tools/test_envelope_interference.py` on the Linux host.
 
 ## Blockers
 

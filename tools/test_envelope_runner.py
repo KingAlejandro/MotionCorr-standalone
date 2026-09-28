@@ -459,6 +459,24 @@ def control_7_session_ownership_cannot_hide_a_stranger():
     check("runner establishes an ownership basis and states whether it is isolated",
           own.get("basis") in ("session", "subtree") and "isolated" in own, f"{own}")
 
+    # The discriminating assertion, at unit level. Spawning a "same-session stranger" from
+    # inside this process is not possible once establish_isolated_session() has made us a
+    # session leader -- and launching one via setsid would put it in neither our session nor
+    # our subtree, so it would read as foreign under BOTH bases and discriminate nothing.
+    # What must be pinned is that a non-isolated session is never owned wholesale.
+    sid_now = er.own_session()
+    iso = er.Sampler(own_user="x", gpu_index=None, mask=None, own_root_pid=os.getpid(),
+                     ownership={"basis": "session", "isolated": True, "sid": sid_now,
+                                "how": "fixture"})
+    noniso = er.Sampler(own_user="x", gpu_index=None, mask=None, own_root_pid=os.getpid(),
+                        ownership={"basis": "subtree", "isolated": False, "sid": sid_now,
+                                   "how": "fixture"})
+    check("an ISOLATED session is owned wholesale", iso._own_sids == {sid_now},
+          f"owned_sids={iso._own_sids}")
+    check("a NON-isolated session is NOT owned wholesale, so a same-shell stranger in it "
+          "still counts as foreign", noniso._own_sids == set(),
+          f"owned_sids={noniso._own_sids} (must be empty; ownership falls back to subtree)")
+
     mask = _own_mask()
     cpus = sorted(er.parse_cpu_list(mask))
     burn = "import time\nt=time.time()\nwhile time.time()-t<3.0: pass\n"

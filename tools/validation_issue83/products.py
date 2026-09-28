@@ -248,14 +248,24 @@ def check_movie_star(path: Path, expect: Dict[str, Any]) -> Dict[str, Any]:
 
 def check_products(out_dir: Path, movie_stems: List[str], suffixes: List[str],
                    star_expect: Dict[str, Any],
-                   expect_geometry: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
+                   expect_geometry: Optional[Tuple[int, int]] = None,
+                   expect_ps_geometry: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
     """Full expected inventory for one output directory.
 
     A missing pair -- image without metadata or the reverse -- is an error, and
     any unexpected extra product is reported so the inventory is exact in both
     directions.
+
+    ``expect_ps_geometry`` asserts the size of ``_PS.mrc``. The power spectrum
+    does not share the corrected average's geometry -- the runner reshapes it to
+    ``--ps_size`` independently (``motioncorr_runner.cpp:1878``) -- so it needs
+    its own expectation. Without one, a build that ignored ``--ps_size`` and
+    emitted any readable, reproducible size would satisfy both the inventory and
+    every schedule comparison, and the option would be published as validated on
+    the strength of a file merely existing.
     """
-    report: Dict[str, Any] = {"movies": {}, "errors": [], "inventory_complete": True}
+    report: Dict[str, Any] = {"movies": {}, "errors": [], "inventory_complete": True,
+                              "geometry_asserted": []}
     expected_paths = set()
 
     for stem in movie_stems:
@@ -277,13 +287,18 @@ def check_products(out_dir: Path, movie_stems: List[str], suffixes: List[str],
             if "error" in header:
                 report["errors"].append(header["error"])
                 continue
-            if expect_geometry is not None and suffix in (".mrc", "_noDW.mrc",
-                                                          "_EVN.mrc", "_ODD.mrc"):
-                want_nx, want_ny = expect_geometry
+            want: Optional[Tuple[int, int]] = None
+            if suffix == "_PS.mrc":
+                want = expect_ps_geometry
+            elif suffix in (".mrc", "_noDW.mrc", "_EVN.mrc", "_ODD.mrc"):
+                want = expect_geometry
+            if want is not None:
+                want_nx, want_ny = want
                 if (header["nx"], header["ny"]) != (want_nx, want_ny):
                     report["errors"].append(
                         f"{path.name}: {header['nx']}x{header['ny']}, "
                         f"expected {want_nx}x{want_ny}")
+                report["geometry_asserted"].append(f"{stem}{suffix}")
         report["movies"][stem] = entry
 
     # Products live under the movie's relative directory, so scan recursively.

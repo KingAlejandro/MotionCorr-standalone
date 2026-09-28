@@ -48,6 +48,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CUDA_STARTUP = "Using CUDA acceleration on GPU device "
 CUDA_COMPLETED = "[CUDA "
 
+#: The runner's own ``--ps_size`` default (``motioncorr_runner.cpp:95``), used
+#: only when a power-spectrum row does not name a size.
+PS_SIZE_DEFAULT = 512
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -288,6 +292,22 @@ def expected_geometry(row: declared.Row, geometry: Dict[str, Any]) -> Optional[t
     return None
 
 
+def expected_ps_geometry(row: declared.Row) -> Optional[tuple]:
+    """Size the ``_PS.mrc`` product must have, when the row asks for one.
+
+    The runner reshapes the spectrum to ``ps_size`` x ``ps_size/2+1`` in Fourier
+    space and inverse-transforms it, so the written image is ``ps_size`` square
+    (``motioncorr_runner.cpp:1878-1887``) regardless of the movie geometry or
+    binning. When a row requests a power spectrum without naming a size, the
+    runner's own default is used rather than an assumption invented here.
+    """
+    if "_PS.mrc" not in row.products:
+        return None
+    args = row.args
+    size = int(args[args.index("--ps_size") + 1]) if "--ps_size" in args else PS_SIZE_DEFAULT
+    return size, size
+
+
 def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
             base_work: Path, compare_tool: Path) -> Dict[str, Any]:
     geometry = dict(declared.FIXTURES[row.fixture])
@@ -352,13 +372,15 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
     suffixes = row.products
     star_expect = expected_star(row, geometry)
     geom_expect = expected_geometry(row, geometry)
+    ps_expect = expected_ps_geometry(row)
+    result["expected_geometry"] = {"image": geom_expect, "power_spectrum": ps_expect}
 
     # ------------------------------------------------------ uninterrupted run
     base_dir = work / "base"
     base_run = run_binary(opts.binary, work, dataset["star"], base_dir, args, opts.gpu)
     witness = backend_witness(base_run["stdout"], base_dir, dataset["stems"], opts.gpu)
     inventory = prod.check_products(base_dir, dataset["stems"], suffixes,
-                                    star_expect, geom_expect)
+                                    star_expect, geom_expect, ps_expect)
     result["schedules"]["base"] = {
         "returncode": base_run["returncode"], "elapsed_sec": base_run["elapsed_sec"],
         "command": base_run["command"], "backend_evidence": witness,
@@ -440,7 +462,7 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
             continue
 
         entry["inventory"] = prod.check_products(sched_dir, dataset["stems"], suffixes,
-                                                 star_expect, geom_expect)
+                                                 star_expect, geom_expect, ps_expect)
         result["errors"].extend(f"{schedule}: {e}" for e in entry["inventory"]["errors"])
 
         reports = sched_dir / "compare"
@@ -499,6 +521,96 @@ def run_row(row: declared.Row, opts: argparse.Namespace, fixtures_dir: Path,
                                   and inventory["inventory_complete"]
                                   and not result["errors"]) else "fail"
     return result
+
+
+# --------------------------------------------------------- cross-row equality
+
+def _row_base_dir(work: Path, row_id: str) -> Path:
+    return work / row_id / "base"
+
+
+def check_cross_row_equalities(results: List[Dict[str, Any]], work: Path,
+                               compare_tool: Path) -> Dict[str, Any]:
+    """Compare rows that must agree, and rows that must not.
+
+    Comparing a row only against its own repeats cannot detect a deterministic
+    error: a unity gain that scaled every pixel would repeat, batch and resume
+    to identical wrong pixels and be published as supported. The declared
+    neutrality is only tested by comparing the two rows against each other --
+    and that comparison is only meaningful if the matching negative control
+    genuinely differs, so both are required here.
+
+    Rows absent from this invocation make a pair ``unrun``; that is reported and
+    never silently treated as agreement.
+    """
+    by_id = {r["row_id"]: r for r in results}
+    out: Dict[str, Any] = {"equal": [], "differ": [], "errors": []}
+
+    def compare_rows(a: str, b: str, tag: str) -> Optional[Dict[str, Any]]:
+        entry: Dict[str, Any] = {"rows": [a, b], "control": tag}
+        for row_id in (a, b):
+            if row_id not in by_id:
+                entry["status"] = "unrun"
+                entry["reason"] = f"row {row_id} was not attempted in this run"
+                return entry
+            if by_id[row_id].get("status") != "pass":
+                entry["status"] = "unrun"
+                entry["reason"] = (f"row {row_id} is "
+                                   f"{by_id[row_id].get('status')}; nothing to compare")
+                return entry
+        stems_a = by_id[a].get("dataset", {}).get("movies", [])
+        stems_b = by_id[b].get("dataset", {}).get("movies", [])
+        if not stems_a or stems_a != stems_b:
+            entry["status"] = "unrun"
+            entry["reason"] = "rows do not share a movie set; not comparable"
+            return entry
+        reports = work / "cross_row"
+        reports.mkdir(parents=True, exist_ok=True)
+        per_movie = {}
+        for stem in stems_a:
+            per_movie[stem] = compare_pair(
+                compare_tool, _row_base_dir(work, a), _row_base_dir(work, b), stem,
+                reports / report_name(stem, f"{a}__vs__{b}"))
+        entry["per_movie"] = per_movie
+        entry["movies_compared"] = len(per_movie)
+        entry["movies_equal"] = sum(1 for c in per_movie.values() if c["passed"])
+        # A comparator that could not produce a verdict is neither "equal" nor
+        # "differs"; it is an unusable control and must not be read as either.
+        unusable = sorted(s for s, c in per_movie.items()
+                          if c.get("overall_status") is None)
+        entry["unusable_comparisons"] = unusable
+        entry["all_equal"] = (bool(per_movie) and not unusable
+                              and entry["movies_equal"] == entry["movies_compared"])
+        entry["status"] = "ran"
+        return entry
+
+    for a, b in declared.NEUTRAL_EQUIVALENCES:
+        entry = compare_rows(a, b, "must-be-equal")
+        out["equal"].append(entry)
+        if entry["status"] != "ran":
+            out["errors"].append(f"neutral equivalence {a} == {b}: {entry['reason']}")
+        elif not entry["all_equal"]:
+            out["errors"].append(
+                f"{a} is declared numerically neutral but differs from {b}: "
+                f"{entry['movies_equal']}/{entry['movies_compared']} movies equal")
+
+    for a, b, why in declared.NEUTRAL_NEGATIVE_CONTROLS:
+        entry = compare_rows(a, b, "must-differ")
+        entry["rationale"] = why
+        out["differ"].append(entry)
+        if entry["status"] != "ran":
+            out["errors"].append(f"negative control {a} != {b}: {entry['reason']}")
+        elif entry["unusable_comparisons"]:
+            out["errors"].append(
+                f"negative control {a} != {b} is unusable: the comparator gave "
+                f"no verdict for {', '.join(entry['unusable_comparisons'])}")
+        elif entry["all_equal"]:
+            out["errors"].append(
+                f"negative control failed: {a} is identical to {b}, so the "
+                f"gain reference is not being applied at all. {why}")
+
+    out["holds"] = not out["errors"]
+    return out
 
 
 # ---------------------------------------------------------------------- main
@@ -566,6 +678,8 @@ def main() -> int:
         results.append(entry)
         print(f"[issue83] {row.row_id}: {entry['status']}", flush=True)
 
+    cross_row = check_cross_row_equalities(results, work, opts.compare_tool.resolve())
+
     declared_ids = {r.row_id for r in declared.ROWS}
     attempted_ids = {r.row_id for r in selected}
     report = {
@@ -575,6 +689,7 @@ def main() -> int:
         "declared_rows": sorted(declared_ids),
         "unrun_rows": sorted(declared_ids - attempted_ids),
         "results": results,
+        "cross_row_equalities": cross_row,
         "counts": {
             "declared": len(declared_ids),
             "attempted": len(results),
@@ -583,9 +698,11 @@ def main() -> int:
             "error": sum(1 for r in results if r["status"] == "error"),
         },
     }
-    # The aggregate is only "complete" when nothing declared was skipped.
+    # The aggregate is only "complete" when nothing declared was skipped and
+    # every declared cross-row relation -- both the equalities and the controls
+    # that must fail -- actually held.
     report["matrix_complete"] = not report["unrun_rows"] and report["counts"]["fail"] == 0 \
-        and report["counts"]["error"] == 0
+        and report["counts"]["error"] == 0 and cross_row["holds"]
 
     if opts.json:
         opts.json.parent.mkdir(parents=True, exist_ok=True)
@@ -593,6 +710,8 @@ def main() -> int:
     print(json.dumps(report["counts"], indent=2))
     if report["unrun_rows"]:
         print(f"UNRUN rows: {', '.join(report['unrun_rows'])}")
+    for problem in cross_row["errors"]:
+        print(f"CROSS-ROW: {problem}")
     return 0 if report["matrix_complete"] else 1
 
 

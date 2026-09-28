@@ -187,8 +187,22 @@ ROWS: List[Row] = [
 
 
 #: Rows whose corrected pixels must additionally be identical to another row,
-#: because the option is declared numerically neutral.
+#: because the option is declared numerically neutral. Consumed by
+#: ``run_matrix.check_cross_row_equalities``; a declared pair with no consumer
+#: is itself a harness defect, since each row would then only ever be compared
+#: against its own repeats and a uniformly wrong gain would look reproducible.
 NEUTRAL_EQUIVALENCES = [("gain_unity", "gain_none")]
+
+#: Pairs that must *differ*. Without these the equality above is satisfied by a
+#: build that ignores ``--gainref`` entirely, which is exactly the regression
+#: the neutrality claim is supposed to exclude. A control that cannot fail is
+#: not evidence, so a pair recorded as equal here is an error.
+NEUTRAL_NEGATIVE_CONTROLS = [
+    ("gain_nonunity", "gain_none",
+     "A non-unity multiplicative gain must change the corrected pixels. If it "
+     "does not, --gainref is being ignored and gain_unity == gain_none above "
+     "is vacuous."),
+]
 
 
 #: Coverage this matrix deliberately does not attempt, with where it belongs.

@@ -12,6 +12,12 @@ different fixture bytes for the same case (NumPy 1.22.4 versus 2.x), and each
 host's freshly written manifest agreed with its own output, so the drift was
 invisible until the committed manifest was consulted directly.
 
+Both declared digests are checked: ``movie_sha256`` for the ``.mrcs`` and
+``ground_truth_sha256`` for the ``*_ground_truth.json``. The motion-truth
+verdicts are computed against the truth file, not the movie, so checking only
+the movie would let an edited truth file move a gate between PASS and FAIL
+while this tool still called the fixture set fully verified.
+
 Exits nonzero on any mismatch, missing case or unreadable manifest. A fixture
 that is absent from the output directory is reported as ``missing`` rather than
 silently skipped; a case present on disk but absent from the manifest is
@@ -67,7 +73,7 @@ def main() -> int:
 
     cases = manifest.get("cases", {})
     result: Dict[str, Any] = {
-        "schema": "issue83-fixture-verify/1",
+        "schema": "issue83-fixture-verify/2",
         "manifest_ref": opts.ref,
         "manifest_source_commit": manifest.get("source_commit"),
         "fixtures_dir": str(opts.fixtures_dir),
@@ -84,26 +90,53 @@ def main() -> int:
         pass
 
     for case, spec in sorted(cases.items()):
-        path = opts.fixtures_dir / f"{case}.mrcs"
-        want: Optional[str] = spec.get("movie_sha256")
-        if not path.exists():
-            result["cases"][case] = {"status": "missing", "expected": want}
-            result["missing"].append(case)
-            continue
-        got = sha256_file(path)
-        ok = (got == want)
-        result["cases"][case] = {
-            "status": "match" if ok else "MISMATCH",
-            "expected": want, "observed": got,
-            "expected_bytes": spec.get("movie_bytes"),
-            "observed_bytes": path.stat().st_size,
-        }
-        if not ok:
-            result["mismatched"].append(case)
+        entry: Dict[str, Any] = {}
+        statuses = []
+        # Both declared artefacts are checked. The motion-truth verdicts are
+        # computed against the *_ground_truth.json, so a movie that matches
+        # while its truth file has drifted would still change PASS/FAIL while
+        # the fixture set reported as fully verified.
+        for kind, filename, digest_key in (
+                ("movie", f"{case}.mrcs", "movie_sha256"),
+                ("ground_truth", f"{case}_ground_truth.json", "ground_truth_sha256")):
+            path = opts.fixtures_dir / filename
+            want: Optional[str] = spec.get(digest_key)
+            if want is None:
+                entry[kind] = {"status": "undeclared_in_manifest", "file": filename}
+                statuses.append("missing")
+                result["missing"].append(f"{case} ({kind})")
+                continue
+            if not path.exists():
+                entry[kind] = {"status": "missing", "file": filename, "expected": want}
+                statuses.append("missing")
+                result["missing"].append(f"{case} ({kind})")
+                continue
+            got = sha256_file(path)
+            ok = (got == want)
+            entry[kind] = {
+                "status": "match" if ok else "MISMATCH", "file": filename,
+                "expected": want, "observed": got,
+                "observed_bytes": path.stat().st_size,
+            }
+            if kind == "movie":
+                entry[kind]["expected_bytes"] = spec.get("movie_bytes")
+            statuses.append("match" if ok else "MISMATCH")
+            if not ok:
+                result["mismatched"].append(f"{case} ({kind})")
+        if "MISMATCH" in statuses:
+            entry["status"] = "MISMATCH"
+        elif "missing" in statuses:
+            entry["status"] = "missing"
+        else:
+            entry["status"] = "match"
+        result["cases"][case] = entry
 
     for path in sorted(opts.fixtures_dir.glob("*.mrcs")):
         if path.stem not in cases:
-            result["undeclared"].append(path.stem)
+            result["undeclared"].append(path.name)
+    for path in sorted(opts.fixtures_dir.glob("*_ground_truth.json")):
+        if path.name[:-len("_ground_truth.json")] not in cases:
+            result["undeclared"].append(path.name)
 
     failed = bool(result["mismatched"]) or bool(result["undeclared"]) \
         or (bool(result["missing"]) and not opts.allow_missing)
@@ -115,9 +148,12 @@ def main() -> int:
 
     for case, entry in sorted(result["cases"].items()):
         print(f"{entry['status']:>8}  {case}")
-        if entry["status"] == "MISMATCH":
-            print(f"          expected {entry['expected']}")
-            print(f"          observed {entry['observed']}")
+        for kind in ("movie", "ground_truth"):
+            part = entry.get(kind, {})
+            print(f"          {part.get('status', '?'):>8}  {kind}")
+            if part.get("status") == "MISMATCH":
+                print(f"                    expected {part['expected']}")
+                print(f"                    observed {part['observed']}")
     if result["undeclared"]:
         print(f"undeclared fixtures: {', '.join(result['undeclared'])}")
     print(f"verifier numpy {result['verifier_numpy_version']}; "

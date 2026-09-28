@@ -118,7 +118,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	patch_x = textToInteger(parser.getOption("--patch_x", "Patching in X-direction for MOTIONCOR2", "1"));
 	patch_y = textToInteger(parser.getOption("--patch_y", "Patching in Y-direction for MOTIONCOR2", "1"));
 	group = textToInteger(parser.getOption("--group_frames", "Average together this many frames before calculating the beam-induced shifts", "1"));
-	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file or a defect map (1 means bad). A .txt defect file holds whitespace-separated integer quadruples (x y w h), one rectangle per line; comments, headers and a UTF-8 BOM are not supported. Blank lines are ignored, an empty file masks nothing, rectangles with width or height <= 0 are skipped, and rectangles are clipped to the image.", "");
+	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file or a defect map (1 means bad). A .txt defect file holds whitespace-separated integer quadruples (x y w h), conventionally one rectangle per line; comments, headers and a UTF-8 BOM are not supported. Blank lines are ignored, an empty file masks nothing, rectangles with width or height <= 0 are skipped, and rectangles are clipped to the image.", "");
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
@@ -3358,14 +3358,18 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 			}
 		};
 		// Built only on an error path; the happy path never pays for it.
-		auto where = [&]() {
+		// A malformed field names its own line; a record truncated by end of
+		// file names where the record started, because the whitespace skip has
+		// by then already stepped past the last content line.
+		auto where = [&](long long at_line) {
 			return " (record " + std::to_string(record_num + 1) +
-			       ", line " + std::to_string(line) + ") of " + fn_defect;
+			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
 		};
 
 		while (true) {
 			skip_ws();
 			if (f_defect.peek() == EOF) break;
+			const long long record_line = line;
 
 			// Read each field as a token and convert it explicitly. Streaming
 			// straight into integers cannot attribute a failure: an out-of-range
@@ -3377,7 +3381,7 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 				if (i > 0) skip_ws();
 				std::string token;
 				if (f_defect.peek() == EOF || !(f_defect >> token)) {
-					REPORT_ERROR("Truncated defect record" + where() +
+					REPORT_ERROR("Truncated defect record" + where(record_line) +
 					             ": expected four integers 'x y w h', but the file ended "
 					             "after " + std::to_string(i) + " of 4 fields.");
 				}
@@ -3390,7 +3394,7 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
 				}
 				if (!integral) {
-					REPORT_ERROR("Malformed defect record" + where() + ": field '" +
+					REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
 					             std::string(FIELD[i]) + "' is \"" + token +
 					             "\", which is not an integer. The MotionCor2 txt defect "
 					             "format does not support comments, headers or "
@@ -3399,7 +3403,7 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 				try {
 					field[i] = std::stoll(token);
 				} catch (const std::out_of_range &) {
-					REPORT_ERROR("Out-of-range defect field" + where() + ": '" +
+					REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
 					             std::string(FIELD[i]) + "' is \"" + token +
 					             "\", which does not fit in a 64-bit integer.");
 				}

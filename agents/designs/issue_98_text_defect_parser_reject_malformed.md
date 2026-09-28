@@ -23,7 +23,7 @@ Rectangle bounds are clipped to the image with overflow-safe arithmetic before a
 iteration, so an off-image rectangle costs O(1) rather than iterating its nominal area.
 
 Only the txt branch of `fillDefectMask` and its new test change. The defect-map branch,
-the SerialEM detector at `src/motioncorr_runner.cpp:181` and `src/micrograph_model.cpp:344`,
+the SerialEM detector at `src/motioncorr_runner.cpp:182` and `src/micrograph_model.cpp:344`,
 the external-MotionCor2 `-DefectFile` passthrough, hot-pixel detection, dose weighting and
 all RNG, noise-model and statistical behaviour are untouched. No runner preflight
 refactor is included.
@@ -91,11 +91,25 @@ sources; only the format name is referenced.
 
 ## Known limitations
 
+A read error that is not end of file cannot be distinguished from a clean end of file
+through this API: `std::istream::peek()` returns `EOF` whenever `good()` is false for any
+reason, and libstdc++ reports a failed `read()` as end of file rather than setting
+`badbit`. A path that opens but cannot be read therefore terminates the parse as if the
+file had simply ended, leaving a silently empty or partial mask and a job that appears to
+succeed. A directory passed as `--defect_file` is the reachable case: `std::ifstream` opens
+it successfully on Linux and macOS. This behaviour predates issue #98 and is unchanged by
+it; it is recorded here as an accepted limitation rather than fixed, because no cheap
+detection exists at this layer.
+
 The strict parser runs on the `--use_own` path only. The external-binary path at
-`src/motioncorr_runner.cpp:724-729` passes `-DefectFile` through to MotionCor2 unvalidated,
+`src/motioncorr_runner.cpp:725-730` passes `-DefectFile` through to MotionCor2 unvalidated,
 so the same file can be accepted there and rejected here. `fn_defect` is job-global
 configuration but is validated per movie, and the per-movie handler at
-`src/motioncorr_runner.cpp:626` continues to the next movie, so one malformed path yields a
+`src/motioncorr_runner.cpp:629` continues to the next movie, so one malformed path yields a
 full read per movie and one error per movie before the job fails. Validating once in
-`initialise()` beside the SerialEM check would address both; that is a runner preflight
+`initialise()` beside the SerialEM check would address all three; that is a runner preflight
 change and is deliberately excluded from this issue's scope.
+
+No CLI-level `--defect_file` identity run exists, because the repository contains no defect
+fixture and no movie fixture wired to one. Mask identity for well-formed input is asserted
+at unit level only.

@@ -280,6 +280,30 @@ def main():
         print(f"  mixed:   4/4 identical across differing geometry and frame counts "
               f"(decoded={stats.get('decoded')}, inline={stats.get('inline_loaded')})")
 
+        # --- queue capacity must not move the automatic memory ceiling ------
+        # A count limit is not a memory limit. Raising --prefetch_queue must
+        # leave the automatic budget at 3x the first movie, or an arbitrarily
+        # large queue silently disables the default bound while the CLI still
+        # promises 3x. Discriminating: under a queue-scaled rule these would
+        # report 4x and 10x.
+        expected_budget = 3 * estimate_bytes(NX, NY, NFRAMES, IO_THREADS)
+        for capacity in ("2", "8"):
+            count, stats, _ = case_equivalence(
+                args.binary, tmp, f"queue{capacity}", names,
+                ["--prefetch", "--prefetch_queue", capacity], "all.star", f"queue{capacity}")
+            assert count == 4, f"expected 4 corrected images, got {count}"
+            assert stats.get("budget_bytes") == expected_budget, (
+                f"--prefetch_queue {capacity} changed the automatic budget: "
+                f"got {stats.get('budget_bytes')}, expected {expected_budget}")
+            assert stats.get("peak_reserved_bytes", 0) <= expected_budget, \
+                f"the byte bound was exceeded with queue capacity {capacity}: {stats}"
+            assert stats.get("over_budget_grants") == 0, \
+                f"unexpected override with queue capacity {capacity}: {stats}"
+            assert stats.get("decoded") == 4, \
+                f"CONTROL: queue capacity {capacity} did not actually prefetch: {stats}"
+            print(f"  queue{capacity}: 4/4 identical, automatic budget still "
+                  f"{expected_budget} B, peak_reserved={stats['peak_reserved_bytes']} B")
+
         # --- budget straddling one movie ------------------------------------
         # Big enough that a whole-MiB budget can be placed either side of one
         # movie's estimate. Below it every movie must fall back in line; just

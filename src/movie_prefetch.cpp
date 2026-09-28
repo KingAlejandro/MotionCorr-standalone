@@ -147,15 +147,29 @@ ByteBudget::Reservation ByteBudget::reserveForced(size_t bytes)
 	return Reservation(this, bytes);
 }
 
+void ByteBudget::setReleaseObserverForTesting(ReleaseObserver observer)
+{
+	std::lock_guard<std::mutex> lock(mutex_);
+	release_observer_ = std::move(observer);
+}
+
 void ByteBudget::returnBytes(size_t bytes)
 {
+	ReleaseObserver observer;
+	size_t reserved_after = 0;
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		// A release of more than is held would mean a reservation was returned
 		// twice; the move-only handle makes that unrepresentable, and this
 		// keeps the counter honest rather than wrapping if it ever happened.
 		reserved_ -= std::min(bytes, reserved_);
+		reserved_after = reserved_;
+		observer = release_observer_;
 	}
+	// Invoked after the bytes are back but before anyone is woken, which is the
+	// exact instant a release-ordering bug is observable. Outside the mutex, so
+	// the observer cannot deadlock against it. Empty in production.
+	if (observer) observer(bytes, reserved_after);
 	cv_.notify_all();
 }
 
@@ -204,6 +218,27 @@ double ByteBudget::blockedSeconds() const
 
 bool isPrefetchableMovie(const FileName &fn)
 {
+	// A POSITIVE whitelist, not "everything except the two formats we know
+	// about". `Image` accepts SPIDER, IMAGIC, raw and several other stacks, and
+	// a negative check silently pushes each new one across an unvalidated
+	// thread boundary and onto byte accounting derived for these readers. Only
+	// the formats this change actually validated are admitted; everything else
+	// takes the in-line path, which is the unchanged serial behaviour.
+	//
+	// getFileFormat() is the same resolution Image::openFile uses: lowercased,
+	// and honouring an explicit "name.dat:mrcs" override, so the whitelist
+	// matches the reader that will really run rather than the literal suffix.
+	// A "#"-style raw specifier resolves to "raw" and is therefore excluded.
+	const FileName format = fn.getFileFormat();
+	const bool whitelisted = (format == "mrc" || format == "mrcs" ||
+	                          format == "tif" || format == "tiff");
+	if (!whitelisted) return false;
+
+	// Belt and braces. These cannot match the whitelist today -- EER resolves
+	// to "eer"/"ecc" and a compressed stack to "bz2"/"xz"/"zst" -- but both
+	// have their own predicates with their own notions of what they own, and
+	// re-admitting either through a future whitelist entry must stay
+	// impossible rather than merely unlikely.
 	if (EERRenderer::isEER(fn)) return false;
 	if (CompressedMRCReader::isCompressedMRC(fn)) return false;
 	return true;
@@ -286,8 +321,14 @@ size_t MoviePrefetcher::resolveBudgetBytes(const std::vector<FileName> &movies,
 			const size_t estimate = estimateDecodedMovieBytes(
 				geometry.nx, geometry.ny, (int)frames.size(), options.n_io_threads);
 			if (estimate == 0) continue;
-			// producer-current + one queued + consumer-active.
-			return saturatingMul(estimate, saturatingAdd(options.queue_capacity, 2));
+			// Fixed at three estimates -- producer-current, one queued and
+			// consumer-active -- and deliberately NOT scaled by the queue
+			// capacity. Scaling it would mean raising a count limit silently
+			// raises the memory ceiling, and a large enough queue would
+			// disable the default bound entirely, while the CLI still promises
+			// "3x the first movie". A larger queue under the automatic budget
+			// simply cannot fill, because bytes, not slots, are the bound.
+			return saturatingMul(estimate, 3);
 		}
 		catch (...)
 		{

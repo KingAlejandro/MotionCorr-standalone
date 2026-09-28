@@ -138,6 +138,14 @@ public:
 	void cancel();
 	bool cancelled() const;
 
+	// Test seam: called on every release, after the bytes are back and before
+	// any waiter is notified -- the one instant at which "were the buffers
+	// freed before their bytes were returned?" is observable. Production never
+	// sets it. The observer runs outside the budget mutex and must not call
+	// back into the budget.
+	using ReleaseObserver = std::function<void(size_t returned_bytes, size_t reserved_after)>;
+	void setReleaseObserverForTesting(ReleaseObserver observer);
+
 	size_t limitBytes() const { return limit_; }
 	size_t reservedBytes() const;
 	size_t peakReservedBytes() const;
@@ -156,6 +164,7 @@ private:
 	size_t over_budget_grants_ = 0;
 	double blocked_seconds_ = 0.0;
 	bool cancelled_ = false;
+	ReleaseObserver release_observer_;
 };
 
 // ---------------------------------------------------------------------------
@@ -308,10 +317,36 @@ struct MoviePrefetchRecord
 	std::exception_ptr error;
 
 	MoviePrefetchRecord() = default;
+	// Move construction has nothing to free: the target is fresh.
 	MoviePrefetchRecord(MoviePrefetchRecord &&) = default;
-	MoviePrefetchRecord &operator=(MoviePrefetchRecord &&) = default;
 	MoviePrefetchRecord(const MoviePrefetchRecord &) = delete;
 	MoviePrefetchRecord &operator=(const MoviePrefetchRecord &) = delete;
+
+	// Move ASSIGNMENT is the case a defaulted operator gets wrong, and it is
+	// reachable the moment a caller reuses one record across repeated
+	// next(record) calls -- which the signature invites. Defaulted, members are
+	// assigned in declaration order, so `reservation` is replaced (releasing
+	// the old one) while this record's previous `Iframes` are still allocated.
+	// That wakes a budget-blocked producer to allocate the next movie on top of
+	// buffers that have not been freed yet: the same transient overshoot the
+	// destructor below exists to prevent, by the same mechanism.
+	MoviePrefetchRecord &operator=(MoviePrefetchRecord &&other) noexcept
+	{
+		if (this == &other) return *this; // self-move must not free anything
+		// Free first, release second. Everything after this point is cheap.
+		Iframes.clear();
+		Iframes.shrink_to_fit();
+		reservation = std::move(other.reservation);
+		index = other.index;
+		filename = std::move(other.filename);
+		mode = other.mode;
+		geometry = other.geometry;
+		frames = std::move(other.frames);
+		Iframes = std::move(other.Iframes);
+		error = std::move(other.error);
+		return *this;
+	}
+
 	~MoviePrefetchRecord()
 	{
 		// Order is the whole point: the allocation must be gone before its

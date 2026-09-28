@@ -749,6 +749,197 @@ void testUnprobeableAutomaticBudget()
 	}
 }
 
+
+// --- Codex review controls -------------------------------------------------
+
+// Admission is a positive whitelist, not "everything except EER and compressed
+// MRC". This is discriminating: under a negative check every one of the
+// rejected extensions below is admitted to the producer, so the test fails.
+void testFormatWhitelistIsPositive()
+{
+	struct Case { const char *name; bool prefetchable; };
+	const Case cases[] = {
+		// Admitted: the readers this change actually validated.
+		{"movie.mrc",       true},
+		{"movie.mrcs",      true},
+		{"movie.tif",       true},
+		{"movie.tiff",      true},
+		{"movie.MRCS",      true},  // getFileFormat() lowercases
+		{"movie.dat:mrcs",  true},  // explicit override picks the real reader
+		// Rejected: other formats Image accepts. A negative check admits all of
+		// these, which is the defect this case exists to catch.
+		{"movie.spi",       false},
+		{"movie.stk",       false},
+		{"movie.xmp",       false},
+		{"movie.vol",       false},
+		{"movie.img",       false}, // IMAGIC pair
+		{"movie.hed",       false},
+		{"movie.st",        false}, // MRC-family, but not a validated route here
+		{"movie.map",       false}, // 3D map, not a stack
+		{"movie.dm4",       false},
+		{"movie",           false}, // no extension: Image defaults to SPIDER
+		{"movie.mrcs#512",  false}, // raw specifier
+		// Rejected, and independently rejected by their own predicates.
+		{"movie.eer",       false},
+		{"movie.ecc",       false},
+		{"movie.mrc.bz2",   false},
+		{"movie.mrcs.xz",   false},
+		{"movie.mrc.zst",   false},
+	};
+	for (const Case &c : cases)
+	{
+		check(movieio::isPrefetchableMovie(FileName(c.name)) == c.prefetchable,
+		      std::string("format routing for ") + c.name + " should be " +
+		      (c.prefetchable ? "prefetchable" : "in-line"));
+	}
+}
+
+// The automatic budget is three movie estimates, full stop. Scaling it by the
+// queue capacity would mean raising a count limit silently raises the memory
+// ceiling, and a large enough queue would disable the default bound while the
+// CLI still promises 3x. Discriminating: under the old
+// `queue_capacity + 2` rule, capacities 2 and 64 give 4x and 66x.
+void testAutomaticBudgetIgnoresQueueCapacity()
+{
+	Watchdog dog(30.0, "automatic budget is independent of queue capacity");
+	const size_t queue_capacities[] = {1, 2, 3, 8, 64};
+	size_t first_limit = 0;
+	for (size_t capacity : queue_capacities)
+	{
+		MoviePrefetcher::Options options;
+		options.budget_bytes = 0; // automatic
+		options.queue_capacity = capacity;
+		options.n_io_threads = kIoThreads;
+		options.first_frame_sum = 1;
+		options.last_frame_sum = -1;
+		// resolveBudgetBytes probes real files, so drive it through the same
+		// arithmetic the producer uses rather than the unprobeable fallback.
+		const size_t resolved =
+			MoviePrefetcher::resolveBudgetBytes(movieNames(2), options);
+		if (capacity == queue_capacities[0]) first_limit = resolved;
+		check(resolved == first_limit,
+		      "queue capacity " + std::to_string(capacity) +
+		      " must not change the automatic byte limit");
+	}
+	// And an explicit budget is still honoured verbatim.
+	MoviePrefetcher::Options explicit_options;
+	explicit_options.budget_bytes = 123456;
+	explicit_options.queue_capacity = 8;
+	check(MoviePrefetcher::resolveBudgetBytes(movieNames(2), explicit_options) == 123456,
+	      "an explicit budget is not rescaled by the queue capacity");
+}
+
+// A queue larger than the byte budget can hold must be stopped by the BYTES,
+// not merely by the slot count, and must not overflow the bound while doing so.
+void testQueueLargerThanBudgetIsStoppedByBytes()
+{
+	Watchdog dog(60.0, "an oversized queue is bounded by bytes, not slots");
+	const int n = 10;
+	MoviePrefetcher::Options options = unitOptions(3, 8); // 3 units, 8 slots
+	MoviePrefetcher prefetcher(movieNames(n), options);
+	FakeLoader loader;
+	loader.decode_seconds = 0.002;
+	loader.install(prefetcher);
+	prefetcher.start();
+
+	const size_t limit = prefetcher.budget().limitBytes();
+	size_t observed_peak_occupancy = 0;
+	for (int i = 0; i < n; i++)
+	{
+		MoviePrefetchRecord record;
+		check(prefetcher.next(record), "record " + std::to_string(i) + " arrives");
+		for (int sample = 0; sample < 20; sample++)
+		{
+			check(prefetcher.budget().reservedBytes() <= limit,
+			      "an 8-slot queue never exceeds a 3-unit byte budget");
+			const size_t occupancy = prefetcher.stats().peak_queue_occupancy;
+			if (occupancy > observed_peak_occupancy) observed_peak_occupancy = occupancy;
+			std::this_thread::sleep_for(std::chrono::microseconds(200));
+		}
+	}
+	// Control: with 8 slots and a 3-unit budget the queue must be held BELOW
+	// its capacity by the bytes. If it ever reached 8 the budget was not the
+	// binding constraint and this case proved nothing.
+	check(observed_peak_occupancy < 8,
+	      "CONTROL: the byte budget, not the slot count, is what bounded the queue");
+	check(prefetcher.budget().peakReservedBytes() <= limit,
+	      "the recorded peak stayed within the budget");
+}
+
+// Reusing one record across repeated next() calls must free the old frames
+// BEFORE their bytes are returned. Observed exactly, via the budget's release
+// hook, which runs after the bytes are back and before any waiter is woken --
+// so with a defaulted move assignment the old frames are still allocated at
+// that instant and the count below is nonzero.
+void testReusedRecordFreesFramesBeforeReturningBytes()
+{
+	Watchdog dog(30.0, "reused record frees frames before returning bytes");
+	ByteBudget budget(unitBytes() * 4);
+
+	MoviePrefetchRecord reused;
+	size_t frames_live_at_release = 0;
+	long releases = 0;
+	budget.setReleaseObserverForTesting([&](size_t, size_t) {
+		releases++;
+		if (!reused.Iframes.empty()) frames_live_at_release += reused.Iframes.size();
+	});
+
+	for (int round = 0; round < 3; round++)
+	{
+		MoviePrefetchRecord fresh;
+		fresh.index = round;
+		fresh.reservation = budget.reserve(unitBytes());
+		check(fresh.reservation.held(), "round " + std::to_string(round) + " reserved");
+		fresh.Iframes.resize(kNFrames);
+		// Move-assign onto a record that already owns frames and a reservation.
+		reused = std::move(fresh);
+		check(reused.index == round, "the reused record took the new contents");
+		check((int)reused.Iframes.size() == kNFrames, "and the new frames");
+		check(budget.reservedBytes() == unitBytes(),
+		      "exactly one movie is charged after the handover");
+	}
+	check(releases >= 2, "CONTROL: the move assignment really did release old reservations");
+	check(frames_live_at_release == 0,
+	      "the previous frames were freed before their bytes were returned");
+
+	// Self-move must not free anything or return bytes.
+	reused = std::move(reused);
+	check(reused.reservation.held(), "self-move keeps the reservation");
+	check((int)reused.Iframes.size() == kNFrames, "self-move keeps the frames");
+	check(budget.reservedBytes() == unitBytes(), "self-move returns nothing");
+
+	budget.setReleaseObserverForTesting(nullptr);
+	reused = MoviePrefetchRecord();
+	check(budget.reservedBytes() == 0, "the last handover returned the bytes");
+}
+
+// The same property through the real producer/consumer, with the consumer
+// reusing one record as next()'s signature invites.
+void testReusedRecordAcrossRealHandovers()
+{
+	Watchdog dog(30.0, "reused record across real next() handovers");
+	const int n = 8;
+	MoviePrefetcher prefetcher(movieNames(n), unitOptions(2));
+	FakeLoader loader;
+	loader.install(prefetcher);
+	prefetcher.start();
+
+	MoviePrefetchRecord record; // ONE record, reused
+	int received = 0;
+	while (prefetcher.next(record))
+	{
+		check(record.index == received, "records still arrive in order when reused");
+		check(record.mode == MoviePrefetchRecord::Mode::Decoded, "and are decoded");
+		check(prefetcher.budget().reservedBytes() <= prefetcher.budget().limitBytes(),
+		      "the bound holds across a reused record");
+		received++;
+	}
+	check(received == n, "every movie arrived through the reused record");
+	check(prefetcher.budget().peakReservedBytes() <= prefetcher.budget().limitBytes(),
+	      "the recorded peak never exceeded the budget");
+	record = MoviePrefetchRecord();
+	check(prefetcher.budget().reservedBytes() == 0, "nothing is left charged");
+}
 } // namespace
 
 int main()
@@ -774,6 +965,11 @@ int main()
 	testDestructorJoinsWithoutDraining();
 	testMixedGeometryAccounting();
 	testUnprobeableAutomaticBudget();
+	testFormatWhitelistIsPositive();
+	testAutomaticBudgetIgnoresQueueCapacity();
+	testQueueLargerThanBudgetIsStoppedByBytes();
+	testReusedRecordFreesFramesBeforeReturningBytes();
+	testReusedRecordAcrossRealHandovers();
 
 	if (failures != 0)
 	{

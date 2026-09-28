@@ -206,7 +206,19 @@ not by permission.
 
 ---
 
-## Final CI at the corrected head
+## Final CI
+
+Two runs: one after corrections 1-5, one after corrections 6-7 changed the tooling. Both under
+the same lane and lock; the second supersedes the first and is the current state.
+
+### After corrections 6-7 — `b5977dc8be28…`, current
+
+`ctest` **15/15**; MRC comparison negative control (now **18 cases**) **PASS**; CPU-mask control
+(now including empty-mask, stride, descending-range and truncated-witness rejection) **PASS**.
+`motioncorr` sha256 `1966681a871e1b3d7e3bb060d0ebc8b3cb7cd82e9d2e1207190c1af8ac8055c3`.
+Log: `cpu_validation_b5977dc8be28.log`.
+
+### After corrections 1-5 — `fbad90a97ce5…`, superseded
 
 `cpu64` (`small-refmac-machine`), 2026-09-28T08:35Z, source `fbad90a97ce5…`, lane
 `taskset -c 32-47` (inside the 32-63 validation range) under
@@ -227,9 +239,11 @@ altered. Log: `cpu_validation_fbad90a97ce5.log`.
 
 `src/` is **unchanged** by these corrections — `git diff 08c87bb..HEAD -- src/` is empty. The
 delta is `tools/compare_prefetch_arms.py`, `tools/cpu_mask_topology.py` (new),
-`scripts/prefetch_scarf_series.sbatch` (new, the executed SCARF harness) and documentation.
-The production source already carries both independent read-only reviews and the Codex
-review; only the evidence tooling is new and it is covered by the two controls above.
+`scripts/prefetch_scarf_series.sbatch` (new, the executed SCARF harness),
+`scripts/verify_retained_arms.sh` (new, the verification driver) and documentation. The
+production source already carries both independent read-only reviews and the Codex review.
+The evidence tooling has now had its own independent read-only review, which found eight
+defects (correction 7); all are fixed and covered by the two controls above.
 
 ### Remaining limitations, unchanged by these corrections
 

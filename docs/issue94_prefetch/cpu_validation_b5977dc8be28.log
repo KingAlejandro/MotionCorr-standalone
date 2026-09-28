@@ -1,0 +1,101 @@
+##### issue94 final CI at the corrected head
+date_utc: 2026-09-28T08:50:57Z  host: small-refmac-machine (ssh alias cpu64)
+source_sha: b5977dc8be280b677c1e1d05e8ae161ca45dd429
+lane: taskset -c 32-47 (within validation range 32-63); build/runtime -j16
+lock: /tmp/motioncorr-issue96-cpu-validation.lock
+##### interference, not altered
+    PID USER     %CPU     ELAPSED PSR COMMAND
+3414243 ubuntu    300       00:00  52 ps
+1156942 ubuntu   99.9 49-09:21:03  27 ctffind
+1635429 ubuntu   99.9 48-06:57:21   0 ctffind
+3414180 root      2.3       00:00  59 sshd
+2722253 ubuntu    0.8 43-17:13:47  62 node
+ctffind 1156942 Cpus_allowed_list=0-63
+ctffind 1635429 Cpus_allowed_list=0-63
+loadavg: 2.27 2.38 2.93 3/7964 3414253
+##### payload identity
+e64dfd82f73bf906eee3d7e38bb0b0028dcef3e98cca61af66a18888d79fffac  src/movie_prefetch.h
+889a31e6a84c2070a99988b274ee764b87e6262c150d98d6f998ac6d2d4057ee  src/movie_prefetch.cpp
+19ec5be4508dff0c9cfb8a2df2c4ac56cd502b7fa35122d37b8e2b7af55a7678  src/motioncorr_runner.h
+8474ccb1f44cf6a62be563aa8f8f11ad67a8cc50ee568a3bf0441d44c55b04e8  src/motioncorr_runner.cpp
+f686a91905ecbb8733de7b11c0b2335e5e6454ca4bb880d6f785f6fe2106a6b1  CMakeLists.txt
+ed0d06e3c1a674ba76706f9a5096203b34ee4c499aa71c97b33fde21541bed80  tests/test_prefetch_lifecycle.cpp
+d50ab301af54fcb6e2fe63bce8e8cbb71f415c357d810d46677c480cf9e7fef9  tests/test_prefetch_equivalence.py
+bd9485a30c0aa0765ddacb7f6072e8a536ba3acc4ceaf463093d6bd945736fd1  tools/compare_prefetch_arms.py
+357f2fa6c5dd0fbaef907b4f61c1dbb9280d3bdcdf24afa26cf515d1bf553deb  tools/cpu_mask_topology.py
+d6df4da18ab9c885c32ae3317d279bfc4be5a0647896eeda500c2ef38cf3dbe3  scripts/prefetch_gpu_screen.sh
+aa8a8389a9962f22408cdaf556cad1c80a8e7496c5c302295608ddd2ea7bd8e2  scripts/prefetch_scarf_series.sbatch
+da6bd145ac0703c23b2fc509f1133d6ba7fa900bcdf0205b890cba0ed8eecb3c  scripts/verify_retained_arms.sh
+##### lock acquired 2026-09-28T08:50:57Z
+inherited Cpus_allowed_list: 32-47
+numactl --show: policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+configure rc=0
+build rc=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+motioncorr sha256: 1966681a871e1b3d7e3bb060d0ebc8b3cb7cd82e9d2e1207190c1af8ac8055c3
+##### full ctest
+      Start 13: DamagedMovie
+13/15 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: PrefetchEquivalence
+14/15 Test #14: PrefetchEquivalence ..............   Passed    8.87 sec
+      Start 15: RunnerModelParser
+15/15 Test #15: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 15
+
+Total Test time (real) =  21.58 sec
+ctest rc=0
+
+##### negative control: MRC comparison (10 mutations)
+negative control for the MRC comparison
+  mutation                                        result    verdict
+  timestamp changes to another valid timestamp    accepted  OK
+  one pixel byte flips                            caught    OK   [probe: PIXELS DIFFER]
+  main header byte flips (nx)                     caught    OK   [probe: main header bytes 0..224 differ]
+  label prefix byte flips (Relion -> Reliom)      caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [229] (count 1)]
+  unused label record 1 gains content             caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [304, 305, 306, 307] (count 4)]
+  timestamp -> garbage, regex no longer matches   caught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  timestamp -> bad month name, regex no longer matchescaught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  timestamp is regex-shaped but an impossible date (only strptime catches it)caught    OK   [probe: B whitelisted label bytes 10..29 are not a writer timestamp: '31-Feb-26  25:61:61']
+  nsymbt differs between the two files            caught    OK   [probe: nsymbt differs, 0 vs 16]
+  nlabl changes (caught by the 0..224 compare, not by the nlabl check)caught    OK   [probe: main header bytes 0..224 differ]
+  file truncated                                  caught    OK   [probe: file sizes differ, 1088 vs 1040]
+  extended header content differs (equal nonzero nsymbt)caught    OK   [probe: extended header (16 bytes) differs]
+  extended header identical (equal nonzero nsymbt)accepted  OK
+  header-only file, no pixel payload              caught    OK   [probe: no pixel payload -- the comparison is vacuous]
+  nsymbt exceeds the payload, EQUAL on both sides caught    OK   [probe: nsymbt 2000000000 exceeds the file (1088 bytes); header is not trustworthy]
+  nsymbt exceeds the payload AND a pixel differs  caught    OK   [probe: nsymbt 2000000000 exceeds the file (1088 bytes); header is not trustworthy]
+  negative nsymbt on both sides                   caught    OK   [probe: negative nsymbt -1]
+  nlabl=0 leaves the timestamp unwhitelisted      caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [249, 251] (count 2)]
+  two timestamps in one record are not whitelistedcaught    OK   [probe: writer timestamps sit at different offsets, [] vs [(29, 48)]]
+  self-test: PASS
+rc=0
+
+##### range-mask control: CPU topology helper
+cpu mask topology self-test
+  check                                               got                         want                        verdict
+  expand '0-7,32-39'                                  [0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39][0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39]OK
+  expand '0,1,2,3,32,33,34,35'                        [0, 1, 2, 3, 32, 33, 34, 35][0, 1, 2, 3, 32, 33, 34, 35]OK
+  expand '0'                                          [0]                         [0]                         OK
+  expand '0-63' length                                64                          64                          OK
+  range mask: logical cpus                            16                          16                          OK
+  range mask: physical cores                          8                           8                           OK
+  range mask: numa nodes                              [0, 1]                      [0, 1]                      OK
+  range mask: full SMT pairs                          8                           8                           OK
+  list mask: physical cores                           4                           4                           OK
+  list mask: numa nodes                               [0]                         [0]                         OK
+  single cpu: physical cores                          1                           1                           OK
+  empty mask raises                                   True                        True                        OK
+  comma-only mask raises                              True                        True                        OK
+  whitespace mask raises                              True                        True                        OK
+  stride syntax rejected                              True                        True                        OK
+  descending range rejected                           True                        True                        OK
+  truncated witness rejected                          True                        True                        OK
+  whitespace inside a valid mask still parses         [0, 1, 2, 3, 32]            [0, 1, 2, 3, 32]            OK
+  OLD comma-only helper on a RANGE mask (must be 0)   0                           0                           OK
+  OLD comma-only helper on an EXPLICIT list (was fine)4                           4                           OK
+  self-test: PASS
+rc=0
+##### loadavg at end: 4.24 3.00 3.12 4/7969 3415461
+##### series rc=0 at 2026-09-28T08:51:40Z
+##### ALL DONE

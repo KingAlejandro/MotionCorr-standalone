@@ -205,6 +205,7 @@ jobs:
         run: |
           set -eu
           expected='--generate-code=arch=compute_80,code=[compute_80,sm_80]'
+          unset CUDAARCHS
           check_default_arch() {
             rm -rf build-cuda-default
             cmake -S . -B build-cuda-default -DCMAKE_BUILD_TYPE=Release \

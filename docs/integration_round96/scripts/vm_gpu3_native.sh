@@ -52,12 +52,13 @@ ls "$T/Movies"/*.tiff | wc -l | sed 's/^/movies: /'
 ls -l "$T/Movies/gain.mrc" 2>/dev/null || echo "NOTE: no gain.mrc in this tutorial tree"
 
 echo; echo "################ BUILDS (CUDA=ON sm80, -j4) ################"
+echo "cmake: $(command -v cmake) $(cmake --version|head -1)"; echo "nvcc: $(command -v nvcc)"
 for arm in main cand; do
   echo "[$arm]"
-  $VENV/bin/cmake -S "$R/$arm" -B "$R/$arm/build" -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \
+  cmake -S "$R/$arm" -B "$R/$arm/build" -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \
       -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=OFF > "$LOG/$arm-cfg.log" 2>&1
   echo "  configure exit=$?"
-  $VENV/bin/cmake --build "$R/$arm/build" -j4 > "$LOG/$arm-build.log" 2>&1
+  cmake --build "$R/$arm/build" -j4 > "$LOG/$arm-build.log" 2>&1
   echo "  build exit=$?  errors=$(grep -cE 'error:' $LOG/$arm-build.log)"
   sha256sum "$R/$arm/build/motioncorr"
   ldd "$R/$arm/build/motioncorr" | grep -iE "cudart|cufft" | sed 's/^/  /'

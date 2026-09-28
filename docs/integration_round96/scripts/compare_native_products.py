@@ -37,6 +37,9 @@ def normalise(text: str, ref_root: Path, test_root: Path) -> str:
     # dates are not product content.
     text = text.replace(str(ref_root), "<OUT>").replace(str(test_root), "<OUT>")
     text = re.sub(r"\d+\.\d+/\d+\.\d+ (min|sec)", "<TIME>", text)
+    text = re.sub(r"\b\d+(\.\d+)? (seconds|sec|minutes|min)\b", "<ELAPSED>", text)
+    text = re.sub(r"\b\d+/\s*\d+ sec\b", "<PROGRESS>", text)
+    text = re.sub(r"(?i)(elapsed|wall|time)[^\n]*?\d+[.:]\d+", r"\1 <T>", text)
     text = re.sub(r"\d{2}:\d{2}:\d{2}", "<CLOCK>", text)
     text = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", "<DATE>", text)
     return text
@@ -94,21 +97,33 @@ def main() -> int:
             e["comparator_exit"] = r.returncode
             try:
                 cj = json.loads(r.stdout)
-                img = cj.get("image") or {}
+                # Schema verified against tools/compare_motioncorr.py --json output:
+                # checks.corrected_image.{num_pixels,pixel_identical,rmse,
+                # max_abs_pixel_error,core_header_diff_bytes,
+                # label_header_diff_bytes,normalized_label_diff_bytes,passed}
+                img = (cj.get("checks") or {}).get("corrected_image") or {}
+                if not img:
+                    raise KeyError("checks.corrected_image absent from comparator JSON")
                 e["pixel_identical"] = img.get("pixel_identical")
+                e["num_pixels"] = img.get("num_pixels")
                 e["image_rmse"] = img.get("rmse")
-                e["max_abs_diff"] = img.get("max_abs_diff")
-                e["normalized_header_diff_bytes"] = img.get("normalized_header_diff_bytes")
-                e["gate_status"] = cj.get("status") or cj.get("overall")
-                n = img.get("pixels_compared") or img.get("n_pixels") or 0
-                pixels += int(n)
-                if e["pixel_identical"]:
+                e["max_abs_pixel_error"] = img.get("max_abs_pixel_error")
+                e["core_header_diff_bytes"] = img.get("core_header_diff_bytes")
+                e["label_header_diff_bytes"] = img.get("label_header_diff_bytes")
+                e["normalized_label_diff_bytes"] = img.get("normalized_label_diff_bytes")
+                e["image_check_passed"] = img.get("passed")
+                e["gate_status"] = cj.get("overall_status")
+                pixels += int(img.get("num_pixels") or 0)
+                if img.get("pixel_identical"):
                     pixel_identical += 1
             except Exception as exc:
                 e["comparator_parse_error"] = str(exc)
                 e["comparator_stdout_head"] = r.stdout[:400]
                 e["comparator_stderr_head"] = r.stderr[:400]
-            e["status"] = "PASS" if r.returncode == 0 else "FAIL"
+            # The image verdict is the image check itself. overall_status can be FAIL purely
+            # because motion/STAR coverage was unavailable, which is not an image regression;
+            # that is recorded separately in gate_status and coverage.
+            e["status"] = "PASS" if e.get("image_check_passed") else "FAIL"
         elif rel.endswith((".star", ".log", ".txt", ".lst", ".eps")):
             e["kind"] = "star" if rel.endswith(".star") else "text"
             if rel.endswith(".star"):

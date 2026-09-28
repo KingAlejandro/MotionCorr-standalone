@@ -209,6 +209,23 @@ def collect(manifest: List[Dict[str, Any]], cfg: Dict[str, str], out_json: Path)
                                    ("run_id", "movie", "group", "label", "threads",
                                     "proc_bind", "dose_per_frame", "gainref")}
             rec["params"] = run["params"]
+            rec["layer"] = "L3"
+            # Movie split, carried into the record. Omitting it was the root
+            # cause of the hold-out leak in the first published analysis: with
+            # no split field, every Layer-3 cell fell into the selection bucket
+            # and the hold-out contained no real-pipeline data at all. It is
+            # derived from the frozen prespecification rather than copied from
+            # the manifest, so a manifest that forgets to tag itself still
+            # yields the right answer, and a manifest that tags itself WRONGLY
+            # is caught here rather than silently believed.
+            derived = ("selection" if movie in SELECTION_MOVIES else
+                       "holdout" if movie in HOLDOUT_MOVIES else "unsplit")
+            declared = run.get("split")
+            if declared in ("selection", "holdout") and declared != derived:
+                raise ValueError(
+                    f"{run['run_id']}: manifest declares split={declared!r} but movie "
+                    f"{movie} is {derived!r} in the frozen prespecification")
+            rec["movie_split"] = derived
             meta = json.loads((d / "run.json").read_text()) if (d / "run.json").exists() else {}
             rec["returncode"] = meta.get("returncode")
             rec["elapsed_s"] = meta.get("elapsed_s")

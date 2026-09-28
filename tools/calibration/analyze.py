@@ -29,6 +29,10 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from tools.calibration.prespecification import (  # noqa: E402
+    HOLDOUT_MOVIES,
+    SELECTION_MOVIES,
+    SEVERITY_GRIDS,
+    split_grid,
     BLOCKING_MARGIN_FACTOR,
     CANDIDATE_DIAGNOSTICS,
     DELTA_B_HARM_A2,
@@ -60,6 +64,97 @@ def get(rec: Dict[str, Any], name: str) -> Optional[float]:
     except (TypeError, ValueError):
         return None
     return f if math.isfinite(f) else None
+
+
+# ---------------------------------------------------------------------------
+# Hold-out split (issue #60 review finding 1, PR #64 discussion_r4119255250)
+# ---------------------------------------------------------------------------
+#
+# The published analysis partitioned cells with a single `split` key. Layer-3
+# records never carried one -- `layer3_pipeline.collect()` did not copy it from
+# the manifest -- so every Layer-3 cell fell into the selection bucket and the
+# hold-out bucket contained no real-pipeline data at all. Measured on the
+# committed data: 420 "hold-out" cells, of which 0 were Layer 3, and all 120
+# hold-out-MOVIE cells leaked into selection. The published hold-out therefore
+# validated only odd Layer-1/2 severities, on the selection movies and on
+# synthetic data.
+#
+# The split is now DERIVED from the frozen prespecification rather than read
+# from a field that may be missing, so the existing data files are classified
+# correctly without re-running anything and the derivation is auditable. Two
+# axes are tracked separately because they answer different questions:
+#
+#   movie axis     -- does the result generalise to micrographs never used to
+#                     choose a threshold? Applies to Layer 1 and Layer 3.
+#   severity axis  -- does it generalise to perturbation strengths never used
+#                     to choose a threshold? Applies to Layer 1 and Layer 2.
+#
+# A cell is joint hold-out only when EVERY axis that applies to it is hold-out.
+
+def _severity_axis(rec: Dict[str, Any]) -> Optional[str]:
+    """Which side of the frozen severity grid this cell's strength falls on."""
+    fault = rec.get("fault") or rec.get("group")
+    if fault not in SEVERITY_GRIDS:
+        return None
+    sev = rec.get("severity")
+    if sev is None:
+        sev = (rec.get("params") or {}).get("severity")
+    try:
+        sev = float(sev)
+    except (TypeError, ValueError):
+        return None
+    parts = split_grid(fault)
+    for side in ("selection", "holdout"):
+        if any(abs(sev - float(v)) <= 1e-9 * max(1.0, abs(float(v))) for v in parts[side]):
+            return side
+    return None
+
+
+def _movie_axis(rec: Dict[str, Any]) -> Optional[str]:
+    """Which side of the frozen movie split this cell's micrograph falls on."""
+    m = rec.get("movie")
+    if m is None:
+        return None
+    if m in SELECTION_MOVIES:
+        return "selection"
+    if m in HOLDOUT_MOVIES:
+        return "holdout"
+    return None
+
+
+def cell_axes(rec: Dict[str, Any]) -> Dict[str, str]:
+    """Every hold-out axis that applies to a cell, and which side it is on."""
+    axes: Dict[str, str] = {}
+    mv = _movie_axis(rec)
+    if mv:
+        axes["movie"] = mv
+    sv = _severity_axis(rec)
+    if sv:
+        axes["severity"] = sv
+    return axes
+
+
+def joint_split(rec: Dict[str, Any]) -> str:
+    """'selection', 'holdout', 'mixed', or 'unsplit' for a cell.
+
+    'mixed' means the cell is hold-out on one axis and selection on another; it
+    is used for neither threshold selection nor hold-out validation, because it
+    is independent in one direction only.
+    """
+    axes = cell_axes(rec)
+    if not axes:
+        return "unsplit"
+    vals = set(axes.values())
+    if vals == {"selection"}:
+        return "selection"
+    if vals == {"holdout"}:
+        return "holdout"
+    return "mixed"
+
+
+def axis_bucket(rec: Dict[str, Any], axis: str) -> Optional[str]:
+    """Which side of ONE named axis a cell is on, ignoring the other axis."""
+    return cell_axes(rec).get(axis)
 
 
 # ---------------------------------------------------------------------------
@@ -129,19 +224,85 @@ def harm_of(rec: Dict[str, Any], harm_key: str) -> float:
     return max(float(v), 0.0)
 
 
-def tier_of(rec: Dict[str, Any], harm_key: str, harm_boundary: float,
-            noise_floor: Dict[str, float]) -> str:
-    """Classify a cell as negligible, marginal, or one of the unacceptable subtypes."""
-    harm = harm_of(rec, harm_key)
-    shift = get(rec, "std_shift_px") or 0.0
-    scale = get(rec, "std_scale_dev") or 0.0
+#: Translation accounting, derived from the frozen FAULT_CLASS and the
+#: injector's declared identity -- never inferred from the measurement.
+#:
+#: PR #64 discussion_r4119255253. The prespecification says a translation is
+#: unacceptable only when it is "not recorded in the STAR metadata", and its
+#: frozen FAULT_CLASS labels X1 "benign_but_alarming": an accounted-for
+#: coordinate translation, the archetypal false alarm the calibration exists to
+#: distinguish. The published tier_of applied the 0.1 px clause to any
+#: translation, so every X1 cell became a harmful positive and the proposed
+#: std_shift_px limit was trained to reject exactly the benign case.
+TRANSLATION_ACCOUNTING = {
+    "X1_translation_px": "accounted",
+    "C1_unrecorded_translation": "unrecorded",
+}
 
+#: Scale mode, same principle. PR #64 discussion_r4119255256: the
+#: prespecification reserves the 1 % clause for a FRAME-DEPENDENT scale error,
+#: and the design record states a uniform scale costs nothing because particle
+#: extraction renormalises it. The published tier_of applied the clause to the
+#: global scale estimate, so uniform X8 gain cells became harmful positives.
+SCALE_MODE = {
+    "X8_gain_error": "uniform",
+    "C2_frame_dependent_scale": "frame_dependent",
+}
+
+
+def fault_of(rec: Dict[str, Any]) -> str:
+    return str(rec.get("fault") or rec.get("group") or "")
+
+
+#: The frozen prespecification is internally inconsistent about a rigid
+#: translation, and this work does not resolve that by picking whichever
+#: reading makes a gate pass. Both readings are carried and every result is
+#: reported under each.
+#:
+#:   "benign"  -- FAULT_CLASS labels X1 "benign_but_alarming" and the design
+#:               record's consequence table gives a translation's cost as
+#:               "none: particle coordinates move with the micrograph". Under
+#:               this reading X1 cells are negligible and the geometry tier is
+#:               empty.
+#:   "harmful" -- the harm tier declares a translation "not recorded in the
+#:               STAR metadata" unacceptable. In a gate's actual use case --
+#:               two backends, the SAME input -- an output offset with
+#:               unchanged metadata is exactly that. Under this reading X1
+#:               cells are unacceptable:geometry.
+#:
+#: Which is right is a scientific decision about whether a cross-backend origin
+#: offset is a signal-loss question or a workflow-integration question. It is
+#: not decidable from these measurements and is referred to #58.
+GEOMETRY_READINGS = ("benign", "harmful")
+
+
+def tier_of(rec: Dict[str, Any], harm_key: str, harm_boundary: float,
+            noise_floor: Dict[str, float],
+            geometry_reading: str = "benign") -> str:
+    """Classify a cell as negligible, marginal, or one of the unacceptable subtypes.
+
+    The geometry and scale clauses fire only for the fault identities the
+    prespecification actually declares harmful. An accounted translation and a
+    uniform scale error are reparameterisations of the same image: they are
+    implementation differences worth reporting, but they are not signal loss,
+    and tiering them as harmful corrupts any threshold derived from them.
+    """
+    harm = harm_of(rec, harm_key)
     if harm > harm_boundary:
         return "unacceptable:envelope"
-    if shift > UNRECORDED_TRANSLATION_HARM_PX:
+
+    fault = fault_of(rec)
+    shift = get(rec, "std_shift_px") or 0.0
+    accounting = TRANSLATION_ACCOUNTING.get(fault)
+    treat_as_unrecorded = (accounting == "unrecorded"
+                           or (accounting == "accounted" and geometry_reading == "harmful"))
+    if treat_as_unrecorded and shift > UNRECORDED_TRANSLATION_HARM_PX:
         return "unacceptable:geometry"
-    if scale > SCALE_ERROR_HARM:
+
+    scale = get(rec, "std_scale_dev") or 0.0
+    if SCALE_MODE.get(fault) == "frame_dependent" and scale > SCALE_ERROR_HARM:
         return "unacceptable:scale"
+
     if harm <= DELTA_B_NEGLIGIBLE_A2:
         return "negligible"
     return "marginal"
@@ -187,7 +348,7 @@ def subtypes_for(diag: str) -> Tuple[str, ...]:
 
 def partition(
     records: List[Dict[str, Any]], diag: str, harm_key: str, harm_boundary: float,
-    floors: Dict[str, float],
+    floors: Dict[str, float], geometry_reading: str = "benign",
 ) -> Tuple[List[float], List[float], Dict[str, int]]:
     """Split cells into the negligible values and the in-responsibility bad values."""
     want = set(subtypes_for(diag))
@@ -198,7 +359,7 @@ def partition(
         v = get(r, diag)
         if v is None:
             continue
-        t = tier_of(r, harm_key, harm_boundary, floors)
+        t = tier_of(r, harm_key, harm_boundary, floors, geometry_reading)
         counts[t] = counts.get(t, 0) + 1
         if t == "negligible":
             neg.append(abs(v))
@@ -209,10 +370,11 @@ def partition(
 
 def separation(
     records: List[Dict[str, Any]], diag: str, harm_key: str, harm_boundary: float,
-    floors: Dict[str, float],
+    floors: Dict[str, float], geometry_reading: str = "benign",
 ) -> Dict[str, Any]:
     """Largest-margin threshold for one diagnostic over the cells it owns."""
-    neg, bad, counts = partition(records, diag, harm_key, harm_boundary, floors)
+    neg, bad, counts = partition(records, diag, harm_key, harm_boundary, floors,
+                                 geometry_reading)
     out: Dict[str, Any] = {
         "responsibility": list(subtypes_for(diag)),
         "n_negligible": len(neg), "n_unacceptable": len(bad), "tier_counts": counts,
@@ -234,10 +396,10 @@ def separation(
 
 def apply_threshold(
     records: List[Dict[str, Any]], diag: str, theta: float, harm_key: str,
-    harm_boundary: float, floors: Dict[str, float],
+    harm_boundary: float, floors: Dict[str, float], geometry_reading: str = "benign",
 ) -> Dict[str, Any]:
     """False positives over EVERY negligible cell; false negatives over the owned ones."""
-    neg, bad, _ = partition(records, diag, harm_key, harm_boundary, floors)
+    neg, bad, _ = partition(records, diag, harm_key, harm_boundary, floors, geometry_reading)
     fp = sum(1 for v in neg if v > theta)
     fn = sum(1 for v in bad if v <= theta)
     return {
@@ -272,7 +434,7 @@ def classify(sel: Dict[str, Any], hold: Dict[str, Any], floor: float) -> str:
 
 def panel_coverage(
     records: List[Dict[str, Any]], panel: Dict[str, float], harm_key: str,
-    harm_boundary: float, floors: Dict[str, float],
+    harm_boundary: float, floors: Dict[str, float], geometry_reading: str = "benign",
 ) -> Dict[str, Any]:
     """Does the union of a set of thresholds catch every unacceptable cell?"""
     caught = missed = 0
@@ -280,7 +442,7 @@ def panel_coverage(
     false_alarms = 0
     n_neg = 0
     for r in records:
-        t = tier_of(r, harm_key, harm_boundary, floors)
+        t = tier_of(r, harm_key, harm_boundary, floors, geometry_reading)
         trip = any((get(r, d) is not None and abs(get(r, d)) > th) for d, th in panel.items())
         if t.startswith("unacceptable:"):
             if trip:
@@ -349,6 +511,9 @@ def main() -> int:
     ap.add_argument("--layer2", type=Path, nargs="*", default=[])
     ap.add_argument("--layer3", type=Path, nargs="*", default=[])
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--geometry-reading", choices=GEOMETRY_READINGS, default="benign",
+                    help="how to tier an accounted-for rigid translation; see "
+                         "GEOMETRY_READINGS. Both are reported in the issue #60 report.")
     args = ap.parse_args()
 
     l1 = load(args.layer1)
@@ -359,6 +524,7 @@ def main() -> int:
     j4_floor = floors.get("j4", {})
 
     report: Dict[str, Any] = {
+        "geometry_reading": args.geometry_reading,
         "counts": {"layer1": len(l1), "layer2": len(l2), "layer3": len(l3)},
         "noise_floor": floors,
         "harm_boundary_declared": DELTA_B_HARM_A2,
@@ -384,17 +550,32 @@ def main() -> int:
     # and layer 3 supply realistic magnitudes. Selection and hold-out splits
     # are kept strictly apart.
     all_recs = l1 + l2 + l3
-    sel = [r for r in all_recs if r.get("split") in (None, "selection", "control")
-           or r.get("movie", "") in ()]
-    hold = [r for r in all_recs if r.get("split") == "holdout"]
+
+    # Two-axis split, derived from the frozen prespecification. Thresholds are
+    # chosen on joint-selection cells only; hold-out is reported three ways
+    # because the axes answer different questions and pooling them hides which
+    # kind of generalisation was actually tested.
+    sel = [r for r in all_recs if joint_split(r) == "selection"]
+    hold = [r for r in all_recs if joint_split(r) == "holdout"]
+    mixed = [r for r in all_recs if joint_split(r) == "mixed"]
+    hold_movie = [r for r in all_recs if axis_bucket(r, "movie") == "holdout"]
+    hold_sev = [r for r in all_recs if axis_bucket(r, "severity") == "holdout"]
+    report["splits"] = {
+        "joint_selection": len(sel), "joint_holdout": len(hold),
+        "mixed_one_axis_only": len(mixed),
+        "unsplit": sum(1 for r in all_recs if joint_split(r) == "unsplit"),
+        "movie_axis_holdout": len(hold_movie),
+        "severity_axis_holdout": len(hold_sev),
+    }
 
     thresholds: Dict[str, Any] = {}
+    reading = args.geometry_reading
     for boundary in DELTA_B_HARM_SENSITIVITY:
         per_diag: Dict[str, Any] = {}
         for d in CANDIDATE_DIAGNOSTICS:
-            s = separation(sel, d, "harm_delta_b_a2", boundary, j4_floor)
+            s = separation(sel, d, "harm_delta_b_a2", boundary, j4_floor, reading)
             if s.get("separable"):
-                h = apply_threshold(hold, d, s["threshold"], "harm_delta_b_a2", boundary, j4_floor)
+                h = apply_threshold(hold, d, s["threshold"], "harm_delta_b_a2", boundary, j4_floor, reading)
             else:
                 h = {"threshold": float("nan"), "fp_rate": float("nan"), "fn_rate": float("nan"),
                      "n_negligible": 0, "n_unacceptable": 0,
@@ -402,6 +583,12 @@ def main() -> int:
             per_diag[d] = {
                 "selection": s,
                 "holdout": h,
+                "holdout_movie_axis": apply_threshold(
+                    hold_movie, d, s["threshold"], "harm_delta_b_a2", boundary, j4_floor, reading)
+                if s.get("separable") else None,
+                "holdout_severity_axis": apply_threshold(
+                    hold_sev, d, s["threshold"], "harm_delta_b_a2", boundary, j4_floor, reading)
+                if s.get("separable") else None,
                 "noise_floor_j4": j4_floor.get(d),
                 "recommendation": classify(s, h, j4_floor.get(d, 0.0) or 0.0),
                 "current_gate2_limit": GATE2_LIMITS_READONLY.get(d),
@@ -422,9 +609,13 @@ def main() -> int:
                 panel[d] = sel_d["threshold"]
         if panel:
             panels[f"harm_{boundary:g}"] = {
-                "selection": panel_coverage(sel, panel, "harm_delta_b_a2", boundary, j4_floor),
-                "holdout": panel_coverage(hold, panel, "harm_delta_b_a2", boundary, j4_floor),
-                "combined": panel_coverage(all_recs, panel, "harm_delta_b_a2", boundary, j4_floor),
+                "selection": panel_coverage(sel, panel, "harm_delta_b_a2", boundary, j4_floor, reading),
+                "holdout": panel_coverage(hold, panel, "harm_delta_b_a2", boundary, j4_floor, reading),
+                "holdout_movie_axis": panel_coverage(
+                    hold_movie, panel, "harm_delta_b_a2", boundary, j4_floor, reading),
+                "holdout_severity_axis": panel_coverage(
+                    hold_sev, panel, "harm_delta_b_a2", boundary, j4_floor, reading),
+                "combined": panel_coverage(all_recs, panel, "harm_delta_b_a2", boundary, j4_floor, reading),
             }
     report["panel_coverage"] = panels
 
@@ -433,7 +624,8 @@ def main() -> int:
 
     # Human-readable summary at the declared boundary.
     key = f"harm_{DELTA_B_HARM_A2:g}"
-    print(f"\nRecommendations at the declared harm boundary delta_B > {DELTA_B_HARM_A2} A^2")
+    print(f"\nRecommendations at the declared harm boundary delta_B > {DELTA_B_HARM_A2} A^2"
+          f"   [geometry reading: {reading}]")
     print(f"{'diagnostic':28s} {'rec':22s} {'theta':>11s} {'sel sep':>9s} "
           f"{'hold FP':>8s} {'hold FN':>8s} {'j4 floor':>10s}")
     for d, v in thresholds[key].items():
@@ -447,10 +639,17 @@ def main() -> int:
 
     census = {}
     for r in all_recs:
-        t = tier_of(r, "harm_delta_b_a2", DELTA_B_HARM_A2, j4_floor)
+        t = tier_of(r, "harm_delta_b_a2", DELTA_B_HARM_A2, j4_floor, reading)
         census[t] = census.get(t, 0) + 1
     print(f"\ncell census at the declared boundary: {census}")
-    print(f"selection cells {len(sel)}, hold-out cells {len(hold)}")
+    print(f"splits: {report['splits']}")
+    for name, subset in (("joint hold-out", hold), ("movie-axis hold-out", hold_movie),
+                         ("severity-axis hold-out", hold_sev)):
+        sub = {}
+        for r in subset:
+            t = tier_of(r, "harm_delta_b_a2", DELTA_B_HARM_A2, j4_floor, reading)
+            sub[t] = sub.get(t, 0) + 1
+        print(f"  {name:24s} n={len(subset):4d} tiers={sub}")
 
     pc = report.get("panel_coverage", {}).get(f"harm_{DELTA_B_HARM_A2:g}")
     if pc:

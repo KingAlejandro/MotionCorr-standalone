@@ -41,12 +41,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools.calibration import diagnostics as dg           # noqa: E402
 from tools.calibration import perturbations as pt          # noqa: E402
 from tools.calibration.prespecification import (           # noqa: E402
+    DOSE_PER_FRAME,
     N_FRAMES,
     PIXEL_SIZE_A,
+    VOLTAGE_KV,
     X4_CORRELATION_LENGTHS,
     delta_b_for_sigma_px,
     split_grid,
 )
+
+
+#: Post-hoc control grid for the frame-dependent scale fault (2026-09-28).
+#: Declared here, outside the frozen prespecification, and never used to set a
+#: threshold.
+C2_FRAME_SCALE_GRID = (0.01, 0.05, 0.20, 0.50)
 
 
 def make_object(ny: int, nx: int, rng: np.random.Generator, pixel_size_a: float) -> np.ndarray:
@@ -81,12 +89,39 @@ def true_trajectory(n_frames: int, rng: np.random.Generator) -> np.ndarray:
     return traj - traj[0]
 
 
+def dose_weight_map(
+    ny: int, nx: int, n_frames: int, dose_per_frame: float,
+    pixel_size_a: float, voltage_kv: float, pre_exposure: float = 0.0,
+) -> np.ndarray:
+    """Grant & Grigorieff critical-exposure dose weights on the rfft grid.
+
+    Shape (n_frames, ny, nx//2+1), normalised so the weights of each frequency
+    sum in quadrature to one, matching ``perturbations.x6_dose_weights`` but
+    evaluated on the 2-D grid the accumulator needs.
+
+    Reimplemented here rather than called through the engine so that layer 2
+    can apply a WRONG dose without touching any engine code.
+    """
+    fy = np.fft.fftfreq(ny)[:, None]
+    fx = np.fft.rfftfreq(nx)[None, :]
+    k = np.sqrt(fy * fy + fx * fx) / pixel_size_a
+    n_c = 0.24499 * np.power(np.maximum(k, 1e-8), -1.6649) + 2.8141
+    if voltage_kv < 250.0:
+        n_c = n_c * 0.8
+    acc = pre_exposure + dose_per_frame * (np.arange(n_frames) + 0.5)
+    w = np.exp(-0.5 * acc[:, None, None] / n_c[None, :, :])
+    norm = np.sqrt((w * w).sum(axis=0, keepdims=True))
+    return w / np.maximum(norm, 1e-12)
+
+
 def build_sum(
     obj: np.ndarray,
     applied: np.ndarray,
     true_traj: np.ndarray,
     noise_sigma: float,
     rng: np.random.Generator,
+    weights: np.ndarray | None = None,
+    frame_scale: np.ndarray | None = None,
 ) -> np.ndarray:
     """Sum the movie after realigning frame f by ``-applied[f]``.
 
@@ -117,7 +152,15 @@ def build_sum(
         sig_ramp = np.exp(-2j * np.pi * (fx * resid[0] + fy * resid[1]))
         noise_ramp = np.exp(2j * np.pi * (fx * applied[f][0] + fy * applied[f][1]))
         frame_noise = np.fft.rfft2(rng.standard_normal((ny, nx)) * noise_sigma)
-        acc += fobj * sig_ramp + frame_noise * noise_ramp
+        contrib = fobj * sig_ramp + frame_noise * noise_ramp
+        if frame_scale is not None:
+            contrib = contrib * float(frame_scale[f])
+        if weights is not None:
+            contrib = contrib * weights[f]
+        acc += contrib
+    if weights is not None:
+        # Dose weighting already carries its own per-frequency normalisation.
+        return np.fft.irfft2(acc, s=(ny, nx))
     return np.fft.irfft2(acc / len(true_traj), s=(ny, nx))
 
 
@@ -140,6 +183,8 @@ def run_trial(
     noise_sigma: float,
     pixel_size_a: float,
     border_px: int,
+    dose_per_frame: float = DOSE_PER_FRAME,
+    voltage_kv: float = VOLTAGE_KV,
 ) -> List[Dict[str, Any]]:
     rng = np.random.default_rng(20260925 + 7919 * trial)
     obj = make_object(ny, nx, rng, pixel_size_a)
@@ -152,22 +197,31 @@ def run_trial(
     recs: List[Dict[str, Any]] = []
 
     def score(fault: str, severity: float, split: str, applied: np.ndarray | None,
-              post=None, extra: Dict[str, Any] | None = None) -> None:
+              post=None, extra: Dict[str, Any] | None = None,
+              reference: np.ndarray | None = None,
+              ref_truth: Dict[str, float] | None = None,
+              weights: np.ndarray | None = None,
+              frame_scale: np.ndarray | None = None) -> None:
         nrng = np.random.default_rng(555_000 + trial)   # same noise realisation as ideal
-        test = build_sum(obj, traj if applied is None else applied, traj, noise_sigma, nrng)
+        test = build_sum(obj, traj if applied is None else applied, traj, noise_sigma, nrng,
+                         weights=weights, frame_scale=frame_scale)
         if post is not None:
             test = post(test)
+        ref = ideal if reference is None else reference
+        ref_t = ideal_truth if ref_truth is None else ref_truth
         rec: Dict[str, Any] = {
             "layer": "L2", "trial": trial, "fault": fault, "severity": severity,
             "split": split, "ny": ny, "nx": nx, "n_frames": n_frames,
             "noise_sigma": noise_sigma, **(extra or {}),
         }
-        rec.update(dg.all_image_diagnostics(ideal, test, pixel_size_a, border_px))
+        rec.update(dg.all_image_diagnostics(ref, test, pixel_size_a, border_px))
         rec.update(truth_transfer(obj, test, pixel_size_a))
-        rec["ideal_truth_delta_b_a2"] = ideal_truth["truth_delta_b_a2"]
+        rec["ideal_truth_delta_b_a2"] = ref_t["truth_delta_b_a2"]
         # Absolute harm: envelope loss of the perturbed sum relative to the
-        # envelope loss the ideal sum already has.
-        rec["harm_delta_b_a2"] = rec["truth_delta_b_a2"] - ideal_truth["truth_delta_b_a2"]
+        # envelope loss its OWN ideal reference already has. For the dose arm
+        # that reference is the correctly dose-weighted sum, so the measurement
+        # is "wrong dose versus right dose", not "dose weighting versus none".
+        rec["harm_delta_b_a2"] = rec["truth_delta_b_a2"] - ref_t["truth_delta_b_a2"]
         recs.append(rec)
         print(f"  t{trial} {fault}={severity:g} {extra or ''} "
               f"relRMSE={rec['image_relative_rmse']:.4e} "
@@ -206,6 +260,36 @@ def run_trial(
             score("X5_applied_delta_b_a2", s, split, None,
                   post=lambda im, b=s: pt.x5_attenuation(im, b, pixel_size_a))
 
+    # --- X6, the dose-weighting fault -------------------------------------
+    # PR #64 discussion_r4119255261: the published layer-2 matrix skipped X6
+    # entirely despite the frozen FAULT_LAYERS declaring it reachable here, so
+    # the real-pipeline dose response had no ground-truth harm bridge. The
+    # reference for this arm is the CORRECTLY dose-weighted ideal sum.
+    w_true = dose_weight_map(ny, nx, n_frames, dose_per_frame, pixel_size_a, voltage_kv)
+    ideal_dw = build_sum(obj, traj, traj, noise_sigma,
+                         np.random.default_rng(555_000 + trial), weights=w_true)
+    ideal_dw_truth = truth_transfer(obj, ideal_dw, pixel_size_a)
+    for split, values in split_grid("X6_dose_scale").items():
+        for rho in values:
+            w_wrong = dose_weight_map(ny, nx, n_frames, dose_per_frame * rho,
+                                      pixel_size_a, voltage_kv)
+            score("X6_dose_scale", rho, split, None, weights=w_wrong,
+                  reference=ideal_dw, ref_truth=ideal_dw_truth,
+                  extra={"dose_per_frame": dose_per_frame,
+                         "reference": "dose_weighted_ideal"})
+
+    # --- C2, the frame-dependent scale control -----------------------------
+    # POST-HOC CONTROL, not part of the frozen matrix. The prespecification
+    # reserves its 1 % scale clause for a FRAME-DEPENDENT error but the matrix
+    # only ever injected uniform ones, leaving that clause with no positive
+    # example. This supplies one. It is used to show the discriminator
+    # responds; NO threshold is derived from it.
+    for eps in C2_FRAME_SCALE_GRID:
+        fs = 1.0 + eps * (np.arange(n_frames) / max(n_frames - 1, 1) - 0.5)
+        score("C2_frame_dependent_scale", eps, "control", None, frame_scale=fs,
+              extra={"post_hoc_control": True,
+                     "definition": "frame f scaled by 1 + eps*(f/(N-1) - 0.5)"})
+
     for split, values in split_grid("X7_hot_pixel_count").items():
         for s in values:
             hrng = np.random.default_rng(33_000 + trial * 41 + int(s))
@@ -224,6 +308,8 @@ def main() -> int:
                     help="per-frame noise standard deviation, in units of object std")
     ap.add_argument("--pixel-size", type=float, default=PIXEL_SIZE_A)
     ap.add_argument("--border-px", type=int, default=100)
+    ap.add_argument("--dose-per-frame", type=float, default=DOSE_PER_FRAME)
+    ap.add_argument("--voltage", type=float, default=VOLTAGE_KV)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
@@ -231,7 +317,8 @@ def main() -> int:
     for t in range(args.trials):
         print(f"[layer2] trial {t}", flush=True)
         records.extend(run_trial(t, args.size[0], args.size[1], args.frames,
-                                 args.noise_sigma, args.pixel_size, args.border_px))
+                                 args.noise_sigma, args.pixel_size, args.border_px,
+                                 args.dose_per_frame, args.voltage))
     args.out.write_text(json.dumps({"records": records,
                                     "config": vars(args) | {"out": str(args.out)}},
                                    indent=2, default=str))

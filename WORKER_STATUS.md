@@ -7,7 +7,7 @@
 | task class | validation |
 | phase | 5/5 — Review findings addressed, validated on cpu64, committed & pushed |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| head | `078cf6e36a44ec1b777e4820e10d3dc82dc08296` |
+| head | `8fc088c53b4fc4706039d5eb078e1aa164c7a3ac` |
 | branch | `round96/72-gemini-3-8-flash` |
 | worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-1d15fa94` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/102 |
@@ -74,3 +74,28 @@ All tests executed and verified on both local macOS (arm64) and remote Linux (`c
 - CPU topology & binding: socket 1 / node 1, `taskset`/`numactl --physcpubind=32-47 --membind=1`. Parallelism <= 8 (well within <= 16 limit).
 - Background interference recorded: two long-running ctffind processes preserved untouched.
 - **NEEDS_GPU: no.** GPU execution strictly avoided; preserved for issue #26 coordinated slot. CUDA compilation tested in CI via Docker container `nvidia/cuda:12.8.0-devel-ubuntu24.04` with package dependencies including `python3-numpy`.
+
+## Final Independent Code / Spec / License Audit
+
+Conducted by two independent, bounded read-only reviewers on exact pushed HEAD commit `8fc088c`:
+
+### 1. Reviewer 1: Code & Specification Conformance
+- **Verdict**: `READY_TO_MERGE` (0 defects found)
+- **Negative Controls & Entrypoints**: All 7 negative controls in `tools/test_ci_fail_closed.py` execute maintained entrypoints in isolated temporary sandboxes (`ci_preflight.py`, `run_known_motion_gates.py`, real `CMakeLists.txt`, `validate_test_collection.py`, `verify_fixtures.py`, `generate_known_motion_fixture.py`). Runner binary check exercises `--binary`, `--outdir`, and `--fixtures` to test binary presence logic directly.
+- **Canonical Inventory & Drift Protection**: Strict schema validation requires non-empty `cases` dictionary in `tools/verify_fixtures.py`. Ground truth JSON verification is mandatory for every declared case. Git HEAD lookup fails closed with exit code 2 on git failure (no silent disk fallback). `generate_known_motion_fixture.py` enforces `--canonical` mode to refuse divergence against canonical truth and `--refuse-conflicting` to prevent parameter collision. Routine generation cannot overwrite `MANIFEST.json`.
+- **Noisy Characterization Segregation**: `km_local_noisy` is visibly executed and reported as `FAIL` in `tools/run_known_motion_gates.py`, and is cleanly segregated from gate-role aggregate acceptance. It is neither hidden nor claimed as a scientific pass.
+- **Scope Conformance**: Whitelist strictly preserved across 10 files. Zero solver changes (`src/**`), zero GPU/CUDA changes, and zero numerical threshold relaxations.
+
+### 2. Reviewer 2: License & Repository Hygiene
+- **Verdict**: `COMPLIANT`
+- **License Terms**: Full compliance with upstream GNU GPL v2.0 (`GPL-2.0` / `GPL-2.0-or-later`). Zero proprietary clauses, ungranted "All rights reserved", or non-commercial restrictions across all 10 new and modified files.
+- **Git Hygiene**: Worktree isolated (`.git/worktrees/t3code-1d15fa94`); build directory and temporary fixtures properly ignored; zero leftover scratch binaries; clean, atomic commit history.
+- **Actionable Item Addressed**: Synchronized line 10 in `WORKER_STATUS.md` to reference the audited commit `8fc088c53b4fc4706039d5eb078e1aa164c7a3ac`.
+
+### 3. Raw Evidence & CI Artifact Links
+- **GitHub Actions Run 36361792988**: [Run 36361792988](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/36361792988)
+  - `Build & Smoke Check (Ubuntu Linux)`: [Job 108740262196](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/36361792988/job/108740262196) (SUCCESS in 2m 3s)
+  - `CUDA compile only (no GPU execution)`: [Job 108740262391](https://github.com/KingAlejandro/MotionCorr-standalone/actions/runs/36361792988/job/108740262391) (SUCCESS in 2m 37s)
+- **PR #102**: [KingAlejandro/MotionCorr-standalone#102](https://github.com/KingAlejandro/MotionCorr-standalone/pull/102)
+- **PR Review Response**: [Comment 5861212540](https://github.com/KingAlejandro/MotionCorr-standalone/pull/102#issuecomment-5861212540)
+- **Remote `cpu64` Validation**: Execution under `/tmp/motioncorr-issue96-cpu-validation.lock` on cores 32-47 (node 1) passing 14/14 CTests, preflight, verification, and all 7 fail-closed negative controls.

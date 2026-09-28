@@ -1,6 +1,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_profile_policy.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 
@@ -235,27 +236,34 @@ bool cudaDoseWeightAndInterpolateDevice(
     const size_t sz_fframe = (size_t)nfy * nfx * sizeof(float2);
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
+    // See cuda_profile_policy.h. The total pair is always created; the three
+    // per-frame pairs below are profiling-only and cost one host-side wait per
+    // frame stage each.
+    const bool detailed_profile = cudaDetailedProfileEnabled();
+
     cudaEvent_t ev_start_total, ev_stop_total;
-    cudaEvent_t ev_start_dw, ev_stop_dw;
-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
-    cudaEvent_t ev_start_interp, ev_stop_interp;
+    cudaEvent_t ev_start_dw = nullptr, ev_stop_dw = nullptr;
+    cudaEvent_t ev_start_cufft = nullptr, ev_stop_cufft = nullptr;
+    cudaEvent_t ev_start_interp = nullptr, ev_stop_interp = nullptr;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
     event_cleanup.add(ev_stop_total);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
-    event_cleanup.add(ev_start_dw);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
-    event_cleanup.add(ev_stop_dw);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
-    event_cleanup.add(ev_start_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
-    event_cleanup.add(ev_stop_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
-    event_cleanup.add(ev_start_interp);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
-    event_cleanup.add(ev_stop_interp);
+    if (detailed_profile) {
+        HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
+        event_cleanup.add(ev_start_dw);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
+        event_cleanup.add(ev_stop_dw);
+        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+        event_cleanup.add(ev_start_cufft);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+        event_cleanup.add(ev_stop_cufft);
+        HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
+        event_cleanup.add(ev_start_interp);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
+        event_cleanup.add(ev_stop_interp);
+    }
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -310,28 +318,32 @@ bool cudaDoseWeightAndInterpolateDevice(
         HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
 
         // Dose weighting
-        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_dw));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
             d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
-        float dw_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
-        total_dw_ms += dw_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
+            float dw_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
+            total_dw_ms += dw_ms;
+        }
 
         // Inverse FFT
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
-        float cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
-        total_cufft_ms += cufft_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+            float cufft_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
+            total_cufft_ms += cufft_ms;
+        }
 
         // Interpolate and accumulate
-        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
+        if (detailed_profile) HANDLE_ERROR(cudaEventRecord(ev_start_interp));
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
@@ -347,11 +359,13 @@ bool cudaDoseWeightAndInterpolateDevice(
             accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, nullptr, d_Iframe, total_pixels);
         }
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
-        float interp_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
-        total_interp_ms += interp_ms;
+        if (detailed_profile) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
+            float interp_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
+            total_interp_ms += interp_ms;
+        }
     }
 
     // Single D2H download of reconstructed image
@@ -365,11 +379,18 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << " [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
-    logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
-    logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
-    logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
+    if (detailed_profile) {
+        logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
+        logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
+        logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+    } else {
+        logfile << "  Dose Weighting Kernel: n/a (detailed profiling disabled)" << std::endl;
+        logfile << "  cuFFT C2R Execution:   n/a (detailed profiling disabled)" << std::endl;
+        logfile << "  Interpolation & Accum: n/a (detailed profiling disabled)" << std::endl;
+    }
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
+    logfile << "  Detailed event profiling: " << (detailed_profile ? "on" : "off") << std::endl;
 
     return true;
 }
@@ -511,7 +532,7 @@ bool cudaRealSpaceInterpolationDevice(
     logfile << " [CUDA Unweighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB (this call's buffers, not the process peak)" << std::endl;
     logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
 
     return true;

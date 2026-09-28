@@ -1,0 +1,25 @@
+PASS     baseline at 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26; every compiled path identical to e0bc6c3257dd9a046a7c85bb40b16b73e4d57302 (tip 329e4360564474bea6d48e583b6bf450a7480353)
+PASS     build mc-issue74-base
+PASS     build mc-issue74
+PASS     ctest CudaProfilePolicyDefault (candidate)
+PASS     ctest CudaWrapperUploadFailure (candidate)
+PASS     ctest CudaWrapperUploadFailure (baseline)
+PASS     CUDA execution witness base (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-on (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-off (startup=1 completion=24/24)
+PASS     exact24 cand-on vs merged-reference
+PASS     exact24 cand-off vs merged-reference
+PASS     exact24 base vs merged-reference
+PASS     exact24 cand-off vs cand-on (same node, same binary)
+PASS     exact24 cand-on vs base (same node)
+PASS     aux outputs cand-off vs cand-on
+PASS     aux outputs cand-on vs base (labels allowed to change)
+PASS     the switch actually switched (uniform on/off at all 27 sites, all 24 logs)
+INFO     known-motion aggregate (accuracy) cand-on: exit=0
+PASS     CUDA execution witness, known-motion gates, cand-on
+INFO     known-motion aggregate (accuracy) cand-off: exit=0
+PASS     CUDA execution witness, known-motion gates, cand-off
+INFO     known-motion aggregate (accuracy) base: exit=0
+PASS     CUDA execution witness, known-motion gates, base
+PASS     CPU masquerade rejection (no CUDA marker on a CPU run)
+PASS     all timing runs produced identical per-movie STAR trajectories

@@ -1,0 +1,564 @@
+=============== 0. provenance ===============
+2026-09-27T14:56:45+01:00
+gn3000.scarf.rl.ac.uk
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=gn3000
+   NumNodes=1 NumCPUs=64 NumTasks=1 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=32000M,node=1,billing=1000,gres/gpu=1
+   AllocTRES=cpu=64,mem=250G,node=1,billing=4000,gres/gpu=4,gres/gpu:a100=4
+     JOBID PARTITION       NAME ST   TIME NODELIST(REASON)
+   3510294       gpu   mcfaults PD   0:00 (QOSMaxJobsPerUserLimit)
+   3510295       gpu     mc-i74  R   0:00 gn3000
+   3510296 gpu-devel    i73pair  R   1:25 gn0001
+Cpus_allowed_list:	0-63
+ 14:56:45 up 16 days, 14:56,  0 users,  load average: 0.00, 0.97, 1.99
+Sun Sep 27 14:56:45 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   27C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA A100-SXM4-40GB          On  |   00000000:41:00.0 Off |                    0 |
+| N/A   26C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA A100-SXM4-40GB          On  |   00000000:81:00.0 Off |                    0 |
+| N/A   25C    P0             49W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA A100-SXM4-40GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   27C    P0             53W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Wed_Jan_15_19:20:09_PST_2025
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+cmake version 3.31.8
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14)
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda8       307G  5.1G  302G   2% /tmp
+=============== 1. source trees ===============
+HEAD is now at 1d7e13f Merge pull request #81 from KingAlejandro/docs/stabilization-evidence
+?? build-cuda/
+?? build-cuda/
+candidate tip  = 329e4360564474bea6d48e583b6bf450a7480353
+baseline  HEAD = 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26 (want 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26)
+compiled-path drift vs e0bc6c3257dd9a046a7c85bb40b16b73e4d57302: <none>
+PASS     baseline at 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26; every compiled path identical to e0bc6c3257dd9a046a7c85bb40b16b73e4d57302 (tip 329e4360564474bea6d48e583b6bf450a7480353)
+ CMakeLists.txt                     |   5 ++
+ docs/issue74/audit.md              | 139 +++++++++++++++++++++++++++++++++++
+ src/acc/cuda/cuda_alignpatch.cu    | 143 +++++++++++++++++++++++--------------
+ src/acc/cuda/cuda_profile_policy.h |  62 ++++++++++++++++
+ src/acc/cuda/cuda_realspace_dw.cu  |  97 +++++++++++++++----------
+ tests/test_cuda_profile_policy.cpp |  59 +++++++++++++++
+ 6 files changed, 413 insertions(+), 92 deletions(-)
+=============== 2. builds (identical options) ===============
+PASS     build mc-issue74-base
+PASS     build mc-issue74
+774f75631480b8e469d3fd51065799256c225b4037d0b16c20d06eec5349291a  /home/vol05/scarf1415/mc-issue74-base/build-cuda/motioncorr
+d89da4baac2209d4cd614318c5ffb42b6811f2168c7836749550eeef332afba5  /home/vol05/scarf1415/mc-issue74/build-cuda/motioncorr
+=============== 3. unit / wrapper controls ===============
+Internal ctest changing into directory: /home/vol05/scarf1415/mc-issue74/build-cuda
+Test project /home/vol05/scarf1415/mc-issue74/build-cuda
+    Start 1: CudaProfilePolicyDefault
+1/1 Test #1: CudaProfilePolicyDefault .........   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.02 sec
+PASS     ctest CudaProfilePolicyDefault (candidate)
+Internal ctest changing into directory: /home/vol05/scarf1415/mc-issue74/build-cuda
+Test project /home/vol05/scarf1415/mc-issue74/build-cuda
+    Start 12: CudaWrapperUploadFailure
+1/1 Test #12: CudaWrapperUploadFailure .........   Passed    1.62 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+cuda        =   1.62 sec*proc (1 test)
+hardware    =   1.62 sec*proc (1 test)
+
+Total Test time (real) =   1.64 sec
+PASS     ctest CudaWrapperUploadFailure (candidate)
+Internal ctest changing into directory: /home/vol05/scarf1415/mc-issue74-base/build-cuda
+Test project /home/vol05/scarf1415/mc-issue74-base/build-cuda
+    Start 11: CudaWrapperUploadFailure
+1/1 Test #11: CudaWrapperUploadFailure .........   Passed    1.52 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+cuda        =   1.52 sec*proc (1 test)
+hardware    =   1.52 sec*proc (1 test)
+
+Total Test time (real) =   1.53 sec
+PASS     ctest CudaWrapperUploadFailure (baseline)
+  Test  #9: RunnerExportedUnits
+  Test #10: RunnerModelParser
+  Test #11: CudaWrapperUploadFailure
+
+Total Tests: 11
+=============== 4. stage inputs node-local ===============
+3.1G	/tmp/i74-3510295/in
+4c4b52b0b234e7d7aa3af32774baf9d7cf3b170b1d604d0ecb7941474a55f8fd  /home/vol05/scarf1415/mc-issue74-run/ev-3510295/inputs.sha256
+28 /home/vol05/scarf1415/mc-issue74-run/ev-3510295/inputs.sha256
+=============== 5. correctness runs (all 24 tutorial movies) ===============
+--- run_all24 base bin=/home/vol05/scarf1415/mc-issue74-base/build-cuda/motioncorr RELION_CUDA_DETAILED_PROFILE=<unset>
+RELION_CUDA_DETAILED_PROFILE unset
+exit=0
+base startup markers: 1
+base completion markers: 24
+--- run_all24 cand-on bin=/home/vol05/scarf1415/mc-issue74/build-cuda/motioncorr RELION_CUDA_DETAILED_PROFILE=<unset>
+RELION_CUDA_DETAILED_PROFILE unset
+exit=0
+cand-on startup markers: 1
+cand-on completion markers: 24
+--- run_all24 cand-off bin=/home/vol05/scarf1415/mc-issue74/build-cuda/motioncorr RELION_CUDA_DETAILED_PROFILE=0
+RELION_CUDA_DETAILED_PROFILE=0
+exit=0
+cand-off startup markers: 1
+cand-off completion markers: 24
+PASS     CUDA execution witness base (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-on (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-off (startup=1 completion=24/24)
+=============== 6. exactness gates ===============
+  "failed": 0,
+  "gate_c": "PASS"
+}
+PASS     exact24 cand-on vs merged-reference
+  "failed": 0,
+  "gate_c": "PASS"
+}
+PASS     exact24 cand-off vs merged-reference
+  "failed": 0,
+  "gate_c": "PASS"
+}
+PASS     exact24 base vs merged-reference
+  "failed": 0,
+  "gate_c": "PASS"
+}
+PASS     exact24 cand-off vs cand-on (same node, same binary)
+  "failed": 0,
+  "gate_c": "PASS"
+}
+PASS     exact24 cand-on vs base (same node)
+ref  = /tmp/i74-3510295/out/cand-on
+test = /tmp/i74-3510295/out/cand-off
+allow_label_changes = False
+
+PASS               Movies/20170629_00021_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00021_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00021_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00021_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00022_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00022_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00022_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00022_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00023_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00023_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00023_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00023_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00024_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00024_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00024_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00024_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00025_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00025_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00025_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00025_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00026_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00026_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00026_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00026_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00027_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00027_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00027_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00027_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00028_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00028_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00028_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00028_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00029_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00029_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00029_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00029_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00030_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00030_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00030_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00030_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00031_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00031_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00031_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00031_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00035_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00035_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00035_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00035_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00036_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00036_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00036_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00036_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00037_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00037_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00037_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00037_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00039_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00039_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00039_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00039_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00040_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00040_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00040_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00040_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00042_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00042_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00042_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00042_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00043_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00043_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00043_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00043_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00044_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00044_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00044_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00044_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00045_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00045_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00045_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00045_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00046_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00046_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00046_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00046_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00047_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00047_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00047_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00047_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00048_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00048_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00048_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00048_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00049_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00049_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00049_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00049_frameImage_shifts.eps         eps (date-normalised)
+EXCLUDED           all_batches.pdf                                     ghostscript embeds a creation timestamp
+EXCLUDED           batch.pdf                                           ghostscript embeds a creation timestamp
+EXCLUDED           batch.pdf.lst                                       ghostscript embeds a creation timestamp
+PASS               corrected_micrographs.star                          star (path-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionEarly.eps   eps (date-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionLate.eps    eps (date-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionTotal.eps   eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionEarly.eps  eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionLate.eps   eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionTotal.eps  eps (date-normalised)
+EXCLUDED           header.pdf                                          ghostscript embeds a creation timestamp
+EXCLUDED           header.pdf.lst                                      ghostscript embeds a creation timestamp
+EXCLUDED           logfile.pdf                                         ghostscript embeds a creation timestamp
+
+compared=55 failed=0 skipped=54
+AUX OUTPUT COMPARISON: PASS
+PASS     aux outputs cand-off vs cand-on
+ref  = /tmp/i74-3510295/out/base
+test = /tmp/i74-3510295/out/cand-on
+allow_label_changes = True
+
+PASS               Movies/20170629_00021_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00021_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00021_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00021_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00022_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00022_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00022_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00022_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00023_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00023_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00023_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00023_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00024_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00024_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00024_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00024_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00025_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00025_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00025_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00025_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00026_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00026_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00026_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00026_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00027_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00027_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00027_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00027_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00028_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00028_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00028_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00028_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00029_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00029_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00029_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00029_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00030_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00030_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00030_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00030_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00031_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00031_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00031_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00031_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00035_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00035_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00035_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00035_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00036_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00036_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00036_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00036_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00037_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00037_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00037_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00037_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00039_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00039_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00039_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00039_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00040_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00040_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00040_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00040_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00042_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00042_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00042_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00042_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00043_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00043_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00043_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00043_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00044_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00044_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00044_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00044_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00045_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00045_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00045_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00045_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00046_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00046_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00046_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00046_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00047_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00047_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00047_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00047_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00048_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00048_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00048_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00048_frameImage_shifts.eps         eps (date-normalised)
+PASS               Movies/20170629_00049_frameImage.log                log (timing/profile lines dropped)
+COVERED_BY_GATE_C  Movies/20170629_00049_frameImage.mrc                pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+COVERED_BY_GATE_C  Movies/20170629_00049_frameImage.star               pixels/headers/trajectory compared by compare_motioncorr.py --gate exact
+PASS               Movies/20170629_00049_frameImage_shifts.eps         eps (date-normalised)
+EXCLUDED           all_batches.pdf                                     ghostscript embeds a creation timestamp
+EXCLUDED           batch.pdf                                           ghostscript embeds a creation timestamp
+EXCLUDED           batch.pdf.lst                                       ghostscript embeds a creation timestamp
+PASS               corrected_micrographs.star                          star (path-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionEarly.eps   eps (date-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionLate.eps    eps (date-normalised)
+PASS               corrected_micrographs_all_rlnAccumMotionTotal.eps   eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionEarly.eps  eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionLate.eps   eps (date-normalised)
+PASS               corrected_micrographs_hist_rlnAccumMotionTotal.eps  eps (date-normalised)
+EXCLUDED           header.pdf                                          ghostscript embeds a creation timestamp
+EXCLUDED           header.pdf.lst                                      ghostscript embeds a creation timestamp
+EXCLUDED           logfile.pdf                                         ghostscript embeds a creation timestamp
+
+compared=55 failed=0 skipped=54
+AUX OUTPUT COMPARISON: PASS
+PASS     aux outputs cand-on vs base (labels allowed to change)
+cand-on  values: [on], lines in one movie log: 27
+cand-off values: [off], lines in one movie log: 27
+PASS     the switch actually switched (uniform on/off at all 27 sites, all 24 logs)
+=============== 7. known-motion gates + CPU masquerade control ===============
+known-motion aggregate exit for cand-on: 0 (accuracy + gates; NOT the backend verdict)
+INFO     known-motion aggregate (accuracy) cand-on: exit=0
+source  = /home/vol05/scarf1415/mc-issue74-run/ev-3510295/kmg-cand-on.json
+expect  = cuda
+
+ok   km_global_hisnr          j1     requested=cuda startup=True completion=True
+ok   km_global_hisnr          j1_dw  requested=cuda startup=True completion=True
+ok   km_global_hisnr          j4     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_hisnr           j4     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_noisy           j4     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j4     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_realscale       j4     requested=cuda startup=True completion=True
+
+runs_checked=15 bad=0 errored_cases=0
+CUDA EXECUTION WITNESS: PASS
+This verdict is about the backend only. It says nothing about estimator accuracy gates, which are reported separately and whose historical failures remain failures.
+PASS     CUDA execution witness, known-motion gates, cand-on
+known-motion aggregate exit for cand-off: 0 (accuracy + gates; NOT the backend verdict)
+INFO     known-motion aggregate (accuracy) cand-off: exit=0
+source  = /home/vol05/scarf1415/mc-issue74-run/ev-3510295/kmg-cand-off.json
+expect  = cuda
+
+ok   km_global_hisnr          j1     requested=cuda startup=True completion=True
+ok   km_global_hisnr          j1_dw  requested=cuda startup=True completion=True
+ok   km_global_hisnr          j4     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_hisnr           j4     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_noisy           j4     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j4     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_realscale       j4     requested=cuda startup=True completion=True
+
+runs_checked=15 bad=0 errored_cases=0
+CUDA EXECUTION WITNESS: PASS
+This verdict is about the backend only. It says nothing about estimator accuracy gates, which are reported separately and whose historical failures remain failures.
+PASS     CUDA execution witness, known-motion gates, cand-off
+known-motion aggregate exit for base: 0 (accuracy + gates; NOT the backend verdict)
+INFO     known-motion aggregate (accuracy) base: exit=0
+source  = /home/vol05/scarf1415/mc-issue74-run/ev-3510295/kmg-base.json
+expect  = cuda
+
+ok   km_global_hisnr          j1     requested=cuda startup=True completion=True
+ok   km_global_hisnr          j1_dw  requested=cuda startup=True completion=True
+ok   km_global_hisnr          j4     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1     requested=cuda startup=True completion=True
+ok   km_local_hisnr           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_hisnr           j4     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1     requested=cuda startup=True completion=True
+ok   km_local_noisy           j1_dw  requested=cuda startup=True completion=True
+ok   km_local_noisy           j4     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1     requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_nonsquare       j4     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1     requested=cuda startup=True completion=True
+ok   km_local_realscale       j1_dw  requested=cuda startup=True completion=True
+ok   km_local_realscale       j4     requested=cuda startup=True completion=True
+
+runs_checked=15 bad=0 errored_cases=0
+CUDA EXECUTION WITNESS: PASS
+This verdict is about the backend only. It says nothing about estimator accuracy gates, which are reported separately and whose historical failures remain failures.
+PASS     CUDA execution witness, known-motion gates, base
+known-motion aggregate exit for cpu-control: 0 (accuracy; NOT the backend verdict)
+source  = /home/vol05/scarf1415/mc-issue74-run/ev-3510295/kmg-cpu-control.json
+expect  = cpu
+
+ok   km_global_hisnr          j1     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_global_hisnr          j1_dw  requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_global_hisnr          j4     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_hisnr           j1     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_hisnr           j1_dw  requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_hisnr           j4     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_noisy           j1     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_noisy           j1_dw  requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_noisy           j4     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_nonsquare       j1     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_nonsquare       j1_dw  requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_nonsquare       j4     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_realscale       j1     requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_realscale       j1_dw  requested=cpu unexpected_cuda_marker=False movie_completed=True
+ok   km_local_realscale       j4     requested=cpu unexpected_cuda_marker=False movie_completed=True
+
+runs_checked=15 bad=0 errored_cases=0
+CPU MASQUERADE REJECTION: PASS
+This verdict is about the backend only. It says nothing about estimator accuracy gates, which are reported separately and whose historical failures remain failures.
+PASS     CPU masquerade rejection (no CUDA marker on a CPU run)
+=============== 8. paired interleaved timing (ABBA x3) ===============
+run 1 cand-on wall=0:25.61 rss=1669404 star_digest=cde2b6407a6fc7de
+run 2 cand-off wall=0:26.99 rss=1667772 star_digest=cde2b6407a6fc7de
+run 3 cand-off wall=0:27.40 rss=1667584 star_digest=cde2b6407a6fc7de
+run 4 cand-on wall=0:27.27 rss=1670676 star_digest=cde2b6407a6fc7de
+run 5 cand-on wall=0:26.02 rss=1668960 star_digest=cde2b6407a6fc7de
+run 6 cand-off wall=0:25.67 rss=1668640 star_digest=cde2b6407a6fc7de
+run 7 cand-off wall=0:26.98 rss=1668200 star_digest=cde2b6407a6fc7de
+run 8 cand-on wall=0:26.03 rss=1672836 star_digest=cde2b6407a6fc7de
+run 9 cand-on wall=0:25.60 rss=1671616 star_digest=cde2b6407a6fc7de
+run 10 cand-off wall=0:25.84 rss=1667036 star_digest=cde2b6407a6fc7de
+run 11 cand-off wall=0:26.10 rss=1669996 star_digest=cde2b6407a6fc7de
+run 12 cand-on wall=0:26.47 rss=1670428 star_digest=cde2b6407a6fc7de
+run 13 base wall=0:25.85 rss=1673080 star_digest=cde2b6407a6fc7de
+run 14 base wall=0:26.91 rss=1669812 star_digest=cde2b6407a6fc7de
+order  tag       wall_s   max_rss_kb  star_digest
+1      cand-on   0:25.61  1669404     cde2b6407a6fc7de
+2      cand-off  0:26.99  1667772     cde2b6407a6fc7de
+3      cand-off  0:27.40  1667584     cde2b6407a6fc7de
+4      cand-on   0:27.27  1670676     cde2b6407a6fc7de
+5      cand-on   0:26.02  1668960     cde2b6407a6fc7de
+6      cand-off  0:25.67  1668640     cde2b6407a6fc7de
+7      cand-off  0:26.98  1668200     cde2b6407a6fc7de
+8      cand-on   0:26.03  1672836     cde2b6407a6fc7de
+9      cand-on   0:25.60  1671616     cde2b6407a6fc7de
+10     cand-off  0:25.84  1667036     cde2b6407a6fc7de
+11     cand-off  0:26.10  1669996     cde2b6407a6fc7de
+12     cand-on   0:26.47  1670428     cde2b6407a6fc7de
+13     base      0:25.85  1673080     cde2b6407a6fc7de
+14     base      0:26.91  1669812     cde2b6407a6fc7de
+PASS     all timing runs produced identical per-movie STAR trajectories
+=============== 9. GPU memory sampling, one pair ===============
+on peak GPU MiB: 3497
+on max RSS kB:   1669064
+off peak GPU MiB: 3335
+off max RSS kB:   1669980
+=============== 10. collect ===============
+634M	/home/vol05/scarf1415/mc-issue74-run/ev-3510295
+
+================= SUMMARY =================
+PASS     baseline at 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26; every compiled path identical to e0bc6c3257dd9a046a7c85bb40b16b73e4d57302 (tip 329e4360564474bea6d48e583b6bf450a7480353)
+PASS     build mc-issue74-base
+PASS     build mc-issue74
+PASS     ctest CudaProfilePolicyDefault (candidate)
+PASS     ctest CudaWrapperUploadFailure (candidate)
+PASS     ctest CudaWrapperUploadFailure (baseline)
+PASS     CUDA execution witness base (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-on (startup=1 completion=24/24)
+PASS     CUDA execution witness cand-off (startup=1 completion=24/24)
+PASS     exact24 cand-on vs merged-reference
+PASS     exact24 cand-off vs merged-reference
+PASS     exact24 base vs merged-reference
+PASS     exact24 cand-off vs cand-on (same node, same binary)
+PASS     exact24 cand-on vs base (same node)
+PASS     aux outputs cand-off vs cand-on
+PASS     aux outputs cand-on vs base (labels allowed to change)
+PASS     the switch actually switched (uniform on/off at all 27 sites, all 24 logs)
+INFO     known-motion aggregate (accuracy) cand-on: exit=0
+PASS     CUDA execution witness, known-motion gates, cand-on
+INFO     known-motion aggregate (accuracy) cand-off: exit=0
+PASS     CUDA execution witness, known-motion gates, cand-off
+INFO     known-motion aggregate (accuracy) base: exit=0
+PASS     CUDA execution witness, known-motion gates, base
+PASS     CPU masquerade rejection (no CUDA marker on a CPU run)
+PASS     all timing runs produced identical per-movie STAR trajectories
+FAILures: 0
+2026-09-27T15:13:53+01:00

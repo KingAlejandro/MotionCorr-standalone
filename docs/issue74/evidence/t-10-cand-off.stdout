@@ -1,0 +1,48 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * Movies/20170629_00021_frameImage.tiff
+  * Movies/20170629_00022_frameImage.tiff
+  * Movies/20170629_00023_frameImage.tiff
+  * Movies/20170629_00024_frameImage.tiff
+  * Movies/20170629_00025_frameImage.tiff
+  * Movies/20170629_00026_frameImage.tiff
+  * Movies/20170629_00027_frameImage.tiff
+  * Movies/20170629_00028_frameImage.tiff
+  * Movies/20170629_00029_frameImage.tiff
+  * Movies/20170629_00030_frameImage.tiff
+  * Movies/20170629_00031_frameImage.tiff
+  * Movies/20170629_00035_frameImage.tiff
+  * Movies/20170629_00036_frameImage.tiff
+  * Movies/20170629_00037_frameImage.tiff
+  * Movies/20170629_00039_frameImage.tiff
+  * Movies/20170629_00040_frameImage.tiff
+  * Movies/20170629_00042_frameImage.tiff
+  * Movies/20170629_00043_frameImage.tiff
+  * Movies/20170629_00044_frameImage.tiff
+  * Movies/20170629_00045_frameImage.tiff
+  * Movies/20170629_00046_frameImage.tiff
+  * Movies/20170629_00047_frameImage.tiff
+  * Movies/20170629_00048_frameImage.tiff
+  * Movies/20170629_00049_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]   1/  24 sec ..~~(,_,">                                                      [oo]   2/  24 sec ....~~(,_,">                                                    [oo]   3/  24 sec .......~~(,_,">                                                 [oo]   4/  24 sec ..........~~(,_,">                                               [oo]   5/  24 sec ............~~(,_,">                                            [oo]   6/  24 sec ...............~~(,_,">                                          [oo]   7/  24 sec .................~~(,_,">                                       [oo]   8/  24 sec ...................~~(,_,">                                     [oo]   9/  24 sec ......................~~(,_,">                                  [oo]  10/  24 sec .........................~~(,_,">                                [oo]  11/  24 sec ...........................~~(,_,">                             [oo]  12/  24 sec ..............................~~(,_,">                           [oo]  12/  22 sec ................................~~(,_,">                        [oo]  13/  22 sec ...................................~~(,_,">                      [oo]  14/  22 sec .....................................~~(,_,">                   [oo]  15/  22 sec .......................................~~(,_,">                 [oo]  16/  22 sec ..........................................~~(,_,">              [oo]  17/  22 sec .............................................~~(,_,">            [oo]  18/  22 sec ...............................................~~(,_,">         [oo]  19/  22 sec ..................................................~~(,_,">       [oo]  20/  22 sec ....................................................~~(,_,">    [oo]  21/  22 sec .......................................................~~(,_,">  [oo]  22/  22 sec .........................................................~~(,_,">oo]  23/  23 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /tmp/i74-3510295/t/10-cand-off/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /tmp/i74-3510295/t/10-cand-off/logfile.pdf
+read gain                          : 0.604 sec (25184 microsec/operation)
+read movie                         : 7.554 sec (314771 microsec/operation)
+apply gain and initial sum         : 3.284 sec (136845 microsec/operation)
+detect hot pixels                  : 0.657 sec (27387 microsec/operation)
+fix defects                        : 1.09 sec (45434 microsec/operation)
+global FFT                         : 0.563 sec (23475 microsec/operation)
+power spectrum                     : 0 sec (0 microsec/operation)
+global alignment                   : 0.27 sec (11284 microsec/operation)
+global iFFT                        : 0.568 sec (23707 microsec/operation)
+prepare patch                      : 0.193 sec (322 microsec/operation)
+patch alignment                    : 1.422 sec (2370 microsec/operation)
+fit polynomial                     : 0.033 sec (1377 microsec/operation)
+dose weighting                     : 1.276 sec (53183 microsec/operation)
+binning                            : 0 sec (0 microsec/operation)

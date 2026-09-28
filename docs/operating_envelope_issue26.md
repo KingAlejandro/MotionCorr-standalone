@@ -165,8 +165,16 @@ set — MRC payload, MRC core header, and MRC labels with only RELION's clock st
 which is the decomposition `docs/gate_contract.md` publishes as `--gate exact`. STAR, EPS and
 per-movie log content were compared after substituting the run's own absolute output path,
 which MotionCorr embeds in the EPS plot title, `corrected_micrographs.star` and the `.pdf.lst`
-lists. PDFs were checked for presence and size only, since ghostscript stamps a creation
-date. No run exited non-zero. No arm lost a movie.
+lists. PDFs gate the verdict on **presence only**. No run exited non-zero. No arm lost a movie.
+
+**Ghostscript PDF output is nondeterministic in length here, which corroborates the
+project's separately tracked PDF differences.** Presence is enforced, size is not, and the
+reason is measured rather than assumed: the *same* arm re-run produced `logfile.pdf` of
+104632 and 104634 bytes with every other product bit-identical, and across `--j` on the CPU
+backend the sizes scatter without order — 104640, 104640, 104640, 104777, 104639, 104640 for
+j = 1, 2, 4, 8, 16, 32. The 137-byte outlier at j=8 is scatter, not a `j` dependence, and
+gating on size would have failed two arms for a property of the PDF writer. A lost PDF is
+still a lost product and still fails the arm.
 
 **Cross-pass determinism.** The instrument correction in section 10 forced a complete
 re-measurement, which yields a control that was not planned: the same 13 arms, same binary

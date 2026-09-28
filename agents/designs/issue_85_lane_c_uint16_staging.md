@@ -48,8 +48,10 @@ Three things were deliberate rather than incidental:
   exactly this case.
 - **The accumulator is memset, not seeded.** The sum is now accumulated one frame per launch through
   `d_Isum`, which is exact because the reference accumulator is a float too. It is zeroed with
-  `cudaMemset` rather than started from frame 0's value: `0.0f + (-0.0f)` is `+0.0f` while a direct
-  store keeps `-0.0f`, and a zero sample against a negative gain entry produces exactly that.
+  `cudaMemset` rather than started from frame 0's value: the reference starts at `+0.0f` and
+  `+0.0f + (-0.0f)` is `+0.0f`, whereas a seeded store would keep `-0.0f`. A zero sample against a
+  negative gain entry produces exactly that product. A mutant that seeds instead is caught by the
+  hostile-gain case of `CudaU16StagingEquivalence`.
 
 `--first_frame_sum` / `--last_frame_sum` are handled by indexing the staging vector with the dense
 frame index, as every other movie buffer does.
@@ -92,11 +94,14 @@ CTest entry is inserted before `CudaWrapperUploadFailure`; PR107 appends after i
 
 ## Results
 
-See `docs/issue85_laneC/RESULTS.md`. Summary: products byte-identical, host RSS -0.637 GiB (-41.9%),
-H2D -683.47 MB/movie (-47.6%), 24-movie wall -20.7%, peak device memory unchanged.
+See `docs/issue85_laneC/RESULTS.md`. Summary: all 24 corrected MRCs and 25 STARs byte-identical in four
+arm pairs; host RSS -0.637 GiB (-41.9%) on the gain arm; H2D -683.47 MB/movie (-47.6%); 24-movie wall
+-20.7% (n=3, shared box); peak device memory unchanged.
 
 ## What this does not establish
 
 Measured on one geometry, one codec, one GPU, one worker. No multi-GPU throughput result. The
 conversion kernel costs +1.0 ms/movie, which is only negligible at this ratio of frames to pixels.
 MRC mode 6 would take the same path with a one-line predicate change but has not been tested.
+The RSS saving is a gain-arm figure: without a gain, non-converging patches materialise the float
+movie anyway and the saving falls to 0.9%.

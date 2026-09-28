@@ -436,12 +436,25 @@ exec "{sys.executable}" "$@"
 
         # 8B: each optics mutation is applied to a copy of the maintained generator, not to a
         # stub, so reverting the production policy makes these cases fail.
+        #
+        # The three fields the review named are NOT equivalent, and the control says which is
+        # which rather than assuming:
+        #   VOLTAGE and the movie reference are written ONLY into the .star. Canonical mode
+        #     preserves the committed truth JSON, so neither the movie digest nor the truth
+        #     digest can see them. These were genuinely silent before the fix.
+        #   PIXEL_SIZE is additionally passed to write_mrc_stack(), so it lands in the MRC
+        #     header and does move movie_sha256. It was already caught. It is kept here for
+        #     coverage, but it is not evidence for this fix and is labelled accordingly.
+        canonical_movie_sha = json.loads(
+            CANONICAL_MANIFEST.read_text())["cases"]["km_global_hisnr"]["movie_sha256"]
+
         mutations = {
-            "pixel_size": ("PIXEL_SIZE = 0.885", "PIXEL_SIZE = 1.000"),
-            "voltage": ("VOLTAGE = 300.0", "VOLTAGE = 200.0"),
-            "movie_reference": ("{movie} 1", "unrelated_movie.mrcs 1"),
+            # label: (needle, replacement, star_only)
+            "voltage": ("VOLTAGE = 300.0", "VOLTAGE = 200.0", True),
+            "movie_reference": ("{movie} 1", "unrelated_movie.mrcs 1", True),
+            "pixel_size": ("PIXEL_SIZE = 0.885", "PIXEL_SIZE = 1.000", False),
         }
-        for label, (needle, replacement) in mutations.items():
+        for label, (needle, replacement, star_only) in mutations.items():
             with self.subTest(mutation=label):
                 src = GENERATOR.read_text()
                 self.assertIn(needle, src, f"mutation anchor {needle!r} no longer present")
@@ -450,17 +463,44 @@ exec "{sys.executable}" "$@"
 
                 out_dir = staged_fixture_dir(f"star_{label}")
                 res = run_generator(mutated, out_dir)
+                combined = res.stderr + res.stdout
 
                 self.assertNotEqual(res.returncode, 0,
                                     f"{label} mutation must fail canonical generation")
-                self.assertIn("STAR disagreement", res.stderr + res.stdout,
-                              f"{label} must be rejected for the STAR, not incidentally")
-                # The pixels are unaffected, so the movie digest cannot be what caught it.
-                self.assertNotIn("generated movie sha256", res.stderr + res.stdout,
-                                 f"{label} changes no pixel; the movie check must not be the detector")
                 self.assertEqual((out_dir / "km_global_hisnr.star").read_bytes(),
                                  committed_star_bytes,
                                  f"{label} must leave the committed STAR unmodified on disk")
+
+                if star_only:
+                    # The load-bearing assertion. The generator writes the movie before the
+                    # STAR check, so the movie exists and can be hashed: prove the pre-existing
+                    # movie digest is blind to this mutation, and that the STAR check is what
+                    # rejected it. Without this the case could pass for the wrong reason.
+                    produced = out_dir / "km_global_hisnr.mrcs"
+                    self.assertTrue(produced.is_file(),
+                                    f"{label}: movie must have been generated before the STAR check")
+                    produced_sha = hashlib.sha256(produced.read_bytes()).hexdigest()
+                    self.assertEqual(produced_sha, canonical_movie_sha,
+                                     f"{label} must not move a pixel, or it is not a test of "
+                                     f"metadata-only drift")
+                    self.assertIn("STAR disagreement", combined,
+                                  f"{label} must be rejected by the STAR check specifically")
+                    self.assertNotIn("generated movie sha256", combined,
+                                     f"{label} is invisible to the movie digest, so the movie "
+                                     f"check must not be the detector")
+                else:
+                    # PIXEL_SIZE reaches the MRC header via write_mrc_stack(), so it is caught
+                    # by the movie digest too. Assert only that it is rejected, and pin the
+                    # header coupling so a future refactor that removes it is visible here.
+                    produced_sha = hashlib.sha256(
+                        (out_dir / "km_global_hisnr.mrcs").read_bytes()).hexdigest()
+                    self.assertNotEqual(produced_sha, canonical_movie_sha,
+                                        "PIXEL_SIZE is expected to reach the MRC header; if it no "
+                                        "longer does, it becomes metadata-only and must move to "
+                                        "the star_only group above")
+                    self.assertTrue(
+                        "STAR disagreement" in combined or "generated movie sha256" in combined,
+                        f"{label} must be rejected by one of the canonical checks")
 
         # 8C: the generator can be bypassed entirely (CI runs the gates with --no-regenerate),
         # so the verifier must independently reject a STAR altered on disk.

@@ -36,7 +36,10 @@ def read_local_shifts(star):
         assert len(fields) == len(labels), (labels, fields)
         row = dict(zip(labels, fields))
         key = (float(row['_rlnCoordinateX']), float(row['_rlnCoordinateY']))
-        patches.setdefault(key, {})[int(row['_rlnMicrographFrameNumber'])] = (
+        frame = int(row['_rlnMicrographFrameNumber'])
+        patch_frames = patches.setdefault(key, {})
+        assert frame not in patch_frames, f'duplicate local-shift row for patch {key}, frame {frame}'
+        patch_frames[frame] = (
             float(row['_rlnMicrographShiftX']), float(row['_rlnMicrographShiftY']))
     return patches
 
@@ -258,6 +261,24 @@ def interpolate_shifts(binary, work):
     """
     for name in ('synthetic_128x128_8frames.mrcs', 'synthetic_128x128_8frames.star'):
         shutil.copy(FIXTURES / name, work / name)
+    duplicate = work / 'duplicate_local_shift.star'
+    duplicate.write_text('''data_local_shift
+
+loop_
+_rlnCoordinateX #1
+_rlnCoordinateY #2
+_rlnMicrographFrameNumber #3
+_rlnMicrographShiftX #4
+_rlnMicrographShiftY #5
+0 0 2 1.0 2.0
+0 0 2 1.0 2.0
+''')
+    try:
+        read_local_shifts(duplicate)
+    except AssertionError as error:
+        assert 'duplicate local-shift row' in str(error), error
+    else:
+        raise AssertionError('duplicate local-shift rows must not be silently overwritten')
     arms = {}
     for arm, extra in (('off', []), ('on', ['--interpolate_shifts'])):
         result = subprocess.run([str(binary), '--i', 'synthetic_128x128_8frames.star',

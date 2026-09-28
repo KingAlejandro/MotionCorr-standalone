@@ -413,8 +413,12 @@ omitted.** `buildSchedule` allocates `bad_x`, `bad_y` and `slot_count`
 That is a host allocation *this component makes*, and `computeBudget` did not
 charge it. With a dense defect mask `n_bad` approaches `W·H`, so a job admitted
 as `O(C·W·H)` would then allocate `O(F·W·H)` — for the tutorial geometry and a
-fully defective mask, 4.1 GiB of schedule against a 2-frame staged ring of
-109 MiB. The calculator built to stop exactly that class of surprise was
+fully defective mask, **3.978 GiB** of schedule (`3·n_bad·4 + n_bad·24·12`, with
+`n_bad = 3710·3838`) against a 2-frame staged ring of 108.63 MiB. An earlier
+revision of this paragraph said "4.1 GiB", which was the draws-only term in
+decimal GB wearing a GiB label -- wrong unit and wrong term, and it overstated
+the cost in the direction this section's argument already favours. Caught by
+independent audit. The calculator built to stop exactly that class of surprise was
 generating one.
 
 The deeper point, now charged explicitly: **`n_bad` is not knowable at

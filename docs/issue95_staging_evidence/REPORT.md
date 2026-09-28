@@ -92,14 +92,14 @@ Raw unedited logs for both epochs are in `raw/`; see `raw/README.md`.
 | file | sha256 |
 | --- | --- |
 | `src/frame_staging_plan.h` | `c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4` |
-| `src/frame_staging_plan.cpp` | `fe7ea1e89094dcb5dbd67e5ace9f1623c626a02875365c2fa97aa54350860578` |
-| `tests/test_frame_staging.cpp` | `6de82d07d0e588ec126781e7434edf839d300620eb3f4550d62c09fc95985a10` |
+| `src/frame_staging_plan.cpp` | `113bb869d4a8918bfa73112321ec49a59260b3a7dae54b286161c989eff7863f` |
+| `tests/test_frame_staging.cpp` | `4e0efbaeea67e758e215217632be7a8350b3c81606610e727f7fda40658a6a4b` |
 | `CMakeLists.txt` | `56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875` |
-| `build-cpu/frame_staging` (binary) | `5120dc26de047310c32545a01df3cac08053cf9ccff59df520ca6fe49652eb29` |
+| `build-cpu/frame_staging` (binary) | `6740791228187eb0dce63d40d3b668671654dfbcc35c5500aca961c5a3fe95a5` |
 
 These are the hashes of the exact files committed on this branch, at the final
 head, taken in the same locked run that produced the results below
-(`raw/09-validationlock-codexfix-oldmodel.log`). The pre-review hashes quoted in the first
+(`raw/11-validationlock-final-mutants.log`). The pre-review hashes quoted in the first
 revision of this report belonged to a source tree that no longer exists; they
 are not reproduced here.
 
@@ -118,7 +118,7 @@ the baseline/restore pair). 248 -> 283 adds the corrected-accounting controls of
 §4a. Earlier counts 235 / 256 / 248 are superseded, not comparable: assertions
 were replaced as well as added. See §4.2.
 
-Coverage of the 235 checks:
+Coverage of the current 283 checks:
 
 | group | cases |
 | --- | --- |
@@ -179,10 +179,17 @@ below but retained, since they were run against a real tree:
 | `write_in_place` ignored, raw host frames clobbered (review finding 3) | **test exit 1** — caught by the frame comparison on `raw-gain-11f` |
 | `d_max > 4` bound removed | **test exit 1** — 2 failures, both in the rejection-path group |
 
-**Final head** (`raw/09-validationlock-codexfix-oldmodel.log`). A second review
-of the exact final head found four assertions that could not fail and two real
-defects. These five mutants target that second round, each named with the
-finding it belongs to:
+**Second post-review head, SUPERSEDED** (`raw/06-validationlock-rereview-mutants.log`).
+A second review found four assertions that could not fail and two real defects.
+These five mutants target that round. Retained because the round happened, not
+because its numbers are current: the head and the check count below were both
+superseded by the corrected-accounting round that follows.
+
+An earlier revision printed this block under a "Final head" heading and cited
+`raw/09` beside it, which is the *next* round's log. That was a careless global
+find-and-replace on my part, caught by independent audit. It is the exact
+failure this document exists to prevent -- a real result filed under the wrong
+run -- so it is corrected here and recorded rather than quietly repaired.
 
 | injected bug | result |
 | --- | --- |
@@ -192,8 +199,8 @@ finding it belongs to:
 | raw host frames written despite `write_in_place = false` (finding E) | **exit 1**, 4 failures — "raw host frames are left untouched", every chunk size |
 | `largestChunkWithin` off-by-one, `best = mid - 1` | **exit 1**, 4 failures across the admission group |
 
-Baseline and restore in the same locked session both returned **248 checks, 0
-failures**, and the restored hashes match the committed tree.
+Baseline and restore in that session both returned **248 checks, 0 failures** --
+a superseded count, at a superseded head.
 
 The two that matter most are **E and F**, because those assertions previously
 *could not fail*: E compared two pristine buffers under a label claiming to
@@ -203,18 +210,40 @@ risk — that raw frames come back untouched, and that a *pre-populated* result
 is cleared — and the mutants above are the proof that the replacements are
 observable rather than merely better worded.
 
-**Corrected-accounting round** (`raw/09-validationlock-codexfix-oldmodel.log`).
-Each mutant reverts one Codex fix, so each proves the corresponding new control
-discriminates the **old** model rather than merely agreeing with the new one:
+**Final head** (`raw/11-validationlock-final-mutants.log`). Each mutant reverts
+one fix, so each proves the corresponding control discriminates the **old**
+model rather than merely agreeing with the new one:
 
 | reverted fix | result |
 | --- | --- |
-| repair schedule omitted from the host budget | **exit 1**, 6 failures — the charge formula, the chunk-independence check, the "dwarfs the staged chunk" check, and the dense-defect `Inadmissible` control |
-| `Iframes` double-counted (alias disabled) | **exit 1**, 6 failures — the alias flag, "charges Iframes once, not twice", the deliberate parts-over-sum check, and the alias-drop assertions |
+| repair schedule omitted from the host budget | **exit 1**, 6 failures — the charge formula, chunk-independence, "dwarfs the staged chunk", and both dense-defect admission controls |
+| `Iframes` double-counted (alias disabled) | **exit 1**, 6 failures — the alias flag, "charges Iframes once, not twice", the parts-over-sum check, and the alias-drop assertions |
 | whole-movie probe removed from the search | **exit 1**, 4 failures — including "the search finds the aliased whole-movie point a monotone search would miss" |
+| exact `reserve` removed from `buildSchedule` | **exit 1**, 1 failure — "the schedule's index vectors are reserved exactly, so the charge covers them" |
 
-Baseline and restore in the same locked session both **283 checks, 0 failures**;
+Baseline and restore in the same locked session both **287 checks, 0 failures**;
 `ctest` 14/14; restored hashes match the committed tree.
+
+### A mutant that survived, and the gap it exposed
+
+`raw/10-validationlock-a1gap-survivor.log` is retained because it records a
+**failure of this suite**, not a success. Two things went wrong in that run and
+both are worth keeping:
+
+- The `reserve` mutant **survived**: 285 checks, 0 failures with the fix
+  reverted. Nothing observed vector capacity, which is the only thing that
+  distinguishes an exactly-reserved vector from a `push_back`-grown one. The
+  A1 fix was real but **untested**, and only the mutant exposed that. A direct
+  capacity assertion was added and the mutant is now caught.
+- The alias mutant **failed to build**, from a shell-escaping bug in the
+  mutation script itself, so it was not evaluated at all. Had the script
+  reported only exit codes, a three-mutant result would have been indistinguishable
+  from a four-mutant one. It printed `BUILD_FAILED` explicitly, which is the
+  only reason the gap was visible. The inline escaping was replaced with a
+  standalone `mutate.py`.
+
+Neither was caught by the reviewers; both were caught by running the controls
+and reading the output rather than the exit status.
 
 Two observations that limit what this control proves, recorded rather than left
 implicit:
@@ -251,8 +280,8 @@ cmake --build build-cpu -j8            # whole project, exit 0
 ctest --output-on-failure              # exit 0
 ```
 
-14/14 passed in 6.96 s, on the same CPU-only `Release` build described in §2.2
-(`raw/08-validationlock-codexfix-build.log`):
+14/14 passed in 7.35 s, on the same CPU-only `Release` build described in §2.2
+(`raw/11-validationlock-final-mutants.log`):
 
 | # | test | result |
 | --- | --- | --- |

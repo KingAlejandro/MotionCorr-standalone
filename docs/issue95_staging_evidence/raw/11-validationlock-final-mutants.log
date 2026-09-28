@@ -1,0 +1,84 @@
+=== START 2026-09-28T07:07:41Z ===
+=== VALIDATION LOCK ACQUIRED 2026-09-28T07:07:41Z ===
+--- payload ---
+c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4  src/frame_staging_plan.h
+113bb869d4a8918bfa73112321ec49a59260b3a7dae54b286161c989eff7863f  src/frame_staging_plan.cpp
+4e0efbaeea67e758e215217632be7a8350b3c81606610e727f7fda40658a6a4b  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+--- inherited cpuset ---
+/proc/self/status:Cpus_allowed_list:	0-63
+0-63
+--- topology ---
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+node 0 size: 115839 MB
+node 0 free: 15850 MB
+node 1 cpus: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+node 1 size: 115862 MB
+node 1 free: 14284 MB
+--- effective policy ---
+policy: bind;preferred node: 1;physcpubind: 48 49 50 51 52 53 54 55 ;cpubind: 1 ;nodebind: 1 ;membind: 1 ;preferred: 1 ;
+--- load/interference at start ---
+ 07:07:41 up 299 days, 21:05, 24 users,  load average: 6.75, 9.37, 8.63
+USER     %CPU COMMAND
+ubuntu   99.9 python3
+ubuntu   99.9 python3
+ubuntu   99.9 ctffind
+=== CONFIGURE EXIT 0 ===
+[ 98%] Built target frame_staging
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
+=== BUILD EXIT 0 ===
+########## BASELINE
+287 checks, 0 failures
+baseline exit 0
+########## MUTANT: OLD MODEL: repair schedule omitted from the host budget
+mutated: sched
+build exit 0
+FAIL: the schedule charge is independent of the chunk
+FAIL: the schedule charge is 3 ints per defect plus one Draw per (defect, frame)
+FAIL: with a dense mask the schedule dwarfs the staged chunk it was omitted beside
+FAIL: corrected model: the same dense job does not fit it
+FAIL: corrected model: the dense job is Inadmissible against the same budget
+FAIL: the rejected dense job leaves the caller's chunk untouched
+test exit 1
+########## MUTANT: OLD MODEL: no-staging double-counts Iframes
+mutated: alias
+build exit 0
+FAIL: the whole-movie float policy aliases the retained real stack
+FAIL: default policy charges Iframes once, not twice
+FAIL: the alias is visible: the parts deliberately over-sum the whole
+FAIL: the alias appears only at the full frame count
+FAIL: host_bytes DROPS at chunk == n_frames for an aliasing policy
+FAIL: no-staging policy aliases
+test exit 1
+########## MUTANT: OLD SEARCH: whole-movie probe removed
+mutated: probe
+build exit 0
+FAIL: a huge budget clamps to the frame count
+FAIL: the search finds the aliased whole-movie point a monotone search would miss
+FAIL: corrected model: the same budget admits the whole movie
+FAIL: and admits it at the full frame count
+287 checks, 4 failures
+test exit 1
+########## MUTANT: A1: exact reserve removed (index vectors may exceed the charge)
+mutated: reserve
+build exit 0
+FAIL: the schedule's index vectors are reserved exactly, so the charge covers them
+287 checks, 1 failures
+test exit 1
+########## RESTORED
+restored build exit 0
+287 checks, 0 failures
+restored exit 0
+100% tests passed out of 14
+
+Total Test time (real) =   7.35 sec
+c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4  src/frame_staging_plan.h
+113bb869d4a8918bfa73112321ec49a59260b3a7dae54b286161c989eff7863f  src/frame_staging_plan.cpp
+4e0efbaeea67e758e215217632be7a8350b3c81606610e727f7fda40658a6a4b  tests/test_frame_staging.cpp
+56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875  CMakeLists.txt
+6740791228187eb0dce63d40d3b668671654dfbcc35c5500aca961c5a3fe95a5  build-cpu/frame_staging
+--- load at end ---
+ 07:08:29 up 299 days, 21:06, 29 users,  load average: 8.44, 9.51, 8.72
+=== END 2026-09-28T07:08:29Z ===

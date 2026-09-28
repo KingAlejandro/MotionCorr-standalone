@@ -83,7 +83,9 @@ header anywhere in this dataset.
 
 **Discriminating negative control** (`scarf_gpu/full_header_verification_negative_control.txt`,
 also `tools/compare_prefetch_arms.py --self-test`). A comparison that only ever says
-"identical" proves nothing, so ten mutations were applied to a synthetic MRC:
+"identical" proves nothing, so mutations are applied to a synthetic MRC. The first round used
+ten; **correction 7 below raised it to eighteen** after a review found three branches that no
+case reached. The original ten were:
 
 | mutation | required | observed |
 |---|---|---|
@@ -276,3 +278,89 @@ Verdicts from that audit: **SPEC_CONFORMANCE_PASSED** (source frozen, every raw 
 per-arm dump, slurm log and `superseded/` entry byte-identical to its introducing commit, the two
 new tool files added to ADR §12 rather than left out of scope, licence convention matched) and
 **CORRECTIONS_INCOMPLETE** for items 1-2 above, which this correction closes.
+
+---
+
+## Correction 7 — eight defects in the evidence tooling itself
+
+The independent code review of the tooling behind corrections 1-3 found eight items. All are
+fixed; `src/` remains frozen. The whole-file verification was **re-run with the corrected tool**
+and still reports **12/12 pairs clean** — the fixes change what the tool *can* catch, not what it
+found here.
+
+### The one that mattered most for provenance
+
+`scripts/prefetch_scarf_series.sbatch` contained
+
+```
+python3 "$SRC/tools/compare_prefetch_arms.py" --root /dev/null > /dev/null 2>&1 || true
+```
+
+which **established nothing**: wrong argument, output discarded, exit code ignored. The
+comparison that actually ran and wrote every `*_correctness_compare_*.txt` artifact was an
+inline heredoc that still compared only bytes `0..224`.
+
+So those in-run artifacts back the **old 224-byte claim**, not the whole-file one. The
+whole-file claim rests entirely on `full_header_verification.txt`, which came from a separate
+`--pair` run — and that run had **no committed provenance**, so a reader could not tell what
+produced it. Both are now fixed: the sbatch calls the maintained tool (with its negative control
+run first and **fatal** on failure), and `scripts/verify_retained_arms.sh` records tool hash,
+root, host, date and command, and fails unless every pair is clean.
+
+Re-run with the corrected tool, `tool_sha bd9485a30c0a…`, 2026-09-28T08:46Z: **12/12 pairs,
+negative control rc=0, `pairs_compared: 12`, `DONE_VERIFY`.**
+
+### Correctness defects in the comparison
+
+- **`nsymbt` had no upper bound.** With a bogus offset-92 word *equal on both sides*, Python
+  slice clamping compared two empty payload slices, the "no pixel payload" vacuity guard never
+  fired, and the tool reported `PROBLEMS: none` with a **negative** pixel-byte count. A real
+  pixel flip was still caught, but mislabelled an extended-header difference. The one guard that
+  exists to prevent a vacuous "identical" verdict was defeated. Now rejected.
+- **The glob missed `*.mrcs`.** Under `--save_movies` the largest outputs would be silently
+  uncompared *and* invisible to the set-equality check, so a stack present in only one arm would
+  not be reported. Not live for this evidence (the flag was not used), fixed anyway.
+
+### Control coverage — three branches no case reached
+
+- **`datetime.strptime` was dead.** Both "bad timestamp" cases are caught earlier by the regex's
+  hardcoded month alternation, so the entire strptime block could have been deleted with all ten
+  cases still passing. Only a *regex-shaped but impossible* date reaches it; `31-Feb-26 25:61:61`
+  is now a case. One case name also promised a date-validity check it never exercised, and is
+  renamed.
+- **The extended-header comparison was never exercised** — the only `nsymbt` case made the two
+  sides *differ*, returning early.
+- **The no-pixel vacuity guard was never taken** — no case built a header-only file. That is the
+  branch the self-test's own docstring appeals to.
+
+Eighteen cases now, including equal-nonzero-`nsymbt` with differing content, `nsymbt` exceeding
+the payload on both sides (with and without a pixel difference), negative `nsymbt`, `nlabl = 0`
+leaving a timestamp unwhitelisted, and two timestamps in one record.
+
+### `cpu_mask_topology.py` — the fix reproduced the bug it replaced
+
+- **An empty or comma-only mask returned `[]`** and reported `distinct_physical_cores: 0` with an
+  empty `numa_nodes_spanned`, exit 0 — byte-for-byte the symptom correction 3 exists to
+  eliminate. Reachable: the sbatch runs under `set -u` but **not** `set -e`, so a failed
+  `CPULIST` substitution yields an empty mask and the `|| echo "topology helper unavailable"`
+  fallback never fires. Now raises.
+- **Stride syntax** (`0-7:2`, which `taskset -c` accepts) raised a bare `int()` traceback; now
+  rejected explicitly.
+- **A truncated witness** — the harness pipes `lscpu` through `head -200` — silently produced a
+  plausible *wrong* count from partial data, which is worse than the obvious zero it replaced.
+  Now an error.
+- **The self-test docstring claimed the comma-only re-run was load-bearing. It is not.** The
+  direct range assertions are what discriminate; the re-run is a self-contained literal with
+  constant results that documents the historical failure for a reader. The false claim is
+  corrected rather than quietly kept.
+
+### What the review confirmed as sound
+
+The whitelist justification holds, and the reviewer strengthened it with two facts the tool
+depended on without saying so: the header buffer comes from `calloc` (`src/memory.cpp:31`), so
+label records 1-9 are deterministic zeros rather than stack garbage; and there is **no
+`setlocale` call anywhere in `src/`**, so `%b` is C-locale English and the hardcoded month
+alternation cannot miss a real timestamp. Coverage of the four byte ranges is complete for sane
+`nsymbt`; `nlabl` outside 0-10 is fail-safe (clamped, and a bad value is caught twice); a
+timestamp-shaped run in pixel data is unreachable; and zeroing the whitelist cannot mask a real
+difference, since the spans must be identical on both sides and both must parse.

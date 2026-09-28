@@ -1,4 +1,11 @@
-=== seriesA-cpu8 (run-3511125) ===
+tool:      /work4/scd/scarf1415/motioncorr/mc-issue94/verify2/tools/compare_prefetch_arms.py
+tool_sha:  bd9485a30c0aa0765ddacb7f6072e8a536ba3acc4ceaf463093d6bd945736fd1
+root:      runs
+host:      cn1052.scarf.rl.ac.uk
+date_utc:  2026-09-28T08:46:21Z
+command:   ./scripts/verify_retained_arms.sh runs .
+
+=== run-3511125 ===
 -- correctness_off vs correctness_on
   MRC files fully identical (whole file minus whitelist): 72
   of which the whitelisted timestamp actually differed:   72
@@ -27,7 +34,7 @@ PROBLEMS: none
   pixel bytes compared:                                   2759049984
   STAR artifacts identical:                               25
 PROBLEMS: none
-=== seriesB-cpu1 (run-cpu16-3511134) ===
+=== run-cpu16-3511134 ===
 -- correctness_off vs correctness_on
   MRC files fully identical (whole file minus whitelist): 72
   of which the whitelisted timestamp actually differed:   72
@@ -56,7 +63,7 @@ PROBLEMS: none
   pixel bytes compared:                                   2759049984
   STAR artifacts identical:                               25
 PROBLEMS: none
-=== seriesC-cpu16 (run-cpu16real-3511138) ===
+=== run-cpu16real-3511138 ===
 -- correctness_off vs correctness_on
   MRC files fully identical (whole file minus whitelist): 72
   of which the whitelisted timestamp actually differed:   72
@@ -85,4 +92,6 @@ PROBLEMS: none
   pixel bytes compared:                                   2759049984
   STAR artifacts identical:                               25
 PROBLEMS: none
+
+pairs_compared: 12
 DONE_VERIFY

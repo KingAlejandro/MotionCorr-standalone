@@ -65,14 +65,21 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
     reserved = {"gain", "corrected_micrographs", "logfile", "header", "batch",
                 "all_batches"}
 
+    # Canonicalize exactly as the runner and the merger do, BEFORE any collision
+    # or decoration check. '/a/x.tif' and 'a/x.tif' have different raw roots but
+    # both land at 'a/x.*' beneath the worker output directory, so a raw-root
+    # check passes them, the second silently overwrites the first, and the merge
+    # then sees one surviving pair satisfying two movies -- PASS on corrupted
+    # coverage.
     roots: dict[str, str] = {}
     for name in names:
-        root = star_io.output_root(name)
+        root = star_io.worker_relative_root(star_io.output_root(name))
         prior = roots.get(root)
         if prior is not None and prior != name:
             problems.append(
                 f"output-name collision: {prior!r} and {name!r} both write {root}.mrc "
-                "(getOutputFileNames replaces '.' with '_', src/motioncorr_runner.cpp:491)"
+                "beneath the worker output directory (getOutputFileNames replaces '.' "
+                "with '_' and concatenates onto --o, src/motioncorr_runner.cpp:491)"
             )
         roots.setdefault(root, name)
 
@@ -183,7 +190,8 @@ def main(argv: list[str] | None = None) -> int:
             "n_movies": len(chunk),
             "first_input_row": lo,
             "movies": [r.values[names_col] for r in chunk],
-            "output_roots": [star_io.output_root(r.values[names_col]) for r in chunk],
+            "output_roots": [star_io.worker_relative_root(
+                star_io.output_root(r.values[names_col])) for r in chunk],
         })
 
     assigned = [m for s in shards for m in s["movies"]]
@@ -202,7 +210,8 @@ def main(argv: list[str] | None = None) -> int:
         "n_shards": a.n,
         "partition": "contiguous",
         "canonical_movies": canonical,
-        "canonical_output_roots": [star_io.output_root(m) for m in canonical],
+        "canonical_output_roots": [
+            star_io.worker_relative_root(star_io.output_root(m)) for m in canonical],
         "shards": shards,
     }
     mpath = Path(a.manifest) if a.manifest else outdir / f"{a.prefix}_manifest.json"

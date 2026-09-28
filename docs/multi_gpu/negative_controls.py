@@ -203,20 +203,23 @@ MUTATIONS = [
 
     ("compare24 keys reports by basename again",
      "tools/multi_gpu/compare24.py",
-     '        report_id = rel.replace("/", "__").replace("\\\\", "__")',
+     "        report_id = report_identifier(rel)",
      "        report_id = Path(rel).name  # MUTATED",
      ["case_compare24_report_identity"]),
 
     ("merge matches absolute roots without normalizing",
      "tools/multi_gpu/merge_workers.py",
-     "    root_owner = {star_io.worker_relative_root(star_io.output_root(m)): k\n"
-     "                  for m, k in owner.items()}",
-     "    root_owner = {star_io.output_root(m): k for m, k in owner.items()}  # MUTATED",
+     "    for movie, k in owner.items():\n"
+     "        root = star_io.worker_relative_root(star_io.output_root(movie))",
+     "    for movie, k in owner.items():\n"
+     "        root = star_io.output_root(movie)  # MUTATED",
      ["case_absolute_movie_roots_attributed"]),
 
     ("merge completeness check un-normalizes the root",
      "tools/multi_gpu/merge_workers.py",
+     "    for movie in canonical:\n"
      "        root = star_io.worker_relative_root(star_io.output_root(movie))",
+     "    for movie in canonical:\n"
      "        root = star_io.output_root(movie)  # MUTATED",
      ["case_absolute_movie_roots_attributed"]),
 
@@ -231,6 +234,38 @@ MUTATIONS = [
      "    out = Path(a.out).resolve()",
      "    out = Path(a.out)  # MUTATED",
      ["case_merge_out_is_resolved"]),
+
+    ("comparison report identity is not injective",
+     "tools/multi_gpu/compare24.py",
+     '    digest = hashlib.sha256(rel_root.encode("utf-8")).hexdigest()[:16]\n'
+     '    label = _SAFE.sub("_", rel_root).strip("_")[-60:] or "root"\n'
+     '    return f"{label}-{digest}"',
+     '    return rel_root.replace("/", "__")  # MUTATED',
+     ["case_compare24_injective_report_identity"]),
+
+    ("reused reports no longer validated against their root",
+     "tools/multi_gpu/compare24.py",
+     "            side = root_sidecar(j)",
+     "            side = j  # MUTATED",
+     ["case_compare24_injective_report_identity"]),
+
+    ("collision preflight uses raw roots again",
+     "tools/multi_gpu/partition_star.py",
+     "        root = star_io.worker_relative_root(star_io.output_root(name))",
+     "        root = star_io.output_root(name)  # MUTATED",
+     ["case_normalized_root_collision_refused"]),
+
+    ("merge drops the duplicate-coverage guard",
+     "tools/multi_gpu/merge_workers.py",
+     "        if root in root_owner:",
+     "        if False:  # MUTATED",
+     ["case_duplicate_coverage_and_zero_pairs_rejected"]),
+
+    ("zero-pair and duplicate-root manifests accepted by the comparator",
+     "tools/multi_gpu/compare24.py",
+     "        if expect == 0:",
+     "        if False:  # MUTATED",
+     ["case_duplicate_coverage_and_zero_pairs_rejected"]),
 
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",

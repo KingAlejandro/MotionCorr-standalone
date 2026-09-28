@@ -36,6 +36,7 @@ TOOLS = ROOT / "tools" / "multi_gpu"
 FAKE = ROOT / "tests" / "fake_worker.py"
 sys.path.insert(0, str(TOOLS))
 import star_io  # noqa: E402
+sys.path.insert(0, str(TOOLS))
 
 PY = sys.executable
 
@@ -1105,6 +1106,140 @@ def case_merge_out_is_resolved(tmp: Path) -> None:
         assert (workdir / "relative_merged" / (root + ".mrc")).exists(), root
 
 
+def case_compare24_injective_report_identity(tmp: Path) -> None:
+    """Report identity is injective in the complete root, and validated on reuse.
+
+    Substituting separators is not injective: "a/b" and "a__b" both map to
+    "a__b". The second comparison overwrites the first report and a later
+    --reuse reads one movie's result for both, turning a genuine fail-then-pass
+    pair into a false 2/2 PASS. Ordered here so a non-injective encoding would
+    launder the failure.
+    """
+    import compare24
+    assert compare24.report_identifier("a/b") != compare24.report_identifier("a__b")
+
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    roots = ["a/b", "a__b"]          # collide under a separator substitution
+    manifest = tmp / "manifest.json"
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": [r + ".tiff" for r in roots]}))
+    ref, test = tmp / "ref", tmp / "test"
+    _tree(ref, roots, failing={"a/b"})   # first fails, second passes
+    _tree(test, roots, failing=set())
+
+    def run24(out, reuse=False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", tool, "--manifest", manifest, "--out", out]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    out = tmp / "exact"
+    cp = run24(out)
+    assert cp.returncode == 1, f"the failing movie was not reported (rc={cp.returncode})"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert (s["verdict"], s["passed"], s["failed"]) == ("FAIL", 1, 1), s
+    reports = sorted(p.name for p in out.glob("*_exact.json"))
+    assert len(reports) == 2 and len(set(reports)) == 2, reports
+
+    cp = run24(out, reuse=True)
+    assert cp.returncode == 1, f"--reuse laundered the failure (rc={cp.returncode})"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert (s["verdict"], s["passed"], s["failed"]) == ("FAIL", 1, 1), s
+
+    # a sidecar naming a different root must be refused, so report identity is
+    # validated independently of whatever the filename encoding happens to be
+    side = next(out.glob("*.root"))
+    side.write_text("some/other/root\n")
+    cp = run24(out, reuse=True)
+    assert cp.returncode == 1, cp.stdout
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("identity mismatch" in (r.get("reason") or "") for r in s["results"]), s
+    side.unlink()
+    cp = run24(out, reuse=True)
+    assert cp.returncode == 1
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("no root sidecar" in (r.get("reason") or "") for r in s["results"]), s
+
+    # positive control: both passing gives PASS on the normal pass and on reuse
+    _tree(ref, roots, failing=set())
+    out2 = tmp / "exact_ok"
+    assert run24(out2).returncode == 0
+    assert run24(out2, reuse=True).returncode == 0
+
+
+def case_normalized_root_collision_refused(tmp: Path) -> None:
+    """'/a/x.tif' and 'a/x.tif' collide once canonicalized, and are refused."""
+    assert star_io.worker_relative_root(star_io.output_root("/a/x.tif")) == "a/x"
+    assert star_io.worker_relative_root(star_io.output_root("a/x.tif")) == "a/x"
+
+    rows = [("/a/x.tif", 1, 0.0), ("a/x.tif", 1, 1.4), ("Movies/c.tiff", 1, 2.8)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    cp = partition(star, 2, tmp / "shards")
+    assert cp.returncode == 3, (
+        "two movies that both write a/x.* beneath the worker directory were "
+        f"accepted (rc={cp.returncode})")
+    assert "output-name collision" in cp.stderr, cp.stderr
+
+    # the decoration check must use the same canonical roots
+    rows = [("/a/x.tif", 1, 0.0), ("a/x_PS.tif", 1, 1.4), ("Movies/c.tiff", 1, 2.8)]
+    build_star(star, rows)
+    cp = partition(star, 2, tmp / "shards_dec")
+    assert cp.returncode == 3, f"decoration collision missed (rc={cp.returncode})"
+    assert "decorated-output collision" in cp.stderr, cp.stderr
+
+    # positive control
+    build_star(star, [("/a/x.tif", 1, 0.0), ("b/x.tif", 1, 1.4),
+                      ("Movies/c.tiff", 1, 2.8)])
+    assert partition(star, 2, tmp / "shards_ok").returncode == 0
+
+    # the manifest must publish the canonical roots the merger will use
+    man = json.loads((tmp / "shards_ok" / "shard_manifest.json").read_text())
+    assert "a/x" in man["canonical_output_roots"], man["canonical_output_roots"]
+    assert not any(r.startswith("/") for r in man["canonical_output_roots"]), man
+
+
+def case_duplicate_coverage_and_zero_pairs_rejected(tmp: Path) -> None:
+    """One product pair may not satisfy two movies, and zero pairs never pass."""
+    # merge: a hand-built manifest whose roots collide after normalization
+    man = tmp / "dup_manifest.json"
+    man.write_text(json.dumps({
+        "canonical_movies": ["/a/x.tif", "a/x.tif"],
+        "canonical_output_roots": ["a/x", "a/x"],
+        "shards": [{"index": 0, "movies": ["/a/x.tif", "a/x.tif"],
+                    "output_roots": ["a/x", "a/x"], "n_movies": 2}]}))
+    w = tmp / "w0"
+    (w / "a").mkdir(parents=True)
+    (w / "a" / "x.mrc").write_text("one")
+    (w / "a" / "x.star").write_text("one")
+    report = tmp / "dup_report.json"
+    cp = merge(man, [w], tmp / "merged", fake_status(tmp, [0]), report)
+    assert cp.returncode == 3, f"one pair satisfied two movies (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert any("duplicate coverage" in p for p in rep["problems"]), rep["problems"]
+
+    # merge: an empty manifest is refused rather than trivially passing
+    empty = tmp / "empty_manifest.json"
+    empty.write_text(json.dumps({"canonical_movies": [], "canonical_output_roots": [],
+                                 "shards": []}))
+    cp = merge(empty, [w], tmp / "merged_empty", fake_status(tmp, [0]))
+    assert cp.returncode == 2 and "nothing to verify" in cp.stderr, cp.stderr
+
+    # compare24: zero pairs is a FAIL, not a vacuous PASS
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    cp = run([PY, TOOLS / "compare24.py", "--ref", tmp, "--test", tmp,
+              "--tool", tool, "--manifest", empty, "--out", tmp / "z"])
+    assert cp.returncode == 2 and "zero-pair" in cp.stderr, cp.stderr
+
+    # compare24: a manifest whose roots collide after normalization is refused
+    cp = run([PY, TOOLS / "compare24.py", "--ref", tmp, "--test", tmp,
+              "--tool", tool, "--manifest", man, "--out", tmp / "z2"])
+    assert cp.returncode == 2 and "not distinct after normalization" in cp.stderr, cp.stderr
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -1136,6 +1271,9 @@ CASES = [
     case_per_worker_cpu_masks,
     case_devices_with_no_witness_refused,
     case_compare24_report_identity,
+    case_compare24_injective_report_identity,
+    case_normalized_root_collision_refused,
+    case_duplicate_coverage_and_zero_pairs_rejected,
     case_absolute_movie_roots_attributed,
     case_gpu_witness_logic,
     case_sampler_lifecycle,

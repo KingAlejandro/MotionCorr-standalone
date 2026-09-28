@@ -110,6 +110,11 @@ def main(argv: list[str] | None = None) -> int:
 
     problems: list[str] = []
 
+    if not manifest.get("canonical_movies"):
+        print("FAIL: manifest lists no movies; there is nothing to verify",
+              file=sys.stderr)
+        return 2
+
     if len(a.workers) != len(shards):
         print(f"FAIL: {len(a.workers)} worker directories for {len(shards)} shards",
               file=sys.stderr)
@@ -155,8 +160,21 @@ def main(argv: list[str] | None = None) -> int:
             owner[m] = s["index"]
     # Normalize to where the runner actually writes beneath each worker's --o,
     # so absolute movie names are attributed instead of reading as lost.
-    root_owner = {star_io.worker_relative_root(star_io.output_root(m)): k
-                  for m, k in owner.items()}
+    #
+    # Build this with a duplicate guard rather than a dict comprehension: two
+    # movies whose normalized roots coincide would silently collapse to one
+    # entry, and the single surviving product pair would then satisfy both --
+    # PASS on coverage that is actually corrupt. The partitioner refuses such a
+    # manifest, but the merge must not depend on having produced it.
+    root_owner: dict[str, int] = {}
+    for movie, k in owner.items():
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        if root in root_owner:
+            problems.append(
+                f"duplicate coverage: two movies normalize to the same output root "
+                f"{root!r}; one product pair cannot satisfy both"
+            )
+        root_owner[root] = k
 
     # Resolve before use. PR55's shell merge built a relative destination and
     # then ran cp from inside each worker directory, so the copies landed under

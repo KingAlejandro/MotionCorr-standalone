@@ -27,13 +27,36 @@ failure rather than a smaller passing set.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import star_io  # noqa: E402
+
+
+_SAFE = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def report_identifier(rel_root: str) -> str:
+    """A filename that is injective in the complete output root.
+
+    Substituting separators is not enough: "a/b" and "a__b" both become "a__b",
+    so the second comparison overwrites the first report and a later --reuse
+    reads one movie's result for both -- turning a genuine fail-then-pass pair
+    into a false 2/2 PASS. The readable part is therefore only a label, and the
+    identity comes from a digest of the exact root.
+    """
+    digest = hashlib.sha256(rel_root.encode("utf-8")).hexdigest()[:16]
+    label = _SAFE.sub("_", rel_root).strip("_")[-60:] or "root"
+    return f"{label}-{digest}"
+
+
+def root_sidecar(report_path: Path) -> Path:
+    return report_path.with_suffix(".root")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -62,6 +85,16 @@ def main(argv: list[str] | None = None) -> int:
         manifest = json.loads(Path(a.manifest).read_text())
         roots = list(manifest["canonical_output_roots"])
         expect = len(roots)
+        if expect == 0:
+            print("FAIL: manifest lists no movies; a zero-pair comparison cannot pass",
+                  file=sys.stderr)
+            return 2
+        normalized = [star_io.worker_relative_root(r) for r in roots]
+        if len(set(normalized)) != len(normalized):
+            dupes = sorted({n for n in normalized if normalized.count(n) > 1})
+            print(f"FAIL: manifest roots are not distinct after normalization: {dupes}; "
+                  "one product pair would be compared for two movies", file=sys.stderr)
+            return 2
     else:
         roots = sorted(
             str(p.relative_to(ref).with_suffix(""))  # already worker-relative
@@ -79,12 +112,7 @@ def main(argv: list[str] | None = None) -> int:
         rm, tm = ref / (rel + ".mrc"), test / (rel + ".mrc")
         rs, ts = ref / (rel + ".star"), test / (rel + ".star")
         name = Path(rel).name
-        # Key the report by the COMPLETE root, not the basename. Movies/set1/a and
-        # Movies/set2/a both end in "a": keying on the basename makes the second
-        # comparison overwrite the first report, and a later --reuse then reads one
-        # movie's report for both -- turning a real fail-then-pass pair into a
-        # false 2/2 exact PASS.
-        report_id = rel.replace("/", "__").replace("\\", "__")
+        report_id = report_identifier(rel)
         missing = [str(p) for p in (rm, tm, rs, ts) if not p.exists()]
         if missing:
             results.append({"movie": name, "root": root, "gate_c_pass": False,
@@ -97,6 +125,21 @@ def main(argv: list[str] | None = None) -> int:
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
                                 "reason": f"--reuse but no report at {j}"})
                 continue
+            # Independently of the filename encoding, a reused report must
+            # carry the root it was produced for. Without this, any future
+            # change to the identifier silently reintroduces cross-reads.
+            side = root_sidecar(j)
+            if not side.exists():
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "reason": f"--reuse but no root sidecar at {side}; "
+                                          "report identity cannot be validated"})
+                continue
+            recorded = side.read_text().strip()
+            if recorded != rel:
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "reason": f"--reuse report identity mismatch: {j} was "
+                                          f"produced for {recorded!r}, not {rel!r}"})
+                continue
             rc = 0
         else:
             cp = subprocess.run(
@@ -105,6 +148,7 @@ def main(argv: list[str] | None = None) -> int:
                  "--gate", "exact", "--json-out", str(j)],
                 capture_output=True, text=True)
             rc = cp.returncode
+            root_sidecar(j).write_text(rel + "\n")
 
         rec: dict[str, object] = {"movie": name, "root": root, "report": j.name,
                                   "returncode": rc}
@@ -138,13 +182,15 @@ def main(argv: list[str] | None = None) -> int:
         results.append(rec)
 
     nfail = len(results) - npass
-    verdict = "PASS" if (nfail == 0 and npass == expect) else "FAIL"
+    # A zero-pair comparison is not a pass. An empty manifest would otherwise
+    # satisfy "no failures and passed == expected" with nothing compared.
+    verdict = "PASS" if (expect > 0 and nfail == 0 and npass == expect) else "FAIL"
     summary = {
         "n_expected": expect, "n_compared": len(results),
         "passed": npass, "failed": nfail, "verdict": verdict,
-        "criterion": "every movie pixel-identical with complete coverage, and the "
-                     "trajectory and STAR checks each passed; a PASS overall_status "
-                     "alone is not sufficient",
+        "criterion": "at least one pair, every movie pixel-identical with complete "
+                     "coverage, and the trajectory and STAR checks each passed; a PASS "
+                     "overall_status alone is not sufficient",
         "excluded": "logfile.pdf -- path-dependent by construction, see #53 section 6.3",
         "results": results,
     }

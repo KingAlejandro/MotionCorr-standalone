@@ -36,6 +36,8 @@ DEFAULT_REQUIRED_TESTS = [
     # RLIMIT_FSIZE injection and is registered under if(UNIX).
     "WriteFaults",
     "ImageWriteFaults",
+    # Added by the #98 malformed-defect-parser group (PR101).
+    "DefectParser",
 ]
 
 
@@ -106,8 +108,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=16,
-                        help="Minimum number of tests that must be collected (default: 16)")
+    parser.add_argument("--min-count", type=int, default=17,
+                        help="Minimum number of tests that must be collected (default: 17)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

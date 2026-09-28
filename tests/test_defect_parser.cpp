@@ -138,6 +138,48 @@ int main()
     check(msg.find("Truncated") != std::string::npos && msg.find("line 2") != std::string::npos,
           "truncated record names its start line, not one past EOF");
 
+    // A path that opens but cannot be read must not be mistaken for an empty
+    // file, which would mask nothing and let the movie publish as if defect
+    // correction had succeeded. A directory named *.txt is the reachable case.
+    //
+    // How much the platform exposes differs: libstdc++ sets badbit, libc++
+    // reports an ordinary EOF. Probe this platform first and assert only what
+    // it can actually distinguish -- and say so out loud when it cannot, rather
+    // than passing silently and looking like coverage.
+    std::cout << "== read error is not a valid empty file ==\n";
+    {
+        const std::string dir = scratch_dir() + "/directory.txt";
+        ::mkdir(dir.c_str(), 0700);
+
+        std::ifstream probe(dir);
+        bool observable = false;
+        if (probe.is_open()) {
+            probe.peek();
+            observable = probe.bad() || !probe.eof();
+        }
+        probe.close();
+
+        MultidimArray<bool> dm;
+        dm.initZeros(ny, nx);
+        int rc_dir = 0;
+        std::string dmsg;
+        try { MotioncorrRunner::fillDefectMask(dm, dir, 1); }
+        catch (RelionError &e) { dmsg = e.msg; rc_dir = 1; }
+        catch (...) { rc_dir = 1; }
+
+        if (observable) {
+            check(rc_dir == 1 && dmsg.find("could not be read") != std::string::npos,
+                  "directory named *.txt rejected as a read error, not empty input");
+            check(count_set(dm) == 0, "rejected read error publishes no mask");
+        } else {
+            std::cout << "  INFO  this platform reports a directory as an ordinary EOF "
+                      << "(rc=" << rc_dir << "); the read-error distinction is NOT "
+                      << "observable here, so nothing is asserted. libstdc++ does set "
+                      << "badbit and the assertion is live there.\n";
+        }
+        ::rmdir(dir.c_str());
+    }
+
     // Issue #98 Plan bullet 5: the SerialEM detector must keep rejecting
     // SerialEM-style input. Both call sites consult it before fillDefectMask,
     // so the strict parser must not have displaced it.

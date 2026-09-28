@@ -1,0 +1,104 @@
+##### issue94 Codex review-fix validation
+date_utc: 2026-09-28T06:45:18Z  host: small-refmac-machine (ssh alias cpu64)
+source_sha: 08c87bb653a3970639dd0699eaa479eb2fc795a9
+lane: taskset -c 32-47 (node1, within the 32-63 validation range); build/runtime -j16
+lock: /tmp/motioncorr-issue96-cpu-validation.lock   (no GPU lock touched, #53 owns it)
+##### topology of the lane
+32,1,1,32,Y
+33,1,1,33,Y
+34,1,1,34,Y
+35,1,1,35,Y
+36,1,1,36,Y
+37,1,1,37,Y
+38,1,1,38,Y
+39,1,1,39,Y
+40,1,1,40,Y
+41,1,1,41,Y
+42,1,1,42,Y
+43,1,1,43,Y
+44,1,1,44,Y
+45,1,1,45,Y
+46,1,1,46,Y
+47,1,1,47,Y
+distinct physical CORE ids in lane: 16 for 16 logical CPUs
+##### interference, not altered
+    PID USER     %CPU     ELAPSED PSR COMMAND
+1156942 ubuntu   99.9 49-07:15:24   1 ctffind
+1635429 ubuntu   99.9 48-04:51:42  25 ctffind
+3252454 root      2.1       00:00  37 sshd
+2722253 ubuntu    0.8 43-15:08:08  38 node
+1519128 root      0.1  6-00:18:21  63 rsyslogd
+ 292988 root      0.1 153-17:55:36 52 dockerd
+3300564 root      0.1 16-00:13:23  12 containerd
+ctffind 1156942 Cpus_allowed_list=0-63 psr=  1
+ctffind 1635429 Cpus_allowed_list=0-63 psr= 25
+loadavg: 2.58 2.53 2.27 4/7975 3252591
+##### payload identity
+e64dfd82f73bf906eee3d7e38bb0b0028dcef3e98cca61af66a18888d79fffac  src/movie_prefetch.h
+889a31e6a84c2070a99988b274ee764b87e6262c150d98d6f998ac6d2d4057ee  src/movie_prefetch.cpp
+19ec5be4508dff0c9cfb8a2df2c4ac56cd502b7fa35122d37b8e2b7af55a7678  src/motioncorr_runner.h
+8474ccb1f44cf6a62be563aa8f8f11ad67a8cc50ee568a3bf0441d44c55b04e8  src/motioncorr_runner.cpp
+f686a91905ecbb8733de7b11c0b2335e5e6454ca4bb880d6f785f6fe2106a6b1  CMakeLists.txt
+ed0d06e3c1a674ba76706f9a5096203b34ee4c499aa71c97b33fde21541bed80  tests/test_prefetch_lifecycle.cpp
+d50ab301af54fcb6e2fe63bce8e8cbb71f415c357d810d46677c480cf9e7fef9  tests/test_prefetch_equivalence.py
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  test-data/synthetic/synthetic_movie.tiff
+##### lock acquired 2026-09-28T06:45:18Z
+inherited Cpus_allowed_list: 32-47
+numactl --show: policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+configure rc=0
+build rc=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+motioncorr sha256: c28c023a3b826c5312b5f1e10be09d6e043d32d8a0c5fe41dde8d79b3be05782
+prefetch_lifecycle sha256: a2d8c8315ae7fd0a756698cbccc7af016a353272b63ee122ff38bfc60be0f702
+##### full ctest
+      Start  4: RunnerExposure
+ 4/15 Test  #4: RunnerExposure ...................   Passed    0.46 sec
+      Start  5: Runner_failure
+ 5/15 Test  #5: Runner_failure ...................   Passed    0.12 sec
+      Start  6: Runner_invalid
+ 6/15 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+      Start  7: Runner_resume
+ 7/15 Test  #7: Runner_resume ....................   Passed    1.83 sec
+      Start  8: Runner_tomography
+ 8/15 Test  #8: Runner_tomography ................   Passed    0.37 sec
+      Start  9: RunnerLateBin
+ 9/15 Test  #9: RunnerLateBin ....................   Passed    0.60 sec
+      Start 10: RunnerExportedUnits
+10/15 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 11: GainCache
+11/15 Test #11: GainCache ........................   Passed    1.20 sec
+      Start 12: TiffRead
+12/15 Test #12: TiffRead .........................   Passed    0.50 sec
+      Start 13: DamagedMovie
+13/15 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: PrefetchEquivalence
+14/15 Test #14: PrefetchEquivalence ..............   Passed    8.83 sec
+      Start 15: RunnerModelParser
+15/15 Test #15: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 15
+
+Total Test time (real) =  21.53 sec
+ctest rc=0
+##### new-test stdout
+ERROR: 
+Cannot read file movie1.mrcs It does not exist
+prefetch lifecycle: all checks passed
+  normal:  4/4 movies identical; budget=466944 B, peak_reserved=466944 B, peak_queue=1
+  control: a changed option does change the pixels (the checks can fail)
+  mixed:   4/4 identical across differing geometry and frame counts (decoded=4, inline=0)
+  queue2: 4/4 identical, automatic budget still 466944 B, peak_reserved=466944 B
+  queue8: 4/4 identical, automatic budget still 466944 B, peak_reserved=466944 B
+  tight:   3/3 identical with a 9 MiB budget holding one movie (unit=8413184 B, peak_reserved=8413184 B)
+  starved: 3/3 identical with a 8 MiB budget, all via the counted in-line fallback (over_budget_grants=3)
+  gain:    4/4 identical with a gain reference applied, all 4 prefetched
+  frames:  4/4 identical with --first_frame_sum 2 --last_frame_sum 7, all 4 prefetched, start frame recorded as 2
+  damaged-first: exit 1 matches serial, both healthy movies retained and identical
+  damaged-last: exit 1 matches serial, both healthy movies retained and identical
+  resume:  non-prefix resume identical, full 4/4 coverage, 3 movies prefetched
+prefetch equivalence: all cases identical to serial
+equivalence exit=0
+##### loadavg at end: 3.97 3.06 2.48 3/7978 3254552
+##### series rc=0 at 2026-09-28T06:46:16Z
+##### ALL DONE

@@ -1,0 +1,29 @@
+[2026-09-28T07:02:28.200633514Z] preflight ok: nvcc=Build cuda_12.8.r12.8/compiler.35404655_0
+[2026-09-28T07:02:28.216829122Z] === build (inside the allocation, so nothing else perturbs it) ===
+[2026-09-28T07:02:46.269010409Z] configure rc=0
+[2026-09-28T07:03:17.368381064Z] build rc=0
+[2026-09-28T07:03:17.747107974Z] === correctness: prefetch off vs on, 24 movies ===
+[2026-09-28T07:05:28.939479768Z] correctness_off exit=0 wall=130.8s
+[2026-09-28T07:07:22.003264870Z] correctness_on exit=0 wall=112.7s
+[2026-09-28T07:07:22.019322719Z] === exact same-backend comparison ===
+[2026-09-28T07:07:32.808090880Z] correctness comparison rc=0
+MRC payloads identical:            72/72
+normalized headers identical:      72/72
+STAR artifacts identical:          25/25
+total pixels compared:             2759049984 bytes
+PROBLEMS: none
+[2026-09-28T07:07:32.845722483Z] === paired timings, arm order alternating, 3 pairs ===
+[2026-09-28T07:09:27.309853619Z] pair1_first_off exit=0 wall=114.1s
+[2026-09-28T07:11:16.470432890Z] pair1_second_on exit=0 wall=108.8s
+[2026-09-28T07:12:59.987583847Z] pair2_first_on exit=0 wall=103.0s
+[2026-09-28T07:14:37.831999098Z] pair2_second_off exit=0 wall=97.5s
+[2026-09-28T07:16:16.304056975Z] pair3_first_off exit=0 wall=98.0s
+[2026-09-28T07:18:04.680675570Z] pair3_second_on exit=0 wall=108.0s
+[2026-09-28T07:18:04.818182959Z] === timing summary (no verdict: n=3 is a screen) ===
+1	pair1_first_off	114.088	3113260
+1	pair1_second_on	108.815	5782404
+2	pair2_first_on	103.040	5783000
+2	pair2_second_off	97.480	3113912
+3	pair3_first_off	97.999	3100904
+3	pair3_second_on	108.030	5778216
+[2026-09-28T07:18:04.846785071Z] === ALL DONE ===

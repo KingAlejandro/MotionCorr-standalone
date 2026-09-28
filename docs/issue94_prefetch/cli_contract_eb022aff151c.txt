@@ -1,0 +1,22 @@
+date_utc: 2026-09-28T00:36:14Z
+host: small-refmac-machine (ssh alias cpu64)
+source_sha: eb022aff151c11d939e2c39a5fc0b56da31ad431
+binary_sha256: 9fda7ac231cc780ff1d2df68dd0ac6f60fae2d86d52c8a717cd3222be180873a
+
+### the three new options are documented in the usage text
+                 --prefetch (false) : (EXPERIMENTAL) Decode the next movie while the current one is being corrected. Off by default.
+              --prefetch_mem_mb (0) : Host memory ceiling in MiB for prefetched, queued and active decoded movies together (0 = 3x the first movie)
+               --prefetch_queue (1) : Decoded movies allowed to wait between the reader and the corrector. This is not the memory bound; --prefetch_mem_mb is.
+
+### option validation rejects unsupported combinations (exit is the binary's own)
+$ motioncorr --i x.star --o o/ --prefetch --use_motioncor2 --motioncor2_exe /bin/true
+  message: --prefetch is valid only with --use_own.
+  exit: 1
+$ motioncorr --i x.star --o o/ --use_own --prefetch --prefetch_mem_mb -5
+  message: --prefetch_mem_mb must be zero (automatic) or positive.
+  exit: 1
+$ motioncorr --i x.star --o o/ --use_own --prefetch --prefetch_queue 0
+  message: --prefetch_queue must be at least 1.
+  exit: 1
+
+### scope: CPU build only. No CUDA build exists; see cuda_syntax_check/.

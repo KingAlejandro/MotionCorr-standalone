@@ -18,9 +18,11 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <omp.h>
+#include <sys/resource.h>
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <memory>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -138,6 +140,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (max_iter != 5 && !do_own)
 		REPORT_ERROR("--max_iter is valid only with --do_own");
 	interpolate_shifts = parser.checkOption("--interpolate_shifts", "(EXPERIMENTAL) Interpolate shifts");
+	do_prefetch = parser.checkOption("--prefetch", "(EXPERIMENTAL) Decode the next movie while the current one is being corrected. Off by default.");
+	prefetch_mem_mb = textToInteger(parser.getOption("--prefetch_mem_mb", "Host memory ceiling in MiB for prefetched, queued and active decoded movies together (0 = 3x the first movie)", "0"));
+	prefetch_queue = textToInteger(parser.getOption("--prefetch_queue", "Decoded movies allowed to wait between the reader and the corrector. This is not the memory bound; --prefetch_mem_mb is.", "1"));
 	ccf_downsample = textToFloat(parser.getOption("--ccf_downsample", "(EXPERT) Downsampling rate of CC map. default = 0 = automatic based on B factor", "0"));
 	if (parser.checkOption("--early_binning", "Do binning before alignment to reduce memory usage. This might dampen signal near Nyquist. (ON by default)"))
 		std::cerr << "Since RELION 3.1, --early_binning is on by default. Use --no_early_binning to disable it." << std::endl;
@@ -161,6 +166,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
 	if (max_io_threads == 0 || max_io_threads < -1)
 		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
+	if (do_prefetch && !do_own) REPORT_ERROR("--prefetch is valid only with --use_own.");
+	if (prefetch_mem_mb < 0) REPORT_ERROR("--prefetch_mem_mb must be zero (automatic) or positive.");
+	if (prefetch_queue < 1) REPORT_ERROR("--prefetch_queue must be at least 1.");
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -593,6 +601,38 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
+	// Bounded next-movie prefetch. The producer owns nothing but the movie list
+	// and the decoded buffers it publishes; every runner member below stays on
+	// this thread. Its destructor cancels and joins, so every path out of this
+	// function -- including the failed-movie REPORT_ERROR -- joins first.
+	std::unique_ptr<movieio::MoviePrefetcher> prefetcher;
+	if (do_own && do_prefetch && !fn_micrographs.empty())
+	{
+		movieio::MoviePrefetcher::Options prefetch_options;
+		prefetch_options.budget_bytes = (prefetch_mem_mb > 0)
+			? movieio::saturatingMul((size_t)prefetch_mem_mb, (size_t)1024 * 1024) : 0;
+		prefetch_options.queue_capacity = (size_t)prefetch_queue;
+		prefetch_options.n_io_threads = (max_io_threads > 0)
+			? XMIPP_MIN(n_threads, max_io_threads) : n_threads;
+		prefetch_options.first_frame_sum = first_frame_sum;
+		prefetch_options.last_frame_sum = last_frame_sum;
+		// EERRenderer::silenceTIFFWarnings() writes libtiff's process-global
+		// warning handler on first use. In a mixed EER/TIFF dataset that first
+		// use would land on the consumer while the producer is inside libtiff
+		// for the next movie. Doing it here, before any second thread exists,
+		// makes the write single-threaded; the function is a no-op afterwards.
+		for (const FileName &movie : fn_micrographs)
+		{
+			if (EERRenderer::isEER(movie)) { EERRenderer::silenceTIFFWarnings(); break; }
+		}
+		prefetcher.reset(new movieio::MoviePrefetcher(fn_micrographs, prefetch_options));
+		prefetcher->start();
+		if (verb > 0)
+			std::cout << " prefetch: enabled, budget_bytes = " << prefetcher->budget().limitBytes()
+			          << ", queue_capacity = " << prefetch_options.queue_capacity
+			          << ", io_threads = " << prefetch_options.n_io_threads << std::endl;
+	}
+
 	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
@@ -602,20 +642,51 @@ void MotioncorrRunner::run()
 		// Abort through the pipeline_control system
 		if (pipeline_control_check_abort_job())
 		{
+			// exit() runs static destructors while a detached producer could
+			// still be touching them, so wake it and join before leaving.
+			if (prefetcher) prefetcher->cancelAndJoin();
 			exit(RELION_EXIT_ABORTED);
 		}
 
 		if (!do_own && !do_motioncor2)
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
+
+		// Records arrive strictly in movie order and the record owns its byte
+		// reservation until it is destroyed at the end of this iteration.
+		movieio::MoviePrefetchRecord record;
+		bool have_record = false;
+		if (prefetcher)
+		{
+			have_record = prefetcher->next(record);
+			if (!have_record || record.index != imic)
+			{
+				// A producer that died of something other than a decode error
+				// stops publishing. Report that cause rather than the
+				// misleading ordering message.
+				std::exception_ptr fatal = prefetcher->producerFatalError();
+				if (fatal) std::rethrow_exception(fatal);
+				REPORT_ERROR("Bug: the movie prefetcher published records out of order.");
+			}
+		}
+
 		bool result = false;
 		try
 		{
+			// A producer-side read error is this movie's failure, rethrown at
+			// exactly the point a serial read would have thrown it, so the
+			// per-movie failure and resume contract is unchanged.
+			if (have_record && record.mode == movieio::MoviePrefetchRecord::Mode::Failed)
+				std::rethrow_exception(record.error);
 			// Header parsing is also a per-movie failure, not a batch abort.
 			Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
 			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
-			result = do_own ? executeOwnMotionCorrection(mic) : executeMotioncor2(mic);
+			movieio::MoviePrefetchRecord *decoded =
+				(have_record && record.mode == movieio::MoviePrefetchRecord::Mode::Decoded)
+					? &record : nullptr;
+			result = do_own ? executeOwnMotionCorrection(mic, decoded, prefetcher.get())
+			                : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
 				saveModel(mic);
@@ -638,6 +709,16 @@ void MotioncorrRunner::run()
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
 
+	if (prefetcher)
+	{
+		// Join first: the producer updates its blocked-time counters after the
+		// push that hands over the last movie, so sampling before the join can
+		// silently drop that interval from the report. Then report, before the
+		// failed-movie check, so the accounting survives a failing run.
+		prefetcher->cancelAndJoin();
+		reportPrefetchStats(prefetcher->stats());
+	}
+
 	if (!failed_movies.empty())
 	{
 		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
@@ -656,6 +737,36 @@ void MotioncorrRunner::run()
 #ifdef TIMING_FFTW
 	timer_fftw.printTimes(false);
 #endif
+}
+
+void MotioncorrRunner::reportPrefetchStats(const movieio::PrefetchStats &stats) const
+{
+	if (verb <= 0) return;
+	// ru_maxrss is the whole-process high-water, not the prefetch buffers, and
+	// it is a ceiling sampled by the kernel rather than an allocator trace.
+	// Units differ by platform: Linux reports KiB, macOS/BSD report bytes.
+	struct rusage usage;
+	long long peak_rss_bytes = -1;
+	if (getrusage(RUSAGE_SELF, &usage) == 0)
+	{
+#if defined(__APPLE__)
+		peak_rss_bytes = (long long)usage.ru_maxrss;
+#else
+		peak_rss_bytes = (long long)usage.ru_maxrss * 1024;
+#endif
+	}
+	std::cout << " prefetch: budget_bytes = " << stats.budget_bytes
+	          << ", peak_reserved_bytes = " << stats.peak_reserved_bytes
+	          << ", peak_queue_occupancy = " << stats.peak_queue_occupancy << std::endl;
+	std::cout << " prefetch: decoded = " << stats.decoded
+	          << ", inline_loaded = " << stats.inline_loaded
+	          << ", failed = " << stats.failed
+	          << ", over_budget_grants = " << stats.over_budget_grants << std::endl;
+	std::cout << " prefetch: producer_budget_blocked_s = " << stats.producer_budget_blocked_s
+	          << ", producer_queue_blocked_s = " << stats.producer_queue_blocked_s
+	          << ", consumer_wait_s = " << stats.consumer_wait_s << std::endl;
+	std::cout << " prefetch: process_peak_rss_bytes = " << peak_rss_bytes
+	          << " (whole process, kernel high-water)" << std::endl;
 }
 
 bool MotioncorrRunner::executeMotioncor2(Micrograph &mic, int rank)
@@ -1257,7 +1368,9 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 	return gain_cache();
 }
 
-bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic,
+                                                 movieio::MoviePrefetchRecord *prefetched,
+                                                 movieio::MoviePrefetcher *prefetcher) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
@@ -1283,9 +1396,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		logfile << "Limitted the number of IO threads per movie to " << n_io_threads << " thread(s)." << std::endl;
 	}
 
-	Image<float> Ihead, Iref, Iref_odd, Iref_even;
+	// Declared before every buffer it accounts for, so it is destroyed after
+	// them. Returning the bytes first would wake a producer blocked on the
+	// budget while this movie's frames are still being freed, and real
+	// resident memory would transiently exceed the limit with no counter
+	// showing it. Filled in below, once the geometry is known.
+	movieio::ByteBudget::Reservation inline_reservation;
+
+	Image<float> Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
-	std::vector<Image<float> > Iframes;
+	// When the producer handed over a decoded movie, its frames stay inside the
+	// record for the whole of this call: the record owns the byte reservation,
+	// so the budget is charged for exactly as long as the buffers exist. With
+	// no record this is the ordinary local vector the serial path always used.
+	std::vector<Image<float> > Iframes_owned;
+	std::vector<Image<float> > &Iframes = (prefetched != nullptr) ? prefetched->Iframes
+	                                                             : Iframes_owned;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -1297,7 +1423,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	int nx, ny, nn;
 
 	// Check image size
-	if (isEER)
+	if (prefetched != nullptr)
+	{
+		// Probed by the producer through movieio::probeGeometry, the same
+		// helper the serial branch below calls.
+		nx = prefetched->geometry.nx;
+		ny = prefetched->geometry.ny;
+		nn = prefetched->geometry.nn;
+	}
+	else if (isEER)
 	{
 		renderer.read(fn_mic, eer_upsampling);
 		nx = renderer.getWidth(); ny = renderer.getHeight();
@@ -1311,25 +1445,30 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 	else
 	{
-		Ihead.read(fn_mic, false, -1, false, true); // select_img -1, mmap false, is_2D true
-		nx = XSIZE(Ihead()); ny = YSIZE(Ihead()); nn = NSIZE(Ihead());
+		const movieio::MovieGeometry geometry = movieio::probeGeometry(fn_mic);
+		nx = geometry.nx; ny = geometry.ny; nn = geometry.nn;
 	}
 
-	// Which frame to use?
+	// Which frame to use? Selection is a pure function of nn and the run-wide
+	// frame options, so a prefetched record cannot disagree with this branch.
 	logfile << "Movie size: X = " << nx << " Y = " << ny << " N = " << nn << std::endl;
+	frames = (prefetched != nullptr) ? prefetched->frames
+	                                 : movieio::selectFrames(nn, first_frame_sum, last_frame_sum);
 	logfile << "Frames to be used:";
-	for (int i = 0; i < nn; i++) {
-		// For users, all numbers are 1-indexed. Internally they are 0-indexed.
-		int frame = i + 1;
-		if (frame < first_frame_sum) continue;
-		if (last_frame_sum > 0 && frame > last_frame_sum) continue;
-		frames.push_back(i);
-		logfile << " " << frame;
-	}
+	for (size_t i = 0; i < frames.size(); i++)
+		logfile << " " << frames[i] + 1; // make 1-indexed for users
 	logfile << std::endl;
 
 	const int n_frames = frames.size();
-	Iframes.resize(n_frames);
+	if (prefetched != nullptr)
+	{
+		if ((int)Iframes.size() != n_frames)
+			REPORT_ERROR("Bug: prefetched frame count does not match its frame selection.");
+	}
+	else
+	{
+		Iframes.resize(n_frames);
+	}
 	Irefframes.resize(n_frames);
 	Fframes.resize(n_frames);
 
@@ -1389,32 +1528,52 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	}
 	RCTOC(TIMING_READ_GAIN);
 
+	// An in-line load inside a prefetching run still charges its bytes, so the
+	// reported peak covers the serial-fallback movies too. The grant is forced
+	// and non-blocking by construction: a consumer that could wait here could
+	// wait on a producer holding the very capacity it needs. It counts as an
+	// override only if it really does exceed the limit.
+	if (prefetched == nullptr && prefetcher != nullptr) {
+		inline_reservation = prefetcher->reserveInline(
+			movieio::estimateDecodedMovieBytes(nx, ny, n_frames, n_io_threads));
+	}
+
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
-	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
-	// that leaves an OpenMP structured block is undefined behaviour: the runtime
-	// calls std::terminate, so one truncated movie used to abort the whole run
-	// with SIGABRT instead of failing just that movie. Capture per frame and
-	// rethrow on the serial path, where run()'s caller records the failure and
-	// continues with the remaining movies.
-	std::vector<std::exception_ptr> read_errors(n_frames);
-	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		try {
-			if (isEER)
-				renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
-			else if (isCompressedMRC)
-				compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
-			else
-				Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
-		} catch (...) {
-			read_errors[iframe] = std::current_exception();
+	if (prefetched != nullptr) {
+		// Already decoded on the producer thread, by movieio::decodeFrames.
+	} else if (isEER || isCompressedMRC) {
+		// EER and compressed MRC keep decoder state that is consumed after this
+		// point -- the EER gain reference is resolved through this very
+		// renderer -- so they are not prefetched and stay on this loop.
+		//
+		// Every reader here can REPORT_ERROR on a damaged movie, and an
+		// exception that leaves an OpenMP structured block is undefined
+		// behaviour: the runtime calls std::terminate, so one truncated movie
+		// used to abort the whole run with SIGABRT instead of failing just that
+		// movie. Capture per frame and rethrow on the serial path, where run()'s
+		// caller records the failure and continues with the remaining movies.
+		std::vector<std::exception_ptr> read_errors(n_frames);
+		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			try {
+				if (isEER)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
+				else
+					compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+			} catch (...) {
+				read_errors[iframe] = std::current_exception();
+			}
 		}
-	}
-	// Report the lowest frame index rather than whichever thread failed first,
-	// so the error a user sees does not depend on the OpenMP schedule.
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		// Report the lowest frame index rather than whichever thread failed
+		// first, so the error a user sees does not depend on the OpenMP schedule.
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		}
+	} else {
+		// The same decoder the producer runs, with the same per-frame exception
+		// capture and lowest-index rethrow.
+		movieio::decodeFrames(fn_mic, frames, n_io_threads, Iframes);
 	}
 	RCTOC(TIMING_READ_MOVIE);
 

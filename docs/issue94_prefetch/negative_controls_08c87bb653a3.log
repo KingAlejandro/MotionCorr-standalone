@@ -1,0 +1,31 @@
+##### issue94 negative controls for the three Codex fixes
+date_utc: 2026-09-28T06:47:01Z  host: small-refmac-machine  base source: 08c87bb653a3
+inherited Cpus_allowed_list: 32-47
+
+### control 1: revert the positive whitelist to the old negative check
+[revert_whitelist] prefetch_lifecycle exit=1  (MUST be nonzero: the control has to catch the reverted defect)
+FAIL: format routing for movie.spi should be in-line
+FAIL: format routing for movie.stk should be in-line
+FAIL: format routing for movie.xmp should be in-line
+FAIL: format routing for movie.vol should be in-line
+FAIL: format routing for movie.img should be in-line
+FAIL: format routing for movie.hed should be in-line
+[revert_whitelist] total FAIL lines: 11
+
+### control 2: revert the automatic budget to queue_capacity + 2 estimates
+[revert_budget] prefetch_lifecycle exit=1  (MUST be nonzero: the control has to catch the reverted defect)
+FAIL: queue capacity 2 must not change the automatic byte limit
+FAIL: the automatic limit is exactly three estimates at queue capacity 2
+FAIL: queue capacity 3 must not change the automatic byte limit
+FAIL: the automatic limit is exactly three estimates at queue capacity 3
+FAIL: queue capacity 8 must not change the automatic byte limit
+FAIL: the automatic limit is exactly three estimates at queue capacity 8
+[revert_budget] total FAIL lines: 8
+
+### control 3: revert the explicit move assignment to = default
+[revert_moveassign] prefetch_lifecycle exit=1  (MUST be nonzero: the control has to catch the reverted defect)
+FAIL: the previous frames were freed before their bytes were returned
+FAIL: self-move keeps the frames
+[revert_moveassign] total FAIL lines: 2
+##### series rc=0 at 2026-09-28T06:50:55Z
+##### NEGCTL DONE

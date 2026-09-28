@@ -1,0 +1,11 @@
+  normal:  4/4 movies identical; budget=466944 B, peak_reserved=466944 B, peak_queue=1
+  control: a changed option does change the pixels (the checks can fail)
+  mixed:   4/4 identical across differing geometry and frame counts (decoded=4, inline=0)
+  tight:   3/3 identical with a 9 MiB budget holding one movie (unit=8413184 B, peak_reserved=8413184 B)
+  starved: 3/3 identical with a 8 MiB budget, all via the counted in-line fallback (over_budget_grants=3)
+  gain:    4/4 identical with a gain reference applied, all 4 prefetched
+  frames:  4/4 identical with --first_frame_sum 2 --last_frame_sum 7, all 4 prefetched, start frame recorded as 2
+  damaged-first: exit 1 matches serial, both healthy movies retained and identical
+  damaged-last: exit 1 matches serial, both healthy movies retained and identical
+  resume:  non-prefix resume identical, full 4/4 coverage, 3 movies prefetched
+prefetch equivalence: all cases identical to serial

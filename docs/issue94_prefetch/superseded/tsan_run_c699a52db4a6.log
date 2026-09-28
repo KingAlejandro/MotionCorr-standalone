@@ -1,0 +1,34 @@
+##### TSan rerun with ASLR disabled (setarch -R)
+date_utc: 2026-09-28T00:23:51Z  host: small-refmac-machine  source_sha: c699a52db4a6465403e48f3c888327dd5b4aa839
+Reason: the first attempt's serial arm died at process start with
+  'FATAL: ThreadSanitizer: unexpected memory mapping'
+which is a TSan/ASLR interaction at load time, not a program fault: it happens
+before main(), and the prefetch arm of the same binary started fine. setarch -R
+pins the layout so both arms start reliably. Recorded rather than quietly retried.
+vm.mmap_rnd_bits: 
+
+inherited Cpus_allowed_list: 32-47
+##### 1. PrefetchLifecycle under TSan
+exit=0
+WARNING count: 0
+prefetch lifecycle: all checks passed
+
+##### 2. serial vs prefetch, real TIFF and MRC readers, under TSan
+movies: Movies/mov0.mrcs Movies/mov1.mrcs Movies/mov2.mrcs Movies/mov3.mrcs Movies/real0.tiff Movies/real1.tiff
+serial exit=0
+prefetch exit=0
+serial   ThreadSanitizer WARNING count: 0
+prefetch ThreadSanitizer WARNING count: 0
+prefetch accounting:
+ prefetch: budget_bytes = 430080, peak_reserved_bytes = 9469952, peak_queue_occupancy = 1
+ prefetch: decoded = 4, inline_loaded = 2, failed = 0, forced_grants = 2
+ prefetch: producer_budget_blocked_s = 0, producer_queue_blocked_s = 0.0829693, consumer_wait_s = 0.00141183
+ prefetch: process_peak_rss_bytes = 130170880 (whole process, kernel high-water)
+outputs: serial=6 prefetch=6
+  6 corrected images compared under TSan, 0 differ, 0 empty
+pixel comparison exit=0
+
+##### any TSan report text
+(end of reports)
+##### series rc=0 at 2026-09-28T00:24:21Z
+##### ALL DONE

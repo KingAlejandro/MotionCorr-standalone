@@ -5,9 +5,9 @@
 | Issue | #53 — current-main multi-GPU scheduler |
 | Model | `claude-opus-5` (high effort), Claude Code / T3 Code |
 | Task class | implementation |
-| Phase | 4 — draft PR open; both independent reviews recorded and their findings fixed |
+| Phase | 5 — native two-GPU correctness complete; GPU slot RELEASED |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (current main) |
-| Head | `e5431fa` |
+| Head | `69638bf` |
 | Branch | `round96/53-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-20acbcac` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/106 (draft) |
@@ -81,8 +81,19 @@ Both required read-only reviews were run and their findings are fixed in
 
 ## Active jobs / allocations
 
-None. cpu64 scratch at `~/mc-issue53-round96` and `~/mc-issue53-round96-base`;
-no job is holding a lock.
+**None. The GPU slot is RELEASED as of 2026-09-28 07:07 UTC.** Verified at
+release: zero processes whose executable is under the run tree (checked via
+`/proc/*/exe`, not a self-matching `pgrep`), zero compute apps on any device,
+all four GPUs at 1 MiB / 0%, `flock /tmp/motioncorr-bench.lock` unheld, host
+load 0.74. #69/#110/#94 are unblocked by this release.
+
+Allocation used while held: GPU0 `GPU-eddb42fe…` and GPU1 `GPU-cd5b9f86…` only;
+all MotionCorr descendants inside CPUs 96-111 on NUMA node 1; build
+`taskset -c 96-103 -j 8`; worker masks `96-103` and `104-111`, disjoint;
+`--j 4 --max_io_threads 4`; every arm under the one benchmark mutex. GPU3 never
+touched. GPU2 idle during the main arms, later running #69's authorized work —
+recorded as concurrent occupancy, not gated on. Scratch retained at
+`~/mc-i53-gpu` on `4-gpu-vm`.
 
 ## Blockers
 
@@ -90,29 +101,31 @@ None for PR A.
 
 ## NEEDS_GPU
 
-Requested, **not scheduled**, **UNRUN**, and reported as unrun. Full plan and
-exact commands: `docs/multi_gpu/NEEDS_GPU.md`.
+**Satisfied and closed.** Full record: `docs/multi_gpu/GPU_ACCEPTANCE.md`,
+artifacts in `docs/multi_gpu/gpu_evidence/`.
 
-- Purpose: native all-24 **serial-versus-sharded exact equality** with physical
-  GPU UUID and completed-stage witnesses. **Correctness only — no timing arm,
-  no competing benchmark matrix.** #26 owns this round's slot.
-- Resources, per the 28 Sep resource update: shared `4GPUs`, **initially at most
-  2 GPUs**; aggregate **16 logical CPUs 96-111 on NUMA node 1**; one
-  `flock /tmp/motioncorr-bench.lock`. A dedicated SCARF allocation preferred if
-  offered. One serial arm, one sharded arm, 24 comparator invocations, two
-  argument-parser probes. No repeats — nothing is being timed.
-- Inputs: `movies.star` `fb998f70…`, `gain.mrc` `8919cdc7…`, verified against
-  `Movies/SHA256SUMS.txt`. Chosen cores, inherited cpuset, NUMA/memory policy and
-  actual GPU UUIDs recorded per run, as the resource update requires.
-- Includes the one claim PR A's CPU evidence cannot support: that an **unpatched
-  CUDA build** resolves `--gpu 0:1:2:3` to device 0 and announces it. That is
-  currently a code-reading claim only.
-- Both arms' complete output trees retained — a parity run cannot certify an arm
-  whose outputs were deleted.
+Source `f433662`, binary `d4e3afb8…`, Release + `-DCUDA=ON` sm80, nvcc 12.8.61,
+driver 570.86.10. Inputs 25/25 verified against `Movies/SHA256SUMS.txt`.
+
+| Arm | Result |
+|---|---|
+| Serial CUDA vs two-worker two-GPU sharded, 24 pairs | **24/24 exact PASS** |
+| Aggregate `corrected_micrographs.star` | identical, canonical order |
+| Device witness | **2 distinct physical UUIDs**, 0 unwitnessed / shared / wrong |
+| Launcher inertness, plain serial vs 1 worker | 24/24 exact PASS |
+| Owned-child failure (SIGKILL) | merge refused, 0 strays, 0 owned compute apps |
+| Non-prefix resume (indices 5-11 missing) | merge PASS, 24/24 exact PASS |
+| Unpatched main, `--gpu 0:1:2:3`, CUDA build | ran all 24 on **one** device, exit 0 |
+
+**No timing, throughput or scaling figure was measured or is claimed.** #26 owns
+that; other work shared the host.
+
+Unrun and explicitly not claimed: >2 devices, `--grouping_for_ps`,
+`--even_odd_split`, EER inputs, gain rotation/flip, other geometries and frame
+counts. `logfile.pdf` equivalence excluded by construction. CPU/RELION Gate 2
+untouched and still separately failing.
 
 ## Next step
 
-Awaiting maintainer review of PR #106 and a #26-coordinated GPU slot. No further
-work is planned on this branch until one or the other arrives; PR B (coordinator
-gain/merge flags) and PR C (bounded dynamic assignment) are separate and not
-started.
+Awaiting maintainer and @codex review of PR #106. PR B (coordinator gain/merge
+flags) and PR C (bounded dynamic assignment) remain separate and not started.

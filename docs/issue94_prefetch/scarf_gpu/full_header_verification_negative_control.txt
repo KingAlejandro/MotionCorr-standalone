@@ -1,0 +1,13 @@
+negative control for the MRC comparison
+  mutation                                        result    verdict
+  timestamp changes to another valid timestamp    accepted  OK
+  one pixel byte flips                            caught    OK   [probe: PIXELS DIFFER]
+  main header byte flips (nx)                     caught    OK   [probe: main header bytes 0..224 differ]
+  label prefix byte flips (Relion -> Reliom)      caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [229] (count 1)]
+  unused label record 1 gains content             caught    OK   [probe: label area differs outside the timestamp whitelist at file offsets [304, 305, 306, 307] (count 4)]
+  timestamp replaced by same-length garbage       caught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  timestamp replaced by an impossible date        caught    OK   [probe: writer timestamps sit at different offsets, [(10, 29)] vs []]
+  nsymbt claims an extended header                caught    OK   [probe: nsymbt differs, 0 vs 16]
+  nlabl changes                                   caught    OK   [probe: main header bytes 0..224 differ]
+  file truncated                                  caught    OK   [probe: file sizes differ, 1088 vs 1040]
+  self-test: PASS

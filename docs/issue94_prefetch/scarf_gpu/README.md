@@ -1,5 +1,15 @@
 # Issue #94 — native CUDA prefetch off/on, on dedicated SCARF allocations
 
+> **CORRECTED — see [`../CORRECTIONS.md`](../CORRECTIONS.md).** Four corrections apply to this
+> document and are not edited into the tables below, which are kept as originally recorded:
+> (1) the "0 of 9" headline is **1 of 9** — series A pair 1 is +5.273 s, prefetch faster, as
+> the table in §2 already shows; (2) "72/72 normalized headers" compared only bytes 0-224 and
+> has since been re-verified over the **whole file** minus a 19-byte justified timestamp
+> whitelist, across all 12 retained pairs; (3) the cpu16 manifest's
+> `distinct_physical_cores: 0` / empty `numa_nodes_spanned` are an awk range-parsing bug —
+> the real values are 8 cores across NUMA nodes 0 and 1; (4) §4's mechanism is a
+> **hypothesis**, not a measurement. The verdict is unchanged.
+
 **Verdict: no measurable benefit, a reproducible +86% host memory cost. Do not promote.**
 Prefetch stays opt-in and off by default. This is the negative result the issue asked to be
 preserved rather than argued away.

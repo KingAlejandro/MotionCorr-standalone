@@ -1,5 +1,9 @@
 # Issue #94 bounded next-movie prefetch — validation evidence
 
+> **See [`CORRECTIONS.md`](CORRECTIONS.md)** for five appended corrections to claims made in
+> this directory and in the #94/#108/#66 comments, including the "0 of 9" count (it is 1 of 9)
+> and the scope of the header comparison. Raw tables and logs are preserved unedited.
+
 What this directory contains, and equally what it does not: **no timing, no GPU run and no
 speedup.** The overlap this change makes possible has not been measured. #26 owns this round's
 initial GPU benchmark slot, so the screening script is prepared and unrun.

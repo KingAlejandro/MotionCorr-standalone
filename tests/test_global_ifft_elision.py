@@ -8,7 +8,7 @@ the failure is quiet: the dose-weighted micrograph still looks right because a
 later transform recomputes it, only `_EVN.mrc`/`_ODD.mrc` are wrong, and the
 wrong values come from an uninitialised buffer, so they vary between runs.
 
-Three independent oracles, none of which needs a stored reference fixture:
+Five independent oracles, none of which needs a stored reference fixture:
 
   A. dose-weighting independence -- `_EVN`/`_ODD` are unweighted sums, so with
      the same selected frames they must not change when `--dose_weighting` is
@@ -31,14 +31,25 @@ Three independent oracles, none of which needs a stored reference fixture:
      even on correct code. It is therefore also sensitive to the polynomial fit
      being accepted, which is why --bfactor is pinned below.
 
-Oracle A is also exercised in the configuration where the elision actually
-fires (no `--even_odd_split`, no `--save_noDW`), via oracle D: the dose-weighted
-micrograph must not depend on `--save_noDW`, because those two invocations take
-opposite branches at the elision.
+  D. the dose-weighted micrograph must not depend on `--save_noDW`, because
+     those two invocations take opposite branches at the elision. Note what
+     this oracle can and cannot see: the `.mrc` it compares is recomputed by
+     the post-dose-weighting transform, so that comparison cannot be perturbed
+     by any elision-predicate error. D's power against the predicate comes from
+     its product-set assertions, not from its pixels.
+  E. the unweighted micrograph must not depend on `--dose_weighting` -- oracle
+     A's invariant applied to `_noDW.mrc`, the product `_EVN`/`_ODD` cannot
+     reach. `keep` is the only arm where `save_noDW` alone makes
+     `pre_dw_sum_needed` true, so without E, restating the elision guard so it
+     drops `save_noDW` while the consumer at the sum keeps it -- the same
+     copy-drift as the PR #57 case, one variable over -- corrupts `_noDW.mrc`
+     and leaves every other oracle, and the rest of the suite, green.
 
-Comparisons are on the full pixel payload and the core header, never on file
-existence. The MRC label area at offset 224 holds a strftime timestamp and is
-excluded; everything before it is compared byte for byte.
+Comparisons are on the full pixel payload and the core header. The product-set
+assertions additionally check that each arm wrote exactly the products it asked
+for and no others; oracle D's demonstrated power is one of those. The MRC label
+area at offset 224 holds a strftime timestamp and is excluded; everything
+before it is compared byte for byte.
 
 What this does NOT guard: the existence of the optimisation. Nothing here
 observes whether the transform was actually skipped, so reverting the elision to
@@ -143,6 +154,22 @@ def same(a, b, keys, left, right):
         assert hd_a == hd_b, f'{k}: core header differs between {left} and {right}'
 
 
+def same_across(a, ka, b, kb, left, right):
+    """Compare one product against its counterpart under a different name."""
+    assert ka in a, f'{left}: expected product {ka} was not written'
+    assert kb in b, f'{right}: expected product {kb} was not written'
+    px_a, hd_a = a[ka]
+    px_b, hd_b = b[kb]
+    assert len(px_a) == len(px_b), \
+        f'{ka} vs {kb}: payload sizes differ, {left} vs {right}'
+    if px_a != px_b:
+        n = sum(x != y for x, y in zip(px_a, px_b))
+        raise AssertionError(
+            f'{ka} vs {kb}: {n} of {len(px_a)} pixel bytes differ '
+            f'between {left} and {right}')
+    assert hd_a == hd_b, f'{ka} vs {kb}: core header differs between {left} and {right}'
+
+
 def test_global_ifft_elision(binary: Path = None):
     if binary is None:
         binary = Path(__file__).resolve().parent.parent / 'build' / 'motioncorr'
@@ -190,13 +217,40 @@ def test_global_ifft_elision(binary: Path = None):
         assert '_noDW.mrc' not in elide, \
             'elided run wrote _noDW.mrc, which it was not asked for'
         assert '_noDW.mrc' in keep, '--save_noDW did not write _noDW.mrc'
-        assert '_EVN.mrc' not in elide and '_EVN.mrc' not in keep, \
-            'even/odd output appeared without --even_odd_split'
+        for absent in ('_EVN.mrc', '_ODD.mrc'):
+            assert absent not in elide and absent not in keep, \
+                f'{absent} appeared without --even_odd_split'
+
+        # --- Oracle E: _noDW.mrc must not depend on --dose_weighting --------
+        # Without dose weighting the unweighted sum IS the micrograph, so with
+        # matched selected frames it must equal the _noDW.mrc of the weighted
+        # run.
+        #
+        # Other tests do read _noDW.mrc pixels -- test_runner_contract.py:97
+        # and :117 -- but both pass --even_odd_split, which holds
+        # pre_dw_sum_needed true so the elision never fires there, and both
+        # compare one binary against itself, so a uniform corruption cancels.
+        # Neither can see this.
+        #
+        # The second comparison anchors on an --even_odd_split arm on purpose.
+        # `plain` and `keep` can both be elided by a single restatement that
+        # drops !do_dose_weighting and save_noDW together, and two buffers of
+        # uninitialised heap may happen to agree; even_odd_split is a term of
+        # pre_dw_sum_needed, so `eo_keep` cannot elide unless that term is
+        # dropped too -- and oracle A catches that.
+        plain = products(invoke(binary, work, star, 'plain', flat), 'plain')
+        same_across(plain, '.mrc', keep, '_noDW.mrc',
+                    'no dose weighting', 'dose weighted with --save_noDW')
+        eo_keep = products(invoke(binary, work, star, 'eo_keep',
+                                  flat + ['--even_odd_split', '--save_noDW'] + dw), 'eo_keep')
+        same(eo_keep, keep, ('_noDW.mrc',),
+             'even/odd split (cannot elide)', 'dose weighted with --save_noDW')
 
     # --- Oracle C: the predicate is not too broad --------------------------
-    # If the elision also swallowed the frames patch clipping reads, every patch
-    # would report zero shift and --patch_x 3 would collapse onto the --patch_x 1
-    # answer. The generated fixture above is motionless, so patch alignment finds
+    # If the elision also swallowed the frames patch clipping reads, alignPatch
+    # fails to converge, the patches are skipped, the model is rejected for too
+    # few observations, and --patch_x 3 collapses onto the --patch_x 1 answer.
+    # The generated fixture above is motionless, so patch alignment finds
     # nothing there and the two agree even on correct code; this check therefore
     # uses the repository's synthetic movie, which carries real motion.
     movie = Path(__file__).resolve().parent.parent / 'test-data/synthetic/synthetic_movie.tiff'
@@ -230,7 +284,9 @@ def test_global_ifft_elision(binary: Path = None):
     print('PASS: global inverse FFT elision preserves every product')
     print('  A dose-weighting independence of EVN/ODD  ok')
     print('  C patch alignment still contributes       ok')
-    print('  D elided branch matches non-elided branch ok')
+    print('  D elided branch matches non-elided branch ok (product set;')
+    print('                                                pixels cannot fail)')
+    print('  E _noDW.mrc independent of --dose_weighting ok')
     print('  B determinism on the eliding arm          ok (defence in depth;')
     print('                                                power undemonstrated)')
     return True

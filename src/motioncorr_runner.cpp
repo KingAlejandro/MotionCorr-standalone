@@ -21,6 +21,7 @@
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <climits>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED

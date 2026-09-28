@@ -75,6 +75,32 @@ add_executable(motioncorr src/apps/run_motioncorr.cpp)
 target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
+# Issue #85 lane A: TIFF ingest attribution benchmarks. Read-only measurement
+# tools; they link the production reader but change no production behaviour,
+# and they are off unless explicitly requested so ordinary builds and CI are
+# unaffected.
+option(BENCHMARKS "Build the ingest attribution benchmarks" OFF)
+if(BENCHMARKS)
+    add_executable(tiff_ingest_bench benchmarks/tiff_ingest_bench.cpp)
+    target_link_libraries(tiff_ingest_bench PRIVATE motioncorr_core)
+    # The H2D arm needs only cudart, not a CUDA build of the core, so it is
+    # available whenever a toolkit is present. One build path, so there is no
+    # second way to produce this evidence.
+    include(CheckLanguage)
+    check_language(CUDA)
+    if(CMAKE_CUDA_COMPILER)
+        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+            set(CMAKE_CUDA_ARCHITECTURES 80)
+        endif()
+        enable_language(CUDA)
+        find_package(CUDAToolkit REQUIRED)
+        add_executable(h2d_stage_bench benchmarks/h2d_stage_bench.cu)
+        target_link_libraries(h2d_stage_bench PRIVATE CUDA::cudart)
+    else()
+        message(STATUS "BENCHMARKS: no CUDA compiler found, skipping h2d_stage_bench")
+    endif()
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)

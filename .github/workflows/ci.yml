@@ -179,7 +179,7 @@ jobs:
       image: nvidia/cuda:12.8.0-devel-ubuntu24.04@sha256:9a8fffc32a955361aa66d754e7a0cda2513052eaf5aaf8f3ba69b80578d1c6a9
     steps:
       - name: Install build dependencies
-        run: |\
+        run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             git cmake build-essential pkg-config libfftw3-dev libtiff-dev \

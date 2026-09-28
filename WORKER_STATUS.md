@@ -7,7 +7,7 @@
 | task class | validation |
 | phase | 5/5 — Review findings addressed, validated on cpu64, committed & pushed |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| head | `fdf14eeec27d196f9071b4de44e5e5927ebb72f5` |
+| head | `8069c3fd45a3505ab5c15fc2795e9c3d74ba5330` |
 | branch | `round96/72-gemini-3-8-flash` |
 | worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-1d15fa94` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/102 |

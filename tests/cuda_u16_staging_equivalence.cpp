@@ -12,15 +12,19 @@
 // unconditional store would leave d_Iframes uninitialised while the sum stayed
 // correct -- invisible to any sum-based check, and consumed by the FFT.
 //
-// Case 3 uses a gain containing zero, a negative entry and a tiny entry. The negative
-// entry is there for the zero-sample product: 0.0f * -1.5f is -0.0f, which a seeded
-// accumulator would turn into +0.0f while a zeroed one keeps as -0.0f.
+// Case 3 uses a gain containing zero, a negative entry and a subnormal entry. The
+// negative entry is there for the zero-sample product: 0.0f * -1.5f is -0.0f. The
+// reference accumulator starts at +0.0f, and +0.0f + (-0.0f) is +0.0f, so the uint16
+// path must memset d_Isum rather than seed it with frame 0's value -- a seeded store
+// would keep -0.0f. That distinction is only observable if the fixture actually
+// contains a zero sample under a negative gain entry, which assertFixture() checks.
 
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/image.h"
 #include "src/multidim_array.h"
 
 #include <cuda_runtime.h>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -32,14 +36,23 @@ const int NX = 61;   // deliberately not a multiple of the 256-thread block
 const int NY = 47;
 const int NFRAMES = 5;
 
+// Pixels whose gain entry is pinned below. Chosen so each lands on a distinct pixel.
+const long int PIX_GAIN_ZERO     = 101;
+const long int PIX_GAIN_NEGATIVE = 103;
+const long int PIX_GAIN_SUBNORMAL = 107;
+
 unsigned short sample(int iframe, long int pixel) {
     // Spans the whole uint16 range and pins the endpoints, so the widening is
     // exercised at 0 and 65535 rather than only in the middle.
     if (pixel == 0) return 0;
     if (pixel == 1) return 65535;
     if (pixel == 2) return 32768;
+    // A zero sample on the negative-gain pixel, so the -0.0f product exists.
+    if (pixel == PIX_GAIN_NEGATIVE) return 0;
     return (unsigned short)((pixel * 7919 + iframe * 104729) % 65536);
 }
+
+bool poisonFrames(CudaMovieSession &s);
 
 struct Arm {
     MultidimArray<float> sum;
@@ -50,14 +63,27 @@ bool runFloatArm(const std::vector<Image<float> > &in, const MultidimArray<float
                  Arm &out, std::ostream &log) {
     CudaMovieSession s(NX, NY, NFRAMES, 0, log);
     if (!s.initialize()) return false;
+    if (!poisonFrames(s)) return false;
     if (!s.applyGainDefectsAndSum(in, gain, out.sum, true)) return false;
     return s.downloadRealFrames(out.frames);
+}
+
+// Both arms poison the resident frame buffer before running. Without this the frame
+// comparison can be vacuous: the two arms run back to back, cudaMalloc does not zero
+// reused memory, and the uint16 arm's d_Iframes is likely to come back holding the
+// float arm's just-freed contents -- which are exactly the expected answer. Dropping
+// the uint16 kernel's unconditional store would then still pass. 0xA5A5A5A5 is a
+// finite float that no legitimate value here can equal.
+bool poisonFrames(CudaMovieSession &s) {
+    return cudaMemset(s.getDeviceRealFrames(), 0xA5,
+                      (size_t)NX * NY * NFRAMES * sizeof(float)) == cudaSuccess;
 }
 
 bool runU16Arm(const std::vector<Image<unsigned short> > &in, const MultidimArray<float> *gain,
                Arm &out, std::ostream &log) {
     CudaMovieSession s(NX, NY, NFRAMES, 0, log);
     if (!s.initialize()) return false;
+    if (!poisonFrames(s)) return false;
     if (!s.applyGainDefectsAndSumU16(in, gain, out.sum, true)) return false;
     return s.downloadRealFrames(out.frames);
 }
@@ -109,10 +135,34 @@ int main() {
     for (long int p = 0; p < n; p++) {
         DIRECT_MULTIDIM_ELEM(gain_plain, p) = 0.5f + (float)(p % 17) / 32.0f;
         float g = 1.0f + (float)(p % 9) / 8.0f;
-        if (p % 101 == 0) g = 0.0f;         // dead pixel, as a real gain has
-        if (p % 103 == 0) g = -1.5f;        // sign change: makes 0 * g == -0.0f
-        if (p % 107 == 0) g = 1.0e-30f;     // near-denormal product
+        if (p == PIX_GAIN_ZERO)      g = 0.0f;      // dead pixel, as a real gain has
+        if (p == PIX_GAIN_NEGATIVE)  g = -1.5f;     // sign change: 0 * g == -0.0f
+        if (p == PIX_GAIN_SUBNORMAL) g = 1.0e-44f;  // every product is subnormal
         DIRECT_MULTIDIM_ELEM(gain_hostile, p) = g;
+    }
+
+    // A fixture that does not contain the cases the comment claims makes every
+    // assertion below vacuous for those cases. Count them rather than assume them.
+    {
+        long int neg_zero_products = 0, zero_gain = 0, subnormal_products = 0;
+        for (int i = 0; i < NFRAMES; i++) {
+            for (long int p = 0; p < n; p++) {
+                const float v = (float)DIRECT_MULTIDIM_ELEM(u16[i](), p);
+                const float g = DIRECT_MULTIDIM_ELEM(gain_hostile, p);
+                const float prod = v * g;
+                if (prod == 0.0f && std::signbit(prod)) neg_zero_products++;
+                if (g == 0.0f) zero_gain++;
+                if (prod != 0.0f && std::fabs(prod) < 1.17549435e-38f) subnormal_products++;
+            }
+        }
+        std::cout << "fixture: " << neg_zero_products << " negative-zero products, "
+                  << zero_gain << " zero-gain pixels, "
+                  << subnormal_products << " subnormal products\n";
+        if (neg_zero_products == 0 || zero_gain == 0 || subnormal_products == 0) {
+            std::cerr << "FAIL fixture does not contain the cases the hostile-gain arm "
+                         "exists to exercise; that arm would prove nothing\n";
+            return 1;
+        }
     }
 
     struct Case { const char *name; const MultidimArray<float> *gain; };

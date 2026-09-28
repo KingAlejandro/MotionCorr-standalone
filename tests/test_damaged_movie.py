@@ -360,6 +360,35 @@ def test_expected_frame_contract(binary: Path, source: Path):
     print("  [PASS] test_expected_frame_contract")
 
 
+
+def test_tomogram_expected_frames(binary: Path, source: Path):
+    """Use real TomogramSet input; global per-series counts survive flattening."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        (tmp / "Movies").mkdir()
+        shutil.copy(source, tmp / "Movies/eight.tiff")
+        create_clean_truncated_tiff(source, tmp / "Movies/four.tiff", 4)
+        for name, movie in [("one", "eight"), ("two", "four")]:
+            (tmp / f"{name}.star").write_text(
+                f"data_{name}\n\nloop_\n_rlnMicrographMovieName #1\n"
+                f"_rlnMicrographPreExposure #2\nMovies/{movie}.tiff 0\n")
+        header = (
+            "data_global\n\nloop_\n_rlnTomoName #1\n_rlnTomoTiltSeriesStarFile #2\n"
+            "_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n"
+            "_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n"
+            "_rlnTomoTiltMovieFrameCount #7\n")
+        for count, success in [(4, True), (5, False)]:
+            (tmp / "tomograms.star").write_text(
+                header + f"one one.star 1 300 2.7 0.1 8\ntwo two.star 1 300 2.7 0.1 {count}\n")
+            result = run_motioncorr(binary, tmp, ["--i", "tomograms.star", "--o", f"tomo_{count}/",
+                                                   "--j", "4", "--expected_frames", "24"])
+            assert (result.returncode == 0) == success, result.stdout + result.stderr
+            assert result.returncode >= 0, "process died from signal"
+            if not success:
+                assert "expected 5 frames, but decoded 4 frames" in result.stdout + result.stderr
+    print("  [PASS] test_tomogram_expected_frames")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--binary", type=Path, required=True)
@@ -380,6 +409,7 @@ def main():
     test_batch_permutations(args.binary, source)
     test_resume_isolation(args.binary, source)
     test_expected_frame_contract(args.binary, source)
+    test_tomogram_expected_frames(args.binary, source)
 
     print("All TIFF integrity and expected-frame validation tests PASSED.")
     return 0

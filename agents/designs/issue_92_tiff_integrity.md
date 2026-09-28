@@ -40,9 +40,9 @@ TIFFSetDirectory(ftiff, 0);
 ## 2. Technical Architecture & Invariants
 
 ### A. Re-entrant LibTIFF Error Capture
-- Implement `TiffErrorContext` holding `has_error`, `last_error`, and `errors` list.
+- Implement `TiffErrorContext` holding `has_error` and the latest diagnostic (`last_error`); no unbounded error list.
 - **LibTIFF >= 4.5+**: Use `TIFFOpenOptionsAlloc()`, `TIFFOpenOptionsSetErrorHandlerExtR()`, and `TIFFOpenExt()` to bind `TiffErrorContext` per handle. This provides re-entrant, thread-safe error capture across concurrent OpenMP threads.
-- **LibTIFF < 4.5 compatibility**: Use a `thread_local TiffErrorContext*` pointer with `TIFFSetErrorHandlerExt` / `TIFFSetErrorHandler`.
+- **LibTIFF < 4.5 compatibility**: Use a `thread_local TiffErrorContext*` pointer with `TIFFSetErrorHandler`, installed once via `std::call_once`. Atomically publish and forward the previous error handler outside an active MotionCorr context. Preserve warning handlers. Modern builds never replace process-global handlers.
 - Callbacks must never throw C++ exceptions across the C library ABI boundary; they record the error into `TiffErrorContext` and return. C++ callers check the context immediately after LibTIFF invocations and throw `REPORT_ERROR`.
 
 ### B. Directory Traversal and Normal EOF Distinction
@@ -61,7 +61,11 @@ TIFFSetDirectory(ftiff, 0);
 
 ### D. Expected Frame Count Contract
 - Add optional CLI option `--expected_frames` (default: `-1`, unconstrained).
-- Inspect input STAR metadata table (`MDin`) for `rlnNrOfFrames`, `rlnMicrographFrameNumber`, or `rlnTomoTiltMovieFrameCount`.
+- Inspect input movie STAR rows for `rlnNrOfFrames` or `rlnTomoTiltMovieFrameCount`. `rlnMicrographFrameNumber` is an index and is explicitly excluded.
+- Counts must be positive; CLI accepts only positive values or the `-1` sentinel. Conflicting row count labels are rejected.
+- Precedence: row count, then tomography global `rlnTomoTiltMovieFrameCount` mapped through its original optics group, then CLI fallback. Row metadata deliberately overrides a different CLI fallback.
+- Expectations describe decoded processing frames, before first/last-frame selection. EER processing frames are already grouped (`raw_frames / eer_grouping`); raw acquisition counts must not be supplied as grouped expectations.
+- Resolve once per movie; preserve the vector alongside filenames through unfinished/at-most filtering. Both initial header and execution header use that same resolved count. Resume also compares the saved model's frame count before accepting an existing result.
 - If an authoritative expected frame count $N_{exp} > 0$ is available:
   - If $N_{decoded} \neq N_{exp}$, throw:
     `REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " + integerToString(expected) + " frames, but decoded " + integerToString(nn) + " frames.")`
@@ -112,3 +116,11 @@ TIFFSetDirectory(ftiff, 0);
    - Damaged-first and damaged-last batch runs at `-j 1` and `-j 4`: Healthy movies retained, job exits non-zero, resume retries damaged.
 6. **Numerical Identity on Healthy Inputs**:
    - Healthy movie decoded buffers and corrected MRC outputs must remain identical to baseline.
+
+## 5. PR103 review corrections (Codex, 2026-09-28)
+
+Architecture consultation and independent read-only review cover count semantics, filtering/resume, TIFF callbacks, scope and licensing. No alignment mathematics, CUDA kernels, dependencies or numerical gates change.
+
+Modern TIFF open-option allocation failure is fatal. Error callbacks set the failure flag before best-effort message allocation and never throw; warnings retain LibTIFF's existing behavior. Open-time errors and errors accompanying successful directory selection are also fatal.
+
+Runtime coverage is reported separately for its exact source and executable. The earlier worker's evidence is historical and does not validate these changes. EER grouped-count and in-memory TIFF callback paths are not claimed exercised; inherited in-memory read/seek callbacks can still throw across the C ABI and need separate follow-up. A cleanly terminated shortened TIFF remains indistinguishable from a valid short movie without an authoritative count.

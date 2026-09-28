@@ -105,7 +105,7 @@ public:
 	int first_frame_ali, last_frame_ali, first_frame_sum, last_frame_sum;
 
 	// Expected number of frames per movie (from --expected_frames, default: -1)
-	int expected_frames;
+	int expected_frames = -1;
 
 	// Group this number of frames and write summed power spectrum. -1 == do not write
 	int grouping_for_ps;
@@ -221,7 +221,7 @@ public:
 
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
-	bool isMovieComplete(const FileName &movie);
+	bool isMovieComplete(const FileName &movie, int effective_expected_frames = -1);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);
@@ -230,7 +230,7 @@ public:
 	void getShiftsMotioncor2(FileName fn_log, Micrograph &mic);
 
 	// Execute our own implementation for a single micrograph
-	bool executeOwnMotionCorrection(Micrograph &mic);
+	bool executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames = -1);
 
 	// Plot the shifts
 	void plotShifts(FileName fn_mic, Micrograph &mic);

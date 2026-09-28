@@ -3,6 +3,7 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
+#include "src/acc/cuda/cuda_scoped_resources.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -26,78 +27,15 @@
 // file owns and does not unwind is leaked for the lifetime of the process, once per
 // failing global alignment and once per failing patch.
 //
-// These mirror the helpers cuda_realspace_dw.cu has used since #82. They live in an
-// anonymous namespace so this file does not add another global-scope definition of a
-// name that file and cuda_fft_prep.cu already define independently.
-//
-// releaseAll() exists so the success path can still report a failing release, which the
-// straight-line cleanup block used to do. Unlike that block it keeps going after the
-// first failure, so one bad handle cannot strand the rest, and it is idempotent, so the
-// destructor is a harmless backstop on the throwing paths.
+// The owners live in cuda_scoped_resources.h with statically proved capacities, so the
+// hot patch loop performs no host heap allocation for them (PR107 review P2).
+
 namespace {
-
-class ScopedDeviceMemory {
-public:
-    ~ScopedDeviceMemory() { (void)releaseAll(); }
-    void add(void *allocation) { allocations.push_back(allocation); }
-    cudaError_t releaseAll() {
-        cudaError_t first_error = cudaSuccess;
-        for (size_t i = 0; i < allocations.size(); ++i) {
-            if (allocations[i] == nullptr) continue;
-            const cudaError_t err = cudaFree(allocations[i]);
-            if (err != cudaSuccess && first_error == cudaSuccess) first_error = err;
-        }
-        allocations.clear();
-        return first_error;
-    }
-
-private:
-    std::vector<void *> allocations;
-};
-
-class ScopedCudaEvents {
-public:
-    ~ScopedCudaEvents() { (void)releaseAll(); }
-    void add(cudaEvent_t event) { events.push_back(event); }
-    cudaError_t releaseAll() {
-        cudaError_t first_error = cudaSuccess;
-        for (size_t i = 0; i < events.size(); ++i) {
-            const cudaError_t err = cudaEventDestroy(events[i]);
-            if (err != cudaSuccess && first_error == cudaSuccess) first_error = err;
-        }
-        events.clear();
-        return first_error;
-    }
-
-private:
-    std::vector<cudaEvent_t> events;
-};
-
-class ScopedCufftPlan {
-public:
-    ScopedCufftPlan() : plan(0), owns_plan(false) {}
-    ~ScopedCufftPlan() { (void)releaseAll(); }
-    void take(cufftHandle handle) {
-        // Releasing first keeps a second take() from silently dropping the previous
-        // plan. There is one call site today; this stops that from being load-bearing.
-        // Re-taking the handle already held would otherwise destroy it and then mark
-        // the dangling value owned, so that case is skipped rather than released.
-        if (owns_plan && plan == handle) return;
-        (void)releaseAll();
-        plan = handle;
-        owns_plan = true;
-    }
-    cufftResult releaseAll() {
-        if (!owns_plan) return CUFFT_SUCCESS;
-        owns_plan = false;
-        return cufftDestroy(plan);
-    }
-
-private:
-    cufftHandle plan;
-    bool owns_plan;
-};
-
+// Proved by counting call sites in cudaAlignPatchDevice below: eight cudaMalloc, eight
+// cudaEventCreate, one plan, none of them inside a loop. Overflow is checked after the
+// registrations rather than assumed.
+const int ALIGN_MAX_BUFFERS = 8;
+const int ALIGN_MAX_EVENTS  = 8;
 } // namespace
 
 static int findGoodSizeCuda(int request) {
@@ -321,9 +259,9 @@ bool cudaAlignPatchDevice(
     // released on every exit path, including the throwing ones. d_Fframes_in is
     // borrowed -- it is the resident Fourier stack or the caller's patch scratch -- and
     // is modified in place but never freed here.
-    ScopedDeviceMemory memory_cleanup;
-    ScopedCudaEvents event_cleanup;
-    ScopedCufftPlan plan_cleanup;
+    mc_cuda::ScopedDeviceMemory<ALIGN_MAX_BUFFERS> memory_cleanup;
+    mc_cuda::ScopedCudaEvents<ALIGN_MAX_EVENTS> event_cleanup;
+    mc_cuda::ScopedCufftPlan plan_cleanup;
 
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_kernel, ev_stop_kernel;
@@ -412,6 +350,13 @@ bool cudaAlignPatchDevice(
     memory_cleanup.add(d_shiftx);
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
     memory_cleanup.add(d_shifty);
+
+    // Capacity control. add() refuses rather than silently dropping, so a future edit
+    // that adds a ninth resource fails here instead of leaking it on a throwing path.
+    if (memory_cleanup.overflowed() || event_cleanup.overflowed()) {
+        REPORT_ERROR("Internal error: CUDA alignment resource registry exceeded its "
+                     "fixed capacity; a resource would not have been released");
+    }
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
 
@@ -585,11 +530,15 @@ bool cudaAlignPatch(
     // Issue #69: this staging buffer is owned by the wrapper, and every step below --
     // the uploads, the device call and the global copyback -- can leave by exception.
     // Register it before the first of them can throw.
-    ScopedDeviceMemory memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<1> memory_cleanup;
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
     memory_cleanup.add(d_Fframes);
+    if (memory_cleanup.overflowed()) {
+        REPORT_ERROR("Internal error: CUDA alignment staging registry exceeded its "
+                     "fixed capacity; a resource would not have been released");
+    }
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         HANDLE_ERROR(cudaMemcpy(

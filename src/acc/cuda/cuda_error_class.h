@@ -104,13 +104,24 @@ struct CudaRetryDecision {
 };
 
 inline CudaRetryDecision cudaRetryDecisionFor(cudaError_t recorded_by_stage,
+                                              cudaError_t sticky_fatal,
                                               cufftResult recorded_cufft,
                                               cudaError_t pending_on_thread)
 {
     CudaRetryDecision decision;
     (void)recorded_cufft;
 
-    // Either source alone is sufficient evidence of a dead context.
+    // Any of the three sources alone is sufficient evidence of a dead context, and the
+    // sticky one is checked first because it is the only one that cannot be erased. The
+    // PR107 P1 review showed why it is needed: a fatal code can be consumed by the
+    // failing stage's own handler (clearing the pending slot) while an earlier
+    // recoverable code occupies the first-failure record, leaving neither of the other
+    // two sources able to see it.
+    if (cudaErrorPoisonsContext(sticky_fatal)) {
+        decision.verdict = CUDA_RETRY_FATAL;
+        decision.decisive = sticky_fatal;
+        return decision;
+    }
     if (cudaErrorPoisonsContext(recorded_by_stage)) {
         decision.verdict = CUDA_RETRY_FATAL;
         decision.decisive = recorded_by_stage;

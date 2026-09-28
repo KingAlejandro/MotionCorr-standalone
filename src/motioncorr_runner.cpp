@@ -29,6 +29,7 @@
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
 #include "src/acc/cuda/cuda_error_class.h"
+#include "src/acc/cuda/cuda_failure_state.h"
 // REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
 // in the CUDA-guarded patch block below. Keeping the include inside the guard too
 // preserves the invariant that a CPU-only build sees no change from this branch
@@ -2149,19 +2150,28 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					// side, because the session keeps the FIRST failure -- a benign
 					// early allocation miss would then mask a fatal fault on a later
 					// patch of the same movie.
-					const cudaError_t recorded = movie_session->getFirstError();
-					const cufftResult recorded_cufft = movie_session->getFirstCufftError();
+					const CudaFailureState &failure = movie_session->getFailureState();
+					const cudaError_t recorded = failure.firstError();
+					const cufftResult recorded_cufft = failure.firstCufftError();
 					const cudaError_t pending = cudaGetLastError();
-					const CudaRetryDecision decision =
-						cudaRetryDecisionFor(recorded, recorded_cufft, pending);
+					const CudaRetryDecision decision = cudaRetryDecisionFor(failure, pending);
 
 					if (decision.verdict == CUDA_RETRY_FATAL) {
-						const cudaError_t decisive = decision.decisive;
+						// Attribute to the stage that recorded the poisoning code when
+						// there is one. If the verdict came from the pending slot
+						// instead, no stage recorded it, and saying so is better than
+						// printing the location of some earlier unrelated failure.
+						std::string origin;
+						if (failure.isPoisoned()) {
+							origin = std::string(", recorded at ") + failure.fatalStage()
+							       + ":" + integerToString(failure.fatalLine());
+						} else {
+							origin = ", pending on this thread; no stage recorded it";
+						}
 						REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
 						                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
-						                 << cudaGetErrorString(decisive)
-						                 << ", recorded at " << movie_session->getFirstErrorStage()
-						                 << ":" << movie_session->getFirstErrorLine()
+						                 << cudaGetErrorString(decision.decisive)
+						                 << origin
 						                 << ". Refusing to retry alignment on a poisoned context.");
 					}
 
@@ -2175,12 +2185,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					        << iy + 1 << ", " << ix + 1 << ")";
 					if (recorded != cudaSuccess) {
 						logfile << "; recorded CUDA error " << cudaGetErrorString(recorded)
-						        << " at " << movie_session->getFirstErrorStage()
-						        << ":" << movie_session->getFirstErrorLine();
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
 					} else if (recorded_cufft != CUFFT_SUCCESS) {
 						logfile << "; recorded cuFFT error code " << recorded_cufft
-						        << " at " << movie_session->getFirstErrorStage()
-						        << ":" << movie_session->getFirstErrorLine();
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
 					} else if (pending != cudaSuccess) {
 						logfile << "; pending CUDA error " << cudaGetErrorString(pending)
 						        << " (no stage recorded one)";

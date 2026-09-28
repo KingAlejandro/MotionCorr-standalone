@@ -11,6 +11,7 @@
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_failure_state.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
@@ -112,16 +113,14 @@ public:
     // Download real frames to host (used e.g. for fallback)
     bool downloadRealFrames(std::vector<Image<float> > &Iframes);
 
-    // Issue #69: the first failure this session observed, preserved across the helper
+    // Issue #69: the failure state this session observed, preserved across the helper
     // boundary. The internal error handlers consume the CUDA error when they return
     // false, so a later cudaGetLastError() reports cudaSuccess and proves nothing about
-    // context health. A caller deciding whether a retry is safe must use these, not a
-    // fresh last-error read.
-    cudaError_t getFirstError() const { return first_error; }
-    cufftResult getFirstCufftError() const { return first_cufft_error; }
-    const char* getFirstErrorStage() const { return first_error_stage; }
-    int getFirstErrorLine() const { return first_error_line; }
-    bool hasFailed() const { return first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS; }
+    // context health. A caller deciding whether a retry is safe must use this, not a
+    // fresh last-error read. It carries both the first failure (diagnostic provenance)
+    // and a monotonically latched poisoning code that no later or earlier record can
+    // displace -- see CudaFailureState.
+    const CudaFailureState& getFailureState() const { return failure_state; }
 
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
@@ -138,12 +137,9 @@ private:
     void recordFailure(cudaError_t err, const char *stage, int line);
     void recordCufftFailure(cufftResult res, const char *stage, int line);
 
-    // First observed failure, sticky for the life of the session. Not reset by
-    // release(): a movie that failed stays failed for reporting purposes.
-    cudaError_t first_error = cudaSuccess;
-    cufftResult first_cufft_error = CUFFT_SUCCESS;
-    const char *first_error_stage = "";
-    int first_error_line = 0;
+    // Sticky for the life of the session. Not reset by release(): a movie that failed
+    // stays failed for reporting purposes, and a poisoned context never un-poisons.
+    CudaFailureState failure_state;
 
     int nx;
     int ny;

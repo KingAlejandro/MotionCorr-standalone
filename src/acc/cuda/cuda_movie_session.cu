@@ -228,20 +228,16 @@ CudaMovieSession::~CudaMovieSession() {
     release();
 }
 
-// Keep the FIRST failure. A later, shallower error (or a later success) must not
-// overwrite the one that actually ended the stage.
+// Delegates to CudaFailureState, which keeps the first failure for diagnostics AND
+// latches any poisoning code monotonically. An earlier version of this function kept
+// only the first failure, so a recoverable allocation miss on one patch suppressed the
+// recording of a fatal fault on a later one -- PR107 review P1.
 void CudaMovieSession::recordFailure(cudaError_t err, const char *stage, int line) {
-    if (first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS) return;
-    first_error = err;
-    first_error_stage = stage ? stage : "(unknown)";
-    first_error_line = line;
+    failure_state.record(err, stage, line);
 }
 
 void CudaMovieSession::recordCufftFailure(cufftResult res, const char *stage, int line) {
-    if (first_error != cudaSuccess || first_cufft_error != CUFFT_SUCCESS) return;
-    first_cufft_error = res;
-    first_error_stage = stage ? stage : "(unknown)";
-    first_error_line = line;
+    failure_state.recordCufft(res, stage, line);
 }
 
 bool CudaMovieSession::initialize() {

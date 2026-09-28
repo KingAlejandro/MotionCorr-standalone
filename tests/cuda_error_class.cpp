@@ -18,6 +18,8 @@
 // covers the predicate, and says so.
 
 #include "src/acc/cuda/cuda_error_class.h"
+#include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_scoped_resources.h"
 
 #include <cstdio>
 #include <vector>
@@ -137,7 +139,10 @@ const RetryCase RETRY_CASES[] = {
 int runRetryCases() {
     int failures = 0, fatal = 0, permitted = 0;
     for (const RetryCase &c : RETRY_CASES) {
-        const CudaRetryDecision d = cudaRetryDecisionFor(c.recorded, c.recorded_cufft, c.pending);
+        // No sticky fatal in this table; the sticky dimension is covered by the
+        // session-state sequences below, which drive the production object.
+        const CudaRetryDecision d =
+            cudaRetryDecisionFor(c.recorded, cudaSuccess, c.recorded_cufft, c.pending);
         const CudaRetryVerdict got = d.verdict;
         // The decisive code must be one the caller can meaningfully report, and on a
         // fatal verdict it must be the code that actually forced it.
@@ -161,6 +166,143 @@ int runRetryCases() {
     }
     std::printf("%d retry cases (%d fatal, %d permitted), %d failures\n",
                 (int)(sizeof(RETRY_CASES) / sizeof(RETRY_CASES[0])), fatal, permitted, failures);
+    return failures;
+}
+
+
+// ---------------------------------------------------------------------------------
+// Production session-state regressions (PR107 review P1).
+//
+// These drive the REAL CudaFailureState that CudaMovieSession holds, through ordered
+// failure sequences, rather than feeding synthetic inputs to the predicate. That
+// distinction is the point: the defect was not in the predicate, it was that the
+// session discarded a later fatal error, so a predicate-only test could not see it.
+//
+// No CUDA call is made anywhere here -- CudaFailureState is pure host state.
+// ---------------------------------------------------------------------------------
+int runSessionStateSequences() {
+    int failures = 0;
+
+    auto check = [&failures](bool ok, const char *what) {
+        if (!ok) { std::printf("FAIL session-state: %s\n", what); ++failures; }
+    };
+
+    {
+        // THE regression. A recoverable allocation miss is recorded on an early patch
+        // and retried successfully. A later patch faults; its handler CONSUMES the
+        // fatal code (so the thread's last-error slot is clear afterwards) and records
+        // it. Under the old first-wins-only rule the record was discarded and the
+        // verdict saw neither source -> retry on a dead context.
+        CudaFailureState state;
+        state.record(cudaErrorMemoryAllocation, "preparePatchInVram", 700);
+        state.record(cudaErrorIllegalAddress, "preparePatchInVram", 742);
+        const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaSuccess);
+        check(d.verdict == CUDA_RETRY_FATAL,
+              "recoverable then consumed fatal then cleared slot must be FATAL");
+        check(d.decisive == cudaErrorIllegalAddress,
+              "the fatal code must be the decisive one");
+        // Diagnostic provenance is still the first failure; poisoning provenance is
+        // the fatal one. Both are preserved, which is what makes the message honest.
+        check(state.firstError() == cudaErrorMemoryAllocation,
+              "first-failure provenance must survive the later fatal record");
+        check(state.firstLine() == 700, "first-failure line must be the early one");
+        check(state.fatalError() == cudaErrorIllegalAddress, "fatal must be latched");
+        check(state.fatalLine() == 742, "fatal line must be the faulting one");
+        check(state.isPoisoned(), "state must report poisoned");
+    }
+    {
+        // Monotonic the other way round: a fatal first, then recoverable noise, must
+        // not un-poison, and must not have its provenance overwritten.
+        CudaFailureState state;
+        state.record(cudaErrorLaunchFailure, "computeGlobalForwardFFT", 611);
+        state.record(cudaErrorMemoryAllocation, "preparePatchInVram", 700);
+        state.record(cudaErrorInvalidValue, "updateDefectPixels", 580);
+        const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaSuccess);
+        check(d.verdict == CUDA_RETRY_FATAL, "a latched fatal must never be cleared");
+        check(state.fatalLine() == 611, "the FIRST fatal must be kept, not the last");
+        check(state.firstError() == cudaErrorLaunchFailure,
+              "first failure was itself the fatal one");
+    }
+    {
+        // The supported recoverable path must stay permitted, or every ordinary OOM
+        // starts aborting movies.
+        CudaFailureState state;
+        state.record(cudaErrorMemoryAllocation, "preparePatchInVram", 700);
+        const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaSuccess);
+        check(d.verdict == CUDA_RETRY_PERMITTED, "recoverable only must stay permitted");
+        check(!state.isPoisoned(), "recoverable must not mark the state poisoned");
+    }
+    {
+        // A cuFFT failure occupies the first-failure slot but cannot poison; a CUDA
+        // fatal recorded afterwards must still latch and decide.
+        CudaFailureState state;
+        state.recordCufft(CUFFT_EXEC_FAILED, "preparePatchInVram", 745);
+        const CudaRetryDecision permitted = cudaRetryDecisionFor(state, cudaSuccess);
+        check(permitted.verdict == CUDA_RETRY_PERMITTED,
+              "a cuFFT failure alone must not be fatal");
+        state.record(cudaErrorECCUncorrectable, "computeGlobalInverseFFT", 660);
+        const CudaRetryDecision fatal = cudaRetryDecisionFor(state, cudaSuccess);
+        check(fatal.verdict == CUDA_RETRY_FATAL,
+              "a fatal recorded after a cuFFT failure must still latch");
+        check(state.firstCufftError() == CUFFT_EXEC_FAILED,
+              "cuFFT provenance must survive");
+    }
+    {
+        CudaFailureState state;
+        const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaSuccess);
+        check(d.verdict == CUDA_RETRY_PERMITTED, "a clean session must be permitted");
+        check(!state.hasFailed() && !state.isPoisoned(), "clean state must report clean");
+    }
+    {
+        // Nothing recorded, fatal still pending: the slot is then the only evidence.
+        CudaFailureState state;
+        const CudaRetryDecision d = cudaRetryDecisionFor(state, cudaErrorIllegalAddress);
+        check(d.verdict == CUDA_RETRY_FATAL, "pending fatal with no record must be FATAL");
+    }
+
+    std::printf("6 session-state sequences, %d failures\n", failures);
+    return failures;
+}
+
+// ---------------------------------------------------------------------------------
+// Capacity and error controls for the fixed-size scoped owners (PR107 review P2).
+// Null slots are skipped by releaseAll, so this exercises counting, capacity refusal
+// and idempotency without making a single CUDA call.
+// ---------------------------------------------------------------------------------
+int runCapacityControls() {
+    int failures = 0;
+    auto check = [&failures](bool ok, const char *what) {
+        if (!ok) { std::printf("FAIL capacity: %s\n", what); ++failures; }
+    };
+
+    {
+        mc_cuda::ScopedDeviceMemory<8> owner;
+        for (int i = 0; i < 8; ++i) check(owner.add(nullptr), "add within capacity must succeed");
+        check(owner.count() == 8, "count must track the registrations");
+        check(!owner.overflowed(), "a full-but-not-over registry must not report overflow");
+        check(!owner.add(nullptr), "add beyond capacity must refuse");
+        check(owner.overflowed(), "refusal must set the overflow flag, not drop silently");
+        check(owner.count() == 8, "a refused add must not grow the count");
+        check(owner.releaseAll() == cudaSuccess, "release of null slots must succeed");
+        check(owner.count() == 0, "release must reset the count");
+        check(owner.releaseAll() == cudaSuccess, "release must be idempotent");
+    }
+    {
+        mc_cuda::ScopedCudaEvents<8> owner;
+        for (int i = 0; i < 8; ++i) check(owner.add(nullptr), "event add within capacity");
+        check(!owner.add(nullptr), "event add beyond capacity must refuse");
+        check(owner.overflowed(), "event overflow must be reported");
+        check(owner.count() == 8, "refused event add must not grow the count");
+    }
+    {
+        // The wrapper's registry holds exactly one.
+        mc_cuda::ScopedDeviceMemory<1> owner;
+        check(owner.add(nullptr), "single-slot add must succeed");
+        check(!owner.add(nullptr), "second add must refuse");
+        check(owner.overflowed(), "single-slot overflow must be reported");
+    }
+
+    std::printf("3 capacity controls, %d failures\n", failures);
     return failures;
 }
 
@@ -190,11 +332,16 @@ int main() {
                 (int)(sizeof(CASES) / sizeof(CASES[0])), poisoning, recoverable, failures,
                 (int)CUDART_VERSION);
     failures += runRetryCases();
+    failures += runSessionStateSequences();
+    failures += runCapacityControls();
     if (failures) return 1;
     std::printf("PASS classifier separates poisoned-context codes from recoverable ones,\n"
                 "     and a fatal error already consumed by a helper -- leaving the\n"
                 "     last-error slot clear -- still refuses the retry, while a recorded\n"
                 "     recoverable allocation failure still permits the supported path.\n"
+                "     A later fatal error is latched monotonically by the production\n"
+                "     session state even when an earlier recoverable one was recorded\n"
+                "     and the last-error slot has since been cleared.\n"
                 "     These cover the predicates only; no real poisoned context is\n"
                 "     synthesised anywhere in this suite, and no device is used.\n");
     return 0;

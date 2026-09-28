@@ -95,11 +95,21 @@ and that `--prefetch` without `--use_own`, a negative `--prefetch_mem_mb` and a 
   emitted for `--use_own --help`. `cli_contract_412f2f98be40.txt` shows all three options
   present.
 
+## The one CUDA-side check that was possible without a slot
+
+`cuda_syntax_check/` holds a `-fsyntax-only` parse of both changed translation units with
+`-D_CUDA_ENABLED`, against minimal stub runtime/cuFFT/cuRAND headers (the project's own
+`src/acc/cuda/*.h` are the real ones). Both exit 0, and a deliberately broken copy produces an
+error, so the harness really does reach the CUDA-only branches. This matters because a
+CPU-only `ctest` run cannot see a broken `#ifdef _CUDA_ENABLED` branch, and the `Iframes`
+alias and relocated read path sit right next to that code. **It is not a CUDA build**: no
+`.cu` compilation, no link, no execution.
+
 ## Explicitly unrun
 
-- Anything on a GPU. No CUDA build, no CUDA test, no timing, no overlap measurement, no
-  same-backend comparison on the 24 tutorial movies. `scripts/prefetch_gpu_screen.sh` refuses
-  to start without an assigned slot.
+- Anything on a GPU. No real CUDA toolkit build, no CUDA test, no timing, no overlap
+  measurement, no same-backend comparison on the 24 tutorial movies.
+  `scripts/prefetch_gpu_screen.sh` refuses to start without an assigned slot.
 - EER and compressed-MRC inputs through the prefetch path. They are routed to the in-line
   serial loader by design and are **unrun**, not "supported".
 - Multi-worker (2/3/4 GPU process) schedules.

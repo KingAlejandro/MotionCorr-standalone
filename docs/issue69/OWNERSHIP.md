@@ -10,6 +10,8 @@ release, immediate invalidation and no allocating host registry.
 * Host alignment wrappers own their upload staging allocation across upload,
   alignment and copyback, including exceptions.
 * The runner owns movie-local patch Fourier scratch; alignment only borrows it.
+  Its movie-scope guard also releases the legacy retained real-frame cache after
+  early-binning/nonresident patch exceptions, including the last failed movie.
 * CudaMovieSession exclusively owns resident frames, shared FFT workspace/tile,
   its movie plans and resident patch cache. Cache replacement clears pointers and
   capacity/geometry before release, checks release, and publishes new claims only

@@ -1479,6 +1479,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTOC(TIMING_READ_MOVIE);
 
 #ifdef _CUDA_ENABLED
+    // Legacy early-binning/nonresident FFT preparation may retain a real-frame
+    // cache. Its normal release at skip_fitting is insufficient if a patch throws.
+    // Keep ownership bounded to this movie even on the final failed movie.
+    struct MovieFrameCacheGuard {
+        ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
+    } movie_frame_cache_guard;
 	std::unique_ptr<CudaMovieSession> movie_session;
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);

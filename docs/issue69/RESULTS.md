@@ -14,6 +14,7 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Same-backend CPU output, base vs candidate, with negative control | ran, identical — but see §3: this is a build-hygiene control, not a behavioural one |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
 | CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures, CUDART 12080 |
+| Retry-verdict controls, incl. cleared-last-error fatal (device-free) | ran, 11 cases, 0 failures |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
@@ -256,6 +257,67 @@ as poisoning would turn every ordinary OOM into a whole-movie abort and remove a
 working fallback. The table is also required to contain both outcomes, so a predicate
 degraded to always-true or always-false fails rather than passing silently.
 
+## 5b. P1 — absence of a pending error is not proof of a usable context
+
+Raised in the [PR107 review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/107#issuecomment-5861849287)
+and fixed narrowly.
+
+**The defect.** The retry asked "is this context usable?" and answered it with
+`cudaGetLastError()`. That is the host thread's last-error slot, and reading it resets
+it. `CudaMovieSession`'s handlers *consume* the error before returning false — they
+read it, log it, return — so by the time the caller regains control the slot reports
+`cudaSuccess` regardless of what happened. A fatal failure that had already been
+consumed was therefore classified recoverable and retried, and the log said "Context is
+still usable". Absence of a pending error is not a certificate of context health.
+
+**The fix**, using existing mechanisms rather than a recovery framework:
+
+| Piece | What it does |
+|---|---|
+| `CudaMovieSession::recordFailure` / `recordCufftFailure` | Two calls added inside the existing `HANDLE_ERROR` / `CUFFT_CHECK` macros. Record the **first** failure with its stage and line, sticky for the session's life |
+| `getFirstError` / `getFirstCufftError` / `getFirstErrorStage` / `getFirstErrorLine` / `hasFailed` | Expose that preserved status across the helper boundary |
+| `cudaRetryVerdictFor(recorded, recorded_cufft, pending)` | A pure predicate. Decides from the **recorded** status; consults the pending slot only when no stage recorded anything — the caller's own unchecked allocation, which runs through no handler |
+
+A cuFFT failure alone does not force a fatal verdict: `cufftResult` reports
+library-level failures that do not themselves imply a dead CUDA context, and if the
+context did die the accompanying CUDA code says so.
+
+**The CUDA-versus-CPU distinction is preserved in the log text.** `alignPatch()`
+dispatches `cudaAlignPatch()` again while `use_gpu` is true, so on a GPU run the
+re-attempt is a CUDA re-dispatch on the same device, not a CPU fallback. The message now
+says that explicitly and names the recorded stage and line.
+
+**Controls, both device-free, executed on the GPU host without creating a CUDA context**
+([`evidence/cuda-interposition.log`](evidence/cuda-interposition.log)):
+
+```
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+11 retry cases (6 fatal, 5 permitted), 0 failures
+```
+
+The 11 retry cases include the negative control the review asked for — a fatal error
+recorded by a helper that then left the last-error slot clear must **still** refuse the
+retry, covered for illegal address, launch failure and uncorrectable ECC — and the
+supported recoverable case, where a recorded `cudaErrorMemoryAllocation` must still
+permit the re-attempt so an ordinary OOM does not begin aborting movies. The table is
+required to contain both verdicts, so a predicate degraded to always-fatal or
+always-permitted fails.
+
+**What this does not cover.** These are predicate tests. The real resident
+nonconvergence path, an actual poisoned context, and asynchronous execution failure are
+**not** exercised, and the review is right that the CPU S1/S2 experiment does not
+replace a GPU-path test. Those remain in `gpu_plan.md`, unrun.
+
+**A build failure is preserved with this work.** The first commit of this fix did not
+compile under `-DCUDA=ON`: `cuda_error_class.h` used `cufftResult` while including only
+`<cuda_runtime.h>`, which was invisible inside `motioncorr_runner.cpp` because
+`<cufft.h>` arrives there transitively, and broke only when the test included the header
+standalone. 14 compile errors, `cuda_error_class` never linked, the control exited 127.
+See [`evidence/cuda-build-failure-preserved.log`](evidence/cuda-build-failure-preserved.log).
+Noted because the same commit passed **14/14 on cpu64** — none of this code compiles in
+a CPU-only build, so the CPU suite cannot stand in for the CUDA one on any change that
+touches these files.
+
 ## 6. Findings fixed
 
 Against `4c952b3f`; full detail in the ADR. Seven, not six: F7 was found while acting
@@ -269,6 +331,7 @@ on a review finding.
 | F4 | Pointer cleared after the free, so a failing `cudaFree` left it set for `release()` to free again | `cuda_movie_session.cu` `releasePreprocessingBuffers` |
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
+| P1 | The retry decided context health from a later `cudaGetLastError()`, which the failing stage had already consumed and reset — so a fatal, consumed failure was retried as recoverable | `motioncorr_runner.cpp`, `cuda_movie_session.{h,cu}`, `cuda_error_class.h` |
 | F7 | `d_patch_fcomplex_buffer` leaked on every throwing exit from the patch loop, including `alignPatchDevice`'s own throw on any CUDA error — so it leaked once per failing movie. Found while fixing a review finding against F6, but the `alignPatchDevice` path makes it pre-existing, not introduced here | `motioncorr_runner.cpp` local-patch block |
 
 ## 7. Independent review

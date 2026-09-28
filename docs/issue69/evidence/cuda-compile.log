@@ -1,28 +1,43 @@
-START 2026-09-28T01:11:52+00:00 host=4-gpu-vm
-pid 1170521's current affinity list: 96-103
+START 2026-09-28T02:11:18+00:00 host=4-gpu-vm
+pid 1174101's current affinity list: 96-111
+/user.slice
 Cuda compilation tools, release 12.8, V12.8.61
 Build cuda_12.8.r12.8/compiler.35404655_0
-0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe
-1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe
-2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe
-3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe
+NOTE: compilation and device-free unit tests only. No CUDA context is created; nothing runs on a GPU.
 configure=0
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
 build=0
+0
 (no warnings in changed files)
---- all build warnings, pre-existing ---
-5
-/home/alex/MotionCorr-i69/build/cuda_error_class
-/home/alex/MotionCorr-i69/build/cuda_fault_matrix
-/home/alex/MotionCorr-i69/build/cuda_wrapper_upload_failure
-/home/alex/MotionCorr-i69/build/motioncorr
-/home/alex/MotionCorr-i69/build/patch_retry_state
-14
-DONE 2026-09-28T01:12:35+00:00
+--- device-free predicate controls ---
+21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
+11 retry cases (6 fatal, 5 permitted), 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones,
+     and a fatal error already consumed by a helper -- leaving the
+     last-error slot clear -- still refuses the retry, while a recorded
+     recoverable allocation failure still permits the supported path.
+     These cover the predicates only; no real poisoned context is
+     synthesised anywhere in this suite, and no device is used.
+cuda_error_class=0
+--- interposition still intact ---
+  __wrap_cufftExecR2C                1 x cufftExecR2C@plt  (__real_ forward)
+  __wrap_cufftMakePlanMany           1 x cufftMakePlanMany@plt  (__real_ forward)
+  __wrap_cufftPlanMany               1 x cufftPlanMany@plt  (__real_ forward)
+  __wrap_cufftSetWorkArea            1 x cufftSetWorkArea@plt  (__real_ forward)
+
+PASS interposition reaches every matched production call site, and the check demonstrably can fail
+DONE 2026-09-28T02:11:57+00:00
 
 === all build warnings, all pre-existing ===
-79:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
-88:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
-97:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
-106:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
-121:/home/alex/MotionCorr-i69/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+80:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
+90:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
+99:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
+108:/home/alex/MotionCorr-i69/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
+122:/home/alex/MotionCorr-i69/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+
+=== source hashes on the GPU host ===
+139bebff72cad803adf2ded4386f822bd5368f63261f2a762dd3d769e2f77f01  src/acc/cuda/cuda_error_class.h
+b265c7840b0110ce50c068c38c9ca8d481a11548bb2eefffc301a31a25b99cfc  src/acc/cuda/cuda_movie_session.h
+c10818ef9c240a464ddee20c788863888912a52a0b75a7e4b652ddb8c19444f5  src/acc/cuda/cuda_movie_session.cu
+f89897ddefe87fb55a144b580f489fac4cdd1aca800e4513e2dfb2c335a6b848  src/motioncorr_runner.cpp
+d248a8950cf8bc4eab4ea3be2700a6c2e47c459b616e6274e85683c8e16bbfd4  tests/cuda_error_class.cpp

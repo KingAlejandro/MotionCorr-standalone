@@ -1,0 +1,31 @@
+=== PRESERVED FAILURE: build of 6b81eb4 before the missing-include fix ===
+START 2026-09-28T02:09:38+00:00 host=4-gpu-vm
+pid 1172855's current affinity list: 96-111
+/user.slice
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+NOTE: compilation and device-free unit tests only. No CUDA context is created; nothing runs on a GPU.
+configure=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+build=2
+(no warnings in changed files)
+--- device-free predicate controls ---
+bash: line 11: /home/alex/MotionCorr-i69/build/cuda_error_class: No such file or directory
+cuda_error_class=127
+DONE 2026-09-28T02:10:14+00:00
+
+--- the 14 compile errors ---
+144:/home/alex/MotionCorr-i69/src/acc/cuda/cuda_error_class.h:89:45: error: ‘cufftResult’ has not been declared
+147:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:80:5: error: ‘cufftResult’ does not name a type
+150:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:89:31: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+153:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:91:30: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+156:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:93:33: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+159:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:99:33: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+162:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:101:33: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+165:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:106:19: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+168:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:108:19: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+171:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:110:19: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+174:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:115:31: error: ‘CUFFT_SUCCESS’ was not declared in this scope
+177:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:120:19: error: ‘CUFFT_EXEC_FAILED’ was not declared in this scope
+180:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:122:31: error: ‘CUFFT_EXEC_FAILED’ was not declared in this scope
+184:/home/alex/MotionCorr-i69/tests/cuda_error_class.cpp:129:72: error: ‘const struct RetryCase’ has no member named ‘recorded_cufft’

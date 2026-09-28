@@ -12,8 +12,8 @@ CUDA build and a 24-movie run both perturb whoever is measuring.
 
 | Item | Value |
 |---|---|
-| Resource | one A100 on `4GPUs`, or a dedicated SCARF Slurm allocation |
-| CPU | `taskset -c 96-103` on the top-level shell (a subset of the round's aggregate 96-111 / node1 budget), build `-j8`, `OMP_NUM_THREADS<=8` |
+| Resource | one A100 on `4GPUs`, or a dedicated SCARF Slurm allocation. Revised round envelope: at most **2** of the four GPUs are available initially |
+| CPU | aggregate round budget is cores **96-111** (16 logical CPUs, all NUMA node 1), build **<= 8**. This task uses `taskset -c 96-103` on the top-level shell, a subset of it, with `OMP_NUM_THREADS<=8` |
 | Mutex | `flock -w 2400 /tmp/motioncorr-bench.lock` around the whole series |
 | Estimated wall time | ~10 min build, ~5 min fault matrix, ~15 min 24-movie control |
 | Device state | read-only classification of the pending error. No `cudaDeviceReset`, no global cache drop, no other process or device touched |
@@ -98,9 +98,14 @@ identical-output assertion there would be the wrong test.
 Issue #69's pass criteria require that "the early-binning streaming path remains
 supported where previously valid", and an earlier version of this plan did not mention
 it. `CudaMovieSession` is only constructed when `use_gpu && !early_binning`
-(`motioncorr_runner.cpp`), so with `--early_binning` the resident path -- and therefore
-every line F3, F4, F5 and F6 touch -- is never entered, and F1/F2 are reached only
-through the non-resident `cudaAlignPatch` wrapper. The control is correspondingly
+(`motioncorr_runner.cpp:1425`), so with `--early_binning` the resident path is never
+entered: F3 and F4 live inside the session, F6 is behind `if (movie_session && ...)`,
+and F7's buffer is only allocated inside the `if (movie_session)` block. F1 and F2 are
+reached only through the non-resident `cudaAlignPatch` wrapper. F5's two `assign`
+statements *do* execute -- they are inside `#ifdef _CUDA_ENABLED` but not behind a
+`movie_session` test -- and are provably no-ops there, because the vectors are still
+zero when no device attempt ran. An earlier version of this paragraph said none of the
+F-lines are entered, which overstated it. The control is correspondingly
 simple and must still be run:
 
 ```

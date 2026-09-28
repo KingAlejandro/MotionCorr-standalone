@@ -13,7 +13,7 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Patch-retry shift-state contract control | ran, passed |
 | Same-backend CPU output, base vs candidate, with negative control | ran, identical — but see §3: this is a build-hygiene control, not a behavioural one |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
-| CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures |
+| CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures, CUDART 12080 |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
@@ -59,10 +59,14 @@ converged truth anchor (commit `cbeaf99`) and the run at `00:04:49` passed 14/14
 failing run is kept rather than overwritten; the `WORKER_STATUS.md` model-comparison
 record counts it as one of two self-corrections.
 
-After the independent reviews, the whole CPU suite was rebuilt from scratch and re-run
-at `2026-09-28T00:29:54`: configure 0, build 0, **14/14 passed**, same-backend control
-passed with its negative control reporting exactly two files, and the retry-state
-control passed.
+The CPU suite was rebuilt from scratch and re-run after each of the two review rounds.
+Round 3, at `2026-09-28T01:11:50` and the current head: configure 0, build 0, **14/14
+passed**, same-backend control passed with its negative control reporting exactly two
+files, retry-state control passed, and the preprocessed-TU control passed with
+"anything else = 0". Lane and topology are recorded in
+[`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt): cores 32-63, `cpubind: 1`,
+i.e. NUMA-node-local, with the two long-running `ctffind` processes recorded as
+interference and not altered.
 
 ## 2. Patch-retry shift-state contract
 
@@ -122,22 +126,46 @@ which has not been done.
 
 ## 4. Why the CPU binaries differ, and why that is not a behaviour change
 
-`motioncorr` base `cb1e1cb1…`, candidate `9dd05f93…`. Every change in this branch to
+`motioncorr` base `cb1e1cb1…`, candidate `d2a83750…`. Every change in this branch to
 `motioncorr_runner.cpp` is inside `#ifdef _CUDA_ENABLED`, so a CPU-only build should
 contain no new code — but the binaries are not identical, and a hash difference left
 unexplained is exactly the kind of thing that later gets waved away.
 
-[`evidence/cpu-preprocessed-identity.log`](evidence/cpu-preprocessed-identity.log)
-settles it. Preprocessing both trees' `motioncorr_runner.cpp` with the same flags and
-no CUDA, stripping line directives and normalising the source root, leaves a
-75,615-line translation unit whose **entire** difference is:
+**That invariant was briefly broken, by me, and this control is why it was caught.**
+The review round added `#include <sstream>` at file scope, outside every guard, to
+support `REPORT_ERROR_STR`. The file's only use of that macro is inside the guarded
+patch block, so the include moved in there rather than the claim being reworded — but
+for one commit the claim in this section was false while the section still asserted it.
+The lesson is the one §3 already states: this comparison exists precisely to catch an
+edit that escapes a CUDA guard, and it only earns that description if it is re-run
+after every change.
 
-- one added line, `friend struct MotioncorrRunnerTestAccess;`, which emits no code, and
-- ten `__LINE__` values inside `RelionError` constructions, shifted because the guarded
-  blocks moved the following lines down.
+[`evidence/cpu-preprocessed-identity.log`](evidence/cpu-preprocessed-identity.log),
+regenerated at this head with
+[`harness/preprocessed_tu_control.sh`](harness/preprocessed_tu_control.sh):
 
-No executable statement changed. That accounts for the binary difference completely,
-and the comparison has its own negative control: an injected line is detected.
+```
+preprocessed lines: base=75615 cand=75616
+differing lines total      : 93
+  friend declaration lines : 1   (emits no code)
+  RelionError __LINE__ lines: 92
+  anything else            : 0   <- must be 0
+negative control OK: an injected line is detected
+PASS CPU-only translation unit differs only by a no-code friend declaration and __LINE__ metadata
+```
+
+Preprocessing both trees with the same flags and no CUDA, stripping line directives and
+normalising the source root, leaves a 75,615-line translation unit whose entire
+difference is one added line — `friend struct MotioncorrRunnerTestAccess;`, which emits
+no code — and 92 `__LINE__` values inside `RelionError` constructions, shifted because
+the guarded blocks moved the following lines down. No executable statement changed.
+That accounts for the binary difference completely. The control fails if any difference
+is neither of those two kinds, and it carries a negative control: an injected line must
+be detected.
+
+(The `__LINE__` count is 92 here against 10 in the first round, because the include move
+shifted lines earlier in the file than the original edits did. The count is not the
+claim; "anything else = 0" is.)
 
 ## 5. CUDA compile
 
@@ -148,20 +176,27 @@ device**, and no timing was produced.
 
 ```
 Cuda compilation tools, release 12.8, V12.8.61
-configure=0   build=0
+configure=0
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+build=0
+(no warnings in changed files)
 ```
 
-All four CUDA objects built and all four binaries linked, including the new
-`cuda_fault_matrix`. **Zero warnings in any changed file**; the five warnings in the
-build are pre-existing, in `src/memory.h` and `src/time.cpp`.
+All five binaries linked — `motioncorr`, `cuda_fault_matrix`, `cuda_error_class`,
+`cuda_wrapper_upload_failure`, `patch_retry_state`. **Zero warnings in any changed
+file**; the five warnings in the build are pre-existing, in `src/memory.h` and
+`src/time.cpp`, and are listed in full in the evidence file.
 
-The fault matrix's `__wrap_` symbols are defined in the binary; `nm` shows all eleven —
+GPU UUIDs are recorded even though nothing ran on a device, because a device index is
+not an identity: GPU 0 is `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`.
+
+The fault matrix's `__wrap_` symbols are defined in the binary; `nm` counts **14** —
 
 ```
 __wrap_cudaMalloc  __wrap_cudaFree  __wrap_cudaMemcpy  __wrap_cudaMemset
-__wrap_cudaDeviceSynchronize  __wrap_cufftCreate  __wrap_cufftMakePlanMany
-__wrap_cufftSetWorkArea  __wrap_cufftPlanMany  __wrap_cufftExecR2C  __wrap_cufftExecC2R
+__wrap_cudaDeviceSynchronize  __wrap_cudaEventCreate  __wrap_cudaEventDestroy
+__wrap_cufftCreate  __wrap_cufftMakePlanMany  __wrap_cufftSetWorkArea
+__wrap_cufftPlanMany  __wrap_cufftDestroy  __wrap_cufftExecR2C  __wrap_cufftExecC2R
 ```
 
 **That shows the test translation unit defines the wrappers. On its own it does not
@@ -176,24 +211,26 @@ The relocation-level check does support it
 attributing every call to its enclosing function:
 
 ```
-cudaAlignPatchDevice  (the F1 site):
-   8 x __wrap_cudaEventCreate    8 x __wrap_cudaMalloc     4 x __wrap_cudaMemcpy
-   2 x __wrap_cudaEventDestroy   2 x __wrap_cudaFree       1 x __wrap_cufftPlanMany
-   2 x __wrap_cufftDestroy       1 x __wrap_cufftExecC2R
-cudaAlignPatch  (the F2 wrapper):
-   1 x __wrap_cudaMalloc         1 x __wrap_cudaFree       2 x __wrap_cudaMemcpy
-CudaMovieSession::preparePatchInVram  (the F3 site):
-   3 x __wrap_cudaMalloc         4 x __wrap_cudaFree       2 x __wrap_cudaMemcpy
-   1 x __wrap_cufftPlanMany      1 x __wrap_cufftDestroy   1 x __wrap_cufftExecR2C
-
-Production (motioncorr_core) call sites still reaching a bare interposed
-symbol -- must be 0, otherwise the harness silently observes nothing: 0
+motioncorr_core call sites routed through __wrap_*: 179
+motioncorr_core call sites still reaching a bare interposed symbol
+  (direct call/jmp to a @plt entry) -- must be 0: 0
+negative control -- same filter with the test-own exemption removed, must be >0: 14
+PASS interposition reaches every matched production call site, and the check
+     demonstrably can fail
 ```
 
-The eight `cudaEventCreate` and the `cufftPlanMany` in the first block are exactly the
-resources F1 leaks, and they are now inside the detector rather than invisible to it.
-The only bare calls left are the `__real_*` forwards inside the wrappers themselves and
-the test's own post-trial reclaim, both by construction.
+The per-function breakdown in the evidence file shows eight `__wrap_cudaEventCreate`,
+eight `__wrap_cudaMalloc` and one `__wrap_cufftPlanMany` inside `cudaAlignPatchDevice`
+— exactly the resources F1 leaks, now inside the detector rather than invisible to it.
+The only bare calls left are the `__real_*` forwards inside the wrappers and the test's
+own post-trial reclaim, both by construction.
+
+The **scope of the zero** is stated in the script rather than implied: it counts direct
+`call`/`jmp` to a `@plt` entry, and it depends on CUDA being linked shared. The script
+refuses to report on a truncated disassembly and runs a negative control — the same
+filter with the test-own exemption removed, which must find the 14 `__real_*` forwards
+and fails the run if it finds none. An earlier version had none of those guards and
+would have printed a confident "0" if `objdump` had failed.
 
 Even so, the matrix has **not been run**; that needs an assigned GPU slot.
 
@@ -221,7 +258,8 @@ degraded to always-true or always-false fails rather than passing silently.
 
 ## 6. Findings fixed
 
-Against `4c952b3f`; full detail in the ADR.
+Against `4c952b3f`; full detail in the ADR. Seven, not six: F7 was found while acting
+on a review finding.
 
 | ID | Defect | Where |
 |---|---|---|
@@ -231,6 +269,7 @@ Against `4c952b3f`; full detail in the ADR.
 | F4 | Pointer cleared after the free, so a failing `cudaFree` left it set for `release()` to free again | `cuda_movie_session.cu` `releasePreprocessingBuffers` |
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
+| F7 | `d_patch_fcomplex_buffer` leaked on every throwing exit from the patch loop, including `alignPatchDevice`'s own throw on any CUDA error — so it leaked once per failing movie. Found while fixing a review finding against F6, but the `alignPatchDevice` path makes it pre-existing, not introduced here | `motioncorr_runner.cpp` local-patch block |
 
 ## 7. Independent review
 
@@ -252,8 +291,34 @@ findings were acted on, including three that were defects in this branch's own w
 
 Three documentation overclaims were also corrected: the `nm`-based interposition claim
 (§5), the same-backend CPU row's status (§3), and an ADR sticky-error list that did not
-match the implementation. The licence verdict was clean: no new dependency, no vendored
-or third-party code, nothing licence-incompatible.
+match the implementation.
+
+### Second round, at the corrected head
+
+Both reviewers were re-run against the pinned head. They verified every prior code
+finding as fixed, and found five more, three of them mine:
+
+- **The removal of an unrelated orchestrator file had silently regressed.** It was
+  untracked in one commit and re-added by a `git add -A` in the next — the same mistake
+  the first commit's message described fixing — while `WORKER_STATUS.md` asserted the
+  removal had held. Untracked again and added to `.git/info/exclude` so it cannot
+  recur.
+- **`#include <sstream>` escaped the CUDA guard**, falsifying §4's own premise in the
+  same commit that relabelled §3 as a control for catching exactly that. Moved inside
+  the guard; §4 regenerated.
+- **The classifier raised the minimum CUDA version for the production build.**
+  `cudaErrorExternalDevice` needs CUDA ≥ 11.6 and there is no version floor in
+  `find_package`, so an older toolkit would have failed to build the product. Now
+  behind `CUDART_VERSION` guards.
+- `reloc_check.sh` had no `set -euo pipefail`, a fixed temp path and no negative
+  control — it could have printed a confident "0" on its own failure. Hardened.
+- The PR93 disclosure said three of four production files (it is four of four), quoted
+  insertions and deletions summed into a single `+N`, and claimed F3 was independent
+  three lines after stating PR93 overlaps it. Corrected in `WORKER_STATUS.md`; **F1, F2
+  and F3** need reconciliation, F4-F7 and the tests do not.
+
+The licence verdict was clean in both rounds: no new dependency, no vendored or
+third-party code, nothing licence-incompatible.
 
 ## 8. Limitations, stated rather than worked around
 

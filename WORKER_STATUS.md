@@ -16,11 +16,15 @@
 
 - `src/acc/cuda/cuda_alignpatch.cu` (F1, F2)
 - `src/acc/cuda/cuda_movie_session.cu` (F3, F4)
-- `src/motioncorr_runner.cpp` (F5, F6 — **shared file**, see coordination)
-- `src/motioncorr_runner.h` (F5 test access only)
-- `tests/test_patch_retry_state.cpp` (new)
-- `tests/cuda_fault_matrix.cpp` (new, GPU)
-- `CMakeLists.txt` (test registration only)
+- `src/motioncorr_runner.cpp` (F5, F6, F7 — **shared file**, see coordination)
+- `src/motioncorr_runner.h` (test access only; one `friend` line, emits no code)
+- `src/acc/cuda/cuda_error_class.h` (**new production header**, added mid-round so the
+  F6 predicate could be unit tested; `#ifdef _CUDA_ENABLED`-guarded, no new logic. It
+  was not on the original whitelist and should have been added when it was created —
+  the whitelist exists to catch exactly a new file appearing under `src/`)
+- `tests/test_patch_retry_state.cpp` (new), `tests/cuda_error_class.cpp` (new),
+  `tests/cuda_fault_matrix.cpp` (new, GPU)
+- `CMakeLists.txt` (test registration and test-target link options only)
 - `agents/designs/issue_69_cuda_failure_contracts.md`, `docs/issue69/**`, `WORKER_STATUS.md`
 
 Not touched: allocators, `custom_allocator.cuh`, `acc_ptr.h`, FFT engine, numerical
@@ -34,11 +38,21 @@ I rely on the existing per-movie failure contract at `:626-645` rather than chan
 
 ### PR93 (#77) is a hard conflict, and it is not just textual
 
-Flagged by the independent spec review; I under-reported it in the first version of
-this file. PR93 `fix/issue77-reviewed-kernels` head `4998599` touches three of my four
-production files, and against main `4c952b3f` its diff is
-`cuda_alignpatch.cu +523/-…`, `cuda_movie_session.cu +130/-…`,
-`motioncorr_runner.cpp +195/-…`.
+Flagged by the independent spec review; I under-reported it twice, and the corrected
+version got two facts wrong, which the second-round code review caught. This is the
+verified version. PR93 `fix/issue77-reviewed-kernels` head `4998599`, measured with
+`git diff --numstat 4c952b3f 4998599`:
+
+| File | PR93 | Also changed by me |
+|---|---|---|
+| `src/acc/cuda/cuda_alignpatch.cu` | +359 / -164 | yes (F1, F2) |
+| `src/acc/cuda/cuda_movie_session.cu` | +92 / -38 | yes (F3, F4) |
+| `src/motioncorr_runner.cpp` | +59 / -136 | yes (F5, F6, F7) |
+| `src/motioncorr_runner.h` | +0 / -22 | yes (one `friend` line) |
+
+So it is **four of my four** production files, not three — an earlier version of this
+section said three, and also quoted insertions and deletions summed into a single `+N`
+figure, which made `motioncorr_runner.cpp` read as `+195` against an actual `+59`.
 
 The overlap is substantive, not incidental:
 
@@ -46,29 +60,42 @@ The overlap is substantive, not incidental:
   the cuFFT plan** I convert to per-call scoped ownership into a process-static
   `PatchAlignCache` with its own `release()`, plus an `AlignCacheFailureCleanup` guard
   and a `FrameStagingCleanup` for the wrapper's `d_Fframes`. That is an **independent
-  and mutually exclusive fix for F1 and F2.** Whichever lands first, the other's
-  version of those two fixes becomes dead code and must be redone against the survivor.
+  and mutually exclusive fix for F1 and F2.**
 - PR93 `#undef`s and redefines `HANDLE_ERROR` and `CUFFT_CHECK` in that file. My ADR's
   rationale is phrased around the fact that at `4c952b3f` the file does *not* do this;
   that sentence needs rewording if PR93 lands first.
-- PR93's `preparePatchInVram` hunk overlaps my F3 hunk in the same function.
+- PR93's `cuda_movie_session.cu` hunk `@@ -653,31 +667,70 @@` rewrites the same patch
+  cache block F3 rewrites, including its own free-and-replace restructuring and a new
+  `cached_group_start` memcmp path. **F3 is therefore not independent either.**
+- In `motioncorr_runner.h` PR93 only deletes the gain-cache block and `EERRenderer`
+  forward declaration, a different region from my `friend` line, so that file should
+  auto-merge.
 
-**Recommended order:** F3, F4, F5, F6 and both new tests are independent of PR93 and
-can land either way. F1 and F2 should be reconciled with whichever of the two is
-merged first, not stacked blindly. I have not rebased onto PR93 and am not requesting
-a merge.
+**Recommended order, corrected.** **F1, F2 and F3** must be reconciled with whichever
+of the two lands first — not stacked. **F4, F5, F6, F7 and both new tests are
+independent**: `git diff 4c952b3f 4998599 -- src/motioncorr_runner.cpp` contains no hit
+for `local_xshifts`, `d_patch_fcomplex_buffer`, `device_prep_ok`, `preparePatchInVram`
+or `alignPatchDevice`, and PR93's `cuda_movie_session.cu` hunks skip
+`releasePreprocessingBuffers` entirely. An earlier version of this section claimed F3
+was independent three lines after stating that PR93 overlaps it; that contradiction is
+resolved in favour of the overlap, which is the one I verified.
+
+I have not rebased onto PR93 and am not requesting a merge.
 
 ## Changed files
 
 Production:
 - `src/acc/cuda/cuda_alignpatch.cu` — F1, F2 scoped ownership of buffers/plan/events
 - `src/acc/cuda/cuda_movie_session.cu` — F3, F4 truthful cache bookkeeping, clear before free
-- `src/motioncorr_runner.cpp` — F5 retry shift reset, F6 poisoned-context classifier
+- `src/motioncorr_runner.cpp` — F5 retry shift reset, F6 poisoned-context refusal,
+  F7 scoped owner for the patch Fourier scratch
 - `src/motioncorr_runner.h` — one `friend` declaration for the test control (emits no code)
+- `src/acc/cuda/cuda_error_class.h` — new, the F6 predicate, extracted so it is testable
 
 Tests and build:
-- `tests/test_patch_retry_state.cpp` (new, CPU), `tests/cuda_fault_matrix.cpp` (new, GPU)
-- `CMakeLists.txt` — registers both
+- `tests/test_patch_retry_state.cpp` (new, CPU), `tests/cuda_error_class.cpp` (new,
+  device-free), `tests/cuda_fault_matrix.cpp` (new, GPU)
+- `CMakeLists.txt` — registers all three
 
 Docs and evidence:
 - `agents/designs/issue_69_cuda_failure_contracts.md`, `docs/issue69/**`, `WORKER_STATUS.md`

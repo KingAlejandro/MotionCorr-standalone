@@ -1,14 +1,48 @@
-51caf957d9bc1b3f48434da82b3c5151a4e10bbabf237e248fec30315e60980a  src/acc/cuda/cuda_alignpatch.cu
-718eb848d377b7776d4da67d71b8ad7c09360e94518dc44c95e4e7e70c2af50c  src/acc/cuda/cuda_movie_session.cu
-23e4934f6adf4b0892a223ad3201fb4ca0a2f07686737ee88c46f047e9e2e9f6  src/motioncorr_runner.cpp
-0a22d17792926db69be74ae0dc166d8ad35a72796c525dbd599eba556b8ca6bc  src/motioncorr_runner.h
-0a0fdf80d3ef31b067a0d8e0c771f1c342c5c3ca0dae0526592b5dca9e604637  tests/test_patch_retry_state.cpp
---- binaries ---
-cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
-0cac291822263f4c968190b92fee26df0bcf9a2ee7760b3ca03cc2f42c1b9efb  /home/ubuntu/mc-i69/build-cand/motioncorr
-60744bad261ecd9e0224b57b436f44ba1817fff12ceb685cf84c9462c4535951  /home/ubuntu/mc-i69/build-cand/patch_retry_state
---- toolchain ---
+=== host / lane / topology ===
+small-refmac-machine
+pid 3148680's current affinity list: 0-63
+/user.slice
+policy: default
+preferred node: current
+physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 0 1 
+nodebind: 0 1 
+
+=== NUMA topology ===
+CPU(s):                               64
+Socket(s):                            2
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+
+=== interference, recorded and NOT altered ===
+USER     %CPU     ELAPSED COMMAND
+ubuntu   99.9 49-01:45:07 ctffind
+ubuntu   99.9 47-23:21:25 ctffind
+root      2.3       00:00 sshd
+ubuntu    0.8 43-09:37:51 node
+root      0.1  5-18:48:04 rsyslogd
+
+=== toolchain ===
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 cmake version 4.4.3
---- input ---
+Python 3.12.3
+
+=== source hashes ===
+00d3b2504f608ebc9f394287ea825232dead436a4d6119437e1251553d73171d  src/acc/cuda/cuda_alignpatch.cu
+718eb848d377b7776d4da67d71b8ad7c09360e94518dc44c95e4e7e70c2af50c  src/acc/cuda/cuda_movie_session.cu
+6eb6aa5178dfad3a0208e3ce29687f8258f30eb07a118e462728a32c79025349  src/acc/cuda/cuda_error_class.h
+10e65c1100cfa61f1417d91482bc9f70ee168a1e037198e6c0c8293c66363f77  src/motioncorr_runner.cpp
+0a22d17792926db69be74ae0dc166d8ad35a72796c525dbd599eba556b8ca6bc  src/motioncorr_runner.h
+0a0fdf80d3ef31b067a0d8e0c771f1c342c5c3ca0dae0526592b5dca9e604637  tests/test_patch_retry_state.cpp
+8de83f94a781d3d11253bf840e2572bab72be7dc0f2aba50280896847f10792f  tests/cuda_error_class.cpp
+3a42ca39015f642b93bd5d7b21203e6072b53f4470383513d77b2d44f3cf8b69  tests/cuda_fault_matrix.cpp
+8838d94a1295bc96df12aeeb6dcde6bffbc324c86daae40b5c478473d20dfd99  CMakeLists.txt
+
+=== input ===
 95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  /home/ubuntu/mc-i69/cand/test-data/synthetic/synthetic_movie.tiff
+
+=== binaries ===
+cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
+d2a837502a1a82566edba0dd87dad32722b297c02b538c5c827c6c88235428d4  /home/ubuntu/mc-i69/build-cand/motioncorr
+891c934abed1bcaaa330d3a2825914c5ad3a74d6ffe636be3709b02cb62b64a7  /home/ubuntu/mc-i69/build-cand/patch_retry_state

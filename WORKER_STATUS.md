@@ -5,9 +5,9 @@
 | Issue | #69 "Make CUDA resource failures leak-free and resume-safe" |
 | Model | `claude-opus-5`, high effort (no routing error observed) |
 | Task class | correctness |
-| Phase | two review rounds against the same two agents, all findings folded in, revalidated at final head; draft PR open; waiting on a GPU slot |
+| Phase | three review passes against the same two agents, both DELTA_CONFIRMED at `934779b7`; ten non-blocking items handed off unfixed; draft PR open; waiting on a GPU slot |
 | Base | main `4c952b3f54479653512c4d208e09c9a8c02f3726` |
-| Head | `2950478` (plus this status update) |
+| Head | source frozen at `934779b7` (the reviewed head). This status update is docs-only; `git diff 934779b7..HEAD -- src tests CMakeLists.txt` is empty |
 | Branch | `round96/69-claude-opus-5` |
 | Worktree | isolated T3 worktree; no other task's files touched |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/107 (draft) |
@@ -187,7 +187,21 @@ evidence and documentation items, three of them mine:
 - `reloc_check.sh` could print a confident "0" on its own failure;
 - the PR93 disclosure was wrong on file count, diff magnitudes and F3's independence.
 
-**The current head carries no verdict.** The reviewers were not run a third time.
+**Round 3 (delta).** The same two reviewers were resumed for a bounded confirmation of
+`92437fa9 -> 934779b7`, covering the CUDA-version guard, the `<sstream>` guard and
+regenerated TU evidence, the fail-closed relocation harness, the coordination-file
+exclusion and the corrected PR93 disclosure. Both returned **DELTA_CONFIRMED** naming
+`934779b7` explicitly, plus **LICENCE_PASSED**. No blocking defect. Verdicts published
+on #69 and PR #107.
+
+Ten non-blocking items were recorded and **deliberately not fixed**, so the verdicts
+bind to the exact reviewed head. They are listed in the published comment. The two I
+would fix first: `docs/issue69/RESULTS.md` never mentions the early-binning control at
+all (an omission -- three other documents state it), and RESULTS §4's "this control is
+why it was caught" is generous, because the escaped `#include` was found by a reviewer
+reading the source, not by the control, which was not re-run.
+
+**Source is frozen at `934779b7`**, which is the head both verdicts cover.
 
 ## Round 1 — done
 
@@ -236,4 +250,11 @@ stays draft until then.
 - GPU slot: #26 announced release and the bench lock is observably free with all four
   A100s idle, but **no slot has been assigned to this task**, so no GPU execution has
   occurred. Availability is not authorization.
+- Review passes: 3 (full, full, bounded delta), all against the same two agents; no new
+  agents were ever spawned. Final: DELTA_CONFIRMED / DELTA_CONFIRMED / LICENCE_PASSED
+  at `934779b7`.
+- **Unrun and unclaimed:** bounded fault matrix, forced-nonconvergence witness,
+  early-binning streaming control, all-24 same-backend CUDA control, and **any build on
+  a CUDA toolkit older than 12.8** -- the `CUDART_VERSION` guards are reasoned, not
+  exercised.
 - Tokens/cost: not observable from here, so not reported.

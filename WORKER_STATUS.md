@@ -5,9 +5,9 @@
 | Issue | #94 bounded next-movie CUDA prefetch |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort — no routing errors, no model substitution |
 | Task class | implementation |
-| Phase | COMPLETE — implemented, reviewed twice, fixed, CPU- and GPU-validated. Verdict: **no-go on promotion**, prefetch stays opt-in. |
+| Phase | COMPLETE — implemented, reviewed, fixed, CPU/GPU-validated, **evidence corrected**. Verdict: **no-go on promotion**, prefetch stays opt-in. |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| Head | `2644a30` (source under GPU test `ab9cd6b9a3ee5c2f0de11a623d849dc921a71448`) |
+| Head | `fbad90a` + CI commit (evidence corrections; `src/` frozen since `08c87bb`) |
 | Branch | `round96/94-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-967d9ef6` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/108 (draft) |
@@ -111,19 +111,27 @@ All released. Each `--exclusive`, so each held the whole 64-CPU 4×A100 node for
 ≤16 CPUs — ~54 min of whole-node occupancy, taken because timing on a shared host is not
 defensible. Node `gn3000`, GPU `GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d`.
 
-**Correctness, all three series:** 72/72 MRC payloads, 72/72 normalized headers, 25/25 STAR
-artifacts, 2 759 049 984 bytes of pixels, 0 failed movies, `decoded=24 inline=0 failed=0
-over_budget_grants=0`. Correctness ran before timing and the job exits without timings if the
-arms disagree.
+**Correctness, all three series:** re-verified over the **whole file** from the retained
+outputs — main header, `nsymbt`/extended header, `nlabl`, the entire 800-byte label area and
+every pixel — minus a 19-byte-per-file writer-timestamp whitelist justified from `src/rwMRC.h`.
+**12/12 retained pairs, 864 file comparisons, 0 problems**, 2 759 049 984 pixel bytes per pair,
+25/25 STAR artifacts, 0 failed movies, `decoded=24 inline=0 failed=0 over_budget_grants=0`. The
+original in-run check covered only bytes 0-224 and its "full normalized headers" wording was an
+overstatement (CORRECTIONS §2). Correctness ran before timing and the job exits without timings
+if the arms disagree.
 
-**Timing:** prefetch faster in **0 of 9 paired blocks**; mean −3.44 s (A), −10.15 s (B),
-−2.39 s (C) on runs of 103/171/100 s. Series not combined into one curve.
+**Timing:** prefetch faster in **1 of 9 paired blocks** (series A pair 1, +5.273 s; an earlier
+headline said 0/9 and was wrong — see `docs/issue94_prefetch/CORRECTIONS.md` §1). Means −3.44 s
+(A), −10.15 s (B), −2.39 s (C) on runs of 103/171/100 s. Series not combined into one curve.
 
 **Host RSS:** 2.97 → 5.51 GiB, **+2.55 GiB / +86%** in every series, spread 5-13 MiB across
 nine runs. Device memory unchanged at 3497 MiB.
 
-**Mechanism:** `consumer_wait_s` 0.3-5 s against `producer_queue_blocked_s` 81-95 s. The decode
-is fully hidden; it was never what the wall clock waited for.
+**Mechanism — HYPOTHESIS, not measured** (CORRECTIONS §4): `consumer_wait_s` 0.3-5.4 s against
+`producer_queue_blocked_s` 81-95 s, in the prefetch-ON arm only. Those counters do not exist in
+the OFF arm, so they cannot establish its critical path, and nothing varied CPU contention or
+residency independently. RSS is a 200 ms-sampled peak of summed `VmRSS` over the owned process
+tree — a lower bound, not an allocator trace and not device memory.
 
 **ADR estimate validated:** `budget_bytes = 3 × 1822785536`, and the §5 formula for
 3710×3838×24 with 8 IO threads gives exactly 1822785536. `peak_reserved == budget` in every
@@ -159,6 +167,27 @@ Findings and fixes posted on #94 (issuecomment-5861326352) and PR #108
 - #94 Codex fixes + negative controls: issuecomment-5864955036 (PR: 5864954787)
 - #94 GPU result / no-go: issuecomment-5865942956 (PR: 5865942642)
 - #66 roadmap report: issuecomment-5865947621
+- #94 evidence corrections: issuecomment-5866418028 (PR: 5866417735)
+- #66 correction: issuecomment-5866423164
+
+## Evidence corrections (2026-09-28)
+
+Five appended in `docs/issue94_prefetch/CORRECTIONS.md`; raw tables, manifests and logs
+preserved unedited. (1) 0/9 → **1/9**. (2) header comparison re-done over the whole file with a
+justified whitelist and a ten-mutation negative control. (3) the cpu16 manifest's topology
+counters were an awk range-parsing bug; corrected from the retained `lscpu` witness, helper
+fixed with a range-mask control that reproduces the old failure. (4) the mechanism demoted to a
+hypothesis; RSS statistic and limits restated. (5) my own claim that PR103/PR110 composition
+needed an unauthorised merge was an over-restriction — composition is authorized, it stays
+UNRUN by choice.
+
+**Final CI at the corrected head** (cpu64 lane 32-47, validation lock, `-j16`, `ctffind`
+untouched): ctest **15/15**, MRC negative control **PASS**, range-mask control **PASS**.
+`motioncorr` sha256 `ec3bf772bdd73a8a030871632d9cf6c8954a76d9bd6aeb6394f01cd60406d29d`.
+
+**Review source coverage:** `git diff 08c87bb..HEAD -- src/` is **empty** — production source is
+frozen and already carries both independent read-only reviews plus the Codex review. The delta
+is evidence tooling and docs, now with the same two reviewers.
 
 ## Verdict
 
@@ -169,7 +198,7 @@ opt-in and off by default on every backend.
 
 ## Next step
 
-Nothing outstanding. Awaiting `@codex` re-review of PR #108 (requested at the review-fix push).
+Awaiting the two reviewers' reports on the evidence delta, and `@codex` re-review of PR #108.
 No merges, no closures, no default promotion.
 
 Still UNRUN and stated as such: the composed PR103/PR110 integrity work (a merge this task is

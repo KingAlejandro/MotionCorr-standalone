@@ -269,6 +269,8 @@ no third-party code is added; the implementation uses only C++17 standard-librar
 - `tests/test_prefetch_equivalence.py`
 - `scripts/prefetch_gpu_screen.sh`
 - `tools/compare_prefetch_arms.py`
+- `tools/cpu_mask_topology.py`
+- `scripts/prefetch_scarf_series.sbatch`
 - `agents/designs/issue_94_bounded_prefetch.md`
 - `WORKER_STATUS.md`
 - `docs/issue94_prefetch/` (evidence only)

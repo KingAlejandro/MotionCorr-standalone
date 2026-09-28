@@ -14,8 +14,12 @@ Raw artifacts in this directory:
 | `compare_products.py` | the comparator actually relied on |
 | `followup_measurements.log` | follow-up capture of the joint-STAR values and patch-convergence evidence |
 | `followup.sh` | the script that produced it (read-only over the retained outputs) |
-| `followup_measurements.log` | follow-up capture of the joint-STAR values and patch-convergence evidence |
-| `followup.sh` | the script that produced it (read-only over retained outputs) |
+
+Note on reproducing these: the two scripts invoke the comparator under the filename it had on
+the run host — `run_validation.sh` calls `compare.py` (the superseded first version) and
+`followup.sh` calls `compare3.py`. Both correspond to what is shipped here as
+`compare_products.py`, which is the corrected version and the one whose output is authoritative.
+Rename accordingly if re-running.
 
 **Read the raw log's own `GATE:` line with care.** `run_validation.sh` ends by invoking an
 earlier comparator that only inspected the top level of each arm directory. motioncorr mirrors
@@ -154,10 +158,14 @@ The default path is provably untouched, on a real movie, at full size.
 
 ### Option-on — INTENTIONALLY CHANGED
 
+Denominators below are from the corrected comparator, which compares every line (164 and 779 are
+the full line counts of those files). `cpu64_product_comparison.log` predates the filter fix and
+shows 163 and 777 for the same numerators, because the old filter dropped path-bearing lines.
+
 | product | synthetic | real movie |
 |---|---|---|
 | output `.mrc` pixel payload | DIFFERS: 16,243/16,384 px (99.14%), max abs 11.93 on data range 428.70 (rel 2.78e-02) | DIFFERS: 14,236,598/14,238,980 px (99.98%), max abs 22.56 on data range 51.42 (rel 4.39e-01) |
-| per-movie `.star` motion model | DIFFERS in 99/163 value lines | DIFFERS in 611/777 value lines |
+| per-movie `.star` motion model | DIFFERS in 99/164 lines | DIFFERS in 611/779 lines |
 | joint `corrected_micrographs.star` | **EQUAL** (measured, see below) | **EQUAL** (measured, see below) |
 
 The changed values are the per-patch local motion model and the resulting interpolated image.

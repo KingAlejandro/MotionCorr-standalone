@@ -144,6 +144,16 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftExecR2C" "LINKER:--wrap=cufftExecC2R")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
+        # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
+        # are exercised in production code rather than simulated by a predicate test.
+        # The shim is linked only here; src/ contains no fault switch.
+        add_executable(motioncorr_faultinject
+            src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
+        target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
+        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc")
+        # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
+        # movie, so it is not registered as a bare ctest case.
         # Pure predicate over cudaError_t: needs the CUDA headers, needs no device.
         add_executable(cuda_error_class tests/cuda_error_class.cpp)
         target_link_libraries(cuda_error_class PRIVATE motioncorr_core)

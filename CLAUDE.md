@@ -1,7 +1,7 @@
 # Claude working style for MotionCorr
 
 This file controls Claude's default behaviour and communication in this repository.
-`AGENTS.md` remains authoritative for project-specific roles and required gates. Satisfy those requirements at the narrowest useful scope; do not add extra process simply because it is possible.
+Read `AGENTS.md` for project rules on scope, correctness, review and shared resources. Apply them at the narrowest useful scope; do not add extra process simply because it is possible.
 
 ## Communication
 

@@ -445,6 +445,8 @@ recommendation to change any gate. Section 7 states what it does not cover.
 | Movie-level jackknife for Stage C | **UNRUN** — 22 x 3 refinements is ~7 h of exclusive GPU lock for a secondary endpoint |
 | Multi-worker, multi-GPU, non-5x5-patch or dose-weighting-off configurations | **UNRUN** |
 | Any statement about numerical gate thresholds | **OUT OF SCOPE** by design |
+| Positive rejection of a degradation between 5.0% and 8.5% effective-data loss | **NOT DEMONSTRATED**, and not demonstrable at the margin itself; see section 7 item 10 |
+| An independent-collection scientific validation | **UNSUPPORTED** here; now owned by #73 |
 
 ---
 
@@ -476,6 +478,14 @@ recommendation to change any gate. Section 7 states what it does not cover.
 8. **Superiority.** Several point estimates favour the accelerated arms. The design has no power
    for superiority and no superiority margin was set; these are reported, not claimed.
 9. **Numerical gate thresholds.** This work proposes none, evaluates none, and changes none.
+10. **Positive rejection between a 5.0% and an 8.5% effective-data loss.** The primary endpoint is
+    demonstrated to refuse a PASS to a control at the harm margin (`rho` 0.94914) and to positively
+    reject one at `rho` 0.91460, but in between it will decline to pass a harmful arm without
+    flagging it. That band is a consequence of the jackknife standard error (about 0.008 for a
+    degraded arm) and cannot be removed by a better control: positive rejection exactly at the
+    margin is impossible by construction, and narrowing the band needs more movies, not more
+    control levels. For the arms actually measured, which sit at `rho` 0.99996 and 0.99998, the
+    band is not reached.
 
 ---
 

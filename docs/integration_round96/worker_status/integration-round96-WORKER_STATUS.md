@@ -5,10 +5,10 @@
 | Issue / role | #96 integration and correctness owner (lane A of the #96 next-round plan) |
 | Model | claude-opus-5, high effort, 1M context |
 | Task class | integration of reviewed round96 correctness PRs; CPU validation; CUDA compile |
-| Phase | **complete.** Four groups integrated, CPU validation and CUDA compile executed, draft PR #110 published, both independent reviews returned |
+| Phase | review follow-up complete. Codex P2 fixed, three owners' fixes composed, **native CUDA executed on two platforms**, licence/scope delta review returned; code/spec delta review outstanding |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main, refetched and pinned) |
 | Branch | `integrate/round96-correctness-foundation` |
-| Candidate source head | `d3c04f7f2a40637e8666ccfb4fb43a6e9540d316` (later commits are docs/evidence only) |
+| Candidate source head | `1c590ba0362fbf48b24b9509381d2e8d2eddebb0` (later commits are docs only) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-75781550` (T3-created, isolated) |
 | Merge authority | **none**. Draft PR only. No merges, no closures, no default promotion. |
 
@@ -90,3 +90,33 @@ Run 36371119141 at head `6b4a950b`: Build & Smoke Check (Ubuntu Linux) **success
 1. Maintainer rulings on the five residual decisions in the PR body.
 2. A coordinator GPU slot for the published `NEEDS_GPU` plan. **Unrun; no CPU run was substituted for it.**
 3. Scoped `CMAKE_CUDA_ARCHITECTURES` build fix under #72/#18.
+
+
+## Review-follow-up round (28 Sep)
+
+| item | state |
+|---|---|
+| Codex P2 `r4119221898` canonical STAR immutability | **fixed** (`b0a70d6`, `13c6e32`, `fe8ca55`), reproduced before/after on cpu64 |
+| #72 / PR102 review fixes | composed (`9524909`, `29e9635`); their restructure reinstated the STAR overwrite, re-applied in `615d67e` |
+| #99 / PR105 `RLIMIT_FSIZE` fix | composed (`1084269`, `318a324`), test files byte-identical to their head |
+| cpu64 combined suite, final source | **17/17**, 8/8 controls, negative control fails on exactly the four groups |
+| **native CUDA, SCARF `3511135`** | **24/24 pixel-identical, 341,735,520 pixels, 25/25 STARs**; device witness pid 410748 on `GPU-c7b9c523…` |
+| **native CUDA, VM GPU3** | identical result on different silicon; witness pid 1228552 on `GPU-b2cb2c39…` |
+| native controls `3511136` | decoded-reader 24/24, failure exit 1 joint STAR withheld, resume exit 0 pixel-identical |
+| CI at source head | both jobs success |
+| licence / scope delta review | **LICENSE_COMPLIANCE_PASSED + SPEC_CONFORMANCE_PASSED** |
+| code / spec delta review | running |
+| `@codex` re-review | requested at `1c590ba0` |
+
+All locks released: cpu64 validation lock free, SCARF jobs finished (only #94's
+remains, untouched), VM GPU3 released and its device lock free.
+
+## What remains before merge
+
+1. Code/spec delta review verdict, and the `@codex` re-review.
+2. Maintainer rulings: the `src/image.h` merge direction; the scoped
+   `CMAKE_CUDA_ARCHITECTURES` fix under #72/#18; whether #72's numpy
+   `FATAL_ERROR` stays unconditional; `generator_sha256`'s meaning; root
+   `WORKER_STATUS.md` tracked or ignored; and whether the GPU3 use of the VM
+   stands, since it extends the published 24-CPU / 3-device envelope.
+3. The #97 upstream-parity divergence ruling before #100 can join.

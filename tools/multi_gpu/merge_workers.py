@@ -167,6 +167,7 @@ def main(argv: list[str] | None = None) -> int:
     # PASS on coverage that is actually corrupt. The partitioner refuses such a
     # manifest, but the merge must not depend on having produced it.
     root_owner: dict[str, int] = {}
+    collapsed_roots: set[str] = set()
     for movie, k in owner.items():
         root = star_io.worker_relative_root(star_io.output_root(movie))
         if root in root_owner:
@@ -174,6 +175,12 @@ def main(argv: list[str] | None = None) -> int:
                 f"duplicate coverage: two movies normalize to the same output root "
                 f"{root!r}; one product pair cannot satisfy both"
             )
+            # Keep the first owner and remember the clash. Overwriting would make
+            # the last colliding movie's shard win attribution, and the single
+            # real product would then be reported as misrouted from a shard it
+            # never came from -- two invented errors on top of the true one.
+            collapsed_roots.add(root)
+            continue
         root_owner[root] = k
 
     # Resolve before use. PR55's shell merge built a relative destination and
@@ -213,7 +220,9 @@ def main(argv: list[str] | None = None) -> int:
                                 "in the manifest")
             else:
                 assigned = root_owner[attribution[0]]
-                if assigned != k:
+                if attribution[0] in collapsed_roots:
+                    pass  # ownership is ambiguous; already reported above
+                elif assigned != k:
                     problems.append(f"misrouted: worker {k} produced {rel}, assigned to "
                                     f"shard {assigned}")
 

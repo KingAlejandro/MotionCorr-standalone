@@ -1149,17 +1149,19 @@ def case_compare24_injective_report_identity(tmp: Path) -> None:
 
     # a sidecar naming a different root must be refused, so report identity is
     # validated independently of whatever the filename encoding happens to be
-    side = next(out.glob("*.root"))
-    side.write_text("some/other/root\n")
+    side = sorted(out.glob("*.origin.json"))[0]
+    tampered = json.loads(side.read_text())
+    tampered["root"] = "some/other/root"
+    side.write_text(json.dumps(tampered))
     cp = run24(out, reuse=True)
     assert cp.returncode == 1, cp.stdout
     s = json.loads((out / "exact_summary.json").read_text())
-    assert any("identity mismatch" in (r.get("reason") or "") for r in s["results"]), s
+    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
     side.unlink()
     cp = run24(out, reuse=True)
     assert cp.returncode == 1
     s = json.loads((out / "exact_summary.json").read_text())
-    assert any("no root sidecar" in (r.get("reason") or "") for r in s["results"]), s
+    assert any("no origin sidecar" in (r.get("reason") or "") for r in s["results"]), s
 
     # positive control: both passing gives PASS on the normal pass and on reuse
     _tree(ref, roots, failing=set())
@@ -1239,6 +1241,102 @@ def case_duplicate_coverage_and_zero_pairs_rejected(tmp: Path) -> None:
     assert cp.returncode == 2 and "not distinct after normalization" in cp.stderr, cp.stderr
 
 
+def case_reuse_pins_the_trees_not_just_the_root(tmp: Path) -> None:
+    """A report may not be reused as the verdict for different inputs.
+
+    Recording only the output root lets a report produced against one pair of
+    trees stand in for the same root against completely different trees -- a
+    passing run reused to certify inputs it never saw.
+    """
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    roots = ["Movies/a"]
+    manifest = tmp / "manifest.json"
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": ["Movies/a.tiff"]}))
+    ref, good, bad = tmp / "ref", tmp / "good", tmp / "bad"
+    _tree(ref, roots, failing=set())
+    _tree(good, roots, failing=set())
+    _tree(bad, roots, failing=set())
+
+    def run24(test, out, reuse=False):
+        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
+               "--tool", tool, "--manifest", manifest, "--out", out]
+        if reuse:
+            cmd.append("--reuse")
+        return run(cmd)
+
+    out = tmp / "exact"
+    assert run24(good, out).returncode == 0, "baseline comparison should pass"
+
+    # same root, different --test tree: the stored report must not be reused
+    cp = run24(bad, out, reuse=True)
+    assert cp.returncode == 1, "a report was reused across a different test tree"
+    s = json.loads((out / "exact_summary.json").read_text())
+    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
+
+    # same trees but the reference file changed underneath: also refused
+    out2 = tmp / "exact2"
+    assert run24(good, out2).returncode == 0
+    (ref / "Movies" / "a.mrc").write_text("changed after the report was written")
+    cp = run24(good, out2, reuse=True)
+    assert cp.returncode == 1, "a report was reused after its inputs changed"
+    s = json.loads((out2 / "exact_summary.json").read_text())
+    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
+
+
+def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
+    """'Movies//a' and 'Movies/a' are one file on disk, so they must collide.
+
+    worker_relative_root originally only stripped leading slashes, while every
+    consumer hands the value to pathlib, which also collapses interior runs.
+    The two domains disagreeing reproduced both review findings through a
+    different spelling: preflight passed the pair, the merge's duplicate guard
+    compared distinct strings, and compare24 counted one product pair twice.
+    """
+    assert star_io.worker_relative_root("Movies//a") == "Movies/a"
+    assert star_io.worker_relative_root("///a/x") == "a/x"
+    assert star_io.worker_relative_root("a/") == "a/", "a trailing slash names a " \
+        "different file and must be preserved"
+
+    rows = [("Movies//a.tif", 1, 0.0), ("Movies/a.tif", 1, 1.4),
+            ("Movies/c.tiff", 1, 2.8)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    cp = partition(star, 2, tmp / "shards")
+    assert cp.returncode == 3, f"'Movies//a' and 'Movies/a' accepted (rc={cp.returncode})"
+    assert "output-name collision" in cp.stderr, cp.stderr
+
+    # the merge must catch it too, from a manifest it did not produce
+    man = tmp / "man.json"
+    man.write_text(json.dumps({
+        "canonical_movies": ["Movies//a.tif", "Movies/a.tif"],
+        "canonical_output_roots": ["Movies/a", "Movies/a"],
+        "shards": [{"index": 0, "movies": ["Movies//a.tif"], "n_movies": 1},
+                   {"index": 1, "movies": ["Movies/a.tif"], "n_movies": 1}]}))
+    w0, w1 = tmp / "w0", tmp / "w1"
+    (w0 / "Movies").mkdir(parents=True)
+    (w0 / "Movies" / "a.mrc").write_text("one")
+    (w0 / "Movies" / "a.star").write_text("one")
+    w1.mkdir()
+    report = tmp / "rep.json"
+    cp = merge(man, [w0, w1], tmp / "merged", fake_status(tmp, [0, 0]), report)
+    assert cp.returncode == 3, f"one pair satisfied two movies (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert any("duplicate coverage" in p for p in rep["problems"]), rep["problems"]
+    # and it must not invent misroutes on top of the true finding
+    assert not any(p.startswith("misrouted:") for p in rep["problems"]), \
+        f"phantom misroute reported alongside the real duplicate: {rep['problems']}"
+
+    # compare24 must refuse the same manifest rather than counting one pair twice
+    tool = tmp / "stub_compare.py"
+    tool.write_text(STUB_COMPARATOR)
+    cp = run([PY, TOOLS / "compare24.py", "--ref", w0, "--test", w0,
+              "--tool", tool, "--manifest", man, "--out", tmp / "z"])
+    assert cp.returncode == 2, f"duplicate normalized roots accepted (rc={cp.returncode})"
+    assert "not distinct after normalization" in cp.stderr, cp.stderr
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -1272,6 +1370,8 @@ CASES = [
     case_compare24_report_identity,
     case_compare24_injective_report_identity,
     case_normalized_root_collision_refused,
+    case_interior_double_slash_is_the_same_product,
+    case_reuse_pins_the_trees_not_just_the_root,
     case_duplicate_coverage_and_zero_pairs_rejected,
     case_absolute_movie_roots_attributed,
     case_gpu_witness_logic,

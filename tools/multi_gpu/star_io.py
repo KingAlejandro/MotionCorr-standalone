@@ -44,6 +44,7 @@ Multiline semicolon blocks are not supported by the C++ reader
 from __future__ import annotations
 
 import dataclasses
+import re
 from pathlib import Path
 
 
@@ -355,6 +356,9 @@ def split_output_path(relpath: str, roots) -> tuple[str, str, str] | None:
     return best
 
 
+_SEPARATOR_RUN = re.compile(r"/{2,}")
+
+
 def worker_relative_root(root: str) -> str:
     """Where an output root actually lands beneath a worker's --o directory.
 
@@ -366,11 +370,21 @@ def worker_relative_root(root: str) -> str:
     absolute root can never succeed, and every product then reads as lost even
     though the runner wrote it exactly where it said it would.
 
+    Interior duplicate separators are collapsed as well, because every consumer
+    of this value hands it to pathlib, which collapses them -- `Movies//a` and
+    `Movies/a` are one file on disk. Leaving the string domain disagreeing with
+    the path domain made the collision, duplicate-coverage and duplicate-root
+    guards compare strings that differ while the filesystem sees one product,
+    which reproduced both review findings verbatim through a different spelling.
+
+    A trailing separator is preserved: `a/` names `.mrc` inside directory `a`,
+    which is a different file from `a.mrc`, and pathlib agrees.
+
     A '..' component cannot escape the output directory: getOutputFileNames
     replaces every '.' with '_' first, so '../x' becomes '__/x'. There is
     deliberately no guard for it here -- one could never fire.
     """
-    return root.lstrip("/")
+    return _SEPARATOR_RUN.sub("/", root.lstrip("/"))
 
 
 def output_root(movie_name: str) -> str:

@@ -50,13 +50,37 @@ def report_identifier(rel_root: str) -> str:
     into a false 2/2 PASS. The readable part is therefore only a label, and the
     identity comes from a digest of the exact root.
     """
-    digest = hashlib.sha256(rel_root.encode("utf-8")).hexdigest()[:16]
+    # surrogatepass: os.scandir yields surrogate escapes for filenames that are
+    # not valid UTF-8, and a plain encode would abort the whole comparator with
+    # a traceback instead of recording a FAIL for that one movie.
+    digest = hashlib.sha256(rel_root.encode("utf-8", "surrogatepass")).hexdigest()[:16]
     label = _SAFE.sub("_", rel_root).strip("_")[-60:] or "root"
     return f"{label}-{digest}"
 
 
 def root_sidecar(report_path: Path) -> Path:
-    return report_path.with_suffix(".root")
+    return report_path.with_suffix(".origin.json")
+
+
+def origin_record(rel: str, ref: Path, test: Path, tool: str,
+                  files: list[Path]) -> dict[str, object]:
+    """What a report must still describe for --reuse to accept it.
+
+    The root alone is not enough: a report produced for root X against one pair
+    of trees would otherwise be accepted as the verdict for root X against
+    completely different trees, so a passing run could be reused to certify
+    inputs it never saw. Pin the resolved trees, the comparator, and each input
+    file's size and mtime.
+    """
+    stat = {}
+    for f in files:
+        try:
+            st = f.stat()
+            stat[str(f)] = [st.st_size, int(st.st_mtime_ns)]
+        except OSError:
+            stat[str(f)] = None
+    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool),
+            "inputs": stat}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -78,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
                          "script's verdict logic is recomputed. Fails if one is missing.")
     a = ap.parse_args(argv)
 
-    ref, test, out = Path(a.ref), Path(a.test), Path(a.out)
+    ref, test, out = Path(a.ref).resolve(), Path(a.test).resolve(), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
 
     if a.manifest:
@@ -131,14 +155,23 @@ def main(argv: list[str] | None = None) -> int:
             side = root_sidecar(j)
             if not side.exists():
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
-                                "reason": f"--reuse but no root sidecar at {side}; "
+                                "reason": f"--reuse but no origin sidecar at {side}; "
                                           "report identity cannot be validated"})
                 continue
-            recorded = side.read_text().strip()
-            if recorded != rel:
+            try:
+                recorded = json.loads(side.read_text())
+            except Exception as exc:  # noqa: BLE001
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
-                                "reason": f"--reuse report identity mismatch: {j} was "
-                                          f"produced for {recorded!r}, not {rel!r}"})
+                                "reason": f"--reuse but unreadable sidecar {side}: {exc}"})
+                continue
+            expected = origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts])
+            if recorded != expected:
+                differing = sorted(k for k in set(recorded) | set(expected)
+                                   if recorded.get(k) != expected.get(k))
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "reason": f"--reuse origin mismatch for {j}: "
+                                          f"{differing} differ from the run that "
+                                          "produced it"})
                 continue
             rc = 0
         else:
@@ -148,7 +181,9 @@ def main(argv: list[str] | None = None) -> int:
                  "--gate", "exact", "--json-out", str(j)],
                 capture_output=True, text=True)
             rc = cp.returncode
-            root_sidecar(j).write_text(rel + "\n")
+            root_sidecar(j).write_text(
+                json.dumps(origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts]),
+                           indent=2, sort_keys=True) + "\n")
 
         rec: dict[str, object] = {"movie": name, "root": root, "report": j.name,
                                   "returncode": rc}

@@ -84,8 +84,8 @@ MUTATIONS = [
 
     ("misrouted check removed from the merge",
      "tools/multi_gpu/merge_workers.py",
-     "                if assigned != k:",
-     "                if False:  # MUTATED",
+     "                elif assigned != k:",
+     "                elif False:  # MUTATED",
      ["case_duplicate_and_misrouted_output", "case_real_output_suffixes_attributed"]),
 
     ("unassigned-output check removed from the merge",
@@ -237,10 +237,10 @@ MUTATIONS = [
 
     ("comparison report identity is not injective",
      "tools/multi_gpu/compare24.py",
-     '    digest = hashlib.sha256(rel_root.encode("utf-8")).hexdigest()[:16]\n'
      '    label = _SAFE.sub("_", rel_root).strip("_")[-60:] or "root"\n'
      '    return f"{label}-{digest}"',
-     '    return rel_root.replace("/", "__")  # MUTATED',
+     '    return rel_root.replace("/", "__")  # MUTATED\n'
+     '    return f"{label}-{digest}"',
      ["case_compare24_injective_report_identity"]),
 
     ("reused reports no longer validated against their root",
@@ -285,6 +285,25 @@ MUTATIONS = [
      "            star_io.worker_relative_root(star_io.output_root(m)) for m in canonical],",
      '        "canonical_output_roots": [star_io.output_root(m) for m in canonical],  # MUTATED',
      ["case_normalized_root_collision_refused"]),
+
+    ("worker-relative root stops collapsing interior separators",
+     "tools/multi_gpu/star_io.py",
+     '    return _SEPARATOR_RUN.sub("/", root.lstrip("/"))',
+     '    return root.lstrip("/")  # MUTATED',
+     ["case_interior_double_slash_is_the_same_product"]),
+
+    ("duplicate coverage overwrites the owner and invents misroutes",
+     "tools/multi_gpu/merge_workers.py",
+     "            collapsed_roots.add(root)\n            continue",
+     "            pass  # MUTATED",
+     ["case_interior_double_slash_is_the_same_product"]),
+
+    ("reuse sidecar records only the root again",
+     "tools/multi_gpu/compare24.py",
+     '    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool),\n'
+     '            "inputs": stat}',
+     '    return {"root": rel}  # MUTATED',
+     ["case_reuse_pins_the_trees_not_just_the_root"]),
 
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",

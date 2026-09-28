@@ -279,7 +279,10 @@ def main():
         assert leftover_c < OUTPUT_BYTES, (
             f"c.mrc is {leftover_c} bytes: nothing was truncated, so this phase is not "
             f"observing the injected fault")
-        print(f"  phase 4: finite hard limit {FINITE_HARD_LIMIT} B -> exit "
+        # Report the limit that was actually applied, not the constant we asked
+        # for: under an inherited hard limit below FINITE_HARD_LIMIT the two
+        # differ, and printing the constant would overstate the condition.
+        print(f"  phase 4: finite hard limit {expected_hard} B -> exit "
               f"{res.returncode}, MotionCorr reported the short write on c.mrc, "
               f"c.mrc truncated to {leftover_c} B, no c.star")
 

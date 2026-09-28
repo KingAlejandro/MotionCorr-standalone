@@ -10,7 +10,7 @@
 | Head | `1955238` (validated source `412f2f98be401760aa2b336deaba3aa348cfafd7`) |
 | Branch | `round96/94-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-967d9ef6` |
-| PR | (opening now — URL recorded here and on the issue) |
+| PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/108 (draft) |
 
 ## Changed files (matches the ADR whitelist)
 
@@ -118,10 +118,24 @@ on the benchmark lock, so it cannot sit on the mutex by accident.
 
 ## Subagents / reviewers
 
-None launched yet. At most two bounded read-only reviewers will be used for the independent
-code/spec/license review before the PR leaves draft.
+Two bounded read-only reviewers running concurrently (the round cap), neither able to write:
+
+1. code/concurrency review — producer-side shared state, deadlock and lost wakeups,
+   reservation lifetime, exception safety across the OpenMP boundary, serial-path behavioural
+   equivalence of the shared-loader refactor, and the `Iframes` aliasing.
+2. spec-scope and license audit — reverse scope isolation against the ADR whitelist, the ADR's
+   own factual claims, whether the tests can actually observe what they assert, unrun-layer
+   honesty of the README and PR body against the raw log, and GPL notices.
+
+Findings and any resulting fixes will be posted on #94 and PR #108 before it leaves draft.
+
+## Progress comments
+
+- #94 plan/ADR: issuecomment-5860965445
+- #95 interface coordination: issuecomment-5860967217
+- #94 PR/validation: issuecomment-5861175290
 
 ## Next step
 
-Open the focused draft PR, record its URL here and on #94, then request independent read-only
-review. No GPU submission until a slot is explicitly transferred from #26.
+Act on the two review reports, then hold. No merges, no default promotion, and no GPU
+submission until a slot is explicitly transferred from #26.

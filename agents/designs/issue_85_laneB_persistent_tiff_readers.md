@@ -1,10 +1,31 @@
 # Design note: persistent TIFF reader handles (issue #85, lane B)
 
 - **Issue**: #85, lane B of the [TIFF ingest optimization program](https://github.com/KingAlejandro/MotionCorr-standalone/issues/85#issuecomment-5876206372)
-- **Status**: experiment, opt-in, default off
+- **Status**: experiment, opt-in, default off. **Measured outcome: no-go for
+  promotion.** The mechanism works and preserves every output exactly, but it
+  removes 1.7% of a movie read and moves the application wall by less than the
+  host's run-to-run noise. See `docs/issue85_laneB_evidence/`.
 - **Base**: `origin/main` `8323c55`
 - **Branch**: `feat/issue-85-laneB-persistent-tiff`
 - **Independent of**: lane C (`feat/issue-85-laneC-uint16-staging`)
+
+## Outcome
+
+Keep the flag off. The pool is correct — 422 parity checks on two LibTIFF
+error-context builds, byte-identical corrected images and STAR files across
+all 24 tutorial movies — and it is not slower, including at 16 readers against
+an 8-CPU budget. It is simply not faster in any way the application can see.
+
+If a future lane revisits this, two results from here should carry over:
+
+1. **Resolving the layout once buys nothing.** The arm that keeps the
+   per-frame `readTIFF` call tracks the parse-once arm within 1% at every
+   reader count. All of the (small) microbenchmark advantage comes from not
+   reopening the file. The simpler variant needs no change to `src/rwTIFF.h`
+   at all.
+2. **Allocation and first touch of the decoded frames is 45% of a
+   single-threaded movie read**, as expensive as the 92,112 inflate calls, and
+   no lane in the current issue #85 program targets it.
 
 ## Question
 

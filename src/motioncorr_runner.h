@@ -33,6 +33,7 @@
 #include "src/micrograph_model.h"
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
+#include "src/movie_prefetch.h"
 
 class EERRenderer;
 
@@ -165,6 +166,17 @@ public:
 	// Random seed for hot pixel replacement (deterministic across threads)
 	int random_seed = 1;
 
+	// Bounded next-movie prefetch (issue #94). Off by default on every backend:
+	// the serial loop remains the shipped behaviour until an overlap gain is
+	// actually measured. See agents/designs/issue_94_bounded_prefetch.md.
+	bool do_prefetch = false;
+	// Host-memory ceiling in MiB for producer-current + queued + consumer-active
+	// decoded movies together. 0 means 3x the first movie's estimate.
+	long prefetch_mem_mb = 0;
+	// Decoded movies allowed to sit between producer and consumer. This alone
+	// is NOT the memory bound; see the byte budget.
+	int prefetch_queue = 1;
+
 	// Archive directory
 	FileName fn_archive;
 
@@ -223,8 +235,14 @@ public:
 	// Get the shifts from MOTIONCOR2
 	void getShiftsMotioncor2(FileName fn_log, Micrograph &mic);
 
-	// Execute our own implementation for a single micrograph
-	bool executeOwnMotionCorrection(Micrograph &mic);
+	// Execute our own implementation for a single micrograph.
+	// `prefetched` is a decoded record handed over by the producer, or nullptr
+	// to load in line exactly as the serial path always has. `prefetcher` is
+	// non-null whenever prefetch is enabled, so an in-line load inside a
+	// prefetching run can still charge its bytes to the shared budget.
+	bool executeOwnMotionCorrection(Micrograph &mic,
+	                                movieio::MoviePrefetchRecord *prefetched = nullptr,
+	                                movieio::MoviePrefetcher *prefetcher = nullptr);
 
 	// Plot the shifts
 	void plotShifts(FileName fn_mic, Micrograph &mic);
@@ -245,6 +263,12 @@ public:
 	static bool detectSerialEMDefectText(FileName fn_defect);
 
 private:
+	// Print the prefetch accounting: budget, peak reserved bytes, peak queue
+	// occupancy, admitted/in-line/failed counts, forced over-budget grants,
+	// blocked intervals and the process-wide RSS high-water. Queue bytes and
+	// RSS are reported separately and never conflated.
+	void reportPrefetchStats(const movieio::PrefetchStats &stats) const;
+
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 

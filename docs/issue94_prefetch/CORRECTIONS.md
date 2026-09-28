@@ -65,7 +65,8 @@ appear in a declared-used label record, requires **both** sides to parse as
 `%d-%b-%y  %H:%M:%S`, and requires both to sit at the **same offset behind an identical
 prefix**. A garbage, relocated or absent label cannot hide inside the whitelist.
 
-**Result, all 12 pairs:**
+**Result — the figures below are PER PAIR and were identical in all 12 pairs.** The aggregate
+over the 12 pairs is 864 file comparisons, 16 416 whitelisted bytes and ~33.1 GB of pixel data:
 
 ```
 MRC files fully identical (whole file minus whitelist): 72
@@ -237,3 +238,41 @@ review; only the evidence tooling is new and it is covered by the two controls a
   current head: all **UNRUN**.
 - n=3 per budget. 1/9 favourable blocks is a direction, not a confidence interval.
 - The mechanism behind the null is a **hypothesis** (correction 4).
+
+---
+
+## Correction 6 — found by the scope audit of corrections 1-5
+
+The first round of corrections was itself incomplete. Three statements survived that
+contradicted the corrected record, and one framing was imprecise. All four are now fixed in
+place, struck rather than deleted:
+
+1. **`scarf_gpu/README.md` §2 heading** still read *"prefetch was never faster, in any of 9
+   pairs"* — directly above the table that disproves it, and inside the section whose body I had
+   already struck through. A heading is the most-scanned line and becomes the anchor text, so
+   this was the worst place for it to survive. Now reads "faster in 1 of 9 pairs", with the
+   original wording kept in an HTML comment.
+
+2. **The top-level `README.md` still declared that no GPU work existed** — *"no timing, no GPU
+   run and no speedup"*, and under *Explicitly unrun*, *"Anything on a GPU… no same-backend
+   comparison on the 24 tutorial movies"* — while `scarf_gpu/` in the same directory held three
+   completed series. **That was a larger contradiction than the one correction 1 fixed.** It
+   arose because the file was written before the GPU work and never revisited. Both passages are
+   struck with the current state stated beside them, the artifact table now lists `scarf_gpu/`,
+   `CORRECTIONS.md` and the final CI log, and the unrun list is rewritten to what is *actually*
+   still unrun.
+
+3. **`scarf_gpu/README.md` §4 still asserted** that *"the prefetch accounting explains the null
+   directly"* — an explanatory claim in the indicative that survived the edit demoting the rest
+   of that section to a hypothesis. Rephrased as an explanation offered, not demonstrated.
+
+4. **The §2 result block here was introduced as "Result, all 12 pairs"** but quotes a single
+   per-pair section. The numbers were never inflated — the surrounding prose gives the aggregate
+   correctly — but a reader taking the block as totals would under-count by 12×. Now labelled
+   per-pair with the aggregate stated: 864 file comparisons, 16 416 whitelisted bytes, ~33.1 GB
+   of pixels.
+
+Verdicts from that audit: **SPEC_CONFORMANCE_PASSED** (source frozen, every raw manifest, TSV,
+per-arm dump, slurm log and `superseded/` entry byte-identical to its introducing commit, the two
+new tool files added to ADR §12 rather than left out of scope, licence convention matched) and
+**CORRECTIONS_INCOMPLETE** for items 1-2 above, which this correction closes.

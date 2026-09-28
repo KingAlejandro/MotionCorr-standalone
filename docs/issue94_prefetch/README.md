@@ -4,9 +4,23 @@
 > this directory and in the #94/#108/#66 comments, including the "0 of 9" count (it is 1 of 9)
 > and the scope of the header comparison. Raw tables and logs are preserved unedited.
 
-What this directory contains, and equally what it does not: **no timing, no GPU run and no
-speedup.** The overlap this change makes possible has not been measured. #26 owns this round's
-initial GPU benchmark slot, so the screening script is prepared and unrun.
+> **SUPERSEDED, 2026-09-28.** The paragraph below was written before any GPU work existed and
+> is now contradicted by `scarf_gpu/` in this same directory. It is struck rather than deleted
+> so the change of state stays visible:
+>
+> ~~What this directory contains, and equally what it does not: **no timing, no GPU run and no
+> speedup.** The overlap this change makes possible has not been measured. #26 owns this
+> round's initial GPU benchmark slot, so the screening script is prepared and unrun.~~
+
+This directory holds the **CPU** validation. The **GPU** work — native CUDA prefetch off/on
+correctness and controlled paired timing/RSS on three dedicated SCARF allocations — was run on
+2026-09-28 and lives in [`scarf_gpu/`](scarf_gpu/README.md), with corrections to both in
+[`CORRECTIONS.md`](CORRECTIONS.md).
+
+**Outcome: no-go on promotion.** Prefetch produced byte-identical products (whole file minus a
+19-byte-per-file writer timestamp, across 12 retained pairs) but was faster in only **1 of 9**
+paired blocks while costing **+2.55 GiB / +86%** host RSS. `--prefetch` stays opt-in and off by
+default. Waiting behind #26 no longer applies: Alex authorised parallel GPU access on 28 Sep.
 
 ## Provenance
 
@@ -34,6 +48,9 @@ produces `-O0` and inflates every host-side number.
 | `tsan_*_eb022aff151c.txt` | stdout of the three sanitizer runs |
 | `cli_contract_eb022aff151c.txt` | option documentation and validation exit codes |
 | `cuda_syntax_check/` | parse-only check of the `_CUDA_ENABLED` branches, with stubs |
+| `scarf_gpu/` | **the GPU work**: three dedicated SCARF series, correctness, timing, RSS, and the full-file header re-verification |
+| `CORRECTIONS.md` | five appended corrections to claims in this directory and in #94/#108/#66 |
+| `cpu_validation_fbad90a97ce5.log` | final CI at the corrected head: ctest plus both controls |
 | `superseded/` | earlier heads' runs, retained; see its README for why |
 
 ## Placement, and the interference that was present
@@ -170,15 +187,27 @@ error, so the harness really does reach the CUDA-only branches. **It is not a CU
 
 ## Explicitly unrun
 
-- Anything on a GPU. No real CUDA toolkit build, no CUDA test, no timing, no overlap
-  measurement, no same-backend comparison on the 24 tutorial movies.
-  `scripts/prefetch_gpu_screen.sh` refuses to start without an assigned slot.
+> **SUPERSEDED for the GPU rows, 2026-09-28.** The first and fourth bullets below were true
+> when written and are no longer. Struck, not deleted:
+>
+> ~~Anything on a GPU. No real CUDA toolkit build, no CUDA test, no timing, no overlap
+> measurement, no same-backend comparison on the 24 tutorial movies.~~ — a real CUDA Release
+> build, three completed series, 24-movie same-backend comparison and paired timings all exist;
+> see `scarf_gpu/`.
+> ~~Real host RSS at tutorial movie scale.~~ — measured, 2.97 GiB off vs 5.51 GiB on.
+
+Still unrun after the GPU work:
+
 - EER and compressed-MRC inputs through the prefetch path. They are routed to the in-line
   serial loader by design and are **unrun**, not "supported". The mixed EER/TIFF case that
   motivated pre-setting libtiff's warning handler is likewise unrun for lack of an EER fixture.
-- Multi-worker (2/3/4 GPU process) schedules.
-- Real host RSS at tutorial movie scale. `process_peak_rss_bytes` is printed by the run, but
-  nothing here exercises it at a size where it would be informative.
+- Multi-worker (2/3/4 concurrent GPU process) schedules.
+- CPU budgets wider than 16 logical CPUs, and any NUMA memory pinning.
+- The composed PR103/PR110 integrity work — authorised, but not run, because a no-go verdict
+  does not justify spending shared GPU capacity to support prose (`CORRECTIONS.md` §5).
+- `nsys` transfer-byte counts and `TIMING=ON` per-stage timers, which would resolve finer
+  effects than process wall and would let the OFF arm's critical path be measured rather than
+  hypothesised.
 - TSan with OpenMP decode threads (`OMP_NUM_THREADS > 1`), which needs a TSan-annotated OpenMP
   runtime to be readable.
 - ThreadSanitizer **at the current head**. It was run at `eb022aff`; the three review fixes

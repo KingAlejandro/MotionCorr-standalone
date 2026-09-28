@@ -82,7 +82,9 @@ Headers are compared over bytes 0-224; 224-1024 is the MRC label area and carrie
 timestamp. Every arm of every series: `exit 0`, 72 MRC + 25 STAR outputs, **0 failed movies**,
 `decoded = 24`, `inline_loaded = 0`, `failed = 0`, `over_budget_grants = 0`.
 
-## 2. Timing — prefetch was never faster, in any of 9 pairs
+## 2. Timing — prefetch was faster in 1 of 9 pairs
+<!-- This heading originally read "prefetch was never faster, in any of 9 pairs", which the
+     table below disproves. Corrected 2026-09-28; see ../CORRECTIONS.md section 1. -->
 
 Paired, arm order alternating within each pair, order label retained. `delta = off − on`, so
 **positive means prefetch faster**.
@@ -138,7 +140,8 @@ deep. The declared bound was never exceeded and no override was ever needed.
 
 ## 4. Why it does not pay — the overlap witness (**HYPOTHESIS**, see `../CORRECTIONS.md` §4)
 
-The prefetch accounting explains the null directly, and more convincingly than the noisy walls:
+The prefetch accounting is the most informative thing measured here, and it is offered as an
+explanation rather than as a demonstration of one — see the Measured/Hypothesis split below:
 
 | series | `consumer_wait_s` | `producer_queue_blocked_s` | `producer_budget_blocked_s` |
 |---|---|---|---|

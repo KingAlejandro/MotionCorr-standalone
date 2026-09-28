@@ -201,3 +201,123 @@ unrun as a distinct observation**, and is recorded as unrun rather than claimed.
 - **Not covered by PR A:** cancellation during output, the full per-product failure matrix
   across DW/noDW/EVN/ODD/PS, and changed gain/options. These are listed against PR B in
   `agents/designs/issue_99_fail_closed_image_writes.md` §7.
+
+
+---
+
+# Addendum — inherited `RLIMIT_FSIZE` hard limit (Codex review on PR #105)
+
+[`discussion_r4119251206`](https://github.com/KingAlejandro/MotionCorr-standalone/pull/105#discussion_r4119251206),
+raised at `910fcf43`. **Tests only — no production source changed in this delta.** The
+findings, claims and limitations recorded above are unaffected; the ghostscript PDF
+nondeterminism (§4) and the unreachable header-write injection (§6) both stand.
+
+| Field | Value |
+|---|---|
+| Host | `small-refmac-machine` (cpu64), `taskset -c 32-63`, `flock /tmp/motioncorr-issue96-cpu-validation.lock` |
+| Date | 2026-09-28T06:4xZ (suite), 06:56Z (corrected finite-hard-limit control) |
+| Cpuset / NUMA witness | `Cpus_allowed_list: 32-63`, `Mems_allowed_list: 0-1`, `numactl --show`: `policy: default`, `cpubind: 1`, `physcpubind: 32..63` |
+| Build | Release `-O3 -DNDEBUG`, CUDA=OFF, `--parallel 16` |
+| Candidate | `10842690b48aacdcd1c6404ba021ad8ce7676e5d` |
+| Harness control | `33dee9e25568bb64bcfff018a9b79bf66b77a28c` — this delta's **fixed writer** with the **pre-delta tests** |
+| Negative control | `28727aa1eab62b6f34417ec465785cc4b3a65455` — pre-fix main `4c952b3f` with the **new** tests |
+| GPU / timing | none, neither run nor claimed |
+
+Logs: [`cpu-rlimit-validation.log`](cpu-rlimit-validation.log),
+[`cpu-finite-hard-limit-control.log`](cpu-finite-hard-limit-control.log).
+Scripts: [`cpu_rlimit_validation.sh`](cpu_rlimit_validation.sh),
+[`cpu_finite_hard_limit_control.sh`](cpu_finite_hard_limit_control.sh).
+
+```
+candidate       motioncorr           3a188c5b02396a22387045f7e79b5cee4033c326273e74057eed1273b727a1ef
+candidate       image_write_faults   126ede949a3a72db881204a0e75832e746399bceb9371e369f6906bd86382667
+harness control image_write_faults   65c800c01e0b237ebce10ccdfb3a41242e2381956a06c859a17be77b8a28744f
+negative ctrl   motioncorr           6071f64933a0fcacaf13f814881417fe62a313f066221f6cbb5e21d091561056
+```
+
+## A1. The defect
+
+Both fault tests wrote `RLIM_INFINITY` as the **hard** limit. An unprivileged process
+cannot raise a hard limit, so under the finite inherited hard `RLIMIT_FSIZE` that CI and
+HPC systems set:
+
+- the C++ suite raised `setrlimit(RLIMIT_FSIZE) failed` while *restoring*, and
+- the Python `preexec_fn` failed in the forked child, so MotionCorr never `exec`'d.
+
+Either way the harness dies before the writer fault runs — and that presents as "the fault
+did not fire", which is the opposite of the truth.
+
+## A2. The fix
+
+Both paths now read the inherited `(soft, hard)`, lower only the soft limit, clamp the
+requested soft value to the hard one, and restore exactly what was inherited. The C++ side
+additionally refuses up front, naming the numbers, if the inherited hard limit is below the
+1 049 600-byte healthy control — that is an environment the suite cannot run in, not a
+writer defect.
+
+Fixing it quietly would not be provable: on a host with an infinite hard limit the *old*
+code also passes, because setting an already-infinite hard limit to infinity is a no-op. So
+both tests now re-run the same injection under a hard limit they lower themselves, which
+needs no privilege — the C++ suite forks and re-execs itself with `hard = 8 MiB`, and the
+Python test adds a phase driving MotionCorr through a `preexec_fn` that lowers the child's
+hard limit.
+
+## A3. The control discriminates
+
+Same fixed writer, same binaries, same command, `hard = soft = 8 388 608`:
+
+```
+inherited by ctest: (8388608, 8388608)
+
+candidate         exit=0   WriteFaults Passed, ImageWriteFaults Passed
+                           phase 4: finite hard limit 8388608 B -> exit 1,
+                                    MotionCorr reported the short write on c.mrc,
+                                    c.mrc truncated to 600000 B, no c.star
+                           inherited RLIMIT_FSIZE: soft=8388608 hard=8388608
+                                    (finite-hard-limit control child)
+
+pre-delta tests   exit=8   WriteFaults ***Failed
+                             subprocess.SubprocessError: Exception occurred in preexec_fn.
+                             (after phase 1 wrote a.mrc 1049600 B -- so it died in the
+                              injection setup, not at a writer assertion)
+                           ImageWriteFaults Subprocess aborted***Exception
+                             what():  setrlimit(RLIMIT_FSIZE) failed
+
+pre-delta tests, no finite hard limit   exit=0   100% tests passed out of 2
+```
+
+The third line isolates the cause: the pre-delta tests fail **only** when the hard limit is
+finite. The candidate's phase 4 asserts on MotionCorr's own
+`Failed to write image data … c.mrc` text rather than on an exit code, because a failed
+spawn is also nonzero — so passing requires the injection to have reached the real binary.
+
+## A4. The first attempt at this control was void, and said so
+
+`bash -c 'ulimit -H -f 8192; …'` **fails**: bash sets only the hard limit and leaves the
+soft limit at infinity, so `soft > hard` and `setrlimit` returns `EINVAL`.
+
+```
+bash: line 1: ulimit: file size: cannot modify limit: Invalid argument
+  rc=1
+  resulting pair: (-1, -1)          <- RLIM_INFINITY; no limit was ever applied
+```
+
+Under that first attempt both the candidate *and* the pre-delta tests passed, which looks
+exactly like "the delta was unnecessary". `ulimit -f 8192` sets both and gives
+`(8388608, 8388608)`; the results in A3 are from that. Recorded because a control that
+silently fails to apply its condition is the same failure mode this issue's tests exist to
+catch.
+
+## A5. Everything else, re-run at the candidate
+
+- Full CPU CTest, normal environment: **15/15 passed**.
+- Negative control — pre-fix main with the **new** tests: **exit 8, both fail**, and for the
+  *writer* reason, not an rlimit reason:
+  `AssertionError: a failed image write was treated as success`,
+  `FAIL: a short payload write must throw, not report success`,
+  `terminate called after throwing an instance of 'RelionError'`. The delta did not blunt
+  the control.
+- Healthy payload: `1a424122f6fd8f9b691197f92d9a6ca712458e9f51898e34232ad3ad271ce9d3`,
+  1 049 600 bytes — unchanged from every earlier revision on this branch.
+- Load on the shared host was 8.35 at start and 4.85 at end of the control run; the box was
+  not idle, which does not affect these pass/fail assertions and no timing was taken.

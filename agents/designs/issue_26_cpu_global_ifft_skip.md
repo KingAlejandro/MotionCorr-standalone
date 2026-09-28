@@ -307,6 +307,11 @@ and is listed in §6.
 
 ### 5.8 Port evidence (this branch)
 
+Branch base is pinned main `4c952b3`. Main has since advanced to `48d1c9f`
+(87 commits, including #110); the branch remains MERGEABLE and CI runs against
+the merge with current main, so the green result below is a statement about the
+merged tree, not only about the base.
+
 Same lane: cpu64, `taskset -c 32-63` (NUMA node 1, `Mems_allowed_list=0-1`,
 policy default, `node1 cpulist=32-63`, `thread_siblings_list(cpu32)=32` i.e. no
 SMT sibling visible in the guest), build and runtime ≤ 16,
@@ -470,7 +475,7 @@ Written for the porting agent; recorded here as delivered.
 | PR #57 / `feat/issue-26-skip-dead-global-ifft` @ `0465ae1` | **superseded.** Prototype and evidence; preserved, not merged. Its predicate restates the guard and its base predates `0f508e0`. |
 | #26 | the investigation this implements. Measurement/tooling for #26 (PR #109) is a separate lane and is untouched. |
 | #66 work package *"#57 CPU inverse-FFT optimization must account for even/odd outputs before integration"* | **discharged** by the shared predicate plus `GlobalIfftElision` and the §5.8 controls. |
-| PR #110 (`integrate/round96-correctness-foundation`) | **merges cleanly — verified, not predicted.** `git merge-tree origin/pr110 HEAD` reports no conflict in any file. The merged `CMakeLists.txt` carries all of #110's `add_test` entries and `GlobalIfftElision`; the merged runner carries both `pre_dw_sum_needed` and `effective_expected_frames` with this predicate intact. No textual overlap in `src/motioncorr_runner.cpp`: in main-side coordinates #110's hunks end at `:1318` and resume at `:3329`, while this change occupies `:1996–2446`. Two semantic contacts, both orthogonal to and compatible with I1's requirement that the product set is unchanged: #110 adds an `effective_expected_frames` parameter to `isMovieComplete`, **and** adds the same parameter to `executeOwnMotionCorrection`'s signature with a frame-count precondition at the top of the very function this change edits — textually disjoint from `:1996–2446`, but worth naming rather than leaving implicit. Nothing from #110's tree is imported here. (An earlier draft of this document predicted a `CMakeLists.txt` conflict; that was inspection, and the merge check refutes it.) |
+| PR #110 (`integrate/round96-correctness-foundation`) — **since merged to main as `48d1c9f`** | **merges cleanly — verified twice.** Re-checked against main *after* #110 landed: `git merge-tree` is clean and the merged runner keeps `pre_dw_sum_needed` declared once at `:2068`, consumed by the guard at `:2419`, with the deliberately-not-unified write guard intact at `:2529` and no restated `do_local` copy reintroduced. GitHub also built the merge commit for CI, so this is observed rather than simulated. Originally recorded pre-merge as: | `git merge-tree origin/pr110 HEAD` reports no conflict in any file. The merged `CMakeLists.txt` carries all of #110's `add_test` entries and `GlobalIfftElision`; the merged runner carries both `pre_dw_sum_needed` and `effective_expected_frames` with this predicate intact. No textual overlap in `src/motioncorr_runner.cpp`: in main-side coordinates #110's hunks end at `:1318` and resume at `:3329`, while this change occupies `:1996–2446`. Two semantic contacts, both orthogonal to and compatible with I1's requirement that the product set is unchanged: #110 adds an `effective_expected_frames` parameter to `isMovieComplete`, **and** adds the same parameter to `executeOwnMotionCorrection`'s signature with a frame-count precondition at the top of the very function this change edits — textually disjoint from `:1996–2446`, but worth naming rather than leaving implicit. Nothing from #110's tree is imported here. (An earlier draft of this document predicted a `CMakeLists.txt` conflict; that was inspection, and the merge check refutes it.) |
 
 **Rejected alternative.** Widening the `:2340` guard, or making even/odd
 independent of it, to enlarge the set of skippable cases. That changes which

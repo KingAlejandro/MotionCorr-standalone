@@ -103,6 +103,14 @@ def compare_mrc(a: bytes, b: bytes, name: str):
     if na < 0:
         problems.append(f"{name}: negative nsymbt {na}")
         return problems, []
+    # An nsymbt larger than the payload makes every slice below clamp: the
+    # pixel comparison silently compares two empty slices, the "no pixel
+    # payload" guard never fires, and the reported byte count goes negative.
+    # A bogus offset-92 word therefore used to yield "PROBLEMS: none".
+    if MRC_HEADER_BYTES + na > len(a):
+        problems.append(f"{name}: nsymbt {na} exceeds the file "
+                        f"({len(a)} bytes); header is not trustworthy")
+        return problems, []
 
     if a[:MRC_LABEL_OFFSET] != b[:MRC_LABEL_OFFSET]:
         problems.append(f"{name}: main header bytes 0..224 differ")
@@ -230,8 +238,13 @@ def compare_arm_dirs(a_dir: Path, b_dir: Path):
     problems = []
     a_out = a_dir / "out" if (a_dir / "out").is_dir() else a_dir
     b_out = b_dir / "out" if (b_dir / "out").is_dir() else b_dir
-    A = {str(p.relative_to(a_out)): p for p in sorted(a_out.glob("**/*.mrc"))}
-    B = {str(p.relative_to(b_out)): p for p in sorted(b_out.glob("**/*.mrc"))}
+    # Both extensions: the runner writes aligned frame stacks as *.mrcs under
+    # --save_movies, and a "*.mrc"-only glob would leave the largest outputs
+    # uncompared AND invisible to the set-equality check below.
+    def mrcs(root):
+        return {str(p.relative_to(root)): p
+                for p in sorted(list(root.glob("**/*.mrc")) + list(root.glob("**/*.mrcs")))}
+    A, B = mrcs(a_out), mrcs(b_out)
     stats = {"mrc_compared": 0, "star_compared": 0, "pixel_bytes": 0,
              "whitelisted_bytes": 0, "files_with_timestamp_diff": 0}
     if not A:
@@ -302,16 +315,73 @@ def self_test() -> int:
                    lambda o: o.__setitem__(224 + 5, ord("m")), True)
     all_ok &= case("unused label record 1 gains content",
                    lambda o: o.__setitem__(slice(224 + 80, 224 + 84), b"junk"), True)
-    all_ok &= case("timestamp replaced by same-length garbage",
+    # These two are caught by the regex, not by strptime -- named accordingly,
+    # because an earlier round named one of them for a date-validity check it
+    # never reached.
+    all_ok &= case("timestamp -> garbage, regex no longer matches",
                    lambda o: o.__setitem__(slice(224 + 10, 224 + 29), b"XXXXXXXXXXXXXXXXXXX"), True)
-    all_ok &= case("timestamp replaced by an impossible date",
+    all_ok &= case("timestamp -> bad month name, regex no longer matches",
                    lambda o: o.__setitem__(slice(224 + 10, 224 + 29), b"99-Zzz-26  08:05:34"), True)
-    all_ok &= case("nsymbt claims an extended header",
+    # This one is regex-SHAPED but not a real date, so it is the only input
+    # that reaches datetime.strptime. Without it the whole strptime block
+    # could be deleted and every other case would still pass.
+    all_ok &= case("timestamp is regex-shaped but an impossible date (only strptime catches it)",
+                   lambda o: o.__setitem__(slice(224 + 10, 224 + 29), b"31-Feb-26  25:61:61"), True)
+    all_ok &= case("nsymbt differs between the two files",
                    lambda o: struct.pack_into("<i", o, MRC_NSYMBT_OFFSET, 16), True)
-    all_ok &= case("nlabl changes",
+    all_ok &= case("nlabl changes (caught by the 0..224 compare, not by the nlabl check)",
                    lambda o: struct.pack_into("<i", o, MRC_NLABL_OFFSET, 2), True)
     all_ok &= case("file truncated",
                    lambda o: o.__delitem__(slice(1040, None)), True)
+    # Cases that need a different base, so they are run explicitly rather than
+    # through case(). Each reaches a branch no mutation above can reach.
+    def pair_case(name, a, b, must_fail):
+        nonlocal all_ok
+        probs, _ = compare_mrc(bytes(a), bytes(b), "probe")
+        ok = bool(probs) == must_fail
+        all_ok &= ok
+        cases.append((name, "caught" if probs else "accepted",
+                      "OK" if ok else "WRONG", probs[:1]))
+
+    # Extended header with equal, nonzero nsymbt: content difference must be caught.
+    ext_a = bytearray(base[:1024]) + bytearray(b"E" * 16) + bytearray(base[1024:])
+    struct.pack_into("<i", ext_a, MRC_NSYMBT_OFFSET, 16)
+    ext_b = bytearray(ext_a)
+    ext_b[1024 + 3] = ord("X")
+    pair_case("extended header content differs (equal nonzero nsymbt)", ext_a, ext_b, True)
+    pair_case("extended header identical (equal nonzero nsymbt)", ext_a, bytearray(ext_a), False)
+
+    # A header-only file has no pixels: "identical" there would be vacuous.
+    hdr_only = bytearray(base[:1024])
+    pair_case("header-only file, no pixel payload", hdr_only, bytearray(hdr_only), True)
+
+    # nsymbt larger than the payload, EQUAL on both sides, so it survives the
+    # na != nb check and reaches the bound guard. Before that guard existed,
+    # Python slice clamping made this report "identical" with a negative byte
+    # count, and a genuine pixel flip was mislabelled an extended-header diff.
+    big = bytearray(base)
+    struct.pack_into("<i", big, MRC_NSYMBT_OFFSET, 2_000_000_000)
+    pair_case("nsymbt exceeds the payload, EQUAL on both sides", big, bytearray(big), True)
+    big_flipped = bytearray(big)
+    big_flipped[1024 + 33] ^= 0xFF
+    pair_case("nsymbt exceeds the payload AND a pixel differs", big, big_flipped, True)
+
+    # nsymbt negative on both sides must be rejected, not silently accepted.
+    neg = bytearray(base)
+    struct.pack_into("<i", neg, MRC_NSYMBT_OFFSET, -1)
+    pair_case("negative nsymbt on both sides", neg, bytearray(neg), True)
+
+    # nlabl = 0 with a real timestamp present: the timestamp must NOT be
+    # whitelisted, so a differing one is reported rather than hidden.
+    nl0_a = bytearray(base); struct.pack_into("<i", nl0_a, MRC_NLABL_OFFSET, 0)
+    nl0_b = bytearray(nl0_a); nl0_b[224 + 10:224 + 29] = b"28-Sep-26  08:05:34"
+    pair_case("nlabl=0 leaves the timestamp unwhitelisted", nl0_a, nl0_b, True)
+
+    # Two timestamps in one record: the record must not be whitelisted at all.
+    two_a = bytearray(base)
+    two_a[224:224 + 60] = b"Relion 28-Sep-26  08:03:24 x 28-Sep-26  08:03:24 pad      "[:60]
+    two_b = bytearray(two_a); two_b[224 + 20] = ord("9")
+    pair_case("two timestamps in one record are not whitelisted", two_a, two_b, True)
 
     print("negative control for the MRC comparison")
     print(f"  {'mutation':<48}{'result':<10}{'verdict'}")

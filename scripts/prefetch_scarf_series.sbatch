@@ -267,50 +267,26 @@ run_arm correctness_off
 run_arm correctness_on --prefetch
 
 log "=== exact same-backend comparison ==="
-python3 "$SRC/tools/compare_prefetch_arms.py" --root /dev/null > /dev/null 2>&1 || true
-python3 - "$OUT/correctness_off/out" "$OUT/correctness_on/out" > "$OUT/correctness_compare.txt" 2>&1 <<'PYX'
-import sys, struct
-from pathlib import Path
-a_root, b_root = Path(sys.argv[1]), Path(sys.argv[2])
-def mrc(p):
-    d = p.read_bytes()
-    nx, ny, nz, mode = struct.unpack("<4i", d[:16])
-    # 0..224 is the normalized header; 224..1024 is the label area, which
-    # carries a wall-clock timestamp and cannot be compared.
-    return d[:224], d[224:1024], d[1024:], (nx, ny, nz, mode)
-def stars(root):
-    return {str(p.relative_to(root)): "\n".join(
-                l.rstrip() for l in p.read_text(errors="replace").splitlines()
-                if not l.strip().startswith("#")).replace(str(root), "OUT")
-            for p in sorted(root.glob("**/*.star"))}
-A = {str(p.relative_to(a_root)): mrc(p) for p in sorted(a_root.glob("**/*.mrc"))}
-B = {str(p.relative_to(b_root)): mrc(p) for p in sorted(b_root.glob("**/*.mrc"))}
-problems = []
-if not A: problems.append("no MRC outputs at all -- the comparison would be vacuous")
-if set(A) != set(B): problems.append(f"different output sets: {sorted(set(A) ^ set(B))}")
-pix = hdr = 0
-for n in sorted(set(A) & set(B)):
-    ah, al, ap, adim = A[n]; bh, bl, bp, bdim = B[n]
-    if not ap: problems.append(f"{n}: zero pixels")
-    if ap != bp: problems.append(f"PIXELS DIFFER: {n}")
-    else: pix += 1
-    if ah != bh: problems.append(f"normalized header differs: {n} {adim} vs {bdim}")
-    else: hdr += 1
-SA, SB = stars(a_root), stars(b_root)
-if not SA: problems.append("no STAR outputs at all")
-if set(SA) != set(SB): problems.append(f"different STAR sets: {sorted(set(SA) ^ set(SB))}")
-st = 0
-for n in sorted(set(SA) & set(SB)):
-    if SA[n] != SB[n]: problems.append(f"STAR differs: {n}")
-    else: st += 1
-print(f"MRC payloads identical:            {pix}/{len(A)}")
-print(f"normalized headers identical:      {hdr}/{len(A)}")
-print(f"STAR artifacts identical:          {st}/{len(SA)}")
-print(f"total pixels compared:             {sum(len(v[2]) for v in A.values())} bytes")
-print("PROBLEMS:" if problems else "PROBLEMS: none")
-for p in problems: print("  -", p)
-sys.exit(1 if problems else 0)
-PYX
+# One implementation, the maintained one. This block used to be an inline
+# heredoc that compared only bytes 0..224 and set the 800-byte label area
+# aside wholesale -- so the correctness_compare.txt artifacts it produced
+# backed a much weaker claim than the surrounding prose made. It was preceded
+# by `compare_prefetch_arms.py --root /dev/null >/dev/null 2>&1 || true`,
+# which looked like a tool invocation and established nothing at all.
+#
+# The self-test runs first and is FATAL: a comparison whose own negative
+# control fails must not be allowed to certify anything.
+python3 "$SRC/tools/compare_prefetch_arms.py" --self-test > "$OUT/compare_self_test.txt" 2>&1
+SELFRC=$?
+echo "compare_self_test_rc: $SELFRC" >> "$MAN"
+if [ $SELFRC -ne 0 ]; then
+	log "COMPARISON SELF-TEST FAILED -- refusing to certify anything with it"
+	cat "$OUT/compare_self_test.txt"
+	exit 4
+fi
+python3 "$SRC/tools/compare_prefetch_arms.py" \
+        --pair "$OUT/correctness_off" "$OUT/correctness_on" \
+        > "$OUT/correctness_compare.txt" 2>&1
 CMP=$?
 log "correctness comparison rc=$CMP"
 cat "$OUT/correctness_compare.txt"

@@ -24,12 +24,23 @@ from pathlib import Path
 
 
 def expand_mask(spec: str):
-    """Expand a Linux CPU list ('0-7,32-39' or '0,1,2') into a sorted list."""
+    """Expand a Linux CPU list ('0-7,32-39' or '0,1,2') into a sorted list.
+
+    Raises rather than returning an empty list. An empty expansion would report
+    `distinct_physical_cores: 0` and an empty `numa_nodes_spanned` -- which is
+    byte-for-byte the symptom this module exists to eliminate, so producing it
+    silently would be the original bug wearing a new coat.
+    """
     cpus = set()
     for part in spec.strip().split(","):
         part = part.strip()
         if not part:
             continue
+        if ":" in part:
+            # `taskset -c` accepts stride syntax such as '0-7:2'. Rejecting it
+            # explicitly beats an int() traceback, and guessing at it would be
+            # worse than both.
+            raise ValueError(f"stride syntax is not supported: {part!r}")
         if "-" in part:
             lo, _, hi = part.partition("-")
             lo, hi = int(lo), int(hi)
@@ -38,6 +49,8 @@ def expand_mask(spec: str):
             cpus.update(range(lo, hi + 1))
         else:
             cpus.add(int(part))
+    if not cpus:
+        raise ValueError(f"mask {spec!r} expands to no CPUs")
     return sorted(cpus)
 
 
@@ -68,6 +81,13 @@ def describe(spec: str, table: dict):
     for c in known:
         siblings.setdefault((table[c][1], table[c][2]), []).append(c)
     full_pairs = sum(1 for v in siblings.values() if len(v) > 1)
+    if missing:
+        # `lscpu ... | head -200` truncates the witness on a large node. Deriving
+        # core and node counts from a partial witness yields a plausible WRONG
+        # number, which is worse than the obvious zero this module replaced.
+        raise ValueError(f"witness does not cover CPUs {missing[:8]}"
+                         f"{'...' if len(missing) > 8 else ''} from mask {spec!r}; "
+                         f"the topology witness is truncated or from another host")
     return {
         "mask": spec,
         "logical_cpus": len(cpus),
@@ -80,9 +100,15 @@ def describe(spec: str, table: dict):
 
 
 def self_test() -> int:
-    """Control: the parser must handle range lists, and the OLD comma-only
-    logic must demonstrably fail on them. Without the second half this test
-    would pass just as happily against the bug it exists to catch."""
+    """Control for the mask parser.
+
+    Honest about what discriminates: the DIRECT assertions below are what catch
+    a broken parser -- reintroduce the comma-only logic as `expand_mask` and the
+    very first range check fails. The `comma_only` re-run at the end is a
+    self-contained literal whose two results are constants; it documents the
+    historical failure for a reader, and it is NOT load-bearing. An earlier
+    version of this docstring claimed it was, which was false.
+    """
     # Synthetic NPS-style witness: 64 CPUs, 8 nodes, SMT sibling = cpu + 32.
     table = {}
     for c in range(64):
@@ -127,8 +153,27 @@ def self_test() -> int:
     d1 = describe("0", table)
     check("single cpu: physical cores", d1["distinct_physical_cores"], 1)
 
-    # The discriminating half: the old helper must get the range mask wrong
-    # and the explicit list right, which is exactly the observed failure.
+    def raises(fn):
+        try:
+            fn()
+        except ValueError as exc:
+            return str(exc)[:60]
+        return "NO ERROR"
+
+    # The empty mask is the one that matters: returning [] here reproduces the
+    # exact "0 physical cores, no NUMA nodes" output this module replaced.
+    check("empty mask raises", raises(lambda: expand_mask("")) != "NO ERROR", True)
+    check("comma-only mask raises", raises(lambda: expand_mask(",,,")) != "NO ERROR", True)
+    check("whitespace mask raises", raises(lambda: expand_mask("  ")) != "NO ERROR", True)
+    check("stride syntax rejected", raises(lambda: expand_mask("0-7:2")) != "NO ERROR", True)
+    check("descending range rejected", raises(lambda: expand_mask("7-0")) != "NO ERROR", True)
+    check("truncated witness rejected",
+          raises(lambda: describe("0-127", table)) != "NO ERROR", True)
+    check("whitespace inside a valid mask still parses",
+          expand_mask(" 0-3 , 32 "), [0, 1, 2, 3, 32])
+
+    # Documentation of the historical failure, not a discriminator (see the
+    # docstring): the old helper got the range mask wrong and the list right.
     check("OLD comma-only helper on a RANGE mask (must be 0)", comma_only("0-7,32-39"), 0)
     check("OLD comma-only helper on an EXPLICIT list (was fine)",
           comma_only("0,1,2,3,32,33,34,35"), 4)

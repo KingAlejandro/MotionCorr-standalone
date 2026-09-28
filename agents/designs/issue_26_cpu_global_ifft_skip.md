@@ -213,6 +213,27 @@ the defect — needing no new fixture:
 
 ---
 
+### 5.5 The merge into main auto-resolves — which is the hazard
+
+`git merge-tree origin/main <head>` on this branch:
+
+| branch head | conflicts | resulting predicate | consumer guard it faces | outcome |
+| :-- | :-- | :-- | :-- | :-- |
+| `13845fb` (before the disjunct) | `CMakeLists.txt` only | `do_local \|\| !do_dose_weighting \|\| save_noDW` | `… \|\| even_odd_split` | **silently corrupting** |
+| `75fde5f` (with the disjunct) | `CMakeLists.txt` only | `… \|\| save_noDW \|\| even_odd_split` | same | correct |
+
+`src/motioncorr_runner.cpp` **auto-merges cleanly in both cases** — git reports no
+conflict there, because the two sides edited different regions. So before the
+disjunct, merging main into this branch would have produced the measured
+EVN/ODD corruption with no conflict, no compiler warning and no failing test
+(§5.2). That is the whole argument for carrying an otherwise inert term.
+
+It also means CI cannot currently run on PR #57: GitHub will not build a merge
+commit for a conflicting pull request, and `CMakeLists.txt` conflicts. The gates
+in §5 were therefore executed directly on cpu64 instead, which is stronger
+evidence than CI on a stale base would have been, but it is not the same thing
+and is listed in §6.
+
 ## 6. UNRUN gaps
 
 Not executed here. None of these may be described as passing.
@@ -227,6 +248,7 @@ Not executed here. None of these may be described as passing.
 | tomography / pre-exposure even-odd path (`test_runner_contract` exposure case) | not run |
 | paired CPU benchmark on current main | deliberately excluded — no new benchmark series in this task |
 | the ported implementation itself | does not exist yet (§7) |
+| CI on the PR #57 head | cannot run while the PR conflicts (§5.5); build + CTests were run directly on cpu64 instead |
 
 The ~24% figure for global-only dose-weighted runs comes from base `3e3a196`
 measurements. It is **not** a current-main performance result and must not be

@@ -5,9 +5,9 @@
 | Issue | #94 bounded next-movie CUDA prefetch |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort — no routing errors, no model substitution |
 | Task class | implementation |
-| Phase | 4/5 — implemented, CPU-validated, evidence published; draft PR next |
+| Phase | 5/5 — implemented, reviewed, fixed, re-validated; draft PR open and current |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
-| Head | `1955238` (validated source `412f2f98be401760aa2b336deaba3aa348cfafd7`) |
+| Head | `c377404` (validated source `eb022aff151c11d939e2c39a5fc0b56da31ad431`) |
 | Branch | `round96/94-claude-opus-5` |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-967d9ef6` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/108 (draft) |
@@ -42,43 +42,52 @@ by a `git add -A` and has been removed from the commit; it stays untracked.
 | `3ded007` | test | STAR path normalisation; budget cases made actually tight |
 | `412f2f9` | chore | GPU screening script and paired arm comparison, not run |
 | `1955238` | docs | CPU validation evidence with placement recorded |
+| `d48dc91` | docs | draft PR and reviewers recorded |
+| `c699a52` | docs | CUDA-branch syntax check against stub headers, with control |
+| `189ed1f` | test | fix assertions that could not observe what they asserted |
+| `23f5023` | docs | validation evidence incl. ThreadSanitizer |
+| `eb022af` | fix | return budget bytes only after the buffers are actually freed |
+| `c377404` | docs | validation evidence for the fixed head, superseded runs retained |
 
 ## Latest test commands and results
 
-Host `cpu64` (`small-refmac-machine`), 2026-09-28T00:11:48Z, source `412f2f98`.
+Host `small-refmac-machine` (ssh alias `cpu64`), 2026-09-28T00:33Z, source `eb022aff`.
 Lane **`taskset -c 32-47`** (top-level, descendants inherit) under
 **`flock /tmp/motioncorr-issue96-cpu-validation.lock`**, build `-j16`, runtime `<= 16`.
-The old independent `/tmp/motioncorr-issue96-cpu.lock` is no longer used.
+The old independent `/tmp/motioncorr-issue96-cpu.lock` is not used anywhere in this task.
 
 ```
 cmake -S <src> -B build-release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON   # rc=0
-cmake --build build-release -j 16                                              # rc=0, 21.6 s
-ctest --output-on-failure -j 1                                                 # rc=0
+cmake --build build-release -j 16                                              # rc=0
+ctest --output-on-failure -j 1                                                 # rc=0, 15/15
 ```
 
-**15/15 tests passed**, 19.84 s. `CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp`
-(GCC 13.3.0, CMake 4.4.3). `motioncorr` sha256 `b8f2907d92862f48c971ff63f226434f0efff2c841324fc6394ce40e17b3df52`.
+`CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp` (GCC 13.3.0, CMake 4.4.3).
+`motioncorr` sha256 `9fda7ac231cc780ff1d2df68dd0ac6f60fae2d86d52c8a717cd3222be180873a`.
 
-- `PrefetchLifecycle` 5.43 s — 19 admission/lifecycle cases, every blocking one watchdogged.
-- `PrefetchEquivalence` 7.31 s — 10 serial-vs-prefetch cases all byte-identical, plus a
-  positive control proving the pixel comparison can fail.
-- 13 pre-existing tests unchanged and still passing.
+ThreadSanitizer, same lane, `OMP_NUM_THREADS=1` (libgomp is not TSan-annotated, so OpenMP
+workers would bury a real finding; with one OpenMP thread the only concurrency left is the
+producer alongside the consumer):
 
-NUMA/placement actually observed (not inferred from the mask): inherited
-`Cpus_allowed_list=32-47`; `lscpu` shows 16 distinct physical cores on socket 1, no SMT
-siblings in the lane; `numactl --show` → `cpubind: 1, nodebind: 1, membind: 0 1`, so CPUs are
-node-local and **memory is not pinned** — no NUMA memory-locality claim is made.
-Interference recorded and not altered: two unrestricted `ctffind` at ~100% each
-(`Cpus_allowed_list=0-63`) and another round worker's `motioncorr` at 100% on CPU 3 (node 0);
-load1 5.42 → 6.57.
+- `PrefetchLifecycle`: exit 0, **0 warnings**.
+- Real serial and prefetched runs over 4 synthetic MRCs and 2 TIFF fixtures, so the actual
+  readers run on the producer thread: both exit 0, **0 warnings each**, all **6 corrected
+  images byte-identical**, none empty.
 
-Full log: `docs/issue94_prefetch/cpu_validation_412f2f98be40.log`.
-CLI contract: `docs/issue94_prefetch/cli_contract_412f2f98be40.txt`.
+NUMA/placement observed, not inferred: inherited `Cpus_allowed_list=32-47`; `lscpu` shows 16
+distinct physical cores on socket 1, no SMT siblings in the lane; `numactl --show` →
+`cpubind 1, nodebind 1, membind 0 1`, so CPUs are node-local and **memory is not pinned** —
+no NUMA memory-locality claim. Interference recorded and not altered: two unrestricted
+`ctffind` at ~100% each (`Cpus_allowed_list=0-63`) plus other round workers.
+
+Evidence: `docs/issue94_prefetch/` (run log, per-test stdout, CLI contract, CUDA syntax check,
+and `superseded/` holding earlier heads' runs including two that record corrections).
 
 ## Active PID / job / allocation
 
-None. The cpu64 job finished at 2026-09-28T00:12:31Z and released the validation lock.
-Staged tree and build remain at `cpu64:~/mc-issue94/src-412f2f98be40/` for re-checks.
+None. The last cpu64 job finished at 2026-09-28T00:34:24Z and released the validation lock.
+Staged trees and builds remain at `cpu64:~/mc-issue94/src-eb022aff151c/` (Release and TSan)
+for re-checks.
 
 ## Blockers
 
@@ -116,26 +125,39 @@ on the benchmark lock, so it cannot sit on the mutex by accident.
   result is the deliverable and the complexity is not promoted. 2/3/4-worker schedules are
   attempted only if the 1-GPU screen is not negative.
 
-## Subagents / reviewers
+## Subagents / reviewers — both complete, both acted on
 
-Two bounded read-only reviewers running concurrently (the round cap), neither able to write:
+Two bounded read-only reviewers (the round cap), neither able to write.
 
-1. code/concurrency review — producer-side shared state, deadlock and lost wakeups,
-   reservation lifetime, exception safety across the OpenMP boundary, serial-path behavioural
-   equivalence of the shared-loader refactor, and the `Iframes` aliasing.
-2. spec-scope and license audit — reverse scope isolation against the ADR whitelist, the ADR's
-   own factual claims, whether the tests can actually observe what they assert, unrun-layer
-   honesty of the README and PR body against the raw log, and GPL notices.
+1. **Code/concurrency**: found one real defect — the record returned its byte reservation
+   before freeing the decoded frames, because a defaulted destructor destroys members in
+   reverse declaration order. That wakes a blocked producer mid-free, so real resident memory
+   transiently reaches `limit + one movie` on a host sized to `limit`, and no counter can show
+   it. Also: no top-level `catch` in the producer thread, `forced_grants` counting in-line
+   loads rather than overrides, a degenerate geometry decoding off-budget, a lock inversion in
+   `pop`, stats sampled before the join, and the libtiff warning-handler write. All fixed in
+   `eb022af`. Reported clean: no deadlock or lost wakeup, no runner member reachable from the
+   producer, serial-path behaviour identical line by line, `Iframes` aliasing sound.
+2. **Spec-scope and license**: `SPEC_CONFORMANCE_PASSED`, `LICENSE_PASSED`. Found seven test
+   assertions that could not observe what they asserted, and four evidence overstatements. All
+   fixed in `189ed1f` and the docs commits.
 
-Findings and any resulting fixes will be posted on #94 and PR #108 before it leaves draft.
+Findings and fixes posted on #94 (issuecomment-5861326352) and PR #108
+(issuecomment-5861326140).
 
 ## Progress comments
 
 - #94 plan/ADR: issuecomment-5860965445
 - #95 interface coordination: issuecomment-5860967217
 - #94 PR/validation: issuecomment-5861175290
+- #94 review findings and fixes: issuecomment-5861326352
+- PR #108 review findings and fixes: issuecomment-5861326140
 
 ## Next step
 
-Act on the two review reports, then hold. No merges, no default promotion, and no GPU
-submission until a slot is explicitly transferred from #26.
+Hold. The CPU deliverable is complete and the draft PR is current at `c377404`. The only
+remaining work is the GPU screen, which waits on an explicit slot transfer from #26. No
+merges, no default promotion, no GPU submission before then.
+
+If the screen is eventually run and shows no meaningful full-run improvement, the negative
+result is the deliverable: record it and do not promote the complexity.

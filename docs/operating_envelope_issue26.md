@@ -258,7 +258,39 @@ frame counts, geometries, formats or heterogeneous movie costs (Phase 3, out of 
 anything about cold-cache or networked storage, since every number here is warm-cache local
 disk.
 
-## 9. Instrument corrections, and what they changed
+## 9. PR22 and PR57, inspected and not imported
+
+Both were inspected read-only at their current heads. Neither is imported: they modify
+`src/`, which is outside this issue's whitelist, and the round prohibits pulling stale
+production code in to retain evidence.
+
+**PR22 `bdfc374` — instrumentation.** It makes `Timer` thread-safe by giving each OpenMP
+thread its own `ThreadTimerData` (`src/time.h`) instead of sharing one `start_times` vector.
+That is exactly the defect behind this report's caveat that a stage covering parallel work is
+indicative rather than exact, so **if PR22 lands, the section 3 stage table becomes exact
+rather than indicative** and is worth re-measuring. Its parser
+(`tools/benchmark_cpu_profile.py:99`) uses `[A-Za-z0-9_\s\-()]` with the hyphen escaped, so
+the historical bug that silently dropped every hyphenated tag (`dw - iFFT`,
+`prep patch - FFT`) is indeed fixed at this head. Its pattern requires the
+`sec (N microsec/operation)` form, which independently matches the strict rule arrived at
+here; `envelope_runner.py` additionally parses the CUDA `ms` profile block, which PR22's does
+not, so the two are complementary rather than duplicates.
+
+**PR57 `13845fb` — the dead global inverse FFT.** Fourteen production lines adding
+`need_real_space_before_dw = do_local || !do_dose_weighting || save_noDW` and skipping the
+transform when it is false. **It does not fire in anything measured here:** every arm in this
+report uses `--patch_x 5 --patch_y 5`, so `do_local` is true and the guard always takes the
+original path. PR57 is therefore orthogonal to every number above, and none of these results
+should be read as evidence for or against it.
+
+On #66's note that even/odd must be counted as a real-frame consumer: the one write of
+real-space `Iframes` between the global inverse transform and the post-dose-weighting
+transform that this inspection located is `motioncorr_runner.cpp:1805`, which sits inside
+`#ifdef WRITE_FRAMES` with its `#define` commented out at `:1800`, so it is disabled debug
+output rather than a live consumer. That is an observation from a bounded read, **not** a
+correctness audit of PR57; its guard condition remains its owner's to verify.
+
+## 10. Instrument corrections, and what they changed
 
 The first pass of this study was measured with an instrument that had four witnesses which
 could not observe what they asserted. An independent read-only review found them; each was
@@ -283,7 +315,7 @@ restarted. Its conclusion is a paired unbound-versus-bound contrast inside one l
 self-contamination is present identically in both arms of every pair and cancels in the
 difference. Its interference figures are labelled instrument v1 and are an upper bound.
 
-## 10. Reproducing
+## 11. Reproducing
 
 ```bash
 cmake -S . -B build-cuda -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \

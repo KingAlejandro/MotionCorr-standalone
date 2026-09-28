@@ -153,6 +153,19 @@ NC=$ROOT/ncsrc; rm -rf "$NC"
 git -C "$ROOT/src" worktree add -q --detach "$NC" "$BASE"
 cd "$NC"
 git checkout -q "$HEAD_SHA" -- tests tools CMakeLists.txt test-data .github
+# Commit the candidate tooling onto the detached base HEAD.
+#
+# verify_fixtures.py deliberately reads the manifest from git:HEAD, not from the
+# working tree, so that a generator-adjacent overwrite cannot self-certify. In a
+# throwaway worktree that is detached at BASE, git:HEAD therefore still resolves
+# to BASE's MANIFEST.json -- which predates star_sha256 -- and Control 6 fails on
+# a schema rejection that is an artifact of this harness rather than a defect in
+# the candidate. Committing makes git:HEAD agree with the working tree, so the
+# only failures left are genuine src/ defects.
+git -c user.name=i96-negative-control -c user.email=noreply@localhost \
+    commit -q -m "negative control: base src/ with candidate tooling" || true
+echo "nc HEAD now carries candidate tooling: MANIFEST has star_sha256 = $(git show HEAD:test-data/known_motion/MANIFEST.json | grep -c star_sha256) entries"
+echo "nc src/ is still base: image.h $( [ "$(sha256sum < src/image.h)" = "$(git show $BASE:src/image.h | sha256sum)" ] && echo yes || echo NO ), motioncorr_runner.cpp $( [ "$(sha256sum < src/motioncorr_runner.cpp)" = "$(git show $BASE:src/motioncorr_runner.cpp | sha256sum)" ] && echo yes || echo NO )"
 cmake -S "$NC" -B "$NC/build" -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCUDA=OFF \
       -DPython3_EXECUTABLE=$VENV/bin/python3 > "$LOG/nc-cfg.log" 2>&1
 echo "nc configure exit=$?"

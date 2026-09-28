@@ -13,8 +13,17 @@
 
 Keep the flag off. The pool is correct — 422 parity checks on two LibTIFF
 error-context builds, byte-identical corrected images and STAR files across
-all 24 tutorial movies — and it is not slower, including at 16 readers against
-an 8-CPU budget. It is simply not faster in any way the application can see.
+all 24 tutorial movies on both CPU and GPU hosts — and it is not slower. It is
+simply not faster in any way the application can see, in either regime.
+
+The GPU regime was the last way this could have changed, because that is where
+ingest share is highest and where several workers contend for one decode
+budget. At 4/3/2/1 concurrent single-GPU workers on 4x A100 under a fixed
+24-CPU budget, the arms differ by −0.3% pooled and the per-W differences
+alternate sign. The contention is real — throughput saturates at 2.13x for 4x
+the GPUs because the CPU budget binds — and the pool does not relieve it. On
+that host the removable lifecycle is 0.73% of a movie read, less than half its
+share on cpu64.
 
 If a future lane revisits this, two results from here should carry over:
 
@@ -26,10 +35,11 @@ If a future lane revisits this, two results from here should carry over:
 2. **Allocation and first touch of the decoded frames is 45% of a
    single-threaded movie read on a madvise-THP host**, as expensive as the
    92,112 inflate calls, and no lane in the current issue #85 program targets
-   it. The percentage is host-dependent — THP `always` versus `madvise` is
-   worth about 40x on frame allocation here — so re-measure before quoting it
-   anywhere else. The underlying fact, that the runner reallocates 1.37 GiB
-   per movie, is not host-dependent.
+   it. The percentage is host-dependent, and this has now been measured
+   rather than assumed: the same stage is 0.632 s on cpu64 (THP `madvise`) and
+   0.118 s on a SCARF GPU node (THP `always`), 5.4x cheaper. Re-measure before
+   quoting it anywhere else. The underlying fact, that the runner reallocates
+   1.37 GiB per movie, is not host-dependent.
 
 ## Question
 

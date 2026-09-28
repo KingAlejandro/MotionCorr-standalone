@@ -195,7 +195,8 @@ evidence and documentation items, three of them mine:
 | 2 full | `92437fa9` | CHANGES_REQUESTED | SPEC_CONFORMANCE_FAILED / LICENCE_PASSED |
 | 3 delta | `934779b7` | DELTA_CONFIRMED | DELTA_CONFIRMED / LICENCE_PASSED |
 | 4 delta | `0a90a4b7` | **DELTA_BLOCKED** | **DELTA_BLOCKED** / LICENCE_PASSED |
-| 5 confirm-only | `f2219fb6` | DELTA_CONFIRMED | **DELTA_BLOCKED** (two doc lines), then fixed |
+| 5 confirm-only | `f2219fb6` | DELTA_CONFIRMED | **DELTA_BLOCKED** (two doc lines) |
+| 6 confirm-only | `d104aa44` | (source unchanged since `e191aab`, covered by pass 5) | DELTA_CONFIRMED / LICENCE_PASSED |
 
 An earlier version of this table listed only the confirmations. Pass 4 was blocked by
 both reviewers and both blocks were real: the code reviewer found that my lost-error
@@ -230,6 +231,15 @@ indeterminate-member read in the new control, a leak the new `REPORT_ERROR` intr
 into the loop this issue de-leaks, and a fault matrix that claimed a test that did not
 exist and would have mis-scored its first real run. Three were documentation
 overclaims, now corrected rather than softened.
+
+## Hand-off
+
+`docs/issue69/HANDOFF.md` lists all 20 known-unfixed items and the 6 unrun layers, so
+none of them depends on this transcript surviving. The spec reviewer's sweep at
+`d104aa44` found one further instance of the stale-quotation class (§5's classifier
+block, stale-but-true and under-claiming); it is item 14 and was deliberately not
+actioned, per that reviewer's own guidance to refresh it when the section is next
+touched.
 
 ## Next step
 

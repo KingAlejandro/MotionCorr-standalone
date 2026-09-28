@@ -169,3 +169,41 @@ once returned the SHA-256 of the empty string, which would have read as a
 spurious mismatch. It switched to blob-OID comparison, which cannot degrade that
 way. A hash-of-nothing is exactly the shape of a green-looking check that
 observed nothing.
+
+
+## I. Review-follow-up round (28 Sep)
+
+Codex review of `f9650704` raised one P2 on this branch: the canonical STAR
+input was mutable. Confirmed by inspection and reproduced end to end.
+
+| # | requirement | evidence | status |
+|---|---|---|---|
+| I1 | `--canonical` preserves the trusted committed STAR | generator compares and refuses; `git status` on `test-data/known_motion` empty after a canonical run | **PASS** |
+| I2 | …or verifies its trusted digest before the gates | `star_sha256` added to the manifest schema (required), the manifest, and per-case verification; covers the `--no-regenerate` path that bypasses the generator | **PASS** |
+| I3 | covers pixel-size / voltage / movie-reference mutation with unchanged pixels | Control 8B, three mutations on copies of the maintained generator | **PASS**, with a correction: see I7 |
+| I4 | discriminating maintained-entrypoint negative control | Control 8: baseline, three mutations, disk-tamper bypass, legacy-manifest schema rejection | **PASS** |
+| I5 | canonical movie/truth checks preserved | unchanged; Controls 4, 5, 7 still pass | **PASS** |
+| I6 | test-registration union preserved | still 17 required names; Control 8 is a case inside `CiFailClosedControls` | **PASS** |
+| I7 | **correction to the finding's framing** | `PIXEL_SIZE` is also passed to `write_mrc_stack()`, so it lands in the MRC header and **does** move `movie_sha256` (measured: `f9da4668…` → `c6c3f5b9…`). It was already caught. `VOLTAGE` and the movie reference are STAR-only and were genuinely silent. Only those two demonstrate the finding | recorded |
+| I8 | before/after proof that the fix changes the outcome | VOLTAGE 300→200 on both heads, movie digest `f9da4668…` **equal to canonical on both**: reviewed head `f965070` → generator exit 0, STAR rewritten, `verify_fixtures` exit 0 reporting *"VERIFIED: 1 canonical fixtures match trusted manifest"* — **NOT DETECTED**. Fix head → generator exit 1, STAR untouched — **DETECTED** | **PASS** |
+| I9 | composed suite at the final source | 17/17; negative control vs base `src/` fails on exactly the four integrated groups' tests | **PASS** (re-run at the composed head) |
+| I10 | native CUDA baseline on a dedicated allocation | SCARF job `3511126`, own exclusive allocation and own dataset copy | see §J |
+
+### A control of mine that could not observe what it asserted
+
+The first version of Control 8 asserted a `PIXEL_SIZE` mutation was *not*
+detected by the movie digest, and passed — but only because the STAR check ran
+first and raised before the movie check was reached. The assertion was
+structurally incapable of failing. Found by measuring rather than reasoning,
+corrected in `fe8ca55`, and the before/after arm had the same flaw (it inferred
+detection from a bare exit code) and was corrected with it. Recorded because a
+green control that observes nothing is the precise failure mode this branch
+exists to remove.
+
+An earlier negative-control run also reported 5 failures rather than 4. The
+fifth was Control 6, and the cause was the harness: `verify_fixtures.py` reads
+the manifest from `git:HEAD` by design, the throwaway worktree was detached at
+base, and base's manifest predates `star_sha256`. Committing the candidate
+tooling onto the detached HEAD fixed the harness; the count returned to 4. It
+also pins a real constraint — `verify_fixtures.py` and `MANIFEST.json` must land
+in one commit, which they do.

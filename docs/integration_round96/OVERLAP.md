@@ -139,3 +139,53 @@ on the resulting tree, not on the branch in isolation.
    its option-on evidence is complete. It is not part of this candidate.
 
 Steps 1–4 are what this branch contains and validated together.
+
+
+## 8. Review-follow-up composition (28 Sep, after the Codex review of `f9650704`)
+
+Three owners fixed three findings; this branch composes them. Nobody's tree was
+edited by anyone else, and no fix was implemented twice.
+
+| finding | owner | taken as |
+|---|---|---|
+| canonical STAR input is mutable (`r4119221898`, P2) | **this integration** | `b0a70d6`, `13c6e32`, `fe8ca55` |
+| unreadable MANIFEST, transactional refuse-conflicting, proven no-`.git` archive fallback | **#72 / PR102** | cherry-picked `9524909`, `29e9635` with original authorship |
+| finite inherited `RLIMIT_FSIZE` makes the write-fault tests fail before the fault fires | **#99 / PR105** | cherry-picked `1084269`, `318a324` with original authorship |
+
+### The one composition that was not additive
+
+PR102's `9524909` rebuilt canonical generation around a staging directory with
+atomic `os.replace`. That restructure **deleted this branch's STAR-immutability
+block and reinstated the overwrite**:
+
+```python
+# Canonical mode verified; atomically replace movie and star, preserving pristine truth
+os.replace(staged_mrcs, mrcs)
+os.replace(staged_star, star)     # <- committed STAR still overwritten
+```
+
+Atomic is not immutable. Taking both fixes at face value would have **regressed
+`r4119221898` with the whole suite still green**, because the movie digest is
+blind to optics-only drift — which is the entire finding. The conflict was
+resolved *towards* PR102's structure and the immutability semantics re-applied
+inside it (`615d67e`), so:
+
+- the STAR is compared and refused, never replaced;
+- the refusal reports that the generated movie digest **equals** canonical, so
+  the proof that the movie check is blind is in the failure text itself;
+- `os.replace` of the movie runs only after **both** checks pass, preserving
+  PR102's transactional property — a rejected run replaces nothing.
+
+Control 8 is what makes this class of regression visible, and it was realigned
+for the new check ordering rather than loosened.
+
+### Verified after composition
+
+- `tests/test_image_write_faults.cpp` and `tests/test_write_faults.py` are
+  **byte-identical** to PR105's head (blobs `e26b8942…`, `bb74ec6c…`), exactly as
+  PR105's own commit map predicted.
+- PR102's `has_git_metadata` archive fallback and transactional staging are
+  carried as authored; this branch's `star_sha256` auto-merged with them.
+- **`src/` and `CMakeLists.txt` are byte-identical to the pre-composition head
+  `fe8ca55`.** No production source changed, so the composition cannot alter
+  native product behaviour.

@@ -1,0 +1,210 @@
+{
+  "all_controls_pass": true,
+  "controls": {
+    "aggregate_needs_every_leg": {
+      "now": "every record-supplied conjunct is paired with a recomputed one",
+      "reproduced": "aggregate trusted matrix_complete/all24_equal and a verified flag that quantified over nothing",
+      "status": "pass"
+    },
+    "all24_asserts_metadata": {
+      "now": "the invocation's implied metadata is asserted, and what cannot be derived is named as not asserted",
+      "reproduced": "check_products(base_dir, stems, suffixes, {}, None)",
+      "status": "pass"
+    },
+    "comparator_coverage": {
+      "now": "checked before it, so it can downgrade a PASS",
+      "reproduced": "coverage_complete checked after the passed shortcut",
+      "status": "pass"
+    },
+    "cross_row_consumed": {
+      "declared_equalities": [
+        [
+          "gain_unity",
+          "gain_none",
+          [
+            "_rlnMicrographGainName"
+          ]
+        ]
+      ],
+      "declared_negative_controls": [
+        [
+          "gain_nonunity",
+          "gain_none"
+        ]
+      ],
+      "status": "pass"
+    },
+    "ground_truth_mutation": {
+      "clean_run_verified": true,
+      "detected_as": [
+        "km_global_hisnr (ground_truth)"
+      ],
+      "from": 0.885,
+      "mutated_file": "km_global_hisnr_ground_truth.json",
+      "mutated_leaf": "/geometry/pixel_size_angstrom",
+      "status": "pass",
+      "to": 0.985
+    },
+    "input_hashes": {
+      "detected": [
+        "rewritten movie",
+        "rewritten gain",
+        "missing movie"
+      ],
+      "harness_files_hashed": [
+        "products.py",
+        "run_all24_schedules.py",
+        "run_matrix.py"
+      ],
+      "status": "pass"
+    },
+    "matrix_schedule_witness": {
+      "now": "per-invocation witness, consumed by the pass condition and printed in every schedule cell",
+      "reproduced": "matrix repeat/batch/resume witnesses written at 7098a6f and consumed nowhere",
+      "status": "pass"
+    },
+    "partial_schedules": {
+      "cases": {
+        "complete": {
+          "all24_equal": true,
+          "partial_screen": false
+        },
+        "empty": {
+          "all24_equal": false,
+          "missing": [
+            "repeat",
+            "batch",
+            "resume"
+          ],
+          "partial_screen": true,
+          "schedules_passed": []
+        },
+        "missing_resume": {
+          "all24_equal": false,
+          "missing": [
+            "resume"
+          ],
+          "partial_screen": true,
+          "schedules_passed": [
+            "batch",
+            "repeat"
+          ]
+        },
+        "repeat_only": {
+          "all24_equal": false,
+          "missing": [
+            "batch",
+            "resume"
+          ],
+          "partial_screen": true,
+          "schedules_passed": [
+            "repeat"
+          ]
+        },
+        "resume_failed": {
+          "all24_equal": false,
+          "partial_screen": false
+        }
+      },
+      "status": "pass"
+    },
+    "provenance_allowance": {
+      "allowance": [
+        "_rlnMicrographGainName"
+      ],
+      "observed_on": "cpu64 93d427e, gain_unity vs gain_none, 3/3 movies",
+      "status": "pass"
+    },
+    "ps_wrong_dimension": {
+      "accepted": "128x128",
+      "rejected": "256x256",
+      "rejection_message": "m01_PS.mrc: 256x256, expected 128x128",
+      "requested": [
+        128,
+        128
+      ],
+      "status": "pass"
+    },
+    "rejection_names_option": {
+      "now": "the option is matched delimited on a diagnostic line and the matched line is kept in the record",
+      "reproduced": "'j' in (stdout+stderr) accepted any nonzero exit",
+      "status": "pass"
+    },
+    "report_attributes_each_section": {
+      "now": "each section names its host, device and binary, and a divergence from the header is stated",
+      "reproduced": "one header over sections from two different jobs",
+      "status": "pass"
+    },
+    "report_renders_witness": {
+      "now": "generator recomputes the witness and renders it per schedule",
+      "reproduced": "all24_equal:true published with resume unproven",
+      "status": "pass"
+    },
+    "report_states_input_coverage": {
+      "now": "schema is disclosed; byte-identical and content-equal are counted separately and the excused cases are named",
+      "reproduced": "VERIFIED 5/5 rendered from a movie-only record",
+      "status": "pass"
+    },
+    "resume_native_witness": {
+      "cases": {
+        "cpu_masquerade": {
+          "unexpected_cuda_marker": true
+        },
+        "empty_executed_set": {
+          "native_cuda_proven": false,
+          "vacuous": true
+        },
+        "executed_movie_without_marker": {
+          "native_cuda_proven": false
+        },
+        "executed_only": {
+          "native_cuda_proven": true,
+          "seeded_movies_not_required": [
+            "Movies/m01",
+            "Movies/m02"
+          ]
+        },
+        "no_invocations": {
+          "native_cuda_proven": false,
+          "vacuous": true
+        },
+        "old_all_movies_behaviour": {
+          "native_cuda_proven": false,
+          "why": "seeded movies have no kernel marker"
+        },
+        "one_silent_invocation": {
+          "native_cuda_proven": false,
+          "startup_marker_per_invocation": [
+            true,
+            false,
+            true
+          ]
+        }
+      },
+      "status": "pass"
+    },
+    "truth_provenance": {
+      "allowance": [
+        "source_commit"
+      ],
+      "float_tolerance_ulps": 4,
+      "observed_on": [
+        "cpu64 93d427e, 4 cases, 1 differing leaf of 4132",
+        "cpu64 8298158, km_local_hisnr, 2 noise leaves 1 ULP apart with the movie digest matching"
+      ],
+      "status": "pass"
+    },
+    "witness_is_consumed": {
+      "now": "witness is part of the pass condition when --gpu is given",
+      "reproduced": "resume passed with native_cuda_proven=false at 7098a6f",
+      "status": "pass"
+    }
+  },
+  "counts": {
+    "failed": 0,
+    "pass": 17,
+    "skipped": 0
+  },
+  "harness_sha256": "579f20405739831e1da25ead684e29fff0eb6d9b17e0bd2d0ff8ce632ab9a7a2",
+  "schema": "issue83-negative-controls/1"
+}

@@ -190,7 +190,7 @@ per-schedule figures, the witness and the drift field would have come from an
 `raw/`**, so they are **withdrawn** — not because they are doubted, but because
 nothing here supports them. What the record does support is the single word
 `pass` and the 1-of-25 attempt count above. The `realscale_local` row's
-per-schedule result of record is job 3511154's, in the matrix table.
+per-schedule result of record is job 3511210's, in the matrix table.
 
 ## Fourth harness defect -- a renderer field that was never emitted
 
@@ -261,22 +261,30 @@ that looked at nothing.
 
 Two things follow, and both are stated rather than smoothed over.
 
-**The runners changed, so the published GPU records are behind them — but not
-in the same way for both claims.** Jobs 3511139 and 3511154 ran `7ba584e`;
+**The runners changed, the GPU records were behind them, and then one fresh
+allocation caught them up.** Jobs 3511139 and 3511154 ran `7ba584e`;
 `run_matrix.py` and `run_all24_schedules.py` changed at `4c2305b`. The STAR
-metadata assertion did not exist at `7ba584e`, so nothing in those records can
-supply it and the report marks it **UNRUN on GPU** rather than carrying the old
-verdict forward. Closing that needs one fresh dedicated allocation.
+metadata assertion did not exist at `7ba584e`, so nothing in those records could
+supply it and two revisions of these documents marked it **UNRUN on GPU** rather
+than carrying the old verdict forward. Job **3511210** (gn3000, exclusive,
+`4c2305b`) has now run it on the real tutorial dataset: the integrated screen
+records `star_metadata_asserted` with binning, first frame, dose and
+pre-exposure, and the two values the invocation does not set are listed as not
+asserted rather than counted. That row is **PASS on GPU**, and four of the
+report's six records now come from that single allocation.
 
-The per-schedule native claim is a different case, and the previous revision of
-this document got it wrong. Each schedule's own `backend_evidence` in those
-records already carries a per-movie kernel stage marker written by the CUDA
-code path into that schedule's own output directory, so the claim is
-**measured, and the report now publishes it as PASS for all 23 payload rows**.
-What `7ba584e` did not keep is the startup banner of every non-final invocation
-— the weaker, redundant witness — and that gap is disclosed per cell as
-`banner K/N` rather than used to withhold the rows. The withholding was a
-defect in this repository's renderer, not a property of the records; see W8a in
+The per-schedule native claim is a different case, and an earlier revision of
+this document got it wrong. Each schedule's own `backend_evidence` — in the
+`7ba584e` records already, and in 3511210's — carries a per-movie kernel stage
+marker written by the CUDA code path into that schedule's own output directory,
+so the claim is **measured, and the report publishes it as PASS for all 23
+payload rows**. What was missing was never the execution witness but the startup
+banner of every non-final invocation, the weaker and redundant one. At 3511210
+`batch` keeps all three, so the one surviving gap is the matrix's `resume`
+schedule, which runs a seed invocation and a resume invocation and keeps only
+the second's stdout: every payload row reads `banner 1/2`. That is disclosed per
+cell rather than used to withhold the row. The withholding was a defect in this
+repository's renderer, not a property of the records; see W8a in
 `withdrawals.md`.
 
 **Every new gate has a negative control, and every control has a meta-check.**
@@ -299,18 +307,23 @@ was empty when every control skipped.
 ## Runs of record
 
 These are the records `report.py` is actually invoked on
-(`tools/validation_issue83/regenerate_report.sh` passes six JSON records drawn
-from these four runs — matrix, truth and fixture-verify all come from
-3511154). They are **not** one run,
-and the report says so section by section:
+(`tools/validation_issue83/regenerate_report.sh` passes six JSON records; four
+of them — matrix, all-24, truth and fixture-verify — now come from one GPU
+allocation, job 3511210). They are still **not** one run, and the report says so
+section by section:
 
 | Section of the report | Host | Commit | Record |
 |---|---|---|---|
-| Declared matrix, input provenance, motion truth | SCARF `gn3000` (exclusive) | `7ba584e` | job **3511154**, `raw/scarf-gn3000-3511154/` |
-| Integrated all-24 screen | SCARF `gn3000` (exclusive) | `7ba584e` | job **3511139**, `raw/scarf-gn3000-3511139/` |
+| Declared matrix, integrated all-24 screen, input provenance, motion truth | SCARF `gn3000` (exclusive) | `4c2305b` | job **3511210**, `raw/scarf-gn3000-3511210/` |
 | Capacity datapoint | SCARF `gn0005` (exclusive) | `0a6dbff` | job 3510288, `raw/scarf-gn0005/capacity.json` |
-| CPU matrix (diagnostic) | cpu64, `taskset -c 32-63 numactl --membind=1` | `4c2305b` | `raw/cpu64-4c2305b/matrix.json` |
-| Gate contracts, controls, CPU pixels | cpu64, `taskset -c 32-63 numactl --membind=1` | `4c2305b` | `raw/cpu64-4c2305b/` |
+| CPU matrix (diagnostic) | cpu64, `taskset -c 32-63 numactl --membind=1` | `cb587bd` | `raw/cpu64-cb587bd/matrix.json` |
+| Gate contracts, controls, meta-controls, CPU pixels | cpu64, `taskset -c 32-63 numactl --membind=1` | `cb587bd` | `raw/cpu64-cb587bd/` |
+
+Jobs **3511154** and **3511139** at `7ba584e` were the runs of record for the
+matrix and the all-24 screen through the previous revision of this document.
+They are preserved unedited under `raw/scarf-gn3000-3511154/` and
+`raw/scarf-gn3000-3511139/`, and `withdrawals.md` still cites 3511139 as the
+historical support for the claims it does cover; they are history, not sources.
 
 The CPU diagnostic section previously came from `raw/cpu64/matrix-cpu-summary.json`
 at `bab9f46`, pinned `taskset -c 56-63`. That record predates the per-schedule
@@ -334,12 +347,29 @@ current contracts.
 > now labels each section with its own source record and flags the ones outside
 > the provenance block's run window. The same correction applies to the
 > sentence in `provenance.md` under "Exact commands".
+>
+> The matrix and all-24 sections **do** now come from one job, 3511210 — but
+> that is an outcome of one allocation happening to run both legs, not a
+> property the report relies on. The per-section labelling stays, because two
+> of the six records still come from elsewhere.
 
 Superseded runs, preserved and not carried into the report: 3510276
 (output-path bug), 3510277 (quota/SIGPIPE), 3510283 (`realscale_local`
 declaration drift, since fixed), 3510297 (pre-correction harness, at
 `f51b45f` — the run whose verdicts are preserved in `raw/scarf-gn0005/`),
 3510290 (no record preserved), 3511145
-(cancelled; started from a dirty tree), the first cpu64 matrix (harness
-expectations 2 and 3), and `raw/cpu64/matrix-cpu-summary.json` (pre-contract
+(cancelled; started from a dirty tree), **3511154** and **3511139** (at
+`7ba584e`, superseded by 3511210 at `4c2305b`), the first cpu64 matrix (harness
+expectations 2 and 3), the earlier cpu64 runs at `7ba584e`, `2a8d13a`,
+`705d2c7` and `4c2305b`, and `raw/cpu64/matrix-cpu-summary.json` (pre-contract
 harness, replaced by the head-commit CPU run).
+
+**The GPU record is one commit behind the head.** 3511210 ran `4c2305b`;
+`cb587bd` changed harness code after it. Two consequences are carried openly
+rather than papered over: the two controls added at `cb587bd`
+(`payload_recorder`, `suite_selects_something`) have run only on cpu64, and
+3511210's placement recorder matched executables by substring, with no
+`match_mode` field in its JSON — every sampled executable was that job's own
+`build-cuda/motioncorr`, but the record does not state how it matched. Neither
+touches a numerical verdict. Closing them needs another dedicated allocation and
+is listed as the next GPU action, not asserted.

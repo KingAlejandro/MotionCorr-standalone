@@ -10,8 +10,8 @@ This block describes the **declared-matrix** run. Sections below name their own 
 - Binary: `/work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr`
 - Binary SHA256: `0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e`
 - Comparator SHA256: `cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b`
-- Harness SHA256: matrix `abe96cc55f26172c2eea2de5ceaaa264b881a02f75311a43d554a5e960ec29a6`, runner `b3a86b9e19363943591c4d890e985eb899350cc0d065e235697dbb846e3d9643`
-- Run: 2026-09-28T08:18:44Z to 2026-09-28T08:26:50Z
+- Harness SHA256: matrix `2ff2095d0d7a6be4807c0d627b9ffd7c8fcbce85f68f561af383846211ed8f58`, runner `be34300c54008b39c42bf5a373296149fbf407f9b7a2e41e4aa7826a8f6d5561`
+- Run: 2026-09-28T09:51:58Z to 2026-09-28T10:00:06Z
 
 - Declared rows 25; attempted 25; pass 25; fail 0; error 0
 - Unrun rows: none
@@ -35,42 +35,40 @@ Exact = every movie identical to the uninterrupted run under `compare_motioncorr
 
 | Row | Axes | Native witness (base) | Products | Repeat | Batch | Resume (non-prefix) | Verdict |
 |---|---|---|---|---|---|---|---|
-| `global_square` | alignment=global, geometry=square | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `local_square` | alignment=local 4x4, geometry=square | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `global_nonsquare` | alignment=global, geometry=non-square 768x512 | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `local_nonsquare` | alignment=local 4x4, geometry=non-square 768x512 | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `gain_none` | gain=absent | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `gain_unity` | gain=unity MRC | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `gain_nonunity` | gain=non-unity MRC | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `defect_skip` | defect=--skip_defect | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `defect_detect` | defect=hot-pixel detection on | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `defect_file` | defect=MotionCor2 defect file | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `dose_off` | dose=off | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `dose_on` | dose=on | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `dose_on_savenoDW` | dose=on, products=saved noDW | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `dose_on_preexposure` | dose=on + pre-exposure | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `evenodd` | products=even/odd split | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `evenodd_dose_noDW` | products=even/odd + saved noDW, dose=on | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `frames_subset` | frames=first 3 last 10 | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `group_frames_2` | frames=--group_frames 2 | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `group_frames_invalid` | frames=--group_frames 0 | n/a (rejected) | rc=1, named **not covered** — this record predates the delimited matcher and kept no matched line | n/a | n/a | n/a | pass |
-| `threads_invalid` | options=--j 0 | n/a (rejected) | rc=1, named **not covered** — this record predates the delimited matcher and kept no matched line | n/a | n/a | n/a | pass |
-| `bin1` | binning=bin 1 | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `early_bin2` | binning=early bin 2 (default) | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `late_bin2` | binning=late bin 2 (--no_early_binning) | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `power_spectrum` | products=power spectrum | yes | complete | exact 3/3, native (3/3 movies marked) | exact 3/3, native (3/3 movies marked, banner 1/3) | exact 3/3, native (3/3 movies marked, banner 1/2) | pass |
-| `realscale_local` | geometry=2048x2048 real scale, alignment=local 5x5 | yes | complete | exact 2/2, native (2/2 movies marked) | exact 2/2, native (2/2 movies marked, banner 1/2) | exact 2/2, native (2/2 movies marked, banner 1/2) | pass |
-
-**Rejection by name is not established for 2 of these rows.** Their verdict was written by the bare-substring test, which any output containing the letters satisfied, and the line it matched was not kept. Rows affected: `group_frames_invalid`, `threads_invalid`.
+| `global_square` | alignment=global, geometry=square | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `local_square` | alignment=local 4x4, geometry=square | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `global_nonsquare` | alignment=global, geometry=non-square 768x512 | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `local_nonsquare` | alignment=local 4x4, geometry=non-square 768x512 | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `gain_none` | gain=absent | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `gain_unity` | gain=unity MRC | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `gain_nonunity` | gain=non-unity MRC | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `defect_skip` | defect=--skip_defect | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `defect_detect` | defect=hot-pixel detection on | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `defect_file` | defect=MotionCor2 defect file | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `dose_off` | dose=off | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `dose_on` | dose=on | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `dose_on_savenoDW` | dose=on, products=saved noDW | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `dose_on_preexposure` | dose=on + pre-exposure | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `evenodd` | products=even/odd split | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `evenodd_dose_noDW` | products=even/odd + saved noDW, dose=on | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `frames_subset` | frames=first 3 last 10 | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `group_frames_2` | frames=--group_frames 2 | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `group_frames_invalid` | frames=--group_frames 0 | n/a (rejected) | rc=1, named by `--group_frames must be positive.` | n/a | n/a | n/a | pass |
+| `threads_invalid` | options=--j 0 | n/a (rejected) | rc=1, named by `--j must be positive.` | n/a | n/a | n/a | pass |
+| `bin1` | binning=bin 1 | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `early_bin2` | binning=early bin 2 (default) | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `late_bin2` | binning=late bin 2 (--no_early_binning) | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `power_spectrum` | products=power spectrum | yes | complete | exact 3/3, native (3 executed) | exact 3/3, native (3 executed) | exact 3/3, native (2 executed, banner 1/2) | pass |
+| `realscale_local` | geometry=2048x2048 real scale, alignment=local 5x5 | yes | complete | exact 2/2, native (2 executed) | exact 2/2, native (2 executed) | exact 2/2, native (1 executed, banner 1/2) | pass |
 
 ### Integrated candidate: all 24 tutorial movies
 
-- Source record: `gn3000.scarf.rl.ac.uk`, device 0, binary `0c5246675175…`, started 2026-09-28T08:10:50Z
-- **Outside the run window named above** — measured at 2026-09-28T08:10:50Z, but the provenance block describes 2026-09-28T08:18:44Z to 2026-09-28T08:26:50Z. Same host and same binary, different run.
+- Source record: `gn3000.scarf.rl.ac.uk`, device 0, binary `0c5246675175…`, started 2026-09-28T10:00:06Z
 - Movies in STAR: 24 (expected 24)
 - Aggregate pixel equality across schedules: pass
 - Native CUDA execution: established for every schedule
-- **This record asserted no STAR metadata.** It checked product presence and cross-schedule equality only, so a field wrong in the same way under every schedule would not have been caught.
+- Metadata asserted on the base products: `binning`=1.0, `dose_per_frame`=1.277, `first_frame`=1, `pre_exposure`=0.0
+- Not asserted here: `original_pixel_size`, `image_geometry` — the tutorial movies are not MRC, so this harness cannot read the values a guess would have to match.
 
 Pixel equality and native execution are separate claims: equal pixels across schedules say nothing about which backend produced them.
 
@@ -103,7 +101,7 @@ These are not implied by any implementation row above.
 - Motion truth `km_local_noisy` (characterization): **FAIL**
 - Motion truth `km_local_nonsquare` (gate): **PASS**
 - Motion truth `km_local_realscale` (gate): **PASS**
-- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-28T09:34:49Z
+- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-28T10:21:54Z
 - **Not the run named in the provenance block above** — hostname, gpu, binary_sha256, binary_path differ, so these two sections are not one measurement.
 - CPU-backend diagnostic (`small-refmac-machine`): 24 pass, 0 fail, 0 error of 24 attempted; unrun: realscale_local. This is a separate verdict: it neither establishes nor overrides any native CUDA result above.
 
@@ -128,5 +126,5 @@ The declared matrix is complete, every attempted row passed, and the inputs were
 
 Not attributable to any run: the capacity datapoint names no host, device, binary or start time, so neither this provenance block nor any other can be shown to describe it.
 
-This aggregate is assembled from more than one run: the integrated all-24 screen and the CPU-backend diagnostic did not come from the run named in the provenance block. Each section says so above.
+This aggregate is assembled from more than one run: the CPU-backend diagnostic did not come from the run named in the provenance block. Each section says so above.
 

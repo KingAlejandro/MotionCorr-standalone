@@ -63,7 +63,8 @@ Eight movies were handed to the resume as already finished and were correctly
 left alone; the sixteen it actually executed each carry a `[CUDA …]` stage
 marker, and the executed set is non-empty, so the quantification is not
 vacuous. The claim W1 withdrew is now **supported by a run**, not by a
-re-reading.
+re-reading. Job 3511210 at `4c2305b` records the same four values, and it is
+that record the published report is now generated from.
 
 An earlier revision of this entry set the same five fields in a fenced `json`
 block, which read as a verbatim extract of a single object. It was neither:
@@ -86,16 +87,20 @@ means "the last invocation showed a startup marker", not "every invocation did".
 markers are absent, not merely unaggregated. Re-deriving them would be
 inventing evidence.
 
-**Now gated by** `report.witness_coverage_gap`, which reports a multi-invocation
-schedule lacking `startup_marker_per_invocation` as not covered rather than
-crediting it, and by `schedule_witness`, which records the marker for every
-invocation. Control: `report_renders_witness`.
+**Now gated by** `schedule_witness`, which records the marker for every
+invocation, and by `report.banner_coverage`, which reports how many of a
+schedule's invocations have one so a cell can never read "native" while
+standing on a single stdout. Control: `report_renders_witness`. (An earlier
+revision of this paragraph named `report.witness_coverage_gap` as the gate.
+That function keys on the per-movie stage markers, not the banner, and using
+it for this is precisely the conflation W8a withdraws.)
 
-**Replacement evidence: the same job 3511139.** `batch` ran 24 invocations and
-the record now carries 24 booleans in `startup_marker_per_invocation`, all
-true, alongside 24 movies with a kernel stage marker. The gap W2 named is
-closed by measurement, and the record says which invocations were examined
-rather than leaving it to be assumed.
+**Replacement evidence: the same job 3511139, reproduced at 3511210.** `batch`
+ran 24 invocations and the record carries 24 booleans in
+`startup_marker_per_invocation`, all true, alongside 24 movies with a kernel
+stage marker; job 3511210 records the same 24/24 at `4c2305b`. The gap W2
+named is closed by measurement, and the record says which invocations were
+examined rather than leaving it to be assumed.
 
 ## W3 — "Input provenance verified" covered the movies only
 
@@ -292,10 +297,12 @@ declared inputs.
 (`manifest_ref`, `manifest_source_commit`), so the verdict names the authority
 it was checked against. Controls: `input_hashes`, `truth_provenance`.
 
-**Replacement evidence:** cpu64 `4c2305b` **VERIFIED (content)** over the 4
+**Replacement evidence:** cpu64 `cb587bd` **VERIFIED (content)** over the 4
 cases this host generates, against manifest commit `e07fdec2…`; `gn3000` job
-3511154 **VERIFIED (content)** over all 5. `gn0005`-as-generated remains **NOT
-VERIFIED** and is preserved as such.
+**3511210** **VERIFIED (content)** over all 5 under schema `/5` with
+`"vacuous": false` (job 3511154 reached the same verdict earlier, but under
+schema `/4`, which records no compared count — see W7).
+`gn0005`-as-generated remains **NOT VERIFIED** and is preserved as such.
 
 ## W7 — A fixture record that compared nothing reported VERIFIED
 
@@ -412,11 +419,18 @@ correction and the tightening respectively, and confirm the control fails each
 time.
 
 **Replacement evidence: not needed for the stage witness — PASS on the record
-already held.** What remains genuinely absent is the startup banner for the
-non-final invocations of `batch` and `resume`. It is the weaker and redundant
-witness, it is disclosed in every affected cell, and it is not worth an
-allocation on its own. The **pixel-equality** results in those cells were never
-in question.
+already held.** What remained genuinely absent was the startup banner for the
+non-final invocations of `batch` and `resume`: the weaker and redundant
+witness, disclosed in every affected cell. The **pixel-equality** results in
+those cells were never in question.
+
+**And then it was measured anyway.** Job **3511210** (`gn3000`, device 0,
+exclusive, `4c2305b`) ran the fixed runner and recorded the banner once per
+invocation. `batch` now carries **3 of 3** per matrix row and **24 of 24** on
+the integrated screen. One gap is left and is disclosed rather than closed:
+the matrix's `resume` schedule runs a seed invocation and a resume invocation
+and only the second's stdout is kept, so every payload row reads
+`banner 1/2`. Every movie in both invocations carries its stage marker.
 
 ## W9 — Option rejection asserted by bare substring
 
@@ -440,8 +454,8 @@ which accepts a real diagnostic and rejects a crash, a backtrace-only output,
 `--j_extra`, `--i` and `--group_frames_max`, and additionally requires each
 declared token to start with `--`. Meta-check: `substring_rejection`.
 
-**Replacement evidence: cpu64 `4c2305b`, real pixels.** Both rejection rows
-pass and the record names the line:
+**Replacement evidence: cpu64 `4c2305b`, real pixels, reproduced on GPU at
+3511210.** Both rejection rows pass and the record names the line:
 
 ```json
 "expected_option": "--group_frames", "option_named": true,
@@ -449,6 +463,12 @@ pass and the record names the line:
 "expected_option": "--j",            "option_named": true,
 "option_named_line": "--j must be positive."
 ```
+
+The published report renders those two rows from 3511210 as
+``rc=1, named by `--group_frames must be positive.` `` and
+``rc=1, named by `--j must be positive.` ``. Through the previous revision these
+rows read **not covered** on GPU, because the `7ba584e` records predate the
+delimited matcher and kept no matched line.
 
 ## W10 — The integrated all-24 screen asserted no STAR metadata
 
@@ -471,15 +491,30 @@ The report prints the asserted values, or a bold *"This record asserted no STAR
 metadata"* for a record that has none. Control: `all24_asserts_metadata`.
 Meta-check: `all24_asserts_nothing`.
 
-**Replacement evidence: partial — CPU only; GPU UNRUN.** cpu64 `4c2305b`
+**Replacement evidence: PASS on the integrated candidate.** cpu64 `4c2305b`
 executed the assertion for the first time anywhere, on a **synthetic** runroot
-(one generated fixture under 24 names, `tools/validation_issue83/stage_synthetic_runroot.py`): all four
-schedules equal, `"star_metadata_asserted": {"binning": 1.0,
-"dose_per_frame": 1.277, "first_frame": 1, "pre_exposure": 0.0}`. That
-establishes the assertion names fields the runner actually writes and does not
-fail a correct run. It says **nothing** about the RELION tutorial dataset. The
-published integrated claim still comes from job 3511139 at `7ba584e`, whose
-record carries no metadata assertion, and the report marks it as such.
+(one generated fixture under 24 names,
+`tools/validation_issue83/stage_synthetic_runroot.py`), which established that
+the assertion names fields the runner actually writes and does not fail a
+correct run — and said nothing about the RELION tutorial dataset.
+
+Job **3511210** (`gn3000`, device 0, exclusive, `4c2305b`) then ran it on the
+tutorial dataset itself: `all24_equal`, 24 of 24 movies in the STAR, no missing
+schedules, no errors, and
+
+```json
+"star_metadata_asserted": {"binning": 1.0, "dose_per_frame": 1.277,
+                           "first_frame": 1, "pre_exposure": 0.0},
+"metadata_not_asserted": ["original_pixel_size", "image_geometry"]
+```
+
+The second field is part of the result, not a footnote to it: the tutorial
+movies are not MRC, so this harness cannot read the pixel size or the geometry
+the products would have to match, and it says so in the record instead of
+leaving the gap silent. The published report prints both.
+
+This row was **UNRUN on GPU** through the previous two revisions of this
+document. It is now measured.
 
 ## What the historical run does still support
 
@@ -499,41 +534,49 @@ executed movies each carry one, and the single invocation recorded
 `startup_marker_found: true`. That is a hand re-reading of an old record, not a
 harness result, and it is recorded here as an observation only.
 
-The corrected harness has since run on a GPU — job 3511139, `gn3000`, device 0,
-exclusive — and produced the witness for itself, which is what W1 and W2 above
-now rest on. The re-reading was right; it was never the evidence.
+The corrected harness has since run on a GPU twice — job 3511139 and then job
+3511210, both `gn3000`, device 0, exclusive — and produced the witness for
+itself, which is what W1 and W2 above now rest on. The re-reading was right; it
+was never the evidence.
 
 ## Status of the replacement evidence
 
 | Claim | Status |
 |---|---|
-| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **18/18** on cpu64, 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate additionally reverted at runtime by `meta_controls.py` to confirm its control then fails (**20 meta-checks**: 17 reverted gates + 3 suite exit-status cases). Of the two `gn3000` records, **3511154 carries 10/10** and **3511139 carries 9 pass / 1 failed** — the whole suite as it then stood at `7ba584e`; an earlier revision said "the `gn3000` records carry 10/10", which is true of one of the two. The controls added since have not been asserted against a GPU record |
-| Input provenance including truth files (`verify_fixtures`) | **VERIFIED (content)** — 4 cases and 4+4 digests compared on cpu64 at `4c2305b` under schema `/5`, all **5** on `gn3000` job 3511154 under schema **`/4`**; see W3 for what "content" excuses and W7 for why the compared count is now part of the verdict. An earlier revision headed this row `verify_fixtures /5` and so attributed a `/5` verdict to a `/4` record: job 3511154's file carries no `compared`, `vacuous` or `declared_cases` field and W7's gate was not in effect for it. The "all 5" figure still holds because `report.py`'s `fixture_coverage` **recomputes** the counts from the per-case statuses precisely so an older record is measured the same way — but the gate attribution was wrong |
-| A fixture record that compares nothing is refused | **PASS** — cpu64 `4c2305b`, empty directory, `"vacuous": true`, exit 1; see W7 |
+| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **19/19** on cpu64 at `cb587bd`, 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate additionally reverted at runtime by `meta_controls.py` to confirm its control then fails (**20 meta-checks**: 17 reverted gates + 3 suite exit-status cases, `raw/cpu64-cb587bd/meta_controls.json`). On a GPU host, **3511210 carries 17/17** — the whole suite at `4c2305b`. The two not asserted there, `payload_recorder` and `suite_selects_something`, were added at `cb587bd` and neither needs a GPU. Historically: 3511154 carried 10/10 and **3511139 carried 9 pass / 1 failed**, the whole suite as it then stood at `7ba584e`; an earlier revision said "the `gn3000` records carry 10/10", which was true of one of the two |
+| Input provenance including truth files (`verify_fixtures`) | **VERIFIED (content)** — all **5** cases and 5+5 digests on `gn3000` job 3511210 under schema `/5`, `"vacuous": false`; 4 cases and 4+4 digests on cpu64, where the 402 MB fixture is not generated. See W3 for what "content" excuses and W7 for why the compared count is now part of the verdict. The superseded job 3511154's file is schema **`/4`** and carries no `compared`, `vacuous` or `declared_cases` field; an earlier revision headed its row `/5` and so attributed a `/5` verdict to a `/4` record |
+| A fixture record that compares nothing is refused | **PASS** — empty directory, `"vacuous": true`, exit 1, on cpu64 and on `gn3000` 3511210; see W7 |
 | `gain_unity == gain_none`, `gain_nonunity != gain_none` | **PASS** on cpu64 and on `gn3000` device 0, real pixels; see W4 |
-| Invalid options are rejected **by name** | **PASS** — cpu64 `4c2305b`, both rejection rows, `option_named_line` recorded verbatim; see W9. Previously asserted by bare substring |
-| Integrated all-24 screen, schedule equality and native CUDA | **PASS** — `gn3000` job 3511139, exclusive. `all24_equal`, no missing schedules, and a non-vacuous native witness on every schedule: `batch` 24/24 invocations, `resume` 16 executed movies each marked |
-| Integrated all-24 screen asserts requested STAR metadata | **UNRUN on GPU** — job 3511139 predates the assertion. Exercised on CPU at `4c2305b` against a **synthetic** 24-name runroot only, which is a harness-contract check and not the integrated candidate; see W10 |
-| Per-row matrix, pixel equality across all four schedules | **PASS** — `gn3000` job 3511154, 25 declared / 25 attempted / 25 pass, no unrun rows |
-| Per-row **native execution** on `repeat`, `batch`, `resume` | **PASS for all 23 payload rows, with one witness partial** — job 3511154 computed a witness *per schedule* from that schedule's own output directory, and every one of the 23 rows × 4 schedules carries `log_present` and `cuda_stage_marker` on every movie. What the record lacks is the startup **banner** for the non-final invocations of `batch` (3) and `resume` (2); the cells say `banner 1/3` and `banner 1/2`. `repeat` runs once and lacks nothing. An earlier revision marked all of this **UNRUN / WITHHELD**; that was wrong and is corrected in W8 |
+| Invalid options are rejected **by name** | **PASS** — both rejection rows on `gn3000` 3511210 and on cpu64, `option_named_line` recorded verbatim (`--group_frames must be positive.`, `--j must be positive.`); see W9. Previously asserted by bare substring, and the superseded GPU records keep no matched line |
+| Integrated all-24 screen, schedule equality and native CUDA | **PASS** — `gn3000` job 3511210, exclusive. `all24_equal`, 24 of 24 movies, no missing schedules, no errors, and a non-vacuous native witness on every schedule: `base`/`repeat` 24 movies marked, `batch` **24/24 invocations bannered** and 24 movies marked, `resume` 16 executed movies each marked |
+| Integrated all-24 screen asserts requested STAR metadata | **PASS** — `gn3000` job 3511210 on the tutorial dataset: `binning` 1.0, `dose_per_frame` 1.277, `first_frame` 1, `pre_exposure` 0.0, with `original_pixel_size` and `image_geometry` named in the record as not derivable. **UNRUN on GPU** in the previous two revisions; see W10 |
+| Per-row matrix, pixel equality across all four schedules | **PASS** — `gn3000` job 3511210, 25 declared / 25 attempted / 25 pass, no unrun rows |
+| Per-row **native execution** on `repeat`, `batch`, `resume` | **PASS for all 23 payload rows, one banner partial** — job 3511210 computes a witness *per schedule* from that schedule's own output directory; every row × schedule carries `log_present` and `cuda_stage_marker` on every movie, and `batch` additionally carries a startup banner for **all 3** invocations. The one remaining gap is `resume`, whose seed invocation's stdout is not kept: every payload row reads `banner 1/2`. An earlier revision marked all of this **UNRUN / WITHHELD** on the strength of the superseded records; that was wrong twice over and is corrected in W8a |
 | Requested 128x128 power spectrum | **PASS** — the `power_spectrum` row asserts the requested dimensions on the written product; the wrong-dimension negative is `ps_wrong_dimension`, asserted on both cpu64 and `gn3000` |
-| `ground_truth_sha256` detects a mutated truth file | **PASS** — cpu64 `4c2305b` and `gn3000` 3511154: `/geometry/pixel_size_angstrom` 0.885 → 0.985 in `km_global_hisnr_ground_truth.json`, detected, after the unmutated tree verified. Recorded **FAILED** in job 3511139, where that precondition was unmet |
+| `ground_truth_sha256` detects a mutated truth file | **PASS** — cpu64 and `gn3000` 3511210: `/geometry/pixel_size_angstrom` 0.885 → 0.985 in `km_global_hisnr_ground_truth.json`, detected, after the unmutated tree verified. Recorded **FAILED** in job 3511139, where that precondition was unmet |
 | `km_local_realscale` row | **PASS** on `gn3000` (matrix row and motion-truth gate). Still **UNRUN on CPU** — the 402 MB fixture is not generated on that host, which is why the CPU matrix exits nonzero |
-| Motion-truth gates | 4 PASS, 1 **FAIL** (`km_local_noisy`, characterization) — `gn3000` job 3511154, on fixtures verified before and after the merged tool regenerated them |
-| CPU support matrix | **24/25 pass, 0 fail, 1 unrun** at `4c2305b`; `raw/cpu64-4c2305b/matrix.json`. Diagnostic only |
+| Motion-truth gates | 4 PASS, 1 **FAIL** (`km_local_noisy`, characterization) — `gn3000` job 3511210, on fixtures verified before and after the merged tool regenerated them |
+| CPU support matrix | **24/25 pass, 0 fail, 1 unrun** at `cb587bd`; `raw/cpu64-cb587bd/matrix.json`. Diagnostic only |
 
-The two GPU jobs above are separate runs and the report says so section by
-section; the reason there are two is in `provenance.md`, "Two native
-allocations, and why".
+Four of the report's six sections now come from **one** allocation, job 3511210,
+which is the first GPU run at a commit whose runners carry the per-schedule
+witness, the delimited rejection matcher and the STAR metadata assertion. The
+other two are a different host and a different run and the report says so
+section by section: the CPU-backend diagnostic from cpu64, and the capacity
+datapoint from `gn0005`, which names no host or binary at all and is rendered
+as unattributable. The superseded GPU records 3511139 and 3511154 stay under
+`docs/issue83/raw/` unedited, including 3511139's recorded control failure.
 
-**Neither GPU job is at the head commit.** Both ran `7ba584e`; the head is
-`e1e26a7`, **seven** commits later, of which four touch the harness and one of
-those four changes two runners. (An earlier revision said "six commits later"
-with `4c2305b` as the head and called four of them GPU-running; the count, the
-head and that last clause were all wrong.) That is the reason W10 is UNRUN
-rather than PASS. It is **not** the reason W8's rows were withheld — that was a
-renderer defect in this repository, corrected in W8a above, and the rows are
-PASS on the record already held.
+**The GPU record is one commit behind the head.** Job 3511210 ran `4c2305b`;
+the head is `cb587bd`, which changes `report.py`, `negative_controls.py` and
+`record_payload_env.py`, adds `meta_controls.py` and `regenerate_report.sh`,
+and touches no runner and no code that executes on a GPU. Two consequences are
+stated rather than smoothed over: the two controls added at the head have not
+been asserted on a GPU host, and job 3511210's placement recorder matched the
+payload by **substring**, its record carrying no `match_mode` field. The
+sampled executables are all the job's own `build-cuda/motioncorr`, so nothing
+is known to be wrong with it; it is simply the weaker check, and the cpu64 run
+at `cb587bd` is the one that used `--match-mode exact`.
 
 Historical CPU/RELION Gate 2 failures remain failures. Nothing here converts one
 into a pass, and no withdrawal above upgrades any row.

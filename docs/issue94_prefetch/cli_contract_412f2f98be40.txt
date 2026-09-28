@@ -23,3 +23,11 @@ $ motioncorr --i x.star --o o/ --use_own --prefetch --prefetch_queue 0
 Every serial arm in PrefetchEquivalence runs without --prefetch and prints no
 prefetch accounting at all; the prefetched arm prints it. Default behaviour on
 both CPU and CUDA builds is unchanged.
+
+--- CORRECTION appended 2026-09-28, not a silent edit -------------------------
+The line above reading "Default behaviour on both CPU and CUDA builds is
+unchanged" overstated this file. No CUDA build existed when it was captured, so
+the CUDA half was an inference from reading the diff, not a recorded check.
+What this file actually records is the CPU build only. The CUDA side is covered
+-- and only as far as it goes -- by cuda_syntax_check/, which is a parse, not a
+build. See the unrun list in README.md.

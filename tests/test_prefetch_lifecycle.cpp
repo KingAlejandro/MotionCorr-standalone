@@ -240,7 +240,10 @@ void testBoundedQueue()
 	{
 		BoundedQueue<int> queue(2);
 		int out = -1;
-		check(queue.push(1) && queue.push(2), "pushes up to capacity succeed");
+		// Two statements, not `a && b`: short-circuiting would skip the second
+		// push entirely if the first ever failed.
+		check(queue.push(1), "first push within capacity succeeds");
+		check(queue.push(2), "second push within capacity succeeds");
 		check(queue.size() == 2, "occupancy is visible");
 		check(queue.pop(out) && out == 1, "pop is FIFO");
 		check(queue.pop(out) && out == 2, "pop is FIFO");
@@ -513,23 +516,39 @@ void testCancelWhileProducerBlockedOnBudget()
 
 	MoviePrefetchRecord held;
 	check(prefetcher.next(held), "hold the only unit of budget");
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	// The producer cannot reserve anything while `held` is alive.
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	// Establish the precondition rather than assuming it: the producer must
+	// actually be asleep on the budget, otherwise cancelAndJoin() returning
+	// proves nothing. Without this the case passes identically against a
+	// producer that had already exited.
+	check(prefetcher.budget().reservedBytes() == held.reservation.bytes(),
+	      "CONTROL: the consumer's movie is the only thing charged, so the producer "
+	      "cannot have reserved anything");
+	check(prefetcher.stats().decoded == 1,
+	      "CONTROL: the producer decoded exactly one movie and is stuck on the second");
 	prefetcher.cancelAndJoin(); // must return, not hang
-	check(true, "cancelAndJoin returned with the producer blocked on the budget");
+	check(prefetcher.stats().decoded == 1,
+	      "cancelAndJoin returned without the producer sneaking another decode through");
 }
 
 void testCancelWhileProducerBlockedOnQueue()
 {
 	Watchdog dog(30.0, "cancel while the producer waits for a queue slot");
+	// Capacity 2, budget for 8: the queue, not the budget, is what stops the
+	// producer here.
 	MoviePrefetcher prefetcher(movieNames(20), unitOptions(8, 2));
 	FakeLoader loader;
 	loader.install(prefetcher);
 	prefetcher.start();
 	// Let the producer fill the queue and block on it without consuming.
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	check(prefetcher.stats().peak_queue_occupancy >= 1,
-	      "CONTROL: the producer really did get ahead and fill the queue");
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	// `>= 1` would be satisfied by a single push and would NOT show the queue
+	// was full, which is the state this case exists to cancel out of.
+	check(prefetcher.stats().peak_queue_occupancy == 2,
+	      "CONTROL: the queue reached its capacity, so the producer really is "
+	      "blocked on a queue slot and not on the budget");
+	check(prefetcher.budget().blockedSeconds() == 0.0,
+	      "CONTROL: and it is not blocked on the budget instead");
 	prefetcher.cancelAndJoin();
 	check(prefetcher.budget().reservedBytes() == 0,
 	      "cancellation drained the queue and returned every reservation");
@@ -569,9 +588,16 @@ void testDestructorJoinsWithoutDraining()
 		prefetcher.start();
 		MoviePrefetchRecord record;
 		check(prefetcher.next(record), "consume one, then abandon the rest");
-		// Falls out of scope with the producer mid-flight, as an exception
-		// unwinding out of the movie loop would.
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		// Establish that there is something to join: the producer must still be
+		// working through the remaining 49 movies, not already finished.
+		check(prefetcher.stats().decoded < 50,
+		      "CONTROL: the producer is genuinely mid-flight when it is destroyed");
+		// Falls out of scope with the producer running, as an exception
+		// unwinding out of the movie loop would leave it.
 	}
+	// Reaching here at all is the assertion: the watchdog fires otherwise, and
+	// a non-joined producer would trip TSan or crash on the destroyed budget.
 	check(true, "the destructor cancelled and joined without hanging");
 }
 
@@ -621,10 +647,13 @@ void testFrameSelection()
 	check(movieio::selectFrames(0, 1, -1).empty(), "an empty movie selects nothing");
 }
 
-void testAutomaticBudget()
+void testUnprobeableAutomaticBudget()
 {
-	// With no explicit budget the limit is queue_capacity + 2 units, i.e.
-	// producer-current + queued + consumer-active.
+	// This covers ONLY the fallback branch of resolveBudgetBytes: no movie can
+	// be probed, so the documented `queue_capacity + 2` units cannot be
+	// computed. The real 3x-the-first-movie path needs actual files on disk and
+	// is covered end to end by the Python `normal` case, which asserts the
+	// budget equals three times an independently recomputed estimate.
 	MoviePrefetcher::Options options;
 	options.budget_bytes = 0;
 	options.queue_capacity = 2;
@@ -632,11 +661,21 @@ void testAutomaticBudget()
 	// resolveBudgetBytes probes real files, and these do not exist, so every
 	// probe throws and the fallback limit applies. That path must not crash and
 	// must still leave a usable prefetcher.
-	std::cout << "  (the two RelionError reports below are expected: this case probes"
+	std::cout << "  (the RelionError reports below are expected: this case probes"
 	             " deliberately absent files)" << std::endl;
 	MoviePrefetcher prefetcher(movieNames(2), options);
 	check(prefetcher.budget().limitBytes() >= 1,
 	      "an unprobeable list still yields a usable, nonzero budget");
+	// Every movie must then take the in-line path rather than being admitted
+	// against a meaningless budget.
+	prefetcher.start();
+	for (int i = 0; i < 2; i++)
+	{
+		MoviePrefetchRecord record;
+		check(prefetcher.next(record), "a record still arrives for movie " + std::to_string(i));
+		check(record.mode != MoviePrefetchRecord::Mode::Decoded,
+		      "nothing is decoded against the fallback budget");
+	}
 }
 
 } // namespace
@@ -661,7 +700,7 @@ int main()
 	testCancelWhileConsumerWaits();
 	testDestructorJoinsWithoutDraining();
 	testMixedGeometryAccounting();
-	testAutomaticBudget();
+	testUnprobeableAutomaticBudget();
 
 	if (failures != 0)
 	{

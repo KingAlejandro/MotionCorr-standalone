@@ -96,9 +96,12 @@ def estimate_bytes(nx, ny, nframes, io_threads):
     so the budget cases below pin the declared arithmetic and not merely
     whatever the implementation happens to compute.
     """
-    page = 4096
-    frame = -(-(nx * ny * 4) // page) * page       # page-rounded frame bytes
-    return nframes * (frame + page) + io_threads * frame
+    PAGE = 4096                  # movieio::kPageBytes
+    PER_FRAME_OVERHEAD = 4096    # movieio::kPerFrameOverheadBytes -- a DIFFERENT
+                                 # constant that happens to share a value today;
+                                 # kept separate so changing one is visible here
+    frame = -(-(nx * ny * 4) // PAGE) * PAGE       # page-rounded frame bytes
+    return nframes * (frame + PER_FRAME_OVERHEAD) + io_threads * frame
 
 
 def read_mrc_pixels(path: Path) -> bytes:
@@ -184,6 +187,7 @@ def assert_same(label, serial_dir, prefetch_dir):
             raise AssertionError(f"{label}: STAR metadata differs for {name}\n"
                                  + "\n".join(diff[:6]))
     la, lb = logs(serial_dir), logs(prefetch_dir)
+    assert la, f"{label}: no per-movie logs at all -- the frame-selection check would be vacuous"
     assert la == lb, f"{label}: frame selection differs\n  serial={la}\n  prefetch={lb}"
     return len(a)
 
@@ -320,18 +324,41 @@ def main():
 
         # --- gain reference -------------------------------------------------
         write_mrc(tmp / "gain2.mrc", [[2.0] * (NX * NY)], NX, NY)
-        count, _, _ = case_equivalence(
+        count, stats, _ = case_equivalence(
             args.binary, tmp, "gain", names, ["--prefetch"], "all.star", "gain",
             serial_extra=["--gainref", "gain2.mrc"])
         assert count == 4
-        print("  gain:    4/4 identical with a gain reference applied")
+        # Without this the case would pass unchanged if prefetch silently
+        # degraded to loading every movie in line.
+        assert stats.get("decoded") == 4, \
+            f"CONTROL: the gain case did not actually prefetch anything: {stats}"
+        print("  gain:    4/4 identical with a gain reference applied, all 4 prefetched")
 
         # --- frame range selection -----------------------------------------
-        count, _, _ = case_equivalence(
+        count, stats, _ = case_equivalence(
             args.binary, tmp, "frames", names, ["--prefetch"], "all.star", "frames",
             serial_extra=["--first_frame_sum", "2", "--last_frame_sum", "7"])
         assert count == 4
-        print("  frames:  4/4 identical with --first_frame_sum 2 --last_frame_sum 7")
+        assert stats.get("decoded") == 4, \
+            f"CONTROL: the frame-range case did not actually prefetch anything: {stats}"
+        # Absolute check, not just serial-vs-prefetch agreement. The selected
+        # frame index and the ORIGINAL frame index are different spaces: shifts
+        # and exposures are written from the original index, so a record that
+        # lost it would give correct pixels with wrong exposures, which no pixel
+        # or header comparison can see. Both arms could be identically wrong, so
+        # pin the absolute value.
+        for star in sorted((tmp / "prefetch_frames").glob("**/mov*.star")):
+            body = star.read_text()
+            assert "_rlnMicrographStartFrame" in body, f"{star}: no start frame recorded"
+            start = [l.split()[1] for l in body.splitlines()
+                     if l.strip().startswith("_rlnMicrographStartFrame")]
+            assert start and start[0] == "2", \
+                f"{star}: start frame is {start} but --first_frame_sum was 2"
+            numbers = [int(l.split()[0]) for l in body.splitlines()
+                       if l.strip() and l.split()[0].isdigit() and len(l.split()) >= 3]
+            assert numbers, f"{star}: no per-frame rows to check"
+        print("  frames:  4/4 identical with --first_frame_sum 2 --last_frame_sum 7, "
+              "all 4 prefetched, start frame recorded as 2")
 
         # --- damaged first and damaged last ---------------------------------
         source = repo / "test-data" / "synthetic" / "synthetic_movie.tiff"
@@ -360,6 +387,14 @@ def main():
                 f"{label}: exit code changed, {sres.returncode} vs {pres.returncode}")
             assert "bad.tiff" in (pres.stdout + pres.stderr), \
                 f"{label}: the damaged movie was not named by the prefetching run"
+            # Without this the case would pass unchanged if prefetch had
+            # silently degraded to loading everything in line: the failure has
+            # to have been produced and tagged by the producer.
+            pstats = parse_prefetch_stats(pres.stdout)
+            assert pstats.get("failed") == 1, \
+                f"{label}: CONTROL: the producer did not tag the damaged movie: {pstats}"
+            assert pstats.get("decoded") == 2, \
+                f"{label}: CONTROL: the healthy movies were not prefetched: {pstats}"
             sp, pp = products(sdir), products(pdir)
             assert set(sp) == set(pp) == {"good1.mrc", "good2.mrc"}, (
                 f"{label}: healthy movies were lost\n  serial={sorted(sp)}\n"

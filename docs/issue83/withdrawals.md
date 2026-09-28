@@ -66,6 +66,98 @@ schedule lacking `startup_marker_per_invocation` as not covered rather than
 crediting it, and by `schedule_witness`, which records the marker for every
 invocation. Control: `report_renders_witness`.
 
+## W3 — "Input provenance verified" covered the movies only
+
+**Published at 7098a6f**: *Input provenance (fixtures vs git manifest) —
+VERIFIED 5/5 on GPU; VERIFIED 4/4 on CPU.*
+
+**Narrower than it reads.** Both preserved records,
+`raw/cpu64/fixture-verify.json` and `raw/scarf-gn0005/fixture-verify.json`, are
+`issue83-fixture-verify/1`, and each case entry holds exactly one digest pair:
+
+```json
+{"expected": "f9da4668…", "expected_bytes": 12583936, "status": "match"}
+```
+
+That is `movie_sha256` against the `.mrcs`. The manifest also declares
+`ground_truth_sha256`, and the motion-truth verdicts — the `km_local_noisy`
+FAIL and the four PASSes — are computed from the `*_ground_truth.json` files,
+not from the movies. Those files were never checked at that commit, so an
+edited or drifted truth could have moved a gate between PASS and FAIL while the
+fixture set still reported as fully verified.
+
+**Withdrawn as stated; restated narrowly.** The historical records establish
+that the movie bytes matched the committed manifest. They establish nothing
+about the truth files.
+
+**Now gated by** `verify_fixtures.py` schema `/4`, which checks both declared
+digests and fails on either. Checking the truth files for the first time found
+real drift, and classifying it correctly is the subject of the next section.
+Controls: `ground_truth_mutation` (a single significant digit changed in a
+truth file must make the set unverified, asserted against real fixtures) and
+`truth_provenance`.
+
+### What the truth check found, and what is excused
+
+Run on cpu64 at 8298158, four cases present. Every `movie_sha256` matched.
+All four `ground_truth_sha256` did not.
+
+| Case | Differing leaves (of ~4132) | Classification |
+|---|---|---|
+| `km_global_hisnr` | `/source_commit` | content equal |
+| `km_local_nonsquare` | `/source_commit` | content equal |
+| `km_local_noisy` | `/source_commit` | content equal |
+| `km_local_hisnr` | `/source_commit`, `/noise/absolute_sigma`, `/noise/noise_free_image_std` | content equal |
+
+Two excuses, both measured, both narrow, neither able to absorb a changed
+motion value:
+
+- The generator stamps the current commit into every truth file, so a fixture
+  regenerated at `9ca8f0d` cannot match a digest recorded at `e07fdec` however
+  identical the motion is. Allowed key: `source_commit`, and no other.
+- `km_local_hisnr`'s two noise statistics differ by **1.8e-16 and 1.5e-16
+  relative** — one unit in the last place. The movie digest for that case
+  matched exactly, which is the proof that the noise actually injected is the
+  same; only the statistic summarising it rounds differently between NumPy
+  builds. Allowed: floats that are the same double to within 4 ULP.
+
+Neither excuse is a numerical tolerance. `truth_provenance` asserts the
+boundary directly: one ULP away is equivalent, `TRUTH_FLOAT_ULPS + 1` away is
+drift, and **1e-12 relative is drift whatever the constant is set to** — that
+last assertion does not scale with the knob, so widening the tolerance is
+caught by behaviour and not only by the declared cap. Integers, integers
+retyped as floats, added leaves, removed leaves and sign changes are never
+eligible.
+
+This is a defect in my own verifier's coverage, not a product defect, and no
+scientific comparator threshold was touched.
+
+## W4 — `gain_unity` and `gain_none` were declared byte-equal
+
+**Declared in `matrix.NEUTRAL_EQUIVALENCES`** as an exact-equality pair, which
+`run_matrix` enforced as "the comparator returns PASS".
+
+**Contradicted on cpu64 at 93d427e**: 0 of 3 movies equal. The comparator's own
+breakdown was `corrected_image: true`, `motion_trajectory: true`,
+`star_fields: false`, with a single named difference —
+`Field '_rlnMicrographGainName' presence mismatch in block 'general'`.
+
+The science was bit-identical. Only one run had been given a gain reference, so
+only one STAR file names one. **My contract was wrong, not the product.**
+
+**Restated**: a unity gain multiplies every pixel by exactly 1.0, so the
+corrected image and the motion trajectory must be bit-identical, and only
+`_rlnMicrographGainName` may differ. The allowance is a named field list
+carried with its rationale, not a class exemption.
+
+**Now gated by** `run_matrix.numerically_equal`, which requires the comparator
+to have reported both numerical checks and tolerates only differences naming an
+allowed field, and by `run_matrix.numerically_differs`, which makes the
+`gain_nonunity != gain_none` negative demand a **numerical** difference — before
+this, a metadata-only difference would have satisfied it, so the negative
+control could have passed while the two runs produced identical pixels.
+Controls: `provenance_allowance`, `cross_row_consumed`.
+
 ## What the historical run does still support
 
 Stated explicitly so the withdrawal is not read as broader than it is.
@@ -91,9 +183,12 @@ until a dedicated SCARF execution produces one.
 | Claim | Status |
 |---|---|
 | Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py`, CPU, every control asserted against both a good and a bad input |
+| Input provenance including truth files (`verify_fixtures` `/4`) | **VERIFIED (content)** on cpu64, 4 cases; see W3 for what "content" excuses |
+| `gain_unity == gain_none`, `gain_nonunity != gain_none` | **PASS** on cpu64, real pixels; see W4 |
 | Integrated all-24 screen, native CUDA, corrected harness | **UNRUN** — requires a dedicated SCARF allocation |
 | Per-row native CUDA matrix, corrected harness | **UNRUN** — same |
-| CPU support matrix and gain equality/negative | see `support-report.md` |
+| `km_local_realscale` row | **UNRUN** on CPU — the fixture is not generated on that host |
+| CPU support matrix | see `support-report.md` |
 
 Historical CPU/RELION Gate 2 failures remain failures. Nothing here converts one
 into a pass, and no withdrawal above upgrades any row.

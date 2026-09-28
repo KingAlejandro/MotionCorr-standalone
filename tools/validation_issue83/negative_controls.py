@@ -385,6 +385,74 @@ def control_report_renders_witness(_tmp: Path, _fixtures: Optional[Path]) -> Dic
             "now": "generator recomputes the witness and renders it per schedule"}
 
 
+def control_report_states_input_coverage(_tmp: Path,
+                                         _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """The report must say which digests a fixture record actually checked.
+
+    The published report rendered *Input provenance -- VERIFIED 5/5* from a
+    record that had compared ``movie_sha256`` alone; the truth files the
+    motion-truth verdicts are read from were never checked (W3). Rendering a
+    `/4` record naively is the mirror defect: four cases classified
+    ``content_equal`` count as zero ``match``, so the old line would have read
+    "VERIFIED -- 0/5 cases match" and told the reader nothing true.
+    """
+    old = {"schema": "issue83-fixture-verify/1", "verified": True,
+           "manifest_ref": "HEAD", "manifest_source_commit": "e07fdec",
+           "verifier_numpy_version": "1.26.4",
+           "cases": {f"km_{i}": {"status": "match"} for i in range(5)}}
+    text = "\n".join(rep.render_fixture_verification(old))
+    require("movie_sha256` only" in text,
+            "a movie-only record was rendered without saying so; this is the "
+            "published W3 overclaim reappearing")
+    require("W3" in text, "the caveat did not point at the withdrawal")
+
+    # The shape actually measured on cpu64: every movie byte-identical, every
+    # truth content-equal. Counting per case would call this "0 byte-identical".
+    new = {"schema": "issue83-fixture-verify/4", "verified": True,
+           "manifest_ref": "HEAD", "manifest_source_commit": "e07fdec",
+           "verifier_numpy_version": "1.26.4",
+           "content_equal": ["km_a (ground_truth)", "km_b (ground_truth)"],
+           "cases": {"km_a": {"status": "content_equal",
+                              "movie": {"status": "match"},
+                              "ground_truth": {"status": "content_equal"}},
+                     "km_b": {"status": "content_equal",
+                              "movie": {"status": "match"},
+                              "ground_truth": {"status": "content_equal"}},
+                     "km_c": {"status": "match",
+                              "movie": {"status": "match"},
+                              "ground_truth": {"status": "match"}}}}
+    text = "\n".join(rep.render_fixture_verification(new))
+    require("Movies (`movie_sha256`): 3 match" in text,
+            f"three byte-identical movies were not reported as such: {text}")
+    require("1 match, 2 content equal" in text,
+            f"the truth files' two kinds of agreement were not distinguished: "
+            f"{text}")
+    require("km_a (ground_truth)" in text,
+            "the content-equal cases were not named")
+    require("movie_sha256` only" not in text,
+            "a record that did check the truth files was captioned as if it "
+            "had not")
+
+    bad = dict(new, verified=False, mismatched=["km_c (ground_truth)"],
+               content_equal=[])
+    bad["cases"] = {"km_c": {"status": "MISMATCH",
+                             "movie": {"status": "match"},
+                             "ground_truth": {"status": "MISMATCH"}}}
+    text = "\n".join(rep.render_fixture_verification(bad))
+    require("NOT VERIFIED" in text and "km_c (ground_truth)" in text,
+            f"a mismatched fixture set was not reported as such: {text}")
+    require("1 MISMATCH" in text,
+            f"the mismatch was not counted against the truth files: {text}")
+
+    absent = "\n".join(rep.render_fixture_verification(None))
+    require("Not checked" in absent,
+            "an absent fixture record rendered as though the check had passed")
+    return {"status": "pass",
+            "reproduced": "VERIFIED 5/5 rendered from a movie-only record",
+            "now": "schema is disclosed; byte-identical and content-equal are "
+                   "counted separately and the excused cases are named"}
+
+
 # ------------------------------------------------------- schedule completeness
 
 def _all24_report(schedules: Dict[str, Any]) -> Dict[str, Any]:
@@ -755,6 +823,7 @@ CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "resume_native_witness": control_resume_witness,
     "witness_is_consumed": control_witness_is_consumed,
     "report_renders_witness": control_report_renders_witness,
+    "report_states_input_coverage": control_report_states_input_coverage,
     "partial_schedules": control_partial_schedules,
     "input_hashes": control_input_hashes,
     "cross_row_consumed": control_cross_row_consumed,

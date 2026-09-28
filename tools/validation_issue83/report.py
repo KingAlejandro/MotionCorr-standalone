@@ -230,12 +230,36 @@ def render_fixture_verification(verify: Optional[Dict[str, Any]]) -> List[str]:
         return lines
     ok = verify.get("verified")
     cases = verify.get("cases", {})
-    matched = sum(1 for c in cases.values() if c.get("status") == "match")
+    schema = str(verify.get("schema", ""))
     lines += [f"- Fixtures checked against `test-data/known_motion/MANIFEST.json` "
               f"as tracked in git (ref `{verify.get('manifest_ref')}`, source "
               f"commit `{verify.get('manifest_source_commit')}`)",
-              f"- Result: **{'VERIFIED' if ok else 'NOT VERIFIED'}** — "
-              f"{matched}/{len(cases)} cases match"]
+              f"- Result: **{'VERIFIED' if ok else 'NOT VERIFIED'}** over "
+              f"{len(cases)} declared case(s)"]
+    # Per artefact, not per case. A case whose movie is byte-identical and
+    # whose truth is content-equal is not "0 byte-identical"; rolling the two
+    # into one status would understate what actually matched.
+    for kind, label in (("movie", "Movies (`movie_sha256`)"),
+                        ("ground_truth", "Ground truths (`ground_truth_sha256`)")):
+        seen = [c[kind].get("status") for c in cases.values() if kind in c]
+        if not seen:
+            continue
+        counts = {name: seen.count(name) for name in
+                  ("match", "content_equal", "MISMATCH", "missing",
+                   "undeclared_in_manifest") if seen.count(name)}
+        lines.append(f"  - {label}: " + ", ".join(
+            f"{n} {name.replace('_', ' ')}" for name, n in counts.items()))
+    if schema.endswith("/1") or schema.endswith("/2"):
+        # /1 and /2 checked movie_sha256 only. Saying "verified" without this
+        # would repeat the overclaim withdrawn as W3.
+        lines.append("- **This record checked `movie_sha256` only.** The "
+                     "`*_ground_truth.json` files, from which the motion-truth "
+                     "verdicts are computed, were not checked at that commit. "
+                     "See `withdrawals.md` W3.")
+    if verify.get("content_equal"):
+        lines.append(f"- Content-equal (digest differs, every value the same "
+                     f"number — commit stamp and/or last-bit float rendering): "
+                     f"{', '.join(verify['content_equal'])}")
     if verify.get("mismatched"):
         lines.append(f"- **Mismatched: {', '.join(verify['mismatched'])}**")
     if verify.get("missing"):

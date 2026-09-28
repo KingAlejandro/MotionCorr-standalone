@@ -702,19 +702,32 @@ void runCapacityChecks()
 
 		// Discrimination: a budget sized for the staged chunk admits under the
 		// old model and must be REJECTED under the corrected one.
+		//
+		// The old model is reconstructed from the SUBJECT policy's own budget by
+		// removing the term it omitted, not asserted about a hand-built
+		// constant. An earlier revision compared `x <= x + y`, which could not
+		// fail; caught by independent review.
 		const unsigned long long small = without_sched.host_bytes + frame_bytes;
-		check(without_sched.host_bytes <= small,
+		const unsigned long long dense_old_model =
+		    with_sched.host_bytes - with_sched.schedule_host_bytes;
+		check(dense_old_model <= small,
 		      "old model: the dense job fits this budget (it ignored the schedule)");
+		check(with_sched.host_bytes > small,
+		      "corrected model: the same dense job does not fit it");
 		long long chunk = -1;
 		check(largestChunkWithin(g, dense, small, chunk) == Admission::Inadmissible,
 		      "corrected model: the dense job is Inadmissible against the same budget");
 		check(chunk == -1, "the rejected dense job leaves the caller's chunk untouched");
 
 		// And it is admitted again once the budget genuinely covers the schedule.
+		// Exact, not `>= 2`: the budget leaves 8 frames of headroom over the
+		// schedule plus the 2-frame ring it was sized from, so the answer is 10.
+		// A bound would accept anything from 2 to 64 and miss a sizeable
+		// arithmetic error.
 		chunk = -1;
 		check(largestChunkWithin(g, dense, with_sched.host_bytes + 8 * frame_bytes, chunk)
-		      == Admission::Fits && chunk >= 2,
-		      "a budget that does cover the schedule admits the dense job");
+		      == Admission::Fits && chunk == 10,
+		      "a budget covering the schedule admits the dense job at exactly 10 frames");
 
 		// Recording the replacements costs a float per entry on top.
 		Policy rec = dense; rec.schedule_records_replacements = true;
@@ -750,7 +763,11 @@ void runCapacityChecks()
 
 		// A budget that fits the true live set but NOT the old double count.
 		const unsigned long long fits = real + r2c;
-		const unsigned long long old_model = real + r2c + real;
+		// Reconstructed from this policy's own budget by re-adding the term the
+		// alias removes, rather than rebuilt from constants.
+		const unsigned long long old_model = b.host_bytes + b.staged_host_bytes;
+		check(old_model == real + r2c + real,
+		      "old model: the alias-free total is 2*real + r2c");
 		check(old_model > fits,
 		      "old model: this budget was reported as too small");
 		long long chunk = -1;
@@ -837,6 +854,19 @@ void runHarnessChecks()
 	      "a self-assigned movie still builds a schedule");
 	check(sched.bad_x.size() == before,
 	      "the schedule sees exactly the defects the mask had before");
+
+	// computeBudget charges 3 ints per defect for bad_x, bad_y and slot_count.
+	// bad_x/bad_y are filled by push_back, so without an exact reserve their
+	// geometric growth can leave up to 2x capacity and the charge -- which
+	// exists to be an UPPER bound -- would under-count by 8 bytes per defect.
+	// Capacity is the only observable that distinguishes the two, so assert it
+	// directly. Without this, removing the reserve is a silent regression: it
+	// was, and a mutant proved the gap before this check existed.
+	check(sched.bad_x.capacity() == sched.bad_x.size() &&
+	      sched.bad_y.capacity() == sched.bad_y.size(),
+	      "the schedule's index vectors are reserved exactly, so the charge covers them");
+	check(sched.slot_count.capacity() == sched.slot_count.size(),
+	      "slot_count is sized exactly by resize");
 
 	// A normal copy must be a deep copy: mutating the source must not move the
 	// destination's mask.

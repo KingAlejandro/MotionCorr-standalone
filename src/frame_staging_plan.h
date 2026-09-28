@@ -116,22 +116,51 @@ bool computeBudget(const Geometry &geom, const Policy &policy, Budget &budget);
 // calculator that only answers "how many bytes" will happily recommend a chunk
 // that can never fit, and evidence that only records success cannot tell "the
 // bound held" from "the bound was overridden". This answers the first of the
-// three outcomes -- inadmissible -- explicitly; waiting for capacity and
-// granting over budget belong to the caller's allocator, not here.
+// three budget outcomes -- inadmissible -- explicitly; waiting for capacity and
+// granting over budget (#94's `over_budget_grants`) belong to the caller's
+// allocator, not here.
+enum class Admission {
+	// out_chunk is the largest chunk_frames in [1, n_frames] that fits.
+	Fits = 0,
+	// Inputs were valid; not even one staged frame fits. This movie can never
+	// be admitted under this budget and the caller must fall back or fail.
+	Inadmissible,
+	// The geometry or policy is malformed. out_error says which. This is a
+	// caller bug, NOT a statement about the movie or the budget.
+	InvalidInput,
+};
+
+// Finds the largest chunk_frames whose resulting host_bytes fits within
+// host_budget_bytes, using `policy` for every other term.
 //
-// Finds the largest chunk_frames in [1, n_frames] whose resulting host_bytes
-// fits within host_budget_bytes, using `policy` for every other term.
-// Returns false, leaving out_chunk untouched, when even a single staged frame
-// does not fit: that movie can never be admitted under this budget and the
-// caller must fall back or fail, not stage it.
+// The return is tri-state on purpose. Collapsing InvalidInput into
+// Inadmissible is the same mistake, one layer up, that this function exists to
+// prevent: a caller that mapped both onto "movie exceeds the host budget" would
+// log a correct-looking budget decision for every movie on a machine with
+// terabytes free, and the misconfiguration would be undiagnosable. Found by
+// independent review of an earlier bool-returning version.
+//
+// out_chunk is written only on Fits. out_error, when non-null, is set to a
+// static string on InvalidInput and to nullptr otherwise.
+//
+// policy.chunk_frames is IGNORED -- this function is choosing that value. A
+// negative one is still rejected as InvalidInput rather than quietly accepted,
+// so a malformed policy does not become valid by being passed here.
 //
 // For multiple concurrent workers the caller must divide the host budget by the
 // worker count BEFORE calling this. See ADR section 7a.2: sizing each worker
 // against the whole host is the failure mode the aggregate bound exists to
 // prevent, and nothing here can detect it.
-bool largestChunkWithin(const Geometry &geom, const Policy &policy,
-                        unsigned long long host_budget_bytes,
-                        long long &out_chunk);
+//
+// Precondition, checked by a test rather than left as prose: host_bytes must be
+// non-decreasing in chunk_frames, which is what makes the binary search sound.
+// It holds because the staged term is the only chunk-dependent one. Adding a
+// chunk-dependent term to Policy that is not monotone would silently break
+// this; MonotonicHostBytes in the test suite is there to notice.
+Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
+                             unsigned long long host_budget_bytes,
+                             long long &out_chunk,
+                             const char **out_error = nullptr);
 
 // Real and R2C whole-movie array sizes, as published in the #95 task comment:
 //   real = 4*F*W*H,  r2c = 8*F*H*(floor(W/2)+1)
@@ -245,6 +274,11 @@ void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j
 // reproduce the runner's raw-host path, which records the value and leaves the
 // raw frame untouched so a later whole-frame gain pass is still valid
 // (motioncorr_runner.cpp:1769). With false, out_replacements must be non-null.
+//
+// On failure this function is NOT atomic: it returns false from inside the
+// bad-pixel loop, so masked pixels already visited may have been written to
+// `frame_data` and to `out_replacements`. A caller must not treat false as
+// "nothing happened and I can retry"; the chunk's frames have to be re-staged.
 //
 // When out_replacements is non-null it must be sized bad.size() * n_frames and
 // is filled at **[iframe * n_bad + ibad]** -- frame-major, matching

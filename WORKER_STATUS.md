@@ -5,7 +5,7 @@
 | issue | #95 — Design and prototype bounded frame/chunk loading without retaining every host frame |
 | model | `claude-opus-5` (high effort), routed as `claude-opus-5[1m]` |
 | task class | architecture (ADR + one bounded component prototype) |
-| phase | 5/5 — reviewed, review fixes applied and re-verified at final head |
+| phase | 5/5 — twice reviewed; second-round fixes applied and re-verified at final head |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
 | head | see `git log`; 4 commits on top of base |
 | branch | `round96/95-claude-opus-5` |
@@ -48,9 +48,14 @@ and raw logs in `docs/issue95_staging_evidence/`.
 | --- | --- |
 | `cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON` | exit 0 |
 | `cmake --build build-cpu -j8` | exit 0 |
-| `./build-cpu/frame_staging` | exit 0 — **256 checks, 0 failures** |
+| `./build-cpu/frame_staging` | exit 0 — **248 checks, 0 failures** |
 | `ctest --output-on-failure` | exit 0 — **14/14 passed** |
-| mutation control, 4 bugs targeting the confirmed review findings | all 4 caught (exit 1); source hash restored |
+| mutation control, 5 bugs targeting the second review's findings | all 5 caught (exit 1); baseline and restore both 248/0; hashes restored |
+
+The check count fell from 256 because the second review found four assertions
+that **could not fail**. They were replaced by assertions that can, not
+supplemented, and the two most important replacements each have a mutant
+proving they are now observable.
 
 **Earlier runs used `/tmp/motioncorr-issue96-cpu.lock`, which did not serialise
 against the other workers in this round.** They are retained in
@@ -105,17 +110,30 @@ of the staging idea (none exists), any memory measurement, any timing.
 
 Both reviews COMMON.md requires were obtained, read-only, at the pre-fix head.
 
-| review | verdict | outcome |
-| --- | --- | --- |
-| code | `CHANGES_REQUESTED` | 2 high, 3 medium, 3 low. All fixed; see the fix commits. The reviewer independently re-derived and **confirmed** the central ordering claim and found the overflow arithmetic clean. |
-| spec + licence | `SPEC_CONFORMANCE_PASSED` / `LICENCE_CLEAN` | 3 required follow-ups (undeclared spec gaps, unqualified "bit-exact", missing raw artefacts) — all three addressed. Scope isolation clean; all arithmetic verified exact. |
+Two direct reviewers total, as required. The code reviewer was **resumed**, not
+replaced, for the second pass, so no third reviewer was spawned.
 
-The two high-severity findings were real defects, both confirmed against the
-source before fixing: the replacement buffer was transposed relative to all
-three production consumers of `resident_bad_replacements`, and the gain multiply
-at `motioncorr_runner.cpp:1752` was missing from both the component and the
-test's transcription — so the test could not have caught it. Each now has a
-mutation control proving the fix is covered, not just applied.
+| review | head | verdict | outcome |
+| --- | --- | --- | --- |
+| code, pass 1 | `1292439` | `CHANGES_REQUESTED` | 2 high, 3 medium, 3 low. All fixed. Independently re-derived and **confirmed** the central ordering claim; found the overflow arithmetic clean. |
+| spec + licence | `1292439` | `SPEC_CONFORMANCE_PASSED` / `LICENCE_CLEAN` | 3 required follow-ups — all addressed. Scope isolation clean; all arithmetic verified exact. |
+| code, pass 2 | `90a50c9` | `CHANGES_REQUESTED` | First independent review of `largestChunkWithin`, which was added after pass 1. Found it **correct** — monotonicity verified term by term, search sound, overflow-safe midpoint, `out_chunk` contract holds. Four items fixed (A, D, E, F); B, C, G, H, I, J carried as documented notes. |
+
+Pass 1's two high-severity findings were real defects: the replacement buffer
+was transposed relative to all three production consumers of
+`resident_bad_replacements`, and the gain multiply at
+`motioncorr_runner.cpp:1752` was missing from the component **and** from the
+test's transcription — so the test could not have caught it.
+
+Pass 2's most useful findings were not about shipped logic but about the test
+surface: four assertions that could not fail, two of them labelled as checking
+the primary value property. It also found that `largestChunkWithin` reported a
+malformed policy as an inadmissible movie — the same collapse of distinct
+outcomes into one signal that the ADR argues against, reproduced inside the
+function written to prevent it. It now returns a tri-state `Admission`.
+
+Every fix in both passes has a mutation control proving it is covered, not just
+applied.
 
 ## Blockers
 

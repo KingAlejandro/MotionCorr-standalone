@@ -475,9 +475,20 @@ distinguishes **three** outcomes, not two: "cannot ever be admitted, fall back",
 calculator that only answers "how many bytes" can recommend a chunk that can
 never fit, and an evidence trail that only records success cannot tell "the
 bound held" from "the bound was overridden N times". `largestChunkWithin()` in
-the component returns the first of those three explicitly, so a caller cannot
+the component answers the first of those three explicitly, so a caller cannot
 silently proceed with an inadmissible chunk. #94's counter for the third
 outcome is `over_budget_grants`; cite that name rather than inventing one.
+
+It returns an `Admission` enum — `Fits`, `Inadmissible`, `InvalidInput` — and
+not a bool. The first version did return a bool, and independent review found
+that it therefore reported a **malformed policy** as an **inadmissible movie**:
+an unset `input_passes` would have made every movie on a machine with terabytes
+free log a correct-looking "exceeds the host budget, falling back" decision,
+with the misconfiguration undiagnosable. That is precisely the collapse of
+distinct outcomes into one signal that this section argues against, reproduced
+one layer up in the function written to prevent it. Worth recording as a
+finding rather than quietly fixing, because the same pressure will apply to
+whatever the staged pipeline returns.
 
 ### 9.1 Two hazards a byte counter cannot see
 

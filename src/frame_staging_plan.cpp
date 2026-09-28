@@ -230,11 +230,25 @@ int countSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j)
 
 } // namespace
 
-bool largestChunkWithin(const Geometry &geom, const Policy &policy,
-                        unsigned long long host_budget_bytes,
-                        long long &out_chunk)
+Admission largestChunkWithin(const Geometry &geom, const Policy &policy,
+                             unsigned long long host_budget_bytes,
+                             long long &out_chunk,
+                             const char **out_error)
 {
-	if (!geometryOk(geom)) return false;
+	if (out_error) *out_error = nullptr;
+
+	auto invalid = [&](const char *why) {
+		if (out_error) *out_error = why;
+		return Admission::InvalidInput;
+	};
+
+	if (!geometryOk(geom))
+		return invalid("invalid geometry: nx, ny and n_frames must be positive");
+	// chunk_frames is chosen here, so its value is ignored -- but a negative one
+	// is a malformed policy and must not become valid by being passed to this
+	// function rather than to computeBudget.
+	if (policy.chunk_frames < 0)
+		return invalid("invalid policy: chunk_frames must not be negative");
 
 	// The staged term is linear in the chunk and every other term is constant,
 	// so binary search is sound. It is used rather than a closed-form divide
@@ -243,14 +257,22 @@ bool largestChunkWithin(const Geometry &geom, const Policy &policy,
 	Policy probe = policy;
 	long long lo = 1, hi = geom.n_frames, best = 0;
 
+	// One staged frame. This separates the two failure meanings: if the policy
+	// itself is malformed, computeBudget says so and that is a caller bug; if
+	// it is well formed and still does not fit, the movie is inadmissible.
 	probe.chunk_frames = 1;
 	Budget b;
-	if (!computeBudget(geom, probe, b) || b.host_bytes > host_budget_bytes)
-		return false; // inadmissible: not even one staged frame fits
+	if (!computeBudget(geom, probe, b))
+		return invalid(b.error ? b.error : "invalid policy");
+	if (b.host_bytes > host_budget_bytes)
+		return Admission::Inadmissible;
 
 	while (lo <= hi) {
 		const long long mid = lo + (hi - lo) / 2;
 		probe.chunk_frames = mid;
+		// A computeBudget failure here is an overflow at a large chunk, not a
+		// malformed policy -- the policy already passed at chunk 1, and the
+		// overflow set is upward-closed. Treat it as "does not fit".
 		if (computeBudget(geom, probe, b) && b.host_bytes <= host_budget_bytes) {
 			best = mid;
 			lo = mid + 1;
@@ -259,9 +281,15 @@ bool largestChunkWithin(const Geometry &geom, const Policy &policy,
 		}
 	}
 
-	if (best < 1) return false;
+	// Unreachable: the chunk-1 probe above established that 1 fits, and the
+	// final iteration necessarily evaluates mid == 1 if everything larger
+	// failed. Retained as a guard rather than an assertion because returning
+	// Inadmissible is the safe answer if that reasoning is ever invalidated;
+	// a mutation-testing gate will report a permanent survivor on this line.
+	if (best < 1) return Admission::Inadmissible;
+
 	out_chunk = best;
-	return true;
+	return Admission::Fits;
 }
 
 void neighborSlots(const bool *bad_mask, int nx, int ny, int d_max, int i, int j,

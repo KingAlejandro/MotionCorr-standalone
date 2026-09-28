@@ -88,15 +88,15 @@ Raw unedited logs for both epochs are in `raw/`; see `raw/README.md`.
 
 | file | sha256 |
 | --- | --- |
-| `src/frame_staging_plan.h` | `ee63ab0b1f739924f8f6291cf0229aa4efbb03f850c59733095532e0959b3b40` |
-| `src/frame_staging_plan.cpp` | `6cd456c40eb535acd9e88220b59c804b6d1a4dc7db8e1d922993d17ba922bd90` |
-| `tests/test_frame_staging.cpp` | `942e7f7d4e9f372f46c5ee0dd054522a45a40ffdbe43cae979f152e7ca5be95e` |
+| `src/frame_staging_plan.h` | `f36e65bd5688a5374132236c3f9024a77950caf1efa7aabbd3f9cf1e45c23bb7` |
+| `src/frame_staging_plan.cpp` | `fe08848af4d9b9ee415e1ce98b796439de863fdf66d1144e123f1e7fd9b387e7` |
+| `tests/test_frame_staging.cpp` | `8143190085a69c9a74db58fa408058b7dccac88d0b8d0d04b7ec2d4712ebdd56` |
 | `CMakeLists.txt` | `56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875` |
-| `build-cpu/frame_staging` (binary) | `e9c77ae5fe74a5f35469968bba0a3de2018297662b7eee1d4da9248a834de4a3` |
+| `build-cpu/frame_staging` (binary) | `d115bf10c52c7995ce37d6042e8430d6f76379c1496c01f7cdf936ebcb051149` |
 
 These are the hashes of the exact files committed on this branch, at the final
 head, taken in the same locked run that produced the results below
-(`raw/05-validationlock-final.log`). The pre-review hashes quoted in the first
+(`raw/06-validationlock-rereview-mutants.log`). The pre-review hashes quoted in the first
 revision of this report belonged to a source tree that no longer exists; they
 are not reproduced here.
 
@@ -108,9 +108,12 @@ are not reproduced here.
 cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON     # exit 0
 cmake --build build-cpu --target frame_staging -j8                        # exit 0
 ./build-cpu/frame_staging                                                 # exit 0
-  -> 256 checks, 0 failures
+  -> 248 checks, 0 failures
 ```
-(`raw/05-validationlock-final.log`)
+(`raw/06-validationlock-rereview-mutants.log`; `raw/07-...-build.log` for the
+whole-project build). The count fell from 256 because a second review found
+four assertions that could not fail; they were replaced by assertions that can,
+not supplemented. See §4.2.
 
 Coverage of the 235 checks:
 
@@ -162,9 +165,9 @@ under the same lock, then reverted:
 | schedule built frame-major instead of pixel-major (reorders the RNG stream) | **test exit 1** — caught on every fixture with more than one frame, at every chunk size including full |
 | neighbour slot list enumerated `dx`-major (transposes `pbuf`) | **test exit 1** — caught on every fixture at every chunk size |
 
-**Current epoch, final head** (`raw/04-validationlock-mutants.log`). These four
-target the specific defects the independent review found, so that the fixes are
-shown to be covered rather than merely applied:
+**Current epoch, first post-review head** (`raw/04-validationlock-mutants.log`).
+These four target the defects the first review found. Superseded by the round
+below but retained, since they were run against a real tree:
 
 | injected bug | result |
 | --- | --- |
@@ -173,10 +176,29 @@ shown to be covered rather than merely applied:
 | `write_in_place` ignored, raw host frames clobbered (review finding 3) | **test exit 1** — caught by the frame comparison on `raw-gain-11f` |
 | `d_max > 4` bound removed | **test exit 1** — 2 failures, both in the rejection-path group |
 
-After reverting, the source hash returned to
-`6cd456c40eb535acd9e88220b59c804b6d1a4dc7db8e1d922993d17ba922bd90`, which is the
-pre-`largestChunkWithin` head, and the suite returned 247 checks, 0 failures.
-The final head at 256 checks adds only the three-way admission group.
+**Final head** (`raw/06-validationlock-rereview-mutants.log`). A second review
+of the exact final head found four assertions that could not fail and two real
+defects. These five mutants target that second round, each named with the
+finding it belongs to:
+
+| injected bug | result |
+| --- | --- |
+| `InvalidInput` collapsed into `Inadmissible` (finding A) | **exit 1**, 3 failures — the malformed-policy, negative-`chunk_frames` and malformed-geometry assertions |
+| `out = Schedule()` deleted from `buildSchedule` (finding F) | **exit 1**, 1 failure — "a rejected buildSchedule clears a previously populated result" |
+| `Movie` self-assignment guard removed (finding D) | **exit 1**, 3 failures — mask preserved, schedule sees the same defects, copy is deep |
+| raw host frames written despite `write_in_place = false` (finding E) | **exit 1**, 4 failures — "raw host frames are left untouched", every chunk size |
+| `largestChunkWithin` off-by-one, `best = mid - 1` | **exit 1**, 4 failures across the admission group |
+
+Baseline and restore in the same locked session both returned **248 checks, 0
+failures**, and the restored hashes match the committed tree.
+
+The two that matter most are **E and F**, because those assertions previously
+*could not fail*: E compared two pristine buffers under a label claiming to
+check repaired pixels, and F asserted emptiness on a `Schedule` that had never
+been populated. Each was replaced by an assertion of the property genuinely at
+risk — that raw frames come back untouched, and that a *pre-populated* result
+is cleared — and the mutants above are the proof that the replacements are
+observable rather than merely better worded.
 
 Two observations that limit what this control proves, recorded rather than left
 implicit:
@@ -184,13 +206,22 @@ implicit:
 - The third old-epoch bug is caught even at chunk = full movie, because slot
   ordering is a correctness property independent of chunking. A control that
   only varied the chunk size would not have been sufficient on its own.
-- **Every mutant was injected into the component, never into the oracle.** The
-  oracle is `referenceRepair` in `tests/test_frame_staging.cpp`, a hand
-  transcription of `motioncorr_runner.cpp:1732-1775`. This control therefore
-  cannot detect drift between that transcription and the runner — the one
-  failure mode that would invalidate the whole differential test. That was
-  checked by reading, including by an independent reviewer who compared the two
-  line by line, but it is not covered by execution.
+- **No mutant was injected into the oracle.** The oracle is `referenceRepair`
+  in `tests/test_frame_staging.cpp`, a hand transcription of
+  `motioncorr_runner.cpp:1732-1775`. This control therefore cannot detect drift
+  between that transcription and the runner — the one failure mode that would
+  invalidate the whole differential test. That was checked by reading, twice,
+  by an independent reviewer comparing the two line by line, but it is not
+  covered by execution. (The finding-D mutant does touch the test file, but it
+  removes a copy-assignment guard, not any part of the oracle's logic.)
+- `largestChunkWithin`'s `best < 1` guard is provably unreachable, so a
+  mutation gate will report a permanent survivor there. It is retained
+  deliberately: returning `Inadmissible` is the safe answer if the reasoning
+  behind its unreachability is ever invalidated.
+- The monotonicity precondition behind the binary search is now asserted across
+  four policy shapes and the full chunk range, rather than left as a comment.
+  That test would not catch a *non-monotone* term added to `Policy` unless the
+  term is exercised by one of those four shapes.
 
 ### 4.3 Whole-project build and existing CTest suite
 
@@ -204,8 +235,8 @@ cmake --build build-cpu -j8            # whole project, exit 0
 ctest --output-on-failure              # exit 0
 ```
 
-14/14 passed in 7.03 s, on the same CPU-only `Release` build described in §2.2
-(`raw/05-validationlock-final.log`):
+14/14 passed in 7.16 s, on the same CPU-only `Release` build described in §2.2
+(`raw/06-validationlock-rereview-mutants.log`):
 
 | # | test | result |
 | --- | --- | --- |

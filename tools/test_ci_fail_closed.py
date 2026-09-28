@@ -127,29 +127,68 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # Case B: CiFailClosedControls missing from collected list
-        tests_without_control = [
-            {"name": "SyntheticRegression"},
-            {"name": "HotPixelRngDeterminism"},
-            {"name": "RunnerExposure"},
-            {"name": "Runner_failure"},
-            {"name": "Runner_invalid"},
-            {"name": "Runner_resume"},
-            {"name": "Runner_tomography"},
-            {"name": "RunnerLateBin"},
-            {"name": "RunnerExportedUnits"},
-            {"name": "GainCache"},
-            {"name": "TiffRead"},
-            {"name": "DamagedMovie"},
-            {"name": "RunnerModelParser"},
+        # The integrated suite registers 16 tests: the 13 pre-existing ones, the
+        # #72 CiFailClosedControls, and the #99 WriteFaults / ImageWriteFaults.
+        INTEGRATED_SUITE = [
+            "SyntheticRegression",
+            "HotPixelRngDeterminism",
+            "RunnerExposure",
+            "Runner_failure",
+            "Runner_invalid",
+            "Runner_resume",
+            "Runner_tomography",
+            "RunnerLateBin",
+            "RunnerExportedUnits",
+            "GainCache",
+            "TiffRead",
+            "DamagedMovie",
+            "RunnerModelParser",
+            "CiFailClosedControls",
+            "WriteFaults",
+            "ImageWriteFaults",
         ]
-        res_missing_new = subprocess.run(
+
+        def drop_one(name: str):
+            """Collection with exactly one required test removed, and a filler
+            added so the count gate cannot be what rejects it.
+
+            Without the filler the short list fails on --min-count first and the
+            missing-name branch is never reached, while the required-test list
+            echoed in the report still contains the name being asserted on. That
+            control would stay green even if the missing-name check were deleted.
+            """
+            kept = [t for t in INTEGRATED_SUITE if t != name]
+            kept.append("AdditiveFillerTest")
+            return kept
+
+        # Case B: a required test is absent, the count gate is satisfied, so the
+        # only thing that can reject the collection is the missing-name check.
+        for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults"):
+            with self.subTest(dropped=dropped):
+                names = drop_one(dropped)
+                self.assertEqual(len(names), len(INTEGRATED_SUITE),
+                                 "filler must keep the collection at the required count")
+                res_missing = subprocess.run(
+                    [sys.executable, str(VALIDATE_COLLECTION)],
+                    input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
+                                      "tests": [{"name": n} for n in names]}),
+                    capture_output=True, text=True
+                )
+                self.assertEqual(res_missing.returncode, 1,
+                                 f"Missing {dropped} must fail validation")
+                self.assertIn(f"Missing required test(s): {dropped}", res_missing.stdout,
+                              "must be rejected for the missing name, not for the test count")
+
+        # Case C: the complete integrated collection is accepted. Without this the
+        # cases above could pass against a validator that rejects everything.
+        res_full = subprocess.run(
             [sys.executable, str(VALIDATE_COLLECTION)],
-            input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0}, "tests": tests_without_control}),
+            input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
+                              "tests": [{"name": n} for n in INTEGRATED_SUITE]}),
             capture_output=True, text=True
         )
-        self.assertEqual(res_missing_new.returncode, 1, "Missing CiFailClosedControls must fail validation")
-        self.assertIn("CiFailClosedControls", res_missing_new.stdout)
+        self.assertEqual(res_full.returncode, 0,
+                         f"Complete integrated collection must pass:\n{res_full.stdout}")
 
     def test_4_missing_fixture_or_truth_fails(self) -> None:
         """Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures."""

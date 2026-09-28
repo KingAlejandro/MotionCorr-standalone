@@ -31,6 +31,11 @@ DEFAULT_REQUIRED_TESTS = [
     "DamagedMovie",
     "RunnerModelParser",
     "CiFailClosedControls",
+    # Added by the #99 fail-closed write group (PR105). WriteFaults is the
+    # end-to-end runner control; ImageWriteFaults is the unit-level
+    # RLIMIT_FSIZE injection and is registered under if(UNIX).
+    "WriteFaults",
+    "ImageWriteFaults",
 ]
 
 
@@ -101,8 +106,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=14,
-                        help="Minimum number of tests that must be collected (default: 14)")
+    parser.add_argument("--min-count", type=int, default=16,
+                        help="Minimum number of tests that must be collected (default: 16)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

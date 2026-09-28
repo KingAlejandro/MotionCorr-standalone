@@ -132,11 +132,15 @@ assert len(ids) == 24, ids
 "
 
 echo "=== 4. REUSE ROUND TRIP, BOTH DIRECTIONS ==="
+# Into a COPY of the comparison directory. Reusing $OUT/exact would leave its
+# summary.json holding the tamper end state (23/1 FAIL), so the only retained
+# artifact for step 3 would contradict the 24/24 it is evidence for.
+cp -a "$OUT/exact" "$OUT/exact_reuse"
 taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/compare24.py" \
     --ref serialG --test "$OUT/merged" \
     --tool "$SRC/tools/compare_motioncorr.py" \
-    --manifest "$OUT/shards/shard_manifest.json" --out "$OUT/exact" --reuse
-SIDE=$(ls "$OUT/exact"/*.origin.json | head -1)
+    --manifest "$OUT/shards/shard_manifest.json" --out "$OUT/exact_reuse" --reuse
+SIDE=$(ls "$OUT/exact_reuse"/*.origin.json | head -1)
 "$PY" -c "
 import json,sys
 p='$SIDE'; d=json.load(open(p)); d['tool_sha256']='0'*64
@@ -147,7 +151,7 @@ set +e
 taskset -c "$MASK" "$PY" "$SRC/tools/multi_gpu/compare24.py" \
     --ref serialG --test "$OUT/merged" \
     --tool "$SRC/tools/compare_motioncorr.py" \
-    --manifest "$OUT/shards/shard_manifest.json" --out "$OUT/exact" --reuse
+    --manifest "$OUT/shards/shard_manifest.json" --out "$OUT/exact_reuse" --reuse
 TAMPER_RC=$?
 set -e
 echo "TAMPER_RC=$TAMPER_RC  (1 expected)"

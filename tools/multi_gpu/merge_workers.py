@@ -405,7 +405,7 @@ def main(argv: list[str] | None = None) -> int:
                 block = merged.block_with_label("rlnMicrographName")
                 col = block.column("rlnMicrographName")
                 # Normalize both sides. getOutputFileNames() is plain
-                # concatenation (src/motioncorr_runner.cpp:552-572), so an
+                # concatenation (src/motioncorr_runner.cpp:553-573), so an
                 # absolute movie name writes "<out>//abs/path/x.mrc" while the
                 # expectation is built through worker_relative_root, which
                 # strips the leading slash. Those name one file but are

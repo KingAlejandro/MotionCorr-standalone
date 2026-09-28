@@ -23,7 +23,7 @@ against, not as an outstanding ask.
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
 | `tests/test_multi_gpu_scheduling.py` | 46 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 65 mutation entries, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 66 mutation entries, each required to break its case |
 
 ## Usage
 
@@ -173,7 +173,7 @@ cmake 4.4.3, Python 3.12 + numpy 2.5.3, under
 | Layer | Result |
 |---|---|
 | `tests/test_multi_gpu_scheduling.py --binary <built>` | **46/46 passed** |
-| `docs/multi_gpu/negative_controls.py` | **65/65 mutations detected**, no survivors |
+| `docs/multi_gpu/negative_controls.py` | **66/66 mutations detected**, no survivors |
 | `tools/validate_test_collection.py --test-dir build` | **PASS**, 18 collected, 18 required |
 | `ctest --output-on-failure -j 4` | **18/18 passed** |
 | end-to-end, real binary: serial vs 3-way sharded | **6/6 exact**, merge `PASS`, aggregate STAR identical, `DISTINCT_PAYLOADS=6/6` |
@@ -216,8 +216,8 @@ outputs with **no GPU compute at all**:
 | Partition at the port head vs the arm's own manifest | identical assignment and shard SHA-256 |
 | The retained pre-port `status.json` | **refused**, rc 2 — it carries no `manifest_sha256` |
 | Merge over the retained `sh2/w0`, `sh2/w1` | **PASS**, 96 files, 24 movies, no staged product rewritten by the aggregate pass, aggregate row order canonical |
-| Exact comparison, 24 pairs, serial CUDA vs two-worker two-GPU | **24/24 PASS**, 24 distinct report ids |
-| `--reuse`, then `--reuse` with a tampered origin sidecar | reproduces `PASS`; **refused**, rc 1 |
+| Exact comparison, 24 pairs, serial CUDA vs two-worker two-GPU | **24/24 PASS**, 24 distinct report ids ([log](port_evidence/4gpus_retained_revalidation.log), not a summary file: the tamper control below reuses the same `--out` and overwrote it) |
+| `--reuse`, then `--reuse` with a tampered origin sidecar | reproduces `PASS`; **refused**, rc 1. The retained [summary](port_evidence/4gpus_retained_reuse_tamper_summary.json) is this arm's end state — 23/1 `FAIL` — and is the tamper being caught, not a regression |
 | Device identity, read from the retained witness | **2 distinct physical UUIDs**, 36 samples, 0 unwitnessed / wrong / shared |
 
 Released after each arm: no process with an executable under the run tree, no
@@ -227,11 +227,11 @@ owned compute apps, mutex unheld. Evidence:
 
 ## Negative controls
 
-`negative_controls.py` holds 65 mutation entries. It applies them one at a time
+`negative_controls.py` holds 66 mutation entries. It applies them one at a time
 to a scratch copy and requires the corresponding cases to fail. An entry whose
 case needs a tool the host lacks is reported SKIPPED and explicitly not counted
 as detected, so the printed figure is detected-over-attempted, not
-detected-over-entries: **65/65 on Linux with `taskset`**, 64/65 attempted on
+detected-over-entries: **66/66 on Linux with `taskset`**, 64/66 attempted on
 macOS. No mutation survives
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list

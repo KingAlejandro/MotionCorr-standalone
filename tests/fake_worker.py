@@ -7,7 +7,7 @@ output-naming and fixed-name-aggregate behaviour the scheduler has to cope with:
 
   * per movie, <out>/<root>.mrc and <out>/<root>.star, where <root> is the movie
     path with its extension dropped and every remaining '.' turned into '_',
-    matching getOutputFileNames() (src/motioncorr_runner.cpp:552);
+    matching getOutputFileNames() (src/motioncorr_runner.cpp:553);
   * the per-movie STAR carries the movie name, optics group and pre-exposure it
     was given, so a test can prove metadata survived partitioning rather than
     only that a file appeared;
@@ -38,7 +38,7 @@ PRODUCTS = (".mrc", ".star")
 
 
 def star_quote(value: str) -> str:
-    """The subset of escapeStringForSTAR (src/strings.cpp:87) these fixtures need.
+    """The subset of escapeStringForSTAR (src/strings.cpp:88) these fixtures need.
 
     A path containing whitespace must be quoted, or the reader sees extra
     columns. Embedded quotes are not produced by any fixture here, and the \a
@@ -55,7 +55,7 @@ def star_quote(value: str) -> str:
 def write_products(outdir: Path, movie: str, optics: str, pre_exposure: str,
                    truncate_mrc: bool = False, marker: str = "") -> None:
     # getOutputFileNames is plain string concatenation, fn_out + fn_root
-    # (src/motioncorr_runner.cpp:552-572), so an absolute movie name lands at
+    # (src/motioncorr_runner.cpp:553-573), so an absolute movie name lands at
     # <out>//abs/path.mrc -- i.e. worker-relative abs/path.mrc. Joining an
     # absolute root with pathlib would instead escape --o entirely and write
     # outside the worker directory.
@@ -157,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
     lines = ["\n", "data_micrographs\n", "\n", "loop_\n",
              "_rlnMicrographName #1\n", "_rlnMicrographMetadata #2\n"]
     # The aggregate rows carry what the binary serializes: fn_out + fn_root,
-    # concatenated, leading slash and all (src/motioncorr_runner.cpp:571).
+    # concatenated, leading slash and all (src/motioncorr_runner.cpp:572).
     for root in (reversed(roots) if a.fake_reverse_aggregate else roots):
         prefix = str(outdir) if str(outdir).endswith(os.sep) else str(outdir) + os.sep
         lines.append(f"{star_quote(prefix + root + '.mrc')} "

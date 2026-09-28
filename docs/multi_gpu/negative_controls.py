@@ -452,6 +452,18 @@ MUTATIONS = [
      "        for k, p, _ in procs:  # MUTATED\n"
      "            reap(k, p)",
      ["case_per_worker_timing_and_rss_recorded"]),
+
+    # The resident-set recording itself, as distinct from the sampler's stop flag.
+    # Gated on taskset because it is only observable where /proc exists: on a host
+    # without it the sampler returns early by design and the case asserts the
+    # absence is stated, so this mutation changes nothing there. Reported SKIPPED
+    # rather than detected on such a host, never claimed.
+    ("resident-set high-water is never recorded",
+     "tools/multi_gpu/run_multi_gpu.py",
+     "                            if kib > self.hwm_kib.get(pid, 0):",
+     "                            if False:  # MUTATED",
+     ["case_per_worker_timing_and_rss_recorded"],
+     "taskset"),
 ]
 
 

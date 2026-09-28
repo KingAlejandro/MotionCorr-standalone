@@ -13,13 +13,13 @@ reviewer can check each one:
   * CR+LF input is rejected outright (src/metadata_table.cpp:1225-1230).
   * A block starts at any line containing "data_"; the block name is everything
     after the first "data_" (`:1241-1245`). A block is a loop table if a line
-    containing "loop_" follows (`:1252`), otherwise a list (`:1256`).
+    containing "loop_" follows (`:1254`), otherwise a list (`:1258`).
   * Label lines start with "_" and the label is taken up to a "#"
     (src/metadata_table.cpp:1054-1061).
   * Every data line is passed through simplify() before tokenization
-    (`:1088`), and the row block ends at the first empty line (`:1091`).
+    (`:1089`), and the row block ends at the first empty line (`:1091`).
   * simplify() (src/strings.cpp:122) first unescapes: it *drops* \\n \\v \\b \\r
-    \\f and \\a, and turns \\t into a space (src/strings.cpp:63-85). It then
+    \\f and \\a, and turns \\t into a space (src/strings.cpp:64-86). It then
     strips leading spaces and collapses every run of spaces to one.
   * nextTokenInSTAR() (src/strings.cpp:595) then splits on spaces, honours a
     leading ' or " as a quoted token, and treats a leading # as end-of-line.
@@ -28,7 +28,7 @@ Two consequences of that order are load-bearing and are asserted, not assumed:
 
   * Because simplify() strips \\a before tokenization, the "\\a-escaped quote"
     lookback in nextTokenInSTAR (src/strings.cpp:628) can never match on a line
-    that came from a file. RELION's own escapeStringForSTAR (src/strings.cpp:87)
+    that came from a file. RELION's own escapeStringForSTAR (src/strings.cpp:88)
     writes \\a for an embedded quote, so such a value does not round-trip through
     its own reader. That is an upstream defect, out of scope to fix here; this
     parser reproduces the reader's actual behaviour rather than the writer's
@@ -53,7 +53,7 @@ class StarFormatError(ValueError):
 
 
 def unescape(line: str) -> str:
-    """Port of unescape(), src/strings.cpp:63."""
+    """Port of unescape(), src/strings.cpp:64."""
     out = []
     for ch in line:
         if ch == "\t":
@@ -84,7 +84,7 @@ def tokenize(simplified: str) -> list[str]:
     """Port of the nextTokenInSTAR() loop, src/strings.cpp:595.
 
     `simplified` must already have been through simplify(), exactly as
-    readStarLoop() does before tokenizing (src/metadata_table.cpp:1088).
+    readStarLoop() does before tokenizing (src/metadata_table.cpp:1089).
     """
     tokens: list[str] = []
     i = 0
@@ -219,7 +219,7 @@ def parse(path: str | Path) -> StarFile:
             raise StarFormatError(
                 f"{path}:{n}: contains a \\a escape byte. simplify() strips it before "
                 "tokenization, so the C++ reader cannot recover the intended value "
-                "(src/strings.cpp:63, :628); refusing to guess."
+                "(src/strings.cpp:64, :628); refusing to guess."
             )
 
     blocks: list[Block] = []
@@ -286,7 +286,7 @@ def parse(path: str | Path) -> StarFile:
                 )
             if len(values) < len(labels):
                 # C++ tolerates exactly one case: two labels, one value, and the
-                # SECOND label a string type (src/metadata_table.cpp:1118-1122).
+                # SECOND label a string type (src/metadata_table.cpp:1123-1124).
                 # Reproducing that needs the EMDL type table, and getting it
                 # wrong in the permissive direction would let a STAR through
                 # here that every worker then rejects at startup. Refuse instead.
@@ -363,7 +363,7 @@ def worker_relative_root(root: str) -> str:
     """Where an output root actually lands beneath a worker's --o directory.
 
     getOutputFileNames() is `fn_out + fn_root` -- plain string concatenation
-    (src/motioncorr_runner.cpp:552-572). For an absolute movie name the result is
+    (src/motioncorr_runner.cpp:553-573). For an absolute movie name the result is
     `<out>//abs/path/x.mrc`, which the filesystem collapses to `<out>/abs/path`.
     So relative to the worker directory the root is the absolute root with its
     leading slashes absorbed. Matching worker files against the unmodified
@@ -388,7 +388,7 @@ def worker_relative_root(root: str) -> str:
 
 
 def output_root(movie_name: str) -> str:
-    """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:552.
+    """Port of MotioncorrRunner::getOutputFileNames, src/motioncorr_runner.cpp:553.
 
     Strips the extension and replaces every remaining '.' with '_'. Two distinct
     movies can therefore share one output root, which is a silent overwrite; the

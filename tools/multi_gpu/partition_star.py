@@ -79,7 +79,7 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
             problems.append(
                 f"output-name collision: {prior!r} and {name!r} both write {root}.mrc "
                 "beneath the worker output directory (getOutputFileNames replaces '.' "
-                "with '_' and concatenates onto --o, src/motioncorr_runner.cpp:552)"
+                "with '_' and concatenates onto --o, src/motioncorr_runner.cpp:553)"
             )
         roots.setdefault(root, name)
 

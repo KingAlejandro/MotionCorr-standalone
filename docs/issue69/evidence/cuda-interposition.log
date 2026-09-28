@@ -1,6 +1,6 @@
 === provenance ===
 4-gpu-vm
-pid 1175374's current affinity list: 96-111
+pid 1181732's current affinity list: 96-111
 /user.slice
 Cuda compilation tools, release 12.8, V12.8.61
 Build cuda_12.8.r12.8/compiler.35404655_0
@@ -8,7 +8,7 @@ NOTE: compilation and device-free unit tests only. No CUDA context is created; n
 
 === device-free predicate controls ===
 21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
-11 retry cases (6 fatal, 5 permitted), 0 failures
+13 retry cases (8 fatal, 5 permitted), 0 failures
 PASS classifier separates poisoned-context codes from recoverable ones,
      and a fatal error already consumed by a helper -- leaving the
      last-error slot clear -- still refuses the retry, while a recorded
@@ -71,5 +71,5 @@ negative control -- same filter with the test-own exemption removed, must be >0:
 PASS interposition reaches every matched production call site, and the check demonstrably can fail
 exit=0
 
-05c794ca4a98e4cb48753aa14b86647b51b0d4308e8c2a1ef28ea57fbe1f1f13  /home/alex/MotionCorr-i69/build/cuda_fault_matrix
-c41c3c6f25e5961c8c1d9d0fe0cbd07daa6c4f08d302630c8876754d06450ab1  /home/alex/MotionCorr-i69/build/cuda_error_class
+817f17e3d4346ef9190b070fd0dd904e7f98e3bf53ae3fd573aac898697be916  /home/alex/MotionCorr-i69/build/cuda_fault_matrix
+a6f8af4938fd93697c9b6f94405c88741a8141775d29c6e45ffb368338e5fc7e  /home/alex/MotionCorr-i69/build/cuda_error_class

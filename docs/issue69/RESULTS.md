@@ -127,7 +127,9 @@ which has not been done.
 
 ## 4. Why the CPU binaries differ, and why that is not a behaviour change
 
-`motioncorr` base `cb1e1cb1…`, candidate `d2a83750…`. Every change in this branch to
+`motioncorr` base `cb1e1cb1…`, candidate `b750e237…` (measured at this head; see
+[`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt), whose five source hashes
+were verified identical to the pinned head before the binaries were quoted). Every change in this branch to
 `motioncorr_runner.cpp` is inside `#ifdef _CUDA_ENABLED`, so a CPU-only build should
 contain no new code — but the binaries are not identical, and a hash difference left
 unexplained is exactly the kind of thing that later gets waved away.
@@ -292,16 +294,34 @@ says that explicitly and names the recorded stage and line.
 
 ```
 21 classifier cases (13 poisoning, 8 recoverable), 0 failures  [CUDART_VERSION 12080]
-11 retry cases (6 fatal, 5 permitted), 0 failures
+13 retry cases (8 fatal, 5 permitted), 0 failures
 ```
 
-The 11 retry cases include the negative control the review asked for — a fatal error
+The 13 retry cases include the negative control the review asked for — a fatal error
 recorded by a helper that then left the last-error slot clear must **still** refuse the
 retry, covered for illegal address, launch failure and uncorrectable ECC — and the
 supported recoverable case, where a recorded `cudaErrorMemoryAllocation` must still
 permit the re-attempt so an ordinary OOM does not begin aborting movies. The table is
 required to contain both verdicts, so a predicate degraded to always-fatal or
 always-permitted fails.
+
+**A regression inside this fix, found by review and corrected.** The first version of
+the predicate preferred the recorded status *unconditionally* and consulted the pending
+slot only when nothing had been recorded. Because the session keeps the **first**
+failure, that reintroduced the same hazard from the other side: a benign early
+`cudaErrorMemoryAllocation` on one patch stayed recorded for the rest of the movie, so a
+fatal fault on a **later** patch — discarded by the first-failure guard, but still
+sticky in the pending slot — became invisible to the verdict and was retried. That was
+strictly worse than the head before the fix, where the pending slot was what got read.
+
+Both sources are now consulted and either alone forces a fatal verdict. That is sound
+because poisoning is monotonic: a context does not recover, so a fatal code from either
+source is decisive, and the preference between them only affects which code the message
+names. The predicate also returns the deciding code, because the call site had been
+re-deriving it with the old rule and would otherwise have printed the recorded
+allocation miss while the verdict was forced by the pending fatal code. Two control rows
+pin the masking case (illegal address and launch failure pending behind a recorded
+allocation miss), which is why the retry table went from 11 rows to 13.
 
 **What this does not cover.** These are predicate tests. The real resident
 nonconvergence path, an actual poisoned context, and asynchronous execution failure are

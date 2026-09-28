@@ -1,6 +1,6 @@
 === host / lane / cpuset / NUMA / memory / load ===
 small-refmac-machine
-pid 3165944's current affinity list: 0-63
+pid 3171700's current affinity list: 0-63
 /user.slice
 policy: default
 preferred node: current
@@ -9,27 +9,27 @@ cpubind: 0 1
 nodebind: 0 1 
                total        used        free      shared  buff/cache   available
 Mem:             226          10          43           0         174         215
- 02:12:45 up 299 days, 16:10, 24 users,  load average: 4.74, 3.52, 3.82
+ 02:21:39 up 299 days, 16:19, 21 users,  load average: 3.39, 3.39, 3.50
 
 === interference, recorded and NOT altered ===
 USER     %CPU     ELAPSED COMMAND
-ubuntu    100       00:48 defect_neg_fina
-ubuntu   99.9 49-02:42:51 ctffind
-ubuntu   99.9 48-00:19:09 ctffind
-ubuntu    0.8 43-10:35:35 node
-root      0.1  5-19:45:48 rsyslogd
+ubuntu    300       00:00 ps
+ubuntu   99.9 49-02:51:45 ctffind
+ubuntu   99.9 48-00:28:03 ctffind
+ubuntu    0.8 43-10:44:29 node
+root      0.1  5-19:54:42 rsyslogd
 
 === toolchain ===
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 cmake version 4.4.3
 
-=== source hashes ===
-56d99f04e7464ac59b524a6cd1ee46b287207d0dd4393bd030284840ff99ceeb  src/acc/cuda/cuda_error_class.h
+=== source hashes (verified identical to the pinned head) ===
+b38a5634fee21d6920163083d621a66b6d30e2ce47ec907582f09ae8290bb2fd  src/acc/cuda/cuda_error_class.h
 b265c7840b0110ce50c068c38c9ca8d481a11548bb2eefffc301a31a25b99cfc  src/acc/cuda/cuda_movie_session.h
 c10818ef9c240a464ddee20c788863888912a52a0b75a7e4b652ddb8c19444f5  src/acc/cuda/cuda_movie_session.cu
-f89897ddefe87fb55a144b580f489fac4cdd1aca800e4513e2dfb2c335a6b848  src/motioncorr_runner.cpp
-d248a8950cf8bc4eab4ea3be2700a6c2e47c459b616e6274e85683c8e16bbfd4  tests/cuda_error_class.cpp
+283f55b13bc432a5b90f9ad9f912139c7115ec0b0a656216c5cb225b8792f94d  src/motioncorr_runner.cpp
+fd1e5f3775c5cb3ba02cf3d8d46daefc26584c7cdb833149bab87a0c47a4d9f0  tests/cuda_error_class.cpp
 
 === binaries ===
 cb1e1cb12ea354544212b3143548ae97de4e199952b33017712643034b53a08d  /home/ubuntu/mc-i69/build-base/motioncorr
-7bf1860624546a4d1bb71525b5f67b0f82ba1d4b18a07c7283413c34069fab11  /home/ubuntu/mc-i69/build-cand/motioncorr
+b750e237b5ed24db8e70caf366dd4fdf19c1509995a8eb69ad9af87313378f42  /home/ubuntu/mc-i69/build-cand/motioncorr

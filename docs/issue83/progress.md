@@ -167,7 +167,15 @@ made, so exactly one datapoint was taken rather than a sweep: the largest
 declared row, `realscale_local` (2048x2048, 24 frames, local 5x5, native CUDA),
 sampled from `nvidia-smi --query-compute-apps` every 0.5 s while it ran.
 
-**Peak 1266 MiB of 40960 MiB** on one A100-SXM4-40GB, 32 samples (job 3510288).
+**Peak 1266 MiB of 40960 MiB** on one A100-SXM4-40GB, 32 samples, sampled from
+the `gn0005` working tree `/scratch/scarf1415/mc-i83-tree`.
+
+> **Corrected.** This line previously named **job 3510288**. No preserved
+> record names a Slurm job or a commit for this sample: `capacity.json` carries
+> a device index, a sample count, a command and the numbers, and no host, no
+> binary digest and no start time. The job number is withdrawn; what the record
+> does support is the working tree named in its own command line. See
+> `provenance.md`, "Corrected — the capacity job number is withdrawn."
 
 The sampler reads the driver, not anything the program says about itself. This
 is one configuration on one device and is not a capacity claim for other
@@ -290,9 +298,10 @@ repository's renderer, not a property of the records; see W8a in
 **Every new gate has a negative control, and every control has a meta-check.**
 A control that passes with its gate reverted is testing nothing, so each gate
 is monkeypatched back to its published form at runtime and the control must
-then fail — **20 such checks**: 17 reverted gates plus three on the suite's own
+then fail — **22 such checks**: 19 reverted gates plus three on the suite's own
 exit status, which itself used to be computed by quantifying over a set that
-was empty when every control skipped.
+was empty when every control skipped. The control suite alongside them is
+**20 controls, 20 pass, 0 skipped, 0 failed**.
 
 > **Corrected.** For two rounds these meta-checks lived in an untracked
 > `.scratch/meta_rev1.py`, so "thirteen meta-checks pass" was the one claim in
@@ -302,7 +311,8 @@ was empty when every control skipped.
 > re-runnable, and writing a `--json` record preserved alongside the control
 > suite's. The same applied to the report recipe, now
 > `tools/validation_issue83/regenerate_report.sh`. The count rose from 13 to 20
-> because this round's gates got meta-checks too.
+> at `cb587bd` and to **22** at `3c9c660`, because each round's new gates got
+> meta-checks too.
 
 ## Runs of record
 
@@ -315,9 +325,9 @@ section by section:
 | Section of the report | Host | Commit | Record |
 |---|---|---|---|
 | Declared matrix, integrated all-24 screen, input provenance, motion truth | SCARF `gn3000` (exclusive) | `4c2305b` | job **3511210**, `raw/scarf-gn3000-3511210/` |
-| Capacity datapoint | SCARF `gn0005` (exclusive) | `0a6dbff` | job 3510288, `raw/scarf-gn0005/capacity.json` |
-| CPU matrix (diagnostic) | cpu64, `taskset -c 32-63 numactl --membind=1` | `cb587bd` | `raw/cpu64-cb587bd/matrix.json` |
-| Gate contracts, controls, meta-controls, CPU pixels | cpu64, `taskset -c 32-63 numactl --membind=1` | `cb587bd` | `raw/cpu64-cb587bd/` |
+| Capacity datapoint | SCARF `gn0005` tree `/scratch/scarf1415/mc-i83-tree` | not recorded | `raw/scarf-gn0005/capacity.json` — no job, no commit, no host, no binary digest, no start time |
+| CPU matrix (diagnostic) | cpu64, `taskset -c 32-63 numactl --membind=1` | `3c9c660` | `raw/cpu64-3c9c660/matrix.json` |
+| Gate contracts, controls, meta-controls, CPU pixels | cpu64, `taskset -c 32-63 numactl --membind=1` | `3c9c660` | `raw/cpu64-3c9c660/` |
 
 Jobs **3511154** and **3511139** at `7ba584e` were the runs of record for the
 matrix and the all-24 screen through the previous revision of this document.
@@ -352,6 +362,12 @@ current contracts.
 > that is an outcome of one allocation happening to run both legs, not a
 > property the report relies on. The per-section labelling stays, because two
 > of the six records still come from elsewhere.
+>
+> **A third correction.** The capacity row above named job **3510288** at
+> `0a6dbff` until this revision. Both are withdrawn: no preserved record ties
+> that sample to a Slurm job or a commit. The row now states what
+> `capacity.json` does carry and, explicitly, what it does not — which is also
+> why the published report renders that section as unattributable.
 
 Superseded runs, preserved and not carried into the report: 3510276
 (output-path bug), 3510277 (quota/SIGPIPE), 3510283 (`realscale_local`
@@ -361,15 +377,26 @@ declaration drift, since fixed), 3510297 (pre-correction harness, at
 (cancelled; started from a dirty tree), **3511154** and **3511139** (at
 `7ba584e`, superseded by 3511210 at `4c2305b`), the first cpu64 matrix (harness
 expectations 2 and 3), the earlier cpu64 runs at `7ba584e`, `2a8d13a`,
-`705d2c7` and `4c2305b`, and `raw/cpu64/matrix-cpu-summary.json` (pre-contract
-harness, replaced by the head-commit CPU run).
+`705d2c7`, `4c2305b` and `cb587bd`, and `raw/cpu64/matrix-cpu-summary.json`
+(pre-contract harness, replaced by the head-commit CPU run).
 
-**The GPU record is one commit behind the head.** 3511210 ran `4c2305b`;
-`cb587bd` changed harness code after it. Two consequences are carried openly
-rather than papered over: the two controls added at `cb587bd`
-(`payload_recorder`, `suite_selects_something`) have run only on cpu64, and
-3511210's placement recorder matched executables by substring, with no
-`match_mode` field in its JSON — every sampled executable was that job's own
-`build-cuda/motioncorr`, but the record does not state how it matched. Neither
-touches a numerical verdict. Closing them needs another dedicated allocation and
-is listed as the next GPU action, not asserted.
+**The GPU record is four commits behind the head.** 3511210 ran `4c2305b`; the
+head is `3c9c660`, four commits on (`e1e26a7`, `cb587bd`, `e0ee89f`,
+`3c9c660`). Three consequences are carried openly rather than papered over:
+
+- The three controls added since (`payload_recorder`,
+  `suite_selects_something` at `cb587bd`; `fixture_verdict_vacuous` at
+  `3c9c660`) have run only on cpu64. None of them needs a GPU.
+- 3511210's placement recorder matched executables by substring, with no
+  `match_mode` field in its JSON — every sampled executable was that job's own
+  `build-cuda/motioncorr`, but the record does not state how it matched.
+- `3c9c660` changes `run_matrix.py`, so unlike the previous revision of this
+  paragraph it can no longer be said that nothing since 3511210 touches a
+  runner. The two changed conditions were **recomputed** over 3511210's
+  preserved record — all 92 payload row × schedule entries satisfy the old and
+  new `native_cuda_proven` identically, and no declared payload row is
+  schedule-free — so the head's definitions would not have moved a verdict in
+  that job. That is a re-read of a held record, not a measurement.
+
+None of the three touches a numerical verdict. Closing them needs another
+dedicated allocation and is listed as the next GPU action, not asserted.

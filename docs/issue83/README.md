@@ -8,6 +8,7 @@ core (PR #82) and evidence (PR #81) under the ADR #66 stabilization spec.
 | `support-report.md` | Generated compact support table. Rows without a raw result are named `unrun`. |
 | `provenance.md` | Hosts, devices, load, affinity, source/binary/input hashes, exact commands. |
 | `progress.md` | Raw chronological worklog, including every defect found and how each was told apart from a product defect. |
+| `withdrawals.md` | Every claim published in an earlier revision that the evidence did not support, what contradicted it, and what now gates it. |
 | `raw/` | Machine-readable per-case reports the table is rendered from. |
 
 ## What this validates, and what it does not

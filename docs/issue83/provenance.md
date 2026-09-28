@@ -94,11 +94,23 @@ The generator's self-rewriting manifest is flagged independently in review on
 PR #82 (`test-data/generate_known_motion_fixture.py:489`). Fixing the generator
 belongs there; this issue only adds a read-only check.
 
-### Three native allocations, and why
+### Four native allocations, and why
 
-The corrected harness needed a real GPU run. It took three. The first two ran
+The corrected harness needed a real GPU run. It took **four** allocations, of
+which three produced records that were ever cited: 3511139, 3511145 (cancelled
+mid-leg), 3511154 and 3511210.
+
+**Corrected.** This heading and sentence read "Three native allocations" and
+"It took three", counting only the allocations whose records were used and
+silently dropping 3511145, which held a node for a leg that was then cancelled.
+An allocation that ran is part of the compute record whether or not its output
+was used, so it is counted here. `withdrawals.md` also carried a cross-reference
+to a still earlier revision of this heading, "Two native allocations, and why";
+that pointer is corrected there.
+
+The first two cited jobs ran
 `7ba584e`; the report was assembled from both, one section at a time, and each
-section named its own source record. The third, **job 3511210**, ran `4c2305b`
+section named its own source record. The last, **job 3511210**, ran `4c2305b`
 — the commit that fixed the gates which quantified over nothing — and produced
 the declared matrix, the integrated all-24 screen, the motion-truth gates and
 the input verification in a single allocation. The published report is now
@@ -188,15 +200,25 @@ retired digest stand for the runs of record.
 | Backend | Runs | SHA256 |
 |---|---|---|
 | CUDA `build-cuda/motioncorr` (Release, sm80, CUDA 12.8, TIMING=ON) | `gn3000` **3511210 — run of record**; 3511139, 3511154 — superseded | `0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e` |
-| CUDA, same configuration | `gn0005` 3510297, 3510288 — **superseded** | `3860bce6165974b9c95f982ce670915d5514c1129aaf80beb2c91462aaec4437` |
-| CPU `build-cpu/motioncorr` (Release) | cpu64 `cb587bd` (and `4c2305b` before it) | `90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4` |
+| CUDA, same configuration | `gn0005` job 3510297 — **superseded** | `3860bce6165974b9c95f982ce670915d5514c1129aaf80beb2c91462aaec4437` |
+| CUDA, the build the **capacity datapoint** sampled | `gn0005` tree `/scratch/scarf1415/mc-i83-tree`, still cited | **not recorded** — `capacity.json` names the path `/scratch/…/mc-i83-tree/build-cuda/motioncorr` and no digest. The digest above is 3510297's, read from that job's own `binaries.sha256`; nothing preserved shows the capacity run used the same build, so it is not asserted here |
+| CPU `build-cpu/motioncorr` (Release) | cpu64 `3c9c660` (and `cb587bd`, `4c2305b` before it) | `90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4` |
 
-All three `gn3000` jobs share one build: the digest is read from each job's own
+The `gn3000` jobs share one build: the digest is read from each job's own
 `binaries.sha256` and is the same value, which also appears in their provenance
 blocks and in the report header. The CPU binary is likewise unchanged across
 the cpu64 runs — this round altered the harness, not the product.
 This table previously carried the gn0005 digest alone, with no run column, so
 it read as the binary behind the published results.
+
+**Corrected, second time.** The gn0005 row previously read "3510297, 3510288 —
+**superseded**" against a single digest. Two things were wrong with that. The
+capacity datapoint is **not** superseded — it is the one gn0005 result the
+published report still renders — so listing it as superseded contradicted the
+"Runs of record" table in `progress.md`, which cites it. And the digest was
+attributed to a run whose record does not carry one; see the correction under
+"GPU — first dedicated allocation" for why the job number cannot be recovered
+either.
 
 ## Harness and comparator
 
@@ -208,6 +230,23 @@ Recorded in every report's `provenance` block. At the time of the runs:
 
 The comparator and `tools/run_known_motion_gates.py` are used exactly as
 merged. No threshold, profile or verdict in either was modified.
+
+The report header prints the harness digests **the source record carries**, not
+the tree's current ones, so after a harness commit the two differ and the header
+keeps naming what actually produced the numbers. Three files have moved since
+job 3511210 recorded `matrix 2ff2095d…`, `runner be34300c…`:
+
+| File | In 3511210's record | At `3c9c660` + this round's docs commit | What changed |
+|---|---|---|---|
+| `matrix.py` | `2ff2095d…` | `6fdf5895…` | two words of prose in the `DEFERRED` table ("below" → "above", twice); no declared row, axis, equivalence, allowance or threshold touched |
+| `run_matrix.py` | `be34300c…` | `1e8fbe04…` | `3c9c660`: `native_cuda_proven` drops the banner conjunct; a schedule-free payload row is an error |
+| `report.py` | `71dbbd87…` | `52cfa63d…` | `cb587bd` moved it to `7001b1de…`, then `3c9c660`: recompute rather than read the producer's summaries |
+
+The `matrix.py` edit is the one worth naming explicitly, because that file
+declares the contract: the two strings said the capacity datapoint and the
+matrix rows were rendered *below* the "deliberately not attempted" table when
+both are above it. Changing prose in a contract file still changes its digest,
+so the divergence is tabulated rather than left for a reader to discover.
 
 ## Compute
 
@@ -227,8 +266,9 @@ sbatch -p gpu --gres=gpu:1 --cpus-per-task=8 --exclusive -t 03:00:00
 | Node load at start | 0.52, 0.74, 0.39 |
 | Working tree | `/scratch/scarf1415/mc-i83-tree` |
 
-Jobs here: **3510297** (matrix + all-24 + report) and **3510288** (capacity
-datapoint + `realscale_local`, at `0a6dbff`).
+Jobs here: **3510297** (matrix + all-24 + report) and one further job that ran
+the capacity datapoint and `realscale_local`. That second job's number and
+commit are **withdrawn** below — no preserved artefact carries either.
 
 **Corrected.** This paragraph named 3510290 at `d48d875` as the source of the
 records preserved in `raw/scarf-gn0005/`. It is not. The preserved log is
@@ -240,11 +280,30 @@ the preserved summaries fall inside its window (`matrix-summary.json`
 3510290 has **no record under `raw/`** and is cited nowhere else in this
 report. The verdicts in `raw/scarf-gn0005/` are 3510297's at `f51b45f`.
 
-Only **3510288**'s capacity datapoint is still cited. 3510297 ran the harness
-before the corrections and is **superseded** by the two `gn3000` jobs below;
-its verdicts are preserved in `raw/scarf-gn0005/` and are not carried into the
-report. An earlier revision of this file called these the "jobs of record",
-which they no longer are.
+Only the capacity datapoint is still cited. 3510297 ran the harness before the
+corrections and is **superseded** by the `gn3000` jobs below; its verdicts are
+preserved in `raw/scarf-gn0005/` and are not carried into the report. An earlier
+revision of this file called these the "jobs of record", which they no longer
+are.
+
+**Corrected — the capacity job number is withdrawn.** Every revision of this
+document so far named job **3510288** as the source of the capacity datapoint.
+No preserved artefact supports that. `raw/scarf-gn0005/capacity.json` records a
+command, a device index, a peak, a sample count and an exit status, and **no
+job id, no host, no binary digest and no start time**; the only preserved
+gn0005 log is `job-3510297.log`, which does not mention the capacity run at all
+(no `measure_capacity`, no `matrix-realscale`, no `3510288`). The number came
+from the working session, not from the record, and a number carried only in an
+author's memory is exactly the kind of evidence this issue exists to refuse.
+
+What the record *does* support: the sampled command names the working tree
+`/scratch/scarf1415/mc-i83-tree`, which only the gn0005 allocation used, so the
+datapoint belongs to **this allocation**. Which job within it, and at which
+commit, cannot be shown from anything preserved — `0a6dbff` is recorded here on
+the same unsupported footing as the job number and is likewise withdrawn. The
+published report already renders this section as **unattributable**, which is
+the correct reading; this correction brings the provenance document into line
+with it rather than the other way round.
 
 No allocation was shared at any point. Other jobs on this shared account —
 3510270, #74's `mc-i74` (3510287) and `mcks` (3510289) — ran on different
@@ -255,7 +314,10 @@ benchmark ever ran concurrently with another thread's on the same allocation.
 ### GPU — corrected-harness allocations (`gn3000`)
 
 The runs above predate the harness corrections. The corrected harness was run
-on three further dedicated allocations, each `--exclusive` on its own node:
+on **four** further dedicated allocations, each `--exclusive` on its own node —
+the job table below has four rows, and an earlier revision of this sentence said
+"three", counting the three whose records were used and dropping the cancelled
+3511145:
 
 ```
 sbatch -p gpu --gres=gpu:1 --cpus-per-task=16 --exclusive -t 02:00:00
@@ -263,7 +325,7 @@ sbatch -p gpu --gres=gpu:1 --cpus-per-task=16 --exclusive -t 02:00:00
 
 | Item | Value |
 |---|---|
-| Node | `gn3000.scarf.rl.ac.uk`, allocated **exclusively**, all three jobs |
+| Node | `gn3000.scarf.rl.ac.uk`, allocated **exclusively**, all four jobs |
 | Devices | 4x NVIDIA A100-SXM4-40GB, driver 580.178.04 |
 | Device used | 0 — `GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d` |
 | Other UUIDs on the node | 1 `GPU-2e1b6776…`, 2 `GPU-69bdbeb9…`, 3 `GPU-0ade54fe…`; none used |
@@ -271,7 +333,7 @@ sbatch -p gpu --gres=gpu:1 --cpus-per-task=16 --exclusive -t 02:00:00
 | Node load at start | 3.06, 2.47, 2.75 (3511139) |
 | Working tree | `/work4/scd/scarf1415/motioncorr/mc-i83b`, quota-safe project space |
 | Tree commit | `7ba584eaf5eae28661d80880fdf220c130c235dc` (3511139, 3511145, 3511154); `4c2305b380ce224e700f3af4732da6e2d7d6b999` (3511210) |
-| CUDA binary | `0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e`, all three |
+| CUDA binary | `0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e`, all four |
 
 | Job | Outcome |
 |---|---|
@@ -294,15 +356,31 @@ arrival and by `git bundle verify` before `git reset --hard`:
 | `i83-scarf-inc` | `fd1ea50..7ba584e` | `7d9a645332f28a802c54a7fc1648deb244a9e266085c55e591c3f831bbef70af` | 139249 |
 | `i83-scarf-inc2` | `7ba584e..4c2305b` | `8732ae97895203319bdb9acbf8e68549705ff1224e2b2d3f5405dbf26b48ced6` | 202188 |
 
-The GPU tree of record therefore sits at `4c2305b`, **one commit behind this
-branch's head `cb587bd`**. That commit changes `report.py`,
-`negative_controls.py` and `record_payload_env.py`, adds `meta_controls.py` and
-`regenerate_report.sh`, and **touches no runner and no code that executes on a
-GPU** — the rendering of a record is not the production of one. Two things do
-follow from the gap and are stated rather than smoothed over: the two controls
-added at the head (`payload_recorder`, `suite_selects_something`) have not been
-asserted on a GPU host, and 3511210's placement recorder matched the payload by
-substring, its record carrying no `match_mode` field.
+The GPU tree of record therefore sits at `4c2305b`, **four commits behind this
+branch's head `3c9c660`** (`e1e26a7`, `cb587bd`, `e0ee89f`, `3c9c660`).
+
+**Corrected.** The previous revision said "one commit behind `cb587bd`" and that
+the gap "touches no runner and no code that executes on a GPU". The count is now
+four, and the second clause is **no longer true**: `3c9c660` changes
+`run_matrix.py`, which is a runner and does execute on a GPU host. Three things
+follow from the gap and are stated rather than smoothed over:
+
+- The two controls added at `cb587bd` (`payload_recorder`,
+  `suite_selects_something`) and the one added at `3c9c660`
+  (`fixture_verdict_vacuous`) have not been asserted on a GPU host. None needs
+  one.
+- 3511210's placement recorder matched the payload by substring, its record
+  carrying no `match_mode` field.
+- `3c9c660` alters `run_matrix.py` in two places that bear on a row's verdict:
+  `native_cuda_proven` no longer conjoins the startup banner, and a payload row
+  declaring no schedules is now an error instead of a vacuous pass. Both were
+  **recomputed over the preserved 3511210 record**: all 92 payload
+  row × schedule entries satisfy the new definition exactly as they satisfied
+  the old one (every movie `log_present` and `cuda_stage_marker`), and no
+  declared payload row is schedule-free, so neither change would move a verdict
+  in that record. That is a recomputation over what was measured, not a new
+  measurement: re-running the matrix at the head on a GPU is listed as a
+  remaining action, not claimed.
 
 The history of the gap is kept because the count and the head were both
 misreported along the way. The superseded GPU tree sat at `7ba584e`, seven
@@ -338,12 +416,15 @@ stdout, so every payload row reads `banner 1/2`.
 
 The control suite has grown with the gates. The superseded `gn3000` records
 carry **10** controls, which is every control that existed at `7ba584e`; job
-3511210 carries **17**, the whole suite at `4c2305b`; and this round's head has
-**19**, all asserted on cpu64 (below). The two added at the head,
-`payload_recorder` and `suite_selects_something`, are pure-Python, neither
-requires a GPU, and neither has been asserted on a GPU host.
+3511210 carries **17**, the whole suite at `4c2305b`; `cb587bd` added
+`payload_recorder` and `suite_selects_something` for **19**; and this round's
+head `3c9c660` adds `fixture_verdict_vacuous` for **20**, all asserted on cpu64
+(below). The three added since `4c2305b` are pure-Python, none requires a GPU,
+and none has been asserted on a GPU host.
 
-Five later cpu64 bundles carried those commits to the CPU host:
+Six later cpu64 bundles carried those commits to the CPU host. cpu64 has no
+outbound GitHub either: its `origin` is a local bundle, so each commit reaches
+it the same way, sha256-verified on both ends before `git fetch`.
 
 | Bundle | Range | SHA256 |
 |---|---|---|
@@ -352,6 +433,7 @@ Five later cpu64 bundles carried those commits to the CPU host:
 | `i83-inc8` | `2a8d13a..705d2c7` | `a46c5334ce97782bd3c3aeca07317b6ceba33bb025e3e9ad571e116a04afadea` |
 | `mc-i83-inc8` | `705d2c7..4c2305b` | `095a4b9f0dd758a20690ddce8ed54b82835e4bd1f4637d733e858f8aab16390d` |
 | `mc-i83-inc9` | `4c2305b..cb587bd` | `4d128cbba1700ef95990b190b2ab7f53aa7e670fe771a48ca85c92d87d0bd508` |
+| `i83-inc-3c9c660` | `cb587bd..3c9c660` | `5d13555aa1707b8ba15907424f77a9450e6ec94918a61eb08662c14fa856829e` |
 
 ### CPU — separate diagnostic verdict
 
@@ -368,9 +450,20 @@ inspected beyond identifying that conflict, and none were altered.
 
 ### CPU — corrected-harness validation
 
-Every harness commit in this series was validated on cpu64 before it was
-pushed, under `flock /tmp/motioncorr-issue96-cpu-validation.lock` so it could
-not overlap another thread's CPU work.
+Every commit in this series that changes `tools/validation_issue83/*.py` was
+validated on cpu64, under `flock /tmp/motioncorr-issue96-cpu-validation.lock`
+so it could not overlap another thread's CPU work.
+
+**Corrected, and narrowed to what is true.** This sentence read "Every harness
+commit in this series was validated on cpu64 **before it was pushed**". Two
+qualifications. First, `e0ee89f` changed `regenerate_report.sh` — a harness file
+— and was a documentation commit validated by regenerating the report locally,
+not by a cpu64 run; "every harness commit" was therefore too broad, and it is
+narrowed here to the Python gates, which is the class the cpu64 run actually
+covers. Second, the head `3c9c660` was pushed **before** its cpu64 run rather
+than after: its commit message says so and names the run as following. The run
+has since happened and is the run of record below, so the code is covered; the
+ordering claim is not, and is withdrawn rather than quietly restated.
 
 | Item | Value |
 |---|---|
@@ -387,52 +480,63 @@ about where the work ran. That confusion was itself a defect, fixed at
 `025908a` and re-checked in every run since
 (`raw/cpu64-705d2c7/gate-child-placement.txt`).
 
-Run of record: **`raw/cpu64-cb587bd/`**, the branch head, binary
+Run of record: **`raw/cpu64-3c9c660/`**, the branch head, binary
 `90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4` — the same
 product binary as every earlier cpu64 run, because this round changed the
 harness and not the product. Earlier commits' runs are preserved beside it
 (`cpu64-7ba584e` 10/10, `cpu64-2a8d13a` 12/12, `cpu64-705d2c7` 12/12,
-`cpu64-4c2305b` 17/17).
+`cpu64-4c2305b` 17/17, `cpu64-cb587bd` 19/19).
 
-Unlike the `4c2305b` run, this one ran a **clean tracked tree**: the previous
-run's one untracked file, `stage_synthetic_runroot.py`, is committed and the
-copy on the host was verified byte-identical to it
-(`fdc93fe3294ecce30f2af41af7c6e22b3eeac18d4287e5bbc6b78cd7a2c88ed8`) before
-being replaced by the tracked one.
+Like the `cb587bd` run, this one ran a **clean tracked tree**: `git status
+--porcelain` lists only untracked evidence and build directories, and the
+harness digests in `harness.sha256` match the committed files at `3c9c660`.
 
 | Stage | Exit | Result |
 |---|---|---|
 | `verify_fixtures` (real fixtures) | 0 | **VERIFIED (content)**, 4 of 5 declared cases; 4 movie and 4 ground-truth digests compared; `km_local_realscale` (402 MB) is not generated on this host |
-| `verify_fixtures` (**empty directory**) | **1** | `"vacuous": true, "verified": false` — nothing to mismatch is no longer a pass |
-| `negative_controls` | 0 | **19 pass / 0 skipped / 0 failed**, including `ground_truth_mutation`, which needs real fixtures |
-| `meta_controls` | 0 | **20/20** — 17 gates reverted at runtime, each making its control fail, plus 3 suite exit-status cases. First run of these checks from a committed module rather than a scratch file; `meta_controls.json` is preserved |
+| `verify_fixtures` (**empty directory**) | **1** | `"vacuous": true, "verified": false` — nothing to mismatch is no longer a pass. The refusal now lives in `verify_fixtures.verdict()`, which the report generator and the controls call directly, so it cannot be true in the tool and absent from a consumer |
+| `negative_controls` | 0 | **20 pass / 0 skipped / 0 failed**, including `ground_truth_mutation`, which needs real fixtures, and the new `fixture_verdict_vacuous` |
+| `meta_controls` | 0 | **22/22** — 19 gates reverted at runtime, each making its control fail, plus 3 suite exit-status cases; `meta_controls.json` is preserved |
 | `run_matrix` (CPU pixels) | **1** | 24 of 25 declared rows **pass**, 0 fail, 0 error; `realscale_local` **unrun** for the missing fixture, so `matrix_complete` is false and the exit status is nonzero. This is the intended behaviour, not a regression |
 | `stage_synthetic_runroot` | 0 | 24 names over one generated fixture |
 | `run_all24_schedules` (synthetic runroot) | 0 | all four schedules equal, `star_metadata_asserted` populated |
-| `record_payload_env` | 0 | `"observed": true` — the recorder now exits 2 if it never saw the payload, so this exit status means something |
+| `record_payload_env` | 0 | `"observed": true` — the recorder exits 2 if it never saw the payload, so this exit status means something |
 
 `ground_truth_mutation` flipped `/geometry/pixel_size_angstrom` from `0.885`
 to `0.985` in `km_global_hisnr_ground_truth.json` and the verifier reported
 `km_global_hisnr (ground_truth)`, having verified the unmutated tree first.
 
 The 24-movie runroot for the last stage is **synthetic** — one generated
-fixture under 24 names, staged by `tools/validation_issue83/stage_synthetic_runroot.py`. It exercises the
-integrated screen's new STAR metadata assertion, which until this run had
-never executed anywhere; it says nothing whatever about the RELION tutorial
-dataset, and the integrated claim in the report is not sourced from it.
+fixture under 24 names, staged by
+`tools/validation_issue83/stage_synthetic_runroot.py`. It exercises the
+integrated screen's STAR metadata assertion; it says nothing whatever about the
+RELION tutorial dataset, and the integrated claim in the report is not sourced
+from it.
+
+**Corrected — a first-execution claim that two preserved records contradict.**
+The previous revision of this paragraph said the STAR metadata assertion "until
+this run had never executed anywhere". Written against the `cb587bd` run, that
+was wrong twice: `raw/cpu64-4c2305b/all24-synthetic.json` (started
+2026-09-28T09:36:01Z) and job 3511210's `all24-summary.json` (started
+10:00:06Z) both carry a populated `star_metadata_asserted` and both predate it
+(10:23:06Z). The first execution anywhere was the cpu64 `4c2305b` run, on the
+synthetic runroot; the first on a GPU and on the tutorial dataset was 3511210.
+The `cb587bd` run was the third, and this one is the fourth. `withdrawals.md`
+W10 states the ordering correctly and this file did not.
 
 Placement was measured on the payload rather than asserted of the launcher:
 `record_payload_env.py` matched processes whose own `/proc/<pid>/exe` **equals**
 the `build-cpu/motioncorr` path above — `"match_mode": "exact"`, recorded in the
 JSON, so the record states how it matched instead of leaving a substring match
-to be assumed — and recorded 76 of them, every one at
+to be assumed — and recorded **81** distinct payload pids, every sampled one at
 `Cpus_allowed_list: 32-63`, `Mems_allowed_list: 0-1`, memory policy `bind:1`,
-every `executable_sha256` the binary above. One process exited between polls
-before a mapping could be sampled; the record carries that as a warning rather
-than reading its policy off the others.
+every `executable_sha256` the binary above. **Two** processes exited between
+polls before a mapping could be sampled (pids 3450032, 3451423); the record
+carries that as a warning rather than reading their policy off the others.
 
-Load on the host was 2.24 / 2.18 / 2.13 at the start and 6.66 / 3.54 / 2.62 at
-the end — the rise is this run's own 8-way work inside the 32-core mask.
+Load on the host was 2.15 / 2.16 / 2.12 at the start (11:07:08Z) and
+6.13 / 3.34 / 2.53 at the end (11:08:46Z) — the rise is this run's own 16-way
+work inside the 32-core mask.
 
 ## Exact commands
 
@@ -484,13 +588,17 @@ The second correction: an earlier revision said "the matrix, all-24 and CPU
 legs of record were all run at `d48d875`, so the published table comes from a
 single harness revision". **That is not true of the report as published.** The
 matrix, the all-24 screen, the motion-truth gates and the input verification all
-come from job **3511210** at `4c2305b`; the capacity datapoint comes from
-3510288 on a different node at `0a6dbff`; the CPU diagnostic comes from **cpu64
-at `cb587bd`** (`raw/cpu64-cb587bd/matrix.json`) — three runs, three commits,
-three hosts. Two earlier revisions of this sentence were each stale in turn: one
+come from job **3511210** at `4c2305b`; the capacity datapoint comes from the
+`gn0005` allocation, at a job and commit no preserved record names; the CPU
+diagnostic comes from **cpu64 at `3c9c660`**
+(`raw/cpu64-3c9c660/matrix.json`) — three runs, three hosts, and one of them not
+pinnable to a commit at all. Three earlier revisions of this sentence were each
+stale in turn: one
 named `bab9f46` as the CPU source after `progress.md` had recorded it
-superseded, and the next named jobs 3511154 and 3511139, which 3511210 has since
-replaced.
+superseded; the next named jobs 3511154 and 3511139, which 3511210 has since
+replaced; and the last named `cb587bd` as the CPU source and job 3510288 as the
+capacity source — the first superseded by the head-commit run, the second
+withdrawn for want of any record naming it.
 `progress.md`, "Runs of record", lists them; the report labels each section
 with its own source record and says when a section falls outside the run
 window the provenance block declares. The `evidence3` paths above are the
@@ -500,7 +608,7 @@ the driver rather than the harness.
 ### Corrected harness — what the `gn3000` jobs ran
 
 Full scripts are preserved alongside the logs, one per job, 3511210's included.
-The parts that matter, unchanged across all three:
+The parts that matter, unchanged across all four:
 
 ```sh
 # The fix for the subshell defect: no pipe, and a refusal rather than a
@@ -527,7 +635,7 @@ git checkout -- test-data/known_motion
   --json "$E/verify_fixtures_inplace.json"
 ```
 
-CPU, every harness commit, under the shared project lock:
+CPU, every commit that changes a Python gate, under the shared project lock:
 
 ```sh
 flock /tmp/motioncorr-issue96-cpu-validation.lock -c '

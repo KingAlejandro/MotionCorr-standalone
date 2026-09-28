@@ -12,8 +12,9 @@
 # at `4c2305b`, which is the first GPU run at a commit whose runners carry the
 # per-schedule witness and the STAR metadata assertion. The other two are a
 # different host and a different run and say so: the CPU-backend diagnostic
-# from cpu64, and the capacity datapoint from gn0005, which names no host or
-# binary and is rendered as unattributable.
+# from cpu64, and the capacity datapoint from the gn0005 tree, which records no
+# host, no binary digest and no start time -- it does name a binary path, and a
+# different one from the header's -- and is rendered as unattributable.
 #
 # Nothing here recomputes a verdict. Every number in the report is read out of
 # these files; the tool's job is to render them and to refuse to let one run's
@@ -27,7 +28,7 @@ python3 "$root/tools/validation_issue83/report.py" \
   --matrix-json          "$raw/scarf-gn3000-3511210/matrix-summary.json" \
   --all24-json           "$raw/scarf-gn3000-3511210/all24-summary.json" \
   --truth-json           "$raw/scarf-gn3000-3511210/truth-summary.json" \
-  --cpu-diagnostic-json  "$raw/cpu64-cb587bd/matrix.json" \
+  --cpu-diagnostic-json  "$raw/cpu64-3c9c660/matrix.json" \
   --capacity-json        "$raw/scarf-gn0005/capacity.json" \
   --fixture-verify-json  "$raw/scarf-gn3000-3511210/verify_fixtures.json" \
   --out                  "$root/docs/issue83/support-report.md"

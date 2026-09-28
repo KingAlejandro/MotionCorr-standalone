@@ -74,7 +74,7 @@ Pixel equality and native execution are separate claims: equal pixels across sch
 
 | Schedule | Runs | Movies exact | Missing pairs | Native witness | Verdict |
 |---|---:|---|---|---|---|
-| base (uninterrupted) | 1 | 24 present | 0 | yes (24 executed) | n/a |
+| base (uninterrupted) | 1 | 24 present | n/a (inventory: 0 errors) | yes (24 executed) | n/a |
 | batch | 24 | 24/24 | 0 | yes (24 executed) | pass |
 | repeat | 1 | 24/24 | 0 | yes (24 executed) | pass |
 | resume | 1 | 24/24 | 0 | yes (16 executed) | pass |
@@ -101,7 +101,7 @@ These are not implied by any implementation row above.
 - Motion truth `km_local_noisy` (characterization): **FAIL**
 - Motion truth `km_local_nonsquare` (gate): **PASS**
 - Motion truth `km_local_realscale` (gate): **PASS**
-- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-28T10:21:54Z
+- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-28T11:07:11Z
 - **Not the run named in the provenance block above** — hostname, gpu, binary_sha256, binary_path differ, so these two sections are not one measurement.
 - CPU-backend diagnostic (`small-refmac-machine`): 24 pass, 0 fail, 0 error of 24 attempted; unrun: realscale_local. This is a separate verdict: it neither establishes nor overrides any native CUDA result above.
 
@@ -115,8 +115,8 @@ Named rather than implied, so the table is not read as broader than it is.
 |---|---|---|
 | Process-shard schedules | #53 / #55 | The multi-GPU scheduler is unmerged and #53 reports that `--gpu 0:1:2:3` silently uses a single device with movies run serially. Sharding is consumed only once that wrapper's aggregation is independently valid; no second scheduler is written here. |
 | EER and compressed decoding paths | #8 | Declared unsupported here until separately evidenced. |
-| Broad allocation / plan / execution fault injection | #69 | Only the single measured capacity datapoint below is in scope. |
-| The CUDA resident-alignment fallback path | #82 review / #69 | Not exercised. Review on PR #82 reports that the fallback at `motioncorr_runner.cpp:2019` retries without resetting `local_xshifts`/`local_yshifts`, so a retry would add onto an abandoned attempt. Nothing here triggers it: the measured peak was 1266 MiB of 40960 on the largest declared row. A local row passing below is therefore not evidence about that path. |
+| Broad allocation / plan / execution fault injection | #69 | Only the single measured capacity datapoint above is in scope. |
+| The CUDA resident-alignment fallback path | #82 review / #69 | Not exercised. Review on PR #82 reports that the fallback at `motioncorr_runner.cpp:2019` retries without resetting `local_xshifts`/`local_yshifts`, so a retry would add onto an abandoned attempt. Nothing here triggers it: the measured peak was 1266 MiB of 40960 on the largest declared row. A local row passing above is therefore not evidence about that path. |
 | Optional CUDA event profiling | #74 | Owned there. |
 | Early-versus-late binning as an exact oracle | #68 | Never compared that way. Each binning mode is compared only against itself across schedules. |
 
@@ -124,7 +124,7 @@ Named rather than implied, so the table is not read as broader than it is.
 
 The declared matrix is complete, every attempted row passed, and the inputs were verified against the committed manifest.
 
-Not attributable to any run: the capacity datapoint names no host, device, binary or start time, so neither this provenance block nor any other can be shown to describe it.
+Not attributable to any run: the capacity datapoint carries no field that ties it to a run in this report, so neither this provenance block nor any other can be shown to describe it. Each such section states above exactly what it does and does not record.
 
 This aggregate is assembled from more than one run: the CPU-backend diagnostic did not come from the run named in the provenance block. Each section says so above.
 

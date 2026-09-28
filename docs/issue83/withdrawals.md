@@ -234,15 +234,36 @@ naming host `gn0005.scarf.rl.ac.uk`, device 0, one binary digest and one run
 window, `2026-09-27T14:14:41Z to 14:20:47Z`, followed by every section of the
 report.
 
-**Contradicted by this repository's own `provenance.md`**, which records the
-capacity datapoint as coming from a **different Slurm job at a different
-commit**: *"Jobs of record: 3510290 (matrix + all-24 + report, at `d48d875`)
-and 3510288 (capacity datapoint + `realscale_local`, at `0a6dbff`)"*. The
-"Memory capacity" section's 1266 MiB was therefore measured by a different
-build in a different allocation from the one the header describes, and nothing
-in the rendered report said so. `capacity.json` records a device index and no
-host and no binary at all, so "Device: 0" in that section could not be tied to
-the header's device 0 even in principle.
+**Contradicted by this repository's own `provenance.md` as it stood at
+7098a6f**, which recorded the capacity datapoint as coming from a **different
+Slurm job at a different commit**: *"Jobs of record: 3510290 (matrix + all-24 +
+report, at `d48d875`) and 3510288 (capacity datapoint + `realscale_local`, at
+`0a6dbff`)"*. The "Memory capacity" section's 1266 MiB was therefore measured
+in a different allocation from the one the header describes, and nothing in the
+rendered report said so. `capacity.json` records a device index but no host, no
+binary **digest** and no start time, so "Device: 0" in that section could not be
+tied to the header's device 0 even in principle.
+
+**Two corrections to the paragraph above**, both made after the withdrawal
+itself was published and neither of which restores the claim.
+
+*The job number and commit are withdrawn.* The sentence quotes a
+`provenance.md` revision that has since been corrected: no preserved record
+names a Slurm job or a commit for the capacity sample. What survives is weaker
+and still sufficient for this withdrawal — the sampled command in
+`capacity.json` names `/scratch/scarf1415/mc-i83-tree/build-cuda/motioncorr`,
+the `gn0005` working tree, which is a different path from the binary the
+7098a6f header named. The quotation is left in place, marked as the revision it
+was, because the withdrawal record should show what was believed when the
+withdrawal was made. See `provenance.md`, "Corrected — the capacity job number
+is withdrawn."
+
+*"No binary at all" was too strong.* `capacity.json` carries a `command` array,
+and that array names a binary path. What it does not carry is a **digest**, a
+host or a start time — which is what makes the section unattributable, and what
+the gate below actually tests. The over-strong phrasing is corrected in place
+above; the "different build" clause it supported has been dropped, because a
+differing path is not by itself proof of a differing build.
 
 **Withdrawn.** The header describes the declared-matrix run only. It was never
 evidence for the provenance of the other sections.
@@ -250,7 +271,7 @@ evidence for the provenance of the other sections.
 **Now gated by** `report.source_attribution`, which prints each section's own
 host, device, binary digest and start time, names field by field any
 divergence from the header, and — for a record like `capacity.json` that
-carries no host or binary — states plainly that the section cannot be
+carries no host and no binary digest — states plainly that the section cannot be
 attributed rather than letting the header speak for it. Control:
 `report_attributes_each_section`, which asserts the divergence is reported for
 a differing host, a differing binary **and** a differing device, that the
@@ -271,8 +292,10 @@ by `report_attributes_each_section`, including having no window check at all,
 comparing only against the start, and treating a missing finish time as proof
 of divergence.
 
-This was not a hypothetical. The corrected report is assembled from two jobs on
-purpose: see `provenance.md`, "Two native allocations, and why".
+This was not a hypothetical. The corrected report is assembled from more than
+one run on purpose: see `provenance.md`, "Four native allocations, and why"
+(the pointer previously read "Two native allocations, and why", which was that
+section's title two allocations ago).
 
 ## W6 — "every `.mrcs` matched the committed manifest"
 
@@ -297,7 +320,7 @@ declared inputs.
 (`manifest_ref`, `manifest_source_commit`), so the verdict names the authority
 it was checked against. Controls: `input_hashes`, `truth_provenance`.
 
-**Replacement evidence:** cpu64 `cb587bd` **VERIFIED (content)** over the 4
+**Replacement evidence:** cpu64 `3c9c660` **VERIFIED (content)** over the 4
 cases this host generates, against manifest commit `e07fdec2…`; `gn3000` job
 **3511210** **VERIFIED (content)** over all 5 under schema `/5` with
 `"vacuous": false` (job 3511154 reached the same verdict earlier, but under
@@ -426,11 +449,32 @@ those cells were never in question.
 
 **And then it was measured anyway.** Job **3511210** (`gn3000`, device 0,
 exclusive, `4c2305b`) ran the fixed runner and recorded the banner once per
-invocation. `batch` now carries **3 of 3** per matrix row and **24 of 24** on
+invocation. `batch` runs one invocation per movie and now carries a banner for
+**every one of them** — 3 of 3 on each of the 22 three-movie payload rows,
+**2 of 2** on `realscale_local`, which stages two movies — and **24 of 24** on
 the integrated screen. One gap is left and is disclosed rather than closed:
 the matrix's `resume` schedule runs a seed invocation and a resume invocation
 and only the second's stdout is kept, so every payload row reads
-`banner 1/2`. Every movie in both invocations carries its stage marker.
+`banner 1/2`.
+
+**Two corrections to the paragraph above.** It first read "`batch` now carries
+**3 of 3** per matrix row", which is the count for 22 of the 23 payload rows
+and not for `realscale_local`; the record shows
+`startup_marker_per_invocation: [true, true]` there, and a blanket "3 of 3"
+would have misdescribed it.
+
+It also read "Every movie in both invocations carries its stage marker," which
+claims more than the record holds. The per-schedule witness is computed over
+that schedule's `executed_movies`, and on `resume` those are the two movies the
+resume invocation actually processed — the seeded movie is deliberately
+excluded, because the whole point of the schedule is that
+`--only_do_unfinished` does **not** re-run it. So the resume record carries
+`per_movie` entries for two movies, not three, and makes **no** stage-marker
+claim about the seeded one. That is the correct scope: a witness for a movie
+this invocation never executed would be exactly the kind of borrowed evidence
+W8a is about. What the seeded movie is covered by instead is
+`preserved_seeded_outputs` and `seeded_hashes` — that its products came through
+the resume byte-identical.
 
 ## W9 — Option rejection asserted by bare substring
 
@@ -543,7 +587,7 @@ was never the evidence.
 
 | Claim | Status |
 |---|---|
-| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **19/19** on cpu64 at `cb587bd`, 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate additionally reverted at runtime by `meta_controls.py` to confirm its control then fails (**20 meta-checks**: 17 reverted gates + 3 suite exit-status cases, `raw/cpu64-cb587bd/meta_controls.json`). On a GPU host, **3511210 carries 17/17** — the whole suite at `4c2305b`. The two not asserted there, `payload_recorder` and `suite_selects_something`, were added at `cb587bd` and neither needs a GPU. Historically: 3511154 carried 10/10 and **3511139 carried 9 pass / 1 failed**, the whole suite as it then stood at `7ba584e`; an earlier revision said "the `gn3000` records carry 10/10", which was true of one of the two |
+| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **20/20** on cpu64 at `3c9c660`, 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate additionally reverted at runtime by `meta_controls.py` to confirm its control then fails (**22 meta-checks**: 19 reverted gates + 3 suite exit-status cases, `raw/cpu64-3c9c660/meta_controls.json`). On a GPU host, **3511210 carries 17/17** — the whole suite at `4c2305b`. The three not asserted there are `payload_recorder` and `suite_selects_something`, added at `cb587bd`, and `fixture_verdict_vacuous`, added at `3c9c660`; none needs a GPU. Historically: 3511154 carried 10/10 and **3511139 carried 9 pass / 1 failed**, the whole suite as it then stood at `7ba584e`; an earlier revision said "the `gn3000` records carry 10/10", which was true of one of the two |
 | Input provenance including truth files (`verify_fixtures`) | **VERIFIED (content)** — all **5** cases and 5+5 digests on `gn3000` job 3511210 under schema `/5`, `"vacuous": false`; 4 cases and 4+4 digests on cpu64, where the 402 MB fixture is not generated. See W3 for what "content" excuses and W7 for why the compared count is now part of the verdict. The superseded job 3511154's file is schema **`/4`** and carries no `compared`, `vacuous` or `declared_cases` field; an earlier revision headed its row `/5` and so attributed a `/5` verdict to a `/4` record |
 | A fixture record that compares nothing is refused | **PASS** — empty directory, `"vacuous": true`, exit 1, on cpu64 and on `gn3000` 3511210; see W7 |
 | `gain_unity == gain_none`, `gain_nonunity != gain_none` | **PASS** on cpu64 and on `gn3000` device 0, real pixels; see W4 |
@@ -551,32 +595,46 @@ was never the evidence.
 | Integrated all-24 screen, schedule equality and native CUDA | **PASS** — `gn3000` job 3511210, exclusive. `all24_equal`, 24 of 24 movies, no missing schedules, no errors, and a non-vacuous native witness on every schedule: `base`/`repeat` 24 movies marked, `batch` **24/24 invocations bannered** and 24 movies marked, `resume` 16 executed movies each marked |
 | Integrated all-24 screen asserts requested STAR metadata | **PASS** — `gn3000` job 3511210 on the tutorial dataset: `binning` 1.0, `dose_per_frame` 1.277, `first_frame` 1, `pre_exposure` 0.0, with `original_pixel_size` and `image_geometry` named in the record as not derivable. **UNRUN on GPU** in the previous two revisions; see W10 |
 | Per-row matrix, pixel equality across all four schedules | **PASS** — `gn3000` job 3511210, 25 declared / 25 attempted / 25 pass, no unrun rows |
-| Per-row **native execution** on `repeat`, `batch`, `resume` | **PASS for all 23 payload rows, one banner partial** — job 3511210 computes a witness *per schedule* from that schedule's own output directory; every row × schedule carries `log_present` and `cuda_stage_marker` on every movie, and `batch` additionally carries a startup banner for **all 3** invocations. The one remaining gap is `resume`, whose seed invocation's stdout is not kept: every payload row reads `banner 1/2`. An earlier revision marked all of this **UNRUN / WITHHELD** on the strength of the superseded records; that was wrong twice over and is corrected in W8a |
+| Per-row **native execution** on `repeat`, `batch`, `resume` | **PASS for all 23 payload rows, one banner partial** — job 3511210 computes a witness *per schedule* from that schedule's own output directory; every row × schedule carries `log_present` and `cuda_stage_marker` on **every movie that schedule executed**, and `batch` additionally carries a startup banner for every one of its per-movie invocations (3 on each three-movie row, 2 on `realscale_local`). The one remaining gap is `resume`, whose seed invocation's stdout is not kept: every payload row reads `banner 1/2`. Note the scope of "executed": on `resume` the seeded movie is not re-run, so it carries no per-movie witness and none is claimed for it — see the second correction under W8a. An earlier revision marked all of this **UNRUN / WITHHELD** on the strength of the superseded records; that was wrong twice over and is corrected in W8a |
 | Requested 128x128 power spectrum | **PASS** — the `power_spectrum` row asserts the requested dimensions on the written product; the wrong-dimension negative is `ps_wrong_dimension`, asserted on both cpu64 and `gn3000` |
 | `ground_truth_sha256` detects a mutated truth file | **PASS** — cpu64 and `gn3000` 3511210: `/geometry/pixel_size_angstrom` 0.885 → 0.985 in `km_global_hisnr_ground_truth.json`, detected, after the unmutated tree verified. Recorded **FAILED** in job 3511139, where that precondition was unmet |
 | `km_local_realscale` row | **PASS** on `gn3000` (matrix row and motion-truth gate). Still **UNRUN on CPU** — the 402 MB fixture is not generated on that host, which is why the CPU matrix exits nonzero |
 | Motion-truth gates | 4 PASS, 1 **FAIL** (`km_local_noisy`, characterization) — `gn3000` job 3511210, on fixtures verified before and after the merged tool regenerated them |
-| CPU support matrix | **24/25 pass, 0 fail, 1 unrun** at `cb587bd`; `raw/cpu64-cb587bd/matrix.json`. Diagnostic only |
+| CPU support matrix | **24/25 pass, 0 fail, 1 unrun** at `3c9c660`; `raw/cpu64-3c9c660/matrix.json`. Diagnostic only |
 
 Four of the report's six sections now come from **one** allocation, job 3511210,
 which is the first GPU run at a commit whose runners carry the per-schedule
 witness, the delimited rejection matcher and the STAR metadata assertion. The
 other two are a different host and a different run and the report says so
 section by section: the CPU-backend diagnostic from cpu64, and the capacity
-datapoint from `gn0005`, which names no host or binary at all and is rendered
-as unattributable. The superseded GPU records 3511139 and 3511154 stay under
-`docs/issue83/raw/` unedited, including 3511139's recorded control failure.
+datapoint from `gn0005`, which names no host, no binary **digest** and no start
+time, and is rendered as unattributable. (It does name a binary *path* in its
+sampled command; an earlier revision of this sentence said "no host or binary
+at all", which was too strong — see the second correction under W5.) The
+superseded GPU records 3511139 and 3511154 stay under `docs/issue83/raw/`
+unedited, including 3511139's recorded control failure.
 
-**The GPU record is one commit behind the head.** Job 3511210 ran `4c2305b`;
-the head is `cb587bd`, which changes `report.py`, `negative_controls.py` and
-`record_payload_env.py`, adds `meta_controls.py` and `regenerate_report.sh`,
-and touches no runner and no code that executes on a GPU. Two consequences are
-stated rather than smoothed over: the two controls added at the head have not
-been asserted on a GPU host, and job 3511210's placement recorder matched the
-payload by **substring**, its record carrying no `match_mode` field. The
-sampled executables are all the job's own `build-cuda/motioncorr`, so nothing
-is known to be wrong with it; it is simply the weaker check, and the cpu64 run
-at `cb587bd` is the one that used `--match-mode exact`.
+**The GPU record is four commits behind the head.** Job 3511210 ran `4c2305b`;
+the head is `3c9c660`, four commits on (`e1e26a7`, `cb587bd`, `e0ee89f`,
+`3c9c660`). An earlier revision of this paragraph said "one commit behind" and
+added that the intervening work "touches no runner and no code that executes on
+a GPU"; that is no longer true, because `3c9c660` changes `run_matrix.py`. Three
+consequences are stated rather than smoothed over:
+
+- The three controls added since — `payload_recorder`, `suite_selects_something`
+  (`cb587bd`) and `fixture_verdict_vacuous` (`3c9c660`) — have not been asserted
+  on a GPU host. None of them needs one.
+- Job 3511210's placement recorder matched the payload by **substring**, its
+  record carrying no `match_mode` field. The sampled executables are all the
+  job's own `build-cuda/motioncorr`, so nothing is known to be wrong with it; it
+  is simply the weaker check, and the cpu64 runs at `cb587bd` and `3c9c660` are
+  the ones that used `--match-mode exact`.
+- `3c9c660`'s two runner changes were **recomputed** over 3511210's preserved
+  record, not re-measured: all 92 payload row × schedule entries satisfy the old
+  and the new `native_cuda_proven` identically, and no declared payload row is
+  schedule-free. That is a re-read of a held record, so it is reported as such —
+  it says the head's definitions would not have moved a verdict in that job, and
+  nothing more. A GPU run at the head remains **UNRUN**.
 
 Historical CPU/RELION Gate 2 failures remain failures. Nothing here converts one
 into a pass, and no withdrawal above upgrades any row.

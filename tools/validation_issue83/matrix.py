@@ -238,13 +238,13 @@ DEFERRED = [
     ("EER and compressed decoding paths", "#8",
      "Declared unsupported here until separately evidenced."),
     ("Broad allocation / plan / execution fault injection", "#69",
-     "Only the single measured capacity datapoint below is in scope."),
+     "Only the single measured capacity datapoint above is in scope."),
     ("The CUDA resident-alignment fallback path", "#82 review / #69",
      "Not exercised. Review on PR #82 reports that the fallback at "
      "`motioncorr_runner.cpp:2019` retries without resetting "
      "`local_xshifts`/`local_yshifts`, so a retry would add onto an abandoned "
      "attempt. Nothing here triggers it: the measured peak was 1266 MiB of "
-     "40960 on the largest declared row. A local row passing below is "
+     "40960 on the largest declared row. A local row passing above is "
      "therefore not evidence about that path."),
     ("Optional CUDA event profiling", "#74", "Owned there."),
     ("Early-versus-late binning as an exact oracle", "#68",

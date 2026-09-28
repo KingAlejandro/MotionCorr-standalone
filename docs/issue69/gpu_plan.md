@@ -1,6 +1,7 @@
 # Issue #69 — GPU work, prepared and waiting for an assigned slot
 
-Nothing in this file has been run. #26 owns this round's initial GPU benchmark slot;
+Nothing in this file has been run, except the build in step 1, which was compile-only
+and executed nothing on a device. #26 owns this round's initial GPU benchmark slot;
 this task publishes its request and waits for Codex monitoring to assign one.
 
 Branch `round96/69-claude-opus-5`. All of this is **correctness** work: it produces no
@@ -12,14 +13,26 @@ CUDA build and a 24-movie run both perturb whoever is measuring.
 | Item | Value |
 |---|---|
 | Resource | one A100 on `4GPUs`, or a dedicated SCARF Slurm allocation |
-| CPU | `taskset -c 96-103` on the top-level shell, build `-j8`, `OMP_NUM_THREADS<=8` |
+| CPU | `taskset -c 96-103` on the top-level shell (a subset of the round's aggregate 96-111 / node1 budget), build `-j8`, `OMP_NUM_THREADS<=8` |
 | Mutex | `flock -w 2400 /tmp/motioncorr-bench.lock` around the whole series |
 | Estimated wall time | ~10 min build, ~5 min fault matrix, ~15 min 24-movie control |
 | Device state | read-only classification of the pending error. No `cudaDeviceReset`, no global cache drop, no other process or device touched |
+| Must be recorded per run | chosen cores, inherited cpuset, CPU/NUMA/memory policy, and the actual GPU UUID from `nvidia-smi --query-gpu=index,uuid,name --format=csv` — not the advertised device index |
 
 ## Commands
 
-### 1. Build (queued behind the bench lock; may already be done)
+### 0. Record the resource context before anything else
+
+```
+taskset -cp $$
+cat /proc/self/cpuset
+numactl --show 2>/dev/null
+nvidia-smi --query-gpu=index,uuid,name,memory.used --format=csv
+```
+
+A device index is not an identity: record the UUID of the GPU actually used.
+
+### 1. Build (done for the current head; see evidence/cuda-compile.log)
 
 ```
 export PATH=/usr/local/cuda/bin:$PATH

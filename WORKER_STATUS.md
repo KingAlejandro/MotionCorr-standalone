@@ -70,6 +70,24 @@ Docs and evidence:
 
 Evidence files: `docs/issue69/evidence/`.
 
+## Resource context, as required by the resource update
+
+- `cpu64` is 2 NUMA nodes: node0 = cores 0-31, node1 = cores 32-63, `numactl` available.
+  My validation lane used **cores 32-63**, which is node-local (node1/socket1), so no
+  cross-node memory traffic. No whole-host 64-core run was made, so the measurement lock
+  was never needed.
+- Recorded interference on `cpu64`, **not altered**: two unrestricted `ctffind`
+  processes at ~100% CPU each, running 49 and 47 days. A concurrent `motioncorr` from
+  another round96 worker was also observed. Topology, policy and the interference
+  snapshot: `docs/issue69/evidence/cpu-resource-policy.txt`.
+- `4GPUs` compile used `taskset -c 96-103`, a subset of the round's aggregate 96-111 /
+  node1 budget, affinity read back from `/proc`. No GPU UUID is recorded for it because
+  nothing was executed on a device. The GPU plan now requires cores, cpuset, NUMA policy
+  and the actual GPU UUID for every run that does touch a device.
+- `WORKER_RESOURCE_UPDATE.md` was dropped into this worktree by the orchestrator and was
+  briefly committed by a `git add -A`; it has been untracked so the PR does not carry an
+  unrelated coordination file. The file itself is left on disk untouched.
+
 ## Active PID / job / allocation
 
 None. Both detached jobs completed and released their locks.

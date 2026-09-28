@@ -29,6 +29,10 @@
 extern "C" cudaError_t __real_cudaMalloc(void **ptr, size_t size);
 
 namespace {
+// Not atomic, deliberately. Every cudaMalloc on the path under test is issued from the
+// main thread -- the OpenMP regions in the fallback do host-side FFT only -- so the
+// ordinal is deterministic. The driver re-derives the ordinal on every run regardless,
+// so any drift fails loudly rather than silently selecting the wrong call.
 long  g_seen = 0;
 long  g_at = -1;
 bool  g_poison = false;

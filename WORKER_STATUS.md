@@ -30,7 +30,10 @@
   was not on the original whitelist and should have been added when it was created —
   the whitelist exists to catch exactly a new file appearing under `src/`)
 - `tests/test_patch_retry_state.cpp` (new), `tests/cuda_error_class.cpp` (new),
-  `tests/cuda_fault_matrix.cpp` (new, GPU)
+  `tests/cuda_fault_matrix.cpp` (new, GPU),
+  `tests/cuda_fault_inject_shim.cpp` (new, GPU — `--wrap` shim linked only into the
+  `motioncorr_faultinject` test target),
+  `tests/run_fallback_boundary_control.sh` (new, GPU — drives the P1c boundary control)
 - `CMakeLists.txt` (test registration and test-target link options only)
 - `agents/designs/issue_69_cuda_failure_contracts.md`, `docs/issue69/**`, `WORKER_STATUS.md`
 
@@ -104,14 +107,21 @@ Production:
 - `src/acc/cuda/cuda_scoped_resources.h` — new, fixed-capacity owners (Codex P2)
 - `src/acc/cuda/cuda_fft_prep.h` / `.cu` — P1c failure out-parameter and recording
 
-The whitelist has now failed three rounds running to record files as they were touched
-— twice for new `src/` headers, once for `cuda_fft_prep.{h,cu}` — and review caught it
-every time. The list above is **nine** production files, not five or seven.
+The whitelist failed **four** rounds running to record files as they were touched —
+twice for new `src/` headers, once for `cuda_fft_prep.{h,cu}`, once for the two new
+`tests/` files — and review caught it every time. Four manual fixes did not prevent a
+fifth lapse, so `docs/issue69/harness/check_volatile_figures.sh` now has a fifth check
+that compares `git diff --name-only` against this file and fails when something in the
+diff is unrecorded. The production list above is **nine** files.
 
 Tests and build:
 - `tests/test_patch_retry_state.cpp` (new, CPU), `tests/cuda_error_class.cpp` (new,
-  device-free), `tests/cuda_fault_matrix.cpp` (new, GPU)
-- `CMakeLists.txt` — registers all three
+  device-free), `tests/cuda_fault_matrix.cpp` (new, GPU),
+  `tests/cuda_fault_inject_shim.cpp` + `tests/run_fallback_boundary_control.sh`
+  (new, GPU — the P1c fallback-boundary control)
+- `CMakeLists.txt` — registers all five test targets. `src/apps/run_motioncorr.cpp` is
+  now also compiled into the `motioncorr_faultinject` test target; the file itself is
+  unmodified and the installed `motioncorr` links neither the shim nor any `--wrap`.
 
 Docs and evidence:
 - `agents/designs/issue_69_cuda_failure_contracts.md`, `docs/issue69/**`, `WORKER_STATUS.md`

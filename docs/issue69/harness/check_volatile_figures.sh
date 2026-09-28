@@ -109,6 +109,31 @@ check_count '[0-9]+ trials, 0 failures'            '[0-9]+ trials, 0 failures'  
 check_count '[0-9]+ session-state sequences'       '[0-9]+ session-state sequences'       "session-state sequences"
 check_count '341735520 pixels'                     '341735520 pixels'                     "all-24 pixel total"
 
+echo "== 5. the documents' file lists must match the actual diff =="
+# The one class that kept recurring after four manual fixes: the whitelist and
+# "Changed files" blocks lagging what was actually touched. Review caught it every
+# time; a check closes it by construction.
+python3 - "$ROOT" "${MC_DIFF_BASE:-4c952b3f54479653512c4d208e09c9a8c02f3726}" <<'PYEOF' || fail=1
+import os, subprocess, sys
+root, base = sys.argv[1], sys.argv[2]
+ws = open(os.path.join(root, "WORKER_STATUS.md")).read()
+out = subprocess.run(["git", "-C", root, "diff", "--name-only", base + "..HEAD"],
+                     capture_output=True, text=True)
+if out.returncode != 0:
+    print("  FAIL could not diff against %s" % base); sys.exit(1)
+tracked = [f for f in out.stdout.split()
+           if f.startswith(("src/", "tests/")) or f == "CMakeLists.txt"]
+if not tracked:
+    print("  FAIL no src/tests/CMake files in the diff; refusing to report"); sys.exit(1)
+missing = [f for f in tracked
+           if f not in ws and os.path.basename(f) not in ws
+           and os.path.basename(f).split(".")[0] not in ws]
+for f in sorted(missing):
+    print("  FAIL %s is in the diff but named nowhere in WORKER_STATUS.md" % f)
+print("  %d src/tests/CMake files in the diff, %d unrecorded" % (len(tracked), len(missing)))
+sys.exit(1 if missing else 0)
+PYEOF
+
 echo
 if [ $fail -ne 0 ]; then echo "FAIL volatile figures disagree with the evidence or the source"; exit 1; fi
 echo "PASS volatile figures agree with the evidence and the source"

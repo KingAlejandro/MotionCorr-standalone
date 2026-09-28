@@ -1,14 +1,10 @@
-START 2026-09-28T08:12:34+00:00 host=4-gpu-vm
-pid 1236943's current affinity list: 112-119
+START 2026-09-28T08:27:22+00:00
+pid 1240900's current affinity list: 112-119
 /user.slice
 2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
-### build (j4, short build lock) ###
 configure=0
 build=0
 compile errors=0
-/home/alex/MotionCorr-i69-p1c/build/motioncorr_faultinject
-
-### discriminating fallback-boundary control ###
 === step 1: clean baseline, no injection ===
 exit=0  mrc=1
 
@@ -27,8 +23,8 @@ exit=0  mrc=1
 
 === step 5: MUTANT -- remove the failure recording; the control must FAIL ===
   mutation applied: failure recording removed from cuda_fft_prep.cu
-  mutant exit=0  refusal messages=0 (must be 0 -- the enforcement cannot see the status)
-  DISCRIMINATING: the fix refuses, the mutant does not.
+  mutant exit=0 (must be 0)  refusals=0 (must be 0)  images=1 (must be >=1)
+  DISCRIMINATING: the fix refuses and fails closed; the mutant completes normally.
 
 PASS fallback-boundary control: production helper -> consumed/cleared last-error ->
      runner post-prep enforcement refuses, no CUDA re-dispatch, fail-closed
@@ -37,4 +33,4 @@ PASS fallback-boundary control: production helper -> consumed/cleared last-error
 NOTE: injected error code, not a genuine poisoned context. No hardware was
       poisoned or reset. Genuine-fault behaviour remains UNRUN.
 control_exit=0
-DONE 2026-09-28T08:17:04+00:00
+DONE 2026-09-28T08:31:54+00:00

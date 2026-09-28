@@ -1,41 +1,36 @@
-=== exact commands, before / fix / mutant ===
+=== exact commands: before / fix / recoverable / mutant ===
 
-BUILD (GPU2, cores 112-119, j4, short build lock):
-  cmake -S ~/MotionCorr-i69-p1c -B <build> -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
-  cmake --build <build> -j4 --target motioncorr_faultinject
+BUILD (GPU2, cores 112-119 node1, <=8 descendants, j4, short build lock):
+  cmake -S <src> -B <build> -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
+  cmake --build <build> -j4
 
-COMMON OPTIONS (max_iter 1 forces nonconvergence so the fallback is entered):
+COMMON (max_iter 1 forces nonconvergence so the fallback is entered):
   --use_own --gpu 0 --j 4 --patch_x 3 --patch_y 3 --bfactor 150 --dose_weighting
   --dose_per_frame 1.0 --voltage 300 --angpix 0.885 --max_iter 1
 
-BEFORE (clean baseline, no injection):
-  MC_FAULT_ORDINAL=0 <build>/motioncorr_faultinject --i <movie> --o <out>/ <common>
+BEFORE   MC_FAULT_ORDINAL=0                      <build>/motioncorr_faultinject --i <movie> --o <out>/ <common>
+FIX      MC_FAULT_ORDINAL=35 MC_FAULT_CODE=poison       <build>/motioncorr_faultinject ...
+RECOVER  MC_FAULT_ORDINAL=35 MC_FAULT_CODE=recoverable  <build>/motioncorr_faultinject ...
+MUTANT   remove the failure-recording line from cuda_fft_prep.cu, rebuild, then
+         MC_FAULT_ORDINAL=35 MC_FAULT_CODE=poison       <mutant>/build/motioncorr_faultinject ...
 
-FIX (poisoning status at the fallback boundary, ordinal 35 = cudaPreparePatch):
-  MC_FAULT_ORDINAL=35 MC_FAULT_CODE=poison <build>/motioncorr_faultinject --i <movie> --o <out>/ <common>
-
-RECOVERABLE (same ordinal, recoverable code):
-  MC_FAULT_ORDINAL=35 MC_FAULT_CODE=recoverable <build>/motioncorr_faultinject --i <movie> --o <out>/ <common>
-
-MUTANT (failure recording removed from cuda_fft_prep.cu, rebuilt, same injection):
-  perl -0pi -e s/if \(failure\) failure->record\(e, __func__, __LINE__\); \\\\\\n//  <mutant>/src/acc/cuda/cuda_fft_prep.cu
-  cmake --build <mutant>/build -j4 --target motioncorr_faultinject
-  MC_FAULT_ORDINAL=35 MC_FAULT_CODE=poison <mutant>/build/motioncorr_faultinject ...
+The ordinal is NOT hardcoded: the driver searches 1..60 each run and takes the first
+whose output contains "recorded at cudaPreparePatch:", failing loudly if none does.
 
 === device / lane / provenance ===
 4-gpu-vm
 2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
 CUDA_VISIBLE_DEVICES=GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598 (UUID, not ordinal)
-taskset -c 112-119, node1, <=8 descendants, j4/io2, /tmp/motioncorr-gpu2-correctness.lock
+taskset -c 112-119 node1; lock /tmp/motioncorr-gpu2-correctness.lock; build lock /tmp/motioncorr-vm-build.lock
 Cuda compilation tools, release 12.8, V12.8.61
 Build cuda_12.8.r12.8/compiler.35404655_0
 
-=== binaries ===
-9e60c95a04f5964551986191a9d344514ade141524c3c6213dbc7c304cb8d091  /home/alex/MotionCorr-i69-p1c/build/motioncorr_faultinject
+=== binary ===
+5a939110e87c02c6872edf8e66db83352aca0e94603c3b83a75cfae93ef86c5c  /home/alex/MotionCorr-i69-p1c/build/motioncorr_faultinject
 === source ===
 0dcf707f909b7217078430d98ada79641815aa170d6d713456e59932b8094bce  src/acc/cuda/cuda_fft_prep.cu
 090e3d50d8237bedd8fd4eef894f23f89b89bdc10f7a4530a3f0d1387c3726c3  src/motioncorr_runner.cpp
-fc3a9b2345ff8ffbf86802c64205acc59f8b799998cb2edc22a265d1211008cb  tests/cuda_fault_inject_shim.cpp
-54b495fc21c2cae3b39293d0aae7d0dc413945eaea342b20e19dbf20406d0859  tests/run_fallback_boundary_control.sh
+fb77b26106990a5544e32140e7fa2afa4ab2367bd4225f375a5fd07dbbd555b6  tests/cuda_fault_inject_shim.cpp
+39aee9af2e7109ed33a08f1f87f880b98ff3002ff0493c8ac7ca87c827cfab7a  tests/run_fallback_boundary_control.sh
 === input ===
 df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0  /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff

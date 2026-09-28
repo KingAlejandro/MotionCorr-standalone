@@ -669,7 +669,7 @@ The ordinal search identifies which `cudaMalloc` lands inside the helper from
 | Clean baseline, no injection | exit 0, 1 corrected image — the run is interpretable |
 | **Poisoning status at the boundary** | **exit 1**, 2 refusal messages, **0 corrected images, 0 joint STAR** |
 | Recoverable status, same ordinal | exit 0, 1 corrected image, **0 refusals** — the documented host path still permitted |
-| **Mutant**: one line removed, the failure recording in the consuming handler | **exit 0, 0 refusals** — it does **not** refuse |
+| **Mutant**: one line removed, the failure recording in the consuming handler | **exit 0, 0 refusals, 1 image** — it does **not** refuse, and completes normally |
 
 The refusal message carries the attribution the fix exists to provide:
 
@@ -680,6 +680,11 @@ cudaPreparePatch:344. Refusing to re-dispatch alignment on a poisoned context;
 the host path would return to the same device.
 ```
 
+The mutant arm asserts its **own** health (exit 0 and an image produced), not just the
+absence of a refusal. Without that, a mutant that crashed for an unrelated reason would
+also show zero refusals and be scored as discriminating — the same
+silent-pass-on-own-failure class this branch has criticised elsewhere.
+
 **This is what makes it discriminating.** The mutant removes exactly the line that
 carries the status out of the helper, and with it the run **completes successfully** —
 which is also a direct demonstration of the pre-fix behaviour: silently continue and
@@ -689,7 +694,16 @@ would prove nothing, and that was precisely the defect in the predicate-only ver
 ### Scope: injected code, not a genuine fault
 
 The fault is an **injected error code** returned by an interposed `cudaMalloc`. No
-hardware was poisoned and no device was reset. This proves the production plumbing
+hardware was poisoned and no device was reset.
+
+Two further distinctions, both raised in review and worth stating rather than glossing.
+The production hazard is *"the handler consumed the code, clearing the slot"*; the
+control produces *"the slot was never set"*, because the shim returns a code without
+calling the runtime. Both leave a clean slot at the decision point, so the decision is
+exercised identically and the conclusion holds — but the consumption step itself is not
+reproduced. And the recoverable arm is meaningful **only because the fault is
+synthetic**: under a genuinely poisoned context that arm could not complete at all, so
+it tests "the runner permits on a recoverable code", not "the device survives". This proves the production plumbing
 carries a poisoning status out of the helper and that the runner refuses on it. It does
 **not** prove behaviour under a real illegal-address or ECC fault, which remains
 **UNRUN** and cannot be synthesised here. The distinction is printed by the control

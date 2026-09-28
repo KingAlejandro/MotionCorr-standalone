@@ -9,9 +9,11 @@
 #   closed, and no corrected image or joint STAR is published for it.
 #
 # WHAT MAKES IT DISCRIMINATING: the same injection is run against a MUTANT tree with
-# the failure recording (or the post-prep enforcement) removed. The mutant must NOT
-# refuse. A control that passes both ways proves nothing, and the previous
-# predicate-only control did exactly that.
+# the failure RECORDING removed -- one line. The mutant must NOT refuse. A control that
+# passes both ways proves nothing, and the previous predicate-only control did exactly
+# that. Mutating the runner's post-prep check instead would add nothing: the positive
+# arm already proves that layer runs, because the refusal string exists nowhere else,
+# and a runner-check mutant produces the identical observable (0 refusals).
 #
 # SCOPE: the fault is an injected error CODE. No hardware is poisoned, nothing is
 # reset. Behaviour under a genuine illegal-address or ECC fault remains UNRUN.
@@ -46,7 +48,9 @@ echo "=== step 2: find an ordinal that lands inside cudaPreparePatch ==="
 ORD=""
 for n in $(seq 1 60); do
   rm -rf "$W/probe"; run "$W/probe" "$n" poison >/dev/null
-  if grep -rqs "cuda_fft_prep.cu" "$W/probe" 2>/dev/null; then ORD=$n; break; fi
+  # Function-exact: the refusal message carries __func__, so this confirms the ordinal
+  # landed in cudaPreparePatch and not in another function of the same file.
+  if grep -rqs "recorded at cudaPreparePatch:" "$W/probe" 2>/dev/null; then ORD=$n; break; fi
 done
 [ -n "$ORD" ] || { echo "FAIL no ordinal in 1..60 reached cudaPreparePatch"; exit 1; }
 echo "  ordinal $ORD lands in cudaPreparePatch:"
@@ -102,11 +106,17 @@ else
       > "$W/mut/run.log" 2>&1
     mexit=$?
     mref=$(grep -rc "unusable after fallback patch preparation" "$W/mut" 2>/dev/null | awk -F: '{s+=$2} END{print s+0}')
-    echo "  mutant exit=$mexit  refusal messages=$mref (must be 0 -- the enforcement cannot see the status)"
-    if [ "$mref" -eq 0 ]; then
-      echo "  DISCRIMINATING: the fix refuses, the mutant does not."
-    else
+    mimg=$(find "$W/mut" -name '*.mrc' | wc -l)
+    echo "  mutant exit=$mexit (must be 0)  refusals=$mref (must be 0)  images=$mimg (must be >=1)"
+    # Assert the mutant's OWN health too. Without this, a mutant that crashed for an
+    # unrelated reason would also show 0 refusals and be declared discriminating --
+    # the same silent-pass-on-own-failure class this branch has criticised elsewhere.
+    if [ "$mref" -eq 0 ] && [ "$mexit" -eq 0 ] && [ "$mimg" -ge 1 ]; then
+      echo "  DISCRIMINATING: the fix refuses and fails closed; the mutant completes normally."
+    elif [ "$mref" -ne 0 ]; then
       echo "  FAIL the mutant also refused, so the control does not discriminate"; fail=1
+    else
+      echo "  FAIL the mutant did not complete normally, so its 0 refusals prove nothing"; fail=1
     fi
   fi
 fi

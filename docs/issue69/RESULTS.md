@@ -17,7 +17,7 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Retry-verdict controls, incl. cleared-last-error fatal (device-free) | 13 cases, 0 failures — **at the previous head; NOT re-run, see §5c** |
 | P1/P2 fixes from the Codex PR107 review | built clean on GPU2 (0 compile errors) and exercised by the device-free suites |
 | Early-binning streaming control | **UNRUN** — no valid bin factor exists for this geometry, see §5d |
-| Fallback-boundary plumbing (P1c: out-parameter, recording handlers, post-prep check) | **NOT COVERED BY ANY CONTROL** — compile and review only; see §5e |
+| Fallback-boundary plumbing (P1c: out-parameter, recording handlers, post-prep check) | **covered natively by an injected-code control that discriminates against a mutant** — see §5f. Injected code, not a genuine fault |
 | CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
 | Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **ran natively on GPU2: 132 trials, 0 failures, 0 leaks** |
@@ -442,7 +442,17 @@ checking is not a compiler, and on this branch an unbuilt CUDA change has alread
 shipped once with 14 compile errors while the CPU suite was green (§5b). **Nothing in
 §5c should be treated as validated until it builds.**
 
-## 5d. Native acceptance on GPU2
+## 5d. Broad native acceptance on GPU2
+
+**Scope note, corrected.** This section is *broad* native acceptance of the resident
+stack at source `f3fdcfb`: the fault matrix and the healthy all-24 comparison, both run
+against real device execution. It does **not** cover P1c, which did not exist at that
+source and whose boundary is covered separately and by *injected codes* in §5f. Earlier
+wording that read as "natively validated" without that split overstated what the broad
+run reaches — the fault matrix never references `cudaPreparePatch`, and the healthy run
+only takes the success path.
+
+### Resources
 
 Alex authorised parallel GPU use on 28 Sep; #69 was assigned **GPU2**
 (`GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598`), CPUs **112-119** on node1, all
@@ -633,6 +643,57 @@ Source hashes match byte-for-byte across the worktree, `cpu64` and the GPU host.
 **Unchanged and still true:** F5 **did not reproduce** natively (§5d); a genuine
 poisoned context, the early-binning control and any older-toolkit build remain
 **UNRUN**; no timing is recorded or claimed.
+
+## 5f. P1c: the retracted coverage gap, now closed
+
+§5e retracted a claim: the predicate control never calls `cudaPreparePatch`, never
+executes the runner's post-prep check, and passes unchanged against the pre-fix source.
+That gap is now closed with a control that drives production code.
+
+`tests/cuda_fault_inject_shim.cpp` interposes `cudaMalloc` via `--wrap` and is linked
+only into `motioncorr_faultinject`, a test target built from the production
+`src/apps/run_motioncorr.cpp`. Nothing in `src/` knows it exists, so there is still no
+production fault switch. `tests/run_fallback_boundary_control.sh` drives it.
+Exact commands for all four arms:
+[`evidence/native-gpu2/10-p1c-commands-and-provenance.txt`](evidence/native-gpu2/10-p1c-commands-and-provenance.txt).
+Full output:
+[`09-p1c-fallback-boundary-control.log`](evidence/native-gpu2/09-p1c-fallback-boundary-control.log).
+
+`--max_iter 1` forces every patch to report nonconvergence, so the fallback is entered.
+The ordinal search identifies which `cudaMalloc` lands inside the helper from
+`cuda_fft_prep.cu`'s own handler naming its file — **ordinal 35**, at
+`cuda_fft_prep.cu:344` — so the hit is demonstrated, not assumed.
+
+| Arm | Result |
+|---|---|
+| Clean baseline, no injection | exit 0, 1 corrected image — the run is interpretable |
+| **Poisoning status at the boundary** | **exit 1**, 2 refusal messages, **0 corrected images, 0 joint STAR** |
+| Recoverable status, same ordinal | exit 0, 1 corrected image, **0 refusals** — the documented host path still permitted |
+| **Mutant**: one line removed, the failure recording in the consuming handler | **exit 0, 0 refusals** — it does **not** refuse |
+
+The refusal message carries the attribution the fix exists to provide:
+
+```
+unusable after fallback patch preparation for …20170629_00021_frameImage.tiff
+(patch 1, 1): an illegal memory access was encountered, recorded at
+cudaPreparePatch:344. Refusing to re-dispatch alignment on a poisoned context;
+the host path would return to the same device.
+```
+
+**This is what makes it discriminating.** The mutant removes exactly the line that
+carries the status out of the helper, and with it the run **completes successfully** —
+which is also a direct demonstration of the pre-fix behaviour: silently continue and
+re-dispatch. The fix fails closed; the mutant does not. A control that passed both ways
+would prove nothing, and that was precisely the defect in the predicate-only version.
+
+### Scope: injected code, not a genuine fault
+
+The fault is an **injected error code** returned by an interposed `cudaMalloc`. No
+hardware was poisoned and no device was reset. This proves the production plumbing
+carries a poisoning status out of the helper and that the runner refuses on it. It does
+**not** prove behaviour under a real illegal-address or ECC fault, which remains
+**UNRUN** and cannot be synthesised here. The distinction is printed by the control
+itself, not only claimed in this document.
 
 ## 6. Findings fixed
 

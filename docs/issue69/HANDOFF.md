@@ -18,7 +18,7 @@ Source frozen at `e191aab`. Latest head is docs-only on top of it.
 | Healthy all-24 same-backend CUDA control | **ran** — 24 images, 341,735,520 pixels, 0 differing, negative control able to fail |
 | Forced-nonconvergence retry witness | **ran, and F5 DID NOT REPRODUCE** — see below |
 | Early-binning streaming control | **UNRUN** — no valid bin factor for this geometry; every arm errors identically |
-| Genuine poisoned context (illegal address / ECC) | **UNRUN** — cannot be synthesised; P1/P1b exercised by injected codes and session-state sequences only |
+| Genuine poisoned context (illegal address / ECC) | **UNRUN** — cannot be synthesised. P1/P1b/P1c are exercised by *injected error codes* and session-state sequences only; no hardware was ever poisoned or reset |
 | Any build on a CUDA toolkit older than 12.8 | **UNRUN** — the `CUDART_VERSION` guards are reasoned, not exercised |
 | Pass criterion 3 (retry reprocesses partial even/odd/DW products) | not this task's; #99/#53's completion contract |
 
@@ -54,7 +54,11 @@ No timing was recorded or claimed: #53 was running concurrently on GPU0/1 throug
    set entry. Needs a real runtime failure to reach.
 6. **Deliverable 1's Fourier-input capture** on a forced-nonconverged patch is argued
    from source, not captured. Needs a device.
-7. **The P1c fallback-boundary plumbing has no automated coverage.** The `failure`
+7. ~~**The P1c fallback-boundary plumbing has no automated coverage.**~~ **CLOSED** by
+   `tests/run_fallback_boundary_control.sh` + `tests/cuda_fault_inject_shim.cpp`:
+   production binary, injected poisoning code at `cudaPreparePatch` (ordinal 35,
+   `cuda_fft_prep.cu:344`), fix refuses and fails closed, mutant without the recording
+   does not refuse. **Still injected-code scope, not a genuine fault.** Original text: The `failure`
    out-parameter, `cuda_fft_prep.cu`'s recording handlers and the runner's post-prep
    check are covered by compilation and review only. The control added with them tests
    the *predicate* given a correctly-carried status and would pass against the pre-fix

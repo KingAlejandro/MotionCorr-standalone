@@ -1,0 +1,40 @@
+START 2026-09-28T08:12:34+00:00 host=4-gpu-vm
+pid 1236943's current affinity list: 112-119
+/user.slice
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+### build (j4, short build lock) ###
+configure=0
+build=0
+compile errors=0
+/home/alex/MotionCorr-i69-p1c/build/motioncorr_faultinject
+
+### discriminating fallback-boundary control ###
+=== step 1: clean baseline, no injection ===
+exit=0  mrc=1
+
+=== step 2: find an ordinal that lands inside cudaPreparePatch ===
+  ordinal 35 lands in cudaPreparePatch:
+    CUDA Error in /home/alex/MotionCorr-i69-p1c/src/acc/cuda/cuda_fft_prep.cu:344
+
+=== step 3: POISONING status at the fallback boundary (the case under test) ===
+  exit=1 (must be nonzero)            refusal messages=2 (must be >=1)
+  corrected images=0 (must be 0)     joint STAR=0 (must be 0)
+  stage/status attribution:
+    unusable after fallback patch preparation for /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff (patch 1, 1): an illegal memory access was encountered, recorded at cudaPreparePatch:344. Refusing to re-dispatch alignment on a poisoned context; the host path would return to the same device.
+
+=== step 4: RECOVERABLE status at the same boundary must still permit ===
+  exit=0 (must be 0)  corrected images=1 (must be 1)  refusals=0 (must be 0)
+
+=== step 5: MUTANT -- remove the failure recording; the control must FAIL ===
+  mutation applied: failure recording removed from cuda_fft_prep.cu
+  mutant exit=0  refusal messages=0 (must be 0 -- the enforcement cannot see the status)
+  DISCRIMINATING: the fix refuses, the mutant does not.
+
+PASS fallback-boundary control: production helper -> consumed/cleared last-error ->
+     runner post-prep enforcement refuses, no CUDA re-dispatch, fail-closed
+     publication, recoverable path still permitted, and a mutant without the
+     recording does NOT refuse.
+NOTE: injected error code, not a genuine poisoned context. No hardware was
+      poisoned or reset. Genuine-fault behaviour remains UNRUN.
+control_exit=0
+DONE 2026-09-28T08:17:04+00:00

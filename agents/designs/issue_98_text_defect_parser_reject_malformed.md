@@ -1,67 +1,101 @@
-# ADR: Issue #98 — Reject malformed MotionCor2 text defect rectangles (grok-4.3)
+# Architectural Design Specification: Reject malformed text defect rectangles
 
-**Date:** 2026-09-28
-**Status:** Draft — scoped for implementation
-**Issue:** #98
-**Model/Task:** grok-4.3 / correctness
+- Issue: #98
+- Status: Implemented; CPU acceptance evidence recorded; awaiting maintainer review
+- Architect: independent read-only code/spec and license/convention reviewers, consulted on the implementation head
+- Base: `4c952b3f54479653512c4d208e09c9a8c02f3726`
 
-## Decision
-Replace the unchecked `while (!f_defect.eof()) { int x,y,w,h; f_defect >> x >> y >> w >> h; ... }` pattern in the MotionCor2 text defect parser with an extraction-checked, bounded, overflow-safe implementation that:
-- Initializes wide-integer temporaries before extraction.
-- Uses extraction status as loop control or explicit post-extraction validation.
-- Distinguishes clean EOF (after complete record + optional whitespace) from malformed token or trailing partial record.
-- Clips rectangle bounds to image dimensions BEFORE any pixel iteration.
-- Rejects zero-size, negative, or overflowed rectangles per policy derived from existing supported contract (empty files, comments).
-- Adds timeout-guarded failing test against old parser behavior for huge off-image rectangles, then verifies fix.
-- Preserves healthy-mask identity and valid defect-fixture semantics exactly.
+## Scope and contracts
 
-## Rationale
-The classic anti-pattern leaves `failbit` set without `eofbit`, causing non-advancing loop with uninitialized or stale rectangle values fed to downstream mask loops. This matches the audit finding and the verified `defect_stream.cpp` reproducer (exact bytes retained). Huge off-image rectangles must terminate boundedly (no billions of iterations). Policy for comments/empty/zero-size must be explicit and derived from contract, not invented.
+Replace the unchecked `while (!f_defect.eof())` loop in `MotioncorrRunner::fillDefectMask`
+(the `ext == "txt"` branch) with an extraction-checked parser. A malformed token sets
+`failbit` without `eofbit`, so the original loop neither advances nor terminates and feeds
+uninitialized `int x, y, w, h` to the mask loops.
 
-## Scope (whitelist)
-**In:**
-- Only the text-defect rectangle parser code path (MotionCor2 format).
-- Associated unit/CLI tests for parser robustness.
-- Sanitizer builds (ASan/UBSan where supported) under CPU lock.
-- ADR, WORKER_STATUS.md, progress comments, small commits, draft PR.
+Each of the four fields is read as a whitespace-delimited token and converted explicitly.
+Streaming directly into integers cannot attribute a failure: an out-of-range value sets
+`failbit` only after `operator>>` has consumed its digits, so a recovery read names the
+following field. Diagnostics report a 1-based record number, the line the record started
+on, the offending field name and its token, and distinguish a truncated final record from
+a malformed one.
 
-**Out (never):**
-- GPU/CUDA paths, any device code, issue26 GPU slot work.
-- Other parsers, I/O, alignment, dose weighting, statistical layers.
-- RNG changes, noise model, #20 work.
-- Merges, issue close, new auth, broad downloads.
-- Any change to numerical gates, RMSE, bit-reproducibility contract.
-- Touching colleague worktrees or #26 resources.
+Rectangle bounds are clipped to the image with overflow-safe arithmetic before any
+iteration, so an off-image rectangle costs O(1) rather than iterating its nominal area.
 
-## Implementation constraints (per task-98 + COMMON)
-- CPU-only (cpu64 under lock).
-- At most 2 concurrent read-only subagents.
-- Preserve other tasks; no merges.
-- Record exact hashes, commands, outputs, NUMA placement.
-- Small separate PR.
-- Healthy mask identity + malformed batch/resume tests.
-- No statistical change.
+Only the txt branch of `fillDefectMask` and its new test change. The defect-map branch,
+the SerialEM detector at `src/motioncorr_runner.cpp:181` and `src/micrograph_model.cpp:344`,
+the external-MotionCor2 `-DefectFile` passthrough, hot-pixel detection, dose weighting and
+all RNG, noise-model and statistical behaviour are untouched. No runner preflight
+refactor is included.
 
-## Verification gates
-1. Old parser + huge malformed rectangle → timeout test FAILS (guard demonstrates hang risk).
-2. Fixed parser → same test passes in bounded time; no UB, no overflow iteration.
-3. Valid defect fixture → identical output mask (bit identity).
-4. Default tutorial (no defects) → identical output.
-5. Malformed-first, malformed-last, resume cases → clean rejection or graceful skip per policy.
-6. Empty file, comment-only, zero-size rect → policy-defined behavior, no crash.
+## Input contract
 
-## Evidence to record
-- Source/binary hashes before/after.
-- Exact failing command + timeout output on old code.
-- Passing command + full output on fix.
-- Mask identity diffs (none).
-- CPU mask, lscpu topology, numactl policy for every run.
-- gh comment URLs, PR URL.
+The supported format is the UCSF MotionCor2 one: whitespace-separated integer quadruples
+`x y w h`, conventionally one rectangle per line.
 
-## Risks & fallbacks
-- Policy for comments/empty may need spec clarification from maintainer (read issue comments first — done).
-- If existing contract silently accepts partial records, document and preserve or escalate.
-- Sanitizers may not be available on all build hosts; note and use where supported.
+- Rejected, each with a diagnostic naming the cause: comment lines, header rows, any
+  non-integer field, a field that does not fit in a 64-bit integer, a record truncated by
+  end of file, and a leading UTF-8 byte order mark.
+- Accepted: blank lines and surrounding whitespace are ignored; an empty or whitespace-only
+  file is valid and masks nothing; a rectangle with width or height <= 0 is a no-op; a
+  rectangle overlapping the image is clipped to the intersection, and one entirely outside
+  masks nothing.
 
-**Owner:** grok-4.3 scoped agent (Claude Code execution)
-**Next:** Implement parser + tests per this ADR; obtain independent read-only review; commit/push draft PR.
+The rejecting cases are self-documenting through their error text. The accepting cases emit
+nothing, so they are stated in the `--defect_file` help string as well as here.
+
+## Numerical and resource constraints
+
+The mask produced for any well-formed file is unchanged. Clipping yields the same
+intersection the original per-pixel `continue` guards produced, without the signed overflow
+the original `y + h` could incur. No new allocation in the mask loop; the parser holds one
+`std::string` token at a time. Hot-pixel statistics, replacement PRNG and dose weighting are
+not reachable from this change, so no numerical gate is affected.
+
+Behaviour on malformed input necessarily changes: the original code's result was undefined,
+so no identity claim against it is meaningful for those inputs. Identity is claimed only for
+well-formed files, and is evidenced by the positive-control suite.
+
+## Acceptance and evidence
+
+`tests/test_defect_parser.cpp` calls `MotioncorrRunner::fillDefectMask` directly and is
+registered as ctest target `DefectParser` with a 120 s timeout, so a regression to the
+pre-fix hang fails the suite rather than stalling it. It covers valid single and multiple
+records, missing trailing newline, blank-line padding, empty and whitespace-only files,
+malformed token first and last, truncated records, non-integer and out-of-range fields,
+comment/header/BOM rejection, diagnostic record and line numbering, zero and negative
+sizes, clipping on all four edges, and huge and beyond-INT32 rectangles under a wall-clock
+bound.
+
+Acceptance requires a positive control on the implementation head and a negative control
+built from the base commit in a separately configured tree, since a copied build directory
+retains its original absolute source path and would rebuild the old sources. Both arms run
+CPU-only on cpu64 under `flock /tmp/motioncorr-issue96-cpu-validation.lock`, on cores within
+32-63, with build and runtime parallelism <= 16, recording inherited cpuset, topology,
+CPU and memory NUMA policy and observed placement. No GPU work is performed; issue #26 owns
+the GPU slot.
+
+## License
+
+Existing RELION GPL-2.0-or-later notices are preserved. No dependency or third-party code
+is added. The parser is original work and is not derived from MotionCor2 or MotionCor3
+sources; only the format name is referenced.
+
+## Changed-file whitelist
+
+- `CMakeLists.txt`
+- `src/motioncorr_runner.cpp`
+- `tests/test_defect_parser.cpp`
+- `.gitignore`
+- `agents/designs/issue_98_text_defect_parser_reject_malformed.md`
+
+## Known limitations
+
+The strict parser runs on the `--use_own` path only. The external-binary path at
+`src/motioncorr_runner.cpp:724-729` passes `-DefectFile` through to MotionCor2 unvalidated,
+so the same file can be accepted there and rejected here. `fn_defect` is job-global
+configuration but is validated per movie, and the per-movie handler at
+`src/motioncorr_runner.cpp:626` continues to the next movie, so one malformed path yields a
+full read per movie and one error per movie before the job fails. Validating once in
+`initialise()` beside the SerialEM check would address both; that is a runner preflight
+change and is deliberately excluded from this issue's scope.

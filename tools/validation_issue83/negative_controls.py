@@ -30,6 +30,7 @@ from typing import Any, Callable, Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import matrix as declared  # noqa: E402
 import products as prod  # noqa: E402
+import report as rep  # noqa: E402
 import run_matrix as rm  # noqa: E402
 import run_all24_schedules as all24  # noqa: E402
 
@@ -283,6 +284,85 @@ def control_witness_is_consumed(_tmp: Path, _fixtures: Optional[Path]) -> Dict[s
             "now": "witness is part of the pass condition when --gpu is given"}
 
 
+HISTORICAL_ALL24 = (REPO_ROOT / "docs" / "issue83" / "raw" / "scarf-gn0005"
+                    / "all24-summary.json")
+
+
+def control_report_renders_witness(_tmp: Path, _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """The generator must not publish the contradiction it published once.
+
+    Run against the preserved historical record rather than a synthetic one, so
+    this control fails if that record is ever quietly edited to agree with the
+    prose. The record states ``all24_equal: true`` and ``resume.passed: true``
+    while resume's own evidence says ``native_cuda_proven: false``; the old
+    renderer printed the witness for ``base`` only, so the table read ``resume
+    ... pass`` and the aggregate read complete.
+    """
+    if not HISTORICAL_ALL24.exists():
+        return {"status": "skipped", "why": f"{HISTORICAL_ALL24} not present"}
+    historical = json.loads(HISTORICAL_ALL24.read_text())
+    resume = historical["schedules"]["resume"]
+
+    # The defect must still be present in the preserved raw record.
+    require(historical.get("all24_equal") is True
+            and resume.get("passed") is True
+            and resume["backend_evidence"].get("native_cuda_proven") is False,
+            "the preserved historical record no longer contains the published "
+            "contradiction; raw reports must be preserved, not corrected")
+
+    require(not rep.all24_witness_holds(historical),
+            "PUBLISHED DEFECT REPRODUCED: the generator still treats a screen "
+            "with an unproven schedule witness as establishing native CUDA")
+
+    table = "\n".join(rep.render_all24(historical))
+    require("native execution NOT established" in table,
+            "the rendered table still shows resume as a plain pass")
+    require("| resume | 1 | 24/24 | 0 | **no** |" in table,
+            "the rendered table does not carry resume's own witness cell")
+
+    # batch ran 24 invocations but the old witness read only the last stdout,
+    # so 23 startup markers are simply not in the record. That gap must be
+    # reported, not filled in with the one marker that was recorded.
+    batch = historical["schedules"]["batch"]
+    require(len(batch.get("runs", [])) > 1
+            and "startup_marker_per_invocation" not in batch["backend_evidence"],
+            "the preserved record no longer shows batch's per-invocation gap")
+    require(rep.witness_coverage_gap(batch),
+            "a 24-invocation schedule witnessed from one stdout was treated as covered")
+    require("1 of 24 invocations examined" in table,
+            "the rendered table does not disclose batch's per-invocation gap")
+
+    # Positive control: every schedule witnessed is accepted.
+    good = json.loads(json.dumps(historical))
+    good["schedules"]["resume"]["backend_evidence"]["native_cuda_proven"] = True
+    require(not rep.all24_witness_holds(good),
+            "the batch per-invocation gap stopped blocking the aggregate")
+    for entry in good["schedules"].values():
+        entry["backend_evidence"]["startup_marker_per_invocation"] = \
+            [True] * max(1, len(entry.get("runs", [])))
+    require(rep.all24_witness_holds(good),
+            "positive control failed: a fully witnessed GPU screen was rejected")
+    require(not rep.witness_coverage_gap(good["schedules"]["batch"]),
+            "a record carrying every invocation's marker was still called uncovered")
+
+    # A CPU screen proves nothing and is not asked to -- unless it masquerades.
+    cpu = {"provenance": {"gpu": None},
+           "schedules": {"repeat": {"backend_evidence": {}}}}
+    require(rep.all24_witness_holds(cpu),
+            "a CPU screen was required to prove native CUDA execution")
+    cpu["schedules"]["repeat"]["backend_evidence"] = {"unexpected_cuda_marker": True}
+    require(not rep.all24_witness_holds(cpu),
+            "a CPU screen emitting CUDA markers was accepted")
+
+    # An absent record, or one with no schedules at all, is not a pass.
+    require(not rep.all24_witness_holds(None), "a missing screen was accepted")
+    require(not rep.all24_witness_holds({"provenance": {"gpu": 0}, "schedules": {}}),
+            "an empty screen was accepted as witnessed")
+    return {"status": "pass",
+            "reproduced": "all24_equal:true published with resume unproven",
+            "now": "generator recomputes the witness and renders it per schedule"}
+
+
 # ------------------------------------------------------- schedule completeness
 
 def _all24_report(schedules: Dict[str, Any]) -> Dict[str, Any]:
@@ -413,6 +493,7 @@ CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "ps_wrong_dimension": control_ps_wrong_dimension,
     "resume_native_witness": control_resume_witness,
     "witness_is_consumed": control_witness_is_consumed,
+    "report_renders_witness": control_report_renders_witness,
     "partial_schedules": control_partial_schedules,
     "input_hashes": control_input_hashes,
     "cross_row_consumed": control_cross_row_consumed,

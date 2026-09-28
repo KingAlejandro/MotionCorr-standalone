@@ -72,7 +72,11 @@ impossibility rather than a test obligation.
 
 ## 4. Supported inputs, and the serial fallback contract
 
-The prototype prefetches **plain MRC/MRCS and TIFF** movies only.
+The prototype prefetches **plain MRC/MRCS and TIFF** movies only, admitted by a **positive
+whitelist** on the format `Image::openFile` would actually resolve (lowercased, honouring an
+explicit `name.dat:mrcs` override). "Everything except EER and compressed MRC" would be wrong:
+`Image` also accepts SPIDER, IMAGIC, raw and others, and a negative check pushes each of them
+across an unvalidated thread boundary and onto byte accounting derived for these readers.
 
 EER and compressed-MRC inputs keep decoder state (`EERRenderer`, `CompressedMRCReader`) that is
 consumed *after* the decode stage — the EER gain reference is resolved through the live
@@ -136,8 +140,12 @@ The reported `process_peak_rss_bytes` exists precisely so that the budget number
 mistaken for the process high-water.
 
 `--prefetch_mem_mb 0` (the default when prefetch is on) sets the budget to `3 x` the first
-movie's estimate — exactly producer-current + one queued + consumer-active — and then holds it
-fixed for the run. Heterogeneous datasets therefore degrade gracefully: a larger-than-budget
+movie's estimate — producer-current + one queued + consumer-active — and then holds it fixed
+for the run. **Fixed at three, and deliberately not scaled by `--prefetch_queue`**: a count
+limit is not a memory limit, so scaling would mean raising the queue silently raises the
+ceiling, and a large enough queue would disable the default bound while the CLI still promises
+`3 x`. A queue larger than three simply cannot fill under the automatic budget, because bytes
+are the bound and slots are not. Heterogeneous datasets degrade gracefully: a larger-than-budget
 outlier takes route (1) above instead of silently growing the high-water.
 
 ## 6. Cancellation, errors and the failure contract
@@ -159,9 +167,15 @@ outlier takes route (1) above instead of silently growing the high-water.
 - Reservations are released by a move-only RAII handle. Double release is unrepresentable, and
   the one early release -- the producer's error path -- runs only after the partial frames have
   actually been dropped.
-- **Order matters as much as count.** `MoviePrefetchRecord` has an explicit destructor that
-  frees `Iframes` and only then releases the reservation, and the reservation is additionally
-  declared first so even a defaulted destructor would run last. Either alone is fragile: a
+- **Order matters as much as count, in two places.** `MoviePrefetchRecord` has an explicit
+  destructor that frees `Iframes` and only then releases the reservation, and the reservation
+  is additionally declared first so even a defaulted destructor would run last. It also has an
+  explicit **move assignment**, because declaring the reservation first fixes destruction and
+  breaks assignment: members are assigned in declaration order, so a defaulted operator would
+  replace the reservation -- releasing the old one -- while the previous `Iframes` are still
+  allocated. That is reachable as soon as a caller reuses one record across repeated
+  `next(record)` calls, which the signature invites. The explicit operator frees first,
+  releases second, and is self-move safe. Either alone is fragile: a
   defaulted destructor destroys members in reverse declaration order, so returning the bytes
   before freeing the buffers would wake a producer blocked on the budget while this movie's
   frames are still being released -- real resident memory would transiently reach

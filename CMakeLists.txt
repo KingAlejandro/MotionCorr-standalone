@@ -84,6 +84,9 @@ if(BUILD_TESTING)
         add_test(NAME SyntheticRegression
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME SyntheticRegressionNegativeControl
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
+                --binary $<TARGET_FILE:motioncorr> --negative-control)
         add_test(NAME HotPixelRngDeterminism
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_hotpixel_rng_determinism.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -123,5 +126,17 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
         add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
         set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
+    endif()
+
+    option(ENABLE_CUDA_HARDWARE_TESTS "Register tests requiring a physical CUDA GPU" OFF)
+    if(Python3_Interpreter_FOUND AND (ENABLE_CUDA_HARDWARE_TESTS OR DEFINED ENV{MOTIONCORR_TEST_GPU} OR DEFINED ENV{CUDA_VISIBLE_DEVICES}))
+        set(_CUDA_TEST_DEVICE 0)
+        if(DEFINED ENV{MOTIONCORR_TEST_GPU})
+            set(_CUDA_TEST_DEVICE $ENV{MOTIONCORR_TEST_GPU})
+        endif()
+        add_test(NAME SyntheticRegressionCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
+                --binary $<TARGET_FILE:motioncorr> --gpu ${_CUDA_TEST_DEVICE} --require-cuda)
+        set_tests_properties(SyntheticRegressionCuda PROPERTIES LABELS "cuda;hardware")
     endif()
 endif()

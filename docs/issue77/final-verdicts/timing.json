@@ -1,0 +1,1389 @@
+{
+  "what": "interleaved paired end-to-end timing, main vs candidate",
+  "not_a_claim_about": [
+    "any cumulative speedup across a series of merges",
+    "speed measured on a different host or a different allocation",
+    "CPU/CUDA agreement",
+    "scientific equivalence"
+  ],
+  "host": "gn3000.scarf.rl.ac.uk",
+  "started": "2026-09-27T20:20:55+0100",
+  "threads": 8,
+  "taskset": "none",
+  "options": [
+    "--use_own",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.277",
+    "--patch_x",
+    "5",
+    "--patch_y",
+    "5",
+    "--bfactor",
+    "150",
+    "--gainref",
+    "Movies/gain.mrc",
+    "--seed",
+    "1",
+    "--gpu",
+    "0"
+  ],
+  "input_star": "movies.star",
+  "tutorial": "/home/vol05/scarf1415/i53-scarf/relion30_tutorial",
+  "binaries": {
+    "main": {
+      "path": "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/build-cuda/motioncorr",
+      "sha256": "5299ebd0aedce467ba0d0f605aaf2554fd940690656f7daaa694c40e5cbd0ab1"
+    },
+    "candidate": {
+      "path": "/scratch/scarf1415/mc-issue77-reviewed/src-candidate-3510657/build-cuda/motioncorr",
+      "sha256": "871626fc3c65f28d260d152fc4c150ede23b42b8f4fc670207e675ce181ee87c"
+    }
+  },
+  "page_cache": "not dropped (no root); one discarded warm-up run precedes the blocks",
+  "blocks": [
+    {
+      "block": 1,
+      "order": [
+        "main",
+        "candidate"
+      ],
+      "runs": {
+        "main": {
+          "command": [
+            "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/build-cuda/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/t_main_b1",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--gpu",
+            "0",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 33.987,
+          "load1_before": 2.68,
+          "load1_after": 1.98,
+          "stages": {
+            "read gain": {
+              "seconds": 1.728,
+              "microsec_per_operation": 72020
+            },
+            "read movie": {
+              "seconds": 9.373,
+              "microsec_per_operation": 390550
+            },
+            "apply gain and initial sum": {
+              "seconds": 3.344,
+              "microsec_per_operation": 139336
+            },
+            "detect hot pixels": {
+              "seconds": 0.699,
+              "microsec_per_operation": 29145
+            },
+            "fix defects": {
+              "seconds": 1.092,
+              "microsec_per_operation": 45524
+            },
+            "global FFT": {
+              "seconds": 0.567,
+              "microsec_per_operation": 23639
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 0.276,
+              "microsec_per_operation": 11527
+            },
+            "global iFFT": {
+              "seconds": 0.573,
+              "microsec_per_operation": 23887
+            },
+            "prepare patch": {
+              "seconds": 0.198,
+              "microsec_per_operation": 330
+            },
+            "patch alignment": {
+              "seconds": 1.597,
+              "microsec_per_operation": 2661
+            },
+            "fit polynomial": {
+              "seconds": 0.033,
+              "microsec_per_operation": 1380
+            },
+            "dose weighting": {
+              "seconds": 1.351,
+              "microsec_per_operation": 56325
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            }
+          },
+          "stage_table_present": true,
+          "resident_pipeline": {
+            "rows": [
+              {
+                "movie": "20170629_00021_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00022_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00023_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00024_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00025_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00026_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00027_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00028_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00029_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00030_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00031_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00035_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00036_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00037_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00039_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00040_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00042_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00043_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00044_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00045_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00046_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00047_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00048_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00049_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              }
+            ],
+            "movies": 24,
+            "pass": true
+          },
+          "gpu_samples": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/t_main_b1.gpu.log",
+          "native_cuda_markers": 1,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        },
+        "candidate": {
+          "command": [
+            "/scratch/scarf1415/mc-issue77-reviewed/src-candidate-3510657/build-cuda/motioncorr",
+            "--i",
+            "movies.star",
+            "--o",
+            "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/t_candidate_b1",
+            "--use_own",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bfactor",
+            "150",
+            "--gainref",
+            "Movies/gain.mrc",
+            "--seed",
+            "1",
+            "--gpu",
+            "0",
+            "--j",
+            "8"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 31.308,
+          "load1_before": 1.98,
+          "load1_after": 2.19,
+          "stages": {
+            "read gain": {
+              "seconds": 1.657,
+              "microsec_per_operation": 69055
+            },
+            "read movie": {
+              "seconds": 8.89,
+              "microsec_per_operation": 370443
+            },
+            "apply gain and initial sum": {
+              "seconds": 3.153,
+              "microsec_per_operation": 131383
+            },
+            "detect hot pixels": {
+              "seconds": 0.667,
+              "microsec_per_operation": 27812
+            },
+            "fix defects": {
+              "seconds": 1.096,
+              "microsec_per_operation": 45672
+            },
+            "global FFT": {
+              "seconds": 0.563,
+              "microsec_per_operation": 23484
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            },
+            "global alignment": {
+              "seconds": 0.251,
+              "microsec_per_operation": 10489
+            },
+            "global iFFT": {
+              "seconds": 0.568,
+              "microsec_per_operation": 23681
+            },
+            "prepare patch": {
+              "seconds": 0.18,
+              "microsec_per_operation": 300
+            },
+            "patch alignment": {
+              "seconds": 0.854,
+              "microsec_per_operation": 1423
+            },
+            "fit polynomial": {
+              "seconds": 0.032,
+              "microsec_per_operation": 1367
+            },
+            "dose weighting": {
+              "seconds": 1.3,
+              "microsec_per_operation": 54191
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_operation": 0
+            }
+          },
+          "stage_table_present": true,
+          "resident_pipeline": {
+            "rows": [
+              {
+                "movie": "20170629_00021_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00022_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00023_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00024_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00025_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00026_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00027_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00028_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00029_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00030_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00031_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00035_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00036_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00037_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00039_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00040_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00042_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00043_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00044_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00045_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00046_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00047_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00048_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              },
+              {
+                "movie": "20170629_00049_frameImage",
+                "checks": {
+                  "resident_fft": true,
+                  "global_completed": true,
+                  "resident_reconstruction": true,
+                  "local_completed": true,
+                  "resident_dose_dispatch": true,
+                  "resident_dose_profile": true,
+                  "no_fallback_warning": true
+                },
+                "pass": true
+              }
+            ],
+            "movies": 24,
+            "pass": true
+          },
+          "gpu_samples": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/t_candidate_b1.gpu.log",
+          "native_cuda_markers": 1,
+          "micrographs_written": 24,
+          "stderr_tail": ""
+        }
+      },
+      "paired": {
+        "ref_wall_seconds": 33.987,
+        "test_wall_seconds": 31.308,
+        "delta_seconds": -2.679,
+        "test_over_ref": 0.9212,
+        "both_completed": true,
+        "same_micrograph_count": true,
+        "micrographs": 24
+      }
+    }
+  ],
+  "discarded_warmup": {
+    "command": [
+      "/scratch/scarf1415/mc-issue77-reviewed/src-main-3510657/build-cuda/motioncorr",
+      "--i",
+      "movies.star",
+      "--o",
+      "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/warmup",
+      "--use_own",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--seed",
+      "1",
+      "--gpu",
+      "0",
+      "--j",
+      "8"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 31.778,
+    "load1_before": 3.16,
+    "load1_after": 2.68,
+    "stages": {
+      "read gain": {
+        "seconds": 1.578,
+        "microsec_per_operation": 65750
+      },
+      "read movie": {
+        "seconds": 9.682,
+        "microsec_per_operation": 403449
+      },
+      "apply gain and initial sum": {
+        "seconds": 3.194,
+        "microsec_per_operation": 133094
+      },
+      "detect hot pixels": {
+        "seconds": 0.609,
+        "microsec_per_operation": 25376
+      },
+      "fix defects": {
+        "seconds": 1.084,
+        "microsec_per_operation": 45193
+      },
+      "global FFT": {
+        "seconds": 0.565,
+        "microsec_per_operation": 23579
+      },
+      "power spectrum": {
+        "seconds": 0.0,
+        "microsec_per_operation": 0
+      },
+      "global alignment": {
+        "seconds": 0.274,
+        "microsec_per_operation": 11417
+      },
+      "global iFFT": {
+        "seconds": 0.569,
+        "microsec_per_operation": 23729
+      },
+      "prepare patch": {
+        "seconds": 0.192,
+        "microsec_per_operation": 321
+      },
+      "patch alignment": {
+        "seconds": 1.585,
+        "microsec_per_operation": 2642
+      },
+      "fit polynomial": {
+        "seconds": 0.032,
+        "microsec_per_operation": 1365
+      },
+      "dose weighting": {
+        "seconds": 1.285,
+        "microsec_per_operation": 53548
+      },
+      "binning": {
+        "seconds": 0.0,
+        "microsec_per_operation": 0
+      }
+    },
+    "stage_table_present": true,
+    "resident_pipeline": {
+      "rows": [
+        {
+          "movie": "20170629_00021_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00022_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00023_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00024_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00025_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00026_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00027_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00028_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00029_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00030_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00031_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00035_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00036_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00037_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00039_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00040_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00042_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00043_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00044_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00045_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00046_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00047_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00048_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        },
+        {
+          "movie": "20170629_00049_frameImage",
+          "checks": {
+            "resident_fft": true,
+            "global_completed": true,
+            "resident_reconstruction": true,
+            "local_completed": true,
+            "resident_dose_dispatch": true,
+            "resident_dose_profile": true,
+            "no_fallback_warning": true
+          },
+          "pass": true
+        }
+      ],
+      "movies": 24,
+      "pass": true
+    },
+    "gpu_samples": "/scratch/scarf1415/mc-issue77-reviewed/final-head-3510657/timing/warmup.gpu.log",
+    "native_cuda_markers": 1,
+    "micrographs_written": 24,
+    "stderr_tail": ""
+  },
+  "paired_summary": {
+    "blocks": 1,
+    "ratios_test_over_ref": [
+      0.9212
+    ],
+    "median_ratio": 0.9212,
+    "min_ratio": 0.9212,
+    "max_ratio": 0.9212,
+    "deltas_seconds": [
+      -2.679
+    ],
+    "median_delta_seconds": -2.679,
+    "all_blocks_completed": true,
+    "all_blocks_same_micrograph_count": true
+  },
+  "stage_breakdown": {
+    "apply gain and initial sum": {
+      "main_median_seconds": 3.344,
+      "candidate_median_seconds": 3.153,
+      "median_delta_seconds": -0.191
+    },
+    "binning": {
+      "main_median_seconds": 0.0,
+      "candidate_median_seconds": 0.0,
+      "median_delta_seconds": 0.0
+    },
+    "detect hot pixels": {
+      "main_median_seconds": 0.699,
+      "candidate_median_seconds": 0.667,
+      "median_delta_seconds": -0.032
+    },
+    "dose weighting": {
+      "main_median_seconds": 1.351,
+      "candidate_median_seconds": 1.3,
+      "median_delta_seconds": -0.051
+    },
+    "fit polynomial": {
+      "main_median_seconds": 0.033,
+      "candidate_median_seconds": 0.032,
+      "median_delta_seconds": -0.001
+    },
+    "fix defects": {
+      "main_median_seconds": 1.092,
+      "candidate_median_seconds": 1.096,
+      "median_delta_seconds": 0.004
+    },
+    "global FFT": {
+      "main_median_seconds": 0.567,
+      "candidate_median_seconds": 0.563,
+      "median_delta_seconds": -0.004
+    },
+    "global alignment": {
+      "main_median_seconds": 0.276,
+      "candidate_median_seconds": 0.251,
+      "median_delta_seconds": -0.025
+    },
+    "global iFFT": {
+      "main_median_seconds": 0.573,
+      "candidate_median_seconds": 0.568,
+      "median_delta_seconds": -0.005
+    },
+    "patch alignment": {
+      "main_median_seconds": 1.597,
+      "candidate_median_seconds": 0.854,
+      "median_delta_seconds": -0.743
+    },
+    "power spectrum": {
+      "main_median_seconds": 0.0,
+      "candidate_median_seconds": 0.0,
+      "median_delta_seconds": 0.0
+    },
+    "prepare patch": {
+      "main_median_seconds": 0.198,
+      "candidate_median_seconds": 0.18,
+      "median_delta_seconds": -0.018
+    },
+    "read gain": {
+      "main_median_seconds": 1.728,
+      "candidate_median_seconds": 1.657,
+      "median_delta_seconds": -0.071
+    },
+    "read movie": {
+      "main_median_seconds": 9.373,
+      "candidate_median_seconds": 8.89,
+      "median_delta_seconds": -0.483
+    }
+  },
+  "overall": "MEASURED",
+  "interpretation": "Paired, interleaved, same host, same pin, same options, same input. Reported as a measurement of these two heads on this machine only."
+}

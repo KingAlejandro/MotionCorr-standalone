@@ -1258,6 +1258,14 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 }
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+#ifdef _CUDA_ENABLED
+    // Normal execution releases this scratch before reconstruction. Also cover
+    // early returns and exceptions while a CUDA movie is being processed.
+    struct AlignPatchCacheCleanup {
+        bool enabled;
+        ~AlignPatchCacheCleanup() noexcept { if (enabled) cudaReleaseAlignPatchCache(); }
+    } align_patch_cache_cleanup{use_gpu};
+#endif
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
@@ -2335,7 +2343,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 skip_fitting:
 #ifdef _CUDA_ENABLED
 	// The retained full-frame cache is only needed while preparing local patches.
-	if (use_gpu) cudaReleaseCachedFrames();
+	if (use_gpu) {
+		cudaReleaseCachedFrames();
+		cudaReleaseAlignPatchCache();
+	}
 #endif
 	if (!do_dose_weighting || save_noDW || even_odd_split) {
 		Iref().reshape(ny, nx);

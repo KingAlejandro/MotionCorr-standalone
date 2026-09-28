@@ -158,6 +158,8 @@ private:
     int *d_group_size = nullptr;
     size_t sz_cached_Ipatches = 0;
     int cached_ngroups_alloc = 0;
+    std::vector<int> cached_group_start;
+    std::vector<int> cached_group_size;
 };
 
 #endif // _CUDA_ENABLED

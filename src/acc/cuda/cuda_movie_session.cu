@@ -10,6 +10,7 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+#include <cstring>
 
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
@@ -34,9 +35,9 @@
 namespace {
 
 __global__ void fusedGainAndSumKernel(
-    float *d_Iframes,
-    float *d_Isum,
-    const float *d_gain,
+    float * __restrict__ d_Iframes,
+    float * __restrict__ d_Isum,
+    const float * __restrict__ d_gain,
     const size_t num_pixels,
     const int n_frames,
     const bool apply_gain
@@ -44,8 +45,9 @@ __global__ void fusedGainAndSumKernel(
     size_t pixel = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     if (pixel >= num_pixels) return;
 
-    float gain_val = apply_gain ? d_gain[pixel] : 1.0f;
+    float gain_val = apply_gain ? __ldg(&d_gain[pixel]) : 1.0f;
     float sum = 0.0f;
+    #pragma unroll 4
     for (int iframe = 0; iframe < n_frames; iframe++) {
         size_t offset = (size_t)iframe * num_pixels + pixel;
         float val = d_Iframes[offset];
@@ -168,21 +170,31 @@ __global__ void updateDefectKernel(
     }
 }
 
-__global__ void scaleComplexKernel(cufftComplex *d_data, const size_t count, const float scale) {
-    size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < count) {
-        d_data[idx].x *= scale;
-        d_data[idx].y *= scale;
+__global__ void scaleComplexKernel(cufftComplex * __restrict__ d_data, const size_t count, const float scale) {
+    size_t idx = ((size_t)blockIdx.x * blockDim.x + threadIdx.x) * 2;
+    if (idx + 1 < count) {
+        float4 v = *reinterpret_cast<const float4*>(&d_data[idx]);
+        v.x *= scale;
+        v.y *= scale;
+        v.z *= scale;
+        v.w *= scale;
+        *reinterpret_cast<float4*>(&d_data[idx]) = v;
+    } else if (idx < count) {
+        float2 v = *reinterpret_cast<const float2*>(&d_data[idx]);
+        v.x *= scale;
+        v.y *= scale;
+        *reinterpret_cast<float2*>(&d_data[idx]) = v;
     }
 }
 
 __global__ void cropAndGroupPatchResidentKernel(
-    const float *d_Iframes,
-    float *d_Ipatches,
+    const float * __restrict__ d_Iframes,
+    float * __restrict__ d_Ipatches,
     const int nx, const int ny,
     const int x_start, const int y_start,
     const int patch_w, const int patch_h,
-    const int *d_group_start, const int *d_group_size,
+    const int * __restrict__ d_group_start,
+    const int * __restrict__ d_group_size,
     const int n_groups
 ) {
     int px = blockIdx.x * blockDim.x + threadIdx.x;
@@ -199,11 +211,12 @@ __global__ void cropAndGroupPatchResidentKernel(
     int g_start = d_group_start[igroup];
     int g_size  = d_group_size[igroup];
 
+    size_t base_pixel = (size_t)src_y * nx + src_x;
     float sum = 0.0f;
+    #pragma unroll 4
     for (int i = 0; i < g_size; i++) {
         int iframe = g_start + i;
-        size_t src_idx = (size_t)iframe * frame_stride + (size_t)src_y * nx + src_x;
-        sum += d_Iframes[src_idx];
+        sum += __ldg(&d_Iframes[(size_t)iframe * frame_stride + base_pixel]);
     }
 
     size_t dst_idx = (size_t)igroup * patch_stride + (size_t)py * patch_w + px;
@@ -385,6 +398,8 @@ void CudaMovieSession::release() {
     cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    cached_group_start.clear();
+    cached_group_size.clear();
     is_initialized = false;
 }
 
@@ -613,14 +628,13 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     for (int iframe = 0; iframe < n_frames; iframe++) {
         CUFFT_CHECK(cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
                                  d_Fframes + (size_t)iframe * complex_stride));
-        // The next plan reuses the same work area; execution failures surface here.
-        HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
     const float inv_size = 1.0f / ((float)nx * ny);
     const size_t total_comp_elems = (size_t)n_frames * ny * nfx;
+    const size_t num_pairs = (total_comp_elems + 1) / 2;
     const int block = 256;
-    const int grid = (int)((total_comp_elems + block - 1) / block);
+    const int grid = (int)((num_pairs + block - 1) / block);
     scaleComplexKernel<<<grid, block>>>(d_Fframes, total_comp_elems, inv_size);
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
@@ -632,18 +646,18 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (!is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
-    // and only reuse the tile after that transform has completed.
+    // C2R can overwrite its input. Copies and transforms use the same default
+    // stream, so each transform finishes before the next copy reuses its tile.
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
-                                complex_stride * sizeof(cufftComplex),
-                                cudaMemcpyDeviceToDevice));
+        HANDLE_ERROR(cudaMemcpyAsync(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
+                                     complex_stride * sizeof(cufftComplex),
+                                     cudaMemcpyDeviceToDevice, 0));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, d_inverse_tile,
                                  (cufftReal*)(d_Iframes + (size_t)iframe * real_stride)));
-        HANDLE_ERROR(cudaDeviceSynchronize());
     }
+    HANDLE_ERROR(cudaDeviceSynchronize());
     return true;
 }
 
@@ -653,31 +667,70 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (!is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (!is_initialized || n_groups <= 0 || !d_out_fpatches || !group_start || !group_size) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    // Reuse or allocate cached scratch buffers
+    // Allocate replacement scratch before releasing the old allocation, so a
+    // failed growth request leaves ownership and capacity consistent.
     if (!d_Ipatches || sz_cached_Ipatches < sz_all_patch_real) {
+        float *replacement = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&replacement, sz_all_patch_real));
         if (d_Ipatches) cudaFree(d_Ipatches);
-        HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
+        d_Ipatches = replacement;
         sz_cached_Ipatches = sz_all_patch_real;
     }
-    if (!d_group_start || cached_ngroups_alloc < n_groups) {
-        if (d_group_start) cudaFree(d_group_start);
-        if (d_group_size) cudaFree(d_group_size);
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
-        cached_ngroups_alloc = n_groups;
+
+    const size_t group_bytes = (size_t)n_groups * sizeof(int);
+    const bool replace_groups = !d_group_start || !d_group_size || cached_ngroups_alloc < n_groups;
+    const bool upload_groups = replace_groups ||
+        cached_group_start.size() != (size_t)n_groups ||
+        cached_group_size.size() != (size_t)n_groups ||
+        memcmp(cached_group_start.data(), group_start, group_bytes) != 0 ||
+        memcmp(cached_group_size.data(), group_size, group_bytes) != 0;
+    if (upload_groups) {
+        int *new_start = d_group_start;
+        int *new_size = d_group_size;
+        if (replace_groups) {
+            new_start = nullptr;
+            new_size = nullptr;
+            const cudaError_t start_error = cudaMalloc((void**)&new_start, group_bytes);
+            const cudaError_t size_error = start_error == cudaSuccess
+                ? cudaMalloc((void**)&new_size, group_bytes) : start_error;
+            if (size_error != cudaSuccess) {
+                if (new_start) cudaFree(new_start);
+                if (new_size) cudaFree(new_size);
+                logfile << "CUDA group allocation failed: " << cudaGetErrorString(size_error) << std::endl;
+                return false;
+            }
+        }
+        // Invalidate before either upload. A failed second copy must not leave
+        // the old host key describing a partially overwritten device pair.
+        cached_group_start.clear();
+        cached_group_size.clear();
+        const cudaError_t start_error = cudaMemcpy(new_start, group_start, group_bytes, cudaMemcpyHostToDevice);
+        const cudaError_t size_error = start_error == cudaSuccess
+            ? cudaMemcpy(new_size, group_size, group_bytes, cudaMemcpyHostToDevice) : start_error;
+        if (size_error != cudaSuccess) {
+            if (replace_groups) { cudaFree(new_start); cudaFree(new_size); }
+            logfile << "CUDA group upload failed: " << cudaGetErrorString(size_error) << std::endl;
+            return false;
+        }
+        if (replace_groups) {
+            if (d_group_start) cudaFree(d_group_start);
+            if (d_group_size) cudaFree(d_group_size);
+            d_group_start = new_start;
+            d_group_size = new_size;
+            cached_ngroups_alloc = n_groups;
+        }
+        cached_group_start.assign(group_start, group_start + n_groups);
+        cached_group_size.assign(group_size, group_size + n_groups);
     }
 
-    HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-
-    dim3 block(16, 16);
-    dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
+    dim3 block(32, 8);
+    dim3 grid((patch_w + 31) / 32, (patch_h + 7) / 8, n_groups);
     cropAndGroupPatchResidentKernel<<<grid, block>>>(
         d_Iframes,
         d_Ipatches,
@@ -708,8 +761,9 @@ bool CudaMovieSession::preparePatchInVram(
 
     const float inv_patch_size = 1.0f / ((float)patch_w * patch_h);
     const size_t total_comp_elems = (size_t)n_groups * patch_h * patch_nfx;
+    const size_t num_pairs = (total_comp_elems + 1) / 2;
     const int block_scale = 256;
-    const int grid_scale = (int)((total_comp_elems + block_scale - 1) / block_scale);
+    const int grid_scale = (int)((num_pairs + block_scale - 1) / block_scale);
     scaleComplexKernel<<<grid_scale, block_scale>>>(d_out_fpatches, total_comp_elems, inv_patch_size);
     HANDLE_ERROR(cudaGetLastError());
 

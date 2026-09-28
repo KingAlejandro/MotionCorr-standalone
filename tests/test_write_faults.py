@@ -44,6 +44,9 @@ from pathlib import Path
 OUTPUT_BYTES = 1024 + 512 * 512 * 4
 # Under the image, far above the STAR/EPS/log products written alongside it.
 FSIZE_LIMIT = 600_000
+# A finite hard limit for the discriminating control: comfortably above every
+# product MotionCorr writes here, so only the *plumbing* changes meaning.
+FINITE_HARD_LIMIT = 8 * 1024 * 1024
 
 COMMON_ARGS = ["--use_own", "--j", "2", "--skip_defect", "--angpix", "1.0",
                "--voltage", "300", "--patch_x", "1", "--patch_y", "1",
@@ -68,16 +71,39 @@ def sha256(path: Path) -> str:
 
 
 def limited_preexec():
-    # Both survive execve: the ignored disposition and the soft limit.
+    # Runs in the forked child, before exec. Both survive execve: the ignored
+    # disposition and the soft limit.
+    #
+    # The hard limit is read and passed back unchanged. An unprivileged process
+    # cannot RAISE a hard limit, so writing RLIM_INFINITY here fails outright
+    # under a finite inherited hard limit -- which CI and HPC systems do set --
+    # and the child then never execs MotionCorr at all. That failure looks like
+    # the writer fault never triggering, which is the opposite of the truth.
     signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
-    resource.setrlimit(resource.RLIMIT_FSIZE, (FSIZE_LIMIT, resource.RLIM_INFINITY))
+    _, hard = resource.getrlimit(resource.RLIMIT_FSIZE)
+    soft = FSIZE_LIMIT if hard == resource.RLIM_INFINITY else min(FSIZE_LIMIT, hard)
+    resource.setrlimit(resource.RLIMIT_FSIZE, (soft, hard))
 
 
-def run(binary: Path, cwd: Path, star: str, out: Path, extra=(), limited=False):
+def finite_hard_preexec():
+    # Same injection, but the child's hard limit is lowered to a finite value
+    # first. Lowering needs no privilege; it is irreversible for that child,
+    # which is exactly the environment being reproduced.
+    signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
+    _, hard = resource.getrlimit(resource.RLIMIT_FSIZE)
+    if hard == resource.RLIM_INFINITY or hard > FINITE_HARD_LIMIT:
+        hard = FINITE_HARD_LIMIT
+    resource.setrlimit(resource.RLIMIT_FSIZE, (min(FSIZE_LIMIT, hard), hard))
+
+
+def run(binary: Path, cwd: Path, star: str, out: Path, extra=(), limited=False,
+        preexec=None):
+    if preexec is None and limited:
+        preexec = limited_preexec
     return subprocess.run(
         [str(binary.resolve()), "--i", star, "--o", str(out) + "/"] + COMMON_ARGS + list(extra),
         cwd=str(cwd), capture_output=True, text=True,
-        preexec_fn=limited_preexec if limited else None)
+        preexec_fn=preexec)
 
 
 def main():
@@ -164,6 +190,58 @@ def main():
             f"the joint STAR does not list both movies:\n{joint_text}")
         print(f"  phase 3: exit 0, b.mrc {b_mrc.stat().st_size} B, joint STAR lists both, "
               f"a.mrc still sha256 {sha256(a_mrc)[:16]}")
+
+        # -- phase 4: the same fault under a FINITE hard limit ----------
+        # Discriminating control for the harness itself. Phases 2-3 pass even
+        # if the preexec writes RLIM_INFINITY as the hard limit, because the
+        # test runner usually inherits an infinite one and setting it to
+        # infinity is then a no-op. Here the child's hard limit is finite, so a
+        # preexec that tries to raise it fails before exec and MotionCorr never
+        # runs -- which would present as "the fault did not fire".
+        #
+        # Passing therefore requires the injection to reach the real binary:
+        # asserted below on MotionCorr's own EFBIG message, not on an exit code
+        # that a failed spawn could also produce.
+        c_mrc = out / "Movies" / "c.mrc"
+        c_star = out / "Movies" / "c.star"
+        shutil.copy(source, movies / "c.tiff")
+        write_star(tmp / "abc.star", ["Movies/a.tiff", "Movies/b.tiff", "Movies/c.tiff"])
+        joint_before = sha256(joint)
+        b_mrc_hash, b_star_hash = sha256(b_mrc), sha256(b_star)
+        res = subprocess.run(
+            [sys.executable, "-c",
+             "import resource;"
+             "print('child hard limit:', resource.getrlimit(resource.RLIMIT_FSIZE)[1])"],
+            capture_output=True, text=True, preexec_fn=finite_hard_preexec)
+        assert res.returncode == 0, (
+            f"could not lower the hard limit in a child: {res.stderr.strip()}")
+        assert str(FINITE_HARD_LIMIT) in res.stdout, (
+            f"the control did not actually get a finite hard limit: {res.stdout.strip()}")
+
+        res = run(args.binary, tmp, "abc.star", out, ["--only_do_unfinished"],
+                  preexec=finite_hard_preexec)
+        combined = res.stdout + res.stderr
+        tail = combined[-2500:]
+        assert res.returncode > 0, (
+            f"exit {res.returncode} under a finite hard RLIMIT_FSIZE; an unprivileged "
+            f"child cannot raise a hard limit, so the injection may never have reached "
+            f"MotionCorr\n{tail}")
+        assert "Failed to write image data" in combined and "c.mrc" in combined, (
+            f"the run failed, but not with MotionCorr's own short-write error naming "
+            f"c.mrc -- so the fault did not reach the writer\n{tail}")
+        assert not c_star.is_file(), "a completion record was written under the finite-hard control"
+        assert sha256(a_mrc) == a_mrc_hash, "the finite-hard control disturbed movie a"
+        assert sha256(b_mrc) == b_mrc_hash and sha256(b_star) == b_star_hash, (
+            "the finite-hard control disturbed movie b, which phase 3 had repaired")
+        assert sha256(joint) == joint_before, (
+            "the joint STAR was republished by the failed finite-hard-control batch")
+        leftover_c = c_mrc.stat().st_size if c_mrc.is_file() else 0
+        assert leftover_c < OUTPUT_BYTES, (
+            f"c.mrc is {leftover_c} bytes: nothing was truncated, so this phase is not "
+            f"observing the injected fault")
+        print(f"  phase 4: finite hard limit {FINITE_HARD_LIMIT} B -> exit "
+              f"{res.returncode}, MotionCorr reported the short write on c.mrc, "
+              f"c.mrc truncated to {leftover_c} B, no c.star")
 
     print("fail-closed image writes: ok")
     return 0

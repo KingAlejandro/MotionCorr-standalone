@@ -476,7 +476,43 @@ calculator that only answers "how many bytes" can recommend a chunk that can
 never fit, and an evidence trail that only records success cannot tell "the
 bound held" from "the bound was overridden N times". `largestChunkWithin()` in
 the component returns the first of those three explicitly, so a caller cannot
-silently proceed with an inadmissible chunk.
+silently proceed with an inadmissible chunk. #94's counter for the third
+outcome is `over_budget_grants`; cite that name rather than inventing one.
+
+### 9.1 Two hazards a byte counter cannot see
+
+Both found by #94's own review of their branch, recorded here because they are
+prerequisites for anything built on this ADR, and because both are invisible to
+exactly the kind of accounting a staging design would otherwise trust.
+
+**Destruction order versus release order.** A record that owns both a byte
+reservation and the buffer that reservation pays for must free the buffer
+*before* releasing the reservation. A defaulted destructor destroys members in
+reverse declaration order, so a reservation declared last is released first --
+waking a producer blocked on the budget while the consumer is still freeing the
+previous movie. Real resident memory transiently reaches `limit + one movie` on
+a host sized to `limit`, and **no counter can ever show it**, because the
+accounting is already back to zero by the time the second allocation lands.
+#94's own bound assertion stayed green throughout. Their fix is an explicit
+destructor that clears the frames before releasing, plus declaring the
+reservation first so member order alone would also be correct.
+
+This does **not** apply to anything in this branch: `Schedule`, `Geometry`,
+`Policy` and `Budget` own no allocation beyond `std::vector`, have no
+destructors and hold no reservation. It applies the moment a staged record type
+exists -- which is the type §7a.1 says must carry `frames[]`, so whoever writes
+it inherits both notes at once.
+
+**A counter that overcounts is not conservative, it is uninformative.** #94's
+override counter previously incremented for every in-line load, including EER
+and compressed MRC, which are in line by *format* rather than by size. An
+all-EER run therefore reported one override per movie with no bound ever
+broken. The acceptance criterion this ADR cares about -- distinguishing "the
+bound held" from "the bound was overridden N times" -- is defeated just as
+completely by a counter that fires when nothing was overridden as by one that
+stays silent when something was. Any staged-byte counter added later needs the
+same scrutiny: what exactly makes it increment, and can it increment when the
+bound was never at risk?
 
 ---
 

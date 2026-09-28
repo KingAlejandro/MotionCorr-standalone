@@ -246,3 +246,7 @@ Recorded so the gap is visible rather than implied:
 - Cancellation, producer/consumer abort and resume are undesigned here by
   deliberate choice (ADR §7a.3), deferring to #94 and #69 rather than defining a
   competing contract.
+- The two hazards in ADR §9.1 are recorded from #94's review of their own
+  branch, not reproduced here. Neither is testable against this branch: nothing
+  in the component owns a byte reservation or a heap allocation, so there is no
+  destruction-order hazard to exercise and no override counter to overcount.

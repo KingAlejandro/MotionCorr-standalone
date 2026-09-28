@@ -4,8 +4,10 @@
 - **Task Class**: Correctness & Reliability
 - **Assigned Issue**: #92 ("Damaged movie partial-read can pass corrupted/short movie as successful")
 - **Base Commit**: `4c952b3f54479653512c4d208e09c9a8c02f3726` (PR #91 merge on `origin/main`)
+- **Head Commit**: `e5907a414fdeb87fa1d72bb733d212771e8e403e`
 - **Working Branch**: `round96/92-gemini-3-8-flash`
-- **Phase**: Implementation & Validation Complete; Ready for Draft PR
+- **Draft PR**: [#103](https://github.com/KingAlejandro/MotionCorr-standalone/pull/103)
+- **Phase**: Complete (Draft PR Opened & Linked; Local and Remote Validation Passed)
 
 ## Progress Summary
 
@@ -38,14 +40,27 @@
 
 ## Hardware & Environment Witnesses
 
-- **Local Machine**: Apple Silicon (Darwin ARM64), clang Apple clang 17.0.0, CMake 3.31.5, LibTIFF 4.7.0.
-- **Resource Limits**: Local parallelism $\le 8$ cores; zero interference with external processes.
-- **NEEDS_GPU**: No GPU required for this task (pure correctness / CPU I/O integrity task).
+- **Linux Validation Host (`cpu64` - small-refmac-machine)**:
+  - OS: Ubuntu 24.04.2 LTS, Linux 6.8.0-86-generic x86_64
+  - Compiler: GCC 13.3.0, CMake 3.28.3, LibTIFF 4.5.1
+  - Affinity: `taskset -c 32-47` (Node 1, socket 1, 16 CPUs) under `/tmp/motioncorr-issue96-cpu-validation.lock`
+  - Results:
+    - `ctest`: **13/13 tests PASSED (100%)** in 8.63s
+    - `test_damaged_movie.py`: **9/9 tests PASSED**
+  - Binary SHA256:
+    - `build/motioncorr`: `b14059884065a0a45e829ba3463199c4f4dd66b5d626ad3944cc1435d5d3580d`
+    - `build/runner_numerics`: `a07d7361398ae73247c93798a687d06aa79e867b22376e4bb0e3a08cbf60be5f`
+- **macOS Apple Silicon Host (Local)**:
+  - OS: Darwin 24.6.0 ARM64, Clang 17.0.0, LibTIFF 4.7.0
+  - CTest `DamagedMovie`: **PASSED** in 0.90s
+- **GPU Requirements**:
+  - `NEEDS_GPU: NO` — Issue #92 is a CPU/file-integrity correctness task.
 
-## Next Steps
+## Commits & Pull Request
 
-1. Create clean git commits on `round96/92-gemini-3-8-flash`.
-2. Push branch to `origin`.
-3. Open draft pull request with `gh pr create --draft`.
-4. Register PR with MCP `link_pull_request`.
-5. Post scoped progress comment on GitHub Issue #92.
+- PR URL: https://github.com/KingAlejandro/MotionCorr-standalone/pull/103
+- Linked via `t3-code:link_pull_request` MCP tool.
+- Commits:
+  - `8cf2b60` docs(design): document TIFF integrity and expected-frame validation (#92)
+  - `7c70fea` fix(io): intercept LibTIFF directory errors and validate expected frame counts (#92)
+  - `e5907a4` test(io): expand damaged movie and expected frame validation test suite (#92)

@@ -2,8 +2,14 @@
 """Check generated fixtures against the committed known-motion manifest.
 
 Ensures fixture files match the trusted, committed MANIFEST.json byte-for-byte
-and digest-for-digest. Rejects missing fixtures, missing truth files, corrupted/
-byte-flipped fixtures, malformed inventories, and undeclared fixtures.
+and digest-for-digest. Rejects missing fixtures, missing truth files, missing or
+altered STAR inputs, corrupted/byte-flipped fixtures, malformed inventories, and
+undeclared fixtures.
+
+All three per-case artifacts are digested: the movie, the ground-truth JSON and
+the .star gate input. The STAR is checked separately because optics metadata --
+pixel size, voltage, movie reference -- can change without moving a pixel, so the
+movie digest alone cannot detect it.
 
 By default, reads the manifest strictly from git (HEAD) to prevent generator-adjacent
 overwrites from self-verifying noncanonical fixture data.
@@ -84,6 +90,12 @@ def validate_manifest_schema(manifest: Any) -> Dict[str, Any]:
         gt_sha = spec.get("ground_truth_sha256")
         if not gt_sha or not HEX_64_PATTERN.match(str(gt_sha)):
             raise ValueError(f"Case '{name}' missing valid 64-hex 'ground_truth_sha256'")
+        # The .star is a gate input: run_known_motion_gates.py reads its optics group for
+        # pixel size and voltage and its movie reference. A manifest that does not pin it
+        # cannot detect metadata drift that leaves the movie pixels untouched.
+        star_sha = spec.get("star_sha256")
+        if not star_sha or not HEX_64_PATTERN.match(str(star_sha)):
+            raise ValueError(f"Case '{name}' missing valid 64-hex 'star_sha256'")
 
     return manifest
 
@@ -130,6 +142,8 @@ def verify_fixtures(
         want_sha = spec["movie_sha256"]
         want_bytes = spec["movie_bytes"]
         want_gt_sha = spec["ground_truth_sha256"]
+        want_star_sha = spec["star_sha256"]
+        star_path = fixtures_dir / f"{case}.star"
         is_heavy = case in HEAVY_CASES or bool(spec.get("heavy", False))
 
         if not path.exists():
@@ -195,6 +209,30 @@ def verify_fixtures(
             continue
 
         case_entry["ground_truth_status"] = "PASS"
+
+        # STAR input check: REQUIRED for every verified case, and deliberately independent of
+        # the movie digest -- a pixel-size, voltage or movie-reference change does not move a
+        # single pixel, so the movie hash cannot see it.
+        if not star_path.is_file():
+            case_entry["star_status"] = "MISSING"
+            case_entry["error"] = f"Required STAR input {star_path.name} is missing"
+            case_entry["status"] = "MISSING"
+            report["cases"][case] = case_entry
+            report["missing"].append(f"{case}_star")
+            continue
+
+        got_star_sha = sha256_file(star_path)
+        case_entry["star_sha256"] = got_star_sha
+        case_entry["expected_star_sha256"] = want_star_sha
+
+        if got_star_sha != want_star_sha:
+            case_entry["star_status"] = "MISMATCH"
+            case_entry["status"] = "MISMATCH"
+            report["cases"][case] = case_entry
+            report["mismatched"].append(f"{case}_star")
+            continue
+
+        case_entry["star_status"] = "PASS"
 
         if not (sha_ok and bytes_ok):
             report["mismatched"].append(case)
@@ -283,6 +321,12 @@ def main() -> int:
                 print(f"        observed: {entry.get('ground_truth_sha256')}")
             elif entry.get("ground_truth_status") == "MISSING":
                 print(f"      ground-truth JSON MISSING: {entry.get('error')}")
+            if entry.get("star_status") == "MISMATCH":
+                print(f"      STAR input hash MISMATCH:")
+                print(f"        expected: {entry.get('expected_star_sha256')}")
+                print(f"        observed: {entry.get('star_sha256')}")
+            elif entry.get("star_status") == "MISSING":
+                print(f"      STAR input MISSING: {entry.get('error')}")
         if report["undeclared"]:
             print(f"  UNDECLARED FIXTURES: {', '.join(report['undeclared'])}")
         if report.get("reason"):

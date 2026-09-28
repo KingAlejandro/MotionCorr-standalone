@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import difflib
 import json
 import struct
 import subprocess
@@ -346,8 +347,35 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     mrcs = outdir / f"{out_name}.mrcs"
     write_mrc_stack(mrcs, stack, PIXEL_SIZE)
     star = outdir / f"{out_name}.star"
-    star.write_text(STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
-                                         movie=mrcs.name))
+    star_text = STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
+                                     movie=mrcs.name)
+    if canonical:
+        # The committed .star is a trusted gate INPUT, not a regenerable artifact, so canonical
+        # mode compares and refuses rather than rewriting it.
+        #
+        # Rewriting it here is not benign. A STAR_TEMPLATE edit that changes the optics -- a
+        # different _rlnMicrographOriginalPixelSize, _rlnVoltage or _rlnMicrographMovieName --
+        # leaves the generated pixels untouched, so the movie_sha256 check below still passes
+        # and verify_fixtures.py, which hashes the movie and the truth JSON, still reports
+        # VERIFIED. run_known_motion_gates.py would then consume freshly generated metadata
+        # under a green canonical verification, which is exactly the bit-exact parity gate
+        # this fixture set exists to provide.
+        if not star.is_file():
+            raise RuntimeError(f"Canonical mode: missing required committed STAR input {star}")
+        existing_star = star.read_text()
+        if existing_star != star_text:
+            diff = "\n".join(difflib.unified_diff(
+                existing_star.splitlines(), star_text.splitlines(),
+                fromfile=f"committed {star.name}", tofile="generated", lineterm="", n=1))
+            raise RuntimeError(
+                f"Canonical mode STAR disagreement for {out_name}: the committed STAR input does "
+                f"not match what this generator would write. The committed file was NOT modified. "
+                f"If the change is intended, update the fixture and its manifest digest as an "
+                f"explicit maintenance step.\n{diff}"
+            )
+        # Canonical mode verified; committed STAR left untouched on disk.
+    else:
+        star.write_text(star_text)
 
     # Declared evaluation grid: endpoint-inclusive, so the four corners and all four edges are
     # sampled. Corners are where the local polynomial is largest and where a sign or axis defect
@@ -526,6 +554,9 @@ def main() -> None:
                 "movie_bytes": info["bytes"],
                 "ground_truth_sha256": hashlib.sha256(
                     Path(info["ground_truth"]).read_bytes()).hexdigest(),
+                # The STAR is a gate input, so it is digested like the movie and the truth.
+                "star_sha256": hashlib.sha256(
+                    Path(info["star"]).read_bytes()).hexdigest(),
             }
         existing["generator"] = Path(__file__).name
         existing["generator_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()

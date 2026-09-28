@@ -1518,6 +1518,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		Iframes_u16.clear();
 		stage_u16 = false;
 	};
+	// Release the native movie once no reader can still want it in its raw form.
+	// Bounding the lifetime this way matters on the degraded paths: a patch that
+	// does not converge downloads the aligned float frames, and that 1.27 GiB
+	// allocation should not have to sit alongside the 0.64 GiB it replaces.
+	auto drop_u16_staging = [&]() {
+		if (!stage_u16) return;
+		Iframes_u16.clear();
+		stage_u16 = false;
+	};
 
 #ifdef _CUDA_ENABLED
 	std::unique_ptr<CudaMovieSession> movie_session;
@@ -1548,6 +1557,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// A uint16-staged movie is raw in the file's sample type; widen it first so
 		// the gain pass below is the same in-place float multiply as ever.
 		expand_u16_to_float();
+		// expand_u16_to_float is a no-op once the staging has been dropped, and that
+		// is only sound while no raw reader remains. Both call sites of this lambda
+		// run at or before the global forward FFT, which is where the drop happens.
+		// Fail here rather than run the gain pass over an unallocated array.
+		if (Iframes.empty() || Iframes[0]().nzyxdim == 0)
+			REPORT_ERROR("materialize_host_frames: the raw host movie is no longer available.");
 		const bool apply_gain = (fn_gain_reference != "");
 		#pragma omp parallel for num_threads(n_threads)
 		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
@@ -1968,6 +1983,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
 			}
 		}
+#ifdef _CUDA_ENABLED
+		// Resident path: the device holds the transformed movie and both
+		// materialize sites are behind us, so the raw host movie is dead. The
+		// float path cannot do this -- its Iframes are still the fallback source
+		// -- which is why main only clears them when there is no session.
+		if (movie_session) drop_u16_staging();
+#endif
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {

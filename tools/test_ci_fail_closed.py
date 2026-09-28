@@ -406,6 +406,10 @@ exec "{sys.executable}" "$@"
         shutil.copy(CANONICAL_MANIFEST, archive_km / "MANIFEST.json")
         shutil.copy(REPO_ROOT / "test-data" / "known_motion" / "km_global_hisnr_ground_truth.json",
                     archive_km / "km_global_hisnr_ground_truth.json")
+        # Canonical mode treats the .star as a trusted input and refuses to write it, so it
+        # must be staged here exactly as the truth JSON is. Same requirement as Controls 5
+        # and 6; this archive sub-case is simply a third canonical invocation.
+        shutil.copy(CANONICAL_STAR, archive_km / "km_global_hisnr.star")
         res_archive_gen = subprocess.run(
             [sys.executable, str(GENERATOR),
              "--case", "km_global_hisnr",
@@ -413,7 +417,8 @@ exec "{sys.executable}" "$@"
              "--outdir", str(archive_km)],
             capture_output=True, text=True
         )
-        self.assertEqual(res_archive_gen.returncode, 0)
+        self.assertEqual(res_archive_gen.returncode, 0,
+                         f"archive canonical generation must succeed: {res_archive_gen.stderr}")
 
         res_archive_verify = subprocess.run(
             [sys.executable, str(VERIFY_FIXTURES),

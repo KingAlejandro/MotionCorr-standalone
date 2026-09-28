@@ -201,3 +201,19 @@ with *"The dimensions of the image after binning must be even"* (3710/2 and
 3838/2 are both odd). Both builds fail identically; the only textual differences
 are the reported source line, which the port shifts by the lines it adds, and
 backtrace addresses.
+
+
+## Overlap check against PR #110
+
+```
+git merge-tree --write-tree origin/pr110 HEAD   ->  8fed7e92b30c57dafdc17eb8f6d5d68a1a7be394
+exit 0, no conflicted paths
+```
+
+Merged `CMakeLists.txt` contains 16 `add_test` entries: all of #110's
+(`DefectParser`, `WriteFaults`, `CiFailClosedControls`, `ImageWriteFaults`),
+the pre-existing ones, and `GlobalIfftElision`. Merged
+`src/motioncorr_runner.cpp` contains `pre_dw_sum_needed` (5 occurrences) and
+`effective_expected_frames` (5 occurrences), with
+`const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;`
+intact. Nothing from #110's tree was imported into this branch.

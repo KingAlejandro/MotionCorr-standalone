@@ -14,8 +14,10 @@ Three independent oracles, none of which needs a stored reference fixture:
      the same selected frames they must not change when `--dose_weighting` is
      added. This is what fails if the predicate omits a consumer.
   B. determinism -- repeating an identical run must reproduce identical bytes.
-     This targets the uninitialised buffer directly, so a single lucky pass of
-     oracle A cannot carry the test.
+     Defence in depth against the uninitialised buffer. Its power is NOT
+     demonstrated: every negative control tried so far trips A or C first, and
+     a large fresh allocation often arrives zero-filled from the kernel, so this
+     check may simply never fire. Do not count it as coverage on its own.
   C. the predicate is not too broad -- `--patch_x 3` must not collapse onto the
      `--patch_x 1` result, which is what happens if the elision swallows the
      frames that patch clipping needs. This one needs a movie that actually

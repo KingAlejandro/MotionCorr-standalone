@@ -321,8 +321,16 @@ SMT sibling visible in the guest), build and runtime ≤ 16,
 | neg-2 | over-broad: always elide | `478a32f43d5c9a56` | **fail**, oracle A |
 | neg-3 | drops `do_local` only | `aa19af3f0f194739` | **fail**, oracle C |
 
-Every oracle has demonstrated power. neg-1 is the substitution the Sep-27
-handoff asked for and fails with "`_EVN.mrc`: 36767 of 36864 pixel bytes differ
+Oracles A and C have demonstrated power; **oracle B's does not**, and should
+not be counted as coverage. Every negative control trips A or C first, so no
+build in this set reaches B in a failing state. B is defence in depth against
+the uninitialised buffer, not a demonstrated detector — and note the buffer is
+not reliably garbage either: a large fresh allocation usually arrives zero-filled
+from the kernel, so the observed run-to-run variation (§5.1) comes from
+intra-process reuse of a just-freed block, which is timing-dependent. A cannot
+be carried by luck, but B might silently never fire.
+
+neg-1 is the substitution the Sep-27 handoff asked for and fails with "`_EVN.mrc`: 36767 of 36864 pixel bytes differ
 between no dose weighting and with dose weighting". neg-3 isolates oracle C
 (neg-2 trips oracle A first) and additionally fails `SyntheticRegression` with
 max pixel difference 10.315765.
@@ -389,7 +397,7 @@ commit claiming to implement it is out of scope.
 
 | path | permitted change |
 | :-- | :-- |
-| `src/motioncorr_runner.cpp` | the shared `pre_dw_sum_needed` declaration, its use at the `:2340` guard, the `need_real_space_before_dw` predicate, the guarded call in the CPU inverse-FFT loop, and the comments at that call site |
+| `src/motioncorr_runner.cpp` | the shared `pre_dw_sum_needed` and `do_local` declarations, their use at the `:2340` guard, the `need_real_space_before_dw` predicate, the guarded call in the CPU inverse-FFT loop, **removal of `do_local`'s second definition below the patch header** (required by §3.1 — one definition per predicate), an explanatory annotation on the unweighted-micrograph write guard marking it as deliberately *not* unified (§2), and the comments at those sites |
 | `tests/test_runner_contract.py` *or* a new `tests/test_*.py` | the §5.4 content check |
 | `CMakeLists.txt` | registration of a new test, if one is added as a new file |
 | `agents/designs/issue_26_cpu_global_ifft_skip.md`, `agents/designs/logs/issue_26_*` | this specification and its evidence |
@@ -434,7 +442,7 @@ Written for the porting agent; recorded here as delivered.
 | PR #57 / `feat/issue-26-skip-dead-global-ifft` @ `0465ae1` | **superseded.** Prototype and evidence; preserved, not merged. Its predicate restates the guard and its base predates `0f508e0`. |
 | #26 | the investigation this implements. Measurement/tooling for #26 (PR #109) is a separate lane and is untouched. |
 | #66 work package *"#57 CPU inverse-FFT optimization must account for even/odd outputs before integration"* | **discharged** by the shared predicate plus `GlobalIfftElision` and the §5.8 controls. |
-| PR #110 (`integrate/round96-correctness-foundation`) | **no textual overlap** in `src/motioncorr_runner.cpp`: #110's hunks end at `:1357` and resume at `:3329`; this change lives at `:1996–2468`. Two semantic contacts, neither a conflict: (a) #110 adds an `effective_expected_frames` parameter to `isMovieComplete` and a frame-count precondition — orthogonal to, and compatible with, I1's requirement that the product set is unchanged; (b) both add `add_test` entries to `CMakeLists.txt`, which will conflict textually at integration and must be resolved by keeping both. Nothing from #110's tree is imported here. |
+| PR #110 (`integrate/round96-correctness-foundation`) | **merges cleanly — verified, not predicted.** `git merge-tree origin/pr110 HEAD` reports no conflict in any file. The merged `CMakeLists.txt` carries all of #110's `add_test` entries and `GlobalIfftElision`; the merged runner carries both `pre_dw_sum_needed` and `effective_expected_frames` with this predicate intact. No textual overlap in `src/motioncorr_runner.cpp`: #110's hunks end at `:1357` and resume at `:3329`; this change lives at `:1996–2468`. One semantic contact: #110 adds an `effective_expected_frames` parameter to `isMovieComplete` and a frame-count precondition, which is orthogonal to, and compatible with, I1's requirement that the product set is unchanged. Nothing from #110's tree is imported here. (An earlier draft of this document predicted a `CMakeLists.txt` conflict; that was inspection, and the merge check refutes it.) |
 
 **Rejected alternative.** Widening the `:2340` guard, or making even/odd
 independent of it, to enlarge the set of skippable cases. That changes which

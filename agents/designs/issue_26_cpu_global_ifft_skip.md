@@ -291,7 +291,7 @@ figure. No wall-time claim is made from these runs.
 | branch head | conflicts | resulting predicate | consumer guard it faces | outcome |
 | :-- | :-- | :-- | :-- | :-- |
 | `13845fb` (before the disjunct) | `CMakeLists.txt` only | `do_local \|\| !do_dose_weighting \|\| save_noDW` | `… \|\| even_odd_split` | **silently corrupting** |
-| `75fde5f` (with the disjunct) | `CMakeLists.txt` only | `… \|\| save_noDW \|\| even_odd_split` | same | correct |
+| `75fde5f` (with the disjunct; PR #57 later advanced to `0465ae1`, same predicate) | `CMakeLists.txt` only | `… \|\| save_noDW \|\| even_odd_split` | same | correct |
 
 `src/motioncorr_runner.cpp` **auto-merges cleanly in both cases** — git reports no
 conflict there, because the two sides edited different regions. So before the
@@ -320,9 +320,10 @@ SMT sibling visible in the guest), build and runtime ≤ 16,
 | neg-1 | pre-port: `… \|\| save_noDW` only | `765a669cd7a8165e` | **fail**, oracle A |
 | neg-2 | over-broad: always elide | `478a32f43d5c9a56` | **fail**, oracle A |
 | neg-3 | drops `do_local` only | `aa19af3f0f194739` | **fail**, oracle C |
+| neg-4 | drops `save_noDW` from the shared predicate | `587d9ca62f18c7c0` | **fail**, oracle D |
 
-Oracles A and C have demonstrated power; **oracle B's does not**, and should
-not be counted as coverage. Every negative control trips A or C first, so no
+Oracles A, C and D have demonstrated power. **Oracle B's does not**, and should
+not be counted as coverage: every negative control trips A, C or D first, so no
 build in this set reaches B in a failing state. B is defence in depth against
 the uninitialised buffer, not a demonstrated detector — and note the buffer is
 not reliably garbage either: a large fresh allocation usually arrives zero-filled
@@ -330,6 +331,10 @@ from the kernel, so the observed run-to-run variation (§5.1) comes from
 intra-process reuse of a just-freed block, which is timing-dependent. A cannot
 be carried by luck, but B might silently never fire.
 
+neg-4 was added specifically because D — the oracle covering the branch where
+the optimization actually fires — had no control; dropping `save_noDW` from the
+shared predicate makes the `:2340` block stop running, and D catches it through
+its product-set assertion (*"`--save_noDW` did not write `_noDW.mrc`"*).
 neg-1 is the substitution the Sep-27 handoff asked for and fails with "`_EVN.mrc`: 36767 of 36864 pixel bytes differ
 between no dose weighting and with dose weighting". neg-3 isolates oracle C
 (neg-2 trips oracle A first) and additionally fails `SyntheticRegression` with
@@ -358,6 +363,26 @@ header (bytes 0–223).
 
 8 output files across 6 arms, all bit-identical.
 
+#### Controls on the delivered port binary
+
+The arms above were run on `src-fixed`, a main-based build carrying the same
+predicate, not on the port binary itself. Repeated against the port
+(`03468dc2ab24b4f5`; the binary is not path-reproducible because `REPORT_ERROR`
+embeds `__FILE__`, so this differs from `8ea55b8d…` built in another directory):
+
+| check | result |
+| :-- | :-- |
+| full CTest suite | **14/14** |
+| tutorial 3710×3838 `--even_odd_split --dose_weighting`, vs main | pixels, core headers **identical** for `.mrc`, `_EVN.mrc`, `_ODD.mrc` |
+| tutorial 3710×3838 elision path, vs main | pixels, core header **identical** |
+| **metadata differential** vs main (per-movie STAR and `corrected_micrographs.star`, output-path normalised) | **identical** in both configurations |
+| **resume / recovery**: rerun with `--only_do_unfinished` over complete `.mrc`/`_EVN`/`_ODD` | completed products **not rewritten** |
+| peak RSS vs main | elision path −197244 kB (**−6.04%**); even/odd path −184 kB (−0.00%) |
+| CI on the PR head | **green** — PR #111 is MERGEABLE, Build & Smoke Check runs `GlobalIfftElision` among 14/14, CUDA compile-only passes |
+
+This closes the tutorial-scale even/odd configuration — the class that produced
+the original corruption — against the delivered binary rather than a proxy.
+
 A seventh arm, non-square **combined with** binning ×2, could not be run: main
 rejects it as invalid input (3710/2 and 3838/2 are both odd — *"The dimensions
 of the image after binning must be even"*). Both builds reject it identically,
@@ -369,11 +394,12 @@ non-square × binning stays UNRUN in §6.
 
 Not executed here. None of these may be described as passing.
 
-Executed and therefore **not** listed here: the global-only dose-weighted
-elision control and `--save_noDW` (§5.5), the even/odd defect control (§5.1),
-peak RSS (§5.6), and — on the port itself — local 5×5, non-square, binning
-(early/late/with even-odd), the full 14-test suite and three negative controls
-(§5.8).
+Executed and therefore **not** listed here. Note which binary each was run on:
+§5.1–§5.6 used main-based builds (`src-fixed`, `pr57`) as the prototype's
+evidence; §5.8 re-ran the load-bearing ones **on the delivered port binary** —
+full CTest suite, tutorial-scale even/odd and elision paths, metadata
+differential, resume, and peak RSS — plus local 5×5, non-square and binning, and
+four negative controls.
 
 | gap | why it matters |
 | :-- | :-- |
@@ -382,7 +408,8 @@ peak RSS (§5.6), and — on the port itself — local 5×5, non-square, binning
 | CUDA resident and `cudaInverseFFT2D` paths | no GPU in this task; declared unoptimized (§3.3), unverified |
 | tomography pre-exposure even/odd path as an **exact-output** control | the `tomography` case (`test_runner_contract.py:141`) runs as part of the 13 CTests, but it carries `--save_noDW`, so the predicate is true and nothing is elided; it is not a control on this change. (The `exposure` case at `:31` has no `--even_odd_split` at all.) |
 | paired CPU benchmark on current main | deliberately excluded — no new benchmark series in this task |
-| CI on the PR #57 head | cannot run while the PR conflicts (§5.7); build + CTests were run directly on cpu64 instead |
+| oracle B (determinism) | present in the test, power **not** demonstrated — every negative control trips A, C or D first (§5.8) |
+| GPU execution of any kind | no GPU used anywhere in this work |
 
 The ~24% figure for global-only dose-weighted runs comes from base `3e3a196`
 measurements. It is **not** a current-main performance result and must not be
@@ -442,7 +469,7 @@ Written for the porting agent; recorded here as delivered.
 | PR #57 / `feat/issue-26-skip-dead-global-ifft` @ `0465ae1` | **superseded.** Prototype and evidence; preserved, not merged. Its predicate restates the guard and its base predates `0f508e0`. |
 | #26 | the investigation this implements. Measurement/tooling for #26 (PR #109) is a separate lane and is untouched. |
 | #66 work package *"#57 CPU inverse-FFT optimization must account for even/odd outputs before integration"* | **discharged** by the shared predicate plus `GlobalIfftElision` and the §5.8 controls. |
-| PR #110 (`integrate/round96-correctness-foundation`) | **merges cleanly — verified, not predicted.** `git merge-tree origin/pr110 HEAD` reports no conflict in any file. The merged `CMakeLists.txt` carries all of #110's `add_test` entries and `GlobalIfftElision`; the merged runner carries both `pre_dw_sum_needed` and `effective_expected_frames` with this predicate intact. No textual overlap in `src/motioncorr_runner.cpp`: #110's hunks end at `:1357` and resume at `:3329`; this change lives at `:1996–2468`. One semantic contact: #110 adds an `effective_expected_frames` parameter to `isMovieComplete` and a frame-count precondition, which is orthogonal to, and compatible with, I1's requirement that the product set is unchanged. Nothing from #110's tree is imported here. (An earlier draft of this document predicted a `CMakeLists.txt` conflict; that was inspection, and the merge check refutes it.) |
+| PR #110 (`integrate/round96-correctness-foundation`) | **merges cleanly — verified, not predicted.** `git merge-tree origin/pr110 HEAD` reports no conflict in any file. The merged `CMakeLists.txt` carries all of #110's `add_test` entries and `GlobalIfftElision`; the merged runner carries both `pre_dw_sum_needed` and `effective_expected_frames` with this predicate intact. No textual overlap in `src/motioncorr_runner.cpp`: in main-side coordinates #110's hunks end at `:1318` and resume at `:3329`, while this change occupies `:1996–2446`. Two semantic contacts, both orthogonal to and compatible with I1's requirement that the product set is unchanged: #110 adds an `effective_expected_frames` parameter to `isMovieComplete`, **and** adds the same parameter to `executeOwnMotionCorrection`'s signature with a frame-count precondition at the top of the very function this change edits — textually disjoint from `:1996–2446`, but worth naming rather than leaving implicit. Nothing from #110's tree is imported here. (An earlier draft of this document predicted a `CMakeLists.txt` conflict; that was inspection, and the merge check refutes it.) |
 
 **Rejected alternative.** Widening the `:2340` guard, or making even/odd
 independent of it, to enlarge the set of skippable cases. That changes which

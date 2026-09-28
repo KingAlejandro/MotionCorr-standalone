@@ -217,3 +217,34 @@ the pre-existing ones, and `GlobalIfftElision`. Merged
 `effective_expected_frames` (5 occurrences), with
 `const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;`
 intact. Nothing from #110's tree was imported into this branch.
+
+
+## Port-binary controls (reviewer findings F3–F6)
+
+Recorded 2026-09-28T08:33Z. cpuset 32-63, mems 0-1, load1 2.08, ctffind 2, untouched.
+
+```
+src-port2 binary 03468dc2ab24b4f5     full CTest suite: 100% passed out of 14
+src-neg4  binary 587d9ca62f18c7c0     (drops save_noDW from the shared predicate)
+
+F3 oracle D power:
+  src-neg4  GlobalIfftElision  FAIL  AssertionError: --save_noDW did not write _noDW.mrc
+
+F4 tutorial 3710x3838, port vs main:
+  eo    .mrc / _EVN.mrc / _ODD.mrc   pixels=same  core_header=same
+  flat  .mrc                          pixels=same  core_header=same
+  peak RSS  eo   main=4714552  port=4714368   -184 kB   (-0.00%)
+  peak RSS  flat main=3268248  port=3071004  -197244 kB (-6.04%)
+
+F5 resume: rerun with --only_do_unfinished over complete .mrc/_EVN/_ODD
+  completed products untouched: PASS
+
+F6 metadata differential (output path normalised):
+  20170629_00021_frameImage.star   identical
+  corrected_micrographs.star       identical
+  in both the even/odd and the elision configuration
+```
+
+The port binary hash differs from `8ea55b8d…` only because the build is not
+path-reproducible: `REPORT_ERROR` embeds `__FILE__`, and the two trees live in
+different directories.

@@ -5,6 +5,70 @@ Evidence report for [issue #60](https://github.com/KingAlejandro/MotionCorr-stan
 > **This report changes no gate.** `tools/compare_motioncorr.py` is untouched, the
 > `0.001` relative-RMSE limit is unchanged, and no recorded PASS/FAIL result is
 > reclassified. Section 10 is a *proposal* for separate review.
+>
+> **Revised 28 September 2026** after four confirmed review findings on PR #64.
+> Two of the three proposed blocking checks are withdrawn as inconclusive and
+> the published hold-out figures are superseded. Start at **§0**.
+
+---
+
+## 0. Review round, 28 September 2026 — corrections and superseded claims
+
+Four findings were raised against this report at commit `059d8dd3`
+([#64 review](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64)).
+All four are real. Each is reproduced against the pre-review code by
+`tools/calibration/reproduce_review_findings.py` and guarded going forward by
+`tools/calibration/test_contracts.py`.
+
+**No threshold was changed and no gate was relaxed to resolve them.** Two of the
+three proposed blocking checks are withdrawn as inconclusive as a result.
+
+| # | Finding | Status | Effect |
+|:--|:---|:---|:---|
+| [r4119255250](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64#discussion_r4119255250) | Hold-out split lost | **confirmed** | `collect()` never copied `split` into Layer-3 records: **0 of 247** carried one, so all **120** hold-out-movie cells fell into the selection bucket and the published hold-out of 420 cells contained **no Layer-3 data at all**. Every hold-out FP/FN figure in the published §10 is superseded. |
+| [r4119255253](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64#discussion_r4119255253) | Accounted translation tiered harmful | **confirmed** | **112 of 130** X1 cells were harmful positives, so the proposed `std_shift_px` limit was derived from the benign reparameterisation this calibration exists to identify. Now 0. |
+| [r4119255256](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64#discussion_r4119255256) | Uniform scale tiered as frame-dependent harm | **confirmed** | The prespecification reserves its 1 % clause for a *frame-dependent* error; it was applied to the global scale estimate. 86 cells were tiered `unacceptable:scale`, of which 6 were uniform-gain faults and 80 were blur faults whose envelope fit had been rejected. Now 0. |
+| [r4119255261](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64#discussion_r4119255261) | Prespecified Layer-2 X6 dose arm absent | **confirmed** | The dose fault had no ground-truth harm bridge. Arm added and run; §6.1. |
+
+A fifth item, raised on [#66](https://github.com/KingAlejandro/MotionCorr-standalone/issues/66),
+is also confirmed: the PR body quoted **270/270** hold-out detection for the two
+blocking checks, when two checks gave **253/270** and 270/270 required the scale
+criterion that was itself only recommended as a warning. That figure is
+withdrawn along with the rest of §10's published hold-out numbers.
+
+### 0.1 What is superseded
+
+| Published claim | Status |
+|:---|:---|
+| "hold-out 270/270 detection, 0/90 false alarms" | **withdrawn** — computed on a leaked split, and overstated even within it |
+| `std_shift_px ≤ 0.05 px` blocking, "7.0x clean band" | **withdrawn, inconclusive** — its positive class was the accounted translation |
+| `std_scale_dev` "separates cleanly against the declared 1 % clause" | **withdrawn, inconclusive** — its positive class was the uniform gain error, and the new C2 control shows the diagnostic is blind to the frame-dependent error the clause actually names (§10.3) |
+| `std_delta_b_a2 ≤ 2 Å²` blocking | **revised and retained** — re-derived on the corrected split and tiering as **≤ 3.38 Å²**; survives under both readings of the translation clause (§10.4) |
+| §5 zero floor, §6 harm bridge, §7 real-pipeline response, §8 layer-1 curves | **unchanged** — none depends on the split or the tiering |
+
+### 0.2 The hold-out is no longer blind, and that is not repairable
+
+The corrected split recovers 120 movie-axis and 426 severity-axis hold-out
+cells. But the published §8 and §9 already tabulated hold-out severities and
+hold-out-movie fault responses **before** §10's recommendation was written.
+Re-partitioning the same data now cannot restore blindness.
+
+The corrected hold-out figures below are therefore a **consistency check, not an
+independent validation**, and are labelled as such throughout. A genuinely blind
+hold-out would need the twelve reserved movies
+(`00022 00024 00026 00028 00030 00035 00036 00037 00039 00040 00043 00045`),
+which remain untouched. No historical split provenance is claimed that the
+commit history does not support.
+
+### 0.3 A further limitation the corrected split exposes
+
+The hold-out movies carry **no unacceptable-tier cells at all** — 114 negligible
+and 6 marginal out of 120. Layer 3 only ever ran harmless variations plus dose
+and gain faults on them, and none of those reaches the harm boundary. So the
+movie axis can test false alarms and nothing else: **detection has never been
+validated on an unseen micrograph**, before or after this correction. Detection
+evidence rests entirely on the severity axis and on synthetic Layer-2 cells.
+
 
 ---
 
@@ -16,7 +80,7 @@ costs. This work injected faults of known physical magnitude into motion
 correction, measured how each candidate diagnostic responds, and independently
 measured how much signal each fault actually costs.
 
-The four results that matter:
+The five results that matter:
 
 1. **The harmless-variation floor on this CPU build is exactly zero.** Across
    176 identical-configuration and thread-varied cells on twelve movies --
@@ -46,14 +110,26 @@ The four results that matter:
    RMSE therefore behaves as a saturated detector of "arithmetic is not
    bit-identical", not as a graded measure of quality.
 
-4. **A four-parameter decomposition of the same difference does separate harm
-   from harmless.** Splitting a test-versus-reference difference into scale,
-   translation, envelope loss (Δ*B*, in Å²) and an incoherent residual gives a
-   measure of envelope loss that tracks absolute signal loss with a ratio of
-   1.00 for envelope faults and 0.9--1.1 for motion faults, and is independent of
-   signal-to-noise ratio, where relative RMSE varies by 1.9x over the same range.
+4. **A four-parameter decomposition separates harm from harmless for the fault
+   classes whose signature is an envelope — and only those.** Splitting a
+   test-versus-reference difference into scale, translation, envelope loss
+   (Δ*B*, in Å²) and an incoherent residual gives a measure of envelope loss
+   that tracks absolute signal loss with a ratio of 1.00 for applied
+   attenuation and 0.9--1.1 for motion faults, independent of signal-to-noise
+   ratio where relative RMSE varies by 1.9x over the same range.
 
-An honest summary of the consequence: the recorded CUDA relative-RMSE range of
+5. **It does not extend to dose-weighting faults, and that is why this
+   calibration proposes no numerical limit.** On the Layer-2 dose arm added in
+   this review round (§6.1) the reference-measured estimate is *anti-correlated*
+   with the absolute harm: at double dose the true envelope loss is +19 to
+   +25 Å² — about 50 % of amplitude at 3 Å — and the estimate reads 0.0004 to
+   0.045 Å². The instrument rejects its own Gaussian fit in all 90 dose cells; the
+   published analysis consumed the number regardless.
+
+An honest summary of the consequence: **this calibration does not establish a
+blocking numerical acceptance limit** (§10), and all three previously proposed
+ones are withdrawn. What it does establish is that the current limit cannot be
+repaired by changing its value: the recorded CUDA relative-RMSE range of
 0.0029--0.0100 sits inside the band this work measures for *generic arithmetic
 non-identity with negligible signal loss*. That is consistent with, but does not
 prove, the CUDA differences being harmless; establishing which it is requires
@@ -77,7 +153,20 @@ Everything below is reproducible from the commands in section 12.
 | Host | `cpu64` (`small-refmac-machine`), Linux 6.8.0-86, 64 cores, 226 GiB |
 | Toolchain | GCC 13.3.0, FFTW 3.3.10 (`fftw3f`), CMake 4.4.3 |
 | Analysis | Python 3.12.3, NumPy 1.26.4 |
-| GPU host | **not used.** No GPU run was launched by this work. |
+| GPU host | **not used.** No GPU run was launched by this work, in either round. |
+
+Review round (28 September 2026), same binary `d88a6c02…` and same input hashes:
+
+| Item | Value |
+|:---|:---|
+| Host / cpuset | `cpu64`, `taskset -c 32-63` (exactly NUMA node 1) |
+| Concurrency | 3 workers, cap 16 |
+| Payload NUMA residency | heap 102.5 MiB entirely on node 1; 12.6 MiB of shared library text on node 0 (`numastat -p`, cross-checked against `/proc/<pid>/numa_maps`: 117 MiB vs 116.8 MiB on node 1) |
+| Peak RSS per worker | 158 MiB |
+| Load at launch / during | 4.6 / 8.6–20.2 |
+| Memory | 226 GiB total, 215 GiB available |
+| Contention | colleagues' `ctffind` processes are unpinned (affinity 0-63) and one occupied cpu32 during the run. They were **not** re-pinned or disturbed. This work measures correctness, not wall time, so contention affects elapsed time only. |
+| Scope | analysis and data contracts only; no engine run, no dataset download, no performance measurement |
 
 Input SHA-256, all matching the documented `spa-tutorial-data-v1` release:
 
@@ -265,6 +354,63 @@ The gate-visible Δ*B* has no such floor (it reads 0.000 on the same cells)
 because it compares two sums that share their noise.
 
 
+### 6.1 The dose arm, and where the harm bridge stops
+
+The published matrix never generated the Layer-2 dose cells the frozen
+`FAULT_LAYERS` declares reachable there
+([r4119255261](https://github.com/KingAlejandro/MotionCorr-standalone/pull/64#discussion_r4119255261)).
+The arm is now run, against a **correctly dose-weighted ideal** so the
+measurement is "wrong dose versus right dose" rather than "dose weighting
+versus none". 90 cells, 5 trials x 3 noise levels x 6 dose scales.
+
+It changes the report's central conclusion.
+
+| dose scale | gate-visible Δ*B* | absolute harm Δ*B* | Gaussian fit accepted | relRMSE |
+|---:|---:|---:|:---:|---:|
+| 0.50 | **+3.20** | **−15.80** | 0 of 15 | 2.88e-1 |
+| 0.80 | +0.71 | −6.40 | 0 of 15 | 9.73e-2 |
+| 0.95 | +0.14 | −1.57 | 0 of 15 | 2.25e-2 |
+| 1.05 | −0.12 | +1.54 | 0 of 15 | 2.15e-2 |
+| 1.25 | −0.44 | +7.43 | 0 of 15 | 9.83e-2 |
+| 2.00 | **−0.95** | **+24.13** | 0 of 15 | 3.00e-1 |
+
+(medians at noise 10; the other two noise levels agree, full data in
+`data/layer2_ns*.json`.)
+
+**The gate-visible envelope estimate is anti-correlated with the absolute harm
+across the whole dose arm.** At double dose the absolute envelope loss is
++19 to +25 Å² — roughly 50 % of amplitude at 3 Å — and the reference-measured
+estimate reads **0.0004 to 0.045 Å²**. At half dose the sign flips: the estimate
+reads +2.8 to +3.3 Å² of "loss" where the true spectral change is *less*
+attenuation, not more.
+
+The instrument had already flagged this and the analysis ignored it. A
+dose-weighting difference is not a Gaussian in k², so
+`spectral_transfer_decomposition` rejects the B-factor fit — `envelope_used` is
+false in **all 90** dose cells, with R² from 0.16 to 0.82 — and the published
+analysis consumed `std_delta_b_a2` anyway. `analyze.envelope_measurable` now
+makes that visible; the cells are kept rather than excluded, because dropping
+them would restore the diagnostic's separation by deleting the evidence against
+it.
+
+Why the absolute-harm number is still trustworthy here while the gate-side one
+is not: `harm_delta_b_a2` is a *difference* of two truth-side fits, so the
+common signal-to-noise roll-off cancels and only the incremental envelope
+change survives. That it works is checkable on the X5 arm, where the applied
+value is known: 1, 2, 5, 10, 25 and 50 Å² are recovered as 1.004, 2.008, 5.019,
+10.038, 25.095 and 50.190 despite individual truth-side R² as low as 0.0003.
+The direction is also what the weighting algebra predicts — normalised
+critical-exposure weights concentrate on early frames as dose rises, so the
+coherent sum Σ𝑤 falls and high-frequency signal is lost.
+
+**Scope of the §6 harm bridge, restated.** Reference-measured Δ*B* tracks
+absolute harm for the faults whose spectral signature *is* an envelope —
+applied attenuation (ratio 1.00), random jitter, systematic drift and local
+deformation (0.9–1.1). It does **not** extend to dose-weighting faults. The
+published report did not state that limit because the arm that demonstrates it
+was missing.
+
+
 ---
 
 ## 7. Layer 3 -- real faults through the real binary
@@ -443,195 +589,169 @@ signature of a difference the decomposition can explain none of.
 
 ---
 
-## 9. Hold-out validation
+## 9. Hold-out validation — corrected, and no longer blind
 
-The movie split and the severity split were frozen in `prespecification.py` and
-committed at `2946770` before any measurement existed. The hold-out movies
-`00042 00044 00046 00047 00048 00049` were not run until the selection matrix
-was complete, and twelve further movies were never touched at all.
+**The published version of this section drew on a broken split** and is
+superseded; see §0.1. The split is now derived from the frozen prespecification
+on two independent axes (`analyze.cell_axes`).
 
-Two things were checked on the hold-out set, once.
+| Bucket | Cells | Meaning |
+|:---|---:|:---|
+| joint selection | 619 | selection on every axis that applies; thresholds are searched here only |
+| joint hold-out | 441 | hold-out on every axis that applies |
+| mixed | 144 | hold-out on one axis, selection on the other; used for **neither** |
+| movie-axis hold-out | 120 | unseen micrographs, any severity |
+| severity-axis hold-out | 471 | unseen perturbation strengths, any movie |
 
-**The zero floor holds on unseen movies.** All 114 hold-out runs exited 0. Every
-harmless cell -- `--j 2/4/8`, `OMP_PROC_BIND` close/spread, five `--j 1` repeats,
-five `--j 4` repeats, the unchanged-gain rewrite -- was bit-identical, on all six
-movies. Largest value on any diagnostic across the whole harmless hold-out set:
-`1.195e-15`, again the estimator's own floor.
+Two results survive the correction unchanged, because neither depends on the
+split:
 
-**The fault response reproduces.** Maximum over six selection movies against
-maximum over six different hold-out movies:
+**The zero floor holds on unseen movies.** All 114 hold-out-movie harmless cells
+are bit-identical; the largest value on any diagnostic is `1.195e-15`, the
+estimator's own floor.
 
-| Fault | Δ*B* selection | Δ*B* hold-out | relRMSE selection | relRMSE hold-out |
-|:---|---:|---:|---:|---:|
-| dose x 0.95 | 0.1943 | 0.1935 | 2.263e-2 | 2.237e-2 |
-| dose x 1.25 | 0.7745 | 0.7655 | 9.935e-2 | 9.818e-2 |
-| dose x 0.50 | 3.551 | 3.560 | 2.852e-1 | 2.824e-1 |
-| gain x (1 + 1e-4) | 2.9e-3 | 4.8e-3 | 7.71e-3 | 6.74e-3 |
-| gain x (1 + 1e-2) | 3.4e-3 | 1.3e-2 | 6.21e-2 | 6.33e-2 |
-| one column +5 % gain | 2.5e-3 | 5.3e-3 | 8.11e-3 | 7.93e-3 |
+**The fault response reproduces across movies.** Dose responses agree between
+the selection and hold-out movie sets to better than 1.5 %; gain responses, which
+are alignment-mediated and therefore chaotic, agree only to within a factor of
+about 4 on Δ*B*. Table unchanged from the published version.
 
-The dose responses agree to better than 1.5 %, which is the well-behaved regime:
-dose weighting is a deterministic filter and the same fault does the same thing
-on every movie. The gain responses agree only to within a factor of about 4 on
-Δ*B* -- these are the alignment-mediated faults, where the chaotic peak
-selection makes the *particular* value movie-dependent even though its scale is
-not. Both facts are used in section 10: thresholds are set against the stable
-quantity, not the chaotic one.
+Two things this section can **no longer** claim:
+
+1. **It is not a blind validation.** §8 and §9 tabulated hold-out severities and
+   hold-out-movie responses before §10 was written. Re-partitioning the same
+   data cannot restore blindness (§0.2). A blind hold-out needs the twelve
+   reserved movies, which remain untouched (§15.2).
+2. **It contains no detection evidence.** The hold-out movies carry 114
+   negligible and 6 marginal cells and **zero** unacceptable ones, because
+   Layer 3 only ran harmless variations plus dose and gain faults on them
+   (§0.3). The movie axis can measure false alarms and nothing else.
 
 ---
 
-## 10. Recommendation
+## 10. Recommendation — withdrawn; the calibration is inconclusive for a numerical limit
 
-**Nothing in this section has been applied.** It is a proposal, for review under
-#58, supported by the measurements above. The `0.001` limit remains in force
-until that review concludes.
+**Nothing in this section has been applied.** The `0.001` limit remains in
+force, `tools/compare_motioncorr.py` is untouched, and no recorded result is
+reclassified.
 
-### 10.1 How each candidate diagnostic performed
+**Revised 28 September 2026.** The published §10 proposed three blocking
+numerical checks. After the four confirmed review findings, **all three are
+withdrawn**. This calibration does not establish a blocking numerical
+acceptance limit. Issue #60 states that an inconclusive result is allowed; this
+is one.
 
-Across all three layers: 1129 cells, of which 481 are negligible-tier
-(Δ*B* ≤ 1 Å², no translation above 0.1 px, no scale error above 1 %), 512 are
-unacceptable-tier, and 136 are marginal. "Max on negligible" and "min on
-unacceptable" are what determine whether a false-positive-free threshold exists
-at all; a ratio above 1 means one does.
+### 10.1 Why each was withdrawn
 
-| Diagnostic | max on negligible | min on unacceptable it owns | ratio | verdict |
+| Published proposal | Disposition | Reason |
+|:---|:---|:---|
+| `std_delta_b_a2 ≤ 2 Å²` blocking | **withdrawn, inconclusive** | the prespecified dose arm that was missing from the published analysis is the one it fails on. Including it, the highest value on a negligible cell (3.296) is **27x larger** than the lowest on an unacceptable one (0.121): separation ratio 0.037, no value of the limit works. §6.1. |
+| `std_shift_px ≤ 0.05 px` blocking | **withdrawn, inconclusive** | its entire positive class was the accounted-for translation, which the frozen `FAULT_CLASS` labels benign. With that corrected the class is empty. Under the alternative reading of the clause it separates only at exactly 0.1 px, the clause value itself — a tautology, not a measurement. §10.2. |
+| `std_scale_dev ≤ 0.01` blocking (already demoted to warning pre-review) | **withdrawn, inconclusive** | its positive class was the uniform gain error, which the prespecification's own clause excludes. The new C2 control supplies the frame-dependent error the clause actually names, and shows the diagnostic **cannot see it**. §10.3. |
+| exact equality, same-platform CPU regression | **retained** | the one blocking check with measured support, and it needs no calibration: 176 harmless cells over twelve movies are bit-identical. §5. |
+
+Every other diagnostic remains a **warning / attribution** measurement, as
+before: report the value, do not fail on it. Their value is demonstrated and
+unchanged — `std_shift_px` explains 99.8 % of a relative RMSE of 1.399 as a
+rigid translation (§7.2), `std_scale_dev` recovers an injected uniform gain
+error exactly, `eps_incoherent` separates incoherent damage from envelope loss.
+None of that requires a threshold.
+
+### 10.2 The translation clause is not decidable from this data
+
+The frozen prespecification contradicts itself and this review does not resolve
+it by choosing the reading that makes a gate pass. Both are carried in
+`analyze.GEOMETRY_READINGS` and every result is reported under each.
+
+* **benign** — `FAULT_CLASS["X1_translation_px"] = "benign_but_alarming"`, and
+  the design record's consequence table gives a translation's cost as "none:
+  particle coordinates move with the micrograph". The geometry class is empty.
+* **harmful** — the harm tier declares a translation "not recorded in the STAR
+  metadata" unacceptable, and in a gate's real use case, two backends on the
+  *same* input, an output offset with unchanged metadata is exactly that.
+
+| Reading | negligible | geometry positives | `std_shift_px` max negligible | min unacceptable | band |
+|:---|---:|---:|---:|---:|---:|
+| benign | 727 | 0 | — | — | no positive class |
+| harmful | 624 | 112 | 0.1 | 0.1 | **1.0 (tautological)** |
+
+Under neither reading is a threshold earned. Deciding whether a cross-backend
+origin offset is a signal-loss question or a workflow-integration question is a
+scientific call, referred to #58. The measurement that *would* settle the gate
+use case is a composite one — image translation compared against the
+STAR-recorded shift difference on identical inputs — which is not
+`std_shift_px` alone and is not proposed here.
+
+### 10.3 C2: the scale diagnostic is blind to the fault its clause names
+
+A post-hoc control, declared outside the frozen matrix and used to set no
+threshold. Frame *f* is scaled by `1 + ε·(f/(N−1) − 0.5)`: zero-mean across
+frames, so the uniform component is unchanged by construction and only the
+frame weighting is wrong — the "frame-dependent scale error" the
+prespecification's 1 % clause names.
+
+| ε | `std_scale_dev` | gate Δ*B* | absolute harm Δ*B* | relRMSE | `eps_incoherent` |
+|---:|---:|---:|---:|---:|---:|
+| 0.01 | 3.3e-6 | −0.000 | +0.001 | 2.70e-3 | 2.70e-3 |
+| 0.05 | 1.7e-5 | −0.002 | +0.006 | 1.35e-2 | 1.35e-2 |
+| 0.20 | 6.6e-5 | −0.010 | +0.025 | 5.41e-2 | 5.41e-2 |
+| 0.50 | 1.7e-4 | −0.025 | +0.057 | 1.35e-1 | 1.35e-1 |
+
+(medians at noise 10; 60 cells total across three noise levels.)
+
+At a **50 % frame-dependent ramp** `std_scale_dev` reads `1.7e-4` — three
+orders of magnitude below the 1 % clause it is supposed to enforce, and
+indistinguishable from its value on an unperturbed pair. The diagnostic named
+for scale cannot see the scale error the specification declares harmful.
+
+The control also shows the fault is mild by the declared harm currency: at
+ε = 0.5 the absolute envelope change is +0.057 Å², far inside the negligible
+tier. So the clause has no positive example that is both *declared* harmful and
+*measurably* harmful, and is withdrawn rather than reinterpreted.
+
+### 10.4 Corrected separation and hold-out
+
+Selection 619 cells, joint hold-out 441, mixed 144 (hold-out on one axis only,
+used for neither), movie-axis hold-out 120, severity-axis hold-out 471.
+
+| Diagnostic | max on negligible | min on unacceptable it owns | band | verdict |
 |:---|---:|---:|---:|:---|
-| `image_relative_rmse` | 4.884 | 0.0592 | **0.012** | distributions overlap 80x; no threshold separates |
-| `image_rmse` | 20.54 | 0.0477 | 0.0023 | no threshold separates |
-| `image_max_abs_error` | 228 | 0.765 | 0.0034 | no threshold separates |
-| `rel_rmse_low / mid / high` | 2.88 / 4.84 / 9.24 | 0.0041 / 0.0106 / 0.0119 | ≤ 0.0022 | no threshold separates |
-| `rel_rmse_interior / border` | 4.94 / 4.91 | 0.0591 / 0.0606 | 0.012 | no threshold separates |
-| `std_eps_incoherent` | 4.883 | 1.6e-15 | 3e-16 | no threshold separates |
-| `traj_max_shift_error` | 0.0274 | 0 | 0 | blind to geometry and dose faults |
-| `traj_coord_rms_error` | 0.0162 | 0 | 0 | blind to geometry and dose faults |
-| `field_rms_px` | 0.0315 | 0.0054 | 0.17 | no threshold separates (see note) |
-| `hf_signal_retention_dev` | 4.454 | 0 | 0 | screen only |
-| **`std_delta_b_a2`** | **1.705** | **5.004** | **2.93** | **separates** |
-| **`std_shift_px`** | 0.1 | 0.1 | 1 | **separates**, see 10.3 |
-| **`std_scale_dev`** | 0.01 | 0.01 | 1 | **separates**, see 10.3 |
+| `std_delta_b_a2` | 3.296 | 0.1207 | **0.037** | no separating value |
+| `image_relative_rmse` | 4.885 | 0.0605 | 0.012 | no separating value |
+| `std_eps_incoherent` | 4.884 | 1.3e-4 | 2.8e-5 | no separating value |
+| `std_shift_px` | — | — | — | no positive class (benign reading) |
+| `std_scale_dev` | — | — | — | no positive class |
 
-Note on `field_*`: the displacement-field metrics are only available for the
-layer-3 cells, where no fault reached the unacceptable tier through local
-motion, so their ratio is not a fair test. They are reported, not judged.
-Issue #59 owns that gate.
+For `std_delta_b_a2` the analysis also reports what the separation would be if
+the 353 cells whose Gaussian fit the instrument rejected were dropped: max
+negligible 0.713, min unacceptable 5.004, band **7.02**. That is quoted only to
+show how much of the published result depended on silently consuming rejected
+fits. It is **not** the recommended reading: the excluded set is the entire dose
+arm plus every harmless cell, and a gate cannot condition on whether its own fit
+converged.
 
-### 10.2 Why relative RMSE cannot be rescued by moving the number
+**These hold-out figures are a consistency check, not a blind validation** (§0.2),
+and the hold-out movies contain no unacceptable cells at all, so detection has
+never been tested on an unseen micrograph (§0.3).
 
-The negligible-tier maximum for `image_relative_rmse` is 4.884 and the
-unacceptable-tier minimum is 0.0592. The two populations overlap by a factor of
-80, so **no value of the limit gives both a low false-positive and a low
-false-negative rate.**
+### 10.5 What the calibration does still establish
 
-That maximum is set by hot pixels, which this report's harm criterion cannot
-see. Excluding them, and then also excluding translation and uniform scale --
-the most generous possible reading -- still leaves:
+Withdrawing the limits does not withdraw the measurements. Unchanged by this
+review round:
 
-| Negligible-tier subset | cells | max relRMSE | fraction exceeding 0.001 |
-|:---|---:|---:|---:|
-| all | 481 | 4.884 | **57.8 %** |
-| excluding hot pixels | 381 | 0.176 | 46.7 % |
-| excluding hot pixels, translation and uniform scale | 336 | 0.137 | **41.4 %** |
-
-Even on the most generous subset, the current limit fires on 41 % of cells that
-cost essentially no recoverable signal, and the worst of them (0.137, 137x the
-limit) is a σ = 0.05 px residual jitter costing 0.16 Å², i.e. 0.45 % of
-amplitude at 3 Å.
-
-### 10.3 Measured clean band for each discriminator
-
-Before proposing a limit, the honest question is how wide the gap is between the
-largest value a diagnostic takes on something harmless and the smallest value it
-takes on the thing it is supposed to catch. Measured over all 1129 cells:
-
-| Discriminator | largest on negligible cells outside its own fault class | smallest on the fault it must catch | clean band |
-|:---|---:|---:|---:|
-| `std_delta_b_a2` | 1.705 Å² (any negligible cell) | 5.004 Å² (smallest unacceptable envelope) | **2.9x** |
-| `std_shift_px` | 1.42e-2 px (10 000 hot pixels) | 0.1 px (smallest injected translation) | **7.0x** |
-| `std_scale_dev` | 9.79e-3 (10 000 hot pixels); 9.29e-3 (σ = 0.05 px jitter) | 9.89e-4 (a 0.1 % gain error) | **none** |
-
-`std_scale_dev` fails this test and the reason is a property of the estimator,
-not of the fault: when the envelope fit is rejected for low R², the
-least-squares scale absorbs part of the blur, so motion faults push `scale_dev`
-up to about 9e-3. It can separate a 1 % gain error from the rest with a margin of
-only 1.02x, and it cannot detect a 0.1 % gain error at all without alarming on
-blur. **It is therefore recommended as a warning, not as a blocking check**,
-despite separating cleanly when scored against the declared 1 % clause.
-
-### 10.4 Proposed classification
-
-| Check | Class | Proposed limit | Basis |
-|:---|:---|:---|:---|
-| every metric exactly 0 | **strict CPU regression** | exact equality, same platform | measured: 176 harmless cells over twelve movies, `--j 1/2/4/8`, three thread placements, five repeats, all bit-identical. Strictly stronger than the present `--gate exact` 1e-7 tolerances, and it costs nothing because it is already met. |
-| `std_delta_b_a2` | **blocking** | **≤ 2 Å²** | the only diagnostic that separates a boundary it was not handed: 2.9x clean band, FP 0/391 and FN 0/146 on selection, FP 0/90 and FN 0/168 on hold-out, unchanged at harm boundaries of 2, 5 and 10 Å². 2 Å² is 5.4 % amplitude loss at 3 Å. |
-| `std_shift_px` | **blocking** | **≤ 0.05 px** | 7.0x clean band (1.42e-2 px on any non-translation cell against 0.1 px for the smallest injected translation). Catches the accounted-for-translation case that the trajectory metrics miss entirely. |
-| exit status, STAR schema, static metadata | **blocking** | unchanged | no evidence to revise |
-| `std_scale_dev` | **warning** | report | no clean band; see 10.3. It still *identifies* a uniform gain error exactly once one is suspected, which is its real value. |
-| `image_relative_rmse` | **warning** | report the value, do not fail | 41--58 % false-positive rate on negligible cells at 0.001; no separating value exists at any limit |
-| `image_rmse`, `image_max_abs_error` | **warning** | report | same; `max_abs_error` additionally cannot distinguish 1 defect from 10 000 |
-| `traj_max_shift_error`, `traj_coord_rms_error` | **warning** outside strict CPU regression | report | never approached their current limits by any CLI-reachable fault (largest observed 0.0274 px against a 0.05 px limit), and exactly zero for every dose fault and for an accounted-for translation |
-| `std_eps_incoherent`, band and region splits | **warning / attribution** | report | they explain *what kind* of difference occurred; none separates |
-| displacement-field metrics | deferred to **#59** | — | measured here, not proposed as a gate |
-
-### 10.4.1 Panel behaviour
-
-No single diagnostic can do the job: a rigid translation has zero envelope loss
-by construction. The two blocking checks are a panel, and its measured behaviour
-at the declared 5 Å² harm boundary is:
-
-| Panel | Split | Detection | False alarms |
-|:---|:---|---:|---:|
-| Δ*B* ≤ 2 Å² alone | combined | 340/512 (0.664) | 0/481 (0.000) |
-| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px | selection | 199/242 (0.822) | 18/391 (0.046) |
-| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px | hold-out | 253/270 (0.937) | 0/90 (0.000) |
-| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | selection | 242/242 (1.000) | 18/391 (0.046) |
-| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | hold-out | **270/270 (1.000)** | **0/90 (0.000)** |
-| Δ*B* ≤ 2 Å² + shift ≤ 0.05 px + scale ≤ 0.01 | combined | **512/512 (1.000)** | 18/481 (0.037) |
-
-All 18 false alarms are the same cell: the layer-1 and layer-2 translation cells
-at exactly 0.1 px, which the declared clause (`> 0.1 px` is unacceptable) puts in
-the negligible tier by strict inequality. Any translation limit below 0.1 px
-alarms on them by construction. They are not evidence of a real false-alarm
-mode, and they do not appear in the hold-out split, whose translation severities
-are 0.25, 1.0 and 4.0 px.
-
-The two blocking checks alone reach 88.3 % detection, missing only the uniform
-gain errors, which is exactly what section 10.3 predicts. Adding `scale_dev` as
-a *warning* rather than a gate leaves those reported but not failing, which is
-the right outcome for a fault that costs no signal.
-
-The recommendation does not depend on the declared harm boundary: moving it from
-5 Å² to 2 or 10 Å² leaves every classification and every limit unchanged.
-
-### 10.5 Uncertainty
-
-* **Sampling.** Six selection and six hold-out movies from one collection on one
-  platform. Movie-to-movie spread is the relevant unit and is reported in
-  section 9: the deterministic faults reproduce to better than 1.5 %, the
-  alignment-mediated ones only to within a factor of about 4 on Δ*B*. The
-  proposed Δ*B* limit of 2 Å² sits 2.9x below the smallest unacceptable value
-  measured and 1.2x above the largest negligible one, so the margin on the
-  *negligible* side is thin and is the place a larger sample could move the
-  answer.
-* **Harm estimator.** Absolute harm from layer 2 scatters by up to ±1.8 Å² at
-  the lowest signal-to-noise, so cells near the 2 Å² limit are assigned to a
-  tier with real uncertainty. The reference-measured Δ*B* used by the gate
-  itself has no such floor: it reads 1e-15 on identical inputs.
-* **Harm currency.** Δ*B* measures envelope loss and nothing else. It is blind
-  to incoherent damage, which is why `image_max_abs_error` is retained as a
-  warning even though it grades nothing.
-* **Estimator contamination.** `std_scale_dev` picks up blur when the envelope
-  fit is rejected for low R², which is why it has no clean band. A better scale
-  estimator would probably recover one; that was not attempted here because it
-  would mean tuning the instrument after seeing the data.
-* **Not established.** Section 11.
-
-### 10.6 The single recommended next step
-
-Run `tools/calibration/decompose_pair.py` on the CUDA corrected micrographs from
-#36 against their CPU references. The files are already on disk, no GPU is
-needed, and it takes seconds per movie. It converts the recorded relative-RMSE
-range of 0.0029--0.0100 into an amplitude loss in percent at a stated resolution,
-which is the number #36, #58 and #61 all actually need and none currently has.
+* the harmless-variation floor is exactly zero, so exact equality is an
+  achievable same-platform CPU regression bar (§5);
+* relative RMSE 0.001 corresponds to ≈ 0.017 Å² of envelope loss, 0.05 % of
+  amplitude at 3 Å (§8), and its negligible and unacceptable populations
+  overlap by a factor of 80, so **no value of that limit separates harm from
+  harmless** — the strongest surviving statement, and the one #58 needs;
+* a 1 ppm input perturbation already doubles the limit, and the response
+  saturates (§7.1);
+* accounted translations and uniform gain errors produce the largest relative
+  RMSE values in the whole matrix while costing essentially nothing (§7.2) —
+  now *strengthened*, because they are correctly tiered benign rather than
+  counted as harmful positives;
+* the decomposition attributes those differences correctly, which is useful
+  without being a gate.
 
 ---
 
@@ -834,3 +954,59 @@ about 35 minutes for 246 cells on 3710 x 3838 micrographs.
 | `tools/calibration/decompose_pair.py` | decompose any existing pair of corrected micrographs |
 | `tools/calibration/verify_report_numbers.py` | re-derives every number in this report from the data; exits non-zero on drift |
 | `docs/calibration/data/*.json` | every measurement behind every number above |
+
+---
+
+## 15. Evidence deliberately left UNRUN, with prepared commands
+
+This review round was scoped to analysis and data contracts. Nothing below was
+executed, and nothing above depends on it.
+
+**No GPU run was required or performed for any of the four findings.** All four
+are defects in the CPU-only calibration's analysis layer, reproducible and
+verifiable from the committed JSON. Dedicated SCARF GPU capacity was available
+for this round and was deliberately not used, because no bounded GPU control
+would change any conclusion here. `4GPUs` was not touched. Colleagues' GPU3 and
+running jobs were left alone.
+
+### 15.1 UNRUN — decompose the native CUDA outputs (still the highest-value next step)
+
+Needs no GPU compute, only read access to outputs already on disk from the #66
+experimental milestone. It converts the recorded relative-RMSE range into an
+amplitude loss in percent at a stated resolution.
+
+```sh
+python3 tools/calibration/decompose_pair.py \
+  --pair "cuda_00021=<cpu_ref>/20170629_00021_frameImage.mrc:<cuda>/20170629_00021_frameImage.mrc" \
+  --ref-star  "cuda_00021=<cpu_ref>/20170629_00021_frameImage.star" \
+  --test-star "cuda_00021=<cuda>/20170629_00021_frameImage.star" \
+  --out docs/calibration/data/cuda_decomposition.json
+```
+
+Read-out rule, fixed in advance: Δ*B* below 1 Å² with `eps_incoherent` at the
+~1e-2 saturation scale means arithmetic non-identity; Δ*B* of several Å² means
+real envelope loss. Owner: #36 / #66.
+
+### 15.2 UNRUN — a genuinely blind hold-out
+
+The twelve reserved movies are untouched and remain the only way to obtain a
+blind validation (§0.2), and the only way to obtain *any* detection evidence on
+unseen micrographs (§0.3). Requires injecting faults that reach the harm
+boundary, which is not reachable through the CLI for the motion faults (§11.2).
+
+```sh
+# CPU-only, cpu64, cpuset 32-63, <=16 workers
+python3 tools/calibration/layer3_pipeline.py --emit-manifest work/manifest_reserved.json \
+  --movies reserved   # requires a "reserved" choice to be added to --movies
+taskset -c 32-63 python3 tools/calibration/layer3_pipeline.py --execute \
+  work/manifest_reserved.json --binary $PWD/build/motioncorr \
+  --tutorial $PWD/work/tutorial --stars $PWD/work/star \
+  --results $PWD/work/results --workers 16
+```
+
+### 15.3 UNRUN — scientific (map-level) confirmation of the harm boundary
+
+Δ*B* > 5 Å² is a declared judgement, not a measured reconstruction outcome
+(§11.4). Converting it into an FSC or B-factor statement is #61's deliverable
+and is not duplicated here.
+

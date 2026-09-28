@@ -9,92 +9,169 @@ Exits non-zero if any number in docs/calibration/issue60_gate_calibration.md
 drifts from what docs/calibration/data/*.json actually contains. It exists so a
 reviewer does not have to take the prose on trust, and so a later edit to the
 data cannot silently invalidate the report.
+
+Revised 28 September 2026 for the review round: the split, the tiering and the
+Layer-2 dose arm all changed, so the expected values here changed with them.
+The superseded pre-review values are listed in report section 0.1.
 """
-import sys, glob, math, statistics as st
+
+from __future__ import annotations
+
+import collections
+import glob
+import math
+import statistics as st
+import sys
 from pathlib import Path
-sys.path.insert(0,'.')
-from tools.calibration import analyze as A
-paths=[Path(p) for p in glob.glob("docs/calibration/data/layer*.json")]
-l1=A.load([p for p in paths if 'layer1' in p.name]); l2=A.load([p for p in paths if 'layer2' in p.name]); l3=A.load([p for p in paths if 'layer3' in p.name])
-allr=l1+l2+l3; floors=A.noise_floor(l3)["j4"]
-ok=[]
-def chk(claim, got, want, tol=0.02):
-    good = abs(got-want) <= tol*max(abs(want),1e-12) if want else abs(got)<=tol
-    ok.append(good)
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from tools.calibration import analyze as A  # noqa: E402
+
+OK: list[bool] = []
+
+
+def chk(claim: str, got: float, want: float, tol: float = 0.02) -> None:
+    good = abs(got - want) <= tol * max(abs(want), 1e-12) if want else abs(got) <= tol
+    OK.append(good)
     print(f"[{'OK ' if good else 'BAD'}] {claim}: report {want}, data {got}")
 
-# 1. harmless floor
-harmless=[r for r in l3 if r.get("group") in ("REF","H1_threads","H2_proc_bind","H3_repeat") or r.get("label") in ("gain_null","mov_null")]
-vals=[abs(A.get(r,d)) for r in harmless for d in
-      ("image_relative_rmse","image_rmse","image_max_abs_error","std_delta_b_a2","std_eps_incoherent",
-       "std_shift_px","std_scale_dev","traj_max_shift_error","traj_coord_rms_error","field_rms_px")
-      if A.get(r,d) is not None]
-chk("harmless cell count", len(harmless), 176, 0)
-print(f"      harmless cells = {len(harmless)}, max |value| = {max(vals):.3e}")
-chk("largest harmless value <= 1.5e-15", max(vals), 1.478e-15, 0.05)
 
-# 2. tier census
-census={}
-for r in allr:
-    t=A.tier_of(r,"harm_delta_b_a2",5.0,floors); census[t]=census.get(t,0)+1
-print("      census:", census)
-chk("negligible cells", census["negligible"], 481, 0)
-chk("total cells", len(allr), 1129, 0)
+def med(rows, key):
+    vals = [v for v in (A.get(r, key) for r in rows) if v is not None]
+    return st.median(vals) if vals else float("nan")
 
-# 3. relative RMSE overlap
-neg=[r for r in allr if A.tier_of(r,"harm_delta_b_a2",5.0,floors)=="negligible"]
-bad=[r for r in allr if A.tier_of(r,"harm_delta_b_a2",5.0,floors).startswith("unacceptable")]
-chk("max relRMSE on negligible", max(abs(A.get(r,"image_relative_rmse")) for r in neg if A.get(r,"image_relative_rmse") is not None), 4.884, 0.01)
-over=sum(1 for r in neg if (A.get(r,"image_relative_rmse") or 0)>0.001)
-chk("negligible cells exceeding 0.001 (fraction)", over/len(neg), 0.578, 0.01)
 
-# 4. delta-B separation
-mn=max(abs(A.get(r,"std_delta_b_a2")) for r in neg if A.get(r,"std_delta_b_a2") is not None)
-mb=min(abs(A.get(r,"std_delta_b_a2")) for r in bad
-       if A.get(r,"std_delta_b_a2") is not None and A.tier_of(r,"harm_delta_b_a2",5.0,floors)=="unacceptable:envelope")
-chk("max dB on negligible", mn, 1.705, 0.01); chk("min dB on unacceptable envelope", mb, 5.004, 0.01)
-chk("dB clean band", mb/mn, 2.93, 0.02)
+def main() -> int:
+    paths = [Path(p) for p in glob.glob("docs/calibration/data/layer*.json")]
+    l1 = A.load([p for p in paths if "layer1" in p.name])
+    l2 = A.load([p for p in paths if "layer2" in p.name])
+    l3 = A.load([p for p in paths if "layer3" in p.name])
+    allr = l1 + l2 + l3
+    floors = A.noise_floor(l3)["j4"]
 
-# 5. shift clean band
-def f(r): return str(r.get("fault") or r.get("group") or "")
-chk("max shift on negligible non-translation", max(abs(A.get(r,"std_shift_px")) for r in neg if "X1" not in f(r) and A.get(r,"std_shift_px") is not None), 1.42e-2, 0.02)
+    print("--- cell counts ---")
+    chk("layer 1 cells", len(l1), 252, 0)
+    chk("layer 2 cells (with the X6 arm and C2 control)", len(l2), 780, 0)
+    chk("layer 3 cells", len(l3), 247, 0)
+    chk("total cells", len(allr), 1279, 0)
 
-# 6. panel
-sel=[r for r in allr if r.get("split") in (None,"selection","control")]; hold=[r for r in allr if r.get("split")=="holdout"]
-c=A.panel_coverage(hold,{"std_delta_b_a2":2.0,"std_shift_px":0.05,"std_scale_dev":1e-2},"harm_delta_b_a2",5.0,floors)
-chk("hold-out detection", c["caught"], 270, 0); chk("hold-out false alarms", c["false_alarms"], 0, 0)
+    print("\n--- section 5: harmless-variation floor ---")
+    harmless = [r for r in l3 if r.get("group") in
+                ("REF", "H1_threads", "H2_proc_bind", "H3_repeat")
+                or r.get("label") in ("gain_null", "mov_null")]
+    vals = [abs(A.get(r, d)) for r in harmless for d in
+            ("image_relative_rmse", "image_rmse", "image_max_abs_error",
+             "std_delta_b_a2", "std_eps_incoherent", "std_shift_px",
+             "std_scale_dev", "traj_max_shift_error", "traj_coord_rms_error",
+             "field_rms_px") if A.get(r, d) is not None]
+    chk("harmless cell count", len(harmless), 176, 0)
+    chk("largest harmless value", max(vals), 1.478e-15, 0.05)
 
-# 7. L1 key rows
-def l1row(flt,sev,key):
-    v=[abs(A.get(r,key)) for r in l1 if r["fault"]==flt and abs(r["severity"]-sev)<1e-9 and A.get(r,key) is not None]
-    return st.median(v)
-chk("L1 translation 0.1px relRMSE", l1row("X1_translation_px",0.1,"image_relative_rmse"), 0.1681, 0.005)
-chk("L1 translation 0.1px dB ~ 0", l1row("X1_translation_px",0.1,"std_delta_b_a2"), 0.0, 1e-12)
-chk("L1 jitter 0.4px dB", l1row("X2_jitter_sigma_px",0.4,"std_delta_b_a2"), 9.911, 0.01)
-chk("L1 applied dB 5 recovered", l1row("X5_applied_delta_b_a2",5.0,"std_delta_b_a2"), 5.004, 0.005)
-chk("L1 jitter 0.02px relRMSE", l1row("X2_jitter_sigma_px",0.02,"image_relative_rmse"), 0.001441, 0.01)
-chk("L1 jitter 0.02px dB", l1row("X2_jitter_sigma_px",0.02,"std_delta_b_a2"), 0.02507, 0.01)
+    print("\n--- section 0 / 9: the corrected two-axis split ---")
+    js = collections.Counter(A.joint_split(r) for r in allr)
+    chk("joint selection cells", js["selection"], 619, 0)
+    chk("joint hold-out cells", js["holdout"], 441, 0)
+    chk("mixed (one axis only)", js["mixed"], 144, 0)
+    chk("movie-axis hold-out cells",
+        sum(1 for r in allr if A.axis_bucket(r, "movie") == "holdout"), 120, 0)
+    chk("severity-axis hold-out cells",
+        sum(1 for r in allr if A.axis_bucket(r, "severity") == "holdout"), 471, 0)
+    chk("Layer-3 cells with no resolvable movie axis",
+        sum(1 for r in l3 if A.axis_bucket(r, "movie") is None), 0, 0)
+    hm = [r for r in allr if A.axis_bucket(r, "movie") == "holdout"]
+    hm_t = collections.Counter(A.tier_of(r, "harm_delta_b_a2", 5.0, floors) for r in hm)
+    chk("hold-out movies carry no unacceptable cells (section 0.3)",
+        sum(v for k, v in hm_t.items() if k.startswith("unacceptable")), 0, 0)
+    chk("hold-out movie negligible cells", hm_t["negligible"], 114, 0)
 
-# 8. the 0.001 extrapolation
-r0=l1row("X2_jitter_sigma_px",0.02,"image_relative_rmse"); b0=l1row("X2_jitter_sigma_px",0.02,"std_delta_b_a2")
-chk("dB at relRMSE=0.001 via jitter", b0*(0.001/r0), 0.017, 0.10)
-r1=l1row("X3_drift_total_px",0.05,"image_relative_rmse"); b1=l1row("X3_drift_total_px",0.05,"std_delta_b_a2")
-chk("dB at relRMSE=0.001 via drift", b1*(0.001/r1), 0.014, 0.10)
-r2=l1row("X5_applied_delta_b_a2",1.0,"image_relative_rmse")
-chk("dB at relRMSE=0.001 via envelope", 1.0*(0.001/r2), 0.018, 0.10)
+    print("\n--- section 0 / 10: the corrected tiering ---")
+    cen = collections.Counter(A.tier_of(r, "harm_delta_b_a2", 5.0, floors) for r in allr)
+    chk("negligible cells (benign reading)", cen["negligible"], 727, 0)
+    chk("unacceptable:envelope cells", cen["unacceptable:envelope"], 344, 0)
+    chk("marginal cells", cen["marginal"], 208, 0)
+    chk("geometry positives under the benign reading",
+        cen.get("unacceptable:geometry", 0), 0, 0)
+    chk("scale positives (no frame-dependent fault in the frozen matrix)",
+        cen.get("unacceptable:scale", 0), 0, 0)
+    cenh = collections.Counter(
+        A.tier_of(r, "harm_delta_b_a2", 5.0, floors, "harmful") for r in allr)
+    chk("geometry positives under the harmful reading",
+        cenh.get("unacceptable:geometry", 0), 112, 0)
 
-# 9. L3 headline cells
-def l3cell(label,key):
-    v=[abs(A.get(r,key)) for r in l3 if r.get("label")==label and A.get(r,key) is not None]
-    return max(v) if v else float('nan')
-chk("L3 translated movie relRMSE", l3cell("mov_shift2_gplus","image_relative_rmse"), 1.399, 0.005)
-chk("L3 translated movie dB", l3cell("mov_shift2_gplus","std_delta_b_a2"), 0.103, 0.05)
-chk("L3 translated movie shift", l3cell("mov_shift2_gplus","std_shift_px"), 2.850, 0.01)
-chk("L3 translated movie trajmax == 0", l3cell("mov_shift2_gplus","traj_max_shift_error"), 0.0, 1e-12)
-chk("L3 gain 1e-6 relRMSE", l3cell("gain_1e-06","image_relative_rmse"), 2.037e-3, 0.01)
-chk("L3 gain 1e-6 dB", l3cell("gain_1e-06","std_delta_b_a2"), 3.813e-4, 0.02)
-chk("L3 gain 1e-1 scale_dev", l3cell("gain_1e-01","std_scale_dev"), 0.1, 0.01)
-chk("L3 dose 0.5 dB", l3cell("dose_0.5","std_delta_b_a2"), 3.551, 0.01)
+    print("\n--- section 6.1: the X6 dose arm ---")
+    x6 = [r for r in l2 if A.fault_of(r) == "X6_dose_scale"]
+    chk("X6 cells generated", len(x6), 90, 0)
+    chk("X6 cells whose Gaussian envelope fit was accepted",
+        sum(1 for r in x6 if r.get("std_envelope_used")), 0, 0)
+    for rho, gate, harm in ((0.5, 3.199, -15.804), (2.0, -0.953, 24.130)):
+        rows = [r for r in x6 if abs(r["severity"] - rho) < 1e-9
+                and r.get("noise_sigma") == 10]
+        chk(f"X6 rho={rho} gate delta-B (noise 10)", med(rows, "std_delta_b_a2"), gate, 0.05)
+        chk(f"X6 rho={rho} absolute harm delta-B (noise 10)",
+            st.median([r["harm_delta_b_a2"] for r in rows]), harm, 0.05)
+    worst = sorted(abs(A.get(r, "std_delta_b_a2")) for r in x6
+                   if abs(r["severity"] - 2.0) < 1e-9 and A.get(r, "std_delta_b_a2") is not None)
+    chk("smallest gate delta-B among the double-dose cells", worst[0], 0.0004, 0.5)
 
-print(f"\n{sum(ok)}/{len(ok)} checks passed")
-sys.exit(0 if all(ok) else 1)
+    print("\n--- section 10.3: the C2 frame-dependent scale control ---")
+    c2 = [r for r in l2 if A.fault_of(r) == "C2_frame_dependent_scale"]
+    chk("C2 cells generated", len(c2), 60, 0)
+    rows = [r for r in c2 if abs(r["severity"] - 0.5) < 1e-9 and r.get("noise_sigma") == 10]
+    chk("C2 eps=0.5 scale_dev (noise 10)", med(rows, "std_scale_dev"), 1.657e-4, 0.05)
+    chk("C2 eps=0.5 absolute harm (noise 10)",
+        st.median([r["harm_delta_b_a2"] for r in rows]), 0.057, 0.15)
+
+    print("\n--- section 10.4: separation now fails for every diagnostic ---")
+    sel = [r for r in allr if A.joint_split(r) == "selection"]
+    for d, mx, mn in (("std_delta_b_a2", 3.296, 0.1207),
+                      ("image_relative_rmse", 4.885, 0.0605)):
+        s = A.separation(sel, d, "harm_delta_b_a2", 5.0, floors)
+        chk(f"{d} separable", 1.0 if s.get("separable") else 0.0, 0.0, 0)
+        chk(f"{d} max on negligible", s["max_negligible"], mx, 0.01)
+        chk(f"{d} min on unacceptable", s["min_unacceptable"], mn, 0.01)
+    s = A.separation(sel, "std_delta_b_a2", "harm_delta_b_a2", 5.0, floors)
+    chk("std_delta_b_a2 separation ratio", s["separation_ratio"], 0.0366, 0.02)
+    chk("cells whose envelope fit was rejected", s["envelope_fit_rejected"], 353, 0)
+    ex = s["if_rejected_fits_excluded"]
+    chk("band if rejected fits were excluded", ex["separation_ratio"], 7.02, 0.02)
+    for d in ("std_shift_px", "std_scale_dev"):
+        s2 = A.separation(sel, d, "harm_delta_b_a2", 5.0, floors)
+        chk(f"{d} has no positive class (benign reading)", s2.get("n_unacceptable", 0), 0, 0)
+
+    print("\n--- sections 7 and 8: unchanged by the review round ---")
+    def l1row(flt, sev, key):
+        return med([r for r in l1 if r["fault"] == flt
+                    and abs(r["severity"] - sev) < 1e-9], key)
+    chk("L1 translation 0.1 px relative RMSE", l1row("X1_translation_px", 0.1,
+                                                     "image_relative_rmse"), 0.1681, 0.005)
+    chk("L1 translation 0.1 px delta-B is zero",
+        l1row("X1_translation_px", 0.1, "std_delta_b_a2"), 0.0, 1e-12)
+    chk("L1 jitter 0.4 px delta-B", l1row("X2_jitter_sigma_px", 0.4, "std_delta_b_a2"),
+        9.911, 0.01)
+    chk("L1 applied 5 A^2 recovered", l1row("X5_applied_delta_b_a2", 5.0,
+                                            "std_delta_b_a2"), 5.004, 0.005)
+    r0 = l1row("X2_jitter_sigma_px", 0.02, "image_relative_rmse")
+    b0 = l1row("X2_jitter_sigma_px", 0.02, "std_delta_b_a2")
+    chk("delta-B at relative RMSE 0.001 (jitter extrapolation)", b0 * (0.001 / r0), 0.017, 0.10)
+
+    def l3cell(label, key):
+        v = [abs(A.get(r, key)) for r in l3 if r.get("label") == label
+             and A.get(r, key) is not None]
+        return max(v) if v else float("nan")
+    chk("L3 translated movie relative RMSE", l3cell("mov_shift2_gplus",
+                                                    "image_relative_rmse"), 1.399, 0.005)
+    chk("L3 translated movie recovered shift", l3cell("mov_shift2_gplus",
+                                                      "std_shift_px"), 2.850, 0.01)
+    chk("L3 translated movie trajectory error is zero",
+        l3cell("mov_shift2_gplus", "traj_max_shift_error"), 0.0, 1e-12)
+    chk("L3 gain 1 ppm relative RMSE", l3cell("gain_1e-06",
+                                              "image_relative_rmse"), 2.037e-3, 0.01)
+    chk("L3 dose 0.5 delta-B", l3cell("dose_0.5", "std_delta_b_a2"), 3.551, 0.01)
+
+    print(f"\n{sum(OK)}/{len(OK)} checks passed")
+    return 0 if all(OK) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

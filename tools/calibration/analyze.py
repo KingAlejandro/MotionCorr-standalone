@@ -250,6 +250,26 @@ SCALE_MODE = {
 }
 
 
+def envelope_measurable(rec: Dict[str, Any]) -> bool:
+    """Is this cell's gate-side envelope estimate a valid measurement?
+
+    ``spectral_transfer_decomposition`` already decides this and records it as
+    ``std_envelope_used``: the Gaussian B-factor fit is accepted only when its
+    R^2 clears STD_MIN_FIT_R2. The published analysis consumed
+    ``std_delta_b_a2`` unconditionally, so cells whose fit the instrument had
+    already REJECTED still contributed a number to the threshold search.
+
+    This matters because the fault class it matters for is the one the review
+    found missing. A dose-weighting difference is not Gaussian in k^2: across
+    the layer-2 dose arm the fit is accepted in 5 of 90 cells, R^2 runs 0.16 to
+    0.82, and the resulting estimate reads about zero on cells whose absolute
+    harm is +24 A^2. Excluding those cells would restore the diagnostic's
+    separation by deleting the evidence against it, so they are kept and the
+    unmeasurable count is reported instead.
+    """
+    return bool(rec.get("std_envelope_used", False))
+
+
 def fault_of(rec: Dict[str, Any]) -> str:
     return str(rec.get("fault") or rec.get("group") or "")
 
@@ -379,6 +399,24 @@ def separation(
         "responsibility": list(subtypes_for(diag)),
         "n_negligible": len(neg), "n_unacceptable": len(bad), "tier_counts": counts,
     }
+    if diag == "std_delta_b_a2":
+        scored = [r for r in records if get(r, diag) is not None]
+        unmeasurable = [r for r in scored if not envelope_measurable(r)]
+        out["envelope_fit_rejected"] = len(unmeasurable)
+        out["envelope_fit_rejected_faults"] = sorted(
+            {fault_of(r) for r in unmeasurable})
+        # What the separation would be if the rejected fits were dropped. Quoted
+        # only to show how much of the result depends on excluding them; it is
+        # NOT the recommended reading.
+        kept = [r for r in records if get(r, diag) is None or envelope_measurable(r)]
+        kneg, kbad, _ = partition(kept, diag, harm_key, harm_boundary, floors,
+                                  geometry_reading)
+        if kneg and kbad:
+            out["if_rejected_fits_excluded"] = {
+                "max_negligible": max(kneg), "min_unacceptable": min(kbad),
+                "separation_ratio": min(kbad) / max(kneg) if max(kneg) > 0 else float("inf"),
+                "n_negligible": len(kneg), "n_unacceptable": len(kbad),
+            }
     if not neg or not bad:
         out["separable"] = False
         return out

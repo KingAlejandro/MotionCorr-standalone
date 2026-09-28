@@ -79,6 +79,12 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    add_executable(defect_parser tests/test_defect_parser.cpp)
+    target_link_libraries(defect_parser PRIVATE motioncorr_core)
+    add_test(NAME DefectParser COMMAND defect_parser)
+    # The malformed-input cases hang the pre-#98 parser; bound them so a
+    # regression fails the suite instead of stalling it.
+    set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME SyntheticRegression

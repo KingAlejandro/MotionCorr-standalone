@@ -257,15 +257,75 @@ sampler of section 10.
 
 ## 6. CPU backend scaling on cpu64
 
-*Executing. `--j` in {1, 2, 4, 8, 16, 32} crossed with unbound versus
-`OMP_PROC_BIND=spread OMP_PLACES=cores`, three repeats, 4-movie subset, lane `taskset -c 0-31`
-= NUMA node 0.*
+CPU-only Release build `CUDA=OFF`, 4-movie subset, lane `taskset -c 0-31` (= NUMA node 0),
+`--j` crossed with thread binding, three repeats, arms paired with order alternating.
+Medians of 3; **read this section with section 6.3 in hand, the lane was not clean.**
 
-Two `ctffind` processes run permanently on that host at ~100% each and are **unpinned**
-(`Cpus_allowed_list: 0-63`), so they enter the measurement lane; one was observed on CPU 18
-mid-series. They are not altered and not waited out. The lane settle gate is expected to time
-out at the start of this series, and that timeout is the evidence that a clean lane is not
-obtainable on this host rather than a defect in the gate.
+### 6.1 The phenomenon this issue reports reproduces on current main
+
+| `--j` | unbound | speedup | par. eff | `spread`+`cores` | speedup | par. eff | binding effect |
+| --: | --: | --: | --: | --: | --: | --: | --: |
+| 1 | 180.25 s | 1.00x | 100.0% | 187.82 s | 1.00x | 100.0% | +4.2% |
+| 2 | 94.38 s | 1.91x | 95.5% | 105.05 s | 1.79x | 89.4% | +11.3% |
+| 4 | **78.56 s** | **2.29x** | **57.4%** | 63.76 s | 2.95x | 73.6% | **−18.8%** |
+| 8 | 41.76 s | 4.32x | 54.0% | 27.99 s | 6.71x | 83.9% | **−33.0%** |
+| 16 | 29.02 s | 6.21x | 38.8% | 20.89 s | 8.99x | 56.2% | **−28.0%** |
+| 32 | 19.52 s | 9.24x | 28.9% | 18.91 s | 9.93x | 31.0% | −3.1% |
+
+Unbound parallel efficiency at `j=4` is **57.4%**, against the **55.8–56.0%** this issue
+reports on the 4-gpu-vm and the **57.1%** the 2026-09-25 audit measured on this host at
+source `3e3a1967`. So the phenomenon is real, it is not an artifact of the old hardware or
+of the old source, and **#82/#90/#91 did not remove it**.
+
+### 6.2 Thread placement, paired
+
+| `--j` | mean `d` (unbound − bound) | ± 2 sem | pairs bound faster | effect `E` | positional `P` |
+| --: | --: | --: | :-- | --: | --: |
+| 1 | −21.57 s | ±29.08 | 0/3 | −17.22 | −13.05 |
+| 2 | +9.60 s | ±42.43 | 2/3 | +19.73 | −30.39 |
+| 4 | **+17.89 s** | **±11.04** | **3/3** | +20.65 | −8.26 |
+| 8 | **+11.69 s** | **±5.14** | **3/3** | +12.45 | −2.27 |
+| 16 | **+7.43 s** | **±2.17** | **3/3** | +6.91 | +1.54 |
+| 32 | +2.50 s | ±3.73 | 3/3 | +2.04 | +1.38 |
+
+`OMP_PROC_BIND=spread OMP_PLACES=cores` is resolved as **faster at `j` = 4, 8 and 16** —
+every pair agrees in sign and the interval excludes zero. At `j` = 1, 2 and 32 the interval
+spans zero and **no effect is resolved at this n**; the table says so rather than reporting
+the point estimate as a result. This reproduces the direction and rough magnitude of the
+2026-09-25 audit (−29.7% at j=4, −28.8% at j=8, −26.1% at j=16) on current main.
+
+Note `P` at `j=2` is −30.4 s against an effect of +19.7 s: the positional term is *larger
+than the effect*. An unpaired, fixed-order A/B at that point would have reported the wrong
+sign with confidence. This is the concrete case the alternation exists for.
+
+### 6.3 The lane was not clean, and that is most of the spread
+
+The repaired interference witness makes the noise explicable instead of mysterious. Foreign
+threads were observed **inside the 0-31 measurement lane in every arm**:
+
+- `ctffind` — the two permanent unpinned jobs, as expected and documented.
+- `python` / `python3` — **another round worker's job, up to 63 simultaneous threads inside
+  the lane** during `c1_j2_spread`. The lane agreement puts other workers on 32-63; this one
+  was not confined.
+- `tar`, `find`, `sshd`, `gs` — transient.
+
+The consequence is visible in the ranges: `j2_unbound` spans 92.1–155.2 s (67%),
+`j1_spread` 181.1–230.7 s (26%), `j4_spread` 50.6–66.8 s (26%). Compare the GPU series on a
+lane where **zero** foreign threads were ever seen: 1.8–5.8% on the confirmation arms.
+
+**So section 6.1 and 6.2 are weaker evidence than sections 4 and 5, and should not be
+treated as interchangeable with them.** The direction of both results is supported —
+independently by two prior studies for 6.1, and by 3/3 sign agreement at three consecutive
+`j` values for 6.2 — but the magnitudes carry the contamination. A load-bearing CPU
+recommendation needs a re-measurement on a lane that is actually exclusive.
+
+Two further limits. These arms ran on the **earlier instrument** (section 10), so their
+`ps`/`gs` interference entries are self-contamination and the totals are an upper bound; the
+`ctffind` and `python` in-lane observations are genuine. And this is a 4-movie subset on one
+host, not a dataset-scale CPU throughput result.
+
+All 12 arms produced products equal to the reference on payload, core header and masked
+labels; no run exited non-zero.
 
 ## 7. Phase 2 — fixed-budget worker protocol, prepared and not executed
 
@@ -307,7 +367,7 @@ never joined into one speedup curve either.
 
 ## 8. Operating guide
 
-Supported by the data in sections 3 and 4, for **this** configuration — one A100, 24 tutorial
+Supported by the data in sections 3, 4 and 5, for **this** configuration — one A100, 24 tutorial
 movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU lane:
 
 1. **Set `--j` to the lane width and leave `--max_io_threads` unset.** On the 16-CPU lane
@@ -315,8 +375,8 @@ movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU
    of raising `--j` is that, uncapped, it raises the IO thread count with it — at a *fixed*
    IO cap of 8, going from `--j 8` to `--j 16` was slightly slower, not faster.
 2. **Do not set `--max_io_threads` below `--j` on the GPU path.** It is the one setting
-   measured here that clearly costs throughput: IO=1 is 1.93x slower than IO=8 at the same
-   `--j`.
+   measured here that clearly costs throughput: IO=1 is **1.90x** slower than IO=8 at the
+   same `--j`.
 3. **Budget ~3.2 GiB of device memory and ~1.6 GiB of host RSS per process** at this movie
    geometry. The traced allocator peak was 3134 MiB on every one of the 24 movies, and the
    NVML-sampled peak 3493 MiB including context. This, not the device's 80 GiB, is what
@@ -328,8 +388,8 @@ movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU
    24-movie runs of a session came in ~2 s above the steady-state distribution that the same
    configuration reached later.
 
-Explicitly **not** established: any best `--j` for the CPU backend on current main (section 6
-pending); any multi-worker or multi-GPU recommendation (section 7 unrun); behaviour at other
+Explicitly **not** established: a load-bearing best `--j` for the CPU backend, because the
+`cpu64` lane was not exclusive during section 6; any multi-worker or multi-GPU recommendation (section 7 unrun); behaviour at other
 frame counts, geometries, formats or heterogeneous movie costs (Phase 3, out of scope); and
 anything about cold-cache or networked storage, since every number here is warm-cache local
 disk.

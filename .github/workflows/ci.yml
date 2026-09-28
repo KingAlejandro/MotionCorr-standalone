@@ -193,5 +193,31 @@ jobs:
             -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
       - name: Compile CUDA and linked controls
         run: cmake --build build-cuda --parallel 4
+      - name: Configure with no explicit architecture
+        # Regression guard for issue #18. Every other CUDA configure in this
+        # repo passes -DCMAKE_CUDA_ARCHITECTURES=80, so none of them could
+        # observe a fresh configure failing at the generate step, or silently
+        # resolving to nvcc's own default. Asserts the exact generated flag
+        # set, not the cache, which the project default deliberately shadows.
+        # Both arms matter: an exported-but-empty CUDAARCHS is a second route
+        # to nvcc's default. Configure only, no GPU required, and this runs
+        # under the container's /bin/sh, so no bashisms.
+        run: |
+          set -eu
+          expected='--generate-code=arch=compute_80,code=[compute_80,sm_80]'
+          check_default_arch() {
+            rm -rf build-cuda-default
+            cmake -S . -B build-cuda-default -DCMAKE_BUILD_TYPE=Release \
+              -DCUDA=ON -DBUILD_TESTING=OFF
+            actual=$(grep -o -- '--generate-code=[^" ]*' \
+              build-cuda-default/CMakeFiles/motioncorr_core.dir/flags.make | sort -u)
+            if [ "$actual" != "$expected" ]; then
+              echo "$1: expected [$expected], generated [$actual]" >&2
+              exit 1
+            fi
+          }
+          check_default_arch "CUDAARCHS unset"
+          CUDAARCHS=; export CUDAARCHS
+          check_default_arch "CUDAARCHS exported empty"
       - name: Record scope
         run: echo "CUDA compilation passed. This job has no GPU and provides no hardware or numerical gate result."

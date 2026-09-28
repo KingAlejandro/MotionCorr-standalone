@@ -5,9 +5,9 @@
 | Issue | #69 "Make CUDA resource failures leak-free and resume-safe" |
 | Model | `claude-opus-5`, high effort (no routing error observed) |
 | Task class | correctness |
-| Phase | implemented, CPU-validated, CUDA-compiled; draft PR open; waiting on a GPU slot |
+| Phase | implemented, reviewed by two independent read-only agents, review findings folded in, revalidated; draft PR open; waiting on a GPU slot |
 | Base | main `4c952b3f54479653512c4d208e09c9a8c02f3726` |
-| Head | `75c21df` (plus this status update) |
+| Head | `192c580` (plus this status update) |
 | Branch | `round96/69-claude-opus-5` |
 | Worktree | isolated T3 worktree; no other task's files touched |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/107 (draft) |
@@ -81,7 +81,7 @@ Docs and evidence:
 | Command | Result |
 |---|---|
 | `ctest --output-on-failure` on base `4c952b3f` | 13/13 passed |
-| `ctest --output-on-failure` on candidate | 14/14 passed |
+| `ctest --output-on-failure` on candidate | 14/14 passed (re-run after review fixes: 14/14) |
 | `build-cand/patch_retry_state` | passed; truth anchor 0.063 px, ratio B/A = 2.0000, sum residual 0 |
 | `compare_cpu_arms.py base cand synthetic_movie.tiff` | 10 files, 262,144 pixels, 0 differing; negative control reported exactly the 2 perturbed files |
 | preprocessed-TU comparison, base vs candidate | only 1 friend declaration and 10 `__LINE__` values differ; negative control detects an injected line |
@@ -91,7 +91,9 @@ Docs and evidence:
 
 | Command | Result |
 |---|---|
-| `cmake -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON && cmake --build -j8` | configure=0, build=0, CUDA 12.8; zero warnings in changed files; all 11 `__wrap_` symbols resolved in `cuda_fault_matrix` |
+| `cmake -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON && cmake --build -j8` | configure=0, build=0, CUDA 12.8; zero warnings in changed files; all three test binaries linked; 14 `__wrap_` symbols |
+| `build/cuda_error_class` (device-free; creates no CUDA context) | 21 cases, 13 poisoning / 8 recoverable, 0 failures |
+| `docs/issue69/harness/reloc_check.sh` (read-only disassembly) | every production call site in `cudaAlignPatchDevice`, `cudaAlignPatch` and `preparePatchInVram` routes through `__wrap_*`; **0** production sites reach a bare interposed symbol |
 
 Evidence files: `docs/issue69/evidence/`.
 
@@ -140,30 +142,47 @@ for Codex monitoring to assign one. Exact commands, resources and locks:
 - **Device safety:** the new code only reads the pending CUDA error. No
   `cudaDeviceReset`, no global cache drop, no other process or device touched.
 
+## Independent review — done
+
+Two read-only agents (code; spec/scope/licence) were run concurrently. Verdicts were
+`CHANGES_REQUESTED` and `SPEC_CONFORMANCE_FAILED` / `LICENCE_PASSED`. Eleven findings
+were acted on and are recorded in `docs/issue69/RESULTS.md` §7 and in commits
+`18a9983`, `d50147b` and `192c580`. Three were defects in this branch's own work: an
+indeterminate-member read in the new control, a leak the new `REPORT_ERROR` introduced
+into the loop this issue de-leaks, and a fault matrix that claimed a test that did not
+exist and would have mis-scored its first real run. Three were documentation
+overclaims, now corrected rather than softened.
+
 ## Next step
 
-Fold in the two independent read-only reviews, then run the GPU layers once a slot is
-assigned and publish the fault-matrix table. The PR stays draft until then.
+Run the GPU layers once a slot is assigned and publish the fault-matrix table. The PR
+stays draft until then.
 
 ## Model comparison record
 
 - Model: `claude-opus-5`, high effort. No routing error; no model substitution.
 - Interventions/revisions by the user: 0 after the initial assignment.
-- Subagents: 2, both read-only, launched concurrently (code review; spec/scope/license).
+- Subagents: 2, both read-only, launched concurrently (code review; spec/scope/licence).
+  Both returned actionable defects; neither was a rubber stamp.
 - Tool or permission failures: 1 local quoting error writing a heredoc over ssh,
   self-corrected by writing the file locally and copying it.
-- Revisions to my own work: 2 substantive — the CPU control's first truth assertion was
+- Revisions to my own work: 5 substantive. Two found by me: — the CPU control's first truth assertion was
   wrong in premise (a single iteration estimates against the mean of the other frames,
   not the truth) and was replaced with a converged anchor; the same-backend comparator
   initially reported 9 spurious differences from unnormalised output-root paths and its
   negative control initially over-reported, both tightened.
-- Bugs found in existing code: 6 (F1-F6), of which F1 and F5 are the substantive ones.
+- Bugs found in existing code: 7 (F1-F6 plus the pre-existing `d_patch_fcomplex_buffer`
+  leak on `alignPatchDevice`'s throw, surfaced while fixing a review finding). F1 and
+  F5 are the substantive ones.
 - Gates verified by actual execution: CPU build and 14/14 CTest, the retry-state
   contract, same-backend CPU output with a negative control, preprocessed-TU identity
   with a negative control, and a clean CUDA compile with interposition resolved.
 - Gates not run: the entire GPU fault matrix, the end-to-end retry witness, and the
   24-movie CUDA control.
-- Diff size vs `4c952b3f`: see `git diff --stat`; production changes are ~160 lines
-  across four files, the rest is tests, evidence and documentation.
-- Elapsed active time: roughly 75 minutes of wall clock from assignment to draft PR.
+- Diff size vs `4c952b3f`: see `git diff --stat`; production changes are ~200 lines
+  across five files, the rest is tests, evidence and documentation.
+- Elapsed active time: roughly 75 minutes to the draft PR, about 2 hours including the
+  independent reviews and acting on them.
+- Final review verdict: not re-run after the fixes. The two recorded verdicts are
+  pre-fix and should be read that way.
 - Tokens/cost: not observable from here, so not reported.

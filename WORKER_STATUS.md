@@ -5,9 +5,9 @@
 | Issue | #69 "Make CUDA resource failures leak-free and resume-safe" |
 | Model | `claude-opus-5`, high effort (no routing error observed) |
 | Task class | correctness |
-| Phase | three review passes against the same two agents, both DELTA_CONFIRMED at `934779b7`; ten non-blocking items handed off unfixed; draft PR open; waiting on a GPU slot |
+| Phase | five review passes against the same two agents; two returned DELTA_BLOCKED and both blocks were real; latest source confirmed at `f2219fb6`; non-blocking items handed off unfixed; draft PR open; waiting on a GPU slot |
 | Base | main `4c952b3f54479653512c4d208e09c9a8c02f3726` |
-| Head | source frozen at `934779b7` (the reviewed head). This status update is docs-only; `git diff 934779b7..HEAD -- src tests CMakeLists.txt` is empty |
+| Head | source frozen at `e191aab`; docs head `f2219fb6`. `git diff e191aab HEAD -- src tests CMakeLists.txt` is empty |
 | Branch | `round96/69-claude-opus-5` |
 | Worktree | isolated T3 worktree; no other task's files touched |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/107 (draft) |
@@ -187,6 +187,23 @@ evidence and documentation items, three of them mine:
 - `reloc_check.sh` could print a confident "0" on its own failure;
 - the PR93 disclosure was wrong on file count, diff magnitudes and F3's independence.
 
+### Verdict history, adverse verdicts included
+
+| Pass | Head | Code reviewer | Spec reviewer |
+|---|---|---|---|
+| 1 full | `75c21df` / `d04657d` | CHANGES_REQUESTED | SPEC_CONFORMANCE_FAILED / LICENCE_PASSED |
+| 2 full | `92437fa9` | CHANGES_REQUESTED | SPEC_CONFORMANCE_FAILED / LICENCE_PASSED |
+| 3 delta | `934779b7` | DELTA_CONFIRMED | DELTA_CONFIRMED / LICENCE_PASSED |
+| 4 delta | `0a90a4b7` | **DELTA_BLOCKED** | **DELTA_BLOCKED** / LICENCE_PASSED |
+| 5 confirm-only | `f2219fb6` | DELTA_CONFIRMED | **DELTA_BLOCKED** (two doc lines), then fixed |
+
+An earlier version of this table listed only the confirmations. Pass 4 was blocked by
+both reviewers and both blocks were real: the code reviewer found that my lost-error
+fix had introduced a masking regression strictly worse than the head it replaced, and
+the spec reviewer found a binary hash in RESULTS that the evidence contradicted. A
+verdict history that records confirmations and omits the adverse verdicts is not a
+history.
+
 **Round 3 (delta).** The same two reviewers were resumed for a bounded confirmation of
 `92437fa9 -> 934779b7`, covering the CUDA-version guard, the `<sstream>` guard and
 regenerated TU evidence, the fail-closed relocation harness, the coordination-file
@@ -250,9 +267,13 @@ stays draft until then.
 - GPU slot: #26 announced release and the bench lock is observably free with all four
   A100s idle, but **no slot has been assigned to this task**, so no GPU execution has
   occurred. Availability is not authorization.
-- Review passes: 3 (full, full, bounded delta), all against the same two agents; no new
-  agents were ever spawned. Final: DELTA_CONFIRMED / DELTA_CONFIRMED / LICENCE_PASSED
-  at `934779b7`.
+- Review passes: 5 (full, full, delta, delta, confirm-only), all against the same two
+  agents; no new agents were ever spawned. Two passes returned DELTA_BLOCKED and both
+  blocks were real. See the verdict history table above.
+- Defects the reviews found in **my own work across the whole task: 13**, of which two
+  were regressions of fixes I had already reported as complete (the re-added
+  coordination file, and the masking regression inside the lost-error fix), and three
+  were stale figures in documents asserting measurements the tree contradicted.
 - **Unrun and unclaimed:** bounded fault matrix, forced-nonconvergence witness,
   early-binning streaming control, all-24 same-backend CUDA control, and **any build on
   a CUDA toolkit older than 12.8** -- the `CUDART_VERSION` guards are reasoned, not

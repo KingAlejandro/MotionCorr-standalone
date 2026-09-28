@@ -60,10 +60,13 @@ converged truth anchor (commit `cbeaf99`) and the run at `00:04:49` passed 14/14
 failing run is kept rather than overwritten; the `WORKER_STATUS.md` model-comparison
 record counts it as one of two self-corrections.
 
-The CPU suite was rebuilt from scratch and re-run after each of the two review rounds.
-Round 3, at `2026-09-28T01:11:50` and the current head: configure 0, build 0, **14/14
-passed**, same-backend control passed with its negative control reporting exactly two
-files, retry-state control passed, and the preprocessed-TU control passed with
+The CPU suite was rebuilt from scratch and re-run after each review round. The run
+backing the figures in this document is the one at the current head,
+`2026-09-28T02:20:05` to `02:20:32` in
+[`evidence/cpu-revalidation.log`](evidence/cpu-revalidation.log): configure 0, build 0,
+**14/14 passed**, same-backend control passed with its negative control reporting
+exactly two files, retry-state control passed, and the preprocessed-TU control passed
+with
 "anything else = 0". Lane and topology are recorded in
 [`evidence/cpu-provenance.txt`](evidence/cpu-provenance.txt): cores 32-63, `cpubind: 1`,
 i.e. NUMA-node-local, with the two long-running `ctffind` processes recorded as
@@ -278,7 +281,7 @@ still usable". Absence of a pending error is not a certificate of context health
 |---|---|
 | `CudaMovieSession::recordFailure` / `recordCufftFailure` | Two calls added inside the existing `HANDLE_ERROR` / `CUFFT_CHECK` macros. Record the **first** failure with its stage and line, sticky for the session's life |
 | `getFirstError` / `getFirstCufftError` / `getFirstErrorStage` / `getFirstErrorLine` / `hasFailed` | Expose that preserved status across the helper boundary |
-| `cudaRetryVerdictFor(recorded, recorded_cufft, pending)` | A pure predicate. Decides from the **recorded** status; consults the pending slot only when no stage recorded anything — the caller's own unchecked allocation, which runs through no handler |
+| `cudaRetryDecisionFor(recorded, recorded_cufft, pending)` → `CudaRetryDecision` | A pure predicate. Consults **both** sources: either the recorded status or the pending slot can independently force a fatal verdict. Only when neither poisons does the preference between them matter, and then only for which code the message names. It also returns that deciding code, so the caller's message cannot disagree with the verdict |
 
 A cuFFT failure alone does not force a fatal verdict: `cufftResult` reports
 library-level failures that do not themselves imply a dead CUDA context, and if the

@@ -92,12 +92,23 @@ both arms and cancels. Its interference figures will be labelled as instrument v
 
 ## Latest results
 
+> **WITHDRAWN — do not carry forward: there is no measured device-memory figure in this
+> study.** An earlier revision of this section reported "3134 MiB traced device peak". That
+> was a sum of 26 per-call size-accounting values (25 patch calls at 62.59 MiB plus one
+> global call at 1569.59 MiB), produced by a parser that added repeated keys. It is neither
+> a trace nor a peak, the underlying value is buffer-size accounting rather than an
+> allocator trace, and **no per-process device-memory bound or worker-sizing rule may be
+> derived from it.** The superseded wording is preserved in the corrections table below and
+> in `docs/benchmark_logs/issue26_envelope_2026-09-27/README.md`.
+
 - Phase 0 baseline, 24 movies, `--use_own --gpu 0 --j 8`, 5x5 patches, dose weighting:
-  **29.03 s**, exit 0, 109 products, 2.66 of 16 cores, 1.52 GiB peak RSS, 3134 MiB traced
-  device peak.
-- Phase 1 screen, 10 distinct effective treatments x 3 repeats: wall time is a function of
-  the effective IO-thread count alone. Across `--j` in {1,2,4,8} at IO=1 the spread is 0.8%,
-  below the 2.5-8.4% run-to-run spread. 12/12 arms bit-equal, no failures.
+  **29.03 s**, exit 0, 109 products, 2.66 of 16 cores, 1.52 GiB peak process-tree RSS.
+  No device-memory figure is quoted; see the withdrawal above.
+- Phase 1 screen, 10 distinct effective treatments x 3 repeats: **no material `--j` effect
+  was detected at fixed effective I/O.** Across `--j` in {1,2,4,8} at IO=1 the medians span
+  3.1% with all four arms' ranges overlapping. At fixed `--j 8`, IO=1 to IO=8 is 1.959x.
+  12/12 arms bit-equal, no failures. (The stronger "wall time is a function of IO alone"
+  claim was withdrawn as too universal.)
 - Phase 1 confirmation, all 24 movies, paired with order alternating: `j16/io16` beat
   `j8/io8` in 5/5 pairs, order-corrected effect **1.889 s** on ~30 s; `j16/io8` was slower
   than `j16/io16` in 3/3 pairs by **3.376 s**. More IO threads help; more compute threads at

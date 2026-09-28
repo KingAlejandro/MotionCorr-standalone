@@ -13,7 +13,8 @@ hide a defect is worse than the defect — and are listed here so nobody reads t
 | `tooling_controls/controls_cpu64_2026-09-28.log` | tooling controls round 1, runner sha256 `b05260db…` | **superseded — two controls were defective**, see below |
 | `tooling_controls/controls_cpu64_round2_2026-09-28.log` | tooling controls round 2, runner sha256 `e7276f5e…` | superseded — reviewer found the residuals below |
 | `tooling_controls/controls_cpu64_round3_2026-09-28.log` | tooling controls round 3, runner sha256 `fbe01390…`, 26 controls | superseded — see round 4 |
-| `tooling_controls/controls_cpu64_round4_2026-09-28.log` | tooling controls round 4, runner sha256 `e3fffa45…`, **28 controls, 0 skipped** | current |
+| `tooling_controls/controls_cpu64_round4_2026-09-28.log` | tooling controls round 4, runner sha256 `e3fffa45…`, 28 controls | superseded by the Codex review fixes |
+| `tooling_controls/controls_cpu64_round5_2026-09-28.log` | tooling controls round 5, **35 controls, 0 skipped** | current |
 | `gpu/*`, `cpu64/*` build and topology witnesses | build scripts | current |
 
 ## Known artifacts inside the retained records
@@ -116,6 +117,52 @@ payload control, and found one sub-item still open plus three new defects:
 Also corrected: the comment justifying the residual check cited ghostscript, but
 `CPlot2D.cpp:57` calls `gs` through blocking `system()`, which reaps it. The mechanism is
 generic; that particular instance cannot occur here, and the comment now says so.
+
+## Additional artifact caveat from the Codex review
+
+`memory.peak_simultaneous_tree_rss_kib` in every retained series was collected with
+`ps --ppid`, which selects only **immediate** children. Helpers spawned at a second level
+were omitted, so the value is a **lower bound** on the process tree it names, and the
+report's ~1.52 GiB per-process figure inherits that. The sampler now walks the full
+descendant tree and records the peak's composition and unit; the retained values are not
+re-measured.
+
+Also: `sampling.*` in every retained series carries aggregates only. Per-sample interference
+identity (pid, session, start time, command line, cpus, timestamp) is retained from this
+source revision onward, so the attribution gap described above for the cpu64 records cannot
+recur — but it cannot be filled retroactively for the existing files.
+
+## The lane was shared during the round-5 controls, and the new records name who
+
+While the controls ran, another worker's job was executing inside the 32-63 lane:
+`python3 src/tools/calibration/layer2_forward.py --trials 5 --size 1024 1024 --frames 24`,
+pids 3290541-3, session 3290533 — alongside the permanent unpinned `ctffind`. It was not
+altered.
+
+This is recorded because it demonstrates the per-sample identity requirement earning its
+keep immediately. A control keyed on the *command name* `python3` failed, because that
+neighbour shares the interpreter's name with the control's own payload; the aggregate
+counters could not distinguish them. The per-sample records named the pid, session and full
+command line in one look, the control was re-keyed on session id, and the ambiguity
+disappeared. Aggregates alone would have left that failure unexplained — which is precisely
+the attribution gap the ADR faults in the original CPU evidence.
+
+## Timing population versus audit population
+
+From this source revision onward the two are distinct, and the distinction matters when
+reading any retained series:
+
+- The **product audit** spans every run, including failures. A failed record is retained,
+  never deleted.
+- The **timing population** — medians, paired contrasts, positional slot ratios — excludes
+  runs that exited non-zero, timed out, were quarantined, had unconfirmed cleanup, or
+  produced no products. A run that died early has a short wall time, and admitting it would
+  make the configuration that failed look like the fastest, inverting the contract's own
+  rule that a failed movie is not a faster arm. Excluded runs are listed by tag and reason
+  in the report output.
+
+The retained series in this directory contain no non-zero exits, so this change does not
+alter any published median; it prevents the inversion rather than correcting one.
 
 ## What is unaffected
 

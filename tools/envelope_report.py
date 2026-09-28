@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import json
 import re
 import statistics
@@ -225,6 +226,28 @@ def main() -> int:
 
     data = json.loads(args.series.read_text())
     runs = [r for r in data["runs"] if r["rep"] != 0]        # rep 0 is the declared warm-up
+
+    # The product audit keeps every run, including the failures -- deleting a failed record
+    # is worse than having it. The TIMING population does not: a run that exited non-zero,
+    # timed out, lost products, or was quarantined must not enter a median or a paired
+    # difference. An arm that died early has a short wall time, and admitting it would make
+    # the configuration that failed look like the fastest one, which is the exact inversion
+    # the measurement contract forbids ("a failed movie is not a faster arm").
+    def _timing_eligible(r: Dict[str, Any]) -> Optional[str]:
+        if r.get("exit_code") != 0:
+            return f"exit_code={r.get('exit_code')}"
+        if r.get("timed_out"):
+            return "timed out"
+        if r.get("quarantined"):
+            return f"quarantined: {str(r.get('quarantine_reason'))[:70]}"
+        if r.get("cleanup_unconfirmed"):
+            return "cleanup unconfirmed"
+        if not r.get("product_count"):
+            return "produced no products"
+        return None
+
+    excluded = [(r["tag"], _timing_eligible(r)) for r in runs if _timing_eligible(r)]
+    timing_runs = [r for r in runs if not _timing_eligible(r)]
     warmups = [r for r in data["runs"] if r["rep"] == 0]
 
     failed = [r["tag"] for r in runs if r["exit_code"] != 0]
@@ -241,7 +264,35 @@ def main() -> int:
         arm_input = {r["arm_id"]: r["command"][r["command"].index("--i") + 1]
                      for r in data["runs"] if "--i" in r["command"]}
 
-    refs: Dict[str, Dict[str, Any]] = {}
+    arm_backend = {}
+    for a in data.get("arms", []):
+        arm_backend[a["id"]] = ("cuda" if a.get("gpu") is not None else "cpu",
+                                os.path.basename(str(a.get("binary", "?"))))
+    for r in data["runs"]:
+        # Prefer the per-run binary identity; fall back to parsing the recorded command so
+        # series written before that field existed still key on a real build class rather
+        # than a placeholder that would collapse CPU and CUDA references together.
+        binid = r.get("binary_sha256") or r.get("binary")
+        if not binid:
+            cmd = r.get("command") or []
+            cand = [c for c in cmd if "/" in str(c) and not str(c).startswith("-")]
+            binid = cand[-1] if cand else None
+            for i, c in enumerate(cmd):
+                if str(c).endswith("/time") and i + 2 < len(cmd):
+                    binid = cmd[i + 2]
+                    break
+        arm_backend.setdefault(
+            r["arm_id"], ("cuda" if r.get("requested", {}).get("gpu_ordinal") is not None
+                          else "cpu", os.path.basename(str(binid))[:40] if binid else "?"))
+
+    def ref_key(aid: str):
+        """Input set AND backend/build class. Keying on the input alone let a second
+        reference silently overwrite the first in a combined CPU/CUDA series, so every arm
+        was then scored against one backend -- and CPU-versus-CUDA differences are known,
+        so that comparison would have been reported as a product mismatch."""
+        return (arm_input.get(aid, "?"),) + tuple(arm_backend.get(aid, ("?", "?")))
+
+    refs: Dict[Any, Dict[str, Any]] = {}
     for rid in args.reference_arm:
         rr = [r for r in runs if r["arm_id"] == rid and r["exit_code"] == 0
               and r.get("product_count", 0) > 0]
@@ -250,21 +301,33 @@ def main() -> int:
             # warm-up this script has already declared non-comparable, or a run that died.
             print(f"ERROR: reference arm {rid} has no successful non-warm-up run with products")
             return 2
-        refs[arm_input.get(rid, "?")] = {"tag": rr[0]["tag"],
-                                         "key": product_key(rr[0], args.results_dir)}
+        k = ref_key(rid)
+        if k in refs:
+            print(f"ERROR: two reference arms share key {k}: "
+                  f"{refs[k]['arm']} and {rid}. Ambiguous references are rejected rather "
+                  f"than silently overwritten.")
+            return 2
+        refs[k] = {"tag": rr[0]["tag"], "arm": rid,
+                   "key": product_key(rr[0], args.results_dir)}
 
     by_arm: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-    for r in runs:
+    for r in timing_runs:
         by_arm[r["arm_id"]].append(r)
+
+    # Product audit spans ALL runs, including the ones excluded from timing.
+    audit_by_arm: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for r in runs:
+        audit_by_arm[r["arm_id"]].append(r)
 
     prod: Dict[str, Any] = {}
     unscored: List[str] = []
-    for arm, rs in by_arm.items():
-        iset = arm_input.get(arm, "?")
-        if iset not in refs:
-            unscored.append(f"{arm} (input {iset})")
+    for arm, rs in audit_by_arm.items():
+        k = ref_key(arm)
+        if k not in refs:
+            unscored.append(f"{arm} (no same-input, same-backend reference: {k})")
             continue
-        ref = refs[iset]["key"]
+        ref = refs[k]["key"]
+        iset = k[0]
         # Compare every run, not one per arm: a product difference that appears in only one
         # repeat is exactly the kind that a one-run-per-arm check would miss.
         per_run = {r["tag"]: compare_products(ref, product_key(r, args.results_dir))
@@ -287,14 +350,14 @@ def main() -> int:
         verdicts = sorted({v["verdict"] for v in per_run.values()})
         prod[arm] = {"runs": per_run, "input_set": iset, "effective_settings_witness": eff,
                      "verdicts": verdicts,
-                     "reference": refs[iset]["tag"],
+                     "reference": refs[k]["tag"], "backend_key": list(k),
                      "all_equal": all(v["verdict"] == "EQUAL" for v in per_run.values()),
                      "product_counts": sorted({r["product_count"] for r in rs})}
 
     print("=" * 78)
     print("PRODUCT EQUALITY, each arm vs the reference for its own input set")
-    for iset, r in sorted(refs.items()):
-        print(f"  input '{iset}' -> reference run {r['tag']}")
+    for k, r in sorted(refs.items(), key=lambda kv: str(kv[0])):
+        print(f"  input '{k[0]}' backend '{k[1]}' binary '{k[2]}' -> reference {r['tag']}")
     if not args.results_dir:
         print("  WARNING: --results-dir not given, so .eps/.log cannot be normalised and are "
               "reported as UNVERIFIED rather than compared")
@@ -337,6 +400,13 @@ def main() -> int:
     if unscored:
         print(f"  arms with no same-input reference, NOT scored: {unscored}")
     print(f"  non-zero exits: {failed if failed else 'none'}")
+    if excluded:
+        print(f"  EXCLUDED FROM TIMING ({len(excluded)} of {len(runs)}), retained in this "
+              f"product audit:")
+        for tag, why in excluded:
+            print(f"      {tag}: {why}")
+    else:
+        print(f"  excluded from timing: none ({len(timing_runs)} runs eligible)")
     print(f"  timed out: {timed_out if timed_out else 'none'}")
     if quarantined:
         print(f"  QUARANTINED ({len(quarantined)}): settle gate not satisfied — these arms "
@@ -388,8 +458,10 @@ def main() -> int:
     print("\n" + "=" * 78)
     print("PAIRED CONTRASTS  (two-arm pairs only; d = t_second_named - t_first_named)")
     print("=" * 78)
+    # Timing-eligible only: a pair containing a failed or quarantined run is not a paired
+    # difference, and admitting it would let a short crashed wall time become an "effect".
     pairs: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
-    for r in runs:
+    for r in timing_runs:
         pairs[r["pair_index"]].append(r)
 
     contrasts: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
@@ -404,6 +476,9 @@ def main() -> int:
         contrasts[key].append({"pair": pidx, "d": b["wall_s"] - a["wall_s"],
                                "first": first, "ta": a["wall_s"], "tb": b["wall_s"]})
 
+    if degenerate:
+        print(f"  note: {degenerate} pair group(s) are not two distinct eligible arms -- "
+              f"this includes pairs whose partner was excluded from the timing population")
     if not contrasts:
         print("  no two-arm pairs in this series (screening schedules are not paired)")
     for key, ds in sorted(contrasts.items()):
@@ -451,7 +526,7 @@ def main() -> int:
     print("SCHEDULE VALIDATION AND POSITIONAL SLOT RATIOS")
     print("=" * 78)
     arms_by_slot: Dict[int, set] = defaultdict(set)
-    for r in runs:
+    for r in timing_runs:
         arms_by_slot[r["order_in_pair"]].add(r["arm_id"])
     fixed = [o for o, a in arms_by_slot.items() if len(a) == 1 and len(arms_by_slot) > 1]
     if fixed:
@@ -466,7 +541,7 @@ def main() -> int:
         print("  every slot was occupied by more than one arm, so the ratios below are "
               "informative")
     by_order: Dict[int, List[float]] = defaultdict(list)
-    for r in runs:
+    for r in timing_runs:
         med = table[r["arm_id"]]["median_s"]
         if med:
             by_order[r["order_in_pair"]].append(r["wall_s"] / med)

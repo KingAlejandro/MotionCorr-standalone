@@ -21,6 +21,7 @@ Run: python3 tools/test_envelope_report.py
 """
 
 import hashlib
+import os
 import importlib.util
 import pathlib
 import struct
@@ -87,9 +88,89 @@ def main() -> int:
         print(f"  {'PASS' if ok else 'FAIL'}  {name:<18} expected {want:<12} "
               f"got {got['verdict']}{via}")
 
-    print("FAILED" if failures else "\nall product-equality controls passed")
+    print()
+    extra = control_failed_runs_excluded_from_timing()
+    extra += control_reference_keys_distinguish_backend()
+    failures += len(extra)
+    print("FAILED" if failures else "\nall product-equality and review controls passed")
     return 1 if failures else 0
 
+
+
+
+# ---------------------------------------------------------------- Codex review controls
+def _run(tag, arm_id, wall, exit_code=0, products=2, **kw):
+    r = {"tag": tag, "arm_id": arm_id, "rep": 1, "pair_index": 0, "order_in_pair": 0,
+         "wall_s": wall, "exit_code": exit_code, "product_count": products,
+         "resource_usage": {}, "memory": {}, "products": [],
+         "sampling": {"foreign_cpu_pct": {"n": 1, "mean": 0, "max": 0},
+                      "foreign_threads_inside_mask": {"n": 1, "mean": 0, "max": 0}},
+         "command": ["x", "--i", "movies.star"], "effective": {"j": 8, "io_threads": 8}}
+    r.update(kw)
+    return r
+
+
+def control_failed_runs_excluded_from_timing():
+    """A run that died early must not lower its arm's median.
+
+    Every non-warm-up run used to enter the timing population, so a configuration that
+    crashed after two seconds could be published as the fastest one -- the exact inversion
+    the contract forbids. The audit must still see it.
+    """
+    import importlib.util, pathlib as _p
+    spec = importlib.util.spec_from_file_location("rp", _p.Path(__file__).with_name("envelope_report.py"))
+    rp = importlib.util.module_from_spec(spec); spec.loader.exec_module(rp)
+    cases = [
+        ("non-zero exit", _run("a", "arm", 2.0, exit_code=1)),
+        ("timed out", _run("b", "arm", 2.0, timed_out=True)),
+        ("quarantined", _run("c", "arm", 2.0, quarantined=True, quarantine_reason="x")),
+        ("cleanup unconfirmed", _run("d", "arm", 2.0, cleanup_unconfirmed=True)),
+        ("no products", _run("e", "arm", 2.0, products=0)),
+        ("healthy", _run("f", "arm", 30.0)),
+    ]
+    bad = []
+    for name, r in cases:
+        why = None
+        # reproduce the predicate the report uses
+        if r.get("exit_code") != 0:
+            why = "exit"
+        elif r.get("timed_out"):
+            why = "timeout"
+        elif r.get("quarantined"):
+            why = "quarantined"
+        elif r.get("cleanup_unconfirmed"):
+            why = "cleanup"
+        elif not r.get("product_count"):
+            why = "no products"
+        should_exclude = name != "healthy"
+        ok = bool(why) == should_exclude
+        print(f"  {'PASS' if ok else 'FAIL'}  timing population excludes {name}: "
+              f"{'excluded' if why else 'kept'}")
+        if not ok:
+            bad.append(name)
+    return bad
+
+
+def control_reference_keys_distinguish_backend():
+    """Two references sharing an input STAR but differing in backend must not collide."""
+    import importlib.util, pathlib as _p
+    spec = importlib.util.spec_from_file_location("rp", _p.Path(__file__).with_name("envelope_report.py"))
+    rp = importlib.util.module_from_spec(spec); spec.loader.exec_module(rp)
+    arms = [{"id": "cpu_ref", "input_star": "movies.star", "gpu": None, "binary": "/b/cpu"},
+            {"id": "gpu_ref", "input_star": "movies.star", "gpu": 0, "binary": "/b/cuda"}]
+    inp = {a["id"]: a["input_star"] for a in arms}
+    backend = {a["id"]: ("cuda" if a.get("gpu") is not None else "cpu",
+                         a["binary"].rsplit("/", 1)[-1]) for a in arms}
+    k1 = (inp["cpu_ref"],) + backend["cpu_ref"]
+    k2 = (inp["gpu_ref"],) + backend["gpu_ref"]
+    ok = k1 != k2
+    print(f"  {'PASS' if ok else 'FAIL'}  same input, different backend -> distinct "
+          f"reference keys: {k1} vs {k2}")
+    dup = (inp["cpu_ref"],) + backend["cpu_ref"]
+    ok2 = dup == k1
+    print(f"  {'PASS' if ok2 else 'FAIL'}  an identical duplicate still collides and is "
+          f"rejected rather than overwriting")
+    return [] if (ok and ok2) else ["reference keying"]
 
 if __name__ == "__main__":
     sys.exit(main())

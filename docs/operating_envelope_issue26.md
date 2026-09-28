@@ -56,7 +56,7 @@ All 24 tutorial movies, one process, one A100, `--j 8`, unprofiled binary `d80cd
 | CPU time | 84.4 s, reported by `time` as **271%**, i.e. 2.71 of the 16 allocated CPUs |
 | Products | 109, exit 0, equal to baseline on payload, core header and masked labels |
 | Backend | **24 of 24 movies carry per-movie CUDA execution evidence; zero fallback warnings** |
-| Peak simultaneous process-tree RSS | **1.52 GiB** |
+| Peak simultaneous process-tree RSS | **1.52 GiB** — but see the scope caveat below |
 | Device memory, per-call size accounting | largest single reported value **1569.59 MiB** (global call); 25 patch calls report 62.59 MiB each. **Not a peak and not an allocator trace** — see below |
 | Device memory, NVML sampled at 0.2 s | **3493 MiB** whole-device, a distinct sampled observation. Not a capacity bound and not reconcilable with the accounting figure |
 | Per-movie device alignment | median **40.6 ms** |
@@ -170,8 +170,13 @@ claim survives. Two neighbouring witnesses are unaffected and stand:
 - **cpuset inheritance** — `Cpus_allowed_list: 96-111`, `Mems_allowed_list: 0-1`, read from
   the launcher. `taskset` sets the mask before exec and it is inherited across exec and fork,
   so it does apply to the payload. It is now additionally read from the resolved payload pid.
-- **Process-tree RSS** — 1.52 GiB peak, sampled over the launcher and its children, which
-  does include MotionCorr. This is a residency total, not a per-node breakdown.
+- **Process-tree RSS** — 1.52 GiB peak, sampled over the launcher and its children.
+  **Caveat on the retained figure:** it was collected with `ps --ppid`, which selects only
+  *immediate* children, so any helper MotionCorr spawns at a second level was omitted and
+  the figure is a **lower bound** on the tree it names. The sampler now walks the full
+  descendant tree per sample and records the peak's composition and unit; the 1.52 GiB
+  number above predates that and is not re-measured here. It is a residency total, not a
+  per-node breakdown.
 
 The runner now resolves the live payload through `/proc/<pid>/exe`, records its pid, session
 and start time, and aggregates per-node residency from `numa_maps` page counts times each
@@ -459,7 +464,8 @@ movies at 3710x3838x24, 5x5 patches with dose weighting, warm page cache, 16-CPU
    measured here that clearly costs throughput: at fixed `--j 8`, IO=1 is **1.959x** slower
    than IO=8.
 3. **Host RSS is ~1.52 GiB per process** at this movie geometry (peak of simultaneously
-   sampled process-tree totals). **No device-memory budget is recommended here.** The earlier
+   sampled process-tree totals) — treat it as a **lower bound**: it was sampled with a
+   depth-1 process selection that omitted grandchildren. **No device-memory budget is recommended here.** The earlier
    "~3.2 GiB traced peak, so that is what bounds worker count" guidance was built on a parser
    artifact and is withdrawn; the per-call accounting maximum (1569.59 MiB) and the NVML
    whole-device sample (3493 MiB) are different quantities and neither is a per-process

@@ -134,14 +134,27 @@ class Sampler(threading.Thread):
     """1 Hz background sampling. Daemon, so it cannot outlive the interpreter."""
 
     def __init__(self, own_user: str, gpu_index: Optional[int], mask: Optional[str],
-                 period: float = 0.2, ps_period: float = 1.0, own_root_pid: Optional[int] = None):
+                 period: float = 0.2, ps_period: float = 1.0, own_root_pid: Optional[int] = None,
+                 ownership: Optional[Dict[str, Any]] = None, max_detail: int = 4000):
         super().__init__(daemon=True)
         self.own_user = own_user
         self.own_root_pid = own_root_pid
         self.foreign_detail: Dict[str, int] = {}
         self._prev_snap: Optional[Dict[int, Any]] = None
         self._prev_t = 0.0
-        self._own_sids = {own_session()}
+        self.ownership = ownership or {"basis": "subtree", "isolated": False,
+                                       "sid": _safe_sid(os.getpid()),
+                                       "how": "not established by the caller"}
+        # Only an isolated session may be owned wholesale. Otherwise the sid is the
+        # launching shell's and would hide unrelated same-shell work; ownership then falls
+        # back to the process subtree, which cannot.
+        self._own_sids = {self.ownership["sid"]} if self.ownership.get("isolated") else set()
+        self._own_pids: set = set()
+        # Per-sample identity, as the ADR requires: aggregates cannot say which process held
+        # the lane at a given instant. Bounded, with the cap and drop count recorded.
+        self.samples_detail: List[Dict[str, Any]] = []
+        self.samples_dropped = 0
+        self.max_detail = max_detail
         self.gpu_index = gpu_index
         self.mask_cpus = parse_cpu_list(mask) if mask else None
         self.period = period
@@ -156,6 +169,10 @@ class Sampler(threading.Thread):
 
     def stop(self) -> None:
         self._halt.set()
+
+    def own_pid_tree(self, root: int) -> None:
+        """Adopt a pid subtree as ours. Used when session ownership is not isolated."""
+        self._own_pids |= own_subtree(root) | {root}
 
     def own_also(self, sid: Optional[int]) -> None:
         """Adopt the payload's session. It runs in its own session so that cancellation can
@@ -172,8 +189,11 @@ class Sampler(threading.Thread):
             return                                  # first tick establishes the baseline
         dt = max(now - self._prev_t, 1e-3)
         total, in_mask = 0.0, 0
+        detail: List[Dict[str, Any]] = []
+        own_pids = self._own_pids | (own_subtree(self.own_root_pid)
+                                     if not self.ownership.get("isolated") else set())
         for pid, (comm, ticks, psid) in snap.items():
-            if psid in self._own_sids or pid not in self._prev_snap:
+            if psid in self._own_sids or pid in own_pids or pid not in self._prev_snap:
                 continue
             pct = (ticks - self._prev_snap[pid][1]) / CLK_TCK / dt * 100.0
             if pct <= 1.0:
@@ -184,9 +204,20 @@ class Sampler(threading.Thread):
                 if cpus:
                     in_mask += len(cpus)
                     self.foreign_detail[comm] = self.foreign_detail.get(comm, 0) + 1
+                    detail.append({"pid": pid, "comm": comm, "sid": psid,
+                                   "starttime": _starttime(pid), "cpus": sorted(set(cpus)),
+                                   "cpu_pct": round(pct, 1), "cmdline": _cmdline(pid)})
         self._prev_snap, self._prev_t = snap, now
         self.foreign_pct.append(round(total, 1))
         self.foreign_in_mask.append(in_mask)
+        if detail:
+            if len(self.samples_detail) < self.max_detail:
+                self.samples_detail.append(
+                    {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
+                     "monotonic_s": round(now, 3), "in_mask": in_mask,
+                     "foreign_cpu_pct_total": round(total, 1), "processes": detail})
+            else:
+                self.samples_dropped += 1
 
     def _sample_device(self) -> None:
         out = subprocess.run(
@@ -226,7 +257,11 @@ class Sampler(threading.Thread):
             "foreign_threads_inside_mask": stats(self.foreign_in_mask),
             "foreign_in_mask_by_command": dict(sorted(self.foreign_detail.items(),
                                                       key=lambda kv: -kv[1])[:10]),
-            "owned_sessions": sorted(self._own_sids),
+            "ownership": self.ownership,
+            "owned_sessions": sorted(x for x in self._own_sids if x is not None),
+            "per_sample_in_mask_detail": self.samples_detail,
+            "per_sample_detail_dropped": self.samples_dropped,
+            "per_sample_detail_cap": self.max_detail,
             "foreign_definition": "CPU actually consumed between consecutive samples by "
                                   "processes outside this run's own subtree, from "
                                   "/proc/<pid>/stat utime+stime deltas. Username cannot be "
@@ -252,6 +287,9 @@ class RssSampler(threading.Thread):
         self.period = period
         self._halt = threading.Event()
         self.tree_rss_kib: List[int] = []
+        self._peak_total = 0
+        self._peak_members: List[Dict[str, Any]] = []
+        self._peak_utc: Optional[str] = None
 
     def stop(self) -> None:
         self._halt.set()
@@ -259,12 +297,28 @@ class RssSampler(threading.Thread):
     def run(self) -> None:
         while not self._halt.is_set():
             try:
-                out = subprocess.run(
-                    ["ps", "-o", "rss=", "--ppid", str(self.root_pid), "--pid", str(self.root_pid)],
-                    capture_output=True, text=True, timeout=10).stdout
-                total = sum(int(x) for x in out.split() if x.isdigit())
+                # Full descendant tree, not `ps --ppid`, which selects only immediate
+                # children: helpers MotionCorr spawns (a shell, ghostscript) are
+                # grandchildren and were omitted, so a figure labelled
+                # peak_simultaneous_tree_rss_kib understated the tree it named -- and that
+                # figure is what the per-process guidance rests on.
+                pids = sorted(own_subtree(self.root_pid) | {self.root_pid})
+                total, members = 0, []
+                for pid in pids:
+                    rss = _rss_kib(pid)
+                    if rss is None:
+                        continue                    # exited between listing and reading
+                    total += rss
+                    members.append({"pid": pid, "comm": _comm(pid), "rss_kib": rss})
                 if total:
+                    now = time.time()
                     self.tree_rss_kib.append(total)
+                    if total > self._peak_total:
+                        # Keep the composition of the peak, not just its value: a single
+                        # number cannot say which processes were simultaneously resident.
+                        self._peak_total = total
+                        self._peak_members = members
+                        self._peak_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
             except Exception:
                 pass
             self._halt.wait(self.period)
@@ -275,8 +329,12 @@ class RssSampler(threading.Thread):
         return {
             "n": len(self.tree_rss_kib),
             "period_s": self.period,
+            "unit": "KiB (ps/proc VmRSS), summed across all owned descendants in one sweep",
             "peak_simultaneous_tree_rss_kib": max(self.tree_rss_kib),
             "mean_simultaneous_tree_rss_kib": int(statistics.fmean(self.tree_rss_kib)),
+            "peak_utc": self._peak_utc,
+            "peak_composition": self._peak_members,
+            "scope": "full descendant tree of the launcher, resolved per sample",
             "note": "maximum of simultaneously observed process-tree totals, not a sum of "
                     "independently observed per-process maxima",
         }
@@ -333,6 +391,45 @@ def _stat_fields(path: str) -> Optional[List[str]]:
     if close < 0:
         return None
     return [raw[raw.find("(") + 1:close]] + raw[close + 2:].split()
+
+
+def establish_isolated_session() -> Dict[str, Any]:
+    """Make the runner's session genuinely its own, or record that it is not.
+
+    Owning "the runner's session" is only sound if that session contains nothing else. The
+    documented reproduction is `taskset -c … flock … python3 envelope_runner.py` with no
+    `setsid`, so the sid is the login shell's: another worker's job, a build or an editor
+    started from the same shell shares it and would be silently excluded from every
+    interference figure, turning real lane contention into a reported zero.
+
+    Already a session leader (launched under `setsid`) means the session is ours alone.
+    Otherwise `setsid()` is attempted. If it cannot be had, ownership falls back to the
+    process subtree, which is narrower and cannot hide an unrelated same-shell process, and
+    the weaker basis is recorded rather than assumed away.
+    """
+    pid = os.getpid()
+    try:
+        if os.getsid(pid) == pid:
+            return {"basis": "session", "isolated": True, "sid": pid,
+                    "how": "already a session leader"}
+    except OSError:
+        pass
+    try:
+        os.setsid()
+        return {"basis": "session", "isolated": True, "sid": os.getsid(pid),
+                "how": "setsid() at startup"}
+    except OSError as exc:
+        return {"basis": "subtree", "isolated": False, "sid": _safe_sid(pid),
+                "how": f"setsid() failed ({exc.__class__.__name__}); the session is shared "
+                       f"with whatever launched this runner, so ownership is by process "
+                       f"subtree instead and same-session strangers are NOT treated as ours"}
+
+
+def _safe_sid(pid: int) -> Optional[int]:
+    try:
+        return os.getsid(pid)
+    except OSError:
+        return None
 
 
 def own_session() -> int:
@@ -526,6 +623,35 @@ def numa_residency(pid: int) -> Optional[Dict[str, Any]]:
             "node_local_fraction_note": "fraction is only meaningful once the sampled pid is "
                                         "confirmed to be the payload; see payload_identity",
             "unit": "bytes, from numa_maps page counts x that mapping's kernelpagesize_kB"}
+
+
+def _rss_kib(pid: int) -> Optional[int]:
+    try:
+        with open(f"/proc/{pid}/statm") as fh:
+            return int(fh.read().split()[1]) * (os.sysconf("SC_PAGE_SIZE") // 1024)
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _comm(pid: int) -> str:
+    f = _stat_fields(f"/proc/{pid}/stat")
+    return f[0] if f else ""
+
+
+def _cmdline(pid: int) -> str:
+    try:
+        with open(f"/proc/{pid}/cmdline", "rb") as fh:
+            return fh.read().replace(b"\0", b" ").decode("utf-8", "replace").strip()[:200]
+    except OSError:
+        return ""
+
+
+def _starttime(pid: int) -> Optional[int]:
+    f = _stat_fields(f"/proc/{pid}/stat")
+    try:
+        return int(f[F_STARTTIME]) if f and len(f) > F_STARTTIME else None
+    except (ValueError, IndexError):
+        return None
 
 
 def parse_cpu_list(spec: str) -> set:
@@ -933,7 +1059,9 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
     samp = Sampler(own_user=cfg["own_user"], gpu_index=gpu_index, mask=cpu_mask,
                    period=cfg.get("device_sample_period_s", 0.2),
                    ps_period=cfg.get("foreign_sample_period_s", 1.0),
-                   own_root_pid=os.getpid())
+                   own_root_pid=os.getpid(),
+                   ownership=cfg.get("_ownership"),
+                   max_detail=cfg.get("per_sample_detail_cap", 4000))
     samp.start()
 
     t0 = time.time()
@@ -957,6 +1085,7 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         # Adopt it here rather than waiting for resolve_payload, otherwise every sample taken in
         # the interval between spawning and resolving would count our own payload as foreign.
         samp.own_also(proc.pid)
+        samp.own_pid_tree(proc.pid)      # also covers the non-isolated-session fallback
         rss = RssSampler(proc.pid, period=cfg.get("rss_period_s", 0.25))
         rss.start()
 
@@ -1105,6 +1234,8 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         "rep": rep,
         "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)),
         "command": cmd,
+        "binary": arm["binary"],
+        "binary_sha256": sha256_file(Path(arm["binary"])),
         "cwd": arm["cwd"],
         "env_overrides": arm.get("env") or {},
         "exit_code": rc,
@@ -1188,6 +1319,8 @@ def main() -> int:
     plan = json.loads(args.plan.read_text())
     cfg = plan.get("config", {})
     cfg.setdefault("own_user", args.own_user)
+    cfg["_ownership"] = establish_isolated_session()
+    print(f"ownership: {cfg['_ownership']}", flush=True)
     args.out.mkdir(parents=True, exist_ok=True)
 
     series = {
@@ -1195,7 +1328,8 @@ def main() -> int:
         "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(),
         "source_commit": plan.get("source_commit"),
         "host": host_witness(),
-        "config": cfg,
+        "config": {k: v for k, v in cfg.items() if not k.startswith("_")},
+        "ownership": cfg.get("_ownership"),
         "inputs": {k: sha256_file(Path(v)) for k, v in (plan.get("input_hashes") or {}).items()},
         "binaries": {k: sha256_file(Path(v)) for k, v in (plan.get("binaries") or {}).items()},
         "runs": [],

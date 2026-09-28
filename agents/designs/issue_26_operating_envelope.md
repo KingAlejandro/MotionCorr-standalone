@@ -142,6 +142,31 @@ report the process under measurement as foreign load in its own lane. An arm who
 gate timed out, or that started with foreign threads in the lane, is recorded as
 **quarantined**: kept in the record, excluded from clean-evidence claims.
 
+**Ownership must be an identity the runner actually owns.** Treating "the runner's session"
+as own is sound only if that session contains nothing else. The reproduction command starts
+plain `python3` under `taskset`/`flock` with no `setsid`, so the sid is the launching
+shell's, and anything else started from that shell would be silently excluded from every
+interference figure — real lane contention reported as zero. The runner now establishes an
+isolated session at startup, or records that it could not and falls back to subtree
+ownership, which cannot hide a same-shell stranger. The basis is written into every record.
+
+**Process-tree RSS means the whole tree.** `ps --ppid` selects only immediate children, so
+helpers spawned one level deeper are omitted from a figure that claims to be a tree total.
+The sampler walks all owned descendants per sample and records the peak's composition and
+unit alongside its value.
+
+**The timing population is not the audit population.** Failed, timed-out, quarantined,
+cleanup-unconfirmed and product-less runs stay in the product audit — deleting a failed
+record is worse than keeping it — but never enter a median or a paired difference. A run
+that died early has a short wall time, and admitting it would make the configuration that
+failed look fastest, inverting the contract's own rule that a failed movie is not a faster
+arm.
+
+**A same-backend baseline must be keyed by backend.** Reference arms are keyed on input set
+**and** backend/build class, and two references colliding on that key are rejected rather
+than silently overwriting one another; otherwise a combined CPU/CUDA series scores every arm
+against whichever reference was registered last.
+
 **Interference evidence must be retained at per-sample and PID level.** The 2026-09-27
 `cpu64` series retained only per-arm aggregates — a max over samples, and per-command
 *accumulated* thread-sample hits — which is enough to show that foreign work entered the

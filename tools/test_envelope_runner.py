@@ -444,6 +444,104 @@ def control_6_normal_exit_with_a_leaked_child_is_caught():
                 pass
 
 
+def control_7_session_ownership_cannot_hide_a_stranger():
+    """A process sharing the launching shell's session must still count as foreign.
+
+    Ownership was "the runner's session id", but the documented reproduction starts plain
+    `python3` under taskset/flock with no setsid, so that sid is the shell's. Anything else
+    started from the same shell was silently excluded from every interference figure, which
+    turns real lane contention into a reported zero.
+    """
+    if not LINUX:
+        skip("session ownership cannot hide a same-shell stranger", "no /proc")
+        return
+    own = er.establish_isolated_session()
+    check("runner establishes an ownership basis and states whether it is isolated",
+          own.get("basis") in ("session", "subtree") and "isolated" in own, f"{own}")
+
+    mask = _own_mask()
+    cpus = sorted(er.parse_cpu_list(mask))
+    burn = "import time\nt=time.time()\nwhile time.time()-t<3.0: pass\n"
+    # A stranger in OUR OWN session (no setsid) and not in our subtree: this is exactly the
+    # same-shell case. It must be seen.
+    samp = er.Sampler(own_user="x", gpu_index=None, mask=mask, period=0.25, ps_period=0.25,
+                      own_root_pid=os.getpid(), ownership=own)
+    samp.start()
+    time.sleep(0.5)
+    pr = subprocess.Popen(["setsid", "taskset", "-c", str(cpus[0]), sys.executable, "-c", burn],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        time.sleep(2.5)
+        pr.wait()
+    finally:
+        _reap(pr)
+        samp.stop(); samp.join(timeout=5)
+    seen = max(samp.foreign_in_mask or [0])
+    check("a foreign burst in the lane is seen at all", seen >= 1,
+          f"in_mask_max={seen} by_command={samp.foreign_detail}")
+    # per-sample identity, the ADR requirement
+    det = samp.summary().get("per_sample_in_mask_detail") or []
+    have = [d for s_ in det for d in s_["processes"]]
+    check("per-sample records carry pid / sid / starttime / cmdline / cpus",
+          bool(have) and all(k in have[0] for k in
+                             ("pid", "sid", "starttime", "cmdline", "cpus", "cpu_pct")),
+          f"samples={len(det)} first={have[0] if have else None}")
+    check("per-sample records are timestamped",
+          bool(det) and "utc" in det[0], f"first_sample_keys={sorted(det[0]) if det else []}")
+
+
+def control_8_tree_rss_includes_grandchildren():
+    """RSS must span the whole owned tree, not just immediate children.
+
+    `ps --ppid` selects only direct children, so helpers MotionCorr spawns (a shell,
+    ghostscript) are grandchildren and were omitted from a figure labelled
+    peak_simultaneous_tree_rss_kib -- the figure the per-process guidance rests on.
+    """
+    if not LINUX:
+        skip("tree RSS includes grandchildren", "no /proc")
+        return
+    mib = 160
+    src = HERE / ".control_gchild.py"
+    src.write_text(
+        "import subprocess, sys, time\n"
+        # parent -> child -> grandchild; only the GRANDCHILD holds the memory
+        "g = subprocess.Popen([sys.executable, '-c',\n"
+        f"  \"buf=bytearray({mib}*1024*1024)\\n\"\n"
+        "  \"for i in range(0,len(buf),4096): buf[i]=1\\n\"\n"
+        "  \"import time; time.sleep(6)\"])\n"
+        "sys.stderr.write('up\\n'); sys.stderr.flush()\n"
+        "time.sleep(6)\n")
+    pr = subprocess.Popen([sys.executable, "-c",
+                           f"import subprocess,sys,time;"
+                           f"p=subprocess.Popen([sys.executable,{str(src)!r}],"
+                           f"stderr=subprocess.PIPE);"
+                           f"sys.stderr.write(p.stderr.readline().decode());"
+                           f"sys.stderr.flush();time.sleep(6)"],
+                          stderr=subprocess.PIPE, start_new_session=True)
+    try:
+        pr.stderr.readline()
+        time.sleep(1.0)
+        rss = er.RssSampler(pr.pid, period=0.2)
+        rss.start(); time.sleep(1.5); rss.stop(); rss.join(timeout=5)
+        summ = rss.summary()
+        peak_mib = summ.get("peak_simultaneous_tree_rss_kib", 0) / 1024.0
+        depth = len(summ.get("peak_composition") or [])
+        check(f"full-tree RSS sees the grandchild's {mib} MiB", peak_mib > mib * 0.5,
+              f"peak={peak_mib:.1f} MiB across {depth} processes")
+        check("peak records its composition and unit", depth >= 3 and "KiB" in summ.get("unit", ""),
+              f"members={[m['comm'] for m in (summ.get('peak_composition') or [])]} unit={summ.get('unit')}")
+        # discriminating: the old depth-1 selection must NOT see it
+        direct = {pr.pid} | set(int(x) for x in subprocess.run(
+            ["ps", "-o", "pid=", "--ppid", str(pr.pid)], capture_output=True,
+            text=True).stdout.split())
+        shallow = sum(er._rss_kib(x) or 0 for x in direct) / 1024.0
+        check("MUTATION - depth-1 selection misses it (this is why the tree walk exists)",
+              shallow < mib * 0.5, f"depth1={shallow:.1f} MiB vs full={peak_mib:.1f} MiB")
+    finally:
+        _reap(pr)
+        src.unlink(missing_ok=True)
+
+
 def _reap(proc) -> None:
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
@@ -463,54 +561,73 @@ def control_4_payload_is_not_its_own_interference():
     """The payload runs in its own session so cancellation can target the whole group.
     A sampler that owns only the runner's session would then report the very process being
     measured as foreign load inside its own lane -- a self-inflicted contamination reading
-    that looks exactly like a real neighbour."""
+    that looks exactly like a real neighbour.
+
+    Ownership is configured as an isolated session, matching production. Under the subtree
+    fallback a child of this process is ours regardless of adoption, so the negative half
+    would have nothing to discriminate.
+    """
     if not LINUX:
         skip("payload is not counted as its own interference", "".strip())
         return
     mask = open(f"/proc/{os.getpid()}/status").read().split("Cpus_allowed_list:")[1].split()[0]
     cpus = sorted(er.parse_cpu_list(mask))
     burn = ("import time\n" "t=time.time()\n" "while time.time()-t<3.0: pass\n")
+    # Configure ownership the way the runner does in production: an isolated session.
+    # Without this the sampler falls back to subtree ownership, under which a child of this
+    # test process is ours whether or not it was explicitly adopted -- correct behaviour,
+    # but it makes the negative half below untestable, because there would be nothing for
+    # adoption to change.
+    own = {"basis": "session", "isolated": True, "sid": er.own_session(),
+           "how": "control fixture"}
     s1 = er.Sampler(own_user="x", gpu_index=None, mask=mask, period=0.25, ps_period=0.25,
-                    own_root_pid=os.getpid())
+                    own_root_pid=os.getpid(), ownership=own)
     s1.start()
     time.sleep(0.5)
     proc = subprocess.Popen(["taskset", "-c", str(cpus[0]), sys.executable, "-c", burn],
                             start_new_session=True,
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        s1.own_also(proc.pid)                  # sid == pid for a session leader
+        payload_sid = proc.pid                 # sid == pid for a session leader
+        s1.own_also(payload_sid)
         time.sleep(2.5)
         proc.wait()
     finally:
         _reap(proc)
         s1.stop(); s1.join(timeout=5)
-    # Assert on the payload's own command, not on a global zero: this host has permanent
-    # unpinned ctffind, so "no foreign threads at all" is not achievable and asserting it
-    # would make the control fail for a reason unrelated to what it tests.
-    me = os.path.basename(sys.executable)[:15]
-    adopted_hits = s1.foreign_detail.get(me, 0)
-    check("adopted payload does not appear in its own foreign list", adopted_hits == 0,
-          f"{me} hits={adopted_hits}  (other in-mask commands seen: "
-          f"{ {k: v for k, v in s1.foreign_detail.items() if k != me} })")
+    # Assert on the payload's own SESSION ID, not on its command name and not on a global
+    # zero. This host runs permanent unpinned ctffind, so "no foreign threads at all" is
+    # unreachable; and another worker's job named `python3` collides with our interpreter's
+    # name, which made a name-keyed assertion fail for a reason unrelated to what it tests.
+    # The per-sample identity records make the precise check possible.
+    def _sids_seen(sampler):
+        return {pr["sid"] for smp in (sampler.summary().get("per_sample_in_mask_detail") or [])
+                for pr in smp["processes"]}
+    adopted_seen = _sids_seen(s1)
+    check("adopted payload's session is absent from its own foreign list",
+          payload_sid not in adopted_seen,
+          f"payload_sid={payload_sid} foreign sids seen={sorted(adopted_seen)}")
 
     # negative half: without adoption the same payload MUST show up, otherwise the control
     # proves nothing about the adoption logic.
     s2 = er.Sampler(own_user="x", gpu_index=None, mask=mask, period=0.25, ps_period=0.25,
-                    own_root_pid=os.getpid())
+                    own_root_pid=os.getpid(), ownership=own)
     s2.start()
     time.sleep(0.5)
     p2 = subprocess.Popen(["taskset", "-c", str(cpus[0]), sys.executable, "-c", burn],
                           start_new_session=True,
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    payload_sid2 = p2.pid
     try:
         time.sleep(2.5)
         p2.wait()
     finally:
         _reap(p2)
         s2.stop(); s2.join(timeout=5)
-    unadopted_hits = s2.foreign_detail.get(me, 0)
+    unadopted_seen = _sids_seen(s2)
     check("without adoption the same payload IS seen (control is not vacuous)",
-          unadopted_hits >= 1, f"{me} hits={unadopted_hits}")
+          payload_sid2 in unadopted_seen,
+          f"payload_sid={payload_sid2} foreign sids seen={sorted(unadopted_seen)}")
 
 
 def main():
@@ -521,6 +638,8 @@ def main():
     control_4_payload_is_not_its_own_interference()
     control_5_execute_arm_records_the_payload_not_the_launcher()
     control_6_normal_exit_with_a_leaked_child_is_caught()
+    control_7_session_ownership_cannot_hide_a_stranger()
+    control_8_tree_rss_includes_grandchildren()
     bad = [n for n, ok, _ in results if not ok]
     if bad:
         print("\nFAILED: " + ", ".join(bad))

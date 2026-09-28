@@ -127,5 +127,18 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
         add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
         set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
+        # Issue #69 bounded fault matrix. The fault switches live in the test
+        # translation unit only; nothing in src/ knows they exist, so there is no
+        # production fault switch and none can be active during a timed run.
+        add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
+        target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
+        target_link_options(cuda_fault_matrix PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaMemset" "LINKER:--wrap=cudaDeviceSynchronize"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftSetWorkArea" "LINKER:--wrap=cufftPlanMany"
+            "LINKER:--wrap=cufftExecR2C" "LINKER:--wrap=cufftExecC2R")
+        add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
+        set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
     endif()
 endif()

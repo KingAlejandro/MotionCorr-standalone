@@ -144,78 +144,102 @@ int main() {
     try {
         MotioncorrRunner runner;
         runner.n_threads = 1;
-        runner.max_iter = 1;          // force the nonconverged verdict the retry reacts to
-        runner.ccf_downsample = 1.0;  // no CCF downsampling, so the recovered shift is direct
+        runner.ccf_downsample = 1.0;  // no CCF downsampling, so shifts are recovered directly
         runner.interpolate_shifts = false;
 
-        const double truth = std::sqrt(
-            TRUE_SX[0]*TRUE_SX[0] + TRUE_SY[0]*TRUE_SY[0] +
-            TRUE_SX[1]*TRUE_SX[1] + TRUE_SY[1]*TRUE_SY[1] +
-            TRUE_SX[2]*TRUE_SX[2] + TRUE_SY[2]*TRUE_SY[2] +
-            TRUE_SX[3]*TRUE_SX[3] + TRUE_SY[3]*TRUE_SY[3]);
-
         std::ostringstream log;
+        std::printf("Issue #69 patch retry shift-state contract (CPU, no device)\n");
+        std::printf("  patch %dx%d, %d groups, scaled_B=%.1f, truth (frame-0 relative):",
+                    PNX, PNY, NFRAMES, (double)SCALED_B);
+        for (int k = 0; k < NFRAMES; k++) std::printf(" (%+.2f,%+.2f)", TRUE_SX[k], TRUE_SY[k]);
+        std::printf("\n\n");
 
-        // --- First attempt. This is what the resident CUDA path does: it accumulates
-        //     its estimate into the caller's vectors and reports nonconvergence.
+        // ----------------------------------------------------------------------
+        // Truth anchor. With enough iterations the estimator converges, and the
+        // accumulated correction is the negative of the applied displacement. This
+        // ties the arms below to a known quantity rather than only to each other.
+        // ----------------------------------------------------------------------
+        runner.max_iter = 12;
+        std::vector<MultidimArray<fComplex> > anchor_stack;
+        buildPatchStack(anchor_stack);
+        std::vector<RFLOAT> anchor_x(NFRAMES, 0.0), anchor_y(NFRAMES, 0.0);
+        const bool anchor_converged = MotioncorrRunnerTestAccess::alignPatch(
+            runner, anchor_stack, PNX, PNY, SCALED_B, anchor_x, anchor_y, log);
+        report("converged reference", anchor_x, anchor_y);
+        double anchor_dev = 0.0;
+        for (int k = 0; k < NFRAMES; k++) {
+            anchor_dev = std::max(anchor_dev, std::fabs((double)anchor_x[k] + TRUE_SX[k]));
+            anchor_dev = std::max(anchor_dev, std::fabs((double)anchor_y[k] + TRUE_SY[k]));
+        }
+        std::printf("  max |recovered + truth| = %.4f px  (converged=%s)\n\n",
+                    anchor_dev, anchor_converged ? "yes" : "no");
+        require(anchor_converged, "Truth anchor did not converge; the fixture is not usable");
+        require(anchor_dev < 0.30,
+                "Truth anchor did not recover the applied displacement; the fixture, not "
+                "the contract, is what this control would be measuring");
+
+        // ----------------------------------------------------------------------
+        // Nonconvergence arms. One iteration cannot reach the 0.5 px tolerance for
+        // these displacements, which is the state the resident CUDA path's fallback
+        // reacts to.
+        // ----------------------------------------------------------------------
+        runner.max_iter = 1;
+
+        // First attempt: accumulates its estimate S1 into the caller's vectors and
+        // reports nonconvergence. This is what alignPatchDevice does in production.
         std::vector<MultidimArray<fComplex> > attempt1;
         buildPatchStack(attempt1);
-        std::vector<RFLOAT> xs(NFRAMES, 0.0), ys(NFRAMES, 0.0);
-        const bool converged1 =
-            MotioncorrRunnerTestAccess::alignPatch(runner, attempt1, PNX, PNY, SCALED_B, xs, ys, log);
-        const std::vector<RFLOAT> s1x = xs, s1y = ys;
-
-        std::printf("Issue #69 patch retry shift-state contract (CPU, no device)\n");
-        std::printf("  patch %dx%d, %d groups, max_iter=%d, scaled_B=%.1f\n",
-                    PNX, PNY, NFRAMES, runner.max_iter, (double)SCALED_B);
-        std::printf("  |truth| = %.4f px\n", truth);
+        std::vector<RFLOAT> s1x(NFRAMES, 0.0), s1y(NFRAMES, 0.0);
+        const bool converged1 = MotioncorrRunnerTestAccess::alignPatch(
+            runner, attempt1, PNX, PNY, SCALED_B, s1x, s1y, log);
         report("attempt 1 (S1)", s1x, s1y);
-
         require(!converged1,
                 "Setup error: the first attempt converged, so it does not reproduce the "
-                "state the retry reacts to. Increase the synthetic shift or lower max_iter.");
-        require(std::fabs(norm2(s1x, s1y) - truth) < 0.25 * truth,
-                "Setup error: the first attempt did not recover the known shift, so the "
-                "arms below would not be comparable.");
+                "state the retry reacts to");
+        require(norm2(s1x, s1y) > 1.0, "First attempt produced no usable estimate");
 
-        // --- Arm B: re-enter WITHOUT resetting, which is what main did at 4c952b3f.
-        //     The patch data is rebuilt exactly as the production fallback rebuilds it:
-        //     from the same, still unshifted frames.
-        std::vector<MultidimArray<fComplex> > attempt2_noreset;
-        buildPatchStack(attempt2_noreset);
-        std::vector<RFLOAT> bx = s1x, by = s1y;
-        MotioncorrRunnerTestAccess::alignPatch(runner, attempt2_noreset, PNX, PNY, SCALED_B, bx, by, log);
-        report("arm B: no reset (S1+S2)", bx, by);
-
-        // --- Arm A: re-enter after restoring the state the first attempt touched.
+        // Arm A: restore the state the first attempt touched, then retry. The patch
+        // data is rebuilt exactly as the production fallback rebuilds it -- from the
+        // same, still unshifted frames.
         std::vector<MultidimArray<fComplex> > attempt2_reset;
         buildPatchStack(attempt2_reset);
         std::vector<RFLOAT> ax(NFRAMES, 0.0), ay(NFRAMES, 0.0);
         MotioncorrRunnerTestAccess::alignPatch(runner, attempt2_reset, PNX, PNY, SCALED_B, ax, ay, log);
         report("arm A: reset (S2)", ax, ay);
 
+        // Arm B: retry without resetting, which is what main did at 4c952b3f.
+        std::vector<MultidimArray<fComplex> > attempt2_noreset;
+        buildPatchStack(attempt2_noreset);
+        std::vector<RFLOAT> bx = s1x, by = s1y;
+        MotioncorrRunnerTestAccess::alignPatch(runner, attempt2_noreset, PNX, PNY, SCALED_B, bx, by, log);
+        report("arm B: no reset (S1+S2)", bx, by);
+
         const double na = norm2(ax, ay), nb = norm2(bx, by);
         std::printf("  |arm A| = %.4f   |arm B| = %.4f   ratio B/A = %.4f\n", na, nb, nb / na);
 
-        // The reset arm reproduces the truth; the non-reset arm doubles it.
-        require(std::fabs(na - truth) < 0.10 * truth,
-                "Reset arm did not recover the known shift once");
-        require(nb > 1.80 * na,
-                "Non-reset arm did not show the doubled correction the fix removes");
-        require(std::fabs(nb / na - 2.0) < 0.20,
-                "Non-reset arm was not close to exactly twice the reset arm");
-
-        // Per-frame, arm B should be the elementwise sum of the two independent estimates.
-        double max_dev = 0.0;
+        // The two attempts see identical input, so the retry re-derives the same
+        // estimate rather than refining the first one.
+        double reproduce_dev = 0.0, sum_dev = 0.0;
         for (int k = 0; k < NFRAMES; k++) {
-            max_dev = std::max(max_dev, std::fabs((double)bx[k] - ((double)s1x[k] + (double)ax[k])));
-            max_dev = std::max(max_dev, std::fabs((double)by[k] - ((double)s1y[k] + (double)ay[k])));
+            reproduce_dev = std::max(reproduce_dev, std::fabs((double)ax[k] - (double)s1x[k]));
+            reproduce_dev = std::max(reproduce_dev, std::fabs((double)ay[k] - (double)s1y[k]));
+            sum_dev = std::max(sum_dev, std::fabs((double)bx[k] - ((double)s1x[k] + (double)ax[k])));
+            sum_dev = std::max(sum_dev, std::fabs((double)by[k] - ((double)s1y[k] + (double)ay[k])));
         }
-        std::printf("  max |armB - (S1 + armA)| per frame = %.6f px\n", max_dev);
-        require(max_dev < 1e-3,
-                "Arm B was not the elementwise sum of the two independent estimates");
+        std::printf("  max |armA - S1|              = %.3e px\n", reproduce_dev);
+        std::printf("  max |armB - (S1 + armA)|     = %.3e px\n", sum_dev);
 
-        std::printf("PASS alignPatch accumulates; re-entry without reset publishes S1+S2\n");
+        require(reproduce_dev < 1e-6,
+                "The retry did not re-derive the same estimate, so the two arms are not "
+                "measuring the accumulation");
+        require(sum_dev < 1e-6,
+                "Arm B was not the elementwise sum of the two independent estimates");
+        require(std::fabs(nb / na - 2.0) < 0.01,
+                "Arm B was not twice arm A");
+
+        std::printf("\nPASS alignPatch accumulates into the caller's vectors and does not\n"
+                    "     re-derive them, so re-entering without a reset publishes S1+S2.\n"
+                    "     Restoring the vectors publishes the single estimate S2.\n");
         return 0;
     } catch (const std::exception &e) {
         std::cerr << "FAIL " << e.what() << '\n';

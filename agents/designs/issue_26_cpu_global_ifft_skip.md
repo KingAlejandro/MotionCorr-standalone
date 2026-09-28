@@ -457,10 +457,12 @@ Written for the porting agent; recorded here as delivered.
    sanity check on that buffer cannot detect the elided case. That check must
    not be relied on as a backstop; the predicate is the only guard.
 4. **Done.** `tests/test_global_ifft_elision.py` (CTest `GlobalIfftElision`),
-   four oracles, asserting full pixel payload, core header, STAR movie
-   association and shift-table completeness, and MRC structural completeness —
-   never file existence. Power demonstrated against three negative controls
-   (§5.8), including the exact substitution this item names.
+   five oracles, asserting full pixel payload, core header, STAR movie
+   association and shift-table completeness, and MRC structural completeness,
+   **plus** product-set assertions — oracle D's demonstrated power is one of
+   those, so the earlier "never file existence" claim was wrong and is
+   withdrawn (§9). Power demonstrated against six negative controls (§5.8 for
+   the original four, §9 for the two added in review).
 5. **Partly done.** Local 5×5, non-square and binning controls executed and
    bit-identical (§5.8). CUDA paths remain declared unoptimized and unverified;
    non-square × binning is unreachable on the available fixtures. Both are in
@@ -482,3 +484,89 @@ independent of it, to enlarge the set of skippable cases. That changes which
 products are written, breaking I1 and the resume contract, for a saving that only
 applies when even/odd output was requested — i.e. when the frames are wanted
 anyway.
+
+## 9. Review addendum — the gap found in review, and oracle E
+
+§5.8 is a dated evidence log and is left as written. This section records what
+independent review changed afterwards.
+
+### 9.1 The gap
+
+Oracles A–D did not cover `_noDW.mrc` pixels. Restating the elision predicate so
+it drops `save_noDW` while the consumer at the sum keeps it —
+
+```
+const bool need_real_space_before_dw = do_local || !do_dose_weighting || even_odd_split;
+```
+
+— is the same copy-drift as the PR #57 case, one variable over. Built as a
+control, it corrupts `_noDW.mrc` by **1046220 of 1048576 pixel bytes** on
+`test-data/synthetic/synthetic_movie.tiff`, and **the entire 18-test suite stayed
+green**. `tests/test_runner_contract.py:97` and `:117` do read `_noDW.mrc` pixels,
+but both pass `--even_odd_split`, which holds `pre_dw_sum_needed` true so the
+elision never fires there, and both compare one binary against itself, so a
+uniform corruption cancels.
+
+### 9.2 Oracle E
+
+The unweighted micrograph must not depend on `--dose_weighting`. Two comparisons:
+
+- `plain`'s `.mrc` (no dose weighting, so the micrograph *is* the unweighted sum)
+  against `keep`'s `_noDW.mrc`.
+- `eo_keep`'s `_noDW.mrc` against `keep`'s `_noDW.mrc`. This anchor is
+  deliberately asymmetric: `plain` and `keep` can both be elided by a single
+  restatement dropping `!do_dose_weighting` and `save_noDW` together, and two
+  uninitialised buffers may agree. `even_odd_split` is a term of
+  `pre_dw_sum_needed`, so `eo_keep` cannot elide unless that term is dropped too
+  — which oracle A catches.
+
+Soundness was checked beyond the test's own arms: the invariant held with pixel
+and core-header equality in **20 of 21** configurations probed (three frame
+selections × seven flag sets; the 21st was a CLI rejection that produced no
+product), so it is a property of the code path, not of the fixture.
+
+### 9.3 Negative controls, re-run
+
+Built against the merged tree, each repeated to check determinism:
+
+| control | substitution | result |
+| :-- | :-- | :-- |
+| drop `save_noDW`, restated | `do_local \|\| !do_dose_weighting \|\| even_odd_split` | **fail** 3/3, oracle E |
+| drop **both** terms, restated | `do_local \|\| even_odd_split` | **fail** 5/5, oracle E's even/odd anchor |
+| drop `even_odd_split`, restated | `do_local \|\| !do_dose_weighting \|\| save_noDW` | **fail** 3/3, oracle A |
+| always elide | `false` | **fail** 3/3, oracle A |
+| drop `do_local` | `pre_dw_sum_needed` | **fail** 3/3, oracle C |
+| unmodified | — | **pass** 3/3 |
+
+Without the even/odd anchor the both-terms control was intermittent (measured
+33–80% detection across independent builds); with it, 5/5.
+
+### 9.4 Guard-rot: the test is now required, not additive
+
+`tools/validate_test_collection.py` did not name `GlobalIfftElision`, and
+`--min-count` defaulted to 17 while the merged tree collects 18. Deleting the
+`add_test` block therefore left the validator green — the repo's only detector
+for a wrong elision predicate could be removed silently. `GlobalIfftElision` is
+now in `DEFAULT_REQUIRED_TESTS` and the minimum is 18; with the block deleted the
+validator fails on both the missing-name and the count check.
+
+That bump required a second edit, and it is worth recording because it is the
+same defect class again: `tools/test_ci_fail_closed.py` holds an independent,
+hardcoded copy of the suite list. Left stale it fails five assertions, and its
+`drop_one` filler — added by `32620aa` precisely so the count gate cannot
+preempt the missing-name gate — would have been silently re-broken. The list now
+carries `GlobalIfftElision`, and the Case B drop tuple exercises it. The suite is
+still restated in three places (`CMakeLists.txt`, `DEFAULT_REQUIRED_TESTS`,
+`INTEGRATED_SUITE`); collapsing those is out of scope here and is left as
+follow-up.
+
+### 9.5 Still UNRUN after this addendum
+
+- Unifying the write guard at `:2529` with `pre_dw_sum_needed` produces an
+  unrequested `_noDW.mrc` that `GlobalIfftElision` does not observe; `Runner_resume`
+  (`test_runner_contract.py:108`) catches it.
+- A stray `_ODD.mrc` write escaping `if (even_odd_split)` is now asserted against
+  (the absence check covers `_EVN` **and** `_ODD`), but no control was built for it.
+- Everything in §6 is unchanged: CUDA paths, tomography/EER/compressed-MRC,
+  non-square × binning, and the fact that no oracle observes whether the
+  transform was actually skipped.

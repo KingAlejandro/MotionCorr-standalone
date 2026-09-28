@@ -4,8 +4,12 @@ Design and changed-file whitelist: [`agents/designs/issue_53_multi_gpu_schedulin
 
 PR A refreshes the #53 launcher concept onto current main, makes the native
 device-list behaviour honest, and proves the scheduling failure modes on CPU.
-**It makes no throughput, memory or numerical claim.** The native CUDA arm is
-prepared but unrun — see [`NEEDS_GPU.md`](NEEDS_GPU.md).
+**It makes no throughput, memory or numerical claim.**
+
+The native two-GPU correctness arm has since been **run and passed** under a
+coordinated slot: see [`GPU_ACCEPTANCE.md`](GPU_ACCEPTANCE.md).
+[`NEEDS_GPU.md`](NEEDS_GPU.md) is retained as the request that arm was executed
+against, not as an outstanding ask.
 
 ## What is here
 
@@ -17,9 +21,9 @@ prepared but unrun — see [`NEEDS_GPU.md`](NEEDS_GPU.md).
 | `tools/multi_gpu/merge_workers.py` | staging plus lost/duplicate/misrouted/failed detection, deterministic order |
 | `tools/multi_gpu/gpu_witness.py` | UUID selection and `nvidia-smi` compute-apps witnesses |
 | `tools/multi_gpu/compare24.py` | per-movie exact comparison against a serial baseline |
-| `tests/test_multi_gpu_scheduling.py` | 27 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
+| `tests/test_multi_gpu_scheduling.py` | 36 CPU-only cases, registered as the `MultiGpuScheduling` CTest |
 | `tests/fake_worker.py` | binary stand-in with fault injection |
-| `docs/multi_gpu/negative_controls.py` | 25 mutations, each required to break its case |
+| `docs/multi_gpu/negative_controls.py` | 39 mutations, each required to break its case |
 
 ## Usage
 
@@ -49,7 +53,7 @@ Everything below comes from one run, recorded in
 
 **Provenance** ([`pr_a_evidence/source_provenance.txt`](pr_a_evidence/source_provenance.txt),
 echoed at the top of the validation log): source head
-`2353876f18398918d0849ca5327978c9c679cd1c`, base
+`f16d46d36f873c26e034fccec2e674575f620fe3`, base
 `4c952b3f54479653512c4d208e09c9a8c02f3726`, staged by `git archive` of the
 **committed** tree with `COPYFILE_DISABLE=1`. The harness asserts the staged
 tree contains zero macOS AppleDouble `._*` files and aborts otherwise
@@ -65,8 +69,8 @@ unpatched-main control binary `de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec
 
 | Layer | Result |
 |---|---|
-| `tests/test_multi_gpu_scheduling.py --binary <built>` | **27/27 passed** |
-| `docs/multi_gpu/negative_controls.py` | **25/25 mutations detected**, no survivors |
+| `tests/test_multi_gpu_scheduling.py --binary <built>` | **37/37 passed** |
+| `docs/multi_gpu/negative_controls.py` | **39/39 mutations detected**, no survivors |
 | `ctest --output-on-failure -j 4` | **14/14 passed** — the 13 pre-existing CPU tests plus `MultiGpuScheduling` |
 | end-to-end: real binary, serial vs 3-way sharded | **6/6 movies exact**, merge `PASS`, aggregate STAR identical |
 
@@ -135,24 +139,24 @@ A trailing colon (`--gpu 0:`) is reported as two device entries, the second
 empty. That is deliberate: it is two colon-separated fields, and `--use_own`
 accepts one.
 
-### What this evidence does and does not show
+### What this evidence shows
 
-It shows that on a **CPU-only** build the list syntax is now rejected *as a
-list*, with the spec echoed and the count named, where before it produced only
-the generic missing-CUDA message. The syntax check was deliberately placed
-outside `#if defined _CUDA_ENABLED` so this is observable without a GPU.
+On a **CPU-only** build the list syntax is rejected *as a list*, with the spec
+echoed and the count named, where before it produced only the generic
+missing-CUDA message. The syntax check sits outside `#if defined _CUDA_ENABLED`
+so this is observable without a GPU.
 
-It does **not** show the behaviour the change exists to stop: on a **CUDA**
-build, unpatched `--gpu 0:1:2:3` proceeds to `gpu_id = 0` and prints
-`Using CUDA acceleration on GPU device 0`, running the whole dataset on one
-device while the user asked for four. That is a code-reading claim
-(`src/motioncorr_runner.cpp:257-259` at `4c952b3f`) plus an **unrun** witness
-listed in [`NEEDS_GPU.md`](NEEDS_GPU.md). No CUDA build was made or run for PR A.
+The behaviour the change exists to stop is **no longer a code-reading claim**.
+It was witnessed on a CUDA build and is recorded in
+[`GPU_ACCEPTANCE.md`](GPU_ACCEPTANCE.md): unpatched main given `--gpu 0:1:2:3`
+printed `Using CUDA acceleration on GPU device 0`, exited 0, and processed all
+24 movies on a single device — 24 corrected MRCs and 24 per-movie CUDA profile
+markers.
 
 ## Negative controls
 
-`negative_controls.py` applies 25 mutations, one at a time, to a scratch copy and
-requires the corresponding cases to fail; all 25 are detected
+`negative_controls.py` applies 39 mutations, one at a time, to a scratch copy and
+requires the corresponding cases to fail; all 39 are detected
 ([`negative_controls.json`](pr_a_evidence/negative_controls.json)). That covers
 every Python-side guard. The one guard outside its reach is the C++ device-list
 rejection, because mutating it needs a rebuild; its control is the recorded

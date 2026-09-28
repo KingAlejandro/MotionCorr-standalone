@@ -1,8 +1,14 @@
 # NEEDS_GPU — #53 native serial-vs-sharded equality and device witnesses
 
-**Status: requested, not scheduled, UNRUN.** Nothing in this file has been
-executed. No result below is claimed. #26 owns this round's initial GPU slot;
-this request waits for Codex monitoring to assign one.
+**Status: SATISFIED and CLOSED, 28 Sep 2026.** A coordinated slot was granted
+and the arms below were executed. Results, exact commands, hashes and
+limitations: [`GPU_ACCEPTANCE.md`](GPU_ACCEPTANCE.md). The allocation actually
+used was two GPUs (GPU0/GPU1 by UUID) and CPUs 96-111, and the slot has been
+released.
+
+This file is retained as the request that arm was executed against. It is no
+longer an outstanding ask, and the plan below is not a claim of results — read
+`GPU_ACCEPTANCE.md` for those.
 
 ## Purpose
 

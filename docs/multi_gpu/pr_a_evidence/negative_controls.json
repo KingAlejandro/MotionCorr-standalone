@@ -1,6 +1,8 @@
 {
-  "n_mutations": 25,
-  "n_detected": 25,
+  "n_mutations": 39,
+  "n_attempted": 39,
+  "n_skipped": 0,
+  "n_detected": 39,
   "survivors": [],
   "results": [
     {
@@ -197,6 +199,118 @@
       "file": "tools/multi_gpu/merge_workers.py",
       "cases": {
         "case_missing_worker_directory": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "per-worker CPU masks collapse to one shared mask",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_per_worker_cpu_masks": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "sampler stop flag shadows threading.Thread._stop again",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_sampler_lifecycle": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "sampler backend errors no longer recorded",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_sampler_lifecycle": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "--devices with --no-witness accepted again",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_devices_with_no_witness_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "compare24 keys reports by basename again",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge matches absolute roots without normalizing",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_absolute_movie_roots_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge completeness check un-normalizes the root",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_absolute_movie_roots_attributed": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "aggregate step runs even when staging failed",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_staging_never_reprocesses": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge --out no longer resolved",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_merge_out_is_resolved": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "comparison report identity is not injective",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_injective_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "reused reports no longer validated against their root",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_compare24_injective_report_identity": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "collision preflight uses raw roots again",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_normalized_root_collision_refused": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "merge drops the duplicate-coverage guard",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "zero-pair and duplicate-root manifests accepted by the comparator",
+      "file": "tools/multi_gpu/compare24.py",
+      "cases": {
+        "case_duplicate_coverage_and_zero_pairs_rejected": "detected"
       },
       "status": "detected"
     },

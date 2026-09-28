@@ -1,31 +1,54 @@
+WAITING_FOR_VALIDATION_LOCK 2026-09-28T07:47:59+00:00
++ echo '=== PROVENANCE ==='
 === PROVENANCE ===
-source_head=2353876f18398918d0849ca5327978c9c679cd1c
++ cat /home/ubuntu/mc-issue53-round96/src_head.txt
+source_head=f16d46d36f873c26e034fccec2e674575f620fe3
 base=4c952b3f54479653512c4d208e09c9a8c02f3726
-staged_via=git archive of the committed tree, COPYFILE_DISABLE=1
-git status --porcelain at stage time:
-?? WORKER_RESOURCE_UPDATE.md
-[end: only WORKER_RESOURCE_UPDATE.md, which is the user's file and deliberately untracked]
---- AppleDouble / stray files in staged tree (must be 0) ---
+staged_via=git archive of committed tree, COPYFILE_DISABLE=1
+porcelain:
+
+[end]
+++ find /home/ubuntu/mc-issue53-round96/src -name '._*'
+++ wc -l
++ echo applefile_count=0
 applefile_count=0
-=== INTERFERENCE AT START ===
-2026-09-28T00:20:57+00:00
-40.52 22.97 13.09 72/8196 3074993
-1156938 bash -c set -e; cd /home/ubuntu/work/pyctffind-optimizer-study-20260810-src/original_source/ctffind-4.1.14; out=/home/ubuntu/work/optimizer-study-output/aspire-smoke/cpp_diag.mrc; printf "%s\n%s\n%s\n%s\n" "/home/ubuntu/work/optimizer-study-output/aspire-smoke/aspire_field.mrc" "$out" "2.7,300,0.07,10000,1.5" "512,30,5,5000,30000,500,0" | OMP_NUM_THREADS=1 ./ctffind --old-school-input -j:1 >/tmp/aspire_cpp.log 2>&1; tail -20 /tmp/aspire_cpp.log; echo SUMMARY; grep -v "^#" "${out%.mrc}.txt"
-1156942 ./ctffind --old-school-input -j:1
-1635423 bash -c repo=/home/ubuntu/work/pyctffind-ctffind5-quadratic-trust-20260811; d=$(mktemp -d); input=$repo/tests/real_cases/empiar_10184_00002hln_00003esn_center_1024.mrc; printf "%s\n%s\n%s\n%s\n%s\n%s\n" "$input" "$d/diag.mrc" "2.7,300.0,0.07,10000.0,0.85" "512,30.0,5.0,5000.0,20000.0,500.0,0.0" "0,1" "0,0,0,0" | OMP_NUM_THREADS=1 /usr/bin/time -f %e /home/ubuntu/work/ctffind-4.1.14-portable/ctffind --old-school-input-ctffind4 -j:1 >/dev/null
-1635428 /usr/bin/time -f %e /home/ubuntu/work/ctffind-4.1.14-portable/ctffind --old-school-input-ctffind4 -j:1
-1635429 /home/ubuntu/work/ctffind-4.1.14-portable/ctffind --old-school-input-ctffind4 -j:1
-3031784 bash -c W="$HOME/ctffind-fastpy-validation-20260720"; LOG="$W/provenance/runaway_variants_20260720/live_cpp_tests"; until grep -q ALL_DONE "$LOG/status.txt" 2>/dev/null; do sleep 5; done; echo "=== STATUS ==="; cat "$LOG/status.txt"; echo "=== cli summary ==="; grep -E "passed|failed" "$LOG/cli.log" | tail -3; echo "=== realdata summary ==="; grep -E "passed|failed|error" "$LOG/realdata.log" | tail -5
---- all non-MotionCorr CPU consumers > 10% ---
-    PID %CPU COMMAND
-3074216 5656 python
-3073592  373 motioncorr
-1156942 99.9 ctffind
-1635429 99.9 ctffind
-3045757  1.0 python3
-2722253  0.8 node
-1519128  0.1 rsyslogd
-=== BUILD (Release, CUDA=OFF) ===
+++ find /home/ubuntu/mc-issue53-round96/src -name '._*'
+++ wc -l
++ '[' 0 -eq 0 ']'
++ echo '=== PAYLOAD / TOPOLOGY / LOAD ==='
+=== PAYLOAD / TOPOLOGY / LOAD ===
++ date -Is
+2026-09-28T07:51:16+00:00
++ hostname
+small-refmac-machine
++ grep Cpus_allowed_list /proc/self/status
+Cpus_allowed_list:	0-63
++ numactl --show
++ head -4
+policy: default
+preferred node: current
+physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 0 1 
++ numactl --hardware
++ sed -n 1,2p
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
++ cat /proc/loadavg
+4.02 4.72 6.88 3/8007 3377101
++ echo '--- concurrent MotionCorr work (recorded, not altered) ---'
+--- concurrent MotionCorr work (recorded, not altered) ---
++ pgrep -alf motioncorr
++ grep -v pgrep
++ grep -v mc-issue53-round96
++ head -5
++ echo '--- ctffind (untouched) ---'
+--- ctffind (untouched) ---
++ pgrep -c ctffind
+2
++ echo '=== BUILD (Release, CUDA=OFF, -j16 on 32-63) ==='
+=== BUILD (Release, CUDA=OFF, -j16 on 32-63) ===
++ rm -rf /home/ubuntu/mc-issue53-round96/build
++ taskset -c 32-63 /home/ubuntu/.mc-venv/bin/cmake -S /home/ubuntu/mc-issue53-round96/src -B /home/ubuntu/mc-issue53-round96/build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF
 -- The C compiler identification is GNU 13.3.0
 -- The CXX compiler identification is GNU 13.3.0
 -- Detecting C compiler ABI info
@@ -50,23 +73,24 @@ applefile_count=0
 -- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43")
 -- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
 -- Found Python3: /home/ubuntu/.mc-venv/bin/python3.12 (found version "3.12.3") found components: Interpreter
--- Configuring done (1.6s)
--- Generating done (0.1s)
+-- Configuring done (0.9s)
+-- Generating done (0.0s)
 -- Build files have been written to: /home/ubuntu/mc-issue53-round96/build
-[  1%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
-[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
-[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
-[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
-[  5%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
-[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
-[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
++ taskset -c 32-63 /home/ubuntu/.mc-venv/bin/cmake --build /home/ubuntu/mc-issue53-round96/build -j 16
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  3%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
+[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
 [  9%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
-[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
 [ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
-[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
-[ 13%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 12%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
 [ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
-[ 16%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
 [ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
 [ 18%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
 [ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
@@ -126,6 +150,15 @@ applefile_count=0
 [ 81%] Building CXX object CMakeFiles/motioncorr_core.dir/src/multidim_array.cpp.o
 [ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
 [ 83%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
+[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
+[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 93%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
+[ 94%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
 In file included from /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.h:48,
                  from /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:49:
 In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
@@ -137,7 +170,6 @@ In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
 /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:579:13: note: declared here
   579 |     RFLOAT *xt=NULL;
       |             ^~
-[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
 In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
     inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:767:25:
 /home/ubuntu/mc-issue53-round96/src/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
@@ -165,14 +197,6 @@ In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
 /home/ubuntu/mc-issue53-round96/src/src/numerical_recipes.cpp:703:13: note: declared here
   703 |     RFLOAT *pt, *ptt, *xit;
       |             ^~
-[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
-[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
-[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
-[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
-[ 90%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
-[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
-[ 93%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
-[ 94%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
 /home/ubuntu/mc-issue53-round96/src/src/time.cpp: In function ‘void progress_bar(long int)’:
 /home/ubuntu/mc-issue53-round96/src/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
   191 |             fprintf(stdout, cheese);
@@ -185,14 +209,25 @@ In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
 [ 98%] Built target motioncorr
 [100%] Linking CXX executable runner_numerics
 [100%] Built target runner_numerics
++ echo BUILD_RC=0
 BUILD_RC=0
++ sha256sum /home/ubuntu/mc-issue53-round96/build/motioncorr
 f4748106a1a296efd961b655fce675c9336cda42ca63f7b4bf4488d12ef9e8f2  /home/ubuntu/mc-issue53-round96/build/motioncorr
++ grep -m1 '^CMAKE_BUILD_TYPE' /home/ubuntu/mc-issue53-round96/build/CMakeCache.txt
 CMAKE_BUILD_TYPE:STRING=Release
++ grep -m1 CXX_FLAGS /home/ubuntu/mc-issue53-round96/build/CMakeFiles/motioncorr_core.dir/flags.make
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
++ g++ --version
++ head -1
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
++ /home/ubuntu/.mc-venv/bin/cmake --version
++ head -1
 cmake version 4.4.3
++ python3 --version
 Python 3.12.3
++ echo '=== SCHEDULING SUITE (real binary) ==='
 === SCHEDULING SUITE (real binary) ===
++ taskset -c 32-63 python3 /home/ubuntu/mc-issue53-round96/src/tests/test_multi_gpu_scheduling.py --binary /home/ubuntu/mc-issue53-round96/build/motioncorr
 ok   case_roundtrip_and_metadata
 ok   case_empty_shard_rejected
 ok   case_output_name_collision
@@ -217,13 +252,26 @@ ok   case_short_row_refused
 ok   case_killed_worker_then_nonprefix_resume
 ok   case_aggregate_star_canonical_order
 ok   case_aggregate_wrong_order_rejected
+ok   case_failed_staging_never_reprocesses
+ok   case_merge_out_is_resolved
 ok   case_launcher_refuses_cpu_gpu_confusion
+ok   case_per_worker_cpu_masks
+ok   case_devices_with_no_witness_refused
+ok   case_compare24_report_identity
+ok   case_compare24_injective_report_identity
+ok   case_normalized_root_collision_refused
+ok   case_duplicate_coverage_and_zero_pairs_rejected
+ok   case_absolute_movie_roots_attributed
 ok   case_gpu_witness_logic
+ok   case_sampler_lifecycle
 ok   case_device_list_rejected
 
-27/27 passed
+37/37 passed
++ echo SCHED_RC=0
 SCHED_RC=0
++ echo '=== NEGATIVE CONTROLS ==='
 === NEGATIVE CONTROLS ===
++ taskset -c 32-63 python3 /home/ubuntu/mc-issue53-round96/src/docs/multi_gpu/negative_controls.py --json-out /home/ubuntu/mc-issue53-round96/negative_controls.json
           detected  partition preflight disabled
                      detected  case_output_name_collision
                      detected  case_duplicate_movie_in_input
@@ -277,12 +325,44 @@ SCHED_RC=0
                      detected  case_link_with_aggregate_refused
           detected  missing worker directory no longer reported
                      detected  case_missing_worker_directory
+          detected  per-worker CPU masks collapse to one shared mask
+                     detected  case_per_worker_cpu_masks
+          detected  sampler stop flag shadows threading.Thread._stop again
+                     detected  case_sampler_lifecycle
+          detected  sampler backend errors no longer recorded
+                     detected  case_sampler_lifecycle
+          detected  --devices with --no-witness accepted again
+                     detected  case_devices_with_no_witness_refused
+          detected  compare24 keys reports by basename again
+                     detected  case_compare24_report_identity
+          detected  merge matches absolute roots without normalizing
+                     detected  case_absolute_movie_roots_attributed
+          detected  merge completeness check un-normalizes the root
+                     detected  case_absolute_movie_roots_attributed
+          detected  aggregate step runs even when staging failed
+                     detected  case_failed_staging_never_reprocesses
+          detected  merge --out no longer resolved
+                     detected  case_merge_out_is_resolved
+          detected  comparison report identity is not injective
+                     detected  case_compare24_injective_report_identity
+          detected  reused reports no longer validated against their root
+                     detected  case_compare24_injective_report_identity
+          detected  collision preflight uses raw roots again
+                     detected  case_normalized_root_collision_refused
+          detected  merge drops the duplicate-coverage guard
+                     detected  case_duplicate_coverage_and_zero_pairs_rejected
+          detected  zero-pair and duplicate-root manifests accepted by the comparator
+                     detected  case_duplicate_coverage_and_zero_pairs_rejected
           detected  launcher no longer refuses an existing --out
                      detected  case_launcher_refuses_cpu_gpu_confusion
 
-25/25 mutations detected
+39/39 mutations detected
++ echo NEGCTL_RC=0
 NEGCTL_RC=0
++ echo '=== FULL CTEST ==='
 === FULL CTEST ===
++ cd /home/ubuntu/mc-issue53-round96/build
++ taskset -c 32-63 /home/ubuntu/.mc-venv/bin/ctest --output-on-failure -j 4
 Test project /home/ubuntu/mc-issue53-round96/build
       Start  1: SyntheticRegression
       Start  2: HotPixelRngDeterminism
@@ -292,153 +372,35 @@ Test project /home/ubuntu/mc-issue53-round96/build
       Start  5: Runner_invalid
  2/14 Test  #5: Runner_invalid ...................   Passed    0.12 sec
       Start  6: Runner_resume
- 3/14 Test  #3: RunnerExposure ...................   Passed    0.62 sec
+ 3/14 Test  #3: RunnerExposure ...................   Passed    0.54 sec
       Start  7: Runner_tomography
- 4/14 Test  #2: HotPixelRngDeterminism ...........   Passed    0.70 sec
+ 4/14 Test  #2: HotPixelRngDeterminism ...........   Passed    0.61 sec
       Start  8: RunnerLateBin
  5/14 Test  #7: Runner_tomography ................   Passed    0.41 sec
       Start  9: RunnerExportedUnits
- 6/14 Test  #1: SyntheticRegression ..............   Passed    1.12 sec
+ 6/14 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
       Start 10: GainCache
- 7/14 Test  #9: RunnerExportedUnits ..............   Passed    0.11 sec
+ 7/14 Test  #1: SyntheticRegression ..............   Passed    1.14 sec
       Start 11: TiffRead
- 8/14 Test  #8: RunnerLateBin ....................   Passed    0.72 sec
+ 8/14 Test  #8: RunnerLateBin ....................   Passed    0.73 sec
       Start 12: DamagedMovie
  9/14 Test #12: DamagedMovie .....................   Passed    0.10 sec
       Start 13: RunnerModelParser
 10/14 Test #13: RunnerModelParser ................   Passed    0.14 sec
       Start 14: MultiGpuScheduling
-11/14 Test #11: TiffRead .........................   Passed    0.54 sec
-12/14 Test  #6: Runner_resume ....................   Passed    2.12 sec
-13/14 Test #10: GainCache ........................   Passed    1.36 sec
-14/14 Test #14: MultiGpuScheduling ...............   Passed    4.66 sec
+11/14 Test #11: TiffRead .........................   Passed    0.53 sec
+12/14 Test #10: GainCache ........................   Passed    1.34 sec
+13/14 Test  #6: Runner_resume ....................   Passed    2.17 sec
+14/14 Test #14: MultiGpuScheduling ...............   Passed    6.76 sec
 
 100% tests passed out of 14
 
-Total Test time (real) =   6.32 sec
+Total Test time (real) =   8.33 sec
++ echo CTEST_RC=0
 CTEST_RC=0
-=== DEVICE LIST: PATCHED vs UNPATCHED MAIN ===
-f4748106a1a296efd961b655fce675c9336cda42ca63f7b4bf4488d12ef9e8f2  /home/ubuntu/mc-issue53-round96/build/motioncorr
-de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec568815c71645f8a  /home/ubuntu/mc-issue53-round96/mc-base-build/motioncorr
---- --gpu "0:1:2:3"
-  patched: ERROR: --gpu 0:1:2:3 requests 4 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
---- --gpu "0,1"
-  patched: ERROR: --gpu 0,1 requests 2 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
---- --gpu "0:1"
-  patched: ERROR: --gpu 0:1 requests 2 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
---- --gpu "0abc"
-  patched: ERROR: --gpu 0abc is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
---- --gpu "-1"
-  patched: ERROR: --gpu -1 is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
---- --gpu "0"
-  patched: ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
-  base   : ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
-=== END TO END: real serial vs sharded ===
-+ R=/home/ubuntu/mc-issue53-round96
-+ BIN=/home/ubuntu/mc-issue53-round96/build/motioncorr
-+ E=/home/ubuntu/mc-issue53-round96/e2e
-+ rm -rf /home/ubuntu/mc-issue53-round96/e2e
-+ mkdir -p '/home/ubuntu/mc-issue53-round96/e2e/Movies/sub dir'
-+ cd /home/ubuntu/mc-issue53-round96/e2e
-+ SRC=/home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff
-+ sha256sum /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff
-95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff
-+ for i in 0 1 2 4 5
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff Movies/mov_00.tiff
-+ for i in 0 1 2 4 5
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff Movies/mov_01.tiff
-+ for i in 0 1 2 4 5
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff Movies/mov_02.tiff
-+ for i in 0 1 2 4 5
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff Movies/mov_04.tiff
-+ for i in 0 1 2 4 5
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff Movies/mov_05.tiff
-+ ln -s /home/ubuntu/mc-issue53-round96/src/test-data/synthetic/synthetic_movie.tiff 'Movies/sub dir/mov_03.tiff'
-+ cat
-+ sha256sum movies.star
-1cd6b99c0afb91ac51d5dc2aed3b0647b0d7a58fc00bdbdafc157a8104d4ed8b  movies.star
-+ OPTS=(--use_own --j 4 --dose_weighting --dose_per_frame 1.0 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1)
-+ echo '=== SERIAL ARM ==='
-=== SERIAL ARM ===
-+ taskset -c 32-63 /home/ubuntu/mc-issue53-round96/build/motioncorr --i movies.star --o serial/ --use_own --j 4 --dose_weighting --dose_per_frame 1.0 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1
-+ echo SERIAL_RC=0
-SERIAL_RC=0
-+ tail -3 serial.log
- ERROR in executing: gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=serial/batch.pdf @serial/batch.pdf.lst > /dev/null
- + Will make an empty PDF-file in serial/batch.pdf
- Done! Written: serial/logfile.pdf
-+ find serial -name '*.mrc'
-+ sort
-serial/Movies/mov_00.mrc
-serial/Movies/mov_01.mrc
-serial/Movies/mov_02.mrc
-serial/Movies/mov_04.mrc
-serial/Movies/mov_05.mrc
-serial/Movies/sub dir/mov_03.mrc
-+ echo '=== SHARDED ARM (3 CPU workers) ==='
-=== SHARDED ARM (3 CPU workers) ===
-+ taskset -c 32-63 python3 /home/ubuntu/mc-issue53-round96/src/tools/multi_gpu/run_multi_gpu.py --star movies.star --out sharded --binary /home/ubuntu/mc-issue53-round96/build/motioncorr --workers 3 --no-witness --cpus 32-63 -- --use_own --j 4 --dose_weighting --dose_per_frame 1.0 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1
-TOTAL	6
-sharded/shards/shard_3way_0.star	2
-sharded/shards/shard_3way_1.star	2
-sharded/shards/shard_3way_2.star	2
-manifest	sharded/shards/shard_manifest.json
-{
-  "n_workers": 3,
-  "wall_seconds": 0.581,
-  "returncodes": [
-    0,
-    0,
-    0
-  ],
-  "verdict": "PASS"
-}
-+ echo SHARDED_RC=0
-SHARDED_RC=0
-+ echo '=== MERGE ==='
-=== MERGE ===
-+ taskset -c 32-63 python3 /home/ubuntu/mc-issue53-round96/src/tools/multi_gpu/merge_workers.py --manifest sharded/shards/shard_manifest.json --workers sharded/w0 sharded/w1 sharded/w2 --status sharded/status.json --out merged --report merge_report.json --aggregate-with /home/ubuntu/mc-issue53-round96/build/motioncorr --input-star movies.star '--aggregate-args=--use_own --j 4 --dose_weighting --dose_per_frame 1.0 --patch_x 3 --patch_y 3 --bfactor 150 --seed 1'
-{
-  "n_movies_expected": 6,
-  "n_files_staged": 24,
-  "verdict": "PASS"
-}
-+ echo MERGE_RC=0
-MERGE_RC=0
-+ echo '=== EXACT PER-MOVIE COMPARISON (serial vs sharded) ==='
-=== EXACT PER-MOVIE COMPARISON (serial vs sharded) ===
-+ test -f merged/corrected_micrographs.star
-+ taskset -c 32-63 python3 /home/ubuntu/mc-issue53-round96/src/tools/multi_gpu/compare24.py --ref serial --test merged --tool /home/ubuntu/mc-issue53-round96/src/tools/compare_motioncorr.py --manifest sharded/shards/shard_manifest.json --out exact
-{
-  "n_expected": 6,
-  "n_compared": 6,
-  "passed": 6,
-  "failed": 0,
-  "verdict": "PASS"
-}
-+ echo COMPARE_RC=0
-COMPARE_RC=0
-+ echo '=== AGGREGATE STAR: serial vs merged, directory prefix normalized ==='
-=== AGGREGATE STAR: serial vs merged, directory prefix normalized ===
-+ taskset -c 32-63 python3 -
-AGGREGATE_STAR_IDENTICAL=1
-+ echo '=== NEGATIVE CONTROL: per-movie metadata really does change the result ==='
-=== NEGATIVE CONTROL: per-movie metadata really does change the result ===
-+ taskset -c 32-63 python3 -
-04c2a1d9349b3c09 serial/Movies/mov_00.mrc
-6717aec7005b29ec serial/Movies/mov_01.mrc
-391592cffc9cee33 serial/Movies/mov_02.mrc
-393aacafef073a61 serial/Movies/mov_04.mrc
-b5dbd72d73e3a56a serial/Movies/mov_05.mrc
-641c3f66343c42c2 serial/Movies/sub dir/mov_03.mrc
-DISTINCT_PAYLOADS=6/6
-E2E_RC=0
-=== INTERFERENCE AT END ===
-2026-09-28T00:21:52+00:00
-51.49 29.74 16.02 8/8009 3077616
-VALIDATE2_RC=0
+++ date -Is
++ echo '=== END 2026-09-28T07:51:59+00:00 ==='
+=== END 2026-09-28T07:51:59+00:00 ===
++ cat /proc/loadavg
+4.91 4.96 6.87 4/8005 3378992
+CTL_FINAL_OUTER_RC=0

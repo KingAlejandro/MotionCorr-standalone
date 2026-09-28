@@ -236,50 +236,54 @@ GPU-c7b9c523...  30 % util, 439 MiB      other three devices: 0 %, 4 MiB
 | main `4c952b3` | 0 | 28.14 s | 1 610 960 kB | 24 |
 | candidate | 0 | 27.92 s | 1 609 476 kB | 24 |
 
-### J2. Shared VM GPU3 — **OUT-OF-ENVELOPE RESOURCE INTERVENTION**
+### J2. Shared VM GPU3 — **USER-AUTHORIZED EXCEPTION to the published envelope**
 
-**Coordinator ruling, 28 Sep: this run was outside the published VM policy and
-must be labelled as such.** The published envelope is GPU3 **unallocated for
-colleagues** and an aggregate of 24 logical CPUs at **96-119**. This run used
-GPU3 and CPUs **120-123**, both outside that envelope. The correct procedure
-was to request a coordinated VM budget first, or to use the authorized
-dedicated SCARF allocation — which was already available and did produce the
-baseline in §J1.
+**Final standing.** This run was authorized by Alex directly and is not an
+unauthorized action or a worker fault. The labelling went through three states
+and all three are kept visible rather than overwritten:
 
-Sequence of record, stated plainly rather than argued: Alex asked mid-task for a
-4-GPU-VM run in addition to SCARF; this job flagged the envelope extension in
-the commit message, the PR comment and the status file at the time; the
-coordinator has now ruled it out of envelope. Both facts stand.
+| when | what |
+|---|---|
+| **2026-09-28T07:22:00.189Z** | Alex's direct user message: *"Run on 4GPU as well"* — the grant |
+| 07:25:04Z → ~07:30Z | the run executed, wholly after the grant |
+| later | a coordinator message called it out-of-envelope; §J2 was relabelled accordingly |
+| later still | the coordinator **retracted** that warning, confirming the grant from read-only history and directing that it be recorded as a user-authorized exception |
 
-What was and was not done: GPU3 selected by UUID, CPUs 120-123, own device lock,
-pre-flight abort if GPU3 had any compute app. #53's GPU0/1 and #69's GPU2 were
-not touched, no colleague process or service was altered, the benchmark mutex
-was not taken and **no timing is claimed** from a shared box. The device and its
-lock were released immediately on completion and are free (verified: all four
-devices at 1 MiB / 0 %, no compute apps).
+The published envelope (GPU3 unallocated, aggregate 24 logical CPUs at 96-119)
+was the standing policy; the user grant supersedes it for this bounded run. The
+extension was flagged in the commit message, the PR comment and the status file
+at the time rather than taken quietly.
 
-**Standing:** artifacts are preserved exactly as produced, under
+**Actual use, occupancy and budget:**
+
+| | |
+|---|---|
+| device | GPU3 only, selected by **UUID** `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d` — ordinals never identify silicon |
+| pre-flight | aborts if GPU3 has any compute app; observed all four devices at 1 MiB / 0 %, no compute apps, no MotionCorr processes, load 0.26 |
+| CPUs | 120-123 (4 logical, NUMA node1, no SMT), inherited `Cpus_allowed_list: 120-123` verified in-job |
+| disjointness | **#53's GPU0/1 + CPUs 96-111 and #69's GPU2 + CPUs 112-119 were never touched**; witness during the run shows the other three devices at 0 % / 1 MiB |
+| build / runtime | `-j4`, `OMP_NUM_THREADS=4` |
+| lock | own device lock `/tmp/motioncorr-gpu3-pr110.lock`; the benchmark mutex deliberately **not** taken, because this is correctness and not timing |
+| colleagues | no llama, colleague process or service altered; none present |
+| release | device and lock released on completion — verified free afterwards: all four devices 1 MiB / 0 %, no compute apps, lock not held |
+| claims | correctness only. **No timing is claimed** from a shared box, and SCARF and VM results are never combined into one curve |
+
+**Artifacts preserved exactly as produced**, under
 `docs/integration_round96/evidence/vm-gpu3/` and on the VM at
-`/home/alex/mc-pr110-gpu3` (2.7 GB). **No further self-expanded VM allocation
-will be made.** GPU3 returns to unallocated. Any remaining bounded native check
-goes to the authorized dedicated SCARF allocation, or waits for a coordinated
-VM budget.
+`/home/alex/mc-pr110-gpu3` (2.7 GB). No raw evidence was rewritten at any point
+in the three labelling states, and no run was restarted for wording.
 
-**This run is corroboration, not the baseline.** The §J1 SCARF result is the
-native evidence of record and can be assessed entirely independently of it.
+**Independence.** §J1's dedicated SCARF baseline is the native evidence of
+record and can be assessed entirely on its own. Strike this section and §J1 is
+unchanged — that separability was true when this was thought to be
+out-of-envelope and remains true now.
 
-```
-pid 1228552  .../cand/build/motioncorr  3206 MiB  GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d
-GPU-b2cb2c39...  20 % util, 3271 MiB     other three: 0 %, 1 MiB
-```
+### J3. Result — the SCARF baseline, independently corroborated on the VM
 
-### J3. Result — the SCARF baseline, with the VM run as corroboration only
+The SCARF column is the evidence of record and stands alone. The VM column is a
+**user-authorized** second platform; it corroborates but is not required.
 
-The SCARF column is the evidence of record. The VM column is retained for
-completeness and is **not** required to support any claim here; strike it and
-§J1 stands unchanged.
-
-| | SCARF gn3001 (**of record**) | VM GPU3 (out-of-envelope, corroboration) |
+| | SCARF gn3001 (**of record**) | VM GPU3 (user-authorized, corroboration) |
 |---|---|---|
 | images pixel-identical | **24/24** | **24/24** |
 | total pixels compared | **341,735,520** | **341,735,520** |

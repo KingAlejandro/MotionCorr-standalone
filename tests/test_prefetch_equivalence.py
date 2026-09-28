@@ -32,6 +32,8 @@ import tempfile
 from pathlib import Path
 
 NX, NY, NFRAMES = 64, 48, 8
+# --j passed by run(); with no --max_io_threads the decoder uses all of them.
+IO_THREADS = 2
 
 
 def write_mrc(path: Path, frames, nx, ny):
@@ -86,6 +88,19 @@ def synthetic_frames(seed, nx, ny, nframes, drift=1):
     return frames
 
 
+def estimate_bytes(nx, ny, nframes, io_threads):
+    """Independent mirror of movieio::estimateDecodedMovieBytes.
+
+    Written out from the formula documented in
+    agents/designs/issue_94_bounded_prefetch.md rather than read from the code,
+    so the budget cases below pin the declared arithmetic and not merely
+    whatever the implementation happens to compute.
+    """
+    page = 4096
+    frame = -(-(nx * ny * 4) // page) * page       # page-rounded frame bytes
+    return nframes * (frame + page) + io_threads * frame
+
+
 def read_mrc_pixels(path: Path) -> bytes:
     """Pixel bytes only: the MRC label area carries a wall-clock timestamp."""
     data = path.read_bytes()
@@ -95,10 +110,17 @@ def read_mrc_pixels(path: Path) -> bytes:
     return data[1024:1024 + nx * ny * nz * 4]
 
 
-def read_star_body(path: Path) -> str:
-    """STAR text with comment lines dropped, so version banners do not matter."""
-    return "\n".join(l.rstrip() for l in path.read_text().splitlines()
+def read_star_body(path: Path, out_dir: Path) -> str:
+    """STAR text, normalized for comparison across two output directories.
+
+    Comment lines are dropped so version banners do not matter, and the output
+    directory -- which is necessarily different between the serial and the
+    prefetched arm -- is replaced by a placeholder. Nothing else is normalized:
+    every shift, exposure and optics value is compared literally.
+    """
+    text = "\n".join(l.rstrip() for l in path.read_text().splitlines()
                      if not l.strip().startswith("#"))
+    return text.replace(str(out_dir) + "/", "OUT/").replace(out_dir.name + "/", "OUT/")
 
 
 def frames_line(log: Path) -> str:
@@ -129,7 +151,7 @@ def products(out_dir: Path):
 
 
 def stars(out_dir: Path):
-    return {p.name: read_star_body(p) for p in sorted(out_dir.glob("**/*.star"))}
+    return {p.name: read_star_body(p, out_dir) for p in sorted(out_dir.glob("**/*.star"))}
 
 
 def logs(out_dir: Path):
@@ -154,8 +176,13 @@ def assert_same(label, serial_dir, prefetch_dir):
         assert a[name] == b[name], f"{label}: corrected pixels differ for {name}"
     sa, sb = stars(serial_dir), stars(prefetch_dir)
     assert set(sa) == set(sb), f"{label}: different STAR sets"
+    assert sa, f"{label}: no STAR files at all -- the metadata comparison would be vacuous"
     for name in sorted(sa):
-        assert sa[name] == sb[name], f"{label}: STAR metadata differs for {name}"
+        if sa[name] != sb[name]:
+            diff = [f"  serial:   {x}\n  prefetch: {y}"
+                    for x, y in zip(sa[name].splitlines(), sb[name].splitlines()) if x != y]
+            raise AssertionError(f"{label}: STAR metadata differs for {name}\n"
+                                 + "\n".join(diff[:6]))
     la, lb = logs(serial_dir), logs(prefetch_dir)
     assert la == lb, f"{label}: frame selection differs\n  serial={la}\n  prefetch={lb}"
     return len(a)
@@ -205,6 +232,13 @@ def main():
         assert stats.get("forced_grants") == 0, f"unexpected budget override: {stats}"
         assert stats.get("peak_reserved_bytes", 0) <= stats.get("budget_bytes", 0), \
             f"the declared byte bound was exceeded: {stats}"
+        expected_budget = 3 * estimate_bytes(NX, NY, NFRAMES, IO_THREADS)
+        assert stats.get("budget_bytes") == expected_budget, (
+            f"the automatic budget is not 3x the documented per-movie estimate: "
+            f"got {stats.get('budget_bytes')}, expected {expected_budget}")
+        assert stats.get("peak_reserved_bytes") == expected_budget, (
+            f"CONTROL: producer-current + queued + consumer-active were never all "
+            f"charged at once, so no overlap was exercised: {stats}")
         # Sanity, not a control: peak occupancy is >= 1 for any published record.
         # The real control for "this test can fail" is the B-factor case below.
         assert stats.get("peak_queue_occupancy", 0) >= 1, \
@@ -242,37 +276,47 @@ def main():
         print(f"  mixed:   4/4 identical across differing geometry and frame counts "
               f"(decoded={stats.get('decoded')}, inline={stats.get('inline_loaded')})")
 
-        # --- tight budget: exactly one movie --------------------------------
-        one_movie_mb = max(1, (NX * NY * 4 * NFRAMES) // (1024 * 1024) + 1)
-        count, stats, _ = case_equivalence(
-            args.binary, tmp, "tight", names,
-            ["--prefetch", "--prefetch_mem_mb", str(one_movie_mb)], "all.star", "tight")
-        assert count == 4, f"expected 4 corrected images, got {count}"
-        assert stats.get("peak_reserved_bytes", 0) <= stats.get("budget_bytes", 0), \
-            f"the tight bound was exceeded: {stats}"
-        print(f"  tight:   4/4 identical with a {one_movie_mb} MiB budget "
-              f"(peak_reserved={stats['peak_reserved_bytes']} B)")
-
-        # --- starved budget: every movie takes the in-line fallback ---------
-        # 1 MiB cannot hold any of these movies once overhead is charged, so
-        # every one must be published as a LoadInline marker and loaded by the
-        # consumer -- and still produce identical output.
+        # --- budget straddling one movie ------------------------------------
+        # Big enough that a whole-MiB budget can be placed either side of one
+        # movie's estimate. Below it every movie must fall back in line; just
+        # above it exactly one movie may be resident at a time.
+        BNX, BNY, BNF = 512, 512, 6
+        unit = estimate_bytes(BNX, BNY, BNF, IO_THREADS)
+        below_mb = unit // (1024 * 1024)            # strictly less than one movie
+        above_mb = below_mb + 1                     # at least one, fewer than two
+        assert below_mb * 1024 * 1024 < unit < above_mb * 1024 * 1024 < 2 * unit, \
+            f"the straddle is not tight: unit={unit}, below={below_mb} MiB, above={above_mb} MiB"
         big_names = []
         for i in range(3):
             name = f"big{i}.mrcs"
-            write_mrc(mixed_dir / name, synthetic_frames(71 + i, 512, 512, 6), 512, 512)
+            write_mrc(mixed_dir / name, synthetic_frames(71 + i, BNX, BNY, BNF), BNX, BNY)
             big_names.append(f"Movies/{name}")
+
+        count, stats, _ = case_equivalence(
+            args.binary, tmp, "tight", big_names,
+            ["--prefetch", "--prefetch_mem_mb", str(above_mb)], "big.star", "tight")
+        assert count == 3, f"expected 3 corrected images, got {count}"
+        assert stats.get("decoded") == 3, f"a movie was refused despite fitting: {stats}"
+        assert stats.get("forced_grants") == 0, f"an override was needed but should not be: {stats}"
+        assert stats.get("peak_reserved_bytes", 0) <= stats.get("budget_bytes", 0), \
+            f"the tight bound was exceeded: {stats}"
+        assert stats.get("peak_reserved_bytes", 0) < 2 * unit, (
+            f"CONTROL: the budget did not actually constrain anything -- two movies were "
+            f"resident at once under a one-movie budget: {stats}")
+        print(f"  tight:   3/3 identical with a {above_mb} MiB budget holding one movie "
+              f"(unit={unit} B, peak_reserved={stats['peak_reserved_bytes']} B)")
+
         count, stats, _ = case_equivalence(
             args.binary, tmp, "starved", big_names,
-            ["--prefetch", "--prefetch_mem_mb", "1"], "big.star", "starved")
+            ["--prefetch", "--prefetch_mem_mb", str(below_mb)], "big.star", "starved")
         assert count == 3, f"expected 3 corrected images, got {count}"
         assert stats.get("inline_loaded") == 3, \
             f"CONTROL: the starved budget did not actually force the fallback: {stats}"
         assert stats.get("decoded") == 0, f"a movie was admitted despite the budget: {stats}"
         assert stats.get("forced_grants") == 3, \
             f"in-line loads were not charged to the budget: {stats}"
-        print(f"  starved: 3/3 identical, all via the counted in-line fallback "
-              f"(forced_grants={stats['forced_grants']})")
+        print(f"  starved: 3/3 identical with a {below_mb} MiB budget, all via the counted "
+              f"in-line fallback (forced_grants={stats['forced_grants']})")
 
         # --- gain reference -------------------------------------------------
         write_mrc(tmp / "gain2.mrc", [[2.0] * (NX * NY)], NX, NY)

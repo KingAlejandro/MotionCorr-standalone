@@ -18,20 +18,26 @@ handled failure.
 The 512x512 float output is 1024 + 1 MiB; the limit below sits under that but
 far above every text product, so exactly the image write fails.
 
-Asserted here, in one three-phase sequence:
+Asserted here, in one four-phase sequence:
   phase 1  movie A alone completes and is recorded.
   phase 2  A+B with --only_do_unfinished under the limit: A is skipped as
            complete, B's image write fails. The run exits non-zero without a
            signal, names B and the product path, leaves A's bytes identical,
            writes no completion record for B, and does not add B to the joint
            STAR.
-  phase 3  A+B with --only_do_unfinished, limit lifted: B's truncated leftover
-           is rejected by the resume check and reprocessed, A is still
+  phase 3  A+B with --only_do_unfinished, injected limit removed: B's truncated
+           leftover is rejected by the resume check and reprocessed, A is still
            untouched, and the joint STAR now has both.
+  phase 4  the same fault again, on movie C, with the child's HARD limit lowered
+           to a finite value. An unprivileged process cannot raise a hard limit,
+           so a preexec that tried to would fail before exec and MotionCorr would
+           never run -- which looks identical to the fault not firing. Asserted
+           on MotionCorr's own short-write message, not on an exit code.
 """
 import argparse
 import hashlib
 import os
+import re
 import resource
 import shutil
 import signal
@@ -47,6 +53,10 @@ FSIZE_LIMIT = 600_000
 # A finite hard limit for the discriminating control: comfortably above every
 # product MotionCorr writes here, so only the *plumbing* changes meaning.
 FINITE_HARD_LIMIT = 8 * 1024 * 1024
+# Emitted only by mrcWriteBlock in src/rwMRC.h, so matching it proves the real
+# writer was reached. Matched as one message so the path cannot come from an
+# unrelated line.
+SHORT_WRITE_RE = re.compile(r"Failed to write image data \(\d+ bytes\) to \S+")
 
 COMMON_ARGS = ["--use_own", "--j", "2", "--skip_defect", "--angpix", "1.0",
                "--voltage", "300", "--patch_x", "1", "--patch_y", "1",
@@ -115,6 +125,16 @@ def main():
     if not source.is_file():
         raise FileNotFoundError(f"fixture missing: {source}")
 
+    # Diagnose a hostile environment up front rather than letting phase 1's
+    # healthy run fail and read as a writer defect. Mirrors the same guard in
+    # tests/test_image_write_faults.cpp.
+    inherited = resource.getrlimit(resource.RLIMIT_FSIZE)
+    print(f"  inherited RLIMIT_FSIZE: {inherited}")
+    if inherited[1] != resource.RLIM_INFINITY and inherited[1] < OUTPUT_BYTES:
+        raise SystemExit(
+            f"inherited hard RLIMIT_FSIZE ({inherited[1]} bytes) is below the "
+            f"{OUTPUT_BYTES}-byte healthy product; this environment cannot host the suite")
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         movies = tmp / "Movies"
@@ -154,7 +174,11 @@ def main():
             f"killed by signal {-res.returncode}: the write fault escaped as a signal or "
             f"a destructor throw instead of a handled per-movie failure\n{tail}")
         assert "b.tiff" in combined, f"the failed movie was not named:\n{tail}"
-        assert "b.mrc" in combined, f"the failed output product was not named:\n{tail}"
+        # One combined match, not two substrings: "b.mrc" alone also appears in
+        # ordinary progress output, so a pair of independent `in` checks could be
+        # satisfied by two unrelated lines.
+        assert SHORT_WRITE_RE.search(combined) and "b.mrc" in SHORT_WRITE_RE.search(combined).group(0), (
+            f"the failed output product was not named in the writer's own error:\n{tail}")
 
         assert not b_star.is_file(), (
             "a completion record was written for a movie whose image write failed")
@@ -208,6 +232,17 @@ def main():
         write_star(tmp / "abc.star", ["Movies/a.tiff", "Movies/b.tiff", "Movies/c.tiff"])
         joint_before = sha256(joint)
         b_mrc_hash, b_star_hash = sha256(b_mrc), sha256(b_star)
+        # Read the applied hard limit back out of a real child rather than
+        # assuming it. An inherited hard limit that is already finite and below
+        # FINITE_HARD_LIMIT is kept as-is -- finite is what this phase needs, and
+        # raising it back up is exactly what is not allowed -- so the assertion
+        # is "finite, and what the preexec should have produced", not equality
+        # against the constant. Demanding the constant would turn a host with
+        # 1_049_600 <= hard < 8_388_608 into a spurious failure, which is the
+        # very environment class this delta exists for.
+        inherited_hard = resource.getrlimit(resource.RLIMIT_FSIZE)[1]
+        expected_hard = (FINITE_HARD_LIMIT if inherited_hard == resource.RLIM_INFINITY
+                         else min(inherited_hard, FINITE_HARD_LIMIT))
         res = subprocess.run(
             [sys.executable, "-c",
              "import resource;"
@@ -215,8 +250,12 @@ def main():
             capture_output=True, text=True, preexec_fn=finite_hard_preexec)
         assert res.returncode == 0, (
             f"could not lower the hard limit in a child: {res.stderr.strip()}")
-        assert str(FINITE_HARD_LIMIT) in res.stdout, (
-            f"the control did not actually get a finite hard limit: {res.stdout.strip()}")
+        reported = int(res.stdout.split(":")[-1])
+        assert reported != resource.RLIM_INFINITY and reported == expected_hard, (
+            f"the control got hard limit {reported}, expected the finite "
+            f"{expected_hard}; the injected condition was not in force")
+        print(f"  phase 4 precheck: child hard limit {reported} B (inherited "
+              f"{'infinity' if inherited_hard == resource.RLIM_INFINITY else inherited_hard})")
 
         res = run(args.binary, tmp, "abc.star", out, ["--only_do_unfinished"],
                   preexec=finite_hard_preexec)
@@ -226,9 +265,10 @@ def main():
             f"exit {res.returncode} under a finite hard RLIMIT_FSIZE; an unprivileged "
             f"child cannot raise a hard limit, so the injection may never have reached "
             f"MotionCorr\n{tail}")
-        assert "Failed to write image data" in combined and "c.mrc" in combined, (
+        m = SHORT_WRITE_RE.search(combined)
+        assert m is not None and "c.mrc" in m.group(0), (
             f"the run failed, but not with MotionCorr's own short-write error naming "
-            f"c.mrc -- so the fault did not reach the writer\n{tail}")
+            f"c.mrc in one message -- so the fault did not reach the writer\n{tail}")
         assert not c_star.is_file(), "a completion record was written under the finite-hard control"
         assert sha256(a_mrc) == a_mrc_hash, "the finite-hard control disturbed movie a"
         assert sha256(b_mrc) == b_mrc_hash and sha256(b_star) == b_star_hash, (

@@ -36,6 +36,20 @@ namespace {
 
 int failures = 0;
 
+// Largest product the suite writes: 1024-byte header + 512*512 float payload.
+// The environment guard below and the control's hard limit are both derived
+// from it, so they cannot drift apart.
+const int BIG = 512;              // 1 MiB payload, larger than any stdio buffer
+const int SMALL = 16;             // 1 KiB payload, fits in the stdio buffer
+const long BIG_BYTES = 1024L + (long)BIG * BIG * 4;
+const long SMALL_BYTES = 1024L + (long)SMALL * SMALL * 4;
+
+// Hard limit the finite-hard-limit control imposes on itself: comfortably above
+// the largest product, so only the *restore* path changes meaning.
+const rlim_t FINITE_HARD = 8u * 1024u * 1024u;
+
+const char *CHILD_ENV = "MC_WRITE_FAULTS_IN_CHILD";
+
 void check(bool condition, const std::string &message)
 {
     if (condition) return;
@@ -136,8 +150,6 @@ const char *TMPDIR_ENV()
 // suite does is still reachable; only the *restore* path changes meaning.
 int runFiniteHardLimitChild(const char *self)
 {
-    const rlim_t FINITE_HARD = 8u * 1024u * 1024u;
-
     struct rlimit rl;
     if (getrlimit(RLIMIT_FSIZE, &rl) != 0) {
         std::cerr << "FAIL: getrlimit before re-exec failed" << std::endl;
@@ -152,20 +164,38 @@ int runFiniteHardLimitChild(const char *self)
         return 0;
     }
 
+    // Marked before the fork, not after it. Only async-signal-safe functions are
+    // allowed between fork() and exec() in a process that may have threads, and
+    // setenv allocates -- this binary links motioncorr_core, so an OpenMP or FFTW
+    // pool could already hold the allocator lock and deadlock the child. The
+    // parent's own in_child flag was captured at entry, so setting it here cannot
+    // change the parent's behaviour.
+    if (setenv(CHILD_ENV, "1", 1) != 0) {
+        std::cerr << "FAIL: setenv for the finite-hard-limit control failed" << std::endl;
+        return 1;
+    }
+
     pid_t pid = fork();
     if (pid < 0) {
+        unsetenv(CHILD_ENV);
         std::cerr << "FAIL: fork for the finite-hard-limit control failed" << std::endl;
         return 1;
     }
     if (pid == 0) {
         struct rlimit child = {FINITE_HARD, FINITE_HARD};
         if (setrlimit(RLIMIT_FSIZE, &child) != 0) _exit(97);
-        setenv("MC_WRITE_FAULTS_IN_CHILD", "1", 1);
-        execl(self, self, (char*)NULL);
+        // execlp, not execl: a slash-less argv[0] (invoked from PATH, a wrapper or
+        // a container entrypoint) is resolved against PATH rather than the cwd.
+        execlp(self, self, (char*)NULL);
         _exit(98);
     }
     int status = 0;
-    if (waitpid(pid, &status, 0) != pid) {
+    pid_t waited;
+    do {
+        waited = waitpid(pid, &status, 0);
+    } while (waited < 0 && errno == EINTR);
+    unsetenv(CHILD_ENV);
+    if (waited != pid) {
         std::cerr << "FAIL: waitpid for the finite-hard-limit control failed" << std::endl;
         return 1;
     }
@@ -199,7 +229,7 @@ int main(int argc, char **argv)
     // and the test would be reporting the signal, not the writer's behaviour.
     signal(SIGXFSZ, SIG_IGN);
 
-    const bool in_child = (getenv("MC_WRITE_FAULTS_IN_CHILD") != NULL);
+    const bool in_child = (getenv(CHILD_ENV) != NULL);
 
     captureFileSizeLimit();
     {
@@ -209,13 +239,27 @@ int main(int argc, char **argv)
                   << " hard="
                   << (rl.rlim_max == RLIM_INFINITY ? "infinity" : std::to_string((unsigned long long)rl.rlim_max))
                   << (in_child ? "  (finite-hard-limit control child)" : "") << std::endl;
-        // The healthy control writes a 1 049 600-byte MRC. Under a hard limit
-        // below that, nothing here is meaningful -- say so instead of reporting
-        // a writer defect that is really the environment.
-        if (rl.rlim_max != RLIM_INFINITY && rl.rlim_max < 1049600u) {
+
+        // The "(finite hard limit)" claim below must come from the limit itself,
+        // not from the environment variable that is only supposed to accompany
+        // it. A stray MC_WRITE_FAULTS_IN_CHILD in the environment would otherwise
+        // skip the control and still print the reassuring label.
+        if (in_child && (rl.rlim_max == RLIM_INFINITY || rl.rlim_max > FINITE_HARD)) {
+            std::cerr << "FAIL: " << CHILD_ENV << " is set but the hard RLIMIT_FSIZE is "
+                      << (rl.rlim_max == RLIM_INFINITY ? "infinity" : std::to_string((unsigned long long)rl.rlim_max))
+                      << ", not the <= " << (unsigned long long)FINITE_HARD
+                      << " this control imposes. Refusing to report a control that did not run."
+                      << std::endl;
+            return 1;
+        }
+
+        // Under a hard limit below the largest healthy product, nothing here is
+        // meaningful -- say so instead of reporting a writer defect that is
+        // really the environment.
+        if (rl.rlim_max != RLIM_INFINITY && (long)rl.rlim_max < BIG_BYTES) {
             std::cerr << "FAIL: inherited hard RLIMIT_FSIZE (" << (unsigned long long)rl.rlim_max
-                      << " bytes) is below the 1049600-byte healthy control; this environment "
-                         "cannot run the suite" << std::endl;
+                      << " bytes) is below the " << BIG_BYTES << "-byte healthy control; this "
+                         "environment cannot run the suite" << std::endl;
             return 1;
         }
     }
@@ -228,10 +272,6 @@ int main(int argc, char **argv)
     const std::string big_path = dir + "/big.mrc";
     const std::string small_path = dir + "/small.mrc";
 
-    const int BIG = 512;              // 1 MiB payload, larger than any stdio buffer
-    const int SMALL = 16;             // 1 KiB payload, fits in the stdio buffer
-    const long BIG_BYTES = 1024L + (long)BIG * BIG * 4;
-    const long SMALL_BYTES = 1024L + (long)SMALL * SMALL * 4;
 
     Image<float> big = makeImage(BIG);
     Image<float> small = makeImage(SMALL);
@@ -350,7 +390,13 @@ int main(int argc, char **argv)
 
     // Run everything above again under a finite hard limit, unless we already are
     // that child. Outermost only, so the recursion is exactly one level deep.
-    if (!in_child && argc > 0 && argv[0] != NULL) {
+    if (!in_child) {
+        if (argc <= 0 || argv[0] == NULL) {
+            std::cerr << "FAIL: no argv[0] to re-exec, so the finite-hard-limit control "
+                         "cannot run. Skipping it silently would report a pass it did not earn."
+                      << std::endl;
+            return 1;
+        }
         if (runFiniteHardLimitChild(argv[0]) != 0) return 1;
     }
 

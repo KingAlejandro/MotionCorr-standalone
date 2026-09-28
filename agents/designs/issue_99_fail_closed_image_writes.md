@@ -150,10 +150,21 @@ a real test of D2 and it fails if only D1 is implemented.
   3. delayed flush/close failure — 16×16 float MRC under a limit between header and
      header+payload; both `fwrite`s succeed, expects a throw naming the path, caught by D2
      alone;
-  4. negative control — the same fault with the limit lifted must not throw, proving the
-     assertions in (2) and (3) are observing the injected fault and not an unrelated error;
+  4. negative control — the same fault with the injected limit removed (restoring the
+     inherited pair, which may itself be finite) must not throw, proving the assertions in
+     (2) and (3) are observing the injected fault and not an unrelated error;
   5. destructor safety — the failing handle is destroyed after the throw without
-     `std::terminate`, which is the regression guard for defect 2's old behaviour.
+     `std::terminate`, which is the regression guard for defect 2's old behaviour;
+  6. finite-hard-limit control — the whole suite re-runs in a child whose *hard*
+     `RLIMIT_FSIZE` it lowers itself (unprivileged). Added after the Codex review on
+     PR #105: an unprivileged process cannot *raise* a hard limit, so restoring a soft
+     limit to `RLIM_INFINITY` fails under a finite inherited hard limit and the harness
+     dies before injecting anything. That is invisible on a host with an infinite hard
+     limit, where writing infinity is a no-op, so the control has to create the condition
+     rather than wait for it. `tests/test_write_faults.py` gains the matching phase 4,
+     driving MotionCorr through a `preexec_fn` that lowers the child's hard limit and
+     asserting on MotionCorr's own short-write message rather than an exit code, since a
+     failed spawn is also nonzero.
 - `tests/test_write_faults.py` (new CTest `WriteFaults`, end-to-end on the existing
   synthetic TIFF; movie A healthy first, then A+B under a file-size limit with
   `--only_do_unfinished`, then repaired retry):

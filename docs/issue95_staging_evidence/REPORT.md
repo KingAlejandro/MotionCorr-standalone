@@ -67,6 +67,9 @@ current, because they were built from different sources.
 | effective policy of the test process | `policy: bind; physcpubind: 48 49 50 51 52 53 54 55; cpubind: 1; nodebind: 1; membind: 1; preferred: 1` (captured from `numactl --show` inside the bound process, not asserted) |
 | NUMA memory policy | `--membind=1`, node-local to the chosen cores |
 | parallelism | `-j8` build, single-threaded test — both within the ≤16 cap |
+| node free memory at run | node0 17923 MB, node1 16277 MB (payload is bound to node1) |
+| load at start / end | 4.25 / 4.17 one-minute average |
+| interference, not altered | two foreign `ctffind` processes at ~100% CPU each, on node0's share; the payload is bound to node1 cores 48-55 |
 | serialisation | `flock /tmp/motioncorr-issue96-cpu-validation.lock` held across configure, build and every test |
 | cmake | 4.4.3 |
 | compiler | `c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0` |
@@ -88,15 +91,15 @@ Raw unedited logs for both epochs are in `raw/`; see `raw/README.md`.
 
 | file | sha256 |
 | --- | --- |
-| `src/frame_staging_plan.h` | `f36e65bd5688a5374132236c3f9024a77950caf1efa7aabbd3f9cf1e45c23bb7` |
-| `src/frame_staging_plan.cpp` | `fe08848af4d9b9ee415e1ce98b796439de863fdf66d1144e123f1e7fd9b387e7` |
-| `tests/test_frame_staging.cpp` | `8143190085a69c9a74db58fa408058b7dccac88d0b8d0d04b7ec2d4712ebdd56` |
+| `src/frame_staging_plan.h` | `c7f6b8d7b9e45f778ef2bd03a914e43c8d4c3ae026d57be1b9c2103c7303fdd4` |
+| `src/frame_staging_plan.cpp` | `fe7ea1e89094dcb5dbd67e5ace9f1623c626a02875365c2fa97aa54350860578` |
+| `tests/test_frame_staging.cpp` | `6de82d07d0e588ec126781e7434edf839d300620eb3f4550d62c09fc95985a10` |
 | `CMakeLists.txt` | `56b061af41eea804d886bd82b4c8b2e5ae2d5f66893ea2c7793d753fbbf53875` |
-| `build-cpu/frame_staging` (binary) | `d115bf10c52c7995ce37d6042e8430d6f76379c1496c01f7cdf936ebcb051149` |
+| `build-cpu/frame_staging` (binary) | `5120dc26de047310c32545a01df3cac08053cf9ccff59df520ca6fe49652eb29` |
 
 These are the hashes of the exact files committed on this branch, at the final
 head, taken in the same locked run that produced the results below
-(`raw/06-validationlock-rereview-mutants.log`). The pre-review hashes quoted in the first
+(`raw/09-validationlock-codexfix-oldmodel.log`). The pre-review hashes quoted in the first
 revision of this report belonged to a source tree that no longer exists; they
 are not reproduced here.
 
@@ -108,12 +111,12 @@ are not reproduced here.
 cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON     # exit 0
 cmake --build build-cpu --target frame_staging -j8                        # exit 0
 ./build-cpu/frame_staging                                                 # exit 0
-  -> 248 checks, 0 failures
+  -> 283 checks, 0 failures
 ```
-(`raw/06-validationlock-rereview-mutants.log`; `raw/07-...-build.log` for the
-whole-project build). The count fell from 256 because a second review found
-four assertions that could not fail; they were replaced by assertions that can,
-not supplemented. See §4.2.
+(`raw/08-validationlock-codexfix-build.log`, and `raw/09-...-oldmodel.log` for
+the baseline/restore pair). 248 -> 283 adds the corrected-accounting controls of
+§4a. Earlier counts 235 / 256 / 248 are superseded, not comparable: assertions
+were replaced as well as added. See §4.2.
 
 Coverage of the 235 checks:
 
@@ -176,7 +179,7 @@ below but retained, since they were run against a real tree:
 | `write_in_place` ignored, raw host frames clobbered (review finding 3) | **test exit 1** — caught by the frame comparison on `raw-gain-11f` |
 | `d_max > 4` bound removed | **test exit 1** — 2 failures, both in the rejection-path group |
 
-**Final head** (`raw/06-validationlock-rereview-mutants.log`). A second review
+**Final head** (`raw/09-validationlock-codexfix-oldmodel.log`). A second review
 of the exact final head found four assertions that could not fail and two real
 defects. These five mutants target that second round, each named with the
 finding it belongs to:
@@ -199,6 +202,19 @@ been populated. Each was replaced by an assertion of the property genuinely at
 risk — that raw frames come back untouched, and that a *pre-populated* result
 is cleared — and the mutants above are the proof that the replacements are
 observable rather than merely better worded.
+
+**Corrected-accounting round** (`raw/09-validationlock-codexfix-oldmodel.log`).
+Each mutant reverts one Codex fix, so each proves the corresponding new control
+discriminates the **old** model rather than merely agreeing with the new one:
+
+| reverted fix | result |
+| --- | --- |
+| repair schedule omitted from the host budget | **exit 1**, 6 failures — the charge formula, the chunk-independence check, the "dwarfs the staged chunk" check, and the dense-defect `Inadmissible` control |
+| `Iframes` double-counted (alias disabled) | **exit 1**, 6 failures — the alias flag, "charges Iframes once, not twice", the deliberate parts-over-sum check, and the alias-drop assertions |
+| whole-movie probe removed from the search | **exit 1**, 4 failures — including "the search finds the aliased whole-movie point a monotone search would miss" |
+
+Baseline and restore in the same locked session both **283 checks, 0 failures**;
+`ctest` 14/14; restored hashes match the committed tree.
 
 Two observations that limit what this control proves, recorded rather than left
 implicit:
@@ -235,8 +251,8 @@ cmake --build build-cpu -j8            # whole project, exit 0
 ctest --output-on-failure              # exit 0
 ```
 
-14/14 passed in 7.16 s, on the same CPU-only `Release` build described in §2.2
-(`raw/06-validationlock-rereview-mutants.log`):
+14/14 passed in 6.96 s, on the same CPU-only `Release` build described in §2.2
+(`raw/08-validationlock-codexfix-build.log`):
 
 | # | test | result |
 | --- | --- | --- |
@@ -256,6 +272,45 @@ is **not** evidence about staging, because no staging code runs in any of them.
 The CUDA-labelled tests (`CudaWrapperUploadFailure`) are not in this list: this
 is a CPU-only build, so they were never configured. They are **unrun**, not
 passing.
+
+## 4a. Corrected capacity accounting (Codex review of `dba0891e`)
+
+Two P2 findings on the capacity model, both confirmed against the source before
+being fixed. Neither changes the §8 decision; both make the calculator honest
+about costs that push in the same direction.
+
+| finding | old model | corrected |
+| --- | --- | --- |
+| repair schedule omitted from the host budget | `schedule_host_bytes` not modelled at all | `3·n_bad·sizeof(int) + n_bad·F·(sizeof(Draw) [+ sizeof(float)])`, all products overflow-checked |
+| `Iframes` double-counted with no staging | `2·real + r2c` | `real + r2c`, via an explicit `staged_aliases_resident` flag |
+
+The alias is deliberately narrow — whole movie **and** retained real stack
+**and** 4-byte samples. A partial chunk is a genuinely separate ring and a
+compact `uint16` buffer is a genuinely separate narrower allocation, so neither
+aliases; both are asserted.
+
+The alias also makes `host_bytes` **non-monotone**: it drops at
+`chunk == n_frames`. `largestChunkWithin` now evaluates the whole movie first
+and binary-searches only `[1, n_frames-1]`. `MonotonicHostBytes` asserts both
+the monotone interval and the drop.
+
+### Why these were not caught here
+
+Recorded because the pattern is the same one this task keeps hitting:
+
+- The double count **contradicted this project's own ADR §4.1 phase table**, and
+  nothing compared the two.
+- It produced the **right number for the wrong reason** — the default policy
+  reported 3.820 GiB, exactly the phase-D figure, but by double-counting
+  `Iframes` rather than by charging `Irefframes`.
+- An **existing test asserted the double count as correct**, labelled "reproduces
+  today's numbers exactly". It did not. That assertion has been replaced.
+
+### Discrimination controls
+
+Each new control computes the **old** model's answer inline and asserts the two
+disagree, so it cannot pass against either model. Backed by mutants that revert
+each fix — see §4.2.
 
 ## 5a. Accepted limitations
 

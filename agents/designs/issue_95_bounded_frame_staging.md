@@ -401,6 +401,67 @@ Under the §8 no-go there is no staged pipeline to attach them to; if the compac
 upload variant is ever built, it inherits #94's contracts rather than defining
 new ones.
 
+### 7a.4 The staging design's own bookkeeping, and an alias it must not double-count
+
+Both found by Codex review of `dba0891e`, both confirmed against the source, both
+fixed in the component. They matter beyond the two lines they touch, because
+each is a way for a capacity model to be confidently wrong.
+
+**The repair schedule is an unbounded host allocation that the calculator
+omitted.** `buildSchedule` allocates `bad_x`, `bad_y` and `slot_count`
+(`n_bad` ints each) and, dominating them, `n_bad × n_frames` `Draw` objects.
+That is a host allocation *this component makes*, and `computeBudget` did not
+charge it. With a dense defect mask `n_bad` approaches `W·H`, so a job admitted
+as `O(C·W·H)` would then allocate `O(F·W·H)` — for the tutorial geometry and a
+fully defective mask, 4.1 GiB of schedule against a 2-frame staged ring of
+109 MiB. The calculator built to stop exactly that class of surprise was
+generating one.
+
+The deeper point, now charged explicitly: **`n_bad` is not knowable at
+admission.** It comes out of hot-pixel detection, which needs the completed sum
+pass — the same barrier §3 identifies. So a staged design must either charge a
+worst-case bound up front (which is `W·H`, i.e. larger than the stack it was
+trying to avoid) or re-check after detection and be prepared to fail a movie it
+already admitted. That is a real cost of staging that this ADR did not price
+before, and it strengthens §8 rather than weakening it.
+
+**The no-staging policy double-counted `Iframes`.** With the whole movie staged
+as decoded floats and the real stack retained, the staged term and the resident
+term are the *same allocation*: the runner decodes straight into `Iframes`
+(`motioncorr_runner.cpp:1409`) and never makes a separate staging copy. The
+model reported `2·real + r2c` for a phase whose live set is `real + r2c`, so it
+could reject a host budget that in fact fits.
+
+Two things make this worse than an ordinary arithmetic slip, and both are worth
+recording:
+
+1. It **contradicted this ADR's own §4.1 phase table**, which correctly lists
+   phase C as `real + r2c` = 2.547 GiB. The calculator and the prose disagreed
+   and nothing noticed.
+2. It produced **the right number for the wrong reason**. The default policy
+   reported 3.820 GiB, which is exactly the §4.1 phase-D figure — but arrived at
+   by double-counting `Iframes` rather than by charging `Irefframes`. A
+   coincidence of magnitude is the hardest kind of error to catch by inspection,
+   and it is precisely the kind that gets quoted later.
+3. An existing test **asserted the double count as correct**, under the label
+   "default policy charges the staged movie and both resident stacks" and the
+   claim that it "reproduces today's numbers exactly". It did not.
+
+The alias is now modelled explicitly and is deliberately narrow: a partial chunk
+is a genuinely separate ring, and a compact `uint16` buffer is a genuinely
+separate narrower allocation converted into the real stack. Neither aliases.
+
+**Consequence for the search.** The alias makes `host_bytes` non-monotone: it
+*drops* at `chunk == n_frames`, because the ring and the retained stack collapse
+into one allocation. `largestChunkWithin` therefore evaluates the whole movie
+first — it is both the maximum and potentially the cheapest point — and binary
+searches only `[1, n_frames-1]`, which is monotone. `MonotonicHostBytes` now
+asserts both halves, so neither the monotone interval nor the alias can regress
+unnoticed.
+
+None of this changes the §8 decision. It makes the calculator honest about a
+cost that pushes in the same direction.
+
 ---
 
 ## 8. Decision and go/no-go
@@ -557,6 +618,13 @@ GPU slot. M2 and M3 need the device.
   built or run. That claim needs its own PR and its own 24-movie evidence.
 - The multi-GPU aggregate host budget of §7a.2 is **stated, not enforced and not
   tested**. The calculator is per-process and cannot see its siblings.
+- The repair-schedule charge of §7a.4 uses a **caller-declared bound**, because
+  `n_bad` is unknowable at admission. The component cannot verify that the bound
+  is honest; a caller that under-declares gets an under-charge and no warning.
+- The bounded corrected-frame accumulator suggested in #96 §1.4 is **not
+  prototyped here** and is out of scope for this task. §5.1 argues `Irefframes`
+  is where the leverage is; sizing an accumulator against
+  `(F-C)·4·W·H` minus its replacement scratch is the next study, not this one.
 - The index mapping of §7a.1 is **stated, not implemented**. No staged record
   type exists to carry `frames[]`, and the EER and compressed-MRC mappings are
   written down but unrun.

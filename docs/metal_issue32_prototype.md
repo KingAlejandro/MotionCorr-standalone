@@ -5,15 +5,19 @@ implementation result separate from scientific acceptance and performance.
 
 ## Revision and platform
 
-- Main base at port time: `8323c55faf1c4ddbe35dd36c5cd1266d48f25c38` (PR #111 merge).
+- Main ref at port time: `8323c55faf1c4ddbe35dd36c5cd1266d48f25c38` (PR #111 merge).
+  Issue #96 currently records `48d1c9f` as main, so its SHA and the live GitHub
+  `refs/heads/main` did not agree during this port; this branch follows the live
+  ref and does not resolve that roadmap discrepancy.
 - Prototype: current-main port of the #30 build/dispatch work and #32 global
   alignment implementation. The published PR head identifies the exact final
   source revision.
+- Source revision used by the retained Metal run: `07bac4164ffc887fede5724f0b3bf4776990cc1a`.
 - Host: Apple M4 Pro, 20-core GPU; macOS 26.7 (25G229); Xcode 27.0 (27A266a),
   macOS SDK 27.0.
 - Build: Release, `-DMETAL=ON`, `-DCUDA=OFF`, using the project's Python
   environment with NumPy available.
-- Binary SHA-256 for the retained run: `7ec9ebecbfcef77958081ed2b6677ea93e1236cb3c8812f83c252eb90604d6fc`.
+- Binary SHA-256 for the retained run: `7af494372c9ed2441fd9dc046e8db9f64e6db2d540a5f576afebfc0ab95624e7`.
 - Requested Metal device: index 0, Apple M4 Pro.
 
 ## What ran
@@ -39,9 +43,9 @@ Command (run once per fixture; `--include-subpixel` selects both fixtures):
   --keep-artifacts
 ```
 
-The retained execution logs and machine report are in the local validation
-directory; the fixture hashes and result metrics below are copied from that
-report.
+The retained execution logs and machine report are at
+`/private/tmp/mc-metal-prototype-evidence/final/` on the executing host; the
+fixture hashes and result metrics below are copied from that report.
 
 ## Acceptance results
 
@@ -67,15 +71,18 @@ diagnostics only.
 ## Build and test status
 
 - Metal-enabled Release build: passed on the host above.
-- `MetalCompletionWitness`: one CTest passed; its controls accept a complete
-  six-stage record and reject the old profile-only smoke record, a wrong device,
-  an incomplete stage list, and a nonconverged record.
+- `MetalCompletionWitness`: one CTest passed; it accepts a complete ordered
+  six-stage record and rejects the old profile-only smoke record, a wrong
+  device, incomplete or reordered stages, and nonconvergence.
 - Full CTest on clean current main `8323c55`: **17/18 passed**;
   `SyntheticRegression` failed its expected-image assertion (max pixel
   difference `23.6498567`, RMSE `0.3119288`; shifts were within `0.004671 px`
   max and `0.003305 px` RMSD). The same failure was seen on the Metal branch.
-  This is a current-main baseline issue, not caused by the Metal changes.
-- CPU-only build behavior is not established by this report.
+-  The Metal-enabled and CPU-only prototype builds each passed **18/19**; the
+  only failure was the same `SyntheticRegression` assertion reproduced on
+  clean current main. The CPU-only binary linked no Metal/Foundation/MPS
+  frameworks, and a `--metal` request exited 1 with the expected unsupported
+  build error.
 
 ## Fixture provenance
 
@@ -88,13 +95,20 @@ diagnostics only.
 | Subpixel ground truth | `38e4ac009c3f73062c063b979a40cf103a077ee94326862f9a6b0a791865395b` |
 | Subpixel movie | `27590926087551e607acf9fd11d11de294ed63005e4647861a94b5ae2bbf93b7` |
 
+| Corrected output | CPU SHA-256 | Metal SHA-256 |
+|---|---|---|
+| Integer MRC | `f6340eec527925ff3aeb75abc005c11023d4ed560ee84a446ff02514bcaa51fa` | `6bc6ae5ec80111a8cc84da06e872c65aac60b5c409f9b04e5b7e8d01e7c1aba1` |
+| Integer per-movie STAR | `d9154c0f20c4c45a62043eefe0b095823894912c1fb6e6810fc14ac17eaffa37` | `ff56154f61f7cdedd4b93ddaab59ff6f2bb789da288dc033a12135a2dcae8895` |
+| Subpixel MRC | `21e679b51c04cc4b1cbf45ab291835283f4cd623d7c617d0ca2abd976752c5a5` | `de3d6756243eb76b5afb62069f1ba8ed7ca3a0c515fd7f56f87c22cb183b5253` |
+| Subpixel per-movie STAR | `4b69a274da04f32c8a6a0193d79bbe4e033e492bb2aadf6555b5f4a4256466a0` | `c88d8f1149b66eec931020171aef7d301ddcfc9404633abbcd686117af96a9a5` |
+
 ## Scope and remaining work
 
 This is an opt-in global-alignment prototype. Local patch alignment and dose
 weighting remain on their existing paths. The next scientific step is to
 diagnose the absolute image RMSE difference without changing any gate, then
 rerun both cases plus discriminating negative controls on the final source.
-Before calling the work accepted, also establish CPU-only build/test behavior,
-complete the relevant current-main regression suite, and run the #32-requested
-three-run timing and memory measurements on a named host. None of those pending
-items is implied by this report.
+CPU-only build isolation was checked; the known current-main
+`SyntheticRegression` failure remains. The #32-requested three-run timing and
+memory measurements have not been completed. None of those pending items is
+implied by this report.

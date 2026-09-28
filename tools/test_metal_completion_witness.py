@@ -46,11 +46,21 @@ def main() -> None:
     assert not incomplete_stages["completion_marker_found"]
     assert not incomplete_stages["complete"]
 
+    reordered_stages = inspect(
+        startup,
+        PROFILE + COMPLETION.replace(
+            "weights,reference,ccf,ifft,peak,fourier_shift",
+            "reference,weights,ccf,ifft,peak,fourier_shift",
+        ),
+    )
+    assert not reordered_stages["completion_marker_found"]
+    assert not reordered_stages["complete"]
+
     nonconverged = inspect(startup, PROFILE + COMPLETION.replace("converged=true", "converged=false"))
     assert not nonconverged["completion_marker_found"]
     assert not nonconverged["complete"]
 
-    print("PASS: actual all-stage completion accepted; smoke, wrong-device, incomplete, and nonconverged logs rejected")
+    print("PASS: complete ordered stages accepted; smoke, wrong-device, incomplete, reordered, and nonconverged logs rejected")
 
 
 if __name__ == "__main__":

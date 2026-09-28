@@ -74,6 +74,10 @@ diagnostics only.
 - `MetalCompletionWitness`: one CTest passed; it accepts a complete ordered
   six-stage record and rejects the old profile-only smoke record, a wrong
   device, incomplete or reordered stages, and nonconvergence.
+- Metal profile timing fields are host wall intervals around synchronous
+  command encoding/setup and completion waits. The reported buffer figure is
+  only the calculated total of explicit buffer lengths; it excludes MPSGraph
+  scratch and is not a process/device peak-memory measurement.
 - Full CTest on clean current main `8323c55`: **17/18 passed**;
   `SyntheticRegression` failed its expected-image assertion (max pixel
   difference `23.6498567`, RMSE `0.3119288`; shifts were within `0.004671 px`

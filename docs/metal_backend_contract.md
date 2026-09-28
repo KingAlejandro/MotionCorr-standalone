@@ -66,8 +66,12 @@ Metal device index.
   host/device transfers.
 - The global path runs six witnessed stages: `weights`, `reference`, `ccf`,
   `ifft`, `peak`, and `fourier_shift`.
-- The profile includes shared-buffer copy, kernel, MPSGraph, and total alignment
-  times. A profile time alone is not a throughput claim.
+- The profile includes shared-buffer copy wall time, kernel-command wall time
+  (encoding plus wait), MPSGraph-command wall time (setup plus wait), and total
+  alignment wall time. It also reports the calculated sizes of the explicitly
+  allocated buffers; this excludes MPSGraph scratch and is not peak GPU or
+  process memory. These profile fields are not throughput or hardware-event
+  measurements.
 - Local patch alignment and dose weighting stay on their existing paths.
 - CPU-only/Linux builds must not acquire Metal framework or Objective-C++
   requirements.

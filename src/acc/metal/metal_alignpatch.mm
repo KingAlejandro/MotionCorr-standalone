@@ -7,6 +7,7 @@
 
 #include "src/acc/metal/metal_alignpatch.h"
 #include "src/error.h"
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -286,8 +287,9 @@ bool metalAlignPatch(
             REPORT_ERROR("Metal execution failed: Empty frame vector provided to metalAlignPatch");
         }
 
-        if (pnx <= 0 || pny <= 0 || !std::isfinite((double)scaled_B) || scaled_B <= 0) {
-            REPORT_ERROR("Metal execution failed: Invalid alignment dimensions or B-factor");
+        if (pnx <= 0 || pny <= 0 || !std::isfinite((double)scaled_B) || scaled_B <= 0 ||
+            !std::isfinite((double)ccf_downsample)) {
+            REPORT_ERROR("Metal execution failed: Invalid alignment dimensions, B-factor, or CCF downsample value");
         }
         if (max_iter <= 0) {
             REPORT_ERROR("Metal execution failed: max_iter must be positive");
@@ -350,6 +352,9 @@ bool metalAlignPatch(
 
         const int nfx = XSIZE(Fframes[0]);
         const int nfy = YSIZE(Fframes[0]);
+        if (nfx != pnx / 2 + 1 || nfy != pny) {
+            REPORT_ERROR("Metal execution failed: Fourier frame dimensions do not match patch dimensions");
+        }
         const int nfy_half = nfy / 2;
 
         float ccf_requested_scale = (float)ccf_downsample;
@@ -398,7 +403,9 @@ bool metalAlignPatch(
         const size_t bytes_Iccs = (size_t)n_frames * ccf_ny * ccf_nx * sizeof(float);
         const size_t bytes_shifts = (size_t)n_frames * sizeof(float);
 
-        const size_t peak_memory_bytes = bytes_frames + bytes_ref + bytes_weight + bytes_Fccs + bytes_Iccs + 4 * bytes_shifts;
+        // This is the sum of explicitly-sized buffers, not a whole-process or
+        // whole-device peak (MPSGraph scratch storage is not included).
+        const size_t tracked_buffer_bytes = bytes_frames + bytes_ref + bytes_weight + bytes_Fccs + bytes_Iccs + 4 * bytes_shifts;
 
         id<MTLBuffer> d_Fframes = [device newBufferWithLength:bytes_frames options:MTLResourceStorageModeShared];
         id<MTLBuffer> d_Fref = [device newBufferWithLength:bytes_ref options:MTLResourceStorageModeShared];
@@ -413,7 +420,7 @@ bool metalAlignPatch(
         if (!d_Fframes || !d_Fref || !d_weight || !d_Fccs || !d_Iccs ||
             !d_cur_xshifts || !d_cur_yshifts || !d_shiftx || !d_shifty) {
             REPORT_ERROR("Metal execution failed: Out of memory allocating buffers (" +
-                         integerToString((long long)(peak_memory_bytes / 1024 / 1024)) + " MiB requested)");
+                         integerToString((long long)(tracked_buffer_bytes / 1024 / 1024)) + " MiB of tracked buffers requested)");
         }
 
         // Host-to-Device transfer
@@ -605,38 +612,38 @@ bool metalAlignPatch(
                 h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
             }
 
-            // Stage 4: Apply Fourier phase shifts on GPU
-            if (n_frames > 1) {
-                float *sx_ptr = (float*)[d_shiftx contents];
-                float *sy_ptr = (float*)[d_shifty contents];
-                for (int iframe = 0; iframe < n_frames; iframe++) {
-                    sx_ptr[iframe] = h_shiftx[iframe];
-                    sy_ptr[iframe] = h_shifty[iframe];
-                }
-                auto t_sh0 = std::chrono::high_resolution_clock::now();
-                {
+            // Stage 4: Apply Fourier phase shifts on GPU. For a one-frame input,
+            // dispatch a no-op frame so the stage witness remains truthful.
+            float *sx_ptr = (float*)[d_shiftx contents];
+            float *sy_ptr = (float*)[d_shifty contents];
+            for (int iframe = 0; iframe < n_frames; iframe++) {
+                sx_ptr[iframe] = h_shiftx[iframe];
+                sy_ptr[iframe] = h_shifty[iframe];
+            }
+            const int shift_grid_frames = std::max(1, n_frames - 1);
+            auto t_sh0 = std::chrono::high_resolution_clock::now();
+            {
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
                 id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
                 if (!enc) {
                     REPORT_ERROR("Metal execution failed: Could not create Fourier phase-shift encoder");
                 }
                 [enc setComputePipelineState:psoShift];
-                    [enc setBuffer:d_Fframes offset:0 atIndex:0];
-                    [enc setBuffer:d_shiftx offset:0 atIndex:1];
-                    [enc setBuffer:d_shifty offset:0 atIndex:2];
-                    [enc setBytes:&nfx length:sizeof(int) atIndex:3];
-                    [enc setBytes:&nfy length:sizeof(int) atIndex:4];
-                    [enc setBytes:&nfy_half length:sizeof(int) atIndex:5];
-                    [enc setBytes:&n_frames length:sizeof(int) atIndex:6];
-                    MTLSize tg = MTLSizeMake(16, 16, 1);
-                    MTLSize grid = MTLSizeMake((nfx + 15) / 16 * 16, (nfy + 15) / 16 * 16, n_frames - 1);
-                    [enc dispatchThreads:grid threadsPerThreadgroup:tg];
-                    [enc endEncoding];
-                    waitForMetalCommandBuffer(cb, "Fourier phase shifting");
-                }
-                auto t_sh1 = std::chrono::high_resolution_clock::now();
-                accumulated_kernel_ms += std::chrono::duration<float, std::milli>(t_sh1 - t_sh0).count();
+                [enc setBuffer:d_Fframes offset:0 atIndex:0];
+                [enc setBuffer:d_shiftx offset:0 atIndex:1];
+                [enc setBuffer:d_shifty offset:0 atIndex:2];
+                [enc setBytes:&nfx length:sizeof(int) atIndex:3];
+                [enc setBytes:&nfy length:sizeof(int) atIndex:4];
+                [enc setBytes:&nfy_half length:sizeof(int) atIndex:5];
+                [enc setBytes:&n_frames length:sizeof(int) atIndex:6];
+                MTLSize tg = MTLSizeMake(16, 16, 1);
+                MTLSize grid = MTLSizeMake((nfx + 15) / 16 * 16, (nfy + 15) / 16 * 16, shift_grid_frames);
+                [enc dispatchThreads:grid threadsPerThreadgroup:tg];
+                [enc endEncoding];
+                waitForMetalCommandBuffer(cb, "Fourier phase shifting");
             }
+            auto t_sh1 = std::chrono::high_resolution_clock::now();
+            accumulated_kernel_ms += std::chrono::duration<float, std::milli>(t_sh1 - t_sh0).count();
 
             // Convergence check
             RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
@@ -667,11 +674,11 @@ bool metalAlignPatch(
         // Emit profile markers adhering to regression test contract
         logfile << " [Metal Global Alignment Profile]" << std::endl;
         logfile << "   Input shared-buffer copy time: " << std::fixed << std::setprecision(2) << h2d_ms << " ms" << std::endl;
-        logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
-        logfile << "   MPSGraph FFT execution time:  " << std::fixed << std::setprecision(2) << accumulated_ifft_ms << " ms" << std::endl;
+        logfile << "   Metal kernel command wall time (encode + wait): " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
+        logfile << "   MPSGraph IFFT command wall time (setup + wait): " << std::fixed << std::setprecision(2) << accumulated_ifft_ms << " ms" << std::endl;
         logfile << "   Output shared-buffer copy time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
         logfile << "   Total Metal alignment time:   " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
-        logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (peak_memory_bytes / (1024.0 * 1024.0)) << " MiB" << std::endl;
+        logfile << "   Tracked Metal buffer allocation (calculated): " << std::fixed << std::setprecision(2) << (tracked_buffer_bytes / (1024.0 * 1024.0)) << " MiB" << std::endl;
         logfile << "[Metal Global Alignment Completed] device_id=" << device_id
                 << " iterations=" << iterations_completed
                 << " stages=weights,reference,ccf,ifft,peak,fourier_shift converged=true" << std::endl;

@@ -1,0 +1,43 @@
+cpu-bind=MASK - gn3001, task  0  0 [411418]: mask 0xffffffffffffffff set
+slurmstepd: error: Unable to create TMPDIR [/scratch/scarf1415/relion-container-tests/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+=== allocation ===
+2026-09-28T08:34:07+01:00
+gn3001.scarf.rl.ac.uk
+JOB=3511136
+Cpus_allowed_list:	0-63
+0, GPU-c7b9c523-f18f-6873-d6d1-d080c2489e8f, 0 MiB
+1, GPU-579f1c79-be4d-c66c-454b-9d073b550e55, 0 MiB
+2, GPU-1f0c1e56-53e0-7257-fb1e-d1486ee5c7b9, 0 MiB
+3, GPU-53bf8dd8-e6a0-3fa2-2c45-73a8efdad998, 0 MiB
+compute apps before:
+binary: 25e27ced399148a722255b9ac83333d176bb563eb600ab9989830a35ad1f0dbe  /work4/scd/scarf1415/motioncorr/pr110-baseline/run-3511135/cand/build/motioncorr
+source head: 07a6a7770709d0fcc63275faeb8033cb8bcfacc2
+
+################ C1 decoded-reader: thread-count invariance, j1 vs j8 ################
+j1 exit=0 products=24
+C1 result: 24/24 movies pixel-identical between --j 1 and --j 8 on the same device
+  sample: pixel_identical=True num_pixels=14238980 rmse=0.0 max_abs=0.0 core_hdr_diff=0 normalized_label_diff=0
+
+################ C2 failure: truncated TIFF ################
+  rebuilt STAR with 2 movie rows
+  tiff references in sandbox STAR: 2
+C2 exit=1 (must be nonzero)
+  damaged movie named:    5
+  failed-movie count:     failed for 1 movie
+  healthy .mrc retained:  1
+  joint STAR withheld:    YES
+
+################ C3 resume after repair ################
+C3 exit=0 (must be 0)
+  products now:           2 of 2
+  joint STAR now present: YES
+  healthy movie untouched by the resume (pixels, not whole-file hash):
+    pixel_identical=True num_pixels=14238980 rmse=0.0 max_abs=0.0 core_hdr_diff=0 normalized_label_diff=0
+  repaired movie matches the full healthy run:
+    pixel_identical=True num_pixels=14238980 rmse=0.0 max_abs=0.0 core_hdr_diff=0 normalized_label_diff=0
+
+=== close-out ===
+(empty = nothing left)
+2026-09-28T08:35:42+01:00
+DONE native controls

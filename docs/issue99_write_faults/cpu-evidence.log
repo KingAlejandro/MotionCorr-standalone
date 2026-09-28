@@ -1,0 +1,100 @@
+=== provenance ===
+2026-09-28T00:14:30+00:00
+small-refmac-machine
+Cpus_allowed_list:	0-63
+head  motioncorr: 59936bbec5d13105f54fe52a5c5d7221126923593a7edd3593c6aaf291e0a1d1  /home/ubuntu/mc-i99/src-head/build-cpu/motioncorr
+neg   motioncorr: b9d16a2d8a69500c8ba8671382716a9cf79e851c2fa8264ed6735f2e3e5c82d8  /home/ubuntu/mc-i99/src-neg/build-cpu/motioncorr
+### acquiring validation lock
+
+############ 1. HEALTHY BYTE PARITY, identical relative paths ############
+arm neg exit=0
+arm head exit=0
+input movie: 95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  /home/ubuntu/mc-i99/evidence/par-head/mov/p.tiff
+--- byte-for-byte comparison of every produced file ---
+Files par-neg/out/logfile.pdf and par-head/out/logfile.pdf differ
+Files par-neg/out/mov/p.log and par-head/out/mov/p.log differ
+--- explicit hashes ---
+mov/p.mrc                        neg=beb91c2ff74aaa98 head=beb91c2ff74aaa98
+mov/p.star                       neg=18add2f32fe1708b head=18add2f32fe1708b
+corrected_micrographs.star       neg=89d486d7ebaa72ed head=89d486d7ebaa72ed
+mov/p.mrc size: 1049600
+
+############ 2. PRE-FIX FALSE COMPLETION (executed reproducer) ############
+phase 1 (a alone, unlimited) exit=0  a.mrc=1049600 bytes
+phase 2 (a+b, RLIMIT_FSIZE=599040 bytes) exit=0   <-- 0 means the failure was swallowed
+  b.mrc on disk: 599040
+  b.star completion record present: YES
+  joint STAR after the failed write:
+    28:out/mov/a.mrc out/mov/a.star            1     6.099077     4.164012     1.935065 
+    29:out/mov/b.mrc out/mov/b.star            1     6.099077     4.164012     1.935065 
+  stderr/stdout tail:
+    000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+     Generating joint STAR file ... 
+    000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+     Written: out/corrected_micrographs.star
+     Now generating logfile.pdf ... 
+     Done! Written: out/logfile.pdf
+
+############ 3. POST-FIX BEHAVIOUR, same injected fault ############
+phase 1 (a alone, unlimited) exit=0  a.mrc=1049600 bytes
+phase 2 (a+b, RLIMIT_FSIZE=599040 bytes) exit=1   <-- nonzero, not a signal
+  b.mrc on disk: 599040
+  b.star completion record present: no
+  a.mrc unchanged: yes
+  joint STAR unchanged (b withheld): yes
+  reported failure:
+    ERROR: 
+    Failed to write image data (1048576 bytes) to out/mov/b.mrc: File too large
+    ERROR: 
+    Failed to write image data (1048576 bytes) to out/mov/b.mrc: File too large
+    ERROR: 
+    Motion correction failed for 1 movie(s): mov/b.tiff. Successful per-movie outputs were retained; joint output was not generated.
+    ERROR: 
+    Motion correction failed for 1 movie(s): mov/b.tiff. Successful per-movie outputs were retained; joint output was not generated.
+phase 3 (repaired retry) exit=0
+  b.mrc now: 1049600
+  b.star present: yes
+  a.mrc still unchanged: yes
+  joint STAR now lists:
+    28:out/mov/a.mrc out/mov/a.star            1     6.099077     4.164012     1.935065 
+    29:out/mov/b.mrc out/mov/b.star            1     6.099077     4.164012     1.935065 
+
+############ 4. NEW TESTS, verbose, on the fixed build ############
+Done constructing a list of tests
+Updating test list for fixtures
+test 14
+    Start 14: WriteFaults
+
+14: Test command: /home/ubuntu/.mc-venv/bin/python3.12 "/home/ubuntu/mc-i99/src-head/tests/test_write_faults.py" "--binary" "/home/ubuntu/mc-i99/src-head/build-cpu/motioncorr"
+14: Working Directory: /home/ubuntu/mc-i99/src-head/build-cpu
+14: Test timeout computed to be: 1500
+14:   phase 1: a.mrc 1049600 B, sha256 31fdde8b43d943a1
+14:   phase 2: exit 1, b.mrc truncated to 600000 B, no b.star, a.mrc unchanged
+14:   phase 3: exit 0, b.mrc 1049600 B, joint STAR lists both, a.mrc still sha256 31fdde8b43d943a1
+14: fail-closed image writes: ok
+1/2 Test #14: WriteFaults ......................   Passed    0.56 sec
+test 15
+    Start 15: ImageWriteFaults
+
+15: Test command: /home/ubuntu/mc-i99/src-head/build-cpu/image_write_faults
+15: Working Directory: /home/ubuntu/mc-i99/src-head/build-cpu
+15: Test timeout computed to be: 1500
+15: in: /home/ubuntu/mc-i99/src-head/src/rwMRC.h, line 609
+15: ERROR: 
+15: Failed to write image data (1048576 bytes) to /tmp/mc_write_faults_3060334/big.mrc: File too large
+15: in: /home/ubuntu/mc-i99/src-head/src/image.h, line 455
+15: ERROR: 
+15: Failed to flush and close image file /tmp/mc_write_faults_3060334/small.mrc: File too large
+15:   destructor dropped 1464 unflushable bytes without terminating
+15: image write faults: ok
+2/2 Test #15: ImageWriteFaults .................   Passed    0.01 sec
+
+The following tests passed:
+	WriteFaults
+	ImageWriteFaults
+
+100% tests passed out of 2
+
+Total Test time (real) =   0.57 sec
+=== EVIDENCE DONE ===
+2026-09-28T00:14:31+00:00

@@ -21,6 +21,9 @@
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <climits>
+#include <cctype>
+#include <stdexcept>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -101,6 +104,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	first_frame_sum =  textToInteger(parser.getOption("--first_frame_sum", "First movie frame used in output sum (start at 1)", "1"));
 	if (first_frame_sum < 1) first_frame_sum = 1;
 	last_frame_sum =  textToInteger(parser.getOption("--last_frame_sum", "Last movie frame used in output sum (0 or negative: use all)", "-1"));
+	expected_frames = textToInteger(parser.getOption("--expected_frames", "Expected decoded frames per movie (-1: unchecked; per-movie STAR count overrides this fallback)", "-1"));
+	if (expected_frames != -1 && expected_frames <= 0)
+		REPORT_ERROR("--expected_frames must be positive or -1 (unchecked).");
 	eer_grouping = textToInteger(parser.getOption("--eer_grouping", "EER grouping", "40"));
 	eer_upsampling = textToInteger(parser.getOption("--eer_upsampling", "EER upsampling (1 = physical or 2 = 2x super-resolution)", "1"));
 
@@ -115,7 +121,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	patch_x = textToInteger(parser.getOption("--patch_x", "Patching in X-direction for MOTIONCOR2", "1"));
 	patch_y = textToInteger(parser.getOption("--patch_y", "Patching in Y-direction for MOTIONCOR2", "1"));
 	group = textToInteger(parser.getOption("--group_frames", "Average together this many frames before calculating the beam-induced shifts", "1"));
-	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file (x y w h) or a defect map (1 means bad)", "");
+	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file or a defect map (1 means bad). A .txt defect file holds whitespace-separated integer quadruples (x y w h), conventionally one rectangle per line; comments, headers and a UTF-8 BOM are not supported. Blank lines are ignored, an empty file masks nothing, rectangles with width or height <= 0 are skipped, and rectangles are clipped to the image.", "");
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
@@ -300,6 +306,7 @@ void MotioncorrRunner::initialise()
 
 		fn_micrographs.clear();
         pre_exposure_micrographs.clear();
+        expected_frames_micrographs.clear();
 		optics_group_micrographs.clear();
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDin)
 		{
@@ -321,6 +328,31 @@ void MotioncorrRunner::initialise()
                 pre_exposure_micrographs.push_back(0.0);
             }
 
+            // Frame indices (rlnMicrographFrameNumber) are not total counts.
+            int row_count = -1;
+            for (EMDLabel label : {EMDL_PARTICLE_NR_FRAMES, EMDL_TOMO_TILT_MOVIE_FRAMECOUNT})
+            {
+                int count;
+                if (!MDin.getValue(label, count)) continue;
+                if (count <= 0)
+                    REPORT_ERROR("Movie " + fn_mic + ": STAR expected frame count must be positive.");
+                if (row_count > 0 && row_count != count)
+                    REPORT_ERROR("Movie " + fn_mic + ": conflicting STAR expected frame counts.");
+                row_count = count;
+            }
+            // TomogramSet assigns one optics group per original global row.
+            if (row_count == -1 && is_tomo)
+            {
+                int count;
+                if (tomogramSet.globalTable.getValue(EMDL_TOMO_TILT_MOVIE_FRAMECOUNT, count, optics_group - 1))
+                {
+                    if (count <= 0)
+                        REPORT_ERROR("Movie " + fn_mic + ": global STAR expected frame count must be positive.");
+                    row_count = count;
+                }
+            }
+            expected_frames_micrographs.push_back(row_count > 0 ? row_count : expected_frames);
+
 		}
 	}
 	else
@@ -328,6 +360,7 @@ void MotioncorrRunner::initialise()
 		fn_in.globFiles(fn_micrographs);
 		optics_group_micrographs.resize(fn_micrographs.size(), 1);
 		pre_exposure_micrographs.resize(fn_micrographs.size(), 0.0);
+		expected_frames_micrographs.resize(fn_micrographs.size(), expected_frames);
 		obsModel.opticsMdt.clear();
 		obsModel.opticsMdt.addObject();
 	}
@@ -361,6 +394,7 @@ void MotioncorrRunner::initialise()
 		fn_out += "/";
 
 	// First backup the given list of all micrographs
+	std::vector<int> expected_frames_given_all = expected_frames_micrographs;
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
 	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
@@ -369,6 +403,7 @@ void MotioncorrRunner::initialise()
 	optics_group_ori_micrographs.clear();
 	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
+	expected_frames_micrographs.clear();
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
 	pre_exposure_micrographs.clear();
@@ -380,7 +415,7 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic], expected_frames_given_all[imic]))
 			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
@@ -400,6 +435,7 @@ void MotioncorrRunner::initialise()
 
 		if (process_this)
 		{
+			expected_frames_micrographs.push_back(expected_frames_given_all[imic]);
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
 			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
@@ -532,7 +568,7 @@ bool completeMrc(const FileName &filename)
 }
 }
 
-bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expected_frames)
 {
 	const FileName average = getOutputFileNames(movie);
 	const FileName root = average.withoutExtension();
@@ -555,7 +591,8 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie)
 		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
 		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
 		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
-		    shifts.numberOfObjects() != nframes) return false;
+		    shifts.numberOfObjects() != nframes ||
+		    (effective_expected_frames > 0 && nframes != effective_expected_frames)) return false;
 		std::vector<bool> seen(nframes, false);
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
 		{
@@ -612,10 +649,17 @@ void MotioncorrRunner::run()
 		{
 			// Header parsing is also a per-movie failure, not a batch abort.
 			Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
+			int exp_frames = (imic < (long int)expected_frames_micrographs.size()) ? expected_frames_micrographs[imic] : expected_frames;
+			if (exp_frames > 0 && mic.getNframes() != exp_frames)
+			{
+				REPORT_ERROR("Movie " + fn_micrographs[imic] + " frame count mismatch: expected " +
+				             integerToString(exp_frames) + " frames, but decoded " +
+				             integerToString(mic.getNframes()) + " frames.");
+			}
 			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
-			result = do_own ? executeOwnMotionCorrection(mic) : executeMotioncor2(mic);
+			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
 				saveModel(mic);
@@ -1257,7 +1301,7 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 	return gain_cache();
 }
 
-bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
@@ -1313,6 +1357,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	{
 		Ihead.read(fn_mic, false, -1, false, true); // select_img -1, mmap false, is_2D true
 		nx = XSIZE(Ihead()); ny = YSIZE(Ihead()); nn = NSIZE(Ihead());
+
+	}
+
+	if (effective_expected_frames > 0 && nn != effective_expected_frames)
+	{
+		REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " +
+		             integerToString(effective_expected_frames) + " frames, but decoded " +
+		             integerToString(nn) + " frames.");
 	}
 
 	// Which frame to use?
@@ -1996,6 +2048,26 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_even().reshape(ny, nx);
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
+
+	// The real-space frames reconstructed below have exactly two readers:
+	// patch clipping (do_local) and the "before dose weighting" sum further
+	// down (pre_dw_sum_needed). When neither runs, nothing reads them before
+	// they are replaced, so the inverse transform is dead work and eliding it
+	// is bit-exact rather than an approximation.
+	//
+	// Both predicates are declared once, here, and used at every site that
+	// depends on them. Restating either condition at its consumer lets the two
+	// drift apart silently, and that is not hypothetical: the prototype in
+	// PR #57 held a copy of this guard, 0f508e0 widened the original with
+	// even_odd_split, and the copy did not follow. Compiling that prototype
+	// predicate against current main corrupts EVN/ODD -- measured, on a
+	// deliberately built control, not something that shipped -- and it does so
+	// with no merge conflict, no warning and no failing test.
+	// See agents/designs/issue_26_cpu_global_ifft_skip.md.
+	const bool do_local = (patch_x > 2) && (patch_y > 2);
+	const bool pre_dw_sum_needed = !do_dose_weighting || save_noDW || even_odd_split;
+	const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;
+
 	RCTIC(TIMING_GLOBAL_IFFT);
 	bool cuda_global_ifft_done = false;
 #ifdef _CUDA_ENABLED
@@ -2022,7 +2094,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+		// The reshape is kept unconditionally as the conservative choice, not
+		// because anything downstream requires it: the post-dose-weighting
+		// transform would resize on its own, and every site that sizes a buffer
+		// from Iframes[0]() sits inside pre_dw_sum_needed, i.e. a case where
+		// this transform ran. Keeping it does mean the emptiness test further
+		// down cannot detect an elided buffer, so need_real_space_before_dw is
+		// the only guard.
+		if (need_real_space_before_dw)
+			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	}
@@ -2031,7 +2111,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// Patch based alignment
 	logfile << std::endl << "Local alignments:" << std::endl;
 	logfile << "Patches: X = " << patch_x << " Y = " << patch_y << std::endl;
-	bool do_local = (patch_x > 2) && (patch_y > 2);
 	if (!do_local) {
 		logfile << "Too few patches to do local alignments. Local alignment is skipped." << std::endl;
 	}
@@ -2334,7 +2413,7 @@ skip_fitting:
 	// The retained full-frame cache is only needed while preparing local patches.
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif
-	if (!do_dose_weighting || save_noDW || even_odd_split) {
+	if (pre_dw_sum_needed) {
 		Iref().reshape(ny, nx);
 		Iref().initZeros();
 		Iref_odd().reshape(ny, nx);
@@ -2438,6 +2517,12 @@ skip_fitting:
 
 		// Final output
 		RCTIC(TIMING_WRITE_RESULT);
+		// NOT pre_dw_sum_needed. This decides whether an unweighted micrograph
+		// is written, and it must exclude even_odd_split: with --even_odd_split
+		// --dose_weighting the unweighted sum is computed for EVN/ODD only, and
+		// writing a _noDW.mrc here would add an output the run never requested.
+		// Same three variables, different question -- do not unify with the
+		// shared predicate above.
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
 			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
@@ -3343,18 +3428,119 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// TODO: error handling !!
-		while (!f_defect.eof()) {
-			int x, y, w, h;
-			f_defect >> x >> y >> w >> h;
-			for (int iy = y, ylim = y + h; iy < ylim; iy++)
-			{
-				if (iy < 0 || iy >= ny) continue;
-				for (int ix = x, xlim = x + w; ix < xlim; ix++)
-				{
-					if (ix < 0 || ix >= nx) continue;
-					DIRECT_A2D_ELEM(bBad, iy, ix) = true;
+		// Extraction-checked parse (issue #98). The supported contract is the
+		// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
+		// Comments, headers and a UTF-8 BOM are NOT part of that format and are
+		// rejected with a specific diagnostic rather than silently mis-parsed.
+		// Blank lines and surrounding whitespace are ignored; an empty file is
+		// valid and masks nothing; non-positive w/h is a no-op rectangle.
+		if (f_defect.peek() == 0xEF) {
+			REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
+			             "mark. The MotionCor2 txt defect format is plain ASCII "
+			             "'x y w h' records; re-save the file without a BOM.");
+		}
+
+		long long record_num = 0, line = 1;
+
+		// Consume whitespace by hand, counting newlines, so a diagnostic can name
+		// the line the offending field is actually on. Doing this before every
+		// field -- not just before each record -- keeps the count exact even when
+		// a record's fields straddle a line break, which this format permits.
+		auto skip_ws = [&]() {
+			int c;
+			while ((c = f_defect.peek()) != EOF && isspace(c)) {
+				if (c == '\n') line++;
+				f_defect.get();
+			}
+		};
+		// Built only on an error path; the happy path never pays for it.
+		// A malformed field names its own line; a record truncated by end of
+		// file names where the record started, because the whitespace skip has
+		// by then already stepped past the last content line.
+		auto where = [&](long long at_line) {
+			return " (record " + std::to_string(record_num + 1) +
+			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
+		};
+		// A path can open and still fail to be read -- a directory whose name ends
+		// .txt is the reachable case. peek() returns EOF for that too, so end of
+		// input is only "clean" when the stream really did reach end of file
+		// without an error. Treating a read failure as an empty file would mask
+		// nothing and let the movie publish as if correction had succeeded.
+		// Platforms differ in how much they expose: libstdc++ sets badbit for a
+		// directory, libc++ reports an ordinary EOF and the distinction is simply
+		// not observable there.
+		auto fail_if_unreadable = [&]() {
+			if (f_defect.bad() || !f_defect.eof()) {
+				REPORT_ERROR("Failed to read the defect file " + fn_defect +
+				             ": the path opened but could not be read. If it is a "
+				             "directory, pass the defect file itself.");
+			}
+		};
+
+		while (true) {
+			skip_ws();
+			if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
+			const long long record_line = line;
+
+			// Read each field as a token and convert it explicitly. Streaming
+			// straight into integers cannot attribute a failure: an out-of-range
+			// value sets failbit *after* consuming its digits, so a recovery read
+			// would name the following field.
+			static const char *const FIELD[4] = { "x", "y", "w", "h" };
+			long long field[4] = { 0, 0, 0, 0 };
+			for (int i = 0; i < 4; i++) {
+				if (i > 0) skip_ws();
+				std::string token;
+				if (f_defect.peek() == EOF || !(f_defect >> token)) {
+					// A read error mid-record must not be reported as truncation.
+					fail_if_unreadable();
+					REPORT_ERROR("Truncated defect record" + where(record_line) +
+					             ": expected four integers 'x y w h', but the file ended "
+					             "after " + std::to_string(i) + " of 4 fields.");
 				}
+
+				// Classify syntax before range, so a token that is both malformed
+				// and huge is reported as malformed rather than out-of-range.
+				size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
+				bool integral = (d < token.size());
+				for (size_t j = d; j < token.size(); j++) {
+					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
+				}
+				if (!integral) {
+					REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which is not an integer. The MotionCor2 txt defect "
+					             "format does not support comments, headers or "
+					             "non-integer fields.");
+				}
+				try {
+					field[i] = std::stoll(token);
+				} catch (const std::out_of_range &) {
+					REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which does not fit in a 64-bit integer.");
+				}
+			}
+			const long long x = field[0], y = field[1], w = field[2], h = field[3];
+			++record_num;
+
+			if (w <= 0 || h <= 0) continue;
+
+			auto safe_add = [](long long a, long long b) -> long long {
+				if (b <= 0) return a;
+				if (a > LLONG_MAX - b) return LLONG_MAX;
+				return a + b;
+			};
+			long long x0 = std::max(0LL, x);
+			long long x1 = std::min((long long)nx, safe_add(x, w));
+			long long y0 = std::max(0LL, y);
+			long long y1 = std::min((long long)ny, safe_add(y, h));
+			if (x0 >= x1 || y0 >= y1) continue;
+
+			for (long long iy = y0; iy < y1; ++iy)
+			{
+				for (long long ix = x0; ix < x1; ++ix)
+					DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
 			}
 		}
 

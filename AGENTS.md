@@ -1,92 +1,27 @@
-# MotionCorr Multi-Agent Development Guidelines
+# MotionCorr project guidance
 
-This project employs a multi-agent engineering workflow to safely extract, optimize, and modernize the standalone RELION motion correction engine while maintaining bit-exact numerical parity against RELION 5.1 (`commit ad0b230`).
+MotionCorr is a standalone RELION-derived CPU/CUDA motion-correction program.
+See `README.md` for builds and usage, and `SOURCE_MANIFEST.txt` for upstream provenance.
 
----
+## Keep work focused
 
-## 1. Agent Roles & Responsibilities
+- Read the relevant issue and latest discussion before changing code.
+- Make small changes consistent with the existing C++17, CUDA and Python code.
+- Write a short design note for significant algorithm, interface or ownership changes. Routine fixes do not need an ADR.
+- Preserve other people's edits, inputs and recorded evidence.
+- Agent tools under `agents/` and `skills/` are optional. No fixed agent roles, refinement loop or repeated audits are required.
 
-1. **Architecture Agent (`agents/architecture_agent/`)**:
-   - **Mandate**: Must be consulted for any non-trivial issue before code changes are made.
-   - **Deliverable**: Architectural Decision Record / Design Specification in `agents/designs/issue_<NUM>_<slug>.md`.
-   - **Key Focus**: Mathematical formulation, numerical tolerance tiers, memory staging budgets, interface contracts, and failure fallbacks.
-   - **System Prompt**: [`agents/architecture_agent/SYSTEM_PROMPT.md`](agents/architecture_agent/SYSTEM_PROMPT.md)
+## Correctness and review
 
-2. **Implementation Agent**:
-   - **Mandate**: Executes changes strictly according to the approved Architectural Design Specification.
-   - **Deliverable**: Modular C++17, CUDA, Python, or CMake code changes with unit test fixtures.
-   - **Tooling**: Uses [`skills/ai-git-commit/`](skills/ai-git-commit/SKILL.md) for clean, traceable commits.
+- Preserve numerical results, metadata and failure/publication behavior unless the task explicitly calls for a change. Explain intentional differences.
+- Do not relax numerical gates or tolerances to make a result pass.
+- When verification is requested, use the relevant existing checks and report the revision, inputs, commands, results and limitations. Planned or unrun checks are not passes.
+- Compilation and green CI do not establish native GPU execution, performance or scientific correctness. Keep those claims separate.
+- Before recommending a merge, check latest-source review, current-head CI and the validation required for the claim. Review correctness, scope and license compatibility together; no separate reviewer for each category is required.
+- Retain upstream notices and use dependencies compatible with the project's GPL-2.0-or-later license.
 
-3. **Review & Verification Agent (`agents/review_agent/`)**:
-   - **Mandate**: Memoryless, isolated, strictly read-only auditor. Does NOT modify code.
-   - **Deliverable**: Objective review reports concluding with an explicit verdict (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
-   - **Key Focus**: Detects numerical parity regressions, OpenMP non-determinism, heap allocations in hot loops, and portability faults.
-   - **System Prompt**: [`agents/review_agent/SYSTEM_PROMPT.md`](agents/review_agent/SYSTEM_PROMPT.md)
+## Shared resources
 
-4. **Specification & Scope Conformance Agent (`agents/spec_compliance_agent/`)**:
-   - **Mandate**: Works alongside the Review Agent to verify that an implementation matches the specification, and *only* the specification.
-   - **Deliverable**: Conformance reports auditing forward completeness (acceptance criteria) and reverse scope isolation (detecting unintended side effects or collateral modifications).
-   - **Pass Criterion**: Passes (`SPEC_CONFORMANCE_PASSED`) if and only if all specification requirements are met and zero out-of-scope side effects are detected.
-   - **System Prompt**: [`agents/spec_compliance_agent/SYSTEM_PROMPT.md`](agents/spec_compliance_agent/SYSTEM_PROMPT.md)
-
-5. **License & Open Source Compliance Agent (`agents/license_compliance_agent/`)**:
-   - **Mandate**: Ensures all software and Python dependencies are certified Open Source (OSI-approved) and comply with project licensing terms (GPL-2.0).
-   - **Deliverable**: Compliance audit reports flagging proprietary code, "All rights reserved" declarations lacking license grants, and non-commercial restrictions.
-   - **System Prompt**: [`agents/license_compliance_agent/SYSTEM_PROMPT.md`](agents/license_compliance_agent/SYSTEM_PROMPT.md)
-
-6. **Pull Request Analysis Agent (`agents/pr_analysis_agent/`)**:
-   - **Mandate**: Discovers pull requests and conducts deep architectural, parity, concurrency, scope, and defect audits on specific PRs.
-   - **Deliverable**: Actionable PR reports with quality gate matrices and merge readiness verdicts (`READY_TO_MERGE`, `CHANGES_REQUESTED`, `BLOCKED_BY_FAULT`).
-   - **System Prompt**: [`agents/pr_analysis_agent/SYSTEM_PROMPT.md`](agents/pr_analysis_agent/SYSTEM_PROMPT.md)
-
-7. **Cleanup & Repository Hygiene Agent (`agents/cleanup_agent/`)**:
-   - **Mandate**: Safely scans and purges ephemeral review dumps, intermediate dialectic drafts, stale logs, and cache files while strictly protecting core source code and baselines.
-   - **Deliverable**: Structured hygiene reports with dry-run previews and execution confirmations (`DRY_RUN` / `APPLIED`).
-   - **System Prompt**: [`agents/cleanup_agent/SYSTEM_PROMPT.md`](agents/cleanup_agent/SYSTEM_PROMPT.md)
-
-8. **Agent Meta-Auditor (`agents/agent_auditor/`)**:
-   - **Mandate**: Audits all peer agents in the ecosystem while strictly excluding its own files.
-   - **Deliverable**: Comprehensive audit reports verifying script compilation, CLI responsiveness, system prompts, templates, and cross-agent consistency.
-   - **System Prompt**: [`agents/agent_auditor/SYSTEM_PROMPT.md`](agents/agent_auditor/SYSTEM_PROMPT.md)
-
----
-
-## 2. Standard Issue Lifecycle
-
-```mermaid
-flowchart TD
-    Issue["Issue #N"] --> Loop{"Dialectic Refinement Loop<br/>(refine_specification.py)"}
-    Loop --> Arch["Architecture Agent (Generator)"]
-    Arch --> Draft["Design Draft (Round R)"]
-    Draft --> Conf["Conformance Agent (Critic)"]
-    Conf -->|SPEC_REVISION_REQUESTED| Loop
-    Conf -->|SPEC_APPROVED| Spec["Certified Specification<br/>(agents/designs/issue_N_design.md)"]
-    Spec --> User{"Maintainer Approval"}
-    User -->|Approved| Impl["Implementation Agent"]
-    Impl --> Code["Source Code & Tests"]
-    Code --> DualAudit{"Dual Verification Gate"}
-    DualAudit --> Rev["Review Agent<br/>(Parity, Thread Safety, Memory)"]
-    DualAudit --> SpecAgent["Spec Conformance Agent<br/>(Scope, Side Effects, Completeness)"]
-    Rev -->|READY_TO_MERGE| GateCheck{"Both Agents Pass?"}
-    SpecAgent -->|SPEC_CONFORMANCE_PASSED| GateCheck
-    GateCheck -->|Yes| LicenseAudit["License Compliance Agent<br/>(audit_licenses.py)"]
-    LicenseAudit -->|PASSED / Approved| Commit["ai-git-commit Skill"]
-    GateCheck -->|No / Warnings| Impl
-    Commit --> Merged["Merged to Branch"]
-```
-
----
-
-## 3. Tooling & Skills Reference
-
-- **Repository Hygiene & Artifact Cleanup**: `python agents/cleanup_agent/scripts/cleanup_repo.py [--apply]`
-- **Pull Request Quality & Defect Audit**: `python agents/pr_analysis_agent/scripts/analyze_pr.py --pr <NUM>`
-- **GitHub PR Discovery & Fetching**: `python skills/github-pr-query/scripts/query_prs.py --state open`
-- **Open Source License & Compliance Audit**: `python agents/license_compliance_agent/scripts/audit_licenses.py`
-- **Dialectic Specification Refinement Loop**: `python agents/scripts/refine_specification.py --issue <NUM> --max-rounds 3`
-- **Spec Conformance Audit & Spec Review**: `python agents/spec_compliance_agent/scripts/verify_spec_conformance.py --issue <NUM>`
-- **Stateless Code Review**: `python agents/review_agent/scripts/review_code.py`
-- **Agent Ecosystem Audit**: `python agents/agent_auditor/scripts/audit_agents.py`
-- **Design Scaffolding & Generation**: `python agents/architecture_agent/scripts/generate_architecture.py --issue <NUM>`
-- **Automated AI Commits**: `python skills/ai-git-commit/scripts/ai_commit.py`
-- **Issue Parser**: `python skills/github-issues-parser/scripts/parse_issues.py`
+- Follow the current task's CPU/GPU allocation and lock rules; check occupancy before running work.
+- Leave unrelated processes and services alone, and use writable scratch with sufficient space.
+- Record actual resources for benchmarks. Compare timings only under matching conditions.

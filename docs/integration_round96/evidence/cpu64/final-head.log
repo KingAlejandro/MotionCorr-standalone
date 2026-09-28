@@ -1,0 +1,134 @@
+##### FINAL-HEAD CPU VALIDATION #####
+UTC 2026-09-28T02:34:40Z
+small-refmac-machine
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+nodebind: 1 
+membind: 1 
+SMT thread(s)/core: 1 ; node1 = CPUs 32-63
+load: 3.90 6.22 5.30 3/7959 3179470
+interference ctffind pid=1156942 cpus=0-63 (recorded, untouched)
+interference ctffind pid=1635429 cpus=0-63 (recorded, untouched)
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 4.4.3
+Python 3.12.3
+numpy 2.5.3
+libtiff-4 4.5.1
+e448a71d55775479d8eea8d91c82f6fcad5d429e0a9d1d55748cd16382eb6c79  /home/ubuntu/mc-i96-final.bundle
+final head: d3c04f7f2a40637e8666ccfb4fb43a6e9540d316
+tree: 1c6d1efd8410866b5e0bc8d31e1043ee45bc9d82
+commits over base: 49
+tracked-source digest: 68aee5e5db553d834e8b00ea23d3f0dba5e4f612325c82a151085a89c452c1ff
+
+##### BUILD #####
+configure exit=0
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+build exit=0  errors=0  warnings=5
+4e2ae80ec069875a595befa91e815bb2a580bdd82eadd9ad1343214741272c89  build/motioncorr
+fa465b3fb9bdcf4c9720ea342a96127eb14f071acbebe7b820f2d278e0ba312b  build/runner_numerics
+8ea691180d1fce86b3c69fa68d068ef65f9a3b073f4156aa642dcf465c07baa7  build/image_write_faults
+b38c2bfca08186558cb72001589b730a813344a28c29ede3b2478c3cfa230948  build/defect_parser
+
+##### FULL SUITE #####
+ctest exit=0
+ 1/17 Test  #1: DefectParser .....................   Passed    0.01 sec
+ 2/17 Test  #5: Runner_failure ...................   Passed    0.12 sec
+ 3/17 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+ 4/17 Test  #4: RunnerExposure ...................   Passed    0.53 sec
+ 5/17 Test  #3: HotPixelRngDeterminism ...........   Passed    0.67 sec
+ 6/17 Test  #8: Runner_tomography ................   Passed    0.44 sec
+ 7/17 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+ 8/17 Test  #2: SyntheticRegression ..............   Passed    1.14 sec
+ 9/17 Test  #9: RunnerLateBin ....................   Passed    0.71 sec
+10/17 Test #12: TiffRead .........................   Passed    0.57 sec
+11/17 Test #14: RunnerModelParser ................   Passed    0.14 sec
+12/17 Test #15: WriteFaults ......................   Passed    0.41 sec
+13/17 Test  #7: Runner_resume ....................   Passed    2.14 sec
+14/17 Test #17: ImageWriteFaults .................   Passed    0.01 sec
+15/17 Test #11: GainCache ........................   Passed    1.44 sec
+16/17 Test #13: DamagedMovie .....................   Passed    4.38 sec
+17/17 Test #16: CiFailClosedControls .............   Passed    6.99 sec
+100% tests passed out of 17
+collected:
+17
+   DefectParser
+   SyntheticRegression
+   HotPixelRngDeterminism
+   RunnerExposure
+   Runner_failure
+   Runner_invalid
+   Runner_resume
+   Runner_tomography
+   RunnerLateBin
+   RunnerExportedUnits
+   GainCache
+   TiffRead
+   DamagedMovie
+   RunnerModelParser
+   WriteFaults
+   CiFailClosedControls
+   ImageWriteFaults
+
+##### FAIL-CLOSED CHAIN #####
+--- $ python3 tools/ci_preflight.py
+exit=0
+CI PREFLIGHT PASS: All 16 required files verified.
+--- $ python3 tools/validate_test_collection.py --test-dir build
+exit=0
+    - WriteFaults                    [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+--- $ python3 test-data/generate_known_motion_fixture.py --canonical
+exit=0
+km_local_nonsquare: /home/ubuntu/mc-i96-final/src/test-data/known_motion/km_local_nonsquare.mrcs (18875392 bytes, sha256 9ef410b8cf70bfaf...)
+    star: /home/ubuntu/mc-i96-final/src/test-data/known_motion/km_local_nonsquare.star
+    truth: /home/ubuntu/mc-i96-final/src/test-data/known_motion/km_local_nonsquare_ground_truth.json
+--- $ python3 tools/verify_fixtures.py
+exit=0
+             PASS  km_local_nonsquare
+   EXCLUDED_HEAVY  km_local_realscale
+VERIFIED: 4 canonical fixtures match trusted manifest (1 heavy cases excluded).
+--- $ python3 tools/test_ci_fail_closed.py
+exit=0
+Ran 7 tests in 6.827s
+
+OK
+
+##### NEGATIVE CONTROL: final-head tests against BASE source #####
+src/ is base: image.h yes  motioncorr_runner.cpp yes
+nc configure exit=0
+nc build exit=0  (a control that does not build detects nothing)
+nc ctest exit=8
+76% tests passed, 4 tests failed out of 17
+tests that FAIL on base source (these detect the integrated defects):
+13/17 Test #13: DamagedMovie .....................***Failed    0.71 sec
+14/17 Test #15: WriteFaults ......................***Failed    0.37 sec
+15/17 Test #17: ImageWriteFaults .................Subprocess aborted***Exception:   1.13 sec
+	 17 - ImageWriteFaults (Subprocess aborted)
+
+##### HEALTHY ALL-24 A/B AT FINAL HEAD #####
+ref build exit=0  ref dirty=0
+3c379b2151e836f1db9442bbf40090a938d20b6bb937d9eddbc393d9f0a03f87  /home/ubuntu/mc-i96-final/refsrc/build/motioncorr
+4e2ae80ec069875a595befa91e815bb2a580bdd82eadd9ad1343214741272c89  /home/ubuntu/mc-i96-final/src/build/motioncorr
+OK distinct binaries
+A/B exit=1
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+##### DONE FINAL #####
+UTC 2026-09-28T02:46:01Z

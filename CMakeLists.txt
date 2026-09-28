@@ -79,11 +79,25 @@ include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
-    # Pure C++ regression (issue #97): must not be gated behind Python discovery.
+    add_executable(defect_parser tests/test_defect_parser.cpp)
+    target_link_libraries(defect_parser PRIVATE motioncorr_core)
+    add_test(NAME DefectParser COMMAND defect_parser)
+    # The malformed-input cases hang the pre-#98 parser; bound them so a
+    # regression fails the suite instead of stalling it.
+    set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
+    # Pure C++ regression (issue #97); registered here beside the other native test,
+    # ahead of the Python/numpy probe, since it needs neither.
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
-    find_package(Python3 COMPONENTS Interpreter)
-    if(Python3_Interpreter_FOUND)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    execute_process(
+        COMMAND "${Python3_EXECUTABLE}" -c "import numpy"
+        RESULT_VARIABLE _NUMPY_CHECK
+        OUTPUT_QUIET ERROR_QUIET
+    )
+    if(NOT _NUMPY_CHECK EQUAL 0)
+        message(FATAL_ERROR "BUILD_TESTING=ON requires Python 3 with 'numpy' installed.")
+    endif()
         add_test(NAME SyntheticRegression
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_synthetic_regression.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -113,9 +127,23 @@ if(BUILD_TESTING)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME GlobalIfftElision
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME WriteFaults
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
+                --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME CiFailClosedControls
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+    # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
+    # so it needs POSIX resource limits and an ignorable SIGXFSZ.
+    if(UNIX)
+        add_executable(image_write_faults tests/test_image_write_faults.cpp)
+        target_link_libraries(image_write_faults PRIVATE motioncorr_core)
+        add_test(NAME ImageWriteFaults COMMAND image_write_faults)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)

@@ -1,0 +1,205 @@
+##### PROVENANCE #####
+UTC 2026-09-28T07:14:21Z
+small-refmac-machine
+6.8.0-86-generic
+--- actual inherited process cpuset / mems ---
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+--- actual NUMA policy in force ---
+policy: bind
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+nodebind: 1 
+membind: 1 
+--- lane topology (CPU,NODE,SOCKET,CORE) ---
+32,1,1,32
+33,1,1,33
+34,1,1,34
+35,1,1,35
+  ... through CPU 63; Thread(s) per core: 1 (1 = no SMT, each logical CPU is a physical core)
+--- load at start ---
+5.39 7.52 8.20 3/7996 3319121
+--- interference (recorded, untouched) ---
+  ctffind pid=1156942 cpus=0-63 rss=29340 kB
+  ctffind pid=1635429 cpus=0-63 rss=13312 kB
+  (ctffind not signalled, reniced or reaffinitised by this job)
+--- OBSERVED NUMA memory placement for this lane ---
+  probe pid=3319127 cpus=32-63
+  numa_maps page counts (N<node>=pages), anon heap lines:
+    N0 = 1053 pages (4.1 MiB)
+    N1 = 66854 pages (261.1 MiB)
+Huge                         0.00            0.00            0.00
+Heap                         0.00            0.64            0.64
+Stack                        0.00            0.07            0.07
+Private                      4.11          260.43          264.55
+----------------  --------------- --------------- ---------------
+Total                        4.11          261.15          265.26
+--- toolchain ---
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 4.4.3
+Python 3.12.3
+numpy 2.5.3
+
+##### SOURCE #####
+289d0d34fa19d5d2559c156fb978dce1c2db8f3b9c1c2699de9b3ad5e0368e5e  /home/ubuntu/mc-i96-fix.bundle
+final head: 07a6a7770709d0fcc63275faeb8033cb8bcfacc2
+tree:       dc94ba66d9f6eba94def91b5d62c7fff625f0f46
+dirty:      0
+fix commits over the reviewed head f965070:
+07a6a77 integrate(round96): stage the STAR in PR102's new archive canonical sub-case
+837a134 docs(integration): record the review-follow-up composition and its one hazard
+95bba57 docs(integration): refresh the PR105 handoff archive after its review delta
+07417b2 docs(#99): evidence for the inherited-hard-limit delta, including a void control
+5e335f2 test(#99): preserve the inherited RLIMIT_FSIZE hard limit
+615d67e integrate(round96): re-apply STAR immutability onto PR102's staging restructure
+fe8659f docs: record Codex review findings reconciliation and cpu64 validation telemetry
+9d31745 fix: address Codex review findings on manifest fail-closed, generator staging, and archive fallback
+0a73554 evidence(#96): dedicated SCARF job script for the PR110 native CUDA baseline
+16f3ca9 evidence(#72): cpu64 validation of the canonical STAR fix at head fe8ca55
+fe8ca55 test(#72): make Control 8 prove the movie digest is blind, not assume it
+8f2ec34 docs(#72): publish the STAR-immutability fix as a reusable patch mapping
+13c6e32 test(#72): discriminating maintained-entrypoint control for STAR immutability
+b0a70d6 fix(#72): keep the canonical STAR input immutable and pin its trusted digest
+changed files vs the reviewed head:
+ docs/integration_round96/OVERLAP.md                |  50 ++++
+ docs/integration_round96/REQUIREMENTS.md           |  38 +++
+ .../evidence/cpu64/starfix-before-after-arms.log   |  31 +++
+ .../cpu64/starfix-fail-closed-controls.log         |  21 ++
+ .../evidence/cpu64/starfix-head-fe8ca55.log        | 178 +++++++++++++
+ .../cpu64/starfix-negative-control-ctest.log       |  95 +++++++
+ ...-the-canonical-STAR-input-immutable-and-p.patch | 241 ++++++++++++++++++
+ ...criminating-maintained-entrypoint-control.patch | 174 +++++++++++++
+ docs/integration_round96/patches/README.md         |  51 ++++
+ .../scripts/cpu_validate_starfix.sh                | 180 +++++++++++++
+ .../scripts/pr110_scarf_baseline.sbatch            | 231 +++++++++++++++++
+ .../worker_status/pr102-issue72-fail-closed-ci.md  |  29 ++-
+ .../pr105-issue99-fail-closed-writes.md            |  49 +++-
+ docs/issue99_write_faults/REPORT.md                | 120 +++++++++
+ .../cpu-finite-hard-limit-control.log              |  56 +++++
+ .../issue99_write_faults/cpu-rlimit-validation.log | 209 ++++++++++++++++
+ .../cpu_finite_hard_limit_control.sh               |  40 +++
+ docs/issue99_write_faults/cpu_rlimit_validation.sh | 141 +++++++++++
+ test-data/generate_known_motion_fixture.py         | 277 +++++++++++++--------
+ test-data/known_motion/MANIFEST.json               |  15 +-
+ tests/test_image_write_faults.cpp                  | 144 ++++++++++-
+ tests/test_write_faults.py                         |  86 ++++++-
+ tools/run_known_motion_gates.py                    |  38 ++-
+ tools/test_ci_fail_closed.py                       | 259 ++++++++++++++++++-
+ tools/verify_fixtures.py                           | 108 ++++++--
+ 25 files changed, 2689 insertions(+), 172 deletions(-)
+payload identity of the three trusted artifact classes:
+  km_global_hisnr      star=f0e1a4875bd94f84 truth=ce4a8df71201c933
+  km_local_hisnr       star=c19f39e164518693 truth=e76efb9e009aa89c
+  km_local_noisy       star=3c07223e2c712a12 truth=bd4cf8ebe1dfbb6b
+  km_local_nonsquare   star=9bb41b34a9804a7b truth=88d04b9dc4ee99e3
+  MANIFEST.json = b499a9511ca376ac
+
+##### BUILD (Release, BUILD_TESTING=ON, CUDA=OFF) #####
+configure exit=0
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+build exit=0  errors=0
+b602be56892755f1b1b47de81cb2302172af5e404999aabf24bce037b6aaefee  build/motioncorr
+62f35b789897c027cb4d90ac8e0e8c09f7dc3003f345bef1761ef56a30bcfb0a  build/defect_parser
+051e9f8d8300071a7a4e4ca66671c2211faaac968ea1546046a28379f5103383  build/image_write_faults
+
+##### COMBINED SUITE AT FINAL SOURCE #####
+ctest exit=0
+100% tests passed out of 17
+ 1/17 Test  #1: DefectParser .....................   Passed    0.01 sec
+ 2/17 Test  #5: Runner_failure ...................   Passed    0.16 sec
+ 3/17 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+ 4/17 Test  #4: RunnerExposure ...................   Passed    0.54 sec
+ 5/17 Test  #3: HotPixelRngDeterminism ...........   Passed    0.62 sec
+ 6/17 Test  #8: Runner_tomography ................   Passed    0.45 sec
+ 7/17 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+ 8/17 Test  #2: SyntheticRegression ..............   Passed    1.09 sec
+ 9/17 Test  #9: RunnerLateBin ....................   Passed    0.65 sec
+10/17 Test #12: TiffRead .........................   Passed    0.54 sec
+11/17 Test #14: RunnerModelParser ................   Passed    0.14 sec
+12/17 Test  #7: Runner_resume ....................   Passed    1.99 sec
+13/17 Test #15: WriteFaults ......................   Passed    0.53 sec
+14/17 Test #17: ImageWriteFaults .................   Passed    0.03 sec
+15/17 Test #11: GainCache ........................   Passed    1.40 sec
+16/17 Test #13: DamagedMovie .....................   Passed    4.45 sec
+17/17 Test #16: CiFailClosedControls .............   Passed   10.91 sec
+registered inventory (union must still be 17):
+17
+
+##### FAIL-CLOSED CHAIN, CI ORDER #####
+--- $ python3 tools/ci_preflight.py
+exit=0
+CI PREFLIGHT PASS: All 16 required files verified.
+--- $ python3 tools/validate_test_collection.py --test-dir build
+exit=0
+    - WriteFaults                    [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+--- $ python3 test-data/generate_known_motion_fixture.py --canonical
+exit=0
+km_local_nonsquare: /home/ubuntu/mc-i96-starfix/src/test-data/known_motion/km_local_nonsquare.mrcs (18875392 bytes, sha256 9ef410b8cf70bfaf...)
+    star: /home/ubuntu/mc-i96-starfix/src/test-data/known_motion/km_local_nonsquare.star
+    truth: /home/ubuntu/mc-i96-starfix/src/test-data/known_motion/km_local_nonsquare_ground_truth.json
+--- $ python3 tools/verify_fixtures.py
+exit=0
+             PASS  km_local_nonsquare
+   EXCLUDED_HEAVY  km_local_realscale
+VERIFIED: 4 canonical fixtures match trusted manifest (1 heavy cases excluded).
+--- canonical run must NOT have modified any committed STAR ---
+  (empty = committed STAR and truth files untouched by --canonical)
+--- $ python3 tools/test_ci_fail_closed.py -v
+exit=0
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+test_8_canonical_star_input_is_immutable (__main__.TestCiFailClosedControls.test_8_canonical_star_input_is_immutable)
+Ran 8 tests in 10.867s
+OK
+
+##### BEFORE/AFTER: does the fix actually change the outcome? #####
+Mutation: VOLTAGE 300.0 -> 200.0. Chosen because VOLTAGE is written ONLY into the
+.star; canonical mode preserves the committed truth JSON, so neither the movie digest
+nor the truth digest can see it. (PIXEL_SIZE is NOT usable for this: it is also passed
+to write_mrc_stack() and lands in the MRC header, so the movie digest already caught
+it. A first pass of this control used PIXEL_SIZE and both heads appeared to detect --
+for the old head that was the movie check, not the STAR. Recorded rather than hidden.)
+canonical movie_sha256 = f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990
+  [reviewed_head_f965070]
+    generator --canonical exit   : 0
+    committed STAR rewritten     : YES  ->30c3fd42de0fabf1
+    voltage now in the STAR      : 200.0
+    generated movie sha256       : f9da46682b8466c7  (EQUALS canonical -- movie digest is blind to this mutation)
+    verify_fixtures exit         : 0
+    what actually rejected it    : none
+    verdict                      : NOT DETECTED -- gates would run on mutated optics
+  [fix_head]
+    generator --canonical exit   : 1
+    committed STAR rewritten     : NO
+    voltage now in the STAR      : 300.0
+    generated movie sha256       : none  (differs from canonical)
+    verify_fixtures exit         : 1
+    what actually rejected it    : generator STAR check
+    verdict                      : DETECTED
+
+##### NEGATIVE CONTROL: final-head tests vs BASE main source #####
+nc HEAD now carries candidate tooling: MANIFEST has star_sha256 = 5 entries
+nc src/ is still base: image.h yes, motioncorr_runner.cpp yes
+nc configure exit=0
+nc build exit=0  (a control that does not build detects nothing)
+nc ctest exit=8
+76% tests passed, 4 tests failed out of 17
+tests failing on base source (must still be exactly the four integrated groups'):
+The following tests FAILED:
+	  1 - DefectParser (Timeout)
+	 13 - DamagedMovie (Failed)
+	 15 - WriteFaults (Failed)
+	 17 - ImageWriteFaults (Subprocess aborted)
+Errors while running CTest
+
+##### DONE #####
+UTC 2026-09-28T07:17:38Z
+No GPU build, run or queuing performed by this job.

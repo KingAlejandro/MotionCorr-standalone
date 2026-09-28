@@ -1,0 +1,219 @@
+##### PROVENANCE #####
+UTC 2026-09-28T02:19:17Z
+host: small-refmac-machine
+Linux small-refmac-machine 6.8.0-86-generic #87-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 22 18:03:36 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+--- inherited cpuset (this job) ---
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+--- numa policy ---
+policy: bind
+preferred node: 1
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+cpubind: 1 
+nodebind: 1 
+membind: 1 
+preferred: 1 
+--- lscpu CPU->NODE/SOCKET/CORE (node1 lane) ---
+32,1,1,32
+33,1,1,33
+34,1,1,34
+35,1,1,35
+36,1,1,36
+37,1,1,37
+38,1,1,38
+39,1,1,39
+40,1,1,40
+41,1,1,41
+42,1,1,42
+43,1,1,43
+44,1,1,44
+45,1,1,45
+46,1,1,46
+47,1,1,47
+48,1,1,48
+49,1,1,49
+50,1,1,50
+51,1,1,51
+52,1,1,52
+53,1,1,53
+54,1,1,54
+55,1,1,55
+56,1,1,56
+57,1,1,57
+58,1,1,58
+59,1,1,59
+60,1,1,60
+61,1,1,61
+62,1,1,62
+63,1,1,63
+--- SMT ---
+Thread(s) per core: 1  (1 = no SMT, so each logical CPU is a physical core)
+--- load and interference at start ---
+2.18 2.54 3.25 3/7959 3168173
+    PID USER     %CPU ELAPSED COMMAND
+3168174 ubuntu    300       0 ps
+1156942 ubuntu   99.9 4243763 ctffind
+1635429 ubuntu   99.9 4148741 ctffind
+2722253 ubuntu    0.8 3753727 node
+1519128 root      0.1  503540 rsyslogd
+ 292988 root      0.1 13267775 dockerd
+3300564 root      0.1 1367243 containerd
+ctffind pid=1156942 Cpus_allowed_list=0-63
+ctffind pid=1635429 Cpus_allowed_list=0-63
+--- toolchain ---
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 4.4.3
+Python 3.12.3
+numpy 2.5.3
+libtiff-4 4.5.1
+
+##### SOURCE #####
+6a5bd460b58b3325a02e68014370cf567e02e27eeefad8339193fcf967f1e850  /home/ubuntu/mc-i96-integration.bundle
+candidate head: 6f2965962c92daffd05b1198a6bae7b9b9fb8fc6
+base (origin/main pin): 4c952b3f54479653512c4d208e09c9a8c02f3726
+commits on top of base: 29
+--- working tree clean? ---
+--- source tree hash (git tree object of candidate) ---
+ac93820e81a8e4ae013d032acbf46e4cd6411e8e
+--- tracked-source digest (src/ tests/ tools/ CMakeLists.txt .github/) ---
+ad8e3829ec7ee1ca2bc26566b2afd44482788109bc13d5a065c2cba581016880  -
+
+##### BUILD (Release, BUILD_TESTING=ON, CUDA=OFF) #####
+configure exit=0
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
+-- Found Python3: /home/ubuntu/.mc-venv/bin/python3 (found version "3.12.3") found components: Interpreter
+-- Configuring done (1.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ubuntu/mc-i96-integration/src/build
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+//ADVANCED property for variable: CMAKE_CXX_FLAGS_RELEASE
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+build exit=0
+build warnings: 5
+--- binary provenance ---
+-rwxrwxr-x 1 ubuntu ubuntu 2397440 Sep 28 02:19 build/motioncorr
+6ad15504be110fc13b4ab19af905743189907f398bd7ea83322b9b1074d13fa0  build/motioncorr
+cce1ef2da546489746cfc7b69083f0bab8eddf1f5a5d0c60e13de697c63f89f8  build/runner_numerics
+1b73a3dac88db134b5714f04bbface1b5cbce32167596ccf7cf33082f853d15a  build/image_write_faults
+--- optimisation actually applied (guard against the -O0 default trap) ---
+
+GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+
+##### CTEST: full suite on the combined tree #####
+ctest exit=8
+  File "/home/ubuntu/mc-i96-integration/src/tools/test_ci_fail_closed.py", line 98, in test_2_absent_dependency_fails_cmake
+    res_on = subprocess.run([
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'cmake'
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.055s
+
+FAILED (errors=1)
+
+
+94% tests passed, 1 tests failed out of 16
+
+Total Test time (real) =   7.40 sec
+
+The following tests FAILED:
+	 15 - CiFailClosedControls (Failed)
+Errors while running CTest
+--- collected test names ---
+16
+  SyntheticRegression
+  HotPixelRngDeterminism
+  RunnerExposure
+  Runner_failure
+  Runner_invalid
+  Runner_resume
+  Runner_tomography
+  RunnerLateBin
+  RunnerExportedUnits
+  GainCache
+  TiffRead
+  DamagedMovie
+  RunnerModelParser
+  WriteFaults
+  CiFailClosedControls
+  ImageWriteFaults
+
+##### FAIL-CLOSED TOOLING CHAIN (#72 order) #####
+--- $ /home/ubuntu/.mc-venv/bin/python3 tools/ci_preflight.py
+CI PREFLIGHT PASS: All 16 required files verified.
+exit=0
+--- $ /home/ubuntu/.mc-venv/bin/python3 tools/validate_test_collection.py --test-dir build
+ERROR: Failed to obtain CTest JSON data: [Errno 2] No such file or directory: 'ctest'
+exit=2
+--- $ /home/ubuntu/.mc-venv/bin/python3 test-data/generate_known_motion_fixture.py --canonical
+km_global_hisnr: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_global_hisnr.mrcs (12583936 bytes, sha256 f9da46682b8466c7...)
+    star: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_global_hisnr.star
+    truth: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_global_hisnr_ground_truth.json
+km_local_hisnr: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_hisnr.mrcs (12583936 bytes, sha256 2ae3c87938545aaf...)
+    star: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_hisnr.star
+    truth: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_hisnr_ground_truth.json
+km_local_noisy: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_noisy.mrcs (12583936 bytes, sha256 98930a070a9da7b1...)
+    star: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_noisy.star
+    truth: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_noisy_ground_truth.json
+km_local_nonsquare: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_nonsquare.mrcs (18875392 bytes, sha256 9ef410b8cf70bfaf...)
+    star: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_nonsquare.star
+    truth: /home/ubuntu/mc-i96-integration/src/test-data/known_motion/km_local_nonsquare_ground_truth.json
+exit=0
+--- $ /home/ubuntu/.mc-venv/bin/python3 tools/verify_fixtures.py
+=== Canonical Fixture Verification (git:HEAD:test-data/known_motion/MANIFEST.json) ===
+             PASS  km_global_hisnr
+             PASS  km_local_hisnr
+             PASS  km_local_noisy
+             PASS  km_local_nonsquare
+   EXCLUDED_HEAVY  km_local_realscale
+VERIFIED: 4 canonical fixtures match trusted manifest (1 heavy cases excluded).
+exit=0
+--- $ /home/ubuntu/.mc-venv/bin/python3 tools/test_ci_fail_closed.py -v
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ERROR
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... ok
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... ok
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+
+======================================================================
+ERROR: test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-i96-integration/src/tools/test_ci_fail_closed.py", line 98, in test_2_absent_dependency_fails_cmake
+    res_on = subprocess.run([
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'cmake'
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.093s
+
+FAILED (errors=1)
+exit=1
+
+##### DONE PHASE 1 #####
+UTC 2026-09-28T02:19:55Z

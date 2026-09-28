@@ -85,6 +85,10 @@ if(BUILD_TESTING)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
+    # Pure C++ regression (issue #97); registered here beside the other native test,
+    # ahead of the Python/numpy probe, since it needs neither.
+    add_test(NAME RunnerInterpolateRecenter
+        COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     execute_process(
         COMMAND "${Python3_EXECUTABLE}" -c "import numpy"

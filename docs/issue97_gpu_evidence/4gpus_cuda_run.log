@@ -1,0 +1,169 @@
+############ GPU RUN START 2026-09-28T15:39:04+00:00 ############
+[bench-lock] acquiring (so this cannot perturb a concurrent benchmark)...
+[bench-lock] acquired after 0s
+=== DEVICE WITNESS (ordinals do not identify silicon; record UUIDs) ===
+index, uuid, name, memory.total [MiB], driver_version
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe, 81920 MiB, 570.86.10
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe, 81920 MiB, 570.86.10
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe, 81920 MiB, 570.86.10
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe, 81920 MiB, 570.86.10
+--- compute apps before (must be empty for a clean attribution) ---
+1687477, 61302 MiB
+1687495, 61302 MiB
+1718299, 426 MiB
+--- lane ---
+Cpus_allowed_list:	96-103
+--- inputs ---
+f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+44f32752ebb62fc22428e95a1449e54e3a6952036285b805b96085f296ec5ed0  /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+
+########## ARM gpu-syn-base-off ##########
+$ /home/alex/mc-issue97-gpu/build-base/motioncorr --i /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --gpu 0 --j 8 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1
+exit=0
+interpolate_shifts = 0
+Patches: X = 3 Y = 3
+patch_blocks=9
+Working on /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs with 8 thread(s).
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+Using CUDA acceleration on GPU device 0 for global alignment.
+  * /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+ Written: /home/alex/mc-issue97-gpu/out/gpu-syn-base-off/corrected_micrographs.star
+
+########## ARM gpu-syn-base-on ##########
+$ /home/alex/mc-issue97-gpu/build-base/motioncorr --i /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --gpu 0 --j 8 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts
+exit=0
+interpolate_shifts = 1
+Patches: X = 3 Y = 3
+patch_blocks=9
+Working on /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs with 8 thread(s).
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+Using CUDA acceleration on GPU device 0 for global alignment.
+  * /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+ Written: /home/alex/mc-issue97-gpu/out/gpu-syn-base-on/corrected_micrographs.star
+
+########## ARM gpu-mov-base-off ##########
+$ /home/alex/mc-issue97-gpu/build-base/motioncorr --i /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff --use_own --gpu 0 --j 8 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+exit=0
+interpolate_shifts = 0
+Patches: X = 5 Y = 5
+patch_blocks=25
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Written: /home/alex/mc-issue97-gpu/out/gpu-mov-base-off/corrected_micrographs.star
+ Done! Written: /home/alex/mc-issue97-gpu/out/gpu-mov-base-off/logfile.pdf
+
+########## ARM gpu-mov-base-on ##########
+$ /home/alex/mc-issue97-gpu/build-base/motioncorr --i /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff --use_own --gpu 0 --j 8 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc --interpolate_shifts
+exit=0
+interpolate_shifts = 1
+Patches: X = 5 Y = 5
+patch_blocks=25
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Written: /home/alex/mc-issue97-gpu/out/gpu-mov-base-on/corrected_micrographs.star
+ Done! Written: /home/alex/mc-issue97-gpu/out/gpu-mov-base-on/logfile.pdf
+
+########## ARM gpu-syn-fixed-off ##########
+$ /home/alex/mc-issue97-gpu/build-fixed/motioncorr --i /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --gpu 0 --j 8 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1
+exit=0
+interpolate_shifts = 0
+Patches: X = 3 Y = 3
+patch_blocks=9
+Working on /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs with 8 thread(s).
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+Using CUDA acceleration on GPU device 0 for global alignment.
+  * /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+ Written: /home/alex/mc-issue97-gpu/out/gpu-syn-fixed-off/corrected_micrographs.star
+
+########## ARM gpu-syn-fixed-on ##########
+$ /home/alex/mc-issue97-gpu/build-fixed/motioncorr --i /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --gpu 0 --j 8 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts
+exit=0
+interpolate_shifts = 1
+Patches: X = 3 Y = 3
+patch_blocks=9
+Working on /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs with 8 thread(s).
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+Using CUDA acceleration on GPU device 0 for global alignment.
+  * /home/alex/mc-issue97-gpu/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+ Written: /home/alex/mc-issue97-gpu/out/gpu-syn-fixed-on/corrected_micrographs.star
+
+########## ARM gpu-mov-fixed-off ##########
+$ /home/alex/mc-issue97-gpu/build-fixed/motioncorr --i /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff --use_own --gpu 0 --j 8 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc
+exit=0
+interpolate_shifts = 0
+Patches: X = 5 Y = 5
+patch_blocks=25
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Written: /home/alex/mc-issue97-gpu/out/gpu-mov-fixed-off/corrected_micrographs.star
+ Done! Written: /home/alex/mc-issue97-gpu/out/gpu-mov-fixed-off/logfile.pdf
+
+########## ARM gpu-mov-fixed-on ##########
+$ /home/alex/mc-issue97-gpu/build-fixed/motioncorr --i /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00026_frameImage.tiff --use_own --gpu 0 --j 8 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc --interpolate_shifts
+exit=0
+interpolate_shifts = 1
+Patches: X = 5 Y = 5
+patch_blocks=25
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Written: /home/alex/mc-issue97-gpu/out/gpu-mov-fixed-on/corrected_micrographs.star
+ Done! Written: /home/alex/mc-issue97-gpu/out/gpu-mov-fixed-on/logfile.pdf
+
+=== rlnAccumMotion per arm ===
+gpu-mov-base-off       1 13.154425 1.827993 11.326432
+gpu-mov-base-on        1 13.154425 1.827993 11.326432
+gpu-mov-fixed-off      1 13.154425 1.827993 11.326432
+gpu-mov-fixed-on       1 13.154425 1.827993 11.326432
+gpu-syn-base-off       1 4.333531 1.393570 2.939961
+gpu-syn-base-on        1 4.333531 1.393570 2.939961
+gpu-syn-fixed-off      1 4.333531 1.393570 2.939961
+gpu-syn-fixed-on       1 4.333531 1.393570 2.939961
+
+=== COMPARISON ===
+
+=== synthetic 128x128 8f, 3x3 patches -- DEFAULT-OFF EXACTNESS CONTROL: syn-base-off vs syn-fixed-off   [expect EQUAL] ===
+  MISSING ARM
+
+=== synthetic 128x128 8f, 3x3 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: syn-base-on vs syn-fixed-on   [expect DIFFERENT] ===
+  MISSING ARM
+
+=== synthetic 128x128 8f, 3x3 patches -- informational: two different modes, not a control: syn-fixed-off vs syn-fixed-on   [expect DIFFERENT] ===
+  MISSING ARM
+
+=== real movie 20170629_00026, 5x5 patches -- DEFAULT-OFF EXACTNESS CONTROL: mov-base-off vs mov-fixed-off   [expect EQUAL] ===
+  MISSING ARM
+
+=== real movie 20170629_00026, 5x5 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: mov-base-on vs mov-fixed-on   [expect DIFFERENT] ===
+  MISSING ARM
+
+=== real movie 20170629_00026, 5x5 patches -- informational: two different modes, not a control: mov-fixed-off vs mov-fixed-on   [expect DIFFERENT] ===
+  MISSING ARM
+
+================ SUMMARY ================
+  syn: option-OFF base vs fixed        not run
+  syn: option-ON  base vs fixed        not run
+  mov: option-OFF base vs fixed        not run
+  mov: option-ON  base vs fixed        not run
+
+GATE: ATTENTION (4 not as expected)
+(numpy absent: byte-level verdicts still valid, per-pixel stats omitted)
+
+--- compute apps after ---
+1687477, 61302 MiB
+1687495, 61302 MiB
+1718299, 426 MiB
+STATUS=DONE
+############ GPU RUN END 2026-09-28T15:39:20+00:00 ############

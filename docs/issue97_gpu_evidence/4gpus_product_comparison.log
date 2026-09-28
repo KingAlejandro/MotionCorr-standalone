@@ -1,0 +1,44 @@
+
+=== synthetic 128x128 8f, 3x3 patches -- DEFAULT-OFF EXACTNESS CONTROL: syn-base-off vs syn-fixed-off   [expect EQUAL] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  EQUAL   synthetic_128x128_8frames.mrc: pixel payload IDENTICAL (65536 bytes, mode 2)
+  EQUAL   synthetic_128x128_8frames.star: STAR byte-identical (164 lines)
+  --> EQUAL (as expected)
+
+=== synthetic 128x128 8f, 3x3 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: syn-base-on vs syn-fixed-on   [expect DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  DIFFER  synthetic_128x128_8frames.mrc: pixel payload DIFFERS
+  DIFFER  synthetic_128x128_8frames.star: STAR DIFFERS in 99/164 compared lines. e.g. 0 0.041336 -> 0 0.041989 | 1 -0.01338 -> 1 -0.01355 | 2 8.077235e-04 -> 2 8.211397e-04 | 3 0.150233 -> 3 0.205701
+  --> DIFFERENT (as expected)
+
+=== synthetic 128x128 8f, 3x3 patches -- informational: two different modes, not a control: syn-fixed-off vs syn-fixed-on   [expect DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  DIFFER  synthetic_128x128_8frames.mrc: pixel payload DIFFERS
+  DIFFER  synthetic_128x128_8frames.star: STAR DIFFERS in 108/164 compared lines. e.g. 0 0.044620 -> 0 0.041989 | 1 -0.01450 -> 1 -0.01355 | 2 9.061781e-04 -> 2 8.211397e-04 | 3 0.189385 -> 3 0.205701
+  --> DIFFERENT (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- DEFAULT-OFF EXACTNESS CONTROL: mov-base-off vs mov-fixed-off   [expect EQUAL] ===
+  EQUAL   20170629_00026_frameImage.mrc: pixel payload IDENTICAL (56955920 bytes, mode 2)
+  EQUAL   20170629_00026_frameImage.star: STAR byte-identical (779 lines)
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> EQUAL (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: mov-base-on vs mov-fixed-on   [expect DIFFERENT] ===
+  DIFFER  20170629_00026_frameImage.mrc: pixel payload DIFFERS
+  DIFFER  20170629_00026_frameImage.star: STAR DIFFERS in 611/779 compared lines. e.g. 0 0.136721 -> 0 0.188569 | 1 -0.00900 -> 1 -0.01341 | 2 2.471854e-04 -> 2 3.566039e-04 | 3 -0.74148 -> 3 -1.06465
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> DIFFERENT (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- informational: two different modes, not a control: mov-fixed-off vs mov-fixed-on   [expect DIFFERENT] ===
+  DIFFER  20170629_00026_frameImage.mrc: pixel payload DIFFERS
+  DIFFER  20170629_00026_frameImage.star: STAR DIFFERS in 636/779 compared lines. e.g. 0 0.188061 -> 0 0.188569 | 1 -0.01327 -> 1 -0.01341 | 2 3.502662e-04 -> 2 3.566039e-04 | 3 -1.05697 -> 3 -1.06465
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> DIFFERENT (as expected)
+
+================ SUMMARY ================
+  syn: option-OFF base vs fixed        as expected
+  syn: option-ON  base vs fixed        as expected
+  mov: option-OFF base vs fixed        as expected
+  mov: option-ON  base vs fixed        as expected
+
+GATE: PASS

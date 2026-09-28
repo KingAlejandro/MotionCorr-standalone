@@ -178,8 +178,19 @@ injection stay with **#69**.
 That job's wrapper returned 1, which is the harness behaving correctly rather
 than a row failing: it was invoked with `--rows realscale_local`, so 24 of the
 25 declared rows were unrun, and an incomplete matrix is deliberately nonzero.
-The row itself passed -- 2/2 movies exact under repeat, batch and non-prefix
-resume, native CUDA witnessed, `declaration_drift` null.
+
+**Corrected — a detail withdrawn for want of a record.** This paragraph went on
+to say the row "passed -- 2/2 movies exact under repeat, batch and non-prefix
+resume, native CUDA witnessed, `declaration_drift` null". The only preserved
+artefact of that job is `raw/scarf-gn0005/capacity.json`, whose `stdout_tail`
+reads in full `[issue83] realscale_local: pass` and
+`{"declared": 25, "attempted": 1, "pass": 1, "fail": 0, "error": 0}`. The
+per-schedule figures, the witness and the drift field would have come from an
+`evidence3/matrix-realscale/summary.json` that is **not preserved under
+`raw/`**, so they are **withdrawn** — not because they are doubted, but because
+nothing here supports them. What the record does support is the single word
+`pass` and the 1-of-25 attempt count above. The `realscale_local` row's
+per-schedule result of record is job 3511154's, in the matrix table.
 
 ## Fourth harness defect -- a renderer field that was never emitted
 
@@ -250,28 +261,47 @@ that looked at nothing.
 
 Two things follow, and both are stated rather than smoothed over.
 
-**The runners changed, so the published GPU records are behind them.** Jobs
-3511139 and 3511154 ran `7ba584e`; `run_matrix.py` and
-`run_all24_schedules.py` changed at `4c2305b`. The missing evidence is missing,
-not merely unaggregated, so the report **withholds** the per-schedule native
-claim for 23 rows and marks the STAR metadata assertion UNRUN on GPU rather
-than carrying the old verdicts forward. Closing those needs one fresh
-dedicated allocation.
+**The runners changed, so the published GPU records are behind them — but not
+in the same way for both claims.** Jobs 3511139 and 3511154 ran `7ba584e`;
+`run_matrix.py` and `run_all24_schedules.py` changed at `4c2305b`. The STAR
+metadata assertion did not exist at `7ba584e`, so nothing in those records can
+supply it and the report marks it **UNRUN on GPU** rather than carrying the old
+verdict forward. Closing that needs one fresh dedicated allocation.
+
+The per-schedule native claim is a different case, and the previous revision of
+this document got it wrong. Each schedule's own `backend_evidence` in those
+records already carries a per-movie kernel stage marker written by the CUDA
+code path into that schedule's own output directory, so the claim is
+**measured, and the report now publishes it as PASS for all 23 payload rows**.
+What `7ba584e` did not keep is the startup banner of every non-final invocation
+— the weaker, redundant witness — and that gap is disclosed per cell as
+`banner K/N` rather than used to withhold the rows. The withholding was a
+defect in this repository's renderer, not a property of the records; see W8a in
+`withdrawals.md`.
 
 **Every new gate has a negative control, and every control has a meta-check.**
 A control that passes with its gate reverted is testing nothing, so each gate
 is monkeypatched back to its published form at runtime and the control must
-then fail — thirteen such checks, including three on the suite's own exit
-status, which itself used to be computed by quantifying over a set that was
-empty when every control skipped. The suite is 17/17 on cpu64 at `4c2305b`
-with 0 skipped, which is the first run where `ground_truth_mutation` actually
-executed rather than skipping for want of fixtures.
+then fail — **20 such checks**: 17 reverted gates plus three on the suite's own
+exit status, which itself used to be computed by quantifying over a set that
+was empty when every control skipped.
+
+> **Corrected.** For two rounds these meta-checks lived in an untracked
+> `.scratch/meta_rev1.py`, so "thirteen meta-checks pass" was the one claim in
+> these documents anchored to a file that was not in the repository and whose
+> output appeared in no job log — the shape of evidence this issue exists to
+> refuse. They are now `tools/validation_issue83/meta_controls.py`, committed,
+> re-runnable, and writing a `--json` record preserved alongside the control
+> suite's. The same applied to the report recipe, now
+> `tools/validation_issue83/regenerate_report.sh`. The count rose from 13 to 20
+> because this round's gates got meta-checks too.
 
 ## Runs of record
 
 These are the records `report.py` is actually invoked on
-(`.scratch/gen_report.sh` passes six JSON records drawn from these four runs —
-matrix, truth and fixture-verify all come from 3511154). They are **not** one run,
+(`tools/validation_issue83/regenerate_report.sh` passes six JSON records drawn
+from these four runs — matrix, truth and fixture-verify all come from
+3511154). They are **not** one run,
 and the report says so section by section:
 
 | Section of the report | Host | Commit | Record |
@@ -293,8 +323,13 @@ current contracts.
 > `d48d875` as the runs of record, and the paragraph under it said the matrix
 > and all-24 legs came from one harness revision so that "one published table
 > should come from one harness revision". Neither is true of the report as
-> published: 3510290 was superseded by the two `gn3000` jobs above, and the
-> matrix and all-24 sections come from two *different* jobs. Rather than
+> published: that superseded gn0005 run was replaced by the two `gn3000` jobs
+> above, and the matrix and all-24 sections come from two *different* jobs.
+> **A second correction on top of that one:** the superseded gn0005 records
+> preserved under `raw/scarf-gn0005/` are not 3510290's at `d48d875` either.
+> The preserved log is `job-3510297.log`, header commit `f51b45f`, and the
+> summaries fall inside its window. No record for 3510290 exists under `raw/`.
+> Rather than
 > re-assert a single-revision claim the evidence does not support, the report
 > now labels each section with its own source record and flags the ones outside
 > the provenance block's run window. The same correction applies to the
@@ -302,7 +337,9 @@ current contracts.
 
 Superseded runs, preserved and not carried into the report: 3510276
 (output-path bug), 3510277 (quota/SIGPIPE), 3510283 (`realscale_local`
-declaration drift, since fixed), 3510290 (pre-correction harness), 3511145
+declaration drift, since fixed), 3510297 (pre-correction harness, at
+`f51b45f` — the run whose verdicts are preserved in `raw/scarf-gn0005/`),
+3510290 (no record preserved), 3511145
 (cancelled; started from a dirty tree), the first cpu64 matrix (harness
 expectations 2 and 3), and `raw/cpu64/matrix-cpu-summary.json` (pre-contract
 harness, replaced by the head-commit CPU run).

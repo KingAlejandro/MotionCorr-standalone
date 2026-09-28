@@ -31,6 +31,7 @@ from typing import Any, Callable, Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import matrix as declared  # noqa: E402
 import products as prod  # noqa: E402
+import record_payload_env as rec  # noqa: E402
 import report as rep  # noqa: E402
 import run_matrix as rm  # noqa: E402
 import verify_fixtures as vf  # noqa: E402
@@ -343,33 +344,60 @@ def control_report_renders_witness(_tmp: Path, _fixtures: Optional[Path]) -> Dic
             "the rendered table does not carry resume's own witness cell")
 
     # batch ran 24 invocations but the old witness read only the last stdout,
-    # so 23 startup markers are simply not in the record. That gap must be
-    # reported, not filled in with the one marker that was recorded.
+    # so 23 startup *banners* are simply not in the record. That is a real gap
+    # in the weaker witness and must be disclosed -- but every one of the 24
+    # movies carries its own kernel stage marker, written into that movie's log
+    # by the CUDA path, so the schedule's products are witnessed. Conflating
+    # the two made the renderer withhold a measured claim, which is its own
+    # misstatement; the two are asserted separately here.
     batch = historical["schedules"]["batch"]
-    require(len(batch.get("runs", [])) > 1
+    require(len(batch.get("runs", [])) == 24
             and "startup_marker_per_invocation" not in batch["backend_evidence"],
             "the preserved record no longer shows batch's per-invocation gap")
-    require(rep.witness_coverage_gap(batch),
-            "a 24-invocation schedule witnessed from one stdout was treated as covered")
-    require("1 of 24 invocations examined" in table,
-            "the rendered table does not disclose batch's per-invocation gap")
+    require(rep.banner_coverage(batch) == (1, 24),
+            f"batch's banner coverage reads {rep.banner_coverage(batch)}, not 1 of 24")
+    require(not rep.witness_coverage_gap(batch),
+            "a schedule whose every movie carries a kernel stage marker was "
+            "withheld as unwitnessed because one field name was absent")
+    require("banner 1/24" in table,
+            "the rendered table does not disclose batch's per-invocation banner gap")
+
+    # resume is a genuine gap, and of a different kind: 16 of its 24 movies are
+    # marked and the record names no executed set, so eight movies skipped and
+    # eight run on the CPU are indistinguishable in it.
+    resume_ev = resume["backend_evidence"]
+    require("executed_movies" not in resume_ev
+            and sum(1 for m in resume_ev["per_movie"].values()
+                    if m.get("cuda_stage_marker")) == 16,
+            "the preserved record no longer shows resume's 16-of-24 ambiguity")
+    require(rep.witness_coverage_gap(resume),
+            "a schedule with eight unexplained unmarked movies was called covered")
 
     # Positive control: every schedule witnessed is accepted.
     good = json.loads(json.dumps(historical))
     good["schedules"]["resume"]["backend_evidence"]["native_cuda_proven"] = True
     require(not rep.all24_witness_holds(good),
-            "the batch per-invocation gap stopped blocking the aggregate")
-    for entry in good["schedules"].values():
-        entry["backend_evidence"]["startup_marker_per_invocation"] = \
-            [True] * max(1, len(entry.get("runs", [])))
+            "resume's unresolved 16-of-24 gap stopped blocking the aggregate")
+    # What the fixed runner records: which movies it actually executed. The
+    # eight preserved seeded products are not re-executed and carry no new
+    # marker, so naming the executed set is what resolves the ambiguity.
+    good["schedules"]["resume"]["backend_evidence"]["executed_movies"] = [
+        stem for stem, m in resume_ev["per_movie"].items()
+        if m.get("cuda_stage_marker")]
     require(rep.all24_witness_holds(good),
             "positive control failed: a fully witnessed GPU screen was rejected")
-    require(not rep.witness_coverage_gap(good["schedules"]["batch"]),
-            "a record carrying every invocation's marker was still called uncovered")
+    require(not rep.witness_coverage_gap(good["schedules"]["resume"]),
+            "a record naming its executed movies was still called uncovered")
+    # The banner gap alone must never block the aggregate -- nor vanish from it.
+    require(rep.banner_coverage(good["schedules"]["batch"]) == (1, 24),
+            "the banner gap disappeared once the aggregate was satisfied")
 
     # A CPU screen proves nothing and is not asked to -- unless it masquerades.
+    # It must still have run every required schedule: "nothing to prove" is a
+    # statement about the backend, not a licence to skip legs.
     cpu = {"provenance": {"gpu": None},
-           "schedules": {"repeat": {"backend_evidence": {}}}}
+           "schedules": {name: {"backend_evidence": {}}
+                         for name in rep.REQUIRED_SCHEDULES}}
     require(rep.all24_witness_holds(cpu),
             "a CPU screen was required to prove native CUDA execution")
     cpu["schedules"]["repeat"]["backend_evidence"] = {"unexpected_cuda_marker": True}
@@ -585,9 +613,46 @@ def control_report_attributes_each_section(_tmp: Path,
     require("CPU" in text and "Not the run named in the provenance block" in text,
             f"a CPU screen under a GPU header was not flagged: {text}")
 
-    # Nothing to attribute must not invent an attribution.
-    require(not rep.source_attribution({"schedules": {}}, matrix),
-            "a record with no provenance at all was given a source line")
+    # ...and the device must be what flags it. The case above is satisfied by
+    # the hostname alone, so it would pass with `gpu` deleted from the identity
+    # fields entirely. Here the *only* difference is `gpu: null` against
+    # `gpu: 0` -- same node, same binary -- which is exactly the shape the
+    # "ignore unknowns" rule swallowed: null there means CPU, not unrecorded.
+    same_host_cpu = json.loads(json.dumps(same))
+    same_host_cpu["provenance"]["gpu"] = None
+    differs = rep.diverging_fields(rep.record_source(same_host_cpu),
+                                   rep.record_source(matrix))
+    require(differs == ["gpu"],
+            f"a CPU record on the header's own host and binary diverged on "
+            f"nothing, so it rendered as part of the GPU run: {differs}")
+    require(rep.is_other_run(same_host_cpu, matrix),
+            "a CPU section was folded into the GPU header's aggregate sentence")
+    text = "\n".join(rep.render_all24(same_host_cpu, matrix))
+    require("Not the run named in the provenance block" in text
+            and "gpu" in text,
+            f"the CPU/GPU divergence was not named in the section: {text}")
+
+    # A record that genuinely never recorded a device is a different case and
+    # must not be turned into a false divergence by the rule above.
+    silent = json.loads(json.dumps(same))
+    silent["provenance"].pop("gpu")
+    require("gpu" not in rep.diverging_fields(rep.record_source(silent),
+                                              rep.record_source(matrix)),
+            "a record that recorded no device at all was reported as running "
+            "on a different device")
+
+    # Nothing to attribute is a third state: not the header's run, and not
+    # demonstrably another one. Silence left the section sitting under the
+    # header's provenance block, which is the inheritance this gate prevents.
+    lines = rep.source_attribution({"schedules": {}}, matrix)
+    require(lines, "a record with no provenance at all was given no source "
+                   "line, so it inherited the header's")
+    require("unattributable" in "\n".join(lines).lower(),
+            f"a record with no provenance was attributed rather than named "
+            f"unattributable: {lines}")
+    require("Not the run named in the provenance block" not in "\n".join(lines),
+            f"a record naming nothing was asserted to be a different run, "
+            f"which the record cannot show either: {lines}")
 
     # The capacity measurement names a device but no host and no binary, so
     # "device 0" there is not the header's device 0 and must not read as it.
@@ -622,6 +687,17 @@ def control_report_attributes_each_section(_tmp: Path,
                 rep.render_capacity(same_build, header)),
             "a capacity datapoint sampled from the header's own binary was "
             "announced as a different build")
+
+    # A sampler that collected nothing writes a null peak and exits with the
+    # wrapped command's status, so a clean exit with no measurement read as a
+    # success. "Peak device memory observed: None MiB" is not a number.
+    nothing = dict(capacity, peak_used_mib=None, samples=0)
+    text = "\n".join(rep.render_capacity(nothing, matrix))
+    require("_unrun_" in text and "None MiB" not in text,
+            f"a capacity record that sampled nothing rendered a peak: {text}")
+    require("1266" not in text, f"a peak appeared from nowhere: {text}")
+    require("1266 MiB" in "\n".join(rep.render_capacity(capacity, matrix)),
+            "positive control failed: a real peak was suppressed")
 
     # The aggregate sentence is the line most likely to be quoted on its own,
     # so the caveat has to survive being read without the sections above it.
@@ -726,10 +802,26 @@ def control_matrix_schedule_witness(_tmp: Path,
              "NOT established"),
             ("vacuous", {"vacuous": True,
                          "startup_marker_per_invocation": []}, "vacuous"),
-            ("last_invocation_only", {"native_cuda_proven": True}, "not covered"),
+            ("no_per_movie_record", {"native_cuda_proven": True}, "not covered"),
+            ("half_marked", {"native_cuda_proven": True,
+                             "per_movie": {"m1": marked,
+                                           "m2": {"cuda_stage_marker": False}}},
+             "**not covered** (1 of 2 movies marked)"),
             ("native", {"native_cuda_proven": True,
                         "startup_marker_per_invocation": [True, True],
-                        "executed_movies": ["m1", "m2"]}, "native (2 executed)")):
+                        "per_movie": {"m1": dict(marked, log_present=True),
+                                      "m2": dict(marked, log_present=True)},
+                        "executed_movies": ["m1", "m2"]}, "native (2 executed)"),
+            # The shape the published GPU matrix actually has: every product
+            # carries its own kernel stage marker, and only the last
+            # invocation's startup banner was kept. The stage evidence is
+            # measured and must be reported as such; the banner gap is
+            # disclosed in the same cell rather than withholding the claim.
+            ("stage_marked_banner_partial",
+             {"native_cuda_proven": True, "startup_marker_found": True,
+              "per_movie": {"m1": dict(marked, log_present=True),
+                            "m2": dict(marked, log_present=True)}},
+             "native (2/2 movies marked, banner 1/2)")):
         entry = {"schedules": {"repeat": dict(row, passed=True, runs=[{}, {}],
                                               backend_evidence=witness)}}
         cell = rep.schedule_cell(entry, "repeat", True)
@@ -742,8 +834,8 @@ def control_matrix_schedule_witness(_tmp: Path,
 
     # The row verdict was written by a harness that never read the witness, so
     # a `pass` there covers pixels and the base run's backend and nothing
-    # about the other three schedules. The published GPU records are exactly
-    # that shape, and the renderer must withhold the claim rather than let the
+    # about the other three schedules. A record carrying no per-movie evidence
+    # for those schedules must have the claim withheld rather than let the
     # verdict column carry it.
     published = {"provenance": {"gpu": 0},
                  "results": [{"row_id": "global_square", "status": "pass",
@@ -765,18 +857,38 @@ def control_matrix_schedule_witness(_tmp: Path,
             f"the table did not say the per-schedule native claim is "
             f"unsupported by this record: {text}")
 
+    per_movie = {f"m{i}": {"cuda_stage_marker": True, "log_present": True}
+                 for i in (1, 2, 3)}
     covered = json.loads(json.dumps(published))
     for name in ("repeat", "batch"):
         covered["results"][0]["schedules"][name]["backend_evidence"] = {
-            "native_cuda_proven": True,
+            "native_cuda_proven": True, "per_movie": per_movie,
             "startup_marker_per_invocation": [True, True, True]}
     covered["results"][0]["schedules"]["resume"] = dict(
         row, passed=True, runs=[{}],
-        backend_evidence={"native_cuda_proven": True,
+        backend_evidence={"native_cuda_proven": True, "per_movie": per_movie,
                           "startup_marker_per_invocation": [True]})
     require(rep.matrix_witness_gaps(covered) == [],
             "positive control failed: a fully witnessed GPU matrix was "
             "reported as having a coverage gap")
+
+    # Second positive control, on the shape the published records really have:
+    # stage markers on every product, no per-invocation banner field. This is
+    # the case the renderer used to withhold, and withholding a measured claim
+    # is a misstatement in the other direction.
+    stage_only = json.loads(json.dumps(covered))
+    for entry in stage_only["results"][0]["schedules"].values():
+        entry.get("backend_evidence", {}).pop("startup_marker_per_invocation", None)
+    require(rep.matrix_witness_gaps(stage_only) == [],
+            "WITHHELD A MEASURED CLAIM: a matrix whose every schedule marked "
+            "every one of its own movies was reported as a coverage gap "
+            "because one field name was absent")
+    # ...but a schedule that drops a single movie's marker is a gap again.
+    dropped = json.loads(json.dumps(stage_only))
+    dropped["results"][0]["schedules"]["batch"]["backend_evidence"][
+        "per_movie"]["m2"]["cuda_stage_marker"] = False
+    require(rep.matrix_witness_gaps(dropped) == ["global_square"],
+            "a schedule with an unmarked movie was accepted as covered")
     require(not rep.matrix_witness_gaps(dict(published,
                                              provenance={"gpu": None})),
             "a CPU matrix was asked to prove native execution")
@@ -842,10 +954,61 @@ def control_rejection_names_option(_tmp: Path,
             require(r.expect_reject.startswith("--") and len(r.expect_reject) > 2,
                     f"row {r.row_id} declares a rejection token "
                     f"{r.expect_reject!r} that is not an option name")
+
+    # Keeping the line is only worth anything if the report reads it. And a
+    # record written by the substring harness carries `option_named: true` with
+    # no line at all: rendering that identically to a record that earned it
+    # republishes the old test's verdict as the new test's. Such a record
+    # exists in this repository (`raw/cpu64/matrix-cpu-summary.json`).
+    earned = {"returncode": 1, "option_named": True,
+              "option_named_line": "--j must be positive."}
+    cell = rep.reject_cell(earned)
+    require("--j must be positive." in cell,
+            f"the matched diagnostic line was recorded and never rendered, so "
+            f"the assertion cannot be rechecked from the report: {cell}")
+
+    legacy = {"returncode": 1, "option_named": True}
+    cell = rep.reject_cell(legacy)
+    require("not covered" in cell,
+            f"a verdict from the bare-substring test rendered as though the "
+            f"delimited matcher had produced it: {cell}")
+
+    report = {"provenance": {"gpu": 0},
+              "results": [{"row_id": "threads_invalid", "status": "pass",
+                           "schedules": {"reject": dict(legacy)}}]}
+    require(rep.rejection_coverage_gaps(report) == ["threads_invalid"],
+            "a rejection row with no matched line was not named as uncovered")
+    require("Rejection by name is not established"
+            in "\n".join(rep.render_matrix(report)),
+            "the report did not disclose that a rejection verdict predates "
+            "the matcher it is presented as having passed")
+    covered = {"provenance": {"gpu": 0},
+               "results": [{"row_id": "threads_invalid", "status": "pass",
+                            "schedules": {"reject": dict(earned)}}]}
+    require(not rep.rejection_coverage_gaps(covered),
+            "positive control failed: a row that kept its matched line was "
+            "reported as uncovered")
+
+    # A rejection row runs no payload, so it must not be counted as a row whose
+    # per-schedule native witness is missing -- and a *payload* row whose
+    # record holds no schedules must be.
+    require(not rep.matrix_witness_gaps(covered),
+            "a rejection row was counted as missing a native witness for "
+            "schedules it never runs")
+    bare = {"provenance": {"gpu": 0},
+            "results": [{"row_id": "global_square", "status": "pass",
+                         "schedules": {"base": {"backend_evidence": {
+                             "native_cuda_proven": True,
+                             "startup_marker_per_invocation": [True]}}}}]}
+    require(rep.matrix_witness_gaps(bare) == ["global_square"],
+            "a payload row whose record contains none of the three required "
+            "schedules produced no gap, so its `pass` carried the native "
+            "claim for schedules with no record at all")
     return {"status": "pass",
             "reproduced": "'j' in (stdout+stderr) accepted any nonzero exit",
-            "now": "the option is matched delimited on a diagnostic line and "
-                   "the matched line is kept in the record"}
+            "now": "the option is matched delimited on a diagnostic line, the "
+                   "matched line is kept in the record and rendered, and a "
+                   "record without one is named as uncovered"}
 
 
 def control_aggregate_needs_every_leg(_tmp: Path,
@@ -872,6 +1035,43 @@ def control_aggregate_needs_every_leg(_tmp: Path,
     got = rep.missing_schedules(legacy)
     require(sorted(got) == ["batch", "resume"],
             f"a record with no missing-schedule field was read as complete: {got}")
+
+    # Quoting the record's own list *instead of* recomputing has the same
+    # shape one level up: a screen that says "nothing missing" while holding
+    # one schedule certified itself. The named list is a claim to add to, not
+    # the measurement.
+    lying = {"all24_equal": True, "provenance": {"gpu": 0},
+             "missing_required_schedules": [],
+             "schedules": {"base": dict(proven)}}
+    got = rep.missing_schedules(lying)
+    require(sorted(got) == ["batch", "repeat", "resume"],
+            f"a screen holding only `base` certified itself complete on the "
+            f"strength of its own summary field: {got}")
+    require(not rep.all24_witness_holds(lying),
+            "a one-schedule screen held its native witness for every schedule")
+    require("PARTIAL" in "\n".join(rep.render_all24(lying)),
+            "a self-certified one-schedule screen was not rendered as partial")
+
+    # And the union must not invent absences: a record naming a schedule the
+    # recomputation cannot see is still missing it.
+    both = dict(lying, missing_required_schedules=["repeat"],
+                schedules={"base": dict(proven), "repeat": dict(proven),
+                           "batch": dict(proven), "resume": dict(proven)})
+    require(rep.missing_schedules(both) == ["repeat"],
+            "a schedule the record itself reported missing was dropped "
+            "because the recomputation found an entry for it")
+
+    # The CPU branch of the witness skipped the missing-schedule gate, so a
+    # CPU screen holding only `base` announced native execution "for every
+    # schedule" -- every schedule being the one that ran.
+    cpu_partial = {"all24_equal": True, "provenance": {"gpu": None},
+                   "movies_in_star": all24.EXPECTED_MOVIES,
+                   "schedules": {"base": {"backend_evidence": {}}}, "errors": []}
+    require(not rep.all24_witness_holds(cpu_partial),
+            "a CPU screen that ran one of four schedules established native "
+            "execution for every schedule")
+    require("NOT established" in "\n".join(rep.render_all24(cpu_partial)),
+            "a one-schedule CPU screen rendered its witness as established")
     require(not rep.all24_witness_holds(legacy),
             "a screen missing two required schedules, each of the two it did "
             "run fully witnessed, still held its witness for the whole screen")
@@ -894,6 +1094,23 @@ def control_aggregate_needs_every_leg(_tmp: Path,
     require(rep.inputs_verified(allowed),
             "positive control failed: a record that did compare both digests "
             "was rejected")
+
+    # ...and the motion-truth leg. A record with no cases rendered a heading, a
+    # source line and the closing "historical failures remain failures"
+    # boilerplate: a section that reads as though gates ran and had nothing to
+    # report. Nothing evaluated is its own verdict and it is not a pass.
+    nogates = {"tool": "run_known_motion_gates.py", "gpu": 0,
+               "binary": "/work4/.../build-cuda/motioncorr", "results": []}
+    text = "\n".join(rep.render_numerical(nogates, None))
+    require("nothing was evaluated" in text,
+            f"a motion-truth record containing no gate results rendered as a "
+            f"section with no findings rather than as an empty one: {text}")
+    # A case whose record states no verdict at all must not print as one.
+    silent = {"tool": "run_known_motion_gates.py", "gpu": 0,
+              "results": [{"case": "km_global_hisnr", "role": "gate"}]}
+    text = "\n".join(rep.render_numerical(silent, None))
+    require("**None**" not in text and "verdict not stated" in text,
+            f"a gate with no recorded verdict was rendered as one: {text}")
     return {"status": "pass",
             "reproduced": "aggregate trusted matrix_complete/all24_equal and a "
                           "verified flag that quantified over nothing",
@@ -1301,6 +1518,75 @@ def control_provenance_allowance(_tmp: Path, _fixtures: Optional[Path]) -> Dict[
             "observed_on": "cpu64 93d427e, gain_unity vs gain_none, 3/3 movies"}
 
 
+def control_payload_recorder(tmp: Path, _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """The placement recorder must not report success having seen nothing.
+
+    It was written to stop placement being asserted of the unpinned launcher
+    instead of measured on the payload, and it carried two instances of the
+    defect it exists to close: a substring match that accepts any executable
+    under the deployment tree, and exit 0 when the payload was never seen --
+    so a job script recording ``$?`` per tool wrote "success" for a recorder
+    whose record says ``observed: false``.
+    """
+    exe = "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr"
+    require(rec.matches(exe, exe, "exact"),
+            "positive control failed: the payload did not match its own path")
+    for other in (exe + "-old", "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr2",
+                  "/home/ubuntu/mc-i83-cpu/tools/motioncorr_helper"):
+        require(not rec.matches(other, "motioncorr", "exact"),
+                f"a different executable under the same tree was recorded as "
+                f"the payload: {other}")
+        require(rec.matches(other, "motioncorr", "substring"),
+                f"positive control failed: the loose mode stopped being loose "
+                f"({other})")
+
+    out = tmp / "placement.json"
+    proc = subprocess.run(
+        [sys.executable, str(HERE / "record_payload_env.py"),
+         "--match", "/nonexistent/payload/that/never/runs",
+         "--json", str(out), "--interval", "0.01", "--timeout", "0.05"],
+        capture_output=True, text=True)
+    record = json.loads(out.read_text())
+    require(record["observed"] is False,
+            "positive control failed: a payload that never ran was observed")
+    require(proc.returncode != 0,
+            f"a recorder that never saw the payload exited "
+            f"{proc.returncode}, so a job's exit-code table recorded success "
+            f"for a run whose placement is unknown")
+    require(record.get("warning"),
+            "the record did not say the payload was never seen")
+    return {"status": "pass",
+            "reproduced": "exit 0 with observed:false, and a substring match "
+                          "that accepted any executable under the tree",
+            "now": "exit 2 when nothing was observed; --match is an exact path "
+                   "by default and the mode is recorded in the file"}
+
+
+def control_suite_selects_something(tmp: Path,
+                                    _fixtures: Optional[Path]) -> Dict[str, Any]:
+    """``--only`` must not be able to select nothing and exit 0.
+
+    The suite's own exit status is quantified over the controls selected, so
+    selecting none made ``pass == len(wanted)`` true of zero and the process
+    exited 0 having checked nothing -- the empty-set pass this whole file
+    exists to prevent, arriving through the argument parser.
+    """
+    for argument in (",", " , ", ",,"):
+        proc = subprocess.run(
+            [sys.executable, str(HERE / __file__.rsplit("/", 1)[-1]),
+             "--only", argument, "--json", str(tmp / "empty.json")],
+            capture_output=True, text=True, cwd=str(HERE))
+        require(proc.returncode != 0,
+                f"--only {argument!r} selected no controls and the suite "
+                f"exited {proc.returncode}")
+        require(not (tmp / "empty.json").exists(),
+                f"--only {argument!r} wrote a control record for a run that "
+                f"checked nothing")
+    return {"status": "pass",
+            "reproduced": "--only ',' ran zero controls and exited 0",
+            "now": "an empty selection is a usage error"}
+
+
 CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "ground_truth_mutation": control_ground_truth_mutation,
     "ps_wrong_dimension": control_ps_wrong_dimension,
@@ -1319,6 +1605,8 @@ CONTROLS: Dict[str, Callable[[Path, Optional[Path]], Dict[str, Any]]] = {
     "cross_row_consumed": control_cross_row_consumed,
     "provenance_allowance": control_provenance_allowance,
     "truth_provenance": control_truth_provenance,
+    "payload_recorder": control_payload_recorder,
+    "suite_selects_something": control_suite_selects_something,
 }
 
 
@@ -1337,6 +1625,12 @@ def main() -> int:
     unknown = [name for name in wanted if name not in CONTROLS]
     if unknown:
         parser.error(f"unknown controls: {', '.join(unknown)}")
+    # ``--only ","`` selects nothing and names nothing unknown, so the suite
+    # would have run zero controls and exited 0 -- the empty-set pass this
+    # whole file exists to prevent, reintroduced through the argument parser.
+    if not wanted:
+        parser.error("--only selected no controls; a suite that runs nothing "
+                     "must not exit 0")
 
     results: Dict[str, Any] = {}
     with tempfile.TemporaryDirectory(prefix="issue83-negctl-") as raw:
@@ -1380,7 +1674,7 @@ def main() -> int:
     # to exit 0 -- so a job script reading the exit status recorded "controls
     # passed" for a run that checked nothing. Quantified over the controls
     # actually selected, so ``--only`` still exits 0 when its subset passes.
-    ran = report["counts"]["pass"] == len(wanted)
+    ran = bool(wanted) and report["counts"]["pass"] == len(wanted)
     return 0 if (report["counts"]["failed"] == 0 and ran) else 1
 
 

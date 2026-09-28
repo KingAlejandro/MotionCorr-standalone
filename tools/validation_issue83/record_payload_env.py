@@ -129,11 +129,29 @@ def host_snapshot() -> Dict[str, Any]:
     }
 
 
+def matches(exe: str, match: str, mode: str) -> bool:
+    """Is this resolved executable path the payload?
+
+    ``exact`` compares the whole path. ``substring`` is the original test and
+    is kept only because a caller may not know the path in advance; it matches
+    any executable under a tree whose name contains the token, which is how a
+    helper's placement could have been merged into the payload's record.
+    """
+    return exe == match if mode == "exact" else match in exe
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--match", required=True,
-                        help="Substring the payload's executable path must contain")
+                        help="Exact resolved path of the payload executable")
+    # A substring test over /proc/<pid>/exe matches every executable under a
+    # deployment tree -- a helper, a comparator, a second build -- and merges
+    # their samples into one map presented as the payload's placement. The
+    # caller already knows the exact path it is about to run, so the default is
+    # equality; the loose test stays available and is recorded in the file.
+    parser.add_argument("--match-mode", choices=("exact", "substring"),
+                        default="exact")
     parser.add_argument("--json", type=Path, required=True)
     # Short enough to land inside a sub-second payload. At 0.5s the correction
     # runs for the small fixtures started and exited between polls, and the
@@ -149,6 +167,7 @@ def main() -> int:
     record: Dict[str, Any] = {
         "schema": "issue83-payload-placement/1",
         "match": opts.match,
+        "match_mode": opts.match_mode,
         "host_at_start": host_snapshot(),
         "payloads": {},
         "note": ("Sampled processes whose own /proc/<pid>/exe matches --match. "
@@ -182,7 +201,7 @@ def main() -> int:
                 exe = os.readlink(entry / "exe")
             except OSError:
                 continue
-            if opts.match not in exe:
+            if not matches(exe, opts.match, opts.match_mode):
                 continue
             got = sample(pid, btime)
             if not got:
@@ -231,7 +250,11 @@ def main() -> int:
                       "executables": executables,
                       "cpus_allowed": cpusets,
                       "mems_allowed": record["mems_allowed_observed"]}, indent=2))
-    return 0
+    # A recorder that never saw the payload has measured nothing. Exiting 0
+    # put "success" in the job's exit-code table for a run whose placement is
+    # unknown -- the same shape as the no-procfs case above, which already
+    # refuses. The record says so; the exit status must agree with it.
+    return 0 if record["observed"] else 2
 
 
 if __name__ == "__main__":

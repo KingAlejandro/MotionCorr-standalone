@@ -130,8 +130,13 @@ truth file must make the set unverified, asserted against real fixtures) and
 
 ### What the truth check found, and what is excused
 
-Run on cpu64 at 8298158, four cases present. Every `movie_sha256` matched.
-All four `ground_truth_sha256` did not.
+Run on cpu64, four cases present (`km_local_realscale`, 402 MB, is not
+generated on that host). Every `movie_sha256` matched. All four
+`ground_truth_sha256` did not. The figures below are read from
+`raw/cpu64-4c2305b/verify_fixtures.json`; an earlier revision attributed them
+to a run at `8298158`, for which **no record exists under `raw/`** — the
+numbers were right and the attribution was not, so it is corrected to the
+record that actually holds them.
 
 | Case | Differing leaves (of ~4132) | Classification |
 |---|---|---|
@@ -162,9 +167,23 @@ motion value:
 
 Re-run on `gn3000` at 7ba584e with all **five** cases present, including
 `km_local_realscale` (402 MB, not generated on cpu64): every `movie_sha256`
-matched, all five `ground_truth_sha256` differed, and every differing leaf was
-`/source_commit` alone — `float_rounding_leaves: []`, 8032 leaves compared for
-`realscale`. The heavy case adds no new excuse.
+matched and all five `ground_truth_sha256` differed. Four of the five differ on
+`/source_commit` alone. `km_local_hisnr` does **not** — in both
+`verify_fixtures.json` and `verify_fixtures_inplace.json` it reads
+
+| field | value |
+|---|---|
+| `differing_leaves` | `/noise/absolute_sigma`, `/noise/noise_free_image_std`, `/source_commit` |
+| `float_rounding_leaves` | `/noise/absolute_sigma`, `/noise/noise_free_image_std` |
+| `float_rounding_max_relative` | 1.840467826221118e-16 |
+
+so the GPU host needed the *same* float-rounding excuse as cpu64, on the same
+case and the same two leaves. `realscale` compared 8032 leaves and added no new
+excuse, which is the claim the paragraph was making; the sweeping
+`float_rounding_leaves: []` that carried it was false and is **withdrawn**.
+Nothing downstream changes — the allowance was already declared, bounded at 4
+ULP and controlled — but the sentence asserted a cleaner result than the record
+holds.
 
 Neither excuse is a numerical tolerance. `truth_provenance` asserts the
 boundary directly: one ULP away is equivalent, `TRUTH_FLOAT_ULPS + 1` away is
@@ -324,31 +343,80 @@ movie — the record holds evidence from a single invocation out of three. The
 published column answered "did native CUDA run at all in this row", and was
 read as "every schedule in this row ran natively".
 
-**Withdrawn, and not recoverable from the preserved record.** The markers for
-the unexamined invocations were never captured. Re-deriving them would be
-inventing evidence.
+**Withdrawn as published.** The rendered column did not answer the question it
+was read as answering.
 
 **Now gated by** `run_matrix.schedule_witness`, called with the stdout of
 *every* invocation in the schedule; by `entry["passed"]`, which now consumes
 it (`and native_schedule and not evidence.get("unexpected_cuda_marker")`); by
 `report.schedule_cell`, which renders each schedule's own witness state —
-`vacuous`, `not covered (1 of N invocations examined)`, `NOT established`, or
-`native (K executed)` — instead of pixel equality alone; and by
+`vacuous`, `NOT established`, `not covered (K of N movies marked)`, or
+`native (…)` — instead of pixel equality alone; and by
 `report.matrix_witness_gaps`, which finds rows whose per-schedule native claim
 the record cannot support and makes the renderer say so. Control:
 `matrix_schedule_witness`. Meta-checks `matrix_witness_unrendered`,
 `matrix_witness_last_invocation_only` and `matrix_witness_gap_unreported`
 revert each of the three gates in turn and confirm the control fails.
 
-**Replacement evidence: UNRUN.** The published GPU records (jobs 3511139 and
-3511154, tree `7ba584e`) predate `run_matrix.py`'s witness change, so they do
-not contain the per-invocation evidence and no re-reading can supply it. The
-report now prints, under the coverage table, *"Per-schedule native execution is
-not established for 23 of these rows"*, names them, and withholds the claim in
-the aggregate sentence. Only a fresh dedicated SCARF allocation running
-`4c2305b` can close this, and until it does the rows stay withheld. The
-**pixel-equality** results in those cells are unaffected and are not withdrawn;
-what is withdrawn is the backend claim laid over them.
+### W8a — the withholding was itself wrong, and is withdrawn
+
+**Published in the previous round:** *"the evidence for the repeat, batch and
+resume cells above is not in the record and cannot be recovered from it"*, with
+all 23 payload rows marked **UNRUN / WITHHELD** and a fresh allocation named as
+the only way to close them.
+
+**That is false, and review caught it.** There are two distinct witnesses and
+the renderer had conflated them:
+
+| Witness | Where it is written | Coverage in job 3511154 |
+|---|---|---|
+| Startup **banner**, `Using CUDA acceleration on GPU device N for global alignment.` | stdout, once per invocation | the **last** invocation only — `batch` 1 of 3, `resume` 1 of 2, `repeat` 1 of 1 (complete) |
+| Kernel **stage marker**, `[CUDA <stage>] completed; converged=` | each movie's own `.log`, in that schedule's own output directory, by the CUDA code path | **complete** — 23 rows × 4 schedules, every movie `log_present` and `cuda_stage_marker` |
+
+`run_matrix.py` at `7ba584e` called
+`backend_witness(run["stdout"], sched_dir, dataset["stems"], opts.gpu)` once per
+schedule, with `sched_dir = work / schedule`. The per-movie markers are
+therefore that schedule's own measurement, not a copy of `base`'s. For `batch`,
+each invocation runs `--do_at_most 1 --only_do_unfinished` and writes exactly
+one movie's log, so the three marked logs were written by three different
+invocations.
+
+`report.witness_coverage_gap` keyed coverage on the *field name*
+`startup_marker_per_invocation`, which only the fixed runner writes, and
+discarded `per_movie` entirely. So every row of a fully stage-witnessed record
+was called a gap — including `repeat`, which runs once and is missing nothing
+at all. The report then withheld 23 rows' worth of measured evidence.
+
+This document's own W2 scores the identical evidence shape — one invocation,
+every movie marked — as *"complete: 24/24 movies marked, single invocation
+examined"* for the historical all-24 `repeat`. Two passages, the same shape,
+opposite verdicts.
+
+**Withholding a measured result is a misstatement in the same way publishing an
+unmeasured one is.** Both replace what the record says with what the author
+concluded. The correction is not a relaxation: the gate now asks the question
+the claim rests on — *was every movie whose pixels are being compared produced
+by the CUDA path?* — and a single unmarked movie still fails it.
+
+**Now gated by** the rewritten `report.witness_coverage_gap`, which requires
+every movie in `per_movie` to carry `log_present` and `cuda_stage_marker`, or,
+where the record names `executed_movies`, every executed movie. A record
+showing 16 of 24 marked with no executed set stays a gap: eight movies skipped
+and eight run on the CPU are indistinguishable in it. `report.banner_coverage`
+reports the banner separately and the cell discloses it as `banner K/N`.
+Controls: `matrix_schedule_witness` (cases `no_per_movie_record`,
+`half_marked`, `stage_marked_banner_partial`, plus the two positive controls
+`stage_only` and `dropped`) and `report_renders_witness`. Meta-checks
+`coverage_keyed_on_field_name` and `banner_gap_silently_dropped` revert the
+correction and the tightening respectively, and confirm the control fails each
+time.
+
+**Replacement evidence: not needed for the stage witness — PASS on the record
+already held.** What remains genuinely absent is the startup banner for the
+non-final invocations of `batch` and `resume`. It is the weaker and redundant
+witness, it is disclosed in every affected cell, and it is not worth an
+allocation on its own. The **pixel-equality** results in those cells were never
+in question.
 
 ## W9 — Option rejection asserted by bare substring
 
@@ -439,15 +507,15 @@ now rest on. The re-reading was right; it was never the evidence.
 
 | Claim | Status |
 |---|---|
-| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **17/17** on cpu64 at `4c2305b` (head), 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate added this round additionally reverted at runtime to confirm its control then fails. The `gn3000` records carry **10/10**, which was the whole suite at `7ba584e`; the seven added since have not been asserted against a GPU record |
-| Input provenance including truth files (`verify_fixtures` `/5`) | **VERIFIED (content)** — 4 cases and 4+4 digests compared on cpu64 at `4c2305b`, all **5** on `gn3000` job 3511154; see W3 for what "content" excuses and W7 for why the compared count is now part of the verdict |
+| Gate contracts reject what they are supposed to reject | **PASS** — `negative_controls.py` **18/18** on cpu64, 0 skipped, against real generated fixtures; every control asserted against both a good and a bad input, and every gate additionally reverted at runtime by `meta_controls.py` to confirm its control then fails (**20 meta-checks**: 17 reverted gates + 3 suite exit-status cases). Of the two `gn3000` records, **3511154 carries 10/10** and **3511139 carries 9 pass / 1 failed** — the whole suite as it then stood at `7ba584e`; an earlier revision said "the `gn3000` records carry 10/10", which is true of one of the two. The controls added since have not been asserted against a GPU record |
+| Input provenance including truth files (`verify_fixtures`) | **VERIFIED (content)** — 4 cases and 4+4 digests compared on cpu64 at `4c2305b` under schema `/5`, all **5** on `gn3000` job 3511154 under schema **`/4`**; see W3 for what "content" excuses and W7 for why the compared count is now part of the verdict. An earlier revision headed this row `verify_fixtures /5` and so attributed a `/5` verdict to a `/4` record: job 3511154's file carries no `compared`, `vacuous` or `declared_cases` field and W7's gate was not in effect for it. The "all 5" figure still holds because `report.py`'s `fixture_coverage` **recomputes** the counts from the per-case statuses precisely so an older record is measured the same way — but the gate attribution was wrong |
 | A fixture record that compares nothing is refused | **PASS** — cpu64 `4c2305b`, empty directory, `"vacuous": true`, exit 1; see W7 |
 | `gain_unity == gain_none`, `gain_nonunity != gain_none` | **PASS** on cpu64 and on `gn3000` device 0, real pixels; see W4 |
 | Invalid options are rejected **by name** | **PASS** — cpu64 `4c2305b`, both rejection rows, `option_named_line` recorded verbatim; see W9. Previously asserted by bare substring |
 | Integrated all-24 screen, schedule equality and native CUDA | **PASS** — `gn3000` job 3511139, exclusive. `all24_equal`, no missing schedules, and a non-vacuous native witness on every schedule: `batch` 24/24 invocations, `resume` 16 executed movies each marked |
 | Integrated all-24 screen asserts requested STAR metadata | **UNRUN on GPU** — job 3511139 predates the assertion. Exercised on CPU at `4c2305b` against a **synthetic** 24-name runroot only, which is a harness-contract check and not the integrated candidate; see W10 |
 | Per-row matrix, pixel equality across all four schedules | **PASS** — `gn3000` job 3511154, 25 declared / 25 attempted / 25 pass, no unrun rows |
-| Per-row **native execution** on `repeat`, `batch`, `resume` | **UNRUN / WITHHELD for 23 rows** — job 3511154 predates the per-schedule witness and the evidence is not in the record. The report names the affected rows and withholds the claim. Needs one fresh dedicated SCARF allocation at `4c2305b`; see W8. Native execution on `base` is unaffected and stands |
+| Per-row **native execution** on `repeat`, `batch`, `resume` | **PASS for all 23 payload rows, with one witness partial** — job 3511154 computed a witness *per schedule* from that schedule's own output directory, and every one of the 23 rows × 4 schedules carries `log_present` and `cuda_stage_marker` on every movie. What the record lacks is the startup **banner** for the non-final invocations of `batch` (3) and `resume` (2); the cells say `banner 1/3` and `banner 1/2`. `repeat` runs once and lacks nothing. An earlier revision marked all of this **UNRUN / WITHHELD**; that was wrong and is corrected in W8 |
 | Requested 128x128 power spectrum | **PASS** — the `power_spectrum` row asserts the requested dimensions on the written product; the wrong-dimension negative is `ps_wrong_dimension`, asserted on both cpu64 and `gn3000` |
 | `ground_truth_sha256` detects a mutated truth file | **PASS** — cpu64 `4c2305b` and `gn3000` 3511154: `/geometry/pixel_size_angstrom` 0.885 → 0.985 in `km_global_hisnr_ground_truth.json`, detected, after the unmutated tree verified. Recorded **FAILED** in job 3511139, where that precondition was unmet |
 | `km_local_realscale` row | **PASS** on `gn3000` (matrix row and motion-truth gate). Still **UNRUN on CPU** — the 402 MB fixture is not generated on that host, which is why the CPU matrix exits nonzero |
@@ -459,10 +527,13 @@ section; the reason there are two is in `provenance.md`, "Two native
 allocations, and why".
 
 **Neither GPU job is at the head commit.** Both ran `7ba584e`; the head is
-`4c2305b`, six commits later, four of which change harness code and one of
-which changes two runners. That is the whole reason W8 and W10 are UNRUN
-rather than PASS, and nothing in this file re-reads an old record to fill the
-gap.
+`e1e26a7`, **seven** commits later, of which four touch the harness and one of
+those four changes two runners. (An earlier revision said "six commits later"
+with `4c2305b` as the head and called four of them GPU-running; the count, the
+head and that last clause were all wrong.) That is the reason W10 is UNRUN
+rather than PASS. It is **not** the reason W8's rows were withheld — that was a
+renderer defect in this repository, corrected in W8a above, and the rows are
+PASS on the record already held.
 
 Historical CPU/RELION Gate 2 failures remain failures. Nothing here converts one
 into a pass, and no withdrawal above upgrades any row.

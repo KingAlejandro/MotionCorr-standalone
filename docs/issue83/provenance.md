@@ -70,9 +70,23 @@ The committed, declared values are:
 
 `tools/validation_issue83/verify_fixtures.py` now reads the manifest from git
 and fails on mismatch. Its two controls: cpu64 `VERIFIED`, SCARF-as-generated
-`NOT VERIFIED` on all five cases. Every GPU result published here comes from a
-run whose fixtures passed that check; superseded runs on the drifted fixtures
-are listed as such in `progress.md` and their verdicts are not carried forward.
+`NOT VERIFIED` on all five cases.
+
+**Corrected.** This paragraph said "Every GPU result published here comes from
+a run whose fixtures passed that check". That is false of job **3511139**,
+whose `verify_fixtures.json` reads `"verified": false` with
+`verifier_numpy_version 1.22.4` and all ten movie and ground-truth artefacts
+mismatched — and 3511139 is the source of the published integrated all-24
+screen. The same file states this correctly further down, so the two sentences
+contradicted each other.
+
+What holds instead: **every published result that *reads* the fixtures** comes
+from a run whose fixtures passed. The all-24 screen does not read them — it
+reads the tutorial runroot — which is why it is still published from a job
+whose fixture check failed, and why that check failing is disclosed rather than
+treated as disqualifying. The capacity datapoint carries no fixture
+verification record of any kind. Superseded runs on the drifted fixtures are
+listed as such in `progress.md` and their verdicts are not carried forward.
 
 The generator's self-rewriting manifest is flagged independently in review on
 PR #82 (`test-data/generate_known_motion_fixture.py:489`). Fixing the generator
@@ -147,10 +161,19 @@ The all-24 leg reads the standard tutorial runroot (24 movies, `movies.star`).
 
 ## Binaries
 
-| Backend | SHA256 |
-|---|---|
-| CUDA `build-cuda/motioncorr` (Release, sm80, CUDA 12.8, TIMING=ON) | `3860bce6165974b9c95f982ce670915d5514c1129aaf80beb2c91462aaec4437` |
-| CPU `build-cpu/motioncorr` (Release) | `90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4` |
+Attributed, because more than one build exists and an unscoped table let the
+retired digest stand for the runs of record.
+
+| Backend | Runs | SHA256 |
+|---|---|---|
+| CUDA `build-cuda/motioncorr` (Release, sm80, CUDA 12.8, TIMING=ON) | `gn3000` **3511139, 3511154 — runs of record** | `0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e` |
+| CUDA, same configuration | `gn0005` 3510297, 3510288 — **superseded** | `3860bce6165974b9c95f982ce670915d5514c1129aaf80beb2c91462aaec4437` |
+| CPU `build-cpu/motioncorr` (Release) | cpu64 `4c2305b` | `90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4` |
+
+Both GPU digests are read from the jobs' own `binaries.sha256`; the gn3000
+value also appears in both jobs' provenance blocks and in the report header.
+This table previously carried the gn0005 digest alone, with no run column, so
+it read as the binary behind the published results.
 
 ## Harness and comparator
 
@@ -181,10 +204,20 @@ sbatch -p gpu --gres=gpu:1 --cpus-per-task=8 --exclusive -t 03:00:00
 | Node load at start | 0.52, 0.74, 0.39 |
 | Working tree | `/scratch/scarf1415/mc-i83-tree` |
 
-Jobs here: **3510290** (matrix + all-24 + report, at `d48d875`) and **3510288**
-(capacity datapoint + `realscale_local`, at `0a6dbff`).
+Jobs here: **3510297** (matrix + all-24 + report) and **3510288** (capacity
+datapoint + `realscale_local`, at `0a6dbff`).
 
-Only **3510288**'s capacity datapoint is still cited. 3510290 ran the harness
+**Corrected.** This paragraph named 3510290 at `d48d875` as the source of the
+records preserved in `raw/scarf-gn0005/`. It is not. The preserved log is
+`raw/scarf-gn0005/job-3510297.log`, whose own provenance header reads
+`2026-09-27T15:13:56+01:00`, `gn0005.scarf.rl.ac.uk`,
+`f51b45f6c574f0d323fdae2460a501a002a78871` — two commits after `d48d875` — and
+the preserved summaries fall inside its window (`matrix-summary.json`
+`started_utc 2026-09-27T14:14:41Z`, `all24-summary.json` `14:21:23Z`). Job
+3510290 has **no record under `raw/`** and is cited nowhere else in this
+report. The verdicts in `raw/scarf-gn0005/` are 3510297's at `f51b45f`.
+
+Only **3510288**'s capacity datapoint is still cited. 3510297 ran the harness
 before the corrections and is **superseded** by the two `gn3000` jobs below;
 its verdicts are preserved in `raw/scarf-gn0005/` and are not carried into the
 report. An earlier revision of this file called these the "jobs of record",
@@ -235,32 +268,42 @@ and by `git bundle verify` before `git reset --hard`:
 |---|---|---|---|
 | `i83-scarf-inc` | `fd1ea50..7ba584e` | `7d9a645332f28a802c54a7fc1648deb244a9e266085c55e591c3f831bbef70af` | 139249 |
 
-The GPU tree therefore sits at `7ba584e`, **six commits behind this branch's
-head**, and **four of the six change code that runs on a GPU**:
+The GPU tree therefore sits at `7ba584e`, **seven commits behind this branch's
+head `e1e26a7`** (`git rev-list --count 7ba584e..HEAD` = 7). **Four of the
+seven touch the harness, and one of those four changes code that runs on a
+GPU**:
 
 | Commit | Touches `tools/validation_issue83/` | Runs on a GPU |
 |---|---|---|
 | `89e7a93` say which digests a fixture record actually checked | yes | no — `verify_fixtures.py` and report rendering |
 | `2a8d13a` make each report section name the run it came from | yes | no — report rendering only |
 | `705d2c7` tell two runs apart when they share a host and a binary | yes | no — report rendering only |
-| `163042d`, `10a2615` (docs) | no | no |
+| `163042d`, `10a2615`, `e1e26a7` (docs) | no | no |
 | `4c2305b` stop the gates that quantified over nothing | yes | **yes** — `run_matrix.py` (per-schedule witness, delimited rejection matcher, comparator coverage order) and `run_all24_schedules.py` (STAR metadata assertion) |
 
 An earlier revision of this file said "two commits behind" and that "neither
 touches a runner, a schedule or a gate that executes on a GPU". Both statements
-have since been overtaken: the count was five at review time and is six now,
-and `4c2305b` changes two runners. The consequence is stated plainly rather
-than smoothed over — the published GPU records **predate** those runner
-changes, so they do not contain the per-schedule witness or the STAR metadata
-assertion, and the report withholds those claims instead of carrying the old
-verdicts forward. See W8 and W10 in `withdrawals.md`.
+have since been overtaken: the count was five at review time, then six, and is
+seven now, and `4c2305b` changes two runners. A subsequent revision said "six
+commits behind" with `4c2305b` as the head and claimed "four of the six change
+code that runs on a GPU" — the count, the head and the last clause were all
+wrong; four touch the harness and one of those runs on a GPU.
+
+The consequence was also overstated. The published GPU records **predate**
+`4c2305b`, so they do not contain the STAR metadata assertion, and the report
+marks that claim UNRUN on GPU instead of carrying an old verdict forward (W10).
+They do, however, already contain a per-movie kernel stage marker for every
+schedule, so the per-schedule native claim is measured and is published as
+PASS; only the startup banner of each non-final invocation is absent, and that
+is disclosed per cell rather than used to withhold. Withholding those rows was
+a renderer defect here, corrected and withdrawn as W8a in `withdrawals.md`.
 
 The control suite has grown with the gates. The `gn3000` GPU records carry
-**10** controls, which is every control that existed at `7ba584e`; the head
-commit has **17**, all asserted on cpu64 (below). The seven added since are
-pure-Python or CPU-executable and none of them requires a GPU to assert, but
-none of them has been run against a GPU record either, because no GPU record
-at `4c2305b` exists yet.
+**10** controls, which is every control that existed at `7ba584e`; `4c2305b`
+has **17**, all asserted on cpu64 (below), and this round's head has **19**.
+The nine added since are pure-Python or CPU-executable and none of them
+requires a GPU to assert, but none of them has been run against a GPU record
+either, because no GPU record later than `7ba584e` exists yet.
 
 Four later cpu64 bundles carried those commits to the CPU host:
 
@@ -377,22 +420,28 @@ python3 -u tools/validation_issue83/measure_capacity.py \
        --include-heavy --rows realscale_local \
        --json evidence3/matrix-realscale/summary.json
 
-# Compact report
-python3 tools/validation_issue83/report.py \
-  --matrix-json evidence4/matrix/summary.json \
-  --all24-json evidence4/all24/summary.json \
-  --truth-json evidence/truth/summary.json \
-  --cpu-diagnostic-json evidence4/matrix-cpu/summary.json \
-  --capacity-json evidence3/capacity.json \
-  --out docs/issue83/support-report.md
+# Compact report -- committed as tools/validation_issue83/regenerate_report.sh
+sh tools/validation_issue83/regenerate_report.sh
 ```
 
-An earlier revision of this file said here that "the matrix, all-24 and CPU
+**Corrected twice, so both corrections are stated.** The recipe above was
+previously written out by hand here and listed **five** `--*-json` options,
+omitting `--fixture-verify-json` — the one that produces the entire
+"Input provenance" section — and named `evidence4/…` working paths from a
+superseded run rather than the preserved records the published report is
+actually built from. A prose recipe that cannot be executed is not provenance,
+so it has been replaced by the committed script, which names all six preserved
+records.
+
+The second correction: an earlier revision said "the matrix, all-24 and CPU
 legs of record were all run at `d48d875`, so the published table comes from a
 single harness revision". **That is not true of the report as published.** The
 matrix comes from job 3511154, the all-24 screen from job 3511139, the capacity
 datapoint from 3510288 on a different node at `0a6dbff`, and the CPU
-diagnostic from cpu64 at `bab9f46` — four runs, three commits, three hosts.
+diagnostic from **cpu64 at `4c2305b`** (`raw/cpu64-4c2305b/matrix.json`, started
+2026-09-28T09:34:49Z) — four runs, three commits, three hosts. That last
+attribution was itself stale: it named `bab9f46`, which `progress.md` had
+already recorded as superseded and no longer the source.
 `progress.md`, "Runs of record", lists them; the report labels each section
 with its own source record and says when a section falls outside the run
 window the provenance block declares. The `evidence3` paths above are the

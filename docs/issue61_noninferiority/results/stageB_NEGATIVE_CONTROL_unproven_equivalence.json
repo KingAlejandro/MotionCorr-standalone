@@ -67,7 +67,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0001086503532002,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -108,7 +108,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0000456960857798,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -149,7 +149,7 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.0,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -190,7 +190,7 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 0.10216366458421586,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     }
@@ -696,7 +696,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.000471977655221,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -737,7 +737,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0002266499221248,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -778,7 +778,7 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.05079679978452561,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "INCONCLUSIVE"
     },
@@ -819,7 +819,7 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 1.6850033008058758,
-     "validity_override": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     }
@@ -930,11 +930,8 @@
   "S1_note": "lower95 <= rho by construction, so a control measuring at or below the margin cannot pass; only a margin-designed control measuring ABOVE the margin tests S1",
   "S1_state": "UNTESTED",
   "S2_at_the_exact_margin_is_unattainable_by_construction": true,
-  "S2_certifying_controls": [
-   "ctrl_noise_f011",
-   "ctrl_noise_f020"
-  ],
-  "S2_sensitivity_demonstrated": true,
+  "S2_certifying_controls": [],
+  "S2_sensitivity_demonstrated": false,
   "candidates": [
    {
     "at_or_beyond_harm_measured": false,
@@ -974,86 +971,19 @@
     "source": "this run",
     "upper95": 1.0056800639682846,
     "why": "milder than the harm margin, so it never exercises the decision"
-   },
-   {
-    "at_or_beyond_harm_measured": true,
-    "control": "ctrl_noise_f0062",
-    "designed_at_or_beyond_harm": false,
-    "designed_rho": null,
-    "earned_a_pass": false,
-    "lower95": 0.9362976728552266,
-    "rejected_at_margin": false,
-    "rho": 0.9491405795719606,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9619834862886947,
-    "why": "does not certify B1"
-   },
-   {
-    "at_or_beyond_harm_measured": true,
-    "control": "ctrl_noise_f0076",
-    "designed_at_or_beyond_harm": false,
-    "designed_rho": null,
-    "earned_a_pass": false,
-    "lower95": 0.9272020045839827,
-    "rejected_at_margin": false,
-    "rho": 0.9396329214483049,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9520638383126271,
-    "why": "does not certify B1"
-   },
-   {
-    "at_or_beyond_harm_measured": true,
-    "control": "ctrl_noise_f011",
-    "designed_at_or_beyond_harm": false,
-    "designed_rho": null,
-    "earned_a_pass": false,
-    "lower95": 0.9001727634258705,
-    "rejected_at_margin": true,
-    "rho": 0.9145985016381414,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.9290242398504123,
-    "why": "certifies B1: at or beyond the harm margin and rejected by the test"
-   },
-   {
-    "at_or_beyond_harm_measured": true,
-    "control": "ctrl_noise_f020",
-    "designed_at_or_beyond_harm": false,
-    "designed_rho": null,
-    "earned_a_pass": false,
-    "lower95": 0.8553528495109983,
-    "rejected_at_margin": true,
-    "rho": 0.8775343864826751,
-    "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
-    "upper95": 0.8997159234543519,
-    "why": "certifies B1: at or beyond the harm margin and rejected by the test"
    }
   ],
   "certificate": {
-   "equivalence_proof": {
-    "bit_identical": true,
-    "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
-    "cpu_baseline_half_map_payload_sha256_peer_host": {
-     "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-     "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
-     "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
-     "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
-    },
-    "cpu_baseline_half_map_payload_sha256_this_host": {
-     "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
-     "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
-    },
-    "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
-   },
-   "n_controls": 4,
-   "path": "/home/alex/mc-issue61/sensitivity_certificate.json",
-   "used": true
+   "path": "/tmp/forged_cert.json",
+   "reason": "certificate does not prove that the control run and this run are the same computation (equivalence_proof.bit_identical is False); refusing to gate on it",
+   "used": false
   },
   "coverage_demonstration_at_margin": null,
-  "demonstrated_detection_boundary_rho": 0.9145985016381414,
+  "demonstrated_detection_boundary_rho": null,
   "forced_inconclusive": true,
   "margin": 0.95,
   "margin_sensitivity_proven": false,
-  "reason": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+  "reason": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
   "rule": "PROTOCOL Amendment 1 requires a control at or beyond the harm margin to be positively rejected (S2).  Amendment 2 additionally requires a coverage demonstration at the margin before a real-arm PASS may stand, because S2 is unattainable at the margin and S1 is vacuous unless a margin-designed control measures above the margin.",
   "sensitivity_demonstrated": false
  }

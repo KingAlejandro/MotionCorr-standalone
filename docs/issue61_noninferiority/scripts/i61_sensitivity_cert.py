@@ -39,6 +39,8 @@ def main(root, stageb_json, out, peer_digests_json):
     margin = res["margins"]["B1_rho"]
     controls = []
     for a, entry in res["arms"].items():
+        if not a.startswith("ctrl_"):
+            continue      # a real arm may never be written into a certificate as a control
         jk = entry.get("held22_jackknife", {}).get("B1_rho_primary_corrected")
         if not jk or "error" in jk:
             pt = entry.get("held22", {}).get("B1_rho_primary_corrected", {}).get("value")
@@ -55,10 +57,19 @@ def main(root, stageb_json, out, peer_digests_json):
                     if (jk["point_estimate"] <= margin and jk["upper95_one_sided"] < margin)
                     else "does not certify B1")})
 
-    local = {h: mrc_payload_sha(f"{root}/rec/cpu/held22_half{h}_class001_unfil.mrc")
-             for h in (1, 2)}
-    peer = json.load(open(peer_digests_json)) if os.path.exists(peer_digests_json) else {}
-    agree = all(str(peer.get(str(h))) == local[h] for h in (1, 2)) if peer else None
+    try:
+        local = {h: mrc_payload_sha(f"{root}/rec/cpu/held22_half{h}_class001_unfil.mrc")
+                 for h in (1, 2)}
+    except FileNotFoundError as exc:
+        print(f"ABORT: local CPU baseline half-map missing, equivalence cannot be proved: {exc}",
+              file=sys.stderr)
+        return 2
+    if not os.path.exists(peer_digests_json):
+        print(f"ABORT: peer digest file {peer_digests_json} absent; a certificate without an "
+              "equivalence proof must not be produced", file=sys.stderr)
+        return 2
+    peer = json.load(open(peer_digests_json))
+    agree = all(str(peer.get(str(h))) == local[h] for h in (1, 2))
 
     cert = {
         "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)",
@@ -74,6 +85,10 @@ def main(root, stageb_json, out, peer_digests_json):
                      "real-arm verdicts"),
         },
     }
+    if not agree:
+        print("ABORT: CPU baseline half-maps differ between hosts; the two runs are NOT the same "
+              "computation and no certificate is written", file=sys.stderr)
+        return 3
     json.dump(cert, open(out, "w"), indent=1, sort_keys=True)
     print(f"margin {margin}")
     for c in cert["controls"]:

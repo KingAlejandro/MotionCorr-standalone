@@ -115,6 +115,15 @@ def main(root, arms):
             dup = [a for a in arms for b in arms if a < b and per[a] == per[b]]
             failures.append(f"stack {m}: identical pixels between arms {dup}")
 
+    # A verification that passes on an empty input set asserts nothing.  Review finding:
+    # zero movies, or zero particles, previously yielded MATCHED_DESIGN_VERIFIED.
+    if not movies:
+        failures.append("no particle stacks found: the stack check could not be performed")
+    if not any(report["n_particles"].values()):
+        failures.append("zero particles in every arm: the metadata checks are vacuous")
+    if len(arms) < 2:
+        failures.append("fewer than two arms: cross-arm identity cannot be tested")
+
     report["n_movies_checked"] = len(movies)
     report["n_stacks_checked"] = len(movies) * len(arms)
     report["failures"] = failures
@@ -124,13 +133,19 @@ def main(root, arms):
     os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(report, open(out, "w"), indent=1, sort_keys=True)
 
+    if not report["field_digests"]:
+        print(f"VERDICT                 : {report['verdict']}")
+        for f in failures:
+            print("  FAILURE:", f)
+        return 1
     print(f"arms checked            : {len(arms)}  {arms}")
     print(f"required fields         : {len(REQUIRED)} (all present in every arm: "
           f"{all(not v for v in report['missing_fields'].values())})")
     print(f"particles per arm       : {sorted(counts)}")
-    print(f"shared field digests    : {len(set(tuple(sorted(report['field_digests'][a].items())) for a in arms))}"
+    print(f"shared field digests    : {len(set(tuple(sorted(report['field_digests'][a].items())) for a in report['field_digests']))}"
           f" distinct field-digest sets across arms (want 1)")
-    print(f"shared block digest     : {sorted(blocks)[0][:16]} ({len(blocks)} distinct, want 1)")
+    print(f"shared block digest     : {(sorted(blocks)[0][:16] if blocks else '-')} "
+          f"({len(blocks)} distinct, want 1)")
     print(f"stacks checked          : {report['n_stacks_checked']} "
           f"({len(movies)} movies x {len(arms)} arms), all distinct per movie: "
           f"{not any('identical pixels' in f for f in failures)}")

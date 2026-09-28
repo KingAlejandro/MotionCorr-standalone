@@ -40,8 +40,8 @@ for seed in ${SEEDS:-61 62 63}; do
         --auto_bfac --autob_lowres 10 > $ROOT/logs/pp_refine_${arm}_${SET}_s${seed}.log 2>&1
       echo "seed=$seed arm=$arm rc=$rc wall=$w iters=$(grep -c 'Expectation iteration' $ROOT/logs/refine_${arm}_${SET}_s${seed}.log) res=$(grep -m1 _rlnFinalResolution $ROOT/pp/$arm/refine_${SET}_s${seed}.star|awk '{print $2}') bfac=$(grep -m1 _rlnBfactorUsedForSharpening $ROOT/pp/$arm/refine_${SET}_s${seed}.star|awk '{print $2}') seed_used=$(grep -m1 _rlnRandomSeed $P/$D/run_optimiser.star|awk '{print $2}')"
     else
-      echo "seed=$seed arm=$arm rc=$rc wall=$w NO HALF MAP"
+      fails=$((${fails:-0}+1)); echo "seed=$seed arm=$arm rc=$rc wall=$w NO HALF MAP"
     fi
   done
 done
-echo STAGE_C2_DONE
+if [ "${fails:-0}" -eq 0 ]; then echo STAGE_C2_DONE; else echo "STAGE_C2_FAILED fails=${fails}"; exit 1; fi

@@ -13,7 +13,9 @@ No source file, comparator or numerical threshold was changed by this work.
 ## 1. What was asked and what was measured
 
 Gate 2 asks whether an accelerated backend reproduces the CPU reference image. This work asks
-whether it preserves *recoverable cryo-EM signal*. The two questions are not interchangeable, and
+whether it preserves *recoverable cryo-EM signal*. **Outcome: inconclusive on every prespecified
+endpoint** — not because a difference was found, but because the primary endpoint has not been
+shown to resolve degradation at its own harm margin. See section 6. The two questions are not interchangeable, and
 this report demonstrates that empirically rather than asserting it (section 6).
 
 Three motion-correction arms were compared, all from one source commit on one input set with one
@@ -43,10 +45,11 @@ a `strftime` timestamp and whole-file hashing gives false mismatches.
 
 ### The instrument controls
 
-The protocol requires that each endpoint be shown to observe what it asserts. Seven controls were
-built by transforming the `cpu` arm's micrographs. Three shipped with PR #65; four
-margin-calibrated ones were added after review showed the original set could not demonstrate
-rejection at the harm margin (see section 3).
+The protocol requires that each endpoint be shown to observe what it asserts. Six distinct
+controls were built by transforming the `cpu` arm's micrographs. Three shipped with PR #65
+(`f005`, `f020`, `envelope_b20`); three new levels were added after review showed the original set
+could not demonstrate rejection at the harm margin (`f0062`, `f0076`, `f011`), and `f020` was
+re-run to obtain the jackknife interval it previously lacked (see section 3).
 
 | Control | Construction | What it tests |
 | --- | --- | --- |
@@ -87,7 +90,7 @@ seed 61. Held-out set, n = 22.
 Differences are negative, i.e. both accelerated arms fit marginally *better* than CPU, by about
 0.02 A of CTF max resolution and 2-3 A of defocus. Neither is claimed as an improvement: the
 design has no power for superiority and no superiority margin was set. The all-24 values agree
-with the held-out values to within 0.004 A and 0.2 A respectively.
+with the held-out values to within 0.0004 A and 0.21 A respectively.
 
 Absolute values are in the expected regime. Across the 24 micrographs, mean CtfMaxResolution is
 3.519 A (`cpu`), 3.500 A (`default`), 3.496 A (`allfftw`), against 3.336 A for the tutorial's own
@@ -166,95 +169,111 @@ The three real arms land on the identical Fourier shell in both sets.
 
 | Arm | Endpoint | Point | one-sided 95% bound | Margin | Verdict |
 | --- | --- | ---: | ---: | ---: | --- |
-| `default` | **B1 `rho` (primary)** | 0.999959 | **0.99969** | >= 0.95 | **PASS** |
-| `default` | B1 `rho`, unmasked FSC | 0.999931 | 0.99939 | >= 0.95 | PASS |
+| `default` | **B1 `rho` (primary)** | 0.999959 | **0.99969** | >= 0.95 | **INCONCLUSIVE** (was PASS) |
+| `default` | B1 `rho`, unmasked FSC | 0.999930 | 0.99939 | >= 0.95 | INCONCLUSIVE (was PASS) |
 | `default` | B2 `d143` delta, A | 0.0000 | +0.0508 | <= +0.05 | INCONCLUSIVE |
-| `default` | B3 auto-B delta, A^2 | -0.007 | -1.70 | >= -10 | PASS |
-| `allfftw` | **B1 `rho` (primary)** | 0.999981 | **0.99992** | >= 0.95 | **PASS** |
-| `allfftw` | B1 `rho`, unmasked FSC | 1.000000 | 0.99988 | >= 0.95 | PASS |
-| `allfftw` | B2 `d143` delta, A | 0.0000 | +0.0000 | <= +0.05 | PASS |
-| `allfftw` | B3 auto-B delta, A^2 | -0.014 | -0.13 | >= -10 | PASS |
+| `default` | B3 auto-B delta, A^2 | -0.007 | -1.70 | >= -10 | INCONCLUSIVE (was PASS) |
+| `allfftw` | **B1 `rho` (primary)** | 0.999981 | **0.99992** | >= 0.95 | **INCONCLUSIVE** (was PASS) |
+| `allfftw` | B1 `rho`, unmasked FSC | 1.000000 | 0.99988 | >= 0.95 | INCONCLUSIVE (was PASS) |
+| `allfftw` | B2 `d143` delta, A | 0.0000 | +0.0000 | <= +0.05 | INCONCLUSIVE (was PASS) |
+| `allfftw` | B3 auto-B delta, A^2 | -0.014 | -0.13 | >= -10 | INCONCLUSIVE (was PASS) |
 
-**The primary endpoint passes for both accelerated backends, with an enormous margin to spare.**
-The achieved jackknife precision is `SE(rho)` = 1.6e-4 for `default` and 3.8e-5 for `allfftw`, so
-the data support a far stronger statement than the 0.95 margin: at 95% confidence the native CUDA
-backend retains at least **99.97%** and the all-FFTW hybrid at least **99.99%** of the effective
-data that the CPU reference recovers, on this set. On a Rosenthal-Henderson basis with B = 100 A^2
-at 3.15 A, those bounds correspond to at most **1e-4 A** and **2.5e-5 A** of equivalent resolution
-loss. This stronger bound is a post-hoc statement of achieved precision; the prespecified margin
-was and remains 0.95.
+**Every Stage B verdict is withdrawn to INCONCLUSIVE**, by the protocol's own validity gate and
+not because any measurement changed. The point estimates and bounds above are exactly those
+published at `ef5935e`; what has gone is the licence to call them a pass. The reason is in the
+next two sections: the endpoint has not been shown to resolve degradation *at* its 0.95 harm
+margin, only at `rho = 0.9146`. Each row retains its pre-override value in
+`stageB_reconstruction.json` as `verdict_before_validity_gate`.
+
+Read descriptively rather than as a verdict, the measurements are: `SE(rho)` = 1.6e-4 for
+`default` and 3.8e-5 for `allfftw`; observed effective-data loss 4.1e-5 and 1.9e-5; one-sided 95%
+bounds 0.99969 and 0.99992, i.e. about 162x and 610x inside the 0.05 allowed loss. On a
+Rosenthal-Henderson basis with B = 100 A^2 at 3.15 A those bounds correspond to at most 1e-4 A and
+2.5e-5 A of equivalent resolution loss. None of that is a non-inferiority conclusion.
 
 ### Why `default` B2 is INCONCLUSIVE, and why it is not evidence of inferiority
 
 The `d143` delta is exactly **0.000 A** on the held-out set and on all 24. Of the 22 jackknife
 replicates, 21 give a delta of exactly 0.000 and one gives **-0.031 A** — a single Fourier shell,
 in `default`'s *favour*. The delete-one jackknife multiplies the replicate spread by `n - 1 = 21`,
-so one discrete shell flip inflates `SE` to 0.0295 and pushes the upper bound to 0.0508, three
-thousandths of an angstrom past the 0.05 margin. This is the quantisation limit the protocol
+so one discrete shell flip inflates `SE` to 0.0295 and pushes the upper bound to 0.05080,
+eight ten-thousandths of an angstrom past the 0.05 margin. This is the quantisation limit the protocol
 predicted in advance: one shell is 0.031 A at box 256 and 1.244531 A/pixel, while the 5% effective
 loss that B1 targets is 0.016 A, below a shell. The verdict is reported as the rule produces it,
-INCONCLUSIVE, and B2 is a coarse secondary for exactly this reason. `allfftw` has zero spread
-across all 22 replicates and passes.
+INCONCLUSIVE, and B2 is a coarse secondary for exactly this reason. `allfftw` has zero spread across all 22 replicates, so its B2 was
+not quantisation-limited; it is nevertheless INCONCLUSIVE now, under the validity gate.
 
-### Validity of the primary endpoint — corrected after review
+### Validity of the primary endpoint — corrected twice, and it does not hold at the margin
 
-**The version of this section published up to `ef5935e` was wrong, and the error mattered.** It
-claimed the precondition was met because `ctrl_noise_f005` sat 5.8 standard errors away from
-`rho = 1.0`. Being displaced from 1.0 is not the same as resolving the harm margin: that control
-measured `rho = 0.9666` with a lower bound of `0.9567`, which is a clean **PASS** against the 0.95
-margin. It therefore never exercised the decision B1 has to make, and certified nothing. Raised as
-[r4119264405](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264405)
-and Copilot 4111302884; the criterion is tightened in [Amendment 1](PROTOCOL.md#10-amendments) and
-is now enforced in code rather than asserted in prose.
+This section has been wrong twice, and both errors ran in the same direction: toward believing the
+endpoint was better validated than it was.
 
-Two properties have to be separated, and only one of them is attainable at the margin:
+**First error (published up to `ef5935e`).** The precondition was declared met because
+`ctrl_noise_f005` sat 5.8 standard errors from `rho = 1.0`. Displacement from 1.0 is not
+resolution of the harm margin: that control measured `rho = 0.9666` with a lower bound of
+`0.9567`, a clean **PASS** against the 0.95 margin. It never exercised the decision B1 makes.
+Raised as [r4119264405](https://github.com/KingAlejandro/MotionCorr-standalone/pull/65#discussion_r4119264405)
+and Copilot 4111302884 → [Amendment 1](PROTOCOL.md#10-amendments).
 
-- **S1 — a control at or beyond the harm margin must not earn a PASS.** This is the property that
-  actually protects a non-inferiority claim, and it is testable arbitrarily close to the margin.
-- **S2 — a control at or beyond the margin is positively rejected** (upper bound below the margin).
-  This can *never* hold for a control sitting exactly at the margin, whose upper bound necessarily
-  exceeds its own point estimate. S2 is only ever demonstrable strictly beyond the margin, and how
-  far beyond is a property of the design's precision, not of the margin.
+**Second error (mine, in the fix).** Amendment 1 added a companion criterion S1 — "no control at
+or beyond the margin may earn a PASS" — and this report claimed it demonstrated at `rho = 0.94914`.
+That claim is **vacuous**. A one-sided lower bound satisfies `lower95 <= rho` by construction, so a
+control *classified* harmful by its own measured `rho` can never pass: the test could not have
+failed. S1 has content only for a control **designed** at or beyond the margin whose *measured*
+`rho` lands **above** it. None did. S1 is **UNTESTED** → [Amendment 2](PROTOCOL.md#10-amendments).
 
-Four margin-calibrated controls were therefore built and run, with their target levels predicted
-and committed before the reconstructions were analysed
+#### What the four margin-calibrated controls actually establish
+
+Targets were predicted and committed before the reconstructions were analysed
 ([`results/sensitivity_certificate.json`](results/sensitivity_certificate.json)):
 
-| Control | `f` | predicted `rho` | measured `rho` | lower 95% | upper 95% | earns a PASS? | positively rejected? |
-| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| `ctrl_noise_f0062` | 0.062 | 0.950 | **0.94914** | 0.93630 | 0.96198 | **No** | no (impossible here) |
-| `ctrl_noise_f0076` | 0.076 | 0.950 | 0.93963 | 0.92720 | 0.95206 | No | no |
-| `ctrl_noise_f011` | 0.110 | 0.929 | 0.91460 | 0.90017 | 0.92902 | No | **Yes** |
-| `ctrl_noise_f020` | 0.200 | 0.8775 | **0.87753** | 0.85535 | 0.89972 | No | **Yes** |
+| Control | `f` | predicted `rho` | measured `rho` | lower 95% | upper 95% | positively rejected? |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `ctrl_noise_f0062` | 0.062 | 0.950 | **0.94914** | 0.93630 | 0.96198 | no |
+| `ctrl_noise_f0076` | 0.076 | 0.950 | 0.93963 | 0.92720 | 0.95206 | no |
+| `ctrl_noise_f011` | 0.110 | 0.929 | 0.91460 | 0.90017 | 0.92902 | **yes** |
+| `ctrl_noise_f020` | 0.200 | 0.8775 | **0.87753** | 0.85535 | 0.89972 | **yes** |
 
-- **S1 is demonstrated at the margin.** `ctrl_noise_f0062` lands at `rho = 0.94914`, which is the
-  0.95 harm margin to within 0.0009, and it does **not** earn a PASS (lower bound 0.9363). An arm
-  as degraded as the study has declared unacceptable cannot be cleared by this test.
-- **S2 is demonstrated at `rho = 0.9146`**, an 8.5% effective-data loss. Between the margin and
-  that boundary the test declines to pass a harmful arm but does not positively flag it, which is
-  the expected behaviour of any finite-precision non-inferiority design and is reported rather
-  than glossed.
-- The `f020` control reproduces the PR #65 value **exactly** (0.87753 on both hosts), and its
-  interval — previously a point estimate only — is now complete.
+**Established.** The endpoint tracks designed degradation quantitatively and monotonically across
+four levels, and it positively rejects a loss of 8.5% (`rho = 0.9146`). `ctrl_noise_f020`
+reproduces the PR #65 value to all sixteen stored digits.
 
-**The gate is not a no-op, and that is shown rather than claimed.** Re-running the identical
-analysis with the certificate withheld
-([`results/stageB_NEGATIVE_CONTROL_no_certificate.json`](results/stageB_NEGATIVE_CONTROL_no_certificate.json))
-drives **every** real-arm Stage B verdict from PASS to INCONCLUSIVE, including arms whose bounds
-sit 300 standard errors inside the margin. The pre-override verdict is retained in the JSON as
-`verdict_before_validity_gate`.
+**Not established.** That the endpoint resolves degradation at the **0.95 harm margin**. Positive
+rejection exactly at the margin cannot be relied on — a control whose measured `rho` equals the
+margin has an upper bound above its own point estimate — and the S1 substitute is untested. The
+quantity a PASS actually depends on is the *coverage* of the jackknife interval at the margin,
+which no experiment here measures.
 
-**Cross-host chain.** The controls ran on `cpu64` and the real arms on `4GPUs`, so the sensitivity
-statement only transfers if the two are the same computation. That is established, not assumed:
-the CPU-baseline half-maps are **bit-identical** across the two hosts
-(`8f118ad7...` / `8bfce61d...`, pixel payload, both halves), and `ctrl_noise_f020` reproduces its
-`rho` to all printed digits. The certificate carries both digests and the consuming gate records
-them.
+**Consequence: every Stage B verdict is withdrawn to INCONCLUSIVE** under Amendment 2. The
+missing experiment is specified there: at least 20 independent noise realisations of a control
+designed at the margin, counting how many wrongly yield `lower95 >= 0.95`, plus a second replicate
+set at the real arms' precision scale (`SE ~ 1.6e-4`, not `~8e-3`). Roughly 50 minutes of
+exclusive `cpu64` lock time. It was not run.
 
-**What a PASS now means.** A real arm passed a test that has been shown to refuse a PASS to a
-control at the harm margin and to positively reject one at an 8.5% loss. It does not mean the
-arms were shown to differ from CPU by less than 5%; it means no such difference was detectable by
-an endpoint with that demonstrated behaviour.
+#### The gate is enforced, and shown to bite three ways
+
+| Run | Certificate | Outcome |
+| --- | --- | --- |
+| [`stageB_reconstruction.json`](results/stageB_reconstruction.json) | authenticated, equivalence proved | no coverage demo → all real-arm verdicts INCONCLUSIVE |
+| [`..._no_certificate.json`](results/stageB_NEGATIVE_CONTROL_no_certificate.json) | absent | INCONCLUSIVE |
+| [`..._unproven_equivalence.json`](results/stageB_NEGATIVE_CONTROL_unproven_equivalence.json) | present but `bit_identical: false` | **refused**, then INCONCLUSIVE |
+
+Two further holes found in review and closed: candidates were drawn from all arms, so a degraded
+*real* arm could have certified sensitivity for the other real arm; and the certificate's
+equivalence proof was copied into the output without ever being checked. Both are fixed and the
+third row above is the test of the second.
+
+#### Cross-host chain
+
+The controls ran on `cpu64`, the real arms on `4GPUs`, so the sensitivity statement transfers only
+if the two are the same computation. Three independent artifacts say they are: the CPU-baseline
+half-maps are bit-identical (pixel payload, both halves); the `ctrl_noise_f020` rebuild reproduces
+all 24 PR #65 pixel digests
+([`control_manifest_followup.json`](results/control_manifest_followup.json),
+`f020_rebuild_matches_pr65_digests = 24/24`); and the extracted-particle metadata block digest is
+`2a01408f40c649ef` on **both** hosts
+([`matched_design_verification_controls_cpu64.json`](results/matched_design_verification_controls_cpu64.json)).
+The half-map digest pair alone is self-reported by the `cpu64` side; the other two are not.
 
 ### The specificity control is the point of this issue
 
@@ -297,7 +316,7 @@ six-arm claim the report made. Replaced by a name-resolved check:
 | whole `data_particles` block identical across arms, as a catch-all for fields not named | one digest, `2a01408f40c649ef` |
 | particles per arm | 4452 in all six |
 | extracted particle stacks **differ** between arms, every movie | 144 digests (24 movies x 6 arms), all distinct per movie |
-| `relion_postprocess` phase-randomisation threshold, held-out set | 16.768418 A in all six arms |
+| `relion_postprocess` phase-randomisation threshold, held-out set (from `fsc_curves.json`) | 16.768418 A in all six arms |
 | verdict | `MATCHED_DESIGN_VERIFIED` |
 
 The one exception is in the secondary all-24 set, where `ctrl_noise_f020` randomises from
@@ -348,8 +367,8 @@ Paired by seed:
 shells — which is *larger than any difference between arms*. Stage C therefore cannot resolve
 anything below about 0.06 A on this data, and every observed between-arm difference is at or below
 its own noise floor. `allfftw` reproduced CPU's resolution exactly at all three seeds. The
-`allfftw` C2 verdict is INCONCLUSIVE only because the seed-to-seed B spread (up to 10 A^2 within
-a single arm) swamps an n = 3 interval; its mean delta is +1.98 A^2, i.e. favourable. The
+`allfftw` C2 verdict is INCONCLUSIVE only because the seed-to-seed B spread (up to 8.66 A^2
+within a single arm) swamps an n = 3 interval; its mean delta is +1.98 A^2, i.e. favourable. The
 auto-sharpening B is not a usable discriminator at this replication level and should not be read
 as one.
 
@@ -371,7 +390,7 @@ proposed or changed by this work.**
 Two observations that #58 and #60 may find useful:
 
 1. The all-FFTW hybrid's two-movie result (`00021` 0.00062, `00046` 0.00039, both passing) does not
-   extend to the full set: across 24 movies its relative RMSE spans 0.00046-0.00302 and half the
+   extend to the full set: across 24 movies its relative RMSE spans 0.00039-0.00302 and half the
    movies exceed 0.001. This is #36's and #58's matter to adjudicate; it is recorded here only
    because those same 24 outputs are this study's input.
 2. Across the 22 held-out movies the per-movie relative image RMSE is **not** a consistent
@@ -409,29 +428,43 @@ equivalence test.
 
 | Stage | Endpoint | Margin (fixed in advance) | `default` | `allfftw` |
 | --- | --- | --- | --- | --- |
-| A | A1 CtfMaxResolution | +0.10 A | PASS | PASS |
+| A | A1 CtfMaxResolution | +0.10 A | PASS* | PASS* |
 | A | A2 mean defocus | +/- 45 A | PASS | PASS |
-| A | A3 CtfFigureOfMerit | -5% relative | PASS | PASS |
+| A | A3 CtfFigureOfMerit | -5% relative | PASS* | PASS* |
 | A | A4 band power ratio | descriptive | 1.00000-1.00006 | 0.99999-1.00000 |
-| **B** | **B1 effective-data fraction `rho`** | **>= 0.95** | **PASS** (>= 0.99969) | **PASS** (>= 0.99992) |
-| B | *validity gate on all Stage B rows* | control at the margin must not pass; one beyond it must be rejected | SATISFIED (S1 at `rho` 0.94914, S2 at 0.91460) | same |
-| B | B2 `d143` delta | <= +0.05 A | INCONCLUSIVE (shell quantisation; point 0.000 A) | PASS |
-| B | B3 auto-B delta | >= -10 A^2 | PASS | PASS |
-| C | C1 `d143` after independent auto-refinement | <= +0.05 A | PASS | PASS |
-| C | C2 auto-B after independent auto-refinement | >= -10 A^2 | PASS | INCONCLUSIVE (seed noise, favourable mean) |
+| **B** | **B1 effective-data fraction `rho`** | **>= 0.95** | **INCONCLUSIVE** | **INCONCLUSIVE** |
+| B | B2 `d143` delta | <= +0.05 A | INCONCLUSIVE | INCONCLUSIVE |
+| B | B3 auto-B delta | >= -10 A^2 | INCONCLUSIVE | INCONCLUSIVE |
+| C | C1 `d143` after independent auto-refinement | <= +0.05 A | PASS** | PASS** |
+| C | C2 auto-B after independent auto-refinement | >= -10 A^2 | PASS** | INCONCLUSIVE |
 
-**Conclusion.** On the 22 held-out movies of this collection, the native CUDA backend and the
-all-FFTW hybrid are **non-inferior to the fixed CPU implementation in recoverable signal**, on
-every prespecified endpoint that the data can resolve. The primary endpoint passes with the
-observed difference roughly 150x inside the margin. Both INCONCLUSIVE results are artefacts of
-endpoint granularity rather than evidence of inferiority: B2's comes from one Fourier-shell flip
-in one of 22 jackknife replicates, in the accelerated arm's *favour*, with a point estimate of
-exactly 0.000 A; C2's comes from an n = 3 interval against seed-driven B noise of up to 10 A^2
-within a single arm, with a favourable mean.
+\* Stage A's own controls show it cannot detect a 5% effective-data loss, and `CtfMaxResolution`
+does not respond even to a 20% one. These passes are near-uninformative and are reported as screen
+results, not evidence.
+\*\* Stage C has **no positive control at all**, so nothing demonstrates it could detect a
+degradation at its own margin. Its within-arm seed spread (up to 0.062 A in `d143`) exceeds every
+between-arm difference it measured.
 
-This conclusion is **not** a statement that the backends are numerically equivalent, it is **not**
-a claim of superiority anywhere a point estimate happens to favour them, and it is **not** a
-recommendation to change any gate. Section 7 states what it does not cover.
+**Conclusion.** On the 22 held-out movies of this collection, **no prespecified endpoint supports a
+non-inferiority conclusion for either accelerated backend.** The primary endpoint's verdicts are
+INCONCLUSIVE because the endpoint has not been shown to resolve degradation at its own harm
+margin; the Stage A passes come from a screen its controls show to be under-powered; the Stage C
+passes rest on three seeds with no positive control.
+
+What the study *does* establish is narrower and still useful:
+
+- both accelerated arms are **measurably indistinguishable from CPU** at the precision achieved —
+  observed effective-data loss 4.1e-5 (`default`) and 1.9e-5 (`allfftw`), bounds 162x and 610x
+  inside the allowed loss, under a matched design verified field by field;
+- the endpoint **does** detect an 8.5% loss and tracks four designed degradation levels
+  quantitatively, so it is not inert;
+- a deterministic envelope removing **81% of 3-2 A power** changes FSC and resolution not at all,
+  which is the direct demonstration that image difference does not imply signal loss.
+
+None of this is a claim of numerical equivalence, of superiority anywhere a point estimate
+favours the accelerated arms, or a recommendation to change any gate. The single experiment that
+would convert the primary endpoint's INCONCLUSIVE into a decision is specified in
+[Amendment 2](PROTOCOL.md#10-amendments).
 
 ### Outcomes declared unrun or unsupported
 
@@ -445,8 +478,12 @@ recommendation to change any gate. Section 7 states what it does not cover.
 | Movie-level jackknife for Stage C | **UNRUN** — 22 x 3 refinements is ~7 h of exclusive GPU lock for a secondary endpoint |
 | Multi-worker, multi-GPU, non-5x5-patch or dose-weighting-off configurations | **UNRUN** |
 | Any statement about numerical gate thresholds | **OUT OF SCOPE** by design |
-| Positive rejection of a degradation between 5.0% and 8.5% effective-data loss | **NOT DEMONSTRATED**, and not demonstrable at the margin itself; see section 7 item 10 |
+| Coverage of the B1 interval at the harm margin | **UNRUN** — the experiment that would license a Stage B PASS; specified in Amendment 2, ~50 min of `cpu64` lock |
+| Positive rejection of a degradation between 5.0% and 8.5% effective-data loss | **NOT DEMONSTRATED** |
+| A positive control for Stage A at its own margins | partially run: the controls show A1 and A3 are under-powered |
+| A positive control for Stage C | **UNRUN** — no sensitivity demonstration exists for the refinement endpoints |
 | An independent-collection scientific validation | **UNSUPPORTED** here; now owned by #73 |
+| Matched-design verification of the margin-calibrated control arms | run: 120 stacks, 5 arms on `cpu64`, same block digest as the `4GPUs` tree |
 
 ---
 
@@ -628,13 +665,33 @@ premise does not hold in this environment and which is documented rather than ch
 | 4111302990 | container image resolved but never emitted or hashed | **Confirmed.** Image path and SHA-256 now recorded |
 | 4111302949 | `i61_stageC2.sh` drops `--allow-run-as-root` | **Premise does not hold here.** That flag is required only when MPI runs as root; these runs executed as the unprivileged user `alex` and all nine refinements completed. The script records the command that was actually executed and is annotated rather than altered |
 
-One further defect was found by this work rather than by review, and is recorded because it is the
-same class as 4111302920: the first version of the new validity gate reported `S1 = True` while
-having no interval to evaluate it against, because the candidate records carried no lower bound.
-It now fails closed — a harmful control without an interval makes S1 *unproven*, not satisfied.
+### Second review round, on the fixes themselves
 
-**Effect on the results.** None of the reported endpoint values changed. The corrected analysis
-reproduces every previously published number exactly, including all 72 corrected-micrograph pixel
-digests and the Stage B bounds. What changed is what those numbers are licensed to support: the
-Stage B PASS verdicts now rest on a sensitivity demonstration that the original set of controls
-could not provide.
+The corrected source was then reviewed again, and the fix for the P1 finding was itself found
+defective. That review changed the study's conclusion.
+
+| Finding | Substance | Disposition |
+| --- | --- | --- |
+| S1 is vacuous | `lower95 <= rho` by construction, so a control classified harmful by its measured `rho` can never earn a PASS; the criterion could not fail | **Confirmed, and decisive.** [Amendment 2](PROTOCOL.md#10-amendments); S1 now reports UNTESTED and every Stage B verdict is withdrawn to INCONCLUSIVE |
+| a real arm could certify sensitivity | candidates were drawn from all arms, so a degraded `default` could have licensed `allfftw` | **Confirmed.** Candidates restricted to declared controls plus certificate entries |
+| the certificate was unauthenticated | `equivalence_proof` was copied into the output and never checked | **Confirmed.** Certificates lacking `bit_identical: true` are refused; tested with a forged one |
+| S1 did not fail closed | `unevaluable` was computed but never used in the gate | **Confirmed**, superseded by the S1 rewrite |
+| `i61_verify.py` passes on zero movies / zero particles | an empty input set yielded `MATCHED_DESIGN_VERIFIED` | **Confirmed.** Both are now failures, as is a single-arm run |
+| `i61_verify.py` crashes in its own summary | `KeyError`/`IndexError` exactly when an arm has a missing field — the case it exists to report | **Confirmed.** Reports the failure instead |
+| `i61_phase2.sh` markers still unconditional | the 4111302927/8 fix was not carried across | **Confirmed.** Rewritten with `set -u`, quoting, and conditional markers |
+| ghostscript tolerance too coarse | exempted a whole log, so a real RELION error alongside a `gs` race passed | **Confirmed.** Per-line filtering |
+| empty job list = success | `EXPECTED=0` gave `RECONSTRUCT_DONE maps=0/0` | **Confirmed.** Guarded in all drivers |
+| `i61_provenance.py` printed a complete-looking JSON on abort | a redirect looked valid unless `$?` was checked | **Confirmed.** Emits an explicit incomplete document |
+| unconditional `EXTRACT_DONE` / `ALL_DONE` / `STAGE_C2_DONE` | same defect class, other scripts | **Confirmed.** All now conditional |
+| six numeric slips in the report | B2 excess (0.0008 not 0.003 A), within-arm B spread (8.66 not 10 A^2), "150x" mislabelled, all-24 RMSE minimum (0.00039), a last-digit rounding, a 0.2 vs 0.21 A gap | **All confirmed and corrected** |
+| "seven controls" | `ctrl_noise_f020` was counted twice; six distinct controls exist | **Confirmed.** Corrected |
+| phase-randomisation row cited the wrong artifact | the values live in `fsc_curves.json` | **Confirmed.** Citation fixed |
+| control arms were not matched-design verified | the three new arms gated every verdict but were unverified | **Confirmed, and run**: 120 stacks, 5 arms, same block digest as the `4GPUs` tree |
+| Amendment 1 misstated the S2 impossibility | it is the sample point estimate, not the true `rho`, that the upper bound exceeds | **Confirmed.** Corrected in Amendment 2 |
+| PROTOCOL B1 says "unmasked-corrected FSC" | ambiguous; the code uses the mask-corrected column and carries unmasked as the alternate | **Documented**, both reported, both give the same verdict |
+
+**Effect on the results.** No measurement changed. Every endpoint value, bound, and all 72
+corrected-micrograph pixel digests reproduce exactly. What changed is the conclusion: the Stage B
+PASS verdicts published at `ef5935e` are **withdrawn to INCONCLUSIVE**, because the sensitivity
+demonstration they rested on does not exist. That is the honest state of the evidence, and the
+experiment that would resolve it is specified rather than left implicit.

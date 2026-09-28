@@ -59,6 +59,7 @@ for arm in ARMS:
             continue
         geom.add((d["nx"], d["ny"], d["nz"], d["mode"], round(d["angpix"], 6)))
 out["geometry_unique"] = sorted(str(g) for g in geom)
+out["geometry_consistent"] = (len(geom) == 1)
 
 # Completeness must be established BEFORE any identity claim.  Review finding 4111302920:
 # the original used .get() on both sides, so two missing files compared equal (None == None)
@@ -86,5 +87,12 @@ out["payload_identity_vs_cpu"] = ident
 if missing:
     print(f"ABORT: {len(missing)} corrected micrograph(s) absent; provenance is incomplete "
           f"and no identity claim may be derived from it: {missing[:5]}", file=sys.stderr)
-json.dump(out, sys.stdout, indent=1, sort_keys=True)
-sys.exit(0 if out["coverage_complete"] else 1)
+# On abort, do NOT write a complete-looking document to stdout: a redirected `> prov.json`
+# would otherwise look valid to anyone who did not check the exit status.
+if out["coverage_complete"]:
+    json.dump(out, sys.stdout, indent=1, sort_keys=True)
+    sys.exit(0)
+json.dump({"coverage_complete": False, "missing_inputs": out["missing_inputs"],
+           "note": "INCOMPLETE - no identity claim may be derived from this run"},
+          sys.stdout, indent=1, sort_keys=True)
+sys.exit(1)

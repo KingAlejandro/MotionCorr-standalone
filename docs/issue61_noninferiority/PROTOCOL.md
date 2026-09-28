@@ -325,3 +325,44 @@ every real-arm Stage B verdict from PASS to INCONCLUSIVE
 baseline half-maps are bit-identical between the two hosts (pixel payload, both halves), and
 `ctrl_noise_f020` reproduces its PR #65 `rho` to all printed digits, so the two runs are the same
 computation and the sensitivity statement transfers without inference.
+
+### Amendment 2 (2026-09-28) — a PASS at the margin additionally requires a coverage demonstration
+
+**Status: tightening. No margin, threshold, endpoint or analysis set is relaxed or changed.**
+
+**Defect.** Amendment 1 introduced a companion criterion, S1 — "no control at or beyond the harm
+margin may earn a PASS" — and reported it as demonstrated at `rho = 0.94914`. Independent review
+of the implementation showed that claim is **vacuous**. A one-sided lower bound satisfies
+`lower95 <= rho` by construction, so a control *classified* as harmful by its own measured `rho`
+can never earn a PASS: the test could not have failed. S1 carries information only for a control
+that was **designed** at or beyond the margin and whose *measured* `rho` nevertheless landed
+**above** it. No control did, so S1 is **UNTESTED**, not satisfied.
+
+Amendment 1 also stated the S2-impossibility argument incorrectly: it is the sample **point
+estimate**, not the true `rho`, that the sample upper bound necessarily exceeds. A control whose
+true `rho` equals the margin can land low enough to be rejected, at the nominal error rate. The
+argument's conclusion stands — S2 at the margin cannot be *relied on* — but for the right reason.
+
+**Consequence.** With S1 untested, the only empirical support for the endpoint's discriminating
+power is S2, which is demonstrated at `rho = 0.9146` (an 8.5% effective-data loss) and **not at
+the 0.95 margin**. Sensitivity *at the prespecified harm margin* is therefore unproven.
+
+**Amended criterion.** A real-arm Stage B verdict may stand as PASS only if, in addition to
+Amendment 1's S2 requirement, the run carries a **coverage demonstration at the margin**: an
+empirical estimate of the probability that an arm whose true `rho` equals 0.95 is wrongly declared
+non-inferior, shown to be no greater than the nominal 5%. Absent that, every real-arm Stage B
+verdict is reported **INCONCLUSIVE**. This is enforced in `scripts/i61_analyse_B.py`.
+
+**The missing experiment, specified.** Construct `N >= 20` *independent noise realisations* of a
+control designed at the margin (`f = 0.062`, seed bases distinct from 65000), run the full
+delete-one-movie jackknife for each, and count how many yield `lower95 >= 0.95`. The false-pass
+rate must be consistent with <= 5%. Estimated cost on `cpu64` at 12-way: about 920
+`relion_reconstruct` jobs and 460 `relion_postprocess` jobs, roughly 50 minutes of exclusive lock
+time, plus about 4 GB of transient storage. A second replicate set at the real arms' precision
+scale (`SE ~ 1.6e-4` rather than `~8e-3`) would be needed before the coverage result could be
+claimed to transfer to arms that differ from CPU only marginally. Neither was run here.
+
+**Effect on the reported results.** No point estimate, bound, margin or artifact changes. Stage B
+B1/B2/B3 verdicts for `default` and `allfftw` move from PASS to **INCONCLUSIVE**. Stage A and
+Stage C are unaffected by this amendment, but neither carries a positive control that
+demonstrates sensitivity at its own margin either, and that is now stated explicitly in the report.

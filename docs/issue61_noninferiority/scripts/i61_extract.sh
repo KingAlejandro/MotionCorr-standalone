@@ -18,6 +18,7 @@ for arm in $ARMS; do
     --scale 256 --norm --bg_radius 71 --white_dust -1 --black_dust -1 --invert_contrast \
     > $ROOT/logs/extract_$arm.log 2> $ROOT/logs/extract_$arm.time
   rc=$?
+  [ "$rc" -eq 0 ] || fails=$((${fails:-0}+1))
   echo "$arm rc=$rc $(grep -m1 'Elapsed (wall clock)' $ROOT/logs/extract_$arm.time|awk '{print $NF}') parts=$(grep -c 'mrcs' Extract61/particles.star 2>/dev/null)"
 done
-echo EXTRACT_DONE
+if [ "${fails:-0}" -eq 0 ]; then echo EXTRACT_DONE; else echo "EXTRACT_FAILED fails=${fails}"; exit 1; fi

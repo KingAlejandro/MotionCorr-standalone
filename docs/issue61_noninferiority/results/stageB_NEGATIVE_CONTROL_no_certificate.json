@@ -67,7 +67,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0001086503532002,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -108,7 +108,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0000456960857798,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -149,7 +149,7 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.0,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -190,7 +190,7 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 0.10216366458421586,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     }
@@ -696,7 +696,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.000471977655221,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -737,7 +737,7 @@
      ],
      "rule": "lower one-sided 95% bound of rho >= 0.95",
      "upper95_one_sided": 1.0002266499221248,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     },
@@ -778,7 +778,7 @@
      ],
      "rule": "upper one-sided 95% bound of (arm-cpu) <= 0.05 A",
      "upper95_one_sided": 0.05079679978452561,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "INCONCLUSIVE"
     },
@@ -819,7 +819,7 @@
      ],
      "rule": "lower one-sided 95% bound of (arm-cpu) >= -10.0 A^2",
      "upper95_one_sided": 1.6850033008058758,
-     "validity_override": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
+     "validity_override": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
      "verdict": "INCONCLUSIVE",
      "verdict_before_validity_gate": "PASS"
     }
@@ -926,53 +926,31 @@
   }
  },
  "validity": {
-  "S1_controls_evaluated": 0,
-  "S1_controls_that_wrongly_passed": [],
-  "S1_controls_without_an_interval": [
-   "ctrl_noise_f020"
-  ],
-  "S1_demonstrated_no_false_pass_down_to_rho": null,
-  "S1_no_harmful_control_passes": false,
+  "S1_informative_controls": [],
+  "S1_note": "lower95 <= rho by construction, so a control measuring at or below the margin cannot pass; only a margin-designed control measuring ABOVE the margin tests S1",
+  "S1_state": "UNTESTED",
   "S2_at_the_exact_margin_is_unattainable_by_construction": true,
   "S2_certifying_controls": [],
   "S2_sensitivity_demonstrated": false,
   "candidates": [
    {
-    "at_or_beyond_harm": false,
-    "control": "default",
-    "earned_a_pass": true,
-    "lower95": 0.9996909082640653,
-    "rejected_at_margin": false,
-    "rho": 0.999958779093095,
-    "source": "this run",
-    "upper95": 1.0002266499221248,
-    "why": "degradation is milder than the harm margin, so it never exercises the decision"
-   },
-   {
-    "at_or_beyond_harm": false,
-    "control": "allfftw",
-    "earned_a_pass": true,
-    "lower95": 0.9999164091202425,
-    "rejected_at_margin": false,
-    "rho": 0.9999810526030111,
-    "source": "this run",
-    "upper95": 1.0000456960857798,
-    "why": "degradation is milder than the harm margin, so it never exercises the decision"
-   },
-   {
-    "at_or_beyond_harm": false,
+    "at_or_beyond_harm_measured": false,
     "control": "ctrl_noise_f005",
+    "designed_at_or_beyond_harm": false,
+    "designed_rho": 0.952,
     "earned_a_pass": true,
     "lower95": 0.956721541428093,
     "rejected_at_margin": false,
     "rho": 0.966596874276714,
     "source": "this run",
     "upper95": 0.9764722071253351,
-    "why": "degradation is milder than the harm margin, so it never exercises the decision"
+    "why": "milder than the harm margin, so it never exercises the decision"
    },
    {
-    "at_or_beyond_harm": true,
+    "at_or_beyond_harm_measured": true,
     "control": "ctrl_noise_f020",
+    "designed_at_or_beyond_harm": false,
+    "designed_rho": null,
     "earned_a_pass": null,
     "lower95": null,
     "rejected_at_margin": false,
@@ -982,23 +960,30 @@
     "why": "no jackknife interval, so the endpoint cannot be shown to reject it"
    },
    {
-    "at_or_beyond_harm": false,
+    "at_or_beyond_harm_measured": false,
     "control": "ctrl_envelope_b20",
+    "designed_at_or_beyond_harm": false,
+    "designed_rho": 1.0,
     "earned_a_pass": true,
     "lower95": 1.0020797999007394,
     "rejected_at_margin": false,
     "rho": 1.003879931934512,
     "source": "this run",
     "upper95": 1.0056800639682846,
-    "why": "degradation is milder than the harm margin, so it never exercises the decision"
+    "why": "milder than the harm margin, so it never exercises the decision"
    }
   ],
-  "certificate_path": null,
+  "certificate": {
+   "reason": "no certificate supplied",
+   "used": false
+  },
+  "coverage_demonstration_at_margin": null,
   "demonstrated_detection_boundary_rho": null,
   "forced_inconclusive": true,
   "margin": 0.95,
-  "reason": "validity precondition FAILED (S1 untestable): no control at or beyond the 0.95 harm margin has a confidence interval, so it is unknown whether a harmful arm could earn a PASS",
-  "rule": "a Stage B verdict for a real arm may stand only if (S1) no control at or beyond the 0.95 harm margin earns a PASS, AND (S2) at least one such control is positively rejected",
+  "margin_sensitivity_proven": false,
+  "reason": "validity precondition FAILED (S2): no declared control at or beyond the 0.95 harm margin was rejected by the test",
+  "rule": "PROTOCOL Amendment 1 requires a control at or beyond the harm margin to be positively rejected (S2).  Amendment 2 additionally requires a coverage demonstration at the margin before a real-arm PASS may stand, because S2 is unattainable at the margin and S1 is vacuous unless a margin-designed control measures above the margin.",
   "sensitivity_demonstrated": false
  }
 }

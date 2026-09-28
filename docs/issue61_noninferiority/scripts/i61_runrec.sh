@@ -14,7 +14,8 @@ ROOT=${ROOT:-/home/alex/mc-issue61}
   rc=$?
   n=$(ls "$ROOT"/rec/*/*.mrc 2>/dev/null | wc -l)
   errs=$(grep -l ERROR "$ROOT"/logs/rec_*.log 2>/dev/null | wc -l)
-  if [ "$rc" -eq 0 ] && [ "$n" -ge "$EXPECTED" ] && [ "$errs" -eq 0 ]; then
+  # an empty job list is not a completed batch
+  if [ "${EXPECTED:-0}" -gt 0 ] && [ "$rc" -eq 0 ] && [ "$n" -ge "$EXPECTED" ] && [ "$errs" -eq 0 ]; then
     echo "RECONSTRUCT_DONE $(date -u +%FT%TZ) maps=$n/$EXPECTED"
   else
     echo "RECONSTRUCT_FAILED $(date -u +%FT%TZ) xargs_rc=$rc maps=$n/$EXPECTED logs_with_ERROR=$errs"

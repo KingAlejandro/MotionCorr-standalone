@@ -68,6 +68,7 @@ PYEOF
   nj=$(wc -l < $ROOT/jobs_$arm.txt)
   t0=$(date +%s)
   [ "$nj" -gt 0 ] && nice -n 5 xargs -P $NPAR -I{} -d '\n' bash -c '{}' < $ROOT/jobs_$arm.txt
+  [ $? -eq 0 ] || fails=$((${fails:-0}+1))
   echo "reconstruct $arm: $nj jobs in $(( $(date +%s) - t0 ))s  maps=$(ls $ROOT/rec/$arm/*.mrc|wc -l)"
 
   : > $ROOT/jobs_pp_$arm.txt
@@ -84,4 +85,4 @@ PYEOF
 done
 echo "CROSS-HOST cpu baseline digests (compare with 4GPUs):"
 sha256sum $ROOT/rec/cpu/held22_half1_class001_unfil.mrc $ROOT/rec/cpu/held22_half2_class001_unfil.mrc
-echo "ALL_DONE $(date -u +%FT%TZ)"
+if [ "${fails:-0}" -eq 0 ]; then echo "ALL_DONE $(date -u +%FT%TZ)"; else echo "RUN_FAILED fails=${fails}"; exit 1; fi

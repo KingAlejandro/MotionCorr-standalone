@@ -767,11 +767,9 @@
   }
  },
  "validity": {
-  "S1_controls_evaluated": 4,
-  "S1_controls_that_wrongly_passed": [],
-  "S1_controls_without_an_interval": [],
-  "S1_demonstrated_no_false_pass_down_to_rho": 0.9491405795719606,
-  "S1_no_harmful_control_passes": true,
+  "S1_informative_controls": [],
+  "S1_note": "lower95 <= rho by construction, so a control measuring at or below the margin cannot pass; only a margin-designed control measuring ABOVE the margin tests S1",
+  "S1_state": "UNTESTED",
   "S2_at_the_exact_margin_is_unattainable_by_construction": true,
   "S2_certifying_controls": [
    "ctrl_noise_f011",
@@ -780,8 +778,10 @@
   "S2_sensitivity_demonstrated": true,
   "candidates": [
    {
-    "at_or_beyond_harm": true,
+    "at_or_beyond_harm_measured": true,
     "control": "ctrl_noise_f0062",
+    "designed_at_or_beyond_harm": true,
+    "designed_rho": 0.95,
     "earned_a_pass": false,
     "lower95": 0.9362976728552266,
     "rejected_at_margin": false,
@@ -791,8 +791,10 @@
     "why": "at or beyond harm but the interval does not exclude the margin"
    },
    {
-    "at_or_beyond_harm": true,
+    "at_or_beyond_harm_measured": true,
     "control": "ctrl_noise_f0076",
+    "designed_at_or_beyond_harm": true,
+    "designed_rho": 0.95,
     "earned_a_pass": false,
     "lower95": 0.9272020045839827,
     "rejected_at_margin": false,
@@ -802,8 +804,10 @@
     "why": "at or beyond harm but the interval does not exclude the margin"
    },
    {
-    "at_or_beyond_harm": true,
+    "at_or_beyond_harm_measured": true,
     "control": "ctrl_noise_f011",
+    "designed_at_or_beyond_harm": true,
+    "designed_rho": 0.929,
     "earned_a_pass": false,
     "lower95": 0.9001727634258705,
     "rejected_at_margin": true,
@@ -813,8 +817,10 @@
     "why": "certifies B1"
    },
    {
-    "at_or_beyond_harm": true,
+    "at_or_beyond_harm_measured": true,
     "control": "ctrl_noise_f020",
+    "designed_at_or_beyond_harm": true,
+    "designed_rho": 0.833,
     "earned_a_pass": false,
     "lower95": 0.8553528495109983,
     "rejected_at_margin": true,
@@ -824,11 +830,17 @@
     "why": "certifies B1"
    }
   ],
-  "certificate_path": null,
+  "certificate": {
+   "reason": "no certificate supplied",
+   "used": false
+  },
+  "coverage_demonstration_at_margin": null,
   "demonstrated_detection_boundary_rho": 0.9145985016381414,
-  "forced_inconclusive": false,
+  "forced_inconclusive": true,
   "margin": 0.95,
-  "rule": "a Stage B verdict for a real arm may stand only if (S1) no control at or beyond the 0.95 harm margin earns a PASS, AND (S2) at least one such control is positively rejected",
-  "sensitivity_demonstrated": true
+  "margin_sensitivity_proven": false,
+  "reason": "sensitivity AT the 0.95 harm margin is UNPROVEN: the test is demonstrated to reject only at rho <= 0.91460, S1 is UNTESTED, and no coverage demonstration at the margin exists.  Real-arm Stage B verdicts are withdrawn to INCONCLUSIVE under PROTOCOL Amendment 2.",
+  "rule": "PROTOCOL Amendment 1 requires a control at or beyond the harm margin to be positively rejected (S2).  Amendment 2 additionally requires a coverage demonstration at the margin before a real-arm PASS may stand, because S2 is unattainable at the margin and S1 is vacuous unless a margin-designed control measures above the margin.",
+  "sensitivity_demonstrated": false
  }
 }

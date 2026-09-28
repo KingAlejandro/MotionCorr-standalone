@@ -13,8 +13,9 @@ GPU work prepared but not run: [`gpu_plan.md`](gpu_plan.md).
 | Patch-retry shift-state contract control | ran, passed |
 | Same-backend CPU output, base vs candidate, with negative control | ran, identical — but see §3: this is a build-hygiene control, not a behavioural one |
 | CPU-visible translation-unit identity, with negative control | ran, only `__LINE__` metadata differs |
-| CUDA error classifier unit test | ran under the CUDA build |
-| CUDA compile of the changed `.cu` and the new fault matrix | ran, clean, zero warnings in changed files |
+| CUDA error classifier unit test (device-free) | ran, 21 cases, 0 failures |
+| CUDA compile of the changed sources and all three test binaries | ran, clean, zero warnings in changed files |
+| Relocation-level check that `--wrap` actually redirects production call sites | ran, 0 bypasses |
 | Bounded CUDA fault matrix | **NEEDS_GPU, not run** |
 | Forced-nonconvergence end-to-end witness | **NEEDS_GPU, not run** |
 | Healthy same-backend 24-movie CUDA control | **NEEDS_GPU, not run** |
@@ -167,11 +168,56 @@ __wrap_cufftSetWorkArea  __wrap_cufftPlanMany  __wrap_cufftExecR2C  __wrap_cufft
 show the linker redirected `motioncorr_core`'s calls to them** — a defined `__wrap_`
 symbol looks the same whether or not the interposition took effect. An earlier version
 of this document asserted the stronger claim on this evidence, which it does not
-support. The relocation-level check is in `evidence/cuda-interposition.log`. Even with
-that, the harness has **not been run**; that needs an assigned GPU slot.
+support.
+
+The relocation-level check does support it
+([`evidence/cuda-interposition.log`](evidence/cuda-interposition.log),
+[`harness/reloc_check.sh`](harness/reloc_check.sh)). Disassembling the linked binary and
+attributing every call to its enclosing function:
+
+```
+cudaAlignPatchDevice  (the F1 site):
+   8 x __wrap_cudaEventCreate    8 x __wrap_cudaMalloc     4 x __wrap_cudaMemcpy
+   2 x __wrap_cudaEventDestroy   2 x __wrap_cudaFree       1 x __wrap_cufftPlanMany
+   2 x __wrap_cufftDestroy       1 x __wrap_cufftExecC2R
+cudaAlignPatch  (the F2 wrapper):
+   1 x __wrap_cudaMalloc         1 x __wrap_cudaFree       2 x __wrap_cudaMemcpy
+CudaMovieSession::preparePatchInVram  (the F3 site):
+   3 x __wrap_cudaMalloc         4 x __wrap_cudaFree       2 x __wrap_cudaMemcpy
+   1 x __wrap_cufftPlanMany      1 x __wrap_cufftDestroy   1 x __wrap_cufftExecR2C
+
+Production (motioncorr_core) call sites still reaching a bare interposed
+symbol -- must be 0, otherwise the harness silently observes nothing: 0
+```
+
+The eight `cudaEventCreate` and the `cufftPlanMany` in the first block are exactly the
+resources F1 leaks, and they are now inside the detector rather than invisible to it.
+The only bare calls left are the `__real_*` forwards inside the wrappers themselves and
+the test's own post-trial reclaim, both by construction.
+
+Even so, the matrix has **not been run**; that needs an assigned GPU slot.
 
 Source hashes on the GPU host match the `cpu64` hashes exactly, so both validations ran
 against the same tree.
+
+### CUDA error classifier
+
+[`evidence/cuda-interposition.log`](evidence/cuda-interposition.log), first block.
+`tests/cuda_error_class.cpp` ran on the GPU host and **creates no CUDA context** — the
+predicate makes no CUDA call, which is why it lives in a header rather than in an
+anonymous namespace in the runner.
+
+```
+21 cases (13 poisoning, 8 recoverable), 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones.
+     This covers the predicate only; no real poisoned context is
+     synthesised anywhere in this suite.
+```
+
+The recoverable half is the half that matters: classifying `cudaErrorMemoryAllocation`
+as poisoning would turn every ordinary OOM into a whole-movie abort and remove a
+working fallback. The table is also required to contain both outcomes, so a predicate
+degraded to always-true or always-false fails rather than passing silently.
 
 ## 6. Findings fixed
 
@@ -186,7 +232,30 @@ Against `4c952b3f`; full detail in the ADR.
 | F5 | The local-patch retry accumulated a second independent correction, publishing roughly twice the true local shift | `motioncorr_runner.cpp` local-patch block |
 | F6 | A poisoned context was retried as though it were an ordinary allocation miss, by a path that dispatches CUDA again | `motioncorr_runner.cpp` local-patch block |
 
-## 7. Limitations, stated rather than worked around
+## 7. Independent review
+
+Two independent read-only reviews were run — one code, one specification/scope/licence.
+Both returned findings and both are reflected above and in the commit history. Eleven
+findings were acted on, including three that were defects in this branch's own work:
+
+- the retry-state control read `use_gpu`/`gpu_id`, which `MotioncorrRunner` does not
+  initialise, and would have dispatched a "device-free" control onto a GPU in a
+  `-DCUDA=ON` build;
+- the poisoned-context `REPORT_ERROR` leaked `d_patch_fcomplex_buffer` — and
+  investigating that showed `alignPatchDevice`'s own throw was already leaking it, so
+  the review turned one self-inflicted bug into an additional pre-existing finding;
+- the fault matrix claimed a classifier unit test that did not exist, would have
+  blanked the stage column for every *throwing* fault (exactly the F1 trials), would
+  have reported one guaranteed false failure from `release()`'s deliberately non-fatal
+  synchronise, and tracked only `cudaMalloc` while F1's leak is mostly events and a
+  cuFFT plan.
+
+Three documentation overclaims were also corrected: the `nm`-based interposition claim
+(§5), the same-backend CPU row's status (§3), and an ADR sticky-error list that did not
+match the implementation. The licence verdict was clean: no new dependency, no vendored
+or third-party code, nothing licence-incompatible.
+
+## 8. Limitations, stated rather than worked around
 
 - The fault matrix, the end-to-end retry witness and the 24-movie CUDA control have not
   run. Nothing here should be read as evidence about them.

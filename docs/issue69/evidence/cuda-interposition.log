@@ -1,0 +1,53 @@
+=== device-free classifier unit test (creates no CUDA context) ===
+21 cases (13 poisoning, 8 recoverable), 0 failures
+PASS classifier separates poisoned-context codes from recoverable ones.
+     This covers the predicate only; no real poisoned context is
+     synthesised anywhere in this suite.
+exit=0
+
+=== relocation-level interposition check ===
+cudaAlignPatchDevice  (the F1 site):
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  8 x __wrap_cudaEventCreate
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cudaEventDestroy
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  2 x __wrap_cudaFree
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  8 x __wrap_cudaMalloc
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  4 x __wrap_cudaMemcpy
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cufftDestroy
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cufftExecC2R
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cufftPlanMany
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cudaEventDestroy
+  cudaAlignPatchDevice(float2*, int, int, int, double, std::  1 x __wrap_cufftDestroy
+
+cudaAlignPatch  (the F2 wrapper):
+  cudaAlignPatch(std::vector<MultidimArray<tComplex<float> >  1 x __wrap_cudaFree
+  cudaAlignPatch(std::vector<MultidimArray<tComplex<float> >  1 x __wrap_cudaMalloc
+  cudaAlignPatch(std::vector<MultidimArray<tComplex<float> >  2 x __wrap_cudaMemcpy
+
+CudaMovieSession::preparePatchInVram  (the F3 site):
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  4 x __wrap_cudaFree
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  3 x __wrap_cudaMalloc
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  2 x __wrap_cudaMemcpy
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  1 x __wrap_cufftDestroy
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  1 x __wrap_cufftExecR2C
+  CudaMovieSession::preparePatchInVram(int, int, int, int, i  1 x __wrap_cufftPlanMany
+
+Production (motioncorr_core) call sites still reaching a bare interposed
+symbol -- must be 0, otherwise the harness silently observes nothing: 0
+
+Bare calls from the test's own code (expected, by construction):
+  (anonymous namespace)::runTrial((anonymous nam 1 x cudaEventDestroy@plt       (post-trial reclaim)
+  (anonymous namespace)::runTrial((anonymous nam 1 x cudaFree@plt               (post-trial reclaim)
+  (anonymous namespace)::runTrial((anonymous nam 1 x cufftDestroy@plt           (post-trial reclaim)
+  __wrap_cudaEventCreate                         1 x cudaEventCreate@plt        (__real_ forward)
+  __wrap_cudaEventDestroy                        1 x cudaEventDestroy@plt       (__real_ forward)
+  __wrap_cudaFree                                1 x cudaFree@plt               (__real_ forward)
+  __wrap_cudaMalloc                              1 x cudaMalloc@plt             (__real_ forward)
+  __wrap_cufftCreate                             1 x cufftCreate@plt            (__real_ forward)
+  __wrap_cufftDestroy                            1 x cufftDestroy@plt           (__real_ forward)
+  __wrap_cufftPlanMany                           1 x cufftPlanMany@plt          (__real_ forward)
+  main                                           1 x cudaEventDestroy@plt       (post-trial reclaim)
+  main                                           1 x cudaFree@plt               (post-trial reclaim)
+  main                                           1 x cufftDestroy@plt           (post-trial reclaim)
+
+c1405a4562d9ededab4be3c85d31b967eda3a8aeab52b7c9a10512f9cd632e5f  /home/alex/MotionCorr-i69/build/cuda_fault_matrix
+dfdc4b1bcb27b1742bab6c9b3cddbe7ba05a40d78678e3408c5a2be6f38afc0e  /home/alex/MotionCorr-i69/build/cuda_error_class

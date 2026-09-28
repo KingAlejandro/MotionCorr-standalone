@@ -1,0 +1,53 @@
+START 2026-09-28T00:29:54+00:00
+configure=0
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+build=0
+ctest=0
+11/14 Test #14: RunnerModelParser ................   Passed    0.14 sec
+12/14 Test #12: TiffRead .........................   Passed    0.55 sec
+13/14 Test #11: GainCache ........................   Passed    1.31 sec
+14/14 Test  #7: Runner_resume ....................   Passed    2.15 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   2.48 sec
+same_backend=0
+negative control reported 2 differing files (expected exactly 2)
+
+PASS same-backend CPU output identical, and the comparison is able to fail
+patch_retry=0
+0cac291822263f4c968190b92fee26df0bcf9a2ee7760b3ca03cc2f42c1b9efb  /home/ubuntu/mc-i69/build-cand/motioncorr
+DONE 2026-09-28T00:30:22+00:00
+Test project /home/ubuntu/mc-i69/build-cand
+      Start  1: PatchRetryState
+      Start  2: SyntheticRegression
+      Start  3: HotPixelRngDeterminism
+      Start  4: RunnerExposure
+ 1/14 Test  #1: PatchRetryState ..................   Passed    0.04 sec
+      Start  5: Runner_failure
+ 2/14 Test  #5: Runner_failure ...................   Passed    0.18 sec
+      Start  6: Runner_invalid
+ 3/14 Test  #6: Runner_invalid ...................   Passed    0.11 sec
+      Start  7: Runner_resume
+ 4/14 Test  #4: RunnerExposure ...................   Passed    0.57 sec
+      Start  8: Runner_tomography
+ 5/14 Test  #3: HotPixelRngDeterminism ...........   Passed    0.65 sec
+      Start  9: RunnerLateBin
+ 6/14 Test  #8: Runner_tomography ................   Passed    0.44 sec
+      Start 10: RunnerExportedUnits
+ 7/14 Test #10: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 11: GainCache
+ 8/14 Test  #2: SyntheticRegression ..............   Passed    1.13 sec
+      Start 12: TiffRead
+ 9/14 Test  #9: RunnerLateBin ....................   Passed    0.72 sec
+      Start 13: DamagedMovie
+10/14 Test #13: DamagedMovie .....................   Passed    0.12 sec
+      Start 14: RunnerModelParser
+11/14 Test #14: RunnerModelParser ................   Passed    0.14 sec
+12/14 Test #12: TiffRead .........................   Passed    0.55 sec
+13/14 Test #11: GainCache ........................   Passed    1.31 sec
+14/14 Test  #7: Runner_resume ....................   Passed    2.15 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   2.48 sec

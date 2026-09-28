@@ -2424,9 +2424,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		Fpatches.clear();
 #ifdef _CUDA_ENABLED
 		if (d_patch_fcomplex_buffer) {
-			cudaFree(d_patch_fcomplex_buffer);
-			d_patch_fcomplex_buffer = nullptr;
-		}
+            cufftComplex *owned = d_patch_fcomplex_buffer;
+            d_patch_fcomplex_buffer = nullptr;
+            if (cudaFree(owned) != cudaSuccess)
+                REPORT_ERROR("Failed to release patch Fourier scratch");
+        }
 #endif
 
 		// Fit polynomial model

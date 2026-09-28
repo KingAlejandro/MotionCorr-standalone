@@ -25,14 +25,21 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <set>
 
 extern "C" cudaError_t __real_cudaMalloc(void **ptr, size_t size);
+extern "C" cudaError_t __real_cudaFree(void *ptr);
 
 namespace {
 // Not atomic, deliberately. Every cudaMalloc on the path under test is issued from the
 // main thread -- the OpenMP regions in the fallback do host-side FFT only -- so the
 // ordinal is deterministic. The driver re-derives the ordinal on every run regardless,
 // so any drift fails loudly rather than silently selecting the wrong call.
+std::set<void*> g_owned;
+size_t g_stale = 0;
+void report_owned() {
+    std::fprintf(stderr, "[faultinject] remaining-owned=%zu stale-releases=%zu\n", g_owned.size(), g_stale);
+}
 long  g_seen = 0;
 long  g_at = -1;
 bool  g_poison = false;
@@ -42,6 +49,7 @@ bool  g_init = false;
 void init_once() {
     if (g_init) return;
     g_init = true;
+    std::atexit(report_owned);
     const char *o = std::getenv("MC_FAULT_ORDINAL");
     g_at = o ? std::atol(o) : 0;
     const char *c = std::getenv("MC_FAULT_CODE");
@@ -62,5 +70,14 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
                      cudaGetErrorName(code), n);
         return code;
     }
-    return __real_cudaMalloc(ptr, size);
+    const cudaError_t result = __real_cudaMalloc(ptr, size);
+    if (result == cudaSuccess) g_owned.insert(*ptr);
+    return result;
+}
+
+extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
+    if (ptr && !g_owned.count(ptr)) ++g_stale;
+    const cudaError_t result = __real_cudaFree(ptr);
+    if (result == cudaSuccess) g_owned.erase(ptr);
+    return result;
 }

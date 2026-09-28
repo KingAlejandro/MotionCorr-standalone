@@ -19,7 +19,8 @@
  * counter keeps the RAII behaviour with no allocation at all.
  *
  * Capacity is a hard error rather than a silent drop. If a future edit adds a ninth
- * resource, add() releases the incoming resource and throws after setting the overflow flag. Silently dropping it would reintroduce exactly the leak
+ * resource, add() releases the incoming resource and throws after setting the
+ * overflow flag. Silently dropping it would reintroduce exactly the leak
  * this whole issue is about, which is why the flag exists instead of an assert that
  * compiles out in Release.
  *

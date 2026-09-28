@@ -743,9 +743,6 @@ bool CudaMovieSession::preparePatchInVram(
         // destroying the plan, and publish the new one only once it exists.
         cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
         CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
-        cached_patch_w = 0;
-        cached_patch_h = 0;
-        cached_patch_ngroups = 0;
         CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
         has_plan_patch_r2c = true;
         int n[2] = {patch_h, patch_w};

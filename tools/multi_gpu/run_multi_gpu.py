@@ -191,11 +191,23 @@ def main(argv: list[str] | None = None) -> int:
                     os.killpg(os.getpgid(p.pid), signal.SIGKILL)
                 except (ProcessLookupError, PermissionError):
                     pass
+                # Reap after the kill: without this the child stays a zombie
+                # until the launcher itself exits.
+                try:
+                    p.wait(timeout=30)
+                except subprocess.TimeoutExpired:
+                    pass
         raise
     finally:
         if sampler is not None:
             sampler.stop()
-            sampler.join(timeout=5)
+            # nvidia-smi calls are bounded at 30 s, so a join that still times
+            # out means the thread is wedged; observations() would then read a
+            # list another thread is writing. Treat it as a witness failure.
+            sampler.join(timeout=40)
+            if sampler.is_alive():
+                sampler.errors.append("sampler thread did not stop; samples are "
+                                      "incomplete and cannot witness anything")
 
     wall = time.time() - started
     status: dict[str, object] = {
@@ -221,6 +233,11 @@ def main(argv: list[str] | None = None) -> int:
         witness["n_samples"] = len(sampler.samples)
         status["gpu_witness"] = witness
         if not witness["all_pids_witnessed_on_intended_distinct_devices"]:
+            verdict_ok = False
+        if sampler.errors:
+            # A sampler that died partway may have witnessed every pid before
+            # it failed. That is still an incomplete observation, and calling
+            # it a pass would be asserting more than was seen.
             verdict_ok = False
     elif devices:
         status["gpu_witness"] = "skipped by --no-witness; no device claim is supported"

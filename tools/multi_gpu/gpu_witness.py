@@ -52,7 +52,14 @@ def _run_smi(args: list[str]) -> str:
     # Always query the full physical set. nvidia-smi ignores CUDA_VISIBLE_DEVICES
     # anyway; clearing it makes that explicit rather than accidental.
     env.pop("CUDA_VISIBLE_DEVICES", None)
-    proc = subprocess.run([exe] + args, capture_output=True, text=True, env=env)
+    # Bounded: an unresponsive nvidia-smi would otherwise hang the sampler
+    # thread, and the launcher's join() would time out while the thread was
+    # still appending to the sample list it is about to read.
+    try:
+        proc = subprocess.run([exe] + args, capture_output=True, text=True, env=env,
+                              timeout=30)
+    except subprocess.TimeoutExpired as exc:
+        raise WitnessError(f"nvidia-smi {' '.join(args)} timed out after 30 s") from exc
     if proc.returncode != 0:
         raise WitnessError(f"nvidia-smi {' '.join(args)} exited {proc.returncode}: "
                            f"{proc.stderr.strip()}")

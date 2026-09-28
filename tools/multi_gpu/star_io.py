@@ -261,8 +261,14 @@ def parse(path: str | Path) -> StarFile:
                 continue
             if s[0] != "_":
                 break
+            # C++ takes substr(pos0 + 1, pos1 - pos0 - 2), which hard-codes
+            # exactly one space before the '#' (src/metadata_table.cpp:1058-1061).
+            # A hand-edited '_rlnMicrographMovieName#1' therefore loses its last
+            # character there and becomes an unknown label; reproducing that is
+            # what keeps this parser from finding a movie column the binary
+            # cannot see.
             hashpos = s.find("#")
-            labels.append(s[1:hashpos].strip() if hashpos >= 0 else s[1:].strip())
+            labels.append(s[1:hashpos - 1] if hashpos >= 0 else s[1:].strip())
             i += 1
 
         row_start = i
@@ -277,11 +283,22 @@ def parse(path: str | Path) -> StarFile:
                     f"{path}:{i + 1}: {len(values)} columns for {len(labels)} labels; "
                     "the C++ reader reports 'more columns than the number of labels'"
                 )
-            legacy_empty = len(labels) == 2 and len(values) == 1
-            if len(values) < len(labels) and not legacy_empty:
+            if len(values) < len(labels):
+                # C++ tolerates exactly one case: two labels, one value, and the
+                # SECOND label a string type (src/metadata_table.cpp:1118-1122).
+                # Reproducing that needs the EMDL type table, and getting it
+                # wrong in the permissive direction would let a STAR through
+                # here that every worker then rejects at startup. Refuse instead.
+                extra = ""
+                if len(labels) == 2 and len(values) == 1:
+                    extra = (" (the C++ reader accepts this particular shape only when "
+                             f"the second label, {labels[1]}, is a string type; this "
+                             "parser does not carry the EMDL type table and refuses "
+                             "rather than guess)")
                 raise StarFormatError(
                     f"{path}:{i + 1}: {len(values)} columns for {len(labels)} labels; "
                     "the C++ reader reports 'fewer columns than the number of labels'"
+                    + extra
                 )
             rows.append(Row(i, lines[i], values))
             i += 1
@@ -345,9 +362,11 @@ def output_root(movie_name: str) -> str:
     movies can therefore share one output root, which is a silent overwrite; the
     partitioner preflights for it.
     """
-    stem = movie_name
-    slash = stem.rfind("/")
-    dot = stem.rfind(".")
-    if dot > slash:
-        stem = stem[:dot]
+    # FileName::withoutExtension() is substr(0, rfind(".")) over the WHOLE path
+    # (src/filename.cpp:272-276): it ignores '/', so 'Movies/run.1/mov' loses
+    # everything from the last dot and becomes 'Movies/run'. Treating the dot as
+    # an extension separator only within the basename would disagree with the
+    # binary about which file gets written.
+    dot = movie_name.rfind(".")
+    stem = movie_name if dot < 0 else movie_name[:dot]
     return stem.replace(".", "_")

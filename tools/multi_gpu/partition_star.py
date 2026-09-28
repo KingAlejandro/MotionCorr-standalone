@@ -59,6 +59,12 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
         else:
             seen[name] = i
 
+    # Fixed-name artifacts the runner writes into --o. A movie whose output root
+    # plus a decoration lands on one of these is overwritten by, or overwrites,
+    # a per-run product.
+    reserved = {"gain", "corrected_micrographs", "logfile", "header", "batch",
+                "all_batches"}
+
     roots: dict[str, str] = {}
     for name in names:
         root = star_io.output_root(name)
@@ -69,6 +75,15 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
                 "(getOutputFileNames replaces '.' with '_', src/motioncorr_runner.cpp:491)"
             )
         roots.setdefault(root, name)
+
+    for root, name in roots.items():
+        for decoration in star_io.OUTPUT_DECORATIONS:
+            if (root + decoration) in reserved:
+                problems.append(
+                    f"reserved-name collision: {name!r} writes "
+                    f"{root + decoration}.* into the output root, which is a "
+                    "fixed-name per-run artifact"
+                )
 
     # One movie's decorated output can be another movie's main output: with
     # --grouping_for_ps, movie 'a' writes a_PS.mrc, which is exactly movie
@@ -98,7 +113,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="where to write the assignment manifest "
                          "(default <outdir>/<prefix>_manifest.json)")
     ap.add_argument("--force", action="store_true",
-                    help="overwrite existing shards with identical content only")
+                    help="overwrite an existing shard whose content differs; without "
+                         "it, a differing shard is refused")
     a = ap.parse_args(argv)
 
     if a.n < 1:

@@ -97,6 +97,13 @@ def main(argv: list[str] | None = None) -> int:
                          "usage error rather than as a dropped option list.")
     a = ap.parse_args(argv)
 
+    if a.link and a.aggregate_with:
+        print("FAIL: --link with --aggregate-with would let the aggregate step "
+              "rewrite a worker's own outputs through the shared inode, destroying "
+              "the evidence needed to diagnose the failure. Copy instead.",
+              file=sys.stderr)
+        return 2
+
     manifest = json.loads(Path(a.manifest).read_text())
     shards = manifest["shards"]
     products = [s for s in a.products.split(",") if s]
@@ -109,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     exits: dict[str, int] = {}
+    launcher_verdict = None
     if a.status:
         status = json.loads(Path(a.status).read_text())
         for w in status.get("workers", []):
@@ -119,6 +127,23 @@ def main(argv: list[str] | None = None) -> int:
                 problems.append(f"worker {k}: no exit code recorded")
             elif rc != 0:
                 problems.append(f"worker {k}: exited {rc}")
+
+        # Zero exit codes are not the whole story. run_multi_gpu.py also fails
+        # its run when the device witness did not hold -- e.g. two workers were
+        # observed on the same physical GPU, or one was never observed at all.
+        # Reading only the return codes would launder that into a merge PASS,
+        # which is precisely the claim this work exists to support.
+        launcher_verdict = status.get("verdict")
+        if launcher_verdict is None:
+            problems.append("status file records no launcher verdict")
+        elif launcher_verdict != "PASS":
+            witness = status.get("gpu_witness")
+            detail = ""
+            if isinstance(witness, dict):
+                detail = (f"; gpu_witness: unwitnessed={witness.get('unwitnessed_pids')}, "
+                          f"wrong_device={witness.get('wrong_device')}, "
+                          f"shared_devices={witness.get('shared_devices')}")
+            problems.append(f"launcher verdict is {launcher_verdict}, not PASS{detail}")
     else:
         problems.append("no --status given, so worker exit codes were never checked; "
                         "a worker that died silently would look like a clean partition")
@@ -145,15 +170,19 @@ def main(argv: list[str] | None = None) -> int:
             problems.append(f"worker {k}: {wpath} is not a directory")
             continue
         for rel, src in worker_files(wpath).items():
-            if is_aggregate(rel):
-                dst = out / "_workers" / f"w{k}" / rel
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src, dst)
-                per_worker_aggregates.append(str(Path("_workers") / f"w{k}" / rel))
-                continue
-
+            # Attribute FIRST. Matching aggregate names by basename alone would
+            # divert a real per-movie product: a movie named Movies/run.tiff
+            # writes Movies/run.log, and a movie named Movies/gain.tiff writes
+            # Movies/gain.mrc. Both would be stashed as "aggregates" and quietly
+            # vanish from the merged tree.
             attribution = star_io.split_output_path(str(rel), root_owner)
             if attribution is None:
+                if is_aggregate(rel):
+                    dst = out / "_workers" / f"w{k}" / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+                    per_worker_aggregates.append(str(Path("_workers") / f"w{k}" / rel))
+                    continue
                 problems.append(f"worker {k}: produced {rel}, which belongs to no movie "
                                 "in the manifest")
             else:
@@ -170,7 +199,13 @@ def main(argv: list[str] | None = None) -> int:
             dst = out / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             if a.link:
-                os.link(src, dst)
+                try:
+                    os.link(src, dst)
+                except OSError as exc:
+                    print(f"FAIL: cannot hardlink {src} -> {dst}: {exc}. A merged tree "
+                          "on a different filesystem must be copied, not linked.",
+                          file=sys.stderr)
+                    return 2
             else:
                 shutil.copy2(src, dst)
 
@@ -189,6 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         "n_movies_expected": len(canonical),
         "n_files_staged": len(produced),
         "worker_exit_codes": exits,
+        "launcher_verdict": launcher_verdict,
         "per_worker_aggregates_preserved": sorted(per_worker_aggregates),
         "problems": problems,
         "verdict": "PASS" if not problems else "FAIL",

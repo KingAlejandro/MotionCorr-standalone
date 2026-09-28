@@ -51,8 +51,8 @@ MUTATIONS = [
 
     ("decorated-output collision preflight removed",
      "tools/multi_gpu/partition_star.py",
-     "        for decoration in star_io.OUTPUT_DECORATIONS:",
-     "        for decoration in []:  # MUTATED",
+     "            other = roots.get(root + decoration)",
+     "            other = None  # MUTATED",
      ["case_decorated_output_collision"]),
 
     ("output attribution falls back to naive suffix stripping",
@@ -93,8 +93,8 @@ MUTATIONS = [
 
     ("worker exit codes no longer gate the merge",
      "tools/multi_gpu/merge_workers.py",
-     "    exits: dict[str, int] = {}\n    if a.status:",
-     "    exits: dict[str, int] = {}\n    if False:  # MUTATED",
+     "        for k in range(len(shards)):\n            rc = exits.get(str(k))",
+     "        for k in []:  # MUTATED\n            rc = exits.get(str(k))",
      ["case_failed_worker_blocks_merge", "case_killed_worker_then_nonprefix_resume"]),
 
     ("missing --status no longer refuses the merge",
@@ -126,6 +126,53 @@ MUTATIONS = [
      "        extra = shlex.split(a.aggregate_args)",
      "        extra = []  # MUTATED",
      ["case_aggregate_star_canonical_order"]),
+
+    ("launcher verdict no longer gates the merge",
+     "tools/multi_gpu/merge_workers.py",
+     '        elif launcher_verdict != "PASS":',
+     "        elif False:  # MUTATED",
+     ["case_failed_device_witness_blocks_merge"]),
+
+    ("aggregate-name match moved back ahead of attribution",
+     "tools/multi_gpu/merge_workers.py",
+     "            attribution = star_io.split_output_path(str(rel), root_owner)\n"
+     "            if attribution is None:\n"
+     "                if is_aggregate(rel):",
+     "            attribution = None if is_aggregate(rel) else "
+     "star_io.split_output_path(str(rel), root_owner)  # MUTATED\n"
+     "            if attribution is None:\n"
+     "                if is_aggregate(rel):",
+     ["case_aggregate_name_shadowing"]),
+
+    ("reserved-name preflight removed",
+     "tools/multi_gpu/partition_star.py",
+     "            if (root + decoration) in reserved:",
+     "            if False:  # MUTATED",
+     ["case_reserved_name_collision"]),
+
+    ("short rows silently accepted",
+     "tools/multi_gpu/star_io.py",
+     "            if len(values) < len(labels):",
+     "            if False:  # MUTATED",
+     ["case_short_row_refused"]),
+
+    ("output_root strips the extension only within the basename",
+     "tools/multi_gpu/star_io.py",
+     '    dot = movie_name.rfind(".")',
+     '    dot = movie_name.rfind(".", movie_name.rfind("/") + 1)  # MUTATED',
+     ["case_output_root_matches_withoutextension"]),
+
+    ("--link no longer refused alongside --aggregate-with",
+     "tools/multi_gpu/merge_workers.py",
+     "    if a.link and a.aggregate_with:",
+     "    if False:  # MUTATED",
+     ["case_link_with_aggregate_refused"]),
+
+    ("missing worker directory no longer reported",
+     "tools/multi_gpu/merge_workers.py",
+     '            problems.append(f"worker {k}: {wpath} is not a directory")',
+     '            _unused = (f"worker {k}: {wpath} is not a directory")  # MUTATED',
+     ["case_missing_worker_directory"]),
 
     ("launcher no longer refuses an existing --out",
      "tools/multi_gpu/run_multi_gpu.py",

@@ -100,10 +100,15 @@ def merge(manifest: Path, workers: list[Path], out: Path, status: Path | None,
     return run(cmd + (extra or []))
 
 
-def fake_status(tmp: Path, codes: list[int]) -> Path:
-    p = tmp / "status.json"
-    p.write_text(json.dumps({"workers": [{"index": k, "returncode": rc}
-                                         for k, rc in enumerate(codes)]}))
+def fake_status(tmp: Path, codes: list[int], verdict: str = "PASS",
+                witness: dict | None = None, name: str = "status.json") -> Path:
+    p = tmp / name
+    body: dict = {"workers": [{"index": k, "returncode": rc}
+                              for k, rc in enumerate(codes)],
+                  "verdict": verdict}
+    if witness is not None:
+        body["gpu_witness"] = witness
+    p.write_text(json.dumps(body))
     return p
 
 
@@ -618,6 +623,159 @@ def case_real_output_suffixes_attributed(tmp: Path) -> None:
     assert any(p.startswith("misrouted:") for p in rep2["problems"]), rep2["problems"]
 
 
+def case_failed_device_witness_blocks_merge(tmp: Path) -> None:
+    """A failed GPU-distinctness witness is not laundered into a merge PASS."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    assert codes == [0, 0], codes
+    # Every worker exited cleanly and every file is present. The only thing
+    # wrong is that both were observed on one physical GPU.
+    status = fake_status(tmp, codes, verdict="FAIL", witness={
+        "unwitnessed_pids": [],
+        "wrong_device": [{"pid": 2, "expected": "GPU-bbbb", "observed": ["GPU-aaaa"]}],
+        "shared_devices": [{"gpu_uuid": "GPU-aaaa", "pids": [1, 2]}],
+        "distinct_devices_witnessed": 1,
+        "all_pids_witnessed_on_intended_distinct_devices": False,
+    })
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report)
+    assert cp.returncode == 3, "a run whose device witness failed was merged as PASS"
+    rep = json.loads(report.read_text())
+    assert any("launcher verdict is FAIL" in p for p in rep["problems"]), rep["problems"]
+    assert any("shared_devices" in p for p in rep["problems"]), rep["problems"]
+
+    # positive control: same files, same exit codes, witness held
+    ok = fake_status(tmp, codes, verdict="PASS", name="status_ok.json")
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged_ok", ok,
+               tmp / "report_ok.json")
+    assert cp.returncode == 0, cp.stderr
+
+
+def case_link_with_aggregate_refused(tmp: Path) -> None:
+    """Hardlinking into the merged tree cannot be combined with the aggregate step."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status,
+               extra=["--link", "--aggregate-with", str(FAKE),
+                      "--input-star", str(star)])
+    assert cp.returncode == 2, f"--link + --aggregate-with accepted (rc={cp.returncode})"
+    assert "shared inode" in cp.stderr, cp.stderr
+    # --link alone is fine
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged_link", status,
+               extra=["--link"])
+    assert cp.returncode == 0, cp.stderr
+
+
+def case_missing_worker_directory(tmp: Path) -> None:
+    """A worker directory that does not exist fails the merge."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", [dirs[0], tmp / "no_such_worker"],
+               tmp / "merged", status, report)
+    assert cp.returncode == 3, "a missing worker directory was merged"
+    rep = json.loads(report.read_text())
+    assert any("is not a directory" in p for p in rep["problems"]), rep["problems"]
+    assert any(p.startswith("lost:") for p in rep["problems"]), rep["problems"]
+
+
+def case_output_root_matches_withoutextension(tmp: Path) -> None:
+    """output_root reproduces FileName::withoutExtension, dots in directories included."""
+    # src/filename.cpp:272-276 is substr(0, rfind(".")) over the whole path.
+    assert star_io.output_root("Movies/run.1/mov") == "Movies/run"
+    assert star_io.output_root("Movies/a.tif") == "Movies/a"
+    assert star_io.output_root("Movies/set.1/a.tif") == "Movies/set_1/a"
+    assert star_io.output_root("Movies/plain") == "Movies/plain"
+    # Two movies the binary would write to one file are therefore caught.
+    rows = [("Movies/run.1/mov", 1, 0.0), ("Movies/run.2/other", 1, 1.4),
+            ("Movies/c.tiff", 1, 2.8)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    cp = partition(star, 2, tmp / "shards")
+    assert cp.returncode == 3, f"both write Movies/run.mrc (rc={cp.returncode})"
+    assert "output-name collision" in cp.stderr, cp.stderr
+
+
+def case_reserved_name_collision(tmp: Path) -> None:
+    """A movie whose output collides with a fixed-name per-run artifact is refused."""
+    for movie, needle in ((f"gain.tiff", "gain"),
+                          ("corrected_micrographs.tiff", "corrected_micrographs")):
+        star = tmp / "movies.star"
+        build_star(star, [(movie, 1, 0.0), ("Movies/b.tiff", 1, 1.4)])
+        cp = partition(star, 2, tmp / ("s_" + needle))
+        assert cp.returncode == 3, f"{movie} accepted (rc={cp.returncode})"
+        assert "reserved-name collision" in cp.stderr, cp.stderr
+    build_star(tmp / "movies.star", [("Movies/gain.tiff", 1, 0.0),
+                                     ("Movies/b.tiff", 1, 1.4)])
+    assert partition(tmp / "movies.star", 2, tmp / "s_ok").returncode == 0
+
+
+def case_short_row_refused(tmp: Path) -> None:
+    """A row with fewer values than labels is refused, not silently shortened."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    text = star.read_text()
+    text = text.replace("Movies/20170629_00021_frameImage.tiff 1 0.000000",
+                        "Movies/20170629_00021_frameImage.tiff 1")
+    star.write_text(text)
+    cp = partition(star, 2, tmp / "shards")
+    assert cp.returncode != 0, "a short row was accepted"
+    assert "fewer columns" in cp.stderr, cp.stderr
+    # The two-label shape the C++ reader sometimes tolerates is refused too,
+    # with the reason stated, rather than guessed at.
+    star.write_text("""
+data_movies
+
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+Movies/a.tiff
+Movies/b.tiff 1
+
+""".lstrip("\n"))
+    cp = partition(star, 1, tmp / "shards2")
+    assert cp.returncode != 0, "the legacy two-column shape was accepted"
+    assert "does not carry the EMDL type table" in cp.stderr, cp.stderr
+
+
+def case_aggregate_name_shadowing(tmp: Path) -> None:
+    """A per-movie output whose basename matches an aggregate is still a movie."""
+    # Movies/gain.tiff writes Movies/gain.mrc. Matching the fixed-name artifact
+    # list by basename alone would divert it into the per-worker stash and drop
+    # it from the merged tree.
+    rows = [("Movies/gain.tiff", 1, 0.0), ("Movies/run.tiff", 1, 1.4),
+            ("Movies/logfile.tiff", 2, 2.8), ("Movies/ok.tiff", 2, 4.2)]
+    star = tmp / "movies.star"
+    build_star(star, rows)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0, "top-level names are fine " \
+        "under Movies/; only the output root itself is reserved"
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report)
+    assert cp.returncode == 0, cp.stderr
+    rep = json.loads(report.read_text())
+    assert rep["verdict"] == "PASS", rep["problems"]
+    for name, _, _ in rows:
+        root = star_io.output_root(name)
+        assert (tmp / "merged" / (root + ".mrc")).exists(), \
+            f"{root}.mrc was diverted instead of staged"
+        assert not (tmp / "merged" / "_workers" / "w0" / (root + ".mrc")).exists()
+        assert not (tmp / "merged" / "_workers" / "w1" / (root + ".mrc")).exists()
+
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_shard_rejected,
@@ -626,6 +784,7 @@ CASES = [
     case_collapsed_spaces_are_a_collision,
     case_decorated_output_collision,
     case_real_output_suffixes_attributed,
+    case_aggregate_name_shadowing,
     case_star_parser_refusals,
     case_clean_merge,
     case_lost_output,
@@ -633,6 +792,12 @@ CASES = [
     case_unassigned_movie_output,
     case_failed_worker_blocks_merge,
     case_missing_status_blocks_merge,
+    case_failed_device_witness_blocks_merge,
+    case_missing_worker_directory,
+    case_link_with_aggregate_refused,
+    case_output_root_matches_withoutextension,
+    case_reserved_name_collision,
+    case_short_row_refused,
     case_killed_worker_then_nonprefix_resume,
     case_aggregate_star_canonical_order,
     case_aggregate_wrong_order_rejected,
@@ -657,10 +822,12 @@ def main(argv: list[str] | None = None) -> int:
               "NOT run and is not claimed to pass.")
 
     failures = []
+    ran = 0
     for case in cases:
         name = getattr(case, "__name__", str(case))
         if a.only and a.only not in name:
             continue
+        ran += 1
         with tempfile.TemporaryDirectory(prefix="mgpu_") as td:
             try:
                 case(Path(td))
@@ -674,7 +841,9 @@ def main(argv: list[str] | None = None) -> int:
                 continue
         print(f"ok   {name}")
 
-    print(f"\n{len(cases) - len(failures)}/{len(cases)} passed")
+    skipped = len(cases) - ran
+    print(f"\n{ran - len(failures)}/{ran} passed"
+          + (f" ({skipped} not selected by --only, and not claimed)" if skipped else ""))
     return 1 if failures else 0
 
 

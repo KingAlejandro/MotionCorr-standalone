@@ -151,18 +151,31 @@ def compare_products(ref: Dict[str, Any], test: Dict[str, Any]) -> Dict[str, Any
                       "extra": extra, "differing": differing,
                       "equal": not (missing or extra or differing)}
     rs, ts = ref["timestamped_bytes"], test["timestamped_bytes"]
+    missing, extra = sorted(set(rs) - set(ts)), sorted(set(ts) - set(rs))
+    # Size is compared with a small tolerance: a PDF's embedded date and the /ID derived
+    # from it can shift the length by a few bytes without any content change.
+    resized = sorted(k for k in set(rs) & set(ts) if abs(rs[k] - ts[k]) > 64)
     out["timestamped"] = {
-        "n_ref": len(rs), "n_test": len(ts),
-        "missing": sorted(set(rs) - set(ts)), "extra": sorted(set(ts) - set(rs)),
-        "note": "content not compared: these embed a generation date by construction",
+        "n_ref": len(rs), "n_test": len(ts), "missing": missing, "extra": extra,
+        "size_differs_beyond_64B": resized,
+        "equal": not (missing or extra or resized),
+        "note": "content not compared: ghostscript embeds a generation date. Presence and "
+                "size are compared, so a lost or truncated PDF still fails the arm.",
     }
     out["not_normalisable"] = sorted(set(ref.get("not_normalisable", []))
                                      | set(test.get("not_normalisable", [])))
     out["unparseable"] = sorted(set(ref.get("unparseable", []))
                                 | set(test.get("unparseable", [])))
+    # [2.6] Two empty product sets trivially satisfy every set difference. Without this
+    # guard, a series in which every arm crashed at startup reports every arm EQUAL.
+    n_products = sum(len(ref[f]) for f in ("payloads", "core_headers", "others")) \
+        + len(ref["timestamped_bytes"])
+    if n_products == 0:
+        out["verdict"] = "NO_PRODUCTS"
+        return out
     out["verdict"] = "EQUAL" if all(out[f]["equal"] for f in
-                                    ("payloads", "core_headers", "labels", "others")) \
-        else "DIFFERS"
+                                    ("payloads", "core_headers", "labels", "others",
+                                     "timestamped")) else "DIFFERS"
     if out["unparseable"]:
         out["verdict"] = "UNPARSEABLE"      # not a pixel mismatch; do not report it as one
     elif out["not_normalisable"]:
@@ -205,9 +218,12 @@ def main() -> int:
 
     refs: Dict[str, Dict[str, Any]] = {}
     for rid in args.reference_arm:
-        rr = [r for r in data["runs"] if r["arm_id"] == rid]
+        rr = [r for r in runs if r["arm_id"] == rid and r["exit_code"] == 0
+              and r.get("product_count", 0) > 0]
         if not rr:
-            print(f"ERROR: reference arm {rid} not in series")
+            # Selecting from the unfiltered run list would allow the baseline to be the
+            # warm-up this script has already declared non-comparable, or a run that died.
+            print(f"ERROR: reference arm {rid} has no successful non-warm-up run with products")
             return 2
         refs[arm_input.get(rid, "?")] = {"tag": rr[0]["tag"],
                                          "key": product_key(rr[0], args.results_dir)}
@@ -243,7 +259,9 @@ def main() -> int:
                              if want_io != want_j else not got["reported_io_cap"])
                     got["matches_request"] = (got["reported_j"] == [want_j]) and io_ok
                     eff[r["tag"]] = got
+        verdicts = sorted({v["verdict"] for v in per_run.values()})
         prod[arm] = {"runs": per_run, "input_set": iset, "effective_settings_witness": eff,
+                     "verdicts": verdicts,
                      "reference": refs[iset]["tag"],
                      "all_equal": all(v["verdict"] == "EQUAL" for v in per_run.values()),
                      "product_counts": sorted({r["product_count"] for r in rs})}
@@ -259,7 +277,7 @@ def main() -> int:
     n_bad = 0
     for arm in sorted(prod):
         v = prod[arm]
-        flag = "EQUAL" if v["all_equal"] else "DIFFERS"
+        flag = "/".join(v["verdicts"])
         if not v["all_equal"]:
             n_bad += 1
         wit = v.get("effective_settings_witness") or {}
@@ -277,10 +295,18 @@ def main() -> int:
             for tag, c in v["runs"].items():
                 if c["verdict"] == "EQUAL":
                     continue
-                for f in ("payloads", "core_headers", "labels", "others"):
+                if c.get("unparseable"):
+                    print(f"      {tag} COULD NOT PARSE: {c['unparseable'][:3]}")
+                if c.get("not_normalisable"):
+                    print(f"      {tag} NOT CHECKED (needs --results-dir): "
+                          f"{c['not_normalisable'][:3]}")
+                if c["verdict"] == "NO_PRODUCTS":
+                    print(f"      {tag} produced NO PRODUCTS AT ALL")
+                for f in ("payloads", "core_headers", "labels", "others", "timestamped"):
                     d = c[f]
-                    if not d["equal"]:
-                        print(f"      {tag} {f}: differing={d['differing'][:4]} "
+                    if not d.get("equal", True):
+                        print(f"      {tag} {f}: differing="
+                              f"{(d.get('differing') or d.get('size_differs_beyond_64B'))[:4]} "
                               f"missing={d['missing'][:4]} extra={d['extra'][:4]}")
     print(f"\n  arms with differing products: {n_bad} of {len(prod)}")
     if unscored:
@@ -294,8 +320,10 @@ def main() -> int:
     print("\n" + "=" * 78)
     print("WALL TIME BY ARM")
     print("=" * 78)
-    print(f"  {'arm':<28} {'n':>2} {'median':>8} {'min':>8} {'max':>8} {'spread%':>8} "
-          f"{'cpu_s':>8} {'peakRSS_MiB':>12} {'VRAM_MiB':>9}")
+    print(f"  {'arm':<26} {'input set':<14} {'n':>2} {'median':>8} {'min':>8} {'max':>8} "
+          f"{'spread%':>8} {'cpu_s':>8} {'RSS_MiB':>8} {'VRAM':>6}")
+    print("  arms consuming different input sets are NOT comparable on time; the input-set\n"
+          "  column exists so a 4-movie screening arm is not read against a 24-movie arm.")
     table = {}
     for arm in sorted(by_arm, key=lambda a: statistics.median(
             [r["wall_s"] for r in by_arm[a]])):
@@ -308,21 +336,92 @@ def main() -> int:
         rss = [r["memory"].get("peak_simultaneous_tree_rss_kib", 0) for r in rs]
         vram = [r["sampling"]["device_vram_mib_sampled"].get("max", 0) for r in rs
                 if r["sampling"]["device_vram_mib_sampled"].get("n")]
-        table[arm] = {"n": len(w), "median_s": med, "min_s": min(w), "max_s": max(w),
+        table[arm] = {"input_set": arm_input.get(arm, "?"), "n": len(w), "median_s": med, "min_s": min(w), "max_s": max(w),
                       "spread_pct": spread, "walls": w,
                       "median_cpu_s": statistics.median(cpu) if cpu else None,
                       "peak_rss_mib": max(rss) // 1024 if rss and max(rss) else None,
                       "peak_vram_mib_sampled": max(vram) if vram else None,
                       "effective": rs[0]["effective"]}
         t = table[arm]
-        print(f"  {arm:<28} {t['n']:>2} {fmt(med):>8} {fmt(min(w)):>8} {fmt(max(w)):>8} "
-              f"{fmt(spread,1):>8} {fmt(t['median_cpu_s'],1):>8} "
-              f"{str(t['peak_rss_mib']):>12} {str(t['peak_vram_mib_sampled']):>9}")
+        print(f"  {arm:<26} {str(arm_input.get(arm,'?'))[:14]:<14} {t['n']:>2} "
+              f"{fmt(med):>8} {fmt(min(w)):>8} {fmt(max(w)):>8} {fmt(spread,1):>8} "
+              f"{fmt(t['median_cpu_s'],1):>8} {str(t['peak_rss_mib']):>8} "
+              f"{str(t['peak_vram_mib_sampled']):>6}")
 
-    # ------------------------------------------------- positional bias, from the same data
+    # ------------------------------------------- paired contrasts, with the positional split
     print("\n" + "=" * 78)
-    print("POSITIONAL BIAS  (wall vs slot within repeat, pooled over arms)")
+    print("PAIRED CONTRASTS  (two-arm pairs only; d = t_second_named - t_first_named)")
     print("=" * 78)
+    pairs: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+    for r in runs:
+        pairs[r["pair_index"]].append(r)
+
+    contrasts: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    degenerate = 0
+    for pidx, rs in pairs.items():
+        if len(rs) != 2 or rs[0]["arm_id"] == rs[1]["arm_id"]:
+            degenerate += 1
+            continue
+        a, b = sorted(rs, key=lambda r: r["arm_id"])
+        key = f"{b['arm_id']} - {a['arm_id']}"
+        first = min(rs, key=lambda r: r["order_in_pair"])["arm_id"]
+        contrasts[key].append({"pair": pidx, "d": b["wall_s"] - a["wall_s"],
+                               "first": first, "ta": a["wall_s"], "tb": b["wall_s"]})
+
+    if not contrasts:
+        print("  no two-arm pairs in this series (screening schedules are not paired)")
+    for key, ds in sorted(contrasts.items()):
+        b_name, a_name = key.split(" - ")
+        d_all = [x["d"] for x in ds]
+        # observed = E -/+ P, where P is the advantage to whichever arm ran second.
+        d_a_first = [x["d"] for x in ds if x["first"] == a_name]
+        d_b_first = [x["d"] for x in ds if x["first"] == b_name]
+        n_b_faster = sum(1 for d in d_all if d < 0)
+        print(f"\n  {key}")
+        print(f"    n pairs               : {len(d_all)}")
+        print(f"    per-pair d (s)        : {[round(d, 3) for d in d_all]}")
+        print(f"    mean d                : {statistics.fmean(d_all):+.3f} s")
+        if len(d_all) > 1:
+            sd = statistics.stdev(d_all)
+            sem = sd / len(d_all) ** 0.5
+            print(f"    sd / sem              : {sd:.3f} / {sem:.3f} s")
+            print(f"    mean d +/- 2 sem      : {statistics.fmean(d_all):+.3f} "
+                  f"+/- {2 * sem:.3f} s")
+            crosses = abs(statistics.fmean(d_all)) < 2 * sem
+            print(f"    interval spans zero   : {'YES - no effect resolved at this n'
+                                                 if crosses else 'no'}")
+        print(f"    pairs where {b_name} faster: {n_b_faster}/{len(d_all)}"
+              f"   (two-sided sign test needs {len(d_all)} >= 6 to reach even the 5% level)")
+        if d_a_first and d_b_first:
+            E = (statistics.fmean(d_a_first) + statistics.fmean(d_b_first)) / 2
+            P = (statistics.fmean(d_b_first) - statistics.fmean(d_a_first)) / 2
+            print(f"    order-split           : E = {E:+.3f} s, positional P = {P:+.3f} s "
+                  f"(advantage to whichever arm ran second)")
+        else:
+            print("    order-split           : NOT AVAILABLE - every pair ran in the same "
+                  "order, so effect and position are confounded")
+    if degenerate:
+        print(f"\n  {degenerate} pair group(s) skipped: not exactly two distinct arms")
+
+    # ----------------------------------------------- schedule validation, then slot ratios
+    print("\n" + "=" * 78)
+    print("SCHEDULE VALIDATION AND POSITIONAL SLOT RATIOS")
+    print("=" * 78)
+    arms_by_slot: Dict[int, set] = defaultdict(set)
+    for r in runs:
+        arms_by_slot[r["order_in_pair"]].add(r["arm_id"])
+    fixed = [o for o, a in arms_by_slot.items() if len(a) == 1 and len(arms_by_slot) > 1]
+    if fixed:
+        # Without this check the slot-ratio estimator below is vacuous: if each arm always
+        # occupies the same slot, every ratio is that arm's own wall over its own median,
+        # i.e. ~1.0 by construction, and the section reads as "no positional bias found"
+        # no matter how large the real bias is.
+        print(f"  WARNING: slots {sorted(fixed)} were always occupied by a single arm, so the "
+              f"ratios below\n  cannot detect positional bias and must not be read as "
+              f"evidence of its absence.")
+    else:
+        print("  every slot was occupied by more than one arm, so the ratios below are "
+              "informative")
     by_order: Dict[int, List[float]] = defaultdict(list)
     for r in runs:
         med = table[r["arm_id"]]["median_s"]
@@ -330,10 +429,8 @@ def main() -> int:
             by_order[r["order_in_pair"]].append(r["wall_s"] / med)
     for o in sorted(by_order):
         v = by_order[o]
-        print(f"  slot {o:>2}: n={len(v):>2} mean ratio to arm median = "
-              f"{statistics.fmean(v):.4f}")
-    print("  A ratio systematically below 1.0 in later slots is page-cache warming, not an\n"
-          "  effect of the configuration that happened to be scheduled there.")
+        print(f"  slot {o:>2}: n={len(v):>2} arms={len(arms_by_slot[o]):>2} "
+              f"mean ratio to arm median = {statistics.fmean(v):.4f}")
 
     # ------------------------------------------------------------------------ interference
     print("\n" + "=" * 78)
@@ -341,6 +438,12 @@ def main() -> int:
     print("=" * 78)
     for arm in sorted(by_arm):
         rs = by_arm[arm]
+        nobs = sum(r["sampling"]["foreign_cpu_pct"].get("n", 0) for r in rs)
+        if nobs == 0:
+            # stats([]) has no "max" key, so a .get(...,0) default would render a sampler
+            # that raised on every tick as an arm with no interference.
+            print(f"  {arm:<28} NOT OBSERVED: the foreign sampler produced no samples")
+            continue
         fmax = max(r["sampling"]["foreign_cpu_pct"].get("max", 0) for r in rs)
         imax = max(r["sampling"]["foreign_threads_inside_mask"].get("max", 0) for r in rs)
         cmds: Dict[str, int] = {}
@@ -356,6 +459,7 @@ def main() -> int:
             {"series": data.get("plan_name"), "source_commit": data.get("source_commit"),
              "reference_arm": args.reference_arm, "failed_runs": failed,
              "product_equality": prod, "timing": table,
+             "paired_contrasts": {k: v for k, v in contrasts.items()},
              "positional": {str(k): statistics.fmean(v) for k, v in by_order.items()}},
             indent=2))
         print(f"\nwrote {args.json_out}")

@@ -142,6 +142,7 @@ this issue.
 | `tools/envelope_runner.py` | measurement runner |
 | `tools/envelope_report.py` | series analyser and product-equality verdict |
 | `tools/test_envelope_report.py` | positive and negative controls for that verdict |
+| `tools/test_envelope_interference.py` | controls for the interference witness (Linux only) |
 | `docs/operating_envelope_issue26.md` | report and operating guide |
 | `docs/benchmark_logs/issue26_envelope_*/**` | raw per-run records |
 

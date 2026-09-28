@@ -88,6 +88,14 @@ def mrc_split_digests(path: Path) -> Optional[Dict[str, Any]]:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
+def _as_int(text: str, default: int = -1) -> int:
+    """sh() reports failure as an '<error: ...>' string, which int() would raise on."""
+    try:
+        return int(str(text).strip())
+    except (TypeError, ValueError):
+        return default
+
+
 def sha256_file(path: Path) -> Optional[str]:
     if not path.is_file():
         return None
@@ -127,6 +135,9 @@ class Sampler(threading.Thread):
         self.own_user = own_user
         self.own_root_pid = own_root_pid
         self.foreign_detail: Dict[str, int] = {}
+        self._prev_snap: Optional[Dict[int, Any]] = None
+        self._prev_t = 0.0
+        self._own_sid = own_session()
         self.gpu_index = gpu_index
         self.mask_cpus = parse_cpu_list(mask) if mask else None
         self.period = period
@@ -143,26 +154,27 @@ class Sampler(threading.Thread):
         self._halt.set()
 
     def _sample_foreign(self) -> None:
-        own = own_subtree(self.own_root_pid) if self.own_root_pid else set()
-        out = subprocess.run(["ps", "-eLo", "pid=,user=,pcpu=,psr=,comm="],
-                             capture_output=True, text=True, timeout=10).stdout
+        now = time.time()
+        snap = cpu_snapshot()
+        if self._prev_snap is None:
+            self._prev_snap, self._prev_t = snap, now
+            return                                  # first tick establishes the baseline
+        dt = max(now - self._prev_t, 1e-3)
         total, in_mask = 0.0, 0
-        for line in out.splitlines():
-            parts = line.split(None, 4)
-            if len(parts) != 5:
+        for pid, (comm, ticks, psid) in snap.items():
+            if psid == self._own_sid or pid not in self._prev_snap:
                 continue
-            try:
-                pid, pc, pr = int(parts[0]), float(parts[2]), int(parts[3])
-            except ValueError:
+            pct = (ticks - self._prev_snap[pid][1]) / CLK_TCK / dt * 100.0
+            if pct <= 1.0:
                 continue
-            if pid in own or pc <= 1.0:
-                continue
-            total += pc
-            if self.mask_cpus is not None and pr in self.mask_cpus:
-                in_mask += 1
-                comm = parts[4].strip()
-                self.foreign_detail[comm] = self.foreign_detail.get(comm, 0) + 1
-        self.foreign_pct.append(total)
+            total += pct
+            if self.mask_cpus:
+                cpus = running_threads_on(self.mask_cpus, pid)
+                if cpus:
+                    in_mask += len(cpus)
+                    self.foreign_detail[comm] = self.foreign_detail.get(comm, 0) + 1
+        self._prev_snap, self._prev_t = snap, now
+        self.foreign_pct.append(round(total, 1))
         self.foreign_in_mask.append(in_mask)
 
     def _sample_device(self) -> None:
@@ -203,9 +215,15 @@ class Sampler(threading.Thread):
             "foreign_threads_inside_mask": stats(self.foreign_in_mask),
             "foreign_in_mask_by_command": dict(sorted(self.foreign_detail.items(),
                                                       key=lambda kv: -kv[1])[:10]),
-            "foreign_definition": "any thread outside this run's own process subtree using "
-                                  ">1% CPU; username is not usable here because concurrent "
-                                  "round workers and ctffind all run as the same user",
+            "foreign_definition": "CPU actually consumed between consecutive samples by "
+                                  "processes outside this run's own subtree, from "
+                                  "/proc/<pid>/stat utime+stime deltas. Username cannot be "
+                                  "used here: concurrent round workers and ctffind all run as "
+                                  "the same user. ps pcpu cannot be used either: it is a "
+                                  "lifetime average and does not resolve activity during the "
+                                  "run. Ownership is by session id, not by a walked process "
+                                  "tree, which races with the sampler's own subprocesses. "
+                                  "in-mask counts only threads in state R.",
             "device_vram_mib_sampled": stats(self.vram_mib),
             "device_util_pct_sampled": stats(self.gpu_util),
             "vram_note": "NVML sampled at this period; a sampled peak is a lower bound on the "
@@ -286,25 +304,110 @@ def own_subtree(root_pid: int) -> set:
     return seen
 
 
-def lane_foreign_threads(mask_cpus: set, own: set, min_pcpu: float = 20.0) -> List[str]:
-    """Busy threads sitting inside our cpuset that are not ours."""
+CLK_TCK = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+
+
+def _stat_fields(path: str) -> Optional[List[str]]:
+    """Fields of a /proc stat file, split safely around the parenthesised comm."""
     try:
-        out = subprocess.run(["ps", "-eLo", "pid=,psr=,pcpu=,comm="], capture_output=True,
-                             text=True, timeout=10).stdout
-    except Exception:
-        return []
-    hits = []
-    for line in out.splitlines():
-        parts = line.split(None, 3)
-        if len(parts) != 4:
+        with open(path) as fh:
+            raw = fh.read()
+    except OSError:
+        return None
+    close = raw.rfind(")")
+    if close < 0:
+        return None
+    return [raw[raw.find("(") + 1:close]] + raw[close + 2:].split()
+
+
+def own_session() -> int:
+    """Session id of this runner.
+
+    Session membership replaces a walked process tree for deciding what is ours. Building
+    the tree from a `ps` snapshot races with the very children the sampler spawns: a `ps` or
+    `nvidia-smi` forked microseconds earlier is absent from the snapshot and is then counted
+    as foreign load. Observed on a real series as `foreign_cpu_max = 2750%` attributed to
+    `ps` -- the sampler's own subprocess -- and to `gs`, MotionCorr's own ghostscript child.
+    Every descendant inherits the session id, and the runner is launched under `setsid`, so
+    the test is exact and needs no snapshot.
+    """
+    f = _stat_fields(f"/proc/{os.getpid()}/stat")
+    try:
+        return int(f[3])            # field 6 (session), shifted by the comm split
+    except (TypeError, ValueError, IndexError):
+        return -1
+
+
+def cpu_snapshot() -> Dict[int, Any]:
+    """{pid: (comm, busy_ticks, sid)} for every visible process.
+
+    Busy ticks are cumulative utime+stime. Two snapshots give CPU actually consumed *between*
+    them, which is the quantity an interference witness needs. `ps`'s `pcpu` cannot supply it:
+    it is cputime divided by lifetime, so sampling it at 1 Hz yields the same slowly-drifting
+    lifetime average every tick. A process that has run for 49 days and is saturating a core
+    right now reads the same as one that is idle right now, and a driver that idles for hours
+    and then spawns a build burst stays invisible for the whole burst.
+    """
+    snap: Dict[int, Any] = {}
+    try:
+        pids = [int(d) for d in os.listdir("/proc") if d.isdigit()]
+    except OSError:
+        return snap
+    for pid in pids:
+        f = _stat_fields(f"/proc/{pid}/stat")
+        if not f or len(f) < 15:
             continue
         try:
-            pid, psr, pcpu = int(parts[0]), int(parts[1]), float(parts[2])
-        except ValueError:
+            snap[pid] = (f[0], int(f[12]) + int(f[13]), int(f[3]))   # comm, utime+stime, sid
+        except (ValueError, IndexError):
             continue
-        if pid in own or pcpu < min_pcpu or psr not in mask_cpus:
+    return snap
+
+
+def running_threads_on(mask_cpus: set, pid: int) -> List[int]:
+    """CPUs in `mask_cpus` on which this process currently has a RUNNING thread."""
+    hits = []
+    try:
+        tids = os.listdir(f"/proc/{pid}/task")
+    except OSError:
+        return hits
+    for tid in tids:
+        f = _stat_fields(f"/proc/{pid}/task/{tid}/stat")
+        if not f or len(f) < 39:
             continue
-        hits.append(f"pid={pid} cpu={psr} pcpu={pcpu} comm={parts[3].strip()}")
+        # State R only: `psr` is populated for sleeping threads too, so counting every thread
+        # whose last CPU happened to fall in the lane would flag idle sleepers as intruders
+        # and keep a lane gate permanently non-clear on a quiet host.
+        if f[1] != "R":
+            continue
+        try:
+            cpu = int(f[37])
+        except (ValueError, IndexError):
+            continue
+        if cpu in mask_cpus:
+            hits.append(cpu)
+    return hits
+
+
+def lane_foreign_threads(mask_cpus: set, own: set, min_pct: float = 20.0,
+                         window_s: float = 0.4) -> List[str]:
+    """Foreign processes actually burning CPU inside our cpuset over a short window."""
+    if not mask_cpus:
+        return []
+    a = cpu_snapshot()
+    time.sleep(window_s)
+    b = cpu_snapshot()
+    sid = own_session()
+    hits = []
+    for pid, (comm, ticks, psid) in b.items():
+        if psid == sid or pid in own or pid not in a:
+            continue
+        pct = (ticks - a[pid][1]) / CLK_TCK / window_s * 100.0
+        if pct < min_pct:
+            continue
+        cpus = running_threads_on(mask_cpus, pid)
+        if cpus:
+            hits.append(f"pid={pid} comm={comm} cpu_pct={pct:.0f} on_cpus={sorted(set(cpus))}")
     return hits
 
 
@@ -369,24 +472,46 @@ def settle(load_max: float, timeout_s: int, log: List[str], mode: str = "global_
 # ----------------------------------------------------------------------------- one run
 
 
-TIMING_LINE = re.compile(r"^\s*([A-Za-z0-9_()\- ]+?)\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*(?:sec|s)?\b")
+# Two distinct instrumented formats, matched strictly rather than by a loose "name: number"
+# rule. A loose rule silently promotes ordinary log prose into the interval record: "Frames to
+# be used: 1 2 3 ..." became a stage named "Frames to be used" with value 1.0, and "The pixel
+# size for CTF estimation: 1.234" became a 1.234-second stage. Both are reported here as
+# stages that do not exist.
+#
+# The `-` in each class is placed last so it is a literal. Written `[A-Za-z0-9_ -()]`, the
+# sequence ' -(' is the range 0x20-0x28 and `-` is not a member, which is how an earlier
+# parser silently dropped every hyphenated tag ('dw - iFFT', 'prep patch - FFT').
+TIMER_LINE = re.compile(
+    r"^([A-Za-z0-9_(). -]+?)\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*sec\s*\(\s*([0-9]+)\s*"
+    r"microsec/operation\s*\)\s*$")
+CUDA_PROFILE_LINE = re.compile(
+    r"^\s*([A-Za-z0-9_(). -]+?)\s*:\s*([0-9]+(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?)\s*"
+    r"(ms|s|MiB)\s*$")
+CUDA_FALLBACK = re.compile(
+    r"falling back|fall back|materializing host frames|WARNING: CUDA", re.I)
+CUDA_EXECUTED = re.compile(r"Total GPU alignment time|\(CUDA in-VRAM\)")
 
 
-def parse_stage_timers(text: str) -> Dict[str, float]:
-    """Parse TIMING stage lines.
+def parse_stage_timers(text: str) -> Dict[str, Dict[str, float]]:
+    """Parse both instrumented formats, keeping them in separate namespaces.
 
-    The character class includes a literal '-' placed last. A previous parser wrote
-    `[A-Za-z0-9_ -()]`, in which ' -(' is the range 0x20-0x28, so '-' was not a member and
-    every hyphenated tag ('dw - iFFT', 'prep patch - FFT') was silently dropped from the
-    record rather than merely from the summary.
+    `TIMING=ON` writes its whole-run breakdown to **stdout** (`src/time.cpp` via
+    `motioncorr_runner.cpp:654`), not into the per-movie logfile. Parsing only the per-movie
+    logs therefore yields no `TIMING` stage at all, and the profiled arm contributes nothing
+    that the unprofiled arm does not already have.
     """
-    out: Dict[str, float] = {}
+    timing: Dict[str, float] = {}
+    cuda: Dict[str, float] = {}
     for line in text.splitlines():
-        m = TIMING_LINE.match(line)
+        m = TIMER_LINE.match(line)
         if m:
-            tag, val = m.group(1).strip(), float(m.group(2))
-            out[tag] = out.get(tag, 0.0) + val
-    return out
+            timing[m.group(1).strip()] = float(m.group(2))
+            continue
+        m = CUDA_PROFILE_LINE.match(line)
+        if m:
+            tag = m.group(1).strip() + (f" [{m.group(3)}]" if m.group(3) != "s" else "")
+            cuda[tag] = cuda.get(tag, 0.0) + float(m.group(2))
+    return {"timing_stdout": timing, "cuda_profile": cuda}
 
 
 def time_v_fields(text: str) -> Dict[str, Any]:
@@ -394,6 +519,7 @@ def time_v_fields(text: str) -> Dict[str, Any]:
         "User time (seconds)": "user_s",
         "System time (seconds)": "sys_s",
         "Elapsed (wall clock) time (h:mm:ss or m:ss)": "wall_str",
+        "Percent of CPU this job got": "pct_cpu",
         "Maximum resident set size (kbytes)": "maxrss_kib",
         "Voluntary context switches": "vol_ctx",
         "Involuntary context switches": "invol_ctx",
@@ -405,8 +531,17 @@ def time_v_fields(text: str) -> Dict[str, Any]:
     for line in text.splitlines():
         if ":" not in line:
             continue
-        k, _, v = line.strip().partition(":")
+        # rpartition, not partition: the wall-clock line is
+        # "Elapsed (wall clock) time (h:mm:ss or m:ss): 0:29.03" and splitting on the first
+        # colon yields the key "Elapsed (wall clock) time (h", which matches nothing.
+        k, _, v = line.strip().rpartition(":")
         key = want.get(k.strip())
+        if key is None:                       # values like 0:29.03 also contain a colon
+            for full, short in want.items():
+                if line.strip().startswith(full + ":"):
+                    key = short
+                    v = line.strip()[len(full) + 1:]
+                    break
         if key:
             v = v.strip()
             try:
@@ -502,17 +637,57 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         except Exception:
             time.sleep(0.25)
 
-    rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
-    wall = time.time() - t0
-    samp.stop(); rss.stop()
-    samp.join(timeout=5); rss.join(timeout=5)
+    timed_out = False
+    try:
+        rc = proc.wait(timeout=cfg.get("run_timeout_s", 7200))
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        log.append(f"RUN_TIMEOUT after {cfg.get('run_timeout_s', 7200)}s; killing payload")
+        proc.kill()
+        try:
+            rc = proc.wait(timeout=60)
+        except subprocess.TimeoutExpired:
+            log.append("payload did not die after SIGKILL")
+            rc = -9
+    except BaseException:
+        proc.kill()
+        proc.wait(timeout=60)
+        raise
+    finally:
+        wall = time.time() - t0
+        samp.stop(); rss.stop()
+        samp.join(timeout=15); rss.join(timeout=15)
+        if samp.is_alive() or rss.is_alive():
+            log.append("a sampler thread did not stop within 15s; its summary may be partial")
 
     time_txt = (rundir / "time_stderr.log").read_text(errors="replace")
     stdout_txt = (rundir / "stdout.log").read_text(errors="replace")
 
-    stage = {}
+    stage = {"whole_run_stdout": parse_stage_timers(stdout_txt)["timing_stdout"],
+             "per_movie": {}}
+    executed, fell_back, movie_logs = 0, [], 0
     for lg in sorted((rundir / "out").rglob("*.log")):
-        stage[lg.name] = parse_stage_timers(lg.read_text(errors="replace"))
+        txt = lg.read_text(errors="replace")
+        movie_logs += 1
+        stage["per_movie"][lg.name] = parse_stage_timers(txt)["cuda_profile"]
+        if CUDA_EXECUTED.search(txt):
+            executed += 1
+        for line in txt.splitlines():
+            if CUDA_FALLBACK.search(line):
+                fell_back.append(f"{lg.name}: {line.strip()[:120]}")
+    # The startup banner only proves --gpu was passed to a CUDA build: it is printed in
+    # initialise() before any movie is read, and it survives every movie falling back to the
+    # CPU. The per-movie evidence below is what distinguishes a GPU run from a silent
+    # CPU-fallback run that would look several times slower for no recorded reason.
+    backend_witness = {
+        "startup_banner": [ln for ln in stdout_txt.splitlines()
+                           if "CUDA acceleration on GPU device" in ln][:2],
+        "movie_logs_seen": movie_logs,
+        "movies_with_cuda_execution_evidence": executed,
+        "fallback_warnings": fell_back,
+        "all_movies_on_cuda": (gpu_index is not None and movie_logs > 0
+                               and executed == movie_logs and not fell_back),
+    }
 
     products = []
     for f in sorted((rundir / "out").rglob("*")):
@@ -523,9 +698,6 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
             if f.suffix in (".mrc", ".mrcs"):
                 entry["mrc"] = mrc_split_digests(f)
             products.append(entry)
-
-    cuda_witness = [ln for ln in stdout_txt.splitlines()
-                    if "GPU" in ln or "CUDA" in ln or "device" in ln.lower()][:8]
 
     return {
         "tag": tag,
@@ -538,17 +710,18 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         "cwd": arm["cwd"],
         "env_overrides": arm.get("env") or {},
         "exit_code": rc,
+        "timed_out": timed_out,
         "wall_s": round(wall, 3),
         "requested": {"j": arm["j"], "max_io_threads": arm.get("max_io_threads"),
                       "gpu_ordinal": gpu_index},
         "device_identity": device_identity,
         "effective": {"j": arm["j"],
                       "io_threads": min(arm["j"], arm["max_io_threads"])
-                      if arm.get("max_io_threads") else arm["j"]},
+                      if (arm.get("max_io_threads") or -1) > 0 else arm["j"]},
         "settle": settle_info,
         "cache_regime": {
             "declared": arm.get("cache_regime", "warm-unless-first"),
-            "host_cached_kib": int(sh("awk '/^Cached:/{print $2}' /proc/meminfo") or 0),
+            "host_cached_kib": _as_int(sh("awk '/^Cached:/{print $2}' /proc/meminfo")),
             "note": "global cache drops are forbidden on this shared host, so the page-cache "
                     "regime is recorded, not controlled; 'File system inputs: 0' in rusage "
                     "means the read was served from cache, not that decode was free",
@@ -558,9 +731,13 @@ def execute_arm(arm: Dict[str, Any], cfg: Dict[str, Any], outdir: Path,
         "memory": rss.summary(),
         "sampling": samp.summary(),
         "stage_timers": stage,
-        "stage_timers_note": "stage intervals nest and overlap; they are not summed into a total, "
-                             "and no TIFF cost is derived as wall minus GPU kernel timers",
-        "cuda_witness_lines": cuda_witness,
+        "stage_timers_note": "whole_run_stdout comes from the TIMING build only and is absent "
+                             "otherwise; per_movie holds the CUDA profile block. Intervals nest "
+                             "and overlap, so they are never summed into a total, and no TIFF "
+                             "cost is derived as wall minus GPU kernel timers. The in-binary "
+                             "Timer is not thread-safe, so a stage covering parallel work is "
+                             "indicative, not exact.",
+        "backend_witness": backend_witness,
         "products": products,
         "product_count": len(products),
         "notes": log,

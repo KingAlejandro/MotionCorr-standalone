@@ -1,0 +1,606 @@
+{
+  "name": "issue26-cpu64-jscaling",
+  "source_commit": "4c952b3f54479653512c4d208e09c9a8c02f3726",
+  "config": {
+    "own_user": "ubuntu",
+    "settle_load_max": 4.0,
+    "settle_timeout_s": 180,
+    "settle_full_gate": true,
+    "inter_run_quiet_s": 8.0,
+    "foreign_sample_period_s": 1.0,
+    "rss_period_s": 0.25,
+    "run_timeout_s": 5400,
+    "settle_mode": "lane"
+  },
+  "input_hashes": {
+    "subset4_star": "/home/ubuntu/mc-issue26-envelope/runroot/subset4.star",
+    "gain": "/home/ubuntu/mc-issue26-envelope/runroot/Movies/gain.mrc"
+  },
+  "binaries": {
+    "cpu_release": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+    "cpu_release_timing": "/home/ubuntu/mc-issue26-envelope/build-cpu-timing/motioncorr"
+  },
+  "interference_note": "two foreign ctffind processes run permanently at ~100% each and are unpinned (Cpus_allowed_list 0-63), so they can enter this lane. They are not altered; each run samples them. settle_load_max is 4.0 rather than 2.0 because 2.0 is unreachable while they run.",
+  "arms": [
+    {
+      "id": "c1_j1_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 1,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j1_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 1,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "c1_j2_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 2,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j2_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 2,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "c1_j4_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 4,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j4_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 4,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "c1_j8_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j8_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 8,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "c1_j16_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 16,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j16_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 16,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "c1_j32_unbound",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 32,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {}
+    },
+    {
+      "id": "c1_j32_spread",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 32,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "env": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "warmup_cpu_j16",
+      "binary": "/home/ubuntu/mc-issue26-envelope/build-cpu/motioncorr",
+      "cwd": "/home/ubuntu/mc-issue26-envelope/runroot",
+      "input_star": "subset4.star",
+      "j": 16,
+      "gpu": null,
+      "cpu_mask": "0-31",
+      "extra_opts": [
+        "--use_own",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--seed",
+        "1"
+      ],
+      "cache_regime": "cold-or-mixed (first touch)"
+    }
+  ],
+  "schedule": [
+    {
+      "arm": "warmup_cpu_j16",
+      "pair": -1,
+      "order": 0,
+      "rep": 0
+    },
+    {
+      "arm": "c1_j1_unbound",
+      "pair": 210,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j1_spread",
+      "pair": 210,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j2_unbound",
+      "pair": 211,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j2_spread",
+      "pair": 211,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j4_unbound",
+      "pair": 212,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j4_spread",
+      "pair": 212,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j8_unbound",
+      "pair": 213,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j8_spread",
+      "pair": 213,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j16_unbound",
+      "pair": 214,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j16_spread",
+      "pair": 214,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j32_unbound",
+      "pair": 215,
+      "order": 0,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j32_spread",
+      "pair": 215,
+      "order": 1,
+      "rep": 1
+    },
+    {
+      "arm": "c1_j1_spread",
+      "pair": 220,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j1_unbound",
+      "pair": 220,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j2_spread",
+      "pair": 221,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j2_unbound",
+      "pair": 221,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j4_spread",
+      "pair": 222,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j4_unbound",
+      "pair": 222,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j8_spread",
+      "pair": 223,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j8_unbound",
+      "pair": 223,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j16_spread",
+      "pair": 224,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j16_unbound",
+      "pair": 224,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j32_spread",
+      "pair": 225,
+      "order": 0,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j32_unbound",
+      "pair": 225,
+      "order": 1,
+      "rep": 2
+    },
+    {
+      "arm": "c1_j1_unbound",
+      "pair": 230,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j1_spread",
+      "pair": 230,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j2_unbound",
+      "pair": 231,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j2_spread",
+      "pair": 231,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j4_unbound",
+      "pair": 232,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j4_spread",
+      "pair": 232,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j8_unbound",
+      "pair": 233,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j8_spread",
+      "pair": 233,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j16_unbound",
+      "pair": 234,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j16_spread",
+      "pair": 234,
+      "order": 1,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j32_unbound",
+      "pair": 235,
+      "order": 0,
+      "rep": 3
+    },
+    {
+      "arm": "c1_j32_spread",
+      "pair": 235,
+      "order": 1,
+      "rep": 3
+    }
+  ]
+}

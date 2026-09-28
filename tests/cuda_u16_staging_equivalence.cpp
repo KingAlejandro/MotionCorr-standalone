@@ -165,6 +165,35 @@ int main() {
         }
     }
 
+    // Second negative control, for the other oracle. The check above short-circuits
+    // on the sum, so it never demonstrated that the per-frame comparison can fail.
+    // Perturb one downloaded frame value directly and require that branch to report it.
+    {
+        Arm a, b;
+        if (!runFloatArm(f32, &gain_plain, a, log) || !runU16Arm(u16, &gain_plain, b, log)) {
+            std::cerr << "FAIL frame-oracle control: an arm did not complete\n" << log.str();
+            return 1;
+        }
+        std::string why;
+        if (!identical(a, b, why)) {
+            std::cerr << "FAIL frame-oracle control: the unperturbed pair already differs ("
+                      << why << ")\n";
+            failures++;
+        } else {
+            const int k = NFRAMES - 1;
+            float &v = DIRECT_MULTIDIM_ELEM(b.frames[k](), n / 3);
+            v = -v - 1.0f;   // changes the bits for every finite value, including 0
+            if (identical(a, b, why)) {
+                std::cerr << "FAIL frame-oracle control: a changed resident frame was not "
+                             "detected, so the frame comparison above is vacuous\n";
+                failures++;
+            } else {
+                std::cout << "PASS frame-oracle control: changed resident frame detected ("
+                          << why << ")\n";
+            }
+        }
+    }
+
     if (failures) {
         std::cerr << failures << " check(s) failed\n";
         return 1;

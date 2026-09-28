@@ -23,6 +23,7 @@
 #include <limits>
 #include <climits>
 #include <cctype>
+#include <stdexcept>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -3353,26 +3354,42 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 			}
 			if (f_defect.peek() == EOF) break;
 
-			const long long record_line = line;
-			long long x = 0, y = 0, w = 0, h = 0;
-			if (!(f_defect >> x >> y >> w >> h)) {
-				// Error path only: recover the offending token for the message.
-				f_defect.clear();
+			const std::string where = " (record " + std::to_string(record_num + 1) +
+			                          ", line " + std::to_string(line) +
+			                          ") of " + fn_defect;
+
+			// Read the four fields as tokens and convert each explicitly. Streaming
+			// straight into integers cannot report the offending field: an
+			// out-of-range value sets failbit *after* consuming its digits, so a
+			// recovery read would name the following token instead.
+			static const char *const FIELD[4] = { "x", "y", "w", "h" };
+			long long field[4] = { 0, 0, 0, 0 };
+			for (int i = 0; i < 4; i++) {
 				std::string token;
-				f_defect >> token;
-				const std::string where = " (record " + std::to_string(record_num + 1) +
-				                          ", line " + std::to_string(record_line) +
-				                          ") of " + fn_defect;
-				if (token.empty()) {
+				if (!(f_defect >> token)) {
 					REPORT_ERROR("Truncated defect record" + where +
-					             ": expected four integers 'x y w h', but the file "
-					             "ended mid-record.");
+					             ": expected four integers 'x y w h', but the file ended "
+					             "after " + std::to_string(i) + " of 4 fields.");
 				}
-				REPORT_ERROR("Malformed defect record" + where +
-				             ": expected four integers 'x y w h', found \"" + token +
-				             "\". The MotionCor2 txt defect format does not support "
-				             "comments, headers or non-integer fields.");
+				size_t used = 0;
+				try {
+					field[i] = std::stoll(token, &used);
+				} catch (const std::out_of_range &) {
+					REPORT_ERROR("Out-of-range defect field" + where + ": '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which does not fit in a 64-bit integer.");
+				} catch (const std::invalid_argument &) {
+					used = 0;
+				}
+				if (used != token.size()) {
+					REPORT_ERROR("Malformed defect record" + where + ": field '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which is not an integer. The MotionCor2 txt defect "
+					             "format does not support comments, headers or "
+					             "non-integer fields.");
+				}
 			}
+			const long long x = field[0], y = field[1], w = field[2], h = field[3];
 			++record_num;
 
 			if (w <= 0 || h <= 0) continue;

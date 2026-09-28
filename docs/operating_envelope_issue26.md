@@ -168,6 +168,17 @@ which MotionCorr embeds in the EPS plot title, `corrected_micrographs.star` and 
 lists. PDFs were checked for presence and size only, since ghostscript stamps a creation
 date. No run exited non-zero. No arm lost a movie.
 
+**Cross-pass determinism.** The instrument correction in section 10 forced a complete
+re-measurement, which yields a control that was not planned: the same 13 arms, same binary
+`d80cdadb…`, same inputs, run as two independent passes hours apart, produced
+**bit-identical MRC payloads in 13 of 13 arms**. So the CUDA backend is deterministic
+run-to-run at this configuration, and the timing arms are comparing genuinely identical
+computations rather than merely similar ones.
+
+This is a **same-backend** statement only. It says nothing about CUDA-versus-CPU agreement,
+where `docs/reference_gates.md` records Gate 2 failures on all 24 movies; that is a different
+requirement and it is not addressed here.
+
 **Positional bias.** Pooled over arms, the mean ratio of wall time to that arm's median by
 slot within a repeat ranges 0.986–1.033 with no monotone trend, so the design's order
 rotation did not leave a systematic first-slot or last-slot advantage in this series. The

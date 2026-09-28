@@ -1,0 +1,248 @@
+##### PHASE 3 START #####
+UTC 2026-09-28T02:25:10Z
+Cpus_allowed_list:	32-63
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+membind: 1 
+interference at start:
+    PID USER     %CPU COMMAND
+1156942 ubuntu   99.9 ctffind
+1635429 ubuntu   99.9 ctffind
+2722253 ubuntu    0.8 node
+3174948 root      0.1 fwupd
+
+##### PRISTINE BASE BUILD (reference arm) #####
+ref head: 4c952b3f54479653512c4d208e09c9a8c02f3726
+ref tree: 2a0b2201f71a43c76bd64bf8ed01b54d9cbf126c
+ref dirty files: 0  (must be 0 -- a contaminated reference invalidates the whole comparison)
+ref configure exit=0
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+ref build exit=0
+
+##### BINARY AND INPUT PROVENANCE #####
+6ac30992ba33cb9a306a57626697b33a64d0d8a7f6b76ebc0c66f17341a21133  /home/ubuntu/mc-i96-integration/refsrc/build/motioncorr
+6ad15504be110fc13b4ab19af905743189907f398bd7ea83322b9b1074d13fa0  /home/ubuntu/mc-i96-integration/src/build/motioncorr
+--- these two binaries MUST differ, or the A/B compares one build with itself ---
+OK: distinct binaries
+--- inputs ---
+tutorial movies: 24
+fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041  /home/ubuntu/mc51/tutorial/movies.star
+movie payload digest-of-digests: 240fefa2297e0c5622931f8f5574b1eccb8892fc9d66ae2fbf39ad2a995ef452  -
+
+##### A/B: all 24 movies, CPU backend, --j 8, default options #####
+A/B exit=1
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+
+##### A/B SUMMARY FROM JSON #####
+top-level keys: ['what', 'not_a_claim_about', 'comparator', 'comparator_sha256', 'options', 'input_star', 'tutorial', 'ref_binary', 'ref_binary_sha256', 'test_binary', 'test_binary_sha256', 'normalization_patterns', 'ref_run', 'test_run', 'tree_comparison', 'per_movie_exact_gate', 'controls', 'summary', 'overall_graded', 'overall_auxiliary', 'overall']
+  what = same-backend regression A/B, main-4c952b3 vs integrate-round96, CPU, j=8
+  comparator = /home/ubuntu/mc-i96-integration/src/tools/compare_motioncorr.py
+  comparator_sha256 = cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b
+  input_star = movies.star
+  tutorial = /home/ubuntu/mc51/tutorial
+  ref_binary = /home/ubuntu/mc-i96-integration/refsrc/build/motioncorr
+  ref_binary_sha256 = 6ac30992ba33cb9a306a57626697b33a64d0d8a7f6b76ebc0c66f17341a21133
+  test_binary = /home/ubuntu/mc-i96-integration/src/build/motioncorr
+  test_binary_sha256 = 6ad15504be110fc13b4ab19af905743189907f398bd7ea83322b9b1074d13fa0
+  overall_graded = PASS
+  overall_auxiliary = FAIL
+  overall = FAIL
+
+/what = same-backend regression A/B, main-4c952b3 vs integrate-round96, CPU, j=8
+/not_a_claim_about = list[3]
+/comparator = /home/ubuntu/mc-i96-integration/src/tools/compare_motioncorr.py
+/comparator_sha256 = cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b
+/options = list[16]
+/options ... 13 more
+/input_star = movies.star
+/tutorial = /home/ubuntu/mc51/tutorial
+/ref_binary = /home/ubuntu/mc-i96-integration/refsrc/build/motioncorr
+/ref_binary_sha256 = 6ac30992ba33cb9a306a57626697b33a64d0d8a7f6b76ebc0c66f17341a21133
+/test_binary = /home/ubuntu/mc-i96-integration/src/build/motioncorr
+/test_binary_sha256 = 6ad15504be110fc13b4ab19af905743189907f398bd7ea83322b9b1074d13fa0
+/normalization_patterns = list[9]
+/normalization_patterns ... 6 more
+/ref_run/command = list[21]
+/ref_run/command ... 18 more
+/ref_run/cwd = /home/ubuntu/mc51/tutorial
+/ref_run/exit_code = 0
+/ref_run/wall_seconds = 218.41
+/ref_run/stdout_tail = 3.67 min ...............~~(,_,">                                          [oo]
+1.07/3.65 min .................~~(,_,">                                       [oo]
+1.23/3.70 min ...................~~(,_,">                                     [oo]
+1.38/3.68 min ......................~~(,_,">                                  [oo]
+1.53/3.67 min .........................~~(,_,">                                [oo]
+1.68/3.67 min ...........................~~(,_,">                             [oo]
+1.83/3.67 min ..............................~~(,_,">                           [oo]
+1.98/3.65 min ................................~~(,_,">                        [oo]
+2.13/3.65 min ...................................~~(,_,">                      [oo]
+2.28/3.65 min .....................................~~(,_,">                   [oo]
+2.43/3.65 min .......................................~~(,_,">                 [oo]
+2.58/3.63 min ..........................................~~(,_,">              [oo]
+2.73/3.63 min .............................................~~(,_,">            [oo]
+2.88/3.63 min ...............................................~~(,_,">         [oo]
+3.03/3.63 min ..................................................~~(,_,">       [oo]
+3.18/3.63 min ....................................................~~(,_,">    [oo]
+3.33/3.63 min .......................................................~~(,_,">  [oo]
+3.48/3.63 min .........................................................~~(,_,">oo]
+3.63/3.63 min ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /home/ubuntu/mc-i96-integration/ab24/out_main-4c952b3_j8/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /home/ubuntu/mc-i96-integration/ab24/out_main-4c952b3_j8/logfile.pdf
+
+/ref_run/stderr_tail = 
+/test_run/command = list[21]
+/test_run/command ... 18 more
+/test_run/cwd = /home/ubuntu/mc51/tutorial
+/test_run/exit_code = 0
+/test_run/wall_seconds = 210.082
+/test_run/stdout_tail = ..............~~(,_,">                                          [oo]
+1.03/3.53 min .................~~(,_,">                                       [oo]
+1.18/3.55 min ...................~~(,_,">                                     [oo]
+1.33/3.55 min ......................~~(,_,">                                  [oo]
+1.47/3.52 min .........................~~(,_,">                                [oo]
+1.62/3.52 min ...........................~~(,_,">                             [oo]
+1.77/3.53 min ..............................~~(,_,">                           [oo]
+1.92/3.53 min ................................~~(,_,">                        [oo]
+2.05/3.50 min ...................................~~(,_,">                      [oo]
+2.20/3.52 min .....................................~~(,_,">                   [oo]
+2.35/3.52 min .......................................~~(,_,">                 [oo]
+2.48/3.50 min ..........................................~~(,_,">              [oo]
+2.63/3.50 min .............................................~~(,_,">            [oo]
+2.78/3.50 min ...............................................~~(,_,">         [oo]
+2.92/3.50 min ..................................................~~(,_,">       [oo]
+3.07/3.50 min ....................................................~~(,_,">    [oo]
+3.20/3.48 min .......................................................~~(,_,">  [oo]
+3.35/3.48 min .........................................................~~(,_,">oo]
+3.50/3.50 min ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /home/ubuntu/mc-i96-integration/ab24/out_integrate-round96_j8/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /home/ubuntu/mc-i96-integration/ab24/out_integrate-round96_j8/logfile.pdf
+
+/test_run/stderr_tail = 
+/tree_comparison/files = list[109]
+/tree_comparison/files[0]/path = Movies/20170629_00021_frameImage.log
+/tree_comparison/files[0]/ref_sha256 = e3405749c1124cbf926cc10e23f5f17ba8fbf11aede39601fb885a261e2b7b63
+/tree_comparison/files[0]/test_sha256 = 87846b5fb454293daf377c3ab09f1f718842caa6ec828f7c516498cd56c97584
+/tree_comparison/files[0]/kind = auxiliary
+/tree_comparison/files[0]/status = PASS
+/tree_comparison/files[0]/identical_bytes = False
+/tree_comparison/files[0]/identical_normalized = True
+/tree_comparison/files[0]/ref_bytes = 4844
+/tree_comparison/files[0]/test_bytes = 4849
+/tree_comparison/files[1]/path = Movies/20170629_00021_frameImage.mrc
+/tree_comparison/files[1]/ref_sha256 = 1d23f2eaca732d44db2d8d0de5e12b5302c54c31c402a9deb2d8a632f729b4ac
+/tree_comparison/files[1]/test_sha256 = f58f3e6e00fea512221bd35abb4f2bb526b95a4f0646ec52c5c18e6e6aab20f0
+/tree_comparison/files[1]/kind = corrected_image
+/tree_comparison/files[1]/status = PASS
+/tree_comparison/files[1]/pixels_compared = 14238980
+/tree_comparison/files[1]/pixel_identical = True
+/tree_comparison/files[1]/max_abs_pixel_error = 0.0
+/tree_comparison/files[1]/core_header_diff_bytes = 0
+/tree_comparison/files[1]/label_header_diff_bytes_raw = 3
+/tree_comparison/files[1]/normalized_label_diff_bytes = 0
+/tree_comparison/files[1]/header_normalization = RELION clock stamp in the first 80-byte MRC label, via compare_motioncorr.normalized_mrc_labels
+/tree_comparison/files[2]/path = Movies/20170629_00021_frameImage.star
+/tree_comparison/files[2]/ref_sha256 = 3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369
+/tree_comparison/files[2]/test_sha256 = 3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369
+/tree_comparison/files[2]/kind = metadata
+/tree_comparison/files[2]/status = PASS
+/tree_comparison/files[2]/field_comparison/num_differences = 0
+/tree_comparison/files[2]/field_comparison/differences = list[0]
+/tree_comparison/files[2]/normalized_text_identical = True
+/tree_comparison/files ... 106 more
+/per_movie_exact_gate = list[24]
+/per_movie_exact_gate[0]/command = list[15]
+/per_movie_exact_gate[0]/command ... 12 more
+/per_movie_exact_gate[0]/exit_code = 0
+/per_movie_exact_gate[0]/overall_status = PASS
+/per_movie_exact_gate[0]/coverage_complete = True
+/per_movie_exact_gate[0]/stderr_tail = 
+/per_movie_exact_gate[0]/movie = 20170629_00021_frameImage
+/per_movie_exact_gate[0]/status = PASS
+/per_movie_exact_gate[1]/command = list[15]
+/per_movie_exact_gate[1]/command ... 12 more
+/per_movie_exact_gate[1]/exit_code = 0
+/per_movie_exact_gate[1]/overall_status = PASS
+/per_movie_exact_gate[1]/coverage_complete = True
+/per_movie_exact_gate[1]/stderr_tail = 
+/per_movie_exact_gate[1]/movie = 20170629_00022_frameImage
+/per_movie_exact_gate[1]/status = PASS
+/per_movie_exact_gate[2]/command = list[15]
+/per_movie_exact_gate[2]/command ... 12 more
+/per_movie_exact_gate[2]/exit_code = 0
+/per_movie_exact_gate[2]/overall_status = PASS
+/per_movie_exact_gate[2]/coverage_complete = True
+/per_movie_exact_gate[2]/stderr_tail = 
+/per_movie_exact_gate[2]/movie = 20170629_00023_frameImage
+/per_movie_exact_gate[2]/status = PASS
+/per_movie_exact_gate ... 21 more
+/controls/victim = Movies/20170629_00021_frameImage.mrc
+/controls/missing/detected = True
+/controls/missing/failing_paths = list[5]
+/controls/missing/failing_paths ... 2 more
+/controls/missing/first_reason = None
+/controls/pixel/detected = True
+/controls/pixel/failing_paths = list[5]
+/controls/pixel/failing_paths ... 2 more
+/controls/pixel/first_reason = None
+/controls/header/detected = True
+/controls/header/failing_paths = list[5]
+/controls/header/failing_paths ... 2 more
+/controls/header/first_reason = None
+/controls/all_detected = True
+/summary/artifacts_total = 109
+/summary/artifacts_pass = 105
+/summary/artifacts_fail = 4
+/summary/corrected_images_compared = 24
+/summary/corrected_images_pass = 24
+/summary/total_pixels_compared = 341735520
+/summary/star_files_compared = 25
+/summary/auxiliary_compared = 60
+/summary/auxiliary_fail = 4
+/summary/per_movie_exact_gate_pass = 24
+/summary/per_movie_exact_gate_total = 24
+/summary/controls_all_detected = True
+/overall_graded = PASS
+/overall_auxiliary = FAIL
+/overall = FAIL
+
+##### ORDERED DECODED-BUFFER CONTROL #####
+ref dumper build exit=0
+cand dumper build exit=0
+53e4e0ffe14cebc58201d733c126bbc41a50532a27b936bbffd2ba7948234c23  /home/ubuntu/mc-i96-integration/dump-ref
+8c5238be1c839074f1e584daeda42ea7528608987d52637b199e2fa4925acd9c  /home/ubuntu/mc-i96-integration/dump-cand
+decoded-buffer control exit=0
+{
+  "cases": 5,
+  "pass": 5,
+  "fail": 0,
+  "unrun": 0,
+  "total_pixels_matched": 740431779,
+  "total_pixels_compared": 740431779
+}
+overall: PASS
+
+##### DONE PHASE 3 #####
+UTC 2026-09-28T02:34:40Z

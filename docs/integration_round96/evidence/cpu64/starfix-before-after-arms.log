@@ -1,0 +1,31 @@
+=== arm_reviewed_head_f965070 gen.log ===
+km_global_hisnr: /home/ubuntu/mc-i96-starfix/arm_reviewed_head_f965070/km_global_hisnr.mrcs (12583936 bytes, sha256 f9da46682b8466c7...)
+    star: /home/ubuntu/mc-i96-starfix/arm_reviewed_head_f965070/km_global_hisnr.star
+    truth: /home/ubuntu/mc-i96-starfix/arm_reviewed_head_f965070/km_global_hisnr_ground_truth.json
+=== arm_reviewed_head_f965070 verify.log ===
+=== Canonical Fixture Verification (file:/home/ubuntu/mc-i96-starfix/oldsrc/test-data/known_motion/MANIFEST.json) ===
+             PASS  km_global_hisnr
+VERIFIED: 1 canonical fixtures match trusted manifest (0 heavy cases excluded).
+
+=== arm_fix_head gen.log ===
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-i96-starfix/arm_fix_head/gen_mutated.py", line 572, in <module>
+    main()
+  File "/home/ubuntu/mc-i96-starfix/arm_fix_head/gen_mutated.py", line 534, in main
+    info = generate_case(name, args.outdir, repo_root, noise_rel=args.noise_rel,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/mc-i96-starfix/arm_fix_head/gen_mutated.py", line 370, in generate_case
+    raise RuntimeError(
+RuntimeError: Canonical mode STAR disagreement for km_global_hisnr: the committed STAR input does not match what this generator would write. The committed file was NOT modified. If the change is intended, update the fixture and its manifest digest as an explicit maintenance step.
+--- committed km_global_hisnr.star
++++ generated
+@@ -11,3 +11,3 @@
+ _rlnAmplitudeContrast #6
+-opticsGroup1 1 0.885000 300.0 2.7 0.1
++opticsGroup1 1 0.885000 200.0 2.7 0.1
+ 
+=== arm_fix_head verify.log ===
+=== Canonical Fixture Verification (file:/home/ubuntu/mc-i96-starfix/src/test-data/known_motion/MANIFEST.json) ===
+             PASS  km_global_hisnr
+VERIFIED: 1 canonical fixtures match trusted manifest (0 heavy cases excluded).
+

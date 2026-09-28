@@ -14,3 +14,8 @@ __pycache__/
 # test-data/generate_known_motion_fixture.py; hashes are versioned in
 # test-data/known_motion/MANIFEST.json
 /test-data/known_motion/*.mrcs
+
+# Per-worker process scratch (#98): status file and host validation scripts
+# are maintained in the worktree, not merged to main.
+/WORKER_STATUS.md
+/i98_cpu64_*.sh

@@ -283,6 +283,47 @@ int readMRC(long int img_select, bool isStack=false, const FileName &name="")
 /** MRC Writer
   * @ingroup MRC
 */
+/** Write one block of an MRC file, failing closed.
+ *
+ * stdio signals a short or failed write only through the returned item count
+ * and the stream error indicator. An unchecked fwrite turns a full disk, a
+ * quota or an I/O error into a silently truncated micrograph that the runner
+ * then publishes as a completed movie, so every write below goes through here.
+ *
+ * Returns an empty string on success, otherwise a diagnostic naming the output
+ * path and the stage. A successful return is not yet durable: the same error
+ * can instead surface at flush time, which fImageHandler::closeFile checks.
+ */
+std::string mrcWriteBlock(FILE *fimg, const void *buffer, size_t bytes, const std::string &stage)
+{
+	if (bytes == 0) return "";
+
+	errno = 0;
+	// A single-item fwrite returns 1 only if every byte was accepted, so the
+	// count is the whole test. The stream error indicator is deliberately not
+	// consulted: it is sticky, so an earlier failure on a reused "r+" stream
+	// would condemn a write that actually succeeded.
+	if (fwrite(buffer, bytes, 1, fimg) == 1) return "";
+
+	const int saved_errno = errno;
+	return "Failed to write " + stage + " (" + std::to_string(bytes) +
+	       " bytes) to " + (std::string)filename + ": " +
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("short write"));
+}
+
+/** Seek within an MRC file being written, failing closed. */
+std::string mrcSeek(FILE *fimg, long int offset, int whence, const std::string &stage)
+{
+	errno = 0;
+	if (fseek(fimg, offset, whence) == 0) return "";
+
+	const int saved_errno = errno;
+	return "Failed to seek to " + stage + " in " + (std::string)filename + ": " +
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("seek failed"));
+}
+
 int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERWRITE, const DataType datatype=Unknown_Type) /* TODO: add type */
 {
 	MRChead *header = (MRChead *) askMemory(sizeof(MRChead));
@@ -497,9 +538,14 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	fl.l_type   = F_WRLCK;
 	fcntl(fileno(fimg), F_SETLKW, &fl); /* locked */
 
+	// The first write error wins; the rest of the routine then skips straight to
+	// releasing the lock and the buffers before reporting it, so a failed write
+	// frees exactly what a successful one does.
+	std::string write_error;
+
 	// Write header
 	if(mode == WRITE_OVERWRITE || mode == WRITE_APPEND)
-		fwrite(header, MRCSIZE, 1, fimg);
+		write_error = mrcWriteBlock(fimg, header, MRCSIZE, "MRC header");
 	freeMemory(header, sizeof(MRChead));
 
 	// When the file type already matches the in-memory type, castPage2Datatype
@@ -508,39 +554,45 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	// first-touching a second full-size image per output file.
 	const bool write_in_place = (output_type == Float && typeid(T) == typeid(float));
 
-	if (write_in_place && NSIZE(data) == 1 && mode == WRITE_OVERWRITE)
-	{
-		fwrite(MULTIDIM_ARRAY(data), datasize, 1, fimg);
-
-		// Unlock the file
-		fl.l_type = F_UNLCK;
-		fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
-
-		return(0);
-	}
-
 	//write only once, ignore select_img
-	char* fdata = (char*)askMemory(datasize);
 	//think about writing in several chunks
+	char* fdata = NULL;
 
-	if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
+	if (write_error.empty())
 	{
-		castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
-		fwrite(fdata, datasize, 1, fimg);
-	}
-	else
-	{
-		if (mode == WRITE_APPEND)
-			fseek(fimg, 0, SEEK_END);
-		else if (mode == WRITE_REPLACE)
+		if (write_in_place && NSIZE(data) == 1 && mode == WRITE_OVERWRITE)
 		{
-			fseek(fimg, offset + datasize * img_select, SEEK_SET);
+			write_error = mrcWriteBlock(fimg, MULTIDIM_ARRAY(data), datasize, "image data");
 		}
-
-		for (size_t i = imgStart; i < imgEnd; i++)
+		else if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
 		{
-			castPage2Datatype(MULTIDIM_ARRAY(data) + i * datasize_n, fdata, output_type, datasize_n);
-			fwrite(fdata, datasize, 1, fimg);
+			fdata = (char*)askMemory(datasize);
+			castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
+			write_error = mrcWriteBlock(fimg, fdata, datasize, "image data");
+		}
+		else
+		{
+			if (mode == WRITE_APPEND)
+				write_error = mrcSeek(fimg, 0, SEEK_END, "the end of the stack");
+			else if (mode == WRITE_REPLACE)
+			{
+				write_error = mrcSeek(fimg, offset + datasize * img_select, SEEK_SET,
+				                      "image " + std::to_string(img_select));
+			}
+
+			if (write_error.empty())
+			{
+				fdata = (char*)askMemory(datasize);
+				for (size_t i = imgStart; i < imgEnd && write_error.empty(); i++)
+				{
+					castPage2Datatype(MULTIDIM_ARRAY(data) + i * datasize_n, fdata, output_type, datasize_n);
+					// The slice label is appended only on failure, so the success
+					// path of a long stack write allocates nothing extra per frame.
+					write_error = mrcWriteBlock(fimg, fdata, datasize, "image data");
+					if (!write_error.empty())
+						write_error += " (slice " + std::to_string(i) + ")";
+				}
+			}
 		}
 	}
 
@@ -548,7 +600,13 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	fl.l_type = F_UNLCK;
 	fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
 
-	freeMemory(fdata, datasize);
+	if (fdata != NULL)
+		freeMemory(fdata, datasize);
+
+	// Reported only after the lock and the scratch buffer are released, so the
+	// throw cannot leak them.
+	if (!write_error.empty())
+		REPORT_ERROR(write_error);
 
 	return(0);
 }

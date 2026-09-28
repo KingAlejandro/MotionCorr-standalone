@@ -1,0 +1,60 @@
+2026-09-28T00:25:22+00:00
+3037c4bff197e2011f8a5121f4dd32f43047b251
+95b5f0d37d481355b8abe30f7380c33d9ea173a87bec6e8fc3e567c057622bd4  test-data/synthetic/synthetic_movie.tiff
+ad5cd5ba40d0ce2e3693bbc027879761d4c32e5220532e5de02f15d9c29ca3fa  build/motioncorr
+policy: bind
+preferred node: 1
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 
+cpubind: 1 
+nodebind: 1 
+membind: 1 
+preferred: 1 
+Cpus_allowed_list:	32-47
+[ 95%] Built target motioncorr_core
+[100%] Built target runner_numerics
+[100%] Built target motioncorr
+Test project /home/ubuntu/mc-pr103-fix-433f04e/build
+      Start  1: SyntheticRegression
+ 1/13 Test  #1: SyntheticRegression ..............   Passed    1.02 sec
+      Start  2: HotPixelRngDeterminism
+ 2/13 Test  #2: HotPixelRngDeterminism ...........   Passed    0.56 sec
+      Start  3: RunnerExposure
+ 3/13 Test  #3: RunnerExposure ...................   Passed    0.48 sec
+      Start  4: Runner_failure
+ 4/13 Test  #4: Runner_failure ...................   Passed    0.12 sec
+      Start  5: Runner_invalid
+ 5/13 Test  #5: Runner_invalid ...................   Passed    0.11 sec
+      Start  6: Runner_resume
+ 6/13 Test  #6: Runner_resume ....................   Passed    1.92 sec
+      Start  7: Runner_tomography
+ 7/13 Test  #7: Runner_tomography ................   Passed    0.39 sec
+      Start  8: RunnerLateBin
+ 8/13 Test  #8: RunnerLateBin ....................   Passed    0.62 sec
+      Start  9: RunnerExportedUnits
+ 9/13 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 10: GainCache
+10/13 Test #10: GainCache ........................   Passed    1.25 sec
+      Start 11: TiffRead
+11/13 Test #11: TiffRead .........................   Passed    0.50 sec
+      Start 12: DamagedMovie
+12/13 Test #12: DamagedMovie .....................   Passed    4.21 sec
+      Start 13: RunnerModelParser
+13/13 Test #13: RunnerModelParser ................   Passed    0.13 sec
+
+100% tests passed out of 13
+
+Total Test time (real) =  11.41 sec
+Running TIFF integrity and expected-frame validation test suite...
+  [PASS] test_strip_truncation
+  [PASS] test_ifd_directory_truncation
+  [PASS] test_hard_truncation
+  [PASS] test_corrupt_header
+  [PASS] test_expected_frames_cli
+  [PASS] test_expected_frames_star
+  [PASS] test_positive_control_short_valid_movie
+  [PASS] test_batch_permutations
+  [PASS] test_resume_isolation
+  [PASS] test_expected_frame_contract
+  [PASS] test_tomogram_expected_frames
+All TIFF integrity and expected-frame validation tests PASSED.
+2026-09-28T00:25:38+00:00

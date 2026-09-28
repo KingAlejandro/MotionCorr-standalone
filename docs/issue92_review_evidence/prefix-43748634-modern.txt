@@ -1,0 +1,36 @@
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/ubuntu/mc-pr103-fix-433f04e/evidence/prefix-43748634/bad.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+in: /home/ubuntu/mc-pr103-fix-433f04e/src/rwTIFF.h, line 77
+ERROR: 
+/home/ubuntu/mc-pr103-fix-433f04e/evidence/prefix-43748634/bad.tiff: Corrupted TIFF directory structure: TIFFAdvanceDirectory: Error fetching directory count
+=== Backtrace  ===
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x4c647) [0x5e249afdb647]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x3c3d4) [0x5e249afcb3d4]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x194a0b) [0x5e249b123a0b]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x195ba4) [0x5e249b124ba4]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0xf8565) [0x5e249b087565]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x43183) [0x5e249afd2183]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a13ed22a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a13ed22a28b]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x433c5) [0x5e249afd23c5]
+==================
+ERROR: 
+/home/ubuntu/mc-pr103-fix-433f04e/evidence/prefix-43748634/bad.tiff: Corrupted TIFF directory structure: TIFFAdvanceDirectory: Error fetching directory count
+Continuing with the remaining movies.
+in: /home/ubuntu/mc-pr103-fix-433f04e/src/motioncorr_runner.cpp, line 686
+ERROR: 
+Motion correction failed for 1 movie(s): /home/ubuntu/mc-pr103-fix-433f04e/evidence/prefix-43748634/bad.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x4c647) [0x5e249afdb647]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x2655c) [0x5e249afb555c]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x43183) [0x5e249afd2183]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a13ed22a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a13ed22a28b]
+/home/ubuntu/mc-pr103-fix-433f04e/build/motioncorr(+0x433c5) [0x5e249afd23c5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/ubuntu/mc-pr103-fix-433f04e/evidence/prefix-43748634/bad.tiff. Successful per-movie outputs were retained; joint output was not generated.

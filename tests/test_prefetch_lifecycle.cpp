@@ -1,7 +1,10 @@
 // Lifecycle and admission tests for the bounded next-movie prefetch (issue #94).
 //
 // These are the cheap checks that gate the prototype: every one of them runs in
-// well under a second, touches no filesystem and needs no GPU. They exist
+// well under a second and needs no GPU. Only the automatic-budget control
+// touches the filesystem, and only because resolveBudgetBytes probes files for
+// real -- with unreadable names every queue capacity hits the same fallback
+// and the control observes nothing. It cleans up after itself. They exist
 // because the interesting failures here -- an early budget release, a double
 // release, a producer left asleep on the resource that was not cancelled -- are
 // invisible to an end-to-end output comparison, which would simply pass.
@@ -16,6 +19,11 @@
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <system_error>
+#include <unistd.h>
 #include <iostream>
 #include <mutex>
 #include <stdexcept>
@@ -95,6 +103,56 @@ MoviePrefetcher::Options unitOptions(size_t units, size_t queue_capacity = 1)
 	options.last_frame_sum = -1;
 	return options;
 }
+
+// Writes a minimal real MRC float32 stack. resolveBudgetBytes probes files for
+// real, so the automatic-budget control below needs something it can actually
+// read: with unreadable names every capacity falls through to the same
+// hardcoded fallback and the test would pass without observing anything.
+void writeTinyMrcStack(const std::string &path, int nx, int ny, int nz)
+{
+	std::vector<char> header(1024, 0);
+	auto put_i32 = [&](size_t off, int32_t v) { std::memcpy(header.data() + off, &v, 4); };
+	auto put_f32 = [&](size_t off, float v) { std::memcpy(header.data() + off, &v, 4); };
+	put_i32(0, nx); put_i32(4, ny); put_i32(8, nz);
+	put_i32(12, 2);                                  // mode 2 = float32
+	put_i32(28, nx); put_i32(32, ny); put_i32(36, nz);
+	put_f32(40, (float)nx); put_f32(44, (float)ny); put_f32(48, (float)nz);
+	put_f32(52, 90.0f); put_f32(56, 90.0f); put_f32(60, 90.0f);
+	put_i32(64, 1); put_i32(68, 2); put_i32(72, 3);
+	put_f32(76, 0.0f); put_f32(80, 1.0f); put_f32(84, 0.5f);
+	std::memcpy(header.data() + 208, "MAP ", 4);
+	put_i32(212, 0x00004144);
+
+	std::ofstream out(path, std::ios::binary);
+	out.write(header.data(), (std::streamsize)header.size());
+	const std::vector<float> plane((size_t)nx * ny, 0.5f);
+	for (int n = 0; n < nz; n++)
+		out.write(reinterpret_cast<const char *>(plane.data()),
+		          (std::streamsize)(plane.size() * sizeof(float)));
+	if (!out) { std::cerr << "FAIL: could not write fixture " << path << std::endl; failures++; }
+}
+
+// Temp directory that cleans up after itself, so the suite leaves no litter.
+class TempDir
+{
+public:
+	TempDir()
+	{
+		path_ = std::filesystem::temp_directory_path() /
+		        ("mc94_lifecycle_" + std::to_string(::getpid()));
+		std::error_code ec;
+		std::filesystem::create_directories(path_, ec);
+	}
+	~TempDir()
+	{
+		std::error_code ec;
+		std::filesystem::remove_all(path_, ec);
+	}
+	std::string file(const std::string &name) const { return (path_ / name).string(); }
+
+private:
+	std::filesystem::path path_;
+};
 
 std::vector<FileName> movieNames(int count, const char *ext = ".mrcs")
 {
@@ -802,6 +860,18 @@ void testFormatWhitelistIsPositive()
 void testAutomaticBudgetIgnoresQueueCapacity()
 {
 	Watchdog dog(30.0, "automatic budget is independent of queue capacity");
+	// Real, probeable files: otherwise every capacity hits the unprobeable
+	// fallback and the comparison below is between five identical constants.
+	TempDir tmp;
+	std::vector<FileName> fixtures;
+	for (int i = 0; i < 2; i++)
+	{
+		const std::string path = tmp.file("auto" + std::to_string(i) + ".mrcs");
+		writeTinyMrcStack(path, kNx, kNy, kNFrames);
+		fixtures.push_back(FileName(path));
+	}
+	const size_t expected =
+		movieio::saturatingMul(unitBytes(), 3); // three estimates, never more
 	const size_t queue_capacities[] = {1, 2, 3, 8, 64};
 	size_t first_limit = 0;
 	for (size_t capacity : queue_capacities)
@@ -812,20 +882,26 @@ void testAutomaticBudgetIgnoresQueueCapacity()
 		options.n_io_threads = kIoThreads;
 		options.first_frame_sum = 1;
 		options.last_frame_sum = -1;
-		// resolveBudgetBytes probes real files, so drive it through the same
-		// arithmetic the producer uses rather than the unprobeable fallback.
-		const size_t resolved =
-			MoviePrefetcher::resolveBudgetBytes(movieNames(2), options);
+		const size_t resolved = MoviePrefetcher::resolveBudgetBytes(fixtures, options);
 		if (capacity == queue_capacities[0]) first_limit = resolved;
 		check(resolved == first_limit,
 		      "queue capacity " + std::to_string(capacity) +
 		      " must not change the automatic byte limit");
+		// Absolute, not just self-consistent: under the old
+		// `queue_capacity + 2` rule these would be 3x, 4x, 5x, 10x and 66x.
+		check(resolved == expected,
+		      "the automatic limit is exactly three estimates at queue capacity " +
+		      std::to_string(capacity));
 	}
+	// CONTROL: the fixtures really were probeable, so the five equal answers
+	// above are not five copies of the unprobeable fallback.
+	check(first_limit == expected && first_limit > 1,
+	      "CONTROL: the budget was computed from a real probe, not the fallback");
 	// And an explicit budget is still honoured verbatim.
 	MoviePrefetcher::Options explicit_options;
 	explicit_options.budget_bytes = 123456;
 	explicit_options.queue_capacity = 8;
-	check(MoviePrefetcher::resolveBudgetBytes(movieNames(2), explicit_options) == 123456,
+	check(MoviePrefetcher::resolveBudgetBytes(fixtures, explicit_options) == 123456,
 	      "an explicit budget is not rescaled by the queue capacity");
 }
 

@@ -38,6 +38,10 @@ DEFAULT_REQUIRED_TESTS = [
     "ImageWriteFaults",
     # Added by the #98 malformed-defect-parser group (PR101).
     "DefectParser",
+    # Added by the #69 CUDA reliability port. Device-free, so it is always
+    # collected; the CUDA-only CudaErrorClass is not listed here, matching
+    # the existing exclusion of CudaWrapperUploadFailure.
+    "PatchRetryState",
 ]
 
 
@@ -108,7 +112,7 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=17,
+    parser.add_argument("--min-count", type=int, default=18,
                         help="Minimum number of tests that must be collected (default: 17)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")

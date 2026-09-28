@@ -183,6 +183,7 @@ exec "{sys.executable}" "$@"
             "WriteFaults",
             "ImageWriteFaults",
             "DefectParser",
+            "PatchRetryState",
         ]
 
         def drop_one(name: str):
@@ -200,7 +201,8 @@ exec "{sys.executable}" "$@"
 
         # Case B: a required test is absent, the count gate is satisfied, so the
         # only thing that can reject the collection is the missing-name check.
-        for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults", "DefectParser"):
+        for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults", "DefectParser",
+                        "PatchRetryState"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

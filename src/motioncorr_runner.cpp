@@ -1449,15 +1449,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
-	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
-	// that leaves an OpenMP structured block is undefined behaviour: the runtime
-	// calls std::terminate, so one truncated movie used to abort the whole run
-	// with SIGABRT instead of failing just that movie. Capture per frame and
-	// rethrow on the serial path, where run()'s caller records the failure and
-	// continues with the remaining movies.
 	// Issue #85 lane B experiment: one pool of persistent TIFF handles per
 	// movie instead of one open/read/close per frame. Same decode routine and
-	// same error text; opt-in, and only for plain TIFF input.
+	// same error text; opt-in, and only for plain TIFF input. The else branch
+	// below is the unchanged original, left at its original indentation so the
+	// experiment is one contiguous block to delete.
 	const bool use_persistent_tiff = (persistent_tiff_readers > 0) && !isEER && !isCompressedMRC &&
 	                                 tiffMovieReaderApplies(fn_mic);
 	if (use_persistent_tiff) {
@@ -1470,6 +1466,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		TiffMovieReader reader(fn_mic, n_readers);
 		reader.readFrames(frames, Iframes);
 	} else {
+	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
+	// that leaves an OpenMP structured block is undefined behaviour: the runtime
+	// calls std::terminate, so one truncated movie used to abort the whole run
+	// with SIGABRT instead of failing just that movie. Capture per frame and
+	// rethrow on the serial path, where run()'s caller records the failure and
+	// continues with the remaining movies.
 	std::vector<std::exception_ptr> read_errors(n_frames);
 	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {

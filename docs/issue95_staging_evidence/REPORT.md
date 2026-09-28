@@ -257,6 +257,40 @@ The CUDA-labelled tests (`CudaWrapperUploadFailure`) are not in this list: this
 is a CPU-only build, so they were never configured. They are **unrun**, not
 passing.
 
+## 5a. Accepted limitations
+
+Raised by independent review of the final head, judged non-blocking by that
+reviewer, and **deliberately not fixed** — changing source after requesting a
+corrected-head verdict would invalidate the verdict, which is the whole point of
+having asked for one. Recorded here so they are not rediscovered as surprises.
+
+- **The self-assignment test's discrimination is allocator-dependent, not
+  structural.** Without the guard, `reset(new bool[n])` allocates the new block
+  before freeing the old, so `std::copy` copies recycled heap onto itself.
+  Whether `badCount()` then differs from 6 depends on what the allocator hands
+  back. It is overwhelmingly likely to differ after `makeMovie` has churned the
+  heap — and did, on this platform — but reading uninitialised memory cannot be
+  observed deterministically, so this class of defect has no deterministic test.
+  Treat that mutant kill as **platform evidence, not proof**. No better
+  formulation is available.
+- **A chunk-1 overflow reports `InvalidInput`.** `largestChunkWithin`'s header
+  says `InvalidInput` means the geometry or policy is malformed. An overflow at
+  chunk 1 — which needs `n_frames · nx · ny > ~4.6e18`, a representability limit
+  on an absurd geometry rather than a caller mistake — also lands there. The
+  forwarded `Budget::error` string is specific and truthful, so no caller is
+  misled, and it does not reintroduce the malformed-policy-as-inadmissible
+  failure that motivated the enum.
+- **`"Movie copy is deep, not aliased"` overclaims in its label.** The
+  "not aliased" half cannot fail: `unique_ptr` is non-copyable, so a shallow
+  copy would not compile. What it observes is that `std::copy` ran with the
+  right size.
+- **`MonotonicHostBytes` samples four policy shapes, not the parameter space**,
+  and checks value monotonicity rather than failure-set upward-closure. The
+  latter needs overflow-scale geometries and was verified analytically by the
+  reviewer instead of by execution.
+- **The standalone raw-gain untouched-frames check is now subsumed** by the
+  in-loop check across all four chunk sizes. Redundant, not wrong.
+
 ## 6. Negative controls that do not exist yet
 
 Recorded so the gap is visible rather than implied:

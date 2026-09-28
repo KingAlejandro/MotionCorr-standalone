@@ -118,6 +118,14 @@ replaced, for the second pass, so no third reviewer was spawned.
 | code, pass 1 | `1292439` | `CHANGES_REQUESTED` | 2 high, 3 medium, 3 low. All fixed. Independently re-derived and **confirmed** the central ordering claim; found the overflow arithmetic clean. |
 | spec + licence | `1292439` | `SPEC_CONFORMANCE_PASSED` / `LICENCE_CLEAN` | 3 required follow-ups — all addressed. Scope isolation clean; all arithmetic verified exact. |
 | code, pass 2 | `90a50c9` | `CHANGES_REQUESTED` | First independent review of `largestChunkWithin`, which was added after pass 1. Found it **correct** — monotonicity verified term by term, search sound, overflow-safe midpoint, `out_chunk` contract holds. Four items fixed (A, D, E, F); B, C, G, H, I, J carried as documented notes. |
+| code, pass 3 | **`d2b75e0`** | **`READY_TO_MERGE`** | Bounded confirmation of the A/D/E/F fixes. All four confirmed correct and complete, no new defect in the delta. Independently re-derived the in-loop "overflow, not malformed" argument and the `out_error`/`out_chunk` contracts, and verified the mutation log's four source hashes against the tree rather than taking the claim. Two accepted limitations recorded, neither blocking. |
+
+Same reviewer resumed all three times. **Two direct reviewers total**; no third
+agent was ever spawned.
+
+`READY_TO_MERGE` is the reviewer's assessment of fitness to hand off. It is
+**not** a recommendation to merge: this PR stays a draft, the decision stays a
+partial no-go, and nothing here is promoted.
 
 Pass 1's two high-severity findings were real defects: the replacement buffer
 was transposed relative to all three production consumers of

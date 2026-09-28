@@ -9,7 +9,7 @@ affinity, and source, binary, harness and input hashes.
 |---|---|
 | Branch | `opus/issue-83-headless-20260927` |
 | Start commit | `1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26` (verified) |
-| Base update | none taken — `origin/main` was at the same `1d7e13f`; `origin/integrate/cuda-stabilization` at `9154b68` is an ancestor |
+| Base update | none taken. `origin/main` has since advanced from `1d7e13f` (a verified ancestor) to `48d1c9f`; **no commit in that range touches `tools/validation_issue83/` or `docs/issue83/`**, the branch merges cleanly, and rebasing would invalidate the exact-head CI and the host records below |
 | Worktrees | one; no other checkout created or modified |
 
 SCARF has no outbound access to GitHub, so commits reach it as git bundles

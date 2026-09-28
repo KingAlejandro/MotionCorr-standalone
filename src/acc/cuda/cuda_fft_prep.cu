@@ -49,17 +49,16 @@ private:
 };
 
 void cudaReleaseCachedFrames() {
-    if (s_d_cached_Iframes != nullptr) {
-        if (s_cached_device_id >= 0) {
-            cudaSetDevice(s_cached_device_id);
-        }
-        cudaFree(s_d_cached_Iframes);
-        s_d_cached_Iframes = nullptr;
-        s_cached_bytes = 0;
-        s_cached_nx = 0;
-        s_cached_ny = 0;
-        s_cached_n_frames = 0;
-        s_cached_device_id = -1;
+    float *owned = s_d_cached_Iframes;
+    const int device = s_cached_device_id;
+    // Invalidate ownership and all claims before any runtime call.
+    s_d_cached_Iframes = nullptr;
+    s_cached_bytes = 0;
+    s_cached_nx = s_cached_ny = s_cached_n_frames = 0;
+    s_cached_device_id = -1;
+    if (owned) {
+        if (device >= 0) cudaSetDevice(device);
+        cudaFree(owned);
     }
 }
 
@@ -256,11 +255,11 @@ bool cudaInverseFFT2D(
         HANDLE_ERROR(cudaMemcpy(MULTIDIM_ARRAY(Iframes[iframe]()), target_d_real, sz_real, cudaMemcpyDeviceToHost));
     }
 
-    if (s_d_cached_Iframes != nullptr) cached_frames_cleanup.keep();
     const cufftResult plan_release = plan_cleanup.releaseAll();
     const cudaError_t memory_release = memory_cleanup.releaseAll();
     CUFFT_CHECK(plan_release);
     HANDLE_ERROR(memory_release);
+    if (s_d_cached_Iframes != nullptr) cached_frames_cleanup.keep();
     return true;
 }
 

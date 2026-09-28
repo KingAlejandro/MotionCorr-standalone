@@ -89,8 +89,9 @@ FaultKind   g_fault_kind = FAULT_NONE;
 long        g_fault_at   = 0;       // 1-based ordinal of the call to fail; 0 = never
 long        g_counts[FAULT_KIND_COUNT];
 bool        g_fault_fired = false;
-    g_stale_releases = 0;
 size_t g_stale_releases = 0;
+bool g_free_sequence = false;
+int g_free_sequence_count = 0;
 
 // Set while the session destructor runs. CudaMovieSession::release() performs a
 // deliberately non-fatal cudaDeviceSynchronize and only logs on failure, so a fault
@@ -165,6 +166,11 @@ cudaError_t __wrap_cudaFree(void *ptr) {
     if (g_active && ptr && !g_outstanding.count(ptr)) ++g_stale_releases;
     const cudaError_t result = __real_cudaFree(ptr);
     if (result == cudaSuccess) g_outstanding.erase(ptr);
+    if (g_free_sequence && result == cudaSuccess) {
+        const int n = ++g_free_sequence_count;
+        if (n == 1) return cudaErrorInvalidValue;
+        if (n == 2) return cudaErrorIllegalAddress;
+    }
     return inject && result == cudaSuccess ? cudaErrorInvalidValue : result;
 }
 
@@ -500,6 +506,56 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     return out;
 }
 
+// Production session controls that re-enter after replacement failed, rather than
+// merely asking a hand-built classifier what it would do.
+int runOwnershipControls() {
+    int failures = 0;
+    HostInputs in; buildHostInputs(in);
+    for (int mode = 0; mode < 4; ++mode) {
+        resetCounters(); g_fault_kind = FAULT_NONE; g_fault_at = 0;
+        g_active = true; g_in_teardown = false;
+        std::ostringstream log;
+        {
+            CudaMovieSession session(NX, NY, NFRAMES, 0, log);
+            MultidimArray<float> sum;
+            bool ok = session.initialize() && session.applyGainDefectsAndSum(in.frames, &in.gain, sum);
+            if (mode == 0) {
+                g_free_sequence = true; g_free_sequence_count = 0;
+                ok = ok && !session.releasePreprocessingBuffers();
+                g_free_sequence = false;
+                ok = ok && g_free_sequence_count == 2 &&
+                    session.getFailureState().firstError() == cudaErrorInvalidValue &&
+                    session.getFailureState().fatalError() == cudaErrorIllegalAddress &&
+                    cudaGetLastError() == cudaSuccess;
+                session.release(); session.release();
+                ok = ok && !session.initialize(); // poison is sticky after release
+            } else {
+                cufftComplex *out = nullptr;
+                const size_t bytes = (size_t)NFRAMES * 48 * 25 * sizeof(cufftComplex);
+                ok = ok && cudaMalloc((void**)&out, bytes) == cudaSuccess;
+                const int gs[4] = {0,1,2,3}, gz[4] = {1,1,1,1};
+                const int small_gs[2] = {0,2}, small_gz[2] = {2,2};
+                ok = ok && session.preparePatchInVram(0,0,32,32,2,small_gs,small_gz,out);
+                g_fault_kind = mode == 1 ? FAULT_MALLOC : mode == 2 ? FAULT_FREE : FAULT_CUFFT_MAKEPLAN;
+                // Grow real scratch, then start/size arrays: fail the size allocation.
+                g_fault_at = g_counts[g_fault_kind] + (mode == 1 ? 3 : 1);
+                ok = ok && !session.preparePatchInVram(0,0,48,48,4,gs,gz,out) && g_fault_fired;
+                g_fault_kind = FAULT_NONE; g_fault_at = 0;
+                ok = ok && session.preparePatchInVram(0,0,48,48,4,gs,gz,out);
+                if (out) cudaFree(out);
+                session.release(); session.release();
+            }
+            if (!ok) { ++failures; std::fprintf(stderr,"FAIL ownership re-entry mode=%d\n",mode); }
+        }
+        g_active = false;
+        if (totalOutstanding() || g_stale_releases) {
+            ++failures; std::fprintf(stderr,"FAIL re-entry resources=%zu stale=%zu\n",totalOutstanding(),g_stale_releases);
+        }
+    }
+    std::printf("Ownership controls: four production session sequences, failures=%d\n",failures);
+    return failures;
+}
+
 } // namespace
 
 int main() {
@@ -552,7 +608,7 @@ int main() {
         }
     };
 
-    int failures = 0, trials = 0;
+    int failures = runOwnershipControls(), trials = 0;
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++) {
         for (long n = 1; n <= budget[k]; n++) {
             const TrialResult r = runTrial((FaultKind)k, n, 1);

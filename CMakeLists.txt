@@ -179,6 +179,12 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftExecC2R")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        add_executable(motioncorr_retry_caller
+            src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
+        target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)
+        target_link_options(motioncorr_retry_caller PRIVATE
+            "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+            "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
         # are exercised in production code rather than simulated by a predicate test.

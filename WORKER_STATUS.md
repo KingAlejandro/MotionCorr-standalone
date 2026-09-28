@@ -5,9 +5,9 @@
 | Issue | #69 "Make CUDA resource failures leak-free and resume-safe" |
 | Model | `claude-opus-5`, high effort (no routing error observed) |
 | Task class | correctness |
-| Phase | implemented, reviewed by two independent read-only agents, review findings folded in, revalidated; draft PR open; waiting on a GPU slot |
+| Phase | two review rounds against the same two agents, all findings folded in, revalidated at final head; draft PR open; waiting on a GPU slot |
 | Base | main `4c952b3f54479653512c4d208e09c9a8c02f3726` |
-| Head | `192c580` (plus this status update) |
+| Head | `2950478` (plus this status update) |
 | Branch | `round96/69-claude-opus-5` |
 | Worktree | isolated T3 worktree; no other task's files touched |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/107 (draft) |
@@ -169,7 +169,27 @@ for Codex monitoring to assign one. Exact commands, resources and locks:
 - **Device safety:** the new code only reads the pending CUDA error. No
   `cudaDeviceReset`, no global cache drop, no other process or device touched.
 
-## Independent review — done
+## Review rounds — two, both with findings
+
+**Round 2** re-ran the same two agents against pinned head `92437fa9`. Verdicts at that
+head: CHANGES_REQUESTED and SPEC_CONFORMANCE_FAILED / LICENCE_PASSED. All nine round-1
+code findings verified fixed and no new production defect found; the blocks were five
+evidence and documentation items, three of them mine:
+
+- the untracking of `WORKER_RESOURCE_UPDATE.md` had **silently regressed** — re-added
+  by a `git add -A` in the commit titled "address review findings", while this file
+  asserted the removal had held. Untracked again and added to `.git/info/exclude`;
+  verified `git add -A` no longer re-adds it;
+- `#include <sstream>` escaped the CUDA guard, falsifying RESULTS §4's premise in the
+  same commit that relabelled §3 as a control for catching escaped guards;
+- the classifier raised the production build's minimum CUDA version with no floor in
+  `find_package`;
+- `reloc_check.sh` could print a confident "0" on its own failure;
+- the PR93 disclosure was wrong on file count, diff magnitudes and F3's independence.
+
+**The current head carries no verdict.** The reviewers were not run a third time.
+
+## Round 1 — done
 
 Two read-only agents (code; spec/scope/licence) were run concurrently. Verdicts were
 `CHANGES_REQUESTED` and `SPEC_CONFORMANCE_FAILED` / `LICENCE_PASSED`. Eleven findings
@@ -193,7 +213,7 @@ stays draft until then.
   Both returned actionable defects; neither was a rubber stamp.
 - Tool or permission failures: 1 local quoting error writing a heredoc over ssh,
   self-corrected by writing the file locally and copying it.
-- Revisions to my own work: 5 substantive. Two found by me: — the CPU control's first truth assertion was
+- Revisions to my own work: 10 substantive. Two found by me before any review: — the CPU control's first truth assertion was
   wrong in premise (a single iteration estimates against the mean of the other frames,
   not the truth) and was replaced with a converged anchor; the same-backend comparator
   initially reported 9 spurious differences from unnormalised output-root paths and its
@@ -210,6 +230,10 @@ stays draft until then.
   across five files, the rest is tests, evidence and documentation.
 - Elapsed active time: roughly 75 minutes to the draft PR, about 2 hours including the
   independent reviews and acting on them.
-- Final review verdict: not re-run after the fixes. The two recorded verdicts are
-  pre-fix and should be read that way.
+- Final review verdict: CHANGES_REQUESTED and SPEC_CONFORMANCE_FAILED / LICENCE_PASSED
+  at head `92437fa9`. Those are pre-fix for round 2 as well; the current head has not
+  been re-reviewed and carries no verdict.
+- GPU slot: #26 announced release and the bench lock is observably free with all four
+  A100s idle, but **no slot has been assigned to this task**, so no GPU execution has
+  occurred. Availability is not authorization.
 - Tokens/cost: not observable from here, so not reported.

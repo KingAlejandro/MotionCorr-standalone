@@ -2,10 +2,10 @@
 """Check generated fixtures against the committed known-motion manifest.
 
 Ensures fixture files match the trusted, committed MANIFEST.json byte-for-byte
-and digest-for-digest. Rejects missing fixtures, corrupted/byte-flipped fixtures,
-and undeclared fixtures.
+and digest-for-digest. Rejects missing fixtures, missing truth files, corrupted/
+byte-flipped fixtures, malformed inventories, and undeclared fixtures.
 
-By default, reads the manifest from git (HEAD) to prevent generator-adjacent
+By default, reads the manifest strictly from git (HEAD) to prevent generator-adjacent
 overwrites from self-verifying noncanonical fixture data.
 """
 
@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 MANIFEST_REL_PATH = "test-data/known_motion/MANIFEST.json"
 HEAVY_CASES = {"km_local_realscale"}
+HEX_64_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 def sha256_file(path: Path) -> str:
@@ -32,23 +34,58 @@ def sha256_file(path: Path) -> str:
 
 
 def load_manifest(repo: Path, ref: str = "HEAD", explicit_path: Optional[Path] = None) -> Tuple[Dict[str, Any], str]:
-    """Load manifest from git if possible, or explicit path / disk fallback."""
+    """Load manifest strictly from git ref, or explicit manifest path if specified.
+
+    Fails closed if the git ref cannot be resolved or if git is unavailable.
+    Does not fall back to an adjacent disk file when ref lookup fails.
+    """
     if explicit_path is not None:
         if not explicit_path.is_file():
             raise FileNotFoundError(f"Explicit manifest file not found: {explicit_path}")
-        return json.loads(explicit_path.read_text()), f"file:{explicit_path}"
+        try:
+            data = json.loads(explicit_path.read_text())
+        except Exception as exc:
+            raise ValueError(f"Failed to parse manifest JSON from {explicit_path}: {exc}") from exc
+        return data, f"file:{explicit_path}"
 
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "show", f"{ref}:{MANIFEST_REL_PATH}"],
+        capture_output=True, text=True
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"Failed to load trusted manifest from git ref '{ref}:{MANIFEST_REL_PATH}' (exit {proc.returncode}): "
+            f"{proc.stderr.strip()}"
+        )
     try:
-        out = subprocess.run(
-            ["git", "-C", str(repo), "show", f"{ref}:{MANIFEST_REL_PATH}"],
-            capture_output=True, text=True, check=True
-        ).stdout
-        return json.loads(out), f"git:{ref}:{MANIFEST_REL_PATH}"
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        fallback = repo / MANIFEST_REL_PATH
-        if fallback.is_file():
-            return json.loads(fallback.read_text()), f"disk:{fallback}"
-        raise RuntimeError(f"Cannot load manifest from git {ref}:{MANIFEST_REL_PATH} or disk {fallback}")
+        data = json.loads(proc.stdout)
+    except Exception as exc:
+        raise ValueError(f"Failed to parse git manifest JSON from {ref}:{MANIFEST_REL_PATH}: {exc}") from exc
+    return data, f"git:{ref}:{MANIFEST_REL_PATH}"
+
+
+def validate_manifest_schema(manifest: Any) -> Dict[str, Any]:
+    """Validate that manifest contains a nonempty, schema-valid cases dictionary."""
+    if not isinstance(manifest, dict):
+        raise ValueError(f"Manifest root must be a JSON object, got {type(manifest).__name__}")
+    cases = manifest.get("cases")
+    if not isinstance(cases, dict) or len(cases) == 0:
+        raise ValueError("Manifest 'cases' inventory is empty or malformed")
+
+    for name, spec in cases.items():
+        if not isinstance(spec, dict):
+            raise ValueError(f"Case '{name}' spec must be a JSON object")
+        movie_sha = spec.get("movie_sha256")
+        if not movie_sha or not HEX_64_PATTERN.match(str(movie_sha)):
+            raise ValueError(f"Case '{name}' missing valid 64-hex 'movie_sha256'")
+        movie_bytes = spec.get("movie_bytes")
+        if not isinstance(movie_bytes, int) or movie_bytes <= 0:
+            raise ValueError(f"Case '{name}' missing valid positive 'movie_bytes'")
+        gt_sha = spec.get("ground_truth_sha256")
+        if not gt_sha or not HEX_64_PATTERN.match(str(gt_sha)):
+            raise ValueError(f"Case '{name}' missing valid 64-hex 'ground_truth_sha256'")
+
+    return manifest
 
 
 def verify_fixtures(
@@ -58,7 +95,9 @@ def verify_fixtures(
     allow_missing_heavy: bool = True,
     cases_filter: Optional[List[str]] = None,
 ) -> Tuple[bool, Dict[str, Any]]:
-    cases = manifest.get("cases", {})
+    manifest = validate_manifest_schema(manifest)
+    cases = manifest["cases"]
+
     report: Dict[str, Any] = {
         "schema": "fixture-verify/1",
         "fixtures_dir": str(fixtures_dir),
@@ -66,9 +105,15 @@ def verify_fixtures(
         "mismatched": [],
         "missing": [],
         "undeclared": [],
+        "verified_count": 0,
+        "excluded_heavy_count": 0,
     }
 
     target_cases = cases_filter if cases_filter is not None else sorted(cases.keys())
+    if not target_cases:
+        report["status"] = "FAIL"
+        report["reason"] = "No target cases selected for verification"
+        return False, report
 
     for case in target_cases:
         if case not in cases:
@@ -81,31 +126,47 @@ def verify_fixtures(
 
         spec = cases[case]
         path = fixtures_dir / f"{case}.mrcs"
-        want_sha = spec.get("movie_sha256")
-        want_bytes = spec.get("movie_bytes")
+        gt_path = fixtures_dir / f"{case}_ground_truth.json"
+        want_sha = spec["movie_sha256"]
+        want_bytes = spec["movie_bytes"]
+        want_gt_sha = spec["ground_truth_sha256"]
         is_heavy = case in HEAVY_CASES or bool(spec.get("heavy", False))
 
         if not path.exists():
-            can_skip = allow_missing or (is_heavy and allow_missing_heavy)
-            status = "MISSING_ALLOWED" if can_skip else "MISSING"
+            if is_heavy and allow_missing_heavy:
+                report["cases"][case] = {
+                    "status": "EXCLUDED_HEAVY",
+                    "expected_sha256": want_sha,
+                    "expected_bytes": want_bytes,
+                    "is_heavy": True,
+                }
+                report["excluded_heavy_count"] += 1
+                continue
+            if allow_missing:
+                report["cases"][case] = {
+                    "status": "MISSING_ALLOWED",
+                    "expected_sha256": want_sha,
+                    "expected_bytes": want_bytes,
+                    "is_heavy": is_heavy,
+                }
+                continue
             report["cases"][case] = {
-                "status": status,
+                "status": "MISSING",
                 "expected_sha256": want_sha,
                 "expected_bytes": want_bytes,
                 "is_heavy": is_heavy,
+                "error": f"Movie file {path.name} not found",
             }
-            if not can_skip:
-                report["missing"].append(case)
+            report["missing"].append(case)
             continue
 
         got_bytes = path.stat().st_size
         got_sha = sha256_file(path)
         sha_ok = (got_sha == want_sha)
         bytes_ok = (got_bytes == want_bytes)
-        ok = sha_ok and bytes_ok
 
         case_entry: Dict[str, Any] = {
-            "status": "PASS" if ok else "MISMATCH",
+            "status": "PASS" if (sha_ok and bytes_ok) else "MISMATCH",
             "expected_sha256": want_sha,
             "observed_sha256": got_sha,
             "expected_bytes": want_bytes,
@@ -113,30 +174,46 @@ def verify_fixtures(
             "is_heavy": is_heavy,
         }
 
-        # Check ground truth JSON if present
-        gt_path = fixtures_dir / f"{case}_ground_truth.json"
-        if gt_path.is_file() and "ground_truth_sha256" in spec:
-            gt_sha = sha256_file(gt_path)
-            case_entry["ground_truth_sha256"] = gt_sha
-            case_entry["expected_ground_truth_sha256"] = spec["ground_truth_sha256"]
-            if gt_sha != spec["ground_truth_sha256"]:
-                case_entry["ground_truth_status"] = "MISMATCH"
-                ok = False
-                case_entry["status"] = "MISMATCH"
-            else:
-                case_entry["ground_truth_status"] = "PASS"
+        # Ground-truth JSON check: REQUIRED for every verified case
+        if not gt_path.is_file():
+            case_entry["ground_truth_status"] = "MISSING"
+            case_entry["error"] = f"Required ground-truth JSON {gt_path.name} is missing"
+            case_entry["status"] = "MISSING"
+            report["cases"][case] = case_entry
+            report["missing"].append(f"{case}_ground_truth")
+            continue
+
+        got_gt_sha = sha256_file(gt_path)
+        case_entry["ground_truth_sha256"] = got_gt_sha
+        case_entry["expected_ground_truth_sha256"] = want_gt_sha
+
+        if got_gt_sha != want_gt_sha:
+            case_entry["ground_truth_status"] = "MISMATCH"
+            case_entry["status"] = "MISMATCH"
+            report["cases"][case] = case_entry
+            report["mismatched"].append(f"{case}_ground_truth")
+            continue
+
+        case_entry["ground_truth_status"] = "PASS"
+
+        if not (sha_ok and bytes_ok):
+            report["mismatched"].append(case)
+        else:
+            report["verified_count"] += 1
 
         report["cases"][case] = case_entry
-        if not ok:
-            report["mismatched"].append(case)
 
     # Check for undeclared fixtures
     if fixtures_dir.is_dir():
-        for path in sorted(fixtures_dir.glob("*.mrcs")):
-            if path.stem not in cases:
-                report["undeclared"].append(path.stem)
+        for f_path in sorted(fixtures_dir.glob("*.mrcs")):
+            if f_path.stem not in cases:
+                report["undeclared"].append(f_path.stem)
 
     failed = bool(report["mismatched"]) or bool(report["missing"]) or bool(report["undeclared"])
+    if report["verified_count"] == 0:
+        failed = True
+        report["reason"] = "Zero fixtures were successfully verified"
+
     report["verified"] = not failed
     return not failed, report
 
@@ -173,8 +250,9 @@ def main() -> int:
 
     try:
         manifest, source = load_manifest(opts.repo, opts.ref, opts.manifest)
+        manifest = validate_manifest_schema(manifest)
     except Exception as exc:
-        print(f"ERROR: Cannot load manifest: {exc}", file=sys.stderr)
+        print(f"ERROR: Cannot load trusted manifest: {exc}", file=sys.stderr)
         return 2
 
     success, report = verify_fixtures(
@@ -199,12 +277,16 @@ def main() -> int:
                 print(f"      observed SHA256: {entry.get('observed_sha256')}")
                 print(f"      expected bytes:  {entry.get('expected_bytes')}")
                 print(f"      observed bytes:  {entry.get('observed_bytes')}")
-                if entry.get("ground_truth_status") == "MISMATCH":
-                    print(f"      ground-truth JSON hash MISMATCH:")
-                    print(f"        expected: {entry.get('expected_ground_truth_sha256')}")
-                    print(f"        observed: {entry.get('ground_truth_sha256')}")
+            if entry.get("ground_truth_status") == "MISMATCH":
+                print(f"      ground-truth JSON hash MISMATCH:")
+                print(f"        expected: {entry.get('expected_ground_truth_sha256')}")
+                print(f"        observed: {entry.get('ground_truth_sha256')}")
+            elif entry.get("ground_truth_status") == "MISSING":
+                print(f"      ground-truth JSON MISSING: {entry.get('error')}")
         if report["undeclared"]:
             print(f"  UNDECLARED FIXTURES: {', '.join(report['undeclared'])}")
+        if report.get("reason"):
+            print(f"  NOTE: {report['reason']}")
 
     if not success:
         print(f"ERROR: Fixture verification failed (mismatched={len(report['mismatched'])}, "
@@ -213,7 +295,8 @@ def main() -> int:
         return 1
 
     if not opts.quiet:
-        print("VERIFIED: All canonical fixtures match trusted manifest.")
+        print(f"VERIFIED: {report['verified_count']} canonical fixtures match trusted manifest "
+              f"({report['excluded_heavy_count']} heavy cases excluded).")
     return 0
 
 

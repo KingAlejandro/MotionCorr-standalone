@@ -92,9 +92,27 @@ def select_cases(fixtures: Path, requested: list[str] | None, include_heavy: boo
         if gt["recommended_run"].get("role", "gate") not in ("gate", "characterization"):
             raise ValueError(f"invalid fixture role: {case}")
         cases[case] = (path, gt)
-    missing = set(requested or []) - cases.keys()
-    if missing:
-        raise ValueError("requested fixtures missing: " + ", ".join(sorted(missing)))
+
+    if requested is not None:
+        missing = set(requested) - cases.keys()
+        if missing:
+            raise ValueError("requested fixtures missing: " + ", ".join(sorted(missing)))
+    else:
+        manifest_path = fixtures / "MANIFEST.json"
+        if manifest_path.is_file():
+            try:
+                manifest_cases = json.loads(manifest_path.read_text()).get("cases", {})
+                expected = set()
+                for cname in manifest_cases.keys():
+                    if not include_heavy and cname in ("km_local_realscale",):
+                        continue
+                    expected.add(cname)
+                missing = expected - cases.keys()
+                if missing:
+                    raise ValueError("required fixtures missing: " + ", ".join(sorted(missing)))
+            except (json.JSONDecodeError, OSError):
+                pass
+
     if not cases:
         raise ValueError("no fixtures selected; run the generator first")
     return list(cases.values())

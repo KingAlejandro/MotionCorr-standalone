@@ -1,0 +1,54 @@
+### patched head binary
+f4748106a1a296efd961b655fce675c9336cda42ca63f7b4bf4488d12ef9e8f2  /home/ubuntu/mc-issue53-round96/build/motioncorr
+CMAKE_BUILD_TYPE:STRING=Release
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+
+### base (unpatched main 4c952b3f) binary
+de35fddc37d8237576adea7d34bec618ce1bf4867286b87ec568815c71645f8a  /home/ubuntu/mc-issue53-round96-base/build/motioncorr
+CMAKE_BUILD_TYPE:STRING=Release
+
+### toolchain
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 4.4.3
+Python 3.12.3
+
+### host
+small-refmac-machine
+64
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+node 0 size: 115839 MB
+node 0 free: 26362 MB
+node 1 cpus: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+node 1 size: 115862 MB
+7.60 6.64 7.46 4/8005 3042114
+
+### PATCHED --gpu "0:1:2:3"
+ERROR: --gpu 0:1:2:3 requests 4 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+### BASE    --gpu "0:1:2:3"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+
+### PATCHED --gpu "0,1"
+ERROR: --gpu 0,1 requests 2 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+### BASE    --gpu "0,1"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+
+### PATCHED --gpu "0:1"
+ERROR: --gpu 0:1 requests 2 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+### BASE    --gpu "0:1"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+
+### PATCHED --gpu "0abc"
+ERROR: --gpu 0abc is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
+### BASE    --gpu "0abc"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+
+### PATCHED --gpu "-1"
+ERROR: --gpu -1 is not a non-negative device id. --use_own expects a single integer, e.g. --gpu 0.
+### BASE    --gpu "-1"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+
+### PATCHED --gpu "0"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+### BASE    --gpu "0"
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).

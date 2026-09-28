@@ -1,0 +1,107 @@
+{
+  "n_mutations": 12,
+  "n_detected": 12,
+  "survivors": [],
+  "results": [
+    {
+      "mutation": "partition preflight disabled",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_output_name_collision": "detected",
+        "case_duplicate_movie_in_input": "detected",
+        "case_collapsed_spaces_are_a_collision": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "empty-shard guard removed",
+      "file": "tools/multi_gpu/partition_star.py",
+      "cases": {
+        "case_empty_shard_rejected": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "shards re-serialized from parsed values instead of original bytes",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_roundtrip_and_metadata": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "C++-reader refusals removed from the STAR parser",
+      "file": "tools/multi_gpu/star_io.py",
+      "cases": {
+        "case_star_parser_refusals": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "lost-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_lost_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "duplicate-output check removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_and_misrouted_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "misrouted / unassigned checks removed from the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_duplicate_and_misrouted_output": "detected",
+        "case_unassigned_movie_output": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "worker exit codes no longer gate the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_failed_worker_blocks_merge": "detected",
+        "case_killed_worker_then_nonprefix_resume": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "missing --status no longer refuses the merge",
+      "file": "tools/multi_gpu/merge_workers.py",
+      "cases": {
+        "case_missing_status_blocks_merge": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "distinct-device assertion removed from the GPU witness",
+      "file": "tools/multi_gpu/gpu_witness.py",
+      "cases": {
+        "case_gpu_witness_logic": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "unwitnessed PIDs counted as witnessed",
+      "file": "tools/multi_gpu/gpu_witness.py",
+      "cases": {
+        "case_gpu_witness_logic": "detected"
+      },
+      "status": "detected"
+    },
+    {
+      "mutation": "launcher no longer refuses an existing --out",
+      "file": "tools/multi_gpu/run_multi_gpu.py",
+      "cases": {
+        "case_launcher_refuses_cpu_gpu_confusion": "detected"
+      },
+      "status": "detected"
+    }
+  ]
+}

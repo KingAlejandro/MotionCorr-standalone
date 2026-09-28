@@ -103,7 +103,7 @@ These are not implied by any implementation row above.
 - Motion truth `km_local_noisy` (characterization): **FAIL**
 - Motion truth `km_local_nonsquare` (gate): **PASS**
 - Motion truth `km_local_realscale` (gate): **PASS**
-- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-27T13:41:25Z
+- Source record for the CPU diagnostic: `small-refmac-machine`, CPU, binary `90d683dd0e40…`, started 2026-09-28T09:34:49Z
 - **Not the run named in the provenance block above** — hostname, binary_sha256, binary_path differ, so these two sections are not one measurement.
 - CPU-backend diagnostic (`small-refmac-machine`): 24 pass, 0 fail, 0 error of 24 attempted; unrun: realscale_local. This is a separate verdict: it neither establishes nor overrides any native CUDA result above.
 

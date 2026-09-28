@@ -30,18 +30,34 @@ Two facts that shaped the harness:
 
 ## Fixtures
 
-All five known-motion fixtures were regenerated and every `.mrcs` sha256
-**matched** the committed `test-data/known_motion/MANIFEST.json`. Fixtures are
-generated, never committed.
+Fixtures are generated, never committed.
+
+> **Withdrawn.** This section previously read "All five known-motion fixtures
+> were regenerated and every `.mrcs` sha256 **matched** the committed
+> `test-data/known_motion/MANIFEST.json`." That was not true, and the section
+> "Fixture drift between hosts" below — written later, from a check that
+> actually read the manifest out of git — contradicts it: all five cases
+> mismatched on SCARF under NumPy 1.22.4. The original claim rested on the
+> manifest the generator writes beside its own output, which agrees with those
+> outputs by construction. The withdrawal is recorded as W6 in
+> `withdrawals.md`; the replacement check is
+> `tools/validation_issue83/verify_fixtures.py`, and what it establishes on
+> each host is stated per-run in `provenance.md`.
 
 ## Compute
 
-- **GPU (primary)**: dedicated SCARF Slurm allocation, `-p gpu --gres=gpu:1
-  --cpus-per-task=8 --exclusive`, node `gn0005`, 4x A100-SXM4-40GB, driver
-  580.178.04, nvcc 12.8.61. No allocation was ever shared: the only other job on
-  this account (3510270) was on a different partition and node.
-- **CPU (diagnostic)**: `cpu64` (small-refmac-machine), 64 cores, load checked
-  before each launch, bounded mask via `taskset`, `--j 8`.
+- **GPU**: dedicated SCARF Slurm allocations only, every one `--exclusive` on
+  its own node, 4x A100-SXM4-40GB, driver 580.178.04, nvcc 12.8.61. First
+  round `-p gpu --gres=gpu:1 --cpus-per-task=8 --exclusive` on `gn0005`;
+  corrected-harness rounds `--cpus-per-task=16` on `gn3000`. No allocation was
+  ever shared, and the QOS one-running-job cap means the `gn3000` jobs could
+  not have overlapped. Full detail, including the other jobs on this shared
+  account and the GPU UUIDs, is in `provenance.md`.
+- **CPU**: `cpu64` (small-refmac-machine), 64 cores, load checked before each
+  launch, under `flock /tmp/motioncorr-issue96-cpu-validation.lock`. The
+  diagnostic matrix cited in the report used `taskset -c 56-63`, `--j 8`; the
+  gate-contract validation of each harness commit uses
+  `taskset -c 32-63 numactl --membind=1`, 16 threads.
 - The shared 4GPUs fallback was **not used**; the dedicated route was available
   throughout. No credential, billing or terms-accepting change was made.
 
@@ -218,19 +234,75 @@ This is the failure mode the issue warned about in a different guise: exit
 status, counts and a matching-looking hash table are not provenance. The table
 was real; it was just a comparison of the fixtures against themselves.
 
+## Gates that quantified over nothing (`4c2305b`)
+
+Review of PR #89 at `7098a6f` found the same defect in four more places. It is
+worth naming once, because it is the defect of this whole issue: **`all()` over
+an empty set is true**, and a gate written as "nothing mismatched" passes a run
+that looked at nothing.
+
+| Where | Passed vacuously when | Now |
+|---|---|---|
+| `verify_fixtures` | no digest was compared at all | counts comparisons per kind; `vacuous` fails the run (W7) |
+| `run_matrix` per-schedule witness | `repeat`/`batch`/`resume` contributed no evidence | witness computed over every invocation and consumed by the row verdict (W8) |
+| `run_matrix` rejection rows | the declared token appeared anywhere in the output, backtrace included | delimited match on a diagnostic line, recorded verbatim (W9) |
+| `run_all24_schedules` | `check_products(..., {}, None)` asserted no metadata | asserts the invocation's own binning, first frame, dose and pre-exposure (W10) |
+
+Two things follow, and both are stated rather than smoothed over.
+
+**The runners changed, so the published GPU records are behind them.** Jobs
+3511139 and 3511154 ran `7ba584e`; `run_matrix.py` and
+`run_all24_schedules.py` changed at `4c2305b`. The missing evidence is missing,
+not merely unaggregated, so the report **withholds** the per-schedule native
+claim for 23 rows and marks the STAR metadata assertion UNRUN on GPU rather
+than carrying the old verdicts forward. Closing those needs one fresh
+dedicated allocation.
+
+**Every new gate has a negative control, and every control has a meta-check.**
+A control that passes with its gate reverted is testing nothing, so each gate
+is monkeypatched back to its published form at runtime and the control must
+then fail — thirteen such checks, including three on the suite's own exit
+status, which itself used to be computed by quantifying over a set that was
+empty when every control skipped. The suite is 17/17 on cpu64 at `4c2305b`
+with 0 skipped, which is the first run where `ground_truth_mutation` actually
+executed rather than skipping for want of fixtures.
+
 ## Runs of record
 
-| Leg | Host | Commit | Outputs |
+These are the records `report.py` is actually invoked on
+(`.scratch/gen_report.sh` passes six JSON records drawn from these four runs —
+matrix, truth and fixture-verify all come from 3511154). They are **not** one run,
+and the report says so section by section:
+
+| Section of the report | Host | Commit | Record |
 |---|---|---|---|
-| GPU matrix + all-24 + report | SCARF `gn0005` (exclusive) | `d48d875` | job 3510290, `evidence4/` |
-| Capacity datapoint + realscale row | SCARF `gn0005` (exclusive) | `0a6dbff` | job 3510288, `evidence3/capacity.json` |
-| CPU matrix (diagnostic) | cpu64, `taskset -c 56-63` | `bab9f46` | `evidence3/matrix-cpu/` |
+| Declared matrix, input provenance, motion truth | SCARF `gn3000` (exclusive) | `7ba584e` | job **3511154**, `raw/scarf-gn3000-3511154/` |
+| Integrated all-24 screen | SCARF `gn3000` (exclusive) | `7ba584e` | job **3511139**, `raw/scarf-gn3000-3511139/` |
+| Capacity datapoint | SCARF `gn0005` (exclusive) | `0a6dbff` | job 3510288, `raw/scarf-gn0005/capacity.json` |
+| CPU matrix (diagnostic) | cpu64, `taskset -c 32-63 numactl --membind=1` | `4c2305b` | `raw/cpu64-4c2305b/matrix.json` |
+| Gate contracts, controls, CPU pixels | cpu64, `taskset -c 32-63 numactl --membind=1` | `4c2305b` | `raw/cpu64-4c2305b/` |
 
-The GPU matrix and all-24 legs were re-run in full at `d48d875` rather than
-splicing the corrected `realscale_local` row into the earlier `bab9f46` report:
-one published table should come from one harness revision, and the rerun costs
-about ten minutes on an already-allocated exclusive node.
+The CPU diagnostic section previously came from `raw/cpu64/matrix-cpu-summary.json`
+at `bab9f46`, pinned `taskset -c 56-63`. That record predates the per-schedule
+witness and the delimited rejection matcher, so it is no longer the source; it
+stays on disk unedited. The replacement is the head-commit run, which reaches
+the same counts (24 pass, 0 fail, 0 error, `realscale_local` unrun) under the
+current contracts.
 
-Superseded runs: 3510276 (output-path bug), 3510277 (quota/SIGPIPE), 3510283
-(`realscale_local` declaration drift, since fixed), and the first cpu64 matrix
-(harness expectations 2 and 3). Their verdicts are not carried into the report.
+> **Corrected.** This table previously named jobs 3510290 and 3510288 at
+> `d48d875` as the runs of record, and the paragraph under it said the matrix
+> and all-24 legs came from one harness revision so that "one published table
+> should come from one harness revision". Neither is true of the report as
+> published: 3510290 was superseded by the two `gn3000` jobs above, and the
+> matrix and all-24 sections come from two *different* jobs. Rather than
+> re-assert a single-revision claim the evidence does not support, the report
+> now labels each section with its own source record and flags the ones outside
+> the provenance block's run window. The same correction applies to the
+> sentence in `provenance.md` under "Exact commands".
+
+Superseded runs, preserved and not carried into the report: 3510276
+(output-path bug), 3510277 (quota/SIGPIPE), 3510283 (`realscale_local`
+declaration drift, since fixed), 3510290 (pre-correction harness), 3511145
+(cancelled; started from a dirty tree), the first cpu64 matrix (harness
+expectations 2 and 3), and `raw/cpu64/matrix-cpu-summary.json` (pre-contract
+harness, replaced by the head-commit CPU run).

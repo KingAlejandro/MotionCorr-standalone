@@ -29,7 +29,7 @@
 /** TIFF Reader
   * @ingroup TIFF
 */
-int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack=false, const FileName &name="")
+int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack=false, const FileName &name="", TiffErrorContext* err_ctx=nullptr)
 {
 //#define DEBUG_TIFF
 #ifdef DEBUG_TIFF
@@ -44,10 +44,17 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	uint16_t sampleFormat, bitsPerSample, resolutionUnit;
 	float xResolution;
 	
+	if (!err_ctx)
+		err_ctx = g_tls_tiff_error_context;
+	TiffErrorScope scope(err_ctx);
+
+	if (err_ctx) err_ctx->clear();
+
 	if (TIFFGetField(ftiff, TIFFTAG_IMAGEWIDTH, &width) != 1 ||
 	    TIFFGetField(ftiff, TIFFTAG_IMAGELENGTH, &length) != 1)
 	{
-		REPORT_ERROR("The input TIFF file does not have the width or height field.");
+		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
+		REPORT_ERROR(name + ": The input TIFF file does not have the width or height field" + detail + ".");
 	}
 
 	// true image dimensions
@@ -59,17 +66,27 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	TIFFGetFieldDefaulted(ftiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
 
 	// Find the number of frames.
-	// TIFFNumberOfDirectories walks the IFD offset chain without parsing each
-	// directory. The previous TIFFSetDirectory loop fully read every directory,
-	// including its per-strip offset and byte-count arrays, and the caller
-	// re-runs this for every frame it reads, so the cost was quadratic in the
-	// frame count. For a well-formed file the count is the same; a directory
-	// too corrupt to parse is now caught by the per-frame read below, which
-	// still validates width, height and pixel format against the first frame,
-	// instead of silently shortening the movie.
+	// TIFFNumberOfDirectories walks the IFD offset chain. If the file is truncated
+	// or has corrupted directory structures, LibTIFF reports an error and returns
+	// the count reached prior to the corruption. We intercept LibTIFF errors to
+	// distinguish legitimate EOF (error count == 0) from truncated/corrupted IFD chains.
+	if (err_ctx) err_ctx->clear();
 	_nDim = TIFFNumberOfDirectories(ftiff);
+	if (err_ctx && err_ctx->has_error)
+	{
+		REPORT_ERROR(name + ": Corrupted TIFF directory structure: " + err_ctx->last_error);
+	}
+	if (_nDim <= 0)
+	{
+		REPORT_ERROR(name + ": No valid TIFF directories found.");
+	}
 	// and go back to the start
-	TIFFSetDirectory(ftiff, 0);
+	if (err_ctx) err_ctx->clear();
+	if (TIFFSetDirectory(ftiff, 0) == 0)
+	{
+		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
+		REPORT_ERROR(name + ": Failed to set TIFF directory 0" + detail);
+	}
 
 #ifdef DEBUG_TIFF
 	printf("TIFF width %d, length %d, nDim %d, sample format %d, bits per sample %d\n", 
@@ -192,8 +209,12 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 
 		for (int i = 0; i < _nDim; i++)
 		{
+			if (err_ctx) err_ctx->clear();
 			if (TIFFSetDirectory(ftiff, img_select) == 0)
-				REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select));
+			{
+				std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
+				REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select) + detail);
+			}
 
 			// Make sure image property is consistent for all frames
 			uint32_t cur_width, cur_length;
@@ -237,11 +258,13 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 			size_t rows_read = 0;
 			for (tstrip_t strip = 0; strip < numberOfStrips; strip++)
 			{
+				if (err_ctx) err_ctx->clear();
 				tsize_t actually_read = TIFFReadEncodedStrip(ftiff, strip, buf, stripSize);
 				if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
-				    (size_t)actually_read % row_bytes != 0)
+				    (size_t)actually_read % row_bytes != 0 || (err_ctx && err_ctx->has_error))
 				{
-					REPORT_ERROR(name + ": Invalid decoded TIFF strip size.");
+					std::string detail = (err_ctx && err_ctx->has_error) ? (" (" + err_ctx->last_error + ")") : "";
+					REPORT_ERROR(name + ": Invalid decoded TIFF strip size" + detail + ".");
 				}
 				tsize_t actually_read_n = actually_read * 8 / bitsPerSample;
 #ifdef DEBUG_TIFF

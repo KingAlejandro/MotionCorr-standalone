@@ -15,3 +15,23 @@ Forbidden (enforced by review):
 Base: 4c952b3
 Branch: round96/97-grok-4-3
 Model: grok-4.3
+
+---
+
+## Amendment 2026-09-28 (Opus 5 review/fix phase, coordinator-directed)
+
+The original whitelist forbade header changes, which blocked a regression test that
+calls real production code rather than a retyped copy of its arithmetic. The
+coordinator directed that such a regression be committed. Scope widened, deliberately
+and minimally, to:
+
+5. `src/motioncorr_runner.h` — extract the recenter into a named method
+   `recenterShiftsToFirstFrame` (public static) and move `interpolateShifts` from
+   private to public so the motion-model arithmetic is unit testable. Both are pure
+   functions of their arguments and read no member state. No behaviour change.
+6. `tests/test_runner_numerics.cpp` + `CMakeLists.txt` — the `interpolate_recenter`
+   case and its ctest registration.
+7. `docs/issue97_cpu_evidence/` — raw cpu64 validation logs, script and comparator.
+
+Still forbidden: CUDA/GPU code, gate or tolerance changes, peak-tie/noise/performance
+work, anything touching another issue, merges, closures, default promotion.

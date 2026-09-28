@@ -1,15 +1,15 @@
 # WORKER_STATUS.md — Issue #97 round96/97-grok-4-3 (grok-4.3)
 
 **Issue**: #97 Fix --interpolate_shifts recentering origin  
-**Model**: grok-4.3 (kept)  
-**Task class**: correctness (tiny scoped fix)  
+**Model**: mixed — grok-4.3 implementation (fix + planning), Opus 5 high review/fix (helper extraction, committed regression, cpu64 validation, corrections)  
+**Task class**: correctness (scoped fix + CPU validation evidence)  
 **Branch**: round96/97-grok-4-3 (isolated origin/main worktree)  
 **Base commit**: 4c952b3f54479653512c4d208e09c9a8c02f3726 (main)  
-**Phase**: Fix verified by execution against the real production symbol (see ADR "Verification status"). Upstream parity divergence identified — needs maintainer sign-off. PR #100 open as draft.
-**Changed files**: `src/motioncorr_runner.cpp` (+5/-3), ADR, whitelist, this file. Test addition reverted — private method AND two of its three witnesses had wrong expected values (see ADR "Withdrawn test").
-**Blockers**: Maintainer sign-off needed — the fix is a deliberate divergence from pinned RELION `ad0b230`, which AGENTS.md declares the parity baseline. GPU still waits on the #26 slot.
-**NEEDS_GPU**: No — prepare only; wait for issue26 slot per COMMON.md  
-**Next step**: Maintainer decision on the deliberate RELION-parity divergence (fix outright vs. gate behind a flag). Then independent review. GPU still blocked on #26 slot.
+**Phase**: CPU validation complete on cpu64. Unit regression committed and passing; default-off exactness proven on a real movie; option-on divergence quantified. Two read-only reviews requested. Draft PR #100 retained.
+**Changed files**: `src/motioncorr_runner.cpp`, `src/motioncorr_runner.h`, `tests/test_runner_numerics.cpp`, `CMakeLists.txt`, `docs/issue97_cpu_evidence/*`, ADR, whitelist, this file.
+**Blockers**: none blocking. The option-on path deliberately diverges from pinned RELION `ad0b230`; documented for the maintainer rather than gated on a second approval. GPU remains deferred to the #26 slot.
+**NEEDS_GPU**: Yes, deferred — CUDA option-on path unverified. Request: one GPU slot to run the same 4-arm option-off/on comparison with `_CUDA_ENABLED`. Waiting on the #26 coordinated slot; no GPU submitted.
+**Next step**: fold in the two read-only review verdicts, then hand to the maintainer. PR stays draft.
 
 ## Scoped plan (per issue-97.json + task-97.md + COMMON.md)
 - Own ONLY the saved-first-frame-origin recentering fix.
@@ -40,3 +40,24 @@
 
 ---
 *Published at session start per task-97.md directive. Model kept as grok-4.3.*
+
+## cpu64 validation summary (2026-09-28)
+
+Full evidence: `docs/issue97_cpu_evidence/` (raw logs, script, comparator).
+
+- Lane CPUs 40-55, verified node1/socket1-local, no SMT siblings; `membind=1`;
+  `Cpus_allowed_list: 40-55` confirmed on a pinned child. Held constant across all arms.
+- Serialized under `flock /tmp/motioncorr-issue96-cpu-validation.lock`.
+- Interference recorded: `ctffind` ~100% on CPU 58 (node1, outside the cpuset).
+  Host not idle. **No timing claim is made from these runs.**
+- Two separate source trees (base `4c952b3`, fixed `792f1e6`), Release, `-j16`.
+  Binaries: base `b27f7351...`, fixed `9fb0c0be...`.
+- Unit: `RunnerInterpolateRecenter` passes on fixed, absent on base.
+  Full suite 14/14 fixed, 13/13 base. Mutation test fails as required when reverted.
+- Integration, default-off: output MRC pixel payload and per-movie STAR
+  **byte-identical** between base and fixed, on both the synthetic fixture and the
+  full-size real movie (56,955,920-byte payload).
+- Integration, option-on: intentionally differs — 99.98% of pixels on the real movie
+  (max abs 22.56 on range 51.42), 611/777 STAR value lines. Joint
+  `corrected_micrographs.star` accumulated motion is **equal** in both arms.
+- Not established: any scientific/downstream claim, timings, CUDA, >1 real movie.

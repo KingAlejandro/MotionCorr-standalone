@@ -5,9 +5,10 @@
 | Issue | #99 — fail-closed MRC image writes and completion |
 | Model | `claude-opus-5` (high effort), Claude Code / T3 Code |
 | Task class | correctness |
+| Model routing | `claude-opus-5[1m]` as assigned; no routing error, no substitution |
 | Phase | 5 — PR A implemented, independently reviewed, review findings applied, re-validated on cpu64; draft PR open and reviewable |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (current main) |
-| Head | `1143da8` |
+| Head | `095f137` |
 | Branch | `round96/99-claude-opus-5` (pushed) |
 | Worktree | `/Users/alex.konstantinov/.t3/worktrees/MotionCorr/t3code-a01709b1` |
 | PR | https://github.com/KingAlejandro/MotionCorr-standalone/pull/105 (draft) |

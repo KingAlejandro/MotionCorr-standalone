@@ -12,12 +12,12 @@ implementation result separate from scientific acceptance and performance.
 - Prototype: current-main port of the #30 build/dispatch work and #32 global
   alignment implementation. The published PR head identifies the exact final
   source revision.
-- Source revision used by the retained Metal run: `07bac4164ffc887fede5724f0b3bf4776990cc1a`.
+- Source revision used by the retained Metal run: `7e7ba3731526dcfd42cb27ec5ddc918f5591ca50`.
 - Host: Apple M4 Pro, 20-core GPU; macOS 26.7 (25G229); Xcode 27.0 (27A266a),
   macOS SDK 27.0.
 - Build: Release, `-DMETAL=ON`, `-DCUDA=OFF`, using the project's Python
   environment with NumPy available.
-- Binary SHA-256 for the retained run: `7af494372c9ed2441fd9dc046e8db9f64e6db2d540a5f576afebfc0ab95624e7`.
+- Binary SHA-256 for the retained run: `fcecb5fa353e266323810b62f6673d00e2ad0da42b1207b80404d81b3f92fca8`.
 - Requested Metal device: index 0, Apple M4 Pro.
 
 ## What ran
@@ -68,6 +68,11 @@ No tolerance was changed. Issue #32 remains open. No performance conclusion is
 drawn from this two-fixture, one-run screen; the timing fields are execution
 diagnostics only.
 
+The one-run Metal global-alignment wall intervals were `168.15 ms` (integer)
+and `82.44 ms` (subpixel); full process wall intervals were `0.258 s` and
+`0.171 s`, respectively. These are single characterizations, not the issue's
+required three-run timing result or a speedup claim.
+
 ## Build and test status
 
 - Metal-enabled Release build: passed on the host above.
@@ -82,7 +87,7 @@ diagnostics only.
   `SyntheticRegression` failed its expected-image assertion (max pixel
   difference `23.6498567`, RMSE `0.3119288`; shifts were within `0.004671 px`
   max and `0.003305 px` RMSD). The same failure was seen on the Metal branch.
--  The Metal-enabled and CPU-only prototype builds each passed **18/19**; the
+- The Metal-enabled and CPU-only prototype builds each passed **18/19**; the
   only failure was the same `SyntheticRegression` assertion reproduced on
   clean current main. The CPU-only binary linked no Metal/Foundation/MPS
   frameworks, and a `--metal` request exited 1 with the expected unsupported
@@ -101,9 +106,9 @@ diagnostics only.
 
 | Corrected output | CPU SHA-256 | Metal SHA-256 |
 |---|---|---|
-| Integer MRC | `f6340eec527925ff3aeb75abc005c11023d4ed560ee84a446ff02514bcaa51fa` | `6bc6ae5ec80111a8cc84da06e872c65aac60b5c409f9b04e5b7e8d01e7c1aba1` |
+| Integer MRC | `7798cc595e58cc617a28cd1e72b3c58dc4724aa3dc60f4a56574e52fec98688f` | `22916f6eb59d9a5758fb822c789f1555cf0672075d2a2c9ada41d928553c5f9e` |
 | Integer per-movie STAR | `d9154c0f20c4c45a62043eefe0b095823894912c1fb6e6810fc14ac17eaffa37` | `ff56154f61f7cdedd4b93ddaab59ff6f2bb789da288dc033a12135a2dcae8895` |
-| Subpixel MRC | `21e679b51c04cc4b1cbf45ab291835283f4cd623d7c617d0ca2abd976752c5a5` | `de3d6756243eb76b5afb62069f1ba8ed7ca3a0c515fd7f56f87c22cb183b5253` |
+| Subpixel MRC | `d23b044aa0267c8587985751b6671615f718fedf21c74452998775dd26f0f096` | `2ac790a7abbe5edc5a95c2d7f95a4ffc8de1f1372c042b27d42a4773a5f65e54` |
 | Subpixel per-movie STAR | `4b69a274da04f32c8a6a0193d79bbe4e033e492bb2aadf6555b5f4a4256466a0` | `c88d8f1149b66eec931020171aef7d301ddcfc9404633abbcd686117af96a9a5` |
 
 ## Scope and remaining work

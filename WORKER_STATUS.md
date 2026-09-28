@@ -5,7 +5,7 @@
 | Issue | [#26](https://github.com/KingAlejandro/MotionCorr-standalone/issues/26) — current-main CPU/CUDA operating envelope |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort |
 | Task class | measurement |
-| Phase | measurement-integrity follow-up applied after the PR109 results review; no reruns |
+| Phase | tooling round 2 applied (cancellation + payload control); awaiting reviewer delta confirmation |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (= `origin/main` at start) |
 | Branch | `round96/26-claude-opus-5` |
 | Head | see `git rev-parse HEAD` on `round96/26-claude-opus-5` |
@@ -141,6 +141,17 @@ as too universal. Cancellation now terminates the owned process group; settle fa
 **quarantined**. Two `/proc` field-index bugs fixed (session read as pgrp, starttime as
 field 21). New controls in `tools/test_envelope_runner.py`, run CPU-only on cpu64 cores
 32-63 under the validation lock with `ctffind` recorded and untouched.
+
+## Tooling round 2 (head `11a3ef61`) — two reproduced defects fixed
+
+| defect | was | now |
+| :-- | :-- | :-- |
+| `_kill_group` returned with an owned child alive | escalation decided by launcher exit; survivor search descended from a dead launcher, blind to reparented children; `group_alive=True` only logged | escalation driven by **pgid** membership (survives reparenting), zombies excluded, recycled pids rejected by start time; **fails closed** — blocks holding the flock, quarantines the arm, aborts the series |
+| payload-vs-launcher control vacuous | `/usr/bin/env` execs, so payload pid == launcher pid and the distinguishing assertion sat behind a guard that never fired | `/usr/bin/time -v`, unconditional differing-pid assertion, and a **mutation** half: sampling the parent (1.45 MiB) must fail the threshold the child (266.07 MiB) passes |
+
+Both have a negative half, so neither can pass vacuously. Round-1 control log retained and
+labelled superseded. No timings rerun; no GPU (#53 holds the slot); no measurement claim
+changed.
 
 ## Verified gates
 

@@ -5,7 +5,7 @@
 | issue | #95 — Design and prototype bounded frame/chunk loading without retaining every host frame |
 | model | `claude-opus-5` (high effort), routed as `claude-opus-5[1m]` |
 | task class | architecture (ADR + one bounded component prototype) |
-| phase | 5/5 — twice reviewed; second-round fixes applied and re-verified at final head |
+| phase | 5/5 — three review rounds plus a Codex capacity-accounting correction, re-verified at final head |
 | base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (origin/main) |
 | head | see `git log`; 4 commits on top of base |
 | branch | `round96/95-claude-opus-5` |
@@ -48,14 +48,14 @@ and raw logs in `docs/issue95_staging_evidence/`.
 | --- | --- |
 | `cmake -S . -B build-cpu -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON` | exit 0 |
 | `cmake --build build-cpu -j8` | exit 0 |
-| `./build-cpu/frame_staging` | exit 0 — **248 checks, 0 failures** |
+| `./build-cpu/frame_staging` | exit 0 — **283 checks, 0 failures** |
 | `ctest --output-on-failure` | exit 0 — **14/14 passed** |
-| mutation control, 5 bugs targeting the second review's findings | all 5 caught (exit 1); baseline and restore both 248/0; hashes restored |
+| old-model control, 3 mutants reverting each Codex fix | all 3 caught (exit 1), 6/6/4 failures; baseline and restore both 283/0; hashes restored |
 
-The check count fell from 256 because the second review found four assertions
-that **could not fail**. They were replaced by assertions that can, not
-supplemented, and the two most important replacements each have a mutant
-proving they are now observable.
+Counts across rounds are **235 → 256 → 248 → 283 and are not comparable**:
+assertions were replaced as well as added. The drop to 248 was the second
+review finding four assertions that could not fail; they were replaced, not
+supplemented. Do not read the sequence as growing coverage.
 
 **Earlier runs used `/tmp/motioncorr-issue96-cpu.lock`, which did not serialise
 against the other workers in this round.** They are retained in
@@ -120,8 +120,11 @@ replaced, for the second pass, so no third reviewer was spawned.
 | code, pass 2 | `90a50c9` | `CHANGES_REQUESTED` | First independent review of `largestChunkWithin`, which was added after pass 1. Found it **correct** — monotonicity verified term by term, search sound, overflow-safe midpoint, `out_chunk` contract holds. Four items fixed (A, D, E, F); B, C, G, H, I, J carried as documented notes. |
 | code, pass 3 | **`d2b75e0`** | **`READY_TO_MERGE`** | Bounded confirmation of the A/D/E/F fixes. All four confirmed correct and complete, no new defect in the delta. Independently re-derived the in-loop "overflow, not malformed" argument and the `out_error`/`out_chunk` contracts, and verified the mutation log's four source hashes against the tree rather than taking the claim. Two accepted limitations recorded, neither blocking. |
 
-Same reviewer resumed all three times. **Two direct reviewers total**; no third
-agent was ever spawned.
+| code, pass 4 | `d3a1632` | in flight | bounded review of the Codex capacity-accounting delta |
+| spec, pass 2 | `d3a1632` | in flight | bounded audit of the corrected accounting and supersession discipline |
+
+Both existing reviewers were **resumed**, never replaced. **Two direct
+reviewers total** across the whole task; no third agent was ever spawned.
 
 `READY_TO_MERGE` is the reviewer's assessment of fitness to hand off. It is
 **not** a recommendation to merge: this PR stays a draft, the decision stays a
@@ -142,6 +145,26 @@ function written to prevent it. It now returns a tri-state `Admission`.
 
 Every fix in both passes has a mutation control proving it is covered, not just
 applied.
+
+## Codex review of `dba0891e`
+
+Two P2 capacity-accounting defects, both confirmed against the source, both
+fixed in `2bd1da8` / `5a553ab`:
+
+1. The repair schedule — `n_bad × n_frames` `Draw` objects plus three `n_bad`
+   int arrays — was a host allocation the component makes and its own budget
+   omitted. Dense mask: admitted as `O(C·W·H)`, allocates `O(F·W·H)`.
+2. The no-staging policy double-counted `Iframes`. The runner decodes straight
+   into `Iframes`, so the staged and resident terms are one allocation.
+
+Neither changes the decision. Both make the calculator honest about costs that
+push the same way — and the fix exposes a new one: `n_bad` is unknowable at
+admission, so a staged design must charge a worst case of `W·H` or re-check
+after detection and be ready to fail an already-admitted movie.
+
+Recorded in ADR §7a.4, including why they were not caught here: the double
+count contradicted the ADR's own §4.1 phase table, gave the right number for
+the wrong reason, and **an existing test asserted it as correct**.
 
 ## Blockers
 

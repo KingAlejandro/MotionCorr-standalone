@@ -573,6 +573,14 @@ SciPy 1.18.1) so the shared validation venv was not modified; the `4GPUs` analys
 its Python 3.12.3 / NumPy 2.4.6 / SciPy 1.17.1 environment, and `ctrl_noise_f020` reproduces
 identically under both.
 
+Three short read-only passes had to run on `4GPUs`, because that is where the arm artifacts and
+the tutorial project live: regenerating `results/environment.txt`, re-digesting the 72 corrected
+micrographs, and the 144-stack matched-design verification. At that date cores 96-111 and 112-119
+were reserved for other Issue #96 threads, so these ran `nice`d on cores **120-123**, which are in
+neither reservation, used no GPU, and took no benchmark lock. The affinity each pass actually ran
+under is recorded in `results/environment.txt` as `observed_affinity_of_this_run` rather than
+asserted. No GPU and no SCARF allocation was consumed by this follow-up.
+
 ### Time and peak memory
 
 | Stage | Unit | Wall | Peak RSS |

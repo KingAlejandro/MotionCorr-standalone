@@ -113,6 +113,8 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME RunnerInterpolateRecenter
+            COMMAND runner_numerics interpolate_recenter)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)

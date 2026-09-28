@@ -244,6 +244,19 @@ public:
 	// Check if fn_defect is Serial EM's defect file
 	static bool detectSerialEMDefectText(FileName fn_defect);
 
+	// Inter-/extrapolate per-group local shifts onto every frame.
+	// Pure function of its arguments (reads no member state); public so the
+	// motion-model arithmetic can be unit tested directly.
+	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+	                       int n_frames,
+	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+
+	// Recenter per-frame shifts so that frame 0 becomes the origin.
+	// The first-frame offset MUST be saved before the in-place subtraction begins,
+	// otherwise iteration zero zeroes the origin that later iterations still need.
+	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
+
 private:
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
@@ -267,10 +280,6 @@ private:
 
 	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
 
-	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
-	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
-	                       int n_frames,
-	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
 };
 
 

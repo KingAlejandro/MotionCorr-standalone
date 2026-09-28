@@ -418,6 +418,106 @@ void negativeControls()
 
 } // namespace
 
+
+uint32_t rd32(const std::string &b, size_t at)
+{ uint32_t v = 0; memcpy(&v, b.data() + at, 4); return v; }
+uint16_t rd16(const std::string &b, size_t at)
+{ uint16_t v = 0; memcpy(&v, b.data() + at, 2); return v; }
+
+/* Offset of directory `k`'s first strip, by walking the IFD chain of a file
+ * this test wrote. Used to damage exactly one frame. */
+size_t firstStripOffset(const std::string &b, int k)
+{
+	size_t ifd = rd32(b, 4);
+	for (int i = 0; i < k; i++)
+	{
+		const uint16_t n = rd16(b, ifd);
+		ifd = rd32(b, ifd + 2 + (size_t)n * 12);
+	}
+	const uint16_t n = rd16(b, ifd);
+	for (uint16_t e = 0; e < n; e++)
+	{
+		const size_t at = ifd + 2 + (size_t)e * 12;
+		if (rd16(b, at) != 273) continue;              // StripOffsets
+		const uint32_t count = rd32(b, at + 4);
+		const uint32_t value = rd32(b, at + 8);
+		return count > 1 ? rd32(b, value) : value;     // out of line when count > 1
+	}
+	return 0;
+}
+
+/* The reopen path: after a frame fails, its worker reopens its handle so the
+ * next frame it takes does not inherit LibTIFF state from the failed one.
+ * Without the reopen a later frame can decode from a poisoned handle, and
+ * nothing else in this file would see it, because readFrames rethrows and the
+ * surviving slots are never compared. */
+void reopenAfterFailure()
+{
+	const uint32_t w = 24, h = 30; const int nf = 6; const int bad = 2;
+	const std::string p = tmpPath("reopen_after_failure.tif");
+	writeTiff(p, makeFrames(nf, w, h, 16, SAMPLEFORMAT_UINT), 16, 8, 1, SAMPLEFORMAT_UINT);
+	std::string bytes = slurp(p);
+	const size_t at = firstStripOffset(bytes, bad);
+	record(at > 8 && at < bytes.size(), "reopen: could not locate the strip to damage");
+	for (size_t i = at; i < at + 24 && i < bytes.size(); i++) bytes[i] = (char)~bytes[i];
+	spit(p, bytes);
+
+	// Reference: read each frame on its own handle, so one bad frame does not
+	// stop the others. This is what the pool must reproduce.
+	std::vector<Image<float> > ref(nf);
+	std::vector<bool> ref_ok(nf, false);
+	for (int i = 0; i < nf; i++)
+	{
+		try { ref[i].read(p, true, i, false, true); ref_ok[i] = true; }
+		catch (RelionError &) {}
+	}
+	record(!ref_ok[bad], "reopen: the damaged frame must fail on the reference path too");
+	int good = 0; for (int i = 0; i < nf; i++) if (ref_ok[i]) good++;
+	record(good == nf - 1, "reopen: exactly one frame should be damaged, " +
+	       std::to_string(nf - good) + " failed");
+
+	for (int readers : {1, 2, 4})
+	{
+		std::vector<int> all; for (int i = 0; i < nf; i++) all.push_back(i);
+		std::vector<Image<float> > got(nf);
+		bool threw = false;
+		try {
+			TiffMovieReader rd(p, readers);
+			rd.readFrames(all, got);
+		} catch (RelionError &) { threw = true; }
+		record(threw, "reopen readers=" + std::to_string(readers) +
+		       ": the damaged movie must still fail");
+		// Every frame the reference decoded must also have decoded here. A
+		// worker that carried a poisoned handle forward would corrupt the
+		// frame it took after the failure.
+		for (int i = 0; i < nf; i++)
+		{
+			if (!ref_ok[i]) continue;
+			const std::string diff = compareFrames(ref[i], got[i]);
+			record(diff.empty(), "reopen readers=" + std::to_string(readers) +
+			       " frame=" + std::to_string(i) +
+			       ": decoded after a sibling frame failed: " + diff);
+		}
+	}
+
+	// A handle that cannot be reopened leaves the pool dead. That must be
+	// reported, not handed to LibTIFF as a null TIFF*.
+	{
+		std::vector<int> all; for (int i = 0; i < nf; i++) all.push_back(i);
+		std::vector<Image<float> > got(nf);
+		TiffMovieReader rd(p, 1);
+		remove(p.c_str());                    // the open handle survives; a reopen cannot
+		try { rd.readFrames(all, got); } catch (RelionError &) {}
+		std::string second;
+		try { std::vector<Image<float> > g2(nf); rd.readFrames(all, g2); }
+		catch (RelionError &e) { second = e.msg; }
+		record(second.find("reused after a reader handle failed to reopen") != std::string::npos,
+		       "reopen: a dead pool must be reported on reuse, got: " + second);
+	}
+	std::cout << "  reopen after failure: surviving frames intact, dead pool reported"
+	          << std::endl;
+}
+
 /* The runner only routes a movie to the pool when this says so, and it has to
  * agree with Image::_read's ordered dispatch chain -- which tries SPIDER, the
  * compressed-MRC guard, and mrcs/mrc/st before it ever reaches the TIFF
@@ -458,6 +558,7 @@ int main()
 	try {
 		eligibilityPredicate();
 		negativeControls();
+		reopenAfterFailure();
 
 		// The tutorial movies' layout: 16-bit unsigned, Deflate, one row per strip.
 		{

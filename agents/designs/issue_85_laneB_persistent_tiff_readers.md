@@ -79,9 +79,17 @@ whole-movie digest check catch a placement error in either copy.
 Errors are captured per frame slot, never per worker — a worker that draws no
 work must not mark anything failed. The lowest failing slot is rethrown, which
 is the ordering the runner's serial rethrow loop already guarantees. Nothing
-throws out of the OpenMP region. After a frame fails, its worker reopens its
-handle, so no frame inherits LibTIFF state from a failed one; the reference
-path gives every frame a fresh handle.
+throws out of the OpenMP region.
+
+After a frame fails, its worker reopens its handle, so no frame inherits
+LibTIFF state from a failed one; the reference path gives every frame a fresh
+handle. This is the conservative choice rather than a demonstrated fix:
+deleting the reopen does not corrupt any surviving frame on the damaged
+fixtures here, because `TIFFSetDirectory` re-seats the handle and LibTIFF
+recovers. What deleting it does break is the dead-pool report below, and the
+test fails there. If a reopen itself fails the pool is dead; `readFrames`
+rejects a later call rather than handing a closed `TIFF*` to LibTIFF, which
+previously segfaulted.
 
 ### Eligibility
 

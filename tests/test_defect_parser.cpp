@@ -76,10 +76,35 @@ int main()
     check(run(m, ny, nx, "0 0 1 1\n2 2 2\n", "m5") == 1, "trailing partial record rejected");
     check(run(m, ny, nx, "1.5 2 3 4\n", "m6") == 1, "float token rejected");
 
-    std::cout << "== comment policy (documents ACTUAL behavior) ==\n";
-    int rc = run(m, ny, nx, "# comment\n0 0 2 3\n", "c1", &msg);
-    std::cout << "  INFO  '#' comment line -> "
-              << (rc ? "REJECTED: " + msg : "accepted") << "\n";
+    // Policy (issue #98): the supported contract is the UCSF MotionCor2 one --
+    // whitespace-separated integer quadruples only. Comments, headers and a
+    // UTF-8 BOM are not part of that format and are rejected with a specific
+    // diagnostic. These are assertions, not observations: the policy is fixed.
+    std::cout << "== comment / header / BOM policy ==\n";
+    check(run(m, ny, nx, "# comment\n0 0 2 3\n", "c1", &msg) == 1 &&
+              msg.find("does not support") != std::string::npos,
+          "'#' comment rejected with a format-explaining message");
+    check(run(m, ny, nx, "x y w h\n0 0 2 3\n", "c2") == 1,
+          "text header row rejected");
+    check(run(m, ny, nx, "\xEF\xBB\xBF" "0 0 2 3\n", "c3", &msg) == 1 &&
+              msg.find("byte order mark") != std::string::npos,
+          "UTF-8 BOM rejected with a BOM-specific message");
+
+    std::cout << "== diagnostic quality (record is 1-based, line is named) ==\n";
+    run(m, ny, nx, "BAD\n", "d1", &msg);
+    check(msg.find("record 1") != std::string::npos && msg.find("line 1") != std::string::npos,
+          "first record reported as 'record 1, line 1'");
+    run(m, ny, nx, "0 0 1 1\n1 1 1 1\nBAD\n", "d2", &msg);
+    check(msg.find("record 3") != std::string::npos && msg.find("line 3") != std::string::npos,
+          "third record reported as 'record 3, line 3'");
+    run(m, ny, nx, "\n\n\n0 0 1 1\nBAD\n", "d3", &msg);
+    check(msg.find("record 2") != std::string::npos && msg.find("line 5") != std::string::npos,
+          "leading blank lines counted: 'record 2, line 5'");
+    run(m, ny, nx, "0 0 1 1\nBAD\n", "d4", &msg);
+    check(msg.find("\"BAD\"") != std::string::npos, "offending token quoted in message");
+    run(m, ny, nx, "0 0 1\n", "d5", &msg);
+    check(msg.find("Truncated") != std::string::npos,
+          "partial record distinguished as 'Truncated', not 'Malformed'");
 
     std::cout << "== zero / negative size ==\n";
     check(run(m, ny, nx, "5 5 0 4\n", "z1") == 0 && count_set(m) == 0, "w=0 -> skipped, 0 px");
@@ -116,7 +141,7 @@ int main()
     check(ms2 < 1000, "rect exceeding INT32 range completes in <1s");
 
     std::cout << "== integer overflow boundary ==\n";
-    rc = run(m, ny, nx, "0 0 99999999999999999999999 5\n", "o1", &msg);
+    int rc = run(m, ny, nx, "0 0 99999999999999999999999 5\n", "o1", &msg);
     std::cout << "  INFO  >LLONG_MAX width -> "
               << (rc ? "REJECTED: " + msg : "accepted") << "\n";
     rc = run(m, ny, nx, "9223372036854775807 0 9223372036854775807 5\n", "o2", &msg);

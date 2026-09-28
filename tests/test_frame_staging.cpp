@@ -17,10 +17,12 @@
 #include "src/frame_staging_plan.h"
 #include "src/funcs.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -46,18 +48,39 @@ void check(bool cond, const std::string &what)
 
 struct Movie {
 	int nx = 0, ny = 0, n_frames = 0;
-	std::vector<float> data;          // n_frames * ny * nx
-	std::vector<unsigned char> mask;  // ny * nx, std::vector<bool> has no data()
+	std::vector<float> data;   // n_frames * ny * nx
+	// A real bool array. std::vector<bool> is the bitset specialisation and has
+	// no data(), and reinterpret_cast-ing an unsigned char buffer to bool* is an
+	// aliasing violation, so own the storage directly.
+	std::unique_ptr<bool[]> mask;
+	std::vector<float> gain;   // ny * nx; empty means "no gain reference"
 	float mean = 0.0f, stddev = 0.0f;
 	int d_max = 2;
+	// Mirrors the runner's host_frames_are_raw: raw frames take the gain multiply
+	// on gather and record the replacement instead of writing it.
+	bool raw_host = false;
 	std::string name;
 
 	float *frame(int f) { return data.data() + (size_t)f * ny * nx; }
-	const bool *badMask() const { return reinterpret_cast<const bool*>(mask.data()); }
+	const float *frame(int f) const { return data.data() + (size_t)f * ny * nx; }
+	const bool *badMask() const { return mask.get(); }
+	const float *gainPtr() const { return gain.empty() ? nullptr : gain.data(); }
 	size_t badCount() const {
 		size_t n = 0;
-		for (size_t i = 0; i < mask.size(); i++) if (mask[i]) n++;
+		for (size_t i = 0; i < (size_t)ny * nx; i++) if (mask[i]) n++;
 		return n;
+	}
+
+	Movie() = default;
+	Movie(const Movie &o) { *this = o; }
+	Movie &operator=(const Movie &o) {
+		nx = o.nx; ny = o.ny; n_frames = o.n_frames;
+		data = o.data; gain = o.gain;
+		mean = o.mean; stddev = o.stddev; d_max = o.d_max;
+		raw_host = o.raw_host; name = o.name;
+		mask.reset(new bool[(size_t)ny * nx]);
+		std::copy(o.mask.get(), o.mask.get() + (size_t)ny * nx, mask.get());
+		return *this;
 	}
 };
 
@@ -79,19 +102,30 @@ Movie makeMovie(const std::string &name, int nx, int ny, int n_frames, int d_max
 	m.nx = nx; m.ny = ny; m.n_frames = n_frames; m.d_max = d_max;
 	m.mean = mean; m.stddev = stddev;
 	m.data.resize((size_t)n_frames * ny * nx);
-	m.mask.assign((size_t)ny * nx, 0);
+	m.mask.reset(new bool[(size_t)ny * nx]);
+	std::fill(m.mask.get(), m.mask.get() + (size_t)ny * nx, false);
 	for (int f = 0; f < n_frames; f++)
 		for (int y = 0; y < ny; y++)
 			for (int x = 0; x < nx; x++)
 				m.data[((size_t)f * ny + y) * nx + x] = syntheticPixel(f, y, x);
-	static_assert(sizeof(bool) == sizeof(unsigned char), "bool must be byte sized");
 	return m;
+}
+
+// A gain reference that is neither 1 nor uniform, so an omitted or misindexed
+// multiply cannot cancel out.
+void addGain(Movie &m)
+{
+	m.gain.resize((size_t)m.ny * m.nx);
+	for (int y = 0; y < m.ny; y++)
+		for (int x = 0; x < m.nx; x++)
+			m.gain[(size_t)y * m.nx + x] = 0.75f + 0.5f * (float)((y * 7 + x * 13) % 11) / 11.0f;
+	m.raw_host = true;
 }
 
 void markBad(Movie &m, int y, int x)
 {
 	if (y < 0 || y >= m.ny || x < 0 || x >= m.nx) return;
-	m.mask[(size_t)y * m.nx + x] = 1;
+	m.mask[(size_t)y * m.nx + x] = true;
 }
 
 void markBlock(Movie &m, int y0, int x0, int h, int w)
@@ -104,14 +138,30 @@ void markBlock(Movie &m, int y0, int x0, int h, int w)
 // --------------------------------------------------------------------------
 // Reference: transcription of the production repair loop
 // --------------------------------------------------------------------------
+//
+// Transcribed from src/motioncorr_runner.cpp:1732-1775, INCLUDING the
+// _CUDA_ENABLED raw-host branches at :1753 (gain multiply on gather) and :1770
+// (record to resident_bad_replacements instead of writing the frame). An
+// earlier draft of this oracle omitted both, which made the differential test
+// structurally blind to them.
+//
+// Note the limit of the intentional-bug control in the evidence report: bugs
+// were injected into the component, never into this oracle, so the control
+// cannot detect drift between this transcription and the runner. That has to be
+// checked by reading, and was.
 
 const int kNumMinOk = 6;
 const int kPbufSize = 100;
 
-void referenceRepair(Movie &m)
+// out_replacements, when non-null, uses the runner's frame-major layout:
+// [iframe * n_bad + bad_idx], as at motioncorr_runner.cpp:1770.
+void referenceRepair(Movie &m, std::vector<float> *out_replacements = nullptr)
 {
 	const bool *bBad = m.badMask();
 	const int nx = m.nx, ny = m.ny, D_MAX = m.d_max;
+	const float *gain = m.raw_host ? m.gainPtr() : nullptr;
+	const size_t n_bad = m.badCount();
+	size_t bad_idx = 0;
 	for (int i = 0; i < ny; i++) {
 		for (int j = 0; j < nx; j++) {
 			if (!bBad[(size_t)i * nx + j]) continue;
@@ -125,15 +175,26 @@ void referenceRepair(Movie &m)
 						const int x = j + dx;
 						if (x < 0 || x >= nx) continue;
 						if (bBad[(size_t)y * nx + x]) continue;
-						pbuf[n_ok] = m.frame(iframe)[(size_t)y * nx + x];
+						float neighbor = m.frame(iframe)[(size_t)y * nx + x];
+						if (gain) neighbor *= gain[(size_t)y * nx + x];
+						pbuf[n_ok] = neighbor;
 						n_ok++;
 					}
 				}
 				float replacement;
 				if (n_ok > kNumMinOk) replacement = pbuf[rand() % n_ok];
 				else replacement = rnd_gaus(m.mean, m.stddev);
-				m.frame(iframe)[(size_t)i * nx + j] = replacement;
+				if (m.raw_host) {
+					// The raw frame is deliberately left alone so the later
+					// whole-frame gain pass stays valid.
+					(*out_replacements)[(size_t)iframe * n_bad + bad_idx] = replacement;
+				} else {
+					m.frame(iframe)[(size_t)i * nx + j] = replacement;
+					if (out_replacements)
+						(*out_replacements)[(size_t)iframe * n_bad + bad_idx] = replacement;
+				}
 			}
+			bad_idx++;
 		}
 	}
 }
@@ -187,12 +248,18 @@ bool scheduledRepair(Movie &m, int chunk, Schedule &sched_out,
 	if (replacements)
 		replacements->assign(sched_out.bad_x.size() * (size_t)m.n_frames, 0.0f);
 
+	// Mirror the runner: raw host frames take the gain on gather and are not
+	// written; gain-corrected frames are written in place with no gain.
+	const float *gain = m.raw_host ? m.gainPtr() : nullptr;
+	const bool write_in_place = !m.raw_host;
+
 	for (int base = 0; base < m.n_frames; base += chunk) {
 		int n = chunk;
 		if (base + n > m.n_frames) n = m.n_frames - base;
 		std::vector<float*> ptrs(n);
 		for (int k = 0; k < n; k++) ptrs[k] = m.frame(base + k);
-		if (!applyChunk(sched_out, m.badMask(), base, n, ptrs.data(), replacements))
+		if (!applyChunk(sched_out, m.badMask(), base, n, ptrs.data(),
+		                gain, write_in_place, replacements))
 			return false;
 	}
 	return true;
@@ -216,8 +283,9 @@ void runOrderingCase(Movie proto, const std::vector<int> &chunks, int seed,
                      bool expect_neighbor, bool expect_gaussian)
 {
 	Movie ref = proto;
+	std::vector<float> ref_replacements(proto.badCount() * (size_t)proto.n_frames, 0.0f);
 	init_random_generator(seed);
-	referenceRepair(ref);
+	referenceRepair(ref, &ref_replacements);
 	const std::vector<int> ref_tail = rngTail();
 
 	for (size_t c = 0; c < chunks.size(); c++) {
@@ -240,19 +308,14 @@ void runOrderingCase(Movie proto, const std::vector<int> &chunks, int seed,
 		      tag + ": every repaired pixel is bit-identical to the reference loop");
 		check(cand_tail == ref_tail, tag + ": process RNG left in the same state");
 
-		// The recorded sparse values must agree with what landed in the frames,
-		// because the resident CUDA path uploads those rather than the frames.
-		bool sparse_ok = true;
-		for (size_t ibad = 0; ibad < sched.bad_x.size() && sparse_ok; ibad++)
-			for (int f = 0; f < proto.n_frames; f++) {
-				const float in_frame = cand.frame(f)[(size_t)sched.bad_y[ibad] * proto.nx
-				                                     + sched.bad_x[ibad]];
-				if (replacements[ibad * (size_t)proto.n_frames + f] != in_frame) {
-					sparse_ok = false;
-					break;
-				}
-			}
-		check(sparse_ok, tag + ": recorded sparse replacements match the frame contents");
+		// The recorded sparse values are what the resident CUDA path uploads, so
+		// compare them against the runner's OWN buffer, in the runner's own
+		// frame-major layout. Comparing them against the component's frames in
+		// the component's own layout would only prove self-consistency and
+		// would not notice a transposed buffer.
+		check(replacements == ref_replacements,
+		      tag + ": recorded sparse replacements match the reference, "
+		            "in the runner's frame-major layout");
 
 		// Observability: assert the fixture actually reached the branch it was
 		// built for, rather than passing because nothing happened.
@@ -260,31 +323,35 @@ void runOrderingCase(Movie proto, const std::vector<int> &chunks, int seed,
 			check(sched.n_neighbor_draws > 0, tag + ": exercised the neighbour branch");
 		if (expect_gaussian)
 			check(sched.n_gaussian_draws > 0, tag + ": exercised the Gaussian branch");
-		check(sched.n_neighbor_draws + sched.n_gaussian_draws
-		      == (long long)sched.bad_x.size() * proto.n_frames,
-		      tag + ": every (pixel, frame) decision is accounted for");
 
-		// n_ok is frame-independent: that is the claim the whole design rests
-		// on, so check it directly rather than inferring it from the values.
-		bool uniform = true;
-		for (size_t ibad = 0; ibad < sched.bad_x.size(); ibad++) {
-			const DrawKind k0 = sched.draws[ibad * (size_t)proto.n_frames].kind;
-			for (int f = 1; f < proto.n_frames; f++)
-				if (sched.draws[ibad * (size_t)proto.n_frames + f].kind != k0) uniform = false;
-		}
-		check(uniform, tag + ": branch choice is constant across frames for each bad pixel");
+		// Deliberately NOT asserted here: that the branch kind is constant
+		// across frames for a given bad pixel, and that the two draw counters
+		// sum to n_bad * n_frames. Both are tautologies over buildSchedule's own
+		// loop nesting -- it computes n_ok once per bad pixel, outside the frame
+		// loop, and increments exactly one counter per iteration. They would
+		// pass no matter what the production loop did. The frame-independence of
+		// n_ok is genuinely covered by the comparison against referenceRepair
+		// above, which recomputes n_ok per frame from real pixel data.
 	}
 
 	// Negative control. The naive chunking must be rejected by the same
 	// comparison that passed above -- otherwise the comparison proves nothing.
-	// Chunk 1 with more than one frame is enough to reorder the stream.
-	if (proto.n_frames > 1 && proto.badCount() > 0) {
-		Movie bad = proto;
-		init_random_generator(seed);
-		brokenRepair(bad, 1);
-		check(std::memcmp(bad.data.data(), ref.data.data(),
-		                  ref.data.size() * sizeof(float)) != 0,
-		      proto.name + ": negative control (naive frame-major chunking) is detected");
+	//
+	// badCount() > 1, not > 0: with a single bad pixel, frame-major and
+	// pixel-major iteration visit the (pixel, frame) pairs in the SAME order, so
+	// brokenRepair legitimately matches the reference and this control would
+	// invert. The raw-host fixtures are excluded because brokenRepair models the
+	// in-place write path only.
+	if (proto.n_frames > 1 && proto.badCount() > 1 && !proto.raw_host) {
+		for (int broken_chunk = 1; broken_chunk <= 2; broken_chunk++) {
+			Movie bad = proto;
+			init_random_generator(seed);
+			brokenRepair(bad, broken_chunk);
+			check(std::memcmp(bad.data.data(), ref.data.data(),
+			                  ref.data.size() * sizeof(float)) != 0,
+			      proto.name + " broken_chunk=" + std::to_string(broken_chunk)
+			      + ": negative control (naive frame-major chunking) is detected");
+		}
 	}
 }
 
@@ -405,6 +472,51 @@ void runCapacityChecks()
 		      "replay does not change the staged bound");
 	}
 
+	// Three-way admission: fits at some chunk, versus can never be admitted.
+	{
+		Geometry g; g.nx = 1024; g.ny = 1024; g.n_frames = 40;
+		Policy p;
+		p.retain_host_real_stack = false;
+		p.retain_host_fourier_stack = false;
+		const unsigned long long frame_bytes = 4ull * 1024 * 1024;
+		long long chunk = -1;
+
+		check(largestChunkWithin(g, p, 10 * frame_bytes, chunk),
+		      "a budget of 10 frames is admissible");
+		check(chunk == 10, "largest admissible chunk is exactly 10 frames");
+
+		chunk = -1;
+		check(largestChunkWithin(g, p, 10 * frame_bytes + frame_bytes / 2, chunk),
+		      "a budget of 10.5 frames is admissible");
+		check(chunk == 10, "a part-frame surplus does not buy another frame");
+
+		// A budget below one staged frame is inadmissible, not "chunk 0".
+		chunk = -1;
+		check(!largestChunkWithin(g, p, frame_bytes - 1, chunk),
+		      "a budget under one frame is reported inadmissible");
+		check(chunk == -1, "an inadmissible result leaves the caller's chunk untouched");
+
+		// Constant terms count against the budget: the same movie becomes
+		// inadmissible once a resident stack is charged.
+		Policy heavy = p;
+		heavy.retain_host_fourier_stack = true;
+		chunk = -1;
+		check(!largestChunkWithin(g, heavy, 10 * frame_bytes, chunk),
+		      "a retained Fourier stack makes the same budget inadmissible");
+
+		// Never more than the movie, however large the budget.
+		chunk = -1;
+		check(largestChunkWithin(g, p, 1ull << 40, chunk) && chunk == g.n_frames,
+		      "a huge budget clamps to the frame count");
+
+		// Extra named terms are charged, not ignored.
+		Policy withextra = p;
+		withextra.extra_host_bytes = (long long)(5 * frame_bytes);
+		chunk = -1;
+		check(largestChunkWithin(g, withextra, 10 * frame_bytes, chunk) && chunk == 5,
+		      "extra host terms reduce the admissible chunk");
+	}
+
 	// Overflow and invalid input must be rejected, not wrapped.
 	{
 		Budget b;
@@ -426,11 +538,100 @@ void runCapacityChecks()
 	}
 }
 
+// --------------------------------------------------------------------------
+// Rejection paths
+// --------------------------------------------------------------------------
+
+void runRejectionChecks()
+{
+	Movie m = makeMovie("reject", 16, 16, 4, 2, 1.0f, 1.0f);
+	markBad(m, 5, 5); markBad(m, 9, 9);
+	Schedule sched;
+	init_random_generator(1);
+	check(buildSchedule(m.badMask(), m.nx, m.ny, m.n_frames, m.d_max,
+	                    m.mean, m.stddev, sched), "reject fixture schedule built");
+
+	const size_t n_bad = sched.bad_x.size();
+	std::vector<float> reps(n_bad * (size_t)m.n_frames, 0.0f);
+	std::vector<float*> ptrs(1);
+	ptrs[0] = m.frame(0);
+
+	check(!applyChunk(sched, nullptr, 0, 1, ptrs.data(), nullptr, true, &reps),
+	      "applyChunk rejects a null mask");
+	check(!applyChunk(sched, m.badMask(), 0, 1, nullptr, nullptr, true, &reps),
+	      "applyChunk rejects null frame pointers");
+	check(!applyChunk(sched, m.badMask(), -1, 1, ptrs.data(), nullptr, true, &reps),
+	      "applyChunk rejects a negative first frame");
+	check(!applyChunk(sched, m.badMask(), 4, 1, ptrs.data(), nullptr, true, &reps),
+	      "applyChunk rejects a chunk past the last frame");
+	check(!applyChunk(sched, m.badMask(), 0, 5, ptrs.data(), nullptr, true, &reps),
+	      "applyChunk rejects a chunk longer than the movie");
+	check(!applyChunk(sched, m.badMask(), 0, 1, ptrs.data(), nullptr, false, nullptr),
+	      "applyChunk rejects record-only with nowhere to record");
+	{
+		std::vector<float> wrong(reps.size() + 1, 0.0f);
+		check(!applyChunk(sched, m.badMask(), 0, 1, ptrs.data(), nullptr, true, &wrong),
+		      "applyChunk rejects a mis-sized replacement buffer");
+	}
+	{
+		// A mask that lost a defect after the schedule was built changes n_ok,
+		// so the slot list no longer matches and the call must refuse rather
+		// than index a stale slot.
+		Movie changed = m;
+		changed.mask[(size_t)9 * changed.nx + 9] = false;
+		std::vector<float*> p2(1); p2[0] = changed.frame(0);
+		check(!applyChunk(sched, changed.badMask(), 0, 1, p2.data(), nullptr, true, &reps),
+		      "applyChunk rejects a mask that changed since the schedule was built");
+	}
+	{
+		Schedule broken = sched;
+		broken.bad_y.pop_back();
+		check(!applyChunk(broken, m.badMask(), 0, 1, ptrs.data(), nullptr, true, &reps),
+		      "applyChunk rejects a schedule with inconsistent bad_y");
+	}
+	{
+		Schedule broken = sched;
+		broken.draws[0].slot = 999;
+		std::vector<float> r2(reps.size(), 0.0f);
+		check(!applyChunk(broken, m.badMask(), 0, 1, ptrs.data(), nullptr, true, &r2),
+		      "applyChunk rejects an out-of-range neighbour slot");
+	}
+
+	// buildSchedule rejections, and no half-populated Schedule on failure.
+	{
+		Schedule out;
+		check(!buildSchedule(m.badMask(), m.nx, m.ny, m.n_frames, 5,
+		                     m.mean, m.stddev, out),
+		      "buildSchedule rejects d_max above the runner's maximum of 4");
+		check(out.bad_x.empty() && out.draws.empty() && out.n_frames == 0,
+		      "a rejected buildSchedule leaves nothing half-populated");
+		check(!buildSchedule(nullptr, m.nx, m.ny, m.n_frames, 2, m.mean, m.stddev, out),
+		      "buildSchedule rejects a null mask");
+		check(!buildSchedule(m.badMask(), 0, m.ny, m.n_frames, 2, m.mean, m.stddev, out),
+		      "buildSchedule rejects zero width");
+		check(!buildSchedule(m.badMask(), m.nx, m.ny, 0, 2, m.mean, m.stddev, out),
+		      "buildSchedule rejects zero frames");
+		check(!buildSchedule(m.badMask(), m.nx, m.ny, m.n_frames, -1, m.mean, m.stddev, out),
+		      "buildSchedule rejects a negative d_max");
+	}
+
+	// The two computeBudget rejections not covered by runCapacityChecks.
+	{
+		Geometry g; g.nx = 8; g.ny = 8; g.n_frames = 8;
+		Budget b;
+		Policy zero_sample; zero_sample.staged_bytes_per_sample = 0;
+		check(!computeBudget(g, zero_sample, b), "zero staged sample width rejected");
+		Policy neg_dev; neg_dev.extra_device_bytes = -1;
+		check(!computeBudget(g, neg_dev, b), "negative extra device bytes rejected");
+	}
+}
+
 } // namespace
 
 int main()
 {
 	runCapacityChecks();
+	runRejectionChecks();
 
 	const std::vector<int> chunks = {1, 2, 3, 5, 24};
 
@@ -488,6 +689,55 @@ int main()
 
 		Movie empty = makeMovie("no-defects", 16, 16, 4, 2, 1.0f, 1.0f);
 		runOrderingCase(empty, {1, 4}, 5, false, false);
+	}
+
+	// Raw host frames with a gain reference: the runner's _CUDA_ENABLED path,
+	// where each neighbour is multiplied by Igain on gather and the replacement
+	// is recorded instead of written. An applyChunk that drops the gain, or
+	// writes the raw frame, diverges here and nowhere else.
+	{
+		Movie m = makeMovie("raw-gain-11f", 36, 28, 11, 2, 9.0f, 2.0f);
+		addGain(m);
+		markBad(m, 7, 7); markBad(m, 14, 21); markBlock(m, 18, 8, 5, 5);
+		runOrderingCase(m, {1, 2, 3, 11}, 17, true, true);
+
+		// And the raw frames must come back untouched, which the frame memcmp
+		// inside runOrderingCase cannot distinguish from "correctly written".
+		Movie cand = m;
+		Schedule sched;
+		std::vector<float> reps;
+		init_random_generator(17);
+		check(scheduledRepair(cand, 2, sched, &reps),
+		      "raw-gain: record-only application succeeded");
+		check(std::memcmp(cand.data.data(), m.data.data(),
+		                  m.data.size() * sizeof(float)) == 0,
+		      "raw-gain: raw host frames are left untouched, as the runner leaves them");
+		bool any_nonzero = false;
+		for (size_t i = 0; i < reps.size(); i++) if (reps[i] != 0.0f) any_nonzero = true;
+		check(any_nonzero, "raw-gain: replacements were actually recorded");
+	}
+
+	// Same geometry with the gain applied to the frames instead: proves the two
+	// modes really differ, so the gain parameter is not inert.
+	{
+		Movie raw = makeMovie("gain-matters", 36, 28, 6, 2, 9.0f, 2.0f);
+		addGain(raw);
+		markBad(raw, 7, 7); markBad(raw, 14, 21); markBad(raw, 3, 30);
+
+		Movie nogain = raw;
+		nogain.raw_host = false;
+		nogain.gain.clear();
+
+		std::vector<float> with_gain(raw.badCount() * (size_t)raw.n_frames, 0.0f);
+		std::vector<float> without(raw.badCount() * (size_t)raw.n_frames, 0.0f);
+		Schedule s1, s2;
+		Movie a = raw, b = nogain;
+		init_random_generator(23);
+		check(scheduledRepair(a, 2, s1, &with_gain), "gain-matters: gain arm ran");
+		init_random_generator(23);
+		check(scheduledRepair(b, 2, s2, &without), "gain-matters: no-gain arm ran");
+		check(with_gain != without,
+		      "gain-matters: dropping the gain multiply changes the replacements");
 	}
 
 	std::fprintf(stderr, "%d checks, %d failures\n", g_checks, g_failures);

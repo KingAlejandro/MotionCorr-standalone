@@ -5,10 +5,10 @@
 | Issue | [#26](https://github.com/KingAlejandro/MotionCorr-standalone/issues/26) — current-main CPU/CUDA operating envelope |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort |
 | Task class | measurement |
-| Phase | GPU Phase 0/1/confirmation re-running on the repaired instrument; cpu64 series executing |
+| Phase | **complete** — all series finished, report written, draft PR reviewable |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (= `origin/main` at start) |
 | Branch | `round96/26-claude-opus-5` |
-| Head | see `git rev-parse HEAD` |
+| Head | see `git rev-parse HEAD` on `round96/26-claude-opus-5` |
 | Draft PR | [#109](https://github.com/KingAlejandro/MotionCorr-standalone/pull/109) |
 
 ## Scope
@@ -32,16 +32,20 @@ Contract is `agents/designs/issue_26_operating_envelope.md`. No file under `src/
 
 | Resource | State |
 | :-- | :-- |
-| `4-gpu-vm` `/tmp/motioncorr-bench.lock` | **held by this task** for the Phase 0/1 series |
+| `4-gpu-vm` `/tmp/motioncorr-bench.lock` | **released** 2026-09-28 ~02:45Z; all 4 GPUs idle. Announced on #66 and to #53/#69/#94 |
 | `4-gpu-vm` CPUs | `taskset -c 96-111` (16 logical, all NUMA node 1), verified inherited |
 | `4-gpu-vm` GPUs | GPU 0 only (`GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`); 1/2/3 left free |
-| `cpu64` `/tmp/motioncorr-issue96-cpu-measure.lock` | **held by this task** for the CPU series |
+| `cpu64` `/tmp/motioncorr-issue96-cpu-measure.lock` | **released** |
 | `cpu64` CPUs | `taskset -c 0-31` (= NUMA node 0). Lane 32-63 untouched and free for other workers |
 | `cpu64` validation lock | **not** held; no whole-host run is planned |
 
-Other tasks: GPU is in use until the series below completes. Post NEEDS_GPU on your own issue
-and it will be scheduled after this slot; do not start a competing timed job, and note that a
-build also perturbs a timed run even though it produces no number.
+GPU is free. #53, #69 and #94 have published NEEDS_GPU; #72, #95 and #99 need none.
+Scheduling note offered on #66: #94 produces numbers so it needs the lock *and* a settle
+gate, while #53 and #69 are correctness-only and need the lock but not a settle gate, so
+they can run back to back. Assignment is Codex monitoring's call, not mine.
+
+64 GB of timed outputs are retained under `/home/alex/MotionCorr-issue26-envelope/results/`
+(host has 700 GB free). Per-product digests are committed, so those trees can be pruned.
 
 ## Builds (frozen, Release)
 
@@ -106,7 +110,12 @@ both arms and cancels. Its interference figures will be labelled as instrument v
 
 ## Blockers
 
-None open. One cleared: see below.
+None open. Two cleared, one raised for someone else.
+
+**Raised:** during the `cpu64` series, another round worker's `python` ran up to **63
+simultaneous threads inside cores 0-31**, which the round assigns to #26; the shared lane is
+32-63. It contaminated that series (arm ranges up to 67%, against 1.8-5.8% on the GPU lane).
+Not altered, not attributed to anyone, recorded in `docs/operating_envelope_issue26.md` §6.3.
 
 ## Findings so far
 
@@ -129,7 +138,25 @@ None open. One cleared: see below.
 
 Not applicable — this task holds the slot.
 
+## Verified gates
+
+| gate | scope | result |
+| :-- | :-- | :-- |
+| payload + core header + masked MRC labels + STAR + EPS | 12 GPU screen arms, 3 GPU confirmation arms, 12 cpu64 arms | **all EQUAL**, 0 differing |
+| effective `--j` / IO cap read back from the binary's own logs | every arm | **matches request** on all |
+| per-movie CUDA execution witness | every GPU arm | **24/24 movies**, zero fallback warnings |
+| cross-pass determinism, two passes hours apart | 13 arms | **bit-identical payloads 13/13** |
+| non-zero exits | 98 timed arms | **none** |
+| `tools/test_envelope_report.py` | product verdict, 4 cases | **pass** |
+| `tools/test_envelope_interference.py` | interference witness, 3 cases | **pass** on Linux host |
+
+## Explicit unrun cases
+
+Phase 2 worker execution (protocol only; #53 owns workers). Multi-GPU and scaled-resource
+series. Phase 3 workload shape — frame counts, geometry, formats, heterogeneous costs. Cold
+cache and networked storage. A clean-lane CPU re-measurement, which §6.3 says is needed
+before any CPU `--j` recommendation is load-bearing.
+
 ## Next step
 
-Complete the Phase 0/1 GPU series and the cpu64 j/binding series, compare products per arm,
-write `docs/operating_envelope_issue26.md`, open the draft PR.
+None outstanding. Draft PR #109 is reviewable.

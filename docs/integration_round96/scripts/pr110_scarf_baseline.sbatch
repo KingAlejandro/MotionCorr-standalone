@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p gpu
+#SBATCH -p gpu-devel
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --exclusive

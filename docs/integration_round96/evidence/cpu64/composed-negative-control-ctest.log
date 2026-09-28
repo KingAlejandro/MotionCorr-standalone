@@ -1,0 +1,96 @@
+Test project /home/ubuntu/mc-i96-starfix/ncsrc/build
+      Start  1: DefectParser
+      Start  2: SyntheticRegression
+      Start  3: HotPixelRngDeterminism
+      Start  4: RunnerExposure
+ 1/17 Test  #4: RunnerExposure ...................   Passed    0.55 sec
+      Start  5: Runner_failure
+ 2/17 Test  #3: HotPixelRngDeterminism ...........   Passed    0.64 sec
+      Start  6: Runner_invalid
+ 3/17 Test  #5: Runner_failure ...................   Passed    0.15 sec
+      Start  7: Runner_resume
+ 4/17 Test  #6: Runner_invalid ...................   Passed    0.13 sec
+      Start  8: Runner_tomography
+ 5/17 Test  #8: Runner_tomography ................   Passed    0.41 sec
+      Start  9: RunnerLateBin
+ 6/17 Test  #2: SyntheticRegression ..............   Passed    1.18 sec
+      Start 10: RunnerExportedUnits
+ 7/17 Test #10: RunnerExportedUnits ..............   Passed    0.14 sec
+      Start 11: GainCache
+ 8/17 Test  #9: RunnerLateBin ....................   Passed    0.65 sec
+      Start 12: TiffRead
+ 9/17 Test #12: TiffRead .........................   Passed    0.73 sec
+      Start 13: DamagedMovie
+10/17 Test #11: GainCache ........................   Passed    1.34 sec
+      Start 14: RunnerModelParser
+11/17 Test  #7: Runner_resume ....................   Passed    2.10 sec
+      Start 15: WriteFaults
+12/17 Test #14: RunnerModelParser ................   Passed    0.16 sec
+      Start 16: CiFailClosedControls
+13/17 Test #15: WriteFaults ......................***Failed    0.45 sec
+  phase 1: a.mrc 1049600 B, sha256 87930b74a7792cc8
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-i96-starfix/ncsrc/tests/test_write_faults.py", line 251, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/ubuntu/mc-i96-starfix/ncsrc/tests/test_write_faults.py", line 151, in main
+    assert res.returncode != 0, (
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: a failed image write was treated as success:
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+ (skipping all micrographs for which a corrected movie already exists) 
+  * Movies/b.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /tmp/tmp0_h8gfml/out/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+ Done! Written: /tmp/tmp0_h8gfml/out/logfile.pdf
+
+
+      Start 17: ImageWriteFaults
+14/17 Test #13: DamagedMovie .....................***Failed    0.85 sec
+Running TIFF integrity and expected-frame validation test suite...
+  [PASS] test_strip_truncation
+  [PASS] test_ifd_directory_truncation
+  [PASS] test_hard_truncation
+  [PASS] test_corrupt_header
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-i96-starfix/ncsrc/tests/test_damaged_movie.py", line 419, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/ubuntu/mc-i96-starfix/ncsrc/tests/test_damaged_movie.py", line 406, in main
+    test_expected_frames_cli(args.binary, source)
+  File "/home/ubuntu/mc-i96-starfix/ncsrc/tests/test_damaged_movie.py", line 179, in test_expected_frames_cli
+    assert res_fail.returncode != 0, "--expected_frames mismatch must fail"
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: --expected_frames mismatch must fail
+
+15/17 Test #17: ImageWriteFaults .................Subprocess aborted***Exception:   1.13 sec
+  inherited RLIMIT_FSIZE: soft=infinity hard=infinity
+FAIL: a short payload write must throw, not report success
+FAIL: the failure must name the output path, got: 
+FAIL: the failure must name the stage, got: 
+in: /home/ubuntu/mc-i96-starfix/ncsrc/src/image.h, line 374
+ERROR: 
+Can not close image file 
+terminate called after throwing an instance of 'RelionError'
+
+16/17 Test #16: CiFailClosedControls .............   Passed   10.75 sec
+17/17 Test  #1: DefectParser .....................***Timeout 120.12 sec
+
+
+76% tests passed, 4 tests failed out of 17
+
+Total Test time (real) = 120.12 sec
+
+The following tests FAILED:
+	  1 - DefectParser (Timeout)
+	 13 - DamagedMovie (Failed)
+	 15 - WriteFaults (Failed)
+	 17 - ImageWriteFaults (Subprocess aborted)
+Errors while running CTest

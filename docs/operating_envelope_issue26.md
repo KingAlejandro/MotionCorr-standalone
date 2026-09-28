@@ -29,7 +29,7 @@ rebase, so all three are prior art re-checked here, not a baseline extended.
 | CUDA Release + `TIMING` | `22e59177…` — identical flags plus `-DTIMING`; a separate class, never mixed into a timed comparison |
 | Toolchain | gcc 13.3.0, nvcc 12.8.61, driver 570.86.10, FFTW 3.3.10, libtiff 6.0.1, CMake 3.28.3 |
 | Host | `4-gpu-vm`, AMD EPYC 7452, 124 logical CPUs, 2 NUMA nodes (0–61, 62–123), 432 GiB |
-| Device | ordinal 0 = `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, A100 80 GB PCIe, `CUDA_VISIBLE_DEVICES` unset |
+| Device | CUDA ordinal 0, `CUDA_VISIBLE_DEVICES` unset. NVML index 0 is `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, A100 80 GB PCIe. The two namespaces are distinct in general, so the identification is evidenced rather than assumed: the NVML sampler on index 0 tracked the run from idle to 3429 MiB, which no other device did |
 | CPU lane | `taskset -c 96-111`; inherited `Cpus_allowed_list` verified `96-111` on every run; all 16 on NUMA node 1 |
 | 24-movie STAR | `fb998f70…` — matches this issue's own reference STAR |
 | gain / movie 00021 | `8919cdc7…` / `df298b1b…` — match `docs/reference_gates.md` |
@@ -65,15 +65,47 @@ The two device figures are different quantities and are labelled as such. The tr
 is what the allocator recorded; the NVML figure is larger because it includes the CUDA
 context. A sampled peak is a lower bound on the true peak at any sampling rate.
 
-**Where the wall time goes.** The binary's own per-movie timer (`motioncorr_runner.cpp:1261`
-to `:2557`) covers the movie correction proper and sums to 22.93 s across 24 movies — median
-0.934 s, range 0.914–1.333 s. The remaining **6.09 s, 21% of the run**, falls outside that
-interval. From the source it comprises process startup, the 24 `plotShifts` EPS writes at
-`:622`, and `generateLogFilePDFAndWriteStarFiles()` at `:650`, which shells out to ghostscript
-three times. This report does not apportion the 6.09 s among those three, because nothing in
-these records separates them; it is reported as one measured residual with its contents
-enumerated. It is not attributed to TIFF, and no TIFF cost anywhere in this document is
-derived by subtracting GPU kernel timers from wall time.
+**Where the wall time goes.** Two instrumented sources, kept separate.
+
+The `TIMING` build's whole-run breakdown, 24 movies, profiled binary `22e59177…`:
+
+| stage | s | | stage | s |
+| :-- | --: | --- | :-- | --: |
+| `read movie` | **7.082** | | `detect hot pixels` | 0.843 |
+| `apply gain and initial sum` | 3.789 | | `fix defects` | 0.596 |
+| `write corrected image` | 2.954 | | `global iFFT` | 0.560 |
+| `patch alignment` | 1.589 | | `global FFT` | 0.537 |
+| `dose weighting` | 1.361 | | `global alignment` | 0.263 |
+| `joint star and logfile pdf` | 1.101 | | `prepare patch` | 0.149 |
+| `write star and shift plot` | 0.129 | | `read gain` | 0.100 |
+| `fit polynomial` | 0.037 | | `power spectrum`, `binning` | 0.000 |
+
+These nest and overlap and are **not** summed into a total; their naive sum is 21.09 s
+against a 28.64 s profiled wall, and that gap is not a residual to attribute. The in-binary
+`Timer` is also not thread-safe, so a stage covering parallel work is indicative rather than
+exact. These come from the profiled binary and are never mixed into the unprofiled timing
+comparison — the unprofiled build emits **zero** `TIMING` stages, which is what makes the two
+genuinely separate classes rather than a labelling convention.
+
+**This is the mechanism behind section 4.** Host-side input and output — `read movie` 7.08 s,
+`apply gain and initial sum` 3.79 s, `write corrected image` 2.95 s — is roughly 13.8 s,
+while the GPU-accelerated arithmetic — `patch alignment` 1.59 s, `global FFT` + `global iFFT`
+1.10 s, `dose weighting` 1.36 s — is roughly 4.0 s. A pipeline in that shape is governed by
+how fast frames can be decoded and written, not by how many threads are available to compute,
+which is exactly the behaviour section 4 measures.
+
+The second source is the per-movie CUDA profile block, present in both builds. It reports a
+device-side `Total GPU alignment time` with a median of 40.2 ms per movie and a traced peak
+allocation of 3134.34 MiB, identical on all 24.
+
+The binary's own per-movie wall timer (`motioncorr_runner.cpp:1261`–`:2557`) sums to 22.93 s
+across 24 movies, median 0.934 s, range 0.914–1.333 s. The remaining **6.09 s** of the 29.03 s
+run falls outside that interval and, from the source, comprises process startup, the 24
+`plotShifts` EPS writes at `:622`, and `generateLogFilePDFAndWriteStarFiles()` at `:650`,
+which shells out to ghostscript three times. The `TIMING` stages above put
+`joint star and logfile pdf` at 1.101 s and `write star and shift plot` at 0.129 s, so the
+final reporting is a real but minority part of that residual. No TIFF cost anywhere in this
+document is derived by subtracting GPU kernel timers from wall time.
 
 **NUMA placement.** The lane pins CPUs to node 1 but `Mems_allowed_list` stays `0-1` — memory
 is not bound. `numastat -p` sampled mid-run nonetheless shows **1.43 GB of 1.45 GB resident on

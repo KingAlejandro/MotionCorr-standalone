@@ -5,11 +5,11 @@
 | Issue | [#26](https://github.com/KingAlejandro/MotionCorr-standalone/issues/26) — current-main CPU/CUDA operating envelope |
 | Model | `claude-opus-5` (Opus 5, 1M context), high effort |
 | Task class | measurement |
-| Phase | Phase 0 + Phase 1 series executing on both hosts |
+| Phase | GPU Phase 0/1/confirmation re-running on the repaired instrument; cpu64 series executing |
 | Base | `4c952b3f54479653512c4d208e09c9a8c02f3726` (= `origin/main` at start) |
 | Branch | `round96/26-claude-opus-5` |
 | Head | see `git rev-parse HEAD` |
-| Draft PR | not yet opened |
+| Draft PR | [#109](https://github.com/KingAlejandro/MotionCorr-standalone/pull/109) |
 
 ## Scope
 
@@ -23,8 +23,10 @@ Contract is `agents/designs/issue_26_operating_envelope.md`. No file under `src/
 | `agents/designs/issue_26_operating_envelope.md` | measurement ADR and whitelist |
 | `tools/envelope_runner.py` | measurement runner |
 | `WORKER_STATUS.md` | this file |
-| `docs/operating_envelope_issue26.md` | report and operating guide (pending) |
-| `docs/benchmark_logs/issue26_envelope_*/` | raw per-run records (pending) |
+| `tools/test_envelope_report.py` | controls for the product verdict |
+| `tools/test_envelope_interference.py` | controls for the interference witness (Linux only) |
+| `docs/operating_envelope_issue26.md` | report and operating guide |
+| `docs/benchmark_logs/issue26_envelope_2026-09-27/` | raw per-run records |
 
 ## Allocation held
 
@@ -61,12 +63,46 @@ tree digest `787a3061e3fde06446884c405e48192c387dc5d284f4712c0b735c31185b4ba0`.
 - declared 4-movie screening subset `ed74c9ed3fafdc64fa510265798bc864b1ba36b59730be4a6f9ebda1e3dc09f1`
   (00021, 00029, 00042, 00049) — **byte-identical STAR on both hosts**
 
+## Instrument corrections (round 2)
+
+An independent read-only review found four witnesses that could not observe what they
+asserted. All four were verified against retained artifacts or a control before being
+accepted, and two changed results, so the GPU series is being **re-run** on the repaired
+instrument rather than reported with caveats. Fixed in `24ea368`:
+
+1. `TIMING` stage intervals were never captured — the profiled build writes them to stdout,
+   not the per-movie log, so the profiled arm added nothing. The loose parse also promoted
+   prose ("Frames to be used: 1 2 3 …") into the interval record as a 1.0-second stage.
+2. The CUDA witness was a startup banner that survives every movie falling back to the CPU.
+   Re-checked against the retained Phase 0 run: 24/24 movies carry per-movie CUDA execution
+   evidence and no log contains a fallback warning, so the published numbers stand.
+3. Interference used `ps pcpu`, a lifetime average that cannot resolve activity during a run;
+   and ownership was a walked `ps` snapshot that raced with the sampler's own children,
+   recording `foreign_cpu_max = 2750%` against its own `ps` and MotionCorr's own `gs`. Now
+   `/proc` utime+stime deltas with session-id ownership, with a three-way control.
+4. Process wall from `/usr/bin/time` was never parsed (colon inside `(h:mm:ss or m:ss)`).
+
+The cpu64 series is being allowed to finish on the earlier instrument: its conclusion is a
+paired unbound-versus-bound contrast in one lane, where self-contamination is identical in
+both arms and cancels. Its interference figures will be labelled as instrument v1.
+
 ## Latest results
 
-- GPU warm-up, 24 movies, `--use_own --gpu 0 --j 8`, 5x5 patches, dose weighting: 28.98 s, exit 0,
-  109 products.
-- Phase 0 baseline, same configuration: **29.03 s**, exit 0, 109 products.
-- Both CPU builds on cpu64 configure and build clean; binary smoke-runs.
+- Phase 0 baseline, 24 movies, `--use_own --gpu 0 --j 8`, 5x5 patches, dose weighting:
+  **29.03 s**, exit 0, 109 products, 2.66 of 16 cores, 1.52 GiB peak RSS, 3134 MiB traced
+  device peak.
+- Phase 1 screen, 10 distinct effective treatments x 3 repeats: wall time is a function of
+  the effective IO-thread count alone. Across `--j` in {1,2,4,8} at IO=1 the spread is 0.8%,
+  below the 2.5-8.4% run-to-run spread. 12/12 arms bit-equal, no failures.
+- Phase 1 confirmation, all 24 movies, paired with order alternating: `j16/io16` beat
+  `j8/io8` in 5/5 pairs, order-corrected effect **1.889 s** on ~30 s; `j16/io8` was slower
+  than `j16/io16` in 3/3 pairs by **3.376 s**. More IO threads help; more compute threads at
+  fixed IO do not.
+- `TIMING` breakdown, 24 movies: `read movie` 7.082 s is the largest stage; host input and
+  output total ~13.8 s against ~4.0 s of GPU-accelerated arithmetic.
+- cpu64, rep 1: `j=32` 25.15 s unbound vs 18.93 s with `OMP_PROC_BIND=spread`.
+- All controls pass: `tools/test_envelope_report.py`, and
+  `tools/test_envelope_interference.py` on the Linux host.
 
 ## Blockers
 

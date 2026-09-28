@@ -81,6 +81,10 @@ if(BUILD_TESTING)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
+    # Pure C++ arithmetic regression (issue #97). Registered above the
+    # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
+    add_test(NAME RunnerInterpolateRecenter
+        COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     add_test(NAME DefectParser COMMAND defect_parser)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
@@ -129,6 +133,9 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME RunnerInterpolateShifts
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts)
         add_test(NAME WriteFaults
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
                 --binary $<TARGET_FILE:motioncorr>)

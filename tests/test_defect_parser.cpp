@@ -130,6 +130,13 @@ int main()
     check(run(m, ny, nx, "0 0\n1 1\n2 2 2 2\nBAD\n", "d6", &msg) == 1 &&
               msg.find("line 4") != std::string::npos,
           "line stays correct after a record split across lines");
+    // A record truncated by EOF names where the record STARTED: by the time the
+    // shortfall is detected the whitespace skip has stepped past the last
+    // content line, so reporting the current line would name a line that does
+    // not exist in the file.
+    run(m, ny, nx, "0 0 1 1\n2 2 2\n", "d7", &msg);
+    check(msg.find("Truncated") != std::string::npos && msg.find("line 2") != std::string::npos,
+          "truncated record names its start line, not one past EOF");
 
     // Issue #98 Plan bullet 5: the SerialEM detector must keep rejecting
     // SerialEM-style input. Both call sites consult it before fillDefectMask,
@@ -200,7 +207,7 @@ int main()
     // Remove the fixtures we created, then the directory.
     for (const char *tag : {"v1","v2","v3","v4","v5","e1","e2","m1","m2","m3","m4","m5","m6",
                             "c1","c2","c3","d1","d2","d3","d4","d5","d6","z1","z2","z3",
-                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1"}) {
+                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1","d7"}) {
         std::remove((scratch_dir() + "/" + tag + ".txt").c_str());
     }
     ::rmdir(scratch_dir().c_str());

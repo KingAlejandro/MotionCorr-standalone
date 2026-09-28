@@ -191,6 +191,36 @@ def main() -> int:
     chk("gate-side R^2 maximum on the dose arm",
         max(r["std_fit_r2"] for r in x6), 0.8361, 0.001)
 
+    print("\n--- figures corrected by the 2026-09-28 report audit ---")
+    hm = [r for r in l3 if A.axis_bucket(r, "movie") == "holdout"]
+    hml = [r for r in hm if r.get("group") in
+           ("REF", "H1_threads", "H2_proc_bind", "H3_repeat")
+           or r.get("label") in ("gain_null", "mov_null")]
+    chk("hold-out movie cells", len(hm), 120, 0)
+    chk("of which harmless (not 114, which is the negligible-tier count)", len(hml), 87, 0)
+    x6d = [abs(r["std_delta_b_a2"]) for r in l2
+           if A.fault_of(r) == "X6_dose_scale" and abs(r["severity"] - 2.0) < 1e-9]
+    chk("double-dose |gate delta-B| maximum", max(x6d), 1.0487, 0.01)
+    chk("double-dose absolute harm minimum",
+        min(r["harm_delta_b_a2"] for r in l2 if A.fault_of(r) == "X6_dose_scale"
+            and abs(r["severity"] - 2.0) < 1e-9), 19.196, 0.01)
+    bad_all = [abs(A.get(r, "std_delta_b_a2")) for r in allr
+               if A.tier_of(r, "harm_delta_b_a2", 5.0, floors) == "unacceptable:envelope"
+               and A.get(r, "std_delta_b_a2") is not None]
+    chk("corpus-wide lowest unacceptable delta-B", min(bad_all), 0.000399, 0.02)
+    x5 = [r for r in l2 if A.fault_of(r) == "X5_applied_delta_b_a2"]
+    chk("X5 truth-side R^2 minimum", min(r["truth_fit_r2"] for r in x5), 1.639e-06, 0.01)
+    g = {r["run_id"]: r for r in l3 if r.get("label") == "mov_shift2_gplus"}
+    chk("translated movie 00025 signed delta-B (sign retained)",
+        g["00025__mov_shift2_gplus"]["std_delta_b_a2"], -0.1025, 0.01)
+    chk("translated movie 00021 signed delta-B",
+        g["00021__mov_shift2_gplus"]["std_delta_b_a2"], 0.0312, 0.02)
+    chk("unsplit cells (off the frozen grids)",
+        sum(1 for r in allr if A.joint_split(r) == "unsplit"), 75, 0)
+    chk("split buckets partition the corpus",
+        sum(1 for r in allr if A.joint_split(r) in
+            ("selection", "holdout", "mixed", "unsplit")), 1279, 0)
+
     print(f"\n{sum(OK)}/{len(OK)} checks passed")
     return 0 if all(OK) else 1
 

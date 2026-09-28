@@ -221,8 +221,12 @@ def harm_of(rec: Dict[str, Any], harm_key: str) -> float:
 
     Layer 2 supplies a measurement against the noiseless object. Elsewhere the
     reference-measured envelope loss stands in for it, which layer 2 licenses
-    by showing the two agree to within 0.9-1.1 for every motion fault and
-    exactly for applied envelopes.
+    for the fault classes whose signature IS an envelope: exactly for applied
+    attenuation, and 0.80-1.18 for motion faults above the estimator floor.
+
+    The licence does not extend to dose-weighting faults, where the two are
+    anti-correlated (report section 6.1), and layers 1 and 3 have no truth-side
+    measurement at all -- see harm_tiered_from_rejected_fit.
     """
     v = rec.get(harm_key)
     if v is None or not isinstance(v, (int, float)) or not math.isfinite(float(v)):

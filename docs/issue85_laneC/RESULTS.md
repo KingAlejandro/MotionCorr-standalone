@@ -4,6 +4,78 @@ Native uint16 TIFF host staging with device-side conversion and gain. Design:
 `agents/designs/issue_85_lane_c_uint16_staging.md`. Raw per-arm records are the `*.run.txt` files
 here; `series.log` is the interleaved timing series; `compare_*.txt` are full comparator outputs.
 
+## Current-main integration status — 29 September 2026
+
+Candidate source `88966d0c9b9d52ee1a1f32b6aff876a86e025231` (tree
+`004aeb593584d4b83f1ab26fe75dad42298160df`) is based on current main
+`a75a3f87f7ef17e0a29b1c91a1edecda08ebed34` and composes the selected #69 ownership implementation
+at `078ec5461119b8a51802debc8f2621b3c304a5bc`. It reuses that ownership code; PR93 is not included.
+The native candidate binary SHA-256 is
+`efe57c8df0db067ad59c361a653fa5e27489def62632bb2b896b82bd7a1d5956`; the current-main binary is
+`681cb423984f0631cc48dc51859c210570beee78c3c7013ba1d5ab68bd189612`.
+
+The exact fast-path predicate is:
+
+```cpp
+use_gpu && !early_binning && !isEER && !isCompressedMRC &&
+((FileName)fn_mic.getFileFormat()).contains("tif") && Ihead.dataType() == UShort
+```
+
+So this enables only resident-CUDA, unsigned-16 TIFF input. CPU processing, early binning, EER,
+compressed MRC, other MRC modes, signed 16-bit, packed 4-bit, 8-bit and float TIFF retain the
+existing float path.
+
+SCARF job `3513069` ran the current-main and candidate binaries sequentially on one A100
+(`GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f`), eight logical CPUs (`0-3,32-35`), CUDA 12.8,
+Release `sm80`, with the 24-movie tutorial input and exact STAR SHA-256
+`fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041`. Four healthy comparisons
+passed the manifest-bound products comparator: each arm had 24 valid MRCs, 25 STARs and
+341,735,520 pixels; MRC headers, payloads, per-movie STARs and joint STAR were equal.
+
+| Mode | Main RSS GiB | Candidate RSS GiB | Difference GiB | Main → candidate wall |
+|---|---:|---:|---:|---:|
+| gain | 1.537 | 0.927 | −0.610 | 25.22 → 23.53 s |
+| no gain | 1.550 | 1.753 | **+0.203** | 24.72 → 23.55 s |
+| selected frames 3–20 | 1.219 | 0.898 | −0.320 | 22.83 → 21.78 s |
+| skip defect | 1.576 | 0.914 | −0.662 | 23.32 → 21.81 s |
+
+Each wall figure is one sequential pair, not a controlled timing series. A second, reverse-order
+no-gain check (job `3513072`) again produced exact products and 24 staging-release records per
+candidate run. Across its two pairs, mean maximum RSS was 1.553 GiB on main and 1.783 GiB on the
+candidate, a **+0.230 GiB** candidate increase. No float fallback was recorded in those runs, so
+they do not measure fallback RSS. The no-gain increase is reproducible in this composition and
+unexplained; retain it as a material limitation rather than claiming a no-gain memory saving.
+
+The strengthened comparator's 16 unit tests pass, including negative controls for equal truncation,
+invalid mode/dimensions, missing image/STAR, changed header/pixel/STAR, extra or wrong movie/product
+inventory, movie identity, and declared extended-header offsets. The 12 retained products-only
+comparisons were regraded without rerunning MotionCorr and all passed: each arm independently
+contains the complete 24-MRC/25-STAR inventory, with zero product differences. The full-tree
+cross-arm comparisons still fail only on 24 per-movie logs; these remain recorded as failures, not
+relabelled as product passes.
+
+Candidate SCARF CTest passed 24/24, including `OutputTreeComparator`,
+`CudaU16StagingEquivalence`, `CudaFaultMatrix`, and `CudaU16FailurePaths`. The latter ran the
+single-movie U16 allocation, H2D and recoverable kernel-status injections, checked float-frame
+materialization and exact fallback products, exercised fatal-kernel fail-closed publication, and
+verified staging release. These are injected status controls, not real CUDA-context poisoning.
+A separate `CiFailClosedControls` invocation still has the same three canonical-fixture hash
+failures on main and candidate; preserve this existing mismatch rather than calling that separate
+control a pass.
+
+The earlier `nsys` result remains **683,471,040 fewer H2D bytes per movie** (1,434,807,040 →
+751,336,000; −47.6%, 270 transfers in each arm), measured twice on the prototype source tree
+`2c4f73bac053d17f7a1ca225126d0832009b3d1e`. It is the retained transfer-byte evidence; it was not
+re-profiled on this current composition. Earlier 24-movie wall and RSS series below are likewise
+prototype-source measurements and must not replace the single-pair current-source data above.
+
+`malloc_trim(0)` remains under `__GLIBC__` for the measured degraded fallback behavior. It is an
+allocator-specific RSS hint, not portable memory management or a correctness requirement. The
+new no-gain RSS increase is not explained by those fallback measurements. **Recommendation:** keep
+this as a draft integration candidate for review, but defer default promotion/merge until the
+current no-gain memory increase is understood or its trade-off is explicitly accepted. The current
+native equality and injected failure coverage are positive; neither removes that limitation.
+
 ## Provenance
 
 | | |

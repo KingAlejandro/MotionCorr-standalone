@@ -731,6 +731,24 @@ def arm_record(arm: ArmResult) -> Dict[str, Any]:
 
 # --------------------------------------------------------------------------
 
+def cross_check_gain_changes_the_product(cases: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """--gainref must change the corrected sum, or the gain row is vacuous."""
+    def payload(case_id: str) -> Optional[str]:
+        for case in cases:
+            if case["case_id"] == case_id and case.get("status") == "PASS":
+                products = case.get("tree", {}).get("product_sha256", {})
+                sums = sorted(r for r in products
+                              if not Path(r).stem.endswith(("_noDW", "_EVN", "_ODD", "_PS")))
+                return products[sums[0]]["payload"] if sums else None
+        return None
+
+    with_gain, without_gain = payload("base_gain"), payload("base_nogain")
+    if with_gain is None or without_gain is None:
+        return None
+    return {"base_gain_payload": with_gain, "base_nogain_payload": without_gain,
+            "differs": with_gain != without_gain}
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -796,6 +814,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if opts.json:
             opts.json.parent.mkdir(parents=True, exist_ok=True)
             opts.json.write_text(json.dumps(session, indent=2, sort_keys=False) + "\n")
+
+    # Cross-case anti-vacuity check. Every row compares a uint16 arm with a
+    # float32 arm that carries the same options, so a --gainref that silently
+    # did nothing would leave both arms equal and the gain row would be testing
+    # the no-gain path twice. Requires the two base rows to actually differ.
+    gain_effect = cross_check_gain_changes_the_product(session["cases"])
+    if gain_effect is not None:
+        session["gain_effect"] = gain_effect
+        if not gain_effect["differs"]:
+            failures += 1
+            print(f"  FAIL gain-effect control: {gain_effect}", flush=True)
 
     session["summary"] = {
         "selected": len(selected),

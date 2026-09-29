@@ -26,6 +26,9 @@
 #include <stdexcept>
 
 #include "src/motioncorr_runner.h"
+#if defined(__GLIBC__)
+#include <malloc.h>   // malloc_trim, see drop_u16_staging
+#endif
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -1379,6 +1382,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
+	// Issue #85 lane C: native uint16 staging for unsigned-16-bit TIFF input on the
+	// resident CUDA path. Holds the decoded movie in its file sample type (half the
+	// bytes of Iframes) until the device has expanded it. Empty on every other path.
+	std::vector<Image<unsigned short> > Iframes_u16;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -1490,6 +1497,24 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	RCTOC(TIMING_READ_GAIN);
 
+	// Issue #85 lane C: decode unsigned-16-bit TIFF straight into uint16 host storage
+	// and let the device expand it, instead of materialising a float32 movie the H2D
+	// copy then has to carry. Only the resident CUDA path consumes uint16 frames, and
+	// only this one datatype is safe: SShort shares bitsPerSample == 16 but wraps
+	// negatives, and the packed 4-bit K2/K3 format reports bitsPerSample == 8 while
+	// doubling the logical width. Everything else keeps the float path unchanged.
+	bool stage_u16 = false;
+#ifdef _CUDA_ENABLED
+	stage_u16 = use_gpu && !early_binning && !isEER && !isCompressedMRC &&
+	            ((FileName)fn_mic.getFileFormat()).contains("tif") &&
+	            Ihead.dataType() == UShort;
+	if (stage_u16) {
+		Iframes_u16.resize(n_frames);
+		logfile << "Staging this movie as native unsigned 16-bit; the uint16 to float "
+		        << "expansion and the gain are applied on the device." << std::endl;
+	}
+#endif
+
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
 	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
@@ -1506,6 +1531,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
 			else if (isCompressedMRC)
 				compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+#ifdef _CUDA_ENABLED
+			else if (stage_u16)
+				// Same reader, same guards, same per-row Y-flip; only the destination
+				// sample type differs, and castPage2T's UShort branch is then a memcpy.
+				Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+#endif
 			else
 				Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
 		} catch (...) {
@@ -1518,6 +1549,49 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
 	}
 	RCTOC(TIMING_READ_MOVIE);
+
+	// Issue #85 lane C: every path other than the resident device one consumes float
+	// frames, so a uint16-staged movie has to be widened before it can reach them.
+	// (float)u16 is exact, so the expanded frames are the same bits the float reader
+	// would have produced -- this only costs the memory the staging saved, and only
+	// on a path that has already lost the device.
+	auto expand_u16_to_float = [&]() {
+		if (!stage_u16) return;
+		const size_t num_pixels = (size_t)nx * ny;
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			Iframes[iframe]().reshape(ny, nx);
+			const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
+			float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+			#pragma omp parallel for num_threads(n_threads) schedule(static)
+			for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
+				dst[pixel] = (float)src[pixel];
+			Iframes_u16[iframe].clear();
+		}
+		Iframes_u16.clear();
+		stage_u16 = false;
+		logfile << "Materialized native uint16 frames as float for CPU fallback." << std::endl;
+	};
+	// Release the native movie once no reader can still want it in its raw form.
+	// Bounding the lifetime this way matters on the degraded paths: a patch that
+	// does not converge downloads the aligned float frames, and that 1.27 GiB
+	// allocation should not have to sit alongside the 0.64 GiB it replaces.
+	auto drop_u16_staging = [&]() {
+		if (!stage_u16) return;
+		Iframes_u16.clear();
+		stage_u16 = false;
+		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
+#if defined(__GLIBC__)
+		// Returning the pages matters here, not just freeing them. Each staged frame
+		// is a ~27 MiB fftw_malloc, which sits under glibc's dynamic mmap threshold
+		// once that threshold has ratcheted up, so the arena keeps the whole ~0.64 GiB.
+		// A non-converging patch then downloads the full float movie on top of it and
+		// peak RSS ends up above the float baseline instead of below it. Measured on
+		// the 24-movie no-gain arm: 2.06 GiB retained versus 1.52 GiB for main.
+		// This is a measured glibc-specific RSS hint, not portable memory management
+		// and not required for correctness. Other allocators keep their own policy.
+		malloc_trim(0);
+#endif
+	};
 
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
@@ -1554,6 +1628,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
 		}
 	}
+	if (stage_u16 && !movie_session) {
+		logfile << "No resident CUDA session; widening the native uint16 movie to float."
+		        << std::endl;
+		expand_u16_to_float();
+	}
 #endif
 
 	MultidimArray<float> Isum(ny, nx);
@@ -1566,6 +1645,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	std::vector<float> resident_bad_replacements;
 	auto materialize_host_frames = [&]() {
 		if (!host_frames_are_raw) return;
+		// A uint16-staged movie is raw in the file's sample type; widen it first so
+		// the gain pass below is the same in-place float multiply as ever.
+		expand_u16_to_float();
+		// expand_u16_to_float is a no-op once the staging has been dropped, and that
+		// is only sound while no raw reader remains. Both call sites of this lambda
+		// run at or before the global forward FFT, which is where the drop happens.
+		// Fail here rather than run the gain pass over an unallocated array.
+		if (Iframes.empty() || Iframes[0]().nzyxdim == 0)
+			REPORT_ERROR("materialize_host_frames: the raw host movie is no longer available.");
 		const bool apply_gain = (fn_gain_reference != "");
 		#pragma omp parallel for num_threads(n_threads)
 		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
@@ -1593,7 +1681,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
 		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
-		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false)) {
+		const bool gain_sum_ok = stage_u16
+		    ? movie_session->applyGainDefectsAndSumU16(Iframes_u16, gain_ptr, Isum, false)
+		    : movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false);
+		if (gain_sum_ok) {
 			cuda_gain_sum_done = true;
 			host_frames_are_raw = true;
 		} else {
@@ -1602,6 +1693,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
 			Isum.initZeros();
+			// The CPU pass below reads float frames in place.
+			expand_u16_to_float();
 		}
 	}
 	if (!cuda_gain_sum_done)
@@ -1876,7 +1969,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 //						std::cout << " " << DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
-						float neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+						// Issue #85 lane C: on the uint16-staged path the raw host
+						// movie lives in Iframes_u16. (float)u16 is the same value
+						// the float reader stored, so the gain multiply below and
+						// every RNG draw that follows are unchanged.
+						float neighbor;
+#ifdef _CUDA_ENABLED
+						if (stage_u16)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u16[iframe](), y, x);
+						else
+#endif
+							neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 #ifdef _CUDA_ENABLED
 						if (host_frames_are_raw && fn_gain_reference != "")
 							neighbor *= DIRECT_A2D_ELEM(Igain, y, x);
@@ -1971,6 +2074,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
 			}
 		}
+#ifdef _CUDA_ENABLED
+		// Resident path: the device holds the transformed movie and both
+		// materialize sites are behind us, so the raw host movie is dead. The
+		// float path cannot do this -- its Iframes are still the fallback source
+		// -- which is why main only clears them when there is no session.
+		if (movie_session) drop_u16_staging();
+#endif
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {

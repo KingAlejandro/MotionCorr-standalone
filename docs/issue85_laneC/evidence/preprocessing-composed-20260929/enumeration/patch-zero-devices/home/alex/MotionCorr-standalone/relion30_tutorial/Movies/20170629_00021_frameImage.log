@@ -1,0 +1,253 @@
+Working on /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 3710 Y = 3838 N = 24
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Frame grouping: n_frames = 24, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 
+interpolate_shifts = 0
+
+Staging this movie as native unsigned 16-bit; the uint16 to float expansion and the gain are applied on the device.
+Movie FFT: batch=1 R2C work=56986624 C2R work=56986624 shared work=56986624 inverse tile=56986624 bytes
+In unaligned sum, Mean = 22.9366 Std = 5.12343 Hotpixel threshold = 53.6771
+Detected 237 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+Released native uint16 host staging after device forward FFT.
+
+Global alignment:
+ Iteration 1: RMSD = 7.4937 px
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 2.03 ms
+   cuFFT execution time:         0.42 ms
+   Device-to-Host transfer time: 0.15 ms
+   Total GPU alignment time:     6.26 ms
+   Buffer VRAM:                  1482.91 MiB
+   cuFFT workspace VRAM:         86.68 MiB
+   Peak GPU memory allocated:    1569.59 MiB
+ [CUDA Global Alignment] completed; converged=no
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 1236), Y range = [0, 1278), Center = (617, 638)
+ Iteration 1: RMSD = 0.84 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.19 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ERROR: No CUDA devices found
+WARNING: CUDA patch preparation declined for patch (1, 1); classified recoverable, continuing with host patch preparation.
+ Iteration 1: RMSD = 0.84 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.76 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (1, 2): 2 / 9, X range = [1236, 2472), Y range = [0, 1278), Center = (1853, 638)
+ Iteration 1: RMSD = 1.30 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.06 ms
+   Total GPU alignment time:     1.65 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 1.30 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.28 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.67 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (1, 3): 3 / 9, X range = [2472, 3708), Y range = [0, 1278), Center = (3089, 638)
+ Iteration 1: RMSD = 0.60 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.39 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 0.60 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     3.09 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (2, 1): 4 / 9, X range = [0, 1236), Y range = [1279, 2557), Center = (617, 1917)
+ Iteration 1: RMSD = 3.40 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.47 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 3.40 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     3.07 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (2, 2): 5 / 9, X range = [1236, 2472), Y range = [1279, 2557), Center = (1853, 1917)
+ Iteration 1: RMSD = 1.38 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.08 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 1.38 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.65 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (2, 3): 6 / 9, X range = [2472, 3708), Y range = [1279, 2557), Center = (3089, 1917)
+ Iteration 1: RMSD = 1.71 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.35 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 1.71 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.62 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (3, 1): 7 / 9, X range = [0, 1236), Y range = [2558, 3836), Center = (617, 3196)
+ Iteration 1: RMSD = 3.39 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.45 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 3.39 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.36 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.06 ms
+   Total GPU alignment time:     2.69 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (3, 2): 8 / 9, X range = [1236, 2472), Y range = [2558, 3836), Center = (1853, 3196)
+ Iteration 1: RMSD = 2.43 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     1.39 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 2.43 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     4.76 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Patch (3, 3): 9 / 9, X range = [2472, 3708), Y range = [2558, 3836), Center = (3089, 3196)
+ Iteration 1: RMSD = 2.06 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.05 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     4.50 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+ Iteration 1: RMSD = 2.06 px
+ [CUDA Patch Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.29 ms
+   cuFFT execution time:         0.06 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.55 ms
+   Buffer VRAM:                  164.74 MiB
+   cuFFT workspace VRAM:         9.67 MiB
+   Peak GPU memory allocated:    174.41 MiB
+ [CUDA Patch Alignment] completed; converged=no
+Pre-exposure: = 0.00
+Dose weighting and summing frames (CUDA in-VRAM)...
+ [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 24, Size: 3710x3838
+  Peak VRAM: 217.33 MiB
+  Dose Weighting Kernel: 9.28 ms
+  cuFFT C2R Execution:   19.91 ms
+  Interpolation & Accum: 2.87 ms
+  Total DW Reconstruction Time: 47.00 ms
+Written aligned and dose-weighted sum to /home/alex/mc118-preprocess-20260929T1311/composed-proof/enumeration/patch-zero-devices//home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.mrc
+Full movie wall time: 5.218 s

@@ -1,0 +1,34 @@
+[  1%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+[  2%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_movie_session.cu.o
+/home/alex/mc118-preprocess-20260929T1311/source/src/acc/cuda/cuda_fft_prep.cu(35): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[  2%] Linking CXX static library libmotioncorr_core.a
+[ 78%] Built target motioncorr_core
+[ 79%] Linking CXX executable runner_numerics
+[ 80%] Linking CXX executable patch_retry_state
+[ 82%] Linking CXX executable defect_parser
+[ 82%] Linking CXX executable motioncorr
+[ 83%] Built target patch_retry_state
+[ 84%] Built target defect_parser
+[ 85%] Built target motioncorr
+[ 86%] Built target runner_numerics
+[ 88%] Linking CXX executable cuda_u16_staging_equivalence
+[ 88%] Linking CXX executable image_write_faults
+[ 89%] Linking CXX executable cuda_wrapper_upload_failure
+[ 90%] Building CXX object CMakeFiles/cuda_fault_matrix.dir/tests/cuda_fault_matrix.cpp.o
+[ 91%] Built target cuda_u16_staging_equivalence
+[ 91%] Built target image_write_faults
+[ 92%] Built target cuda_wrapper_upload_failure
+[ 93%] Linking CXX executable motioncorr_retry_caller
+[ 94%] Building CXX object CMakeFiles/motioncorr_faultinject.dir/tests/cuda_fault_inject_shim.cpp.o
+[ 95%] Linking CXX executable cuda_error_class
+[ 95%] Built target cuda_error_class
+[ 97%] Built target motioncorr_retry_caller
+[ 98%] Linking CXX executable motioncorr_faultinject
+[ 99%] Built target motioncorr_faultinject
+[100%] Linking CXX executable cuda_fault_matrix
+[100%] Built target cuda_fault_matrix

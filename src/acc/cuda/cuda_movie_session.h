@@ -43,6 +43,20 @@ public:
         bool download_sum = true
     );
 
+    // Issue #85 lane C: same contract as applyGainDefectsAndSum, but the host movie
+    // is held in its native unsigned 16-bit form and the uint16 -> float expansion
+    // happens on the device while the gain is applied. Halves the host payload and
+    // the PCIe bytes for unsigned-16-bit TIFF input. Products are bit-identical:
+    // uint16 -> float32 is exact, and the gain multiply, the store into d_Iframes
+    // and the ascending per-pixel accumulation are the same operations in the same
+    // order. Callers with any other input type must keep using the float overload.
+    bool applyGainDefectsAndSumU16(
+        const std::vector<Image<unsigned short> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
     // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
     // path, which re-runs the original host scan verbatim.
     bool downloadUnalignedSum(MultidimArray<float> &unaligned_sum);

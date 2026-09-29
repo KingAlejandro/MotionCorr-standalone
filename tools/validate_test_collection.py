@@ -38,18 +38,23 @@ DEFAULT_REQUIRED_TESTS = [
     "ImageWriteFaults",
     # Added by the #98 malformed-defect-parser group (PR101).
     "DefectParser",
-    # Added by the #69 CUDA reliability port. Device-free, so it is always
-    # collected; the CUDA-only CudaErrorClass is not listed here, matching
-    # the existing exclusion of CudaWrapperUploadFailure.
-    "PatchRetryState",
-    # Added by the #53 static multi-GPU worker group (PR106 -> PR117 port).
-    "MultiGpuScheduling",
     # Added by the #26 global inverse-FFT elision (PR111). This is the only
     # test in the suite that can observe a wrong elision predicate: both parity
     # comparators skip _EVN/_ODD, so without this entry the guard could be
     # dropped from CMakeLists.txt with the collected count still at the
     # minimum and CI still green.
     "GlobalIfftElision",
+    # Added by the #69 CUDA reliability port. Device-free, so it is always
+    # collected; the CUDA-only CudaErrorClass is not listed here, matching
+    # the existing exclusion of CudaWrapperUploadFailure.
+    "PatchRetryState",
+    # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
+    # independently before pairwise image equality is considered.
+    "OutputTreeComparator",
+    # Added by the #53 static multi-GPU worker group (PR106 -> PR117 port).
+    # tests/test_multi_gpu_scheduling.py is device-free: it drives the wrapper
+    # with a fake worker, so it is collected in every build.
+    "MultiGpuScheduling",
     # Added by the #97 interpolate-shift recentering fix (PR100/PR114).
     # RunnerInterpolateRecenter is the helper-level arithmetic regression;
     # RunnerInterpolateShifts drives the binary end to end and is the only test
@@ -126,8 +131,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=22,
-                        help="Minimum number of tests that must be collected (default: 22)")
+    parser.add_argument("--min-count", type=int, default=23,
+                        help="Minimum number of tests that must be collected (default: 23)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

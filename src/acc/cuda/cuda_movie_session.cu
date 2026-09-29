@@ -67,6 +67,42 @@ __global__ void fusedGainAndSumKernel(
     d_Isum[pixel] = sum;
 }
 
+// Issue #85 lane C: native uint16 staging. One frame per launch, so only a single
+// frame-sized uint16 staging buffer is ever resident instead of a second whole movie.
+//
+// Arithmetic is pinned to the fused float kernel above, term for term:
+//   (float)u16 is exact for every value in [0, 65535] (binary32 holds every integer
+//   up to 2^24), so the converted sample equals the float that castPage2T produced
+//   on the host and cudaMemcpy used to deliver.
+//   __fmul_rn / __fadd_rn are the same IEEE-754 round-to-nearest operations the
+//   compiler emits for `val *= gain` and `sum += val` there. They are written as
+//   intrinsics rather than operators so that no -fmad contraction can fuse the
+//   multiply into the accumulate: an FFMA rounds once where the reference rounds
+//   twice, which would move d_Isum and with it the hot-pixel threshold.
+//   d_Isum is memset to zero before frame 0 and accumulated in ascending frame
+//   order, so the addend sequence per pixel is identical to the single-kernel
+//   float accumulator. Spilling that accumulator to a float array between frames
+//   is exact because it is a float there too.
+__global__ void convertGainAndAccumulateU16Kernel(
+    const unsigned short *d_src,
+    float *d_frame_dst,
+    float *d_Isum,
+    const float *d_gain,
+    const size_t num_pixels,
+    const bool apply_gain
+) {
+    size_t pixel = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (pixel >= num_pixels) return;
+
+    float val = (float)d_src[pixel];
+    if (apply_gain) val = __fmul_rn(val, d_gain[pixel]);
+    // Unconditional, unlike the float kernel: there the H2D copy had already
+    // deposited the frame, so a no-gain movie needed no store. Here the device
+    // buffer holds nothing until this line runs.
+    d_frame_dst[pixel] = val;
+    d_Isum[pixel] = __fadd_rn(d_Isum[pixel], val);
+}
+
 // ---------------------------------------------------------------------------
 // GPU hot-pixel statistics (Issue #50 addendum: issue_50_gpu_hotpixel_statistics.md)
 //
@@ -445,6 +481,72 @@ bool CudaMovieSession::applyGainDefectsAndSum(
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
+    return true;
+}
+
+bool CudaMovieSession::applyGainDefectsAndSumU16(
+    const std::vector<Image<unsigned short> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
+    if ((int)raw_frames.size() != n_frames) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    const size_t num_pixels = (size_t)ny * nx;
+    const size_t sz_real = num_pixels * sizeof(float);
+    const size_t sz_u16 = num_pixels * sizeof(unsigned short);
+
+    // One frame, not one movie. A whole-movie uint16 device buffer would add
+    // 0.637 GiB to the high-water mark for this geometry and turn a host-memory
+    // saving into a VRAM cost; a single frame adds 27 MiB for the duration of
+    // this call. Owned locally so the bare `return false` in HANDLE_ERROR frees it.
+    unsigned short *stage = nullptr;
+    mc_cuda::ScopedDeviceMemory<1> stage_owner(&failure_state);
+    HANDLE_ERROR(cudaMalloc((void**)&stage, sz_u16));
+    stage_owner.add(stage);
+
+    bool apply_gain = (gain_ref != nullptr);
+    if (apply_gain) {
+        if (!d_gain) {
+            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
+        }
+        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+    }
+
+    // The accumulator starts at +0.0f exactly as `float sum = 0.0f` does. Seeding
+    // frame 0 with a plain store instead would differ for a -0.0f product, which
+    // a zero sample against a negative gain entry can produce.
+    HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_real));
+
+    const int block = 256;
+    const int grid = (int)((num_pixels + block - 1) / block);
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        // Per-frame upload keeps the same failure granularity as the float path:
+        // a fault names a frame index and leaves the rest untransferred.
+        HANDLE_ERROR(cudaMemcpy(stage, raw_frames[iframe]().data, sz_u16,
+                                cudaMemcpyHostToDevice));
+        convertGainAndAccumulateU16Kernel<<<grid, block>>>(
+            stage, d_Iframes + (size_t)iframe * num_pixels, d_Isum, d_gain,
+            num_pixels, apply_gain);
+        HANDLE_ERROR(cudaGetLastError());
+        // The blocking cudaMemcpy above is the reuse barrier for stage.ptr: it is
+        // issued on the same (default) stream as the kernel, so frame i+1's copy
+        // cannot start writing the buffer until frame i's kernel has retired.
+    }
+
+    if (download_sum) {
+        unaligned_sum.reshape(ny, nx);
+        HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum, sz_real, cudaMemcpyDeviceToHost));
+    } else {
+        // Same argument as the float path: without the D2H there is no other
+        // synchronisation point, so a fault would surface at an unrelated later
+        // call and bypass the caller's reset-and-fall-back recovery.
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
+
+    HANDLE_ERROR(stage_owner.releaseAll());
     return true;
 }
 

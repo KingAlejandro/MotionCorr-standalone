@@ -1449,35 +1449,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	RCTOC(TIMING_READ_GAIN);
 
-	// Read images
-	RCTIC(TIMING_READ_MOVIE);
-	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
-	// that leaves an OpenMP structured block is undefined behaviour: the runtime
-	// calls std::terminate, so one truncated movie used to abort the whole run
-	// with SIGABRT instead of failing just that movie. Capture per frame and
-	// rethrow on the serial path, where run()'s caller records the failure and
-	// continues with the remaining movies.
-	std::vector<std::exception_ptr> read_errors(n_frames);
-	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		try {
-			if (isEER)
-				renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
-			else if (isCompressedMRC)
-				compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
-			else
-				Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
-		} catch (...) {
-			read_errors[iframe] = std::current_exception();
-		}
-	}
-	// Report the lowest frame index rather than whichever thread failed first,
-	// so the error a user sees does not depend on the OpenMP schedule.
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
-	}
-	RCTOC(TIMING_READ_MOVIE);
-
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
     // cache. Its normal release at skip_fitting is insufficient if a patch throws.
@@ -1513,7 +1484,53 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
 		}
 	}
+
+	bool nvcomp_ingested = false;
+#if defined(_NVCOMP_ENABLED)
+	if (movie_session && !isEER && !isCompressedMRC) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		if (movie_session->ingestCompressedTiffStrips(fn_mic, frames, gain_ptr, n_io_threads)) {
+			nvcomp_ingested = true;
+			logfile << "Ingested and decompressed TIFF directly on GPU via nvCOMP." << std::endl;
+		}
+	}
 #endif
+#endif
+
+	// Read images
+	RCTIC(TIMING_READ_MOVIE);
+	bool do_host_read = true;
+#ifdef _CUDA_ENABLED
+	if (nvcomp_ingested) do_host_read = false;
+#endif
+	if (do_host_read) {
+		// Every reader here can REPORT_ERROR on a damaged movie, and an exception
+		// that leaves an OpenMP structured block is undefined behaviour: the runtime
+		// calls std::terminate, so one truncated movie used to abort the whole run
+		// with SIGABRT instead of failing just that movie. Capture per frame and
+		// rethrow on the serial path, where run()'s caller records the failure and
+		// continues with the remaining movies.
+		std::vector<std::exception_ptr> read_errors(n_frames);
+		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			try {
+				if (isEER)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
+				else if (isCompressedMRC)
+					compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+				else
+					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			} catch (...) {
+				read_errors[iframe] = std::current_exception();
+			}
+		}
+		// Report the lowest frame index rather than whichever thread failed first,
+		// so the error a user sees does not depend on the OpenMP schedule.
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		}
+	}
+	RCTOC(TIMING_READ_MOVIE);
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
@@ -1547,7 +1564,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTIC(TIMING_GAIN_AND_SUM);
 #ifdef _CUDA_ENABLED
 	bool cuda_gain_sum_done = false;
-	if (movie_session) {
+	if (nvcomp_ingested) {
+		cuda_gain_sum_done = true;
+		host_frames_are_raw = false;
+	} else if (movie_session) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
@@ -1811,7 +1831,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				bad_ys.push_back(i);
 			}
 #ifdef _CUDA_ENABLED
-		if (host_frames_are_raw)
+		if (nvcomp_ingested && n_bad > 0 && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
+			if (!movie_session->downloadRealFrames(Iframes)) {
+				logfile << "WARNING: Could not download frames for defect correction." << std::endl;
+			}
+		}
+		if (host_frames_are_raw || nvcomp_ingested)
 			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
 #endif
 		size_t bad_idx = 0;
@@ -1852,7 +1877,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else
 					replacement = rnd_gaus(frame_mean, frame_std);
 #ifdef _CUDA_ENABLED
-				if (host_frames_are_raw) {
+				if (host_frames_are_raw || nvcomp_ingested) {
 					resident_bad_replacements[(size_t)iframe * bad_xs.size() + bad_idx] = replacement;
 				} else
 #endif
@@ -1871,6 +1896,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
 				discard_preprocessing_session("sparse defect update");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
+			}
+		}
+		if (nvcomp_ingested) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe].clear();
 			}
 		}
 #endif

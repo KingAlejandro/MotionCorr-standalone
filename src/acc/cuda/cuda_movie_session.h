@@ -2,6 +2,7 @@
 #define CUDA_MOVIE_SESSION_H_
 
 #include <vector>
+#include <string>
 #include <ostream>
 #include "src/image.h"
 #include "src/multidim_array.h"
@@ -42,6 +43,19 @@ public:
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
     );
+
+#if defined(_NVCOMP_ENABLED)
+    // Direct GPU TIFF Ingestion via nvCOMP Batched Deflate.
+    // Reads compressed strips from disk, uploads compressed bytes over PCIe,
+    // decompresses directly into VRAM, and fuses Y-flip, gain application,
+    // and initial unaligned sum.
+    bool ingestCompressedTiffStrips(
+        const std::string &fn_mic,
+        const std::vector<int> &frames,
+        const MultidimArray<float> *gain_ref,
+        int n_threads
+    );
+#endif
 
     // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
     // path, which re-runs the original host scan verbatim.

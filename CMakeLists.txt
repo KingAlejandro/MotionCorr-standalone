@@ -81,6 +81,22 @@ if(CUDA)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
+
+    option(USE_NVCOMP "Enable GPU Deflate decompression via NVIDIA nvCOMP" OFF)
+    if(USE_NVCOMP)
+        find_path(NVCOMP_INCLUDE_DIR nvcomp/deflate.h
+            HINTS ${NVCOMP_ROOT}/include $ENV{NVCOMP_ROOT}/include)
+        find_library(NVCOMP_LIB nvcomp
+            HINTS ${NVCOMP_ROOT}/lib $ENV{NVCOMP_ROOT}/lib64)
+        if(NVCOMP_INCLUDE_DIR AND NVCOMP_LIB)
+            target_include_directories(motioncorr_core PUBLIC ${NVCOMP_INCLUDE_DIR})
+            target_link_libraries(motioncorr_core PUBLIC ${NVCOMP_LIB})
+            target_compile_definitions(motioncorr_core PUBLIC _NVCOMP_ENABLED)
+            message(STATUS "Found nvCOMP: ${NVCOMP_LIB}")
+        else()
+            message(FATAL_ERROR "USE_NVCOMP=ON requested but nvcomp headers or library not found. Set NVCOMP_ROOT.")
+        endif()
+    endif()
 endif()
 
 add_executable(motioncorr src/apps/run_motioncorr.cpp)

@@ -11,6 +11,13 @@
 #include <algorithm>
 #include <climits>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#if defined(_NVCOMP_ENABLED)
+#include <tiffio.h>
+#include <cstring>
+#include "nvcomp.h"
+#include "nvcomp/deflate.h"
+#endif
+
 
 // Issue #69. These handlers CONSUME the error: they read it, log it, and return false.
 // By the time the caller regains control, cudaGetLastError() has been reset and reports
@@ -66,6 +73,36 @@ __global__ void fusedGainAndSumKernel(
     }
     d_Isum[pixel] = sum;
 }
+
+#if defined(_NVCOMP_ENABLED)
+__global__ void fusedU16FlipGainAndSumKernel(
+    const uint16_t *src_u16,
+    float *dst_Iframes,
+    float *dst_Isum,
+    const float *d_gain,
+    int nx,
+    int ny,
+    int n_frames,
+    bool apply_gain
+) {
+    size_t x = (size_t)blockDim.x * (size_t)blockIdx.x + threadIdx.x;
+    size_t dest_y = (size_t)blockDim.y * (size_t)blockIdx.y + threadIdx.y;
+    if (x >= (size_t)nx || dest_y >= (size_t)ny) return;
+
+    size_t dest_pixel = dest_y * (size_t)nx + x;
+    size_t src_y = (size_t)(ny - 1 - dest_y);
+    float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
+    float sum = 0.0f;
+
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        size_t src_idx = ((size_t)iframe * (size_t)ny + src_y) * (size_t)nx + x;
+        float val = (float)src_u16[src_idx] * gain_val;
+        dst_Iframes[(size_t)iframe * (size_t)ny * (size_t)nx + dest_pixel] = val;
+        sum += val;
+    }
+    dst_Isum[dest_pixel] = sum;
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // GPU hot-pixel statistics (Issue #50 addendum: issue_50_gpu_hotpixel_statistics.md)
@@ -628,6 +665,217 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     HANDLE_ERROR(free_error);
     return true;
 }
+
+#if defined(_NVCOMP_ENABLED)
+bool CudaMovieSession::ingestCompressedTiffStrips(
+    const std::string &fn_mic,
+    const std::vector<int> &frames,
+    const MultidimArray<float> *gain_ref,
+    int n_threads
+) {
+    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes || !d_Isum) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
+    if (!tif) return false;
+
+    uint32_t width = 0, height = 0;
+    uint16_t bits = 0, compression = 0;
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
+    TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
+
+    if ((int)width != nx || (int)height != ny || bits != 16 ||
+        (compression != COMPRESSION_DEFLATE && compression != COMPRESSION_ADOBE_DEFLATE)) {
+        TIFFClose(tif);
+        return false;
+    }
+
+    uint32_t strips_per_dir = TIFFNumberOfStrips(tif);
+    if ((int)strips_per_dir != ny) {
+        TIFFClose(tif);
+        return false;
+    }
+    TIFFClose(tif);
+
+    const int num_req_frames = (int)frames.size();
+    if (num_req_frames != n_frames) return false;
+
+    const size_t total_chunks = (size_t)num_req_frames * strips_per_dir;
+    const size_t uncomp_row_bytes = (size_t)nx * sizeof(uint16_t);
+    const size_t bytes_u16_total = (size_t)n_frames * (size_t)ny * uncomp_row_bytes;
+    const size_t num_pixels = (size_t)ny * (size_t)nx;
+    const size_t sz_real = num_pixels * sizeof(float);
+
+    struct StripInfo {
+        size_t offset;
+        size_t raw_size;
+    };
+    std::vector<std::vector<uint8_t>> frame_compressed(num_req_frames);
+    std::vector<std::vector<StripInfo>> frame_strip_infos(num_req_frames);
+    std::vector<bool> read_success(num_req_frames, true);
+
+    int io_threads = n_threads > 0 ? n_threads : 4;
+    #pragma omp parallel num_threads(io_threads)
+    {
+        TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
+        if (t) {
+            #pragma omp for schedule(dynamic, 1)
+            for (int f = 0; f < num_req_frames; f++) {
+                int dir_idx = frames[f];
+                if (!TIFFSetDirectory(t, dir_idx)) {
+                    read_success[f] = false;
+                    continue;
+                }
+                auto &comp_buf = frame_compressed[f];
+                auto &sinfos = frame_strip_infos[f];
+                sinfos.resize(strips_per_dir);
+
+                for (uint32_t s = 0; s < strips_per_dir; s++) {
+                    tmsize_t raw_sz = TIFFRawStripSize(t, s);
+                    if (raw_sz <= 6) {
+                        read_success[f] = false;
+                        break;
+                    }
+                    size_t curr_off = comp_buf.size();
+                    comp_buf.resize(curr_off + raw_sz);
+                    tmsize_t nread = TIFFReadRawStrip(t, s, comp_buf.data() + curr_off, raw_sz);
+                    if (nread != raw_sz) {
+                        read_success[f] = false;
+                        break;
+                    }
+                    sinfos[s].offset = curr_off;
+                    sinfos[s].raw_size = raw_sz;
+                }
+            }
+            TIFFClose(t);
+        } else {
+            #pragma omp critical
+            for (int f = 0; f < num_req_frames; f++) read_success[f] = false;
+        }
+    }
+
+    for (int f = 0; f < num_req_frames; f++) {
+        if (!read_success[f]) return false;
+    }
+
+    size_t total_compressed_bytes = 0;
+    for (int f = 0; f < num_req_frames; f++) {
+        total_compressed_bytes += frame_compressed[f].size();
+    }
+
+    std::vector<uint8_t> h_compressed(total_compressed_bytes);
+    std::vector<size_t> h_comp_bytes(total_chunks);
+    std::vector<size_t> h_comp_offsets(total_chunks);
+    std::vector<size_t> h_decomp_offsets(total_chunks);
+    std::vector<size_t> h_uncomp_buffer_bytes(total_chunks, uncomp_row_bytes);
+
+    size_t write_pos = 0;
+    size_t chunk_idx = 0;
+    for (int f = 0; f < num_req_frames; f++) {
+        size_t f_sz = frame_compressed[f].size();
+        std::memcpy(h_compressed.data() + write_pos, frame_compressed[f].data(), f_sz);
+
+        for (uint32_t s = 0; s < strips_per_dir; s++) {
+            h_comp_offsets[chunk_idx] = write_pos + frame_strip_infos[f][s].offset + 2;
+            h_comp_bytes[chunk_idx] = frame_strip_infos[f][s].raw_size - 6;
+            h_decomp_offsets[chunk_idx] = ((size_t)f * strips_per_dir + s) * uncomp_row_bytes;
+            chunk_idx++;
+        }
+        write_pos += f_sz;
+    }
+
+    bool apply_gain = (gain_ref != nullptr);
+    if (apply_gain) {
+        if (!d_gain) {
+            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
+        }
+        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+    }
+
+    void *d_comp_buf = nullptr;
+    uint16_t *d_decomp_u16 = nullptr;
+    void **d_comp_ptrs = nullptr;
+    size_t *d_comp_sizes = nullptr;
+    void **d_decomp_ptrs = nullptr;
+    size_t *d_uncomp_sizes = nullptr;
+    size_t *d_actual_sizes = nullptr;
+    nvcompStatus_t *d_statuses = nullptr;
+    void *d_temp = nullptr;
+
+    mc_cuda::ScopedDeviceMemory<9> mem_guard(&failure_state);
+    HANDLE_ERROR(cudaMalloc(&d_comp_buf, total_compressed_bytes));
+    mem_guard.add(d_comp_buf);
+    HANDLE_ERROR(cudaMalloc(&d_decomp_u16, bytes_u16_total));
+    mem_guard.add(d_decomp_u16);
+    HANDLE_ERROR(cudaMalloc(&d_comp_ptrs, sizeof(void*) * total_chunks));
+    mem_guard.add(d_comp_ptrs);
+    HANDLE_ERROR(cudaMalloc(&d_comp_sizes, sizeof(size_t) * total_chunks));
+    mem_guard.add(d_comp_sizes);
+    HANDLE_ERROR(cudaMalloc(&d_decomp_ptrs, sizeof(void*) * total_chunks));
+    mem_guard.add(d_decomp_ptrs);
+    HANDLE_ERROR(cudaMalloc(&d_uncomp_sizes, sizeof(size_t) * total_chunks));
+    mem_guard.add(d_uncomp_sizes);
+    HANDLE_ERROR(cudaMalloc(&d_actual_sizes, sizeof(size_t) * total_chunks));
+    mem_guard.add(d_actual_sizes);
+    HANDLE_ERROR(cudaMalloc(&d_statuses, sizeof(nvcompStatus_t) * total_chunks));
+    mem_guard.add(d_statuses);
+
+    std::vector<void*> h_comp_ptrs(total_chunks);
+    std::vector<void*> h_decomp_ptrs(total_chunks);
+    uint8_t *d_comp_base = (uint8_t*)d_comp_buf;
+    uint8_t *d_decomp_base = (uint8_t*)d_decomp_u16;
+
+    for (size_t i = 0; i < total_chunks; i++) {
+        h_comp_ptrs[i] = d_comp_base + h_comp_offsets[i];
+        h_decomp_ptrs[i] = d_decomp_base + h_decomp_offsets[i];
+    }
+
+    size_t temp_bytes = 0;
+    nvcompStatus_t t_stat = nvcompBatchedDeflateDecompressGetTempSizeAsync(
+        total_chunks, uncomp_row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
+        &temp_bytes, bytes_u16_total);
+    if (t_stat != nvcompSuccess) return false;
+
+    if (temp_bytes > 0) {
+        HANDLE_ERROR(cudaMalloc(&d_temp, temp_bytes));
+        mem_guard.add(d_temp);
+    }
+
+    cudaStream_t stream = 0;
+
+    HANDLE_ERROR(cudaMemcpyAsync(d_comp_buf, h_compressed.data(), total_compressed_bytes, cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_comp_ptrs, h_comp_ptrs.data(), sizeof(void*) * total_chunks, cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_comp_sizes, h_comp_bytes.data(), sizeof(size_t) * total_chunks, cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_decomp_ptrs, h_decomp_ptrs.data(), sizeof(void*) * total_chunks, cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_uncomp_sizes, h_uncomp_buffer_bytes.data(), sizeof(size_t) * total_chunks, cudaMemcpyHostToDevice, stream));
+
+    nvcompStatus_t decomp_stat = nvcompBatchedDeflateDecompressAsync(
+        (const void* const*)d_comp_ptrs,
+        d_comp_sizes,
+        d_uncomp_sizes,
+        d_actual_sizes,
+        total_chunks,
+        d_temp,
+        temp_bytes,
+        d_decomp_ptrs,
+        nvcompBatchedDeflateDecompressDefaultOpts,
+        d_statuses,
+        stream);
+    if (decomp_stat != nvcompSuccess) return false;
+
+    dim3 block(16, 16);
+    dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
+    fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
+        d_decomp_u16, d_Iframes, d_Isum, d_gain, nx, ny, n_frames, apply_gain);
+    HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaStreamSynchronize(stream));
+
+    HANDLE_ERROR(mem_guard.releaseAll());
+    return true;
+}
+#endif
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;

@@ -1,10 +1,23 @@
 # Issue #85 lane C — measured results
 
+## Latest combined main — 29 September 2026
+
+Current tested source `7b5a637b` includes main `6393547e`, the #69 enumeration
+recording and preprocessing-disposal fixes, plus PR114's selected-frame recentering.
+Native CTest **28/28**, preprocessing **8/8**, enumeration **10/10**, and
+retained native recenter off/on witnesses pass. Both GitHub jobs pass at that exact
+source. The optional U16 failure harness also passes separately (five executions;
+not counted as a 29th default CTest). No new performance or full24 claim follows.
+[Exact source, commands, outputs, resource identities, limitations and CI](evidence/main-composed-20260929/README.md).
+
+The sections below retain the earlier-source measurements and failures. Their
+source hashes and original qualifications still apply.
+
 Native uint16 TIFF host staging with device-side conversion and gain. Design:
 `agents/designs/issue_85_lane_c_uint16_staging.md`. Raw per-arm records are the `*.run.txt` files
 here; `series.log` is the interleaved timing series; `compare_*.txt` are full comparator outputs.
 
-## Current-main integration status — 29 September 2026
+## Earlier a75a3f87 integration status — 29 September 2026
 
 Candidate source `88966d0c9b9d52ee1a1f32b6aff876a86e025231` (tree
 `004aeb593584d4b83f1ab26fe75dad42298160df`) is based on current main

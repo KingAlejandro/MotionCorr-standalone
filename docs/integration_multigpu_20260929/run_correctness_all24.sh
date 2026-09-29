@@ -62,13 +62,13 @@ print(f"shards{n}_disjoint_and_complete={'PASS' if ok else 'FAIL'}")
 PY
   note "A$N merge"
   $PY "$MG/merge_workers.py" --manifest "$OUT/a$N-sharded/shards/shard_manifest.json" \
-      --workers "$OUT/a$N-sharded"/worker* --status "$OUT/a$N-sharded/status.json" \
+      --workers "$OUT/a$N-sharded"/w[0-9]* --status "$OUT/a$N-sharded/status.json" \
       --out "$OUT/a$N-merged" --report "$OUT/a$N-merge-report.json" \
       --aggregate-with "$BUILD/motioncorr" --input-star movies.star \
       --aggregate-args "$(printf '%s ' "${OPTS[@]}")"
   rec "a${N}_merge_rc" $?
   note "C$N per-movie exact comparison vs serial"
-  $PY "$MG/compare24.py" --ref "$OUT/a1-serial/worker0/out" --test "$OUT/a$N-merged" \
+  $PY "$MG/compare24.py" --ref "$OUT/a1-serial/w0" --test "$OUT/a$N-merged" \
       --tool "$SRC/tools/compare_motioncorr.py" \
       --manifest "$OUT/a$N-sharded/shards/shard_manifest.json" \
       --out "$OUT/c$N-compare.json"
@@ -81,17 +81,17 @@ movies=[x for s in m["shards"] for x in s["movies"]]
 json.dump({"movies":sorted(movies)}, open(sys.argv[2],"w"), indent=1)
 PY
   $PY "$SRC/docs/issue85_laneC/compare_output_trees.py" \
-      "$OUT/a1-serial/worker0/out" "$OUT/a$N-merged" \
+      "$OUT/a1-serial/w0" "$OUT/a$N-merged" \
       --manifest "$OUT/s$N-manifest.json" --input-star movies.star \
       --json-out "$OUT/s$N-structural.json"
   rec "s${N}_structural_rc" $?
   note "C3-$N aggregate STAR identity"
-  if diff -q <(grep -v '^# *version\|^ *$' "$OUT/a1-serial/worker0/out/corrected_micrographs.star") \
+  if diff -q <(grep -v '^# *version\|^ *$' "$OUT/a1-serial/w0/corrected_micrographs.star") \
              <(grep -v '^# *version\|^ *$' "$OUT/a$N-merged/corrected_micrographs.star") >/dev/null; then
      rec "c3_${N}_aggregate_star" IDENTICAL
   else
      rec "c3_${N}_aggregate_star" DIFFERS
-     diff <(cat "$OUT/a1-serial/worker0/out/corrected_micrographs.star") \
+     diff <(cat "$OUT/a1-serial/w0/corrected_micrographs.star") \
           <(cat "$OUT/a$N-merged/corrected_micrographs.star") > "$OUT/c3-$N-star.diff"
   fi
   note "witness A$N: UUID, actual pid, achieved mask"
@@ -114,17 +114,21 @@ note "A5 controlled owned-child failure: SIGKILL worker 0 of a 4-worker run"
       --cpus '0-5;6-11;12-17;18-23' --sample-interval 0.5 -- "${OPTS[@]}" \
       > "$OUT/a5-launch.log" 2>&1 ; echo "a5_launch_rc=$?" >> "$OUT/results.txt" ) &
 LPID=$!
-for _ in $(seq 1 120); do
-  W0=$($PY - "$OUT/a5-killed/status.json" 2>/dev/null <<'PY'
-import json,sys
-print(json.load(open(sys.argv[1]))["workers"][0]["pid"])
-PY
-) && break
-  W0=$(pgrep -f "motioncorr .*worker0" | head -1) && [ -n "$W0" ] && break
+# status.json is only written after the launcher exits, so it cannot identify a
+# live worker. Match the real child on the shard path the launcher gave it.
+W0=""
+for _ in $(seq 1 180); do
+  W0=$(pgrep -f -- "--i .*a5-killed/shards/shard_4way_0.star" | head -1)
+  [ -n "$W0" ] && break
   sleep 1
 done
-echo "a5_target_pid=$W0" >> "$OUT/results.txt"
-[ -n "${W0:-}" ] && kill -9 "$W0"
+echo "a5_target_pid=${W0:-NONE}" >> "$OUT/results.txt"
+if [ -z "$W0" ]; then
+  # No kill means no fault, and the FAIL verdict below would mean nothing.
+  rec a5_control VACUOUS_NO_WORKER_FOUND
+else
+  kill -9 "$W0" && rec a5_control KILL_DELIVERED
+fi
 wait $LPID
 sleep 3
 nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv,noheader \
@@ -132,10 +136,21 @@ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv,nohead
 rec a5_strays_on_owned_devices "$(grep -c -E "$U0|$U1|$U2|$U3" "$OUT/a5-occupancy-after.csv")"
 note "A5 merge must refuse"
 $PY "$MG/merge_workers.py" --manifest "$OUT/a5-killed/shards/shard_manifest.json" \
-    --workers "$OUT/a5-killed"/worker* --status "$OUT/a5-killed/status.json" \
+    --workers "$OUT/a5-killed"/w[0-9]* --status "$OUT/a5-killed/status.json" \
     --out "$OUT/a5-merged" --report "$OUT/a5-merge-report.json" \
     > "$OUT/a5-merge.log" 2>&1
 rec a5_merge_rc $?   # must be non-zero
+$PY - "$OUT/a5-killed/status.json" <<'PY' | tee -a "$OUT/results.txt"
+import json,sys
+try:
+    st=json.load(open(sys.argv[1]))
+except Exception as e:
+    print(f"a5_status_readable=NO ({e})"); raise SystemExit
+rcs=[w.get("returncode") for w in st.get("workers",[])]
+print(f"a5_worker_returncodes={rcs}")
+print(f"a5_worker0_signal_killed={'PASS' if rcs and rcs[0]==-9 else 'FAIL'}")
+print(f"a5_other_workers_zero={'PASS' if all(r==0 for r in rcs[1:]) else 'FAIL'}")
+PY
 
 # ------------------------------------------------------- A6 non-prefix resume
 note "A6 non-prefix resume: remove a non-prefix set of completed movies, resume"
@@ -151,28 +166,29 @@ canon=sorted(canon)
 # be satisfied by "continue from the end".
 drop=set(canon[5:12])
 removed=0
-for w in sorted(root.glob("worker*")):
-    for p in (w/"out").rglob("*"):
+for w in sorted(root.glob("w[0-9]*")):
+    for p in w.rglob("*"):
         if p.is_file() and any(Path(m).stem in p.name for m in drop):
             p.unlink(); removed+=1
 print(f"a6_products_removed={removed}")
 print(f"a6_dropped_indices=5-11 is_prefix=0")
+print("a6_control=" + ("REMOVALS_MADE" if removed else "VACUOUS_NOTHING_REMOVED"))
 PY
-for W in "$OUT/a6-resume"/worker*; do
-  IDX=${W##*worker}
+for IDX in 0 1; do
+  W="$OUT/a6-resume/w$IDX"
   case $IDX in 0) D=$U0; M=0-11;; 1) D=$U1; M=12-23;; esac
   ( cd "$TUT" && CUDA_VISIBLE_DEVICES="$D" taskset -c "$M" \
-      "$BUILD/motioncorr" --i "$W/shard.star" --o "$W/out/" --only_do_unfinished \
-      --gpu 0 "${OPTS[@]}" > "$W/resume.log" 2>&1 )
+      "$BUILD/motioncorr" --i "$OUT/a6-resume/shards/shard_2way_$IDX.star" \
+      --o "$W/" --only_do_unfinished --gpu 0 "${OPTS[@]}" > "$W/resume.log" 2>&1 )
   rec "a6_worker${IDX}_resume_rc" $?
 done
 $PY "$MG/merge_workers.py" --manifest "$OUT/a6-resume/shards/shard_manifest.json" \
-    --workers "$OUT/a6-resume"/worker* --status "$OUT/a6-resume/status.json" \
+    --workers "$OUT/a6-resume"/w[0-9]* --status "$OUT/a6-resume/status.json" \
     --out "$OUT/a6-merged" --report "$OUT/a6-merge-report.json" \
     --aggregate-with "$BUILD/motioncorr" --input-star movies.star \
     --aggregate-args "$(printf '%s ' "${OPTS[@]}")"
 rec a6_merge_rc $?
-$PY "$MG/compare24.py" --ref "$OUT/a1-serial/worker0/out" --test "$OUT/a6-merged" \
+$PY "$MG/compare24.py" --ref "$OUT/a1-serial/w0" --test "$OUT/a6-merged" \
     --tool "$SRC/tools/compare_motioncorr.py" \
     --manifest "$OUT/a6-resume/shards/shard_manifest.json" --out "$OUT/a6-compare.json"
 rec a6_pixel_exact_rc $?

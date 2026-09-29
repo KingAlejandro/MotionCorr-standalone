@@ -30,7 +30,7 @@ Both preprocessing arms ran and both passed:
 | Test | Time | What only this arm can see |
 |---|---|---|
 | `CudaPreprocessingFailurePaths` | 4.86 s | the compact uint16 staging path; additionally requires the "Released native uint16 host staging" and "Materialized native uint16 frames as float" log witnesses |
-| `CudaPreprocessingFailurePathsFloatHost` | 3.74 s | the float host movie every non-uint16-TIFF input still takes |
+| `CudaPreprocessingFailurePathsFloatHost` | 5.21 s | the float host movie every non-uint16-TIFF input still takes |
 
 Keeping both was the composition decision: PR115 registered only the second and
 PR118 only the first, and the composed source contains both production paths.

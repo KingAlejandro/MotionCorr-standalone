@@ -1,57 +1,39 @@
 {
-  "source_root": "/home/alex/mc-i83-compat-20260929",
-  "binary": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-  "binary_sha256": "159e675a3186487c8b159a44f65a2b05b0ab25c9523c7a065b56f09f810409ce",
+  "source_root": "/work4/scd/scarf1415/mc-issue83/src",
+  "binary": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+  "binary_sha256": "21a07802e8ca98738a4889e26750a04e109da883cafab1a1998930ab1f1f01c5",
   "comparator_sha256": "b5d5d9986bcc928dfaa3ca32f0329061094eeaaf60233bd9fd3864df20441732",
   "fixtures_sha256": "682b4e18515bd6766ebc7369f7bcfa3c7affee48b949dd1b69b8702de14fe6d3",
   "harness_sha256": "c05349d3a102b2c113a0f5373769cbab9972179bd05ac65c72e9f8482ef369f4",
-  "host": "4-gpu-vm",
-  "workdir": "/tmp/mc83-v4",
+  "host": "gn0001.scarf.rl.ac.uk",
+  "workdir": "/tmp/mc83-rec-3514082",
   "device": {
-    "index": "3",
-    "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
-    "name": "NVIDIA A100 80GB PCIe",
-    "memory_used": "425 MiB",
-    "topology": "\t\u001b[4mGPU0\tGPU1\tGPU2\tGPU3\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tPHB\tPHB\tPHB\t0-123\t0-1\t\tN/A\nGPU1\tPHB\t X \tPHB\tPHB\t0-123\t0-1\t\tN/A\nGPU2\tPHB\tPHB\t X \tPHB\t0-123\t0-1\t\tN/A\nGPU3\tPHB\tPHB\tPHB\t X \t0-123\t0-1\t\tN/A\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n"
+    "index": "0",
+    "uuid": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
+    "name": "NVIDIA A100-SXM4-40GB",
+    "memory_used": "0 MiB",
+    "topology": "\t\u001b[4mGPU0\tNIC0\tNIC1\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tNODE\tNODE\t1-2,4-5,33-34\t0\t\tN/A\nNIC0\tNODE\t X \tNODE\t\t\t\t\nNIC1\tNODE\tNODE\t X \t\t\t\t\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n\nNIC Legend:\n\n  NIC0: mlx5_0\n  NIC1: mlx5_1\n\n"
   },
   "device_catalogue": [
     {
       "index": "0",
-      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
-      "name": "NVIDIA A100 80GB PCIe",
-      "memory_used": "439 MiB"
-    },
-    {
-      "index": "1",
-      "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
-      "name": "NVIDIA A100 80GB PCIe",
-      "memory_used": "425 MiB"
-    },
-    {
-      "index": "2",
-      "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
-      "name": "NVIDIA A100 80GB PCIe",
-      "memory_used": "425 MiB"
-    },
-    {
-      "index": "3",
-      "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
-      "name": "NVIDIA A100 80GB PCIe",
-      "memory_used": "425 MiB"
+      "uuid": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
+      "name": "NVIDIA A100-SXM4-40GB",
+      "memory_used": "0 MiB"
     }
   ],
-  "slurm_job_id": null,
+  "slurm_job_id": "3514082",
   "cpus_allowed": [
-    0,
     1,
     2,
-    3,
     4,
     5,
-    6,
-    7
+    33,
+    34,
+    36,
+    37
   ],
-  "threads": 4,
+  "threads": 8,
   "uuid_witness": "required",
   "cases": [
     {
@@ -70,37 +52,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1929455,
-            "wall_start": 1790694066.4556386,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615051297",
+            "pid": 3039795,
+            "wall_start": 1790694119.2084043,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161288799",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.407,
+            "wall_seconds": 1.885,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 7,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/base_gain/out-primary/",
+              "/tmp/mc83-rec-3514082/base_gain/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -122,7 +104,7 @@
               "--defect_file",
               "defects.txt"
             ],
-            "cwd": "/tmp/mc83-v4/base_gain/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/base_gain/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -131,37 +113,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1929610,
-            "wall_start": 1790694067.9235423,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615051444",
+            "pid": 3039839,
+            "wall_start": 1790694121.1116908,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161288989",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.343,
+            "wall_seconds": 1.498,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 7,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/base_gain/out-float/",
+              "/tmp/mc83-rec-3514082/base_gain/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -183,7 +165,7 @@
               "--defect_file",
               "defects.txt"
             ],
-            "cwd": "/tmp/mc83-v4/base_gain/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/base_gain/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -194,7 +176,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/base_gain/out-primary",
+            "root": "/tmp/mc83-rec-3514082/base_gain/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -202,7 +184,7 @@
             "pixel_count": 3072
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/base_gain/out-float",
+            "root": "/tmp/mc83-rec-3514082/base_gain/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -300,7 +282,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/base_gain/out-primary",
+        "root": "/tmp/mc83-rec-3514082/base_gain/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -325,7 +307,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/base_gain/out-float",
+        "root": "/tmp/mc83-rec-3514082/base_gain/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -363,37 +345,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1929702,
-            "wall_start": 1790694069.3164794,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615051583",
+            "pid": 3039879,
+            "wall_start": 1790694122.637012,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289142",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.886,
+            "wall_seconds": 1.533,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/base_nogain/out-primary/",
+              "/tmp/mc83-rec-3514082/base_nogain/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -411,7 +393,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-v4/base_nogain/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/base_nogain/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -420,37 +402,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1930242,
-            "wall_start": 1790694071.2397487,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615051775",
+            "pid": 3039923,
+            "wall_start": 1790694124.1837115,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289297",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.122,
+            "wall_seconds": 1.494,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 6,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/base_nogain/out-float/",
+              "/tmp/mc83-rec-3514082/base_nogain/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -468,7 +450,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-v4/base_nogain/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/base_nogain/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -479,7 +461,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/base_nogain/out-primary",
+            "root": "/tmp/mc83-rec-3514082/base_nogain/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -487,7 +469,7 @@
             "pixel_count": 3072
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/base_nogain/out-float",
+            "root": "/tmp/mc83-rec-3514082/base_nogain/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -577,7 +559,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/base_nogain/out-primary",
+        "root": "/tmp/mc83-rec-3514082/base_nogain/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -602,7 +584,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/base_nogain/out-float",
+        "root": "/tmp/mc83-rec-3514082/base_nogain/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -641,37 +623,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1930338,
-            "wall_start": 1790694072.4179156,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615051893",
+            "pid": 3039963,
+            "wall_start": 1790694125.70284,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289448",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.142,
+            "wall_seconds": 1.533,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 6,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/save_nodw/out-primary/",
+              "/tmp/mc83-rec-3514082/save_nodw/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -695,7 +677,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/save_nodw/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/save_nodw/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -704,37 +686,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1930557,
-            "wall_start": 1790694073.5874424,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052010",
+            "pid": 3040003,
+            "wall_start": 1790694127.2503433,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289603",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.387,
+            "wall_seconds": 1.526,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 7,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/save_nodw/out-float/",
+              "/tmp/mc83-rec-3514082/save_nodw/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -758,7 +740,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/save_nodw/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/save_nodw/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -769,7 +751,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/save_nodw/out-primary",
+            "root": "/tmp/mc83-rec-3514082/save_nodw/out-primary",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -777,7 +759,7 @@
             "pixel_count": 6144
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/save_nodw/out-float",
+            "root": "/tmp/mc83-rec-3514082/save_nodw/out-float",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -895,7 +877,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/save_nodw/out-primary",
+        "root": "/tmp/mc83-rec-3514082/save_nodw/out-primary",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -932,7 +914,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/save_nodw/out-float",
+        "root": "/tmp/mc83-rec-3514082/save_nodw/out-float",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -983,37 +965,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931090,
-            "wall_start": 1790694075.11663,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052163",
+            "pid": 3040043,
+            "wall_start": 1790694128.8062472,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289759",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.206,
+            "wall_seconds": 1.518,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 6,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/power_spectrum/out-primary/",
+              "/tmp/mc83-rec-3514082/power_spectrum/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1037,7 +1019,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/power_spectrum/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/power_spectrum/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1046,37 +1028,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931432,
-            "wall_start": 1790694076.3476338,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052286",
+            "pid": 3040083,
+            "wall_start": 1790694130.338871,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161289912",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.123,
+            "wall_seconds": 1.582,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 6,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/power_spectrum/out-float/",
+              "/tmp/mc83-rec-3514082/power_spectrum/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1100,7 +1082,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/power_spectrum/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/power_spectrum/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1111,7 +1093,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/power_spectrum/out-primary",
+            "root": "/tmp/mc83-rec-3514082/power_spectrum/out-primary",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -1119,7 +1101,7 @@
             "pixel_count": 4096
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/power_spectrum/out-float",
+            "root": "/tmp/mc83-rec-3514082/power_spectrum/out-float",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -1241,7 +1223,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/power_spectrum/out-primary",
+        "root": "/tmp/mc83-rec-3514082/power_spectrum/out-primary",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -1278,7 +1260,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/power_spectrum/out-float",
+        "root": "/tmp/mc83-rec-3514082/power_spectrum/out-float",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -1330,37 +1312,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931586,
-            "wall_start": 1790694077.6126077,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052412",
+            "pid": 3040123,
+            "wall_start": 1790694131.95079,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290073",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.89,
+            "wall_seconds": 1.512,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/even_odd/out-primary/",
+              "/tmp/mc83-rec-3514082/even_odd/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1381,7 +1363,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/even_odd/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/even_odd/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1390,37 +1372,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931615,
-            "wall_start": 1790694078.5203183,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052503",
+            "pid": 3040164,
+            "wall_start": 1790694133.4772983,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290226",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.898,
+            "wall_seconds": 1.514,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/even_odd/out-float/",
+              "/tmp/mc83-rec-3514082/even_odd/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1441,7 +1423,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/even_odd/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/even_odd/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1452,7 +1434,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/even_odd/out-primary",
+            "root": "/tmp/mc83-rec-3514082/even_odd/out-primary",
             "file_count": 16,
             "mrc_count": 3,
             "star_count": 2,
@@ -1460,7 +1442,7 @@
             "pixel_count": 9216
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/even_odd/out-float",
+            "root": "/tmp/mc83-rec-3514082/even_odd/out-float",
             "file_count": 16,
             "mrc_count": 3,
             "star_count": 2,
@@ -1594,7 +1576,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/even_odd/out-primary",
+        "root": "/tmp/mc83-rec-3514082/even_odd/out-primary",
         "file_count": 16,
         "mrc_count": 3,
         "star_count": 2,
@@ -1643,7 +1625,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/even_odd/out-float",
+        "root": "/tmp/mc83-rec-3514082/even_odd/out-float",
         "file_count": 16,
         "mrc_count": 3,
         "star_count": 2,
@@ -1709,37 +1691,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931654,
-            "wall_start": 1790694079.4554424,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052597",
+            "pid": 3040204,
+            "wall_start": 1790694135.0226073,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290380",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.865,
+            "wall_seconds": 1.536,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/all_output_modes/out-primary/",
+              "/tmp/mc83-rec-3514082/all_output_modes/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1768,7 +1750,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1777,37 +1759,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931679,
-            "wall_start": 1790694080.3401265,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052685",
+            "pid": 3040244,
+            "wall_start": 1790694136.575332,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290536",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.974,
+            "wall_seconds": 1.653,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/all_output_modes/out-float/",
+              "/tmp/mc83-rec-3514082/all_output_modes/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -1836,7 +1818,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/all_output_modes/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/all_output_modes/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1847,7 +1829,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/all_output_modes/out-primary",
+            "root": "/tmp/mc83-rec-3514082/all_output_modes/out-primary",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -1855,7 +1837,7 @@
             "pixel_count": 13312
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/all_output_modes/out-float",
+            "root": "/tmp/mc83-rec-3514082/all_output_modes/out-float",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -2039,7 +2021,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/all_output_modes/out-primary",
+        "root": "/tmp/mc83-rec-3514082/all_output_modes/out-primary",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -2112,7 +2094,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/all_output_modes/out-float",
+        "root": "/tmp/mc83-rec-3514082/all_output_modes/out-float",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -2198,37 +2180,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931708,
-            "wall_start": 1790694081.3615735,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052787",
+            "pid": 3040284,
+            "wall_start": 1790694138.2687109,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290705",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.871,
+            "wall_seconds": 1.623,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/selected_unequal_groups/out-primary/",
+              "/tmp/mc83-rec-3514082/selected_unequal_groups/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2254,7 +2236,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/selected_unequal_groups/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/selected_unequal_groups/input-u16"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2263,37 +2245,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931733,
-            "wall_start": 1790694082.262672,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052877",
+            "pid": 3040326,
+            "wall_start": 1790694139.9121387,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161290869",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.892,
+            "wall_seconds": 1.509,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/selected_unequal_groups/out-float/",
+              "/tmp/mc83-rec-3514082/selected_unequal_groups/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2319,7 +2301,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/selected_unequal_groups/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/selected_unequal_groups/input-f32"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2330,7 +2312,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/selected_unequal_groups/out-primary",
+            "root": "/tmp/mc83-rec-3514082/selected_unequal_groups/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2338,7 +2320,7 @@
             "pixel_count": 3888
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/selected_unequal_groups/out-float",
+            "root": "/tmp/mc83-rec-3514082/selected_unequal_groups/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2439,7 +2421,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/selected_unequal_groups/out-primary",
+        "root": "/tmp/mc83-rec-3514082/selected_unequal_groups/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2464,7 +2446,7 @@
         "Movies/mov00_g2_54x72x8.tiff": "3a0f31c88a1a605ae607a3118787434d446e6692295773f50720ce68e9c041d4"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/selected_unequal_groups/out-float",
+        "root": "/tmp/mc83-rec-3514082/selected_unequal_groups/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2502,37 +2484,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931773,
-            "wall_start": 1790694083.1871204,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615052970",
+            "pid": 3040366,
+            "wall_start": 1790694141.4525726,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291023",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.886,
+            "wall_seconds": 1.524,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/second_geometry/out-primary/",
+              "/tmp/mc83-rec-3514082/second_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2552,7 +2534,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/second_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/second_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2561,37 +2543,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931818,
-            "wall_start": 1790694084.0962594,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053061",
+            "pid": 3040409,
+            "wall_start": 1790694142.9969654,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291178",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.841,
+            "wall_seconds": 1.549,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/second_geometry/out-float/",
+              "/tmp/mc83-rec-3514082/second_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2611,7 +2593,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/second_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/second_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2622,7 +2604,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/second_geometry/out-primary",
+            "root": "/tmp/mc83-rec-3514082/second_geometry/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2630,7 +2612,7 @@
             "pixel_count": 3888
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/second_geometry/out-float",
+            "root": "/tmp/mc83-rec-3514082/second_geometry/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2725,7 +2707,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/second_geometry/out-primary",
+        "root": "/tmp/mc83-rec-3514082/second_geometry/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2750,7 +2732,7 @@
         "Movies/mov00_g2_54x72x8.tiff": "3a0f31c88a1a605ae607a3118787434d446e6692295773f50720ce68e9c041d4"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/second_geometry/out-float",
+        "root": "/tmp/mc83-rec-3514082/second_geometry/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2790,37 +2772,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931843,
-            "wall_start": 1790694084.979073,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053149",
+            "pid": 3040449,
+            "wall_start": 1790694144.584115,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291337",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.999,
+            "wall_seconds": 1.632,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/successive_same_geometry/out-primary/",
+              "/tmp/mc83-rec-3514082/successive_same_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2840,7 +2822,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/successive_same_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/successive_same_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -2851,37 +2833,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931876,
-            "wall_start": 1790694086.0216243,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053253",
+            "pid": 3040501,
+            "wall_start": 1790694146.251929,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291503",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.858,
+            "wall_seconds": 1.683,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/successive_same_geometry/out-float/",
+              "/tmp/mc83-rec-3514082/successive_same_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -2901,7 +2883,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/successive_same_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/successive_same_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -2914,7 +2896,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/successive_same_geometry/out-primary",
+            "root": "/tmp/mc83-rec-3514082/successive_same_geometry/out-primary",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -2922,7 +2904,7 @@
             "pixel_count": 9216
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/successive_same_geometry/out-float",
+            "root": "/tmp/mc83-rec-3514082/successive_same_geometry/out-float",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -3123,7 +3105,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/successive_same_geometry/out-primary",
+        "root": "/tmp/mc83-rec-3514082/successive_same_geometry/out-primary",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3174,7 +3156,7 @@
         "Movies/mov02_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/successive_same_geometry/out-float",
+        "root": "/tmp/mc83-rec-3514082/successive_same_geometry/out-float",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3238,37 +3220,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931905,
-            "wall_start": 1790694086.9507747,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053346",
+            "pid": 3040555,
+            "wall_start": 1790694147.9944873,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291678",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.848,
+            "wall_seconds": 1.61,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/successive_mixed_geometry/out-primary/",
+              "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -3286,7 +3268,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-v4/successive_mixed_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/successive_mixed_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3297,37 +3279,37 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 1931948,
-            "wall_start": 1790694087.8508031,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053436",
+            "pid": 3040608,
+            "wall_start": 1790694149.6461525,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161291843",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.85,
+            "wall_seconds": 1.68,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/successive_mixed_geometry/out-float/",
+              "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -3345,7 +3327,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-v4/successive_mixed_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec-3514082/successive_mixed_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3358,7 +3340,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/successive_mixed_geometry/out-primary",
+            "root": "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-primary",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -3366,7 +3348,7 @@
             "pixel_count": 10032
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/successive_mixed_geometry/out-float",
+            "root": "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-float",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -3560,7 +3542,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/successive_mixed_geometry/out-primary",
+        "root": "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-primary",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3611,7 +3593,7 @@
         "Movies/mov02_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-v4/successive_mixed_geometry/out-float",
+        "root": "/tmp/mc83-rec-3514082/successive_mixed_geometry/out-float",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3674,37 +3656,37 @@
         "failing": {
           "exit_code": 1,
           "identity": {
-            "pid": 1931990,
-            "wall_start": 1790694088.765044,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053528",
+            "pid": 3040660,
+            "wall_start": 1790694151.3804102,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292016",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.441,
+            "wall_seconds": 0.842,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 3,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 4,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/gain_geometry_mismatch/out-failing/",
+              "/tmp/mc83-rec-3514082/gain_geometry_mismatch/out-failing/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -3724,7 +3706,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/gain_geometry_mismatch/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/gain_geometry_mismatch/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3839,37 +3821,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932003,
-            "wall_start": 1790694089.2183459,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053573",
+            "pid": 3040682,
+            "wall_start": 1790694152.2377846,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292102",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 1.024,
+            "wall_seconds": 1.645,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/repeat_all_output_modes/out-primary/",
+              "/tmp/mc83-rec-3514082/repeat_all_output_modes/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -3898,7 +3880,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/repeat_all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/repeat_all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -3907,37 +3889,37 @@
         "repeat": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932029,
-            "wall_start": 1790694090.2508323,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053676",
+            "pid": 3040722,
+            "wall_start": 1790694153.88882,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292267",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.827,
+            "wall_seconds": 1.661,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/repeat_all_output_modes/out-repeat/",
+              "/tmp/mc83-rec-3514082/repeat_all_output_modes/out-repeat/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -3966,7 +3948,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/repeat_all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/repeat_all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -3977,7 +3959,7 @@
         "repeat": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/repeat_all_output_modes/out-primary",
+            "root": "/tmp/mc83-rec-3514082/repeat_all_output_modes/out-primary",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -3985,7 +3967,7 @@
             "pixel_count": 13312
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/repeat_all_output_modes/out-repeat",
+            "root": "/tmp/mc83-rec-3514082/repeat_all_output_modes/out-repeat",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -4169,7 +4151,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/repeat_all_output_modes/out-primary",
+        "root": "/tmp/mc83-rec-3514082/repeat_all_output_modes/out-primary",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -4259,37 +4241,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932057,
-            "wall_start": 1790694091.1161187,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053763",
+            "pid": 3040762,
+            "wall_start": 1790694155.5912387,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292437",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.842,
+            "wall_seconds": 1.887,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 11,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/resume_non_prefix/out-primary/",
+              "/tmp/mc83-rec-3514082/resume_non_prefix/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -4317,7 +4299,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/resume_non_prefix/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/resume_non_prefix/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -4328,37 +4310,37 @@
         "resume": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932089,
-            "wall_start": 1790694091.983333,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615053850",
+            "pid": 3040818,
+            "wall_start": 1790694157.4970083,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292628",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.859,
+            "wall_seconds": 1.654,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/resume_non_prefix/out-resume/",
+              "/tmp/mc83-rec-3514082/resume_non_prefix/out-resume/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -4387,7 +4369,7 @@
               "gain.mrc",
               "--only_do_unfinished"
             ],
-            "cwd": "/tmp/mc83-v4/resume_non_prefix/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/resume_non_prefix/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -4400,7 +4382,7 @@
         "non_prefix_resume": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-v4/resume_non_prefix/out-primary",
+            "root": "/tmp/mc83-rec-3514082/resume_non_prefix/out-primary",
             "file_count": 28,
             "mrc_count": 9,
             "star_count": 4,
@@ -4408,7 +4390,7 @@
             "pixel_count": 21504
           },
           "candidate": {
-            "root": "/tmp/mc83-v4/resume_non_prefix/out-resume",
+            "root": "/tmp/mc83-rec-3514082/resume_non_prefix/out-resume",
             "file_count": 28,
             "mrc_count": 9,
             "star_count": 4,
@@ -4729,7 +4711,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/resume_non_prefix/out-primary",
+        "root": "/tmp/mc83-rec-3514082/resume_non_prefix/out-primary",
         "file_count": 28,
         "mrc_count": 9,
         "star_count": 4,
@@ -4897,37 +4879,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932143,
-            "wall_start": 1790694093.7745733,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615054029",
+            "pid": 3040914,
+            "wall_start": 1790694160.9962845,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161292978",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.799,
+            "wall_seconds": 1.505,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/ineligible_float_tiff/out-primary/",
+              "/tmp/mc83-rec-3514082/ineligible_float_tiff/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -4947,7 +4929,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/ineligible_float_tiff/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/ineligible_float_tiff/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -5019,7 +5001,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/ineligible_float_tiff/out-primary",
+        "root": "/tmp/mc83-rec-3514082/ineligible_float_tiff/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -5057,37 +5039,37 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 1932168,
-            "wall_start": 1790694094.5948093,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615054111",
+            "pid": 3040954,
+            "wall_start": 1790694162.5241888,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161293131",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.812,
+            "wall_seconds": 1.537,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 5,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/ineligible_early_binning/out-primary/",
+              "/tmp/mc83-rec-3514082/ineligible_early_binning/out-primary/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -5109,7 +5091,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/ineligible_early_binning/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/ineligible_early_binning/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -5183,7 +5165,7 @@
         }
       },
       "tree": {
-        "root": "/tmp/mc83-v4/ineligible_early_binning/out-primary",
+        "root": "/tmp/mc83-rec-3514082/ineligible_early_binning/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -5223,37 +5205,37 @@
         "failing": {
           "exit_code": 1,
           "identity": {
-            "pid": 1932193,
-            "wall_start": 1790694095.4346974,
-            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
-            "start_ticks": "615054195",
+            "pid": 3040995,
+            "wall_start": 1790694164.088352,
+            "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
+            "start_ticks": "161293287",
             "cpus_allowed": [
-              0,
               1,
               2,
-              3,
               4,
               5,
-              6,
-              7
+              33,
+              34,
+              36,
+              37
             ],
-            "wall_seconds": 0.361,
+            "wall_seconds": 0.807,
             "compute_app_uuids": [
-              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+              "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36"
             ],
-            "compute_app_samples": 2,
-            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "compute_app_samples": 4,
+            "cuda_visible_devices": "GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36",
             "command": [
-              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-v4/damaged_movie_named/out-failing/",
+              "/tmp/mc83-rec-3514082/damaged_movie_named/out-failing/",
               "--use_own",
               "--gpu",
               "0",
               "--j",
-              "4",
+              "8",
               "--max_io_threads",
               "2",
               "--patch_x",
@@ -5273,7 +5255,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-v4/damaged_movie_named/input-u16"
+            "cwd": "/tmp/mc83-rec-3514082/damaged_movie_named/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",

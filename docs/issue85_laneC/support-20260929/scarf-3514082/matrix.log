@@ -1,0 +1,34 @@
+[case] base_gain: gain applied, compact ingest on the primary geometry
+  PASS
+[case] base_nogain: no gain: the U16 kernel's unconditional d_Iframes store
+  PASS
+[case] save_nodw: --dose_weighting --save_noDW keeps both sums and associates the noDW image
+  PASS
+[case] power_spectrum: --grouping_for_ps/--ps_size writes a _PS.mrc at its own geometry
+  PASS
+[case] even_odd: --even_odd_split writes _EVN/_ODD and records no association outside tomography
+  PASS
+[case] all_output_modes: noDW + even/odd + power spectrum together
+  PASS
+[case] selected_unequal_groups: --first_frame_sum 2 --last_frame_sum 8 --group_frames 2 over 8 frames: groups 2,2,3
+  PASS
+[case] second_geometry: a second, differently shaped nonsquare movie
+  PASS
+[case] successive_same_geometry: three movies of one geometry in one process
+  PASS
+[case] successive_mixed_geometry: consecutive movies of different geometry in one process
+  PASS
+[case] gain_geometry_mismatch: a gain reference that does not match the second movie fails closed
+  PASS
+[case] repeat_all_output_modes: repeat of the full output-mode run must be byte-exact
+  PASS
+[case] resume_non_prefix: --only_do_unfinished after deleting a middle movie's products
+  PASS
+[case] ineligible_float_tiff: float32 TIFF never enters the compact path
+  PASS
+[case] ineligible_early_binning: --bin_factor 2 with early binning leaves a uint16 TIFF on the float path
+  PASS
+[case] damaged_movie_named: a truncated uint16 movie beside healthy ones fails closed and is named
+  PASS
+
+compact-ingest support matrix: {'selected': 16, 'passed': 16, 'failed': 0}

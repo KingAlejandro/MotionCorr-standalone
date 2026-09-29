@@ -157,6 +157,9 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+        add_test(NAME MultiGpuScheduling
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_multi_gpu_scheduling.py
+                --binary $<TARGET_FILE:motioncorr>)
     # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
     # so it needs POSIX resource limits and an ignorable SIGXFSZ.
     if(UNIX)

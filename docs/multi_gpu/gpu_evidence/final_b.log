@@ -1,0 +1,249 @@
++ cd /home/alex/mc-i53-gpu/run
++ date -Is
+2026-09-28T07:03:27+00:00
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ mine=0
++ echo my_device_compute_apps=0
+my_device_compute_apps=0
++ '[' 0 -eq 0 ']'
++ echo '=== concurrent occupancy (other devices, recorded not gated) ==='
+=== concurrent occupancy (other devices, recorded not gated) ===
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
+1213665, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3422 MiB
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 3431 MiB, 16 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
++ cat /proc/loadavg
+1.96 2.96 2.77 2/2761 1215025
++ echo '=== A5. OWNED-CHILD FAILURE ==='
+=== A5. OWNED-CHILD FAILURE ===
++ LAUNCHER=1215026
++ echo launcher_pid=1215026
+launcher_pid=1215026
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/run_multi_gpu.py --star movies.star --out itr --binary /home/alex/mc-i53-gpu/build-final/motioncorr --devices GPU-eddb42fe-4f9a-adde-76d3-b924e14add54,GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d --cpus '96-103;104-111' -- --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
+++ seq 1 900
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ sleep 1
++ continue
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=0
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=0
++ '[' 0 -ge 3 ']'
++ sleep 1
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=0
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=0
++ '[' 0 -ge 3 ']'
++ sleep 1
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=1
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=1
++ '[' 1 -ge 3 ']'
++ sleep 1
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=2
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=2
++ '[' 2 -ge 3 ']'
++ sleep 1
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=2
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=2
++ '[' 2 -ge 3 ']'
++ sleep 1
++ for i in $(seq 1 900)
++ '[' -f itr/w0/command.json ']'
++ '[' -f itr/w1/command.json ']'
+++ find itr/w0 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n0=3
+++ find itr/w1 -name '*.mrc' '!' -name '*_PS.mrc'
+++ wc -l
++ n1=3
++ '[' 3 -ge 3 ']'
++ '[' 3 -ge 1 ']'
++ break
+++ /home/alex/mc-env/bin/python -c 'import json;print(json.load(open('\''itr/w0/command.json'\''))['\''pid'\''])'
++ W0=1215033
+++ /home/alex/mc-env/bin/python -c 'import json;print(json.load(open('\''itr/w1/command.json'\''))['\''pid'\''])'
++ W1=1215034
++ echo 'w0_pid=1215033 w1_pid=1215034 n0=3 n1=3'
+w0_pid=1215033 w1_pid=1215034 n0=3 n1=3
++ taskset -cp 1215033
+pid 1215033's current affinity list: 96-103
++ taskset -cp 1215034
+pid 1215034's current affinity list: 104-111
++ nvidia-smi --query-compute-apps=pid,gpu_uuid --format=csv,noheader
+1215033, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54
+1215034, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d
+++ pgrep -f build-final/motioncorr
+++ tr '\n' ' '
++ CHILDREN_BEFORE='1215026 1215033 1215034 '
++ echo 'children_before=1215026 1215033 1215034 '
+children_before=1215026 1215033 1215034 
++ kill -9 1215033
++ echo KILLED_W0=1215033
+KILLED_W0=1215033
++ wait 1215026
++ echo ITR_LAUNCH_RC=3
+ITR_LAUNCH_RC=3
++ tail -6 itr_launch.log
+  "returncodes": [
+    -9,
+    0
+  ],
+  "verdict": "FAIL"
+}
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''itr/status.json'\''))
+print('\''ITR_VERDICT=%s'\''%d['\''verdict'\'']);print('\''ITR_RCS=%s'\''%[w['\''returncode'\''] for w in d['\''workers'\'']])'
+ITR_VERDICT=FAIL
+ITR_RCS=[-9, 0]
++ /home/alex/mc-env/bin/python -
+COMPLETED_AT_INTERRUPT=17/24
+IS_PREFIX=0
+missing_canonical_indices=[5, 6, 7, 8, 9, 10, 11]
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/merge_workers.py --manifest itr/shards/shard_manifest.json --workers itr/w0 itr/w1 --status itr/status.json --out m_itr --report merge_itr.json
+  worker 0: exited -9
+  launcher verdict is FAIL, not PASS; gpu_witness: unwitnessed=[], wrong_device=[], shared_devices=[]
+  lost: Movies/20170629_00026_frameImage.tiff has no .mrc output (expected Movies/20170629_00026_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00026_frameImage.tiff has no .star output (expected Movies/20170629_00026_frameImage.star, shard 0)
+  lost: Movies/20170629_00027_frameImage.tiff has no .mrc output (expected Movies/20170629_00027_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00027_frameImage.tiff has no .star output (expected Movies/20170629_00027_frameImage.star, shard 0)
+  lost: Movies/20170629_00028_frameImage.tiff has no .mrc output (expected Movies/20170629_00028_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00028_frameImage.tiff has no .star output (expected Movies/20170629_00028_frameImage.star, shard 0)
+  lost: Movies/20170629_00029_frameImage.tiff has no .mrc output (expected Movies/20170629_00029_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00029_frameImage.tiff has no .star output (expected Movies/20170629_00029_frameImage.star, shard 0)
+  lost: Movies/20170629_00030_frameImage.tiff has no .mrc output (expected Movies/20170629_00030_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00030_frameImage.tiff has no .star output (expected Movies/20170629_00030_frameImage.star, shard 0)
+  lost: Movies/20170629_00031_frameImage.tiff has no .mrc output (expected Movies/20170629_00031_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00031_frameImage.tiff has no .star output (expected Movies/20170629_00031_frameImage.star, shard 0)
+  lost: Movies/20170629_00035_frameImage.tiff has no .mrc output (expected Movies/20170629_00035_frameImage.mrc, shard 0)
+  lost: Movies/20170629_00035_frameImage.tiff has no .star output (expected Movies/20170629_00035_frameImage.star, shard 0)
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 69,
+  "verdict": "FAIL"
+}
++ echo MERGE_INTERRUPT_RC=3
+MERGE_INTERRUPT_RC=3
++ sleep 3
+++ pgrep -f build-final/motioncorr
+++ wc -l
++ echo strays_after_kill=0
+strays_after_kill=0
++ pgrep -af build-final/motioncorr
++ grep -v pgrep
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ echo my_compute_apps_after_kill=0
+my_compute_apps_after_kill=0
++ echo '=== A6. BOUNDED NON-PREFIX RESUME ==='
+=== A6. BOUNDED NON-PREFIX RESUME ===
++ for k in 0 1
++ '[' 0 = 0 ']'
++ M=96-103
++ U=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54
++ env CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 taskset -c 96-103 /home/alex/mc-i53-gpu/build-final/motioncorr --i itr/shards/shard_2way_0.star --o itr/w0/ --gpu 0 --only_do_unfinished --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
++ echo RESUME_W0_RC=0
+RESUME_W0_RC=0
++ grep -m1 'Using CUDA acceleration' itr/w0/resume.log
+Using CUDA acceleration on GPU device 0 for global alignment.
++ grep -m1 'skipping all micrographs' itr/w0/resume.log
+ (skipping all micrographs for which a corrected movie already exists) 
++ for k in 0 1
++ '[' 1 = 0 ']'
++ M=104-111
++ U=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d
++ env CUDA_VISIBLE_DEVICES=GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d taskset -c 104-111 /home/alex/mc-i53-gpu/build-final/motioncorr --i itr/shards/shard_2way_1.star --o itr/w1/ --gpu 0 --only_do_unfinished --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4
++ echo RESUME_W1_RC=0
+RESUME_W1_RC=0
++ grep -m1 'Using CUDA acceleration' itr/w1/resume.log
+Using CUDA acceleration on GPU device 0 for global alignment.
++ grep -m1 'skipping all micrographs' itr/w1/resume.log
+ (skipping all micrographs for which a corrected movie already exists) 
++ /home/alex/mc-env/bin/python -c '
+import json;json.dump({'\''workers'\'':[{'\''index'\'':k,'\''returncode'\'':0} for k in (0,1)],
+ '\''verdict'\'':'\''PASS'\'','\''note'\'':'\''resume arm: workers re-run with --only_do_unfinished into their own dirs'\''},
+ open('\''itr/status_resumed.json'\'','\''w'\''),indent=2)'
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/merge_workers.py --manifest itr/shards/shard_manifest.json --workers itr/w0 itr/w1 --status itr/status_resumed.json --out m_res --report merge_res.json --aggregate-with /home/alex/mc-i53-gpu/build-final/motioncorr --input-star movies.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+  worker 0: produced resume.log, which belongs to no movie in the manifest
+  worker 1: produced resume.log, which belongs to no movie in the manifest
+  duplicate: resume.log produced by workers 0 and 1
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 97,
+  "verdict": "FAIL"
+}
++ echo MERGE_RESUMED_RC=3
+MERGE_RESUMED_RC=3
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-final/tools/multi_gpu/compare24.py --ref serialG --test m_res --tool /home/alex/mc-i53-gpu/src-final/tools/compare_motioncorr.py --manifest itr/shards/shard_manifest.json --out exact_res --python /home/alex/mc-env/bin/python
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo COMPARE_RESUMED_RC=0
+COMPARE_RESUMED_RC=0
++ echo '=== RELEASE CHECKS ==='
+=== RELEASE CHECKS ===
++ date -Is
+2026-09-28T07:04:35+00:00
+++ pgrep -f mc-i53-gpu/build
+++ wc -l
++ echo final_strays=0
+final_strays=0
++ pgrep -af mc-i53-gpu/build
++ grep -v pgrep
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ echo final_my_compute_apps=0
+final_my_compute_apps=0
++ echo '=== all-device occupancy at release ==='
+=== all-device occupancy at release ===
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
++ nvidia-smi --query-gpu=index,uuid,memory.used --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 4 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
++ cat /proc/loadavg
+4.43 3.53 2.98 5/2760 1216200
+FINAL_B_OUTER_RC=0

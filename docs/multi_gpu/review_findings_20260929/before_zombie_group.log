@@ -1,0 +1,30 @@
+NOTE: --binary not given; the --gpu device-list rejection case is NOT run and is not claimed to pass.
+FAIL case_launcher_signal_reaps_owned_process_group: launcher did not report signal 15: rc=1; /tmp/mgpu_869b5p_f/run_15/shards/shard_1way_0.star	1
+manifest	/tmp/mgpu_869b5p_f/run_15/shards/shard_manifest.json
+; TOTAL	1
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-pr117-review-p1-20260929/before/tools/multi_gpu/run_multi_gpu.py", line 438, in main
+    w.join()
+  File "/usr/lib/python3.12/threading.py", line 1147, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.12/threading.py", line 1167, in _wait_for_tstate_lock
+    if lock.acquire(block, timeout):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/mc-pr117-review-p1-20260929/before/tools/multi_gpu/run_multi_gpu.py", line 78, in interrupt
+    raise LauncherInterrupted(signum)
+run_multi_gpu.LauncherInterrupted: launcher interrupted by signal 15
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/mgpu_869b5p_f/invoke_launcher.py", line 12, in <module>
+    rc = launcher.main()
+         ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/mc-pr117-review-p1-20260929/before/tools/multi_gpu/run_multi_gpu.py", line 443, in main
+    _terminate_process_groups(procs)
+  File "/home/ubuntu/mc-pr117-review-p1-20260929/before/tools/multi_gpu/run_multi_gpu.py", line 166, in _terminate_process_groups
+    raise RuntimeError(f"owned worker process groups remain after SIGKILL: {remaining}")
+RuntimeError: owned worker process groups remain after SIGKILL: [3799744]
+
+
+0/1 passed (52 not selected by --only, and not claimed)

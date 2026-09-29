@@ -1,0 +1,28 @@
++ echo '=== A0. DEVICE-LIST WITNESS ON A CUDA BUILD ==='
+=== A0. DEVICE-LIST WITNESS ON A CUDA BUILD ===
++ for b in "$BASE:base" "$BIN:head"
++ p=/home/alex/mc-i53-gpu/build-base/motioncorr
++ n=base
++ echo '--- base --gpu 0:1:2:3 ---'
+--- base --gpu 0:1:2:3 ---
++ CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54,GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d
++ taskset -c 96-111 /home/alex/mc-i53-gpu/build-base/motioncorr --i movies.star --o /tmp/i53probe_base/ --use_own --gpu 0:1:2:3 --j 1
++ grep -E 'Using CUDA|ERROR: [^ ]|device'
++ head -3
+Using CUDA acceleration on GPU device 0 for global alignment.
++ echo '  exit=0'
+  exit=0
++ for b in "$BASE:base" "$BIN:head"
++ p=/home/alex/mc-i53-gpu/build-head/motioncorr
++ n=head
++ echo '--- head --gpu 0:1:2:3 ---'
+--- head --gpu 0:1:2:3 ---
++ CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54,GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d
++ taskset -c 96-111 /home/alex/mc-i53-gpu/build-head/motioncorr --i movies.star --o /tmp/i53probe_head/ --use_own --gpu 0:1:2:3 --j 1
++ grep -E 'Using CUDA|ERROR: [^ ]|device'
++ head -3
+ERROR: --gpu 0:1:2:3 requests 4 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
+ERROR: --gpu 0:1:2:3 requests 4 device entries, but --use_own supports exactly one device id (e.g. --gpu 0). This repository has no MPI runner, so the ':'-separated per-rank syntax has no meaning here. To use several GPUs, run one process per device over disjoint subsets of the input STAR; see tools/multi_gpu/.
++ echo '  exit=1'
+  exit=1
++ echo '=== A1. SERIAL BASELINE, 1 GPU, all 24 ==='

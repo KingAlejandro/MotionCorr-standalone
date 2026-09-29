@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""End-to-end CPU arm: serial versus 3-way sharded, with the real binary.
+
+This is the arm that exercises the worker contract against the *binary current
+main builds*, rather than against the fake worker. It is the CPU analogue of the
+native two-GPU arm recorded in ../GPU_ACCEPTANCE.md.
+
+Why the comparison is not vacuous. The fixture is one synthetic TIFF symlinked
+six times, so identical metadata handling would make all six corrected images
+byte-identical and an exact comparison would prove nothing. The movies are split
+across two optics groups with different pixel sizes and voltages and given
+distinct pre-exposures, and the run asserts all six corrected payloads differ
+(DISTINCT_PAYLOADS). Per-movie optics and exposure therefore demonstrably reach
+each movie, and serial-versus-sharded equality is a real check on partitioning.
+
+One movie sits under a directory containing a space, so the quoted-path handling
+in the shard writer and the merge attribution are exercised rather than assumed.
+
+Nothing here is timed and no throughput figure is produced.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+OPTICS = """\
+# version 30001
+
+data_optics
+
+loop_
+_rlnOpticsGroupName #1
+_rlnOpticsGroup #2
+_rlnMicrographOriginalPixelSize #3
+_rlnVoltage #4
+_rlnSphericalAberration #5
+_rlnAmplitudeContrast #6
+opticsGroup1            1     0.885000   200.000000     1.400000     0.100000
+'optics group two'      2     1.070000   300.000000     2.700000     0.070000
+
+data_movies
+
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+_rlnMicrographPreExposure #3
+"""
+
+ROWS = [
+    ("Movies/mov_00.tiff", 1, 0.0),
+    ("Movies/mov_01.tiff", 1, 1.4),
+    ("Movies/mov_02.tiff", 2, 2.8),
+    ("Movies/sub dir/mov_03.tiff", 2, 4.2),
+    ("Movies/mov_04.tiff", 1, 5.6),
+    ("Movies/mov_05.tiff", 2, 7.0),
+]
+
+WORKER_ARGS = ["--use_own", "--j", "4", "--dose_weighting", "--dose_per_frame", "1.0",
+               "--patch_x", "3", "--patch_y", "3", "--bfactor", "150", "--seed", "1"]
+
+
+def run(cmd, cwd=None, env=None):
+    print("+ " + " ".join(str(c) for c in cmd), flush=True)
+    cp = subprocess.run([str(c) for c in cmd], cwd=cwd, env=env,
+                        capture_output=True, text=True)
+    sys.stdout.write(cp.stdout)
+    sys.stderr.write(cp.stderr)
+    print(f"  rc={cp.returncode}", flush=True)
+    return cp
+
+
+def mrc_payload_digest(path: Path) -> str:
+    """Hash the pixel payload only.
+
+    RELION stamps a timestamp into the MRC label, so a whole-file hash of two
+    scientifically identical runs differs. The 1024-byte header is skipped;
+    these fixtures carry no extended header.
+    """
+    data = path.read_bytes()
+    return hashlib.sha256(data[1024:]).hexdigest()
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--binary", required=True)
+    ap.add_argument("--src", required=True, help="source tree holding tools/ and test-data/")
+    ap.add_argument("--work", required=True, help="scratch dir; must not exist")
+    ap.add_argument("--json-out", default=None)
+    a = ap.parse_args()
+
+    src = Path(a.src).resolve()
+    tools = src / "tools" / "multi_gpu"
+    comparator = src / "tools" / "compare_motioncorr.py"
+    movie = src / "test-data" / "synthetic" / "synthetic_movie.tiff"
+    if not movie.is_file():
+        print(f"FAIL: fixture movie missing: {movie}", file=sys.stderr)
+        return 2
+
+    work = Path(a.work).resolve()
+    if work.exists():
+        print(f"FAIL: refusing to reuse existing --work {work}", file=sys.stderr)
+        return 2
+    work.mkdir(parents=True)
+
+    for name, _, _ in ROWS:
+        dst = work / name
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        os.symlink(movie, dst)
+
+    star = work / "movies.star"
+    text = OPTICS
+    for name, optics, pre in ROWS:
+        token = f"'{name}'" if " " in name else name
+        text += f"{token} {optics} {pre:.6f}\n"
+    star.write_text(text + "\n")
+
+    py = sys.executable
+    results: dict[str, object] = {"work": str(work), "binary": a.binary}
+
+    # --- serial baseline -------------------------------------------------
+    serial = work / "serial"
+    cp = run([a.binary, "--i", "movies.star", "--o", str(serial) + os.sep] + WORKER_ARGS,
+             cwd=work)
+    results["serial_rc"] = cp.returncode
+    if cp.returncode != 0:
+        return 3
+
+    # --- sharded run -----------------------------------------------------
+    cp = run([py, tools / "run_multi_gpu.py", "--star", "movies.star",
+              "--out", "sharded", "--binary", a.binary,
+              "--workers", "3", "--no-witness", "--"] + WORKER_ARGS, cwd=work)
+    results["sharded_rc"] = cp.returncode
+    if cp.returncode != 0:
+        return 3
+
+    manifest = work / "sharded" / "shards" / "shard_manifest.json"
+
+    # --- merge, with the aggregate STAR regenerated by the stock binary ---
+    cp = run([py, tools / "merge_workers.py",
+              "--manifest", manifest,
+              "--workers", work / "sharded" / "w0", work / "sharded" / "w1",
+              work / "sharded" / "w2",
+              "--status", work / "sharded" / "status.json",
+              "--out", work / "merged",
+              "--report", work / "merge_report.json",
+              "--aggregate-with", a.binary,
+              "--input-star", "movies.star",
+              f"--aggregate-args={' '.join(WORKER_ARGS)}"], cwd=work)
+    results["merge_rc"] = cp.returncode
+    if cp.returncode != 0:
+        return 3
+    results["merge_report"] = json.loads((work / "merge_report.json").read_text())
+
+    # --- per-movie exact comparison --------------------------------------
+    cp = run([py, tools / "compare24.py",
+              "--ref", serial, "--test", work / "merged",
+              "--tool", comparator, "--manifest", manifest,
+              "--out", work / "exact"], cwd=work)
+    results["compare_rc"] = cp.returncode
+    summary = work / "exact" / "summary.json"
+    if summary.is_file():
+        results["exact_summary"] = json.loads(summary.read_text())
+
+    # --- the comparison must not be vacuous ------------------------------
+    digests = {}
+    for name, _, _ in ROWS:
+        root = name.rsplit(".", 1)[0]
+        mrc = serial / (root + ".mrc")
+        digests[root] = mrc_payload_digest(mrc) if mrc.is_file() else None
+    distinct = len({d for d in digests.values() if d})
+    results["payload_digests"] = digests
+    results["distinct_payloads"] = f"{distinct}/{len(ROWS)}"
+    print(f"DISTINCT_PAYLOADS={distinct}/{len(ROWS)}")
+
+    # --- aggregate STAR equality, output prefix normalised ----------------
+    def norm(p: Path, prefix: str) -> str:
+        return p.read_text().replace(prefix, "<OUT>/")
+
+    ser_star = serial / "corrected_micrographs.star"
+    mrg_star = work / "merged" / "corrected_micrographs.star"
+    if ser_star.is_file() and mrg_star.is_file():
+        same = norm(ser_star, str(serial) + os.sep) == norm(mrg_star, str(work / "merged") + os.sep)
+    else:
+        same = False
+    results["aggregate_star_identical"] = same
+    print(f"AGGREGATE_STAR_IDENTICAL={int(same)}")
+
+    ok = (results["compare_rc"] == 0 and distinct == len(ROWS) and same
+          and results["merge_report"].get("verdict") == "PASS")
+    results["verdict"] = "PASS" if ok else "FAIL"
+    if a.json_out:
+        Path(a.json_out).write_text(json.dumps(results, indent=2) + "\n")
+    print(f"E2E_VERDICT={results['verdict']}")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

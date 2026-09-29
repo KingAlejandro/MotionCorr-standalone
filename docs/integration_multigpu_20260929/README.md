@@ -137,6 +137,17 @@ executed · **BLOCKED** waiting on another owner. A prepared check is not a pass
 | CI, both jobs | GitHub | PASS | green on `a8d8dc6`, `9450a9d`, `0ed67fa`, `f104605` |
 | **Native CUDA CTest** | 4-gpu-vm GPU3 | **PASS** | **30/30** at `0ed67fa`; re-run at the corrected 29 is in the queued SCARF job |
 | Measurement-tool controls | cpu64 | PASS | 8/8, and each fails on its targeted mutation |
+| Old-source rejection, arm 1 (all of main's `src/`) | cpu64 | PASS | rejected at compile; weak — only the access change |
+| Old-source rejection, arm 2 (main's runner body) | cpu64 | PASS | `MultiGpuScheduling` fails on `case_device_list_rejected` |
+
+**What 23/23 does not cover.** A `-DCUDA=OFF` build cannot execute PR115's or
+PR118's production changes at all, so the CPU figure says nothing about them.
+The old-source control makes this concrete: swapping back main's runner body
+fails exactly one device-free test, `MultiGpuScheduling`, on PR117's `--gpu`
+validation. `PatchRetryState` passes on main's body — it characterises a
+contract PR115 exposed for testing rather than detecting a composed change.
+Coverage of PR115's and PR118's changes is the native suite and the owners'
+own controls on their own sources.
 
 ### Untimed all-24 native correctness
 

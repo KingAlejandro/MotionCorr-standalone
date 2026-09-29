@@ -75,6 +75,7 @@ if(CUDA)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
     find_package(CUDAToolkit REQUIRED)
     target_compile_definitions(motioncorr_core PUBLIC _CUDA_ENABLED)
+    target_compile_options(motioncorr_core PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
     target_sources(motioncorr_core PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"

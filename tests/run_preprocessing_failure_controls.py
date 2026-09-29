@@ -56,6 +56,8 @@ def main():
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--mutant-binary", type=Path)
     parser.add_argument("--workdir", type=Path)
+    parser.add_argument("--float-host", action="store_true",
+                        help="test the shared disposal boundary without compact U16 host staging")
     args = parser.parse_args()
     binary = args.binary.resolve()
     work = args.workdir.resolve() if args.workdir else Path(tempfile.mkdtemp(prefix="mc-preprocessing-"))
@@ -64,7 +66,8 @@ def main():
     require(binary.is_file(), f"missing binary: {binary}")
 
     source = Path(__file__).resolve().parents[1]
-    comparator_path = source / "docs/issue85_laneC/compare_output_trees.py"
+    comparator_path = source / ("docs/issue69/evidence/ownership-20260929/compare-native.py"
+                                if args.float_host else "docs/issue85_laneC/compare_output_trees.py")
     spec = importlib.util.spec_from_file_location("preprocessing_comparator", comparator_path)
     comparator = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = comparator
@@ -72,6 +75,26 @@ def main():
     frames = [[int(value) for value in frame] for frame in synthetic_frames()]
     manifest = {"movies": ["Movies/control.tiff"], "expected_shape_xyz": [NX, NY, 1],
                 "joint_star": "corrected_micrographs.star"}
+    def validate_products(out):
+        if not args.float_host:
+            comparator.validate_tree(out, manifest)
+            return
+        expected = {Path("Movies/control.mrc"), Path("Movies/control.star"),
+                    Path("corrected_micrographs.star")}
+        actual = {p.relative_to(out) for p in out.rglob("*") if p.suffix in (".mrc", ".star")}
+        require(actual == expected, f"unexpected product inventory: {actual}")
+        image = out / "Movies/control.mrc"
+        require(struct.unpack_from("<3i", image.read_bytes()) == (NX, NY, 1),
+                "unexpected image dimensions")
+        comparator.compare(out, out, 1, 2)
+
+    def compare_products(reference, candidate):
+        if not args.float_host:
+            return comparator.compare_trees(reference, candidate, manifest, compare_auxiliary=False)
+        validate_products(reference)
+        validate_products(candidate)
+        return dict(status="PASS", **comparator.compare(reference, candidate, 1, 2))
+
     data = {}
     records = []
     for kind in ("u16", "float"):
@@ -90,7 +113,8 @@ def main():
                "--seed", "1", "--angpix", "1.0", "--voltage", "300",
                "--defect_file", "defects.txt"]
         env = dict(os.environ)
-        for key in ("MC_FAULT_ORDINAL", "MC_FAULT_CODE", "MC_FAULT_TRACE", "MC_U16_FAULT", "MC_U16_STAGE_BYTES"):
+        for key in ("MC_FAULT_ORDINAL", "MC_FAULT_CODE", "MC_FAULT_TRACE", "MC_U16_FAULT", "MC_U16_STAGE_BYTES",
+                    "MC_COUNT_FAULT_ORDINAL", "MC_COUNT_FAULT_CODE"):
             env.pop(key, None)
         env["MC_PREPROCESS_FAULT"] = fault
         env["OMP_NUM_THREADS"] = "4"
@@ -123,19 +147,19 @@ def main():
     for kind in data:
         out, rc, text = run("healthy-" + kind, kind)
         require(rc == 0, f"healthy {kind} failed: {text[-2000:]}")
-        comparator.validate_tree(out, manifest)
+        validate_products(out)
         require("injected" not in text, "healthy run unexpectedly injected a fault")
         healthy[kind] = out
-    require("Released native uint16 host staging" in (work / "healthy-u16/out/Movies/control.log").read_text(),
+    require(args.float_host or "Released native uint16 host staging" in (work / "healthy-u16/out/Movies/control.log").read_text(),
             "healthy U16 run did not reach the staging-release boundary")
 
     out, rc, text = run("sparse-recoverable", fault="sparse-recoverable")
     require(rc == 0, "recoverable sparse update did not complete")
     require("injected cudaErrorMemoryAllocation at updateDefectPixels" in text,
             "sparse recoverable injection did not reach its production helper")
-    require("Materialized native uint16 frames as float" in text,
+    require(args.float_host or "Materialized native uint16 frames as float" in text,
             "sparse recoverable path did not materialize raw host frames")
-    report = comparator.compare_trees(healthy["u16"], out, manifest, compare_auxiliary=False)
+    report = compare_products(healthy["u16"], out)
     require(report["status"] == "PASS", "recoverable sparse output differs from healthy output")
     (work / "recoverable-products.json").write_text(json.dumps(report, indent=2) + "\n")
 
@@ -172,10 +196,11 @@ def main():
                     f"mutant {fault} did not complete normally without the refusal")
             require("[preprocessfault] later cudaMalloc" in text,
                     f"mutant {fault} did not witness forbidden GPU redispatch")
-            report = comparator.compare_trees(healthy[kind], out, manifest, compare_auxiliary=False)
+            report = compare_products(healthy[kind], out)
             require(report["status"] == "PASS", f"mutant {fault} did not produce complete expected products")
         print("PASS three disabled-guard mutants complete and redispatch; fixed binary refuses")
-    provenance = {"input_sha256": {kind: {str(p.relative_to(root)): digest(p)
+    provenance = {"host_storage": "float" if args.float_host else "compact uint16",
+                  "input_sha256": {kind: {str(p.relative_to(root)): digest(p)
                                          for p in root.rglob("*") if p.is_file()}
                                     for kind, root in data.items()},
                   "comparator_sha256": digest(comparator_path), "runs": records}

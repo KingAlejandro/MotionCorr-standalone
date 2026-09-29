@@ -198,6 +198,36 @@ and it is unmapped and re-created at a different address for the next movie, so 
 carried between movies. That is the capacity bound and the lifetime bound, observed rather than
 derived.
 
+
+### Successive movies of mixed geometry, and the PR head
+
+Job `3514104`, same node and allocation class, PR head `d6f553e9` (this work merged onto #118's
+tip `081651fe`), binary sha256 `ceaa71ea…8ab3e76`.
+
+Four successive uint16 Adobe-Deflate movies in three shapes and three frame counts, ordered so
+every movie is preceded by one of a different size. All three arms exit 0 with four corrected
+MRCs, and the staging mapping is re-derived for each movie:
+
+| movie | shape | mapping |
+|---|---|---:|
+| `small_a.tif` | 10 x 512 x 384 | 3,932,160 B |
+| `large_b.tif` | 12 x 1024 x 768 | 18,874,368 B |
+| `small_c.tif` | 10 x 512 x 384 | 3,932,160 B |
+| `large_d.tif` | 14 x 896 x 640 | 16,056,320 B |
+
+Each figure is exactly `n_frames * nx * ny * 2`. The mapping shrinks again after the large movie,
+so no high-water capacity is carried across geometries. `compare_mixed_geometry.py` reports
+**PASS, 9 products, 0 differences** against both main and the unfixed candidate, with its
+negative control tripping in each case.
+
+CTest on the PR head: **29/30**, the one failure again `CiFailClosedControls`. The required-test
+union validates at 23. No-gain peak RSS on the PR head, alternating: main 1,627,280 and
+1,627,468 kB; head 1,627,996 and 1,628,924 kB, i.e. **+716 and +1,456 kB**.
+
+The headline products and memory table above was measured on `fb0f6536`, whose `src/` differs
+from the PR head only by #118's own composition of the PR114 recenter extraction, which does not
+touch the staging path.
+
 ## 5. Does the staging want to be reused across movies?
 
 No, and the measurement says why. The staging has to be released before the float movie a
@@ -248,3 +278,8 @@ Recorded because each one changed a reported number or would have.
 5. The first version of the contract test used a square, page-aligned geometry, so a transposed
    `bind(frames, n, ny, nx)` could not fail its shape check and `discardThrough()`'s page
    rounding was never exercised.
+6. The generated mixed-geometry `movies.star` had no `data_optics` block, so ObservationModel
+   rejected it before any movie was read and all three arms exited 1 with no products --
+   identically, so nothing was falsely attributed to the change, but nothing was proven either.
+   The comparator then raised `FileNotFoundError` from its own mutation step rather than saying
+   the tree was empty. Both are fixed and the arm is rerun in job `3514104`.

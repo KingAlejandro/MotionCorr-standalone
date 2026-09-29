@@ -1,8 +1,14 @@
 # Issue #95 / #118 — the compact-ingest no-gain memory regression
 
-Follow-up to [#118](https://github.com/KingAlejandro/MotionCorr-standalone/pull/118). Pinned
-source, commands, raw records and every failed control are in this directory. No merge, no
-promotion and no scientific claim is made here.
+Follow-up to [#118](https://github.com/KingAlejandro/MotionCorr-standalone/pull/118). No merge,
+no promotion and no scientific claim is made here.
+
+Raw job output, the comparator reports with their negative controls, the `/proc/<pid>/smaps`
+snapshots and the exact scripts are retained on SCARF at
+`/work4/scd/scarf1415/motioncorr/i95-memory-20260929/evidence/` (see its `README.md`). Jobs
+`3514038` build, `3514042` attribution, `3514070` the `CiFailClosedControls` three-way control,
+`3514094` the headline validation, `3514104` the PR head. Job `3514066` is a superseded first
+pass on the pre-review source and its log is retained beside the others.
 
 ## 1. What was measured before this work
 

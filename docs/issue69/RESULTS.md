@@ -1,5 +1,17 @@
 # Issue 69: composed CUDA reliability results
 
+## Latest combined main — 29 September 2026
+
+Current tested source `0f2ddd5d` includes main `6393547e`, the #69 enumeration
+recording and preprocessing-disposal fixes, plus PR114's selected-frame recentering.
+Native CTest **26/26**, preprocessing **8/8**, enumeration **10/10**, and
+retained native recenter off/on witnesses pass. Both GitHub jobs pass at that exact
+source. No new performance or full24 claim follows.
+[Exact source, commands, outputs, resource identities, limitations and CI](evidence/main-composed-20260929/README.md).
+
+The sections below retain the earlier-source measurements and failures. Their
+source hashes and original qualifications still apply.
+
 ## Enumeration failure follow-up (29 September)
 
 Source review found two unrecorded `cudaGetDeviceCount` error returns: session

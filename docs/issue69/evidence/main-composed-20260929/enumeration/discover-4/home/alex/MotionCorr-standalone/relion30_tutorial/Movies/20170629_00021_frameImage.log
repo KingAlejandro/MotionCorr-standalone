@@ -1,0 +1,32 @@
+Working on /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 3710 Y = 3838 N = 24
+Frames to be used: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Frame grouping: n_frames = 24, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=56986624 C2R work=56986624 shared work=56986624 inverse tile=56986624 bytes
+In unaligned sum, Mean = 22.9366 Std = 5.12343 Hotpixel threshold = 53.6771
+Detected 237 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 7.4937 px
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 2.03 ms
+   cuFFT execution time:         0.42 ms
+   Device-to-Host transfer time: 0.06 ms
+   Total GPU alignment time:     4.91 ms
+   Buffer VRAM:                  1482.91 MiB
+   cuFFT workspace VRAM:         86.68 MiB
+   Peak GPU memory allocated:    1569.59 MiB
+ [CUDA Global Alignment] completed; converged=no
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 3 Y = 3
+Patch (1, 1): 1 / 9, X range = [0, 1236), Y range = [0, 1278), Center = (617, 638)

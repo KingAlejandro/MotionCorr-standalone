@@ -169,6 +169,7 @@ if(BUILD_TESTING AND CUDA)
         add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
         target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
         target_link_options(cuda_fault_matrix PRIVATE
+            "LINKER:--wrap=cudaGetDeviceCount"
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
             "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaMemset"
             "LINKER:--wrap=cudaDeviceSynchronize"
@@ -192,7 +193,8 @@ if(BUILD_TESTING AND CUDA)
         add_executable(motioncorr_faultinject
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
-        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree")
+        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaGetDeviceCount")
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Issue #69. Pure predicate over cudaError_t plus the host-only failure state:

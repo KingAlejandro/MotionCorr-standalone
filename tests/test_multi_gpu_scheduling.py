@@ -27,6 +27,8 @@ import hashlib
 import io
 import json
 import os
+import signal
+import shlex
 import shutil
 import subprocess
 import sys
@@ -593,6 +595,70 @@ def case_aggregate_wrong_order_rejected(tmp: Path) -> None:
     assert cp.returncode == 3, f"reversed aggregate order accepted (rc={cp.returncode})"
     rep = json.loads(report.read_text())
     assert any("canonical input order" in p for p in rep["problems"]), rep["problems"]
+
+
+def case_aggregate_star_must_match_partition_content(tmp: Path) -> None:
+    """Same movie rows with edited optics may not source aggregate metadata."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    manifest = json.loads((shards / "shard_manifest.json").read_text())
+    original_sha = manifest["input_sha256"]
+    dirs, codes = run_workers(tmp, shards, 2)
+
+    original = star.read_bytes()
+    modified = original.replace(b"0.885000", b"0.886000", 1)
+    assert modified != original and len(modified) == len(original)
+    old_stat = star.stat()
+    star.write_bytes(modified)
+    os.utime(star, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+    assert star.stat().st_size == old_stat.st_size
+    assert star.stat().st_mtime_ns == old_stat.st_mtime_ns
+    assert hashlib.sha256(star.read_bytes()).hexdigest() != original_sha
+
+    out = tmp / "must_not_aggregate"
+    report = tmp / "aggregate_identity.json"
+    cp = merge(shards / "shard_manifest.json", dirs, out,
+               fake_status(tmp, codes, manifest=shards / "shard_manifest.json",
+                           workers=dirs), report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_note=aggregate-ran"])
+    assert cp.returncode == 2, \
+        f"aggregate accepted a changed same-size/same-mtime STAR (rc={cp.returncode})"
+    assert "does not match the partition manifest" in cp.stderr, cp.stderr
+    assert not (out / "note.txt").exists(), "aggregate binary ran on unrelated optics"
+
+
+def case_aggregate_args_may_not_override_owned_paths(tmp: Path) -> None:
+    """Extra arguments cannot redirect the verified aggregate input or output."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    altered = tmp / "changed_optics.star"
+    altered.write_bytes(star.read_bytes().replace(b"200.000000", b"201.000000", 1))
+    assert altered.read_bytes() != star.read_bytes()
+    for name, args in (("input", ["--i", str(altered)]),
+                       ("output", ["--o", str(tmp / "redirected")])):
+        out = tmp / f"merge_{name}"
+        cp = merge(shards / "shard_manifest.json", dirs, out, status,
+                   extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                          "--aggregate-args=" + shlex.join(args)])
+        assert cp.returncode == 2, \
+            f"aggregate accepted owned {args[0]} override: {cp.returncode}; {cp.stdout}; {cp.stderr}"
+        assert args[0] in cp.stderr and "aggregate" in cp.stderr, cp.stderr
+        assert not out.exists(), "staging started before argument ownership was checked"
+        assert not (tmp / "redirected").exists(), "aggregate wrote outside its staged tree"
+
+    out = tmp / "merge_valid"
+    cp = merge(shards / "shard_manifest.json", dirs, out, status,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_note=valid"])
+    assert cp.returncode == 0, cp.stderr + cp.stdout
+    assert (out / "note.txt").read_text().strip() == "valid"
 
 
 def case_decorated_output_collision(tmp: Path) -> None:
@@ -1331,6 +1397,56 @@ def case_reuse_pins_the_trees_not_just_the_root(tmp: Path) -> None:
     s = json.loads((out2 / "exact_summary.json").read_text())
     assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
 
+    # Content, not restored metadata, identifies every MRC/STAR input.
+    manifest.write_text(json.dumps({"canonical_output_roots": roots,
+                                    "canonical_movies": ["Movies/a.tiff"],
+                                    "marker": "1"}))
+    bound = tmp / "content_bound"
+    assert run24(good, bound).returncode == 0
+    assert run24(good, bound, reuse=True).returncode == 0, \
+        "unchanged content must remain reusable"
+
+    def reject_same_metadata_change(path: Path, replacement: bytes) -> None:
+        original = path.read_bytes()
+        assert len(replacement) == len(original) and replacement != original
+        old_stat = path.stat()
+        path.write_bytes(replacement)
+        os.utime(path, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+        assert path.stat().st_size == old_stat.st_size
+        assert path.stat().st_mtime_ns == old_stat.st_mtime_ns
+        cp = run24(good, bound, reuse=True)
+        assert cp.returncode == 1, f"same-size/same-mtime edit was reused: {path}"
+        path.write_bytes(original)
+        os.utime(path, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+        assert run24(good, bound, reuse=True).returncode == 0, \
+            f"restoring the original content should restore reuse: {path}"
+
+    for path in (ref / "Movies" / "a.mrc", good / "Movies" / "a.mrc",
+                 ref / "Movies" / "a.star", good / "Movies" / "a.star"):
+        original = path.read_bytes()
+        reject_same_metadata_change(path, b"X" + original[1:])
+
+    # The partition manifest and the comparator JSON report are content-bound too.
+    original_manifest = manifest.read_bytes()
+    manifest_stat = manifest.stat()
+    changed_manifest = original_manifest.replace(b'"marker": "1"', b'"marker": "2"')
+    assert len(changed_manifest) == len(original_manifest)
+    manifest.write_bytes(changed_manifest)
+    os.utime(manifest, ns=(manifest_stat.st_atime_ns, manifest_stat.st_mtime_ns))
+    assert run24(good, bound, reuse=True).returncode == 1, \
+        "same-size/same-mtime manifest edit was reused"
+    manifest.write_bytes(original_manifest)
+    os.utime(manifest, ns=(manifest_stat.st_atime_ns, manifest_stat.st_mtime_ns))
+    assert run24(good, bound, reuse=True).returncode == 0
+
+    report = next(bound.glob("*_exact.json"))
+    report_bytes = report.read_bytes()
+    report_stat = report.stat()
+    report.write_bytes(report_bytes + b" ")
+    os.utime(report, ns=(report_stat.st_atime_ns, report_stat.st_mtime_ns))
+    assert run24(good, bound, reuse=True).returncode == 1, \
+        "edited report JSON was reused under its unchanged origin sidecar"
+
 
 def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
     """'Movies//a' and 'Movies/a' are one file on disk, so they must collide.
@@ -1742,6 +1858,43 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
     assert st["gpu_witness"]["all_pids_witnessed_on_intended_distinct_devices"], st
     assert [w["returncode"] for w in st["workers"]] == [0, 0], st
 
+    ok_dir = tmp / "ok"
+    ok_manifest = Path(st["manifest"])
+    ok_workers = [ok_dir / "w0", ok_dir / "w1"]
+    ok_status = ok_dir / "status.json"
+    ok_report = tmp / "merge_good_witness.json"
+    cp = merge(ok_manifest, ok_workers, tmp / "merged_good_witness", ok_status,
+               ok_report)
+    assert cp.returncode == 0, \
+        f"complete GPU witness should merge: {cp.stderr} {cp.stdout}"
+
+    def merge_forged_witness(name: str, mutate) -> None:
+        forged = json.loads(json.dumps(st))
+        mutate(forged)
+        status_path = tmp / f"forged_{name}.json"
+        status_path.write_text(json.dumps(forged))
+        cp = merge(ok_manifest, ok_workers, tmp / f"merged_forged_{name}",
+                   status_path, tmp / f"report_forged_{name}.json")
+        assert cp.returncode == 3, \
+            f"merge accepted incomplete GPU witness {name}: {cp.stdout} {cp.stderr}"
+
+    merge_forged_witness("missing", lambda status: status.pop("gpu_witness"))
+    merge_forged_witness("false_success", lambda status: status["gpu_witness"].update(
+        all_pids_witnessed_on_intended_distinct_devices=False))
+    merge_forged_witness("missing_sampler_errors", lambda status:
+                         status["gpu_witness"].pop("sampler_errors"))
+    merge_forged_witness("sampler_error", lambda status:
+                         status["gpu_witness"].update(sampler_errors=["sample failed"]))
+    merge_forged_witness("missing_pid", lambda status:
+                         status["gpu_witness"]["witnessed"].pop(
+                             str(status["workers"][0]["pid"])))
+    merge_forged_witness("wrong_uuid", lambda status:
+                         status["gpu_witness"]["witnessed"].update(
+                             {str(status["workers"][0]["pid"]): [UUID_B]}))
+    merge_forged_witness("shared_uuid", lambda status:
+                         status["gpu_witness"]["witnessed"].update(
+                             {str(status["workers"][1]["pid"]): [UUID_A]}))
+
     # both workers observed on ONE physical device
     rc, st = launch(apps(lambda i, p: UUID_A), "shared")
     assert rc == 3 and st["verdict"] == "FAIL", st
@@ -1785,7 +1938,182 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
                tmp / "merged_forced", out / "status.json", tmp / "rep_forced.json")
     assert cp.returncode == 3, "a PASS contradicted by its own witness was merged"
     rep = json.loads((tmp / "rep_forced.json").read_text())
-    assert any("does not support it" in p for p in rep["problems"]), rep["problems"]
+    assert any("GPU witness" in p for p in rep["problems"]), rep["problems"]
+
+
+def case_launcher_signal_reaps_owned_process_group(tmp: Path) -> None:
+    """SIGTERM/SIGINT to the launcher must reap workers and their children."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:1])
+    worker = tmp / "term_ignoring_worker.py"
+    worker.write_text("""#!/usr/bin/env python3
+import json, os, signal, subprocess, sys, time
+from pathlib import Path
+signal.signal(signal.SIGTERM, signal.SIG_IGN)
+out = Path(sys.argv[sys.argv.index('--o') + 1])
+child_code = ("import signal,time,sys; from pathlib import Path; "
+             "out=Path(sys.argv[1]); signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+             "(out/'child_ready').write_text('ready'); time.sleep(300)")
+child = subprocess.Popen([sys.executable, '-c', child_code, str(out)])
+while not (out / 'child_ready').exists(): time.sleep(0.01)
+(out / 'pids.json').write_text(json.dumps({'worker': os.getpid(),
+                                          'child': child.pid, 'pgid': os.getpgrp()}))
+while True: time.sleep(0.1)
+""")
+    worker.chmod(0o755)
+
+    wrapper = tmp / "invoke_launcher.py"
+    wrapper.write_text(
+        "import sys\n"
+        f"sys.path.insert(0, {str(TOOLS)!r})\n"
+        "import run_multi_gpu as launcher\n"
+        "launcher._TERMINATE_GRACE_SECONDS = 0.2\n"
+        "launcher._KILL_REAP_SECONDS = 2.0\n"
+        "raise SystemExit(launcher.main())\n")
+
+    for signum in (signal.SIGTERM, signal.SIGINT):
+        out = tmp / f"run_{signum}"
+        proc = subprocess.Popen([PY, wrapper, "--star", star, "--out", out,
+                                 "--binary", worker, "--workers", "1", "--no-witness"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        group = None
+        try:
+            marker = out / "w0" / "pids.json"
+            deadline = time.monotonic() + 8.0
+            while time.monotonic() < deadline and not marker.exists():
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.02)
+            assert marker.exists(), f"worker did not reach signal-ready state for {signum}"
+            pids = json.loads(marker.read_text())
+            group = int(pids["pgid"])
+            assert pids["worker"] == group, pids
+
+            proc.send_signal(signum)
+            rc = proc.wait(timeout=8.0)
+            stdout, stderr = proc.communicate(timeout=1.0)
+            assert rc == 128 + signum, \
+                f"launcher did not report signal {signum}: rc={rc}; {stdout}; {stderr}"
+            status = json.loads((out / "status.json").read_text())
+            assert status["verdict"] == "FAIL" and status["termination_signal"] == signum, status
+            assert status["workers"][0]["returncode"] != 0, status
+
+            deadline = time.monotonic() + 3.0
+            while time.monotonic() < deadline:
+                try:
+                    os.killpg(group, 0)
+                except ProcessLookupError:
+                    break
+                time.sleep(0.02)
+            else:
+                raise AssertionError(f"owned worker process group {group} survived signal cleanup")
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait(timeout=3.0)
+            if group is not None:
+                try:
+                    os.killpg(group, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+
+
+def case_launcher_signal_reaches_cooperative_worker(tmp: Path) -> None:
+    """A normal worker must receive TERM, not inherit the spawn signal mask."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:1])
+    worker = tmp / "cooperative_worker.py"
+    worker.write_text("""#!/usr/bin/env python3
+import os, signal, sys, time
+from pathlib import Path
+out = Path(sys.argv[sys.argv.index('--o') + 1])
+def stop(signum, _frame):
+    (out/'received_term').write_text(str(signum))
+    raise SystemExit(0)
+signal.signal(signal.SIGTERM, stop)
+(out/'ready').write_text(str(os.getpid()))
+while True: time.sleep(0.01)
+""")
+    worker.chmod(0o755)
+    out = tmp / "run"
+    proc = subprocess.Popen([PY, TOOLS / "run_multi_gpu.py", "--star", star,
+                             "--out", out, "--binary", worker, "--workers", "1",
+                             "--no-witness"], stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True)
+    group = None
+    try:
+        marker = out / "w0" / "ready"
+        deadline = time.monotonic() + 8.0
+        while time.monotonic() < deadline and not marker.exists() and proc.poll() is None:
+            time.sleep(0.02)
+        assert marker.exists(), "cooperative worker did not become ready"
+        group = int(marker.read_text())
+        proc.send_signal(signal.SIGTERM)
+        rc = proc.wait(timeout=15.0)
+        stdout, stderr = proc.communicate(timeout=1.0)
+        assert rc == 128 + signal.SIGTERM, (rc, stdout, stderr)
+        assert (out / "w0" / "received_term").exists(), \
+            "worker never received TERM; spawn must not leave it blocked across exec"
+        status = json.loads((out / "status.json").read_text())
+        assert status["verdict"] == "FAIL" and status["termination_signal"] == signal.SIGTERM
+        assert status["workers"][0]["returncode"] == 0, status
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=3.0)
+        if group is not None:
+            try:
+                os.killpg(group, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+
+def case_launcher_signal_during_spawn_keeps_child_owned(tmp: Path) -> None:
+    """An interrupt after Popen but before bookkeeping must still reap the child."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:1])
+    worker = tmp / "sleeping_worker.py"
+    worker.write_text("#!/usr/bin/env python3\nimport time\ntime.sleep(300)\n")
+    worker.chmod(0o755)
+    pid_file = tmp / "spawned.pid"
+    wrapper = tmp / "interrupt_spawn.py"
+    wrapper.write_text(
+        "import os, signal, sys\nfrom pathlib import Path\n"
+        f"sys.path.insert(0, {str(TOOLS)!r})\n"
+        "import run_multi_gpu as launcher\n"
+        "original = launcher.subprocess.Popen\n"
+        "def spawn(*args, **kwargs):\n"
+        "    child = original(*args, **kwargs)\n"
+        f"    Path({str(pid_file)!r}).write_text(str(child.pid))\n"
+        "    os.kill(os.getpid(), signal.SIGTERM)\n"
+        "    return child\n"
+        "launcher.subprocess.Popen = spawn\n"
+        "raise SystemExit(launcher.main())\n")
+    out = tmp / "run"
+    group = None
+    try:
+        cp = run([PY, wrapper, "--star", star, "--out", out, "--binary", worker,
+                  "--workers", "1", "--no-witness"], timeout=15.0)
+        assert pid_file.exists(), "spawn boundary was not reached"
+        group = int(pid_file.read_text())
+        assert cp.returncode == 128 + signal.SIGTERM, cp.stderr + cp.stdout
+        status = json.loads((out / "status.json").read_text())
+        assert len(status["workers"]) == 1 and status["workers"][0]["pid"] == group, \
+            "interrupt discarded ownership of the newly started child"
+        try:
+            os.killpg(group, 0)
+        except ProcessLookupError:
+            pass
+        else:
+            raise AssertionError("child survived interruption during spawn bookkeeping")
+    finally:
+        if group is None and pid_file.exists():
+            group = int(pid_file.read_text())
+        if group is not None:
+            try:
+                os.killpg(group, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
 
 
 def case_per_worker_timing_and_rss_recorded(tmp: Path) -> None:
@@ -1995,6 +2323,8 @@ CASES = [
     case_short_row_refused,
     case_killed_worker_then_nonprefix_resume,
     case_aggregate_star_canonical_order,
+    case_aggregate_star_must_match_partition_content,
+    case_aggregate_args_may_not_override_owned_paths,
     case_aggregate_wrong_order_rejected,
     case_failed_staging_never_reprocesses,
     case_merge_out_is_resolved,
@@ -2016,6 +2346,9 @@ CASES = [
     case_aggregate_may_not_rewrite_staged_products,
     case_stale_comparison_report_is_not_republished,
     case_launcher_verdict_follows_the_device_witness,
+    case_launcher_signal_reaps_owned_process_group,
+    case_launcher_signal_reaches_cooperative_worker,
+    case_launcher_signal_during_spawn_keeps_child_owned,
     case_per_worker_timing_and_rss_recorded,
     case_aggregate_staging_namespace_reserved,
     case_comparator_exit_must_match_its_report,

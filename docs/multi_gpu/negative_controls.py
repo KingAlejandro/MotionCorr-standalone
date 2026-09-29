@@ -126,8 +126,8 @@ MUTATIONS = [
 
     ("aggregate extra arguments dropped instead of forwarded",
      "tools/multi_gpu/merge_workers.py",
-     "        extra = shlex.split(a.aggregate_args)",
-     "        extra = []  # MUTATED",
+     "    aggregate_extra = shlex.split(a.aggregate_args)",
+     "    aggregate_extra = []  # MUTATED",
      ["case_aggregate_star_canonical_order"]),
 
     ("launcher verdict no longer gates the merge",
@@ -312,7 +312,8 @@ MUTATIONS = [
     ("reuse sidecar records only the root again",
      "tools/multi_gpu/compare24.py",
      '    return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool_path),\n'
-     '            "tool_sha256": tool_sha, "inputs": stat}',
+     '            "tool_identity": file_identity(tool_path),\n'
+     '            "manifest_sha256": manifest_sha256, "inputs": inputs}',
      '    return {"root": rel}  # MUTATED',
      ["case_reuse_pins_the_trees_not_just_the_root"]),
 
@@ -386,8 +387,8 @@ MUTATIONS = [
 
     ("reuse provenance stops pinning the comparator's contents",
      "tools/multi_gpu/compare24.py",
-     "        tool_sha = hashlib.sha256(tool_path.read_bytes()).hexdigest()",
-     "        tool_sha = None  # MUTATED",
+     '            "tool_identity": file_identity(tool_path),',
+     '            "tool_identity": None,  # MUTATED',
      ["case_stale_comparison_report_is_not_republished"]),
 
     # --- the launcher's witness-to-verdict wiring, and the witness oracles ---
@@ -436,17 +437,17 @@ MUTATIONS = [
 
     ("merge accepts a PASS its own witness record contradicts",
      "tools/multi_gpu/merge_workers.py",
-     '            if isinstance(witness, dict) and not witness.get(\n'
-     '                    "all_pids_witnessed_on_intended_distinct_devices"):',
-     "            if False:  # MUTATED",
+     '            problems.extend(gpu_witness_problems(status))',
+     "            pass  # MUTATED",
      ["case_launcher_verdict_follows_the_device_witness"]),
 
     ("launcher waits on its children sequentially again",
      "tools/multi_gpu/run_multi_gpu.py",
-     "        waiters = [threading.Thread(target=reap, args=(k, p), daemon=True)\n"
-     "                   for k, p, _ in procs]\n"
-     "        for w in waiters:\n"
-     "            w.start()\n"
+     "        for k, p, _ in procs:\n"
+     "            waiter = threading.Thread(target=reap, args=(k, p), daemon=True)\n"
+     "            with _defer_launcher_signals():\n"
+     "                waiter.start()\n"
+     "                waiters.append(waiter)\n"
      "        for w in waiters:\n"
      "            w.join()",
      "        for k, p, _ in procs:  # MUTATED\n"
@@ -482,6 +483,84 @@ MUTATIONS = [
      '            if status not in ("PASS", "FAIL") or rc != (0 if status == "PASS" else 1):',
      "            if False:  # MUTATED",
      ["case_comparator_exit_must_match_its_report"]),
+
+    ("comparison input identity trusts only size and mtime again",
+     "tools/multi_gpu/compare24.py",
+     '            "sha256": digest}',
+     '            "sha256": None}  # MUTATED',
+     ["case_reuse_pins_the_trees_not_just_the_root"]),
+
+    ("reused report contents are not verified",
+     "tools/multi_gpu/compare24.py",
+     '                expected["report_sha256"] = hashlib.sha256(report_bytes).hexdigest()',
+     '                expected["report_sha256"] = recorded.get("report_sha256")  # MUTATED',
+     ["case_reuse_pins_the_trees_not_just_the_root"]),
+
+    ("comparison origin no longer binds the partition manifest",
+     "tools/multi_gpu/compare24.py",
+     '            "manifest_sha256": manifest_sha256, "inputs": inputs}',
+     '            "manifest_sha256": None, "inputs": inputs}  # MUTATED',
+     ["case_reuse_pins_the_trees_not_just_the_root"]),
+
+    ("aggregate input content guard removed before staging",
+     "tools/multi_gpu/merge_workers.py",
+     '        if actual_sha256.lower() != manifest_input_sha256.lower():',
+     '        if False:  # MUTATED',
+     ["case_aggregate_star_must_match_partition_content"]),
+
+    ("aggregate arguments override verified input and output paths",
+     "tools/multi_gpu/merge_workers.py",
+     '    aggregate_owned = {"--i", "--o"}',
+     '    aggregate_owned = set()  # MUTATED',
+     ["case_aggregate_args_may_not_override_owned_paths"]),
+
+    ("GPU PASS may omit its witness",
+     "tools/multi_gpu/merge_workers.py",
+     '        return problems + ["GPU PASS has no complete gpu_witness record"]',
+     '        return problems  # MUTATED',
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("GPU PASS ignores sampler failures",
+     "tools/multi_gpu/merge_workers.py",
+     '    if witness.get("sampler_errors") != []:',
+     '    if False:  # MUTATED',
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("GPU PASS ignores observed PID to UUID evidence",
+     "tools/multi_gpu/merge_workers.py",
+     '    if witnessed != expected_observed:',
+     '    if False:  # MUTATED',
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
+    ("launcher TERM handlers are not installed",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '        previous_handlers = _install_signal_handlers()',
+     '        previous_handlers = {}  # MUTATED',
+     ["case_launcher_signal_reaps_owned_process_group"]),
+
+    ("worker inherits blocked TERM across exec",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '    _signal_deferral_depth += 1\n'
+     '    try:\n'
+     '        yield\n'
+     '    finally:\n'
+     '        _signal_deferral_depth -= 1\n'
+     '        if _signal_deferral_depth == 0 and _pending_launcher_signal is not None:\n'
+     '            signum = _pending_launcher_signal\n'
+     '            _pending_launcher_signal = None\n'
+     '            raise LauncherInterrupted(signum)',
+     '    inherited_mask = signal.pthread_sigmask(signal.SIG_BLOCK, set(_LAUNCHER_SIGNALS))\n'
+     '    try:\n'
+     '        yield\n'
+     '    finally:\n'
+     '        signal.pthread_sigmask(signal.SIG_SETMASK, inherited_mask)  # MUTATED',
+     ["case_launcher_signal_reaches_cooperative_worker"]),
+
+    ("interrupt is raised before spawn ownership is recorded",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '        if _signal_deferral_depth:',
+     '        if False:  # MUTATED',
+     ["case_launcher_signal_during_spawn_keeps_child_owned"]),
 ]
 
 

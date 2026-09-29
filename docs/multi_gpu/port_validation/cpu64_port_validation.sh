@@ -2,7 +2,7 @@
 # CPU validation of the #53 static-worker port on the Linux validation host.
 #
 # Runs on cpu64 under flock /tmp/motioncorr-issue96-cpu-validation.lock, confined
-# to cores 32-63 (NUMA node 1), build -j 16, per the #66/#96 resource rules.
+# to 16 cores within the 32-63 validation lane (NUMA node 1), build -j 16.
 #
 # Layers, in order, each fail-closed:
 #   1. provenance and AppleDouble assertion on the staged tree
@@ -32,7 +32,7 @@ VENV="$HOME/.mc-venv"
 PY="$VENV/bin/python3"
 CMAKE="$VENV/bin/cmake"
 CTEST="$VENV/bin/ctest"
-MASK="32-63"
+MASK="${MC_CPU_MASK:-32-47}"
 export PATH="$VENV/bin:$PATH"
 
 echo "=== PROVENANCE ==="
@@ -46,6 +46,11 @@ git -C "$SRC" status --porcelain
 
 echo "=== HOST / TOPOLOGY / LOAD AT START ==="
 date -Is; hostname; grep Cpus_allowed_list /proc/self/status; cat /proc/loadavg
+echo "validation_script_pid=$$"
+ps -p $$ -o pid,ppid,lstart,args
+readlink /proc/$$/exe
+numactl --show
+lscpu -e=CPU,CORE,SOCKET,NODE
 echo '--- concurrent MotionCorr work (recorded, not altered) ---'
 pgrep -alf motioncorr | grep -v pgrep | grep -v "$ROOT" | head -5 || true
 echo '--- ctffind (untouched) ---'
@@ -95,7 +100,7 @@ echo "COLLECT_RC=$COLLECT_RC"
 
 echo "=== FULL CTEST ==="
 set +e
-cd "$BUILD" && taskset -c "$MASK" "$CTEST" --output-on-failure -j 4
+cd "$BUILD" && taskset -c "$MASK" "$CTEST" --output-on-failure -j 1
 CTEST_RC=$?
 set -e
 echo "CTEST_RC=$CTEST_RC"

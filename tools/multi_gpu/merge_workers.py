@@ -32,6 +32,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -60,6 +61,85 @@ def is_aggregate(rel: Path) -> bool:
     return (name in AGGREGATE_NAMES
             or name.startswith(AGGREGATE_PREFIXES)
             or name.endswith(AGGREGATE_SUFFIXES))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def gpu_witness_problems(status: dict[str, object]) -> list[str]:
+    """Validate the evidence needed to certify a GPU-backed PASS."""
+    devices = status.get("devices")
+    if devices is None:
+        return []
+    problems: list[str] = []
+    if not isinstance(devices, list) or not devices:
+        return ["GPU status has no valid intended-device list"]
+    workers = status.get("workers")
+    if not isinstance(workers, list) or len(workers) != len(devices):
+        return ["GPU status worker/device counts do not match"]
+
+    expected: dict[str, str] = {}
+    seen_indices: set[int] = set()
+    uuids: list[str] = []
+    for device in devices:
+        if not isinstance(device, dict) or not isinstance(device.get("uuid"), str) \
+                or not device["uuid"]:
+            problems.append("GPU status contains a device without a physical UUID")
+            continue
+        uuids.append(device["uuid"])
+    if len(uuids) != len(devices) or len(set(uuids)) != len(devices):
+        problems.append("GPU status intended UUIDs are missing or not distinct")
+
+    for worker in workers:
+        if not isinstance(worker, dict):
+            problems.append("GPU status contains a malformed worker record")
+            continue
+        index, pid = worker.get("index"), worker.get("pid")
+        if (not isinstance(index, int) or isinstance(index, bool)
+                or index < 0 or index >= len(devices) or index in seen_indices):
+            problems.append("GPU status worker indices do not form a unique device mapping")
+            continue
+        seen_indices.add(index)
+        if not isinstance(pid, int) or isinstance(pid, bool) or pid <= 0:
+            problems.append(f"GPU status worker {index} has no valid PID")
+            continue
+        if any(str(pid) == prior for prior in expected):
+            problems.append("GPU status assigns the same PID to multiple workers")
+            continue
+        device = devices[index]
+        if isinstance(device, dict) and isinstance(device.get("uuid"), str):
+            expected[str(pid)] = device["uuid"]
+    if seen_indices != set(range(len(devices))):
+        problems.append("GPU status worker indices do not cover every intended device")
+
+    witness = status.get("gpu_witness")
+    if not isinstance(witness, dict):
+        return problems + ["GPU PASS has no complete gpu_witness record"]
+    if witness.get("all_pids_witnessed_on_intended_distinct_devices") is not True:
+        problems.append("GPU witness success condition is not true")
+    if witness.get("sampler_errors") != []:
+        problems.append("GPU witness has missing or non-empty sampler_errors")
+    if witness.get("expected") != expected:
+        problems.append("GPU witness expected PID/UUID mapping differs from worker/device records")
+
+    witnessed = witness.get("witnessed")
+    expected_observed = {pid: [uuid] for pid, uuid in expected.items()}
+    if witnessed != expected_observed:
+        problems.append("GPU witness did not observe every worker PID on its intended UUID")
+    if witness.get("unwitnessed_pids") != []:
+        problems.append("GPU witness records unwitnessed worker PIDs")
+    if witness.get("wrong_device") != []:
+        problems.append("GPU witness records a wrong-device worker")
+    if witness.get("shared_devices") != []:
+        problems.append("GPU witness records shared physical devices")
+    if witness.get("distinct_devices_witnessed") != len(devices):
+        problems.append("GPU witness distinct-device count does not match the worker count")
+    return problems
 
 
 def worker_files(root: Path) -> dict[Path, Path]:
@@ -99,6 +179,16 @@ def main(argv: list[str] | None = None) -> int:
                          "usage error rather than as a dropped option list.")
     a = ap.parse_args(argv)
 
+    aggregate_extra = shlex.split(a.aggregate_args)
+    aggregate_owned = {"--i", "--o"}
+    clashes = sorted({arg.split("=", 1)[0] for arg in aggregate_extra
+                      if arg.split("=", 1)[0] in aggregate_owned})
+    if clashes:
+        print(f"FAIL: {', '.join(clashes)} is owned by the aggregate step and must "
+              "not appear in --aggregate-args; the input STAR and output tree "
+              "must remain the ones verified by this merge", file=sys.stderr)
+        return 2
+
     if a.link and a.aggregate_with:
         print("FAIL: --link with --aggregate-with would let the aggregate step "
               "rewrite a worker's own outputs through the shared inode, destroying "
@@ -106,9 +196,34 @@ def main(argv: list[str] | None = None) -> int:
               file=sys.stderr)
         return 2
 
-    manifest = json.loads(Path(a.manifest).read_text())
+    manifest_path = Path(a.manifest).resolve()
+    manifest = json.loads(manifest_path.read_text())
     shards = manifest["shards"]
     products = [s for s in a.products.split(",") if s]
+
+    input_star_path = None
+    manifest_input_sha256 = None
+    if a.aggregate_with:
+        if not a.input_star:
+            print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
+            return 2
+        manifest_input_sha256 = manifest.get("input_sha256")
+        if (not isinstance(manifest_input_sha256, str)
+                or re.fullmatch(r"[0-9a-fA-F]{64}", manifest_input_sha256) is None):
+            print("FAIL: partition manifest has no valid input_sha256 for aggregate STAR",
+                  file=sys.stderr)
+            return 2
+        input_star_path = Path(a.input_star).resolve()
+        try:
+            actual_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            print(f"FAIL: cannot hash aggregate input STAR {input_star_path}: {exc}",
+                  file=sys.stderr)
+            return 2
+        if actual_sha256.lower() != manifest_input_sha256.lower():
+            print("FAIL: aggregate input STAR content does not match the partition "
+                  "manifest input_sha256", file=sys.stderr)
+            return 2
 
     problems: list[str] = []
 
@@ -228,22 +343,7 @@ def main(argv: list[str] | None = None) -> int:
         if launcher_verdict is None:
             problems.append("status file records no launcher verdict")
         elif launcher_verdict == "PASS":
-            # A PASS is not allowed to contradict the record it carries. The
-            # branch below reads gpu_witness only to build a failure message, so
-            # without this a status whose own witness says two workers shared a
-            # device would be accepted on the strength of the word "PASS".
-            witness = status.get("gpu_witness")
-            if isinstance(witness, dict) and not witness.get(
-                    "all_pids_witnessed_on_intended_distinct_devices"):
-                problems.append(
-                    "launcher verdict is PASS but its own gpu_witness record does "
-                    f"not support it: unwitnessed={witness.get('unwitnessed_pids')}, "
-                    f"wrong_device={witness.get('wrong_device')}, "
-                    f"shared_devices={witness.get('shared_devices')}, "
-                    f"sampler_errors={witness.get('sampler_errors')}")
-            elif isinstance(witness, str):
-                problems.append(f"launcher verdict is PASS but the device witness was "
-                                f"not performed: {witness}")
+            problems.extend(gpu_witness_problems(status))
         else:
             witness = status.get("gpu_witness")
             detail = ""
@@ -358,6 +458,7 @@ def main(argv: list[str] | None = None) -> int:
 
     report: dict[str, object] = {
         "manifest": str(a.manifest),
+        "aggregate_input_star_sha256": manifest_input_sha256,
         "merged_into": str(out),
         "n_movies_expected": len(canonical),
         "n_files_staged": len(produced),
@@ -370,15 +471,24 @@ def main(argv: list[str] | None = None) -> int:
                        "path-dependent by construction (see module docstring)",
     }
 
+    if a.aggregate_with and not problems:
+        try:
+            current_input_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            current_input_sha256 = None
+            problems.append(f"cannot recheck aggregate input STAR before launch: {exc}")
+        if current_input_sha256 != manifest_input_sha256:
+            problems.append("aggregate input STAR changed after preflight; aggregate "
+                            "binary was not run")
+
     if problems:
         report["aggregate_star"] = "not attempted: staging failed"
     elif a.aggregate_with:
         if not a.input_star:
             print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
             return 2
-        extra = shlex.split(a.aggregate_args)
         cmd = [a.aggregate_with, "--i", str(Path(a.input_star).resolve()),
-               "--o", str(out) + os.sep, "--only_do_unfinished"] + extra
+               "--o", str(out) + os.sep, "--only_do_unfinished"] + aggregate_extra
         # The aggregate step exists only to have the stock binary regenerate the
         # dataset STAR over the staged tree. It is a full --only_do_unfinished run,
         # and isMovieComplete() is option-dependent -- do_dose_weighting/save_noDW,
@@ -392,6 +502,13 @@ def main(argv: list[str] | None = None) -> int:
         staged_before = {rel: hashlib.sha256((out / rel).read_bytes()).hexdigest()
                          for rel in sorted(produced)}
         proc = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            final_input_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            final_input_sha256 = None
+            problems.append(f"cannot verify aggregate input STAR after launch: {exc}")
+        if final_input_sha256 != manifest_input_sha256:
+            problems.append("aggregate input STAR changed while the aggregate binary ran")
         rewritten = sorted(
             rel for rel, digest in staged_before.items()
             if not (out / rel).exists()

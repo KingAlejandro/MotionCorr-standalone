@@ -33,6 +33,7 @@ bookkeeping only; #26 owns this round's benchmark matrix.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime
 import hashlib
 import json
@@ -48,6 +49,121 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gpu_witness  # noqa: E402
 import partition_star  # noqa: E402
+
+_LAUNCHER_SIGNALS = (signal.SIGINT, signal.SIGTERM)
+_TERMINATE_GRACE_SECONDS = 5.0
+_KILL_REAP_SECONDS = 5.0
+_signal_deferral_depth = 0
+_pending_launcher_signal: int | None = None
+
+
+class LauncherInterrupted(Exception):
+    def __init__(self, signum: int):
+        super().__init__(f"launcher interrupted by signal {signum}")
+        self.signum = signum
+
+
+def _install_signal_handlers() -> dict[int, object]:
+    global _signal_deferral_depth, _pending_launcher_signal
+    _signal_deferral_depth = 0
+    _pending_launcher_signal = None
+    previous = {sig: signal.getsignal(sig) for sig in _LAUNCHER_SIGNALS}
+
+    def interrupt(signum, _frame):
+        global _pending_launcher_signal
+        if _signal_deferral_depth:
+            if _pending_launcher_signal is None:
+                _pending_launcher_signal = signum
+            return
+        raise LauncherInterrupted(signum)
+
+    for sig in _LAUNCHER_SIGNALS:
+        signal.signal(sig, interrupt)
+    return previous
+
+
+def _ignore_launcher_signals() -> None:
+    for sig in _LAUNCHER_SIGNALS:
+        signal.signal(sig, signal.SIG_IGN)
+
+
+def _restore_signal_handlers(previous: dict[int, object]) -> None:
+    for sig, handler in previous.items():
+        signal.signal(sig, handler)
+
+
+@contextlib.contextmanager
+def _defer_launcher_signals():
+    """Record interruption only after a just-started child/thread is owned.
+
+    Defer the Python handler, not the OS signal mask: blocking around Popen
+    would leave SIGINT/SIGTERM blocked in every worker across exec.
+    Python signal handlers run on the main thread, where this context is used.
+    """
+    global _signal_deferral_depth, _pending_launcher_signal
+    _signal_deferral_depth += 1
+    try:
+        yield
+    finally:
+        _signal_deferral_depth -= 1
+        if _signal_deferral_depth == 0 and _pending_launcher_signal is not None:
+            signum = _pending_launcher_signal
+            _pending_launcher_signal = None
+            raise LauncherInterrupted(signum)
+
+
+def _process_group_exists(pgid: int) -> bool:
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _terminate_process_groups(procs: list[tuple[int, subprocess.Popen, Path]],
+                              grace_seconds: float | None = None) -> None:
+    """Terminate and reap only the process groups started by this launcher.
+
+    A worker's session/process-group id is its PID because it was started with
+    ``start_new_session=True``. Signal the group even if its leader has already
+    exited: grandchildren may still be running in that owned group.
+    """
+    groups = sorted({proc.pid for _, proc, _ in procs})
+    if grace_seconds is None:
+        grace_seconds = _TERMINATE_GRACE_SECONDS
+    for pgid in groups:
+        try:
+            os.killpg(pgid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+
+    deadline = time.monotonic() + max(0.0, grace_seconds)
+    while time.monotonic() < deadline and any(_process_group_exists(g) for g in groups):
+        for _, proc, _ in procs:
+            proc.poll()
+        time.sleep(0.05)
+
+    for pgid in groups:
+        if _process_group_exists(pgid):
+            try:
+                os.killpg(pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+    for _, proc, _ in procs:
+        try:
+            proc.wait(timeout=_KILL_REAP_SECONDS)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"could not reap owned worker PID {proc.pid}")
+
+    deadline = time.monotonic() + _KILL_REAP_SECONDS
+    while time.monotonic() < deadline and any(_process_group_exists(g) for g in groups):
+        time.sleep(0.05)
+    remaining = [g for g in groups if _process_group_exists(g)]
+    if remaining:
+        raise RuntimeError(f"owned worker process groups remain after SIGKILL: {remaining}")
 
 
 def _iso(epoch: float) -> str:
@@ -249,22 +365,32 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     sampler = None
-    if devices and not a.no_witness:
-        sampler = Sampler(a.sample_interval)
-        sampler.start()
-
     # Per-worker timing and resident set. These are the quantities a scaling
     # comparison needs and cannot reconstruct afterwards; recording them costs
     # nothing and changes no production source. This is bookkeeping, not a
     # benchmark: see docs/multi_gpu/SCALING_EXPERIMENT.md for what an
     # interpretable measurement additionally requires.
     resources = ResourceSampler(a.sample_interval)
-    resources.start()
-
     procs: list[tuple[int, subprocess.Popen, Path]] = []
     stamps: dict[int, dict[str, float]] = {}
+    codes: dict[int, int] = {}
+    waiters: list[threading.Thread] = []
+    previous_handlers: dict[int, object] = {}
+    sampler_started = False
+    resources_started = False
+    interrupted_signal: int | None = None
     started = time.time()
     try:
+        previous_handlers = _install_signal_handlers()
+        if devices and not a.no_witness:
+            sampler = Sampler(a.sample_interval)
+            with _defer_launcher_signals():
+                sampler.start()
+                sampler_started = True
+        with _defer_launcher_signals():
+            resources.start()
+            resources_started = True
+
         for k in range(n):
             wdir = out / f"w{k}"
             wdir.mkdir()
@@ -279,14 +405,14 @@ def main(argv: list[str] | None = None) -> int:
                 env = gpu_witness.worker_env(devices[k], env)
                 cmd += ["--gpu", "0"]
             cmd += extra
-            log = (wdir / "run.log").open("w")
             # exec a fresh process: nothing in this launcher has touched CUDA, so
             # no already-initialized context is ever inherited.
-            p = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
-                                 start_new_session=True)
-            stamps[k] = {"started": time.time()}
-            resources.watch(p.pid, k)
-            procs.append((k, p, wdir))
+            with (wdir / "run.log").open("w") as log, _defer_launcher_signals():
+                p = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
+                                     start_new_session=True)
+                stamps[k] = {"started": time.time()}
+                resources.watch(p.pid, k)
+                procs.append((k, p, wdir))
             (wdir / "command.json").write_text(json.dumps({
                 "index": k, "command": cmd, "pid": p.pid,
                 "cuda_visible_devices": env.get("CUDA_VISIBLE_DEVICES"),
@@ -298,68 +424,62 @@ def main(argv: list[str] | None = None) -> int:
         # as the moment worker 0 was reaped, so the final-worker tail -- the whole
         # point of recording ends -- would read as zero whenever the workers are
         # reaped in finishing order.
-        codes: dict[int, int] = {}
-
         def reap(index: int, proc: subprocess.Popen) -> None:
             rc = proc.wait()
             stamps[index]["ended"] = time.time()
             codes[index] = rc
 
-        waiters = [threading.Thread(target=reap, args=(k, p), daemon=True)
-                   for k, p, _ in procs]
-        for w in waiters:
-            w.start()
+        for k, p, _ in procs:
+            waiter = threading.Thread(target=reap, args=(k, p), daemon=True)
+            with _defer_launcher_signals():
+                waiter.start()
+                waiters.append(waiter)
         for w in waiters:
             w.join()
 
-        results = []
-        for k, p, wdir in procs:
-            s = stamps[k]
-            results.append({"index": k, "pid": p.pid, "returncode": codes[k],
-                            "log": str((wdir / "run.log").resolve()),
-                            "started_at": _iso(s["started"]),
-                            "ended_at": _iso(s["ended"]),
-                            "wall_seconds": round(s["ended"] - s["started"], 3),
-                            "rss_hwm_kib": resources.hwm_kib.get(p.pid),
-                            "rss_note": resources.unavailable or
-                                        ("worker process only; ghostscript children "
-                                         f"excluded; sampled every {a.sample_interval}s")})
+    except LauncherInterrupted as exc:
+        interrupted_signal = exc.signum
+        _ignore_launcher_signals()
+        _terminate_process_groups(procs)
+        for waiter in waiters:
+            if waiter.ident is not None:
+                waiter.join(timeout=_KILL_REAP_SECONDS)
     except BaseException:
-        # Terminate only the children this launcher started, by their own process
-        # group, so nothing else on a shared box is touched.
-        for k, p, _ in procs:
-            if p.poll() is None:
-                try:
-                    os.killpg(os.getpgid(p.pid), signal.SIGTERM)
-                except (ProcessLookupError, PermissionError):
-                    pass
-        for k, p, wdir in procs:
-            try:
-                p.wait(timeout=30)
-            except subprocess.TimeoutExpired:
-                try:
-                    os.killpg(os.getpgid(p.pid), signal.SIGKILL)
-                except (ProcessLookupError, PermissionError):
-                    pass
-                # Reap after the kill: without this the child stays a zombie
-                # until the launcher itself exits.
-                try:
-                    p.wait(timeout=30)
-                except subprocess.TimeoutExpired:
-                    pass
+        _ignore_launcher_signals()
+        _terminate_process_groups(procs)
         raise
     finally:
-        resources.stop()
-        resources.join(timeout=10)
+        if resources_started:
+            resources.stop()
+            resources.join(timeout=10)
         if sampler is not None:
             sampler.stop()
             # nvidia-smi calls are bounded at 30 s, so a join that still times
             # out means the thread is wedged; observations() would then read a
             # list another thread is writing. Treat it as a witness failure.
-            sampler.join(timeout=40)
-            if sampler.is_alive():
+            if sampler_started:
+                sampler.join(timeout=40)
+            if sampler_started and sampler.is_alive():
                 sampler.errors.append("sampler thread did not stop; samples are "
                                       "incomplete and cannot witness anything")
+        if previous_handlers:
+            _restore_signal_handlers(previous_handlers)
+
+    results = []
+    for k, p, wdir in procs:
+        rc = codes.get(k)
+        if rc is None:
+            rc = p.wait()
+        ended = stamps[k].setdefault("ended", time.time())
+        results.append({"index": k, "pid": p.pid, "returncode": rc,
+                        "log": str((wdir / "run.log").resolve()),
+                        "started_at": _iso(stamps[k]["started"]),
+                        "ended_at": _iso(ended),
+                        "wall_seconds": round(ended - stamps[k]["started"], 3),
+                        "rss_hwm_kib": resources.hwm_kib.get(p.pid),
+                        "rss_note": resources.unavailable or
+                                    ("worker process only; ghostscript children "
+                                     f"excluded; sampled every {a.sample_interval}s")})
 
     wall = time.time() - started
     # Resolved paths and the manifest digest, so merge_workers.py can prove this
@@ -391,9 +511,11 @@ def main(argv: list[str] | None = None) -> int:
         "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "workers": results,
         "devices": devices or None,
+        "termination_signal": interrupted_signal,
     }
 
-    verdict_ok = all(r["returncode"] == 0 for r in results)
+    verdict_ok = (interrupted_signal is None
+                  and all(r["returncode"] == 0 for r in results))
 
     if sampler is not None:
         expected = {p.pid: devices[k]["uuid"] for k, p, _ in procs}
@@ -420,6 +542,8 @@ def main(argv: list[str] | None = None) -> int:
                       "verdict": status["verdict"]}, indent=2))
     if not verdict_ok:
         print(f"FAIL: see {out / 'status.json'}", file=sys.stderr)
+        if interrupted_signal is not None:
+            return 128 + interrupted_signal
         return 3
     return 0
 

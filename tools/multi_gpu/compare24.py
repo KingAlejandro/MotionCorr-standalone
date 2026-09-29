@@ -41,6 +41,14 @@ import star_io  # noqa: E402
 _SAFE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def report_identifier(rel_root: str) -> str:
     """A filename that is injective in the complete output root.
 
@@ -62,34 +70,43 @@ def root_sidecar(report_path: Path) -> Path:
     return report_path.with_suffix(".origin.json")
 
 
+def file_identity(path: Path) -> dict[str, object]:
+    """Hash a file and retain size/mtime as supporting provenance.
+
+    Restored size and mtime do not identify content. The metadata check also
+    fails closed if a file observably changes while it is being hashed.
+    """
+    before = path.stat()
+    digest = sha256_file(path)
+    after = path.stat()
+    first = (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+    last = (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+    if first != last:
+        raise OSError(f"{path} changed while its content digest was computed")
+    return {"size": after.st_size, "mtime_ns": int(after.st_mtime_ns),
+            "sha256": digest}
+
+
 def origin_record(rel: str, ref: Path, test: Path, tool: str,
-                  files: list[Path]) -> dict[str, object]:
+                  files: list[Path], manifest_sha256: str | None
+                  ) -> dict[str, object]:
     """What a report must still describe for --reuse to accept it.
 
     The root alone is not enough: a report produced for root X against one pair
     of trees would otherwise be accepted as the verdict for root X against
     completely different trees, so a passing run could be reused to certify
-    inputs it never saw. Pin the resolved trees, the comparator, and each input
-    file's size and mtime.
+    inputs it never saw. Pin the resolved trees, comparator, manifest, and
+    content of each input. Filesystem metadata is supplementary only.
     """
-    stat = {}
-    for f in files:
-        try:
-            st = f.stat()
-            stat[str(f)] = [st.st_size, int(st.st_mtime_ns)]
-        except OSError:
-            stat[str(f)] = None
+    inputs = {str(f): file_identity(f) for f in files}
     # The comparator's path is not its identity. Replacing tools/compare_motioncorr.py
     # in place, or resolving the same relative string to a different file, leaves the
     # recorded string unchanged, so --reuse would certify checks the current
     # comparator never performed. Pin the resolved path and its contents.
     tool_path = Path(tool).resolve()
-    try:
-        tool_sha = hashlib.sha256(tool_path.read_bytes()).hexdigest()
-    except OSError:
-        tool_sha = None
     return {"root": rel, "ref": str(ref), "test": str(test), "tool": str(tool_path),
-            "tool_sha256": tool_sha, "inputs": stat}
+            "tool_identity": file_identity(tool_path),
+            "manifest_sha256": manifest_sha256, "inputs": inputs}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -114,8 +131,12 @@ def main(argv: list[str] | None = None) -> int:
     ref, test, out = Path(a.ref).resolve(), Path(a.test).resolve(), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    if a.manifest:
-        manifest = json.loads(Path(a.manifest).read_text())
+    manifest_path = Path(a.manifest).resolve() if a.manifest else None
+    manifest_sha256 = None
+    if manifest_path:
+        manifest_bytes = manifest_path.read_bytes()
+        manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
+        manifest = json.loads(manifest_bytes)
         roots = list(manifest["canonical_output_roots"])
         expect = len(roots)
         if expect == 0:
@@ -153,6 +174,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         j = out / (report_id + "_exact.json")
+        report_bytes: bytes
         if a.reuse:
             if not j.exists():
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
@@ -173,7 +195,18 @@ def main(argv: list[str] | None = None) -> int:
                 results.append({"movie": name, "root": root, "gate_c_pass": False,
                                 "reason": f"--reuse but unreadable sidecar {side}: {exc}"})
                 continue
-            expected = origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts])
+            try:
+                expected = origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts],
+                                         manifest_sha256)
+                report_bytes = j.read_bytes()
+                expected["report_sha256"] = hashlib.sha256(report_bytes).hexdigest()
+                if (manifest_path and
+                        file_identity(manifest_path)["sha256"] != manifest_sha256):
+                    raise OSError("manifest changed after its roots were loaded")
+            except OSError as exc:
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "reason": f"--reuse could not verify content identity: {exc}"})
+                continue
             if recorded != expected:
                 differing = sorted(k for k in set(recorded) | set(expected)
                                    if recorded.get(k) != expected.get(k))
@@ -191,6 +224,16 @@ def main(argv: list[str] | None = None) -> int:
             # by construction -- would accept it as a pass for inputs it never saw.
             j.unlink(missing_ok=True)
             root_sidecar(j).unlink(missing_ok=True)
+            try:
+                before = origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts],
+                                       manifest_sha256)
+                if (manifest_path and
+                        file_identity(manifest_path)["sha256"] != manifest_sha256):
+                    raise OSError("manifest changed after its roots were loaded")
+            except OSError as exc:
+                results.append({"movie": name, "root": root, "gate_c_pass": False,
+                                "reason": f"could not pin comparison inputs: {exc}"})
+                continue
             cp = subprocess.run(
                 [a.python, a.tool, "--ref-mrc", str(rm), "--test-mrc", str(tm),
                  "--ref-star", str(rs), "--test-star", str(ts),
@@ -210,7 +253,8 @@ def main(argv: list[str] | None = None) -> int:
             # comparison comes back PASS. Refuse to publish reusable evidence
             # the comparator itself contradicted.
             try:
-                status = (json.loads(j.read_text()) or {}).get("overall_status")
+                report_bytes = j.read_bytes()
+                status = (json.loads(report_bytes) or {}).get("overall_status")
             except Exception:  # noqa: BLE001
                 status = None
             if status not in ("PASS", "FAIL") or rc != (0 if status == "PASS" else 1):
@@ -220,14 +264,26 @@ def main(argv: list[str] | None = None) -> int:
                                           f"status {status!r}; no sidecar published, so "
                                           "this comparison cannot be reused"})
                 continue
-            root_sidecar(j).write_text(
-                json.dumps(origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts]),
-                           indent=2, sort_keys=True) + "\n")
+            try:
+                after = origin_record(rel, ref, test, a.tool, [rm, tm, rs, ts],
+                                      manifest_sha256)
+                if after != before:
+                    raise OSError("comparison inputs or tool changed while the comparator ran")
+                if (manifest_path and
+                        file_identity(manifest_path)["sha256"] != manifest_sha256):
+                    raise OSError("manifest changed while the comparator ran")
+            except OSError as exc:
+                results.append({"movie": name, "root": root, "returncode": rc,
+                                "gate_c_pass": False,
+                                "reason": f"could not bind reusable comparison evidence: {exc}"})
+                continue
+            after["report_sha256"] = hashlib.sha256(report_bytes).hexdigest()
+            root_sidecar(j).write_text(json.dumps(after, indent=2, sort_keys=True) + "\n")
 
         rec: dict[str, object] = {"movie": name, "root": root, "report": j.name,
                                   "returncode": rc}
         try:
-            d = json.loads(j.read_text())
+            d = json.loads(report_bytes)
         except Exception as exc:  # noqa: BLE001
             rec.update({"gate_c_pass": False, "reason": f"unreadable report: {exc}"})
             results.append(rec)

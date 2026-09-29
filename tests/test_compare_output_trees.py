@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import struct
@@ -10,6 +11,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Optional
 
 SCRIPT = Path(__file__).resolve().parents[1] / "docs" / "issue85_laneC" / "compare_output_trees.py"
 SPEC = importlib.util.spec_from_file_location("compare_output_trees", SCRIPT)
@@ -38,7 +40,7 @@ class TestOutputTreeComparator(unittest.TestCase):
         self.tmp.cleanup()
 
     def _write_mrc(self, path: Path, *, mode: int = 2, dims=(4, 3, 1),
-                   nsymbt: int = 8, payload: bytes | None = None,
+                   nsymbt: int = 8, payload: Optional[bytes] = None,
                    timestamp: bytes = b"28-Sep-26  15:38:06") -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         nx, ny, nz = dims
@@ -91,6 +93,15 @@ class TestOutputTreeComparator(unittest.TestCase):
         self.assertEqual(report["base"]["star_count"], 3)
         self.assertEqual(report["base"]["pixel_count"], 24)
 
+    def test_products_only_does_not_require_auxiliary_log_inventory(self) -> None:
+        (self.candidate / "one.log").unlink()
+        report = compare.compare_trees(self.base, self.candidate, self.manifest,
+                                       compare_auxiliary=False)
+        self.assertEqual(report["status"], "PASS")
+        with self.assertRaises(compare.ValidationError):
+            compare.compare_trees(self.base, self.candidate, self.manifest,
+                                  compare_auxiliary=True)
+
     def test_changed_header_field_is_detected(self) -> None:
         path = self.candidate / "Movies" / "a.mrc"
         raw = bytearray(path.read_bytes())
@@ -142,6 +153,11 @@ class TestOutputTreeComparator(unittest.TestCase):
         path.write_text("\n".join(path.read_text().splitlines()[:-1]) + "\n")
         self._assert_fails(self.candidate, "movie rows")
 
+    def test_extra_movie_product_is_rejected(self) -> None:
+        extra = self.candidate / "Movies" / "unexpected.mrc"
+        self._write_mrc(extra)
+        self._assert_fails(self.candidate, "corrected MRC inventory differs")
+
     def test_unsupported_mrc_mode_and_malformed_dimensions_are_rejected(self) -> None:
         mode_path = self.candidate / "Movies" / "a.mrc"
         raw = bytearray(mode_path.read_bytes())
@@ -162,12 +178,38 @@ class TestOutputTreeComparator(unittest.TestCase):
         path.write_bytes(raw)
         self._assert_fails(self.candidate, "file length")
 
+    def test_valid_extended_header_length_keeps_payload_offset_and_hashes_header(self) -> None:
+        path = self.candidate / "Movies" / "a.mrc"
+        self._write_mrc(path, nsymbt=16)
+        candidate_info = compare.validate_tree(self.candidate, self.manifest)
+        self.assertEqual(candidate_info["mrc_count"], 2)
+        report = compare.compare_trees(self.base, self.candidate, self.manifest,
+                                       compare_auxiliary=False)
+        self.assertIn("Movies/a.mrc", report["different_products"])
+        self.assertEqual(report["mrc_sha256"]["Movies/a.mrc"]["base_payload"],
+                         report["mrc_sha256"]["Movies/a.mrc"]["candidate_payload"])
+        self.assertNotEqual(report["mrc_sha256"]["Movies/a.mrc"]["base_extended"],
+                            report["mrc_sha256"]["Movies/a.mrc"]["candidate_extended"])
+
     def test_ms_in_star_is_not_mistaken_for_a_timing_line(self) -> None:
         path = self.candidate / "Movies" / "a.star"
         path.write_text(path.read_text().replace("200.0", "200.0 ms"))
         report = compare.compare_trees(self.base, self.candidate, self.manifest,
                                        compare_auxiliary=False)
         self.assertEqual(report["status"], "FAIL")
+
+    def test_input_star_hash_and_ordered_movie_inventory_are_pinned(self) -> None:
+        source = self.root / "movies.star"
+        source.write_text(
+            "data_movies\n\nloop_\n_rlnMicrographMovieName #1\n"
+            "Movies/a.tiff\nMovies/b.tiff\n"
+        )
+        pinned = dict(self.manifest)
+        pinned["input_star_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+        compare.validate_input_star(source, pinned)
+        source.write_text(source.read_text().replace("Movies/b.tiff", "Movies/a.tiff"))
+        with self.assertRaises(compare.ValidationError):
+            compare.validate_input_star(source, pinned)
 
 
 if __name__ == "__main__":

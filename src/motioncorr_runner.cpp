@@ -1528,6 +1528,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 		Iframes_u16.clear();
 		stage_u16 = false;
+		logfile << "Materialized native uint16 frames as float for CPU fallback." << std::endl;
 	};
 	// Release the native movie once no reader can still want it in its raw form.
 	// Bounding the lifetime this way matters on the degraded paths: a patch that
@@ -1537,6 +1538,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (!stage_u16) return;
 		Iframes_u16.clear();
 		stage_u16 = false;
+		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
 #if defined(__GLIBC__)
 		// Returning the pages matters here, not just freeing them. Each staged frame
 		// is a ~27 MiB fftw_malloc, which sits under glibc's dynamic mmap threshold
@@ -1544,6 +1546,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// A non-converging patch then downloads the full float movie on top of it and
 		// peak RSS ends up above the float baseline instead of below it. Measured on
 		// the 24-movie no-gain arm: 2.06 GiB retained versus 1.52 GiB for main.
+		// This is a measured glibc-specific RSS hint, not portable memory management
+		// and not required for correctness. Other allocators keep their own policy.
 		malloc_trim(0);
 #endif
 	};
@@ -1625,6 +1629,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			cuda_gain_sum_done = true;
 			host_frames_are_raw = true;
 		} else {
+			// Issue #69 owns the session's error classification and sticky fatal latch.
+			// A failed uint16 staging operation may widen the host movie only when the
+			// CUDA context remains usable. Never turn a consumed fatal status into an
+			// apparent CPU retry followed by later use of a poisoned session/device.
+			if (stage_u16 && movie_session->getFailureState().isPoisoned()) {
+				const CudaFailureState &failure = movie_session->getFailureState();
+				REPORT_ERROR_STR("CUDA device became unusable during uint16 movie staging for "
+				                 << fn_mic << ": "
+				                 << cudaGetErrorString(failure.fatalError())
+				                 << " (recorded at " << failure.fatalStage() << ":"
+				                 << failure.fatalLine() << "). Refusing CPU fallback after a fatal device error.");
+			}
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
 			movie_session.reset();
 			// The failed CUDA call may have partially written the sum. Start the
@@ -2022,6 +2038,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {
 			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
+			if (movie_session->getFailureState().isPoisoned()) {
+				const CudaFailureState &failure = movie_session->getFailureState();
+				REPORT_ERROR_STR("CUDA device became unusable during resident forward FFT for "
+				                 << fn_mic << ": "
+				                 << cudaGetErrorString(failure.fatalError())
+				                 << " (recorded at " << failure.fatalStage() << ":"
+				                 << failure.fatalLine()
+				                 << "). Refusing to materialize and retry after a fatal device error.");
+			}
 			movie_session.reset();
 			materialize_host_frames();
 		}

@@ -91,10 +91,11 @@ def load_manifest(path: Path) -> Dict[str, Any]:
     shape = manifest.get("expected_shape_xyz")
     if not isinstance(movies, list) or not movies:
         raise ValidationError("manifest movies inventory is empty or malformed")
+    for item in movies:
+        if not isinstance(item, str) or not item or "\n" in item or "\r" in item:
+            raise ValidationError("manifest movie identities must be non-empty single-line strings")
     if len(set(movies)) != len(movies):
         raise ValidationError("manifest movie inventory contains duplicates")
-    for item in movies:
-        _relative_product(item, "movie")
     if (not isinstance(shape, list) or len(shape) != 3 or
             any(type(v) is not int or v <= 0 for v in shape)):
         raise ValidationError("manifest expected_shape_xyz must contain three positive integers")
@@ -102,7 +103,35 @@ def load_manifest(path: Path) -> Dict[str, Any]:
     return manifest
 
 
-def _expected_paths(manifest: Dict[str, Any]) -> Tuple[set[Path], set[Path], Dict[str, str]]:
+def validate_input_star(path: Path, manifest: Dict[str, Any]) -> None:
+    expected_hash = manifest.get("input_star_sha256")
+    if not expected_hash:
+        return
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ValidationError(f"cannot read input STAR {path}: {exc}") from exc
+    actual_hash = hashlib.sha256(raw).hexdigest()
+    if actual_hash.lower() != str(expected_hash).lower():
+        raise ValidationError(f"input STAR hash {actual_hash} differs from manifest {expected_hash}")
+    try:
+        text = raw.decode("latin-1")
+    except UnicodeDecodeError as exc:
+        raise ValidationError(f"input STAR is not readable text: {path}") from exc
+    rows: List[List[str]] = []
+    for block, columns, values in _parse_star_loops(text, path):
+        if block == "movies" and "_rlnMicrographMovieName" in columns:
+            idx = columns.index("_rlnMicrographMovieName")
+            rows.extend([[row[idx]] for row in values])
+    observed = [row[0] for row in rows]
+    if observed != manifest["movies"]:
+        raise ValidationError(
+            f"input STAR movie inventory differs from manifest: observed {len(observed)} rows, "
+            f"expected {len(manifest['movies'])} in the recorded order"
+        )
+
+
+def _expected_paths(manifest: Dict[str, Any]) -> Tuple[Set[Path], Set[Path], Dict[str, str]]:
     mrcs: Set[Path] = set()
     stars: Set[Path] = set()
     movie_for_stem: Dict[str, str] = {}
@@ -186,6 +215,8 @@ def _read_star_tag(path: Path, block_name: str, tag: str) -> str:
             continue
         if block == block_name and stripped.startswith(tag) and not in_loop:
             values = _star_tokens(stripped, path, number)
+            if not values or values[0] != tag:
+                continue
             if len(values) != 2:
                 raise ValidationError(f"malformed {tag} value in {path}:{number}")
             found.append(values[1])
@@ -399,7 +430,7 @@ def compare_trees(base: Path, candidate: Path, manifest: Dict[str, Any],
     b_root, c_root = base.absolute(), candidate.absolute()
     b_files = set(base_info["files"])
     c_files = set(candidate_info["files"])
-    if b_files != c_files:
+    if compare_auxiliary and b_files != c_files:
         raise ValidationError(
             f"tree file inventories differ; base-only={sorted(b_files-c_files)[:10]}, "
             f"candidate-only={sorted(c_files-b_files)[:10]}"
@@ -411,6 +442,8 @@ def compare_trees(base: Path, candidate: Path, manifest: Dict[str, Any],
     if compare_auxiliary:
         paths = sorted(Path(p) for p in b_files)
     else:
+        # Each tree has already been checked independently against the required
+        # image/STAR inventory. Auxiliary file presence is outside this mode.
         paths = sorted(product_paths)
     for rel in paths:
         if rel.suffix.lower() in SKIP_SUFFIXES:
@@ -457,6 +490,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("candidate", type=Path)
     parser.add_argument("--manifest", type=Path, required=True,
                         help="JSON containing exact input movie inventory and corrected-image dimensions")
+    parser.add_argument("--input-star", type=Path, default=None,
+                        help="input STAR to verify against the manifest hash and movie list")
     parser.add_argument("--products-only", action="store_true",
                         help="Compare validated MRC/STAR products only; omit logs/EPS/other auxiliary files")
     parser.add_argument("--json-out", type=Path, default=None,
@@ -464,6 +499,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     opts = parser.parse_args(argv)
     try:
         manifest = load_manifest(opts.manifest)
+        if manifest.get("input_star_sha256") and opts.input_star is None:
+            raise ValidationError("--input-star is required because the manifest pins an input STAR hash")
+        if opts.input_star is not None:
+            validate_input_star(opts.input_star, manifest)
         report = compare_trees(opts.base, opts.candidate, manifest,
                                compare_auxiliary=not opts.products_only)
     except ValidationError as exc:

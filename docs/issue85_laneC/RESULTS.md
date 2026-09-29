@@ -112,9 +112,11 @@ three runs each from the interleaved series:
 | base | 1,596,240 kB | 1,595,848 kB | 1,596,148 kB | **1,596,079 kB** (1.522 GiB) |
 | candidate | 926,904 kB | 928,392 kB | 928,184 kB | **927,827 kB** (0.885 GiB) |
 
-**Δ = −668,252 kB = −0.637 GiB = −41.9%.** The predicted movie delta is 667,452 kB; measured and
-predicted agree to 0.12%, so the saving is the movie representation and nothing else. Within-arm
-spread is 392 kB (base) and 1,488 kB (candidate).
+**Δ = −668,252 kB = −0.637 GiB = −41.9%.** The predicted movie delta is 667,452 kB, within 0.12%
+of the measured saving. That agreement is consistent with the smaller host representation, but this
+is a combined ingest/lifetime/allocator change: the candidate also releases the native frames earlier
+and calls glibc's `malloc_trim(0)`. These data do not isolate each mechanism. Within-arm spread is
+392 kB (base) and 1,488 kB (candidate).
 
 This is a gain-arm figure. The no-gain arm is 1,587,308 → 1,572,812 kB (−0.9%), because in that arm
 non-converging patches download the full float movie anyway; see below.
@@ -133,6 +135,11 @@ no-gain arm, and it is where the first two versions of this change regressed:
 
 Both steps were necessary. Freeing without trimming left the arena holding the 0.637 GiB, so the
 download stacked on top of it.
+
+`malloc_trim(0)` remains in this measured fallback because it brought the no-gain high-water mark
+below main in the retained runs. It is a glibc-specific allocator hint, not portable memory
+management and not part of the correctness contract. Explicit reusable buffer ownership is a
+separate follow-up; this change does not attempt that refactor.
 
 ## 3. PCIe — −683.47 MB per movie
 
@@ -215,3 +222,34 @@ would fail CPU-only CI.
 - EER, compressed MRC, packed 4-bit, signed 16-bit, 8-bit and float TIFF keep the existing float path
   by construction; not re-measured, and the CPU suite covers their behaviour.
 - No claim of scientific equivalence: this is same-backend byte parity against the same main.
+
+## 8. Structural acceptance regrade
+
+On 29 September 2026 the retained output trees were regraded with the manifest-bound comparator
+at `compare_output_trees.py` SHA-256
+`64872c869491036ff3457fa4f825fbdb6dc68d9fd00f977ee01ce5ca6b165cd0`.
+The input `movies.star` hash was
+`fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041`.
+The retained timed outputs were not regenerated. Per-arm MRC/STAR inventories, MRC dimensions,
+mode, extended-header/data offsets, payload lengths and movie associations were validated before
+pairwise comparison. **All 12 products-only pairs passed**: each arm contains 24 valid MRCs,
+25 STARs and 341,735,520 pixels, with no MRC or STAR product difference. The complete non-PDF
+tree reports retain a `FAIL` for 10 cross-arm pairs because all 24 movie `.log` files differ;
+the two same-arm rerun controls pass. A representative log diff contains the new U16 staging
+diagnostic, volatile CUDA timing values, and the output-root path. These log-only failures do not
+indicate missing or truncated corrected products. Full commands, input binding and JSON reports
+are in [the retained-output regrade](regrade-20260929/README.md). PDFs are inventoried but their
+contents are not covered by this image/STAR comparator.
+
+## 9. Fast-path boundary
+
+The implementation enables native unsigned-16 staging only when all of these source conditions hold:
+
+```cpp
+use_gpu && !early_binning && !isEER && !isCompressedMRC &&
+((FileName)fn_mic.getFileFormat()).contains("tif") && Ihead.dataType() == UShort
+```
+
+This is the resident CUDA TIFF path for unsigned 16-bit samples. CPU processing, early binning, EER,
+compressed MRC, other MRC modes, signed 16-bit, packed 4-bit, 8-bit and float TIFF continue through
+the existing float path. No MRC mode 6, packed, signed or 8-bit path is enabled by this change.

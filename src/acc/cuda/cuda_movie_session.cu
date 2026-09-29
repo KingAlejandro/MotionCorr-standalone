@@ -489,7 +489,7 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     MultidimArray<float> &unaligned_sum,
     bool download_sum
 ) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     if ((int)raw_frames.size() != n_frames) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
@@ -501,11 +501,10 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     // 0.637 GiB to the high-water mark for this geometry and turn a host-memory
     // saving into a VRAM cost; a single frame adds 27 MiB for the duration of
     // this call. Owned locally so the bare `return false` in HANDLE_ERROR frees it.
-    struct StageBuffer {
-        unsigned short *ptr = nullptr;
-        ~StageBuffer() { if (ptr) cudaFree(ptr); }
-    } stage;
-    HANDLE_ERROR(cudaMalloc((void**)&stage.ptr, sz_u16));
+    unsigned short *stage = nullptr;
+    mc_cuda::ScopedDeviceMemory<1> stage_owner(&failure_state);
+    HANDLE_ERROR(cudaMalloc((void**)&stage, sz_u16));
+    stage_owner.add(stage);
 
     bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
@@ -525,10 +524,10 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Per-frame upload keeps the same failure granularity as the float path:
         // a fault names a frame index and leaves the rest untransferred.
-        HANDLE_ERROR(cudaMemcpy(stage.ptr, raw_frames[iframe]().data, sz_u16,
+        HANDLE_ERROR(cudaMemcpy(stage, raw_frames[iframe]().data, sz_u16,
                                 cudaMemcpyHostToDevice));
         convertGainAndAccumulateU16Kernel<<<grid, block>>>(
-            stage.ptr, d_Iframes + (size_t)iframe * num_pixels, d_Isum, d_gain,
+            stage, d_Iframes + (size_t)iframe * num_pixels, d_Isum, d_gain,
             num_pixels, apply_gain);
         HANDLE_ERROR(cudaGetLastError());
         // The blocking cudaMemcpy above is the reuse barrier for stage.ptr: it is
@@ -546,6 +545,7 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
+    HANDLE_ERROR(stage_owner.releaseAll());
     return true;
 }
 

@@ -203,9 +203,32 @@ if(BUILD_TESTING AND CUDA)
         add_executable(motioncorr_faultinject
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
-        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree")
+        target_link_options(motioncorr_faultinject PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError")
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
+        # Optional Issue #85 lane C native failure matrix. Supplying the known
+        # uint16 TIFF fixture opts into this hardware test; ordinary CI and CPU-only
+        # CTest collection do not require the external data.
+        set(MOTIONCORR_U16_TEST_MOVIE "" CACHE FILEPATH
+            "Optional uint16 TIFF fixture for the native lane-C failure matrix")
+        set(MOTIONCORR_U16_TEST_STAGE_BYTES "28477960" CACHE STRING
+            "Bytes in one uint16 frame for MOTIONCORR_U16_TEST_MOVIE")
+        if(MOTIONCORR_U16_TEST_MOVIE)
+            if(NOT EXISTS "${MOTIONCORR_U16_TEST_MOVIE}")
+                message(FATAL_ERROR "MOTIONCORR_U16_TEST_MOVIE does not exist: ${MOTIONCORR_U16_TEST_MOVIE}")
+            endif()
+            find_program(BASH_EXECUTABLE bash REQUIRED)
+            add_test(NAME CudaU16FailurePaths
+                COMMAND ${BASH_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_u16_failure_controls.sh
+                    $<TARGET_FILE:motioncorr_faultinject>
+                    ${MOTIONCORR_U16_TEST_MOVIE} ${MOTIONCORR_U16_TEST_STAGE_BYTES}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/docs/issue85_laneC/compare_output_trees.py)
+            set_tests_properties(CudaU16FailurePaths PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 900)
+        endif()
         # Issue #69. Pure predicate over cudaError_t plus the host-only failure state:
         # needs the CUDA headers, needs no device.
         add_executable(cuda_error_class tests/cuda_error_class.cpp)

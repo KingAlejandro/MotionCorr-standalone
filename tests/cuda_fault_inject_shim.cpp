@@ -20,6 +20,13 @@
 //   MC_FAULT_ORDINAL  1-based index of the cudaMalloc call to fail (0/unset = never)
 //   MC_FAULT_CODE     "poison" -> cudaErrorIllegalAddress, else cudaErrorMemoryAllocation
 //   MC_FAULT_TRACE    if set, log every cudaMalloc ordinal to stderr for ordinal discovery
+//
+// Issue #85 lane C controls, confined to this test-only binary:
+//   MC_U16_FAULT        alloc | h2d | kernel-recoverable | kernel-fatal
+//   MC_U16_STAGE_BYTES  exact uint16 frame allocation size to distinguish it from
+//                       the session's float buffers (derived from the input TIFF)
+// These return controlled error codes at the actual U16 allocation, upload, or
+// post-launch status-check boundary. They do not simulate a genuinely poisoned GPU.
 
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -45,6 +52,11 @@ long  g_at = -1;
 bool  g_poison = false;
 bool  g_trace = false;
 bool  g_init = false;
+const char *g_u16_fault = nullptr;
+size_t g_u16_stage_bytes = 0;
+void *g_u16_stage_ptr = nullptr;
+bool g_u16_fault_injected = false;
+bool g_u16_stage_upload_seen = false;
 
 void init_once() {
     if (g_init) return;
@@ -55,11 +67,27 @@ void init_once() {
     const char *c = std::getenv("MC_FAULT_CODE");
     g_poison = (c && std::strcmp(c, "poison") == 0);
     g_trace = std::getenv("MC_FAULT_TRACE") != nullptr;
+    g_u16_fault = std::getenv("MC_U16_FAULT");
+    const char *stage = std::getenv("MC_U16_STAGE_BYTES");
+    if (stage) g_u16_stage_bytes = (size_t)std::strtoull(stage, nullptr, 10);
+}
+
+bool is_u16_fault(const char *name) {
+    return g_u16_fault && std::strcmp(g_u16_fault, name) == 0;
 }
 } // namespace
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();
+    if (g_u16_stage_bytes && size == g_u16_stage_bytes) {
+        std::fprintf(stderr, "[u16fault] stage-alloc-request size=%zu\n", size);
+        if (!g_u16_fault_injected && is_u16_fault("alloc")) {
+            g_u16_fault_injected = true;
+            if (ptr) *ptr = nullptr;
+            std::fprintf(stderr, "[u16fault] injected stage allocation failure\n");
+            return cudaErrorMemoryAllocation;
+        }
+    }
     const long n = ++g_seen;
     if (g_trace) std::fprintf(stderr, "[faultinject] cudaMalloc #%ld size=%zu\n", n, size);
     if (g_at > 0 && n == g_at) {
@@ -72,12 +100,63 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     }
     const cudaError_t result = __real_cudaMalloc(ptr, size);
     if (result == cudaSuccess) g_owned.insert(*ptr);
+    if (result == cudaSuccess && g_u16_stage_bytes && size == g_u16_stage_bytes) {
+        g_u16_stage_ptr = ptr ? *ptr : nullptr;
+        std::fprintf(stderr, "[u16fault] stage-alloc-ok ptr=%p size=%zu\n",
+                     g_u16_stage_ptr, size);
+    }
+    return result;
+}
+
+extern "C" cudaError_t __real_cudaMemcpy(void *dst, const void *src, size_t count,
+                                         cudaMemcpyKind kind);
+extern "C" cudaError_t __real_cudaGetLastError(void);
+
+extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t count,
+                                         cudaMemcpyKind kind) {
+    init_once();
+    const bool stage_upload = g_u16_stage_ptr && dst == g_u16_stage_ptr &&
+                              kind == cudaMemcpyHostToDevice &&
+                              count == g_u16_stage_bytes;
+    if (stage_upload && !g_u16_fault_injected && is_u16_fault("h2d")) {
+        g_u16_fault_injected = true;
+        std::fprintf(stderr, "[u16fault] injected stage H2D failure size=%zu\n", count);
+        return cudaErrorMemoryAllocation;
+    }
+    const cudaError_t result = __real_cudaMemcpy(dst, src, count, kind);
+    if (stage_upload && result == cudaSuccess) {
+        g_u16_stage_upload_seen = true;
+        std::fprintf(stderr, "[u16fault] stage-h2d-ok size=%zu\n", count);
+    }
     return result;
 }
 
 extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
+    init_once();
     if (ptr && !g_owned.count(ptr)) ++g_stale;
+    const bool stage_free = ptr && ptr == g_u16_stage_ptr;
+    if (stage_free) std::fprintf(stderr, "[u16fault] stage-free-request ptr=%p\n", ptr);
     const cudaError_t result = __real_cudaFree(ptr);
     if (result == cudaSuccess) g_owned.erase(ptr);
+    if (stage_free && result == cudaSuccess) {
+        std::fprintf(stderr, "[u16fault] stage-free-ok ptr=%p\n", ptr);
+        g_u16_stage_ptr = nullptr;
+    }
     return result;
+}
+
+extern "C" cudaError_t __wrap_cudaGetLastError(void) {
+    init_once();
+    if (g_u16_stage_upload_seen && !g_u16_fault_injected &&
+        (is_u16_fault("kernel-recoverable") || is_u16_fault("kernel-fatal"))) {
+        g_u16_fault_injected = true;
+        g_u16_stage_upload_seen = false;
+        const bool fatal = is_u16_fault("kernel-fatal");
+        const cudaError_t code = fatal ? cudaErrorIllegalAddress
+                                       : cudaErrorInvalidConfiguration;
+        std::fprintf(stderr, "[u16fault] injected post-launch conversion status: %s\n",
+                     cudaGetErrorName(code));
+        return code;
+    }
+    return __real_cudaGetLastError();
 }

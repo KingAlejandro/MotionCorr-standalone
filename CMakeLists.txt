@@ -177,6 +177,25 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaMemcpy")
         add_test(NAME CudaWrapperUploadFailure COMMAND cuda_wrapper_upload_failure)
         set_tests_properties(CudaWrapperUploadFailure PROPERTIES LABELS "cuda;hardware")
+        add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
+        target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
+        target_link_options(cuda_fault_matrix PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaMemset"
+            "LINKER:--wrap=cudaDeviceSynchronize"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftSetWorkArea"
+            "LINKER:--wrap=cufftPlanMany" "LINKER:--wrap=cufftExecR2C"
+            "LINKER:--wrap=cufftExecC2R")
+        add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
+        set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        add_executable(motioncorr_retry_caller
+            src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
+        target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)
+        target_link_options(motioncorr_retry_caller PRIVATE
+            "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+            "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
         # are exercised in production code rather than simulated by a predicate test.
@@ -184,7 +203,7 @@ if(BUILD_TESTING AND CUDA)
         add_executable(motioncorr_faultinject
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
-        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc")
+        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree")
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Issue #69. Pure predicate over cudaError_t plus the host-only failure state:

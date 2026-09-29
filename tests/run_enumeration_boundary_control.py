@@ -7,11 +7,13 @@ removed. A mutant is accepted only if it completes, produces an image/joint STAR
 never emits the fatal refusal, so an unrelated crash cannot satisfy the control.
 """
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 
 def main():
@@ -21,6 +23,8 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--initialize-mutant", type=Path)
     parser.add_argument("--patch-mutant", type=Path)
+    parser.add_argument("--comparator", type=Path, default=Path(__file__).resolve().parents[1] /
+                        "docs/issue69/evidence/ownership-20260929/compare-native.py")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     common = ["--i", str(args.movie.resolve()), "--use_own", "--gpu", "0",
@@ -29,6 +33,18 @@ def main():
               "--dose_weighting", "--dose_per_frame", "1", "--voltage", "300",
               "--angpix", "0.885"]
     rows = []
+
+    def sha256(path):
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+
+    provenance = {str(path.resolve()): sha256(path) for path in
+                  [args.binary, args.movie, Path(__file__), args.comparator,
+                   *filter(None, [args.initialize_mutant, args.patch_mutant])]}
+    (args.output / "hashes.json").write_text(json.dumps(provenance, indent=2) + "\n")
 
     def run(name, ordinal=0, code="zero-devices", binary=None):
         destination = args.output / name
@@ -88,6 +104,12 @@ def main():
             row, text = run(f"{boundary}-{code}", ordinal, code)
             completed(row)
             assert all(marker not in text for marker in markers.values()), row
+            candidate = args.output / row["name"]
+            subprocess.run([sys.executable, str(args.comparator),
+                            str(args.output / "healthy"), str(candidate),
+                            "--images", "1", "--stars", "2", "--report",
+                            str(candidate / "parity.json")], check=True)
+            row["parity"] = json.loads((candidate / "parity.json").read_text())
         mutant = args.initialize_mutant if boundary == "initialize" else args.patch_mutant
         if mutant:
             row, text = run(f"{boundary}-mutant", ordinal, "poison", mutant)

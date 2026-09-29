@@ -121,6 +121,20 @@ and calls glibc's `malloc_trim(0)`. These data do not isolate each mechanism. Wi
 This is a gain-arm figure. The no-gain arm is 1,587,308 → 1,572,812 kB (−0.9%), because in that arm
 non-converging patches download the full float movie anyway; see below.
 
+The other retained 24-movie modes have one `time -v` observation each. They are useful mode-specific
+memory records, not repeated current-composition measurements:
+
+| mode | base peak RSS | retained candidate peak RSS | change |
+|---|---:|---:|---:|
+| gain (three-run means) | 1.522 GiB | 0.885 GiB | −0.637 GiB (−41.9%) |
+| no gain | 1.514 GiB | 1.500 GiB | −0.014 GiB (−0.9%) |
+| selected frames 3–20 | 1.205 GiB | 0.727 GiB | −0.478 GiB (−39.7%) |
+| skip defect | 1.562 GiB | 0.872 GiB | −0.690 GiB (−44.2%) |
+
+The selected-frame and skip-defect numbers are single observations from the original candidate and
+base binaries. All four modes have retained product-only comparisons, but these peak-RSS figures
+were not remeasured on the current-main/#69 composition.
+
 ### Degraded path
 
 A patch that does not converge downloads the full float movie from the device. That happens in the

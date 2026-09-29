@@ -119,6 +119,17 @@ if(BUILD_TESTING)
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     add_test(NAME DefectParser COMMAND defect_parser)
+    # Device-free control for the nvCOMP ingestion staging layout. Deliberately not
+    # under if(CUDA): the alignment rule and the zlib wrapper checks are integer and
+    # byte logic, and a successful A100 decode cannot observe either of them.
+    # Header-only and deliberately not linked against motioncorr_core: these
+    # contracts must be checkable in a build with no CUDA and no nvCOMP.
+    add_executable(deflate_layout tests/test_deflate_layout.cpp)
+    target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME DeflateLayout COMMAND deflate_layout)
+    add_executable(scratch_arena tests/test_scratch_arena.cpp)
+    target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME ScratchArena COMMAND scratch_arena)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)

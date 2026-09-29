@@ -242,7 +242,7 @@ def model_parser(binary, work):
     print('legacy empty trailing string preserved')
 
 
-def interpolate_shifts(binary, work):
+def interpolate_shifts(binary, work, gpu=None):
     """Issue #97: --interpolate_shifts recentered against an origin it had already zeroed.
 
     Drives the real binary rather than the helper, so it covers the parts the unit
@@ -280,12 +280,13 @@ _rlnMicrographShiftY #5
     else:
         raise AssertionError('duplicate local-shift rows must not be silently overwritten')
     arms = {}
+    backend = [] if gpu is None else ['--gpu', str(gpu)]
     for arm, extra in (('off', []), ('on', ['--interpolate_shifts'])):
         result = subprocess.run([str(binary), '--i', 'synthetic_128x128_8frames.star',
                                  '--o', arm + '/', '--use_own', '--j', '1',
                                  '--patch_x', '3', '--patch_y', '3', '--angpix', '1',
                                  '--voltage', '300', '--dose_per_frame', '1',
-                                 '--first_frame_sum', '2', '--group_frames', '2', *extra],
+                                 '--first_frame_sum', '2', '--group_frames', '2', *backend, *extra],
                                 cwd=work, text=True, capture_output=True, timeout=120)
         assert result.returncode == 0, result.stdout + result.stderr
         log = (work / arm / 'synthetic_128x128_8frames.log').read_text()
@@ -293,6 +294,11 @@ _rlnMicrographShiftY #5
         assert 'Frames to be used: 2 3 4 5 6 7 8' in log, log
         assert ' | 2 3 | 4 5 | 6 7 8 | ' in log, 'unequal final group not reached: ' + log
         assert f'interpolate_shifts = {int(arm == "on")}' in log, log
+        if gpu is not None:
+            # An accepted --gpu flag alone does not prove that the local shifts
+            # came from native CUDA rather than the CPU fallback.
+            assert log.count('[CUDA Patch Alignment] completed; converged=yes') == 9, log
+            assert '[CUDA Patch Alignment] completed; converged=no' not in log, log
         arms[arm] = read_local_shifts(work / arm / 'synthetic_128x128_8frames.star')
 
     on, off = arms['on'], arms['off']
@@ -355,11 +361,17 @@ def main():
     parser.add_argument('--binary', required=True, type=Path)
     parser.add_argument('--case', choices=CASES, required=True)
     parser.add_argument('--helper', type=Path)
+    parser.add_argument('--gpu', type=int, help='Native CUDA device for interpolate_shifts only')
     args = parser.parse_args()
+    if args.gpu is not None and (args.case != 'interpolate_shifts' or args.gpu < 0):
+        parser.error('--gpu requires --case interpolate_shifts and a nonnegative device')
     global HELPER
     HELPER = args.helper.resolve() if args.helper else None
     with tempfile.TemporaryDirectory(prefix='motioncorr-contract-') as directory:
-        CASES[args.case](args.binary.resolve(), Path(directory))
+        if args.gpu is None:
+            CASES[args.case](args.binary.resolve(), Path(directory))
+        else:
+            interpolate_shifts(args.binary.resolve(), Path(directory), gpu=args.gpu)
     print(f'PASS runner {args.case}')
 
 

@@ -162,6 +162,12 @@ if(BUILD_TESTING)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME RunnerInterpolateShiftsCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts --gpu 0)
+        set_tests_properties(RunnerInterpolateShiftsCuda PROPERTIES LABELS "cuda;hardware")
+    endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
         target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)

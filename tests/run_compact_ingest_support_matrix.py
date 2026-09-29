@@ -38,6 +38,7 @@ import importlib.util
 import json
 import os
 import shutil
+import struct
 import subprocess
 import sys
 import threading
@@ -514,7 +515,9 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
     record["witnesses"]["primary"] = assert_witnesses(primary, expect_u16=case.expect_u16,
                                                       movies=movies)
     comparator.validate_input_star(star, manifest)
-    record["tree"] = summarize(comparator.validate_tree(primary.out, manifest))
+    primary_tree = comparator.validate_tree(primary.out, manifest)
+    record["product_stats"] = assert_non_constant(primary.out, primary_tree)
+    record["tree"] = summarize(primary_tree)
 
     if case.float_twin:
         f32_root = base / "input-f32"
@@ -532,7 +535,9 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
         require(f32_movies == movies and sha256_file(f32_star) == manifest["input_star_sha256"],
                 f"{case.case_id}: the float twin does not share the uint16 arm's contract")
         record["float_input_sha256"] = {m: sha256_file(f32_root / m) for m in f32_movies}
-        record["float_tree"] = summarize(comparator.validate_tree(twin.out, manifest))
+        twin_tree = comparator.validate_tree(twin.out, manifest)
+        assert_non_constant(twin.out, twin_tree)
+        record["float_tree"] = summarize(twin_tree)
         report = compare_products(primary.out, twin.out, manifest, manifest)
         record["comparisons"]["u16_vs_float32_tiff"] = report
         require(report["status"] == "PASS",
@@ -675,6 +680,25 @@ def compare_products(primary: Path, twin: Path, manifest: Dict[str, Any],
     comparator.validate_tree(twin, twin_manifest)
     report = comparator.compare_trees(primary, twin, manifest, compare_auxiliary=False)
     return summarize_comparison(report)
+
+
+def assert_non_constant(root: Path, info: Dict[str, Any]) -> Dict[str, Any]:
+    """Every declared product must carry signal.
+
+    Byte equality between two arms is satisfied just as well by two identically
+    blank images, and the comparator's header check only rejects dmin > dmax. A
+    row that produced a constant image would otherwise pass everything.
+    """
+    stats: Dict[str, Any] = {}
+    for rel in sorted(info["mrc"]):
+        header = (root / rel).read_bytes()[:1024]
+        dmin, dmax, dmean = struct.unpack_from("<3f", header, 76)
+        rms = struct.unpack_from("<f", header, 216)[0]
+        stats[rel] = {"dmin": dmin, "dmax": dmax, "dmean": dmean, "rms": rms}
+        require(dmax > dmin and rms > 0.0,
+                f"{root / rel}: constant product (dmin={dmin}, dmax={dmax}, rms={rms}); "
+                f"equality between two blank images proves nothing")
+    return stats
 
 
 def summarize(info: Dict[str, Any]) -> Dict[str, Any]:

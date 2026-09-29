@@ -83,6 +83,24 @@ if(CUDA)
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 endif()
 
+option(METAL "Build with Apple Metal acceleration" OFF)
+if(METAL)
+    if(NOT APPLE)
+        message(FATAL_ERROR "Apple Metal acceleration is only supported on Apple platforms (macOS).")
+    endif()
+    enable_language(OBJCXX)
+    set(CMAKE_OBJCXX_STANDARD 17)
+    set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
+    find_library(METAL_FRAMEWORK Metal REQUIRED)
+    find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
+    find_library(MPS_FRAMEWORK MetalPerformanceShaders REQUIRED)
+    find_library(MPSGRAPH_FRAMEWORK MetalPerformanceShadersGraph REQUIRED)
+    target_compile_definitions(motioncorr_core PUBLIC _METAL_ENABLED)
+    target_sources(motioncorr_core PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm")
+    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/acc/metal/metal_alignpatch.mm" PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    target_link_libraries(motioncorr_core PUBLIC "${METAL_FRAMEWORK}" "${FOUNDATION_FRAMEWORK}" "${MPS_FRAMEWORK}" "${MPSGRAPH_FRAMEWORK}")
+endif()
+
 add_executable(motioncorr src/apps/run_motioncorr.cpp)
 target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
@@ -153,6 +171,8 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+        add_test(NAME MetalCompletionWitness
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_metal_completion_witness.py)
     # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
     # so it needs POSIX resource limits and an ignorable SIGXFSZ.
     if(UNIX)

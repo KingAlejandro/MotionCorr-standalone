@@ -59,6 +59,19 @@ cmake --build build-cuda --parallel
 
 **Experimental CUDA status:** The 24-movie RELION SPA tutorial rerun completed, but 0/24 movies passed Gate 2: corrected-image relative RMSE was 0.002899–0.010082 against the 0.001 limit. Use `--gpu` for investigation until this discrepancy is resolved; see the [CUDA validation report](docs/cuda_global_alignment_validation.md). The CPU path remains the default.
 
+When built with Apple Metal support on macOS (`-DMETAL=ON`), passing `--metal` enables Metal acceleration on Apple Silicon:
+
+```sh
+# Build with Apple Metal support (macOS only)
+cmake -S . -B build-metal -DMETAL=ON
+cmake --build build-metal --parallel
+
+# Run with Metal acceleration for global alignment
+./build-metal/motioncorr --i movies.star --o MotionCorr --use_own --metal --metal_device 0 --j 1
+```
+
+**Metal status:** The opt-in build and device dispatch are followed by a current-main global-alignment prototype for [Issue #32](https://github.com/KingAlejandro/MotionCorr-standalone/issues/32). It executes the Metal weighting, reference, CCF, MPSGraph inverse-FFT, peak/subpixel, and Fourier-shift stages on Apple Silicon. The current prototype still **fails the relaxed Gate 2 absolute image-RMSE check** on both seeded fixtures; the measured values and remaining checks are recorded in the [Issue #32 prototype report](docs/metal_issue32_prototype.md). It is not an accepted or default backend. CPU-only builds remain the default and free of Metal frameworks; see the [Metal backend contract](docs/metal_backend_contract.md).
+
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 
 ```sh

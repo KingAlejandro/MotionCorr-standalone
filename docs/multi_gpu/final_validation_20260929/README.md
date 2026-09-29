@@ -77,3 +77,9 @@ CLI hunk retains its earlier native compilation/24-movie evidence, but a fresh
 CUDA build at this composed main has not been run in this task. No scaling or
 throughput claim is made. More than two devices, PS/even/odd output modes, EER,
 gain rotation/flip and heterogeneous-movie load balance remain unrun here.
+
+## Raw artifacts
+
+Raw logs and JSON comparison reports are preserved in `raw-evidence.tar.gz`.
+`SHA256SUMS` identifies each original archive member and the compact archive.
+The two before-fix failures and replay scripts are also readable beside it.

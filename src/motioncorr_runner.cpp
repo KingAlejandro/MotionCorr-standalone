@@ -2423,10 +2423,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				interpolateShifts(group_start, group_size, local_xshifts, local_yshifts, n_frames, interpolated_xshifts, interpolated_yshifts);
 				if (interpolate_shifts) {
 					// Recenter to the first frame
-					for (int iframe = 0; iframe < n_frames; iframe++) {
-						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
-						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
-					}
+					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
 					// Store shifts
 					for (int iframe = 0; iframe < n_frames; iframe++) {
 						patch_xshifts.push_back(interpolated_xshifts[iframe]);
@@ -2832,6 +2829,23 @@ skip_fitting:
 	logfile << "Full movie wall time: " << std::fixed << std::setprecision(3) << movie_wall_sec << " s" << std::endl;
 
 	return true;
+}
+
+void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
+	if (xshifts.size() != yshifts.size())
+		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
+	if (xshifts.empty()) return;
+
+	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while
+	// iterating upwards zeroes the origin on the very first iteration, so every later
+	// frame would subtract zero and keep its un-recentered absolute value.
+	const RFLOAT origin_x = xshifts[0];
+	const RFLOAT origin_y = yshifts[0];
+
+	for (size_t iframe = 0; iframe < xshifts.size(); iframe++) {
+		xshifts[iframe] -= origin_x;
+		yshifts[iframe] -= origin_y;
+	}
 }
 
 void MotioncorrRunner::interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,

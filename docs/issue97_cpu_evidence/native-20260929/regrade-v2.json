@@ -1,0 +1,74 @@
+{
+  "status": "PASS",
+  "old_source_anchor_failures": 18,
+  "comparisons": {
+    "off": {
+      "same_complete_image": true,
+      "same_complete_stars": true,
+      "structural_inventory_pass": true,
+      "image_provenance": {
+        "main": {
+          "dimensions": [
+            128,
+            128,
+            1
+          ],
+          "mode": 2,
+          "extended_bytes": 0,
+          "file_bytes": 66560,
+          "header_sha256": "599bd3cd23b2d5cfbd71055c811248fb48c63dd533e498824f198f67f601fd42",
+          "extended_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "payload_sha256": "365a09e51fb1a875e82ea4c0ced57833ac4651bccf1b2e962d6650304bd1e09f"
+        },
+        "candidate": {
+          "dimensions": [
+            128,
+            128,
+            1
+          ],
+          "mode": 2,
+          "extended_bytes": 0,
+          "file_bytes": 66560,
+          "header_sha256": "599bd3cd23b2d5cfbd71055c811248fb48c63dd533e498824f198f67f601fd42",
+          "extended_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "payload_sha256": "365a09e51fb1a875e82ea4c0ced57833ac4651bccf1b2e962d6650304bd1e09f"
+        }
+      }
+    },
+    "on": {
+      "same_complete_image": false,
+      "same_complete_stars": false,
+      "structural_inventory_pass": true,
+      "image_provenance": {
+        "main": {
+          "dimensions": [
+            128,
+            128,
+            1
+          ],
+          "mode": 2,
+          "extended_bytes": 0,
+          "file_bytes": 66560,
+          "header_sha256": "63cdd2f3f83726ed98a08f72cf75eca68ce42114b3f3a96f77c91883b38fd9c4",
+          "extended_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "payload_sha256": "6a9fcab049940a838582604a4126eae6c266917191501e9890ae221ee6b7bba3"
+        },
+        "candidate": {
+          "dimensions": [
+            128,
+            128,
+            1
+          ],
+          "mode": 2,
+          "extended_bytes": 0,
+          "file_bytes": 66560,
+          "header_sha256": "8d8029907f75f1ca4ae44be15df5228abc8b3c90f1f63589da9b3d283d952921",
+          "extended_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "payload_sha256": "31d19c7982dc9d635866fa4718a6bcfb913bf0430f282a90e23ad8ddbd06a515"
+        }
+      }
+    }
+  },
+  "scope": "One native selected-frame fixture, 9 converged CUDA patches per arm; intentional option-on difference; no science/performance claim",
+  "regrade_note": "Initial compare_trees invocation expected tutorial Movies/ layout; this fixture uses root-level products. Regraded retained products via identical structural validate_mrc and STAR parsers, exact declared inventory and timestamp-only header normalization."
+}

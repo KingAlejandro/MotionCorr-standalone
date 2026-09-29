@@ -4,6 +4,16 @@ Commit: ad0b230ca22095700f6392479326836efb1c911d
 Local change: src/motioncorr_runner.cpp initializes per-movie metadata for direct file or wildcard input.
 Local change: src/funcs.cpp clears the cached rnd_gaus() Box-Muller deviate on re-seed, so
               init_random_generator() restores a reproducible Gaussian sequence.
+Local change: src/motioncorr_runner.cpp and src/motioncorr_runner.h fix the
+              --interpolate_shifts recentering origin (issue #97). Upstream recenters in place
+              against interpolated_*shifts[0], which iteration zero has already set to zero, so
+              frames 1..n-1 keep un-recentered absolute values. The recentering is extracted into
+              recenterShiftsToFirstFrame(), which saves the origin first; interpolateShifts is
+              made public+static for unit testing. This is a DELIBERATE divergence from upstream
+              behaviour on the experimental, default-off --interpolate_shifts path. In the
+              tested option-off controls, candidate and pre-fix standalone outputs had identical
+              MRC pixel payloads and per-movie STAR data. This same-backend evidence is not a
+              whole-program bit-exact parity claim against upstream.
 
 src/CPlot2D.cpp
 src/CPlot2D.h

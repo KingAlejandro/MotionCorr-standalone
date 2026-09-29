@@ -1,0 +1,294 @@
+############ START 2026-09-28T15:36:57+00:00 ############
+[lock] waiting
+[lock] acquired after 0s at 2026-09-28T15:36:57+00:00
+===== PROVENANCE =====
+
+$ hostname
+small-refmac-machine
+exit=0
+
+$ uname -r
+6.8.0-86-generic
+exit=0
+CPU(s):                               64
+Model name:                           AMD EPYC 7763 64-Core Processor
+Thread(s) per core:                   1
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+Cpus_allowed_list:	40-55
+Mems_allowed_list:	0-1
+--- load at start ---
+3.75 5.54 4.95 4/7993 3542074
+--- other users of cores 32-63 ---
+    PID USER     %CPU PSR ELAPSED COMMAND
+3542075 ubuntu    400  54       0 ps
+3527719 ubuntu    125  59     700 tiff_reader_ben
+
+$ /home/ubuntu/.mc-venv/bin/cmake --version
+cmake version 4.4.3
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+exit=0
+
+$ /home/ubuntu/.mc-venv/bin/python --version
+Python 3.12.3
+exit=0
+
+$ gcc --version
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+exit=0
+
+===== SOURCE (two independent clones, checked out from the remote) =====
+[base] HEAD=8323c55faf1c4ddbe35dd36c5cd1266d48f25c38  tree=9f5dd916441a6965675acd4b900d91fa43db0e49  dirty=0
+[fixed] HEAD=4b25d35a6a885d087e295564e660ad3af59b70ba  tree=36eceaf90013578bbacff0f73c1f33096c71b6b7  dirty=0
+--- every file that differs between the two trees ---
+
+$ git -C /home/ubuntu/mc-issue97-port/src-fixed diff --stat 8323c55 HEAD
+ CMakeLists.txt                                     |   7 +
+ SOURCE_MANIFEST.txt                                |   8 +
+ agents/designs/issue_97_recenter_origin.md         |  71 +++
+ docs/issue97_cpu_evidence/PORT.md                  |  88 ++++
+ docs/issue97_cpu_evidence/README.md                | 215 +++++++++
+ docs/issue97_cpu_evidence/compare_products.py      | 143 ++++++
+ .../cpu64_product_comparison.log                   |  44 ++
+ docs/issue97_cpu_evidence/cpu64_validation_run.log | 511 +++++++++++++++++++++
+ docs/issue97_cpu_evidence/followup.sh              |  47 ++
+ .../issue97_cpu_evidence/followup_measurements.log |  86 ++++
+ .../issue97_cpu_evidence/port_assertion_margins.py |  83 ++++
+ .../port_option_off_control.py                     |  44 ++
+ docs/issue97_cpu_evidence/port_validation.log      | 292 ++++++++++++
+ docs/issue97_cpu_evidence/port_validation.sh       | 108 +++++
+ docs/issue97_cpu_evidence/run_validation.sh        | 144 ++++++
+ src/motioncorr_runner.cpp                          |  22 +-
+ src/motioncorr_runner.h                            |  17 +-
+ tests/test_runner_contract.py                      | 120 ++++-
+ tests/test_runner_numerics.cpp                     | 114 +++++
+ tools/test_ci_fail_closed.py                       |  10 +-
+ tools/validate_test_collection.py                  |  10 +-
+ 21 files changed, 2170 insertions(+), 14 deletions(-)
+exit=0
+--- production delta, whole of src/ ---
+
+$ diff -r /home/ubuntu/mc-issue97-port/src-base/src /home/ubuntu/mc-issue97-port/src-fixed/src
+diff -r /home/ubuntu/mc-issue97-port/src-base/src/motioncorr_runner.cpp /home/ubuntu/mc-issue97-port/src-fixed/src/motioncorr_runner.cpp
+2240,2243c2240
+< 					for (int iframe = 0; iframe < n_frames; iframe++) {
+< 						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
+< 						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
+< 					}
+---
+> 					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
+2646a2644,2660
+> }
+> 
+> void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
+> 	if (xshifts.size() != yshifts.size())
+> 		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
+> 	if (xshifts.empty()) return;
+> 
+> 	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while
+> 	// iterating upwards zeroes the origin on the very first iteration, so every later
+> 	// frame would subtract zero and keep its un-recentered absolute value.
+> 	const RFLOAT origin_x = xshifts[0];
+> 	const RFLOAT origin_y = yshifts[0];
+> 
+> 	for (size_t iframe = 0; iframe < xshifts.size(); iframe++) {
+> 		xshifts[iframe] -= origin_x;
+> 		yshifts[iframe] -= origin_y;
+> 	}
+diff -r /home/ubuntu/mc-issue97-port/src-base/src/motioncorr_runner.h /home/ubuntu/mc-issue97-port/src-fixed/src/motioncorr_runner.h
+252a253,265
+> 	// Inter-/extrapolate per-group local shifts onto every frame.
+> 	// Pure function of its arguments (reads no member state), hence static; public
+> 	// so the motion-model arithmetic can be unit tested directly.
+> 	static void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+> 	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+> 	                       int n_frames,
+> 	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+> 
+> 	// Recenter per-frame shifts so that frame 0 becomes the origin.
+> 	// The first-frame offset MUST be saved before the in-place subtraction begins,
+> 	// otherwise iteration zero zeroes the origin that later iterations still need.
+> 	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
+> 
+276,279d288
+< 	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+< 	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+< 	                       int n_frames,
+< 	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+exit=1
+--- hashes of the sources and of the analysis scripts that run below ---
+7d458c27dc69adcc9b99162c756420092afeaa55b7f7221b92d60bec75948090  /home/ubuntu/mc-issue97-port/src-base/src/motioncorr_runner.cpp
+a1a071b8ac4bdbb0e01feed7c0f85f079987307a2e6700d803a3f0b7646b38d4  /home/ubuntu/mc-issue97-port/src-fixed/src/motioncorr_runner.cpp
+60547115ded0ce1445a925e47551924500f21bd2d20385046ec4136bb302b11e  /home/ubuntu/mc-issue97-port/src-base/src/motioncorr_runner.h
+c2e3135e1f17788fbeac11224cae6d8c1fc90ecc60f83275905f84e73894d41d  /home/ubuntu/mc-issue97-port/src-fixed/src/motioncorr_runner.h
+cd525fb35f461676fda2cf6391872848b00cb726aaff149ffcbf6191744ec2d7  /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py
+043a2b1483063025e6107e8cd7395fa13e843a5aad46df56ce4848d3cc2f301d  /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_numerics.cpp
+101dd8d8a3ec698e97d55083f2751f7b6e56bcab7aa1ab2697f116f6673ab730  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_assertion_margins.py
+284953231b5d177b24ff8dd628f19effc43747a25f763ccbe2c6f899f64bf174  /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_option_off_control.py
+
+===== BUILD (Release, -j16, pinned, out of tree) =====
+[base] configure exit=0
+[base] build exit=0
+  CMAKE_BUILD_TYPE:STRING=Release
+  CMAKE_HOME_DIRECTORY:INTERNAL=/home/ubuntu/mc-issue97-port/src-base
+  sha256 binary: ce9b97d12a3abab3b3c3c0d414a149773f736c43c51f82e88b370afe7e9ac4b5  /home/ubuntu/mc-issue97-port/build-base/motioncorr
+[fixed] configure exit=0
+[fixed] build exit=0
+  CMAKE_BUILD_TYPE:STRING=Release
+  CMAKE_HOME_DIRECTORY:INTERNAL=/home/ubuntu/mc-issue97-port/src-fixed
+  sha256 binary: 789171c3165be726eca404c56afbe090108e7dc5170aa62db4a94ad1099d8a38  /home/ubuntu/mc-issue97-port/build-fixed/motioncorr
+
+===== COLLECTION GATE =====
+--- candidate validator on the candidate build: must PASS ---
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/tools/validate_test_collection.py --test-dir /home/ubuntu/mc-issue97-port/build-fixed
+=== CTest Collection Validation: PASS === 
+  Collected tests: 20
+    - RunnerInterpolateRecenter      [REQUIRED]
+    - DefectParser                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - RunnerInterpolateShifts        [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+exit=0
+--- the same validator on the BASE build: must FAIL ---
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/tools/validate_test_collection.py --test-dir /home/ubuntu/mc-issue97-port/build-base
+=== CTest Collection Validation: FAIL === 
+  Collected tests: 18
+    - DefectParser                   [REQUIRED]
+    - SyntheticRegression            [REQUIRED]
+    - HotPixelRngDeterminism         [REQUIRED]
+    - RunnerExposure                 [REQUIRED]
+    - Runner_failure                 [REQUIRED]
+    - Runner_invalid                 [REQUIRED]
+    - Runner_resume                  [REQUIRED]
+    - Runner_tomography              [REQUIRED]
+    - RunnerLateBin                  [REQUIRED]
+    - RunnerExportedUnits            [REQUIRED]
+    - GainCache                      [REQUIRED]
+    - TiffRead                       [REQUIRED]
+    - DamagedMovie                   [REQUIRED]
+    - GlobalIfftElision              [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+  MISSING REQUIRED TESTS:
+    RunnerInterpolateRecenter
+    RunnerInterpolateShifts
+  FAILURE REASON: Test count 18 is less than minimum 20
+exit=1
+
+===== FULL CTEST =====
+[fixed] ctest exit=0
+
+100% tests passed out of 20
+
+Total Test time (real) =  14.56 sec
+[base] ctest exit=0
+
+100% tests passed out of 18
+
+Total Test time (real) =  13.87 sec
+--- the two new cases must not exist on base ---
+
+$ taskset -c 40-55 numactl --membind=1 ctest --test-dir /home/ubuntu/mc-issue97-port/build-base -R RunnerInterpolate -N
+Test project /home/ubuntu/mc-issue97-port/build-base
+
+Total Tests: 0
+exit=0
+
+===== NEW CASE: positive and negative control =====
+--- candidate binary: must pass ---
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py --binary /home/ubuntu/mc-issue97-port/build-fixed/motioncorr --case interpolate_shifts
+PASS runner interpolate_shifts
+exit=0
+--- BASE binary, same test: must fail, proving the call site is covered ---
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py --binary /home/ubuntu/mc-issue97-port/build-base/motioncorr --case interpolate_shifts
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py", line 346, in <module>
+    main()
+  File "/home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py", line 341, in main
+    CASES[args.case](args.binary.resolve(), Path(directory))
+  File "/home/ubuntu/mc-issue97-port/src-fixed/tests/test_runner_contract.py", line 307, in interpolate_shifts
+    assert frames[3][axis] == off[patch][3][axis], (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ((20.0, 20.0), 0, 0.0, 0.025063)
+exit=1
+--- unit regression ---
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/mc-issue97-port/build-fixed/runner_numerics interpolate_recenter
+PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+exit=0
+
+===== PER-ASSERTION OUTCOME AND MARGINS =====
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_assertion_margins.py /home/ubuntu/mc-issue97-port/build-base/motioncorr /home/ubuntu/mc-issue97-port/build-fixed/motioncorr /home/ubuntu/mc-issue97-port/src-fixed/test-data/fixtures /home/ubuntu/mc-issue97-port/src-fixed/tests
+tolerance asserted by the test: 3e-05
+
+BASE  (unfixed)   9 patches, 18 patch-axis observations
+  coverage assertions (these hold on both builds by design):
+    frame numbers [2..8]                         violations 0/9
+    off-arm group layout [3,5,7]                 violations 0/9
+    value at first selected frame is 0           violations 0/9
+  detectors:
+    cross-arm anchor frame 3                     violations 18/18   min 0.000444  max 0.068627
+                                                 violating by 15x .. 2288x the tolerance
+    cross-arm anchor frame 5                     violations 18/18   min 0.000442  max 0.068627
+                                                 violating by 15x .. 2288x the tolerance
+    segment linearity                            violations 18/18   min 0.000444  max 0.068627
+                                                 violating by 15x .. 2288x the tolerance
+  first-segment step X: min 0.000000  max 0.000000   0/9 patches clear the 100x floor
+  first-segment step Y: min 0.000000  max 0.000000   0/9 patches clear the 100x floor
+
+FIXED   9 patches, 18 patch-axis observations
+  coverage assertions (these hold on both builds by design):
+    frame numbers [2..8]                         violations 0/9
+    off-arm group layout [3,5,7]                 violations 0/9
+    value at first selected frame is 0           violations 0/9
+  detectors:
+    cross-arm anchor frame 3                     violations 0/18   min 0.000000  max 0.000000
+    cross-arm anchor frame 5                     violations 0/18   min 0.000000  max 0.000000
+    segment linearity                            violations 0/18   min 0.000000  max 0.000010
+  first-segment step X: min 0.005665  max 0.058140   9/9 patches clear the 100x floor
+  first-segment step Y: min 0.000444  max 0.068627   6/9 patches clear the 100x floor
+exit=0
+
+===== DEFAULT-OFF EXACTNESS CONTROL =====
+
+$ taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/python /home/ubuntu/mc-issue97-port/src-fixed/docs/issue97_cpu_evidence/port_option_off_control.py /home/ubuntu/mc-issue97-port/build-base/motioncorr /home/ubuntu/mc-issue97-port/build-fixed/motioncorr /home/ubuntu/mc-issue97-port/src-fixed/test-data/fixtures
+option-off  MRC pixel payload (65536 B): IDENTICAL   per-movie STAR: 0/119 lines differ
+option-on   MRC pixel payload (65536 B): DIFFERS   per-movie STAR: 90/155 lines differ
+exit=0
+
+--- load at end ---
+7.21 6.41 5.32 20/7997 3545765
+STATUS=DONE
+############ END 2026-09-28T15:38:26+00:00 ############

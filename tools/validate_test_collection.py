@@ -57,6 +57,9 @@ DEFAULT_REQUIRED_TESTS = [
     # that can see the recenter call site still being wired up.
     "RunnerInterpolateRecenter",
     "RunnerInterpolateShifts",
+    # Issue #95: the only test that can observe the native uint16 staging
+    # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
+    "NativeU16Staging",
 ]
 
 
@@ -127,8 +130,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=22,
-                        help="Minimum number of tests that must be collected (default: 22)")
+    parser.add_argument("--min-count", type=int, default=23,
+                        help="Minimum number of tests that must be collected (default: 23)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

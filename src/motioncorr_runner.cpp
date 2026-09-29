@@ -26,9 +26,7 @@
 #include <stdexcept>
 
 #include "src/motioncorr_runner.h"
-#if defined(__GLIBC__)
-#include <malloc.h>   // malloc_trim, see drop_u16_staging
-#endif
+#include "src/native_u16_staging.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -1345,6 +1343,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// resident CUDA path. Holds the decoded movie in its file sample type (half the
 	// bytes of Iframes) until the device has expanded it. Empty on every other path.
 	std::vector<Image<unsigned short> > Iframes_u16;
+	// Owns those frames' pixels as one mapping; see NativeU16MovieStaging. Movie
+	// scoped, so a throw anywhere below still returns the pages. Declared AFTER
+	// Iframes_u16 on purpose: release() writes through the frames it bound, so it
+	// has to run before that vector is destroyed.
+	NativeU16MovieStaging u16_staging;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -1468,9 +1471,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	            ((FileName)fn_mic.getFileFormat()).contains("tif") &&
 	            Ihead.dataType() == UShort;
 	if (stage_u16) {
-		Iframes_u16.resize(n_frames);
+		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		// One line, and it keeps the exact prefix docs/issue85_laneC/compare_movie_logs.py
+		// filters on. A second line would make every u16-staged log differ under that
+		// retained comparator for a reason that is not a product difference.
 		logfile << "Staging this movie as native unsigned 16-bit; the uint16 to float "
-		        << "expansion and the gain are applied on the device." << std::endl;
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
 	}
 #endif
 
@@ -1525,8 +1534,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
 				dst[pixel] = (float)src[pixel];
 			Iframes_u16[iframe].clear();
+			u16_staging.discardThrough(iframe + 1);
 		}
-		Iframes_u16.clear();
+		u16_staging.release();
 		stage_u16 = false;
 		logfile << "Materialized native uint16 frames as float for CPU fallback." << std::endl;
 	};
@@ -1536,20 +1546,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// allocation should not have to sit alongside the 0.64 GiB it replaces.
 	auto drop_u16_staging = [&]() {
 		if (!stage_u16) return;
-		Iframes_u16.clear();
+		// Returning the pages matters here, not just freeing them: a non-converging
+		// patch downloads the full float movie afterwards, and anything the staging
+		// still holds is added to that. munmap makes the release unconditional, so
+		// this no longer depends on an allocator returning arena pages.
+		u16_staging.release();
 		stage_u16 = false;
 		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
-#if defined(__GLIBC__)
-		// Returning the pages matters here, not just freeing them. Each staged frame
-		// is a ~27 MiB fftw_malloc, which sits under glibc's dynamic mmap threshold
-		// once that threshold has ratcheted up, so the arena keeps the whole ~0.64 GiB.
-		// A non-converging patch then downloads the full float movie on top of it and
-		// peak RSS ends up above the float baseline instead of below it. Measured on
-		// the 24-movie no-gain arm: 2.06 GiB retained versus 1.52 GiB for main.
-		// This is a measured glibc-specific RSS hint, not portable memory management
-		// and not required for correctness. Other allocators keep their own policy.
-		malloc_trim(0);
-#endif
 	};
 
 #ifdef _CUDA_ENABLED

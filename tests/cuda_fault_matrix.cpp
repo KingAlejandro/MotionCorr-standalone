@@ -27,6 +27,7 @@
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_fft_prep.h"
 #include "src/error.h"
 
 #include <cuda_runtime.h>
@@ -92,6 +93,10 @@ bool        g_fault_fired = false;
 size_t g_stale_releases = 0;
 bool g_free_sequence = false;
 int g_free_sequence_count = 0;
+bool g_count_armed = false;
+bool g_count_fired = false;
+cudaError_t g_count_error = cudaSuccess;
+long g_count_calls = 0;
 
 // Set while the session destructor runs. CudaMovieSession::release() performs a
 // deliberately non-fatal cudaDeviceSynchronize and only logs on failure, so a fault
@@ -133,6 +138,7 @@ bool shouldFail(FaultKind kind) {
 
 extern "C" {
 
+cudaError_t __real_cudaGetDeviceCount(int *count);
 cudaError_t __real_cudaMalloc(void **ptr, size_t size);
 cudaError_t __real_cudaFree(void *ptr);
 cudaError_t __real_cudaMemcpy(void *dst, const void *src, size_t size, cudaMemcpyKind kind);
@@ -159,6 +165,18 @@ cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     const cudaError_t result = __real_cudaMalloc(ptr, size);
     if (g_active && result == cudaSuccess) g_outstanding.insert(*ptr);
     return result;
+}
+
+cudaError_t __wrap_cudaGetDeviceCount(int *count) {
+    ++g_count_calls;
+    if (g_count_armed) {
+        g_count_armed = false;
+        g_count_fired = true;
+        *count = 0;
+        // Returned status only: leave the runtime last-error slot clean.
+        return g_count_error;
+    }
+    return __real_cudaGetDeviceCount(count);
 }
 
 cudaError_t __wrap_cudaFree(void *ptr) {
@@ -562,6 +580,65 @@ int runOwnershipControls() {
     return failures;
 }
 
+int runEnumerationControls() {
+    int failures = 0;
+    HostInputs in; buildHostInputs(in);
+    const std::vector<int> starts{0, 2}, sizes{2, 2};
+    for (int boundary = 0; boundary < 2; ++boundary) {
+        for (int mode = 0; mode < 3; ++mode) {
+            resetCounters(); g_fault_kind = FAULT_NONE; g_fault_at = 0;
+            g_active = true; g_count_fired = false;
+            g_count_error = mode == 0 ? cudaErrorIllegalAddress :
+                            mode == 1 ? cudaErrorInitializationError : cudaSuccess;
+            bool ok = cudaGetLastError() == cudaSuccess;
+            g_count_armed = true;
+            std::ostringstream log;
+            if (boundary == 0) {
+                CudaMovieSession session(NX, NY, NFRAMES, 0, log);
+                const bool initialized = session.initialize();
+                const CudaFailureState &state = session.getFailureState();
+                ok = ok && !initialized && g_count_fired &&
+                     state.firstError() == g_count_error &&
+                     state.isPoisoned() == (mode == 0) && cudaGetLastError() == cudaSuccess;
+                if (mode == 0) {
+                    const long calls = g_count_calls;
+                    ok = ok && std::string(state.fatalStage()) == "initialize" &&
+                         !session.initialize() && g_count_calls == calls;
+                } else {
+                    ok = ok && session.initialize();
+                }
+                session.release();
+            } else {
+                CudaFailureState state;
+                std::vector<MultidimArray<fComplex> > output;
+                const bool prepared = cudaPreparePatch(in.frames, 0, 32, 0, 32,
+                    2, starts, sizes, output, 0, log, &state);
+                const cudaError_t pending = cudaGetLastError();
+                const CudaRetryDecision decision = cudaRetryDecisionFor(state, pending);
+                ok = ok && !prepared && g_count_fired && pending == cudaSuccess &&
+                     state.firstError() == g_count_error &&
+                     (decision.verdict == CUDA_RETRY_FATAL) == (mode == 0);
+                if (mode == 0) {
+                    ok = ok && std::string(state.fatalStage()) == "cudaPreparePatch";
+                } else {
+                    ok = ok && cudaPreparePatch(in.frames, 0, 32, 0, 32,
+                        2, starts, sizes, output, 0, log, &state);
+                }
+            }
+            g_count_armed = false; g_active = false;
+            ok = ok && totalOutstanding() == 0 && g_stale_releases == 0 && hostInputsIntact(in);
+            if (!ok) {
+                ++failures;
+                std::fprintf(stderr, "FAIL enumeration boundary=%s mode=%s\n",
+                    boundary == 0 ? "initialize" : "cudaPreparePatch",
+                    mode == 0 ? "fatal" : mode == 1 ? "recoverable" : "zero-devices");
+            }
+        }
+    }
+    std::printf("Enumeration controls: six production boundary cases, failures=%d\n", failures);
+    return failures;
+}
+
 } // namespace
 
 int main() {
@@ -614,7 +691,7 @@ int main() {
         }
     };
 
-    int failures = runOwnershipControls(), trials = 0;
+    int failures = runOwnershipControls() + runEnumerationControls(), trials = 0;
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++) {
         for (long n = 1; n <= budget[k]; n++) {
             const TrialResult r = runTrial((FaultKind)k, n, 1);

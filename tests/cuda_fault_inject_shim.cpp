@@ -20,6 +20,8 @@
 //   MC_FAULT_ORDINAL  1-based index of the cudaMalloc call to fail (0/unset = never)
 //   MC_FAULT_CODE     "poison" -> cudaErrorIllegalAddress, else cudaErrorMemoryAllocation
 //   MC_FAULT_TRACE    if set, log every cudaMalloc ordinal to stderr for ordinal discovery
+//   MC_COUNT_FAULT_ORDINAL  1-based cudaGetDeviceCount call to replace
+//   MC_COUNT_FAULT_CODE     "poison", "recoverable", or "zero-devices"
 //
 // Issue #85 lane C controls, confined to this test-only binary:
 //   MC_U16_FAULT        alloc | h2d | kernel-recoverable | kernel-fatal
@@ -38,6 +40,7 @@
 
 extern "C" cudaError_t __real_cudaMalloc(void **ptr, size_t size);
 extern "C" cudaError_t __real_cudaFree(void *ptr);
+extern "C" cudaError_t __real_cudaGetDeviceCount(int *count);
 
 namespace {
 // Not atomic, deliberately. Every cudaMalloc on the path under test is issued from the
@@ -51,6 +54,9 @@ void report_owned() {
 }
 long  g_seen = 0;
 long  g_at = -1;
+long g_count_seen = 0;
+long g_count_at = 0;
+cudaError_t g_count_error = cudaSuccess;
 bool  g_poison = false;
 bool  g_trace = false;
 bool  g_init = false;
@@ -105,12 +111,38 @@ void init_once() {
     const char *stage = std::getenv("MC_U16_STAGE_BYTES");
     if (stage) g_u16_stage_bytes = (size_t)std::strtoull(stage, nullptr, 10);
     g_preprocess_fault = std::getenv("MC_PREPROCESS_FAULT");
+    const char *count_ordinal = std::getenv("MC_COUNT_FAULT_ORDINAL");
+    g_count_at = count_ordinal ? std::atol(count_ordinal) : 0;
+    const char *count_code = std::getenv("MC_COUNT_FAULT_CODE");
+    if (count_code && std::strcmp(count_code, "poison") == 0)
+        g_count_error = cudaErrorIllegalAddress;
+    else if (count_code && std::strcmp(count_code, "recoverable") == 0)
+        g_count_error = cudaErrorInitializationError;
 }
 
 bool is_u16_fault(const char *name) {
     return g_u16_fault && std::strcmp(g_u16_fault, name) == 0;
 }
 } // namespace
+
+extern "C" cudaError_t __wrap_cudaGetDeviceCount(int *count) {
+    init_once();
+    const long n = ++g_count_seen;
+    if (g_trace) std::fprintf(stderr, "[faultinject] cudaGetDeviceCount #%ld\n", n);
+    if (g_count_at > 0 && n == g_count_at) {
+        if (count) *count = 0;
+        const cudaError_t pending = cudaGetLastError();
+        if (pending != cudaSuccess) {
+            std::fprintf(stderr, "[faultinject] enumeration precondition failed: pending=%s\n",
+                         cudaGetErrorName(pending));
+            std::exit(3);
+        }
+        std::fprintf(stderr, "[faultinject] INJECTING %s at cudaGetDeviceCount #%ld; last-error clean\n",
+                     cudaGetErrorName(g_count_error), n);
+        return g_count_error;
+    }
+    return __real_cudaGetDeviceCount(count);
+}
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();

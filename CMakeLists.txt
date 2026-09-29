@@ -187,7 +187,8 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
             "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftSetWorkArea"
             "LINKER:--wrap=cufftPlanMany" "LINKER:--wrap=cufftExecR2C"
-            "LINKER:--wrap=cufftExecC2R")
+            "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
         add_executable(motioncorr_retry_caller
@@ -208,7 +209,7 @@ if(BUILD_TESTING AND CUDA)
             "-rdynamic"
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
-            "LINKER:--wrap=cudaDeviceSynchronize")
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py

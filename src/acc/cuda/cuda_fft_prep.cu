@@ -299,6 +299,7 @@ bool cudaPreparePatch(
 
     int dev_count = 0;
     cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    if (failure) failure->record(count_err, __func__, __LINE__);
     if (count_err != cudaSuccess || dev_count == 0) {
         logfile << "ERROR: No CUDA devices found" << std::endl;
         return false;

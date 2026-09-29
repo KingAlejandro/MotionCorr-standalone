@@ -1,6 +1,28 @@
 # Issue 69: composed CUDA reliability results
 
-## Source and disposition
+## Enumeration failure follow-up (29 September)
+
+Source review found two unrecorded `cudaGetDeviceCount` error returns: session
+initialization and `cudaPreparePatch`. Commit `7572e3a` records both before returning,
+so a fatal returned status remains visible even when the runtime last-error slot is
+clean. Recoverable errors and a successful zero-device query retain their old behavior.
+The current runner driver is `0e159ff`; its later changes affect only control grading
+and provenance. Production/C++ test sources are unchanged from `7572e3a`.
+
+Fresh native results on GPU2 / CPUs112-119: **22/22 CTest**, **301 resource trials plus
+six enumeration cases, zero failures**. The production controls located initialization
+at query ordinal2 and fallback preparation at ordinal5. Both fatal arms refused further
+allocation and published no image/joint STAR. Each of the four recoverable/zero-device
+arms produced one MRC/two STAR files exactly matching healthy pixels, full normalized
+headers and metadata. Removing either recording line independently fails its matrix
+controls and makes that production fatal arm incorrectly complete. Fresh all24 versus
+the retained current-main reference matches 24 MRC/25 STAR/**341,735,520 pixels** and
+full normalized headers exactly. These are injected statuses, not real context poisoning.
+
+[Commands, source/binary/input hashes, raw logs, mutants and limits](evidence/enumeration-20260929/README.md).
+Final independent review and CI for this follow-up remain pending; no merge is implied.
+
+## Initial ownership execution and disposition
 
 Executed production/test source: **078ec5461119b8a51802debc8f2621b3c304a5bc**.
 Reference main: **a75a3f87f7ef17e0a29b1c91a1edecda08ebed34**. PR115 contains

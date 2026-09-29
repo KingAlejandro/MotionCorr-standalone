@@ -1,0 +1,67 @@
+[faultinject] cudaGetDeviceCount #1
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo][faultinject] cudaGetDeviceCount #2
+[faultinject] cudaMalloc #1 size=1366942080
+[faultinject] cudaMalloc #2 size=1367678976
+[faultinject] cudaMalloc #3 size=56955920
+[faultinject] cudaMalloc #4 size=56986624
+[faultinject] cudaMalloc #5 size=56986624
+[faultinject] cudaMalloc #6 size=16384
+[faultinject] cudaMalloc #7 size=16
+[faultinject] cudaMalloc #8 size=8192
+[faultinject] cudaMalloc #9 size=8
+[faultinject] cudaMalloc #10 size=1582112
+[faultinject] cudaMalloc #11 size=12
+[faultinject] cudaMalloc #12 size=948
+[faultinject] cudaMalloc #13 size=948
+[faultinject] cudaMalloc #14 size=22752
+[faultinject] cudaGetDeviceCount #3
+[faultinject] cudaMalloc #15 size=3786912
+[faultinject] cudaMalloc #16 size=1893456
+[faultinject] cudaMalloc #17 size=90885888
+[faultinject] cudaMalloc #18 size=90699264
+[faultinject] cudaMalloc #19 size=96
+[faultinject] cudaMalloc #20 size=96
+[faultinject] cudaMalloc #21 size=96
+[faultinject] cudaMalloc #22 size=96
+[faultinject] cudaMalloc #23 size=151887744
+[faultinject] cudaMalloc #24 size=151642368
+[faultinject] cudaMalloc #25 size=96
+[faultinject] cudaMalloc #26 size=96
+[faultinject] cudaGetDeviceCount #4
+[faultinject] INJECTING cudaErrorIllegalAddress at cudaGetDeviceCount #4; last-error clean
+in: /home/alex/mc-pr115-enumeration-20260929/src/src/acc/cuda/cuda_alignpatch.cu, line 251
+ERROR: 
+No CUDA capable devices found
+=== Backtrace  ===
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x51e17) [0x5c48ba3f0e17]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x2cb1a) [0x5c48ba3cbb1a]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0xf8578) [0x5c48ba497578]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x100830) [0x5c48ba49f830]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x47cb3) [0x5c48ba3e6cb3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ba9e242a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ba9e242a28b]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x48365) [0x5c48ba3e7365]
+==================
+ERROR: 
+No CUDA capable devices found
+Continuing with the remaining movies.
+   1/   1 sec ............................................................~~(,_,"> yum!
+in: /home/alex/mc-pr115-enumeration-20260929/src/src/motioncorr_runner.cpp, line 697
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x51e17) [0x5c48ba3f0e17]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x28dae) [0x5c48ba3c7dae]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x47cb3) [0x5c48ba3e6cb3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ba9e242a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ba9e242a28b]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x48365) [0x5c48ba3e7365]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

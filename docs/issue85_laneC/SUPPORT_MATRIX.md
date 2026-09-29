@@ -122,6 +122,23 @@ the uint16 staging (`motioncorr_runner.cpp:1937-1938`) exact; two nonsquare
 geometries; consecutive same- and mixed-geometry movies in one process; repeat
 and non-prefix resume exact under unchanged tolerances.
 
+## PR125 reviewed with this matrix
+
+The memory owner's no-gain RSS fix (`t3code/fix-compact-ingest-memory-regression`,
+head `fb0f653`, PR125) was run through the unmodified matrix rather than
+re-implemented. Their branch was cloned and built untouched and the harness was
+pointed at their binary, so nothing in their tree changed. Same host, same
+device, same deterministic fixtures.
+
+**16/16 rows PASS, 28/28 arms UUID-witnessed, and 38/38 products byte-identical**
+in header, extended header and payload against the frozen source, with identical
+inputs on both sides. Evidence: `support-20260929/cross-source-pr125/`.
+
+That is product and support equivalence at these synthetic geometries. It is not
+a memory result — no RSS was measured here, and the +0.230 GiB no-gain
+regression their PR exists to fix is theirs to demonstrate — and it is not a
+real-data result.
+
 ## What the runs established that was not previously recorded
 
 - **A failing movie withholds the whole joint STAR, not just its own row.**

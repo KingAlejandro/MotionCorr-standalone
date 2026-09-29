@@ -1,0 +1,362 @@
+{
+  "purpose": "product equality across two production sources under one harness",
+  "harness_sha256": "60a648c2a4e8bd8985d1310fc856bc0189f4dd58115a0d88b0a6be8e4ad09a55",
+  "base": {
+    "branch": "t3code/compact-ingest-compatibility-tests",
+    "source": "6827b314 frozen PR118 + main 6393547e",
+    "binary_sha256": "159e675a3186487c8b159a44f65a2b05b0ab25c9523c7a065b56f09f810409ce"
+  },
+  "candidate": {
+    "branch": "t3code/fix-compact-ingest-memory-regression",
+    "head": "fb0f653",
+    "binary_sha256": "e7133e21f1639864ed3d342c74f8c39271907c33c6e07360af9239426c7dde71"
+  },
+  "host": "4-gpu-vm",
+  "device": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "products_compared": 38,
+  "products_identical": 38,
+  "rows": [
+    {
+      "case": "all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_EVN.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+    },
+    {
+      "case": "all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_ODD.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+    },
+    {
+      "case": "all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "base_gain",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "5d0b830a56328092236ccd53099cc24609db137d3715bb05e57b8a9bd5d0c5d1"
+    },
+    {
+      "case": "base_nogain",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+    },
+    {
+      "case": "even_odd",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "even_odd",
+      "product": "Movies/mov00_g1_64x48x6_EVN.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+    },
+    {
+      "case": "even_odd",
+      "product": "Movies/mov00_g1_64x48x6_ODD.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+    },
+    {
+      "case": "ineligible_early_binning",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "f0942f60d3a240c4d26a52b8df4d347cc7d41b202e245eb32fc27391dfc32e9b"
+    },
+    {
+      "case": "ineligible_float_tiff",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "power_spectrum",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "power_spectrum",
+      "product": "Movies/mov00_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "repeat_all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "repeat_all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_EVN.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+    },
+    {
+      "case": "repeat_all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_ODD.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+    },
+    {
+      "case": "repeat_all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "repeat_all_output_modes",
+      "product": "Movies/mov00_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov00_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov00_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov01_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov01_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov01_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov02_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov02_g1_64x48x6_PS.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+    },
+    {
+      "case": "resume_non_prefix",
+      "product": "Movies/mov02_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "save_nodw",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+    },
+    {
+      "case": "save_nodw",
+      "product": "Movies/mov00_g1_64x48x6_noDW.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "second_geometry",
+      "product": "Movies/mov00_g2_54x72x8.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "ea746742e30e6385fcf79a3dde5879f4341fe83f78d338de2a731fe27b7471a2"
+    },
+    {
+      "case": "selected_unequal_groups",
+      "product": "Movies/mov00_g2_54x72x8.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "bc88904b73f86a327dfb1b45f8797d3a2956873f64da59258f2046f2d41971a5"
+    },
+    {
+      "case": "successive_mixed_geometry",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+    },
+    {
+      "case": "successive_mixed_geometry",
+      "product": "Movies/mov01_g2_54x72x8.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "f78e7a280c059dd1a2d3afab5b4afac1efb0490938caeeec31dbf3b177987d87"
+    },
+    {
+      "case": "successive_mixed_geometry",
+      "product": "Movies/mov02_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+    },
+    {
+      "case": "successive_same_geometry",
+      "product": "Movies/mov00_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "successive_same_geometry",
+      "product": "Movies/mov01_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    },
+    {
+      "case": "successive_same_geometry",
+      "product": "Movies/mov02_g1_64x48x6.mrc",
+      "inputs_identical": true,
+      "header_equal": true,
+      "extended_equal": true,
+      "payload_equal": true,
+      "payload_sha256": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+    }
+  ]
+}

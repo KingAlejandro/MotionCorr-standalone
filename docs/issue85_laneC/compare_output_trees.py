@@ -5,6 +5,15 @@ Each arm is structurally validated against an explicit movie manifest before the
 arms are compared. In particular, equal files are not enough: an identically
 truncated MRC, an unsupported mode, or two missing STAR products must fail.
 
+The manifest declares, per movie, the complete set of corrected images the run
+was asked to produce -- the plain sum plus any of ``_noDW`` / ``_EVN`` / ``_ODD``
+/ ``_PS`` -- and the geometry each of them must have. Declaring the set is what
+makes a missing requested product a failure rather than a smaller inventory that
+still matches on both sides, and per-product geometry is what lets ``_PS.mrc``
+(sized by ``--ps_size``) and a mixed-geometry batch be graded at all. Products
+that the run also records in the joint STAR carry the tag that must point at
+them, so a published image with no metadata association fails too.
+
 Only declared nondeterminism is normalized:
 * the exact output-root prefix in text products;
 * measured-duration lines in ``.log`` files only;
@@ -71,6 +80,31 @@ class MrcInfo:
     payload_sha256: str
 
 
+@dataclass(frozen=True)
+class ProductSpec:
+    """One corrected image the run was asked to write for a movie.
+
+    ``suffix`` is appended to the movie stem: "" is the plain sum, "_noDW" the
+    unweighted sum kept beside a dose-weighted one, "_EVN"/"_ODD" the even/odd
+    sums, "_PS" the power spectrum. ``shape`` is that product's own geometry,
+    which is not the movie's for "_PS" (it is --ps_size square). ``joint_tag``
+    is the data_micrographs tag the run must use to point at this product, or
+    None when the run publishes the image without recording an association.
+    """
+    suffix: str
+    shape: Tuple[int, int, int]
+    joint_tag: Optional[str]
+
+
+@dataclass(frozen=True)
+class MovieSpec:
+    movie: str
+    stem: str
+    products: Tuple[ProductSpec, ...]
+    general_tags: Tuple[Tuple[str, str], ...]
+    optics_group: Optional[str]
+
+
 def _relative_product(value: str, name: str) -> PurePosixPath:
     if not isinstance(value, str) or not value:
         raise ValidationError(f"manifest {name} must be a non-empty relative path")
@@ -78,6 +112,100 @@ def _relative_product(value: str, name: str) -> PurePosixPath:
     if p.is_absolute() or any(part in ("", ".", "..") for part in p.parts):
         raise ValidationError(f"unsafe manifest path for {name}: {value!r}")
     return p
+
+
+def _movie_identity(item: Any) -> str:
+    value = item.get("movie") if isinstance(item, dict) else item
+    if not isinstance(value, str) or not value or "\n" in value or "\r" in value:
+        raise ValidationError("manifest movie identities must be non-empty single-line strings")
+    return value
+
+
+def _shape_triple(value: Any, name: str) -> Tuple[int, int, int]:
+    if (not isinstance(value, list) or len(value) != 3 or
+            any(type(v) is not int or v <= 0 for v in value)):
+        raise ValidationError(f"manifest {name} must contain three positive integers")
+    return (value[0], value[1], value[2])
+
+
+def _tag_map(value: Any, name: str) -> Tuple[Tuple[str, str], ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, dict):
+        raise ValidationError(f"manifest {name} must be an object of tag -> expected value")
+    pairs = []
+    for tag, expected in sorted(value.items()):
+        if not isinstance(tag, str) or not tag.startswith("_rln"):
+            raise ValidationError(f"manifest {name} key {tag!r} is not a _rln STAR tag")
+        if isinstance(expected, bool) or not isinstance(expected, (str, int, float)):
+            raise ValidationError(f"manifest {name}[{tag}] must be a string or number")
+        pairs.append((tag, str(expected)))
+    return tuple(pairs)
+
+
+def _product_specs(raw: Any, default_shape: Tuple[int, int, int], where: str) -> Tuple[ProductSpec, ...]:
+    """Parse a declared product set. Absent means the plain corrected sum only."""
+    if raw is None:
+        return (ProductSpec(suffix="", shape=default_shape, joint_tag=None),)
+    if not isinstance(raw, list) or not raw:
+        raise ValidationError(f"{where} products must be a non-empty list")
+    specs: List[ProductSpec] = []
+    seen: Set[str] = set()
+    for entry in raw:
+        if not isinstance(entry, dict):
+            raise ValidationError(f"{where} product entries must be objects")
+        suffix = entry.get("suffix", "")
+        if not isinstance(suffix, str) or (suffix and not re.fullmatch(r"_[A-Za-z0-9]+", suffix)):
+            raise ValidationError(f"{where} product suffix {suffix!r} must be empty or _ALNUM")
+        if suffix in seen:
+            raise ValidationError(f"{where} declares product suffix {suffix!r} twice")
+        seen.add(suffix)
+        shape = (_shape_triple(entry["shape_xyz"], f"{where} product {suffix or 'sum'} shape_xyz")
+                 if "shape_xyz" in entry else default_shape)
+        joint_tag = entry.get("joint_tag")
+        if joint_tag is not None and (not isinstance(joint_tag, str) or not joint_tag.startswith("_rln")):
+            raise ValidationError(f"{where} product {suffix or 'sum'} joint_tag must be a _rln STAR tag")
+        specs.append(ProductSpec(suffix=suffix, shape=shape, joint_tag=joint_tag))
+    if not any(spec.suffix == "" for spec in specs):
+        raise ValidationError(f"{where} must declare the plain corrected sum (suffix \"\")")
+    return tuple(specs)
+
+
+def movie_specs(manifest: Dict[str, Any]) -> List[MovieSpec]:
+    """Expand the manifest into one fully resolved spec per movie.
+
+    A movie entry may be a bare path (it then inherits the manifest defaults) or
+    an object overriding shape_xyz, products, general_tags or optics_group. The
+    override is what makes a batch of differently shaped movies gradeable: one
+    expected_shape_xyz cannot describe it.
+    """
+    default_shape = _shape_triple(manifest.get("expected_shape_xyz"), "expected_shape_xyz")
+    default_products_raw = manifest.get("products")
+    default_tags = _tag_map(manifest.get("general_tags"), "general_tags")
+    default_optics = manifest.get("optics_group")
+    if default_optics is not None and isinstance(default_optics, bool):
+        raise ValidationError("manifest optics_group must be a string or number")
+    specs: List[MovieSpec] = []
+    stems: Set[str] = set()
+    for item in manifest["movies"]:
+        movie = _movie_identity(item)
+        entry = item if isinstance(item, dict) else {}
+        unknown = set(entry) - {"movie", "shape_xyz", "products", "general_tags", "optics_group"}
+        if unknown:
+            raise ValidationError(f"manifest movie {movie}: unknown keys {sorted(unknown)}")
+        shape = (_shape_triple(entry["shape_xyz"], f"movie {movie} shape_xyz")
+                 if "shape_xyz" in entry else default_shape)
+        products = _product_specs(entry.get("products", default_products_raw), shape, f"movie {movie}")
+        stem = PurePosixPath(movie).stem
+        if stem in stems:
+            raise ValidationError(f"movie stems are not unique: {stem}")
+        stems.add(stem)
+        tags = _tag_map(entry["general_tags"], f"movie {movie} general_tags") if "general_tags" in entry else default_tags
+        optics = entry.get("optics_group", default_optics)
+        specs.append(MovieSpec(movie=movie, stem=stem, products=products,
+                               general_tags=tags,
+                               optics_group=None if optics is None else str(optics)))
+    return specs
 
 
 def load_manifest(path: Path) -> Dict[str, Any]:
@@ -88,18 +216,20 @@ def load_manifest(path: Path) -> Dict[str, Any]:
     if not isinstance(manifest, dict):
         raise ValidationError("manifest root must be an object")
     movies = manifest.get("movies")
-    shape = manifest.get("expected_shape_xyz")
     if not isinstance(movies, list) or not movies:
         raise ValidationError("manifest movies inventory is empty or malformed")
-    for item in movies:
-        if not isinstance(item, str) or not item or "\n" in item or "\r" in item:
-            raise ValidationError("manifest movie identities must be non-empty single-line strings")
-    if len(set(movies)) != len(movies):
+    identities = [_movie_identity(item) for item in movies]
+    if len(set(identities)) != len(identities):
         raise ValidationError("manifest movie inventory contains duplicates")
-    if (not isinstance(shape, list) or len(shape) != 3 or
-            any(type(v) is not int or v <= 0 for v in shape)):
-        raise ValidationError("manifest expected_shape_xyz must contain three positive integers")
+    forbidden = manifest.get("forbidden_joint_tags")
+    if forbidden is not None:
+        if (not isinstance(forbidden, list) or
+                any(not isinstance(tag, str) or not tag.startswith("_rln") for tag in forbidden)):
+            raise ValidationError("manifest forbidden_joint_tags must be a list of _rln STAR tags")
     _relative_product(manifest.get("joint_star", "corrected_micrographs.star"), "joint_star")
+    # Resolving here rather than in validate_tree keeps every schema error a
+    # manifest error, reported once, before either arm is touched.
+    movie_specs(manifest)
     return manifest
 
 
@@ -135,13 +265,11 @@ def _expected_paths(manifest: Dict[str, Any]) -> Tuple[Set[Path], Set[Path], Dic
     mrcs: Set[Path] = set()
     stars: Set[Path] = set()
     movie_for_stem: Dict[str, str] = {}
-    for movie in manifest["movies"]:
-        stem = PurePosixPath(movie).stem
-        if stem in movie_for_stem:
-            raise ValidationError(f"movie stems are not unique: {stem}")
-        movie_for_stem[stem] = movie
-        mrcs.add(Path("Movies") / f"{stem}.mrc")
-        stars.add(Path("Movies") / f"{stem}.star")
+    for spec in movie_specs(manifest):
+        movie_for_stem[spec.stem] = spec.movie
+        for product in spec.products:
+            mrcs.add(Path("Movies") / f"{spec.stem}{product.suffix}.mrc")
+        stars.add(Path("Movies") / f"{spec.stem}.star")
     joint = Path(manifest.get("joint_star", "corrected_micrographs.star"))
     if joint in stars:
         raise ValidationError("joint STAR path collides with a per-movie STAR")
@@ -236,7 +364,7 @@ def _path_inside_root(root: Path, value: str, rel_expected: Path, star_path: Pat
         raise ValidationError(f"{star_path} references {actual_rel}, expected {rel_expected}")
 
 
-def _parse_joint_micrographs(path: Path) -> List[List[str]]:
+def _joint_micrograph_loop(path: Path) -> Tuple[List[str], List[List[str]]]:
     try:
         text = path.read_text(encoding="latin-1")
     except OSError as exc:
@@ -247,10 +375,22 @@ def _parse_joint_micrographs(path: Path) -> List[List[str]]:
             matches.append((cols, rows))
     if len(matches) != 1:
         raise ValidationError(f"expected one data_micrographs image/metadata loop in {path}")
-    cols, rows = matches[0]
+    return matches[0]
+
+
+def _parse_joint_micrographs(path: Path) -> List[List[str]]:
+    cols, rows = _joint_micrograph_loop(path)
     idx_image = cols.index("_rlnMicrographName")
     idx_metadata = cols.index("_rlnMicrographMetadata")
     return [[row[idx_image], row[idx_metadata]] for row in rows]
+
+
+def _values_match(actual: str, expected: str) -> bool:
+    """STAR numbers are reformatted on write, so compare them as numbers."""
+    try:
+        return math.isclose(float(actual), float(expected), rel_tol=0.0, abs_tol=1e-9)
+    except ValueError:
+        return actual == expected
 
 
 def _decode_header(path: Path, raw: bytes) -> Tuple[str, Tuple[int, int, int], int, int, int]:
@@ -365,34 +505,72 @@ def validate_tree(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
         if (root / rel).is_symlink():
             raise ValidationError(f"{root / rel}: required product must not be a symlink")
 
-    shape = manifest["expected_shape_xyz"]
+    specs = movie_specs(manifest)
     mrc_info: Dict[str, MrcInfo] = {}
-    for rel in sorted(expected_mrcs):
-        mrc_info[rel.as_posix()] = validate_mrc(root / rel, shape)
+    pixel_count = 0
+    for spec in specs:
+        for product in spec.products:
+            rel = Path("Movies") / f"{spec.stem}{product.suffix}.mrc"
+            mrc_info[rel.as_posix()] = validate_mrc(root / rel, product.shape)
+            pixel_count += math.prod(product.shape)
 
-    for stem, movie in movie_for_stem.items():
-        rel = Path("Movies") / f"{stem}.star"
+    for spec in specs:
+        rel = Path("Movies") / f"{spec.stem}.star"
         identity = _read_star_tag(root / rel, "general", "_rlnMicrographMovieName")
-        if identity != movie:
-            raise ValidationError(f"{root / rel}: movie identity {identity!r}, expected {movie!r}")
+        if identity != spec.movie:
+            raise ValidationError(f"{root / rel}: movie identity {identity!r}, expected {spec.movie!r}")
+        # The acquisition association: pixel equality cannot see a movie summed
+        # from the wrong first frame, at the wrong dose, or under the wrong
+        # optics, because each of those is a legitimate different-but-valid run.
+        for tag, expected in spec.general_tags:
+            actual = _read_star_tag(root / rel, "general", tag)
+            if not _values_match(actual, expected):
+                raise ValidationError(f"{root / rel}: {tag} is {actual!r}, expected {expected!r}")
 
     joint_rel = Path(manifest.get("joint_star", "corrected_micrographs.star"))
-    joint_rows = _parse_joint_micrographs(root / joint_rel)
-    expected_rows = len(movie_for_stem)
-    if len(joint_rows) != expected_rows:
-        raise ValidationError(f"{root / joint_rel}: {len(joint_rows)} movie rows, expected {expected_rows}")
+    joint_cols, joint_raw = _joint_micrograph_loop(root / joint_rel)
+    expected_rows = len(specs)
+    if len(joint_raw) != expected_rows:
+        raise ValidationError(f"{root / joint_rel}: {len(joint_raw)} movie rows, expected {expected_rows}")
+    forbidden = set(manifest.get("forbidden_joint_tags") or ())
+    present_forbidden = sorted(forbidden & set(joint_cols))
+    if present_forbidden:
+        raise ValidationError(f"{root / joint_rel}: unexpected association column(s) {present_forbidden}")
+    idx_image = joint_cols.index("_rlnMicrographName")
+    idx_metadata = joint_cols.index("_rlnMicrographMetadata")
+    spec_for_stem = {spec.stem: spec for spec in specs}
     seen: Set[str] = set()
-    for image_path, metadata_path in joint_rows:
+    for row in joint_raw:
+        image_path, metadata_path = row[idx_image], row[idx_metadata]
         image_rel = Path(Path(image_path).name)
-        if image_rel.suffix != ".mrc" or image_rel.stem not in movie_for_stem:
+        if image_rel.suffix != ".mrc" or image_rel.stem not in spec_for_stem:
             raise ValidationError(f"{root / joint_rel}: unexpected movie identity in image path {image_path!r}")
         stem = image_rel.stem
         if stem in seen:
             raise ValidationError(f"{root / joint_rel}: duplicate movie row for {stem}")
         seen.add(stem)
+        spec = spec_for_stem[stem]
         _path_inside_root(root, image_path, Path("Movies") / f"{stem}.mrc", root / joint_rel)
         _path_inside_root(root, metadata_path, Path("Movies") / f"{stem}.star", root / joint_rel)
-    missing_rows = set(movie_for_stem) - seen
+        for product in spec.products:
+            if product.joint_tag is None:
+                continue
+            if product.joint_tag not in joint_cols:
+                raise ValidationError(
+                    f"{root / joint_rel}: missing {product.joint_tag} association for "
+                    f"{stem}{product.suffix}.mrc"
+                )
+            _path_inside_root(root, row[joint_cols.index(product.joint_tag)],
+                              Path("Movies") / f"{stem}{product.suffix}.mrc", root / joint_rel)
+        if spec.optics_group is not None:
+            if "_rlnOpticsGroup" not in joint_cols:
+                raise ValidationError(f"{root / joint_rel}: missing _rlnOpticsGroup column")
+            actual = row[joint_cols.index("_rlnOpticsGroup")]
+            if not _values_match(actual, spec.optics_group):
+                raise ValidationError(
+                    f"{root / joint_rel}: {stem} optics group {actual!r}, expected {spec.optics_group!r}"
+                )
+    missing_rows = set(spec_for_stem) - seen
     if missing_rows:
         raise ValidationError(f"{root / joint_rel}: missing movie rows {sorted(missing_rows)}")
 
@@ -403,8 +581,8 @@ def validate_tree(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
         "files": all_files,
         "mrc_count": len(mrc_info),
         "star_count": len(actual_stars),
-        "movie_count": len(movie_for_stem),
-        "pixel_count": math.prod(shape) * len(movie_for_stem),
+        "movie_count": len(specs),
+        "pixel_count": pixel_count,
         "mrc": mrc_info,
     }
 

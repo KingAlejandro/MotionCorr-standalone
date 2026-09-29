@@ -4,34 +4,34 @@
   "binary_sha256": "21a07802e8ca98738a4889e26750a04e109da883cafab1a1998930ab1f1f01c5",
   "comparator_sha256": "b5d5d9986bcc928dfaa3ca32f0329061094eeaaf60233bd9fd3864df20441732",
   "fixtures_sha256": "682b4e18515bd6766ebc7369f7bcfa3c7affee48b949dd1b69b8702de14fe6d3",
-  "harness_sha256": "506a6cb1ccefaa6e8286120f4987a0320041f774d53482394521224a1fe2cefe",
+  "harness_sha256": "60a648c2a4e8bd8985d1310fc856bc0189f4dd58115a0d88b0a6be8e4ad09a55",
   "host": "gn0003.scarf.rl.ac.uk",
-  "workdir": "/tmp/mc83-final-3514075",
+  "workdir": "/tmp/mc83-rec2-3514089",
   "device": {
     "index": "0",
-    "uuid": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+    "uuid": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
     "name": "NVIDIA A100-SXM4-40GB",
     "memory_used": "0 MiB",
-    "topology": "\t\u001b[4mGPU0\tNIC0\tNIC1\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tNODE\tNODE\t4-7,36-39\t0\t\tN/A\nNIC0\tNODE\t X \tNODE\t\t\t\t\nNIC1\tNODE\tNODE\t X \t\t\t\t\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n\nNIC Legend:\n\n  NIC0: mlx5_0\n  NIC1: mlx5_1\n\n"
+    "topology": "\t\u001b[4mGPU0\tNIC0\tNIC1\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tNODE\tNODE\t\t1\t\tN/A\nNIC0\tNODE\t X \tNODE\t\t\t\t\nNIC1\tNODE\tNODE\t X \t\t\t\t\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n\nNIC Legend:\n\n  NIC0: mlx5_0\n  NIC1: mlx5_1\n\n"
   },
   "device_catalogue": [
     {
       "index": "0",
-      "uuid": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+      "uuid": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
       "name": "NVIDIA A100-SXM4-40GB",
       "memory_used": "0 MiB"
     }
   ],
-  "slurm_job_id": "3514075",
+  "slurm_job_id": "3514089",
   "cpus_allowed": [
-    4,
     5,
     6,
     7,
-    36,
+    8,
     37,
     38,
-    39
+    39,
+    40
   ],
   "threads": 8,
   "uuid_witness": "required",
@@ -52,32 +52,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488485,
-            "wall_start": 1790693813.5920508,
+            "pid": 2490532,
+            "wall_start": 1790694354.6644804,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161258234",
+            "start_ticks": "161312341",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.715,
+            "wall_seconds": 1.742,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 10,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/base_gain/out-primary/",
+              "/tmp/mc83-rec2-3514089/base_gain/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -104,7 +104,7 @@
               "--defect_file",
               "defects.txt"
             ],
-            "cwd": "/tmp/mc83-final-3514075/base_gain/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/base_gain/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -113,32 +113,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488531,
-            "wall_start": 1790693815.3732672,
+            "pid": 2490574,
+            "wall_start": 1790694356.4252005,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161258412",
+            "start_ticks": "161312517",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.481,
+            "wall_seconds": 1.424,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/base_gain/out-float/",
+              "/tmp/mc83-rec2-3514089/base_gain/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -165,7 +165,7 @@
               "--defect_file",
               "defects.txt"
             ],
-            "cwd": "/tmp/mc83-final-3514075/base_gain/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/base_gain/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -176,7 +176,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/base_gain/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/base_gain/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -184,7 +184,7 @@
             "pixel_count": 3072
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/base_gain/out-float",
+            "root": "/tmp/mc83-rec2-3514089/base_gain/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -273,8 +273,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1868.462646484375,
+          "dmax": 12185.2529296875,
+          "dmean": 2508.432861328125,
+          "rms": 1074.8389892578125
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/base_gain/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/base_gain/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -299,7 +307,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/base_gain/out-float",
+        "root": "/tmp/mc83-rec2-3514089/base_gain/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -337,32 +345,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488573,
-            "wall_start": 1790693816.8806226,
+            "pid": 2490614,
+            "wall_start": 1790694357.8771982,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161258562",
+            "start_ticks": "161312662",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.467,
+            "wall_seconds": 1.438,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/base_nogain/out-primary/",
+              "/tmp/mc83-rec2-3514089/base_nogain/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -385,7 +393,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-final-3514075/base_nogain/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/base_nogain/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -394,32 +402,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488615,
-            "wall_start": 1790693818.3620214,
+            "pid": 2490654,
+            "wall_start": 1790694359.3293247,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161258711",
+            "start_ticks": "161312807",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.527,
+            "wall_seconds": 1.445,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/base_nogain/out-float/",
+              "/tmp/mc83-rec2-3514089/base_nogain/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -442,7 +450,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-final-3514075/base_nogain/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/base_nogain/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -453,7 +461,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/base_nogain/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/base_nogain/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -461,7 +469,7 @@
             "pixel_count": 3072
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/base_nogain/out-float",
+            "root": "/tmp/mc83-rec2-3514089/base_nogain/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -542,8 +550,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1228.3311767578125,
+          "dmax": 8595.4111328125,
+          "dmean": 1671.6014404296875,
+          "rms": 713.7672729492188
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/base_nogain/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/base_nogain/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -568,7 +584,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/base_nogain/out-float",
+        "root": "/tmp/mc83-rec2-3514089/base_nogain/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -607,32 +623,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488659,
-            "wall_start": 1790693819.915502,
+            "pid": 2490694,
+            "wall_start": 1790694360.8003175,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161258866",
+            "start_ticks": "161312954",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.494,
+            "wall_seconds": 1.456,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/save_nodw/out-primary/",
+              "/tmp/mc83-rec2-3514089/save_nodw/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -661,7 +677,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/save_nodw/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/save_nodw/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -670,32 +686,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488705,
-            "wall_start": 1790693821.424306,
+            "pid": 2490736,
+            "wall_start": 1790694362.2712133,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259017",
+            "start_ticks": "161313102",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.499,
+            "wall_seconds": 1.383,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/save_nodw/out-float/",
+              "/tmp/mc83-rec2-3514089/save_nodw/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -724,7 +740,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/save_nodw/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/save_nodw/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -735,7 +751,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/save_nodw/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/save_nodw/out-primary",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -743,7 +759,7 @@
             "pixel_count": 6144
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/save_nodw/out-float",
+            "root": "/tmp/mc83-rec2-3514089/save_nodw/out-float",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -846,8 +862,22 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov00_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/save_nodw/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/save_nodw/out-primary",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -884,7 +914,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/save_nodw/out-float",
+        "root": "/tmp/mc83-rec2-3514089/save_nodw/out-float",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -935,32 +965,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488749,
-            "wall_start": 1790693822.9534454,
+            "pid": 2490776,
+            "wall_start": 1790694363.6827064,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259170",
+            "start_ticks": "161313243",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.438,
+            "wall_seconds": 1.437,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/power_spectrum/out-primary/",
+              "/tmp/mc83-rec2-3514089/power_spectrum/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -989,7 +1019,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/power_spectrum/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/power_spectrum/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -998,32 +1028,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488787,
-            "wall_start": 1790693824.4058988,
+            "pid": 2490826,
+            "wall_start": 1790694365.1341064,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259315",
+            "start_ticks": "161313388",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.537,
+            "wall_seconds": 1.483,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/power_spectrum/out-float/",
+              "/tmp/mc83-rec2-3514089/power_spectrum/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -1052,7 +1082,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/power_spectrum/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/power_spectrum/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1063,7 +1093,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/power_spectrum/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/power_spectrum/out-primary",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -1071,7 +1101,7 @@
             "pixel_count": 4096
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/power_spectrum/out-float",
+            "root": "/tmp/mc83-rec2-3514089/power_spectrum/out-float",
             "file_count": 15,
             "mrc_count": 2,
             "star_count": 2,
@@ -1178,8 +1208,22 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov00_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/power_spectrum/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/power_spectrum/out-primary",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -1216,7 +1260,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/power_spectrum/out-float",
+        "root": "/tmp/mc83-rec2-3514089/power_spectrum/out-float",
         "file_count": 15,
         "mrc_count": 2,
         "star_count": 2,
@@ -1268,32 +1312,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488832,
-            "wall_start": 1790693825.9727018,
+            "pid": 2490868,
+            "wall_start": 1790694366.6472719,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259472",
+            "start_ticks": "161313539",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.462,
+            "wall_seconds": 1.448,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/even_odd/out-primary/",
+              "/tmp/mc83-rec2-3514089/even_odd/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -1319,7 +1363,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/even_odd/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/even_odd/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1328,32 +1372,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488874,
-            "wall_start": 1790693827.4499679,
+            "pid": 2490909,
+            "wall_start": 1790694368.1108582,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259619",
+            "start_ticks": "161313685",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.453,
+            "wall_seconds": 1.438,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/even_odd/out-float/",
+              "/tmp/mc83-rec2-3514089/even_odd/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -1379,7 +1423,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/even_odd/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/even_odd/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1390,7 +1434,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/even_odd/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/even_odd/out-primary",
             "file_count": 16,
             "mrc_count": 3,
             "star_count": 2,
@@ -1398,7 +1442,7 @@
             "pixel_count": 9216
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/even_odd/out-float",
+            "root": "/tmp/mc83-rec2-3514089/even_odd/out-float",
             "file_count": 16,
             "mrc_count": 3,
             "star_count": 2,
@@ -1511,8 +1555,28 @@
           "_rlnMicrographNameOdd"
         ]
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov00_g1_64x48x6_EVN.mrc": {
+          "dmin": 857.9869384765625,
+          "dmax": 6686.79541015625,
+          "dmean": 1253.816650390625,
+          "rms": 542.9581298828125
+        },
+        "Movies/mov00_g1_64x48x6_ODD.mrc": {
+          "dmin": 868.44970703125,
+          "dmax": 7237.36083984375,
+          "dmean": 1253.5853271484375,
+          "rms": 546.8112182617188
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/even_odd/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/even_odd/out-primary",
         "file_count": 16,
         "mrc_count": 3,
         "star_count": 2,
@@ -1561,7 +1625,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/even_odd/out-float",
+        "root": "/tmp/mc83-rec2-3514089/even_odd/out-float",
         "file_count": 16,
         "mrc_count": 3,
         "star_count": 2,
@@ -1627,32 +1691,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488913,
-            "wall_start": 1790693828.9349134,
+            "pid": 2490949,
+            "wall_start": 1790694369.5932007,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259768",
+            "start_ticks": "161313834",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.531,
+            "wall_seconds": 1.552,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/all_output_modes/out-primary/",
+              "/tmp/mc83-rec2-3514089/all_output_modes/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -1686,7 +1750,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1695,32 +1759,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2488957,
-            "wall_start": 1790693830.4815023,
+            "pid": 2490989,
+            "wall_start": 1790694371.161295,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161259923",
+            "start_ticks": "161313991",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.529,
+            "wall_seconds": 1.528,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/all_output_modes/out-float/",
+              "/tmp/mc83-rec2-3514089/all_output_modes/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -1754,7 +1818,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/all_output_modes/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/all_output_modes/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -1765,7 +1829,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/all_output_modes/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/all_output_modes/out-primary",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -1773,7 +1837,7 @@
             "pixel_count": 13312
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/all_output_modes/out-float",
+            "root": "/tmp/mc83-rec2-3514089/all_output_modes/out-float",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -1924,8 +1988,40 @@
           "_rlnMicrographNameOdd"
         ]
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov00_g1_64x48x6_EVN.mrc": {
+          "dmin": 857.9869384765625,
+          "dmax": 6686.79541015625,
+          "dmean": 1253.816650390625,
+          "rms": 542.9581298828125
+        },
+        "Movies/mov00_g1_64x48x6_ODD.mrc": {
+          "dmin": 868.44970703125,
+          "dmax": 7237.36083984375,
+          "dmean": 1253.5853271484375,
+          "rms": 546.8112182617188
+        },
+        "Movies/mov00_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        },
+        "Movies/mov00_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/all_output_modes/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/all_output_modes/out-primary",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -1998,7 +2094,7 @@
         "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/all_output_modes/out-float",
+        "root": "/tmp/mc83-rec2-3514089/all_output_modes/out-float",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -2084,32 +2180,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489001,
-            "wall_start": 1790693832.0660918,
+            "pid": 2491029,
+            "wall_start": 1790694372.7327404,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260081",
+            "start_ticks": "161314148",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.466,
+            "wall_seconds": 1.505,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/selected_unequal_groups/out-primary/",
+              "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -2140,7 +2236,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/selected_unequal_groups/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/selected_unequal_groups/input-u16"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2149,32 +2245,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489051,
-            "wall_start": 1790693833.5527127,
+            "pid": 2491069,
+            "wall_start": 1790694374.2583172,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260230",
+            "start_ticks": "161314300",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.441,
+            "wall_seconds": 1.473,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/selected_unequal_groups/out-float/",
+              "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -2205,7 +2301,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/selected_unequal_groups/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/selected_unequal_groups/input-f32"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2216,7 +2312,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/selected_unequal_groups/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2224,7 +2320,7 @@
             "pixel_count": 3888
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/selected_unequal_groups/out-float",
+            "root": "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2316,8 +2412,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "2d6c62123f46e42f544247c1296756591da576f914c661e844f0ce7fb132bf2d"
       },
+      "product_stats": {
+        "Movies/mov00_g2_54x72x8.mrc": {
+          "dmin": 2174.340576171875,
+          "dmax": 14750.6923828125,
+          "dmean": 2890.749267578125,
+          "rms": 1060.3837890625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/selected_unequal_groups/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2342,7 +2446,7 @@
         "Movies/mov00_g2_54x72x8.tiff": "3a0f31c88a1a605ae607a3118787434d446e6692295773f50720ce68e9c041d4"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/selected_unequal_groups/out-float",
+        "root": "/tmp/mc83-rec2-3514089/selected_unequal_groups/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2380,32 +2484,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489124,
-            "wall_start": 1790693835.0250885,
+            "pid": 2491112,
+            "wall_start": 1790694375.771712,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260377",
+            "start_ticks": "161314452",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.556,
+            "wall_seconds": 1.431,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/second_geometry/out-primary/",
+              "/tmp/mc83-rec2-3514089/second_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -2430,7 +2534,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/second_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/second_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2439,32 +2543,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489165,
-            "wall_start": 1790693836.6012459,
+            "pid": 2491152,
+            "wall_start": 1790694377.2233956,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260535",
+            "start_ticks": "161314597",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.466,
+            "wall_seconds": 1.44,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/second_geometry/out-float/",
+              "/tmp/mc83-rec2-3514089/second_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -2489,7 +2593,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/second_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/second_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g2_54x72x8.log"
@@ -2500,7 +2604,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/second_geometry/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/second_geometry/out-primary",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2508,7 +2612,7 @@
             "pixel_count": 3888
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/second_geometry/out-float",
+            "root": "/tmp/mc83-rec2-3514089/second_geometry/out-float",
             "file_count": 14,
             "mrc_count": 1,
             "star_count": 2,
@@ -2594,8 +2698,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "2d6c62123f46e42f544247c1296756591da576f914c661e844f0ce7fb132bf2d"
       },
+      "product_stats": {
+        "Movies/mov00_g2_54x72x8.mrc": {
+          "dmin": 2612.112060546875,
+          "dmax": 16450.66796875,
+          "dmean": 3314.093017578125,
+          "rms": 1284.18603515625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/second_geometry/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/second_geometry/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2620,7 +2732,7 @@
         "Movies/mov00_g2_54x72x8.tiff": "3a0f31c88a1a605ae607a3118787434d446e6692295773f50720ce68e9c041d4"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/second_geometry/out-float",
+        "root": "/tmp/mc83-rec2-3514089/second_geometry/out-float",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -2660,32 +2772,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489203,
-            "wall_start": 1790693838.1049497,
+            "pid": 2491192,
+            "wall_start": 1790694378.7011266,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260685",
+            "start_ticks": "161314745",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.445,
+            "wall_seconds": 1.556,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/successive_same_geometry/out-primary/",
+              "/tmp/mc83-rec2-3514089/successive_same_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -2710,7 +2822,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/successive_same_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/successive_same_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -2721,32 +2833,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489256,
-            "wall_start": 1790693839.5866997,
+            "pid": 2491244,
+            "wall_start": 1790694380.294085,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260833",
+            "start_ticks": "161314904",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.528,
+            "wall_seconds": 1.527,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/successive_same_geometry/out-float/",
+              "/tmp/mc83-rec2-3514089/successive_same_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -2771,7 +2883,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/successive_same_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/successive_same_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -2784,7 +2896,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/successive_same_geometry/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/successive_same_geometry/out-primary",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -2792,7 +2904,7 @@
             "pixel_count": 9216
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/successive_same_geometry/out-float",
+            "root": "/tmp/mc83-rec2-3514089/successive_same_geometry/out-float",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -2972,8 +3084,28 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "901ad038ffcde828a3f49b5dce9f7892385d75ea029e57061068ff6cfaf40329"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov01_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov02_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/successive_same_geometry/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/successive_same_geometry/out-primary",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3024,7 +3156,7 @@
         "Movies/mov02_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/successive_same_geometry/out-float",
+        "root": "/tmp/mc83-rec2-3514089/successive_same_geometry/out-float",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3088,32 +3220,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489310,
-            "wall_start": 1790693841.2460363,
+            "pid": 2491299,
+            "wall_start": 1790694381.881633,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161260999",
+            "start_ticks": "161315063",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.525,
+            "wall_seconds": 1.57,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/successive_mixed_geometry/out-primary/",
+              "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -3136,7 +3268,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-final-3514075/successive_mixed_geometry/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3147,32 +3279,32 @@
         "float": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489362,
-            "wall_start": 1790693842.8137457,
+            "pid": 2491353,
+            "wall_start": 1790694383.494522,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261156",
+            "start_ticks": "161315224",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.531,
+            "wall_seconds": 1.574,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/successive_mixed_geometry/out-float/",
+              "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-float/",
               "--use_own",
               "--gpu",
               "0",
@@ -3195,7 +3327,7 @@
               "--voltage",
               "300.0"
             ],
-            "cwd": "/tmp/mc83-final-3514075/successive_mixed_geometry/input-f32"
+            "cwd": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/input-f32"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3208,7 +3340,7 @@
         "u16_vs_float32_tiff": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/successive_mixed_geometry/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-primary",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -3216,7 +3348,7 @@
             "pixel_count": 10032
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/successive_mixed_geometry/out-float",
+            "root": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-float",
             "file_count": 22,
             "mrc_count": 3,
             "star_count": 4,
@@ -3389,8 +3521,28 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "0c7874c55f78fed0547d5f0d5ec83ea1da5183a04c9b2ba0421db0ac9e49cc68"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1228.3311767578125,
+          "dmax": 8595.4111328125,
+          "dmean": 1671.6014404296875,
+          "rms": 713.7672729492188
+        },
+        "Movies/mov01_g2_54x72x8.mrc": {
+          "dmin": 1741.0635986328125,
+          "dmax": 10968.0087890625,
+          "dmean": 2209.395263671875,
+          "rms": 856.12890625
+        },
+        "Movies/mov02_g1_64x48x6.mrc": {
+          "dmin": 1228.3311767578125,
+          "dmax": 8595.4111328125,
+          "dmean": 1671.6014404296875,
+          "rms": 713.7672729492188
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/successive_mixed_geometry/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-primary",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3441,7 +3593,7 @@
         "Movies/mov02_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f"
       },
       "float_tree": {
-        "root": "/tmp/mc83-final-3514075/successive_mixed_geometry/out-float",
+        "root": "/tmp/mc83-rec2-3514089/successive_mixed_geometry/out-float",
         "file_count": 22,
         "mrc_count": 3,
         "star_count": 4,
@@ -3504,32 +3656,32 @@
         "failing": {
           "exit_code": 1,
           "identity": {
-            "pid": 2489414,
-            "wall_start": 1790693844.3993914,
+            "pid": 2491405,
+            "wall_start": 1790694385.1232362,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261314",
+            "start_ticks": "161315387",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 0.658,
+            "wall_seconds": 0.625,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 4,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/gain_geometry_mismatch/out-failing/",
+              "/tmp/mc83-rec2-3514089/gain_geometry_mismatch/out-failing/",
               "--use_own",
               "--gpu",
               "0",
@@ -3554,7 +3706,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/gain_geometry_mismatch/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/gain_geometry_mismatch/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -3669,32 +3821,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489436,
-            "wall_start": 1790693845.0725596,
+            "pid": 2491427,
+            "wall_start": 1790694385.7641869,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261382",
+            "start_ticks": "161315451",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.462,
+            "wall_seconds": 1.513,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/repeat_all_output_modes/out-primary/",
+              "/tmp/mc83-rec2-3514089/repeat_all_output_modes/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -3728,7 +3880,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/repeat_all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/repeat_all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -3737,32 +3889,32 @@
         "repeat": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489474,
-            "wall_start": 1790693846.5405192,
+            "pid": 2491467,
+            "wall_start": 1790694387.28352,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261528",
+            "start_ticks": "161315603",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.41,
+            "wall_seconds": 1.511,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/repeat_all_output_modes/out-repeat/",
+              "/tmp/mc83-rec2-3514089/repeat_all_output_modes/out-repeat/",
               "--use_own",
               "--gpu",
               "0",
@@ -3796,7 +3948,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/repeat_all_output_modes/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/repeat_all_output_modes/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -3807,7 +3959,7 @@
         "repeat": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/repeat_all_output_modes/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/repeat_all_output_modes/out-primary",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -3815,7 +3967,7 @@
             "pixel_count": 13312
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/repeat_all_output_modes/out-repeat",
+            "root": "/tmp/mc83-rec2-3514089/repeat_all_output_modes/out-repeat",
             "file_count": 18,
             "mrc_count": 5,
             "star_count": 2,
@@ -3966,8 +4118,40 @@
           "_rlnMicrographNameOdd"
         ]
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov00_g1_64x48x6_EVN.mrc": {
+          "dmin": 857.9869384765625,
+          "dmax": 6686.79541015625,
+          "dmean": 1253.816650390625,
+          "rms": 542.9581298828125
+        },
+        "Movies/mov00_g1_64x48x6_ODD.mrc": {
+          "dmin": 868.44970703125,
+          "dmax": 7237.36083984375,
+          "dmean": 1253.5853271484375,
+          "rms": 546.8112182617188
+        },
+        "Movies/mov00_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        },
+        "Movies/mov00_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/repeat_all_output_modes/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/repeat_all_output_modes/out-primary",
         "file_count": 18,
         "mrc_count": 5,
         "star_count": 2,
@@ -4057,32 +4241,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489512,
-            "wall_start": 1790693847.9865572,
+            "pid": 2491507,
+            "wall_start": 1790694388.8310795,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261673",
+            "start_ticks": "161315758",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.509,
+            "wall_seconds": 1.684,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/resume_non_prefix/out-primary/",
+              "/tmp/mc83-rec2-3514089/resume_non_prefix/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -4115,7 +4299,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/resume_non_prefix/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/resume_non_prefix/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -4126,32 +4310,32 @@
         "resume": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489564,
-            "wall_start": 1790693849.5135672,
+            "pid": 2491561,
+            "wall_start": 1790694390.5339882,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161261826",
+            "start_ticks": "161315928",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.517,
+            "wall_seconds": 1.597,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 10,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/resume_non_prefix/out-resume/",
+              "/tmp/mc83-rec2-3514089/resume_non_prefix/out-resume/",
               "--use_own",
               "--gpu",
               "0",
@@ -4185,7 +4369,7 @@
               "gain.mrc",
               "--only_do_unfinished"
             ],
-            "cwd": "/tmp/mc83-final-3514075/resume_non_prefix/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/resume_non_prefix/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -4198,7 +4382,7 @@
         "non_prefix_resume": {
           "status": "PASS",
           "base": {
-            "root": "/tmp/mc83-final-3514075/resume_non_prefix/out-primary",
+            "root": "/tmp/mc83-rec2-3514089/resume_non_prefix/out-primary",
             "file_count": 28,
             "mrc_count": 9,
             "star_count": 4,
@@ -4206,7 +4390,7 @@
             "pixel_count": 21504
           },
           "candidate": {
-            "root": "/tmp/mc83-final-3514075/resume_non_prefix/out-resume",
+            "root": "/tmp/mc83-rec2-3514089/resume_non_prefix/out-resume",
             "file_count": 28,
             "mrc_count": 9,
             "star_count": 4,
@@ -4470,8 +4654,64 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "901ad038ffcde828a3f49b5dce9f7892385d75ea029e57061068ff6cfaf40329"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov00_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        },
+        "Movies/mov00_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov01_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov01_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        },
+        "Movies/mov01_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        },
+        "Movies/mov02_g1_64x48x6.mrc": {
+          "dmin": 761.5374755859375,
+          "dmax": 5201.15185546875,
+          "dmean": 1023.642578125,
+          "rms": 436.9494323730469
+        },
+        "Movies/mov02_g1_64x48x6_PS.mrc": {
+          "dmin": 2.3388898372650146,
+          "dmax": 957.0740966796875,
+          "dmean": 11.648101806640625,
+          "rms": 33.98980712890625
+        },
+        "Movies/mov02_g1_64x48x6_noDW.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/resume_non_prefix/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/resume_non_prefix/out-primary",
         "file_count": 28,
         "mrc_count": 9,
         "star_count": 4,
@@ -4639,32 +4879,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489656,
-            "wall_start": 1790693852.688579,
+            "pid": 2491659,
+            "wall_start": 1790694393.9828532,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161262143",
+            "start_ticks": "161316273",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.46,
+            "wall_seconds": 1.48,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
-            "compute_app_samples": 8,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "compute_app_samples": 9,
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/ineligible_float_tiff/out-primary/",
+              "/tmp/mc83-rec2-3514089/ineligible_float_tiff/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -4689,7 +4929,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/ineligible_float_tiff/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/ineligible_float_tiff/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -4752,8 +4992,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1842.515869140625,
+          "dmax": 12892.90625,
+          "dmean": 2507.402099609375,
+          "rms": 1070.6510009765625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/ineligible_float_tiff/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/ineligible_float_tiff/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -4791,32 +5039,32 @@
         "primary": {
           "exit_code": 0,
           "identity": {
-            "pid": 2489694,
-            "wall_start": 1790693854.1724985,
+            "pid": 2491699,
+            "wall_start": 1790694395.4859483,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161262292",
+            "start_ticks": "161316423",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 1.465,
+            "wall_seconds": 1.53,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 9,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/ineligible_early_binning/out-primary/",
+              "/tmp/mc83-rec2-3514089/ineligible_early_binning/out-primary/",
               "--use_own",
               "--gpu",
               "0",
@@ -4843,7 +5091,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/ineligible_early_binning/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/ineligible_early_binning/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log"
@@ -4908,8 +5156,16 @@
         "joint_star": "corrected_micrographs.star",
         "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
       },
+      "product_stats": {
+        "Movies/mov00_g1_64x48x6.mrc": {
+          "dmin": 1805.647216796875,
+          "dmax": 11650.939453125,
+          "dmean": 2507.402099609375,
+          "rms": 1058.5006103515625
+        }
+      },
       "tree": {
-        "root": "/tmp/mc83-final-3514075/ineligible_early_binning/out-primary",
+        "root": "/tmp/mc83-rec2-3514089/ineligible_early_binning/out-primary",
         "file_count": 14,
         "mrc_count": 1,
         "star_count": 2,
@@ -4949,32 +5205,32 @@
         "failing": {
           "exit_code": 1,
           "identity": {
-            "pid": 2489734,
-            "wall_start": 1790693855.66518,
+            "pid": 2491739,
+            "wall_start": 1790694397.0437696,
             "executable": "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
-            "start_ticks": "161262441",
+            "start_ticks": "161316579",
             "cpus_allowed": [
-              4,
               5,
               6,
               7,
-              36,
+              8,
               37,
               38,
-              39
+              39,
+              40
             ],
-            "wall_seconds": 0.713,
+            "wall_seconds": 0.66,
             "compute_app_uuids": [
-              "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f"
+              "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b"
             ],
             "compute_app_samples": 4,
-            "cuda_visible_devices": "GPU-460457fe-b9d1-4f25-66f4-e4bbb8bfd14f",
+            "cuda_visible_devices": "GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b",
             "command": [
               "/work4/scd/scarf1415/mc-issue83/src/build-cuda/motioncorr",
               "--i",
               "movies.star",
               "--o",
-              "/tmp/mc83-final-3514075/damaged_movie_named/out-failing/",
+              "/tmp/mc83-rec2-3514089/damaged_movie_named/out-failing/",
               "--use_own",
               "--gpu",
               "0",
@@ -4999,7 +5255,7 @@
               "--gainref",
               "gain.mrc"
             ],
-            "cwd": "/tmp/mc83-final-3514075/damaged_movie_named/input-u16"
+            "cwd": "/tmp/mc83-rec2-3514089/damaged_movie_named/input-u16"
           },
           "logs": [
             "Movies/mov00_g1_64x48x6.log",
@@ -5129,6 +5385,11 @@
       "joint_star_written": false
     }
   ],
+  "gain_effect": {
+    "base_gain_payload": "5d0b830a56328092236ccd53099cc24609db137d3715bb05e57b8a9bd5d0c5d1",
+    "base_nogain_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2",
+    "differs": true
+  },
   "summary": {
     "selected": 16,
     "passed": 16,

@@ -4,11 +4,11 @@ Produced by `tests/run_compact_ingest_support_matrix.py`. The readable result is
 [`../SUPPORT_MATRIX.md`](../SUPPORT_MATRIX.md); this directory holds what it
 rests on.
 
-- `scarf-3514082/` — run of record. SCARF `gn0001`, Slurm job 3514082, one
-  cgroup-isolated A100-SXM4-40GB (`GPU-319bf3ef-…`), CPU mask 1,2,4,5,33,34,36,37.
-- `scarf-3514075/` — an earlier complete 16/16 run of the same matrix on
-  `gn0003` and a different device, before the non-constant-product guard was
-  added. Retained as a second SCARF execution, not as the run of record.
+- `scarf-3514089/` — run of record. SCARF `gn0003`, Slurm job 3514089, one
+  cgroup-isolated A100-SXM4-40GB (`GPU-6ddab9a9-…`), CPU mask 5-8,37-40.
+- `scarf-3514082/` — an earlier complete 16/16 run of the same matrix on
+  `gn0001` and a different device, before the gain-effect control was added.
+  Retained as a second SCARF execution, not as the run of record.
   Each `support-matrix.json` carries every arm's command line, PID, start ticks,
   executable link, CPU mask, sampled `nvidia-smi` compute-app UUIDs, input and
   binary hashes, the per-movie native-stage verdicts, the validated manifest and

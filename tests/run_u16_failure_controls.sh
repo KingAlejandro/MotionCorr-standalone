@@ -89,8 +89,8 @@ echo "workdir=$WORK"
 echo "movie=$MOVIE"
 echo "stage_bytes=$STAGE_BYTES"
 echo "=== healthy resident CUDA reference ==="
-MC_U16_FAULT=none MC_U16_STAGE_BYTES="$STAGE_BYTES" \
-    "$FAULT_BIN" "${COMMON[@]}" --gpu 0 --o "$WORK/healthy/out/" \
+( cd "$DATA_ROOT" && MC_U16_FAULT=none MC_U16_STAGE_BYTES="$STAGE_BYTES" \
+    "$FAULT_BIN" "${COMMON[@]}" --gpu 0 --o "$WORK/healthy/out/" ) \
     >"$WORK/healthy/out/run.log" 2>&1
 [ "$(find "$WORK/healthy/out" -name '*.mrc' -type f | wc -l | tr -d ' ')" = 1 ] || {
     echo "FAIL healthy reference did not produce exactly one corrected MRC"; exit 1;
@@ -106,8 +106,8 @@ run_u16() {
     local mode=$1 out=$2
     mkdir -p "$out"
     set +e
-    MC_U16_FAULT="$mode" MC_U16_STAGE_BYTES="$STAGE_BYTES" \
-        "$FAULT_BIN" "${COMMON[@]}" --gpu 0 --o "$out/" >"$out/run.log" 2>&1
+    ( cd "$DATA_ROOT" && MC_U16_FAULT="$mode" MC_U16_STAGE_BYTES="$STAGE_BYTES" \
+        "$FAULT_BIN" "${COMMON[@]}" --gpu 0 --o "$out/" ) >"$out/run.log" 2>&1
     local rc=$?
     set -e
     printf '%s\n' "$rc" >"$out/exit-code.txt"

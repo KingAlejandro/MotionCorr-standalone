@@ -30,6 +30,60 @@ find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(ZLIB REQUIRED)
 
+# Which DEFLATE implementation LibTIFF uses is fixed when LibTIFF itself is
+# built (libdeflate has been an option since 4.2) and is invisible from a
+# version number, yet it governs most of the movie-read cost: the tutorial
+# movies are Adobe Deflate with RowsPerStrip=1, so one movie is 92,112
+# whole-strip decompressions. Probe the library that will actually be linked,
+# by asking it to select the libdeflate subcodec -- only a LibTIFF built with
+# libdeflate accepts that. The probe writes and removes one small TIFF, under
+# an explicit path in the build tree: try_run leaves the working directory as
+# the one cmake was invoked from, which may not be writable, and a probe that
+# cannot create its file would report a false "zlib only".
+if(CMAKE_CROSSCOMPILING)
+    set(TIFF_DEFLATE_SUBCODEC "not probed (cross-compiling)")
+else()
+    include(CheckCSourceRuns)
+    set(_mc_saved_required_libraries "${CMAKE_REQUIRED_LIBRARIES}")
+    set(_mc_saved_required_definitions "${CMAKE_REQUIRED_DEFINITIONS}")
+    set(CMAKE_REQUIRED_LIBRARIES TIFF::TIFF)
+    set(CMAKE_REQUIRED_DEFINITIONS
+        "-DMC_PROBE_TIFF=\"${CMAKE_CURRENT_BINARY_DIR}/mc_deflate_subcodec_probe.tif\"")
+    check_c_source_runs("
+#include <stdio.h>
+#include <tiffio.h>
+int main(void)
+{
+    TIFF *tif;
+    int ok = 0;
+    TIFFSetErrorHandler(0);
+    TIFFSetWarningHandler(0);
+    tif = TIFFOpen(MC_PROBE_TIFF, \"w\");
+    if (tif) {
+        if (TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE) == 1)
+            ok = TIFFSetField(tif, TIFFTAG_DEFLATE_SUBCODEC,
+                              DEFLATE_SUBCODEC_LIBDEFLATE) == 1;
+        TIFFClose(tif);
+        remove(MC_PROBE_TIFF);
+    }
+    return ok ? 0 : 1;
+}
+" TIFF_HAS_LIBDEFLATE)
+    set(CMAKE_REQUIRED_LIBRARIES "${_mc_saved_required_libraries}")
+    set(CMAKE_REQUIRED_DEFINITIONS "${_mc_saved_required_definitions}")
+    if(TIFF_HAS_LIBDEFLATE)
+        set(TIFF_DEFLATE_SUBCODEC "libdeflate")
+    else()
+        set(TIFF_DEFLATE_SUBCODEC "zlib only")
+    endif()
+endif()
+message(STATUS "LibTIFF Deflate subcodec: ${TIFF_DEFLATE_SUBCODEC}")
+if(TIFF_DEFLATE_SUBCODEC STREQUAL "zlib only")
+    message(STATUS "  Deflate movie reads use zlib here. A LibTIFF built with "
+                   "libdeflate decodes the same bytes faster; see README, "
+                   "\"LibTIFF Deflate backend\". Results are unaffected.")
+endif()
+
 set(RELION_VERSION_SUFFIX "-motioncorr-standalone")
 configure_file(src/macros.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/macros.cpp @ONLY)
 

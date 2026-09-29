@@ -1,6 +1,7 @@
 #include "src/motioncorr_runner.h"
 #include "src/jaz/single_particle/new_ft.h"
 #include "src/fftw.h"
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -14,7 +15,31 @@ void require(bool condition, const std::string &message)
 int main(int argc, char **argv)
 {
     try {
-        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output");
+        require(argc == 4 || argc == 5,
+                "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output\n"
+                "       runner_numerics read_tiff_raw input output [max_rows]");
+        if (std::string(argv[1]) == "read_tiff_raw") {
+            // Dump decoded samples in index order. The row sums below cannot
+            // see sample order within a row: swapping the two nibbles of a
+            // packed 4-bit byte, for instance, leaves every row sum identical.
+            // An optional row bound keeps the dump proportionate to what the
+            // caller compares, since one super-resolution frame is 217 MiB.
+            Image<float> movie;
+            movie.read(argv[2], true, -1, false, true); // all frames, 2D stack
+            const long nx = XSIZE(movie()), ny = YSIZE(movie()), nn = NSIZE(movie());
+            const long all_rows = ny * nn;
+            const long rows = (argc == 5) ? std::min(all_rows, static_cast<long>(textToInteger(argv[4]))) : all_rows;
+            require(rows >= 0, "max_rows must not be negative");
+            std::ofstream out(argv[3], std::ios::binary);
+            require(out.good(), "Cannot open raw sample output");
+            const long dims[3] = {nx, ny, nn};
+            out.write(reinterpret_cast<const char*>(dims), sizeof(dims));
+            out.write(reinterpret_cast<const char*>(MULTIDIM_ARRAY(movie())),
+                      static_cast<std::streamsize>(sizeof(float)) * nx * rows);
+            out.close(); // flush before judging success: ~ofstream would swallow it
+            require(out.good(), "Failed writing raw samples");
+            return 0;
+        }
         if (std::string(argv[1]) == "read_tiff") {
             // Dump per-row sums of a decoded TIFF stack. Row sums are exact in
             // double for integer sample values, and any row-striding or Y-flip

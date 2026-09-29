@@ -30,6 +30,42 @@ Requires Homebrew and an OpenMP-capable compiler (such as `libomp` with AppleCla
 brew install cmake fftw libomp libtiff libpng jpeg ghostscript
 ```
 
+### LibTIFF Deflate backend
+
+Movie TIFFs from K2/K3 detectors are Adobe Deflate with one row per strip, so
+reading one 24-frame 3710 x 3838 movie is 92,112 whole-strip decompressions.
+LibTIFF can service those through either zlib or libdeflate. The choice is made
+when LibTIFF itself is built, it is not visible in the version number, and both
+decode identical bytes -- only the speed differs. Configure reports which one
+this build will link:
+
+```
+-- LibTIFF Deflate subcodec: libdeflate
+```
+
+Some distributions build LibTIFF with libdeflate and some do not; the configure
+line above is the reliable answer for your machine. Measured on one host with a
+single MotionCorr binary and two LibTIFF 4.5.1 builds differing only in
+libdeflate support, over the 24 tutorial movies with `--j 8`: the `read movie`
+stage was **5.68 s with libdeflate against 9.93 s with zlib**, and wall clock
+208.8 s against 213.4 s. Both arms produced byte-identical images and STAR
+files. Conditions, the runtime
+witness for which decoder actually ran, and the parity result are in
+[`docs/issue85_codec/`](docs/issue85_codec/).
+
+To use libdeflate where the system library lacks it, build LibTIFF with
+libdeflate support and configure a **fresh** build directory against it -- the
+probe result and the resolved LibTIFF path are both cached, so re-running
+configure in an existing build tree keeps the old library:
+
+```sh
+cmake -S . -B build-libdeflate -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_PREFIX_PATH=/path/to/libtiff-with-libdeflate
+```
+
+If that LibTIFF is outside the default loader path, the built binary needs it
+at run time too, via `LD_LIBRARY_PATH` or an install RPATH.
+
 ### Compiling and Testing
 
 ```sh

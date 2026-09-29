@@ -1,0 +1,39 @@
+=== source and binary ===
+main a75a3f87f7ef17e0a29b1c91a1edecda08ebed34 + this branch's diff (mc85.patch sha256 1b714e7782aa35699f79d91e52df7a1eefc99e6b20fe3e7991a03ce7df149386)
+motioncorr sha256 d884fb5d2e45824849734447779b58934bfff83c84cd127dd9a9622d7101f1f5
+runner_numerics sha256 c3dddfa1d133a47a6a2220c5d0887eba893d787ee09fa58839933a7284e04838
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
+
+=== libtiff arms ===
+tiff-ld  fd7b26c8389342ae85953d0789a580572b4a432bff776f1b9f9b855e368b054e  deps: libz.so.1 libz.so.1 libdeflate.so.0 libdeflate.so.0 
+tiff-zlib  ab81eae9710e383b90bea57bee596abbf16871c5aced792890ca08740b670f56  deps: libz.so.1 libz.so.1 
+system   aad9b47982a23560b6f6657adcd70a1141d0971bd4f2eb5b3753745f3e8feee4
+
+=== inputs ===
+movies24.star sha256 fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041
+sha256 of the 25 input hashes: 96d489d8e23fe07e0b43cdde82fb0dcc17fb33199f5f8613e60844786c82704e  -
+
+=== host ===
+small-refmac-machine  64 cpus  THP=always [madvise] never
+gcc 13  cmake cmake version 4.4.3
+measurement cpuset 0-31 under /tmp/motioncorr-issue96-cpu-measure.lock; validation cpuset 32-47 (<=16) under /tmp/motioncorr-issue96-cpu-validation.lock
+background: two long-running ctffind processes (~2 cores), present throughout both arms
+
+=== ctest, both arms ===
+arm=ld  94% tests passed, 1 tests failed out of 18
+	 17 - CiFailClosedControls (Failed)
+arm=zlib  94% tests passed, 1 tests failed out of 18
+	 17 - CiFailClosedControls (Failed)
+
+=== TiffRead coverage and its mutation control ===
+  u16_deflate_rps1: 3 frame(s) 29x37, 111 row sums and 3219 samples exact
+  u16_raw_rps7: 2 frame(s) 16x50, 100 row sums and 1600 samples exact
+    raise AssertionError(
+AssertionError: packed4bit_k2sr: output row 0 sample 0 differs (5.0 != 7.0)
+
+=== parity matrix ===
+parity_gain_ld_rerun: IDENTICAL {"mrc_files": 24, "mrc_differing": 0, "text_files": 49, "text_differing": 0, "gate_movies": 24, "gate_failing": 0, "missing": 0} mutated= None
+parity_gain_ld_vs_zlib: IDENTICAL {"mrc_files": 24, "mrc_differing": 0, "text_files": 49, "text_differing": 0, "gate_movies": 24, "gate_failing": 0, "missing": 0} mutated= None
+parity_nogain_ld_vs_zlib: IDENTICAL {"mrc_files": 24, "mrc_differing": 0, "text_files": 49, "text_differing": 0, "gate_movies": 24, "gate_failing": 0, "missing": 0} mutated= None
+parity_nc_pixel: DIFFERENT {"mrc_files": 24, "mrc_differing": 1, "text_files": 49, "text_differing": 0, "gate_movies": 24, "gate_failing": 1, "missing": 0} mutated= 20170629_00021_frameImage.mrc@float12345 (1 ULP)
+parity_nc_star: DIFFERENT {"mrc_files": 24, "mrc_differing": 0, "text_files": 49, "text_differing": 1, "gate_movies": 24, "gate_failing": 1, "missing": 0} mutated= 20170629_00021_frameImage.star@shift line 27 +0.001 px

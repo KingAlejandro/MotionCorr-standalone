@@ -6,6 +6,7 @@
 #include <ostream>
 #include "src/image.h"
 #include "src/multidim_array.h"
+#include "src/acc/cuda/cuda_scratch_arena.h"
 #include "src/complex.h"
 #include "src/micrograph_model.h"
 
@@ -45,10 +46,25 @@ public:
     );
 
 #if defined(_NVCOMP_ENABLED)
-    // Direct GPU TIFF Ingestion via nvCOMP Batched Deflate.
-    // Reads compressed strips from disk, uploads compressed bytes over PCIe,
-    // decompresses directly into VRAM, and fuses Y-flip, gain application,
-    // and initial unaligned sum.
+    // Direct GPU TIFF ingestion via nvCOMP Batched Deflate: reads compressed strips
+    // from disk, uploads only the compressed bytes over PCIe, decompresses on the
+    // device, and fuses the row flip, gain application and unaligned sum straight
+    // into the resident d_Iframes/d_Isum.
+    //
+    // Allocates no device memory for staging. Frames are processed in bounded
+    // batches whose entire working set -- compressed inputs, uint16 outputs, chunk
+    // descriptor arrays and the nvCOMP scratch -- is carved out of d_Fframes, which
+    // initialize() has already allocated and which holds nothing until
+    // computeGlobalForwardFFT() overwrites every element of it. The session's VRAM
+    // high-water mark is therefore unchanged from the host-read path. (d_gain is
+    // still allocated on demand, exactly as applyGainDefectsAndSum() does.)
+    //
+    // Claims the buffer through fourier_guard, so it is refused once the spectrum
+    // is in there, and the forward transform is refused while these views are live.
+    //
+    // Returns false on any geometry, I/O, zlib-wrapper or per-chunk nvCOMP failure,
+    // leaving the caller to fall back to the host reader. A partially written
+    // d_Iframes/d_Isum is safe: applyGainDefectsAndSum() overwrites both in full.
     bool ingestCompressedTiffStrips(
         const std::string &fn_mic,
         const std::vector<int> &frames,
@@ -182,6 +198,16 @@ private:
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
+
+    // What d_Fframes currently holds. The ingest path borrows that allocation as
+    // scratch instead of allocating its own staging, so the transition out of
+    // IngestScratch is what makes the forward transform safe to run.
+    mc_cuda::FourierStorageGuard fourier_guard;
+    cudaStream_t ingest_stream = 0;
+    // Synchronises and tears down the ingest stream, then declares every scratch
+    // view dead. Idempotent; called from a scope guard so it also runs on the
+    // HANDLE_ERROR early-return paths.
+    void endIngestScratch();
 
     // Cached patch resources to avoid allocations and plan recreation in patch loop
     cufftHandle plan_patch_r2c = 0;

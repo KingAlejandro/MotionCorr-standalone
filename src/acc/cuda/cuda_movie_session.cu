@@ -14,8 +14,10 @@
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
 #include <cstring>
+#include <cstdint>
 #include "nvcomp.h"
 #include "nvcomp/deflate.h"
+#include "src/acc/cuda/cuda_deflate_layout.h"
 #endif
 
 
@@ -75,6 +77,21 @@ __global__ void fusedGainAndSumKernel(
 }
 
 #if defined(_NVCOMP_ENABLED)
+// Batched counterpart of fusedGainAndSumKernel for the nvCOMP ingestion path.
+//
+// Reads one batch of freshly decompressed uint16 rows out of the staging arena,
+// applies the TIFF->MRC row flip and the gain, writes float frames into their final
+// slots in the resident d_Iframes, and accumulates the unaligned sum.
+//
+// The sum is carried in d_Isum between batches rather than reduced per batch: each
+// pixel is owned by exactly one thread per launch and launches are ordered on the
+// stream, so reading d_Isum, adding this batch's frames in frame order and writing
+// back reproduces the same left-to-right float accumulation order as the
+// single-launch whole-movie kernel. Re-associating it per batch would not.
+//
+// src_row_stride_u16 is the padded row pitch of the staging arena in uint16 elements,
+// not nx: nvCOMP requires each per-chunk output pointer to meet its own alignment,
+// and nx*2 bytes is not guaranteed to be a multiple of it.
 __global__ void fusedU16FlipGainAndSumKernel(
     const uint16_t *src_u16,
     float *dst_Iframes,
@@ -82,22 +99,25 @@ __global__ void fusedU16FlipGainAndSumKernel(
     const float *d_gain,
     int nx,
     int ny,
-    int n_frames,
+    size_t src_row_stride_u16,
+    int frame_offset,
+    int batch_frames,
+    bool first_batch,
     bool apply_gain
 ) {
     size_t x = (size_t)blockDim.x * (size_t)blockIdx.x + threadIdx.x;
     size_t dest_y = (size_t)blockDim.y * (size_t)blockIdx.y + threadIdx.y;
     if (x >= (size_t)nx || dest_y >= (size_t)ny) return;
 
-    size_t dest_pixel = dest_y * (size_t)nx + x;
-    size_t src_y = (size_t)(ny - 1 - dest_y);
-    float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
-    float sum = 0.0f;
+    const size_t dest_pixel = dest_y * (size_t)nx + x;
+    const size_t src_y = (size_t)(ny - 1 - dest_y);
+    const float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
+    float sum = first_batch ? 0.0f : dst_Isum[dest_pixel];
 
-    for (int iframe = 0; iframe < n_frames; iframe++) {
-        size_t src_idx = ((size_t)iframe * (size_t)ny + src_y) * (size_t)nx + x;
-        float val = (float)src_u16[src_idx] * gain_val;
-        dst_Iframes[(size_t)iframe * (size_t)ny * (size_t)nx + dest_pixel] = val;
+    for (int b = 0; b < batch_frames; b++) {
+        const size_t src_idx = ((size_t)b * (size_t)ny + src_y) * src_row_stride_u16 + x;
+        const float val = (float)src_u16[src_idx] * gain_val;
+        dst_Iframes[((size_t)(frame_offset + b) * (size_t)ny + dest_y) * (size_t)nx + x] = val;
         sum += val;
     }
     dst_Isum[dest_pixel] = sum;
@@ -410,6 +430,7 @@ bool CudaMovieSession::initialize() {
             << " shared work=" << fft_work_bytes
             << " inverse tile=" << sz_comp << " bytes" << std::endl;
 
+    fourier_guard.reset();
     is_initialized = true;
     return true;
 }
@@ -667,218 +688,339 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
 }
 
 #if defined(_NVCOMP_ENABLED)
+namespace {
+
+// cudaFreeHost on every exit path, including the HANDLE_ERROR early returns.
+struct ScopedPinnedHost {
+    void *ptr = nullptr;
+    ~ScopedPinnedHost() { if (ptr) cudaFreeHost(ptr); }
+};
+
+} // namespace
+
+using mc_tiff_deflate::alignUp;
+using mc_tiff_deflate::stripSlotOffset;
+using mc_tiff_deflate::frameStageBytes;
+using mc_tiff_deflate::zlibWrapperIsUsable;
+
+void CudaMovieSession::endIngestScratch() {
+    if (ingest_stream) {
+        // Nothing may still be reading or writing the arena when the FFT phase takes
+        // d_Fframes back. There is no host work worth overlapping at this boundary,
+        // so this synchronises rather than handing an event to a later stream.
+        recordFailure(cudaStreamSynchronize(ingest_stream), "ingest scratch sync", __LINE__);
+        recordFailure(cudaStreamDestroy(ingest_stream), "ingest scratch stream", __LINE__);
+        ingest_stream = 0;
+    }
+    fourier_guard.finishIngestScratch();
+}
+
 bool CudaMovieSession::ingestCompressedTiffStrips(
     const std::string &fn_mic,
     const std::vector<int> &frames,
     const MultidimArray<float> *gain_ref,
     int n_threads
 ) {
-    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
+    if (!d_Iframes || !d_Isum || !d_Fframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
-    if (!tif) return false;
-
-    uint32_t width = 0, height = 0;
-    uint16_t bits = 0, compression = 0;
-    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
-    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
-    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
-    TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
-
-    if ((int)width != nx || (int)height != ny || bits != 16 ||
-        (compression != COMPRESSION_DEFLATE && compression != COMPRESSION_ADOBE_DEFLATE)) {
-        TIFFClose(tif);
-        return false;
-    }
-
-    uint32_t strips_per_dir = TIFFNumberOfStrips(tif);
-    if ((int)strips_per_dir != ny) {
-        TIFFClose(tif);
-        return false;
-    }
-    TIFFClose(tif);
-
     const int num_req_frames = (int)frames.size();
-    if (num_req_frames != n_frames) return false;
+    if (num_req_frames != n_frames || n_frames <= 0 || nx <= 0 || ny <= 0) return false;
 
-    const size_t total_chunks = (size_t)num_req_frames * strips_per_dir;
-    const size_t uncomp_row_bytes = (size_t)nx * sizeof(uint16_t);
-    const size_t bytes_u16_total = (size_t)n_frames * (size_t)ny * uncomp_row_bytes;
-    const size_t num_pixels = (size_t)ny * (size_t)nx;
-    const size_t sz_real = num_pixels * sizeof(float);
-
-    struct StripInfo {
-        size_t offset;
-        size_t raw_size;
-    };
-    std::vector<std::vector<uint8_t>> frame_compressed(num_req_frames);
-    std::vector<std::vector<StripInfo>> frame_strip_infos(num_req_frames);
-    std::vector<bool> read_success(num_req_frames, true);
-
-    int io_threads = n_threads > 0 ? n_threads : 4;
-    #pragma omp parallel num_threads(io_threads)
+    // ------------------------------------------------------------------
+    // Pass A: geometry and per-strip compressed sizes. Tag reads only; no
+    // payload leaves the disk here, so the whole layout can be planned before
+    // a single byte is staged.
+    // ------------------------------------------------------------------
+    std::vector<std::vector<uint32_t> > raw_sizes(num_req_frames);
     {
-        TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
-        if (t) {
-            #pragma omp for schedule(dynamic, 1)
-            for (int f = 0; f < num_req_frames; f++) {
-                int dir_idx = frames[f];
-                if (!TIFFSetDirectory(t, dir_idx)) {
-                    read_success[f] = false;
-                    continue;
-                }
-                auto &comp_buf = frame_compressed[f];
-                auto &sinfos = frame_strip_infos[f];
-                sinfos.resize(strips_per_dir);
-
-                for (uint32_t s = 0; s < strips_per_dir; s++) {
-                    tmsize_t raw_sz = TIFFRawStripSize(t, s);
-                    if (raw_sz <= 6) {
-                        read_success[f] = false;
-                        break;
-                    }
-                    size_t curr_off = comp_buf.size();
-                    comp_buf.resize(curr_off + raw_sz);
-                    tmsize_t nread = TIFFReadRawStrip(t, s, comp_buf.data() + curr_off, raw_sz);
-                    if (nread != raw_sz) {
-                        read_success[f] = false;
-                        break;
-                    }
-                    sinfos[s].offset = curr_off;
-                    sinfos[s].raw_size = raw_sz;
-                }
+        TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
+        if (!tif) return false;
+        bool ok = true;
+        for (int f = 0; f < num_req_frames && ok; f++) {
+            if (!TIFFSetDirectory(tif, frames[f])) { ok = false; break; }
+            uint32_t width = 0, height = 0;
+            uint16_t bits = 0, compression = 0, planar = PLANARCONFIG_CONTIG, samples = 1;
+            TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+            TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+            TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
+            TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
+            TIFFGetFieldDefaulted(tif, TIFFTAG_PLANARCONFIG, &planar);
+            TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLESPERPIXEL, &samples);
+            if ((int)width != nx || (int)height != ny || bits != 16 || samples != 1 ||
+                planar != PLANARCONFIG_CONTIG ||
+                (compression != COMPRESSION_DEFLATE && compression != COMPRESSION_ADOBE_DEFLATE)) {
+                ok = false; break;
             }
-            TIFFClose(t);
-        } else {
-            #pragma omp critical
-            for (int f = 0; f < num_req_frames; f++) read_success[f] = false;
+            // One row per strip is what makes a strip a self-contained Deflate stream
+            // of exactly nx uint16 samples. Anything else changes the chunk geometry.
+            if ((int)TIFFNumberOfStrips(tif) != ny ||
+                TIFFStripSize(tif) != (tmsize_t)((size_t)nx * sizeof(uint16_t))) {
+                ok = false; break;
+            }
+            raw_sizes[f].resize(ny);
+            for (int s = 0; s < ny; s++) {
+                const tmsize_t rs = TIFFRawStripSize(tif, s);
+                if (rs < 7 || (uint64_t)rs > 0xFFFFFFFFull) { ok = false; break; }
+                raw_sizes[f][s] = (uint32_t)rs;
+            }
+            if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
         }
+        TIFFClose(tif);
+        if (!ok) return false;
     }
 
+    // ------------------------------------------------------------------
+    // Staging geometry. Both the compressed inputs and the decompressed outputs
+    // must satisfy the alignment nvCOMP reports for this build of the library;
+    // the previous revision passed base+2 pointers, which is outside the API
+    // contract. Query rather than assume.
+    // ------------------------------------------------------------------
+    nvcompAlignmentRequirements_t align_req;
+    std::memset(&align_req, 0, sizeof(align_req));
+    if (nvcompBatchedDeflateDecompressGetRequiredAlignments(
+            nvcompBatchedDeflateDecompressDefaultOpts, &align_req) != nvcompSuccess) {
+        return false;
+    }
+    const size_t in_align  = std::max<size_t>((size_t)align_req.input, 1);
+    const size_t out_align = std::max<size_t>((size_t)align_req.output, sizeof(uint16_t));
+    const size_t tmp_align = std::max<size_t>((size_t)align_req.temp, 256);
+
+    const size_t row_bytes = (size_t)nx * sizeof(uint16_t);
+    const size_t row_pitch_bytes = alignUp(row_bytes, out_align);
+    if (row_pitch_bytes % sizeof(uint16_t) != 0) return false;
+    const size_t row_pitch_u16 = row_pitch_bytes / sizeof(uint16_t);
+
+    // Compressed bytes a single frame occupies once every payload is placed so that
+    // its raw Deflate start (strip start + 2) is in_align-aligned.
+    std::vector<size_t> frame_stage_bytes(num_req_frames, 0);
+    size_t max_frame_stage = 0;
     for (int f = 0; f < num_req_frames; f++) {
-        if (!read_success[f]) return false;
+        const size_t cursor = frameStageBytes(raw_sizes[f].data(), ny, in_align);
+        frame_stage_bytes[f] = cursor;
+        max_frame_stage = std::max(max_frame_stage, cursor);
     }
 
-    size_t total_compressed_bytes = 0;
-    for (int f = 0; f < num_req_frames; f++) {
-        total_compressed_bytes += frame_compressed[f].size();
+    // ------------------------------------------------------------------
+    // Claim d_Fframes as ingest scratch. initialize() already allocated it for the
+    // spectrum, nothing writes it until computeGlobalForwardFFT(), and that
+    // transform overwrites every element -- so the whole ingest working set can
+    // live there and the session's VRAM high-water mark does not move. Then take
+    // the largest frame batch that fits.
+    // ------------------------------------------------------------------
+    if (!fourier_guard.beginIngestScratch()) {
+        logfile << "WARNING: nvCOMP ingestion refused: the Fourier buffer is not free."
+                << std::endl;
+        return false;
     }
+    // Local class: has the enclosing member function's access, so no friend needed.
+    struct ScratchScope {
+        CudaMovieSession *session;
+        ~ScratchScope() { session->endIngestScratch(); }
+    } scratch_scope = { this };
 
-    std::vector<uint8_t> h_compressed(total_compressed_bytes);
-    std::vector<size_t> h_comp_bytes(total_chunks);
-    std::vector<size_t> h_comp_offsets(total_chunks);
-    std::vector<size_t> h_decomp_offsets(total_chunks);
-    std::vector<size_t> h_uncomp_buffer_bytes(total_chunks, uncomp_row_bytes);
+    mc_cuda::DeviceScratchArena arena(
+        d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
 
-    size_t write_pos = 0;
-    size_t chunk_idx = 0;
-    for (int f = 0; f < num_req_frames; f++) {
-        size_t f_sz = frame_compressed[f].size();
-        std::memcpy(h_compressed.data() + write_pos, frame_compressed[f].data(), f_sz);
+    // Views into the arena. None of these owns memory; none may be freed.
+    struct BatchViews {
+        uint8_t *comp; uint16_t *u16;
+        void **cptr; size_t *csize; void **dptr; size_t *dsize; size_t *asize;
+        nvcompStatus_t *status; void *temp;
+        size_t comp_capacity, temp_bytes;
+    };
+    BatchViews v;
+    std::memset(&v, 0, sizeof(v));
+    int batch_frames = 0;
 
-        for (uint32_t s = 0; s < strips_per_dir; s++) {
-            h_comp_offsets[chunk_idx] = write_pos + frame_strip_infos[f][s].offset + 2;
-            h_comp_bytes[chunk_idx] = frame_strip_infos[f][s].raw_size - 6;
-            h_decomp_offsets[chunk_idx] = ((size_t)f * strips_per_dir + s) * uncomp_row_bytes;
-            chunk_idx++;
+    for (int candidate = n_frames; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
+        const size_t chunks = (size_t)candidate * (size_t)ny;
+        size_t temp_bytes = 0;
+        if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
+                chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
+                &temp_bytes, (size_t)candidate * (size_t)ny * row_bytes) != nvcompSuccess) {
+            break;
         }
-        write_pos += f_sz;
+        arena.reset();
+        BatchViews c;
+        std::memset(&c, 0, sizeof(c));
+        c.comp_capacity = (size_t)candidate * alignUp(max_frame_stage, in_align);
+        c.temp_bytes = temp_bytes;
+        c.comp   = (uint8_t *)arena.alloc(c.comp_capacity, in_align);
+        c.u16    = (uint16_t *)arena.alloc((size_t)candidate * (size_t)ny * row_pitch_bytes, out_align);
+        c.cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
+        c.csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+        c.dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
+        c.dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+        c.asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+        c.status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
+        bool fits = c.comp && c.u16 && c.cptr && c.csize && c.dptr && c.dsize && c.asize && c.status;
+        if (fits && temp_bytes) {
+            c.temp = arena.alloc(temp_bytes, tmp_align);
+            fits = (c.temp != 0);
+        }
+        if (fits) { v = c; batch_frames = candidate; break; }
+        if (candidate == 1) break;
+    }
+    if (batch_frames <= 0) {
+        logfile << "WARNING: nvCOMP ingestion refused: a one-frame batch does not fit the "
+                << arena.capacity() << "-byte pre-FFT scratch arena." << std::endl;
+        return false;
     }
 
-    bool apply_gain = (gain_ref != nullptr);
+    // The arena can only honour this because its base came from cudaMalloc. Checked
+    // rather than assumed: a misaligned input is undefined behaviour in nvCOMP that
+    // decodes correctly often enough to pass a pixel comparison.
+    if (((uintptr_t)v.comp % in_align) != 0) return false;
+
+    logfile << "nvCOMP ingestion: batch=" << batch_frames << "/" << n_frames
+            << " frames, scratch=" << arena.used() << "/" << arena.capacity()
+            << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
+            << ", nvCOMP temp=" << v.temp_bytes
+            << ", input alignment=" << in_align << std::endl;
+
+    // ------------------------------------------------------------------
+    // Host side: one pinned staging buffer sized for the worst batch, reused.
+    // ------------------------------------------------------------------
+    ScopedPinnedHost stage;
+    HANDLE_ERROR(cudaHostAlloc(&stage.ptr, v.comp_capacity, cudaHostAllocDefault));
+    uint8_t *const h_stage = (uint8_t *)stage.ptr;
+
+    const size_t max_chunks = (size_t)batch_frames * (size_t)ny;
+    std::vector<void *>         h_comp_ptrs(max_chunks);
+    std::vector<size_t>         h_comp_size(max_chunks);
+    std::vector<void *>         h_dec_ptrs(max_chunks);
+    std::vector<size_t>         h_dec_size(max_chunks, row_bytes);
+    std::vector<size_t>         h_act_size(max_chunks);
+    std::vector<nvcompStatus_t> h_statuses(max_chunks);
+
+    const bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
-        if (!d_gain) {
-            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
-        }
+        const size_t sz_real = (size_t)ny * (size_t)nx * sizeof(float);
+        if (!d_gain) HANDLE_ERROR(cudaMalloc((void **)&d_gain, sz_real));
         HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
     }
 
-    void *d_comp_buf = nullptr;
-    uint16_t *d_decomp_u16 = nullptr;
-    void **d_comp_ptrs = nullptr;
-    size_t *d_comp_sizes = nullptr;
-    void **d_decomp_ptrs = nullptr;
-    size_t *d_uncomp_sizes = nullptr;
-    size_t *d_actual_sizes = nullptr;
-    nvcompStatus_t *d_statuses = nullptr;
-    void *d_temp = nullptr;
+    HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
+    cudaStream_t stream = ingest_stream;
+    const int io_threads = n_threads > 0 ? n_threads : 4;
 
-    mc_cuda::ScopedDeviceMemory<9> mem_guard(&failure_state);
-    HANDLE_ERROR(cudaMalloc(&d_comp_buf, total_compressed_bytes));
-    mem_guard.add(d_comp_buf);
-    HANDLE_ERROR(cudaMalloc(&d_decomp_u16, bytes_u16_total));
-    mem_guard.add(d_decomp_u16);
-    HANDLE_ERROR(cudaMalloc(&d_comp_ptrs, sizeof(void*) * total_chunks));
-    mem_guard.add(d_comp_ptrs);
-    HANDLE_ERROR(cudaMalloc(&d_comp_sizes, sizeof(size_t) * total_chunks));
-    mem_guard.add(d_comp_sizes);
-    HANDLE_ERROR(cudaMalloc(&d_decomp_ptrs, sizeof(void*) * total_chunks));
-    mem_guard.add(d_decomp_ptrs);
-    HANDLE_ERROR(cudaMalloc(&d_uncomp_sizes, sizeof(size_t) * total_chunks));
-    mem_guard.add(d_uncomp_sizes);
-    HANDLE_ERROR(cudaMalloc(&d_actual_sizes, sizeof(size_t) * total_chunks));
-    mem_guard.add(d_actual_sizes);
-    HANDLE_ERROR(cudaMalloc(&d_statuses, sizeof(nvcompStatus_t) * total_chunks));
-    mem_guard.add(d_statuses);
+    // ------------------------------------------------------------------
+    // Pass B: read, upload, decompress, verify and convert one batch at a time.
+    // ------------------------------------------------------------------
+    for (int f0 = 0; f0 < n_frames; f0 += batch_frames) {
+        const int bf = std::min(batch_frames, n_frames - f0);
+        const size_t chunks = (size_t)bf * (size_t)ny;
 
-    std::vector<void*> h_comp_ptrs(total_chunks);
-    std::vector<void*> h_decomp_ptrs(total_chunks);
-    uint8_t *d_comp_base = (uint8_t*)d_comp_buf;
-    uint8_t *d_decomp_base = (uint8_t*)d_decomp_u16;
+        std::vector<size_t> frame_base(bf);
+        size_t stage_used = 0;
+        for (int i = 0; i < bf; i++) {
+            frame_base[i] = alignUp(stage_used, in_align);
+            stage_used = frame_base[i] + frame_stage_bytes[f0 + i];
+        }
+        if (stage_used > v.comp_capacity) return false;
 
-    for (size_t i = 0; i < total_chunks; i++) {
-        h_comp_ptrs[i] = d_comp_base + h_comp_offsets[i];
-        h_decomp_ptrs[i] = d_decomp_base + h_decomp_offsets[i];
+        std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
+        #pragma omp parallel num_threads(io_threads)
+        {
+            TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
+            if (!t) {
+                #pragma omp critical
+                { for (int i = 0; i < bf; i++) frame_ok[i] = 0; }
+            } else {
+                #pragma omp for schedule(dynamic, 1)
+                for (int i = 0; i < bf; i++) {
+                    const int f = f0 + i;
+                    if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
+                    uint8_t *fb = h_stage + frame_base[i];
+                    size_t cursor = 0;
+                    bool ok = true;
+                    for (int s = 0; s < ny && ok; s++) {
+                        const size_t raw_sz = raw_sizes[f][s];
+                        const size_t slot = stripSlotOffset(cursor, in_align);
+                        if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)raw_sz) != (tmsize_t)raw_sz) {
+                            ok = false; break;
+                        }
+                        if (!zlibWrapperIsUsable(fb + slot, raw_sz)) {
+                            // Named, because otherwise the only externally visible
+                            // difference between this refusal and a read failure is
+                            // that the movie fails -- which makes the guard
+                            // impossible to tell apart from the one after it.
+                            #pragma omp critical
+                            logfile << "WARNING: strip " << s << " of frame " << f
+                                    << " has an unusable zlib wrapper; falling back to"
+                                       " the host reader." << std::endl;
+                            ok = false;
+                            break;
+                        }
+                        const size_t chunk = (size_t)i * (size_t)ny + (size_t)s;
+                        // Payload only: the 2-byte zlib header and the 4-byte Adler32
+                        // trailer are not part of the RFC 1951 stream nvCOMP consumes.
+                        h_comp_ptrs[chunk] = v.comp + frame_base[i] + slot + 2;
+                        h_comp_size[chunk] = raw_sz - 6;
+                        h_dec_ptrs[chunk]  = (uint8_t *)v.u16 + chunk * row_pitch_bytes;
+                        cursor = slot + raw_sz;
+                    }
+                    if (!ok) frame_ok[i] = 0;
+                }
+                TIFFClose(t);
+            }
+        }
+        for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
+
+        HANDLE_ERROR(cudaMemcpyAsync(v.comp, h_stage, stage_used, cudaMemcpyHostToDevice, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(v.cptr, h_comp_ptrs.data(), chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(v.csize, h_comp_size.data(), chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(v.dptr,  h_dec_ptrs.data(),  chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(v.dsize,  h_dec_size.data(),  chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
+
+        if (nvcompBatchedDeflateDecompressAsync(
+                (const void *const *)v.cptr, v.csize, v.dsize, v.asize,
+                chunks, v.temp, v.temp_bytes, v.dptr,
+                nvcompBatchedDeflateDecompressDefaultOpts, v.status, stream) != nvcompSuccess) {
+            return false;
+        }
+
+        // Fail closed. Without this the batch buffer's previous contents, or raw
+        // cudaMalloc garbage on the first batch, would be cast to float, gain-applied
+        // and aligned as if it were image data, and the function would return success.
+        HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
+        HANDLE_ERROR(cudaStreamSynchronize(stream));
+        for (size_t c = 0; c < chunks; c++) {
+            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
+                logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
+                        << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]
+                        << " bytes=" << h_act_size[c] << " expected=" << row_bytes
+                        << "; falling back to the host reader." << std::endl;
+                return false;
+            }
+        }
+
+        dim3 block(16, 16);
+        dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
+        fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
+            v.u16, d_Iframes, d_Isum, d_gain, nx, ny, row_pitch_u16,
+            f0, bf, f0 == 0, apply_gain);
+        HANDLE_ERROR(cudaGetLastError());
+        HANDLE_ERROR(cudaStreamSynchronize(stream));
     }
 
-    size_t temp_bytes = 0;
-    nvcompStatus_t t_stat = nvcompBatchedDeflateDecompressGetTempSizeAsync(
-        total_chunks, uncomp_row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
-        &temp_bytes, bytes_u16_total);
-    if (t_stat != nvcompSuccess) return false;
-
-    if (temp_bytes > 0) {
-        HANDLE_ERROR(cudaMalloc(&d_temp, temp_bytes));
-        mem_guard.add(d_temp);
-    }
-
-    cudaStream_t stream = 0;
-
-    HANDLE_ERROR(cudaMemcpyAsync(d_comp_buf, h_compressed.data(), total_compressed_bytes, cudaMemcpyHostToDevice, stream));
-    HANDLE_ERROR(cudaMemcpyAsync(d_comp_ptrs, h_comp_ptrs.data(), sizeof(void*) * total_chunks, cudaMemcpyHostToDevice, stream));
-    HANDLE_ERROR(cudaMemcpyAsync(d_comp_sizes, h_comp_bytes.data(), sizeof(size_t) * total_chunks, cudaMemcpyHostToDevice, stream));
-    HANDLE_ERROR(cudaMemcpyAsync(d_decomp_ptrs, h_decomp_ptrs.data(), sizeof(void*) * total_chunks, cudaMemcpyHostToDevice, stream));
-    HANDLE_ERROR(cudaMemcpyAsync(d_uncomp_sizes, h_uncomp_buffer_bytes.data(), sizeof(size_t) * total_chunks, cudaMemcpyHostToDevice, stream));
-
-    nvcompStatus_t decomp_stat = nvcompBatchedDeflateDecompressAsync(
-        (const void* const*)d_comp_ptrs,
-        d_comp_sizes,
-        d_uncomp_sizes,
-        d_actual_sizes,
-        total_chunks,
-        d_temp,
-        temp_bytes,
-        d_decomp_ptrs,
-        nvcompBatchedDeflateDecompressDefaultOpts,
-        d_statuses,
-        stream);
-    if (decomp_stat != nvcompSuccess) return false;
-
-    dim3 block(16, 16);
-    dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
-    fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
-        d_decomp_u16, d_Iframes, d_Isum, d_gain, nx, ny, n_frames, apply_gain);
-    HANDLE_ERROR(cudaGetLastError());
-    HANDLE_ERROR(cudaStreamSynchronize(stream));
-
-    HANDLE_ERROR(mem_guard.releaseAll());
     return true;
 }
 #endif
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;
+    // Takes d_Fframes for the spectrum. Refused while ingest scratch views into the
+    // same allocation are still live: the transform would otherwise overwrite
+    // staging bytes that something is still reading, with no error anywhere.
+    if (!fourier_guard.beginFourierWrite()) {
+        logfile << "ERROR: forward FFT refused: the Fourier buffer still holds live "
+                   "ingest scratch." << std::endl;
+        return false;
+    }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t real_stride = (size_t)nx * ny;

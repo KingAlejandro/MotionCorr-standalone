@@ -1491,7 +1491,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		if (movie_session->ingestCompressedTiffStrips(fn_mic, frames, gain_ptr, n_io_threads)) {
 			nvcomp_ingested = true;
-			logfile << "Ingested and decompressed TIFF directly on GPU via nvCOMP." << std::endl;
 		}
 	}
 #endif

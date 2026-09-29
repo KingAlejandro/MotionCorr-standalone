@@ -76,12 +76,16 @@ Two hosts, two A100 variants, two drivers, two independently built binaries. The
 second venue is a shared VM, so it is reported as corroboration; the SCARF
 allocation is the run of record. No timing is claimed from either.
 
-Required-test suites at this head: **22/22 CPU** on `cpu64` from a clean clone of
-`6bb67e4` (unchanged by the later test-only commits) (cores 32-63, 8-way, under the advisory issue-96 validation lock,
-`ctffind` and the concurrent issue-85 codec run on cores 0-31 left alone), and
-**29 collected / 28 passed** on the VM CUDA build. The single CUDA-build failure
-is `CiFailClosedControls`, which needs `.git` to resolve its trusted manifest and
-fails in any rsync'd working copy; it passes in the clean clone.
+Required-test suites: **22/22 CPU** on `cpu64` from a clean clone of `6bb67e4`
+(cores 32-63, 8-way, under the advisory issue-96 validation lock, with `ctffind`
+and the concurrent issue-85 codec run on cores 0-31 left alone), and **29
+collected / 28 passed** on the VM CUDA build. Nothing the 22 required tests
+execute changed after `6bb67e4`: the only non-documentation change since is
+`tests/run_compact_ingest_support_matrix.py`, which is CUDA-only and not in the
+required list, and `git diff 6bb67e4..HEAD` over `compare_output_trees.py` and
+its self-test is empty. The one CUDA-build failure is `CiFailClosedControls`,
+which needs `.git` to resolve its trusted manifest and fails in any rsync'd
+working copy; it passes in the clean clone.
 
 ## Support table
 

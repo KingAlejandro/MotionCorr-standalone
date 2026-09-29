@@ -1,0 +1,125 @@
+{
+  "command": [
+    "/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject",
+    "--i",
+    "/home/alex/mc118-preprocess-20260929T1311/main-proof/u16-observed/one_movie.star",
+    "--j",
+    "4",
+    "--use_own",
+    "--patch_x",
+    "3",
+    "--patch_y",
+    "3",
+    "--bfactor",
+    "150",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--voltage",
+    "200",
+    "--angpix",
+    "0.885",
+    "--max_iter",
+    "1",
+    "--gpu",
+    "0",
+    "--o",
+    "/home/alex/mc118-preprocess-20260929T1311/main-proof/u16-observed/kernel-fatal/out/",
+    "--max_io_threads",
+    "2"
+  ],
+  "pid": 1874073,
+  "exe": "/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject",
+  "stat": "1874073 (motioncorr_faul) R 1874072 1873141 1873141 0 -1 4194304 24 0 0 0 0 0 0 0 20 0 1 0 614669061 5410816 0 18446744073709551615 100445803061248 100445805104369 140730914288688 0 0 0 0 0 0 0 0 0 17 102 0 0 0 0 0 100445805581896 100445805588784 100445856903168 140730914290306 140730914290711 140730914290711 140730914291633 0\n",
+  "status": "Name:\tmotioncorr_faul\nUmask:\t0002\nState:\tR (running)\nTgid:\t1874073\nNgid:\t0\nPid:\t1874073\nPPid:\t1874072\nTracerPid:\t0\nUid:\t1004\t1004\t1004\t1004\nGid:\t1004\t1004\t1004\t1004\nFDSize:\t64\nGroups:\t100 1004 \nNStgid:\t1874073\nNSpid:\t1874073\nNSpgid:\t1873141\nNSsid:\t1873141\nKthread:\t0\nVmPeak:\t    7900 kB\nVmSize:\t    7900 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     708 kB\nVmRSS:\t     708 kB\nRssAnon:\t      64 kB\nRssFile:\t     644 kB\nRssShmem:\t       0 kB\nVmData:\t     188 kB\nVmStk:\t     132 kB\nVmExe:\t    1996 kB\nVmLib:\t    4100 kB\nVmPTE:\t      52 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/1773298\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t00000ff,00000000,00000000,00000000\nCpus_allowed_list:\t96-103\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003\nMems_allowed_list:\t0-1\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+  "numa_maps": "5b5adc667000 default file=/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject mapped=41 active=0 N1=41 kernelpagesize_kB=4\n5b5adc692000 default file=/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n5b5adc885000 default file=/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n5b5adc8f9000 default file=/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n7a8a23000000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 mapped=16 active=0 N0=4 N1=12 kernelpagesize_kB=4\n7a8a23023000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n7a8a231f5000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n7a8a23226000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 anon=2 dirty=2 mapped=8 active=0 N1=8 kernelpagesize_kB=4\n7a8a2333b000 default file=/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0 mapped=5 active=0 N0=4 N1=1 kernelpagesize_kB=4\n7a8a23340000 default file=/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0\n7a8a23368000 default file=/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0\n7a8a23371000 default file=/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0 anon=2 dirty=2 N1=2 kernelpagesize_kB=4\n7a8a23373000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1 mapped=8 active=0 N0=4 N1=4 kernelpagesize_kB=4\n7a8a2337b000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7a8a233cb000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7a8a233fa000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1 anon=2 dirty=2 mapped=6 active=0 N1=6 kernelpagesize_kB=4\n7a8a23400000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 mapped=16 active=0 N0=4 N1=12 kernelpagesize_kB=4\n7a8a23423000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n7a8a235e9000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n7a8a23611000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n7a8a2362b000 default anon=1 dirty=1 N1=1 kernelpagesize_kB=4\n7a8a2362d000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 mapped=11 active=0 N0=11 kernelpagesize_kB=4\n7a8a23638000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n7a8a23674000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n7a8a23681000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7a8a23683000 default file=/etc/ld.so.cache mapped=14 active=0 N0=14 kernelpagesize_kB=4\n7a8a23691000 default anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7a8a23693000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=1 mapmax=52 N1=1 kernelpagesize_kB=4\n7a8a23694000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=43 mapmax=58 N1=43 kernelpagesize_kB=4\n7a8a236bf000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=10 mapmax=55 N1=10 kernelpagesize_kB=4\n7a8a236c9000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 anon=4 dirty=4 active=0 N1=4 kernelpagesize_kB=4\n7ffe7825b000 default stack anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7ffe782b4000 default\n7ffe782b8000 default\n",
+  "cpus": [
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103
+  ],
+  "cuda_visible_devices": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "fault": "kernel-fatal",
+  "gpu_samples": [
+    {
+      "time": 1790690244.1757157,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.2789638,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.3809526,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.484486,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.5877957,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.691383,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.802216,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690244.9302714,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "time": 1790690245.0453591,
+      "exit": 0,
+      "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1874073, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+      "stderr": ""
+    },
+    {
+      "time": 1790690245.149401,
+      "exit": 0,
+      "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1874073, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+      "stderr": ""
+    },
+    {
+      "time": 1790690245.2652204,
+      "exit": 0,
+      "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1874073, [No data]\n",
+      "stderr": ""
+    },
+    {
+      "time": 1790690245.3683305,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "returncode": 1,
+  "binary_sha256": "e04660e1f4e7a7735e7b6579576573dfa21999c3ea49604d3ad2c66838aeaf11",
+  "physical_gpu_witness": true
+}

@@ -56,14 +56,53 @@ the lane-C staging controls.
 | | Count |
 |---|---|
 | Device-free (required union) | 23 |
-| CUDA / hardware labelled | 7 |
-| **Default total** | **30** |
-| With `MOTIONCORR_U16_TEST_MOVIE` set | 31 |
+| CUDA labelled | 6 |
+| **Default total** | **29** |
+| With `MOTIONCORR_U16_TEST_MOVIE` set | 30 |
 
-The seven hardware tests are `RunnerInterpolateShiftsCuda`,
+The six CUDA tests are `RunnerInterpolateShiftsCuda`,
 `CudaWrapperUploadFailure`, `CudaU16StagingEquivalence`, `CudaFaultMatrix`,
-`CudaPreprocessingFailurePaths`, `CudaPreprocessingFailurePathsFloatHost`,
-`CudaErrorClass`. `CudaU16FailurePaths` stays opt-in behind the external fixture.
+`CudaPreprocessingFailurePaths`, `CudaErrorClass`; five carry the `hardware`
+label as well. `CudaU16FailurePaths` stays opt-in behind the external fixture.
+
+## Independent review and what changed because of it
+
+A current-source review was run against `f104605`. It verified the
+no-new-production claim independently — its own blob-identity matrix over all
+33 changed files, its own `patch(1)` reconstruction of the runner, and a
+reverse-apply containment check proving PR115's runner work survived PR118's
+supersession — and confirmed the test-union arithmetic, the `--wrap` symbol
+sets, the shim superset relation (by compiling both signatures and reading the
+mangled names with `nm`), scope and licence. It found **no defect in the
+composed production source**. Every finding was in this directory's harness:
+
+| Finding | Action |
+|---|---|
+| P1 `run_matched_experiment.py` globbed `worker*` for the merge, so every arm was excluded and nothing was ever graded | fixed; it now also refuses on a worker-count mismatch |
+| P1 A6 copied the a2 tree, whose `status.json` names a2's manifest and logs, so `merge_workers` refused and the arm could never pass | A6 is now its own run |
+| A6's dropped set was the tail of worker 0's contiguous shard, i.e. a suffix resume | now removes an interior gap from every shard and asserts it is interior |
+| The second preprocessing arm's rationale was false | arm removed; see composition note 4 |
+| The sampler discarded the pid from `compute_apps`, so a co-tenant on a granted UUID was added to our figure | intersects with the descendant set; foreign contexts recorded separately |
+| RSS over-counts shared pages once per process, which is not constant across a 1/2/4-worker contrast | `Pss` sampled alongside and documented as the figure to compare arms on |
+| Both consumers read `status["witness"]`; the launcher writes `gpu_witness` and there is no `verdict` key | fixed in both |
+| The block reference could silently fall back to a previous block's tree | no fallback; each arm records `graded_against` |
+| `verify_composition.py` scanned only `src/` while its verdict said "every production byte" | scans `tests/`, `tools/` and `CMakeLists.txt` too, with the three hand-reconciled files declared up front |
+
+Two findings were routed rather than fixed. `run_preprocessing_failure_controls.py:202`
+records `host_storage` as one host path for a run that exercises both; the file
+is byte-identical in PR115 and PR118 and belongs to the shared executor
+([PR115 comment](https://github.com/KingAlejandro/MotionCorr-standalone/pull/115#issuecomment-5892887040)).
+And 13 of the 23 required names inherited from main are absent from
+`test_ci_fail_closed.py`'s drop-one loop, so their missing-name rejection is
+never exercised; all three names this composition adds are covered, and
+widening the inherited set is not this task's scope.
+
+Not addressed, and recorded as a limitation: `test_aggregate_sampler.py` and
+`verify_composition.py` are not registered as CTests, so nothing re-runs them
+automatically. Registering them would change the required-test union that three
+other owners are tracking, which is a coordination cost this task should not
+impose unilaterally. They are run by hand and their results are recorded here.
+
 
 ## Requirements, evidence and support matrix
 
@@ -82,8 +121,9 @@ executed · **BLOCKED** waiting on another owner. A prepared check is not a pass
 | No production line written by the integrator | PASS | `verify_composition.py` PASS; fails on all three negative controls |
 | Recompute the required-test union | PASS | 23 names, `--min-count` 23, restated list and drop-one loop updated |
 | Complete test collection controls | PASS | `CiFailClosedControls` 8/8 on both hosts |
+| Provenance oracle over `src/`, `tests/`, `tools/`, `CMakeLists.txt` | PASS | `verify_composition.py`; 3 declared reconciliations, 0 unsourced |
 | Keep #93 / #108 / #121 out | PASS | absent from the branch |
-| Current-source independent review | PENDING | in progress |
+| Current-source independent review | PASS | no defect in the composed production source; all harness findings fixed or routed |
 
 ### Executed checks
 
@@ -95,8 +135,8 @@ executed · **BLOCKED** waiting on another owner. A prepared check is not a pass
 | Negative controls: PR117 mutation harness on the composed tree | cpu64 | PASS | 83/83 detected, 0 skipped |
 | CUDA compile, both arms | SCARF cn062 | PASS | distinct binaries `670cfa26…` / `5ac37830…` |
 | CI, both jobs | GitHub | PASS | green on `a8d8dc6`, `9450a9d`, `0ed67fa`, `f104605` |
-| **Native CUDA CTest** | 4-gpu-vm GPU3 | **PASS** | **30/30**, both preprocessing arms |
-| Measurement-tool controls | cpu64 | PASS | 6/6, and each fails on its targeted mutation |
+| **Native CUDA CTest** | 4-gpu-vm GPU3 | **PASS** | **30/30** at `0ed67fa`; re-run at the corrected 29 is in the queued SCARF job |
+| Measurement-tool controls | cpu64 | PASS | 8/8, and each fails on its targeted mutation |
 
 ### Untimed all-24 native correctness
 
@@ -166,9 +206,18 @@ two P1 fixes frozen in `b70f352b` (`merge accepts an empty required-product list
 
 ### Native CUDA, 4-gpu-vm GPU3, composed source `0ed67fa`
 
-**30/30 CTest PASS** on a real A100, 0 failed: 23 device-free plus 7
-cuda-labelled, 6 of them hardware. Both preprocessing arms pass. Full record in
+**30/30 CTest PASS** on a real A100, 0 failed. Full record in
 `evidence/native-ctest-vm-20260929/`.
+
+That run is **pinned to `0ed67fa`**, which still registered the duplicate
+`CudaPreprocessingFailurePathsFloatHost` arm; the current source registers 29.
+Every test in the 29 passed there, and the only difference is the removed
+duplicate, but the 30/30 figure describes the earlier source and is labelled as
+such rather than restated for this one. The re-run at 29 is folded into the
+SCARF correctness job, which reconfigures before testing. A first VM re-run
+attempt refused: a colleague's RELION cross-validation job (`dxp41838`, pid
+1905876) holds a context on all four VM devices, so the box is not available and
+was left alone.
 
 One disjoint device only — GPU0/1/2 belong to the shared reconstruction-cleanup
 fix validation. The occupancy gate refused a first attempt because something

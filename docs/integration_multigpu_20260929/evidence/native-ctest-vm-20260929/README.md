@@ -1,5 +1,11 @@
 # Native CUDA CTest on the composed candidate — 29 Sep 2026
 
+> **Pinned to `0ed67fa`.** That source still registered the duplicate
+> `CudaPreprocessingFailurePathsFloatHost` arm, which the independent review
+> then showed to be a near-duplicate asserting less than the arm it sat beside.
+> The current source registers 29, not 30. Every test in the 29 passed here.
+> This record is retained as executed rather than restated for the new source.
+
 **30/30 PASS**, 0 failed, 103.57 s total. This is a real device run, not a
 compile check.
 

@@ -93,6 +93,10 @@ if(BUILD_TESTING)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
+    # Pure C++ arithmetic regression (issue #97). Registered above the
+    # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
+    add_test(NAME RunnerInterpolateRecenter
+        COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     add_test(NAME DefectParser COMMAND defect_parser)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
@@ -141,6 +145,9 @@ if(BUILD_TESTING)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)
+        add_test(NAME RunnerInterpolateShifts
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts)
         add_test(NAME WriteFaults
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
                 --binary $<TARGET_FILE:motioncorr>)
@@ -155,6 +162,12 @@ if(BUILD_TESTING)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME RunnerInterpolateShiftsCuda
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
+                --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts --gpu 0)
+        set_tests_properties(RunnerInterpolateShiftsCuda PROPERTIES LABELS "cuda;hardware")
+    endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
         target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)

@@ -1486,13 +1486,31 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
         ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
     } movie_frame_cache_guard;
 	std::unique_ptr<CudaMovieSession> movie_session;
+	// A preprocessing failure may be recoverable, but releasing its resources can
+	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
+	// release and BEFORE destroying it or materializing/re-dispatching the movie.
+	auto discard_preprocessing_session = [&](const char *boundary) {
+		if (!movie_session) return;
+		movie_session->release();
+		const CudaFailureState &failure = movie_session->getFailureState();
+		const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaGetLastError());
+		if (decision.verdict == CUDA_RETRY_FATAL) {
+			const std::string origin = failure.isPoisoned()
+			    ? std::string(failure.fatalStage()) + ":" + integerToString(failure.fatalLine())
+			    : "pending on this thread";
+			REPORT_ERROR_STR("CUDA device became unusable during " << boundary << " for " << fn_mic
+			                 << ": " << cudaGetErrorString(decision.decisive)
+			                 << " (recorded at " << origin << "). First failure at "
+			                 << failure.firstStage() << ":" << failure.firstLine()
+			                 << ". Refusing CPU fallback after a fatal device error.");
+		}
+		movie_session.reset();
+	};
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		if (!movie_session->initialize()) {
-            if (movie_session->getFailureState().isPoisoned())
-                REPORT_ERROR("Fatal CUDA session initialization failure for " + fn_mic);
+			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
-			movie_session.reset();
 		}
 	}
 #endif
@@ -1538,8 +1556,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			cuda_gain_sum_done = true;
 			host_frames_are_raw = true;
 		} else {
+			discard_preprocessing_session("gain and sum preprocessing");
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
-			movie_session.reset();
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
 			Isum.initZeros();
@@ -1848,11 +1866,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
 			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
+				discard_preprocessing_session("sparse defect preparation");
 				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
-				movie_session.reset();
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
+				discard_preprocessing_session("sparse defect update");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
-				movie_session.reset();
 			}
 		}
 #endif
@@ -1915,8 +1933,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {
+			discard_preprocessing_session("resident forward FFT");
 			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
-			movie_session.reset();
 			materialize_host_frames();
 		}
 	#endif

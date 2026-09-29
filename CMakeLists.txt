@@ -193,8 +193,14 @@ if(BUILD_TESTING AND CUDA)
         add_executable(motioncorr_faultinject
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
-        target_link_options(motioncorr_faultinject PRIVATE "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
-            "LINKER:--wrap=cudaGetDeviceCount")
+        target_link_libraries(motioncorr_faultinject PRIVATE ${CMAKE_DL_LIBS})
+        target_link_options(motioncorr_faultinject PRIVATE "-rdynamic"
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetDeviceCount"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaDeviceSynchronize")
+        add_test(NAME CudaPreprocessingFailurePaths
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject> --float-host)
+        set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Issue #69. Pure predicate over cudaError_t plus the host-only failure state:

@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <set>
+#include <dlfcn.h>
+#include <execinfo.h>
 
 extern "C" cudaError_t __real_cudaMalloc(void **ptr, size_t size);
 extern "C" cudaError_t __real_cudaFree(void *ptr);
@@ -52,6 +54,40 @@ bool  g_poison = false;
 bool  g_trace = false;
 bool  g_init = false;
 
+const char *g_preprocess_fault = nullptr;
+bool g_preprocess_injected = false;
+bool g_preprocess_release_injected = false;
+
+// Test binary only, exported with -rdynamic. Resolve the real production caller
+// rather than relying on a fixture-specific allocation ordinal or byte count.
+// The driver requires an exact injection witness, so unavailable symbols fail it.
+bool called_from(const char *name) {
+    void *frames[16];
+    const int n = backtrace(frames, 16);
+    for (int i = 1; i < n; ++i) {
+        Dl_info info = {};
+        if (dladdr(frames[i], &info) && info.dli_sname &&
+            std::strstr(info.dli_sname, name)) return true;
+    }
+    return false;
+}
+
+bool preprocess_mode(const char *name) {
+    return g_preprocess_fault && std::strcmp(g_preprocess_fault, name) == 0;
+}
+
+cudaError_t inject_preprocess(bool fatal, const char *boundary) {
+    g_preprocess_injected = true;
+    // Consume any unrelated launch slot: the returned code alone must survive
+    // through the production helper's failure state and session disposal.
+    (void)cudaGetLastError();
+    const cudaError_t code = fatal ? cudaErrorIllegalAddress : cudaErrorMemoryAllocation;
+    std::fprintf(stderr, "[preprocessfault] injected %s at %s; pending slot cleared\n",
+                 cudaGetErrorName(code), boundary);
+    return code;
+}
+
+
 void init_once() {
     if (g_init) return;
     g_init = true;
@@ -61,6 +97,7 @@ void init_once() {
     const char *c = std::getenv("MC_FAULT_CODE");
     g_poison = (c && std::strcmp(c, "poison") == 0);
     g_trace = std::getenv("MC_FAULT_TRACE") != nullptr;
+    g_preprocess_fault = std::getenv("MC_PREPROCESS_FAULT");
     const char *count_ordinal = std::getenv("MC_COUNT_FAULT_ORDINAL");
     g_count_at = count_ordinal ? std::atol(count_ordinal) : 0;
     const char *count_code = std::getenv("MC_COUNT_FAULT_CODE");
@@ -92,6 +129,20 @@ extern "C" cudaError_t __wrap_cudaGetDeviceCount(int *count) {
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();
+    if (g_preprocess_injected)
+        std::fprintf(stderr, "[preprocessfault] later cudaMalloc size=%zu\n", size);
+    if (!g_preprocess_injected && g_preprocess_fault) {
+        const bool sparse = (preprocess_mode("sparse-recoverable") ||
+                             preprocess_mode("sparse-fatal") ||
+                             preprocess_mode("sparse-release-fatal")) &&
+                            called_from("updateDefectPixels");
+        const bool initialize = preprocess_mode("init-fatal") && called_from("initialize");
+        if (sparse || initialize) {
+            if (ptr) *ptr = nullptr;
+            return inject_preprocess(preprocess_mode("sparse-fatal") || initialize,
+                                     sparse ? "updateDefectPixels" : "initialize");
+        }
+    }
     const long n = ++g_seen;
     if (g_trace) std::fprintf(stderr, "[faultinject] cudaMalloc #%ld size=%zu\n", n, size);
     if (g_at > 0 && n == g_at) {
@@ -108,8 +159,40 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
 }
 
 extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
+    init_once();
     if (ptr && !g_owned.count(ptr)) ++g_stale;
     const cudaError_t result = __real_cudaFree(ptr);
     if (result == cudaSuccess) g_owned.erase(ptr);
+    if (result == cudaSuccess && g_preprocess_injected &&
+        !g_preprocess_release_injected && preprocess_mode("sparse-release-fatal") &&
+        called_from("CudaMovieSession")) {
+        // The real free ran and ownership accounting is updated. Only its status
+        // is replaced; this does not leave a real leak or poison the device.
+        g_preprocess_release_injected = true;
+        std::fprintf(stderr, "[preprocessfault] injected cudaErrorIllegalAddress after real session cudaFree\n");
+        return cudaErrorIllegalAddress;
+    }
     return result;
+}
+
+extern "C" cudaError_t __real_cudaDeviceSynchronize(void);
+extern "C" cudaError_t __wrap_cudaDeviceSynchronize(void) {
+    init_once();
+    const cudaError_t result = __real_cudaDeviceSynchronize();
+    if (result == cudaSuccess && !g_preprocess_injected &&
+        preprocess_mode("forward-fatal") && called_from("computeGlobalForwardFFT"))
+        return inject_preprocess(true, "computeGlobalForwardFFT");
+    return result;
+}
+
+
+extern "C" cudaError_t __real_cudaMemcpy(void *dst, const void *src, size_t count,
+                                         cudaMemcpyKind kind);
+extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t count,
+                                         cudaMemcpyKind kind) {
+    init_once();
+    if (!g_preprocess_injected && preprocess_mode("float-gain-fatal") &&
+        called_from("applyGainDefectsAndSum"))
+        return inject_preprocess(true, "applyGainDefectsAndSum");
+    return __real_cudaMemcpy(dst, src, count, kind);
 }

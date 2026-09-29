@@ -65,6 +65,81 @@ The seven hardware tests are `RunnerInterpolateShiftsCuda`,
 `CudaPreprocessingFailurePaths`, `CudaPreprocessingFailurePathsFloatHost`,
 `CudaErrorClass`. `CudaU16FailurePaths` stays opt-in behind the external fixture.
 
+## Requirements, evidence and support matrix
+
+Status vocabulary: **PASS** executed and met · **PENDING** prepared, not yet
+executed · **BLOCKED** waiting on another owner. A prepared check is not a pass.
+
+### Composition and review
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Start from current main `6393547e` | PASS | branch base; three `--no-ff` merges |
+| Compose PR115, then PR117, then PR118 | PASS | `f7da619`, `7c17f2d`, `1793e7e` |
+| Merge/`-x` provenance, no obsolete CUDA history | PASS | merge commits of the owner sources; no PR106/PR107 chain imported |
+| Preserve owner commits, authorship and evidence | PASS | owner commits unrewritten; their `docs/` trees carried in |
+| Do not duplicate PR118's PR115 cross-port | PASS | `verify_composition.py`: 10 of 11 `src/` files resolve to PR118's bytes |
+| No production line written by the integrator | PASS | `verify_composition.py` PASS; fails on all three negative controls |
+| Recompute the required-test union | PASS | 23 names, `--min-count` 23, restated list and drop-one loop updated |
+| Complete test collection controls | PASS | `CiFailClosedControls` 8/8 on both hosts |
+| Keep #93 / #108 / #121 out | PASS | absent from the branch |
+| Current-source independent review | PENDING | in progress |
+
+### Executed checks
+
+| Check | Host | Status | Result |
+|---|---|---|---|
+| CPU Release build | cpu64 | PASS | exit 0 |
+| Required-test collection gate | cpu64 | PASS | 23/23 |
+| CPU CTest | cpu64 | PASS | 23/23 |
+| Negative controls: PR117 mutation harness on the composed tree | cpu64 | PASS | 83/83 detected, 0 skipped |
+| CUDA compile, both arms | SCARF cn062 | PASS | distinct binaries `670cfa26…` / `5ac37830…` |
+| CI, both jobs | GitHub | PASS | green on `a8d8dc6`, `9450a9d`, `0ed67fa`, `f104605` |
+| **Native CUDA CTest** | 4-gpu-vm GPU3 | **PASS** | **30/30**, both preprocessing arms |
+| Measurement-tool controls | cpu64 | PASS | 6/6, and each fails on its targeted mutation |
+
+### Untimed all-24 native correctness
+
+All rows **PENDING**, queued as one exclusive 4-GPU SCARF job. Driver:
+`run_correctness_all24.sh`.
+
+| Requirement | Arm |
+|---|---|
+| Serial vs 2-worker, per-movie exact | C2 via `compare24.py` |
+| Serial vs 4-worker, per-movie exact | C4 |
+| Complete finite pixels, full normalized MRC + extended headers, STAR inventory | S2/S4 via `compare_output_trees.py` |
+| Aggregate STAR, optics and exposure identity | C3 |
+| UUID, actual pid and achieved mask per worker | launcher witness + sampler `/proc` readback |
+| Distinct shards, disjoint and complete | shard-manifest check |
+| Controlled owned-child failure | A5, reports `KILL_DELIVERED` or `VACUOUS_NO_WORKER_FOUND` |
+| Non-prefix resume | A6, canonical indices 5-11, reports removals made |
+
+### Matched fixed-budget experiment
+
+**BLOCKED**, prepared. Driver: `run_matched_experiment.py`. Waits on memory
+owner `b3c72f3f`'s +0.230 GiB no-gain disposition and tests owner `ff83c21a`'s
+accepted delta; neither has landed (both worktrees are still at their base).
+
+Design: float vs compact ingest, 1/2/4 workers, fixed total 24 logical CPUs
+(24 / 12+12 / 6+6+6+6) with per-worker `--j` and `--max_io_threads` equal to
+that worker's CPU count, identical output modes, matched gain and no-gain
+series, >=3 interleaved complete blocks with rotated arm order, every run
+retained in `runs.jsonl` with `retained` and `excluded_because`. Recorded per
+arm: launcher wall including setup and final drain, worker tail, simultaneous
+aggregate RSS, UUID-filtered per-process GPU memory with interval, achieved
+placement, and a full output grade against the block reference.
+
+**No GO/NO-GO performance conclusion exists yet**, because no arm has run. The
+retained PR118 gain-arm screen (31.57 → 25.04 s) is a different source under
+different resources and does not transfer to this composition.
+
+### Blocking dependency
+
+PR115 and PR118 share an open reconstruction-cleanup review finding. The shared
+executor's fix is uncommitted in their checkout (four files). This branch is
+pinned to the sources before it and **must be recomposed and re-validated**;
+re-run `verify_composition.py` with the updated owner revisions afterwards.
+
 ## Executed evidence
 
 ### CPU, cpu64 (`small-refmac-machine`), 29 Sep 2026
@@ -89,12 +164,22 @@ tree that each scheduling guard is still what makes its test pass, including the
 two P1 fixes frozen in `b70f352b` (`merge accepts an empty required-product list`,
 `launcher mistakes zombie-only groups for live survivors`).
 
-### Native CUDA
+### Native CUDA, 4-gpu-vm GPU3, composed source `0ed67fa`
 
-Pending. See the two drivers below. No native result is claimed for this
-composition yet, and neither owner's retained native suite (PR115 26/26,
-PR118 28/28, PR117's regraded 24/24) certifies it — they were executed on their
-own sources, before composition.
+**30/30 CTest PASS** on a real A100, 0 failed: 23 device-free plus 7
+cuda-labelled, 6 of them hardware. Both preprocessing arms pass. Full record in
+`evidence/native-ctest-vm-20260929/`.
+
+One disjoint device only — GPU0/1/2 belong to the shared reconstruction-cleanup
+fix validation. The occupancy gate refused a first attempt because something
+briefly held a context on GPU3; that refusal is retained beside the passing
+retry.
+
+This is the composed source's own native suite. It is **not** the all-24
+serial-versus-2-and-4-worker matrix, which needs four devices and is queued as a
+separate exclusive job, and it carries no timing claim. Neither owner's retained
+native suite (PR115 26/26, PR118 28/28, PR117's regraded 24/24) certifies this
+composition — each ran on its own source, before composition.
 
 ## Measurement tooling: what was verified before use
 

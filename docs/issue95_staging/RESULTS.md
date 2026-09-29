@@ -102,7 +102,103 @@ pages as `expand_u16_to_float` consumes it, matching the per-frame `clear()` the
 on. Without that, holding the whole mapping while building a float movie twice its size would have
 traded one regression for another.
 
-## 4. Does the staging want to be reused across movies?
+## 4. Measured result
+
+**Job `3514094`, SCARF `gn0003`, gpu-devel, 1x A100-SXM4-40GB `GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b`,
+8 logical CPUs `8-11,40-43`, `Mems_allowed_list 0-1`, AMD EPYC 7302, glibc 2.34, THP `always`,
+CUDA 12.8.61, g++ 11.5.0, Release `sm80` `-DTIMING=ON`, 24 RELION SPA tutorial movies,
+`movies.star` sha256 `fb998f70…9cf0041`.** Arms: main `a75a3f87f7ef17e0a29b1c91a1edecda08ebed34`,
+PR118 frozen `6827b314c013475a8c297cb27f3e6c19e030376d`, this change `fb0f6536`
+(binary sha256 recorded in the job log). Peak RSS from `/usr/bin/time -v`.
+
+### 24-movie peak RSS and products, one run per arm per option set
+
+| option set | main kB | fix kB | fix − main | PR118 kB | PR118 − main | products |
+|---|---:|---:|---:|---:|---:|---|
+| gain | 1,611,684 | 945,928 | -665,756 | 958,168 | -653,516 | PASS / PASS |
+| no gain | 1,608,316 | 1,612,000 | +3,684 | 1,789,504 | +181,188 | PASS / PASS |
+| `--first_frame_sum 3 --last_frame_sum 20` | 1,222,848 | 723,296 | -499,552 | 858,120 | -364,728 | PASS / PASS |
+| `--skip_defect` | 1,649,888 | 1,655,292 | +5,404 | 1,845,152 | +195,264 | PASS / PASS |
+| `--save_noDW --even_odd_split --grouping_for_ps 3` + gain | 3,111,328 | 1,779,972 | -1,331,356 | 2,061,000 | -1,050,328 | PASS / PASS |
+
+### Matched alternating pairs, three repeats per arm per mode
+
+| mode | arm | peak RSS kB (r1, r2, r3) | mean | wall s (r1, r2, r3) | mean |
+|---|---|---|---:|---|---:|
+| nogain | main | 1,626,244, 1,626,784, 1,624,528 | 1,625,852 | 24.66, 24.78, 24.78 | 24.74 |
+| nogain | cand | 1,837,580, 1,895,300, 1,841,392 | 1,858,090 | 24.17, 24.12, 24.17 | 24.15 |
+| nogain | fix | 1,626,960, 1,630,224, 1,630,696 | 1,629,293 | 23.93, 23.92, 23.78 | 23.88 |
+| gain | main | 1,611,744, 1,611,960, 1,611,960 | 1,611,888 | 24.89, 24.94, 24.86 | 24.90 |
+| gain | cand | 946,060, 946,084, 971,176 | 954,440 | 23.99, 23.96, 24.20 | 24.05 |
+| gain | fix | 946,312, 945,824, 946,320 | 946,152 | 23.86, 23.80, 26.96 | 24.87 |
+
+Arm order alternates by repeat (`main cand fix`, then `fix cand main`). No foreign GPU compute
+app was present at any run start; the node's 1-minute load average rose from 2.02 to 5.32 across
+the series, so the node was shared with other CPU work throughout and these are not clean-room
+timings.
+
+One outlier: `gain fix r3` at 26.96 s against 23.86 and 23.80 for the same arm, at the highest
+recorded load. On medians the order is fix 23.86 s, candidate 23.99 s, main 24.89 s in the gain
+arm and fix 23.92 s, candidate 24.17 s, main 24.78 s without gain. The claim this supports is
+narrow and it is the one the task asked for: **the memory fix did not buy its result with wall
+time.** It is not a speedup measurement.
+
+### Gate summary
+
+- required-test collection: **PASS**
+- products gain fix-vs-main: **PASS**
+- products gain fix-vs-cand: **PASS**
+- products nogain fix-vs-main: **PASS**
+- products nogain fix-vs-cand: **PASS**
+- products sel fix-vs-main: **PASS**
+- products sel fix-vs-cand: **PASS**
+- products skipdef fix-vs-main: **PASS**
+- products skipdef fix-vs-cand: **PASS**
+- products modes fix-vs-main: **PASS**
+- products modes fix-vs-cand: **PASS**
+- u16 fault matrix: **PASS**
+
+Products are compared with `docs/issue85_laneC/compare_output_trees.py` (manifest-bound: MRC
+inventory, dimensions, mode, extended-header and data offsets, exact payload length, finite
+pixels, normalized header / extended header / payload digests, per-movie and joint STAR), except
+the requested-modes row, which `compare_requested_modes.py` grades over the whole 145-product
+inventory. Every comparison ran its own negative control and every control tripped. Each row is
+graded twice: `fix` against `main` and `fix` against the unfixed PR118 candidate.
+
+`--skip_defect` and no gain are the two arms where a non-converging patch downloads the float
+movie. In both, the candidate's increase over main (+195,264 kB and +181,188 kB) drops to
++5,404 kB and +3,684 kB.
+
+### Failure behaviour
+
+`CudaU16FailurePaths` passes on this build: the recoverable device-staging allocation failure, the
+recoverable U16 H2D failure and the recoverable conversion-kernel launch-status failure each
+produce exact complete products for the affected movie, and the fatal conversion-kernel status
+fails closed with no CPU retry and no completion marker. These are injected status codes;
+genuine device poisoning remains untested, as that harness already states.
+
+### Capacity, lifetime and payload identity
+
+Sampling at 5 ms with periodic `/proc/<pid>/smaps` snapshots, three movies, pid 2496061,
+executable `.../final-3514094/build-fix/motioncorr`, started `2026-09-29T15:41:05.984653Z`:
+
+| t | VmRSS | the staging mapping |
+|---|---:|---|
+| 0.418 s | 566,076 kB | `0x14c41820f000` size 667,456 kB, Rss 667,456 kB, AnonHugePages 663,552 kB, Private_Dirty 667,456 kB |
+| 0.814 s | 881,472 kB | absent — released at the device forward FFT |
+| 1.068 s | 205,824 kB | absent |
+| 1.322 s | 265,900 kB | `0x14c34b430000` size 667,456 kB, Rss 108,544 kB — movie 2, a new mapping at a new address |
+| 1.576 s | 751,956 kB | `0x14c34b430000` Rss 591,680 kB, AnonHugePages 589,824 kB |
+| 3.107 s onwards | 165,456 kB | absent |
+
+667,456 kB is 683,472,384 B, which is `24 * ceil64(3710*3838*2)` — the movie's whole uint16
+payload plus 56 bytes of slice padding per frame, and it is the figure the movie log records. The
+mapping is 99.4% huge-page backed on this host, it is fully resident while the frames are alive,
+and it is unmapped and re-created at a different address for the next movie, so nothing is
+carried between movies. That is the capacity bound and the lifetime bound, observed rather than
+derived.
+
+## 5. Does the staging want to be reused across movies?
 
 No, and the measurement says why. The staging has to be released before the float movie a
 non-converging patch downloads is materialised, otherwise the two are live together: 0.6365 GiB
@@ -120,7 +216,7 @@ mapping already gets huge pages, so it would change nothing here, and on a `THP=
 is a separate, separately measurable change to first-touch cost, not to the high-water mark this
 issue is about.
 
-## 5. What this does not establish
+## 6. What this does not establish
 
 - One geometry family, one codec, one GPU, one worker. No multi-GPU aggregate-budget result.
 - Same-backend byte parity against the same main. No scientific-equivalence claim.
@@ -133,7 +229,7 @@ issue is about.
   reproduced with the same three names on main `a75a3f87`, on PR118's frozen `6827b314` and on
   this branch, so it is preexisting and unrelated; it is not relabelled as a pass.
 
-## 6. Harness defects found while running this, and fixed
+## 7. Harness defects found while running this, and fixed
 
 Recorded because each one changed a reported number or would have.
 

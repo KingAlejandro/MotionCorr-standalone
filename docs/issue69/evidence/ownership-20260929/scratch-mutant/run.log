@@ -1,0 +1,109 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo][faultinject] INJECTING cudaErrorMemoryAllocation at cudaMalloc #34
+ERROR: out of memory in /home/alex/mc-pr115-ownership-20260929/src/src/acc/cuda/cuda_alignpatch.cu at line 351 (error-code 2)
+in: /home/alex/mc-pr115-ownership-20260929/src/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+=== Backtrace  ===
+build/motioncorr_faultinject(+0x51c67) [0x5bc7fac41c67]
+build/motioncorr_faultinject(+0x13737f) [0x5bc7fad2737f]
+build/motioncorr_faultinject(+0x138f59) [0x5bc7fad28f59]
+build/motioncorr_faultinject(+0xf7b8b) [0x5bc7face7b8b]
+build/motioncorr_faultinject(+0x100520) [0x5bc7facf0520]
+build/motioncorr_faultinject(+0x47c73) [0x5bc7fac37c73]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77130862a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77130862a28b]
+build/motioncorr_faultinject(+0x48325) [0x5bc7fac38325]
+==================
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+Continuing with the remaining movies.
+   1/   1 sec ............................................................~~(,_,"> yum!
+in: /home/alex/mc-pr115-ownership-20260929/src/src/motioncorr_runner.cpp, line 697
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+build/motioncorr_faultinject(+0x51c67) [0x5bc7fac41c67]
+build/motioncorr_faultinject(+0x28d72) [0x5bc7fac18d72]
+build/motioncorr_faultinject(+0x47c73) [0x5bc7fac37c73]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x77130862a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x77130862a28b]
+build/motioncorr_faultinject(+0x48325) [0x5bc7fac38325]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=1 stale-releases=0

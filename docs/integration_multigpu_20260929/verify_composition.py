@@ -55,6 +55,14 @@ def main(argv=None) -> int:
                     help="owner source, repeatable, e.g. --owner pr115=0f2ddd5d")
     ap.add_argument("--three-way", default="src/motioncorr_runner.cpp",
                     help="file every owner touches; reconstructed independently")
+    ap.add_argument("--scan", action="append",
+                    default=None, metavar="PREFIX",
+                    help="path prefixes to scan; repeatable. Default: src/ tests/ "
+                         "tools/ CMakeLists.txt SOURCE_MANIFEST.txt")
+    ap.add_argument("--reconciled", action="append", default=None, metavar="PATH",
+                    help="file the integrator resolved by hand, repeatable. These "
+                         "are reported as RECONCILED rather than UNSOURCED, so the "
+                         "set has to be declared up front and cannot grow silently.")
     ap.add_argument("--reconstruct", metavar="FROM=REV,PATCHED_WITH=REV",
                     default="from=pr118,patched_with=pr117",
                     help="which owner supplies the base content and which supplies "
@@ -69,28 +77,47 @@ def main(argv=None) -> int:
             print(f"FAIL: --reconstruct names unknown owner {lbl!r}")
             return 2
 
+    scan = a.scan or ["src/", "tests/", "tools/", "CMakeLists.txt",
+                      "SOURCE_MANIFEST.txt"]
+    declared = set(a.reconciled if a.reconciled is not None else [
+        "CMakeLists.txt",
+        "tools/validate_test_collection.py",
+        "tools/test_ci_fail_closed.py",
+    ])
     changed = [p for p in git(a.repo, "diff", "--name-only", a.base, a.head).split()
-               if p.startswith("src/")]
+               if any(p.startswith(pre) for pre in scan)]
     if not changed:
-        print("FAIL: no src/ file differs from the base; nothing to verify")
+        print("FAIL: nothing in the scanned prefixes differs from the base")
         return 2
 
-    unexplained, explained = [], {}
+    unexplained, explained, reconciled = [], {}, []
     for path in changed:
         if path == a.three_way:
             continue
         head_bytes = blob(a.repo, a.head, path)
+        if head_bytes is None:
+            # A path deleted at head would compare equal to a missing owner blob
+            # and count as explained. Refuse instead.
+            unexplained.append(path + "  (absent at head)")
+            continue
         match = [lbl for lbl, rev in owners.items() if blob(a.repo, rev, path) == head_bytes]
         if match:
             explained[path] = match
+        elif path in declared:
+            reconciled.append(path)
         else:
             unexplained.append(path)
 
-    print(f"src/ files changed vs {a.base}: {len(changed)}")
+    print(f"files changed vs {a.base} under {' '.join(scan)}: {len(changed)}")
     for path, m in sorted(explained.items()):
         print(f"  OK        {path}  == {'/'.join(sorted(m))}")
+    for path in sorted(reconciled):
+        print(f"  RECONCILED {path}  declared integrator resolution")
     for path in unexplained:
-        print(f"  UNSOURCED {path}  matches no owner source")
+        print(f"  UNSOURCED {path}  matches no owner source and was not declared")
+    missing = sorted(declared - set(reconciled))
+    if missing:
+        print(f"  NOTE      declared but not reached: {', '.join(missing)}")
 
     # The three-way file, reconstructed rather than compared.
     ok3 = False
@@ -123,9 +150,13 @@ def main(argv=None) -> int:
                                    input=head3.decode(errors="replace"), text=True)
 
     if unexplained or not ok3:
-        print("\nRESULT: FAIL -- the branch carries production content no owner wrote.")
+        print("\nRESULT: FAIL -- the branch carries content no owner wrote and the "
+              "integrator did not declare.")
         return 1
-    print("\nRESULT: PASS -- every production byte is traceable to an owner source.")
+    print(f"\nRESULT: PASS -- under {' '.join(scan)}, every changed file is either "
+          f"byte-identical to an owner source or one of the {len(reconciled)} declared "
+          f"integrator resolutions. This is a provenance check, not a review of those "
+          f"resolutions.")
     return 0
 
 

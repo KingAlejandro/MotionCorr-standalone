@@ -112,6 +112,12 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
            "omp_proc_bind": env["OMP_PROC_BIND"], "omp_places": env["OMP_PLACES"],
            "command": " ".join(shlex.quote(c) for c in cmd), "retained": True}
 
+    def exclude(reason: str) -> None:
+        """Accumulate, do not overwrite: an arm can fail for several reasons and
+        recording only the last one loses the others."""
+        rec["excluded_because"] = (rec["excluded_because"] + "; " + reason
+                                   if rec.get("excluded_because") else reason)
+
     t0 = time.time()
     proc = subprocess.Popen(cmd, cwd=cfg.tutorial, env=env,
                             stdout=(out_root.parent / f"{a['arm']}.log").open("wb"),
@@ -122,7 +128,11 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
          "--interval", str(cfg.sample_interval),
          "--out", str(out_root.parent / f"{a['arm']}.memory.json")])
     rc = proc.wait()
-    sampler.wait(timeout=120)
+    try:
+        sampler.wait(timeout=120)
+    except subprocess.TimeoutExpired:
+        sampler.kill(); sampler.wait()
+        rec["sampler_killed"] = True
     rec["launcher_rc"] = rc
     rec["driver_wall_s"] = round(time.time() - t0, 3)
 
@@ -136,9 +146,9 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
                                    "rss_hwm_kib", "started_at", "ended_at")}
                                  for w in st.get("workers", [])]
         rec["cpu_masks_requested"] = st.get("cpu_masks")
-        rec["witness"] = st.get("witness")
+        rec["gpu_witness"] = st.get("gpu_witness")
     else:
-        rec.update({"retained": True, "excluded_because": "no status.json"})
+        exclude("no status.json")
     mem_path = out_root.parent / f"{a['arm']}.memory.json"
     if mem_path.is_file():
         rec["memory"] = json.loads(mem_path.read_text())
@@ -147,19 +157,24 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
         rec["achieved_placement"] = rec["memory"].pop("achieved_placement", None)
         rec["memory"].pop("sweeps_raw", None)   # kept on disk, not in the index
     else:
-        rec["excluded_because"] = "no memory record"
+        exclude("no memory record")
 
     if rc != 0:
-        rec["excluded_because"] = f"launcher rc {rc}"
+        exclude(f"launcher rc {rc}")
         return rec
 
     # Merge, then grade the products. An arm is only comparable if its output
     # tree is complete and equal to the block reference.
     merged = out_root.parent / f"{a['arm']}-merged"
+    wdirs = sorted(out_root.glob("w[0-9]*"))
+    if len(wdirs) != a["workers"]:
+        exclude(f"found {len(wdirs)} worker directories for "
+                f"{a['workers']} workers; not merging")
+        return rec
     m = subprocess.run(
         [sys.executable, str(cfg.src / "tools/multi_gpu/merge_workers.py"),
          "--manifest", str(out_root / "shards/shard_manifest.json"),
-         "--workers", *[str(p) for p in sorted(out_root.glob("worker*"))],
+         "--workers", *[str(p) for p in wdirs],
          "--status", str(status_path), "--out", str(merged),
          "--report", str(out_root.parent / f"{a['arm']}-merge.json"),
          "--aggregate-with", str(binary), "--input-star", "movies.star",
@@ -167,11 +182,16 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
         cwd=cfg.tutorial, capture_output=True, text=True)
     rec["merge_rc"] = m.returncode
     if m.returncode != 0:
-        rec["excluded_because"] = "merge refused"
+        exclude("merge refused")
         return rec
     if ref is None:
         rec["grade"] = "reference"
         return rec
+    # Which tree this arm was graded against, recorded on the arm itself. Without
+    # it, a block whose reference arm failed to merge would grade every arm
+    # against a previous block's tree and nothing would say so.
+    rec["graded_against"] = str(ref)
+    rec["graded_against_block"] = ref.parent.name
     g = subprocess.run(
         [sys.executable, str(cfg.src / "docs/issue85_laneC/compare_output_trees.py"),
          str(ref), str(merged), "--manifest", str(cfg.manifest),
@@ -181,7 +201,7 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
     rec["grade_rc"] = g.returncode
     rec["grade"] = "PASS" if g.returncode == 0 else "FAIL"
     if g.returncode != 0:
-        rec["excluded_because"] = "products did not grade equal to the block reference"
+        exclude("products did not grade equal to the block reference")
     return rec
 
 
@@ -232,9 +252,17 @@ def main(argv=None) -> int:
         for a in ordered:
             is_ref = a["arm"] == "gain-float-w1"
             rec = run_arm(a, block, cfg, None if is_ref else ref)
-            if is_ref and rec.get("merge_rc") == 0:
-                ref = cfg.out / f"block{block}" / f"{a['arm']}-merged"
+            if is_ref:
+                if rec.get("merge_rc") == 0:
+                    ref = cfg.out / f"block{block}" / f"{a['arm']}-merged"
+                else:
+                    # Do not fall back to an earlier block's reference. Grading a
+                    # block against another block's tree is a different claim.
+                    ref = None
             index.write(json.dumps(rec) + "\n"); index.flush()
+            if rec.get("grade") is None and not is_ref and ref is None:
+                rec["excluded_because"] = ("this block has no reference tree; the "
+                                           "reference arm did not merge")
             print(f"block{block} {a['arm']}: rc={rec.get('launcher_rc')} "
                   f"wall={rec.get('launcher_wall_s')} grade={rec.get('grade')} "
                   f"excluded={rec.get('excluded_because')}")

@@ -94,15 +94,19 @@ PY
      diff <(cat "$OUT/a1-serial/w0/corrected_micrographs.star") \
           <(cat "$OUT/a$N-merged/corrected_micrographs.star") > "$OUT/c3-$N-star.diff"
   fi
-  note "witness A$N: UUID, actual pid, achieved mask"
+  note "witness A$N: UUID, actual pid, requested mask and the launcher witness"
   $PY - "$OUT/a$N-sharded/status.json" <<'PY' | tee -a "$OUT/results.txt"
 import json,sys
 s=json.load(open(sys.argv[1])); n=s["n_workers"]
 w=s["workers"]; d=s.get("devices") or []
 print(f"witness{n}_devices={d}")
 print(f"witness{n}_pids={[x['pid'] for x in w]}")
-print(f"witness{n}_masks={s.get('cpu_masks')}")
-print(f"witness{n}_verdict={s.get('witness',{}).get('verdict') if isinstance(s.get('witness'),dict) else s.get('witness')}")
+print(f"witness{n}_requested_masks={s.get('cpu_masks')}")
+w_=s.get("gpu_witness") or {}
+print(f"witness{n}_all_pids_on_intended_distinct_devices={w_.get('all_pids_witnessed_on_intended_distinct_devices')}")
+print(f"witness{n}_distinct_devices={w_.get('distinct_devices_witnessed')}")
+print(f"witness{n}_unwitnessed_pids={w_.get('unwitnessed_pids')}")
+print(f"witness{n}_wrong_device={w_.get('wrong_device')} shared={w_.get('shared_devices')}")
 print(f"witness{n}_tail_s={s.get('final_worker_tail_seconds')}")
 PY
 done
@@ -127,7 +131,7 @@ if [ -z "$W0" ]; then
   # No kill means no fault, and the FAIL verdict below would mean nothing.
   rec a5_control VACUOUS_NO_WORKER_FOUND
 else
-  kill -9 "$W0" && rec a5_control KILL_DELIVERED
+  if kill -9 "$W0"; then rec a5_control KILL_DELIVERED; else rec a5_control KILL_FAILED; fi
 fi
 wait $LPID
 sleep 3
@@ -153,25 +157,41 @@ print(f"a5_other_workers_zero={'PASS' if all(r==0 for r in rcs[1:]) else 'FAIL'}
 PY
 
 # ------------------------------------------------------- A6 non-prefix resume
-note "A6 non-prefix resume: remove a non-prefix set of completed movies, resume"
-cp -a "$OUT/a2-sharded" "$OUT/a6-resume"
+note "A6 non-prefix resume: interior gaps in BOTH shards, then resume"
+# A fresh run, not a copy of a2. status.json records absolute paths to its own
+# manifest and worker logs, so a copied tree is refused by merge_workers before
+# anything is compared and the arm can never reach a pass.
+$PY "$MG/run_multi_gpu.py" --star movies.star --out "$OUT/a6-resume" \
+    --binary "$BUILD/motioncorr" --devices "$U0,$U1" --cpus '0-11;12-23' \
+    --sample-interval 0.5 -- "${OPTS[@]}" > "$OUT/a6-initial.log" 2>&1
+rec a6_initial_rc $?
 $PY - "$OUT/a6-resume" <<'PY' | tee -a "$OUT/results.txt"
-import json,sys,shutil
+import json,sys
 from pathlib import Path
 root=Path(sys.argv[1])
 man=json.load(open(root/"shards/shard_manifest.json"))
-canon=[m for s in man["shards"] for m in s["movies"]]
-canon=sorted(canon)
-# Canonical indices 5-11 removed: not a prefix, so --only_do_unfinished cannot
-# be satisfied by "continue from the end".
-drop=set(canon[5:12])
+# Shards are contiguous slices of the input row order, so a set chosen without
+# consulting shard boundaries can be a plain suffix of one worker's own shard.
+# Remove an INTERIOR gap from each shard instead: --only_do_unfinished then has
+# to fill a hole with completed movies on both sides of it, which is exactly the
+# case a "continue from where it stopped" implementation gets wrong.
+drop=set(); spans=[]
+for sh in man["shards"]:
+    movies=sh["movies"]
+    if len(movies) < 5:
+        continue
+    lo, hi = 2, min(5, len(movies)-1)   # leaves movies before AND after the hole
+    drop |= set(movies[lo:hi]); spans.append((sh["index"], lo, hi, len(movies)))
+stems={Path(m).stem for m in drop}
 removed=0
 for w in sorted(root.glob("w[0-9]*")):
-    for p in w.rglob("*"):
-        if p.is_file() and any(Path(m).stem in p.name for m in drop):
-            p.unlink(); removed+=1
+    for pth in w.rglob("*"):
+        if pth.is_file() and any(st in pth.name for st in stems):
+            pth.unlink(); removed+=1
+print(f"a6_interior_gaps={spans}")
+print(f"a6_movies_dropped={len(drop)}")
 print(f"a6_products_removed={removed}")
-print(f"a6_dropped_indices=5-11 is_prefix=0")
+print("a6_gap_is_interior=" + ("PASS" if all(lo>0 and hi<n for _,lo,hi,n in spans) and spans else "FAIL"))
 print("a6_control=" + ("REMOVALS_MADE" if removed else "VACUOUS_NOTHING_REMOVED"))
 PY
 for IDX in 0 1; do

@@ -229,23 +229,21 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
             "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount")
-        # Composition: both preprocessing arms are kept, because the composed
-        # source contains both host paths and each arm can only observe its own.
-        # Without --float-host the controls drive the compact uint16 staging path
-        # (PR118's registration); with it they drive the float host movie that
-        # every non-uint16-TIFF input still takes (PR115's registration). One
-        # registration alone would leave the other production path uncovered.
+        # Composition: ONE arm, PR118's. PR115 registered this script with
+        # --float-host and PR118 without it, but the flag does not select a
+        # production host path: tests/run_preprocessing_failure_controls.py
+        # writes both a uint16 and a float TIFF, runs both healthy arms, and
+        # runs a fixed case list containing both kinds, regardless of the flag
+        # (stage_u16 is chosen by input dtype in src/motioncorr_runner.cpp).
+        # --float-host only swaps the comparator module and SUPPRESSES two
+        # uint16 log assertions, so PR118's registration does strictly more work
+        # over the same runs. A second registration would re-run the identical
+        # eight movie runs for another 900 s hardware timeout and assert less.
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
-            LABELS "cuda;hardware" TIMEOUT 900)
-        add_test(NAME CudaPreprocessingFailurePathsFloatHost
-            COMMAND ${Python3_EXECUTABLE}
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
-                --binary $<TARGET_FILE:motioncorr_faultinject> --float-host)
-        set_tests_properties(CudaPreprocessingFailurePathsFloatHost PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.

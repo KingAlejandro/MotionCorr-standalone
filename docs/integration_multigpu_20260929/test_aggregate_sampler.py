@@ -119,6 +119,52 @@ class TestAggregateSampler(unittest.TestCase):
 
 
 
+    def test_7_foreign_gpu_context_is_not_attributed_to_us(self):
+        """A co-tenant on a granted UUID must not be added to our GPU figure.
+
+        No device here, so compute_apps is replaced. This is a control on the
+        attribution logic, not on nvidia-smi: the point of reading
+        --query-compute-apps instead of whole-device memory.used is that the pid
+        is available, and the sampler must actually use it.
+        """
+        import aggregate_sampler as mod
+        p = subprocess.Popen([sys.executable, "-c", HOLDER, "8", "0.0"])
+        uuid = "GPU-test-0000"
+        real = mod.gpu_witness
+
+        class Fake:
+            @staticmethod
+            def compute_apps():
+                return [{"pid": str(p.pid), "gpu_uuid": uuid, "used_gpu_memory": "100 MiB"},
+                        {"pid": "999999", "gpu_uuid": uuid, "used_gpu_memory": "700 MiB"}]
+
+        mod.gpu_witness = Fake
+        try:
+            s = mod.AggregateSampler([p.pid], [uuid], 0.05)
+            s.start(); p.wait(); s.stop(); s.join(timeout=5)
+            rec = s.record()
+        finally:
+            mod.gpu_witness = real
+        self.assertEqual(rec["peak_gpu_mib_by_uuid"][uuid], 100,
+                         f"foreign 700 MiB context attributed to us: {rec['peak_gpu_mib_by_uuid']}")
+        self.assertEqual(rec["peak_gpu_mib_all_uuids"], 100)
+        self.assertTrue(rec["foreign_gpu_contexts"],
+                        "a device we do not own alone must be recorded, not ignored")
+        self.assertEqual(rec["foreign_gpu_contexts"][0]["pid"], "999999")
+
+    def test_8_pss_is_sampled_and_below_rss(self):
+        """Pss must be present on Linux and must not exceed RSS."""
+        p = subprocess.Popen([sys.executable, "-c", HOLDER, str(MIB), "0.0"])
+        rec = self._run([p])
+        pss = rec.get("peak_simultaneous_host_pss_kib")
+        if pss is None:
+            self.skipTest("smaps_rollup unavailable on this kernel")
+        self.assertLessEqual(pss, rec["peak_simultaneous_host_rss_kib"],
+                             "Pss above RSS means shared pages were not divided")
+        self.assertGreater(pss, 0)
+
+
+
 if __name__ == "__main__":
     if not Path("/proc").is_dir():
         print("SKIP: no /proc on this platform; these controls verified nothing.")

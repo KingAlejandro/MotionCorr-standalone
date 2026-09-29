@@ -181,6 +181,12 @@ def main(argv: list[str] | None = None) -> int:
                          "usage error rather than as a dropped option list.")
     a = ap.parse_args(argv)
 
+    products = [suffix.strip() for suffix in a.products.split(",") if suffix.strip()]
+    if not products:
+        print("FAIL: at least one required product suffix must be specified",
+              file=sys.stderr)
+        return 2
+
     aggregate_extra = shlex.split(a.aggregate_args)
     aggregate_owned = {"--i", "--o"}
     clashes = sorted({arg.split("=", 1)[0] for arg in aggregate_extra
@@ -201,7 +207,6 @@ def main(argv: list[str] | None = None) -> int:
     manifest_path = Path(a.manifest).resolve()
     manifest = json.loads(manifest_path.read_text())
     shards = manifest["shards"]
-    products = [s for s in a.products.split(",") if s]
 
     input_star_path = None
     manifest_input_sha256 = None

@@ -155,6 +155,42 @@ def run_workers(tmp: Path, shard_dir: Path, n: int, prefix: str = "shard",
 # cases
 # --------------------------------------------------------------------------
 
+def case_empty_required_products_refused(tmp: Path) -> None:
+    """An empty suffix list cannot turn missing scientific outputs into PASS."""
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:1])
+    shards = tmp / "shards"
+    assert partition(star, 1, shards).returncode == 0
+    workers, codes = run_workers(tmp, shards, 1)
+    manifest = shards / "shard_manifest.json"
+    status = fake_status(tmp, codes)
+    healthy = merge(manifest, workers, tmp / "healthy", status)
+    assert healthy.returncode == 0, healthy.stderr + healthy.stdout
+    for worker in workers:
+        for path in worker.rglob("*"):
+            if path.is_file() and path.suffix in (".mrc", ".star"):
+                path.unlink()
+
+    aggregate_marker = tmp / "aggregate_called"
+    aggregate = tmp / "aggregate.py"
+    aggregate.write_text("#!/usr/bin/env python3\nfrom pathlib import Path\n"
+                         f"Path({str(aggregate_marker)!r}).write_text('called')\n")
+    aggregate.chmod(0o755)
+    for i, products in enumerate(("", " ", ",,,", " , \t, ")):
+        for with_aggregate in (False, True):
+            out = tmp / f"empty_{i}_{with_aggregate}"
+            report = tmp / f"empty_{i}_{with_aggregate}.json"
+            extra = ["--products", products]
+            if with_aggregate:
+                extra += ["--aggregate-with", str(aggregate), "--input-star", str(star)]
+            cp = merge(manifest, workers, out, status, report, extra)
+            assert cp.returncode == 2 and "required product" in cp.stderr.lower(), \
+                f"empty products accepted or refused too late: {cp.stdout} {cp.stderr}"
+            assert not out.exists() and not report.exists(), \
+                "invalid product list must be refused before staging"
+            assert not aggregate_marker.exists(), "invalid product list launched aggregation"
+
+
 def case_roundtrip_and_metadata(tmp: Path) -> None:
     """Shards preserve optics, exposure and quoted paths byte for byte."""
     star = tmp / "movies.star"
@@ -1966,12 +2002,33 @@ while True: time.sleep(0.1)
 
     wrapper = tmp / "invoke_launcher.py"
     wrapper.write_text(
-        "import sys\n"
+        "import ctypes, json, os, sys\nfrom pathlib import Path\n"
         f"sys.path.insert(0, {str(TOOLS)!r})\n"
         "import run_multi_gpu as launcher\n"
         "launcher._TERMINATE_GRACE_SECONDS = 0.2\n"
         "launcher._KILL_REAP_SECONDS = 2.0\n"
-        "raise SystemExit(launcher.main())\n")
+        # Adopt orphan grandchildren but deliberately do not reap them while
+        # main runs. This reproduces a non-reaping container init on any Linux
+        # host without leaving test zombies for that host's PID 1 to collect.
+        "if sys.platform == 'linux':\n"
+        "    libc = ctypes.CDLL(None, use_errno=True)\n"
+        "    if libc.prctl(36, 1, 0, 0, 0) != 0: raise OSError(ctypes.get_errno())\n"
+        "out = Path(sys.argv[sys.argv.index('--out') + 1])\n"
+        "try:\n"
+        "    rc = launcher.main()\n"
+        "finally:\n"
+        "    if sys.platform == 'linux':\n"
+        "        marker = out / 'w0' / 'pids.json'\n"
+        "        if marker.exists():\n"
+        "            pids = json.loads(marker.read_text())\n"
+        "            stat = Path('/proc') / str(pids['child']) / 'stat'\n"
+        "            if stat.exists():\n"
+        "                (out / 'adopted_child_stat').write_text(stat.read_text())\n"
+        "        while True:\n"
+        "            try: pid, status = os.waitpid(-1, os.WNOHANG)\n"
+        "            except ChildProcessError: break\n"
+        "            if pid == 0: break\n"
+        "raise SystemExit(rc)\n")
 
     for signum in (signal.SIGTERM, signal.SIGINT):
         out = tmp / f"run_{signum}"
@@ -1999,6 +2056,10 @@ while True: time.sleep(0.1)
             status = json.loads((out / "status.json").read_text())
             assert status["verdict"] == "FAIL" and status["termination_signal"] == signum, status
             assert status["workers"][0]["returncode"] != 0, status
+            if sys.platform == "linux":
+                adopted = (out / "adopted_child_stat").read_text().rsplit(")", 1)[1].split()
+                assert adopted[0] == "Z" and int(adopted[1]) == proc.pid, adopted
+                assert int(adopted[2]) == group and int(adopted[3]) == group, adopted
 
             deadline = time.monotonic() + 3.0
             while time.monotonic() < deadline:
@@ -2303,6 +2364,7 @@ def case_comparator_exit_must_match_its_report(tmp: Path) -> None:
 
 CASES = [
     case_roundtrip_and_metadata,
+    case_empty_required_products_refused,
     case_empty_shard_rejected,
     case_output_name_collision,
     case_duplicate_movie_in_input,

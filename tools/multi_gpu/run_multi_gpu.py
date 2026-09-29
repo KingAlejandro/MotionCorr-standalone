@@ -119,6 +119,32 @@ def _process_group_exists(pgid: int) -> bool:
         return False
     except PermissionError:
         return True
+    if sys.platform == "linux":
+        # killpg(..., 0) includes zombies. A container's PID 1 can leave adopted
+        # grandchildren in that state indefinitely; they cannot run or receive
+        # signals, and this launcher can only reap its own direct children.
+        # Refuse to declare cleanup complete if /proc cannot establish the
+        # member's PID, original session/group and state from one stat record.
+        try:
+            for entry in Path("/proc").iterdir():
+                if not entry.name.isdigit():
+                    continue
+                try:
+                    raw = (entry / "stat").read_text()
+                except FileNotFoundError:
+                    continue  # exited while taking this snapshot
+                fields = raw.rsplit(")", 1)[1].split()
+                if int(raw.split(" ", 1)[0]) != int(entry.name):
+                    return True
+                if int(fields[2]) != pgid:
+                    continue
+                if int(fields[3]) != pgid or int(fields[19]) <= 0:
+                    return True  # not demonstrably a member of our session
+                if fields[0] != "Z":
+                    return True
+        except (OSError, ValueError, IndexError):
+            return True  # unavailable/ambiguous process evidence is not success
+        return False
     return True
 
 

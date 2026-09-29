@@ -567,6 +567,16 @@ MUTATIONS = [
      '        if _signal_deferral_depth:',
      '        if False:  # MUTATED',
      ["case_launcher_signal_during_spawn_keeps_child_owned"]),
+    ("merge accepts an empty required-product list",
+     "tools/multi_gpu/merge_workers.py",
+     "    if not products:\n",
+     "    if False and not products:\n",
+     ["case_empty_required_products_refused"]),
+    ("launcher mistakes zombie-only groups for live survivors",
+     "tools/multi_gpu/run_multi_gpu.py",
+     '    if sys.platform == "linux":\n        # killpg(..., 0) includes zombies.',
+     '    if False:\n        # killpg(..., 0) includes zombies.',
+     ["case_launcher_signal_reaps_owned_process_group"], "taskset"),
 ]
 
 

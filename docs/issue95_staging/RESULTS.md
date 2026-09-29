@@ -102,3 +102,53 @@ pages as `expand_u16_to_float` consumes it, matching the per-frame `clear()` the
 on. Without that, holding the whole mapping while building a float movie twice its size would have
 traded one regression for another.
 
+## 4. Does the staging want to be reused across movies?
+
+No, and the measurement says why. The staging has to be released before the float movie a
+non-converging patch downloads is materialised, otherwise the two are live together: 0.6365 GiB
+plus 1.2731 GiB instead of 1.2731 GiB. Keeping one buffer alive across movies would therefore
+raise the no-gain peak by roughly the whole staging payload, which is the regression this work
+removes, not a saving.
+
+What is reusable here is the mapping discipline, not the buffer. #95's "source-owned reusable
+buffers only where lifetimes permit" is answered for this path: the lifetimes do not permit it.
+The churn the reuse would have avoided is instead removed by collapsing 24 allocations and 24
+frees into one `mmap` and one `munmap`.
+
+`MADV_HUGEPAGE` on the mapping was considered and is not included. On a `THP=always` host the
+mapping already gets huge pages, so it would change nothing here, and on a `THP=madvise` host it
+is a separate, separately measurable change to first-touch cost, not to the high-water mark this
+issue is about.
+
+## 5. What this does not establish
+
+- One geometry family, one codec, one GPU, one worker. No multi-GPU aggregate-budget result.
+- Same-backend byte parity against the same main. No scientific-equivalence claim.
+- The wall-time figures are matched alternating pairs on a shared node, with foreign GPU compute
+  apps and load average recorded at each run start. They bound whether this change traded memory
+  for speed; they are not a speedup measurement.
+- The attribution reads `/proc/<pid>/smaps` at a sampled high-water mark, so the mapping-level
+  split is accurate to the sampling interval, not an allocator trace.
+- `CiFailClosedControls` still fails its three canonical-fixture hash controls. That failure is
+  reproduced with the same three names on main `a75a3f87`, on PR118's frozen `6827b314` and on
+  this branch, so it is preexisting and unrelated; it is not relabelled as a pass.
+
+## 6. Harness defects found while running this, and fixed
+
+Recorded because each one changed a reported number or would have.
+
+1. The first requested-modes comparison compared raw STAR bytes and reported one differing
+   product out of 145. The difference was the absolute output directory embedded in the joint
+   STAR: 24 rows x 4 path occurrences x 1 character = 96 bytes. All 120 MRCs and all 24 per-movie
+   STARs were identical. `compare_output_trees.py` does not have this problem because it
+   validates that product paths resolve inside the tree instead of comparing them byte for byte.
+2. The same driver's negative controls deep-copied the 8 GiB arm under test, four times. They
+   hard-link now, with the single mutated file written privately.
+3. The output-root substitution initially used only the resolved path. A run records the `--o`
+   argument it was given, which is not the resolved path when a parent is a symlink, so the
+   substitution missed entirely. Both spellings are substituted now.
+4. `compare_mixed_geometry.py` shipped with defect 1 still in it and was caught by the
+   independent review before it produced a number.
+5. The first version of the contract test used a square, page-aligned geometry, so a transposed
+   `bind(frames, n, ny, nx)` could not fail its shape check and `discardThrough()`'s page
+   rounding was never exercised.

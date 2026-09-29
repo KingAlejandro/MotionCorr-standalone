@@ -1,0 +1,24 @@
+validate_collection_rc=0
+ctest_rc=0
+100% tests passed out of 23
+negative_controls_rc=0
+          detected  GPU PASS may omit its witness
+                     detected  case_launcher_verdict_follows_the_device_witness
+          detected  GPU witness may be relabelled as CPU by dropping intended devices
+                     detected  case_launcher_verdict_follows_the_device_witness
+          detected  GPU PASS ignores sampler failures
+                     detected  case_launcher_verdict_follows_the_device_witness
+          detected  GPU PASS ignores observed PID to UUID evidence
+                     detected  case_launcher_verdict_follows_the_device_witness
+          detected  launcher TERM handlers are not installed
+                     detected  case_launcher_signal_reaps_owned_process_group
+          detected  worker inherits blocked TERM across exec
+                     detected  case_launcher_signal_reaches_cooperative_worker
+          detected  interrupt is raised before spawn ownership is recorded
+                     detected  case_launcher_signal_during_spawn_keeps_child_owned
+          detected  merge accepts an empty required-product list
+                     detected  case_empty_required_products_refused
+          detected  launcher mistakes zombie-only groups for live survivors
+                     detected  case_launcher_signal_reaps_owned_process_group
+
+83/83 mutations detected

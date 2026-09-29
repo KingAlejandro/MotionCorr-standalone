@@ -1,0 +1,33 @@
+head=d8dbf75
+=== sampler controls (8) ===
+test_1_peak_is_simultaneous_not_sum_of_peaks (__main__.TestAggregateSampler.test_1_peak_is_simultaneous_not_sum_of_peaks)
+Two equal, non-overlapping peaks must read as one peak, not two. ... ok
+test_2_overlapping_peaks_do_add_up (__main__.TestAggregateSampler.test_2_overlapping_peaks_do_add_up)
+Negative control for test 1: when they DO overlap, the total rises. ... ok
+test_3_grandchildren_are_counted (__main__.TestAggregateSampler.test_3_grandchildren_are_counted)
+ghostscript is a grandchild of the launcher, so the walk must recurse. ... ok
+test_4_no_sweeps_publishes_null_not_zero (__main__.TestAggregateSampler.test_4_no_sweeps_publishes_null_not_zero) ... ok
+test_5_interval_is_published_with_the_figure (__main__.TestAggregateSampler.test_5_interval_is_published_with_the_figure) ... ok
+test_6_achieved_placement_is_read_back_not_restated (__main__.TestAggregateSampler.test_6_achieved_placement_is_read_back_not_restated)
+The mask must come from the kernel, so a mask that was NOT applied shows. ... ok
+test_7_foreign_gpu_context_is_not_attributed_to_us (__main__.TestAggregateSampler.test_7_foreign_gpu_context_is_not_attributed_to_us)
+A co-tenant on a granted UUID must not be added to our GPU figure. ... ok
+test_8_pss_is_sampled_and_below_rss (__main__.TestAggregateSampler.test_8_pss_is_sampled_and_below_rss)
+Pss must be present on Linux and must not exceed RSS. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 12.790s
+
+OK
+sampler_rc=0
+=== provenance oracle on the new head ===
+  RECONCILED tools/validate_test_collection.py  declared integrator resolution
+  OK        src/motioncorr_runner.cpp  == pr118 + pr117 diff
+
+RESULT: PASS -- under src/ tests/ tools/ CMakeLists.txt SOURCE_MANIFEST.txt, every changed file is either byte-identical to an owner source or one of the 3 declared integrator resolutions. This is a provenance check, not a review of those resolutions.
+=== CPU reconfigure + full CTest (CMakeLists changed) ===
+rebuild_rc=0
+collection_rc=0
+ctest_rc=0
+100% tests passed out of 23
+RECHECK_DONE

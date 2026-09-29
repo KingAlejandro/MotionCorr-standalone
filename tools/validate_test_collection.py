@@ -51,6 +51,9 @@ DEFAULT_REQUIRED_TESTS = [
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",
+    # Issue #95: the only test that can observe the native uint16 staging
+    # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
+    "NativeU16Staging",
 ]
 
 

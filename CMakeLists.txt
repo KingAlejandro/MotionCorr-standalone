@@ -159,6 +159,15 @@ if(BUILD_TESTING)
         add_executable(image_write_faults tests/test_image_write_faults.cpp)
         target_link_libraries(image_write_faults PRIVATE motioncorr_core)
         add_test(NAME ImageWriteFaults COMMAND image_write_faults)
+
+        # Issue #95: the native uint16 staging ownership contract. Device-free:
+        # it checks that the frames alias one mapping, that Image::read's
+        # coreAllocateReuse() keeps that slice, and that release() returns the
+        # payload to the operating system. The last assertion needs /proc and
+        # reports a skip elsewhere; CI runs on Linux.
+        add_executable(native_u16_staging tests/test_native_u16_staging.cpp)
+        target_link_libraries(native_u16_staging PRIVATE motioncorr_core)
+        add_test(NAME NativeU16Staging COMMAND native_u16_staging)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)

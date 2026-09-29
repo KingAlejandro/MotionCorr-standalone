@@ -292,8 +292,23 @@ void MotioncorrRunner::initialise()
 			             "single integer, e.g. --gpu 0.");
 		}
 
+		// sscanf("%d") in textToInteger can wrap oversized digit strings to a
+		// different valid device. Bound each step before multiplying or adding,
+		// and reject before querying CUDA (also in a CPU-only build).
+		int parsed_gpu_id = 0;
+		for (char ch : requested_id)
+		{
+			const int digit = ch - '0';
+			if (parsed_gpu_id > (INT_MAX - digit) / 10)
+			{
+				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is outside the supported device id range [0, " +
+				             integerToString(INT_MAX) + "].");
+			}
+			parsed_gpu_id = parsed_gpu_id * 10 + digit;
+		}
+
 #if defined _CUDA_ENABLED
-		gpu_id = textToInteger(requested_id);
+		gpu_id = parsed_gpu_id;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
 		if (gpu_id >= devCount || gpu_id < 0) {
 			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");

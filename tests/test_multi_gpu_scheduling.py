@@ -553,7 +553,11 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
                          ("0,1", "2 device entries"),
                          ("0:1", "2 device entries"),
                          ("0abc", "not a non-negative device id"),
-                         ("-1", "not a non-negative device id")):
+                         ("-1", "not a non-negative device id"),
+                         ("2147483648", "outside the supported device id range"),
+                         ("4294967296", "outside the supported device id range"),
+                         ("18446744073709551616", "outside the supported device id range"),
+                         ("9" * 128, "outside the supported device id range")):
         cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own",
                   "--gpu", spec])
         assert cp.returncode != 0, f"--gpu {spec} was accepted"
@@ -561,24 +565,34 @@ def case_device_list_rejected(tmp: Path, binary: str) -> None:
         assert needle in combined, f"--gpu {spec}: {combined[:400]}"
         assert spec in combined, f"--gpu {spec} not quoted back: {combined[:400]}"
 
-    # A single valid id must not hit either new error, and must reach the check
-    # that comes next. Asserting only the ABSENCE of the two strings would pass
-    # for any failure mode at all -- including the binary crashing before it
-    # parsed --gpu -- so the positive half decides this.
-    cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", "0"])
-    combined = cp.stdout + cp.stderr
-    assert "device entries" not in combined, combined[:400]
-    assert "not a non-negative" not in combined, combined[:400]
-    assert cp.returncode != 0, "--gpu 0 with a missing input must still fail"
-    # On a CPU-only build the next check is the missing-CUDA error. On a CUDA
-    # build the device id is accepted and the run proceeds to the input, which
-    # does not exist. Exactly one of the two must be what happened.
-    cpu_only = "built without CUDA support" in combined
-    cuda_build = ("Using CUDA acceleration on GPU device 0" in combined
-                  or "Invalid GPU device ID" in combined
-                  or "no_such_input.star" in combined)
-    assert cpu_only or cuda_build, \
-        f"--gpu 0 failed for an unrecognised reason: {combined[:400]}"
+    # Both ends of the representable range (and leading zeroes) must reach the
+    # next check. A rejection of every argument is not a valid range parser.
+    for spec in ("0", "00000000000000000000000000000000", "2147483647",
+                 "000000000000000000002147483647"):
+        cp = run([binary, "--i", missing, "--o", tmp / "out", "--use_own", "--gpu", spec])
+        combined = cp.stdout + cp.stderr
+        assert "device entries" not in combined, combined[:400]
+        assert "not a non-negative" not in combined, combined[:400]
+        assert "outside the supported device id range" not in combined, combined[:400]
+        assert cp.returncode != 0, f"--gpu {spec} with a missing input must still fail"
+        cpu_only = "built without CUDA support" in combined
+        if int(spec) == 0:
+            cuda_build = ("Using CUDA acceleration on GPU device 0" in combined
+                          or "Invalid GPU device ID 0" in combined
+                          or "no_such_input.star" in combined)
+        else:
+            cuda_build = "Invalid GPU device ID 2147483647" in combined
+        assert cpu_only or cuda_build, \
+            f"representable --gpu {spec} failed for an unrecognised reason: {combined[:400]}"
+
+    # The native ordinal rule must not constrain the external backend's syntax.
+    for spec in ("0:1", "4294967296"):
+        cp = run([binary, "--i", missing, "--o", tmp / "external", "--use_motioncor2",
+                  "--motioncor2_exe", "/bin/false", "--gpu", spec])
+        combined = cp.stdout + cp.stderr
+        assert cp.returncode != 0 and "no_such_input.star" in combined, combined[:400]
+        assert "device entries" not in combined, combined[:400]
+        assert "outside the supported device id range" not in combined, combined[:400]
 
 
 def case_aggregate_star_canonical_order(tmp: Path) -> None:

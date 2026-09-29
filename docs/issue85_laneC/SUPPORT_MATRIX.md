@@ -56,7 +56,7 @@ the native-stage check.
 |---|---|---|
 | Host | SCARF `gn0003`, Slurm **3514089** | `4-gpu-vm` |
 | Allocation | `-p gpu --gres=gpu:1 --cpus-per-task=8 --mem=48G`; CPU mask 5-8,37-40 | `taskset -c 0-7`, no other compute app on the device |
-| Device | `GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b`, A100-SXM4-40GB, the only GPU visible to the cgroup, idle before and after | `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, A100 80GB PCIe |
+| Device | `GPU-6ddab9a9-0eec-0c3f-e70e-faa553e35a8b`, A100-SXM4-40GB, driver 580.178.04, the only GPU visible to the cgroup, idle before and after | `GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d`, A100 80GB PCIe, driver 570.86.10 |
 | Binary | `21a07802e8ca98738a4889e26750a04e109da883cafab1a1998930ab1f1f01c5`, built by Slurm 3514047, Release, CUDA 12.8.61, `sm_80` | `159e675a3186487c8b159a44f65a2b05b0ab25c9523c7a065b56f09f810409ce` |
 | Result | **16/16 rows PASS, 28/28 arms UUID-witnessed, 38 products graded, gain-effect control true** | 16/16 PASS, 28/28 witnessed, 38 products |
 
@@ -72,7 +72,8 @@ Harness identity in both runs, matching the committed files byte for byte:
 `gn0001` and a different device, made before the gain-effect control was added.
 It is kept as a second SCARF execution, not as the run of record.
 
-Two hosts, two A100 variants, two drivers, two independently built binaries. The
+Two hosts, two A100 variants (SXM4-40GB and PCIe-80GB), two drivers (580.178.04
+and 570.86.10) and two independently built binaries. The
 second venue is a shared VM, so it is reported as corroboration; the SCARF
 allocation is the run of record. No timing is claimed from either.
 

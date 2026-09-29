@@ -1,0 +1,4353 @@
+{
+  "source_root": "/home/alex/mc-i83-compat-20260929",
+  "binary": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+  "binary_sha256": "159e675a3186487c8b159a44f65a2b05b0ab25c9523c7a065b56f09f810409ce",
+  "comparator_sha256": "b5d5d9986bcc928dfaa3ca32f0329061094eeaaf60233bd9fd3864df20441732",
+  "fixtures_sha256": "682b4e18515bd6766ebc7369f7bcfa3c7affee48b949dd1b69b8702de14fe6d3",
+  "harness_sha256": "eca7574337d04fc709a8f7a8f37cc7bff76bba1a4e6372de059db12386f60814",
+  "host": "4-gpu-vm",
+  "workdir": "/tmp/mc83-full",
+  "device": {
+    "index": "3",
+    "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+    "name": "NVIDIA A100 80GB PCIe",
+    "memory_used": "1 MiB",
+    "topology": "\t\u001b[4mGPU0\tGPU1\tGPU2\tGPU3\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tPHB\tPHB\tPHB\t0-123\t0-1\t\tN/A\nGPU1\tPHB\t X \tPHB\tPHB\t0-123\t0-1\t\tN/A\nGPU2\tPHB\tPHB\t X \tPHB\t0-123\t0-1\t\tN/A\nGPU3\tPHB\tPHB\tPHB\t X \t0-123\t0-1\t\tN/A\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n"
+  },
+  "device_catalogue": [
+    {
+      "index": "0",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used": "1 MiB"
+    },
+    {
+      "index": "1",
+      "uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used": "1 MiB"
+    },
+    {
+      "index": "2",
+      "uuid": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used": "1 MiB"
+    },
+    {
+      "index": "3",
+      "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used": "1 MiB"
+    }
+  ],
+  "slurm_job_id": null,
+  "cpus_allowed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 4,
+  "uuid_witness": "required",
+  "cases": [
+    {
+      "case_id": "base_gain",
+      "requirement": "gain applied, compact ingest on the primary geometry",
+      "note": "carries --defect_file so the host neighbour read of the uint16 staging (motioncorr_runner.cpp:1937-1938) is exercised, not only the device kernel",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904214,
+            "wall_start": 1790693305.10879,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975162",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.875,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/base_gain/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc",
+              "--defect_file",
+              "defects.txt"
+            ],
+            "cwd": "/tmp/mc83-full/base_gain/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904243,
+            "wall_start": 1790693306.0009046,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975251",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.871,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/base_gain/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc",
+              "--defect_file",
+              "defects.txt"
+            ],
+            "cwd": "/tmp/mc83-full/base_gain/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/base_gain/out-primary",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3072
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/base_gain/out-float",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3072
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "af5cd167bfcc5fbbedddfc82c6b21c1f22582a2c779073cbc28701dd66ad5a67",
+              "candidate_header": "af5cd167bfcc5fbbedddfc82c6b21c1f22582a2c779073cbc28701dd66ad5a67",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "5d0b830a56328092236ccd53099cc24609db137d3715bb05e57b8a9bd5d0c5d1",
+              "candidate_payload": "5d0b830a56328092236ccd53099cc24609db137d3715bb05e57b8a9bd5d0c5d1"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc",
+        "--defect_file",
+        "defects.txt"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc",
+              "_rlnMicrographDefectFile": "defects.txt"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/base_gain/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3072
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/base_gain/out-float",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3072
+      }
+    },
+    {
+      "case_id": "base_nogain",
+      "requirement": "no gain: the U16 kernel's unconditional d_Iframes store",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904271,
+            "wall_start": 1790693306.8992808,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975341",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.842,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/base_nogain/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0"
+            ],
+            "cwd": "/tmp/mc83-full/base_nogain/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904299,
+            "wall_start": 1790693307.757361,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975427",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.885,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/base_nogain/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0"
+            ],
+            "cwd": "/tmp/mc83-full/base_nogain/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/base_nogain/out-primary",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3072
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/base_nogain/out-float",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3072
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "candidate_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2",
+              "candidate_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/base_nogain/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3072
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/base_nogain/out-float",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3072
+      }
+    },
+    {
+      "case_id": "save_nodw",
+      "requirement": "--dose_weighting --save_noDW keeps both sums and associates the noDW image",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_noDW"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904327,
+            "wall_start": 1790693308.669354,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975518",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.856,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/save_nodw/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/save_nodw/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904355,
+            "wall_start": 1790693309.5426016,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975605",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.857,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/save_nodw/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/save_nodw/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/save_nodw/out-primary",
+            "file_count": 15,
+            "mrc_count": 2,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 6144
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/save_nodw/out-float",
+            "file_count": 15,
+            "mrc_count": 2,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 6144
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov00_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/save_nodw/out-primary",
+        "file_count": 15,
+        "mrc_count": 2,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 6144
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/save_nodw/out-float",
+        "file_count": 15,
+        "mrc_count": 2,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 6144
+      }
+    },
+    {
+      "case_id": "power_spectrum",
+      "requirement": "--grouping_for_ps/--ps_size writes a _PS.mrc at its own geometry",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_PS"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904383,
+            "wall_start": 1790693310.432509,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975694",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.849,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/power_spectrum/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/power_spectrum/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904411,
+            "wall_start": 1790693311.2982666,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975781",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.863,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/power_spectrum/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/power_spectrum/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/power_spectrum/out-primary",
+            "file_count": 15,
+            "mrc_count": 2,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 4096
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/power_spectrum/out-float",
+            "file_count": 15,
+            "mrc_count": 2,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 4096
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov00_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "32",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/power_spectrum/out-primary",
+        "file_count": 15,
+        "mrc_count": 2,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 4096
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/power_spectrum/out-float",
+        "file_count": 15,
+        "mrc_count": 2,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 4096
+      }
+    },
+    {
+      "case_id": "even_odd",
+      "requirement": "--even_odd_split writes _EVN/_ODD and records no association outside tomography",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_EVN",
+        "_ODD"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904441,
+            "wall_start": 1790693312.1952503,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975871",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.856,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/even_odd/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--even_odd_split",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/even_odd/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904486,
+            "wall_start": 1790693313.0685186,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614975958",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.85,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/even_odd/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--even_odd_split",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/even_odd/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/even_odd/out-primary",
+            "file_count": 16,
+            "mrc_count": 3,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 9216
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/even_odd/out-float",
+            "file_count": 16,
+            "mrc_count": 3,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 9216
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov00_g1_64x48x6_EVN.mrc": {
+              "base_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "candidate_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499",
+              "candidate_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+            },
+            "Movies/mov00_g1_64x48x6_ODD.mrc": {
+              "base_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "candidate_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db",
+              "candidate_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--even_odd_split",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_EVN"
+              },
+              {
+                "suffix": "_ODD"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75",
+        "forbidden_joint_tags": [
+          "_rlnMicrographNameEven",
+          "_rlnMicrographNameOdd"
+        ]
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/even_odd/out-primary",
+        "file_count": 16,
+        "mrc_count": 3,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 9216
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/even_odd/out-float",
+        "file_count": 16,
+        "mrc_count": 3,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 9216
+      }
+    },
+    {
+      "case_id": "all_output_modes",
+      "requirement": "noDW + even/odd + power spectrum together",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_noDW",
+        "_EVN",
+        "_ODD",
+        "_PS"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904520,
+            "wall_start": 1790693313.952486,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976046",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.869,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/all_output_modes/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--even_odd_split",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/all_output_modes/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904548,
+            "wall_start": 1790693314.840149,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976135",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.882,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/all_output_modes/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--even_odd_split",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/all_output_modes/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/all_output_modes/out-primary",
+            "file_count": 18,
+            "mrc_count": 5,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 13312
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/all_output_modes/out-float",
+            "file_count": 18,
+            "mrc_count": 5,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 13312
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov00_g1_64x48x6_EVN.mrc": {
+              "base_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "candidate_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499",
+              "candidate_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+            },
+            "Movies/mov00_g1_64x48x6_ODD.mrc": {
+              "base_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "candidate_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db",
+              "candidate_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+            },
+            "Movies/mov00_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            },
+            "Movies/mov00_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "32",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              },
+              {
+                "suffix": "_EVN"
+              },
+              {
+                "suffix": "_ODD"
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75",
+        "forbidden_joint_tags": [
+          "_rlnMicrographNameEven",
+          "_rlnMicrographNameOdd"
+        ]
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/all_output_modes/out-primary",
+        "file_count": 18,
+        "mrc_count": 5,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 13312
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/all_output_modes/out-float",
+        "file_count": 18,
+        "mrc_count": 5,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 13312
+      }
+    },
+    {
+      "case_id": "selected_unequal_groups",
+      "requirement": "--first_frame_sum 2 --last_frame_sum 8 --group_frames 2 over 8 frames: groups 2,2,3",
+      "note": "",
+      "geometries": [
+        "g2_54x72x8"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904576,
+            "wall_start": 1790693315.7676384,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976228",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.88,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/selected_unequal_groups/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--first_frame_sum",
+              "2",
+              "--last_frame_sum",
+              "8",
+              "--group_frames",
+              "2",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/selected_unequal_groups/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g2_54x72x8.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904604,
+            "wall_start": 1790693316.6711478,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976318",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.879,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/selected_unequal_groups/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--first_frame_sum",
+              "2",
+              "--last_frame_sum",
+              "8",
+              "--group_frames",
+              "2",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/selected_unequal_groups/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g2_54x72x8.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/selected_unequal_groups/out-primary",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3888
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/selected_unequal_groups/out-float",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3888
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g2_54x72x8.mrc": {
+              "base_header": "ad260acd13f461b1f20675be35e0ce33dd0c47c03dff61d164fcce1aba788a1e",
+              "candidate_header": "ad260acd13f461b1f20675be35e0ce33dd0c47c03dff61d164fcce1aba788a1e",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "bc88904b73f86a327dfb1b45f8797d3a2956873f64da59258f2046f2d41971a5",
+              "candidate_payload": "bc88904b73f86a327dfb1b45f8797d3a2956873f64da59258f2046f2d41971a5"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g2_54x72x8.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g2_54x72x8.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "8",
+        "--group_frames",
+        "2",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g2_54x72x8.tiff": "976ca3107c820926561068e10a0e7cb5dfaf20342bf12de59e3e9538bd3d9f65",
+        "gain.mrc": "50d6e80a0d71c849b020c615897eaa1cf0fef225ec175c4edd8aafbe0122bf2a"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g2_54x72x8.tiff",
+            "shape_xyz": [
+              54,
+              72,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 2,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 54,
+              "_rlnImageSizeY": 72,
+              "_rlnImageSizeZ": 8,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          54,
+          72,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "2d6c62123f46e42f544247c1296756591da576f914c661e844f0ce7fb132bf2d"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/selected_unequal_groups/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3888
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/selected_unequal_groups/out-float",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3888
+      }
+    },
+    {
+      "case_id": "second_geometry",
+      "requirement": "a second, differently shaped nonsquare movie",
+      "note": "",
+      "geometries": [
+        "g2_54x72x8"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904638,
+            "wall_start": 1790693317.5817902,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976409",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.865,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/second_geometry/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/second_geometry/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g2_54x72x8.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904666,
+            "wall_start": 1790693318.469413,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976498",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.842,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/second_geometry/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/second_geometry/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g2_54x72x8.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/second_geometry/out-primary",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3888
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/second_geometry/out-float",
+            "file_count": 14,
+            "mrc_count": 1,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 3888
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g2_54x72x8.mrc": {
+              "base_header": "95fe4efdaba019ec598c672c392994eaa4f01ecc9017a8db0013ae97fc22a2a0",
+              "candidate_header": "95fe4efdaba019ec598c672c392994eaa4f01ecc9017a8db0013ae97fc22a2a0",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "ea746742e30e6385fcf79a3dde5879f4341fe83f78d338de2a731fe27b7471a2",
+              "candidate_payload": "ea746742e30e6385fcf79a3dde5879f4341fe83f78d338de2a731fe27b7471a2"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g2_54x72x8.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g2_54x72x8.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g2_54x72x8.tiff": "976ca3107c820926561068e10a0e7cb5dfaf20342bf12de59e3e9538bd3d9f65",
+        "gain.mrc": "50d6e80a0d71c849b020c615897eaa1cf0fef225ec175c4edd8aafbe0122bf2a"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g2_54x72x8.tiff",
+            "shape_xyz": [
+              54,
+              72,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 54,
+              "_rlnImageSizeY": 72,
+              "_rlnImageSizeZ": 8,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          54,
+          72,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "2d6c62123f46e42f544247c1296756591da576f914c661e844f0ce7fb132bf2d"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/second_geometry/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3888
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/second_geometry/out-float",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3888
+      }
+    },
+    {
+      "case_id": "successive_same_geometry",
+      "requirement": "three movies of one geometry in one process",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6",
+        "g1_64x48x6",
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904694,
+            "wall_start": 1790693319.3518472,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976586",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.901,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/successive_same_geometry/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/successive_same_geometry/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g1_64x48x6.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904726,
+            "wall_start": 1790693320.2944913,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976681",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.98,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 6,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/successive_same_geometry/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/successive_same_geometry/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g1_64x48x6.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/successive_same_geometry/out-primary",
+            "file_count": 22,
+            "mrc_count": 3,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 9216
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/successive_same_geometry/out-float",
+            "file_count": 22,
+            "mrc_count": 3,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 9216
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov01_g1_64x48x6.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov02_g1_64x48x6.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov01_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov01_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov01_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov02_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov01_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov02_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "901ad038ffcde828a3f49b5dce9f7892385d75ea029e57061068ff6cfaf40329"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/successive_same_geometry/out-primary",
+        "file_count": 22,
+        "mrc_count": 3,
+        "star_count": 4,
+        "movie_count": 3,
+        "pixel_count": 9216
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/successive_same_geometry/out-float",
+        "file_count": 22,
+        "mrc_count": 3,
+        "star_count": 4,
+        "movie_count": 3,
+        "pixel_count": 9216
+      }
+    },
+    {
+      "case_id": "successive_mixed_geometry",
+      "requirement": "consecutive movies of different geometry in one process",
+      "note": "no gain reference: one --gainref is bound to one geometry, which gain_geometry_mismatch covers as its own row",
+      "geometries": [
+        "g1_64x48x6",
+        "g2_54x72x8",
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904763,
+            "wall_start": 1790693321.346148,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976786",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.9,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/successive_mixed_geometry/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0"
+            ],
+            "cwd": "/tmp/mc83-full/successive_mixed_geometry/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g2_54x72x8.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        },
+        "float": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904798,
+            "wall_start": 1790693322.293515,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976881",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.902,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/successive_mixed_geometry/out-float/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0"
+            ],
+            "cwd": "/tmp/mc83-full/successive_mixed_geometry/input-f32"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g2_54x72x8.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "u16_vs_float32_tiff": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/successive_mixed_geometry/out-primary",
+            "file_count": 22,
+            "mrc_count": 3,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 10032
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/successive_mixed_geometry/out-float",
+            "file_count": 22,
+            "mrc_count": 3,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 10032
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "candidate_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2",
+              "candidate_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+            },
+            "Movies/mov01_g2_54x72x8.mrc": {
+              "base_header": "7331e72a6022bfe34d88e82f79b94c2688e9a89b6bce0a0f8292bf35eca9d11e",
+              "candidate_header": "7331e72a6022bfe34d88e82f79b94c2688e9a89b6bce0a0f8292bf35eca9d11e",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "f78e7a280c059dd1a2d3afab5b4afac1efb0490938caeeec31dbf3b177987d87",
+              "candidate_payload": "f78e7a280c059dd1a2d3afab5b4afac1efb0490938caeeec31dbf3b177987d87"
+            },
+            "Movies/mov02_g1_64x48x6.mrc": {
+              "base_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "candidate_header": "75b4a13396307317d3d8cd4337d158dcbd5c0b9949ed620aaca9cb4c13d23c38",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2",
+              "candidate_payload": "83c9bf8eadac7557c2db66eb030ae9aae3946f94e23f392c478288ff08e717e2"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov01_g2_54x72x8.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "float": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov01_g2_54x72x8.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov01_g2_54x72x8.tiff": "976ca3107c820926561068e10a0e7cb5dfaf20342bf12de59e3e9538bd3d9f65",
+        "Movies/mov02_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov01_g2_54x72x8.tiff",
+            "shape_xyz": [
+              54,
+              72,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 54,
+              "_rlnImageSizeY": 72,
+              "_rlnImageSizeZ": 8
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov02_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "0c7874c55f78fed0547d5f0d5ec83ea1da5183a04c9b2ba0421db0ac9e49cc68"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/successive_mixed_geometry/out-primary",
+        "file_count": 22,
+        "mrc_count": 3,
+        "star_count": 4,
+        "movie_count": 3,
+        "pixel_count": 10032
+      },
+      "float_tree": {
+        "root": "/tmp/mc83-full/successive_mixed_geometry/out-float",
+        "file_count": 22,
+        "mrc_count": 3,
+        "star_count": 4,
+        "movie_count": 3,
+        "pixel_count": 10032
+      }
+    },
+    {
+      "case_id": "gain_geometry_mismatch",
+      "requirement": "a gain reference that does not match the second movie fails closed",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6",
+        "g2_54x72x8"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "failing": {
+          "exit_code": 1,
+          "identity": {
+            "pid": 1904830,
+            "wall_start": 1790693323.257517,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614976977",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.461,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 3,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/gain_geometry_mismatch/out-failing/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/gain_geometry_mismatch/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g2_54x72x8.log"
+          ]
+        }
+      },
+      "comparisons": {},
+      "witnesses": {
+        "failing": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov01_g2_54x72x8.tiff": "976ca3107c820926561068e10a0e7cb5dfaf20342bf12de59e3e9538bd3d9f65",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov01_g2_54x72x8.tiff",
+            "shape_xyz": [
+              54,
+              72,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 54,
+              "_rlnImageSizeY": 72,
+              "_rlnImageSizeZ": 8,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "58d3272640849d309bdb88577194dce04cd9f245febbf68b8f33fe2b64f78dbd"
+      },
+      "published_products": [
+        "Movies/mov00_g1_64x48x6.mrc",
+        "Movies/mov00_g1_64x48x6.star"
+      ],
+      "joint_star_written": false
+    },
+    {
+      "case_id": "repeat_all_output_modes",
+      "requirement": "repeat of the full output-mode run must be byte-exact",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_noDW",
+        "_EVN",
+        "_ODD",
+        "_PS"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904846,
+            "wall_start": 1790693323.7294092,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977024",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.861,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/repeat_all_output_modes/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--even_odd_split",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/repeat_all_output_modes/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        },
+        "repeat": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904874,
+            "wall_start": 1790693324.5978746,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977111",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.852,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/repeat_all_output_modes/out-repeat/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--even_odd_split",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/repeat_all_output_modes/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "repeat": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/repeat_all_output_modes/out-primary",
+            "file_count": 18,
+            "mrc_count": 5,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 13312
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/repeat_all_output_modes/out-repeat",
+            "file_count": 18,
+            "mrc_count": 5,
+            "star_count": 2,
+            "movie_count": 1,
+            "pixel_count": 13312
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "complete non-PDF tree",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov00_g1_64x48x6_EVN.mrc": {
+              "base_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "candidate_header": "6d8784ec0bdcf57517646e053eca6b8d6b4099f820c420acad0cb45b5860326d",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499",
+              "candidate_payload": "b79bbb077c311d9cfccd4dbf9bca5ac4e370bed159b6b6bb95120d1fc43e0499"
+            },
+            "Movies/mov00_g1_64x48x6_ODD.mrc": {
+              "base_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "candidate_header": "0533582525db8199734ebcf922227b11b93b0cce0a610932ccd3cb31577fbf5b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db",
+              "candidate_payload": "7b4844587dafd7bc2c16c9b461e58d8164b0c6d71f13adc2fd0499c3e7f7d7db"
+            },
+            "Movies/mov00_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            },
+            "Movies/mov00_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "repeat": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--even_odd_split",
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "32",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              },
+              {
+                "suffix": "_EVN"
+              },
+              {
+                "suffix": "_ODD"
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75",
+        "forbidden_joint_tags": [
+          "_rlnMicrographNameEven",
+          "_rlnMicrographNameOdd"
+        ]
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/repeat_all_output_modes/out-primary",
+        "file_count": 18,
+        "mrc_count": 5,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 13312
+      }
+    },
+    {
+      "case_id": "resume_non_prefix",
+      "requirement": "--only_do_unfinished after deleting a middle movie's products",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6",
+        "g1_64x48x6",
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum",
+        "_noDW",
+        "_PS"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904902,
+            "wall_start": 1790693325.4882627,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977200",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.917,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/resume_non_prefix/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/resume_non_prefix/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g1_64x48x6.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        },
+        "resume": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1904934,
+            "wall_start": 1790693326.4294283,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977294",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.971,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 6,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/resume_non_prefix/out-resume/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--dose_weighting",
+              "--dose_per_frame",
+              "1.277",
+              "--save_noDW",
+              "--grouping_for_ps",
+              "2",
+              "--ps_size",
+              "32",
+              "--gainref",
+              "gain.mrc",
+              "--only_do_unfinished"
+            ],
+            "cwd": "/tmp/mc83-full/resume_non_prefix/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov01_g1_64x48x6.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {
+        "non_prefix_resume": {
+          "status": "PASS",
+          "base": {
+            "root": "/tmp/mc83-full/resume_non_prefix/out-primary",
+            "file_count": 28,
+            "mrc_count": 9,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 21504
+          },
+          "candidate": {
+            "root": "/tmp/mc83-full/resume_non_prefix/out-resume",
+            "file_count": 28,
+            "mrc_count": 9,
+            "star_count": 4,
+            "movie_count": 3,
+            "pixel_count": 21504
+          },
+          "different_files": [],
+          "different_products": [],
+          "comparison_scope": "products",
+          "mrc_sha256": {
+            "Movies/mov00_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov00_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            },
+            "Movies/mov00_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov01_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov01_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            },
+            "Movies/mov01_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            },
+            "Movies/mov02_g1_64x48x6.mrc": {
+              "base_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "candidate_header": "7c8f01e41e02394cca5ce06a175be2e95dac62c489fb7f4b637eaa1a9252092b",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff",
+              "candidate_payload": "eb5f321660356aba2e972bc196f3d81b783dc5556dcf975eed8e0dbac841dfff"
+            },
+            "Movies/mov02_g1_64x48x6_PS.mrc": {
+              "base_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "candidate_header": "c500c109a8aa8615914fa15e51eb0ecab00c9d00d10437f92e725d32283bffd6",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd",
+              "candidate_payload": "2bc126abe14b1cc694f1fda918d5ddc32f62edacd249d3c5effc2a651d47cfdd"
+            },
+            "Movies/mov02_g1_64x48x6_noDW.mrc": {
+              "base_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "candidate_header": "931278e1dad1b46f557c1edac05c6746b4b5e7922b9e9a91c7280cf01680e1be",
+              "base_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "candidate_extended": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f",
+              "candidate_payload": "fed7ca9007042952223762edb9ba55f6083573a035446132f2e757b314b9d56f"
+            }
+          }
+        }
+      },
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov01_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        },
+        "resume": {
+          "Movies/mov01_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--save_noDW",
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "32",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov01_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov02_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov01_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov02_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              },
+              {
+                "suffix": "_noDW",
+                "joint_tag": "_rlnMicrographNameNoDW"
+              },
+              {
+                "suffix": "_PS",
+                "shape_xyz": [
+                  32,
+                  32,
+                  1
+                ],
+                "joint_tag": "_rlnCtfPowerSpectrum"
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographDoseRate": 1.277,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "901ad038ffcde828a3f49b5dce9f7892385d75ea029e57061068ff6cfaf40329"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/resume_non_prefix/out-primary",
+        "file_count": 28,
+        "mrc_count": 9,
+        "star_count": 4,
+        "movie_count": 3,
+        "pixel_count": 21504
+      },
+      "resume_removed_products": [
+        "Movies/mov01_g1_64x48x6.log",
+        "Movies/mov01_g1_64x48x6.mrc",
+        "Movies/mov01_g1_64x48x6.star",
+        "Movies/mov01_g1_64x48x6_PS.mrc",
+        "Movies/mov01_g1_64x48x6_noDW.mrc",
+        "Movies/mov01_g1_64x48x6_shifts.eps"
+      ],
+      "resume_rewritten_existing_products": [
+        "all_batches.pdf",
+        "batch.pdf",
+        "batch.pdf.lst",
+        "corrected_micrographs.star",
+        "corrected_micrographs_all_rlnAccumMotionEarly.eps",
+        "corrected_micrographs_all_rlnAccumMotionLate.eps",
+        "corrected_micrographs_all_rlnAccumMotionTotal.eps",
+        "header.pdf",
+        "header.pdf.lst",
+        "logfile.pdf"
+      ],
+      "resume_control_rewritten": [
+        "Movies/mov00_g1_64x48x6.log",
+        "Movies/mov00_g1_64x48x6.mrc",
+        "Movies/mov00_g1_64x48x6.star",
+        "Movies/mov00_g1_64x48x6_PS.mrc",
+        "Movies/mov00_g1_64x48x6_noDW.mrc",
+        "Movies/mov00_g1_64x48x6_shifts.eps",
+        "Movies/mov02_g1_64x48x6.log",
+        "Movies/mov02_g1_64x48x6.mrc",
+        "Movies/mov02_g1_64x48x6.star",
+        "Movies/mov02_g1_64x48x6_PS.mrc",
+        "Movies/mov02_g1_64x48x6_noDW.mrc",
+        "Movies/mov02_g1_64x48x6_shifts.eps"
+      ]
+    },
+    {
+      "case_id": "ineligible_float_tiff",
+      "requirement": "float32 TIFF never enters the compact path",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": false,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1905004,
+            "wall_start": 1790693328.4533086,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977497",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.867,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/ineligible_float_tiff/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/ineligible_float_tiff/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {},
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/ineligible_float_tiff/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 3072
+      }
+    },
+    {
+      "case_id": "ineligible_early_binning",
+      "requirement": "--bin_factor 2 with early binning leaves a uint16 TIFF on the float path",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": false,
+      "status": "PASS",
+      "arms": {
+        "primary": {
+          "exit_code": 0,
+          "identity": {
+            "pid": 1905032,
+            "wall_start": 1790693329.341217,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977585",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.859,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 5,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/ineligible_early_binning/out-primary/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--bin_factor",
+              "2",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/ineligible_early_binning/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {},
+      "witnesses": {
+        "primary": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": false,
+            "released_after_device_forward_fft": false,
+            "host_fallback": false,
+            "session_initialized": false,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--bin_factor",
+        "2",
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "ba3ea89ee20eedff92e6920a09a64a1aff34c4711819f909e65d807b668e973f",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              32,
+              24,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 2.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          32,
+          24,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "c0442047e00b1e0b695cdcc51bdd0b94d3a2e33f28f02dcb79bd487b5fe0ea75"
+      },
+      "tree": {
+        "root": "/tmp/mc83-full/ineligible_early_binning/out-primary",
+        "file_count": 14,
+        "mrc_count": 1,
+        "star_count": 2,
+        "movie_count": 1,
+        "pixel_count": 768
+      }
+    },
+    {
+      "case_id": "damaged_movie_named",
+      "requirement": "a truncated uint16 movie beside healthy ones fails closed and is named",
+      "note": "",
+      "geometries": [
+        "g1_64x48x6",
+        "g1_64x48x6",
+        "g1_64x48x6"
+      ],
+      "declared_products": [
+        "sum"
+      ],
+      "expect_compact_ingest": true,
+      "status": "PASS",
+      "arms": {
+        "failing": {
+          "exit_code": 1,
+          "identity": {
+            "pid": 1905060,
+            "wall_start": 1790693330.2276063,
+            "executable": "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+            "start_ticks": "614977674",
+            "cpus_allowed": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "wall_seconds": 0.459,
+            "compute_app_uuids": [
+              "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d"
+            ],
+            "compute_app_samples": 3,
+            "cuda_visible_devices": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+            "command": [
+              "/home/alex/mc-i83-compat-20260929/build-cuda/motioncorr",
+              "--i",
+              "movies.star",
+              "--o",
+              "/tmp/mc83-full/damaged_movie_named/out-failing/",
+              "--use_own",
+              "--gpu",
+              "0",
+              "--j",
+              "4",
+              "--max_io_threads",
+              "2",
+              "--patch_x",
+              "2",
+              "--patch_y",
+              "2",
+              "--max_iter",
+              "2",
+              "--bfactor",
+              "150",
+              "--seed",
+              "1",
+              "--angpix",
+              "1.4",
+              "--voltage",
+              "300.0",
+              "--gainref",
+              "gain.mrc"
+            ],
+            "cwd": "/tmp/mc83-full/damaged_movie_named/input-u16"
+          },
+          "logs": [
+            "Movies/mov00_g1_64x48x6.log",
+            "Movies/mov02_g1_64x48x6.log"
+          ]
+        }
+      },
+      "comparisons": {},
+      "witnesses": {
+        "failing": {
+          "Movies/mov00_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          },
+          "Movies/mov02_g1_64x48x6.tiff": {
+            "selected_compact_ingest": true,
+            "released_after_device_forward_fft": true,
+            "host_fallback": false,
+            "session_initialized": true,
+            "resident_reconstruction": true
+          }
+        }
+      },
+      "options": [
+        "--gainref",
+        "gain.mrc"
+      ],
+      "input_sha256": {
+        "Movies/mov00_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "Movies/mov01_g1_64x48x6.tiff": "0f1677cd6453dc7aa57862d5495e35b68c9961cb67a13f77e5deae939fa9f826",
+        "Movies/mov02_g1_64x48x6.tiff": "4b010ebf903921bd8398bda5da4eb4dda9b72b090b1b5de8442ca58c34326601",
+        "gain.mrc": "74c149b05431076696e9ef43edd09fb0fe98108f0870170fb8816db77bc93efe"
+      },
+      "manifest": {
+        "schema_version": 2,
+        "movies": [
+          {
+            "movie": "Movies/mov00_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov01_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          },
+          {
+            "movie": "Movies/mov02_g1_64x48x6.tiff",
+            "shape_xyz": [
+              64,
+              48,
+              1
+            ],
+            "products": [
+              {
+                "suffix": ""
+              }
+            ],
+            "general_tags": {
+              "_rlnMicrographOriginalPixelSize": 1.4,
+              "_rlnVoltage": 300.0,
+              "_rlnMicrographStartFrame": 1,
+              "_rlnMicrographBinning": 1.0,
+              "_rlnImageSizeX": 64,
+              "_rlnImageSizeY": 48,
+              "_rlnImageSizeZ": 6,
+              "_rlnMicrographGainName": "gain.mrc"
+            },
+            "optics_group": 1
+          }
+        ],
+        "expected_shape_xyz": [
+          64,
+          48,
+          1
+        ],
+        "joint_star": "corrected_micrographs.star",
+        "input_star_sha256": "901ad038ffcde828a3f49b5dce9f7892385d75ea029e57061068ff6cfaf40329"
+      },
+      "published_products": [
+        "Movies/mov00_g1_64x48x6.mrc",
+        "Movies/mov00_g1_64x48x6.star",
+        "Movies/mov02_g1_64x48x6.mrc",
+        "Movies/mov02_g1_64x48x6.star"
+      ],
+      "joint_star_written": false
+    }
+  ],
+  "summary": {
+    "selected": 16,
+    "passed": 16,
+    "failed": 0
+  }
+}

@@ -73,6 +73,19 @@ public:
     );
 #endif
 
+    // Fetch individual d_Iframes pixels: one neighbour value per (defect, frame).
+    // Replaces downloading the whole movie for hot-pixel replacement, which cost a
+    // fresh movie-sized host allocation plus a full device-to-host copy on every
+    // movie. sample_y[k] < 0 marks an entry the caller fills itself (the Gaussian
+    // branch) and leaves out[k] at zero. Uses the pre-FFT scratch arena, so it adds
+    // no device allocation.
+    bool gatherFrameSamples(
+        const std::vector<int> &sample_frame,
+        const std::vector<int> &sample_y,
+        const std::vector<int> &sample_x,
+        std::vector<float> &out
+    );
+
     // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
     // path, which re-runs the original host scan verbatim.
     bool downloadUnalignedSum(MultidimArray<float> &unaligned_sum);
@@ -204,6 +217,10 @@ private:
     // IngestScratch is what makes the forward transform safe to run.
     mc_cuda::FourierStorageGuard fourier_guard;
     cudaStream_t ingest_stream = 0;
+    // Points the ingest at the worker-lifetime pinned staging pool, growing it if
+    // this movie needs more. The pool deliberately outlives the session, which is
+    // constructed and destroyed once per movie.
+    bool ensurePinnedStage(size_t bytes);
     // Synchronises and tears down the ingest stream, then declares every scratch
     // view dead. Idempotent; called from a scope guard so it also runs on the
     // HANDLE_ERROR early-return paths.

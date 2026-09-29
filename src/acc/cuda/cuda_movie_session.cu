@@ -124,6 +124,27 @@ __global__ void fusedU16FlipGainAndSumKernel(
 }
 #endif
 
+// Sparse read-back for hot-pixel replacement. One thread per (defect, frame)
+// sample. A negative y marks the Gaussian branch, which the host fills itself; the
+// slot is still written so nothing uninitialised is copied back.
+__global__ void gatherFrameSamplesKernel(
+    const float *d_Iframes,
+    int nx,
+    int ny,
+    const int *sample_frame,
+    const int *sample_y,
+    const int *sample_x,
+    float *out,
+    size_t n_samples
+) {
+    size_t i = (size_t)blockDim.x * (size_t)blockIdx.x + threadIdx.x;
+    if (i >= n_samples) return;
+    const int y = sample_y[i];
+    if (y < 0) { out[i] = 0.0f; return; }
+    out[i] = d_Iframes[((size_t)sample_frame[i] * (size_t)ny + (size_t)y) * (size_t)nx
+                       + (size_t)sample_x[i]];
+}
+
 // ---------------------------------------------------------------------------
 // GPU hot-pixel statistics (Issue #50 addendum: issue_50_gpu_hotpixel_statistics.md)
 //
@@ -688,20 +709,113 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
 }
 
 #if defined(_NVCOMP_ENABLED)
-namespace {
-
-// cudaFreeHost on every exit path, including the HANDLE_ERROR early returns.
-struct ScopedPinnedHost {
-    void *ptr = nullptr;
-    ~ScopedPinnedHost() { if (ptr) cudaFreeHost(ptr); }
-};
-
-} // namespace
-
 using mc_tiff_deflate::alignUp;
 using mc_tiff_deflate::stripSlotOffset;
 using mc_tiff_deflate::frameStageBytes;
 using mc_tiff_deflate::zlibWrapperIsUsable;
+
+namespace {
+// Worker-lifetime pinned staging for the compressed strips.
+//
+// CudaMovieSession is constructed and destroyed once per movie
+// (motioncorr_runner.cpp), so a session-owned buffer would pay cudaHostAlloc and
+// cudaFreeHost on every movie: measured at ~110 ms and ~43 ms for 126 MiB on an
+// A100 host, which is most of what the faster ingest buys back. The pool outlives
+// the session and is grown, never shrunk.
+//
+// thread_local, not a shared static: movies are dispatched one at a time here, but
+// a worker-per-thread arrangement must not share one pinned buffer. One device per
+// process is assumed, which is already how --gpu behaves.
+struct PinnedStagePool {
+    void *ptr = nullptr;
+    size_t bytes = 0;
+    // Destroyed at thread exit, possibly after the CUDA context has gone; the
+    // status is deliberately ignored because there is nowhere left to report it.
+    ~PinnedStagePool() { if (ptr) cudaFreeHost(ptr); }
+};
+thread_local PinnedStagePool t_pinned_stage;
+} // namespace
+
+bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
+    if (t_pinned_stage.ptr && t_pinned_stage.bytes >= bytes) return true;
+    if (t_pinned_stage.ptr) {
+        HANDLE_ERROR(cudaFreeHost(t_pinned_stage.ptr));
+        t_pinned_stage.ptr = nullptr;
+        t_pinned_stage.bytes = 0;
+    }
+    // Headroom, rounded to 32 MiB. Compressed size drifts by a few MiB between
+    // movies of the same geometry, so an exact fit reallocated on 7 of 24 tutorial
+    // movies; with slack the pool is allocated once for the run.
+    const size_t reserve = mc_cuda::alignUp(bytes + bytes / 8, (size_t)32 << 20);
+    HANDLE_ERROR(cudaHostAlloc(&t_pinned_stage.ptr, reserve, cudaHostAllocDefault));
+    t_pinned_stage.bytes = reserve;
+    // Logged only when the pool actually grows, so "allocated once across the run"
+    // is something the log can show rather than something the design merely claims.
+    logfile << "nvCOMP ingestion: pinned staging pool grown to " << reserve
+            << " bytes for a " << bytes << "-byte request (worker lifetime)" << std::endl;
+    return true;
+}
+
+bool CudaMovieSession::gatherFrameSamples(
+    const std::vector<int> &sample_frame,
+    const std::vector<int> &sample_y,
+    const std::vector<int> &sample_x,
+    std::vector<float> &out
+) {
+    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes || !d_Fframes) return false;
+    const size_t n = sample_frame.size();
+    if (sample_y.size() != n || sample_x.size() != n) return false;
+    out.assign(n, 0.0f);
+    if (n == 0) return true;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    // Bounds are checked here rather than in the kernel: an out-of-range coordinate
+    // means the caller's mask and the device geometry disagree, which is a defect in
+    // the caller, not an input to tolerate with a clamp.
+    for (size_t i = 0; i < n; i++) {
+        if (sample_y[i] < 0) continue;
+        if (sample_frame[i] < 0 || sample_frame[i] >= n_frames ||
+            sample_y[i] >= ny || sample_x[i] < 0 || sample_x[i] >= nx) {
+            logfile << "ERROR: defect neighbour sample " << i << " out of range: frame="
+                    << sample_frame[i] << " y=" << sample_y[i] << " x=" << sample_x[i]
+                    << std::endl;
+            return false;
+        }
+    }
+
+    // Same borrowed arena as the ingest: still pre-FFT here, so no allocation.
+    if (!fourier_guard.beginIngestScratch()) return false;
+    struct ScratchScope {
+        CudaMovieSession *session;
+        ~ScratchScope() { session->endIngestScratch(); }
+    } scratch_scope = { this };
+
+    mc_cuda::DeviceScratchArena arena(
+        d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
+    int *d_f = (int *)arena.alloc(n * sizeof(int), sizeof(int));
+    int *d_y = (int *)arena.alloc(n * sizeof(int), sizeof(int));
+    int *d_x = (int *)arena.alloc(n * sizeof(int), sizeof(int));
+    float *d_out = (float *)arena.alloc(n * sizeof(float), sizeof(float));
+    if (!d_f || !d_y || !d_x || !d_out) {
+        logfile << "ERROR: " << n << " defect neighbour samples do not fit the "
+                << arena.capacity() << "-byte pre-FFT scratch arena." << std::endl;
+        return false;
+    }
+
+    HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
+    cudaStream_t stream = ingest_stream;
+    HANDLE_ERROR(cudaMemcpyAsync(d_f, sample_frame.data(), n * sizeof(int), cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_y, sample_y.data(), n * sizeof(int), cudaMemcpyHostToDevice, stream));
+    HANDLE_ERROR(cudaMemcpyAsync(d_x, sample_x.data(), n * sizeof(int), cudaMemcpyHostToDevice, stream));
+    const int block = 256;
+    const int grid = (int)((n + block - 1) / block);
+    gatherFrameSamplesKernel<<<grid, block, 0, stream>>>(
+        d_Iframes, nx, ny, d_f, d_y, d_x, d_out, n);
+    HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaMemcpyAsync(out.data(), d_out, n * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    HANDLE_ERROR(cudaStreamSynchronize(stream));
+    return true;
+}
 
 void CudaMovieSession::endIngestScratch() {
     if (ingest_stream) {
@@ -883,9 +997,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // ------------------------------------------------------------------
     // Host side: one pinned staging buffer sized for the worst batch, reused.
     // ------------------------------------------------------------------
-    ScopedPinnedHost stage;
-    HANDLE_ERROR(cudaHostAlloc(&stage.ptr, v.comp_capacity, cudaHostAllocDefault));
-    uint8_t *const h_stage = (uint8_t *)stage.ptr;
+    if (!ensurePinnedStage(v.comp_capacity)) return false;
+    uint8_t *const h_stage = (uint8_t *)t_pinned_stage.ptr;
 
     const size_t max_chunks = (size_t)batch_frames * (size_t)ny;
     std::vector<void *>         h_comp_ptrs(max_chunks);

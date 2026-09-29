@@ -83,26 +83,101 @@ in host RAM. Two further differences from the SCARF measurement, both reducing t
 ratio here: this host's libtiff uses libdeflate rather than zlib, and the warm page
 cache removes disk from all three arms equally.
 
-## 6. The integrated path is still slower end to end
+## 6. End-to-end, after removing the two costs outside ingestion
 
-Application wall, same 24 movies, one run each: arena **48.4 s** vs control **34.3 s**.
-Ingestion saves only 237 ms per movie and the integration gives more than that back.
-Two costs only this path pays, both measured on the same host:
+The first measurement of the integrated path was *slower* than the host reader:
+48.4 s against 34.3 s over 24 movies. Two costs outside ingestion accounted for it,
+and both are now removed.
 
-- per-movie pinned staging: `cudaHostAlloc` 126 MiB = 110 ms, `cudaFreeHost` = 43 ms;
-- the hot-pixel defect path downloads frames back, which all 24 movies enter: a cold
-  1.27 GiB host allocation plus D2H measures ~1.0 s, plus 151 ms to free.
+**Pinned staging moved to worker lifetime.** `CudaMovieSession` is constructed and
+destroyed once per movie, so a session-owned buffer paid `cudaHostAlloc` (~110 ms for
+126 MiB) and `cudaFreeHost` (~43 ms) on every movie. The pool is now `thread_local`
+and outlives the session. Sized exactly it still reallocated on 7 of 24 movies,
+because compressed size drifts a few MiB between movies of the same geometry; with
+12.5% headroom rounded to 32 MiB it is **allocated once per run**, which the log
+records ("pinned staging pool grown to 167772160 bytes for a 126069120-byte request").
 
-The split between these two is **inferred, not isolated**. The component costs are
-measured. The direction is not in doubt: the regression is entirely outside ingestion.
+**Hot-pixel replacement no longer downloads the movie.** See the section below.
+`Could not download frames` appears 0 times and all 24 movies still report
+`Fixed hot pixels`.
 
-The first is a defect in this change — the staging buffer belongs at session lifetime.
-The second is the resident-path problem from #118/#125: the download exists only
-because the runner derives `frame_mean`/`frame_std` from host frames before calling
-`updateDefectPixels`, which already applies replacements on the device.
+| Arm | Wall, 24 movies | Peak VRAM |
+|---|---|---|
+| control (host read) | 35.3 s | 3484 MiB |
+| arena + worker-lifetime pinned + sparse gather | **16.3 s** | **3484 MiB** |
+
+**2.2x faster end to end, with peak VRAM still unchanged.** The control reproduces at
+34.3 / 34.6 / 35.3 s across three runs; the nvCOMP arm at 48.4 s before these two
+fixes, 17.3 s with the exact-fit pool, 16.3 s with headroom.
+
+The end-to-end saving (~790 ms/movie) is larger than the ingestion-stage saving
+(237 ms/movie) predicts. The likely remainder is that the control materialises a
+1.27 GiB host `Iframes` buffer per movie and the nvCOMP path never does; a cold
+allocation of that size plus fill measured ~1.0 s. This attribution is **inferred**,
+not isolated.
 
 ## Limitations
 
-Wall-clock figures in section 6 are single runs taken without box-wide exclusivity and
-are not a timing study; the section 5 medians are. One host only. The added
-`nvCOMP ingestion:` log line breaks byte-exact log parity with the host-read path.
+Wall-clock figures in section 6 are single runs taken without box-wide exclusivity
+and are not a timing study, though the control was repeated three times at 34.3-35.3 s
+and the two arms differ by more than 2x; the section 5 medians are proper repeats.
+One host only. The added `nvCOMP ingestion:` lines break byte-exact log parity with
+the host-read path. The scenario matrix uses 4 movies, since defect geometry rather
+than movie content selects the branches; the 24-movie comparison is the default
+auto-hot-pixel case only.
+
+---
+
+# Sparse hot-pixel neighbour gathering
+
+## Why the whole-movie download was avoidable
+
+The replacement loop reads exactly one neighbour per (defect, frame): it gathers every
+valid neighbour into a buffer and takes entry `rand() % n_ok`. Two properties make a
+sparse form exact rather than merely equivalent:
+
+- `n_ok` depends only on the defect mask and the image bounds, never on pixel values,
+  so it is computable before any frame data exists;
+- the draw is therefore an index into a value-independent ordering, so the selected
+  neighbour resolves to a coordinate that can be fetched afterwards.
+
+`rand()` is still called on exactly the branch where `n_ok > NUM_MIN_OK`, and
+`rnd_gaus()` on the other, in the same defect-then-frame order. Both draw from the
+same stream, so preserving the branch pattern preserves the stream.
+
+`src/defect_neighbours.h` holds the two functions; `tests/test_defect_neighbours.cpp`
+checks the resolved coordinate against a literal transcription of the original gather
+over isolated defects, every edge and corner, a 5x5 dense block, a full bad row and
+column, a fully masked image, and the EER radius `d_max = 4`. Four mutants were
+caught: rank off-by-one, reversed scan order, a clamped negative rank, and a count
+that ignores the mask.
+
+## Scenario matrix
+
+Control build (`USE_NVCOMP=OFF`, original dense loop, host frames) versus nvCOMP build
+(sparse gather), 4 movies, `--seed 1`, products compared as MRC data past the header
+and STAR text.
+
+| Scenario | bBad sources exercised | MRC data mismatches | STAR differing |
+|---|---|---|---|
+| gain | auto hot pixels (67) | 0 / 4 | 0 / 5 |
+| nogain | auto hot pixels (237) | 0 / 4 | 0 / 5 |
+| defectfile | defect file + gain-zero + auto | 0 / 4 | 0 / 5 |
+| gainzero | gain-zero (41) + auto | 0 / 4 | 0 / 5 |
+| dense_nogain | defect file + auto, no gain | 0 / 4 | 0 / 5 |
+
+The defect fixture is deliberately dense: 312 defect-file pixels, of which
+**102 take the neighbour branch and 210 take the Gaussian branch** (counted with the
+same helper the runner uses, at `D_MAX = 2`, `NUM_MIN_OK = 6`). Both branches are
+therefore exercised, and the 15x15 and 9x9 solid blocks are the dense-defect case.
+
+## The two controls that make those zeros mean something
+
+**The scenarios are distinct.** Each differs from its neighbours in all 4 micrographs:
+gain vs defectfile, gain vs gainzero, gain vs nogain, and nogain vs dense_nogain all
+report 4/4 data mismatches. A fixture that silently masked nothing would have shown 0.
+
+**The oracle can see a wrong replacement.** A mutant build taking the neighbour one
+rank along (`(rand() + 1) % n_ok`) produces **4/4 data mismatches in every one of the
+five scenarios**. So MRC equality is sensitive to a single-rank change in one selected
+neighbour, and the zeros above are a result rather than an insensitive comparison.

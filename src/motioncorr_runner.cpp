@@ -26,6 +26,7 @@
 #include <stdexcept>
 
 #include "src/motioncorr_runner.h"
+#include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -1830,21 +1831,60 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				bad_ys.push_back(i);
 			}
 #ifdef _CUDA_ENABLED
-		if (nvcomp_ingested && n_bad > 0 && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
-			if (!movie_session->downloadRealFrames(Iframes)) {
-				logfile << "WARNING: Could not download frames for defect correction." << std::endl;
-			}
-		}
+		// The nvCOMP ingest never populates host frames, and the replacement loop
+		// only ever reads one neighbour per (defect, frame). Downloading the whole
+		// movie to supply them cost a fresh movie-sized host allocation plus a full
+		// device-to-host copy per movie; fetch just those pixels instead.
+		const bool sparse_neighbours =
+			nvcomp_ingested && (Iframes.empty() || Iframes[0]().nzyxdim == 0);
 		if (host_frames_are_raw || nvcomp_ingested)
 			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
+
+		std::vector<int> sample_frame, sample_y, sample_x;
+		if (sparse_neighbours) {
+			const size_t n_samples = bad_xs.size() * (size_t)n_frames;
+			sample_frame.assign(n_samples, 0);
+			sample_y.assign(n_samples, -1);
+			sample_x.assign(n_samples, -1);
+		}
+		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
 		size_t bad_idx = 0;
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
+#ifdef _CUDA_ENABLED
+			// n_ok is a property of the mask and the bounds, never of the pixel
+			// values, so on the sparse path it is computed once per defect and the
+			// drawn index is resolved to a coordinate. rand() and rnd_gaus() are
+			// still called on exactly the same branches in the same defect-then-frame
+			// order, which is what keeps the stream and the chosen value identical.
+			const int sparse_n_ok = sparse_neighbours
+				? mc_defect::countValidNeighbours(bad_mask, nx, ny, i, j, D_MAX) : 0;
+#endif
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
+#ifdef _CUDA_ENABLED
+				if (sparse_neighbours) {
+					const size_t k = (size_t)iframe * bad_xs.size() + bad_idx;
+					if (sparse_n_ok > NUM_MIN_OK) {
+						const int rank = rand() % sparse_n_ok;
+						int sy = -1, sx = -1;
+						if (!mc_defect::nthValidNeighbour(bad_mask, nx, ny, i, j,
+						                                  D_MAX, rank, &sy, &sx)) {
+							discard_preprocessing_session("sparse defect neighbour");
+							REPORT_ERROR("Could not resolve a hot-pixel neighbour for sparse defect correction.");
+						}
+						sample_frame[k] = iframe;
+						sample_y[k] = sy;
+						sample_x[k] = sx;
+					} else {
+						resident_bad_replacements[k] = rnd_gaus(frame_mean, frame_std);
+					}
+					continue;
+				}
+#endif
 				RFLOAT pbuf[PBUF_SIZE];
 //				std::cout << "Frame: "<< iframe << std::endl;
 				int n_ok = 0;
@@ -1886,6 +1926,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
+		if (sparse_neighbours && !bad_xs.empty()) {
+			std::vector<float> gathered;
+			if (!movie_session->gatherFrameSamples(sample_frame, sample_y, sample_x, gathered)) {
+				discard_preprocessing_session("sparse defect neighbour gather");
+				REPORT_ERROR("Sparse hot-pixel neighbour gather failed for " + fn_mic);
+			}
+			for (size_t k = 0; k < gathered.size(); k++)
+				if (sample_y[k] >= 0) resident_bad_replacements[k] = gathered[k];
+		}
 		if (movie_session && !bad_xs.empty()) {
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
@@ -1897,7 +1946,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
 			}
 		}
-		if (nvcomp_ingested) {
+		if (nvcomp_ingested && !sparse_neighbours) {
 			for (int iframe = 0; iframe < n_frames; iframe++) {
 				Iframes[iframe].clear();
 			}

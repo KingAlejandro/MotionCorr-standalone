@@ -130,6 +130,9 @@ if(BUILD_TESTING)
     add_executable(scratch_arena tests/test_scratch_arena.cpp)
     target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ScratchArena COMMAND scratch_arena)
+    add_executable(defect_neighbours tests/test_defect_neighbours.cpp)
+    target_include_directories(defect_neighbours PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME DefectNeighbours COMMAND defect_neighbours)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)

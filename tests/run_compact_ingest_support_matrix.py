@@ -223,6 +223,13 @@ def pick_device(requested: Optional[str]) -> Dict[str, str]:
     catalogue = [{"index": r[0], "uuid": r[1], "name": r[2], "memory_used": r[3]} for r in rows]
     require(bool(catalogue), "nvidia-smi reported no devices")
     if requested is None:
+        # Honour a device the caller or the scheduler already pinned. nvidia-smi
+        # ignores CUDA_VISIBLE_DEVICES, so without this a CTest inside a
+        # one-GPU allocation would pick the node's physical device 0 -- someone
+        # else's GPU -- and then fail its own UUID witness.
+        inherited = [v for v in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",") if v]
+        requested = inherited[0] if inherited else None
+    if requested is None:
         chosen = catalogue[0]
     else:
         matches = [d for d in catalogue if requested in (d["uuid"], d["index"])]
@@ -440,7 +447,7 @@ def prepare_inputs(case: Case, root: Path, *, floating: bool) -> Tuple[Path, Lis
         frames = fixtures.synthetic_movie(geom.nx, geom.ny, geom.n_frames, geom.seed)
         fixtures.write_movie(root / movie, frames, geom.nx, geom.ny, floating=floating)
     if case.damaged_frames is not None:
-        target = root / movies[1]
+        target = root / movies[case.failing_movie]
         healthy = target.with_suffix(".healthy")
         shutil.move(str(target), str(healthy))
         fixtures.truncate_after_frame(healthy, target, case.damaged_frames)
@@ -518,16 +525,15 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
         record["arms"]["float"] = arm_record(twin)
         require(twin.returncode == 0, f"{case.case_id}: float arm exited {twin.returncode}")
         record["witnesses"]["float"] = assert_witnesses(twin, expect_u16=False, movies=f32_movies)
-        f32_manifest = dict(manifest)
-        f32_manifest["input_star_sha256"] = sha256_file(f32_star)
-        # The declared identities differ only in the file the STAR names, so the
-        # inventory contract is identical and the products must be too.
-        f32_manifest["movies"] = [dict(e) for e in manifest["movies"]]
-        for entry, movie in zip(f32_manifest["movies"], f32_movies):
-            entry["movie"] = movie
-            entry["general_tags"] = dict(entry["general_tags"])
-        record["float_tree"] = summarize(comparator.validate_tree(twin.out, f32_manifest))
-        report = compare_products(primary.out, twin.out, manifest, f32_manifest)
+        # Both arms declare the same movie names in different input roots, so
+        # the twin satisfies the identical manifest -- including the input STAR
+        # hash, since the STAR text is byte-identical. Only the TIFF sample
+        # format differs, which is the whole point of the pairing.
+        require(f32_movies == movies and sha256_file(f32_star) == manifest["input_star_sha256"],
+                f"{case.case_id}: the float twin does not share the uint16 arm's contract")
+        record["float_input_sha256"] = {m: sha256_file(f32_root / m) for m in f32_movies}
+        record["float_tree"] = summarize(comparator.validate_tree(twin.out, manifest))
+        report = compare_products(primary.out, twin.out, manifest, manifest)
         record["comparisons"]["u16_vs_float32_tiff"] = report
         require(report["status"] == "PASS",
                 f"{case.case_id}: compact ingest products differ from the float32 twin: "
@@ -672,7 +678,19 @@ def compare_products(primary: Path, twin: Path, manifest: Dict[str, Any],
 
 
 def summarize(info: Dict[str, Any]) -> Dict[str, Any]:
-    return {k: v for k, v in info.items() if k not in ("mrc", "files")}
+    """Drop the file listing, keep every product's identity.
+
+    A row that is not part of a pairwise comparison would otherwise retain no
+    hash at all, so its "complete expected products" claim could not be checked
+    against anything later."""
+    out = {k: v for k, v in info.items() if k not in ("mrc", "files")}
+    out["product_sha256"] = {
+        rel: {"header": m.header_sha256, "extended": m.extended_sha256,
+              "payload": m.payload_sha256, "dimensions": list(m.dimensions),
+              "mode": m.mode, "bytes": m.file_bytes}
+        for rel, m in sorted(info["mrc"].items())
+    }
+    return out
 
 
 def summarize_comparison(report: Dict[str, Any]) -> Dict[str, Any]:

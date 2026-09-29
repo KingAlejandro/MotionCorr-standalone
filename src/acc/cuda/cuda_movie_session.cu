@@ -11,12 +11,19 @@
 #include <algorithm>
 #include <climits>
 
+// Issue #69. These handlers CONSUME the error: they read it, log it, and return false.
+// By the time the caller regains control, cudaGetLastError() has been reset and reports
+// cudaSuccess, which is not a certificate that the context is healthy -- it only means
+// nobody has recorded anything since. So each handler also records the code and the
+// stage on the session, and the caller decides from that recorded status rather than
+// from a later last-error read.
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
     cudaError_t err = (cmd); \
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        recordFailure(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -27,6 +34,7 @@
     if (res != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << res << std::endl; \
+        recordCufftFailure(res, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -254,6 +262,18 @@ CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, 
 
 CudaMovieSession::~CudaMovieSession() {
     release();
+}
+
+// Delegates to CudaFailureState, which keeps the first failure for diagnostics AND
+// latches any poisoning code monotonically. An earlier version of this function kept
+// only the first failure, so a recoverable allocation miss on one patch suppressed the
+// recording of a fatal fault on a later one -- PR107 review P1.
+void CudaMovieSession::recordFailure(cudaError_t err, const char *stage, int line) {
+    failure_state.record(err, stage, line);
+}
+
+void CudaMovieSession::recordCufftFailure(cufftResult res, const char *stage, int line) {
+    failure_state.recordCufft(res, stage, line);
 }
 
 bool CudaMovieSession::initialize() {
@@ -695,14 +715,23 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     if (!is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaDeviceSynchronize());
+    // Issue #69: clear the member before the free, not after. HANDLE_ERROR returns on a
+    // failing cudaFree, and leaving the pointer set would have release() free it a
+    // second time at the end of the movie. A free that fails here means the context is
+    // already unusable; freeing the same pointer again cannot repair that.
+    cudaError_t free_error = cudaSuccess;
     if (d_gain) {
-        HANDLE_ERROR(cudaFree(d_gain));
+        float *owned_gain = d_gain;
         d_gain = nullptr;
+        free_error = cudaFree(owned_gain);
     }
     if (d_Isum) {
-        HANDLE_ERROR(cudaFree(d_Isum));
+        float *owned_sum = d_Isum;
         d_Isum = nullptr;
+        const cudaError_t sum_error = cudaFree(owned_sum);
+        if (free_error == cudaSuccess) free_error = sum_error;
     }
+    HANDLE_ERROR(free_error);
     return true;
 }
 

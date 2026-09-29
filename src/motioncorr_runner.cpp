@@ -34,6 +34,14 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
+#include "src/acc/cuda/cuda_error_class.h"
+#include "src/acc/cuda/cuda_failure_state.h"
+// REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
+// in the CUDA-guarded patch block below. Keeping the include inside the guard too
+// preserves the invariant that a CPU-only build sees no change from this port except
+// a friend declaration that emits no code. Measured on cpu64: base and port produce
+// identical MRC pixels, STAR and EPS; only a wall-time line differs.
+#include <sstream>
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -2229,6 +2237,24 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #ifdef _CUDA_ENABLED
 		cufftComplex *d_patch_fcomplex_buffer = nullptr;
 		size_t sz_cached_patch_fcomplex = 0;
+		// Issue #69. This scratch outlives the patch loop but is freed at the bottom of
+		// it, and several statements inside the loop leave by exception:
+		// alignPatchDevice() throws on any CUDA error (every error macro in
+		// cuda_alignpatch.cu throws), the resident-frame download reports a hard error,
+		// and the poisoned-context check fails the movie deliberately. run() catches
+		// RelionError per movie and continues, so without this guard the buffer is
+		// leaked once per failing movie for the lifetime of the process. NOTE: this
+		// guard covers only the caller's buffer. cudaAlignPatchDevice's own eight
+		// buffers, eight events and cuFFT plan STILL leak on its throwing paths --
+		// that is issue #69 F1/F2, deliberately left to PR #93, which rewrites the
+		// same ownership. The explicit free below stays and nulls, so this is a
+		// backstop, not a second free.
+		struct PatchFourierScratchGuard {
+			cufftComplex **slot;
+			~PatchFourierScratchGuard() {
+				if (*slot) { cudaFree(*slot); *slot = nullptr; }
+			}
+		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
 		int ipatch = 1;
@@ -2261,6 +2287,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				bool converged = false;
 
 #ifdef _CUDA_ENABLED
+				// Distinguishes the two ways the device attempt can decline to produce
+				// shifts (issue #69): device_prep_ok == false is a resource failure
+				// that happened before any shift existed, whereas prep_ok with
+				// converged == false is a completed alignment reporting its
+				// convergence verdict. Only the first is a fallback candidate.
+				bool device_prep_ok = false;
 				if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
@@ -2273,21 +2305,118 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 							sz_cached_patch_fcomplex = sz_fpatches;
 						}
 					}
-					bool prep_ok = false;
 					if (d_patch_fcomplex_buffer) {
-						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
+						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
-					if (prep_ok) {
+					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
 						converged = alignPatchDevice(d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
 				}
+				if (movie_session && !device_prep_ok) {
+					// Issue #69, corrected after review. The question here is whether a
+					// retry is safe, and it must NOT be answered from a later
+					// cudaGetLastError() read.
+					//
+					// preparePatchInVram's own error handler consumes the code: it
+					// reads it, logs it, and returns false. cudaGetLastError() is the
+					// host thread's last-error slot and that read resets it, so by the
+					// time we get here it reports cudaSuccess. Absence of a pending
+					// error is not a certificate that the context is healthy -- it only
+					// means nothing has been recorded since. Treating it as one turns a
+					// fatal, already-consumed failure into a permitted retry, which is
+					// exactly the lost-error contract this branch was pulled up on.
+					//
+					// So the session preserves the status of the stage that actually
+					// failed, and BOTH that and the pending slot are consulted: either
+					// can independently prove the context is dead. Preferring only the
+					// recorded status would reintroduce the same bug from the other
+					// side, because the session keeps the FIRST failure -- a benign
+					// early allocation miss would then mask a fatal fault on a later
+					// patch of the same movie.
+					const CudaFailureState &failure = movie_session->getFailureState();
+					const cudaError_t recorded = failure.firstError();
+					const cufftResult recorded_cufft = failure.firstCufftError();
+					const cudaError_t pending = cudaGetLastError();
+					const CudaRetryDecision decision = cudaRetryDecisionFor(failure, pending);
+
+					if (decision.verdict == CUDA_RETRY_FATAL) {
+						// Attribute to the stage that recorded the poisoning code when
+						// there is one. If the verdict came from the pending slot
+						// instead, no stage recorded it, and saying so is better than
+						// printing the location of some earlier unrelated failure.
+						std::string origin;
+						if (failure.isPoisoned()) {
+							origin = std::string(", recorded at ") + failure.fatalStage()
+							       + ":" + integerToString(failure.fatalLine());
+						} else {
+							origin = ", pending on this thread; no stage recorded it";
+						}
+						REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+						                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+						                 << cudaGetErrorString(decision.decisive)
+						                 << origin
+						                 << ". Refusing to retry alignment on a poisoned context.");
+					}
+
+					// Permitted. Say precisely what is about to happen: alignPatch()
+					// dispatches cudaAlignPatch() again while use_gpu is true, so on a
+					// GPU run this is a CUDA re-dispatch on the same device, NOT a CPU
+					// fallback. It is only a CPU fallback when the CPU backend is
+					// selected. Reporting it as a fallback would overstate the recovery
+					// this branch supports.
+					logfile << "WARNING: resident patch preparation did not complete for patch ("
+					        << iy + 1 << ", " << ix + 1 << ")";
+					if (recorded != cudaSuccess) {
+						logfile << "; recorded CUDA error " << cudaGetErrorString(recorded)
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
+					} else if (recorded_cufft != CUFFT_SUCCESS) {
+						logfile << "; recorded cuFFT error code " << recorded_cufft
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
+					} else if (pending != cudaSuccess) {
+						logfile << "; pending CUDA error " << cudaGetErrorString(pending)
+						        << " (no stage recorded one)";
+					} else {
+						logfile << "; no CUDA or cuFFT error was recorded by any stage";
+					}
+					logfile << ". Classified recoverable, so this patch is re-attempted through "
+					        << (use_gpu ? "alignPatch(), which re-dispatches CUDA on the same "
+					                      "device -- this is not a CPU fallback"
+					                    : "the CPU path")
+					        << "." << std::endl;
+				}
 				if (!converged)
 #endif
 				{
+#ifdef _CUDA_ENABLED
+					// Issue #69: restart the shift state before the second attempt.
+					//
+					// alignPatch() and cudaAlignPatchDevice() both *accumulate*
+					// (xshifts[i] += cur_xshifts[i]) and neither reads the incoming
+					// values to pre-shift its input. The caller owes them the invariant
+					// that the incoming shifts already describe the supplied Fframes.
+					//
+					// A resident attempt that ran and did not converge leaves its
+					// estimate S1 in these vectors, and applied its Fourier phase
+					// shifts only to d_patch_fcomplex_buffer -- its own scratch, which
+					// the next preparePatchInVram overwrites wholesale. The resident
+					// real frames and the host Iframes are untouched by a patch
+					// attempt. So the retry below re-extracts exactly the same
+					// unshifted data and would add an independent second estimate S2
+					// on top of S1, publishing roughly twice the true local shift for
+					// this patch.
+					//
+					// Because the first attempt modified nothing else, zeroing these
+					// two vectors restores everything it touched, and the retry starts
+					// from the same state the first attempt started from.
+					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
+					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.
@@ -2301,12 +2430,44 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTIC(TIMING_PREP_PATCH);
 					bool cuda_patch_prep_done = false;
 #ifdef _CUDA_ENABLED
+					// Issue #69, second boundary. The health check above runs BEFORE
+					// this preparation, so it cannot see a fatal error raised HERE --
+					// and cudaPreparePatch's own handler consumes the code and returns
+					// false, clearing the last-error slot. alignPatch() below then
+					// re-dispatches CUDA whenever use_gpu is set, so without this the
+					// retry can land on a context this very stage just killed.
+					// Peeking at the cleared slot afterwards is not sufficient; the
+					// status has to be carried out of the helper.
+					CudaFailureState fallback_prep_failure;
 					if (use_gpu) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,
-							gpu_id, logfile
+							gpu_id, logfile, &fallback_prep_failure
 						);
+						if (!cuda_patch_prep_done) {
+							const CudaRetryDecision after_prep = cudaRetryDecisionFor(
+								fallback_prep_failure, cudaGetLastError());
+							if (after_prep.verdict == CUDA_RETRY_FATAL) {
+								std::string origin;
+								if (fallback_prep_failure.isPoisoned()) {
+									origin = std::string(", recorded at ")
+									       + fallback_prep_failure.fatalStage() + ":"
+									       + integerToString(fallback_prep_failure.fatalLine());
+								} else {
+									origin = ", pending on this thread; no stage recorded it";
+								}
+								REPORT_ERROR_STR("CUDA device context is unusable after fallback patch "
+								                 "preparation for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(after_prep.decisive) << origin
+								                 << ". Refusing to re-dispatch alignment on a poisoned "
+								                    "context; the host path would return to the same device.");
+							}
+							logfile << "WARNING: CUDA patch preparation declined for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "continuing with host patch preparation." << std::endl;
+						}
 					}
 #endif
 					if (!cuda_patch_prep_done) {

@@ -11,6 +11,7 @@
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_failure_state.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
@@ -126,6 +127,15 @@ public:
     // Download real frames to host (used e.g. for fallback)
     bool downloadRealFrames(std::vector<Image<float> > &Iframes);
 
+    // Issue #69: the failure state this session observed, preserved across the helper
+    // boundary. The internal error handlers consume the CUDA error when they return
+    // false, so a later cudaGetLastError() reports cudaSuccess and proves nothing about
+    // context health. A caller deciding whether a retry is safe must use this, not a
+    // fresh last-error read. It carries both the first failure (diagnostic provenance)
+    // and a monotonically latched poisoning code that no later or earlier record can
+    // displace -- see CudaFailureState.
+    const CudaFailureState& getFailureState() const { return failure_state; }
+
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
     cufftComplex* getDeviceFourierFrames() { return d_Fframes; }
@@ -138,6 +148,13 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    void recordFailure(cudaError_t err, const char *stage, int line);
+    void recordCufftFailure(cufftResult res, const char *stage, int line);
+
+    // Sticky for the life of the session. Not reset by release(): a movie that failed
+    // stays failed for reporting purposes, and a poisoned context never un-poisons.
+    CudaFailureState failure_state;
+
     int nx;
     int ny;
     int n_frames;

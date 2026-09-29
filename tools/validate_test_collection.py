@@ -44,6 +44,13 @@ DEFAULT_REQUIRED_TESTS = [
     # dropped from CMakeLists.txt with the collected count still at the
     # minimum and CI still green.
     "GlobalIfftElision",
+    # Added by the #69 CUDA reliability port. Device-free, so it is always
+    # collected; the CUDA-only CudaErrorClass is not listed here, matching
+    # the existing exclusion of CudaWrapperUploadFailure.
+    "PatchRetryState",
+    # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
+    # independently before pairwise image equality is considered.
+    "OutputTreeComparator",
 ]
 
 
@@ -114,8 +121,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=18,
-                        help="Minimum number of tests that must be collected (default: 18)")
+    parser.add_argument("--min-count", type=int, default=20,
+                        help="Minimum number of tests that must be collected (default: 20)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

@@ -1,0 +1,10 @@
+const std::string &requested_id = allThreadIDs[0][0];
+		if (requested_id.empty() || requested_id.find_first_not_of("0123456789") != std::string::npos)
+		{
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is not a non-negative device id. --use_own expects a "
+			             "single integer, e.g. --gpu 0.");
+		}
+
+#if defined _CUDA_ENABLED
+		gpu_id = textToInteger(requested_id);
+		

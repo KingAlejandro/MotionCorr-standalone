@@ -1,0 +1,71 @@
+{
+  "tested_source": "b70f352b523daffa47ef8e95501dcfdd77fa1861",
+  "prior_pr_head": "074b169b486d37c8679202c2f0159355eb14befb",
+  "cpu": {
+    "host": "cpu64",
+    "root": "/home/ubuntu/mc-pr117-gpu-range-20260929",
+    "source": "b70f352b523daffa47ef8e95501dcfdd77fa1861",
+    "source_status": "",
+    "binary_sha256": "59e1b58d002d7de725af15255b1b99a8241a219959be1c72766ece97e544b5dd",
+    "old_source": "169b1b2582ae28b2b643227c534e19db32602892",
+    "old_binary_sha256": "52210df3c3a0c47b56a61e53aad8b6b4d9498986e2a9587d4ecd1d6e1b1cc1d4",
+    "old_parser_equals_prior_pr": true,
+    "old_parser_sha256": "c563b2d57f54291c26a9a7fc8220428da3b854065b6e8d7aef08648b18cd40ca",
+    "prior_parser_sha256": "c563b2d57f54291c26a9a7fc8220428da3b854065b6e8d7aef08648b18cd40ca",
+    "cpu_mask": "32-47",
+    "memory_policy": "membind=1",
+    "max_build_threads": 16,
+    "lock": "/tmp/motioncorr-issue96-cpu-validation.lock",
+    "scheduler_cases": 54,
+    "scheduler_passed": 54,
+    "mutants_detected": 83,
+    "mutants_attempted": 83,
+    "mutants_skipped": 0,
+    "required_test_count": 21,
+    "ctest_passed": 21,
+    "ctest_failed": 0,
+    "serial_sharded_movies": 6,
+    "distinct_payloads": 6,
+    "aggregate_star_identical": true
+  },
+  "cuda_cli": {
+    "host": "4GPUs",
+    "root": "/home/alex/mc-pr117-gpu-range-20260929",
+    "source": "b70f352b523daffa47ef8e95501dcfdd77fa1861",
+    "source_status": "",
+    "binary_sha256": "182a7aa1abb889461a3c252e6d1eba0cf47e5327afb2353c15e9452d9114ed9c",
+    "old_source": "a48c7f501bc116394830bcbeda10d9c2b4a3f9f9",
+    "old_binary_sha256": "0be8e28e3a01a6e094c30359fc50e82bc2caf2e06046a942c1ada8832a16f53d",
+    "old_parser_equals_prior_pr": true,
+    "old_parser_sha256": "c563b2d57f54291c26a9a7fc8220428da3b854065b6e8d7aef08648b18cd40ca",
+    "prior_parser_sha256": "c563b2d57f54291c26a9a7fc8220428da3b854065b6e8d7aef08648b18cd40ca",
+    "cpu_mask": "104-111",
+    "memory_policy": "membind=1",
+    "max_build_threads": 4,
+    "architecture": "sm80",
+    "toolkit": "12.8",
+    "dedicated_lock": "/tmp/motioncorr-gpu1-correctness.lock",
+    "build_lock": "/tmp/motioncorr-vm-build.lock",
+    "reserved_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+    "old_alias_reproduced": true,
+    "fixed_cli_passed": 10,
+    "real_binary_regression_case_passed": true,
+    "gpu_compute_executed": false,
+    "enumeration": "cudaGetDeviceCount interposed; missing STAR stops before movie execution"
+  },
+  "archives": {
+    "cuda-cli-raw.tar.gz": {
+      "bytes": 6053,
+      "sha256": "4a5be7f76d7bcd53efba449f4bb76644987062cf8dba339bf81ea7a7cbb1f892"
+    },
+    "cpu64-reports.tar.gz": {
+      "bytes": 47861,
+      "sha256": "b4a3cc67383f3066577fa9b471f3ec9488d6c74b6d28b3f56aff29c24de30f23"
+    }
+  },
+  "retained_full_cpu_archive": {
+    "bytes": 16461130,
+    "sha256": "d9eb6be8638e13f97a1ec993569054775beea6f022b4d9451b208da0bae8d9f0",
+    "local": "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/state-20260929/pr117-gpu-id-range/cpu64-raw.tar.gz"
+  }
+}

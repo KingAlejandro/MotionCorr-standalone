@@ -24,6 +24,7 @@ esac
 [ "$(dirname "$MOVIE_REL")" = "Movies" ] || {
     echo "FAIL movie must be directly inside the dataset Movies directory: $MOVIE"; exit 2;
 }
+INPUT_STAR=$DATA_ROOT/movies.star
 if [ "${5:-}" != "" ]; then
     WORK=$5
     mkdir "$WORK" 2>/dev/null || { echo "FAIL workdir already exists: $WORK"; exit 2; }
@@ -36,10 +37,36 @@ fi
 [ -f "$COMPARATOR" ] || { echo "FAIL missing comparator $COMPARATOR"; exit 2; }
 case "$STAGE_BYTES" in ''|*[!0-9]*) echo "FAIL stage-bytes must be an integer"; exit 2;; esac
 mkdir -p "$WORK/healthy/out"
-python3 - "$MOVIE_REL" "$WORK/one_movie_manifest.json" <<'PY'
-import json, sys
+python3 - "$MOVIE_REL" "$INPUT_STAR" "$WORK/one_movie.star" "$WORK/one_movie_manifest.json" <<'PY'
+import json, shlex, sys
 from pathlib import Path
-movie, output = sys.argv[1:]
+movie, input_star, star_output, manifest_output = sys.argv[1:]
+lines = Path(input_star).read_text().splitlines()
+start = next((i for i, line in enumerate(lines) if line.strip() == "data_movies"), None)
+if start is None:
+    raise SystemExit(f"FAIL input STAR has no data_movies block: {input_star}")
+end = next((i for i in range(start + 1, len(lines))
+            if lines[i].strip().startswith("data_")), len(lines))
+block = lines[start:end]
+kept = []
+matches = 0
+for line in block:
+    stripped = line.strip()
+    if stripped and not stripped.startswith(("#", "_")) and stripped.lower() not in ("loop_",):
+        try:
+            tokens = shlex.split(stripped, comments=False, posix=True)
+        except ValueError:
+            tokens = []
+        if tokens and tokens[0].lower().endswith(".tiff"):
+            if tokens[0] == movie:
+                matches += 1
+                kept.append(line)
+            continue
+    kept.append(line)
+if matches != 1:
+    raise SystemExit(f"FAIL expected one matching movie row for {movie}, found {matches}")
+Path(star_output).write_text("\n".join(lines[:start] + kept + lines[end:]) + "\n")
+output = manifest_output
 Path(output).write_text(json.dumps({
     "schema_version": 1,
     "movies": [movie],
@@ -49,7 +76,7 @@ Path(output).write_text(json.dumps({
 PY
 MANIFEST="$WORK/one_movie_manifest.json"
 
-COMMON=(--i "$MOVIE_REL" --j 4 --use_own --patch_x 3 --patch_y 3 --bfactor 150
+COMMON=(--i "$WORK/one_movie.star" --j 4 --use_own --patch_x 3 --patch_y 3 --bfactor 150
         --dose_weighting --dose_per_frame 1.0 --voltage 200 --angpix 0.885
         --max_iter 1)
 

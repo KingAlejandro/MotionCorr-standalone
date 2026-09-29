@@ -254,10 +254,11 @@ def validate_input_star(path: Path, manifest: Dict[str, Any]) -> None:
             idx = columns.index("_rlnMicrographMovieName")
             rows.extend([[row[idx]] for row in values])
     observed = [row[0] for row in rows]
-    if observed != manifest["movies"]:
+    expected = [spec.movie for spec in movie_specs(manifest)]
+    if observed != expected:
         raise ValidationError(
-            f"input STAR movie inventory differs from manifest: observed {len(observed)} rows, "
-            f"expected {len(manifest['movies'])} in the recorded order"
+            f"input STAR movie inventory differs from manifest: observed {observed[:4]}, "
+            f"expected {expected[:4]} in the recorded order"
         )
 
 

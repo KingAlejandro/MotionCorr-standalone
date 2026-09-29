@@ -136,6 +136,8 @@ class Case:
     repeat: bool = False
     resume_non_prefix: bool = False
     damaged_frames: Optional[int] = None
+    failing_movie: Optional[int] = None
+    failure_message: Optional[str] = None
     start_frame: int = 1
     note: str = ""
 
@@ -178,7 +180,13 @@ CASES: List[Case] = [
          [G1, G1, G1], []),
     Case("successive_mixed_geometry",
          "consecutive movies of different geometry in one process",
-         [G1, G2, G1], []),
+         [G1, G2, G1], [], gain=False,
+         note="no gain reference: one --gainref is bound to one geometry, which "
+              "gain_geometry_mismatch covers as its own row"),
+    Case("gain_geometry_mismatch",
+         "a gain reference that does not match the second movie fails closed",
+         [G1, G2], [], failing_movie=1, float_twin=False,
+         failure_message="size of the image and the size of the gain reference do not match"),
     Case("repeat_all_output_modes", "repeat of the full output-mode run must be byte-exact",
          [G1], DW + ["--save_noDW", "--even_odd_split"] + PS_OPTS,
          products=ALL_PRODUCTS, forbidden_joint_tags=EVNODD_TAGS, repeat=True,
@@ -196,7 +204,7 @@ CASES: List[Case] = [
          [G1], ["--bin_factor", "2"], expect_u16=False, float_twin=False),
     Case("damaged_movie_named",
          "a truncated uint16 movie beside healthy ones fails closed and is named",
-         [G1, G1, G1], [], damaged_frames=3, float_twin=False),
+         [G1, G1, G1], [], damaged_frames=3, failing_movie=1, float_twin=False),
 ]
 
 
@@ -241,10 +249,12 @@ class ComputeAppWatcher(threading.Thread):
         self.interval = interval
         self.samples: List[str] = []
         self.sample_count = 0
-        self._stop = threading.Event()
+        # Not _stop: threading.Thread uses that name for an internal method, and
+        # shadowing it makes the interpreter call an Event when the thread ends.
+        self._halt = threading.Event()
 
     def run(self) -> None:
-        while not self._stop.is_set():
+        while not self._halt.is_set():
             try:
                 out = nvidia_smi("--query-compute-apps=pid,gpu_uuid", "--format=csv,noheader")
             except Exception:
@@ -254,10 +264,10 @@ class ComputeAppWatcher(threading.Thread):
                 parts = [p.strip() for p in line.split(",")]
                 if len(parts) == 2 and parts[0] == str(self.pid) and parts[1] not in self.samples:
                     self.samples.append(parts[1])
-            self._stop.wait(self.interval)
+            self._halt.wait(self.interval)
 
     def stop(self) -> List[str]:
-        self._stop.set()
+        self._halt.set()
         self.join(timeout=5)
         return self.samples
 
@@ -381,7 +391,6 @@ def build_manifest(case: Case, movies: Sequence[str], *, input_star: Path,
                    gain_name: Optional[str], defect_name: Optional[str]) -> Dict[str, Any]:
     entries: List[Any] = []
     for movie, geom in zip(movies, case.geometries):
-        n_selected = len(select_frames(case, geom))
         tags = {
             "_rlnMicrographOriginalPixelSize": ANGPIX,
             "_rlnVoltage": VOLTAGE,
@@ -389,7 +398,12 @@ def build_manifest(case: Case, movies: Sequence[str], *, input_star: Path,
             "_rlnMicrographBinning": 2.0 if "--bin_factor" in case.options else 1.0,
             "_rlnImageSizeX": geom.nx,
             "_rlnImageSizeY": geom.ny,
-            "_rlnImageSizeZ": n_selected,
+            # The movie's own frame count, not the selected count: the runner
+            # records the selection in _rlnMicrographStartFrame alone, and
+            # --last_frame_sum leaves no trace in the metadata at all. That is a
+            # support limitation of the STAR contract, recorded rather than
+            # worked around; only pixel comparison can see a changed last frame.
+            "_rlnImageSizeZ": geom.n_frames,
         }
         if "--dose_weighting" in case.options:
             tags["_rlnMicrographDoseRate"] = DOSE_PER_FRAME
@@ -420,14 +434,6 @@ def product_shape(case: Case, geom: Geometry) -> List[int]:
     return geom.shape
 
 
-def select_frames(case: Case, geom: Geometry) -> List[int]:
-    first = case.start_frame
-    last = geom.n_frames
-    if "--last_frame_sum" in case.options:
-        last = min(last, int(case.options[case.options.index("--last_frame_sum") + 1]))
-    return list(range(first, last + 1))
-
-
 def prepare_inputs(case: Case, root: Path, *, floating: bool) -> Tuple[Path, List[str], Optional[str], Optional[str]]:
     movies = movie_names(case)
     for movie, geom in zip(movies, case.geometries):
@@ -442,8 +448,8 @@ def prepare_inputs(case: Case, root: Path, *, floating: bool) -> Tuple[Path, Lis
     gain_name = None
     if case.gain:
         geom = case.geometries[0]
-        require(all(g.nx == geom.nx and g.ny == geom.ny for g in case.geometries) or
-                len({(g.nx, g.ny) for g in case.geometries}) == 1,
+        mixed = len({(g.nx, g.ny) for g in case.geometries}) != 1
+        require(not mixed or case.failure_message is not None,
                 f"{case.case_id}: one gain reference cannot cover mixed geometry")
         gain_name = "gain.mrc"
         fixtures.write_gain(root / gain_name, geom.nx, geom.ny, GAIN_VALUE)
@@ -487,10 +493,10 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
                               gain_name=gain_name, defect_name=defect_name)
     record["manifest"] = manifest
 
-    if case.damaged_frames is not None:
-        return execute_damaged_case(case, record, binary, base, u16_root, movies, options,
-                                    device, threads=threads, timeout=timeout,
-                                    uuid_required=uuid_required)
+    if case.failing_movie is not None:
+        return execute_failing_movie_case(case, record, binary, base, u16_root, movies, options,
+                                          device, threads=threads, timeout=timeout,
+                                          uuid_required=uuid_required)
 
     primary = run_arm(binary, u16_root, base / "out-primary", options, device,
                       name=f"{case.case_id}:primary", threads=threads, timeout=timeout,
@@ -552,17 +558,27 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
         record["resume_removed_products"] = removed
         require(len(removed) >= len(case.products) + 1,
                 f"{case.case_id}: resume control removed too little ({removed})")
+        # Copied logs make log presence useless as a recomputation signal, so the
+        # untouched movies are identified by their products' inode timestamps.
+        before = {p.relative_to(resumed).as_posix(): p.stat().st_mtime_ns
+                  for p in resumed.rglob("*") if p.is_file()}
         arm = run_arm(binary, u16_root, resumed, options + ["--only_do_unfinished"], device,
                       name=f"{case.case_id}:resume", threads=threads, timeout=timeout,
                       uuid_required=uuid_required)
         record["arms"]["resume"] = arm_record(arm)
         require(arm.returncode == 0, f"{case.case_id}: resume arm exited {arm.returncode}")
-        # Only the withheld movie may be recomputed; the others must be skipped,
-        # which is what makes this a non-prefix resume rather than a full rerun.
-        recomputed = [m for m in movies if f"Movies/{Path(m).stem}.log" in arm.logs]
-        record["resume_recomputed"] = recomputed
-        require(recomputed == [movies[1]],
-                f"{case.case_id}: resume recomputed {recomputed}, expected only {movies[1]}")
+        after = {p.relative_to(resumed).as_posix(): p.stat().st_mtime_ns
+                 for p in resumed.rglob("*") if p.is_file()}
+        rewritten = sorted(rel for rel, stamp in after.items()
+                           if rel in before and before[rel] != stamp)
+        record["resume_rewritten_existing_products"] = rewritten
+        surviving = {Path(movies[i]).stem for i in (0, 2)}
+        # A completed movie that is rewritten is a full rerun wearing a resume's
+        # name; only the withheld movie's own products may reappear.
+        offenders = [rel for rel in rewritten
+                     if any(Path(rel).name.startswith(stem) for stem in surviving)]
+        require(not offenders,
+                f"{case.case_id}: --only_do_unfinished rewrote completed products {offenders}")
         record["witnesses"]["resume"] = assert_witnesses(arm, expect_u16=case.expect_u16,
                                                          movies=[movies[1]])
         report = comparator.compare_trees(primary.out, resumed, manifest, compare_auxiliary=False)
@@ -570,26 +586,54 @@ def execute_case(case: Case, binary: Path, work: Path, device: Dict[str, str],
         require(report["status"] == "PASS",
                 f"{case.case_id}: resumed tree differs: {report['different_products']}")
 
+        # Powered control for the detector itself. An mtime comparison that
+        # silently saw nothing would pass the row above just as happily, so run
+        # the same arm without --only_do_unfinished and require it to trip.
+        control = base / "out-resume-control"
+        shutil.copytree(primary.out, control)
+        control_before = {p.relative_to(control).as_posix(): p.stat().st_mtime_ns
+                          for p in control.rglob("*") if p.is_file()}
+        control_arm = run_arm(binary, u16_root, control, options, device,
+                              name=f"{case.case_id}:resume-control", threads=threads,
+                              timeout=timeout, uuid_required=uuid_required)
+        require(control_arm.returncode == 0,
+                f"{case.case_id}: resume control arm exited {control_arm.returncode}")
+        control_after = {p.relative_to(control).as_posix(): p.stat().st_mtime_ns
+                         for p in control.rglob("*") if p.is_file()}
+        control_rewritten = sorted(
+            rel for rel, stamp in control_after.items()
+            if rel in control_before and control_before[rel] != stamp
+            and any(Path(rel).name.startswith(stem) for stem in surviving))
+        record["resume_control_rewritten"] = control_rewritten
+        require(control_rewritten,
+                f"{case.case_id}: without --only_do_unfinished the detector still saw no "
+                f"rewrite, so it cannot observe a full rerun")
+
     record["status"] = "PASS"
     return record
 
 
-def execute_damaged_case(case: Case, record: Dict[str, Any], binary: Path, base: Path,
-                         root: Path, movies: Sequence[str], options: Sequence[str],
-                         device: Dict[str, str], *, threads: int, timeout: int,
-                         uuid_required: bool) -> Dict[str, Any]:
-    damaged = movies[1]
-    arm = run_arm(binary, root, base / "out-damaged", options, device,
-                  name=f"{case.case_id}:damaged", threads=threads, timeout=timeout,
+def execute_failing_movie_case(case: Case, record: Dict[str, Any], binary: Path, base: Path,
+                               root: Path, movies: Sequence[str], options: Sequence[str],
+                               device: Dict[str, str], *, threads: int, timeout: int,
+                               uuid_required: bool) -> Dict[str, Any]:
+    """One movie in the batch must fail, be named, publish nothing, and leave the
+    healthy movies' products and their joint-STAR rows intact."""
+    damaged = movies[case.failing_movie]
+    arm = run_arm(binary, root, base / "out-failing", options, device,
+                  name=f"{case.case_id}:failing", threads=threads, timeout=timeout,
                   uuid_required=uuid_required)
-    record["arms"]["damaged"] = arm_record(arm)
+    record["arms"]["failing"] = arm_record(arm)
     diagnostics = arm.stdout + arm.stderr
     require(arm.returncode != 0,
             f"{case.case_id}: a damaged movie exited 0")
     require(arm.returncode > 0,
             f"{case.case_id}: process died on signal {-arm.returncode}")
     require(Path(damaged).name in diagnostics,
-            f"{case.case_id}: the damaged movie was not named in the diagnostics")
+            f"{case.case_id}: the failing movie was not named in the diagnostics")
+    if case.failure_message:
+        require(case.failure_message in diagnostics,
+                f"{case.case_id}: diagnostics did not state {case.failure_message!r}")
     stems = {Path(m).stem for m in movies}
     published = sorted(p.relative_to(arm.out).as_posix()
                        for p in arm.out.rglob("*") if p.suffix in (".mrc", ".star"))
@@ -610,7 +654,7 @@ def execute_damaged_case(case: Case, record: Dict[str, Any], binary: Path, base:
         require(damaged_stem not in named,
                 f"{case.case_id}: the failed movie appears in the joint STAR")
     # The healthy movies still had to take the compact path.
-    record["witnesses"]["damaged"] = assert_witnesses(
+    record["witnesses"]["failing"] = assert_witnesses(
         arm, expect_u16=True, movies=[m for m in movies if m != damaged])
     record["status"] = "PASS"
     return record

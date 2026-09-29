@@ -229,6 +229,16 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # Issue #83 / #85 lane C: the compact-ingest support matrix. Generates its
+        # own uint16 and float32 TIFF fixtures, so it needs a device but no
+        # external data. CUDA-only, hence not in DEFAULT_REQUIRED_TESTS, matching
+        # the existing exclusion of CudaWrapperUploadFailure and CudaErrorClass.
+        add_test(NAME CudaCompactIngestSupportMatrix
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_compact_ingest_support_matrix.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(CudaCompactIngestSupportMatrix PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 3600)
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Optional Issue #85 lane C native failure matrix. Supplying the known

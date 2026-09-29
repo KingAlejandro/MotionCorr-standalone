@@ -520,6 +520,12 @@ MUTATIONS = [
      '        return problems  # MUTATED',
      ["case_launcher_verdict_follows_the_device_witness"]),
 
+    ("GPU witness may be relabelled as CPU by dropping intended devices",
+     "tools/multi_gpu/merge_workers.py",
+     '        if "gpu_witness" in status:',
+     '        if False:  # MUTATED',
+     ["case_launcher_verdict_follows_the_device_witness"]),
+
     ("GPU PASS ignores sampler failures",
      "tools/multi_gpu/merge_workers.py",
      '    if witness.get("sampler_errors") != []:',

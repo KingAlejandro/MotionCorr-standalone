@@ -75,6 +75,8 @@ def gpu_witness_problems(status: dict[str, object]) -> list[str]:
     """Validate the evidence needed to certify a GPU-backed PASS."""
     devices = status.get("devices")
     if devices is None:
+        if "gpu_witness" in status:
+            return ["GPU witness is present without an intended-device list"]
         return []
     problems: list[str] = []
     if not isinstance(devices, list) or not devices:

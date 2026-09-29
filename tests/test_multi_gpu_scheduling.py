@@ -1879,6 +1879,8 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
             f"merge accepted incomplete GPU witness {name}: {cp.stdout} {cp.stderr}"
 
     merge_forged_witness("missing", lambda status: status.pop("gpu_witness"))
+    merge_forged_witness("missing_devices", lambda status: status.pop("devices"))
+    merge_forged_witness("null_devices", lambda status: status.update(devices=None))
     merge_forged_witness("false_success", lambda status: status["gpu_witness"].update(
         all_pids_witnessed_on_intended_distinct_devices=False))
     merge_forged_witness("missing_sampler_errors", lambda status:

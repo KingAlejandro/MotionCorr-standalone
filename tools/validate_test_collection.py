@@ -51,6 +51,12 @@ DEFAULT_REQUIRED_TESTS = [
     # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
     # independently before pairwise image equality is considered.
     "OutputTreeComparator",
+    # Added by the #97 interpolate-shift recentering fix (PR100/PR114).
+    # RunnerInterpolateRecenter is the helper-level arithmetic regression;
+    # RunnerInterpolateShifts drives the binary end to end and is the only test
+    # that can see the recenter call site still being wired up.
+    "RunnerInterpolateRecenter",
+    "RunnerInterpolateShifts",
 ]
 
 

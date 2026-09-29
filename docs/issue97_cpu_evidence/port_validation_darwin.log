@@ -1,0 +1,132 @@
+############ darwin/arm64 second-platform reproduction 2026-09-28T15:39:20Z ############
+Independent toolchain and clean clones. This is a corroborating run; the record is
+port_validation.log on cpu64. SyntheticRegression fails here on BOTH trees against a
+Linux-generated baseline, which no file in this branch can reach.
+
+Darwin 25.6.0 arm64
+ProductName:		macOS ProductVersion:		26.7 BuildVersion:		25G229 
+cmake version 4.4.3
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+[base] HEAD=8323c55faf1c4ddbe35dd36c5cd1266d48f25c38 tree=9f5dd916441a6965675acd4b900d91fa43db0e49 dirty=0
+[fixed] HEAD=4b25d35a6a885d087e295564e660ad3af59b70ba tree=36eceaf90013578bbacff0f73c1f33096c71b6b7 dirty=0
+--- production delta, whole of src/ ---
+diff -r src-base/src/motioncorr_runner.cpp src-fixed/src/motioncorr_runner.cpp
+2240,2243c2240
+< 					for (int iframe = 0; iframe < n_frames; iframe++) {
+< 						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
+< 						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
+< 					}
+---
+> 					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
+2646a2644,2660
+> }
+> 
+> void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
+> 	if (xshifts.size() != yshifts.size())
+> 		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
+> 	if (xshifts.empty()) return;
+> 
+> 	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while
+> 	// iterating upwards zeroes the origin on the very first iteration, so every later
+> 	// frame would subtract zero and keep its un-recentered absolute value.
+> 	const RFLOAT origin_x = xshifts[0];
+> 	const RFLOAT origin_y = yshifts[0];
+> 
+> 	for (size_t iframe = 0; iframe < xshifts.size(); iframe++) {
+> 		xshifts[iframe] -= origin_x;
+> 		yshifts[iframe] -= origin_y;
+> 	}
+diff -r src-base/src/motioncorr_runner.h src-fixed/src/motioncorr_runner.h
+252a253,265
+> 	// Inter-/extrapolate per-group local shifts onto every frame.
+> 	// Pure function of its arguments (reads no member state), hence static; public
+> 	// so the motion-model arithmetic can be unit tested directly.
+> 	static void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+> 	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+> 	                       int n_frames,
+> 	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+> 
+> 	// Recenter per-frame shifts so that frame 0 becomes the origin.
+> 	// The first-frame offset MUST be saved before the in-place subtraction begins,
+> 	// otherwise iteration zero zeroes the origin that later iterations still need.
+> 	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
+> 
+276,279d288
+< 	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+< 	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+< 	                       int n_frames,
+< 	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+--- hashes ---
+7d458c27dc69adcc9b99162c756420092afeaa55b7f7221b92d60bec75948090  src-base/src/motioncorr_runner.cpp
+a1a071b8ac4bdbb0e01feed7c0f85f079987307a2e6700d803a3f0b7646b38d4  src-fixed/src/motioncorr_runner.cpp
+101dd8d8a3ec698e97d55083f2751f7b6e56bcab7aa1ab2697f116f6673ab730  src-fixed/docs/issue97_cpu_evidence/port_assertion_margins.py
+284953231b5d177b24ff8dd628f19effc43747a25f763ccbe2c6f899f64bf174  src-fixed/docs/issue97_cpu_evidence/port_option_off_control.py
+56fe3bb188517461768167581d1656f33b2e0ea2c83f77abdf81765e9d5799aa  build-base/motioncorr
+aa2516b8c550017ad2405d934b03e11bf87bb65eb18dc3adf0fc8e0cb34019b2  build-fixed/motioncorr
+
+===== COLLECTION GATE =====
+=== CTest Collection Validation: PASS === 
+  Collected tests: 20
+candidate build exit=
+  MISSING REQUIRED TESTS:
+    RunnerInterpolateRecenter
+    RunnerInterpolateShifts
+  FAILURE REASON: Test count 18 is less than minimum 20
+base build exit=
+
+===== FULL CTEST =====
+[fixed] ctest exit=8
+95% tests passed, 1 tests failed out of 20
+[base] ctest exit=8
+94% tests passed, 1 tests failed out of 18
+
+===== NEW CASE =====
+PASS runner interpolate_shifts
+candidate exit=0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ((20.0, 20.0), 0, 0.0, 0.038158)
+base exit= (must be nonzero)
+PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+unit exit=0
+
+===== PER-ASSERTION OUTCOME AND MARGINS =====
+tolerance asserted by the test: 3e-05
+
+BASE  (unfixed)   9 patches, 18 patch-axis observations
+  coverage assertions (these hold on both builds by design):
+    frame numbers [2..8]                         violations 0/9
+    off-arm group layout [3,5,7]                 violations 0/9
+    value at first selected frame is 0           violations 0/9
+  detectors:
+    cross-arm anchor frame 3                     violations 18/18   min 0.001330  max 0.068462
+                                                 violating by 44x .. 2282x the tolerance
+    cross-arm anchor frame 5                     violations 18/18   min 0.001340  max 0.068462
+                                                 violating by 45x .. 2282x the tolerance
+    segment linearity                            violations 18/18   min 0.001330  max 0.068462
+                                                 violating by 44x .. 2282x the tolerance
+  first-segment step X: min 0.000000  max 0.000000   0/9 patches clear the 100x floor
+  first-segment step Y: min 0.000000  max 0.000000   0/9 patches clear the 100x floor
+
+FIXED   9 patches, 18 patch-axis observations
+  coverage assertions (these hold on both builds by design):
+    frame numbers [2..8]                         violations 0/9
+    off-arm group layout [3,5,7]                 violations 0/9
+    value at first selected frame is 0           violations 0/9
+  detectors:
+    cross-arm anchor frame 3                     violations 0/18   min 0.000000  max 0.000000
+    cross-arm anchor frame 5                     violations 0/18   min 0.000000  max 0.000000
+    segment linearity                            violations 0/18   min 0.000000  max 0.000010
+  first-segment step X: min 0.005657  max 0.058140   9/9 patches clear the 100x floor
+  first-segment step Y: min 0.001330  max 0.068462   6/9 patches clear the 100x floor
+exit=0
+
+===== DEFAULT-OFF EXACTNESS CONTROL =====
+option-off  MRC pixel payload (65536 B): IDENTICAL   per-movie STAR: 0/119 lines differ
+option-on   MRC pixel payload (65536 B): DIFFERS   per-movie STAR: 90/155 lines differ
+exit=0
+############ END 2026-09-28T15:40:12Z ############

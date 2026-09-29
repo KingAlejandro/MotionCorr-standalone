@@ -162,10 +162,11 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 20 tests: the 13 pre-existing ones, the
+        # The integrated suite registers 22 tests: the 13 pre-existing ones, the
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
-        # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState, and
-        # #85 lane C OutputTreeComparator.
+        # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState, the
+        # #85 lane C OutputTreeComparator, and the #97
+        # RunnerInterpolateRecenter / RunnerInterpolateShifts.
         #
         # This list restates DEFAULT_REQUIRED_TESTS, so it has to be updated in
         # the same commit that adds a required test. It is deliberately a
@@ -194,6 +195,8 @@ exec "{sys.executable}" "$@"
             "GlobalIfftElision",
             "PatchRetryState",
             "OutputTreeComparator",
+            "RunnerInterpolateRecenter",
+            "RunnerInterpolateShifts",
         ]
 
         def drop_one(name: str):
@@ -213,7 +216,8 @@ exec "{sys.executable}" "$@"
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
-                        "OutputTreeComparator"):
+                        "OutputTreeComparator",
+                        "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

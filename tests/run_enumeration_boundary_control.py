@@ -38,12 +38,22 @@ def main():
         env = dict(os.environ, MC_FAULT_ORDINAL="0", MC_FAULT_TRACE="1",
                    MC_COUNT_FAULT_ORDINAL=str(ordinal), MC_COUNT_FAULT_CODE=code)
         with (destination / "run.log").open("w") as log:
-            result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT,
-                                    timeout=180)
+            process = subprocess.Popen(command, env=env, stdout=log, stderr=subprocess.STDOUT)
+            proc = Path("/proc") / str(process.pid)
+            identity = {"pid": process.pid, "executable": str((proc / "exe").resolve()),
+                        "stat": (proc / "stat").read_text(),
+                        "status": (proc / "status").read_text()}
+            (destination / "payload.json").write_text(json.dumps(identity, indent=2) + "\n")
+            try:
+                exit_code = process.wait(timeout=180)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                raise
         text = "\n".join(path.read_text(errors="replace")
                          for path in destination.rglob("*.log"))
         row = dict(name=name, command=command, ordinal=ordinal, code=code,
-                   exit=result.returncode, images=len(list(destination.rglob("*.mrc"))),
+                   exit=exit_code, images=len(list(destination.rglob("*.mrc"))),
                    joint_stars=len(list(destination.rglob("corrected_micrographs.star"))))
         if ordinal:
             assert f"at cudaGetDeviceCount #{ordinal}; last-error clean" in text, row

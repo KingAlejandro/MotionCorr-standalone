@@ -16,6 +16,14 @@ FAULT_BIN=$(realpath "$1")
 MOVIE=$(realpath "$2")
 STAGE_BYTES=$3
 COMPARATOR=$(realpath "$4")
+DATA_ROOT=$(cd "$(dirname "$MOVIE")/.." && pwd)
+case "$MOVIE" in
+    "$DATA_ROOT"/*) MOVIE_REL=${MOVIE#"$DATA_ROOT"/} ;;
+    *) echo "FAIL movie must be inside the dataset Movies directory: $MOVIE"; exit 2 ;;
+esac
+[ "$(dirname "$MOVIE_REL")" = "Movies" ] || {
+    echo "FAIL movie must be directly inside the dataset Movies directory: $MOVIE"; exit 2;
+}
 if [ "${5:-}" != "" ]; then
     WORK=$5
     mkdir "$WORK" 2>/dev/null || { echo "FAIL workdir already exists: $WORK"; exit 2; }
@@ -28,7 +36,7 @@ fi
 [ -f "$COMPARATOR" ] || { echo "FAIL missing comparator $COMPARATOR"; exit 2; }
 case "$STAGE_BYTES" in ''|*[!0-9]*) echo "FAIL stage-bytes must be an integer"; exit 2;; esac
 mkdir -p "$WORK/healthy/out"
-python3 - "$MOVIE" "$WORK/one_movie_manifest.json" <<'PY'
+python3 - "$MOVIE_REL" "$WORK/one_movie_manifest.json" <<'PY'
 import json, sys
 from pathlib import Path
 movie, output = sys.argv[1:]
@@ -41,7 +49,7 @@ Path(output).write_text(json.dumps({
 PY
 MANIFEST="$WORK/one_movie_manifest.json"
 
-COMMON=(--i "$MOVIE" --j 4 --use_own --patch_x 3 --patch_y 3 --bfactor 150
+COMMON=(--i "$MOVIE_REL" --j 4 --use_own --patch_x 3 --patch_y 3 --bfactor 150
         --dose_weighting --dose_per_frame 1.0 --voltage 200 --angpix 0.885
         --max_iter 1)
 
@@ -138,8 +146,8 @@ rc=$(run_u16 kernel-fatal "$WORK/kernel-fatal/out")
 [ "$(find "$WORK/kernel-fatal/out" -name '*.mrc' -type f | wc -l | tr -d ' ')" = 0 ] || {
     echo "FAIL fatal U16 error published a corrected image"; exit 1;
 }
-[ "$(find "$WORK/kernel-fatal/out" -name corrected_micrographs.star -type f | wc -l | tr -d ' ')" = 0 ] || {
-    echo "FAIL fatal U16 error published a joint STAR"; exit 1;
+[ "$(find "$WORK/kernel-fatal/out" -name '*.star' -type f | wc -l | tr -d ' ')" = 0 ] || {
+    echo "FAIL fatal U16 error published a per-movie or joint STAR"; exit 1;
 }
 [ "$(count_markers 'injected post-launch conversion status: cudaErrorIllegalAddress' "$WORK/kernel-fatal/out")" = 1 ] || {
     echo "FAIL fatal conversion launch-status injection did not run"; exit 1;

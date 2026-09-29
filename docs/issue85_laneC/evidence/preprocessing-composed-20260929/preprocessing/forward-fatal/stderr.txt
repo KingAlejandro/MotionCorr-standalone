@@ -1,0 +1,32 @@
+The number of patches is too small (<= 2). Patch based alignment will be skipped.
+[preprocessfault] injected cudaErrorIllegalAddress at computeGlobalForwardFFT; pending slot cleared
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 1575
+ERROR: 
+CUDA device became unusable during resident forward FFT for Movies/control.tiff: an illegal memory access was encountered (recorded at computeGlobalForwardFFT:744). First failure at computeGlobalForwardFFT:744. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x5b9458833357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x3fd87) [0x5b94587fbd87]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x2992) [0x5b94588df852]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x210) [0x5b94588e80b0]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x5b94588285c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x718b2d82a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x718b2d82a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x5b9458828ca5]
+==================
+ERROR: 
+CUDA device became unusable during resident forward FFT for Movies/control.tiff: an illegal memory access was encountered (recorded at computeGlobalForwardFFT:744). First failure at computeGlobalForwardFFT:744. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 700
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x5b9458833357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x4dbd5) [0x5b9458809bd5]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x5b94588285c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x718b2d82a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x718b2d82a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x5b9458828ca5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

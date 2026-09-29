@@ -1,0 +1,86 @@
+### Issue #97 follow-up measurements (review findings N1, N3) -- 2026-09-28T07:00:29+00:00
+### Re-uses retained arm outputs from the 85dd1f9 validation run.
+### No rebuild, no motioncorr re-run, no timing measurement.
+
+--- placement (held identical to the original run) ---
+Cpus_allowed_list:	40-55
+Mems_allowed_list:	0-1
+policy: bind
+physcpubind: 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 
+nodebind: 1 
+membind: 1 
+--- load at this follow-up ---
+30.78 15.81 9.48 3/7999 3289814
+--- concurrent users of cores 32-63 ---
+    PID USER     %CPU PSR COMMAND
+1635429 ubuntu   99.9  50 ctffind
+
+--- N3: was the recenter block actually reached? ---
+    do_local requires patch_x > 2 AND patch_y > 2. Read from the NESTED per-movie
+    logfile, which the original run_validation.sh grep ('$out'/*.log) never matched.
+syn-base-off   Patches: X = 3 Y = 3 interpolate_shifts = 0   patch_blocks=9    too_few_patches=0
+syn-base-on    Patches: X = 3 Y = 3 interpolate_shifts = 1   patch_blocks=9    too_few_patches=0
+syn-fixed-off  Patches: X = 3 Y = 3 interpolate_shifts = 0   patch_blocks=9    too_few_patches=0
+syn-fixed-on   Patches: X = 3 Y = 3 interpolate_shifts = 1   patch_blocks=9    too_few_patches=0
+mov-base-off   Patches: X = 5 Y = 5 interpolate_shifts = 0   patch_blocks=25   too_few_patches=0
+mov-base-on    Patches: X = 5 Y = 5 interpolate_shifts = 1   patch_blocks=25   too_few_patches=0
+mov-fixed-off  Patches: X = 5 Y = 5 interpolate_shifts = 0   patch_blocks=25   too_few_patches=0
+mov-fixed-on   Patches: X = 5 Y = 5 interpolate_shifts = 1   patch_blocks=25   too_few_patches=0
+
+--- N1: rlnAccumMotion Total/Early/Late (values the previous filter discarded) ---
+    Columns: opticsGroup AccumMotionTotal AccumMotionEarly AccumMotionLate
+syn-base-off   1 4.323048 1.386941 2.936107
+syn-base-on    1 4.323048 1.386941 2.936107
+syn-fixed-off  1 4.323048 1.386941 2.936107
+syn-fixed-on   1 4.323048 1.386941 2.936107
+mov-base-off   1 13.167835 1.829223 11.338612
+mov-base-on    1 13.167835 1.829223 11.338612
+mov-fixed-off  1 13.167835 1.829223 11.338612
+mov-fixed-on   1 13.167835 1.829223 11.338612
+
+--- corrected comparator: path TOKENS normalised, so data rows are compared ---
+
+=== synthetic 128x128 8f, 3x3 patches -- DEFAULT-OFF EXACTNESS CONTROL: syn-base-off vs syn-fixed-off   [expect EQUAL] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  EQUAL   synthetic_128x128_8frames.mrc: pixel payload IDENTICAL (65536 bytes, mode 2)
+  EQUAL   synthetic_128x128_8frames.star: STAR byte-identical (164 lines)
+  --> EQUAL (as expected)
+
+=== synthetic 128x128 8f, 3x3 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: syn-base-on vs syn-fixed-on   [expect DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  DIFFER  synthetic_128x128_8frames.mrc: pixel payload DIFFERS: 16243/16384 px (99.139%), max|d|=11.9294, mean|d|=0.25329, range=428.696, relmax=2.783e-02
+  DIFFER  synthetic_128x128_8frames.star: STAR DIFFERS in 99/164 compared lines. e.g. 0 0.030874 -> 0 0.024578 | 1 -0.00962 -> 1 -0.00796 | 2 4.998201e-04 -> 2 3.705826e-04 | 3 0.149213 -> 3 0.201560
+  --> DIFFERENT (as expected)
+
+=== synthetic 128x128 8f, 3x3 patches -- informational: two different modes, not a control: syn-fixed-off vs syn-fixed-on   [expect DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  DIFFER  synthetic_128x128_8frames.mrc: pixel payload DIFFERS: 16199/16384 px (98.871%), max|d|=6.21082, mean|d|=0.0410583, range=428.202, relmax=1.450e-02
+  DIFFER  synthetic_128x128_8frames.star: STAR DIFFERS in 108/164 compared lines. e.g. 0 0.026903 -> 0 0.024578 | 1 -0.00893 -> 1 -0.00796 | 2 4.697862e-04 -> 2 3.705826e-04 | 3 0.187561 -> 3 0.201560
+  --> DIFFERENT (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- DEFAULT-OFF EXACTNESS CONTROL: mov-base-off vs mov-fixed-off   [expect EQUAL] ===
+  EQUAL   20170629_00026_frameImage.mrc: pixel payload IDENTICAL (56955920 bytes, mode 2)
+  EQUAL   20170629_00026_frameImage.star: STAR byte-identical (779 lines)
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> EQUAL (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- INTENTIONAL OPTION-ON BUGFIX CHANGE: mov-base-on vs mov-fixed-on   [expect DIFFERENT] ===
+  DIFFER  20170629_00026_frameImage.mrc: pixel payload DIFFERS: 14236598/14238980 px (99.983%), max|d|=22.5567, mean|d|=1.32428, range=51.4246, relmax=4.386e-01
+  DIFFER  20170629_00026_frameImage.star: STAR DIFFERS in 611/779 compared lines. e.g. 0 0.136231 -> 0 0.187684 | 1 -0.00896 -> 1 -0.01334 | 2 2.462481e-04 -> 2 3.548301e-04 | 3 -0.74075 -> 3 -1.06312
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> DIFFERENT (as expected)
+
+=== real movie 20170629_00026, 5x5 patches -- informational: two different modes, not a control: mov-fixed-off vs mov-fixed-on   [expect DIFFERENT] ===
+  DIFFER  20170629_00026_frameImage.mrc: pixel payload DIFFERS: 14230161/14238980 px (99.938%), max|d|=11.6251, mean|d|=0.11809, range=50.5046, relmax=2.302e-01
+  DIFFER  20170629_00026_frameImage.star: STAR DIFFERS in 635/779 compared lines. e.g. 0 0.187200 -> 0 0.187684 | 1 -0.01320 -> 1 -0.01334 | 2 3.486594e-04 -> 2 3.548301e-04 | 3 -1.05544 -> 3 -1.06312
+  EQUAL   corrected_micrographs.star: STAR identical after normalising path tokens (25 lines compared, values included)
+  --> DIFFERENT (as expected)
+
+================ SUMMARY ================
+  syn: option-OFF base vs fixed        as expected
+  syn: option-ON  base vs fixed        as expected
+  mov: option-OFF base vs fixed        as expected
+  mov: option-ON  base vs fixed        as expected
+
+GATE: PASS
+compare exit=0

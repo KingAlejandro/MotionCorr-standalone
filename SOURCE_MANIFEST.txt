@@ -10,6 +10,16 @@ Local change: src/motioncorr_runner.cpp rejects a --gpu device list under --use_
               a non-integer or negative id, which textToInteger's sscanf("%d") previously
               coerced ("0abc" resolved to device 0). --use_motioncor2 passes the list through
               unchanged.
+Local change: src/motioncorr_runner.cpp and src/motioncorr_runner.h fix the
+              --interpolate_shifts recentering origin (issue #97). Upstream recenters in place
+              against interpolated_*shifts[0], which iteration zero has already set to zero, so
+              frames 1..n-1 keep un-recentered absolute values. The recentering is extracted into
+              recenterShiftsToFirstFrame(), which saves the origin first; interpolateShifts is
+              made public+static for unit testing. This is a DELIBERATE divergence from upstream
+              behaviour on the experimental, default-off --interpolate_shifts path. In the
+              tested option-off controls, candidate and pre-fix standalone outputs had identical
+              MRC pixel payloads and per-movie STAR data. This same-backend evidence is not a
+              whole-program bit-exact parity claim against upstream.
 
 src/CPlot2D.cpp
 src/CPlot2D.h

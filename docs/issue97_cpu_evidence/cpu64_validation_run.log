@@ -1,0 +1,511 @@
+############ START 2026-09-28T01:00:03+00:00 ############
+[lock] waiting for /tmp/motioncorr-issue96-cpu-validation.lock ...
+[lock] acquired after 30s at 2026-09-28T01:00:33+00:00
+===== PROVENANCE =====
+
+$ hostname
+small-refmac-machine
+exit=0
+
+$ uptime
+ 01:00:33 up 299 days, 14:58, 24 users,  load average: 16.36, 11.00, 9.42
+exit=0
+
+$ lscpu
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        48 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               64
+On-line CPU(s) list:                  0-63
+Vendor ID:                            AuthenticAMD
+Model name:                           AMD EPYC 7763 64-Core Processor
+CPU family:                           25
+Model:                                1
+Thread(s) per core:                   1
+Core(s) per socket:                   32
+Socket(s):                            2
+Stepping:                             1
+BogoMIPS:                             4890.81
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm rep_good nopl cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero xsaveerptr wbnoinvd arat npt lbrv nrip_save tsc_scale vmcb_clean flushbyasid pausefilter pfthreshold v_vmsave_vmload vgif umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor fsrm arch_capabilities
+Virtualization:                       AMD-V
+Hypervisor vendor:                    KVM
+Virtualization type:                  full
+L1d cache:                            4 MiB (64 instances)
+L1i cache:                            4 MiB (64 instances)
+L2 cache:                             32 MiB (64 instances)
+L3 cache:                             32 MiB (2 instances)
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31
+NUMA node1 CPU(s):                    32-63
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          Not affected
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Not affected
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Not affected
+Vulnerability Spec rstack overflow:   Vulnerable: Safe RET, no microcode
+Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                  Not affected
+Vulnerability Tsx async abort:        Not affected
+exit=0
+
+--- NUMA hardware ---
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+node 0 size: 115839 MB
+node 0 free: 16572 MB
+node 1 cpus: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+node 1 size: 115862 MB
+node 1 free: 26334 MB
+node distances:
+node   0   1 
+  0:  10  20 
+  1:  20  10 
+
+--- requested cpuset: 40-55  membind: node1 ---
+--- actual inherited affinity of a pinned child ---
+Cpus_allowed_list:	40-55
+Mems_allowed_list:	0-1
+policy: bind
+preferred node: 1
+physcpubind: 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 
+cpubind: 1 
+nodebind: 1 
+membind: 1 
+preferred: 1 
+
+--- CPU -> NODE/SOCKET/CORE map for my lane ---
+40,1,1,40
+41,1,1,41
+42,1,1,42
+43,1,1,43
+44,1,1,44
+45,1,1,45
+46,1,1,46
+47,1,1,47
+48,1,1,48
+49,1,1,49
+50,1,1,50
+51,1,1,51
+52,1,1,52
+53,1,1,53
+54,1,1,54
+55,1,1,55
+
+--- interference: other users of cores 32-63 ---
+    PID USER     %CPU PSR COMMAND
+1156942 ubuntu   99.9  32 ctffind
+1635429 ubuntu   99.9  33 ctffind
+
+--- load at start ---
+16.36 11.00 9.42 3/7996 3139030
+
+===== SOURCE STAGING =====
+[base] HEAD=4c952b3f54479653512c4d208e09c9a8c02f3726
+[base] tree clean: 0 modified
+[base] sha256 src/motioncorr_runner.cpp: f8345989154a7bed2f630ba5a428d6f6bcd0138b9f9fceec2ef3889cfe653485  /home/ubuntu/mc-issue97-grok-opus/src-base/src/motioncorr_runner.cpp
+[base] sha256 src/motioncorr_runner.h:   7b545910c8f11d7a59357cac6eb0bfe472172c43c3403003426c4dd0fbd92d80  /home/ubuntu/mc-issue97-grok-opus/src-base/src/motioncorr_runner.h
+[fixed] HEAD=85dd1f9a4c7b96e224034b009236a1a2600e5e46
+[fixed] tree clean: 0 modified
+[fixed] sha256 src/motioncorr_runner.cpp: f1550193df79b540afc769c10b423d7ccdf94330b5f8b443d0086fa3cd39d2c2  /home/ubuntu/mc-issue97-grok-opus/src-fixed/src/motioncorr_runner.cpp
+[fixed] sha256 src/motioncorr_runner.h:   cd9425306b0180b80dd085433b5f0dc9458e03e7944fd31e7d927ed0bce16894  /home/ubuntu/mc-issue97-grok-opus/src-fixed/src/motioncorr_runner.h
+--- the ONLY production delta between the two trees ---
+--- /home/ubuntu/mc-issue97-grok-opus/src-base/src/motioncorr_runner.cpp	2026-09-28 00:48:21.476253674 +0000
++++ /home/ubuntu/mc-issue97-grok-opus/src-fixed/src/motioncorr_runner.cpp	2026-09-28 01:00:35.443794608 +0000
+@@ -2158,10 +2158,7 @@
+ 				interpolateShifts(group_start, group_size, local_xshifts, local_yshifts, n_frames, interpolated_xshifts, interpolated_yshifts);
+ 				if (interpolate_shifts) {
+ 					// Recenter to the first frame
+-					for (int iframe = 0; iframe < n_frames; iframe++) {
+-						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
+-						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
+-					}
++					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
+ 					// Store shifts
+ 					for (int iframe = 0; iframe < n_frames; iframe++) {
+ 						patch_xshifts.push_back(interpolated_xshifts[iframe]);
+@@ -2561,6 +2558,23 @@
+ 	return true;
+ }
+ 
++void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
++	if (xshifts.size() != yshifts.size())
++		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
++	if (xshifts.empty()) return;
++
++	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while
++	// iterating upwards zeroes the origin on the very first iteration, so every later
++	// frame would subtract zero and keep its un-recentered absolute value.
++	const RFLOAT origin_x = xshifts[0];
++	const RFLOAT origin_y = yshifts[0];
++
++	for (size_t iframe = 0; iframe < xshifts.size(); iframe++) {
++		xshifts[iframe] -= origin_x;
++		yshifts[iframe] -= origin_y;
++	}
++}
++
+ void MotioncorrRunner::interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+                                          std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+                                          int n_frames,
+--- /home/ubuntu/mc-issue97-grok-opus/src-base/src/motioncorr_runner.h	2026-09-28 00:48:21.476253674 +0000
++++ /home/ubuntu/mc-issue97-grok-opus/src-fixed/src/motioncorr_runner.h	2026-09-28 01:00:35.443794608 +0000
+@@ -244,6 +244,19 @@
+ 	// Check if fn_defect is Serial EM's defect file
+ 	static bool detectSerialEMDefectText(FileName fn_defect);
+ 
++	// Inter-/extrapolate per-group local shifts onto every frame.
++	// Pure function of its arguments (reads no member state), hence static; public
++	// so the motion-model arithmetic can be unit tested directly.
++	static void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
++	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
++	                       int n_frames,
++	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
++
++	// Recenter per-frame shifts so that frame 0 becomes the origin.
++	// The first-frame offset MUST be saved before the in-place subtraction begins,
++	// otherwise iteration zero zeroes the origin that later iterations still need.
++	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
++
+ private:
+ 	// shiftx, shifty is relative to the (real space) image size
+ 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
+@@ -267,10 +280,6 @@
+ 
+ 	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
+ 
+-	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+-	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+-	                       int n_frames,
+-	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+ };
+ 
+ 
+
+===== BUILD (Release, -j16, pinned) =====
+--- configure base ---
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5")
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43")
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
+-- Found Python3: /usr/bin/python3.12 (found version "3.12.3") found components: Interpreter
+-- Configuring done (1.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ubuntu/mc-issue97-grok-opus/build-base
+configure exit=0
+--- build base ---
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
+	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/cmake --build /home/ubuntu/mc-issue97-grok-opus/build-base -j 16"
+	User time (seconds): 165.80
+	System time (seconds): 14.76
+	Percent of CPU this job got: 881%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:20.47
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 352744
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 11
+	Minor (reclaiming a frame) page faults: 2897393
+	Voluntary context switches: 1423
+	Involuntary context switches: 724
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 120008
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+CMAKE_BUILD_TYPE: CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_HOME_DIRECTORY: CMAKE_HOME_DIRECTORY:INTERNAL=/home/ubuntu/mc-issue97-grok-opus/src-base
+[base] sha256 binary: b27f7351d0b0481c01fe99df89f792bf3dc0782d572b05530bcd86dbd6911a0c  /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr
+[base] binary opt level check:
+GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+--- configure fixed ---
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5")
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43")
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
+-- Found Python3: /usr/bin/python3.12 (found version "3.12.3") found components: Interpreter
+-- Configuring done (1.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ubuntu/mc-issue97-grok-opus/build-fixed
+configure exit=0
+--- build fixed ---
+[100%] Linking CXX executable runner_numerics
+[100%] Built target runner_numerics
+	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/.mc-venv/bin/cmake --build /home/ubuntu/mc-issue97-grok-opus/build-fixed -j 16"
+	User time (seconds): 167.70
+	System time (seconds): 14.74
+	Percent of CPU this job got: 907%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:20.10
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 352788
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 1
+	Minor (reclaiming a frame) page faults: 2903580
+	Voluntary context switches: 1366
+	Involuntary context switches: 703
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 120432
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+CMAKE_BUILD_TYPE: CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_HOME_DIRECTORY: CMAKE_HOME_DIRECTORY:INTERNAL=/home/ubuntu/mc-issue97-grok-opus/src-fixed
+[fixed] sha256 binary: cd9a7316eecf108132afabe6041f26433e741611d816901257e8f6252fa56de1  /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr
+[fixed] binary opt level check:
+GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+
+===== UNIT REGRESSION =====
+--- fixed tree: the new case must exist and pass ---
+Test project /home/ubuntu/mc-issue97-grok-opus/build-fixed
+    Start 1: RunnerInterpolateRecenter
+1/1 Test #1: RunnerInterpolateRecenter ........   Passed    0.00 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =   0.01 sec
+ctest exit=0
+--- fixed tree: direct invocation ---
+PASS archived witness, slope 1 (X only) (bug reproduced and fixed)
+PASS slope +2 X / -1.5 Y, nonzero origin both axes (bug reproduced and fixed)
+PASS unequal last group, negative X slope, piecewise (bug reproduced and fixed)
+PASS zero-origin control (no-op) (no-op control)
+PASS empty-input guard
+PASS issue97 interpolate_recenter
+exit=0
+--- base tree: the case must NOT exist (proves it is new) ---
+Test project /home/ubuntu/mc-issue97-grok-opus/build-base
+
+Total Tests: 0
+--- full suite, fixed tree (bounded) ---
+      Start  3: HotPixelRngDeterminism
+      Start  4: RunnerExposure
+ 1/14 Test  #1: RunnerInterpolateRecenter ........   Passed    0.01 sec
+      Start  5: Runner_failure
+ 2/14 Test  #5: Runner_failure ...................   Passed    0.16 sec
+      Start  6: Runner_invalid
+ 3/14 Test  #6: Runner_invalid ...................   Passed    0.12 sec
+      Start  7: Runner_resume
+ 4/14 Test  #4: RunnerExposure ...................   Passed    0.52 sec
+      Start  8: Runner_tomography
+ 5/14 Test  #3: HotPixelRngDeterminism ...........   Passed    0.68 sec
+      Start  9: RunnerLateBin
+ 6/14 Test  #8: Runner_tomography ................   Passed    0.46 sec
+      Start 10: RunnerExportedUnits
+ 7/14 Test #10: RunnerExportedUnits ..............   Passed    0.11 sec
+      Start 11: GainCache
+ 8/14 Test  #2: SyntheticRegression ..............   Passed    1.17 sec
+      Start 12: TiffRead
+ 9/14 Test  #9: RunnerLateBin ....................   Passed    0.71 sec
+      Start 13: DamagedMovie
+10/14 Test #13: DamagedMovie .....................   Passed    0.10 sec
+      Start 14: RunnerModelParser
+11/14 Test #14: RunnerModelParser ................   Passed    0.16 sec
+12/14 Test #12: TiffRead .........................   Passed    0.59 sec
+13/14 Test #11: GainCache ........................   Passed    1.35 sec
+14/14 Test  #7: Runner_resume ....................   Passed    2.21 sec
+
+100% tests passed out of 14
+
+Total Test time (real) =   2.50 sec
+full-suite ctest exit=0
+--- full suite, base tree (baseline for comparison) ---
+      Start  1: SyntheticRegression
+      Start  2: HotPixelRngDeterminism
+      Start  3: RunnerExposure
+      Start  4: Runner_failure
+ 1/13 Test  #4: Runner_failure ...................   Passed    0.16 sec
+      Start  5: Runner_invalid
+ 2/13 Test  #5: Runner_invalid ...................   Passed    0.15 sec
+      Start  6: Runner_resume
+ 3/13 Test  #3: RunnerExposure ...................   Passed    0.52 sec
+      Start  7: Runner_tomography
+ 4/13 Test  #2: HotPixelRngDeterminism ...........   Passed    0.68 sec
+      Start  8: RunnerLateBin
+ 5/13 Test  #7: Runner_tomography ................   Passed    0.51 sec
+      Start  9: RunnerExportedUnits
+ 6/13 Test  #1: SyntheticRegression ..............   Passed    1.12 sec
+      Start 10: GainCache
+ 7/13 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 11: TiffRead
+ 8/13 Test  #8: RunnerLateBin ....................   Passed    0.73 sec
+      Start 12: DamagedMovie
+ 9/13 Test #12: DamagedMovie .....................   Passed    0.10 sec
+      Start 13: RunnerModelParser
+10/13 Test #13: RunnerModelParser ................   Passed    0.16 sec
+11/13 Test #11: TiffRead .........................   Passed    0.55 sec
+12/13 Test  #6: Runner_resume ....................   Passed    2.15 sec
+13/13 Test #10: GainCache ........................   Passed    1.35 sec
+
+100% tests passed out of 13
+
+Total Test time (real) =   2.47 sec
+base full-suite ctest exit=0
+
+===== INTEGRATION: option-off / option-on x base / fixed =====
+input hashes:
+44f32752ebb62fc22428e95a1449e54e3a6952036285b805b96085f296ec5ed0  /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs
+f989391b9d0e3e3b927a8de59d60179ade0b7ae5075ce7c3a9a5002ae2254ae3  /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff
+8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1  /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc
+
+########## ARM syn-base-off ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1
+exit=0
+--- products ---
+  7280510d80de0a7d771c3212398cc7f2675c2b2f064a4452be098c6251038420  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-off/corrected_micrographs.star
+  af479955176e3a32c63b6d8e2a04e3b43970e3aaed1805aef77f37921047eb75  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-off/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrc
+  d18a2485a6aeb6d52624a1882fb5bc312b81ccab25b864a7ab31a2a3ad3ffeb1  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-off/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.star
+
+########## ARM syn-base-on ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts
+exit=0
+/home/ubuntu/mc-issue97-grok-opus/out/syn-base-on/time.log:	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts --o /home/ubuntu/mc-issue97-grok-opus/out/syn-base-on/"
+--- products ---
+  9e631ad636d50fedd6efec789170cbd8a7d9b9894ddd9f1cfc1b9198b00d0df1  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-on/corrected_micrographs.star
+  1aa90c792d641c879472bc8862f957bad0169eac4e7cce41dd9e24b3001b8471  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-on/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrc
+  00e2dba90c52768bb8d44ab363f64f9fc1105398fc4b489660b9a51ef39676a2  /home/ubuntu/mc-issue97-grok-opus/out/syn-base-on/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.star
+
+########## ARM syn-fixed-off ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1
+exit=0
+--- products ---
+  301b2600d077f76421d3dcf68ae99f41b4a1c8fcfb8579db23cc97825cc722b9  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-off/corrected_micrographs.star
+  af479955176e3a32c63b6d8e2a04e3b43970e3aaed1805aef77f37921047eb75  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-off/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrc
+  d18a2485a6aeb6d52624a1882fb5bc312b81ccab25b864a7ab31a2a3ad3ffeb1  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-off/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.star
+
+########## ARM syn-fixed-on ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts
+exit=0
+/home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-on/time.log:	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrcs --use_own --j 16 --patch_x 3 --patch_y 3 --angpix 1 --voltage 300 --dose_per_frame 1 --interpolate_shifts --o /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-on/"
+--- products ---
+  e10578f275ed5fdd00baf44f281848cd94e0ab9c8e19fdb0a5e08b36ee3afef6  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-on/corrected_micrographs.star
+  704a45bd07c9203751014ebddbd76a3bb48c36152eee719f2a16ad36682e20f9  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-on/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.mrc
+  16c78a0f60829976218a16fdbd71dbef3d57b7990ce63a8e8d4a835037ea2f27  /home/ubuntu/mc-issue97-grok-opus/out/syn-fixed-on/home/ubuntu/mc-issue97-grok-opus/src-fixed/test-data/fixtures/synthetic_128x128_8frames.star
+
+########## ARM mov-base-off ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc
+exit=0
+--- products ---
+  00c001625aa6f65cc9b56ca881547038529358303dc82c5539e828b71d20fdba  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-off/corrected_micrographs.star
+  3efd0c4e0400f8b18de9cdb25e470c514464b4b1c6f60ede613f07d589948aaa  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-off/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.mrc
+  ec48cac45b494303df7c1e8e1a12c6a4ed092949910f6efeeb84d360b10a1218  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-off/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.star
+
+########## ARM mov-base-on ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc --interpolate_shifts
+exit=0
+/home/ubuntu/mc-issue97-grok-opus/out/mov-base-on/time.log:	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/mc-issue97-grok-opus/build-base/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc --interpolate_shifts --o /home/ubuntu/mc-issue97-grok-opus/out/mov-base-on/"
+--- products ---
+  eae772a4814e6d9168d43bea2541998face93f67bb20170e69e6d3d8621b815d  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-on/corrected_micrographs.star
+  25289ccf01016e4adf942aaea27fffbd353202d60551f773ca4d4ed9b8907eec  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-on/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.mrc
+  dd33627b3990c13cb80f2e5dea7652c9fa5df1fc9ab568fcce65a352b6166ddb  /home/ubuntu/mc-issue97-grok-opus/out/mov-base-on/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.star
+
+########## ARM mov-fixed-off ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc
+exit=0
+--- products ---
+  bb4ad911f67bd0cb3982e2ae51fe02e1a79877d84eab0be75c6785bde8745c0b  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-off/corrected_micrographs.star
+  367fefd9ae91489d305c0dff018291051f9b732abd70d90173ed1773761a0458  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-off/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.mrc
+  ec48cac45b494303df7c1e8e1a12c6a4ed092949910f6efeeb84d360b10a1218  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-off/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.star
+
+########## ARM mov-fixed-on ##########
+$ /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc --interpolate_shifts
+exit=0
+/home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-on/time.log:	Command being timed: "taskset -c 40-55 numactl --membind=1 /home/ubuntu/mc-issue97-grok-opus/build-fixed/motioncorr --i /home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.tiff --use_own --j 16 --patch_x 5 --patch_y 5 --angpix 0.885 --voltage 200 --dose_per_frame 1.277 --gainref /home/ubuntu/mc-issue60/work/tutorial/Movies/gain.mrc --interpolate_shifts --o /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-on/"
+--- products ---
+  7f89c88e70174ffefd2e50a6cfb3c389187da4ef28734a9c0bd59386b6bf0775  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-on/corrected_micrographs.star
+  9d9853bcb499b3c6e97b7817e7e34f518e56d4243748e26cbb08854b3262bd4d  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-on/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.mrc
+  3bfedd61e356c1e50f5f870ea18ecb6be08daf8b8786fbfcc8ecaca70ae6e76f  /home/ubuntu/mc-issue97-grok-opus/out/mov-fixed-on/home/ubuntu/mc-issue60/work/tutorial/Movies/20170629_00026_frameImage.star
+
+===== COMPARISON =====
+
+=== syn-base-off  vs  syn-fixed-off   [expected: EQUAL] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (AS EXPECTED)
+
+=== syn-base-on  vs  syn-fixed-on   [expected: DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (*** UNEXPECTED ***)
+
+=== syn-fixed-off  vs  syn-fixed-on   [expected: DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (*** UNEXPECTED ***)
+
+=== mov-base-off  vs  mov-fixed-off   [expected: EQUAL] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (AS EXPECTED)
+
+=== mov-base-on  vs  mov-fixed-on   [expected: DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (*** UNEXPECTED ***)
+
+=== mov-fixed-off  vs  mov-fixed-on   [expected: DIFFERENT] ===
+  EQUAL   corrected_micrographs.star: STAR identical ignoring path/date lines
+  --> EQUAL  (*** UNEXPECTED ***)
+
+================ SUMMARY ================
+  syn off base-vs-fixed        as expected
+  syn on  base-vs-fixed        UNEXPECTED
+  mov off base-vs-fixed        as expected
+  mov on  base-vs-fixed        UNEXPECTED
+
+GATE: ATTENTION (2 checks not as expected)
+compare exit=1
+
+--- load at end ---
+11.38 10.77 9.48 3/7991 3141715
+STATUS=DONE
+############ END 2026-09-28T01:01:51+00:00 ############

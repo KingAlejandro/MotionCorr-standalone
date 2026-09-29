@@ -33,6 +33,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <set>
+#include <dlfcn.h>
+#include <execinfo.h>
 
 extern "C" cudaError_t __real_cudaMalloc(void **ptr, size_t size);
 extern "C" cudaError_t __real_cudaFree(void *ptr);
@@ -57,6 +59,38 @@ size_t g_u16_stage_bytes = 0;
 void *g_u16_stage_ptr = nullptr;
 bool g_u16_fault_injected = false;
 bool g_u16_stage_upload_seen = false;
+const char *g_preprocess_fault = nullptr;
+bool g_preprocess_injected = false;
+bool g_preprocess_release_injected = false;
+
+// Test binary only, exported with -rdynamic. Resolve the real production caller
+// rather than relying on a fixture-specific allocation ordinal or byte count.
+// The driver requires an exact injection witness, so unavailable symbols fail it.
+bool called_from(const char *name) {
+    void *frames[16];
+    const int n = backtrace(frames, 16);
+    for (int i = 1; i < n; ++i) {
+        Dl_info info = {};
+        if (dladdr(frames[i], &info) && info.dli_sname &&
+            std::strstr(info.dli_sname, name)) return true;
+    }
+    return false;
+}
+
+bool preprocess_mode(const char *name) {
+    return g_preprocess_fault && std::strcmp(g_preprocess_fault, name) == 0;
+}
+
+cudaError_t inject_preprocess(bool fatal, const char *boundary) {
+    g_preprocess_injected = true;
+    // Consume any unrelated launch slot: the returned code alone must survive
+    // through the production helper's failure state and session disposal.
+    (void)cudaGetLastError();
+    const cudaError_t code = fatal ? cudaErrorIllegalAddress : cudaErrorMemoryAllocation;
+    std::fprintf(stderr, "[preprocessfault] injected %s at %s; pending slot cleared\n",
+                 cudaGetErrorName(code), boundary);
+    return code;
+}
 
 void init_once() {
     if (g_init) return;
@@ -70,6 +104,7 @@ void init_once() {
     g_u16_fault = std::getenv("MC_U16_FAULT");
     const char *stage = std::getenv("MC_U16_STAGE_BYTES");
     if (stage) g_u16_stage_bytes = (size_t)std::strtoull(stage, nullptr, 10);
+    g_preprocess_fault = std::getenv("MC_PREPROCESS_FAULT");
 }
 
 bool is_u16_fault(const char *name) {
@@ -79,6 +114,20 @@ bool is_u16_fault(const char *name) {
 
 extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
     init_once();
+    if (g_preprocess_injected)
+        std::fprintf(stderr, "[preprocessfault] later cudaMalloc size=%zu\n", size);
+    if (!g_preprocess_injected && g_preprocess_fault) {
+        const bool sparse = (preprocess_mode("sparse-recoverable") ||
+                             preprocess_mode("sparse-fatal") ||
+                             preprocess_mode("sparse-release-fatal")) &&
+                            called_from("updateDefectPixels");
+        const bool initialize = preprocess_mode("init-fatal") && called_from("initialize");
+        if (sparse || initialize) {
+            if (ptr) *ptr = nullptr;
+            return inject_preprocess(preprocess_mode("sparse-fatal") || initialize,
+                                     sparse ? "updateDefectPixels" : "initialize");
+        }
+    }
     if (g_u16_stage_bytes && size == g_u16_stage_bytes) {
         std::fprintf(stderr, "[u16fault] stage-alloc-request size=%zu\n", size);
         if (!g_u16_fault_injected && is_u16_fault("alloc")) {
@@ -115,6 +164,9 @@ extern "C" cudaError_t __real_cudaGetLastError(void);
 extern "C" cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t count,
                                          cudaMemcpyKind kind) {
     init_once();
+    if (!g_preprocess_injected && preprocess_mode("float-gain-fatal") &&
+        called_from("applyGainDefectsAndSum") && !called_from("applyGainDefectsAndSumU16"))
+        return inject_preprocess(true, "applyGainDefectsAndSum");
     const bool stage_upload = g_u16_stage_ptr && dst == g_u16_stage_ptr &&
                               kind == cudaMemcpyHostToDevice &&
                               count == g_u16_stage_bytes;
@@ -142,6 +194,25 @@ extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
         std::fprintf(stderr, "[u16fault] stage-free-ok ptr=%p\n", ptr);
         g_u16_stage_ptr = nullptr;
     }
+    if (result == cudaSuccess && g_preprocess_injected &&
+        !g_preprocess_release_injected && preprocess_mode("sparse-release-fatal") &&
+        called_from("CudaMovieSession")) {
+        // The real free ran and ownership accounting is updated. Only its status
+        // is replaced; this does not leave a real leak or poison the device.
+        g_preprocess_release_injected = true;
+        std::fprintf(stderr, "[preprocessfault] injected cudaErrorIllegalAddress after real session cudaFree\n");
+        return cudaErrorIllegalAddress;
+    }
+    return result;
+}
+
+extern "C" cudaError_t __real_cudaDeviceSynchronize(void);
+extern "C" cudaError_t __wrap_cudaDeviceSynchronize(void) {
+    init_once();
+    const cudaError_t result = __real_cudaDeviceSynchronize();
+    if (result == cudaSuccess && !g_preprocess_injected &&
+        preprocess_mode("forward-fatal") && called_from("computeGlobalForwardFFT"))
+        return inject_preprocess(true, "computeGlobalForwardFFT");
     return result;
 }
 

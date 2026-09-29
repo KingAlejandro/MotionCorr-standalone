@@ -124,8 +124,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=20,
-                        help="Minimum number of tests that must be collected (default: 20)")
+    parser.add_argument("--min-count", type=int, default=21,
+                        help="Minimum number of tests that must be collected (default: 21)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

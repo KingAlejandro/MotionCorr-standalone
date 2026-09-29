@@ -23,7 +23,12 @@ MOVIES = [
 
 
 def frame_rows(nx, ny, iframe, stem):
-    """Deterministic, frame-dependent, non-constant content with wrapping edges."""
+    """Deterministic, frame-dependent, non-constant content.
+
+    Edges do not wrap. This dataset exists to compare two arms byte for byte on
+    the same input, not to recover a known shift, so periodicity is not required
+    and is not claimed.
+    """
     seed = (sum(ord(c) for c in stem) * 131 + iframe * 7919) & 0xFFFF
     rows = []
     for y in range(ny):

@@ -168,6 +168,9 @@ if(BUILD_TESTING)
         add_executable(native_u16_staging tests/test_native_u16_staging.cpp)
         target_link_libraries(native_u16_staging PRIVATE motioncorr_core)
         add_test(NAME NativeU16Staging COMMAND native_u16_staging)
+        # Exit 77 when the resident-set arm could not run, so ctest reports NOTRUN
+        # rather than a Passed that hides a skipped assertion.
+        set_tests_properties(NativeU16Staging PROPERTIES SKIP_RETURN_CODE 77)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)

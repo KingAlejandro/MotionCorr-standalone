@@ -1,22 +1,3 @@
-/***************************************************************************
- *
- * Author: "Sjors H.W. Scheres"
- * MRC Laboratory of Molecular Biology
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * This complete copyright notice must be included in any revised version of the
- * source code. Additional authorship citations may be added, but existing
- * author citations must be preserved.
- ***************************************************************************/
 #ifndef NATIVE_U16_STAGING_H_
 #define NATIVE_U16_STAGING_H_
 
@@ -59,6 +40,9 @@ public:
 		// The mapping base is page aligned; a 64-byte slice stride leaves every
 		// frame pointer at least as aligned as a separate allocation made it.
 		stride_ = (pixels_ * sizeof(unsigned short) + 63u) & ~(size_t)63u;
+		if (stride_ / sizeof(unsigned short) < pixels_ ||
+		    stride_ > (size_t)-1 / (size_t)n_frames)
+			REPORT_ERROR("Native uint16 staging: movie size overflows size_t.");
 		const size_t want = stride_ * (size_t)n_frames;
 		void *p = mmap(NULL, want, PROT_READ | PROT_WRITE,
 		               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -96,13 +80,29 @@ public:
 			discarded_ = aligned_end;
 	}
 
+	// True while p points into this mapping, i.e. while this object owns it.
+	bool owns(const unsigned short *p) const
+	{
+		const unsigned char *q = (const unsigned char *)p;
+		return base_ != NULL && q >= base_ && q < base_ + bytes_;
+	}
+
 	void release()
 	{
 		if (bound_ != NULL) {
 			for (size_t i = 0; i < bound_->size(); i++) {
 				MultidimArray<unsigned short> &a = (*bound_)[i]();
-				a.data = NULL; // the mapping owns the pixels, not the Image
-				a.nzyxdimAlloc = 0;
+				if (a.data == NULL) continue;
+				if (owns(a.data)) {
+					a.data = NULL; // the mapping owns these pixels, not the Image
+					a.nzyxdimAlloc = 0;
+				} else {
+					// The frame left the mapping, which only happens if something
+					// asked for more than bind() reserved: coreAllocateReuse() then
+					// allocates privately and leaves destroyData clear, so nothing
+					// would ever free it. Hand ownership back rather than drop it.
+					a.destroyData = true;
+				}
 			}
 			bound_->clear();
 			bound_ = NULL;

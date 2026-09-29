@@ -13,7 +13,7 @@ edited STAR byte in a copy of the candidate tree must both be reported.
 
 Usage: compare_mixed_geometry.py <base-out> <candidate-out> <geometry.json> [--json-out F]
 """
-import argparse, hashlib, importlib.util, json, shutil, sys, tempfile
+import argparse, hashlib, importlib.util, json, os, shutil, sys, tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -31,6 +31,30 @@ def load_comparator():
 def inventory(root):
     return sorted(p.relative_to(root).as_posix()
                   for p in root.rglob("*") if p.is_file() and p.suffix in (".mrc", ".star"))
+
+
+def root_spellings(*roots):
+    """Every way an arm's own output root can appear inside its STAR files.
+
+    MotioncorrRunner records the --o argument it was given, which is not the
+    resolved path when a parent is a symlink. compare_output_trees.py normalizes
+    this before comparing STAR text; comparing raw bytes here instead reported
+    every STAR as differing whenever the two arms wrote to differently named
+    directories. Longest first so a prefix never shadows a longer match.
+    """
+    out = set()
+    for r in roots:
+        out.add(str(r))
+        out.add(str(Path(r).resolve()))
+        out.add(os.path.realpath(str(r)))
+    return sorted((s for s in out if s), key=len, reverse=True)
+
+
+def star_digest(root, rel, spellings):
+    text = (root / rel).read_text(errors="replace")
+    for s in spellings:
+        text = text.replace(s, "<OUTPUT_ROOT>")
+    return hashlib.sha256(text.encode()).hexdigest()
 
 
 def grade(cot, base, cand, geom):
@@ -65,12 +89,13 @@ def grade(cot, base, cand, geom):
                         "payload_sha256": ib.payload_sha256,
                         "header_sha256": ib.header_sha256,
                         "extended_sha256": ib.extended_sha256})
+    spellings = root_spellings(base, cand)
     for rel in [f"Movies/{s}.star" for s in stems] + ["corrected_micrographs.star"]:
-        db = hashlib.sha256((base / rel).read_bytes()).hexdigest()
-        dc = hashlib.sha256((cand / rel).read_bytes()).hexdigest()
+        db = star_digest(base, rel, spellings)
+        dc = star_digest(cand, rel, spellings)
         if db != dc:
-            diffs.append(f"{rel}: STAR bytes differ")
-        checked.append({"file": rel, "sha256": db})
+            diffs.append(f"{rel}: STAR text differs")
+        checked.append({"file": rel, "root_normalised_sha256": db})
     return {"status": "FAIL" if diffs else "PASS", "differences": diffs, "checked": checked}
 
 
@@ -83,7 +108,9 @@ def main():
     a = ap.parse_args()
     cot = load_comparator()
     geom = json.loads(a.geometry.read_text())
-    report = grade(cot, a.base.resolve(), a.candidate.resolve(), geom)
+    # Deliberately NOT resolved: root_spellings() needs the spelling the run was
+    # given as well as the resolved one.
+    report = grade(cot, a.base, a.candidate, geom)
 
     # Negative control: the same grading must reject a one-bit payload edit and a
     # one-byte STAR edit, otherwise a PASS above says nothing.
@@ -93,15 +120,27 @@ def main():
         stem0 = Path(geom["movies"][0]).stem
         mrc = mutant / f"Movies/{stem0}.mrc"
         raw = bytearray(mrc.read_bytes())
-        raw[1024] ^= 0x01
+        # The payload starts after the 1024-byte header AND the extended header,
+        # so read nsymbt rather than assuming it is zero; otherwise the control
+        # would edit the extended header and report the wrong provenance.
+        nsymbt = int.from_bytes(bytes(raw[92:96]), "little")
+        payload0 = 1024 + nsymbt
+        raw[payload0] ^= 0x01
         mrc.write_bytes(bytes(raw))
         star = mutant / "corrected_micrographs.star"
         star.write_text(star.read_text() + "# injected\n")
-        control = grade(cot, a.base.resolve(), mutant, geom)
+        control = grade(cot, a.base, mutant, geom)
+        want_mrc = f"Movies/{stem0}.mrc: payload_sha256"
+        want_star = "corrected_micrographs.star: STAR text differs"
+        saw_mrc = any(d.startswith(want_mrc) for d in control["differences"])
+        saw_star = want_star in control["differences"]
         report["negative_control"] = {
             "status": control["status"],
             "differences": control["differences"],
-            "tripped": control["status"] == "FAIL" and len(control["differences"]) >= 2,
+            "payload_offset": payload0,
+            # Naming both injected differences, rather than counting them, so the
+            # control cannot trip on an unrelated difference and look healthy.
+            "tripped": control["status"] == "FAIL" and saw_mrc and saw_star,
         }
     ok = report["status"] == "PASS" and report["negative_control"]["tripped"]
     report["overall"] = "PASS" if ok else "FAIL"

@@ -1472,12 +1472,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	            Ihead.dataType() == UShort;
 	if (stage_u16) {
 		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		// One line, and it keeps the exact prefix docs/issue85_laneC/compare_movie_logs.py
+		// filters on. A second line would make every u16-staged log differ under that
+		// retained comparator for a reason that is not a product difference.
 		logfile << "Staging this movie as native unsigned 16-bit; the uint16 to float "
-		        << "expansion and the gain are applied on the device." << std::endl;
-		logfile << "Native uint16 host staging: one mapping of " << u16_staging.bytes()
-		        << " bytes for " << n_frames << " x " << nx << " x " << ny
-		        << " samples, released before any float movie is materialized."
-		        << std::endl;
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
 	}
 #endif
 

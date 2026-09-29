@@ -52,9 +52,14 @@ const bool kCanMeasureRss = false;
 long rss_kb() { return -1; }
 #endif
 
+// Deliberately not square, so a transposed bind(frames, n, ny, nx) fails the
+// shape check, and deliberately not a page multiple (1534*2046*2 = 6,277,128 B,
+// 1532.5 pages), so discardThrough()'s page rounding is actually exercised.
+// 16 frames x 5.99 MiB: each frame is under glibc's 32 MiB mmap cap, which is
+// the regime the regression lived in.
 const int kFrames = 16;
-const int kNx = 2048;
-const int kNy = 2048;                       // 8 MiB per frame, 128 MiB per movie
+const int kNx = 1534;
+const int kNy = 2046;
 const size_t kPixels = (size_t)kNx * kNy;
 const long kPayloadKb = (long)((kPixels * sizeof(unsigned short) * kFrames) / 1024);
 
@@ -141,8 +146,19 @@ int main()
 	// --- 3. incremental release keeps later frames intact ---------------------
 	for (int i = 0; i < kFrames; i++) touch(frames[i]().data, kPixels, (unsigned short)(i + 1));
 	const int kept_from = kFrames / 2;
+	const long before_discard = rss_kb();
 	for (int i = 0; i < kept_from; i++) frames[i].clear();
 	staging.discardThrough(kept_from);
+	if (kCanMeasureRss) {
+		// Without this, a discardThrough() that returned nothing would still
+		// pass the tail check below, which is the only other thing it is asked
+		// to do. Half the payload is consumed here.
+		const long returned = before_discard - rss_kb();
+		check(returned > (kPayloadKb * 2) / 5,
+		      "discardThrough() returns the consumed pages ("
+		      + std::to_string(returned) + " kB of about "
+		      + std::to_string(kPayloadKb / 2) + " kB)");
+	}
 	bool tail_intact = true;
 	for (int i = kept_from; i < kFrames; i++) {
 		unsigned short *p = frames[i]().data;
@@ -157,10 +173,12 @@ int main()
 	staging.release();
 	check(frames.empty(), "release() clears the frame vector");
 	staging.release();
-	check(true, "release() is idempotent");
+	check(staging.bytes() == 0, "release() is idempotent and leaves no capacity");
 
 	if (!kCanMeasureRss) {
 		std::printf("SKIP   resident-set assertions need /proc; not run on this platform\n");
+		std::printf("%s (%d failures), resident-set arm SKIPPED\n", failures ? "FAILED" : "PASSED", failures);
+		return failures ? 1 : 77;   // 77 = CTest SKIP_RETURN_CODE
 	} else {
 		const long base = rss_kb();
 		std::vector<Image<unsigned short> > f2;

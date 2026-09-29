@@ -83,13 +83,17 @@ def main():
     baseline, text = run("healthy")
     completed(baseline)
     count = max(map(int, re.findall(r"cudaGetDeviceCount #(\d+)", text)))
-    markers = {"initialize": "Fatal CUDA session initialization failure",
-               "patch": "recorded at cudaPreparePatch:"}
+    markers = {"initialize": ("Fatal CUDA session initialization failure",
+                              "CUDA device became unusable during session initialization"),
+               "patch": ("recorded at cudaPreparePatch:",)}
+    refusal_markers = tuple(marker for values in markers.values() for marker in values)
     ordinals = {}
     for ordinal in range(1, min(count, 12) + 1):
         row, text = run(f"discover-{ordinal}", ordinal, "poison")
-        for boundary, marker in markers.items():
-            if boundary not in ordinals and marker in text:
+        for boundary, boundary_markers in markers.items():
+            if boundary not in ordinals and any(marker in text for marker in boundary_markers):
+                if boundary == "initialize" and boundary_markers[1] in text:
+                    assert "recorded at initialize:" in text, row
                 assert row["exit"] != 0 and row["images"] == row["joint_stars"] == 0, row
                 # No new device allocation is allowed after the returned fatal status.
                 tail = (args.output / row["name"] / "run.log").read_text().split(
@@ -103,7 +107,7 @@ def main():
         for code in ("recoverable", "zero-devices"):
             row, text = run(f"{boundary}-{code}", ordinal, code)
             completed(row)
-            assert all(marker not in text for marker in markers.values()), row
+            assert all(marker not in text for marker in refusal_markers), row
             candidate = args.output / row["name"]
             subprocess.run([sys.executable, str(args.comparator),
                             str(args.output / "healthy"), str(candidate),
@@ -114,7 +118,7 @@ def main():
         if mutant:
             row, text = run(f"{boundary}-mutant", ordinal, "poison", mutant)
             completed(row)
-            assert all(marker not in text for marker in markers.values()), row
+            assert all(marker not in text for marker in refusal_markers), row
     report = dict(status="PASS", production_ordinals=ordinals, runs=rows,
                   mutation_controls="PASS" if args.initialize_mutant and args.patch_mutant else "UNRUN",
                   scope="Returned error-code injection with clean last-error slot; no real context poisoning")

@@ -1,0 +1,37 @@
++ git clone -q --branch t3code/integrate-cuda-multigpu-candidate --single-branch https://github.com/KingAlejandro/MotionCorr-standalone.git hybrid
++ cd hybrid
+++ git rev-parse HEAD
++ echo composed=b98c061134dc0bbab2027c6243187b146e20fe6e
+composed=b98c061134dc0bbab2027c6243187b146e20fe6e
++ git checkout 6393547e -- src/motioncorr_runner.cpp
++ git diff --stat HEAD -- src/
+ src/motioncorr_runner.cpp | 393 ++++------------------------------------------
+ 1 file changed, 27 insertions(+), 366 deletions(-)
++ echo '--- CPU-path lines differing between main and composed runner (outside _CUDA_ENABLED) ---'
+--- CPU-path lines differing between main and composed runner (outside _CUDA_ENABLED) ---
++ git diff HEAD -- src/motioncorr_runner.cpp
++ grep -cE '^[+-][^+-]'
+384
++ cd ..
++ exec
++ flock -w 3600 9
++ taskset -c 32-47 numactl --membind=1 cmake -S hybrid -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=ON -DPython3_EXECUTABLE=/home/ubuntu/.mc-venv/bin/python
++ echo configure_rc=0
+configure_rc=0
++ taskset -c 32-47 numactl --membind=1 cmake --build build -j16
++ BR=0
++ echo build_rc=0
+build_rc=0
++ '[' 0 -ne 0 ']'
++ taskset -c 32-47 numactl --membind=1 ctest --test-dir build --output-on-failure
++ echo ctest_rc=8
+ctest_rc=8
++ grep -E 'tests passed|tests failed' ctest.log
+96% tests passed, 1 tests failed out of 23
++ awk '/The following tests FAILED/,0' ctest.log
++ head -10
+The following tests FAILED:
+	 21 - MultiGpuScheduling (Failed)
+Errors while running CTest
++ echo OLDSOURCE2_DONE
+OLDSOURCE2_DONE

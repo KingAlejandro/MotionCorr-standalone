@@ -50,7 +50,13 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "multi_gpu"))
-import gpu_witness  # noqa: E402
+try:
+    import gpu_witness  # noqa: E402
+except ImportError as _exc:  # host RSS still works; GPU sampling reports why it did not
+    gpu_witness = None
+    _GPU_IMPORT_ERROR = f"gpu_witness unavailable: {_exc}"
+else:
+    _GPU_IMPORT_ERROR = None
 
 PAGE_SIZE = os.sysconf("SC_PAGE_SIZE")
 
@@ -97,6 +103,10 @@ def _tree_rss_kib(pids: list[int]) -> tuple[int, int]:
 
 
 class AggregateSampler(threading.Thread):
+    # The stop flag is _stop_event, not _stop: threading.Thread already has a
+    # private _stop(), and join() calls it through _wait_for_tstate_lock once
+    # the thread has finished. Shadowing it makes every join() raise
+    # "'Event' object is not callable" after the run has already completed.
     def __init__(self, roots: list[int], uuids: list[str], interval: float):
         super().__init__(daemon=True)
         self.roots = roots
@@ -104,13 +114,13 @@ class AggregateSampler(threading.Thread):
         self.interval = interval
         self.sweeps: list[dict] = []
         self.error: str | None = None
-        self._stop = threading.Event()
+        self._stop_event = threading.Event()
 
     def run(self) -> None:
         if not Path("/proc").is_dir():
             self.error = "no /proc on this platform; no host RSS was sampled"
             return
-        while not self._stop.is_set():
+        while not self._stop_event.is_set():
             t = time.time()
             try:
                 kids = _children_map()
@@ -122,7 +132,9 @@ class AggregateSampler(threading.Thread):
                 self.error = f"host sweep failed: {type(exc).__name__}: {exc}"
                 return
             gpu, gpu_err = {}, None
-            if self.uuids:
+            if self.uuids and gpu_witness is None:
+                gpu_err = _GPU_IMPORT_ERROR
+            elif self.uuids:
                 try:
                     for app in gpu_witness.compute_apps():
                         if app["gpu_uuid"] in self.uuids:
@@ -133,10 +145,10 @@ class AggregateSampler(threading.Thread):
             self.sweeps.append({"t": round(t, 3), "rss_kib": rss_kib,
                                 "pids": counted, "gpu_mib_by_uuid": gpu,
                                 "gpu_error": gpu_err})
-            self._stop.wait(self.interval)
+            self._stop_event.wait(self.interval)
 
     def stop(self) -> None:
-        self._stop.set()
+        self._stop_event.set()
 
     def record(self) -> dict:
         n = len(self.sweeps)

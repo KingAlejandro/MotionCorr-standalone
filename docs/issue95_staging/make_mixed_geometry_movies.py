@@ -77,8 +77,20 @@ def main():
     (root / "Movies").mkdir(parents=True, exist_ok=False)
     for stem, nx, ny, nf in MOVIES:
         write_tiff(root / "Movies" / f"{stem}.tif", nx, ny, nf, stem)
-    star = ["", "data_movies", "", "loop_", "_rlnMicrographMovieName #1", ""]
-    star += [f"Movies/{stem}.tif" for stem, _, _, _ in MOVIES] + [""]
+    # RELION 3.1 layout. Without a data_optics block carrying voltage, Cs and a
+    # pixel size, ObservationModel rejects the input before any movie is read --
+    # which it did, identically in all three arms, on the first attempt at this
+    # dataset.
+    star = [
+        "# version 30001", "", "data_optics", "", "loop_",
+        "_rlnOpticsGroupName #1", "_rlnOpticsGroup #2",
+        "_rlnMicrographOriginalPixelSize #3", "_rlnVoltage #4",
+        "_rlnSphericalAberration #5", "_rlnAmplitudeContrast #6",
+        "opticsGroup1 1 1.0 200 1.4 0.1", "",
+        "# version 30001", "", "data_movies", "", "loop_",
+        "_rlnMicrographMovieName #1", "_rlnOpticsGroup #2",
+    ]
+    star += [f"Movies/{stem}.tif 1" for stem, _, _, _ in MOVIES] + [""]
     (root / "movies.star").write_text("\n".join(star) + "\n")
     spec = {"movies": [f"Movies/{s}.tif" for s, _, _, _ in MOVIES],
             "shapes": {s: [nx, ny, 1] for s, nx, ny, _ in MOVIES},

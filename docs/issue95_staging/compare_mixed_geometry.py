@@ -108,6 +108,13 @@ def main():
     a = ap.parse_args()
     cot = load_comparator()
     geom = json.loads(a.geometry.read_text())
+    # A run that failed before writing anything must be reported as a missing
+    # inventory, not as a traceback from the negative control's mutation step.
+    for side in (a.base, a.candidate):
+        if not inventory(side):
+            print(f"mixed-geometry comparison: FAIL; {side} contains no products")
+            print("OVERALL FAIL")
+            return 1
     # Deliberately NOT resolved: root_spellings() needs the spelling the run was
     # given as well as the resolved one.
     report = grade(cot, a.base, a.candidate, geom)

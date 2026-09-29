@@ -103,6 +103,22 @@ class TestAggregateSampler(unittest.TestCase):
         self.assertIn("max", rec["observed_sweep_spacing_s"])
 
 
+    def test_6_achieved_placement_is_read_back_not_restated(self):
+        """The mask must come from the kernel, so a mask that was NOT applied shows."""
+        import shutil
+        if not shutil.which("taskset"):
+            self.skipTest("no taskset on this host")
+        # Ask for one cpu; the record must show that one cpu, not the plan.
+        p = subprocess.Popen(["taskset", "-c", "1", sys.executable, "-c", HOLDER, "8", "0.0"])
+        rec = self._run([p])
+        got = [e for e in rec["achieved_placement"] if e.get("cpus_allowed_list")]
+        self.assertTrue(got, "no placement captured for any pid")
+        self.assertIn("1", [e["cpus_allowed_list"] for e in got],
+                      f"achieved mask not read back: {[e['cpus_allowed_list'] for e in got]}")
+        self.assertTrue(any(e.get("exe") for e in got), "no exe resolved for any pid")
+
+
+
 if __name__ == "__main__":
     if not Path("/proc").is_dir():
         print("SKIP: no /proc on this platform; these controls verified nothing.")

@@ -136,13 +136,15 @@ def run_arm(a: dict, block: int, cfg, ref: Path | None) -> dict:
                                    "rss_hwm_kib", "started_at", "ended_at")}
                                  for w in st.get("workers", [])]
         rec["cpu_masks_requested"] = st.get("cpu_masks")
-        rec["achieved_masks"] = st.get("achieved_cpu_masks")
         rec["witness"] = st.get("witness")
     else:
         rec.update({"retained": True, "excluded_because": "no status.json"})
     mem_path = out_root.parent / f"{a['arm']}.memory.json"
     if mem_path.is_file():
         rec["memory"] = json.loads(mem_path.read_text())
+        # Achieved masks, actual pids and the OMP values each worker really held
+        # come from the sampler's /proc readback, not from the launcher's plan.
+        rec["achieved_placement"] = rec["memory"].pop("achieved_placement", None)
         rec["memory"].pop("sweeps_raw", None)   # kept on disk, not in the index
     else:
         rec["excluded_because"] = "no memory record"

@@ -102,6 +102,39 @@ def _tree_rss_kib(pids: list[int]) -> tuple[int, int]:
     return total, counted
 
 
+def _placement(pid: int) -> dict | None:
+    """What this process was ACTUALLY given, read from the kernel.
+
+    The launcher records the taskset mask it requested. A mask that was not
+    applied, or an OMP setting the worker did not inherit, is invisible there,
+    and thread placement is a first-order effect on this workload -- so the
+    achieved values are read back from /proc rather than restated from the plan.
+    """
+    try:
+        status = Path(f"/proc/{pid}/status").read_text()
+    except OSError:
+        return None
+    rec: dict[str, object] = {"pid": pid}
+    for line in status.splitlines():
+        for key, field in (("Name:", "comm"), ("Cpus_allowed_list:", "cpus_allowed_list"),
+                           ("Mems_allowed_list:", "mems_allowed_list")):
+            if line.startswith(key):
+                rec[field] = line.split(None, 1)[1].strip() if len(line.split(None, 1)) > 1 else ""
+    try:
+        rec["exe"] = os.path.realpath(f"/proc/{pid}/exe")
+    except OSError:
+        rec["exe"] = None
+    try:
+        env = Path(f"/proc/{pid}/environ").read_bytes().split(b"\0")
+        wanted = ("OMP_PROC_BIND", "OMP_PLACES", "OMP_NUM_THREADS", "CUDA_VISIBLE_DEVICES")
+        rec["env"] = {k: v for k, v in
+                      (e.decode("utf-8", "replace").split("=", 1) for e in env if b"=" in e)
+                      if k in wanted}
+    except OSError:
+        rec["env"] = None
+    return rec
+
+
 class AggregateSampler(threading.Thread):
     # The stop flag is _stop_event, not _stop: threading.Thread already has a
     # private _stop(), and join() calls it through _wait_for_tstate_lock once
@@ -113,6 +146,10 @@ class AggregateSampler(threading.Thread):
         self.uuids = [u for u in uuids if u]
         self.interval = interval
         self.sweeps: list[dict] = []
+        # pid -> achieved placement, captured the first sweep the pid is seen in.
+        # Late capture would miss a worker that exits between sweeps, so the
+        # record says how many pids were ever seen against how many were placed.
+        self.placement: dict[int, dict] = {}
         self.error: str | None = None
         self._stop_event = threading.Event()
 
@@ -125,6 +162,11 @@ class AggregateSampler(threading.Thread):
             try:
                 kids = _children_map()
                 pids = _descendants(self.roots, kids)
+                for pid in pids:
+                    if pid not in self.placement:
+                        got = _placement(pid)
+                        if got is not None:
+                            self.placement[pid] = got
                 rss_kib, counted = _tree_rss_kib(pids)
             except Exception as exc:  # noqa: BLE001
                 # Record and stop. A sampler that dies silently would certify the
@@ -158,6 +200,12 @@ class AggregateSampler(threading.Thread):
             "roots": self.roots,
             "uuids": self.uuids,
             "error": self.error,
+            "achieved_placement": list(self.placement.values()),
+            "achieved_placement_note": (
+                "Cpus_allowed_list, Mems_allowed_list, realpath(/proc/pid/exe) and the "
+                "OMP/CUDA_VISIBLE_DEVICES values the process actually holds, captured "
+                "on the first sweep each pid was seen in. A process that started and "
+                "exited entirely between two sweeps has no entry."),
             "semantics": (
                 "peak_simultaneous_host_rss_kib is the maximum over sweeps of one "
                 "sweep's total across the whole descendant tree, ghostscript "

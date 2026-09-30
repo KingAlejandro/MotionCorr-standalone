@@ -68,3 +68,109 @@ identical run with `--o` on `/dev/shm`:
 So 1.08 s is the cost of moving 1.37 GB into the page cache and 0.50 s is the
 filesystem underneath it. `out - mrc stats` is identical on both (1.31 vs
 1.31 s), as a pure-CPU stage should be.
+
+## What changed, and what each item is worth
+
+**One statistics pass per MRC write** (`cbf8dc7`). `writeMRC` asked `MDMainHeader`
+for amin, amax, amean and arms one at a time and fell back to
+`computeMin()`/`computeMax()`/`computeAvg()`/`computeStddev()` separately, so a
+14.2 M-pixel float micrograph was traversed four times per output file.
+`computeMinMaxAvgStddev` merges them, preserving every accumulator's type,
+seed, comparison form and summation order. `out - mrc stats` 1.37 → 0.40 s.
+
+**A Ghostscript pass that re-encoded its own input** (`cbf8dc7`). With no
+previous `all_batches.pdf`, `concatenatePDFfiles(all_batches.pdf, [batch.pdf])`
+is a one-input concatenation, and Ghostscript re-rendered `batch.pdf` to
+produce it: 0.30 s. It is now a copy when the single input starts with `%PDF`;
+anything else — including the empty placeholder written when no EPS was found —
+still goes to Ghostscript, so that diagnostic and its `false` return are
+unchanged. `out - gs all_batches.pdf` 0.295 → 0.001 s.
+
+**The two independent Ghostscript passes in parallel** (`cbf8dc7`).
+`header.pdf` and `batch.pdf` read disjoint EPS sets and write different files.
+0.126 + 0.310 serial → 0.315 s overlapped.
+
+**The writes moved off the critical path** (`92e7662`). One background thread
+writes movie N's products while the main thread computes movie N+1. The
+main-thread cost of `write corrected image` goes from 2.03 s to 0.001 s and
+`write star and shift plot` from 0.125 s to 0.001 s — the work is still done,
+in `out - mrc payload`, on the writer.
+
+## What it is worth end to end
+
+From `campaign_cuda.txt` — six rounds, arm order rotated, 24 movies, `--j 8`:
+
+| arm | median wall | vs baseline | rounds faster |
+|---|---|---|---|
+| baseline | 28.73 s | — | — |
+| + one stats pass, fewer gs passes | 27.41 s | **-1.26 s (-4.4%)** | 6/6 |
+| + background writer | 26.88 s | **-1.88 s (-6.5%)** | 6/6 |
+
+Neither arm's range overlaps the baseline's. Peak RSS is unchanged at
+1560 MiB: the extra in-flight micrograph is not what sets the peak.
+
+## Consistency and robustness
+
+**Products.** `compare_outputs.py` compares every file the two runs produced.
+MRC is compared as bytes 0-223 (which covers amin/amax/amean at 76/80/84 and
+arms at 216) and the payload from 1024 on; the 800-byte `strftime` label is
+reported and not asserted. STAR, EPS and list files are compared byte for
+byte. PDFs are compared as rendered page rasters, because Ghostscript stamps
+`/CreationDate` and a time-derived `/ID`. Logs are compared after dropping the
+lines that carry a duration. Both runs wrote to the same output path, one at a
+time, because the path is embedded in the STAR and EPS products. Results in
+`parity_cuda.txt`.
+
+The reference is the branch's parent `6393547`, not the local `main` ref
+(`1d7e13f`), which is 113 non-merge commits behind it. Comparing against that
+ref would mix this work with everything already merged — the first paired run
+did exactly that and attributed 5.4 s to these changes, of which 2.3 s was the
+gain-reference cache.
+
+**Fail-closed behaviour.** The property the background writer could plausibly
+break is the one `tests/test_write_faults.py` asserts: a movie whose image
+write fails must leave no completion record, must not enter the joint STAR, and
+must be reprocessed on `--only_do_unfinished`. It is preserved structurally —
+the per-movie STAR is submitted after the images into the same FIFO, and the
+first failure in a group cancels the rest of that group — and the test passes.
+
+**Test suite.** `ctest` on `small-refmac-machine`, both the baseline and the
+final tree: 20 of 21 pass, including `WriteFaults`, `GlobalIfftElision` (which
+covers `--even_odd_split` and `--save_noDW`, so the multi-image-per-movie path),
+`Runner_resume`, `DamagedMovie`, and the new `MrcHeaderStats`.
+`CiFailClosedControls` fails identically in the baseline: it shells out to a
+bare `cmake`, which is not on PATH there (only `~/.mc-venv/bin/cmake`), and it
+asserts on a git-ref error message that differs because the tree was staged
+with `git archive` and has no git metadata. Both are artefacts of how the tree
+was staged, not of these changes. Logs in `ctest_*.log`.
+
+**What the fused statistics routine is tested against.** `MrcHeaderStats`
+compares it with all four originals bit for bit over 13 cases. Five separate
+mutations of it are rejected by those cases and one is not, because that one is
+provably equivalent; `mutants.txt` has the record and the reasoning.
+
+## What is left, and what was considered and not done
+
+After the three changes, the output work still on the critical path is the
+Ghostscript tail: `gs header.pdf` overlapped with `gs batch.pdf` (0.32 s) and
+then `gs logfile.pdf` (0.32 s), about 0.66 s, 2.5% of wall. It is a tail: it
+runs after the last movie, so there is no computation left to overlap it with,
+and the only parallelism in it is the one already taken.
+
+Considered and not done:
+
+- **Build `logfile.pdf` in one Ghostscript pass** over the header EPS, the
+  pre-existing `all_batches.pdf` and the batch EPS, concurrently with the other
+  two passes. Same pages, saves about 0.2 s. Rejected for now: it changes
+  `logfile.pdf` from a concatenation of two Ghostscript-produced PDFs into a
+  direct render, which is a larger claim to defend than 0.8% of wall is worth.
+- **Parallelising the statistics reduction.** It would change the summation
+  order, and therefore amean and arms in the published header. Mutation B in
+  `mutants.txt` is exactly this, and the test rejects it.
+- **Fixing `computeStats`**, which has the seeding defect described above. Its
+  existing callers depend on the values it returns; that is a separate change
+  with its own parity question.
+
+The largest remaining stages are not output at all: `read movie` at 7.1 s (26%
+of wall) and `apply gain and initial sum` at 3.6 s (13%). Those are issues #85,
+#94 and #95.

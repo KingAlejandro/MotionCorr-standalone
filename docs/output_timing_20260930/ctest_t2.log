@@ -1,0 +1,87 @@
+# ctest, small-refmac-machine, taskset -c 56-63, Release -O3, TIMING=ON,
+# BUILD_TESTING=ON with -DPython3_EXECUTABLE=~/.mc-venv/bin/python.
+# arm: t2
+
+Test project /home/ubuntu/mc-output-speed-20260930/src-t2/build-cpu
+      Start  1: RunnerInterpolateRecenter
+      Start  2: MrcHeaderStats
+      Start  3: DefectParser
+      Start  4: SyntheticRegression
+ 1/21 Test  #1: RunnerInterpolateRecenter ........   Passed    0.01 sec
+      Start  5: HotPixelRngDeterminism
+ 2/21 Test  #3: DefectParser .....................   Passed    0.01 sec
+      Start  6: RunnerExposure
+ 3/21 Test  #2: MrcHeaderStats ...................   Passed    0.01 sec
+      Start  7: Runner_failure
+ 4/21 Test  #7: Runner_failure ...................   Passed    0.14 sec
+      Start  8: Runner_invalid
+ 5/21 Test  #8: Runner_invalid ...................   Passed    0.11 sec
+      Start  9: Runner_resume
+ 6/21 Test  #6: RunnerExposure ...................   Passed    0.61 sec
+      Start 10: Runner_tomography
+ 7/21 Test  #5: HotPixelRngDeterminism ...........   Passed    0.76 sec
+      Start 11: RunnerLateBin
+ 8/21 Test  #4: SyntheticRegression ..............   Passed    0.85 sec
+      Start 12: RunnerExportedUnits
+ 9/21 Test #12: RunnerExportedUnits ..............   Passed    0.14 sec
+      Start 13: GainCache
+10/21 Test #10: Runner_tomography ................   Passed    0.47 sec
+      Start 14: TiffRead
+11/21 Test #11: RunnerLateBin ....................   Passed    0.72 sec
+      Start 15: DamagedMovie
+12/21 Test #14: TiffRead .........................   Passed    0.60 sec
+      Start 16: GlobalIfftElision
+13/21 Test #13: GainCache ........................   Passed    1.42 sec
+      Start 17: RunnerModelParser
+14/21 Test #17: RunnerModelParser ................   Passed    0.17 sec
+      Start 18: RunnerInterpolateShifts
+15/21 Test  #9: Runner_resume ....................   Passed    2.36 sec
+      Start 19: WriteFaults
+16/21 Test #19: WriteFaults ......................   Passed    0.60 sec
+      Start 20: CiFailClosedControls
+17/21 Test #16: GlobalIfftElision ................   Passed    1.59 sec
+      Start 21: ImageWriteFaults
+18/21 Test #18: RunnerInterpolateShifts ..........   Passed    0.68 sec
+19/21 Test #21: ImageWriteFaults .................   Passed    0.02 sec
+20/21 Test #15: DamagedMovie .....................   Passed    3.46 sec
+21/21 Test #20: CiFailClosedControls .............***Failed    8.09 sec
+.E...F..
+======================================================================
+ERROR: test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-output-speed-20260930/src-t2/tools/test_ci_fail_closed.py", line 133, in test_2_absent_dependency_fails_cmake
+    res_on = subprocess.run([
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'cmake'
+
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-output-speed-20260930/src-t2/tools/test_ci_fail_closed.py", line 400, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+----------------------------------------------------------------------
+Ran 8 tests in 8.027s
+
+FAILED (failures=1, errors=1)
+
+
+95% tests passed, 1 tests failed out of 21
+
+Total Test time (real) =  11.32 sec
+
+The following tests FAILED:
+	 20 - CiFailClosedControls (Failed)
+Errors while running CTest

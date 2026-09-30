@@ -1,0 +1,29 @@
+[  0%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+/home/alex/mc-pr115-enumeration-20260929/src/src/acc/cuda/cuda_fft_prep.cu(35): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[  1%] Linking CXX static library libmotioncorr_core.a
+[ 79%] Built target motioncorr_core
+[ 80%] Linking CXX executable motioncorr
+[ 82%] Linking CXX executable runner_numerics
+[ 82%] Linking CXX executable defect_parser
+[ 83%] Linking CXX executable patch_retry_state
+[ 84%] Built target patch_retry_state
+[ 85%] Built target motioncorr
+[ 87%] Built target runner_numerics
+[ 87%] Built target defect_parser
+[ 89%] Linking CXX executable image_write_faults
+[ 89%] Linking CXX executable cuda_wrapper_upload_failure
+[ 90%] Linking CXX executable cuda_fault_matrix
+[ 91%] Linking CXX executable motioncorr_retry_caller
+[ 92%] Built target cuda_fault_matrix
+[ 93%] Linking CXX executable motioncorr_faultinject
+[ 94%] Built target cuda_wrapper_upload_failure
+[ 95%] Built target image_write_faults
+[ 97%] Built target motioncorr_retry_caller
+[ 98%] Linking CXX executable cuda_error_class
+[ 98%] Built target cuda_error_class
+[100%] Built target motioncorr_faultinject

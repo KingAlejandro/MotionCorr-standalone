@@ -22,8 +22,15 @@ import zlib
 NIBBLE_SUM = bytes((b & 0x0F) + ((b >> 4) & 0x0F) for b in range(256))
 
 
-def write_tiff(path, frame_rows, bits, compression, rows_per_strip, logical_width):
-    """Minimal little-endian classic TIFF writer, one IFD per frame."""
+def write_tiff(path, frame_rows, bits, compression, rows_per_strip, logical_width,
+               sample_format=1):
+    """Minimal little-endian classic TIFF writer, one IFD per frame.
+
+    sample_format is the TIFF SampleFormat tag: 1 unsigned integer (the reader's
+    UShort branch at 16 bits), 3 IEEE float. The compact-ingest support matrix
+    needs both from one writer, because its uint16/float32 arms must differ in
+    nothing but the sample type.
+    """
     height = len(frame_rows[0])
     with open(path, "wb") as fh:
         fh.write(b"II" + struct.pack("<HI", 42, 0))
@@ -57,7 +64,7 @@ def write_tiff(path, frame_rows, bits, compression, rows_per_strip, logical_widt
                 (278, 4, 1, rows_per_strip),
                 (279, 4, n, cnt_pos),
                 (284, 3, 1, 1),
-                (339, 3, 1, 1),
+                (339, 3, 1, sample_format),
             ])
             ifd_pos = fh.tell()
             fh.write(struct.pack("<H", len(entries)))

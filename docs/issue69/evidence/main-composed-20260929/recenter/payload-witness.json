@@ -1,0 +1,163 @@
+[
+  {
+    "command": [
+      "/home/alex/mc-pr115-enumeration-20260929/build/motioncorr",
+      "--i",
+      "synthetic_128x128_8frames.star",
+      "--o",
+      "off/",
+      "--use_own",
+      "--j",
+      "1",
+      "--patch_x",
+      "3",
+      "--patch_y",
+      "3",
+      "--angpix",
+      "1",
+      "--voltage",
+      "300",
+      "--dose_per_frame",
+      "1",
+      "--first_frame_sum",
+      "2",
+      "--group_frames",
+      "2",
+      "--gpu",
+      "0"
+    ],
+    "pid": 1871978,
+    "exe": "/home/alex/mc-pr115-enumeration-20260929/build/motioncorr",
+    "stat": "1871978 (motioncorr) R 1871977 1869215 1869215 0 -1 4194304 24 0 0 0 0 0 0 0 20 0 1 0 614645083 5210112 0 18446744073709551615 100169285500928 100169287494657 140735095208816 0 0 0 0 0 0 0 0 0 17 117 0 0 0 0 0 100169287960176 100169287967024 100170116431872 140735095217123 140735095217354 140735095217354 140735095218110 0\n",
+    "status": "Name:\tmotioncorr\nUmask:\t0002\nState:\tR (running)\nTgid:\t1871978\nNgid:\t0\nPid:\t1871978\nPPid:\t1871977\nTracerPid:\t0\nUid:\t1004\t1004\t1004\t1004\nGid:\t1004\t1004\t1004\t1004\nFDSize:\t64\nGroups:\t100 1004 \nNStgid:\t1871978\nNSpid:\t1871978\nNSpgid:\t1869215\nNSsid:\t1869215\nKthread:\t0\nVmPeak:\t    7360 kB\nVmSize:\t    7360 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     528 kB\nVmRSS:\t     528 kB\nRssAnon:\t      56 kB\nRssFile:\t     472 kB\nRssShmem:\t       0 kB\nVmData:\t     180 kB\nVmStk:\t     132 kB\nVmExe:\t    1948 kB\nVmLib:\t    3860 kB\nVmPTE:\t      52 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/1773298\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t0ff0000,00000000,00000000,00000000\nCpus_allowed_list:\t112-119\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003\nMems_allowed_list:\t0-1\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+    "numa_maps": "5b1a7aad7000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr mapped=9 active=0 N1=9 kernelpagesize_kB=4\n5b1a7aae0000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n5b1a7acc7000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n5b1a7ad38000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n753306a00000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 mapped=16 mapmax=2 active=0 N0=4 N1=12 kernelpagesize_kB=4\n753306a23000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n753306bf5000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n753306c26000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 anon=2 dirty=2 mapped=8 active=0 N1=8 kernelpagesize_kB=4\n753306e00000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 mapped=16 mapmax=2 active=0 N0=4 N1=12 kernelpagesize_kB=4\n753306e23000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n753306fe9000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n753307011000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n75330706f000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n753307077000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7533070c7000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7533070fc000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 mapped=11 mapmax=2 active=0 N0=11 kernelpagesize_kB=4\n753307107000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n753307143000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n753307150000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n753307152000 default file=/etc/ld.so.cache mapped=14 active=0 N0=14 kernelpagesize_kB=4\n753307160000 default anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n753307162000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=1 mapmax=58 N1=1 kernelpagesize_kB=4\n753307163000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=43 mapmax=65 N1=43 kernelpagesize_kB=4\n75330718e000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=10 mapmax=61 N1=10 kernelpagesize_kB=4\n753307198000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 anon=4 dirty=4 active=0 N1=4 kernelpagesize_kB=4\n7fff71599000 default stack anon=3 dirty=3 active=0 N1=3 kernelpagesize_kB=4\n7fff715e2000 default\n7fff715e6000 default\n",
+    "cuda_visible_devices": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "gpu_samples": [
+      {
+        "time": 1790690004.392196,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690004.5225801,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1871978, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690004.6266003,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1871978, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690004.7285173,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1871978, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690004.8312418,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1871978, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690004.9453049,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1871978, [No data]\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.047873,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+        "stderr": ""
+      }
+    ],
+    "returncode": 0,
+    "physical_gpu_witness": true
+  },
+  {
+    "command": [
+      "/home/alex/mc-pr115-enumeration-20260929/build/motioncorr",
+      "--i",
+      "synthetic_128x128_8frames.star",
+      "--o",
+      "on/",
+      "--use_own",
+      "--j",
+      "1",
+      "--patch_x",
+      "3",
+      "--patch_y",
+      "3",
+      "--angpix",
+      "1",
+      "--voltage",
+      "300",
+      "--dose_per_frame",
+      "1",
+      "--first_frame_sum",
+      "2",
+      "--group_frames",
+      "2",
+      "--gpu",
+      "0",
+      "--interpolate_shifts"
+    ],
+    "pid": 1872005,
+    "exe": "/home/alex/mc-pr115-enumeration-20260929/build/motioncorr",
+    "stat": "1872005 (motioncorr) R 1871977 1869215 1869215 0 -1 4194304 21 0 0 0 0 0 0 0 20 0 1 0 614645156 5210112 0 18446744073709551615 101133129076736 101133131070465 140720891609984 0 0 0 0 0 0 0 0 0 17 117 0 0 0 0 0 101133131535984 101133131542832 101134132432896 140720891612111 140720891612362 140720891612362 140720891613118 0\n",
+    "status": "Name:\tmotioncorr\nUmask:\t0002\nState:\tR (running)\nTgid:\t1872005\nNgid:\t0\nPid:\t1872005\nPPid:\t1871977\nTracerPid:\t0\nUid:\t1004\t1004\t1004\t1004\nGid:\t1004\t1004\t1004\t1004\nFDSize:\t64\nGroups:\t100 1004 \nNStgid:\t1872005\nNSpid:\t1872005\nNSpgid:\t1869215\nNSsid:\t1869215\nKthread:\t0\nVmPeak:\t    7360 kB\nVmSize:\t    7360 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     524 kB\nVmRSS:\t     524 kB\nRssAnon:\t      52 kB\nRssFile:\t     472 kB\nRssShmem:\t       0 kB\nVmData:\t     180 kB\nVmStk:\t     132 kB\nVmExe:\t    1948 kB\nVmLib:\t    3860 kB\nVmPTE:\t      56 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/1773298\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t0ff0000,00000000,00000000,00000000\nCpus_allowed_list:\t112-119\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003\nMems_allowed_list:\t0-1\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+    "numa_maps": "5bfae43b4000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr mapped=9 active=0 N1=9 kernelpagesize_kB=4\n5bfae43bd000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n5bfae45a4000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n5bfae4615000 default file=/home/alex/mc-pr115-enumeration-20260929/build/motioncorr anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n7b3fc9a00000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 mapped=16 mapmax=2 active=0 N0=4 N1=12 kernelpagesize_kB=4\n7b3fc9a23000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n7b3fc9bf5000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10\n7b3fc9c26000 default file=/usr/lib/x86_64-linux-gnu/libfftw3f.so.3.6.10 anon=2 dirty=2 mapped=8 active=0 N1=8 kernelpagesize_kB=4\n7b3fc9e00000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 mapped=16 mapmax=2 active=0 N0=4 N1=12 kernelpagesize_kB=4\n7b3fc9e23000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n7b3fc9fe9000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10\n7b3fca011000 default file=/usr/lib/x86_64-linux-gnu/libfftw3.so.3.6.10 anon=2 dirty=2 mapped=3 active=0 N1=3 kernelpagesize_kB=4\n7b3fca11d000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7b3fca125000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7b3fca175000 default file=/usr/lib/x86_64-linux-gnu/libtiff.so.6.0.1\n7b3fca1aa000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 mapped=11 mapmax=2 active=0 N0=11 kernelpagesize_kB=4\n7b3fca1b5000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n7b3fca1f1000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0\n7b3fca1fe000 default file=/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7b3fca200000 default file=/etc/ld.so.cache mapped=14 active=0 N0=14 kernelpagesize_kB=4\n7b3fca20e000 default anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7b3fca210000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=1 mapmax=55 N1=1 kernelpagesize_kB=4\n7b3fca211000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=43 mapmax=62 N1=43 kernelpagesize_kB=4\n7b3fca23c000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 mapped=10 mapmax=58 N1=10 kernelpagesize_kB=4\n7b3fca246000 default file=/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 anon=4 dirty=4 active=0 N1=4 kernelpagesize_kB=4\n7ffc22bfc000 default stack anon=2 dirty=2 active=0 N1=2 kernelpagesize_kB=4\n7ffc22d4c000 default\n7ffc22d50000 default\n",
+    "cuda_visible_devices": "GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598",
+    "gpu_samples": [
+      {
+        "time": 1790690005.1222165,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.2548828,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1872005, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.359842,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1872005, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.4628477,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1872005, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.567237,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1872005, /home/alex/mc-pr115-enumeration-20260929/build/motioncorr\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.6795692,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\nGPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1872005, [No data]\n",
+        "stderr": ""
+      },
+      {
+        "time": 1790690005.8049357,
+        "exit": 0,
+        "stdout": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1871900, /home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject\n",
+        "stderr": ""
+      }
+    ],
+    "returncode": 0,
+    "physical_gpu_witness": true
+  }
+]

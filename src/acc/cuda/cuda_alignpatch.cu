@@ -3,6 +3,7 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
+#include "src/acc/cuda/cuda_scoped_resources.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -18,6 +19,24 @@
         REPORT_ERROR("cuFFT error: code " + integerToString(err)); \
     } \
 } while (0)
+
+// Issue #69. Every error macro in this translation unit leaves by exception:
+// HANDLE_ERROR here is the cuda_settings.h variant, i.e. CRITICAL(ERRGPUKERN) ->
+// REPORT_ERROR -> throw RelionError, and CUFFT_CHECK throws directly. run() catches
+// RelionError per movie and continues with the remaining movies, so any resource this
+// file owns and does not unwind is leaked for the lifetime of the process, once per
+// failing global alignment and once per failing patch.
+//
+// The owners live in cuda_scoped_resources.h with statically proved capacities, so the
+// hot patch loop performs no host heap allocation for them (PR107 review P2).
+
+namespace {
+// Proved by counting call sites in cudaAlignPatchDevice below: eight cudaMalloc, eight
+// cudaEventCreate, one plan, none of them inside a loop. Overflow is checked after the
+// registrations rather than assumed.
+const int ALIGN_MAX_BUFFERS = 8;
+const int ALIGN_MAX_EVENTS  = 8;
+} // namespace
 
 static int findGoodSizeCuda(int request) {
     const int good_numbers[] = {192, 216, 256, 288, 324,
@@ -236,19 +255,35 @@ bool cudaAlignPatchDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // Ownership (issue #69): everything registered below is owned by this call and is
+    // released on every exit path, including the throwing ones. d_Fframes_in is
+    // borrowed -- it is the resident Fourier stack or the caller's patch scratch -- and
+    // is modified in place but never freed here.
+    mc_cuda::ScopedDeviceMemory<ALIGN_MAX_BUFFERS> memory_cleanup;
+    mc_cuda::ScopedCudaEvents<ALIGN_MAX_EVENTS> event_cleanup;
+    mc_cuda::ScopedCufftPlan plan_cleanup;
+
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_kernel, ev_stop_kernel;
     cudaEvent_t ev_start_cufft, ev_stop_cufft;
     cudaEvent_t ev_start_d2h, ev_stop_d2h;
 
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
+    event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
+    event_cleanup.add(ev_stop_total);
     HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
+    event_cleanup.add(ev_start_kernel);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
+    event_cleanup.add(ev_stop_kernel);
     HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
+    event_cleanup.add(ev_start_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
+    event_cleanup.add(ev_stop_cufft);
     HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
+    event_cleanup.add(ev_start_d2h);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
+    event_cleanup.add(ev_stop_d2h);
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -298,21 +333,40 @@ bool cudaAlignPatchDevice(
     float *d_shiftx = nullptr;
     float *d_shifty = nullptr;
 
+    // Register each allocation immediately, before the next one can throw.
     HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
+    memory_cleanup.add(d_Fref);
     HANDLE_ERROR(cudaMalloc(&d_weight, sz_weight));
+    memory_cleanup.add(d_weight);
     HANDLE_ERROR(cudaMalloc(&d_Fccs, sz_fccs));
+    memory_cleanup.add(d_Fccs);
     HANDLE_ERROR(cudaMalloc(&d_Iccs, sz_iccs));
+    memory_cleanup.add(d_Iccs);
     HANDLE_ERROR(cudaMalloc(&d_cur_xshifts, sz_shifts));
+    memory_cleanup.add(d_cur_xshifts);
     HANDLE_ERROR(cudaMalloc(&d_cur_yshifts, sz_shifts));
+    memory_cleanup.add(d_cur_yshifts);
     HANDLE_ERROR(cudaMalloc(&d_shiftx, sz_shifts));
+    memory_cleanup.add(d_shiftx);
     HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
+    memory_cleanup.add(d_shifty);
+
+    // Capacity control. add() refuses rather than silently dropping, so a future edit
+    // that adds a ninth resource fails here instead of leaking it on a throwing path.
+    if (memory_cleanup.overflowed() || event_cleanup.overflowed()) {
+        REPORT_ERROR("Internal error: CUDA alignment resource registry exceeded its "
+                     "fixed capacity; a resource would not have been released");
+    }
 
     size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
 
     // Initialize cuFFT batched C2R plan
     cufftHandle plan_c2r;
     int n[2] = {ccf_ny, ccf_nx};
-    CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames));
+    CUFFT_CHECK(cufftCreate(&plan_c2r));
+    plan_cleanup.take(plan_c2r);
+    size_t plan_work_bytes = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames, &plan_work_bytes));
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -446,25 +500,15 @@ bool cudaAlignPatchDevice(
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
 
-    // Cleanup
-    CUFFT_CHECK(cufftDestroy(plan_c2r));
-    HANDLE_ERROR(cudaFree(d_Fref));
-    HANDLE_ERROR(cudaFree(d_weight));
-    HANDLE_ERROR(cudaFree(d_Fccs));
-    HANDLE_ERROR(cudaFree(d_Iccs));
-    HANDLE_ERROR(cudaFree(d_cur_xshifts));
-    HANDLE_ERROR(cudaFree(d_cur_yshifts));
-    HANDLE_ERROR(cudaFree(d_shiftx));
-    HANDLE_ERROR(cudaFree(d_shifty));
-
-    HANDLE_ERROR(cudaEventDestroy(ev_start_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_total));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_kernel));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_cufft));
-    HANDLE_ERROR(cudaEventDestroy(ev_start_d2h));
-    HANDLE_ERROR(cudaEventDestroy(ev_stop_d2h));
+    // Cleanup. Release through the same objects that own the throwing paths, so there
+    // is exactly one release mechanism and no path can free twice. Every resource is
+    // attempted even if an earlier one fails; the first failure is still reported.
+    const cufftResult plan_release = plan_cleanup.releaseAll();
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    const cudaError_t event_release = event_cleanup.releaseAll();
+    CUFFT_CHECK(plan_release);
+    HANDLE_ERROR(memory_release);
+    HANDLE_ERROR(event_release);
 
     logfile << " [CUDA " << stage_name << "] completed; converged="
             << (converged ? "yes" : "no") << std::endl;
@@ -488,9 +532,18 @@ bool cudaAlignPatch(
     const int nfx = XSIZE(Fframes[0]), nfy = YSIZE(Fframes[0]);
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
 
+    // Issue #69: this staging buffer is owned by the wrapper, and every step below --
+    // the uploads, the device call and the global copyback -- can leave by exception.
+    // Register it before the first of them can throw.
+    mc_cuda::ScopedDeviceMemory<1> memory_cleanup;
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc(&d_Fframes, sz_fframes));
+    memory_cleanup.add(d_Fframes);
+    if (memory_cleanup.overflowed()) {
+        REPORT_ERROR("Internal error: CUDA alignment staging registry exceeded its "
+                     "fixed capacity; a resource would not have been released");
+    }
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         HANDLE_ERROR(cudaMemcpy(
@@ -517,7 +570,7 @@ bool cudaAlignPatch(
         }
     }
 
-    HANDLE_ERROR(cudaFree(d_Fframes));
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return converged;
 }
 

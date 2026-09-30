@@ -10,6 +10,7 @@
 
 #ifdef _CUDA_ENABLED
 #include <cufft.h>
+#include "src/acc/cuda/cuda_failure_state.h"
 
 /**
  * CUDA implementation of analytical dose weighting, cuFFT inverse transform,
@@ -24,7 +25,8 @@ bool cudaDoseWeightAndInterpolate(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
 );
 
 /**
@@ -39,7 +41,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
 );
 
 /**
@@ -55,7 +58,8 @@ bool cudaRealSpaceInterpolation(
     const std::vector<Image<float> > &Iframes,
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
 );
 
 /**
@@ -70,7 +74,8 @@ bool cudaRealSpaceInterpolationDevice(
     const int nx, const int ny, const int n_frames,
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
-    std::ostream &logfile
+    std::ostream &logfile,
+    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
 );
 
 #endif // _CUDA_ENABLED

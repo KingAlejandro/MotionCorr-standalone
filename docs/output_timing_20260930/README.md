@@ -21,7 +21,7 @@ local disk; `/dev/shm` was used only for the filesystem probe below.
 | `t2` | + `92e7662`, `b796441` | plus the background output writer |
 
 `instr` is the measurement baseline rather than `main`: the local `main` ref
-(`1d7e13f`) is 30-odd commits behind this branch's parent, and comparing against
+(`1d7e13f`) is 113 non-merge commits behind this branch's parent, and comparing against
 it credits this work with unrelated merged changes — a first paired run did
 exactly that, reporting -5.4 s where the gain cache alone accounted for 2.3 s.
 
@@ -29,8 +29,12 @@ exactly that, reporting -5.4 s where the gain cache alone accounted for 2.3 s.
 
 - `stage_baseline.txt` — the baseline decomposition, three repeats.
 - `fs_probe.txt` — the same run with output to `/dev/shm` instead of disk.
-- `campaign_cuda.txt`, `campaign_cpu.txt` — rotated multi-arm timing.
-- `parity_*.txt` — product comparisons against the baseline.
+- `campaign_cuda.txt` — the six-round CUDA campaign; the cleanest timing.
+- `campaign_cuda_final.txt` — the final binaries at `--j 8` and `--j 6`.
+- `campaign_cpu.txt` — the CPU-path campaign on `small-refmac-machine`.
+- `parity_cuda.txt` — product comparison against the baseline.
+- `mutants.txt`, `mutation_probe.cpp` — what the statistics test can reject.
+- `ctest_instr.log`, `ctest_t2.log` — the suite, baseline and final tree.
 - `compare_outputs.py` — the comparator: MRC core header and payload exactly,
   STAR/EPS exactly, PDF by rendered page raster, log ignoring timed lines.
 - `summarise_runs.py` — the campaign summariser.

@@ -1,5 +1,7 @@
-# Output destination probe: local disk (/home, QEMU HDD) vs tmpfs (/dev/shm)
-# Same binary (instr arm), alternating order, otherwise identical to the baseline runs.
+# Output destination probe: local disk (/home, QEMU HDD) vs tmpfs (/dev/shm).
+# Same binary (instr arm = 6393547 + sub-timers), 4-gpu-vm, taskset -c 96-103,
+# under flock, 24 tutorial movies, --j 8 --gpu 0. Two pairs, order alternated
+# within each pair (disk,shm then shm,disk).
 
 == disk_p1 (wall 0:28.59) ==
 write corrected image              : 2.906 sec (121122 microsec/operation)
@@ -19,5 +21,11 @@ out - mrc stats                    : 1.316 sec (54843 microsec/operation)
 out - mrc payload                  : 1.083 sec (45164 microsec/operation)
 out - mrc close                    : 0.001 sec (46 microsec/operation)
 
-# probe_disk_p2 produced no stage table: the run was still writing when its
-# output directory was removed by the next iteration; excluded.
+== disk_p2 (wall 0:29.14) ==
+write corrected image              : 2.971 sec (123811 microsec/operation)
+out - mrc stats                    : 1.33 sec (55431 microsec/operation)
+out - mrc payload                  : 1.63 sec (67931 microsec/operation)
+out - mrc close                    : 0.001 sec (67 microsec/operation)
+
+# Medians: out - mrc payload 1.58 s on disk, 1.08 s on tmpfs; out - mrc stats
+# 1.31 s on both, as a pure-CPU stage should be.

@@ -70,3 +70,30 @@ digests, with cross-version evidence for 1.26.4 / 2.2.6 / 2.4.1.
 The 24-movie run there (25.74 s, 0.90 GiB, compact arm) is a functional sanity
 check on a different GPU model, not a timing result: one observation, and the
 `gpu-devel` node was not exclusive.
+
+## Final head, measured — SCARF `gnx002` exclusive, job 3515779
+
+`scarf-3515779-final.log`. Source **`f41460e`**, candidate binary `3b51580832`,
+main binary `675fccf3f4`, input `fb998f70`. A100-SXM4-40GB, CUDA 12.8.61,
+`--exclusive`, 24 movies, 5 repeats interleaved, each arm at its own best
+operating point.
+
+| arm | median s | five observations | host RSS |
+|---|---|---|---|
+| candidate nvCOMP, `--j 6 --max_io_threads 6` | **12.93** | 12.87 12.92 12.93 12.93 12.99 | **0.551 GiB** |
+| candidate compact, `--j 6 --max_io_threads 6` | 20.28 | 20.20 20.26 20.28 20.36 21.52 | 0.901 |
+| candidate float, `--j 8` | 20.40 | 20.35 20.39 20.40 20.45 20.51 | 1.536 |
+| main, `--j 8` | 24.57 | 24.51 24.57 24.57 24.59 24.60 | 1.535 |
+
+**x1.90 wall, 2.79x host RSS.** Every arm produced 24/24 MRC.
+
+This supersedes the 4GPUs `154e8aa` campaign (x2.05) as the claim about the
+tree that would land, and does not extend it. Different venue: A100-SXM4-40GB
+rather than A100 80GB PCIe, and 4GPUs went offline mid-campaign. The ratio
+differs because **main is faster here** (24.57 s against 31.40 s) while nvCOMP
+is about the same (12.93 against 15.31) -- the ceiling moved, not the floor.
+The exclusive allocation also shows how tight the arms are: 0.12 s across five
+nvCOMP runs, 0.09 s across five main runs.
+
+Tests at this head: nvCOMP 39/39, CUDA-without-nvCOMP 38/38, CPU-only 32/32.
+Support matrix 26/31 PASS, 0 FAIL, 5 matched-rejection rows.

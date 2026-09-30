@@ -1869,12 +1869,22 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// d_Iframes survives releasePreprocessingBuffers(), which frees only d_gain
 	// and d_Isum, so this is also correct at the forward-FFT boundary.
 	//
-	// Returns false when the copy itself fails; the guard before the forward FFT
-	// turns that into a clean failure of this movie rather than a corrupt one.
+	// Returns false when the copy itself fails. EVERY caller must act on that:
+	// a discarded return leaves the same zero-size frames the copy existed to
+	// prevent, and discard_preprocessing_session only throws for a POISONING
+	// code, so a copy that fails with an ordinary error would otherwise fall
+	// straight through to the transform.
 	auto preserve_device_movie = [&]() -> bool {
 		if (!movie_session || !nvcomp_ingested) return true;   // host movie intact
 		if (!Iframes.empty() && Iframes[0]().nzyxdim != 0) return true;  // already copied
 		if (!movie_session->downloadRealFrames(Iframes)) {
+			// downloadRealFrames reshapes then copies frame by frame, so a
+			// failure part way leaves frames 0..k-1 valid, frame k allocated but
+			// uninitialised and the rest zero-size. The "already copied" test
+			// above inspects only Iframes[0] and would read that as a finished
+			// copy. Clear it, so a partial result cannot be mistaken for a
+			// complete one by this lambda or by any later emptiness check.
+			for (size_t i = 0; i < Iframes.size(); i++) Iframes[i].clear();
 			logfile << "WARNING: could not copy the resident movie back before releasing the "
 			        << "CUDA session; this movie has no representation left to fall back on."
 			        << std::endl;
@@ -2292,12 +2302,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
 			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
-				preserve_device_movie();
+				const bool kept_prep = preserve_device_movie();
 				discard_preprocessing_session("sparse defect preparation");
+				if (!kept_prep)
+					REPORT_ERROR("Sparse defect preparation failed for " + fn_mic + " and the "
+					             "device movie could not be copied back.");
 				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
-				preserve_device_movie();
+				const bool kept_update = preserve_device_movie();
 				discard_preprocessing_session("sparse defect update");
+				if (!kept_update)
+					REPORT_ERROR("The sparse defect update failed for " + fn_mic + " and the "
+					             "device movie could not be copied back.");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
 			}
 		}
@@ -2384,8 +2400,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {
-			preserve_device_movie();
+			// Checked, unlike the two defect-block sites: the pre-FFT guard above
+			// is gated on !movie_session and has already run by the time we get
+			// here, so nothing downstream would catch a failed copy. Without
+			// this, a copy that fails with a non-poisoning code reaches the CPU
+			// transform with zero-size frames and REPORT_ERROR leaves an OpenMP
+			// region, which is std::terminate for the whole job.
+			const bool recovered = preserve_device_movie();
 			discard_preprocessing_session("resident forward FFT");
+			if (!recovered)
+				REPORT_ERROR("The resident forward FFT failed for " + fn_mic + " and the "
+				             "device movie could not be copied back, so no valid "
+				             "representation remains. Failing this movie rather than "
+				             "transforming empty frames.");
 			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
 			materialize_host_frames();
 		}

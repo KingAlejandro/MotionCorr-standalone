@@ -138,15 +138,21 @@ must be reprocessed on `--only_do_unfinished`. It is preserved structurally —
 the per-movie STAR is submitted after the images into the same FIFO, and the
 first failure in a group cancels the rest of that group — and the test passes.
 
-**Test suite.** `ctest` on `small-refmac-machine`, both the baseline and the
-final tree: 20 of 21 pass, including `WriteFaults`, `GlobalIfftElision` (which
-covers `--even_odd_split` and `--save_noDW`, so the multi-image-per-movie path),
-`Runner_resume`, `DamagedMovie`, and the new `MrcHeaderStats`.
+**Test suite.** `ctest` on `small-refmac-machine`: the baseline passes 20 of 21
+(`ctest_instr.log`) and the final tree 21 of 22 (`ctest_final.log`), including
+`WriteFaults`, `GlobalIfftElision` (which covers `--even_odd_split` and
+`--save_noDW`, so the multi-image-per-movie path), `Runner_resume`,
+`DamagedMovie`, and the new `MrcHeaderStats` and `PdfConcat`.
 `CiFailClosedControls` fails identically in the baseline: it shells out to a
 bare `cmake`, which is not on PATH there (only `~/.mc-venv/bin/cmake`), and it
 asserts on a git-ref error message that differs because the tree was staged
 with `git archive` and has no git metadata. Both are artefacts of how the tree
-was staged, not of these changes. Logs in `ctest_*.log`.
+was staged, not of these changes.
+
+`PdfConcat` failed on its first run against a host that has Ghostscript,
+because it asserted an outcome for an empty input that Ghostscript never
+produced. That is recorded in `mutants.txt` and the case was removed; the
+version here passes with and without Ghostscript installed.
 
 **What the fused statistics routine is tested against.** `MrcHeaderStats`
 compares it with all four originals bit for bit over 13 cases. Five separate

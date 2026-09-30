@@ -1,0 +1,93 @@
+# ctest on the final tree, small-refmac-machine, taskset -c 56-63, Release -O3,
+# TIMING=ON, BUILD_TESTING=ON with -DPython3_EXECUTABLE=~/.mc-venv/bin/python.
+#
+# CiFailClosedControls fails identically in the baseline (ctest_instr.log): it
+# shells out to a bare 'cmake', which is not on PATH on this host, and asserts
+# on a git-ref message that differs because the tree was staged with
+# 'git archive' and carries no git metadata. Both are staging artefacts.
+
+Test project /home/ubuntu/mc-output-speed-20260930/src-final2/build-cpu
+      Start  1: RunnerInterpolateRecenter
+      Start  2: MrcHeaderStats
+      Start  3: PdfConcat
+      Start  4: DefectParser
+ 1/22 Test  #1: RunnerInterpolateRecenter ........   Passed    0.01 sec
+      Start  5: SyntheticRegression
+ 2/22 Test  #4: DefectParser .....................   Passed    0.01 sec
+      Start  6: HotPixelRngDeterminism
+ 3/22 Test  #2: MrcHeaderStats ...................   Passed    0.01 sec
+      Start  7: RunnerExposure
+ 4/22 Test  #3: PdfConcat ........................   Passed    0.06 sec
+      Start  8: Runner_failure
+ 5/22 Test  #8: Runner_failure ...................   Passed    0.13 sec
+      Start  9: Runner_invalid
+ 6/22 Test  #9: Runner_invalid ...................   Passed    0.11 sec
+      Start 10: Runner_resume
+ 7/22 Test  #7: RunnerExposure ...................   Passed    0.56 sec
+      Start 11: Runner_tomography
+ 8/22 Test  #6: HotPixelRngDeterminism ...........   Passed    0.66 sec
+      Start 12: RunnerLateBin
+ 9/22 Test  #5: SyntheticRegression ..............   Passed    0.88 sec
+      Start 13: RunnerExportedUnits
+10/22 Test #13: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 14: GainCache
+11/22 Test #11: Runner_tomography ................   Passed    0.47 sec
+      Start 15: TiffRead
+12/22 Test #12: RunnerLateBin ....................   Passed    0.77 sec
+      Start 16: DamagedMovie
+13/22 Test #15: TiffRead .........................   Passed    0.66 sec
+      Start 17: GlobalIfftElision
+14/22 Test #14: GainCache ........................   Passed    1.43 sec
+      Start 18: RunnerModelParser
+15/22 Test #10: Runner_resume ....................   Passed    2.15 sec
+      Start 19: RunnerInterpolateShifts
+16/22 Test #18: RunnerModelParser ................   Passed    0.16 sec
+      Start 20: WriteFaults
+17/22 Test #20: WriteFaults ......................   Passed    0.53 sec
+      Start 21: CiFailClosedControls
+18/22 Test #19: RunnerInterpolateShifts ..........   Passed    0.75 sec
+      Start 22: ImageWriteFaults
+19/22 Test #22: ImageWriteFaults .................   Passed    0.03 sec
+20/22 Test #17: GlobalIfftElision ................   Passed    1.63 sec
+21/22 Test #16: DamagedMovie .....................   Passed    3.45 sec
+22/22 Test #21: CiFailClosedControls .............***Failed    8.48 sec
+.E...F..
+======================================================================
+ERROR: test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-output-speed-20260930/src-final2/tools/test_ci_fail_closed.py", line 133, in test_2_absent_dependency_fails_cmake
+    res_on = subprocess.run([
+             ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'cmake'
+
+======================================================================
+FAIL: test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ubuntu/mc-output-speed-20260930/src-final2/tools/test_ci_fail_closed.py", line 400, in test_6_trusted_git_lookup_and_tampered_disk_manifest
+    self.assertIn("Failed to load trusted manifest from git ref", res_invalid_ref.stderr)
+AssertionError: 'Failed to load trusted manifest from git ref' not found in "ERROR: Cannot load trusted manifest: Cannot resolve git ref 'nonexistent_ref_12345' in source archive without git metadata\n"
+
+----------------------------------------------------------------------
+Ran 8 tests in 8.420s
+
+FAILED (failures=1, errors=1)
+
+
+95% tests passed, 1 tests failed out of 22
+
+Total Test time (real) =  11.59 sec
+
+The following tests FAILED:
+	 21 - CiFailClosedControls (Failed)
+Errors while running CTest

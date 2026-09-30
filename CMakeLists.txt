@@ -359,6 +359,27 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
+        # run_preprocessing_failure_controls.py builds its fixture with
+        # TIFFTAG_COMPRESSION = 1, so the fast path declines it and
+        # unweighted-release-fatal / dw-release-fatal have only ever run on the
+        # compact-U16 arm, which keeps a host movie. The nvCOMP arm keeps none,
+        # and the reconstruction fallback is exactly where that was a
+        # std::terminate before this branch, so this is a different test rather
+        # than a repetition. Writes its own Adobe Deflate RowsPerStrip=1 fixture
+        # and pins --ingest nvcomp, so an ineligible fixture fails the run
+        # instead of quietly falling back to the arm it is meant to replace.
+        #
+        # Not in DEFAULT_REQUIRED_TESTS, for the same reason
+        # CudaPreprocessingFailurePaths is not: it needs a GPU and a USE_NVCOMP
+        # build, and a CPU-only configuration would fail the collection gate on
+        # a test it cannot run.
+        add_test(NAME CudaNvcompReconstructionFailures
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_reconstruction_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject>)
+        set_tests_properties(CudaNvcompReconstructionFailures PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 900)
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Optional Issue #85 lane C native failure matrix. Supplying the known

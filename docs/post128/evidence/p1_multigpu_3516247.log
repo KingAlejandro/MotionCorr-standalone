@@ -1,0 +1,106 @@
+cpu-bind=MASK - gn3002, task  0  0 [1236601]: mask 0xffffffffffffffff set
+############ IDENTITY ############
+2026-09-30T21:33:14+01:00
+gn3002.scarf.rl.ac.uk
+0, GPU-7e062742-81c2-4e12-743c-24d2b196032a, NVIDIA A100-SXM4-80GB, 81920 MiB
+1, GPU-3c9c438e-a1cd-abf9-814e-e5b9936ceb29, NVIDIA A100-SXM4-80GB, 81920 MiB
+2, GPU-0c25691b-81a2-dc59-333b-053cca13d2f7, NVIDIA A100-SXM4-80GB, 81920 MiB
+3, GPU-5365f504-dc36-b598-9727-5c3b0274f202, NVIDIA A100-SXM4-80GB, 81920 MiB
+Cpus_allowed_list:	0-63
+THP=[always] madvise never
+cpu0 siblings=0,32
+  node1 cpus=4-7,36-39
+  node3 cpus=12-15,44-47
+  node5 cpus=20-23,52-55
+  node7 cpus=28-31,60-63
+SOURCE=c07b1277f62b9aab09c6d53276b4b091ec110ff4  dirty=0
+BASELINE_ORACLE=/home/vol05/scarf1415/post128/baseline-products
+
+############ BUILD (nvcomp) ############
+configure=0
+build=0  sha256=550b39df72f6ff59  undef=0
+
+############ LINUX TEST CLOSURE ############
+-- MultiGpuScheduling --
+ok   case_per_worker_timing_and_rss_recorded
+ok   case_aggregate_staging_namespace_reserved
+
+50/50 passed
+-- OutputTreeComparator --
+----------------------------------------------------------------------
+Ran 17 tests in 0.540s
+
+OK
+-- full ctest --
+100% tests passed, 0 tests failed out of 40
+collection gate: PASS
+
+############ COMPARATOR MANIFEST ############
+movies: 24
+
+############ VENUE STABILITY CONTROL ############
+phase0 repeat: rc=0 wall=12.71 s (phase 0 recorded 12.89 s)
+Validated 24 movies, 24 MRC images, 25 STAR files, 341735520 pixels per arm
+Comparison: products; status=PASS; different files=0
+   compare_rc=0 status=PASS
+
+############ COMPARATOR CONTROL ############
+mutated one payload byte in 20170629_00021_frameImage.mrc
+-- unmutated copy (must PASS) --
+FAIL: /home/vol05/scarf1415/p1-multigpu/ctl_same/corrected_micrographs.star references a product outside its output root: '/home/vol05/scarf1415/post128/baseline-products/Movies/20170629_00021_frameImage.mrc'
+   compare_rc=1 status=FAIL
+-- one flipped pixel byte (must FAIL) --
+FAIL: /home/vol05/scarf1415/p1-multigpu/ctl_mut/corrected_micrographs.star references a product outside its output root: '/home/vol05/scarf1415/post128/baseline-products/Movies/20170629_00021_frameImage.mrc'
+   compare_rc=1 status=FAIL
+
+############ CORRECTNESS: 1 / 2 / 4 WORKERS ############
+--- 1 worker(s) ---
+launch_rc=0
+  verdict=PASS budget_covered=32 disjoint=True mean_cores_busy=4.37 cpu_s=51.854
+  affinity: ['MATCH']
+  witnessed: ['0-31']
+  omp: ['32']
+  gpu_witness_ok=True
+  merge_rc=0 verdict=PASS
+FAIL: /home/vol05/scarf1415/p1-multigpu/m1: STAR inventory differs; missing=[], extra=['_workers/w0/corrected_micrographs.star']
+   compare_rc=1 status=FAIL
+--- 2 worker(s) ---
+launch_rc=0
+  verdict=PASS budget_covered=32 disjoint=True mean_cores_busy=4.59 cpu_s=31.309
+  affinity: ['MATCH', 'MATCH']
+  witnessed: ['0-15', '16-31']
+  omp: ['16', '16']
+  gpu_witness_ok=True
+  merge_rc=0 verdict=PASS
+FAIL: /home/vol05/scarf1415/p1-multigpu/m2: STAR inventory differs; missing=[], extra=['_workers/w0/corrected_micrographs.star', '_workers/w1/corrected_micrographs.star']
+   compare_rc=1 status=FAIL
+--- 4 worker(s) ---
+launch_rc=0
+  verdict=PASS budget_covered=32 disjoint=True mean_cores_busy=7.07 cpu_s=43.257
+  affinity: ['MATCH', 'MATCH', 'MATCH', 'MATCH']
+  witnessed: ['8-15', '0-7', '24-31', '16-23']
+  omp: ['8', '8', '8', '8']
+  gpu_witness_ok=True
+  merge_rc=0 verdict=PASS
+FAIL: /home/vol05/scarf1415/p1-multigpu/m4: STAR inventory differs; missing=[], extra=['_workers/w0/corrected_micrographs.star', '_workers/w1/corrected_micrographs.star', '_workers/w2/corrected_micrographs.star', '_workers/w3/corrected_micrographs.star']
+   compare_rc=1 status=FAIL
+
+############ FIXED-BUDGET CAMPAIGN: 32 cores, 1/2/4 GPU, 5 reps ############
+ARM gpu=2 rep=1 rc=0 wall=6.97 verdict=PASS mrc=24/24 cores_busy=4.61 cpu_s=31.459 tail=0.18 rss_max_gib=0.552
+ARM gpu=4 rep=1 rc=0 wall=6.04 verdict=PASS mrc=24/24 cores_busy=7.14 cpu_s=42.058 tail=0.56 rss_max_gib=0.552
+ARM gpu=1 rep=1 rc=0 wall=12.02 verdict=PASS mrc=24/24 cores_busy=4.34 cpu_s=51.55 tail=0.00 rss_max_gib=0.547
+ARM gpu=4 rep=2 rc=0 wall=5.61 verdict=PASS mrc=24/24 cores_busy=5.16 cpu_s=28.075 tail=0.50 rss_max_gib=0.553
+ARM gpu=1 rep=2 rc=0 wall=12.06 verdict=PASS mrc=24/24 cores_busy=4.38 cpu_s=52.054 tail=0.00 rss_max_gib=0.548
+ARM gpu=2 rep=2 rc=0 wall=7.04 verdict=PASS mrc=24/24 cores_busy=4.7 cpu_s=32.251 tail=0.20 rss_max_gib=0.552
+ARM gpu=1 rep=3 rc=0 wall=12.03 verdict=PASS mrc=24/24 cores_busy=4.4 cpu_s=52.195 tail=0.00 rss_max_gib=0.549
+ARM gpu=2 rep=3 rc=0 wall=6.90 verdict=PASS mrc=24/24 cores_busy=4.6 cpu_s=31.0 tail=0.18 rss_max_gib=0.551
+ARM gpu=4 rep=3 rc=0 wall=5.81 verdict=PASS mrc=24/24 cores_busy=6.32 cpu_s=35.699 tail=0.42 rss_max_gib=0.553
+ARM gpu=2 rep=4 rc=0 wall=6.80 verdict=PASS mrc=24/24 cores_busy=4.63 cpu_s=30.781 tail=0.20 rss_max_gib=0.551
+ARM gpu=4 rep=4 rc=0 wall=7.39 verdict=PASS mrc=24/24 cores_busy=7.1 cpu_s=50.864 tail=1.19 rss_max_gib=0.551
+ARM gpu=1 rep=4 rc=0 wall=12.02 verdict=PASS mrc=24/24 cores_busy=4.37 cpu_s=51.831 tail=0.00 rss_max_gib=0.548
+ARM gpu=4 rep=5 rc=0 wall=6.34 verdict=PASS mrc=24/24 cores_busy=7.44 cpu_s=45.916 tail=0.64 rss_max_gib=0.554
+ARM gpu=1 rep=5 rc=0 wall=12.20 verdict=PASS mrc=24/24 cores_busy=4.32 cpu_s=51.999 tail=0.00 rss_max_gib=0.547
+ARM gpu=2 rep=5 rc=0 wall=6.99 verdict=PASS mrc=24/24 cores_busy=4.56 cpu_s=31.061 tail=0.18 rss_max_gib=0.550
+
+P1_DONE c07b1277f62b9aab09c6d53276b4b091ec110ff4
+2026-09-30T21:39:25+01:00

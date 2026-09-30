@@ -389,6 +389,83 @@ class ResourceSampler(threading.Thread):
         self._stop_event.set()
 
 
+class ProductSampler(threading.Thread):
+    """Record when each worker's per-movie products first appear on disk.
+
+    Wall time per worker says how long it took; it does not say where the time
+    went. A worker that spends a second in CUDA setup before its first movie
+    and one that is slow on every movie have the same total. Polling for
+    products separates them without touching the binary: the gap from launch to
+    the first product is setup, the gaps between products are per-movie cost,
+    and the gap from the last product to exit is the aggregate tail.
+
+    Poll interval is deliberately much finer than the resource sampler's. At
+    four workers a movie completes about every 0.5 s per worker, so a 0.5 s
+    poll would quantise the very intervals being measured.
+
+    Paths come from the partition manifest's output_roots, not from a glob.
+    A glob has to guess the product naming, and every guess is wrong somewhere:
+    "*_frameImage.mrc" is specific to this dataset's filenames, while "*.mrc"
+    also matches the gain reference sitting in the same tree. The manifest
+    already states exactly which products each shard must produce.
+
+    First-seen time is an upper bound on completion: the file appears when the
+    writer creates it and is seen up to one interval later. The interval is
+    recorded so that is checkable.
+    """
+
+    def __init__(self, interval: float = 0.05):
+        super().__init__(daemon=True)
+        self.interval = interval
+        self.expect: dict[int, list[tuple[str, Path]]] = {}
+        self.seen: dict[int, dict[str, float]] = {}
+        self._stop_event = threading.Event()
+
+    def watch(self, index: int, wdir: Path, roots: list[str]) -> None:
+        self.expect[index] = [(r, wdir / (r + ".mrc")) for r in roots]
+        self.seen[index] = {}
+
+    def run(self) -> None:
+        while not self._stop_event.is_set():
+            now = time.time()
+            for k, items in list(self.expect.items()):
+                got = self.seen[k]
+                for name, path in items:
+                    if name in got:
+                        continue
+                    try:
+                        if path.exists():
+                            got[name] = now
+                    except OSError:
+                        pass
+            self._stop_event.wait(self.interval)
+
+    def stop(self) -> None:
+        self._stop_event.set()
+
+
+def movie_wall_times(wdir: Path) -> list[float]:
+    """The binary's own per-movie wall times, from the per-movie logs.
+
+    src/motioncorr_runner.cpp writes "Full movie wall time: N s" per movie.
+    That is the process's own measurement of the movie loop, so comparing its
+    sum against the observed worker wall separates movie work from everything
+    around it without trusting the poller's resolution.
+    """
+    out = []
+    try:
+        for log in sorted(wdir.rglob("*.log")):
+            for line in log.read_text(errors="replace").splitlines():
+                if "Full movie wall time:" in line:
+                    try:
+                        out.append(float(line.split(":", 1)[1].strip().split()[0]))
+                    except (ValueError, IndexError):
+                        pass
+    except OSError:
+        pass
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -429,6 +506,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--omp-proc-bind", default=None, help="OMP_PROC_BIND for every worker")
     ap.add_argument("--omp-places", default=None, help="OMP_PLACES for every worker")
     ap.add_argument("--sample-interval", type=float, default=0.5)
+    ap.add_argument("--product-interval", type=float, default=0.05,
+                    help="poll interval for the per-product timeline. Much finer than "
+                         "--sample-interval because at four workers a movie lands "
+                         "roughly every 0.5 s and a coarse poll would quantise exactly "
+                         "the intervals being measured.")
     ap.add_argument("--no-witness", action="store_true",
                     help="skip GPU witnessing; only valid with CPU workers")
     ap.add_argument("worker_args", nargs=argparse.REMAINDER,
@@ -549,6 +631,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"FAIL: partitioning exited {rc}", file=sys.stderr)
         return rc
     manifest = json.loads((shard_dir / "shard_manifest.json").read_text())
+    shard_roots = {s["index"]: list(s.get("output_roots") or []) for s in manifest["shards"]}
 
     extra = list(a.worker_args)
     if extra and extra[0] == "--":
@@ -578,6 +661,7 @@ def main(argv: list[str] | None = None) -> int:
     # benchmark: see docs/multi_gpu/SCALING_EXPERIMENT.md for what an
     # interpretable measurement additionally requires.
     resources = ResourceSampler(a.sample_interval)
+    products = ProductSampler(a.product_interval)
     procs: list[tuple[int, subprocess.Popen, Path]] = []
     confirmed: dict[int, tuple[str | None, str]] = {}
     stamps: dict[int, dict[str, float]] = {}
@@ -586,6 +670,7 @@ def main(argv: list[str] | None = None) -> int:
     previous_handlers: dict[int, object] = {}
     sampler_started = False
     resources_started = False
+    products_started = False
     interrupted_signal: int | None = None
     # Exact, unsampled CPU total for everything this launcher reaps, including
     # the ghostscript grandchildren the per-worker /proc sampling cannot see: a
@@ -604,6 +689,9 @@ def main(argv: list[str] | None = None) -> int:
         with _defer_launcher_signals():
             resources.start()
             resources_started = True
+        with _defer_launcher_signals():
+            products.start()
+            products_started = True
 
         for k in range(n):
             wdir = out / f"w{k}"
@@ -643,6 +731,7 @@ def main(argv: list[str] | None = None) -> int:
                                      start_new_session=True)
                 stamps[k] = {"started": time.time()}
                 resources.watch(p.pid, k)
+                products.watch(k, wdir, shard_roots[k])
                 procs.append((k, p, wdir))
             if masks[k]:
                 confirmed[k] = confirm_affinity(p.pid, masks[k])
@@ -688,6 +777,9 @@ def main(argv: list[str] | None = None) -> int:
         if resources_started:
             resources.stop()
             resources.join(timeout=10)
+        if products_started:
+            products.stop()
+            products.join(timeout=10)
         if sampler is not None:
             sampler.stop()
             # nvidia-smi calls are bounded at 30 s, so a join that still times
@@ -742,6 +834,32 @@ def main(argv: list[str] | None = None) -> int:
         ticks = resources.cpu_ticks.get(p.pid)
         wall_s = ended - stamps[k]["started"]
         cpu_s = round(sum(ticks) / _CLK_TCK, 3) if ticks else None
+
+        # Phase split. setup is launch -> first product, which on a CUDA build
+        # includes context creation and plan construction; produce is first ->
+        # last product; tail is last product -> exit, which is the aggregate
+        # STAR/EPS/PDF work. These partition the worker wall exactly.
+        seen = products.seen.get(k, {})
+        t0 = stamps[k]["started"]
+        first = min(seen.values()) if seen else None
+        last = max(seen.values()) if seen else None
+        gaps = sorted(seen.values())
+        phases = {
+            "n_products": len(seen),
+            "setup_seconds": round(first - t0, 3) if first else None,
+            "produce_seconds": round(last - first, 3) if first and last else None,
+            "tail_seconds": round(ended - last, 3) if last else None,
+            "first_product_offset": round(first - t0, 3) if first else None,
+            "product_offsets": [round(v - t0, 3) for v in gaps],
+            "inter_product_seconds": [round(b - a, 3) for a, b in zip(gaps, gaps[1:])],
+            "poll_interval": a.product_interval,
+            "note": "product first-seen times are upper bounds by up to one poll "
+                    "interval; setup+produce+tail partition the worker wall",
+        }
+        binary_movie_times = movie_wall_times(wdir)
+        phases["binary_movie_wall_sum"] = (round(sum(binary_movie_times), 3)
+                                           if binary_movie_times else None)
+        phases["binary_movie_walls"] = binary_movie_times
         results.append({"index": k, "pid": p.pid, "returncode": rc,
                         "log": str((wdir / "run.log").resolve()),
                         "started_at": _iso(stamps[k]["started"]),
@@ -757,7 +875,8 @@ def main(argv: list[str] | None = None) -> int:
                                                 else None,
                         "cpu_mask": requested,
                         "cpu_mask_width": len(mask_sets[k]) if mask_sets else None,
-                        "cpu_affinity": affinity})
+                        "cpu_affinity": affinity,
+                        "phases": phases})
 
     wall = time.time() - started
     # Resolved paths and the manifest digest, so merge_workers.py can prove this
@@ -800,6 +919,17 @@ def main(argv: list[str] | None = None) -> int:
                                 "cpu_budget_covered: a scaling number is only "
                                 "meaningful when the budget was actually used.",
         "affinity_problems": affinity_problems or None,
+        "phase_rollup": {
+            "max_setup_seconds": max((r["phases"]["setup_seconds"] or 0) for r in results) if results else None,
+            "max_tail_seconds": max((r["phases"]["tail_seconds"] or 0) for r in results) if results else None,
+            "first_product_spread": (round(max(r["phases"]["first_product_offset"] or 0 for r in results)
+                                           - min(r["phases"]["first_product_offset"] or 0 for r in results), 3)
+                                     if results else None),
+            "note": "first_product_spread is the stagger between workers reaching "
+                    "their first product. If per-process CUDA setup serialises "
+                    "across concurrent workers this grows with worker count; if "
+                    "setup is genuinely parallel it stays near zero.",
+        },
         "started_at": _iso(started),
         "ended_at": _iso(started + wall),
         "wall_seconds": round(wall, 3),

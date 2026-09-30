@@ -979,6 +979,58 @@ def case_per_worker_cpu_masks(tmp: Path) -> None:
     assert one["cpu_masks_disjoint"] is False, one
 
 
+def case_phase_timeline_recorded(tmp: Path) -> None:
+    """Per-worker setup / produce / tail is recorded and partitions the wall.
+
+    Worker wall alone cannot distinguish a worker that spent a second in CUDA
+    setup before its first movie from one that was slow on every movie. The
+    phase split is what separates them, and it is the quantity a scaling study
+    reads, so it has to be present and self-consistent rather than plausible.
+
+    fake_worker is given an uneven per-movie sleep so the phases have real
+    width: a timeline that is all zeros would satisfy a weaker assertion.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "ph",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--product-interval", "0.01",
+              "--worker-extra=--fake_sleep_per_movie 0.05",
+              "--worker-extra=--fake_sleep_per_movie 0.05"])
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    st = json.loads((tmp / "ph" / "status.json").read_text())
+
+    total_products = 0
+    for w in st["workers"]:
+        ph = w["phases"]
+        assert ph["n_products"] > 0, f"no products observed for w{w['index']}: {ph}"
+        total_products += ph["n_products"]
+        for key in ("setup_seconds", "produce_seconds", "tail_seconds"):
+            assert ph[key] is not None and ph[key] >= 0, (key, ph)
+        # the three phases must partition the worker wall, not merely coexist
+        s = ph["setup_seconds"] + ph["produce_seconds"] + ph["tail_seconds"]
+        assert abs(s - w["wall_seconds"]) < 0.05, (s, w["wall_seconds"], ph)
+        # the sleep must be visible, or the timeline is not resolving anything
+        assert ph["produce_seconds"] > 0.0, ph
+        assert len(ph["product_offsets"]) == ph["n_products"], ph
+        assert ph["product_offsets"] == sorted(ph["product_offsets"]), ph
+
+    assert total_products == len(DEFAULT_ROWS), (total_products, len(DEFAULT_ROWS))
+
+    roll = st["phase_rollup"]
+    for key in ("max_setup_seconds", "max_tail_seconds", "first_product_spread"):
+        assert roll[key] is not None and roll[key] >= 0, (key, roll)
+
+    # Negative control: the sampler must be driven by the manifest, not by a
+    # glob. The gain reference is an .mrc sitting in the same tree and is not a
+    # product; if it were counted, n_products would exceed the shard size.
+    for k, w in enumerate(st["workers"]):
+        shard = json.loads((tmp / "ph" / "shards" / "shard_manifest.json").read_text())
+        expect = len(shard["shards"][k]["output_roots"])
+        assert w["phases"]["n_products"] == expect, (k, w["phases"]["n_products"], expect)
+
+
 def case_cpu_budget_gate(tmp: Path) -> None:
     """--cpu-budget refuses anything that is not a witnessed disjoint partition.
 
@@ -2171,6 +2223,7 @@ CASES = [
     case_launcher_refuses_cpu_gpu_confusion,
     case_per_worker_cpu_masks,
     case_cpu_budget_gate,
+    case_phase_timeline_recorded,
     case_per_worker_args_and_cpu_accounting,
     case_devices_with_no_witness_refused,
     case_normalized_root_collision_refused,

@@ -120,6 +120,9 @@ if(BUILD_TESTING)
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     add_test(NAME MrcHeaderStats
         COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
+    add_executable(pdf_concat tests/test_pdf_concat.cpp)
+    target_link_libraries(pdf_concat PRIVATE motioncorr_core)
+    add_test(NAME PdfConcat COMMAND pdf_concat)
     add_test(NAME DefectParser COMMAND defect_parser)
     # Device-free control for the nvCOMP ingestion staging layout. Deliberately not
     # under if(CUDA): the alignment rule and the zlib wrapper checks are integer and

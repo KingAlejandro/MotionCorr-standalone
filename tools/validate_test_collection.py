@@ -72,6 +72,7 @@ DEFAULT_REQUIRED_TESTS = [
     # any of amin/amax/amean/arms and every product comparator would still pass,
     # because both sides would be reading the same drifted header.
     "MrcHeaderStats",
+    "PdfConcat",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

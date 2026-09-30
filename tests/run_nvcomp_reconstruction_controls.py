@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""The two reconstruction-cleanup controls, run on the nvCOMP ingest path.
+"""Recovery controls for the nvCOMP ingest arm.
+
+Covers the two reconstruction-cleanup controls on this arm, and the four
+composition defects PROVENANCE.md lists as having no automated control:
+preservation after a recoverable failure with no host movie, the patch-retry
+fallback that used to read zero-size frames, the partial TIFFOpen that used to
+deadlock the OpenMP team, and a scratch teardown that fails after the worker
+has already returned success.
 
 run_preprocessing_failure_controls.py builds its fixture with
 TIFFTAG_COMPRESSION = 1, so the nvCOMP fast path declines it and both new
@@ -199,12 +206,58 @@ def main() -> int:
         if not ok:
             fails.append("mutant-" + fault)
 
+    # ---- the four composition defects that had no control -------------
+    # Each ran only on an arm that keeps a host movie, or not at all. Here the
+    # movie arrives through nvCOMP, so there is no host copy and these are the
+    # paths that used to end the whole job rather than one movie.
+    healthy_products = sorted(
+        p.name for p in (ROOT / "runs" / "healthy-nvcomp").rglob("*")
+        if p.suffix in (".mrc", ".star"))
+
+    recovery = [
+        ("sparse-recoverable", (),
+         "recoverable defect-update failure: the movie must be recovered from the "
+         "device, not lost with it",
+         ["Recovered the movie from device memory"]),
+        ("patch-prep-recoverable", (),
+         "patch retry after a failed resident preparation: the frames must be "
+         "fetched back, not read at zero size",
+         []),
+        ("ingest-teardown-fatal", (),
+         "teardown fails after the worker returned success: the ingest must not "
+         "be reported as successful",
+         ["scratch teardown recorded an error"]),
+        ("tiff-open-partial", (),
+         "some ingest threads get no TIFF handle: the team must not deadlock, and "
+         "the movie must fall back",
+         []),
+    ]
+    for fault, extra, what, needles in recovery:
+        rc, text, out, path = run(FIXED, f"recover-{fault}", fault, extra)
+        prods = sorted(p.name for p in out.rglob("*") if p.suffix in (".mrc", ".star"))
+        checks = {
+            "fault actually injected": "[preprocessfault]" in text,
+            "completed, one movie not the job": rc == 0,
+            "complete products": prods == healthy_products,
+            "no CUDA redispatch after a fatal": "[preprocessfault] later cudaMalloc" not in text
+                                                 or fault != "ingest-teardown-fatal",
+        }
+        for n in needles:
+            checks[f"witness {n!r}"] = n in text
+        bad = [k for k, v in checks.items() if not v]
+        print(f"[{'PASS' if not bad else 'FAIL'}] {fault:<26} rc={rc} path={path} "
+              f"products={len(prods)}" + (f"  failed: {bad}" if bad else ""))
+        print(f"        {what}")
+        if bad:
+            fails.append(fault)
+
     print()
     if fails:
         print(f"FAIL: {fails}")
         return 1
-    print("PASS: both reconstruction-cleanup controls hold on the nvCOMP ingest arm, "
-          "and fail on a build with the refusal removed")
+    print("PASS: reconstruction-cleanup controls hold on the nvCOMP arm and fail on a "
+          "build with the refusal removed; all four previously uncontrolled recovery "
+          "paths complete the movie with full products")
     return 0
 
 

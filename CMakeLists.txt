@@ -352,7 +352,12 @@ if(BUILD_TESTING AND CUDA)
             "-rdynamic"
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
-            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount")
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount"
+            # cudaStreamSynchronize reaches the ingest scratch teardown, which runs
+            # after the worker has already chosen its return value; TIFFOpen reaches
+            # the multi-threaded strip reader, where some threads holding a handle
+            # and some not is the state that used to deadlock the OpenMP team.
+            "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py

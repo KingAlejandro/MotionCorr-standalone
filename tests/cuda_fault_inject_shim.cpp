@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <tiffio.h>
 #include <set>
 #include <dlfcn.h>
 #include <execinfo.h>
@@ -120,10 +121,43 @@ void init_once() {
         g_count_error = cudaErrorInitializationError;
 }
 
+long g_tiff_open_seen = 0;
+
 bool is_u16_fault(const char *name) {
     return g_u16_fault && std::strcmp(g_u16_fault, name) == 0;
 }
 } // namespace
+
+extern "C" cudaError_t __real_cudaStreamSynchronize(cudaStream_t);
+extern "C" cudaError_t __wrap_cudaStreamSynchronize(cudaStream_t s) {
+    init_once();
+    const cudaError_t result = __real_cudaStreamSynchronize(s);
+    // The ingest scratch scope synchronises and destroys its stream in a
+    // destructor, i.e. AFTER ingestCompressedTiffStrips has already chosen
+    // true. Failing here is the only way to reach the case where the decode
+    // reported success and the teardown did not.
+    if (result == cudaSuccess && !g_preprocess_injected &&
+        preprocess_mode("ingest-teardown-fatal") && called_from("endIngestScratch"))
+        return inject_preprocess(false, "endIngestScratch");
+    return result;
+}
+
+extern "C" TIFF *__real_TIFFOpen(const char *, const char *);
+extern "C" TIFF *__wrap_TIFFOpen(const char *name, const char *mode) {
+    init_once();
+    // Fail every TIFFOpen after the first, so a multi-threaded ingest has some
+    // threads with a handle and some without. That is the state that used to
+    // deadlock the OpenMP team, because the worksharing region sat inside the
+    // else arm and the threads without a handle never encountered it.
+    if (preprocess_mode("tiff-open-partial") && called_from("ingestCompressedTiffStrips")) {
+        const long n = ++g_tiff_open_seen;
+        if (n > 1) {
+            std::fprintf(stderr, "[preprocessfault] refused TIFFOpen #%ld inside the ingest\n", n);
+            return nullptr;
+        }
+    }
+    return __real_TIFFOpen(name, mode);
+}
 
 extern "C" cudaError_t __wrap_cudaGetDeviceCount(int *count) {
     init_once();
@@ -154,6 +188,12 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
                              preprocess_mode("sparse-release-fatal")) &&
                             called_from("updateDefectPixels");
         const bool initialize = preprocess_mode("init-fatal") && called_from("initialize");
+        // Forces device_prep_ok == false, which is the only way into the patch
+        // retry arm. On the nvCOMP arm that arm has to fetch the movie back from
+        // the device first; before the fix it read zero-size host frames.
+        if (!g_preprocess_injected && preprocess_mode("patch-prep-recoverable") &&
+            called_from("preparePatchInVram"))
+            return inject_preprocess(false, "preparePatchInVram");
         if (sparse || initialize) {
             if (ptr) *ptr = nullptr;
             return inject_preprocess(preprocess_mode("sparse-fatal") || initialize,

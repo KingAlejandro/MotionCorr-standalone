@@ -24,6 +24,7 @@
 #include <climits>
 #include <cctype>
 #include <stdexcept>
+#include <thread>
 
 #include "src/motioncorr_runner.h"
 #ifdef _CUDA_ENABLED
@@ -90,8 +91,8 @@
 	int TIMING_W_EPS = MCtimer.setNew("out - per-movie eps");
 	int TIMING_W_SCAN = MCtimer.setNew("out - joint star scan");
 	int TIMING_W_HISTEPS = MCtimer.setNew("out - joint hist eps");
-	int TIMING_W_GS_HEADER = MCtimer.setNew("out - gs header.pdf");
-	int TIMING_W_GS_BATCH = MCtimer.setNew("out - gs batch.pdf");
+	int TIMING_W_GS_HEADER = MCtimer.setNew("out - gs header+batch");
+	int TIMING_W_GS_BATCH = MCtimer.setNew("out - gs batch.pdf (inner)");
 	int TIMING_W_GS_ALLB = MCtimer.setNew("out - gs all_batches.pdf");
 	int TIMING_W_GS_LOGFILE = MCtimer.setNew("out - gs logfile.pdf");
 //	int TIMING_ = MCtimer.setNew("");
@@ -1257,10 +1258,11 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	else
 	{
 
-		// Always calculate the new overall headers at the top of the PDF file
-		RCTIC(TIMING_W_GS_HEADER);
-		joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", all_fn_eps);
-		RCTOC(TIMING_W_GS_HEADER);
+		// header.pdf and batch.pdf read disjoint EPS sets and write different
+		// files, so the two Ghostscript passes run at the same time. Each is a
+		// separate single-threaded process; the shorter one (header) then costs
+		// nothing.
+		const std::vector<FileName> header_fn_eps = all_fn_eps;
 
 		// Combine all EPS into a single logfile.pdf
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
@@ -1275,9 +1277,24 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 
+		RCTIC(TIMING_W_GS_HEADER);
+		// joinMultipleEPSIntoSinglePDF reports its own failures and falls back
+		// to an empty PDF, so it has no result to return; anything that does
+		// escape it is captured here rather than reaching a std::thread
+		// boundary, where it would be std::terminate.
+		std::exception_ptr header_failure;
+		std::thread header_thread([&]() {
+			try { joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", header_fn_eps); }
+			catch (...) { header_failure = std::current_exception(); }
+		});
+
 		RCTIC(TIMING_W_GS_BATCH);
 		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
 		RCTOC(TIMING_W_GS_BATCH);
+
+		header_thread.join();
+		RCTOC(TIMING_W_GS_HEADER);
+		if (header_failure) std::rethrow_exception(header_failure);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;

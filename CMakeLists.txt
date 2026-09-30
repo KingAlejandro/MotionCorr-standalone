@@ -97,6 +97,8 @@ if(BUILD_TESTING)
     # find_package(Python3 ... REQUIRED) line because it needs no interpreter.
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
+    add_test(NAME MrcHeaderStats
+        COMMAND $<TARGET_FILE:runner_numerics> mrc_stats)
     add_test(NAME DefectParser COMMAND defect_parser)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.

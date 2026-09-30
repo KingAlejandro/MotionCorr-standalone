@@ -5,6 +5,9 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <cstring>
+#include <cstdint>
+#include <limits>
 
 void require(bool condition, const std::string &message)
 {
@@ -126,6 +129,92 @@ int main(int argc, char **argv)
                 std::cout << "PASS empty-input guard\n";
             }
             std::cout << "PASS issue97 interpolate_recenter\n";
+            return 0;
+        }
+        if (std::string(argv[1]) == "mrc_stats") {
+            // The MRC header's amin/amax/amean/arms used to come from four
+            // separate full traversals (computeMin, computeMax, computeAvg,
+            // computeStddev). computeMinMaxAvgStddev merges them into one, so
+            // it has to reproduce all four *to the bit* -- these four numbers
+            // are published header fields at offsets 76/80/84/216, and a
+            // parity gate compares them.
+            //
+            // Compared as raw bit patterns, not with ==: NaN != NaN would let a
+            // NaN-for-number substitution through, and -0.0 == +0.0 would hide
+            // a sign flip.
+            auto bits = [](RFLOAT v) {
+                static_assert(sizeof(RFLOAT) == sizeof(uint64_t), "expects 64-bit RFLOAT");
+                uint64_t u; std::memcpy(&u, &v, sizeof(u)); return u;
+            };
+            const float qnan = std::numeric_limits<float>::quiet_NaN();
+            const float finf = std::numeric_limits<float>::infinity();
+
+            struct Case { const char *name; std::vector<float> v; };
+            std::vector<Case> cases = {
+                {"empty", {}},
+                {"single element", {3.5f}},
+                // size 2 is the only size for which the Bessel factor
+                // N/(N-1) is not 1 under integer division.
+                {"two elements", {-1.25f, 4.75f}},
+                {"three elements", {2.0f, -8.0f, 5.5f}},
+                // The discriminating case for a naive fusion: under an
+                // `else if` on the max test, a strictly increasing array never
+                // updates the minimum. Checked against computeStats below.
+                {"strictly increasing", {1.0f, 2.0f, 3.0f, 4.0f, 5.0f}},
+                {"strictly decreasing", {5.0f, 4.0f, 3.0f, 2.0f, 1.0f}},
+                {"constant", std::vector<float>(1000, -2.75f)},
+                {"all negative", {-1.0f, -7.0f, -3.0f, -2.0f}},
+                {"NaN in the middle", {1.0f, qnan, -4.0f, 9.0f}},
+                {"NaN first", {qnan, 1.0f, -4.0f}},
+                {"infinities", {finf, -finf, 0.0f, 1.0f}},
+                {"negative zero", {-0.0f, 0.0f}},
+            };
+            // A large pseudo-random block, so the summation order actually has
+            // room to matter: a reassociated or vectorised sum will not land on
+            // the same double here, while it would on a handful of elements.
+            {
+                std::vector<float> big(1 << 18);
+                uint32_t state = 0x13572468u;
+                for (size_t i = 0; i < big.size(); i++) {
+                    state = state * 1664525u + 1013904223u;
+                    big[i] = static_cast<float>(static_cast<int32_t>(state)) * 1e-6f;
+                }
+                cases.push_back({"262144 pseudo-random", big});
+            }
+
+            bool naive_fusion_distinguished = false;
+            for (const Case &c : cases) {
+                MultidimArray<float> a;
+                if (!c.v.empty()) {
+                    a.resize(1, 1, 1, (long int)c.v.size());
+                    for (size_t i = 0; i < c.v.size(); i++) DIRECT_MULTIDIM_ELEM(a, i) = c.v[i];
+                }
+                const float want_min = a.computeMin(), want_max = a.computeMax();
+                const RFLOAT want_avg = a.computeAvg(), want_stddev = a.computeStddev();
+
+                float got_min, got_max; RFLOAT got_avg, got_stddev;
+                a.computeMinMaxAvgStddev(got_min, got_max, got_avg, got_stddev);
+
+                require(bits(got_min) == bits(want_min), std::string("min differs: ") + c.name);
+                require(bits(got_max) == bits(want_max), std::string("max differs: ") + c.name);
+                require(bits(got_avg) == bits(want_avg), std::string("avg differs: ") + c.name);
+                require(bits(got_stddev) == bits(want_stddev), std::string("stddev differs: ") + c.name);
+
+                // Negative control: computeStats is the obvious thing to reuse
+                // and is wrong here. If it ever agreed on every case, this test
+                // would no longer be able to reject that mistake, so demand
+                // that at least one case separates them.
+                if (!c.v.empty()) {
+                    RFLOAT s_avg = 0, s_stddev = 0; float s_min = 0, s_max = 0;
+                    a.computeStats(s_avg, s_stddev, s_min, s_max);
+                    if (bits(s_min) != bits(want_min) || bits(s_max) != bits(want_max))
+                        naive_fusion_distinguished = true;
+                }
+            }
+            require(naive_fusion_distinguished,
+                    "no case separates computeStats' else-if min tracking from computeMin; "
+                    "the test cannot reject that fusion mistake");
+            std::cout << "PASS fused MRC header statistics (" << cases.size() << " cases)\n";
             return 0;
         }
         require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output");

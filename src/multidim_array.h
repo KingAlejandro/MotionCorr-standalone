@@ -2651,6 +2651,71 @@ public:
         return stddev;
     }
 
+    /** Minimum, maximum, average and standard deviation in a single traversal.
+     *
+     * Bit-identical to calling computeMin(), computeMax(), computeAvg() and
+     * computeStddev() in turn, for every input including empty, single-element
+     * and NaN-bearing arrays: each accumulator keeps the type, the initial
+     * value, the comparison form and the summation order of the routine it
+     * replaces, and only the four traversals are merged into one.
+     *
+     * Do not vectorise, unroll or parallelise the two sums. They are what the
+     * MRC header's amean and arms are built from, so reassociating them changes
+     * published header bytes.
+     *
+     * This is not computeStats(): that one tracks the minimum under an
+     * `else if`, so an element that raises the maximum can never lower the
+     * minimum, and it seeds min/max from the double range rather than from
+     * element 0. Its callers depend on those values; this routine is separate
+     * rather than a fix so that they keep them.
+     */
+    void computeMinMaxAvgStddev(T &_minval, T &_maxval, RFLOAT &_avg, RFLOAT &_stddev) const
+    {
+        const long int size = NZYXSIZE(*this);
+
+        // computeMin()/computeMax()/computeAvg() return 0 on an empty array;
+        // computeStddev() returns 0 for size <= 1.
+        _minval = _maxval = static_cast< T >(0);
+        _avg = 0;
+        _stddev = 0;
+        if (size <= 0)
+            return;
+
+        T minval = data[0];
+        T maxval = data[0];
+        RFLOAT sum = 0;
+        RFLOAT sum_sq = 0;
+
+        T* ptr = NULL;
+        long int n;
+        FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY_ptr(*this, n, ptr)
+        {
+            const T Tval = *ptr;
+            // Same comparisons, in the same direction, as computeMin/computeMax:
+            // with NaN present both are false, so a NaN never becomes an extreme.
+            if (Tval > maxval)
+                maxval = Tval;
+            if (Tval < minval)
+                minval = Tval;
+
+            const RFLOAT val = static_cast< RFLOAT >(Tval);
+            sum += val;
+            sum_sq += val * val;
+        }
+
+        _minval = minval;
+        _maxval = maxval;
+        _avg = sum / size;
+
+        if (size > 1)
+        {
+            // computeStddev()'s formula, on its own average, unchanged.
+            RFLOAT stddev = sum_sq / size - _avg * _avg;
+            stddev *= size / (size - 1);
+            _stddev = sqrt(static_cast< RFLOAT >(ABS(stddev)));
+        }
+    }
+
     /** Compute statistics.
      *
      * The average, standard deviation, minimum and maximum value are

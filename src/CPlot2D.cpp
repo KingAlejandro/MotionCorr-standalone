@@ -84,8 +84,45 @@ bool concatenatePDFfiles(FileName fn_pdf_out, FileName pdf1, FileName pdf2)
 
 }
 
+namespace
+{
+// True when the file starts with a PDF signature. Used only to decide whether a
+// one-input "concatenation" may be served by a copy: on anything else --
+// notably the empty placeholder joinMultipleEPSIntoSinglePDF() leaves when it
+// found no EPS input -- we still hand the file to Ghostscript, so the diagnostic
+// and the false return stay exactly as they were.
+bool looksLikePDF(const FileName &fn)
+{
+	std::ifstream in(fn.c_str(), std::ios::binary);
+	char magic[5] = {0};
+	return in.read(magic, 4) && std::string(magic, 4) == "%PDF";
+}
+
+bool copyFileContents(const FileName &from, const FileName &to)
+{
+	std::ifstream in(from.c_str(), std::ios::binary);
+	std::ofstream out(to.c_str(), std::ios::binary | std::ios::trunc);
+	if (!in || !out) return false;
+	out << in.rdbuf();
+	// Both are checked: a full disk shows up on the ofstream, a read error on
+	// the ifstream, and either would otherwise leave a truncated PDF behind.
+	out.flush();
+	return in.good() || (in.eof() && out.good());
+}
+}
+
 bool concatenatePDFfiles(FileName fn_pdf_out, std::vector<FileName> fn_pdfs)
 {
+	// Concatenating one PDF is a copy. Ghostscript re-encodes it instead, which
+	// on the 24-movie tutorial run cost 0.30 s -- 28% of the whole PDF stage --
+	// to reproduce bytes it was handed. The pages are unchanged either way.
+	if (fn_pdfs.size() == 1 && fn_pdfs[0] != fn_pdf_out && looksLikePDF(fn_pdfs[0]))
+	{
+		if (copyFileContents(fn_pdfs[0], fn_pdf_out))
+			return true;
+		std::cerr << " ERROR copying " << fn_pdfs[0] << " to " << fn_pdf_out << "\n";
+		return false;
+	}
 
 	FileName fn_comb = fn_pdf_out;
 	// check if fn_pdf_out occurs in fn_pdfs

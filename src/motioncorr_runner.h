@@ -60,6 +60,13 @@ public:
 	int n_threads;
 	int max_io_threads;
 
+	// Write each movie's products on the calling thread instead of handing them
+	// to the background OutputWriter. The two paths produce the same products in
+	// the same order; this exists so the writer can be ablated against an
+	// otherwise identical binary, and as an escape hatch on a host where the
+	// extra thread costs more CPU than the overlap buys.
+	bool sync_output = false;
+
 	// Output rootname
 	FileName fn_in, fn_out, fn_movie;
 

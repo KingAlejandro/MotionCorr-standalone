@@ -119,6 +119,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
+	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -656,7 +657,7 @@ void MotioncorrRunner::run()
 	// One background thread writes the finished products of movie N while the
 	// main thread computes movie N+1. See src/output_writer.h for the order,
 	// fail-closed and memory-bound properties this relies on.
-	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(true));
+	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
 
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.

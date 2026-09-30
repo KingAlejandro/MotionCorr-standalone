@@ -1411,6 +1411,18 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			try { joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", header_fn_eps); }
 			catch (...) { header_failure = std::current_exception(); }
 		});
+		// The batch pass below is not noexcept: joinMultipleEPSIntoSinglePDF
+		// falls back to touch() when Ghostscript fails, and touch() REPORT_ERRORs
+		// if the ofstream will not open. Unwinding through a still-joinable
+		// std::thread is an unconditional std::terminate, so the job would abort
+		// instead of reporting a failed PDF -- with every micrograph and STAR
+		// already correctly written. joinable() means "not yet joined", not
+		// "still running", so this is needed even when the header pass finished
+		// long ago.
+		struct HeaderThreadJoiner {
+			std::thread &t;
+			~HeaderThreadJoiner() { if (t.joinable()) t.join(); }
+		} header_joiner{header_thread};
 
 		RCTIC(TIMING_W_GS_BATCH);
 		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
@@ -2784,6 +2796,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						if (!movie_session->downloadRealFrames(Iframes))
 							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 						host_frames_are_raw = false;
+					} else if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
+						// The #126 arm never set host_frames_are_raw, because there is no
+						// raw host movie to mark: the device ingest skipped the host read
+						// entirely. Without this the gate above is false, nothing is
+						// downloaded, and cudaPreparePatch/the CPU patch path read
+						// XSIZE(Iframes[0]()) == 0. The unweighted-reconstruction
+						// fallback below already carries exactly this arm; the patch
+						// retry was missing it.
+						if (!movie_session->downloadRealFrames(Iframes))
+							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 					}
 #endif
 					RCTIC(TIMING_PREP_PATCH);

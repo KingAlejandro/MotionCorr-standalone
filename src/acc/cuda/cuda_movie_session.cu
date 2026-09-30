@@ -1265,9 +1265,20 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             if (!t) {
                 #pragma omp critical
                 { for (int i = 0; i < bf; i++) frame_ok[i] = 0; }
-            } else {
-                #pragma omp for schedule(dynamic, 1)
-                for (int i = 0; i < bf; i++) {
+            }
+            // The worksharing construct is encountered by every thread of the
+            // team, not just the ones that got a handle. OpenMP requires that,
+            // and libgomp implements the loop's implicit barrier and the
+            // parallel region's final barrier as the same team barrier: with
+            // the `omp for` inside the else arm, a thread whose TIFFOpen failed
+            // skipped one arrival, the barrier released a generation early, and
+            // the threads that did stage frames then blocked forever on
+            // arrivals that had already left. A failing thread has already
+            // zeroed every frame_ok[i], so the batch is refused below whatever
+            // its iterations would have done.
+            #pragma omp for schedule(dynamic, 1)
+            for (int i = 0; i < bf; i++) {
+                    if (!t) continue;
                     const int f = f0 + i;
                     if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
                     uint8_t *fb = h_stage + frame_base[i];
@@ -1304,9 +1315,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                         cursor = slot + raw_sz;
                     }
                     if (!ok) frame_ok[i] = 0;
-                }
-                TIFFClose(t);
             }
+            if (t) TIFFClose(t);
         }
         for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
 

@@ -232,9 +232,17 @@ void Timer::tic(int timer)
 
 void Timer::toc(int timer)
 {
-	gettimeofday(&end_time, NULL);
-	times[timer] += (end_time.tv_sec - start_times[timer].tv_sec) * 1000000 +
-				   (end_time.tv_usec - start_times[timer].tv_usec);
+	// Local, not the shared end_time member: two threads timing different tags
+	// would otherwise each read whichever end stamp landed last, and report a
+	// duration measured from the other one's clock. The tags written by the
+	// output writer thread are ticked only there, so with a local stamp each
+	// tag's total is its own again. The accumulation into times[timer] is
+	// still unsynchronised, so a tag ticked from more than one thread -- every
+	// "(in thread)" row -- remains unusable; see issue #9.
+	timeval end;
+	gettimeofday(&end, NULL);
+	times[timer] += (end.tv_sec - start_times[timer].tv_sec) * 1000000 +
+				   (end.tv_usec - start_times[timer].tv_usec);
 }
 
 void Timer::printTimes(bool doClear)

@@ -143,9 +143,16 @@ int main(int argc, char **argv)
             // Compared as raw bit patterns, not with ==: NaN != NaN would let a
             // NaN-for-number substitution through, and -0.0 == +0.0 would hide
             // a sign flip.
+            // Width-agnostic, so the case still builds and still compares bits
+            // in a RELION_SINGLE_PRECISION build. There the fused path
+            // deliberately delegates to the original four calls, and this case
+            // then asserts that delegation is exact -- which is the property
+            // that matters in that build.
             auto bits = [](RFLOAT v) {
-                static_assert(sizeof(RFLOAT) == sizeof(uint64_t), "expects 64-bit RFLOAT");
-                uint64_t u; std::memcpy(&u, &v, sizeof(u)); return u;
+                static_assert(sizeof(RFLOAT) == sizeof(uint64_t) ||
+                              sizeof(RFLOAT) == sizeof(uint32_t),
+                              "RFLOAT is expected to be 32- or 64-bit");
+                uint64_t u = 0; std::memcpy(&u, &v, sizeof(v)); return u;
             };
             const float qnan = std::numeric_limits<float>::quiet_NaN();
             const float finf = std::numeric_limits<float>::infinity();

@@ -178,6 +178,26 @@ def main():
                 "the joint STAR was republished by a failed batch")
             assert "b.mrc" not in joint.read_text(), (
                 "the failed movie was added to the joint STAR")
+        # The per-movie log must not be left claiming success for a product that
+        # failed. "Written ..." is emitted when the write is QUEUED, not when it
+        # lands -- deliberately, because the text and its position are compared
+        # against main byte for byte and making it truthful in background mode
+        # would change a product. The safety property is therefore not that the
+        # claim is never premature, but that a deferred failure always corrects
+        # it in the same file. Nothing asserted that until now.
+        b_log = out / "Movies" / "b.log"
+        assert b_log.is_file(), "the failed movie has no log to correct"
+        log_text = b_log.read_text()
+        assert "ERROR:" in log_text, (
+            "the failed movie's log still claims the product was written and carries no "
+            f"correction; a reader of this file alone would believe it succeeded:\n"
+            f"{log_text[-800:]}")
+        assert "b.mrc" in log_text, (
+            "the log correction does not name the product that failed")
+        a_log_text = (out / "Movies" / "a.log").read_text()
+        assert "ERROR:" not in a_log_text, (
+            "the healthy movie's log was given a failure it did not have")
+
         leftover = b_mrc.stat().st_size if b_mrc.is_file() else 0
         assert leftover < OUTPUT_BYTES, (
             f"b.mrc is {leftover} bytes: the fault did not truncate anything, so the "

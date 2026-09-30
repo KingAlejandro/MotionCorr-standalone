@@ -33,9 +33,27 @@ enum class MovieIngestStatus
 	NotApplicable,        // no nvCOMP, no session, or an encoding this path declines
 	Success,              // d_Iframes and d_Isum hold the whole movie
 	RecoverableFailure,   // fall back to a host reader; the device is still usable
-	InvalidInput,         // the movie itself is unusable; another reader will not help
 	FatalDeviceFailure    // the CUDA context is poisoned; no redispatch
 };
+
+// There is deliberately no InvalidInput state.
+//
+// It was declared, and the runner handled it, but no code path could produce
+// it -- a documented contract that nothing implements is worse than a smaller
+// one. The question is whether this path can ever know that a movie is bad
+// rather than merely unsuitable for it, and it cannot:
+//
+//   Unsupported encodings (predictor, byte order, bits per sample, a zlib
+//   wrapper this path does not accept) say nothing about the movie's validity.
+//   The ordinary reader handles all of them. That is NotApplicable.
+//
+//   An Adler-32 mismatch looks like proof of corrupt input, and it is the one
+//   case that tempted the state. But that checksum is computed over the output
+//   of OUR OWN decompression, so a mismatch is equally consistent with a defect
+//   in this path. Classifying it as bad input would skip the fallback, turn a
+//   bug here into a reported data error, and lose the run that the host reader
+//   would have completed correctly. It is RecoverableFailure: fall back, and
+//   let the reader that verifies the same checksum for itself decide.
 
 class CudaMovieSession {
 public:

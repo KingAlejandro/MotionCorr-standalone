@@ -1699,10 +1699,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		REPORT_ERROR("The CUDA context became unusable during device ingestion of " + fn_mic
 		             + ". Refusing any fallback after a fatal device error.");
 		break;
-	case MovieIngestStatus::InvalidInput:
-		REPORT_ERROR("Device ingestion rejected " + fn_mic + " as unusable input. "
-		             "Another reader would reject it too; failing this movie.");
-		break;
 	case MovieIngestStatus::RecoverableFailure:
 		// The attempt touched the device and failed without poisoning it. The
 		// host reader below re-reads the movie from the immutable file, and

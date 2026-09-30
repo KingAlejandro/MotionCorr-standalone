@@ -2717,6 +2717,25 @@ public:
     {
         const long int size = NZYXSIZE(*this);
 
+#ifdef RELION_SINGLE_PRECISION
+        // computeStddev() is not one-pass in a single-precision build: it takes
+        // two passes and, above 1e6 elements, centres them on the median,
+        // because sum-of-squares in float loses too much. Fusing the four
+        // reductions here would therefore produce a DIFFERENT statistic in that
+        // build, not the same one computed faster, and the value goes straight
+        // into the MRC header RMS field.
+        //
+        // So the fusion applies only to the double build this branch measured.
+        // Single precision keeps main's exact call sequence. Proving an exact
+        // single-precision fusion is a separate piece of work, and until it is
+        // done the safe difference is one traversal, not one header byte.
+        _minval = computeMin();
+        _maxval = computeMax();
+        _avg = computeAvg();
+        _stddev = computeStddev();
+        return;
+#endif
+
         // computeMin()/computeMax()/computeAvg() return 0 on an empty array;
         // computeStddev() returns 0 for size <= 1.
         _minval = _maxval = static_cast< T >(0);

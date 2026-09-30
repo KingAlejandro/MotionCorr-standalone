@@ -435,6 +435,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	header->nyStart = (int)0;
 	header->nzStart = (int)0;
 
+	OTIC(TIMING_W_STATS);
 	if (!MDMainHeader.isEmpty())
 	{
 		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, aux))
@@ -487,6 +488,8 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	}
 
 	header->nsymbt = 0;
+
+	OTOC(TIMING_W_STATS);
 
 	//Create label "Relion version    date time"
 #define MRC_LABEL_LEN 80
@@ -544,9 +547,11 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	std::string write_error;
 
 	// Write header
+	OTIC(TIMING_W_HEADER);
 	if(mode == WRITE_OVERWRITE || mode == WRITE_APPEND)
 		write_error = mrcWriteBlock(fimg, header, MRCSIZE, "MRC header");
 	freeMemory(header, sizeof(MRChead));
+	OTOC(TIMING_W_HEADER);
 
 	// When the file type already matches the in-memory type, castPage2Datatype
 	// is a straight memcpy into a scratch buffer that is then written and
@@ -558,6 +563,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	//think about writing in several chunks
 	char* fdata = NULL;
 
+	OTIC(TIMING_W_PAYLOAD);
 	if (write_error.empty())
 	{
 		if (write_in_place && NSIZE(data) == 1 && mode == WRITE_OVERWRITE)
@@ -595,6 +601,8 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 			}
 		}
 	}
+
+	OTOC(TIMING_W_PAYLOAD);
 
 	// Unlock the file
 	fl.l_type = F_UNLCK;

@@ -80,6 +80,20 @@
 	int TIMING_WRITE_RESULT = MCtimer.setNew("write corrected image");
 	int TIMING_SAVE_MODEL_PLOT = MCtimer.setNew("write star and shift plot");
 	int TIMING_LOGFILE_PDF = MCtimer.setNew("joint star and logfile pdf");
+	// Measurement-only decomposition of the output stage.
+	int TIMING_W_OPEN = MCtimer.setNew("out - mrc open");
+	int TIMING_W_STATS = MCtimer.setNew("out - mrc stats");
+	int TIMING_W_HEADER = MCtimer.setNew("out - mrc header");
+	int TIMING_W_PAYLOAD = MCtimer.setNew("out - mrc payload");
+	int TIMING_W_CLOSE = MCtimer.setNew("out - mrc close");
+	int TIMING_W_STAR = MCtimer.setNew("out - per-movie star");
+	int TIMING_W_EPS = MCtimer.setNew("out - per-movie eps");
+	int TIMING_W_SCAN = MCtimer.setNew("out - joint star scan");
+	int TIMING_W_HISTEPS = MCtimer.setNew("out - joint hist eps");
+	int TIMING_W_GS_HEADER = MCtimer.setNew("out - gs header.pdf");
+	int TIMING_W_GS_BATCH = MCtimer.setNew("out - gs batch.pdf");
+	int TIMING_W_GS_ALLB = MCtimer.setNew("out - gs all_batches.pdf");
+	int TIMING_W_GS_LOGFILE = MCtimer.setNew("out - gs logfile.pdf");
 //	int TIMING_ = MCtimer.setNew("");
 
 #else
@@ -662,8 +676,12 @@ void MotioncorrRunner::run()
 			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
+				RCTIC(TIMING_W_STAR);
 				saveModel(mic);
+				RCTOC(TIMING_W_STAR);
+				RCTIC(TIMING_W_EPS);
 				plotShifts(fn_micrographs[imic], mic);
+				RCTOC(TIMING_W_EPS);
 				RCTOC(TIMING_SAVE_MODEL_PLOT);
 			}
 		}
@@ -1083,6 +1101,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	MDavg.clear();
 	MDmov.clear();
 
+	RCTIC(TIMING_W_SCAN);
 	for (long int imic = 0; imic < fn_ori_micrographs.size(); imic++)
 	{
 		// For output STAR file
@@ -1155,6 +1174,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 	}
 
+    RCTOC(TIMING_W_SCAN);
     if (verb > 0) progress_bar(fn_ori_micrographs.size());
 
 	// Write out STAR files at the end
@@ -1197,6 +1217,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_LATE);
 	FileName fn_eps, fn_eps_root = fn_out + "corrected_micrographs";
 	std::vector<FileName> all_fn_eps;
+	RCTIC(TIMING_W_HISTEPS);
 	for (int i = 0; i < plot_labels.size(); i++)
 	{
 		EMDLabel label = plot_labels[i];
@@ -1223,18 +1244,23 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 	}
+	RCTOC(TIMING_W_HISTEPS);
 	if (do_skip_logfile)
 	{
 
 		// Just have the overall headers only in the output PDF file
+		RCTIC(TIMING_W_GS_LOGFILE);
 		joinMultipleEPSIntoSinglePDF(fn_out + "logfile.pdf", all_fn_eps);
+		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 	else
 	{
 
 		// Always calculate the new overall headers at the top of the PDF file
+		RCTIC(TIMING_W_GS_HEADER);
 		joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", all_fn_eps);
+		RCTOC(TIMING_W_GS_HEADER);
 
 		// Combine all EPS into a single logfile.pdf
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
@@ -1249,16 +1275,22 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 
+		RCTIC(TIMING_W_GS_BATCH);
 		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
+		RCTOC(TIMING_W_GS_BATCH);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
 		if (exists(fn_out + "all_batches.pdf")) fn_pdfs.push_back(fn_out + "all_batches.pdf");
 		fn_pdfs.push_back(fn_out + "batch.pdf");
+		RCTIC(TIMING_W_GS_ALLB);
 		concatenatePDFfiles(fn_out + "all_batches.pdf", fn_pdfs);
+		RCTOC(TIMING_W_GS_ALLB);
 
 		// Put header in front of comabined batches
+		RCTIC(TIMING_W_GS_LOGFILE);
 		concatenatePDFfiles(fn_out + "logfile.pdf", fn_out + "header.pdf", fn_out + "all_batches.pdf");
+		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 

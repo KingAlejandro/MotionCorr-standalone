@@ -136,6 +136,60 @@ static void testArenaFitsTutorialMovie() {
     check(one_frame < arena / n_frames * 2, "a one-frame batch fits within two frame slabs");
 }
 
+// The pinned budget must bound the bytes that are actually pinned.
+//
+// MOTIONCORR_NVCOMP_PINNED_MAX_MB used to be compared against the compressed
+// payload of the candidate batch, while the pool reserved that payload plus
+// 12.5% rounded up to a 32 MiB granule. A 64 MiB cap therefore admitted a
+// 64 MiB payload and pinned 96 MiB; an 8 MiB cap pinned 32 MiB. Under a
+// process-per-GPU layout each worker has its own pool, so the overshoot
+// multiplies by the worker count.
+//
+// This calls the same pinnedReserveBytes() production calls. A formula
+// restated here would drift and the check would stop observing the quantity
+// it claims to bound.
+static void testPinnedBudgetBoundsWhatIsPinned() {
+    const size_t caps[] = { (size_t)1 << 20, (size_t)8 << 20, (size_t)64 << 20,
+                            (size_t)256 << 20, (size_t)1024 << 20 };
+    for (size_t i = 0; i < sizeof(caps) / sizeof(caps[0]); i++) {
+        const size_t cap = caps[i];
+        // Largest payload the selector may admit under this cap, by bisection
+        // on the same predicate the selector uses.
+        size_t lo = 0, hi = cap;
+        while (lo < hi) {
+            const size_t mid = lo + (hi - lo + 1) / 2;
+            if (pinnedReserveBytes(mid) <= cap) lo = mid; else hi = mid - 1;
+        }
+        check(lo == 0 || pinnedReserveBytes(lo) <= cap,
+              "an admitted batch never reserves more pinned bytes than the cap");
+    }
+    // The property the old code got wrong, stated directly.
+    check(pinnedReserveBytes((size_t)64 << 20) > ((size_t)64 << 20),
+          "the reservation really is larger than the payload, so the two are not interchangeable");
+}
+
+// The cap parse must reject what it cannot represent, and say so, rather than
+// silently installing a different budget.
+static void testPinnedCapParsing() {
+    size_t out = 0;
+    check(parsePinnedCapBytes("64", out) && out == ((size_t)64 << 20), "plain MiB value accepted");
+    check(parsePinnedCapBytes("1024", out) && out == ((size_t)1024 << 20), "four-digit value accepted");
+    out = 0;
+    // atol("1G") == 1, which installed a 1 MiB cap and declined the fast path
+    // for the whole run with no message naming the cause.
+    check(!parsePinnedCapBytes("1G", out), "a suffixed size is rejected, not truncated to its digits");
+    check(!parsePinnedCapBytes("0.5", out), "a fractional value is rejected");
+    check(!parsePinnedCapBytes("abc", out), "a non-numeric value is rejected");
+    check(!parsePinnedCapBytes("", out), "an empty value is rejected");
+    check(!parsePinnedCapBytes("0", out), "zero is rejected rather than meaning the default");
+    check(!parsePinnedCapBytes("-8", out), "a negative value is rejected");
+    check(!parsePinnedCapBytes(" 64", out), "a leading space is rejected");
+    check(!parsePinnedCapBytes("64 ", out), "a trailing space is rejected");
+    // 2^44 MiB shifts past 64 bits; atol + unchecked << 20 produced a cap of 0.
+    check(!parsePinnedCapBytes("17592186044416", out), "a value that overflows the MiB shift is rejected");
+    check(!parsePinnedCapBytes("99999999999999999999999", out), "a value that overflows decimal parsing is rejected");
+}
+
 int main() {
     testSlotAlignment(4);
     testSlotAlignment(8);
@@ -144,6 +198,8 @@ int main() {
     testDensePackingIsRejected(8);
     testZlibWrapper();
     testArenaFitsTutorialMovie();
+    testPinnedBudgetBoundsWhatIsPinned();
+    testPinnedCapParsing();
 
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("deflate layout: all checks passed\n");

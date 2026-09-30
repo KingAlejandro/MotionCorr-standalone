@@ -897,7 +897,7 @@ bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
     // Headroom, rounded to 32 MiB. Compressed size drifts by a few MiB between
     // movies of the same geometry, so an exact fit reallocated on 7 of 24 tutorial
     // movies; with slack the pool is allocated once for the run.
-    const size_t reserve = mc_cuda::alignUp(bytes + bytes / 8, (size_t)32 << 20);
+    const size_t reserve = mc_tiff_deflate::pinnedReserveBytes(bytes);
     HANDLE_ERROR(cudaHostAlloc(&t_pinned_stage.ptr, reserve, cudaHostAllocDefault));
     t_pinned_stage.bytes = reserve;
     // Logged only when the pool actually grows, so "allocated once across the run"
@@ -1124,8 +1124,26 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // the pool by itself.
     size_t pinned_cap = (size_t)256 << 20;
     if (const char *env = getenv("MOTIONCORR_NVCOMP_PINNED_MAX_MB")) {
-        const long mb = atol(env);
-        if (mb > 0) pinned_cap = (size_t)mb << 20;
+        size_t parsed = 0;
+        if (mc_tiff_deflate::parsePinnedCapBytes(env, parsed)) {
+            pinned_cap = parsed;
+        } else {
+            // Say so. Silently substituting the default is how "1G" became a
+            // 1 MiB cap that turned the fast path off for a whole run with no
+            // message naming the cause.
+            logfile << "WARNING: MOTIONCORR_NVCOMP_PINNED_MAX_MB is not a positive"
+                    << " whole number of MiB; using the default " << pinned_cap
+                    << " bytes." << std::endl;
+        }
+    }
+    // The pool is never shrunk, so a cap lowered mid-run cannot be honoured by
+    // declining a batch: those bytes are already pinned. Refuse rather than
+    // report a budget the worker is not inside.
+    if (t_pinned_stage.ptr && t_pinned_stage.bytes > pinned_cap) {
+        logfile << "nvCOMP ingestion declined: this worker already holds "
+                << t_pinned_stage.bytes << " pinned bytes, above the "
+                << pinned_cap << "-byte cap; using the host reader." << std::endl;
+        return false;
     }
 
     // Views into the arena. None of these owns memory; none may be freed.
@@ -1151,7 +1169,13 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         BatchViews c;
         std::memset(&c, 0, sizeof(c));
         c.comp_capacity = (size_t)candidate * alignUp(max_frame_stage, in_align);
-        if (c.comp_capacity > pinned_cap) { if (candidate == 1) break; continue; }
+        // Against the bytes that will actually be pinned, not the payload: the
+        // pool adds 12.5% headroom and rounds up to a 32 MiB granule, so a cap
+        // enforced on the payload is overshot by construction.
+        if (mc_tiff_deflate::pinnedReserveBytes(c.comp_capacity) > pinned_cap) {
+            if (candidate == 1) break;
+            continue;
+        }
         c.temp_bytes = temp_bytes;
         c.comp   = (uint8_t *)arena.alloc(c.comp_capacity, in_align);
         c.u16    = (uint16_t *)arena.alloc((size_t)candidate * (size_t)ny * row_pitch_bytes, out_align);
@@ -1187,7 +1211,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     logfile << "nvCOMP ingestion: batch=" << batch_frames << "/" << n_frames
             << " frames, scratch=" << arena.used() << "/" << arena.capacity()
             << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
-            << ", pinned staging=" << v.comp_capacity << "/" << pinned_cap
+            << ", pinned staging=" << mc_tiff_deflate::pinnedReserveBytes(v.comp_capacity)
+            << "/" << pinned_cap << " reserved, " << v.comp_capacity << " payload"
             << ", nvCOMP temp=" << v.temp_bytes
             << ", input alignment=" << in_align << std::endl;
 

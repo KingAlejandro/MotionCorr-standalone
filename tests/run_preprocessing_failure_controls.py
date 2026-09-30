@@ -104,14 +104,14 @@ def main():
         (root / "defects.txt").write_text("10 12 1 1\n")
         data[kind] = root
 
-    def run(name, kind="u16", fault="none", executable=binary):
+    def run(name, kind="u16", fault="none", executable=binary, extra=()):
         out = work / name / "out"
         out.mkdir(parents=True)
         cmd = [str(executable), "--i", "movies.star", "--o", str(out) + "/",
                "--use_own", "--gpu", "0", "--j", "4", "--max_io_threads", "2",
                "--patch_x", "2", "--patch_y", "2", "--max_iter", "1", "--bfactor", "150",
                "--seed", "1", "--angpix", "1.0", "--voltage", "300",
-               "--defect_file", "defects.txt"]
+               "--defect_file", "defects.txt", *extra]
         env = dict(os.environ)
         for key in ("MC_FAULT_ORDINAL", "MC_FAULT_CODE", "MC_FAULT_TRACE", "MC_U16_FAULT", "MC_U16_STAGE_BYTES",
                     "MC_COUNT_FAULT_ORDINAL", "MC_COUNT_FAULT_CODE"):
@@ -168,8 +168,12 @@ def main():
              ("sparse-release-fatal", "u16", "updateDefectPixels"),
              ("float-gain-fatal", "float", "applyGainDefectsAndSum"),
              ("forward-fatal", "u16", "computeGlobalForwardFFT")]
-    for fault, kind, stage in cases:
-        out, rc, text = run(fault, kind, fault)
+    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1")
+    cases = [(fault, kind, stage, ()) for fault, kind, stage in cases]
+    cases += [("unweighted-release-fatal", "u16", "cudaRealSpaceInterpolationDevice", ()),
+              ("dw-release-fatal", "u16", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]
+    for fault, kind, stage, extra in cases:
+        out, rc, text = run(fault, kind, fault, extra=extra)
         require("at " + stage + "; pending slot cleared" in text,
                 f"{fault}: missing exact production injection witness")
         require(rc != 0, f"{fault}: fatal status was reported as success")
@@ -186,6 +190,9 @@ def main():
                     "injected cudaErrorIllegalAddress after real session cudaFree" in text and
                     "recorded at releaseBuffer:" in text and "First failure at updateDefectPixels:" in text,
                     "release fatal did not retain both operation and cleanup attribution")
+        if fault in ("unweighted-release-fatal", "dw-release-fatal"):
+            require("reconstruction for" in text and "recorded at scoped cudaFree:" in text,
+                    f"{fault}: reconstruction cleanup status was not retained by the session")
 
     if args.mutant_binary:
         mutant = args.mutant_binary.resolve()

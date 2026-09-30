@@ -1489,10 +1489,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// A preprocessing failure may be recoverable, but releasing its resources can
 	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
 	// release and BEFORE destroying it or materializing/re-dispatching the movie.
-	auto discard_preprocessing_session = [&](const char *boundary) {
-		if (!movie_session) return;
-		movie_session->release();
-		const CudaFailureState &failure = movie_session->getFailureState();
+	auto refuse_fallback_if_fatal = [&](const CudaFailureState &failure, const char *boundary) {
 		const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaGetLastError());
 		if (decision.verdict == CUDA_RETRY_FATAL) {
 			const std::string origin = failure.isPoisoned()
@@ -1504,6 +1501,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			                 << failure.firstStage() << ":" << failure.firstLine()
 			                 << ". Refusing CPU fallback after a fatal device error.");
 		}
+	};
+	auto discard_preprocessing_session = [&](const char *boundary) {
+		if (!movie_session) return;
+		movie_session->release();
+		refuse_fallback_if_fatal(movie_session->getFailureState(), boundary);
 		movie_session.reset();
 	};
 	if (use_gpu && !early_binning) {
@@ -2622,6 +2624,8 @@ skip_fitting:
 			logfile << "Summing frames before dose weighting (CUDA in-VRAM)..." << std::endl;
 			cuda_unweighted_done = movie_session->reconstructUnweighted(Iref, p_even, p_odd, poly_model);
 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			if (!cuda_unweighted_done)
+				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident unweighted reconstruction");
 		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
@@ -2631,8 +2635,11 @@ skip_fitting:
 			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
 			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
 			logfile << "Summing frames before dose weighting (CUDA)..." << std::endl;
-			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile);
+			CudaFailureState reconstruction_failure;
+			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile, &reconstruction_failure);
 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			if (!cuda_unweighted_done)
+				refuse_fallback_if_fatal(reconstruction_failure, "unweighted reconstruction");
 		}
 		if (!cuda_unweighted_done)
 #endif
@@ -2762,13 +2769,18 @@ skip_fitting:
 			}
 			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
 			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+			if (!cuda_dw_done)
+				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident dose-weighted reconstruction");
 		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
 			}
 			logfile << "Dose weighting and summing frames (CUDA)..." << std::endl;
-			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile);
+			CudaFailureState reconstruction_failure;
+			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile, &reconstruction_failure);
+			if (!cuda_dw_done)
+				refuse_fallback_if_fatal(reconstruction_failure, "dose-weighted reconstruction");
 		}
 		if (!cuda_dw_done)
 #endif

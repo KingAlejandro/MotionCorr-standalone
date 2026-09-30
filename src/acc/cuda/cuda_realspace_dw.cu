@@ -19,6 +19,7 @@
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        if (failure) failure->record(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -31,6 +32,7 @@
     if (result != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ \
                 << " : code " << result << std::endl; \
+        if (failure) failure->recordCufft(result, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -176,7 +178,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     if (n_frames == 0) return true;
 
@@ -190,9 +193,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    mc_cuda::ScopedDeviceMemory<8> memory_cleanup;
-    mc_cuda::ScopedCudaEvents<8> event_cleanup;
-    mc_cuda::ScopedCufftPlan plan_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
+    mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
+    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
     const int nfx = nx / 2 + 1, nfy = ny;
     const int nfy_half = nfy / 2;
@@ -355,7 +358,8 @@ bool cudaDoseWeightAndInterpolate(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     const int n_frames = Fframes.size();
     if (n_frames == 0) return true;
@@ -364,7 +368,7 @@ bool cudaDoseWeightAndInterpolate(
     const int nx = (nfx - 1) * 2, ny = nfy;
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
 
-    mc_cuda::ScopedDeviceMemory<8> memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Fframes, sz_fframes));
@@ -380,7 +384,7 @@ bool cudaDoseWeightAndInterpolate(
     }
 
     bool res = cudaDoseWeightAndInterpolateDevice(
-        (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile
+        (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, failure
     );
 
     const cudaError_t memory_release = memory_cleanup.releaseAll();
@@ -396,7 +400,8 @@ bool cudaRealSpaceInterpolationDevice(
     const int nx, const int ny, const int n_frames,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     if (n_frames == 0) return true;
 
@@ -410,8 +415,8 @@ bool cudaRealSpaceInterpolationDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    mc_cuda::ScopedDeviceMemory<8> memory_cleanup;
-    mc_cuda::ScopedCudaEvents<8> event_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
+    mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
 
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
@@ -504,7 +509,8 @@ bool cudaRealSpaceInterpolation(
     const std::vector<Image<float> > &Iframes,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     const int n_frames = Iframes.size();
     if (n_frames == 0) return true;
@@ -512,7 +518,7 @@ bool cudaRealSpaceInterpolation(
     const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
     const size_t sz_iframes = (size_t)n_frames * ny * nx * sizeof(float);
 
-    mc_cuda::ScopedDeviceMemory<8> memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     float *d_Iframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Iframes, sz_iframes));
@@ -528,7 +534,7 @@ bool cudaRealSpaceInterpolation(
     }
 
     bool res = cudaRealSpaceInterpolationDevice(
-        d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile
+        d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile, failure
     );
 
     const cudaError_t memory_release = memory_cleanup.releaseAll();

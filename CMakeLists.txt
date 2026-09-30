@@ -245,6 +245,23 @@ if(BUILD_TESTING)
         add_test(NAME WriteFaults
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # The same three-phase fail-closed sequence with the background output
+        # writer turned off. WriteFaults above exercises the deferred path, where
+        # the write fails on the worker thread and the failure is collected after
+        # the fact; this one exercises the inline path, where it propagates on the
+        # spot. --sync_output is a measurement control, so it must not be a way to
+        # get weaker failure semantics.
+        add_test(NAME WriteFaultsSync
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
+                --binary $<TARGET_FILE:motioncorr> --runner-arg --sync_output)
+        # Several MRC products for one movie, so the rule under test is not merely
+        # "the image write failed" but "the first failed product cancels the rest
+        # of that movie's group, the per-movie STAR among them". With one product
+        # per movie the ordering requirement is unobservable.
+        add_test(NAME WriteFaultsMultiProduct
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
+                --binary $<TARGET_FILE:motioncorr> --runner-arg --save_noDW
+                --runner-arg --even_odd_split)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME OutputTreeComparator

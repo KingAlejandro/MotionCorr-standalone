@@ -73,6 +73,16 @@ DEFAULT_REQUIRED_TESTS = [
     # because both sides would be reading the same drifted header.
     "MrcHeaderStats",
     "PdfConcat",
+    # Added with the #127 background output writer. WriteFaults exercises the
+    # deferred path (failure raised on the worker thread, collected afterwards);
+    # WriteFaultsSync runs the identical sequence on the inline path that
+    # --sync_output selects, so the measurement control cannot also be a route to
+    # weaker failure semantics. WriteFaultsMultiProduct gives one movie several
+    # MRC products, which is the only configuration in which "the first failed
+    # product cancels the rest of that movie's group, the STAR among them" is
+    # observable at all.
+    "WriteFaultsSync",
+    "WriteFaultsMultiProduct",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

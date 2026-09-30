@@ -109,7 +109,18 @@ def run(binary: Path, cwd: Path, star: str, out: Path, extra=(), limited=False,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--binary", type=Path, required=True)
+    ap.add_argument("--runner-arg", action="append", default=[], metavar="OPT",
+                    help="Extra option passed to every invocation. Used to run this "
+                         "same sequence against the synchronous output writer "
+                         "(--sync_output) and against a movie with several MRC "
+                         "products, where the fail-closed rule is not just 'the "
+                         "image failed' but 'the first failed product cancels the "
+                         "rest of that movie, the STAR among them'. Repeatable.")
     args = ap.parse_args()
+    global COMMON_ARGS
+    COMMON_ARGS = list(COMMON_ARGS) + list(args.runner_arg)
+    if args.runner_arg:
+        print(f"extra runner options: {' '.join(args.runner_arg)}")
     repo = Path(__file__).resolve().parent.parent
     source = repo / "test-data" / "synthetic" / "synthetic_movie.tiff"
     if not source.is_file():

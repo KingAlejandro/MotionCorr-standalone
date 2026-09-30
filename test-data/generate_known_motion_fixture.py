@@ -30,7 +30,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import difflib
+import itertools
 import json
+import math
 import struct
 import os
 import subprocess
@@ -219,7 +221,30 @@ def particle_boxes(cx, cy, sigma, shift_xy, nx, ny, slack=3.0):
 
 # --- MRC ------------------------------------------------------------------------------------
 
+def mean_std(values: np.ndarray, chunk: int = 1 << 20) -> tuple[float, float]:
+    """Population mean and standard deviation, independent of the NumPy version.
+
+    NumPy's float32 and float64 reductions change between releases (2.2 and 2.3 differ in the
+    last bits of ``std`` and ``mean``), and these statistics feed the noise scale, the hot-pixel
+    value and the MRC header, all of which are covered by the canonical digests. ``math.fsum``
+    is correctly rounded, so every step below is a fixed IEEE-754 operation on the same inputs.
+    """
+    flat = np.ascontiguousarray(values).ravel()
+    n = flat.size
+
+    def chunks(square: bool):
+        for i in range(0, n, chunk):
+            c = flat[i:i + chunk].astype(np.float64)
+            yield (c * c if square else c).tolist()
+
+    s1 = math.fsum(itertools.chain.from_iterable(chunks(False)))
+    s2 = math.fsum(itertools.chain.from_iterable(chunks(True)))
+    mean = s1 / n
+    return mean, math.sqrt(max(s2 / n - mean * mean, 0.0))
+
+
 def write_mrc_stack(path: Path, stack: np.ndarray, pixel_size: float) -> None:
+    mean, rms = mean_std(stack)
     ny, nx = stack.shape[1], stack.shape[2]
     nz = stack.shape[0]
     header = bytearray(1024)
@@ -229,11 +254,11 @@ def write_mrc_stack(path: Path, stack: np.ndarray, pixel_size: float) -> None:
     struct.pack_into("<3f", header, 40, nx * pixel_size, ny * pixel_size, nz * pixel_size)
     struct.pack_into("<3f", header, 52, 90.0, 90.0, 90.0)
     struct.pack_into("<3i", header, 64, 1, 2, 3)
-    struct.pack_into("<3f", header, 76, float(stack.min()), float(stack.max()), float(stack.mean()))
+    struct.pack_into("<3f", header, 76, float(stack.min()), float(stack.max()), mean)
     struct.pack_into("<2i", header, 88, 0, 0)
     header[208:212] = b"MAP "
     header[212:216] = bytes((0x44, 0x41, 0, 0))
-    struct.pack_into("<f", header, 216, float(stack.std()))
+    struct.pack_into("<f", header, 216, rms)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as fh:
         fh.write(header)
@@ -339,14 +364,14 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     iy_grid, ix_grid = np.mgrid[0:ny, 0:nx].astype(np.float64)
     clean0 = render(cx, cy, sig, amp, ix_grid, iy_grid, nx, ny,
                     boxes=particle_boxes(cx, cy, sig, (0.0, 0.0), nx, ny))
-    base_std = float(clean0.std())
+    base_mean, base_std = mean_std(clean0)
     noise_sigma = cfg["noise_rel"] * base_std
 
     # Fixed detector-coordinate hot pixels (not warped: a detector defect does not move).
     hot_rng = np.random.default_rng(seed + 977)
     hot_x = hot_rng.integers(8, nx - 8, cfg["n_hot"])
     hot_y = hot_rng.integers(8, ny - 8, cfg["n_hot"])
-    hot_val = float(clean0.mean() + 40.0 * base_std)
+    hot_val = base_mean + 40.0 * base_std
 
     frames = np.arange(n_frames)
     field = injected_motion(frames, ix_grid, iy_grid, nx, ny, n_frames, local_scale)

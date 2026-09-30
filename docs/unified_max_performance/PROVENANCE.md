@@ -151,3 +151,59 @@ with the suite still green. Added here.
 `tools/test_ci_fail_closed.py` restates the list by hand — deliberately, so
 that a stale copy is detectable. Both copies are updated in the same commit at
 every step and are asserted identical.
+
+## Defects found and fixed after composition
+
+None of these is an imported change. Each was found on the composed tree,
+because composing is what made it reachable or observable, and each is listed
+with the check that can see it.
+
+| # | commit | defect | class | control |
+|---|---|---|---|---|
+| 1 | `06d158a`, `ac71b3f` | nvCOMP arm left **no valid representation** after a recoverable failure. `materialize_host_frames()` returns at its own first line on that arm, so a recoverable `updateDefectPixels` failure reached the CPU FFT with zero-size frames and `REPORT_ERROR` left an OpenMP region — `std::terminate`, killing the job. Four sites. | composition | **not written** |
+| 2 | `b49b472` | Pinned budget enforced against the compressed payload, not the reservation: a 64 MiB cap pinned 96 MiB, an 8 MiB cap 32 MiB, per worker. | pre-existing (#126) | `DeflateLayout` |
+| 3 | `b49b472` | `atol` cap parsing: `1G` silently became a 1 MiB cap that disabled the fast path for a whole run with no message. | pre-existing (#126) | `DeflateLayout` |
+| 4 | `4aea2e6` | Patch-retry fallback gated on `host_frames_are_raw`, which the nvCOMP arm never sets, so `cudaPreparePatch` read `XSIZE == 0`. | composition | **not written** |
+| 5 | `4aea2e6` | `#pragma omp for` inside one arm of an if/else: a failing `TIFFOpen` skipped a barrier arrival and deadlocked the team. | pre-existing (#126) | **not written** |
+| 6 | `4aea2e6` | Ghostscript overlap: a throw from the main-thread `batch.pdf` pass unwound through a joinable `std::thread` — `std::terminate`. | pre-existing (#127) | `OutputStageFaults` |
+| 7 | `95b4719`, `f5e564d` | CUDA-without-nvCOMP failed to link. `gatherFrameSamples` and then `endIngestScratch` were defined inside the guard and declared outside. The first stayed green only because the optimiser proved the call dead. | pre-existing (#126) | `NvcompGuards` |
+| 8 | `cad4a29` | The ingest scratch teardown records failures **after** the return value is chosen, so a failed `cudaStreamSynchronize` was reported as a successful ingest. | pre-existing (#126) | **not written** |
+| 9 | `1d13a4f`, `26f2273` | My own reconciliation errors, caught by `TiffRead` and by argparse. | mine | the tests that caught them |
+
+Three of these are `std::terminate` or deadlock paths that end the whole job
+rather than one movie, and all three were unreachable on the branches they came
+from: #115's recovery paths assume a host movie that #126 removes, and #126's
+guard mismatch is invisible until something gives the guarded symbol an
+unguarded caller.
+
+**Four of the nine have no automated control.** That is the branch's largest
+remaining gap and is stated in each commit message rather than implied.
+
+## Additions that are not imports
+
+| commit | what | why |
+|---|---|---|
+| `5c72343` | `--sync_output` | PR127 constructs `OutputWriter(true)` unconditionally; ablating the writer would otherwise need a second binary, and any timing difference would carry every other difference two builds can have. |
+| `89ec92f` | `--ingest auto\|nvcomp\|compact\|float`, `--ingest_witness` | IOParser treats an unknown flag as a *warning*, and PR126 deliberately removed its own log line for byte-exact log parity — so a benchmark arm could have run entirely on the host reader and looked identical. A pinned `--ingest` fails the movie when its path cannot be taken, so an arm proves which path it ran. |
+| `cad4a29` | `MovieIngestStatus` | A bare bool conflated "no nvCOMP / unsupported encoding", "tried and failed, device fine" and "context dead" — and could not express a failure discovered after the value was chosen. |
+| `78eccd5` | `--allow-added-log-line` | The candidate legitimately records which path ran. Suppressing the line would restore the unobservability; a log-wide waiver would hide real differences. Paired with two controls: the arm must fail *without* the allowance, and an ordinary log line mutation must still be rejected. |
+| `f5e564d` | `tools/check_nvcomp_guards.py` | No test in the suite can see a guard mismatch, because the suite never links the configuration it breaks. |
+
+## Required-test registry, final
+
+| step | count | added |
+|---|---|---|
+| main `6393547e` | 20 | — |
+| + #115 | 21 | `PatchRetryState` |
+| + #118/#125 | 23 | `OutputTreeComparator`, `NativeU16Staging` |
+| + #126 | 26 | `DeflateLayout`, `ScratchArena`, `DefectNeighbours` |
+| + #127 A | 27 | `MrcHeaderStats` |
+| + #127 B | 28 | `PdfConcat` |
+| + writer fail-closed | 30 | `WriteFaultsSync`, `WriteFaultsMultiProduct` |
+| + guard check | 31 | `NvcompGuards` |
+| + PDF-stage fault | 32 | `OutputStageFaults` |
+
+Both copies — `tools/validate_test_collection.py` and the hand-restated list in
+`tools/test_ci_fail_closed.py` — are updated in the same commit at every step,
+asserted identical, and every required name is checked to be registered in
+CMakeLists.txt.

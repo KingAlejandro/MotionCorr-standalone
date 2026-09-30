@@ -1,0 +1,77 @@
+############ IDENTITY ############
+2026-09-30T22:38:49+00:00
+4-gpu-vm
+allocation=0-123  nproc=124
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, NVIDIA A100 80GB PCIe
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, NVIDIA A100 80GB PCIe
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, NVIDIA A100 80GB PCIe
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, NVIDIA A100 80GB PCIe
+THP=always [madvise] never
+foreign_compute_apps=0
+load=0.00 0.04 0.01
+settle_wait_seconds=0
+
+############ SOURCE + BUILD (inside the lock) ############
+SOURCE=098b4bda97d16b2f11bc6ae3432c2c89b89a8bec
+build=0 sha256=6739006508315179
+
+############ SERIAL ORACLE (1 process, 24 movies) ############
+rc=0 wall=13.024032435 mrc=24/24
+oracle digest lines=48
+
+############ CORRECTNESS: 1 / 2 / 4 WORKERS ############
+control self-digest: MATCH
+control mutated: DIFFER as required
+--- 1 worker(s) ---
+  launch_rc=0
+  verdict=PASS budget=32 disjoint=True affinity=['MATCH'] cores_busy=3.24
+  gpu_witness=True
+  witnessed_masks=['0-31']
+  products=48 lines; vs oracle: IDENTICAL
+--- 2 worker(s) ---
+  launch_rc=0
+  verdict=PASS budget=32 disjoint=True affinity=['MATCH', 'MATCH'] cores_busy=3.96
+  gpu_witness=True
+  witnessed_masks=['0-15', '16-31']
+  products=48 lines; vs oracle: IDENTICAL
+--- 4 worker(s) ---
+  launch_rc=0
+  verdict=PASS budget=32 disjoint=True affinity=['MATCH', 'MATCH', 'MATCH', 'MATCH'] cores_busy=5.08
+  gpu_witness=True
+  witnessed_masks=['0-7', '8-15', '16-23', '24-31']
+  products=48 lines; vs oracle: IDENTICAL
+
+############ TIMED CAMPAIGN: budget 32 cores, 1/2/4 GPU, 5 reps ############
+G4ARM gpu=2 rep=1 rc=0 wall=7.54 mrc=24 verdict=PASS cores=3.94 cpu_s=29.12 tail=0.12 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=4 rep=1 rc=0 wall=5.22 mrc=24 verdict=PASS cores=5.04 cpu_s=25.551 tail=0.41 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=1 rep=1 rc=0 wall=13.14 mrc=24 verdict=PASS cores=3.23 cpu_s=41.946 tail=0.00 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=4 rep=2 rc=0 wall=5.25 mrc=24 verdict=PASS cores=5.02 cpu_s=25.579 tail=0.38 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=22
+G4ARM gpu=1 rep=2 rc=0 wall=13.04 mrc=24 verdict=PASS cores=3.23 cpu_s=41.655 tail=0.00 foreign_gpu_apps=0
+   foreign_cpu_pct_before=14 after=1
+G4ARM gpu=2 rep=2 rc=0 wall=7.59 mrc=24 verdict=PASS cores=3.98 cpu_s=29.619 tail=0.13 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=1 rep=3 rc=0 wall=13.05 mrc=24 verdict=PASS cores=3.25 cpu_s=41.904 tail=0.00 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=2 rep=3 rc=0 wall=8.54 mrc=24 verdict=PASS cores=3.93 cpu_s=32.981 tail=0.12 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=4 rep=3 rc=0 wall=5.30 mrc=24 verdict=PASS cores=5.09 cpu_s=26.167 tail=0.40 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=2 rep=4 rc=0 wall=7.40 mrc=24 verdict=PASS cores=3.9 cpu_s=28.261 tail=0.13 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=4 rep=4 rc=0 wall=5.26 mrc=24 verdict=PASS cores=5.07 cpu_s=25.923 tail=0.43 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=1 rep=4 rc=0 wall=13.82 mrc=24 verdict=PASS cores=3.27 cpu_s=44.745 tail=0.00 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=4 rep=5 rc=0 wall=5.17 mrc=24 verdict=PASS cores=5.02 cpu_s=25.18 tail=0.35 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=1 rep=5 rc=0 wall=13.08 mrc=24 verdict=PASS cores=3.21 cpu_s=41.481 tail=0.00 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+G4ARM gpu=2 rep=5 rc=0 wall=7.43 mrc=24 verdict=PASS cores=3.95 cpu_s=28.769 tail=0.09 foreign_gpu_apps=0
+   foreign_cpu_pct_before=1 after=1
+
+G4_DONE 098b4bda97d16b2f11bc6ae3432c2c89b89a8bec
+2026-09-30T22:43:09+00:00

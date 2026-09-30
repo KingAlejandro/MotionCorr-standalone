@@ -340,7 +340,7 @@ int main() {
         requireEmpty();
     } catch (const std::exception &e) {
         std::cerr << "FAIL: " << e.what() << '\n'; return 1;
-    } catch (const RelionError &e) {
+    } catch (RelionError &e) {
         std::cerr << "Unexpected production exception: " << e << '\n'; return 1;
     }
     std::cout << "PASS: movie-scoped patch workspace actual-path matrix\n";

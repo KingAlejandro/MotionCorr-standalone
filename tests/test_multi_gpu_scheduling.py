@@ -1076,6 +1076,20 @@ def case_per_worker_args_and_cpu_accounting(tmp: Path) -> None:
         assert cmd[-2:] == ["--j", want], cmd
         assert cmd.count("--j") == 2, cmd
 
+    # A per-worker value with no space needs the '=' form. argparse treats a
+    # '-'-prefixed token as an option unless it contains a space, so '--j 2'
+    # survives as a separate token by accident and a bare flag does not.
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "x_bare",
+              "--binary", FAKE, "--workers", "1", "--no-witness",
+              "--worker-extra", "--fake_marker"])
+    assert cp.returncode == 2 and "usage:" in (cp.stderr + cp.stdout), cp.stderr
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "x_eq",
+              "--binary", FAKE, "--workers", "1", "--no-witness",
+              "--worker-extra=--fake_marker"])
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    assert json.loads((tmp / "x_eq" / "w0" / "command.json").read_text()
+                      )["command"][-1] == "--fake_marker"
+
     st = json.loads((tmp / "x_ok" / "status.json").read_text())
     assert st["cpu_seconds_total"] is not None and st["cpu_seconds_total"] > 0, st
     assert st["mean_cores_busy"] is not None, st

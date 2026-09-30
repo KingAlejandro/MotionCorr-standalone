@@ -418,7 +418,11 @@ def main(argv: list[str] | None = None) -> int:
                          "overrides a shared '--j 8' (IOParser takes the last "
                          "occurrence). This is how per-worker thread counts are set; a "
                          "single shared --j gives every worker the same count no matter "
-                         "how wide its cpu mask is.")
+                         "how wide its cpu mask is. Write it as "
+                         "--worker-extra=--sync_output: argparse only accepts a "
+                         "'-'-prefixed value as a separate token when it contains a "
+                         "space, so '--worker-extra --j 2' happens to work while "
+                         "'--worker-extra --sync_output' exits on a usage error.")
     ap.add_argument("--omp-num-threads", default=None,
                     help="OMP_NUM_THREADS for every worker. Default when --cpus is "
                          "given: that worker's mask width.")

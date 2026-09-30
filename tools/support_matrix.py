@@ -103,8 +103,13 @@ row("seed_7",                "movies_one.star", G + ["--j", "4", "--seed", "7"])
 row("global_only_1x1",       "movies_one.star", G + ["--j", "4", "--patch_x", "1", "--patch_y", "1"])
 row("patch_3x3",             "movies_one.star", G + ["--j", "4", "--patch_x", "3", "--patch_y", "3"])
 row("interpolate_shifts",    "movies_one.star", G + ["--j", "4", "--interpolate_shifts"])
-row("bin2_early",            "movies_one.star", G + ["--j", "4", "--bin_factor", "2"])
-row("bin2_no_early",         "movies_one.star", G + ["--j", "4", "--bin_factor", "2", "--no_early_binning"])
+# Positive binning coverage. bin_factor 2 on 3710x3838 gives 1855x1919, and main
+# rejects an odd binned dimension, so a factor of 2 only ever proved matched
+# rejection on this fixture. 1.855 lands on even dimensions and exercises the
+# binning path itself, early and late.
+row("bin_even_early",        "movies_one.star", G + ["--j", "4", "--bin_factor", "1.855"])
+row("bin_even_late",         "movies_one.star", G + ["--j", "4", "--bin_factor", "1.855", "--no_early_binning"])
+row("reject_bin2_no_early",  "movies_one.star", G + ["--j", "4", "--bin_factor", "2", "--no_early_binning"])
 row("max_iter_1",            "movies_one.star", G + ["--j", "4", "--max_iter", "1"])
 # ---- output ------------------------------------------------------------
 row("save_noDW",             "movies_one.star", G + ["--j", "4", "--save_noDW"])
@@ -120,7 +125,7 @@ row("dose_cutoff",           "movies_one.star", G + ["--j", "4", "--dose_motions
 # refuse them identically. They are not evidence that the feature is
 # unsupported, which is how the first report read them.
 row("reject_gain_rot_90",    "movies_one.star", G + ["--j", "4", "--gain_rot", "1"])
-row("reject_bin2_odd",       "movies_one.star", G + ["--j", "4", "--bin_factor", "2"])
+row("reject_bin2_early",     "movies_one.star", G + ["--j", "4", "--bin_factor", "2"])
 
 
 def main() -> int:

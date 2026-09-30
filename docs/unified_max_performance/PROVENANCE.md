@@ -160,14 +160,14 @@ with the check that can see it.
 
 | # | commit | defect | class | control |
 |---|---|---|---|---|
-| 1 | `06d158a`, `ac71b3f` | nvCOMP arm left **no valid representation** after a recoverable failure. `materialize_host_frames()` returns at its own first line on that arm, so a recoverable `updateDefectPixels` failure reached the CPU FFT with zero-size frames and `REPORT_ERROR` left an OpenMP region — `std::terminate`, killing the job. Four sites. | composition | **not written** |
+| 1 | `06d158a`, `ac71b3f` | *(control: `sparse-recoverable` on the nvCOMP fixture, passing)* nvCOMP arm left **no valid representation** after a recoverable failure. `materialize_host_frames()` returns at its own first line on that arm, so a recoverable `updateDefectPixels` failure reached the CPU FFT with zero-size frames and `REPORT_ERROR` left an OpenMP region — `std::terminate`, killing the job. Four sites. | composition | **not written** |
 | 2 | `b49b472` | Pinned budget enforced against the compressed payload, not the reservation: a 64 MiB cap pinned 96 MiB, an 8 MiB cap 32 MiB, per worker. | pre-existing (#126) | `DeflateLayout` |
 | 3 | `b49b472` | `atol` cap parsing: `1G` silently became a 1 MiB cap that disabled the fast path for a whole run with no message. | pre-existing (#126) | `DeflateLayout` |
-| 4 | `4aea2e6` | Patch-retry fallback gated on `host_frames_are_raw`, which the nvCOMP arm never sets, so `cudaPreparePatch` read `XSIZE == 0`. | composition | **not written** |
-| 5 | `4aea2e6` | `#pragma omp for` inside one arm of an if/else: a failing `TIFFOpen` skipped a barrier arrival and deadlocked the team. | pre-existing (#126) | **not written** |
+| 4 | `4aea2e6` | Patch-retry fallback gated on `host_frames_are_raw`, which the nvCOMP arm never sets, so `cudaPreparePatch` read `XSIZE == 0`. | composition | **still none.** `patch-prep-recoverable` exists but its injection site is not reached on the 48x40 control fixture, so it is held behind `--include-unproven` rather than shipped red. Needs a fixture on which `preparePatchInVram` actually runs |
+| 5 | `4aea2e6` | `#pragma omp for` inside one arm of an if/else: a failing `TIFFOpen` skipped a barrier arrival and deadlocked the team. | pre-existing (#126) | `tiff-open-partial`, passing — falls back to the compact arm with complete products |
 | 6 | `4aea2e6` | Ghostscript overlap: a throw from the main-thread `batch.pdf` pass unwound through a joinable `std::thread` — `std::terminate`. | pre-existing (#127) | `OutputStageFaults` |
 | 7 | `95b4719`, `f5e564d` | CUDA-without-nvCOMP failed to link. `gatherFrameSamples` and then `endIngestScratch` were defined inside the guard and declared outside. The first stayed green only because the optimiser proved the call dead. | pre-existing (#126) | `NvcompGuards` |
-| 8 | `cad4a29` | The ingest scratch teardown records failures **after** the return value is chosen, so a failed `cudaStreamSynchronize` was reported as a successful ingest. | pre-existing (#126) | **not written** |
+| 8 | `cad4a29` | The ingest scratch teardown records failures **after** the return value is chosen, so a failed `cudaStreamSynchronize` was reported as a successful ingest. | pre-existing (#126) | `ingest-teardown-fatal`, passing — falls back to the compact arm with complete products |
 | 9 | `1d13a4f`, `26f2273` | My own reconciliation errors, caught by `TiffRead` and by argparse. | mine | the tests that caught them |
 
 Three of these are `std::terminate` or deadlock paths that end the whole job
@@ -207,3 +207,29 @@ Both copies — `tools/validate_test_collection.py` and the hand-restated list i
 `tools/test_ci_fail_closed.py` — are updated in the same commit at every step,
 asserted identical, and every required name is checked to be registered in
 CMakeLists.txt.
+
+## Recovery-control status, measured
+
+On SCARF `gnx002`, job 3515778, nvCOMP build:
+
+| control | result | route taken |
+|---|---|---|
+| `unweighted-release-fatal` | PASS, refusal + cleanup attributed, 0 products | nvcomp |
+| `dw-release-fatal` | PASS, same | nvcomp |
+| `sparse-recoverable` | PASS, job survived, 3/3 products | nvcomp |
+| `ingest-teardown-fatal` | PASS, job survived, 3/3 products | **fell back to compact** |
+| `tiff-open-partial` | PASS, job survived, 3/3 products | **fell back to compact** |
+| `patch-prep-recoverable` | **unproven** — injection site not reached on this fixture | — |
+
+Each row asserts the outcome that matters and is common to all of them: the
+fault fires, the job survives rather than dying, and the movie still produces
+its complete product set. The internal route is printed, not asserted. An
+earlier version asserted a route per row and failed on runs whose products
+were perfect, because the code had taken a different and equally correct path.
+
+Two of these rows only became meaningful once the pinned `--ingest nvcomp` was
+removed from them: their correct outcome *is* a fallback, and pinning the
+device path turns correct behaviour into a failed movie.
+
+So five of the nine defects now have a passing control, and one -- the
+patch-retry fallback -- still has none.

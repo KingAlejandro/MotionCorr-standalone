@@ -137,6 +137,11 @@ def main() -> int:
                          "rows below show the guard firing but not that it can stay silent, "
                          "so the mutant rows are reported UNRUN rather than skipped quietly.")
     ap.add_argument("--workdir", type=Path, default=None)
+    ap.add_argument("--include-unproven", action="store_true",
+                    help="also run rows whose injection site is not reached on this "
+                         "fixture. Off by default: such a row fails for want of a "
+                         "fixture, not for a defect, and a red row that proves nothing "
+                         "is worse than an openly recorded gap.")
     ap.add_argument("--cpus", default=None,
                     help="optional taskset CPU list for every run, e.g. 96-103; "
                          "unpinned by default")
@@ -225,10 +230,13 @@ def main() -> int:
          "recoverable defect-update failure: the movie must be recovered from the "
          "device, not lost with it",
          ["Recovered the movie from device memory"]),
-        ("patch-prep-recoverable", (),
-         "patch retry after a failed resident preparation: the frames must be "
-         "fetched back, not read at zero size",
-         []),
+        # patch-prep-recoverable is NOT in the registered set. The fault never
+        # fires on this 48x40 fixture -- preparePatchInVram is not reached, so
+        # the row reports "fault actually injected" false and would ship red
+        # while proving nothing. It is kept behind --include-unproven so the
+        # work is not lost, and the patch-retry path is recorded in
+        # PROVENANCE.md as still having no working control rather than being
+        # quietly counted as covered.
         ("ingest-teardown-fatal", ("--ingest", "auto"),
          "teardown fails after the worker returned success: the ingest must not "
          "be reported as successful",
@@ -238,6 +246,10 @@ def main() -> int:
          "the movie must fall back",
          []),
     ]
+    if a.include_unproven:
+        recovery.append(("patch-prep-recoverable", (),
+                         "patch retry after a failed resident preparation",
+                         []))
     for fault, extra, what, needles in recovery:
         rc, text, out, path = run(FIXED, f"recover-{fault}", fault, extra)
         prods = sorted(p.name for p in out.rglob("*") if p.suffix in (".mrc", ".star"))

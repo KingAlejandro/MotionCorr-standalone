@@ -58,8 +58,8 @@ exactly that, reporting -5.4 s where the gain cache alone accounted for 2.3 s.
 | ⤷ joint STAR rescan, histogram EPS | 0.016 | | |
 | **total** | **4.19** | | **15% of wall** |
 
-Same output stage on the CPU path is ~2.8 s of a 210 s run, so it is a CUDA-path
-problem: the GPU shortens everything except the writing.
+The same output stage on the CPU path is 2.98 s of a 222.8 s run — 1.3% — so
+this is a CUDA-path problem: the GPU shortens everything except the writing.
 
 The payload split between CPU and filesystem comes from `fs_probe.txt` — the
 identical run with `--o` on `/dev/shm`:

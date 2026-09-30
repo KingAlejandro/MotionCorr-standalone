@@ -1,3 +1,17 @@
+> **SUPERSEDED — historical record.** The 12.4x headline below is not a valid
+> speedup and should not be cited. It sums independent per-stage minima taken from
+> different repetitions, so the total corresponds to no observed execution, and it
+> starts the GPU arm after the compressed bytes are already in host RAM while
+> charging the CPU arm for obtaining them. The nvCOMP run it describes also passed
+> `cudaMalloc` base + 2 as chunk inputs, which violates the 4-byte input alignment
+> nvCOMP 5.3.0.16 reports, and never read the per-chunk statuses.
+>
+> **Current result: 5.52x for ingestion**, measured with complete repeated
+> pipelines from the same start and end point, and with alignment, zlib wrapper
+> validation, Adler-32 verification and per-chunk status checks included. See
+> [`nvcomp_scratch_arena_evidence.md`](nvcomp_scratch_arena_evidence.md), which is
+> the current statement. This file is retained for provenance only.
+
 # GPU Deflate Decompression Microbenchmark: NVIDIA A100 vs Multi-Threaded CPU (libtiff)
 
 **Date**: 2026-09-29  

@@ -15,6 +15,7 @@
 #include <tiffio.h>
 #include <cstring>
 #include <cstdint>
+#include <cstdlib>
 #include "nvcomp.h"
 #include "nvcomp/deflate.h"
 #include "src/acc/cuda/cuda_deflate_layout.h"
@@ -123,6 +124,54 @@ __global__ void fusedU16FlipGainAndSumKernel(
     dst_Isum[dest_pixel] = sum;
 }
 #endif
+
+// RFC 1950 Adler-32 over each decompressed strip.
+//
+// Handing nvCOMP only bytes [2, n-4) discards the checksum LibTIFF's zlib path
+// verifies for free. Per-chunk status and decompressed length do not replace it: a
+// corruption that still inflates to the right number of bytes is reported as
+// success. Recomputing it here restores the integrity semantics the fast path would
+// otherwise silently weaken relative to the reader it replaces.
+//
+// One block per strip. The serial recurrence is avoided by using the closed forms
+//   A = 1 + sum(d_i),   B = n + sum((n - i) * d_i)
+// which are ordinary reductions; the modulo is applied once at the end. The
+// weighted sum needs 64 bits: for a 7420-byte row it reaches ~1.4e10.
+__global__ void adler32StripsKernel(
+    const unsigned char *decomp_base,
+    size_t row_pitch_bytes,
+    size_t row_bytes,
+    uint32_t *out_adler,
+    size_t n_chunks
+) {
+    const size_t chunk = blockIdx.x;
+    if (chunk >= n_chunks) return;
+    const unsigned char *row = decomp_base + chunk * row_pitch_bytes;
+
+    unsigned long long sum_d = 0, sum_w = 0;
+    for (size_t i = threadIdx.x; i < row_bytes; i += blockDim.x) {
+        const unsigned long long d = row[i];
+        sum_d += d;
+        sum_w += (unsigned long long)(row_bytes - i) * d;
+    }
+    __shared__ unsigned long long s_d[256];
+    __shared__ unsigned long long s_w[256];
+    s_d[threadIdx.x] = sum_d;
+    s_w[threadIdx.x] = sum_w;
+    __syncthreads();
+    for (unsigned stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            s_d[threadIdx.x] += s_d[threadIdx.x + stride];
+            s_w[threadIdx.x] += s_w[threadIdx.x + stride];
+        }
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) {
+        const unsigned long long a = (1ull + s_d[0]) % 65521ull;
+        const unsigned long long b = ((unsigned long long)row_bytes + s_w[0]) % 65521ull;
+        out_adler[chunk] = (uint32_t)((b << 16) | a);
+    }
+}
 
 // Sparse read-back for hot-pixel replacement. One thread per (defect, frame)
 // sample. A negative y marks the Gaussian branch, which the host fills itself; the
@@ -852,26 +901,49 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
         bool ok = true;
-        for (int f = 0; f < num_req_frames && ok; f++) {
+        const char *reject = nullptr;
+        // Raw Deflate decompression reproduces only what LibTIFF would do for one
+        // exactly-specified encoding. Everything outside that subset must fall back
+        // rather than be decoded with the wrong semantics, so the eligible encoding
+        // is enumerated positively: any tag this path does not implement is a
+        // refusal, not a default.
+        if (TIFFIsByteSwapped(tif)) reject = "non-native byte order";
+        for (int f = 0; f < num_req_frames && ok && !reject; f++) {
             if (!TIFFSetDirectory(tif, frames[f])) { ok = false; break; }
             uint32_t width = 0, height = 0;
             uint16_t bits = 0, compression = 0, planar = PLANARCONFIG_CONTIG, samples = 1;
+            uint16_t predictor = PREDICTOR_NONE, sample_format = SAMPLEFORMAT_UINT;
+            uint16_t fill_order = FILLORDER_MSB2LSB;
             TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
             TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
             TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
             TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
             TIFFGetFieldDefaulted(tif, TIFFTAG_PLANARCONFIG, &planar);
             TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLESPERPIXEL, &samples);
-            if ((int)width != nx || (int)height != ny || bits != 16 || samples != 1 ||
-                planar != PLANARCONFIG_CONTIG ||
-                (compression != COMPRESSION_DEFLATE && compression != COMPRESSION_ADOBE_DEFLATE)) {
-                ok = false; break;
-            }
+            TIFFGetFieldDefaulted(tif, TIFFTAG_PREDICTOR, &predictor);
+            TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLEFORMAT, &sample_format);
+            TIFFGetFieldDefaulted(tif, TIFFTAG_FILLORDER, &fill_order);
+            // Horizontal differencing is undone by LibTIFF after inflation; this
+            // path hands the inflated bytes straight to the cast, so predictor 2
+            // would silently produce differences instead of samples.
+            if (predictor != PREDICTOR_NONE)             reject = "TIFFTAG_PREDICTOR != 1";
+            // The cast kernel reads uint16. Signed or float samples of the same
+            // width would be reinterpreted rather than converted.
+            else if (sample_format != SAMPLEFORMAT_UINT) reject = "TIFFTAG_SAMPLEFORMAT != UINT";
+            else if (fill_order != FILLORDER_MSB2LSB)    reject = "non-native TIFFTAG_FILLORDER";
+            else if ((int)width != nx || (int)height != ny) reject = "frame geometry differs";
+            else if (bits != 16)                         reject = "bits per sample != 16";
+            else if (samples != 1)                       reject = "samples per pixel != 1";
+            else if (planar != PLANARCONFIG_CONTIG)      reject = "planar configuration not contiguous";
+            else if (compression != COMPRESSION_DEFLATE &&
+                     compression != COMPRESSION_ADOBE_DEFLATE) reject = "compression is not Deflate";
+            if (reject) break;
             // One row per strip is what makes a strip a self-contained Deflate stream
             // of exactly nx uint16 samples. Anything else changes the chunk geometry.
             if ((int)TIFFNumberOfStrips(tif) != ny ||
                 TIFFStripSize(tif) != (tmsize_t)((size_t)nx * sizeof(uint16_t))) {
-                ok = false; break;
+                reject = "strip layout is not one full row per strip";
+                break;
             }
             raw_sizes[f].resize(ny);
             for (int s = 0; s < ny; s++) {
@@ -882,6 +954,13 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
         }
         TIFFClose(tif);
+        if (reject) {
+            // Named, so an unexpected fallback is diagnosable from the log rather
+            // than showing up only as the slower path being taken.
+            logfile << "nvCOMP ingestion declined (" << reject
+                    << "); using the host reader." << std::endl;
+            return false;
+        }
         if (!ok) return false;
     }
 
@@ -937,11 +1016,21 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     mc_cuda::DeviceScratchArena arena(
         d_Fframes, (size_t)n_frames * (size_t)ny * (size_t)nfx * sizeof(cufftComplex));
 
+    // Pinned host memory is a per-worker resource, not a per-session one, and under
+    // a process-per-GPU layout the pools add up across workers. Cap it and let the
+    // cap bound the batch as the arena does, rather than letting a large movie size
+    // the pool by itself.
+    size_t pinned_cap = (size_t)256 << 20;
+    if (const char *env = getenv("MOTIONCORR_NVCOMP_PINNED_MAX_MB")) {
+        const long mb = atol(env);
+        if (mb > 0) pinned_cap = (size_t)mb << 20;
+    }
+
     // Views into the arena. None of these owns memory; none may be freed.
     struct BatchViews {
         uint8_t *comp; uint16_t *u16;
         void **cptr; size_t *csize; void **dptr; size_t *dsize; size_t *asize;
-        nvcompStatus_t *status; void *temp;
+        nvcompStatus_t *status; uint32_t *adler; void *temp;
         size_t comp_capacity, temp_bytes;
     };
     BatchViews v;
@@ -960,6 +1049,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         BatchViews c;
         std::memset(&c, 0, sizeof(c));
         c.comp_capacity = (size_t)candidate * alignUp(max_frame_stage, in_align);
+        if (c.comp_capacity > pinned_cap) { if (candidate == 1) break; continue; }
         c.temp_bytes = temp_bytes;
         c.comp   = (uint8_t *)arena.alloc(c.comp_capacity, in_align);
         c.u16    = (uint16_t *)arena.alloc((size_t)candidate * (size_t)ny * row_pitch_bytes, out_align);
@@ -969,7 +1059,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         c.dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
         c.asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
         c.status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
-        bool fits = c.comp && c.u16 && c.cptr && c.csize && c.dptr && c.dsize && c.asize && c.status;
+        c.adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
+        bool fits = c.comp && c.u16 && c.cptr && c.csize && c.dptr && c.dsize && c.asize
+                    && c.status && c.adler;
         if (fits && temp_bytes) {
             c.temp = arena.alloc(temp_bytes, tmp_align);
             fits = (c.temp != 0);
@@ -978,8 +1070,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (candidate == 1) break;
     }
     if (batch_frames <= 0) {
-        logfile << "WARNING: nvCOMP ingestion refused: a one-frame batch does not fit the "
-                << arena.capacity() << "-byte pre-FFT scratch arena." << std::endl;
+        logfile << "nvCOMP ingestion declined: a one-frame batch fits neither the "
+                << arena.capacity() << "-byte pre-FFT scratch arena nor the "
+                << pinned_cap << "-byte pinned staging cap"
+                << " (MOTIONCORR_NVCOMP_PINNED_MAX_MB); using the host reader." << std::endl;
         return false;
     }
 
@@ -991,6 +1085,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     logfile << "nvCOMP ingestion: batch=" << batch_frames << "/" << n_frames
             << " frames, scratch=" << arena.used() << "/" << arena.capacity()
             << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
+            << ", pinned staging=" << v.comp_capacity << "/" << pinned_cap
             << ", nvCOMP temp=" << v.temp_bytes
             << ", input alignment=" << in_align << std::endl;
 
@@ -1007,6 +1102,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     std::vector<size_t>         h_dec_size(max_chunks, row_bytes);
     std::vector<size_t>         h_act_size(max_chunks);
     std::vector<nvcompStatus_t> h_statuses(max_chunks);
+    std::vector<uint32_t>       h_adler_expected(max_chunks);
+    std::vector<uint32_t>       h_adler_actual(max_chunks);
 
     const bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
@@ -1073,6 +1170,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                         h_comp_ptrs[chunk] = v.comp + frame_base[i] + slot + 2;
                         h_comp_size[chunk] = raw_sz - 6;
                         h_dec_ptrs[chunk]  = (uint8_t *)v.u16 + chunk * row_pitch_bytes;
+                        // Stored Adler-32: the last four bytes of the strip, big-endian.
+                        const uint8_t *tr = fb + slot + raw_sz - 4;
+                        h_adler_expected[chunk] = ((uint32_t)tr[0] << 24) | ((uint32_t)tr[1] << 16) |
+                                                  ((uint32_t)tr[2] << 8)  |  (uint32_t)tr[3];
                         cursor = slot + raw_sz;
                     }
                     if (!ok) frame_ok[i] = 0;
@@ -1098,10 +1199,22 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         // Fail closed. Without this the batch buffer's previous contents, or raw
         // cudaMalloc garbage on the first batch, would be cast to float, gain-applied
         // and aligned as if it were image data, and the function would return success.
+        adler32StripsKernel<<<(unsigned)chunks, 256, 0, stream>>>(
+            (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, v.adler, chunks);
+        HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
+        HANDLE_ERROR(cudaMemcpyAsync(h_adler_actual.data(), v.adler, chunks * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaStreamSynchronize(stream));
         for (size_t c = 0; c < chunks; c++) {
+            if (h_adler_actual[c] != h_adler_expected[c]) {
+                logfile << "WARNING: strip " << c << " of frames [" << f0 << ","
+                        << (f0 + bf) << ") failed its zlib Adler-32 check: computed 0x"
+                        << std::hex << h_adler_actual[c] << " stored 0x"
+                        << h_adler_expected[c] << std::dec
+                        << "; falling back to the host reader." << std::endl;
+                return false;
+            }
             if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
                 logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
                         << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]

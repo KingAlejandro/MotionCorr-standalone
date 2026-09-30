@@ -101,16 +101,26 @@ records ("pinned staging pool grown to 167772160 bytes for a 126069120-byte requ
 `Could not download frames` appears 0 times and all 24 movies still report
 `Fixed hot pixels`.
 
-| Arm | Wall, 24 movies | Peak VRAM |
-|---|---|---|
-| control (host read) | 35.3 s | 3484 MiB |
-| arena + worker-lifetime pinned + sparse gather | **16.3 s** | **3484 MiB** |
+Repeated as a **matched interleaved study** on one head, arms alternating within each
+repetition, every observation kept. `--j 4`, `taskset -c 0-7`, one A100 selected by
+UUID, 24 movies, `--seed 1`.
 
-**2.2x faster end to end, with peak VRAM still unchanged.** The control reproduces at
-34.3 / 34.6 / 35.3 s across three runs; the nvCOMP arm at 48.4 s before these two
-fixes, 17.3 s with the exact-fit pool, 16.3 s with headroom.
+| Arm | n | median | min | max |
+|---|---|---|---|---|
+| main `6393547` | 4 | 33.59 s | 32.57 | 33.84 |
+| this branch, `USE_NVCOMP=OFF` | 4 | 33.31 s | 31.86 | 33.40 |
+| this branch, nvCOMP | 4 | **15.88 s** | 15.67 | 15.91 |
 
-The end-to-end saving (~790 ms/movie) is larger than the ingestion-stage saving
+**2.12x against main, 2.10x against the branch's own control**, peak VRAM unchanged at
+3484 MiB. A separate 5-repetition interleaved run of the latter two agreed: 33.25 s
+versus 15.81 s.
+
+Main and the branch control are within 1% of each other, so the #115 lineage this
+branch carries is not inflating the baseline and the control is representative. These
+figures include the Adler-32 verification added later, which is therefore not
+measurably expensive at this scale.
+
+The end-to-end saving (~730 ms/movie) is larger than the ingestion-stage saving
 (237 ms/movie) predicts. The likely remainder is that the control materialises a
 1.27 GiB host `Iframes` buffer per movie and the nvCOMP path never does; a cold
 allocation of that size plus fill measured ~1.0 s. This attribution is **inferred**,
@@ -181,3 +191,79 @@ report 4/4 data mismatches. A fixture that silently masked nothing would have sh
 rank along (`(rand() + 1) % n_ok`) produces **4/4 data mismatches in every one of the
 five scenarios**. So MRC equality is sensitive to a single-rank change in one selected
 neighbour, and the zeros above are a result rather than an insensitive comparison.
+
+---
+
+# Format eligibility and integrity hardening
+
+## The eligible encoding is enumerated positively
+
+Raw Deflate decompression reproduces LibTIFF only for one exactly-specified encoding.
+Pass A now refuses anything outside it with a named reason and falls back, rather than
+defaulting tags it does not implement:
+
+predictor 1, `SAMPLEFORMAT_UINT`, 16 bits, one sample per pixel, contiguous planar,
+native byte order (`TIFFIsByteSwapped`), `FILLORDER_MSB2LSB`, Deflate, and one full
+row per strip.
+
+## Adler-32 is verified rather than discarded
+
+Passing nvCOMP only bytes `[2, n-4)` drops the RFC 1950 checksum that LibTIFF's zlib
+path verifies. Per-chunk status and decompressed length do not replace it: a
+corruption that still inflates to the right number of bytes is reported as success.
+
+`adler32StripsKernel` recomputes it per strip, one block each, using the closed forms
+`A = 1 + sum(d_i)` and `B = n + sum((n - i) * d_i)` so the serial recurrence becomes
+two reductions; the weighted sum needs 64 bits (~1.4e10 for a 7420-byte row). The
+closed form was checked against the RFC 1950 recurrence over lengths 1 to 16384 and
+all-zero, all-255 and random content.
+
+## Results
+
+Control build (`USE_NVCOMP=OFF`, LibTIFF) against the guarded nvCOMP build. Fixtures
+are 4-frame re-encodings of a tutorial movie, one IFD per frame.
+
+| Fixture | nvCOMP build | Products vs control |
+|---|---|---|
+| `ok` | accepted, ingest runs | identical |
+| `predictor2` | declined: `TIFFTAG_PREDICTOR != 1` | identical (via fallback) |
+| `signed16neg` | declined: `TIFFTAG_SAMPLEFORMAT != UINT` | identical (via fallback) |
+| `bigendian` | declined: `non-native byte order` | identical (via fallback) |
+| `adler_only` | refused: Adler-32 mismatch | both arms fail, 0 micrographs |
+
+`adler_only` differs from `ok` in exactly **4 bytes** — only the stored trailer. The
+Deflate payload is untouched and inflates to the correct length, so status and size
+cannot see it; libdeflate rejects the file with `LIBDEFLATE_BAD_DATA`.
+
+## Each check is demonstrated necessary
+
+A build with the four checks removed, same fixtures:
+
+| Fixture | Without the check |
+|---|---|
+| `predictor2` | **segmentation fault** |
+| `signed16neg` | **differs from control** — silently wrong pixels |
+| `bigendian` | **differs from control** — silently wrong pixels |
+| `adler_only` | **produces a micrograph the control refuses** |
+
+An earlier `signed16` fixture built from unmodified tutorial data came out *identical*
+without the check, because those values are all below 32768 and the reinterpretation
+is a no-op. That fixture proved nothing and was replaced with one whose samples are
+genuinely negative. Recorded because a declared harm class with no instance trains a
+gate on benign examples.
+
+## Pinned staging is capped, and the cap bounds the batch
+
+Default 256 MiB per worker, `MOTIONCORR_NVCOMP_PINNED_MAX_MB` to change it. Batch
+selection respects it alongside the arena:
+
+| Cap | Batch chosen | Pinned staging | Products |
+|---|---|---|---|
+| 256 MiB (default) | 24 / 24 | 126069120 | reference |
+| 64 MiB | 12 / 24 | 63034560 | identical |
+| 16 MiB | 3 / 24 | 15758640 | identical |
+| 1 MiB | declines, falls back | — | produced by host reader |
+
+Byte-identical output at batch 3, 12 and 24 also exercises the multi-batch path: the
+unaligned sum is carried in `d_Isum` between batches specifically so the float
+accumulation order matches the single-launch whole-movie kernel.

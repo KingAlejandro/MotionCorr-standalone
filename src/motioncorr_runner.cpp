@@ -87,8 +87,6 @@
 	int TIMING_W_HEADER = MCtimer.setNew("out - mrc header");
 	int TIMING_W_PAYLOAD = MCtimer.setNew("out - mrc payload");
 	int TIMING_W_CLOSE = MCtimer.setNew("out - mrc close");
-	int TIMING_W_STAR = MCtimer.setNew("out - per-movie star");
-	int TIMING_W_EPS = MCtimer.setNew("out - per-movie eps");
 	int TIMING_W_SCAN = MCtimer.setNew("out - joint star scan");
 	int TIMING_W_HISTEPS = MCtimer.setNew("out - joint hist eps");
 	int TIMING_W_GS_HEADER = MCtimer.setNew("out - gs header+batch");

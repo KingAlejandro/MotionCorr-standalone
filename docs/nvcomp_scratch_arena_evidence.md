@@ -111,8 +111,9 @@ UUID, 24 movies, `--seed 1`.
 | this branch, `USE_NVCOMP=OFF` | 4 | 33.31 s | 31.86 | 33.40 |
 | this branch, nvCOMP | 4 | **15.88 s** | 15.67 | 15.91 |
 
-**2.12x against main, 2.10x against the branch's own control**, peak VRAM unchanged at
-3484 MiB. A separate 5-repetition interleaved run of the latter two agreed: 33.25 s
+**2.12x against main, 2.10x against the branch's own control** at this thread count,
+peak VRAM unchanged at 3484 MiB. See the matched sweep below: at `--j 8` the baselines
+are considerably faster and the defensible figure is 1.71x. A separate 5-repetition interleaved run of the latter two agreed: 33.25 s
 versus 15.81 s.
 
 Main and the branch control are within 1% of each other, so the #115 lineage this
@@ -191,6 +192,47 @@ report 4/4 data mismatches. A fixture that silently masked nothing would have sh
 rank along (`(rand() + 1) % n_ok`) produces **4/4 data mismatches in every one of the
 five scenarios**. So MRC equality is sensitive to a single-rank change in one selected
 neighbour, and the zeros above are a result rather than an insensitive comparison.
+
+---
+
+# Matched sweep across sources, one setting
+
+> **This supersedes the 2.12x figure in section 6.** That was measured at `--j 4`,
+> where the CPU decode baseline is starved. At `--j 8` on the same 8 logical CPUs the
+> baselines are much faster and the correct statement is **1.71x over main**.
+
+Every source built the same way (Release, `CUDA=ON`, `sm_80`) and run under one
+setting: one A100 selected by UUID, `taskset -c 0-7`, `--j 8`, the same 24 tutorial
+movies from the same directory, `--seed 1`, identical options. Arms rotate within
+each repetition so drift is shared; 4 repetitions, all observations kept.
+
+| Source | What it is | n | median | min | max |
+|---|---|---|---|---|---|
+| this head | nvCOMP + arena + hardening | 4 | **15.85 s** | 15.84 | 16.78 |
+| `b16c228` | nvCOMP, before the format/integrity checks | 4 | 15.71 s | 15.43 | 15.90 |
+| `584b1c5` | #118 compact uint16 | 4 | **21.63 s** | 21.45 | 21.80 |
+| `8323c55` | #118 base | 4 | 26.92 s | 26.62 | 29.03 |
+| `caf0375` | #121 tested source | 4 | 26.97 s | 26.77 | 27.64 |
+| `main` `6393547` | current main | 4 | 27.05 s | 26.92 | 27.45 |
+| `4c952b3f` | #109 source | 4 | 27.22 s | 27.07 | 29.09 |
+
+- **1.71x over main**, and **1.36x over `584b1c5`**, the best non-nvCOMP source. The
+  1.36x is the number that matters for integration: it is the incremental win over
+  the compact-uint16 direction, not over the float baseline that is already being
+  replaced.
+- The format and integrity hardening costs **0.9%** (15.85 s against 15.71 s), about
+  6 ms per movie. Adler-32 verification of 92,112 strips is not measurably expensive.
+- Main, `8323c55`, `caf0375` and `4c952b3f` all sit within 1% of each other at
+  26.9-27.2 s, so there is no regression among them and no advantage to `caf0375`
+  under these conditions. Its original 17.63 s was measured with 24 logical CPUs and
+  node-local storage; that advantage does not survive an 8-CPU setting.
+- **All seven sources produce byte-identical micrograph data** across all 24 movies
+  (compared past the MRC header), so the wall times are comparing the same work.
+
+The published figures for these sources differ from the table above because they were
+taken under different CPU counts and storage. Re-running them under one setting is
+the point; the numbers here are not directly comparable to the originals and do not
+contradict them.
 
 ---
 

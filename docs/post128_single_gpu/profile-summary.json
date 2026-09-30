@@ -1,0 +1,565 @@
+{
+  "classification": "MEASURED trace intervals and traced allocations; not unprofiled application timing",
+  "range_scope": "overlapping inclusive CPU ranges; do not sum",
+  "ranges": {
+    "CLI": {
+      "count": 1,
+      "inclusive_seconds": 0.000136289
+    },
+    "startup": {
+      "count": 1,
+      "inclusive_seconds": 0.28558949
+    },
+    "movie": {
+      "count": 24,
+      "inclusive_seconds": 10.749150784999998
+    },
+    "TIMING_READ_GAIN": {
+      "count": 24,
+      "inclusive_seconds": 0.06740865000000001
+    },
+    "session:releaseBuffer": {
+      "count": 24,
+      "inclusive_seconds": 0.387764262
+    },
+    "session:release": {
+      "count": 48,
+      "inclusive_seconds": 0.089755507
+    },
+    "session:recordCufftFailure": {
+      "count": 168,
+      "inclusive_seconds": 7.533900000000006e-05
+    },
+    "session:recordFailure": {
+      "count": 696,
+      "inclusive_seconds": 0.00032384499999999996
+    },
+    "cufftCreate": {
+      "count": 696,
+      "inclusive_seconds": 0.004774700999999993
+    },
+    "cufftMakePlanMany": {
+      "count": 696,
+      "inclusive_seconds": 1.3756735530000022
+    },
+    "session:ingestCompressedTiffStrips": {
+      "count": 24,
+      "inclusive_seconds": 2.764721063
+    },
+    "session:ensurePinnedStage": {
+      "count": 24,
+      "inclusive_seconds": 0.107823103
+    },
+    "compressed read/repack": {
+      "count": 24,
+      "inclusive_seconds": 1.011400738
+    },
+    "compressed H2D": {
+      "count": 24,
+      "inclusive_seconds": 0.001969758
+    },
+    "session:endIngestScratch": {
+      "count": 48,
+      "inclusive_seconds": 0.001448303
+    },
+    "TIMING_READ_MOVIE": {
+      "count": 24,
+      "inclusive_seconds": 1.6519e-05
+    },
+    "TIMING_GAIN_AND_SUM": {
+      "count": 24,
+      "inclusive_seconds": 5.656000000000001e-05
+    },
+    "TIMING_DETECT_HOT": {
+      "count": 24,
+      "inclusive_seconds": 0.5711977359999999
+    },
+    "session:reduceUnalignedSum": {
+      "count": 24,
+      "inclusive_seconds": 0.05397976599999999
+    },
+    "session:reduceUnalignedSumSqDev": {
+      "count": 24,
+      "inclusive_seconds": 0.010508236
+    },
+    "session:collectAboveThreshold": {
+      "count": 24,
+      "inclusive_seconds": 0.010470689
+    },
+    "TIMING_FIX_DEFECT": {
+      "count": 24,
+      "inclusive_seconds": 1.3167188920000001
+    },
+    "session:gatherFrameSamples": {
+      "count": 24,
+      "inclusive_seconds": 0.006791158
+    },
+    "session:updateDefectPixels": {
+      "count": 24,
+      "inclusive_seconds": 0.018588488999999996
+    },
+    "session:releasePreprocessingBuffers": {
+      "count": 24,
+      "inclusive_seconds": 0.009255362
+    },
+    "TIMING_GLOBAL_FFT": {
+      "count": 24,
+      "inclusive_seconds": 0.567910314
+    },
+    "session:computeGlobalForwardFFT": {
+      "count": 24,
+      "inclusive_seconds": 0.567568839
+    },
+    "TIMING_POWER_SPECTRUM": {
+      "count": 24,
+      "inclusive_seconds": 3.1457e-05
+    },
+    "TIMING_GLOBAL_ALIGNMENT": {
+      "count": 24,
+      "inclusive_seconds": 0.295863199
+    },
+    "global align": {
+      "count": 24,
+      "inclusive_seconds": 0.29581294999999996
+    },
+    "cufftDestroy": {
+      "count": 696,
+      "inclusive_seconds": 0.1427833650000001
+    },
+    "TIMING_GLOBAL_IFFT": {
+      "count": 24,
+      "inclusive_seconds": 0.5759708240000002
+    },
+    "session:computeGlobalInverseFFT": {
+      "count": 24,
+      "inclusive_seconds": 0.5741096259999999
+    },
+    "TIMING_PREP_PATCH": {
+      "count": 600,
+      "inclusive_seconds": 0.2413723779999997
+    },
+    "session:preparePatchInVram": {
+      "count": 600,
+      "inclusive_seconds": 0.22519519299999993
+    },
+    "TIMING_PATCH_ALIGN": {
+      "count": 600,
+      "inclusive_seconds": 1.9382004619999988
+    },
+    "patch align": {
+      "count": 600,
+      "inclusive_seconds": 1.9376071920000009
+    },
+    "TIMING_FIT_POLYNOMIAL": {
+      "count": 24,
+      "inclusive_seconds": 0.0329996
+    },
+    "TIMING_DOSE_WEIGHTING": {
+      "count": 24,
+      "inclusive_seconds": 1.297319215
+    },
+    "session:reconstructDoseWeighted": {
+      "count": 24,
+      "inclusive_seconds": 1.2109847960000002
+    },
+    "TIMING_BINNING": {
+      "count": 24,
+      "inclusive_seconds": 1.6910000000000002e-05
+    },
+    "TIMING_WRITE_RESULT": {
+      "count": 24,
+      "inclusive_seconds": 0.001151076
+    },
+    "output submit/wait": {
+      "count": 48,
+      "inclusive_seconds": 0.0002956169999999999
+    },
+    "TIMING_SAVE_MODEL_PLOT": {
+      "count": 24,
+      "inclusive_seconds": 0.000356097
+    },
+    "STAR write": {
+      "count": 24,
+      "inclusive_seconds": 0.14505830999999997
+    },
+    "EPS write": {
+      "count": 24,
+      "inclusive_seconds": 0.25185916300000005
+    },
+    "writer drain": {
+      "count": 1,
+      "inclusive_seconds": 0.140014785
+    },
+    "TIMING_LOGFILE_PDF": {
+      "count": 1,
+      "inclusive_seconds": 1.088745959
+    },
+    "TIMING_W_SCAN": {
+      "count": 1,
+      "inclusive_seconds": 0.010462077
+    },
+    "TIMING_W_HISTEPS": {
+      "count": 1,
+      "inclusive_seconds": 0.059953931
+    },
+    "TIMING_W_GS_HEADER": {
+      "count": 1,
+      "inclusive_seconds": 0.47962508
+    },
+    "TIMING_W_GS_BATCH": {
+      "count": 1,
+      "inclusive_seconds": 0.479475041
+    },
+    "TIMING_W_GS_ALLB": {
+      "count": 1,
+      "inclusive_seconds": 0.012289257
+    },
+    "TIMING_W_GS_LOGFILE": {
+      "count": 1,
+      "inclusive_seconds": 0.520956783
+    }
+  },
+  "cuda_apis": [
+    {
+      "name": "cuModuleLoadData",
+      "count": 2616,
+      "inclusive_seconds": 1.21840636
+    },
+    {
+      "name": "cudaEventSynchronize_v3020",
+      "count": 8761,
+      "inclusive_seconds": 1.207609807
+    },
+    {
+      "name": "cudaDeviceSynchronize_v3020",
+      "count": 1248,
+      "inclusive_seconds": 1.090819879
+    },
+    {
+      "name": "cudaMemcpy_v3020",
+      "count": 7700,
+      "inclusive_seconds": 0.939304408
+    },
+    {
+      "name": "cudaMemcpyAsync_v3020",
+      "count": 288,
+      "inclusive_seconds": 0.749657395
+    },
+    {
+      "name": "cudaMalloc_v3020",
+      "count": 5544,
+      "inclusive_seconds": 0.378752825
+    },
+    {
+      "name": "cudaFree_v3020",
+      "count": 5544,
+      "inclusive_seconds": 0.2836849
+    },
+    {
+      "name": "cuMemAlloc_v2",
+      "count": 794,
+      "inclusive_seconds": 0.121526554
+    },
+    {
+      "name": "cudaHostAlloc_v3020",
+      "count": 1,
+      "inclusive_seconds": 0.107730154
+    },
+    {
+      "name": "cuMemFree_v2",
+      "count": 794,
+      "inclusive_seconds": 0.099104592
+    },
+    {
+      "name": "cudaEventRecord_v3020",
+      "count": 17522,
+      "inclusive_seconds": 0.089062628
+    },
+    {
+      "name": "cudaLaunchKernel_v7000",
+      "count": 8372,
+      "inclusive_seconds": 0.08868726
+    },
+    {
+      "name": "cuLaunchKernel",
+      "count": 17170,
+      "inclusive_seconds": 0.077447997
+    },
+    {
+      "name": "cuModuleUnload",
+      "count": 2616,
+      "inclusive_seconds": 0.054999808
+    },
+    {
+      "name": "cudaStreamSynchronize_v3020",
+      "count": 120,
+      "inclusive_seconds": 0.050996954
+    },
+    {
+      "name": "cudaFreeHost_v3020",
+      "count": 1,
+      "inclusive_seconds": 0.044779035
+    },
+    {
+      "name": "cuMemcpyHtoD_v2",
+      "count": 2042,
+      "inclusive_seconds": 0.01820233
+    },
+    {
+      "name": "cuMemGetInfo_v2",
+      "count": 744,
+      "inclusive_seconds": 0.012224187
+    },
+    {
+      "name": "cudaEventCreate_v3020",
+      "count": 5184,
+      "inclusive_seconds": 0.005297228
+    },
+    {
+      "name": "cudaEventDestroy_v3020",
+      "count": 5184,
+      "inclusive_seconds": 0.003335331
+    },
+    {
+      "name": "cudaStreamCreate_v3020",
+      "count": 48,
+      "inclusive_seconds": 0.002774361
+    },
+    {
+      "name": "cudaMemset_v3020",
+      "count": 48,
+      "inclusive_seconds": 0.001633378
+    },
+    {
+      "name": "cudaStreamDestroy_v5050",
+      "count": 48,
+      "inclusive_seconds": 0.000896639
+    },
+    {
+      "name": "cuStreamIsCapturing",
+      "count": 2352,
+      "inclusive_seconds": 0.000521297
+    },
+    {
+      "name": "cuMemsetD8_v2",
+      "count": 48,
+      "inclusive_seconds": 0.000476886
+    },
+    {
+      "name": "cuCtxSetCurrent",
+      "count": 792,
+      "inclusive_seconds": 0.000296626
+    },
+    {
+      "name": "cuCtxSynchronize",
+      "count": 72,
+      "inclusive_seconds": 0.000227718
+    },
+    {
+      "name": "cuGetProcAddress_v2",
+      "count": 419,
+      "inclusive_seconds": 0.000129449
+    },
+    {
+      "name": "cuInit",
+      "count": 3,
+      "inclusive_seconds": 6.85e-06
+    },
+    {
+      "name": "cudaGetDriverEntryPointByVersion_v12050",
+      "count": 7,
+      "inclusive_seconds": 6.25e-06
+    },
+    {
+      "name": "cuModuleGetLoadingMode",
+      "count": 2,
+      "inclusive_seconds": 2.52e-06
+    }
+  ],
+  "kernels": [
+    {
+      "name": "void nvcomp_deflate::inflate_kernel<(bool)1, (bool)1, (bool)0>(const void *const *, const unsigned long *, void *const *, const unsigned long *, unsigned long *, nvcomp_deflate::deflateStatus_t *, nvcomp_deflate::DeflateCorrectnessChecker<T3> *, bool)",
+      "count": 24,
+      "summed_gpu_seconds": 0.574425795
+    },
+    {
+      "name": "void prime_fft_factor<(unsigned int)101, EPT<(unsigned int)2>, (unsigned int)8, (unsigned int)4, (unsigned int)1, (padding_t)14, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float>(kernel_arguments_t<T10>)",
+      "count": 1728,
+      "summed_gpu_seconds": 0.406503795
+    },
+    {
+      "name": "void prime_fft_factor<(unsigned int)53, EPT<(unsigned int)2>, (unsigned int)8, (unsigned int)9, (unsigned int)1, (padding_t)14, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float>(kernel_arguments_t<T10>)",
+      "count": 2328,
+      "summed_gpu_seconds": 0.356981371
+    },
+    {
+      "name": "void prime_fft_factor<(unsigned int)19, EPT<(unsigned int)2>, (unsigned int)8, (unsigned int)21, (unsigned int)1, (padding_t)14, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float>(kernel_arguments_t<T10>)",
+      "count": 1728,
+      "summed_gpu_seconds": 0.264929001
+    },
+    {
+      "name": "fourierShiftKernel(float2 *, const float *, const float *, int, int, int, int)",
+      "count": 1277,
+      "summed_gpu_seconds": 0.244220018
+    },
+    {
+      "name": "applyDoseWeightKernel(float2 *, int, int, int, float, float, float, const float *, int, int)",
+      "count": 576,
+      "summed_gpu_seconds": 0.219701298
+    },
+    {
+      "name": "void regular_fft_factor<(unsigned int)7, EPT<(unsigned int)7>, (unsigned int)64, (unsigned int)32, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 2328,
+      "summed_gpu_seconds": 0.204225326
+    },
+    {
+      "name": "void regular_bluestein_fft<(unsigned int)1728, EPT<(unsigned int)12>, (unsigned int)2, (unsigned int)4, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)0, unsigned int, float>(kernel_arguments_blu_t<T9>)",
+      "count": 600,
+      "summed_gpu_seconds": 0.185520363
+    },
+    {
+      "name": "void regular_fft_factor<(unsigned int)5, EPT<(unsigned int)5>, (unsigned int)256, (unsigned int)8, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 1728,
+      "summed_gpu_seconds": 0.149565555
+    },
+    {
+      "name": "void regular_fft_factor<(unsigned int)2, EPT<(unsigned int)2>, (unsigned int)256, (unsigned int)8, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 1728,
+      "summed_gpu_seconds": 0.148091362
+    },
+    {
+      "name": "interpolateAndAccumulatePolynomialKernel(float *, float *, const float *, int, int, float, float, float, float, float, float, float, float, float, float, float, float)",
+      "count": 576,
+      "summed_gpu_seconds": 0.105220917
+    },
+    {
+      "name": "<unnamed>::scaleComplexKernel(float2 *, unsigned long, float)",
+      "count": 624,
+      "summed_gpu_seconds": 0.094474763
+    },
+    {
+      "name": "void postprocess_kernel<float, unsigned int, (loadstore_modifier_t)2>(real_complex_args_t<T2>)",
+      "count": 1176,
+      "summed_gpu_seconds": 0.094333851
+    },
+    {
+      "name": "void preprocess_kernel<float, unsigned int, (loadstore_modifier_t)2>(real_complex_args_t<T2>)",
+      "count": 1152,
+      "summed_gpu_seconds": 0.091560052
+    },
+    {
+      "name": "<unnamed>::cropAndGroupPatchResidentKernel(const float *, float *, int, int, int, int, int, int, const int *, const int *, int)",
+      "count": 600,
+      "summed_gpu_seconds": 0.06700486
+    },
+    {
+      "name": "<unnamed>::fusedU16FlipGainAndSumKernel(const unsigned short *, float *, float *, const float *, int, int, unsigned long, int, int, bool, bool)",
+      "count": 24,
+      "summed_gpu_seconds": 0.050324126
+    },
+    {
+      "name": "<unnamed>::adler32StripsKernel(const unsigned char *, unsigned long, unsigned long, unsigned int *, unsigned long)",
+      "count": 24,
+      "summed_gpu_seconds": 0.045991679
+    },
+    {
+      "name": "computeCCFKernel(const float2 *, const float2 *, const float *, float2 *, int, int, int, int, int, int)",
+      "count": 1277,
+      "summed_gpu_seconds": 0.017253722
+    },
+    {
+      "name": "void regular_fft<(unsigned int)972, EPT<(unsigned int)9, (unsigned int)12>, (unsigned int)8, (unsigned int)1, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 69,
+      "summed_gpu_seconds": 0.016562243
+    },
+    {
+      "name": "computeReferenceKernel(const float2 *, float2 *, int, int, int, int, int, int)",
+      "count": 1277,
+      "summed_gpu_seconds": 0.01353393
+    },
+    {
+      "name": "void regular_fft_c2r<(unsigned int)972, EPT<(unsigned int)9, (unsigned int)12>, (unsigned int)1, (unsigned int)12, (padding_t)14, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)0, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 69,
+      "summed_gpu_seconds": 0.012985431
+    },
+    {
+      "name": "void regular_fft<(unsigned int)192, EPT<(unsigned int)12, (unsigned int)16>, (unsigned int)16, (unsigned int)4, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)1, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 1208,
+      "summed_gpu_seconds": 0.011162995
+    },
+    {
+      "name": "void regular_fft_c2r<(unsigned int)192, EPT<(unsigned int)12, (unsigned int)16>, (unsigned int)4, (unsigned int)20, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)0, unsigned int, float, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 1208,
+      "summed_gpu_seconds": 0.010358485
+    },
+    {
+      "name": "findPeakAndInterpolateKernel(const float *, float *, float *, int, int, int, float, float, int)",
+      "count": 1277,
+      "summed_gpu_seconds": 0.005691344
+    },
+    {
+      "name": "<unnamed>::sumUnalignedKernel(const float *, unsigned long, double *, double *)",
+      "count": 24,
+      "summed_gpu_seconds": 0.002062418
+    },
+    {
+      "name": "<unnamed>::combinePartialsKernel(const double *, int, double *)",
+      "count": 72,
+      "summed_gpu_seconds": 0.002049452
+    },
+    {
+      "name": "<unnamed>::collectAboveThresholdKernel(const float *, unsigned long, double, double, int *, unsigned int, unsigned int *, unsigned int *, unsigned int *)",
+      "count": 24,
+      "summed_gpu_seconds": 0.001910352
+    },
+    {
+      "name": "<unnamed>::sumSqDevUnalignedKernel(const float *, unsigned long, double, double *)",
+      "count": 24,
+      "summed_gpu_seconds": 0.001794579
+    },
+    {
+      "name": "computeWeightsKernel(float *, int, int, int, int, int, float)",
+      "count": 624,
+      "summed_gpu_seconds": 0.001677237
+    },
+    {
+      "name": "void convert<(unsigned int)0, (unsigned int)16>(double2 *, void *, unsigned long)",
+      "count": 48,
+      "summed_gpu_seconds": 0.00041478
+    },
+    {
+      "name": "void generate_chirp_signal<(unsigned int)16>(double2 *, unsigned long, unsigned long)",
+      "count": 24,
+      "summed_gpu_seconds": 0.000309022
+    },
+    {
+      "name": "<unnamed>::updateDefectKernel(float *, const int *, const int *, const float *, int, int, int, int)",
+      "count": 24,
+      "summed_gpu_seconds": 0.000256832
+    },
+    {
+      "name": "void scale_conjugate<(unsigned int)16>(double2 *, double2 *, unsigned long, double)",
+      "count": 24,
+      "summed_gpu_seconds": 0.000247389
+    },
+    {
+      "name": "void regular_fft<(unsigned int)1728, EPT<(unsigned int)12>, (unsigned int)1, (unsigned int)4, (padding_t)6, (twiddle_t)0, (loadstore_modifier_t)2, (layout_t)0, unsigned int, double, HostConfigPlaceholder>(kernel_arguments_t<T9>)",
+      "count": 24,
+      "summed_gpu_seconds": 0.000185024
+    },
+    {
+      "name": "<unnamed>::gatherFrameSamplesKernel(const float *, int, int, const int *, const int *, const int *, float *, unsigned long)",
+      "count": 24,
+      "summed_gpu_seconds": 8.2719e-05
+    }
+  ],
+  "kernel_busy_union_seconds": 3.401612086,
+  "traced_allocation_peak_bytes_by_kind": {
+    "Device": 3196668336,
+    "Device Static": 1471,
+    "Pinned": 167772160
+  },
+  "duplicate_static_events": 4016,
+  "unmatched_frees": 0,
+  "memory_scope": "trace excludes untraced driver/context/device reservations; pinned trace is reservation, not host RSS"
+}

@@ -1,0 +1,39 @@
+Working on Movies/control.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 48 Y = 40 N = 6
+Frames to be used: 1 2 3 4 5 6
+Frame grouping: n_frames = 6, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=8000 C2R work=8000 shared work=8000 inverse tile=8000 bytes
+In unaligned sum, Mean = 755.303 Std = 113.064 Hotpixel threshold = 1433.69
+Detected 9 hot pixels to be corrected.
+Fixed hot pixels.
+Computing full-frame Fourier transforms (CUDA in-VRAM)...
+
+Global alignment:
+ Iteration 1: RMSD = 3.91263 px
+ [CUDA Global Alignment Profile]
+   Host-to-Device transfer time: 0.00 ms (Resident VRAM)
+   Custom kernel execution time: 0.12 ms
+   cuFFT execution time:         0.02 ms
+   Device-to-Host transfer time: 0.05 ms
+   Total GPU alignment time:     2.07 ms
+   Buffer VRAM:                  0.15 MiB
+   cuFFT workspace VRAM:         0.05 MiB
+   Peak GPU memory allocated:    0.19 MiB
+ [CUDA Global Alignment] completed; converged=no
+Reconstructing globally aligned frames (CUDA in-VRAM)...
+
+Local alignments:
+Patches: X = 2 Y = 2
+Too few patches to do local alignments. Local alignment is skipped.
+Summing frames before dose weighting (CUDA in-VRAM)...
+ [CUDA Unweighted Reconstruction Profile (Resident VRAM)]
+  Device: 0, Frames: 6, Size: 48x40
+  Peak VRAM: 0.01 MiB
+  Total Unweighted Reconstruction Time: 0.94 ms
+Written aligned but non-dose weighted sum to /home/alex/mc118-preprocess-20260929T1311/composed-proof/preprocessing/healthy-float/out/Movies/control.mrc
+Full movie wall time: 0.171 s

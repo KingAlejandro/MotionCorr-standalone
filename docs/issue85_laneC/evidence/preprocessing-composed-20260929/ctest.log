@@ -1,0 +1,60 @@
+Internal ctest changing into directory: /home/alex/mc118-preprocess-20260929T1311/build
+Test project /home/alex/mc118-preprocess-20260929T1311/build
+      Start  1: PatchRetryState
+ 1/25 Test  #1: PatchRetryState ..................   Passed    0.05 sec
+      Start  2: DefectParser
+ 2/25 Test  #2: DefectParser .....................   Passed    0.02 sec
+      Start  3: SyntheticRegression
+ 3/25 Test  #3: SyntheticRegression ..............   Passed    1.32 sec
+      Start  4: HotPixelRngDeterminism
+ 4/25 Test  #4: HotPixelRngDeterminism ...........   Passed    0.76 sec
+      Start  5: RunnerExposure
+ 5/25 Test  #5: RunnerExposure ...................   Passed    0.68 sec
+      Start  6: Runner_failure
+ 6/25 Test  #6: Runner_failure ...................   Passed    0.18 sec
+      Start  7: Runner_invalid
+ 7/25 Test  #7: Runner_invalid ...................   Passed    0.18 sec
+      Start  8: Runner_resume
+ 8/25 Test  #8: Runner_resume ....................   Passed    2.70 sec
+      Start  9: Runner_tomography
+ 9/25 Test  #9: Runner_tomography ................   Passed    0.55 sec
+      Start 10: RunnerLateBin
+10/25 Test #10: RunnerLateBin ....................   Passed    0.90 sec
+      Start 11: RunnerExportedUnits
+11/25 Test #11: RunnerExportedUnits ..............   Passed    0.15 sec
+      Start 12: GainCache
+12/25 Test #12: GainCache ........................   Passed    2.55 sec
+      Start 13: TiffRead
+13/25 Test #13: TiffRead .........................   Passed    0.71 sec
+      Start 14: DamagedMovie
+14/25 Test #14: DamagedMovie .....................   Passed    6.26 sec
+      Start 15: GlobalIfftElision
+15/25 Test #15: GlobalIfftElision ................   Passed    1.80 sec
+      Start 16: RunnerModelParser
+16/25 Test #16: RunnerModelParser ................   Passed    0.24 sec
+      Start 17: WriteFaults
+17/25 Test #17: WriteFaults ......................   Passed    0.65 sec
+      Start 18: CiFailClosedControls
+18/25 Test #18: CiFailClosedControls .............   Passed   18.06 sec
+      Start 19: OutputTreeComparator
+19/25 Test #19: OutputTreeComparator .............   Passed    0.30 sec
+      Start 20: ImageWriteFaults
+20/25 Test #20: ImageWriteFaults .................   Passed    0.03 sec
+      Start 21: CudaU16StagingEquivalence
+21/25 Test #21: CudaU16StagingEquivalence ........   Passed    0.44 sec
+      Start 22: CudaWrapperUploadFailure
+22/25 Test #22: CudaWrapperUploadFailure .........   Passed    0.38 sec
+      Start 23: CudaFaultMatrix
+23/25 Test #23: CudaFaultMatrix ..................   Passed    1.87 sec
+      Start 24: CudaPreprocessingFailurePaths
+24/25 Test #24: CudaPreprocessingFailurePaths ....   Passed    4.79 sec
+      Start 25: CudaErrorClass
+25/25 Test #25: CudaErrorClass ...................   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 25
+
+Label Time Summary:
+cuda        =   7.48 sec*proc (5 tests)
+hardware    =   7.47 sec*proc (4 tests)
+
+Total Test time (real) =  45.57 sec

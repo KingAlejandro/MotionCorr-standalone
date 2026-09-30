@@ -1,0 +1,68 @@
+[faultinject] cudaGetDeviceCount #1
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo][faultinject] cudaGetDeviceCount #2
+[faultinject] cudaMalloc #1 size=1366942080
+[faultinject] cudaMalloc #2 size=1367678976
+[faultinject] cudaMalloc #3 size=56955920
+[faultinject] cudaMalloc #4 size=56986624
+[faultinject] cudaMalloc #5 size=56986624
+[faultinject] cudaMalloc #6 size=28477960
+[faultinject] cudaMalloc #7 size=16384
+[faultinject] cudaMalloc #8 size=16
+[faultinject] cudaMalloc #9 size=8192
+[faultinject] cudaMalloc #10 size=8
+[faultinject] cudaMalloc #11 size=1582112
+[faultinject] cudaMalloc #12 size=12
+[faultinject] cudaMalloc #13 size=948
+[faultinject] cudaMalloc #14 size=948
+[faultinject] cudaMalloc #15 size=22752
+[faultinject] cudaGetDeviceCount #3
+[faultinject] cudaMalloc #16 size=3786912
+[faultinject] cudaMalloc #17 size=1893456
+[faultinject] cudaMalloc #18 size=90885888
+[faultinject] cudaMalloc #19 size=90699264
+[faultinject] cudaMalloc #20 size=96
+[faultinject] cudaMalloc #21 size=96
+[faultinject] cudaMalloc #22 size=96
+[faultinject] cudaMalloc #23 size=96
+[faultinject] cudaMalloc #24 size=151887744
+[faultinject] cudaMalloc #25 size=151642368
+[faultinject] cudaMalloc #26 size=96
+[faultinject] cudaMalloc #27 size=96
+[faultinject] cudaGetDeviceCount #4
+[faultinject] INJECTING cudaErrorIllegalAddress at cudaGetDeviceCount #4; last-error clean
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/acc/cuda/cuda_alignpatch.cu, line 251
+ERROR: 
+No CUDA capable devices found
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x636c3ee38417]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x514d0) [0x636c3ee124d0]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x6a74) [0x636c3eee8be4]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x210) [0x636c3eeed350]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x636c3ee2d683]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7abd6e42a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7abd6e42a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x636c3ee2dd65]
+==================
+ERROR: 
+No CUDA capable devices found
+Continuing with the remaining movies.
+   2/   2 sec ............................................................~~(,_,"> yum!
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 700
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x636c3ee38417]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x4dc97) [0x636c3ee0ec97]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x636c3ee2d683]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7abd6e42a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7abd6e42a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x636c3ee2dd65]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

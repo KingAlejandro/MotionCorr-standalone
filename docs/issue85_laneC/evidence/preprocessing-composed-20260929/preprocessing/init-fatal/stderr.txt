@@ -1,0 +1,32 @@
+The number of patches is too small (<= 2). Patch based alignment will be skipped.
+[preprocessfault] injected cudaErrorIllegalAddress at initialize; pending slot cleared
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 1575
+ERROR: 
+CUDA device became unusable during session initialization for Movies/control.tiff: an illegal memory access was encountered (recorded at initialize buffers:342). First failure at initialize buffers:342. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x64f55b32d357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x3fd87) [0x64f55b2f5d87]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x675c) [0x64f55b3dd61c]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x210) [0x64f55b3e20b0]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x64f55b3225c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7dd275c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7dd275c2a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x64f55b322ca5]
+==================
+ERROR: 
+CUDA device became unusable during session initialization for Movies/control.tiff: an illegal memory access was encountered (recorded at initialize buffers:342). First failure at initialize buffers:342. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 700
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x64f55b32d357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x4dbd5) [0x64f55b303bd5]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x64f55b3225c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7dd275c2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7dd275c2a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x64f55b322ca5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

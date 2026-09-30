@@ -1,0 +1,11 @@
+Working on Movies/control.tiff with 4 thread(s).
+
+Limitted the number of IO threads per movie to 2 thread(s).
+Movie size: X = 48 Y = 40 N = 6
+Frames to be used: 1 2 3 4 5 6
+Frame grouping: n_frames = 6, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 
+interpolate_shifts = 0
+
+Movie FFT: batch=1 R2C work=8000 C2R work=8000 shared work=8000 inverse tile=8000 bytes
+CUDA Error in /home/alex/mc118-preprocess-20260929T1311/source/src/acc/cuda/cuda_movie_session.cu:454 : an illegal memory access was encountered

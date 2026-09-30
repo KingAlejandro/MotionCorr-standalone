@@ -1,0 +1,55 @@
+[faultinject] cudaGetDeviceCount #1
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo][faultinject] cudaGetDeviceCount #2
+[faultinject] cudaMalloc #1 size=1366942080
+[faultinject] cudaMalloc #2 size=1367678976
+[faultinject] cudaMalloc #3 size=56955920
+[faultinject] cudaMalloc #4 size=56986624
+[faultinject] cudaMalloc #5 size=56986624
+[faultinject] cudaMalloc #6 size=28477960
+[faultinject] cudaMalloc #7 size=16384
+[faultinject] cudaMalloc #8 size=16
+[faultinject] cudaMalloc #9 size=8192
+[faultinject] cudaMalloc #10 size=8
+[faultinject] cudaMalloc #11 size=1582112
+[faultinject] cudaMalloc #12 size=12
+[faultinject] cudaMalloc #13 size=948
+[faultinject] cudaMalloc #14 size=948
+[faultinject] cudaMalloc #15 size=22752
+[faultinject] cudaGetDeviceCount #3
+[faultinject] INJECTING cudaErrorIllegalAddress at cudaGetDeviceCount #3; last-error clean
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/acc/cuda/cuda_alignpatch.cu, line 251
+ERROR: 
+No CUDA capable devices found
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x5b695a420357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x5140e) [0x5b695a3fa40e]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x366e) [0x5b695a4cd52e]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x210) [0x5b695a4d50b0]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x5b695a4155c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f7a0142a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f7a0142a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x5b695a415ca5]
+==================
+ERROR: 
+No CUDA capable devices found
+Continuing with the remaining movies.
+   1/   1 sec ............................................................~~(,_,"> yum!
+in: /home/alex/mc118-preprocess-20260929T1311/source/src/motioncorr_runner.cpp, line 700
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x5b695a420357]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(+0x4dbd5) [0x5b695a3f6bd5]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(main+0x53) [0x5b695a4155c3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f7a0142a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f7a0142a28b]
+/home/alex/mc118-preprocess-20260929T1311/build/motioncorr_faultinject(_start+0x25) [0x5b695a415ca5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

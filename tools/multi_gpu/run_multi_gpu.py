@@ -38,6 +38,8 @@ import datetime
 import hashlib
 import json
 import os
+import resource
+import shlex
 import shutil
 import signal
 import subprocess
@@ -198,6 +200,79 @@ def _iso(epoch: float) -> str:
         epoch, datetime.timezone.utc).isoformat(timespec="milliseconds")
 
 
+_CLK_TCK = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+
+
+def parse_cpu_list(spec: str) -> set[int]:
+    """Parse a Linux CPU list ("0-3,8,10-11") into a set of cpu ids."""
+    cpus: set[int] = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            lo, _, hi = part.partition("-")
+            lo_i, hi_i = int(lo), int(hi)
+            if hi_i < lo_i:
+                raise ValueError(f"descending cpu range {part!r}")
+            cpus.update(range(lo_i, hi_i + 1))
+        else:
+            cpus.add(int(part))
+    return cpus
+
+
+def format_cpu_list(cpus: set[int]) -> str:
+    out, run = [], []
+    for c in sorted(cpus):
+        if run and c == run[-1] + 1:
+            run.append(c)
+            continue
+        if run:
+            out.append(str(run[0]) if len(run) == 1 else f"{run[0]}-{run[-1]}")
+        run = [c]
+    if run:
+        out.append(str(run[0]) if len(run) == 1 else f"{run[0]}-{run[-1]}")
+    return ",".join(out)
+
+
+def confirm_affinity(pid: int, requested: str, deadline_seconds: float = 5.0
+                     ) -> tuple[str | None, str]:
+    """Poll /proc/<pid>/status until the requested mask is in force.
+
+    ``taskset -c`` calls sched_setaffinity and then execs, so for a short window
+    after fork the child still carries the launcher's inherited mask. Sampling
+    at the 0.5 s resource interval is too coarse for that window and too slow
+    for a worker that exits quickly, so the mask is confirmed here instead, at
+    millisecond granularity, and the sampler keeps watching for a later change.
+
+    Returns (settled_mask_or_None, status) where status is MATCH, MISMATCH,
+    EXITED_BEFORE_WITNESS or NO_PROC.
+    """
+    status_path = Path(f"/proc/{pid}/status")
+    if not Path("/proc").is_dir():
+        return None, "NO_PROC"
+    want = parse_cpu_list(requested)
+    last: str | None = None
+    deadline = time.monotonic() + deadline_seconds
+    while True:
+        try:
+            for line in status_path.read_text().splitlines():
+                if line.startswith("Cpus_allowed_list:"):
+                    last = line.split(":", 1)[1].strip()
+                    break
+        except (OSError, ValueError):
+            return (last, "MISMATCH" if last is not None else "EXITED_BEFORE_WITNESS")
+        if last is not None:
+            try:
+                if parse_cpu_list(last) == want:
+                    return last, "MATCH"
+            except ValueError:
+                return last, "MISMATCH"
+        if time.monotonic() >= deadline:
+            return last, "MISMATCH" if last is not None else "EXITED_BEFORE_WITNESS"
+        time.sleep(0.005)
+
+
 class Sampler(threading.Thread):
     """Poll nvidia-smi compute-apps while the workers run."""
 
@@ -250,6 +325,23 @@ class ResourceSampler(threading.Thread):
     Scope: the worker process only. MotionCorr spawns ghostscript children for
     the EPS/PDF output, and those are NOT included. This is a per-process
     figure, not a per-run host footprint.
+
+    Also samples Cpus_allowed_list and the utime/stime tick counters.
+
+    Affinity has to be read back rather than assumed. ``taskset -c`` calls
+    sched_setaffinity and then execs, so between fork and that call the child
+    still carries the launcher's inherited mask -- a single read taken right
+    after Popen can legitimately observe the wrong mask. More importantly, a
+    requested mask is not necessarily the mask in force: a cpuset or cgroup can
+    narrow it, and a mask naming a cpu outside the allocation makes taskset fail
+    outright. Every distinct observation is kept, in order, so the settled value
+    is checkable and a transient one is visible instead of hidden.
+
+    CPU time is sampled for per-worker attribution only. It is a lower bound --
+    a worker that exits between two polls is recorded at its last reading -- and
+    it excludes ghostscript. The exact run total comes from getrusage
+    (RUSAGE_CHILDREN) in main(), which needs no sampling and does include the
+    reaped grandchildren.
     """
 
     def __init__(self, interval: float):
@@ -257,6 +349,8 @@ class ResourceSampler(threading.Thread):
         self.interval = interval
         self.pids: dict[int, int] = {}
         self.hwm_kib: dict[int, int] = {}
+        self.cpus_allowed: dict[int, list[str]] = {}
+        self.cpu_ticks: dict[int, tuple[int, int]] = {}
         self.unavailable: str | None = None
         self._stop_event = threading.Event()
 
@@ -276,9 +370,19 @@ class ResourceSampler(threading.Thread):
                             kib = int(line.split()[1])
                             if kib > self.hwm_kib.get(pid, 0):
                                 self.hwm_kib[pid] = kib
-                            break
+                        elif line.startswith("Cpus_allowed_list:"):
+                            seen = self.cpus_allowed.setdefault(pid, [])
+                            value = line.split(":", 1)[1].strip()
+                            if not seen or seen[-1] != value:
+                                seen.append(value)
                 except (OSError, ValueError):
                     pass  # exited between listing and reading, or not readable
+                try:
+                    raw = Path(f"/proc/{pid}/stat").read_text()
+                    f = raw.rsplit(")", 1)[1].split()
+                    self.cpu_ticks[pid] = (int(f[11]), int(f[12]))  # utime, stime
+                except (OSError, ValueError, IndexError):
+                    pass
             self._stop_event.wait(self.interval)
 
     def stop(self) -> None:
@@ -302,6 +406,24 @@ def main(argv: list[str] | None = None) -> int:
                          "e.g. --cpus '96-103;104-111'. Disjoint per-worker masks are "
                          "what keep two workers on one node from sharing cores, which "
                          "a single shared mask does not.")
+    ap.add_argument("--cpu-budget", type=int, default=None,
+                    help="assert the union of the per-worker masks is exactly this many "
+                         "cpus. A fixed-total-resource comparison is only fixed if the "
+                         "budget is checked at every worker count; without this, 4 "
+                         "workers at one mask each silently use 4x the cores of 1.")
+    ap.add_argument("--worker-extra", action="append", default=None, metavar="ARGS",
+                    help="extra arguments for ONE worker, repeatable; give exactly as "
+                         "many as there are workers, or none. shlex-split and appended "
+                         "AFTER the shared worker arguments, so a per-worker '--j 2' "
+                         "overrides a shared '--j 8' (IOParser takes the last "
+                         "occurrence). This is how per-worker thread counts are set; a "
+                         "single shared --j gives every worker the same count no matter "
+                         "how wide its cpu mask is.")
+    ap.add_argument("--omp-num-threads", default=None,
+                    help="OMP_NUM_THREADS for every worker. Default when --cpus is "
+                         "given: that worker's mask width.")
+    ap.add_argument("--omp-proc-bind", default=None, help="OMP_PROC_BIND for every worker")
+    ap.add_argument("--omp-places", default=None, help="OMP_PLACES for every worker")
     ap.add_argument("--sample-interval", type=float, default=0.5)
     ap.add_argument("--no-witness", action="store_true",
                     help="skip GPU witnessing; only valid with CPU workers")
@@ -345,6 +467,8 @@ def main(argv: list[str] | None = None) -> int:
         n = a.workers
 
     masks: list[str | None] = [None] * n
+    mask_sets: list[set[int]] = []
+    allocation = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
     if a.cpus:
         parts = [m.strip() for m in a.cpus.split(";") if m.strip()]
         if len(parts) == 1:
@@ -360,6 +484,58 @@ def main(argv: list[str] | None = None) -> int:
                   "than running unpinned, which would silently break a shared-host "
                   "core budget.", file=sys.stderr)
             return 2
+        try:
+            mask_sets = [parse_cpu_list(m) for m in masks if m]
+        except ValueError as exc:
+            print(f"FAIL: --cpus is not a valid cpu list: {exc}", file=sys.stderr)
+            return 2
+        if any(not s for s in mask_sets):
+            print("FAIL: --cpus contains an empty mask", file=sys.stderr)
+            return 2
+        overlaps = []
+        for i in range(len(mask_sets)):
+            for j in range(i + 1, len(mask_sets)):
+                shared = mask_sets[i] & mask_sets[j]
+                if shared:
+                    overlaps.append(f"w{i}/w{j} share {format_cpu_list(shared)}")
+        masks_disjoint = not overlaps
+        union = set().union(*mask_sets)
+        # Sharing cores between workers stays available -- it is a real thing to
+        # measure. What it must not do is pass as a fixed-budget point, so the
+        # refusal attaches to --cpu-budget, which is the flag that makes that
+        # claim, rather than to the capability. Union size alone cannot catch it:
+        # four workers each on 0-7 cover exactly 8 cpus while oversubscribing 4x.
+        if a.cpu_budget is not None and overlaps:
+            print("FAIL: --cpu-budget asserts a partitioned budget, but the masks "
+                  "overlap: " + "; ".join(overlaps) + ". Give disjoint per-worker "
+                  "masks, or drop --cpu-budget and record this as an "
+                  "oversubscription run.", file=sys.stderr)
+            return 2
+        if allocation and not union <= set(allocation):
+            outside = union - set(allocation)
+            print(f"FAIL: --cpus names cpu(s) {format_cpu_list(outside)} outside this "
+                  f"process's allocation ({format_cpu_list(set(allocation))}). taskset "
+                  "would fail per worker, or a cpuset would silently narrow the mask.",
+                  file=sys.stderr)
+            return 2
+        if a.cpu_budget is not None and len(union) != a.cpu_budget:
+            print(f"FAIL: --cpu-budget {a.cpu_budget} but the masks cover "
+                  f"{len(union)} cpu(s) ({format_cpu_list(union)})", file=sys.stderr)
+            return 2
+    else:
+        masks_disjoint = None
+    if not a.cpus and a.cpu_budget is not None:
+        print("FAIL: --cpu-budget only means something with --cpus; without pinning "
+              "every worker sees the whole allocation.", file=sys.stderr)
+        return 2
+
+    per_worker_extra: list[list[str]] = [[] for _ in range(n)]
+    if a.worker_extra:
+        if len(a.worker_extra) != n:
+            print(f"FAIL: {len(a.worker_extra)} --worker-extra value(s) for {n} "
+                  "worker(s); give exactly one per worker or none", file=sys.stderr)
+            return 2
+        per_worker_extra = [shlex.split(s) for s in a.worker_extra]
 
     out.mkdir(parents=True)
     shard_dir = out / "shards"
@@ -381,7 +557,8 @@ def main(argv: list[str] | None = None) -> int:
     # worker directories exist to prevent -- while the children still exit zero
     # and the launcher still writes verdict PASS. Refuse before anything starts.
     OWNED = {"--i", "--o", "--gpu"}
-    clashes = sorted({t for t in extra if t in OWNED})
+    clashes = sorted({tok for tok in extra + [x for e in per_worker_extra for x in e]
+                      if tok in OWNED})
     if clashes:
         print(f"FAIL: {', '.join(clashes)} is set by this launcher and must not appear "
               "in the worker arguments. The binary takes the last occurrence of a "
@@ -398,6 +575,7 @@ def main(argv: list[str] | None = None) -> int:
     # interpretable measurement additionally requires.
     resources = ResourceSampler(a.sample_interval)
     procs: list[tuple[int, subprocess.Popen, Path]] = []
+    confirmed: dict[int, tuple[str | None, str]] = {}
     stamps: dict[int, dict[str, float]] = {}
     codes: dict[int, int] = {}
     waiters: list[threading.Thread] = []
@@ -405,6 +583,12 @@ def main(argv: list[str] | None = None) -> int:
     sampler_started = False
     resources_started = False
     interrupted_signal: int | None = None
+    # Exact, unsampled CPU total for everything this launcher reaps, including
+    # the ghostscript grandchildren the per-worker /proc sampling cannot see: a
+    # worker's own cutime/cstime roll into its rusage when the launcher reaps it.
+    # Taken as a delta because the launcher may already have reaped children
+    # (partition_star runs in-process, but a future caller may not).
+    ru0 = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.time()
     try:
         previous_handlers = _install_signal_handlers()
@@ -431,6 +615,23 @@ def main(argv: list[str] | None = None) -> int:
                 env = gpu_witness.worker_env(devices[k], env)
                 cmd += ["--gpu", "0"]
             cmd += extra
+            cmd += per_worker_extra[k]
+            # OMP settings decide how the worker's threads land on the mask, and
+            # an unset OMP_NUM_THREADS makes libgomp default to the cpu count it
+            # can see. Resolve it to the mask width so n workers on a partitioned
+            # budget do not each open a pool sized for the whole node, and record
+            # the resolved values either way so an inherited setting is never
+            # mistaken for a chosen one.
+            if a.omp_num_threads is not None:
+                env["OMP_NUM_THREADS"] = a.omp_num_threads
+            elif mask_sets:
+                env["OMP_NUM_THREADS"] = str(len(mask_sets[k]))
+            if a.omp_proc_bind is not None:
+                env["OMP_PROC_BIND"] = a.omp_proc_bind
+            if a.omp_places is not None:
+                env["OMP_PLACES"] = a.omp_places
+            omp_env = {v: env.get(v) for v in
+                       ("OMP_NUM_THREADS", "OMP_PROC_BIND", "OMP_PLACES")}
             # exec a fresh process: nothing in this launcher has touched CUDA, so
             # no already-initialized context is ever inherited.
             with (wdir / "run.log").open("w") as log, _defer_launcher_signals():
@@ -439,11 +640,16 @@ def main(argv: list[str] | None = None) -> int:
                 stamps[k] = {"started": time.time()}
                 resources.watch(p.pid, k)
                 procs.append((k, p, wdir))
+            if masks[k]:
+                confirmed[k] = confirm_affinity(p.pid, masks[k])
             (wdir / "command.json").write_text(json.dumps({
                 "index": k, "command": cmd, "pid": p.pid,
                 "cuda_visible_devices": env.get("CUDA_VISIBLE_DEVICES"),
                 "device": devices[k] if devices else None,
                 "cpu_mask": masks[k],
+                "cpu_mask_width": len(mask_sets[k]) if mask_sets else None,
+                "omp": omp_env,
+                "worker_extra": per_worker_extra[k],
             }, indent=2) + "\n")
 
         # One waiter per child. Waiting sequentially would record worker 1's end
@@ -491,21 +697,63 @@ def main(argv: list[str] | None = None) -> int:
         if previous_handlers:
             _restore_signal_handlers(previous_handlers)
 
+    ru1 = resource.getrusage(resource.RUSAGE_CHILDREN)
+    cpu_seconds_total = round((ru1.ru_utime - ru0.ru_utime)
+                              + (ru1.ru_stime - ru0.ru_stime), 3)
+
     results = []
+    affinity_problems: list[str] = []
     for k, p, wdir in procs:
         rc = codes.get(k)
         if rc is None:
             rc = p.wait()
         ended = stamps[k].setdefault("ended", time.time())
+        observed = resources.cpus_allowed.get(p.pid, [])
+        requested = masks[k]
+        at_launch, verdict = confirmed.get(k, (None, "UNPINNED"))
+        affinity: dict[str, object] = {
+            "requested": requested,
+            "witnessed_at_launch": at_launch,
+            "later_observations": observed,
+            "verdict": verdict,
+            "note": "read back from /proc/<pid>/status Cpus_allowed_list rather than "
+                    "assumed from the taskset argument, so a cpuset that narrows the "
+                    "mask is visible. later_observations is the 0.5 s sampler trace "
+                    "and records any change after launch.",
+        }
+        if verdict == "MISMATCH":
+            affinity_problems.append(
+                f"w{k}: requested {requested}, in force {at_launch}")
+        elif verdict == "EXITED_BEFORE_WITNESS" and a.cpu_budget is not None:
+            # Only a problem when a fixed-budget claim is being made. A worker
+            # that exits in under a few milliseconds is a test fake, not a
+            # scaling point, and failing those would make the device-free suite
+            # flaky for no gain.
+            affinity_problems.append(
+                f"w{k}: exited before its mask could be read, so the --cpu-budget "
+                f"{a.cpu_budget} partition is unwitnessed for this worker")
+        elif verdict == "NO_PROC" and a.cpu_budget is not None:
+            affinity_problems.append(
+                f"w{k}: no /proc on this platform, so --cpu-budget cannot be witnessed")
+        ticks = resources.cpu_ticks.get(p.pid)
+        wall_s = ended - stamps[k]["started"]
+        cpu_s = round(sum(ticks) / _CLK_TCK, 3) if ticks else None
         results.append({"index": k, "pid": p.pid, "returncode": rc,
                         "log": str((wdir / "run.log").resolve()),
                         "started_at": _iso(stamps[k]["started"]),
                         "ended_at": _iso(ended),
-                        "wall_seconds": round(ended - stamps[k]["started"], 3),
+                        "wall_seconds": round(wall_s, 3),
                         "rss_hwm_kib": resources.hwm_kib.get(p.pid),
                         "rss_note": resources.unavailable or
                                     ("worker process only; ghostscript children "
-                                     f"excluded; sampled every {a.sample_interval}s")})
+                                     f"excluded; sampled every {a.sample_interval}s"),
+                        "cpu_seconds_sampled": cpu_s,
+                        "mean_threads_running": round(cpu_s / wall_s, 2)
+                                                if cpu_s is not None and wall_s > 0
+                                                else None,
+                        "cpu_mask": requested,
+                        "cpu_mask_width": len(mask_sets[k]) if mask_sets else None,
+                        "cpu_affinity": affinity})
 
     wall = time.time() - started
     # Resolved paths and the manifest digest, so merge_workers.py can prove this
@@ -521,6 +769,33 @@ def main(argv: list[str] | None = None) -> int:
         "worker_args": extra,
         "cpus": a.cpus,
         "cpu_masks": masks,
+        "cpu_mask_widths": [len(s) for s in mask_sets] or None,
+        "cpu_budget_requested": a.cpu_budget,
+        "cpu_budget_covered": len(set().union(*mask_sets)) if mask_sets else None,
+        "cpu_masks_disjoint": masks_disjoint,
+        "cpu_masks_disjoint_note": "false means workers shared cores. Allowed, but "
+                                   "such a run is an oversubscription measurement, "
+                                   "not a fixed-budget scaling point; --cpu-budget "
+                                   "refuses it for that reason.",
+        "launcher_allocation": format_cpu_list(set(allocation)) if allocation else None,
+        "omp_requested": {"OMP_NUM_THREADS": a.omp_num_threads,
+                          "OMP_PROC_BIND": a.omp_proc_bind,
+                          "OMP_PLACES": a.omp_places},
+        "omp_note": "as requested on the command line. The value each worker was "
+                    "actually given, including the mask-width default for "
+                    "OMP_NUM_THREADS and anything inherited from the environment, "
+                    "is in that worker's command.json.",
+        "cpu_seconds_total": cpu_seconds_total,
+        "cpu_seconds_total_note": "getrusage(RUSAGE_CHILDREN) delta across the run: "
+                                  "exact, unsampled, and includes the ghostscript "
+                                  "grandchildren each worker reaps.",
+        "mean_cores_busy": round(cpu_seconds_total / wall, 2) if wall > 0 else None,
+        "mean_cores_busy_note": "cpu_seconds_total / launcher wall. Achieved "
+                                "parallelism averaged over the whole run, including "
+                                "the serial tails. Compare against "
+                                "cpu_budget_covered: a scaling number is only "
+                                "meaningful when the budget was actually used.",
+        "affinity_problems": affinity_problems or None,
         "started_at": _iso(started),
         "ended_at": _iso(started + wall),
         "wall_seconds": round(wall, 3),
@@ -542,6 +817,11 @@ def main(argv: list[str] | None = None) -> int:
 
     verdict_ok = (interrupted_signal is None
                   and all(r["returncode"] == 0 for r in results))
+    # A mask that was requested but never observed in force is not pinning. If
+    # this did not fail the verdict, an oversubscribed run -- every worker on the
+    # whole node -- would be filed as a fixed-budget scaling point.
+    if affinity_problems:
+        verdict_ok = False
 
     if sampler is not None:
         expected = {p.pid: devices[k]["uuid"] for k, p, _ in procs}
@@ -564,6 +844,10 @@ def main(argv: list[str] | None = None) -> int:
     (out / "status.json").write_text(json.dumps(status, indent=2) + "\n")
 
     print(json.dumps({"n_workers": n, "wall_seconds": status["wall_seconds"],
+                      "cpu_budget_covered": status["cpu_budget_covered"],
+                      "cpu_seconds_total": cpu_seconds_total,
+                      "mean_cores_busy": status["mean_cores_busy"],
+                      "affinity": [r["cpu_affinity"]["verdict"] for r in results],
                       "returncodes": [r["returncode"] for r in results],
                       "verdict": status["verdict"]}, indent=2))
     if not verdict_ok:

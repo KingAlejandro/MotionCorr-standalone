@@ -211,6 +211,46 @@ class TestOutputTreeComparator(unittest.TestCase):
         with self.assertRaises(compare.ValidationError):
             compare.validate_input_star(source, pinned)
 
+    def test_cli_exit_code_agrees_with_the_report_it_writes(self) -> None:
+        """A comparator that prints FAIL and exits 0 certifies the opposite of
+        what it found. Every case above calls compare_trees directly, so the
+        exit path is the one part of the contract nothing else observes: a
+        caller that only checks the return code and a reader who only reads the
+        JSON would then disagree about the same run.
+        """
+        import subprocess
+
+        def invoke(out: Path) -> tuple[int, dict]:
+            cp = subprocess.run(
+                [sys.executable, str(SCRIPT),
+                 "--base", str(self.base), "--candidate", str(self.candidate),
+                 "--manifest", str(manifest_path), "--json-out", str(out),
+                 "--products-only"],
+                capture_output=True, text=True)
+            return cp.returncode, json.loads(out.read_text())
+
+        manifest_path = self.root / "manifest.json"
+        manifest_path.write_text(json.dumps(self.manifest) + "\n")
+
+        rc, report = invoke(self.root / "pass.json")
+        self.assertEqual(report["status"], "PASS", report)
+        self.assertEqual(rc, 0, report)
+
+        path = self.candidate / "Movies" / "a.mrc"
+        raw = bytearray(path.read_bytes())
+        raw[1024 + 8 + 4] ^= 1
+        path.write_bytes(raw)
+        rc, report = invoke(self.root / "fail.json")
+        self.assertEqual(report["status"], "FAIL", report)
+        self.assertNotEqual(rc, 0, report)
+
+        # And a tree the validator rejects outright, which takes the other
+        # return path: the report is still written and still disagrees with 0.
+        (self.candidate / "Movies" / "b.mrc").unlink()
+        rc, report = invoke(self.root / "invalid.json")
+        self.assertEqual(report["status"], "FAIL", report)
+        self.assertNotEqual(rc, 0, report)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -156,7 +156,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
-	gpu_ids = parser.getOption("--gpu", "Device ids for each MPI-thread, e.g 0:1:2:3", "");
+	gpu_ids = parser.getOption("--gpu", "Device ids. --use_motioncor2 passes the MotionCor2 list syntax through (e.g 0:1:2:3); --use_own supports exactly one device id (e.g 0) and rejects a list", "");
 
 	int doseweight_section = parser.addSection("Dose-weighting options");
 	do_dose_weighting = parser.checkOption("--dose_weighting", "Use dose-weighting scheme");
@@ -304,14 +304,58 @@ void MotioncorrRunner::initialise()
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
 	}
 #endif
-#if defined _CUDA_ENABLED
 	if (do_own && gpu_ids.length() > 0)
 	{
-		untangleDeviceIDs(gpu_ids, allThreadIDs);
-		if (allThreadIDs.size() > 0 && allThreadIDs[0].size() > 0)
-			gpu_id = textToInteger(allThreadIDs[0][0]);
-		else
-			gpu_id = 0;
+		// The device-list syntax is validated the same way in every build, so a CPU-only
+		// build rejects an unsupported list for the reason it is unsupported instead of
+		// reporting only the missing CUDA support.
+		//
+		// untangleDeviceIDs() consumes the string it is handed up to the last ':'
+		// (src/args.cpp:437-443), so "0:1:2:3" comes back as "3". Parse a copy: gpu_ids
+		// must still hold what the user typed when the error below quotes it.
+		std::string gpu_ids_to_parse = gpu_ids;
+		untangleDeviceIDs(gpu_ids_to_parse, allThreadIDs);
+
+		// --use_own processes one movie at a time in one process with one CUDA context, and
+		// the device-scoped state it relies on (src/acc/cuda/cuda_fft_prep.cu) is process
+		// global, so a device list is not merely unimplemented here. Silently honouring the
+		// first entry would report a multi-device run that never happened.
+		size_t n_requested = 0;
+		for (size_t irank = 0; irank < allThreadIDs.size(); irank++)
+			n_requested += allThreadIDs[irank].size();
+		if (allThreadIDs.size() != 1 || n_requested != 1)
+		{
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " requests " + integerToString((int)n_requested) +
+			             " device entries, but --use_own supports exactly one device id (e.g. --gpu 0). "
+			             "This repository has no MPI runner, so the ':'-separated per-rank syntax has no "
+			             "meaning here. To use several GPUs, run one process per device over disjoint "
+			             "subsets of the input STAR; see tools/multi_gpu/.");
+		}
+
+		const std::string &requested_id = allThreadIDs[0][0];
+		if (requested_id.empty() || requested_id.find_first_not_of("0123456789") != std::string::npos)
+		{
+			REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is not a non-negative device id. --use_own expects a "
+			             "single integer, e.g. --gpu 0.");
+		}
+
+		// sscanf("%d") in textToInteger can wrap oversized digit strings to a
+		// different valid device. Bound each step before multiplying or adding,
+		// and reject before querying CUDA (also in a CPU-only build).
+		int parsed_gpu_id = 0;
+		for (char ch : requested_id)
+		{
+			const int digit = ch - '0';
+			if (parsed_gpu_id > (INT_MAX - digit) / 10)
+			{
+				REPORT_ERROR("ERROR: --gpu " + gpu_ids + " is outside the supported device id range [0, " +
+				             integerToString(INT_MAX) + "].");
+			}
+			parsed_gpu_id = parsed_gpu_id * 10 + digit;
+		}
+
+#if defined _CUDA_ENABLED
+		gpu_id = parsed_gpu_id;
 		HANDLE_ERROR(accGPUGetDeviceCount(&devCount));
 		if (gpu_id >= devCount || gpu_id < 0) {
 			REPORT_ERROR("Invalid GPU device ID " + integerToString(gpu_id) + ". Found " + integerToString(devCount) + " CUDA device(s).");
@@ -319,13 +363,10 @@ void MotioncorrRunner::initialise()
 		use_gpu = true;
 		if (verb > 0)
 			std::cout << "Using CUDA acceleration on GPU device " << gpu_id << " for global alignment." << std::endl;
-	}
 #else
-	if (do_own && gpu_ids.length() > 0)
-	{
 		REPORT_ERROR("ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).");
-	}
 #endif
+	}
 
 	// Set up which micrograph movies to process
     is_tomo = false;

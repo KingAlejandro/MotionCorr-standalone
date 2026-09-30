@@ -94,6 +94,11 @@ DEFAULT_REQUIRED_TESTS = [
     # difference the scope guard makes; a check for "non-zero exit" would pass
     # on the defect.
     "OutputStageFaults",
+    # Added by the #53 static multi-GPU harness. Device-free, so it is collected
+    # in every configuration. PR117 also lowered --min-count from main's 23 to
+    # 21; that edit is deliberately NOT taken -- it was written when the suite
+    # had 21 tests and would loosen the count gate rather than raise it.
+    "MultiGpuScheduling",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

@@ -222,8 +222,7 @@ class TestOutputTreeComparator(unittest.TestCase):
 
         def invoke(out: Path) -> tuple[int, dict]:
             cp = subprocess.run(
-                [sys.executable, str(SCRIPT),
-                 "--base", str(self.base), "--candidate", str(self.candidate),
+                [sys.executable, str(SCRIPT), str(self.base), str(self.candidate),
                  "--manifest", str(manifest_path), "--json-out", str(out),
                  "--products-only"],
                 capture_output=True, text=True)

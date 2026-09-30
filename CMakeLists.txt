@@ -75,12 +75,29 @@ if(CUDA)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
     find_package(CUDAToolkit REQUIRED)
     target_compile_definitions(motioncorr_core PUBLIC _CUDA_ENABLED)
+    target_compile_options(motioncorr_core PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
     target_sources(motioncorr_core PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
+
+    option(USE_NVCOMP "Enable GPU Deflate decompression via NVIDIA nvCOMP" OFF)
+    if(USE_NVCOMP)
+        find_path(NVCOMP_INCLUDE_DIR nvcomp/deflate.h
+            HINTS ${NVCOMP_ROOT}/include $ENV{NVCOMP_ROOT}/include)
+        find_library(NVCOMP_LIB nvcomp
+            HINTS ${NVCOMP_ROOT}/lib $ENV{NVCOMP_ROOT}/lib64)
+        if(NVCOMP_INCLUDE_DIR AND NVCOMP_LIB)
+            target_include_directories(motioncorr_core PUBLIC ${NVCOMP_INCLUDE_DIR})
+            target_link_libraries(motioncorr_core PUBLIC ${NVCOMP_LIB})
+            target_compile_definitions(motioncorr_core PUBLIC _NVCOMP_ENABLED)
+            message(STATUS "Found nvCOMP: ${NVCOMP_LIB}")
+        else()
+            message(FATAL_ERROR "USE_NVCOMP=ON requested but nvcomp headers or library not found. Set NVCOMP_ROOT.")
+        endif()
+    endif()
 endif()
 
 add_executable(motioncorr src/apps/run_motioncorr.cpp)
@@ -102,6 +119,20 @@ if(BUILD_TESTING)
     add_test(NAME RunnerInterpolateRecenter
         COMMAND $<TARGET_FILE:runner_numerics> interpolate_recenter)
     add_test(NAME DefectParser COMMAND defect_parser)
+    # Device-free control for the nvCOMP ingestion staging layout. Deliberately not
+    # under if(CUDA): the alignment rule and the zlib wrapper checks are integer and
+    # byte logic, and a successful A100 decode cannot observe either of them.
+    # Header-only and deliberately not linked against motioncorr_core: these
+    # contracts must be checkable in a build with no CUDA and no nvCOMP.
+    add_executable(deflate_layout tests/test_deflate_layout.cpp)
+    target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME DeflateLayout COMMAND deflate_layout)
+    add_executable(scratch_arena tests/test_scratch_arena.cpp)
+    target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME ScratchArena COMMAND scratch_arena)
+    add_executable(defect_neighbours tests/test_defect_neighbours.cpp)
+    target_include_directories(defect_neighbours PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME DefectNeighbours COMMAND defect_neighbours)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)

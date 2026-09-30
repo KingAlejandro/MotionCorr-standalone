@@ -27,6 +27,7 @@
 
 #include "src/motioncorr_runner.h"
 #include "src/native_u16_staging.h"
+#include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -1459,18 +1460,73 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	RCTOC(TIMING_READ_GAIN);
 
-	// Issue #85 lane C: decode unsigned-16-bit TIFF straight into uint16 host storage
-	// and let the device expand it, instead of materialising a float32 movie the H2D
-	// copy then has to carry. Only the resident CUDA path consumes uint16 frames, and
-	// only this one datatype is safe: SShort shares bitsPerSample == 16 but wraps
-	// negatives, and the packed 4-bit K2/K3 format reports bitsPerSample == 8 while
-	// doubling the logical width. Everything else keeps the float path unchanged.
+	// Issue #85 lane C. Set below, once the CUDA session state is known: the
+	// compact arm is only worth its host mapping when a resident session will
+	// actually consume it. Declared out here because expand_u16_to_float() reads
+	// it on the CPU-only path too.
 	bool stage_u16 = false;
+
 #ifdef _CUDA_ENABLED
-	stage_u16 = use_gpu && !early_binning && !isEER && !isCompressedMRC &&
-	            ((FileName)fn_mic.getFileFormat()).contains("tif") &&
-	            Ihead.dataType() == UShort;
-	if (stage_u16) {
+    // Legacy early-binning/nonresident FFT preparation may retain a real-frame
+    // cache. Its normal release at skip_fitting is insufficient if a patch throws.
+    // Keep ownership bounded to this movie even on the final failed movie.
+    struct MovieFrameCacheGuard {
+        ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
+    } movie_frame_cache_guard;
+	std::unique_ptr<CudaMovieSession> movie_session;
+	// A preprocessing failure may be recoverable, but releasing its resources can
+	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
+	// release and BEFORE destroying it or materializing/re-dispatching the movie.
+	auto discard_preprocessing_session = [&](const char *boundary) {
+		if (!movie_session) return;
+		movie_session->release();
+		const CudaFailureState &failure = movie_session->getFailureState();
+		const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaGetLastError());
+		if (decision.verdict == CUDA_RETRY_FATAL) {
+			const std::string origin = failure.isPoisoned()
+			    ? std::string(failure.fatalStage()) + ":" + integerToString(failure.fatalLine())
+			    : "pending on this thread";
+			REPORT_ERROR_STR("CUDA device became unusable during " << boundary << " for " << fn_mic
+			                 << ": " << cudaGetErrorString(decision.decisive)
+			                 << " (recorded at " << origin << "). First failure at "
+			                 << failure.firstStage() << ":" << failure.firstLine()
+			                 << ". Refusing CPU fallback after a fatal device error.");
+		}
+		movie_session.reset();
+	};
+	if (use_gpu && !early_binning) {
+		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		if (!movie_session->initialize()) {
+			discard_preprocessing_session("session initialization");
+			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
+		}
+	}
+
+	bool nvcomp_ingested = false;
+#if defined(_NVCOMP_ENABLED)
+	if (movie_session && !isEER && !isCompressedMRC) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		if (movie_session->ingestCompressedTiffStrips(fn_mic, frames, gain_ptr, n_io_threads)) {
+			nvcomp_ingested = true;
+		}
+	}
+#endif
+
+	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
+	// one of three paths runs for a healthy movie:
+	//   eligible Deflate TIFF and nvCOMP available -> device ingest, above;
+	//   otherwise eligible unsigned-16-bit TIFF    -> compact host uint16 staging;
+	//   otherwise                                  -> main's float host reader.
+	// Deciding the compact arm here, after the session exists, is what lets it
+	// require a live session. PR125 had to approximate that with
+	// use_gpu && !early_binning and then widen again when initialize() failed,
+	// which bound and released a movie-sized mapping for nothing. Only UShort is
+	// safe: SShort shares bitsPerSample == 16 but wraps negatives, and the packed
+	// 4-bit K2/K3 format reports bitsPerSample == 8 while doubling the logical width.
+	if (!nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
+	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
+	    Ihead.dataType() == UShort) {
+		stage_u16 = true;
 		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
 		// One line, and it keeps the exact prefix docs/issue85_laneC/compare_movie_logs.py
 		// filters on. A second line would make every u16-staged log differ under that
@@ -1485,36 +1541,42 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
-	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
-	// that leaves an OpenMP structured block is undefined behaviour: the runtime
-	// calls std::terminate, so one truncated movie used to abort the whole run
-	// with SIGABRT instead of failing just that movie. Capture per frame and
-	// rethrow on the serial path, where run()'s caller records the failure and
-	// continues with the remaining movies.
-	std::vector<std::exception_ptr> read_errors(n_frames);
-	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		try {
-			if (isEER)
-				renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
-			else if (isCompressedMRC)
-				compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+	bool do_host_read = true;
 #ifdef _CUDA_ENABLED
-			else if (stage_u16)
-				// Same reader, same guards, same per-row Y-flip; only the destination
-				// sample type differs, and castPage2T's UShort branch is then a memcpy.
-				Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+	if (nvcomp_ingested) do_host_read = false;
 #endif
-			else
-				Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
-		} catch (...) {
-			read_errors[iframe] = std::current_exception();
+	if (do_host_read) {
+		// Every reader here can REPORT_ERROR on a damaged movie, and an exception
+		// that leaves an OpenMP structured block is undefined behaviour: the runtime
+		// calls std::terminate, so one truncated movie used to abort the whole run
+		// with SIGABRT instead of failing just that movie. Capture per frame and
+		// rethrow on the serial path, where run()'s caller records the failure and
+		// continues with the remaining movies.
+		std::vector<std::exception_ptr> read_errors(n_frames);
+		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			try {
+				if (isEER)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
+				else if (isCompressedMRC)
+					compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+#ifdef _CUDA_ENABLED
+				else if (stage_u16)
+					// Same reader, same guards, same per-row Y-flip; only the destination
+					// sample type differs, and castPage2T's UShort branch is then a memcpy.
+					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+#endif
+				else
+					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			} catch (...) {
+				read_errors[iframe] = std::current_exception();
+			}
 		}
-	}
-	// Report the lowest frame index rather than whichever thread failed first,
-	// so the error a user sees does not depend on the OpenMP schedule.
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		// Report the lowest frame index rather than whichever thread failed first,
+		// so the error a user sees does not depend on the OpenMP schedule.
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		}
 	}
 	RCTOC(TIMING_READ_MOVIE);
 
@@ -1554,48 +1616,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		stage_u16 = false;
 		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
 	};
-
-#ifdef _CUDA_ENABLED
-    // Legacy early-binning/nonresident FFT preparation may retain a real-frame
-    // cache. Its normal release at skip_fitting is insufficient if a patch throws.
-    // Keep ownership bounded to this movie even on the final failed movie.
-    struct MovieFrameCacheGuard {
-        ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
-    } movie_frame_cache_guard;
-	std::unique_ptr<CudaMovieSession> movie_session;
-	// A preprocessing failure may be recoverable, but releasing its resources can
-	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
-	// release and BEFORE destroying it or materializing/re-dispatching the movie.
-	auto discard_preprocessing_session = [&](const char *boundary) {
-		if (!movie_session) return;
-		movie_session->release();
-		const CudaFailureState &failure = movie_session->getFailureState();
-		const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaGetLastError());
-		if (decision.verdict == CUDA_RETRY_FATAL) {
-			const std::string origin = failure.isPoisoned()
-			    ? std::string(failure.fatalStage()) + ":" + integerToString(failure.fatalLine())
-			    : "pending on this thread";
-			REPORT_ERROR_STR("CUDA device became unusable during " << boundary << " for " << fn_mic
-			                 << ": " << cudaGetErrorString(decision.decisive)
-			                 << " (recorded at " << origin << "). First failure at "
-			                 << failure.firstStage() << ":" << failure.firstLine()
-			                 << ". Refusing CPU fallback after a fatal device error.");
-		}
-		movie_session.reset();
-	};
-	if (use_gpu && !early_binning) {
-		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
-		if (!movie_session->initialize()) {
-			discard_preprocessing_session("session initialization");
-			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
-		}
-	}
-	if (stage_u16 && !movie_session) {
-		logfile << "No resident CUDA session; widening the native uint16 movie to float."
-		        << std::endl;
-		expand_u16_to_float();
-	}
-#endif
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
@@ -1638,7 +1658,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTIC(TIMING_GAIN_AND_SUM);
 #ifdef _CUDA_ENABLED
 	bool cuda_gain_sum_done = false;
-	if (movie_session) {
+	if (nvcomp_ingested) {
+		cuda_gain_sum_done = true;
+		host_frames_are_raw = false;
+	} else if (movie_session) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
@@ -1907,16 +1930,60 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				bad_ys.push_back(i);
 			}
 #ifdef _CUDA_ENABLED
-		if (host_frames_are_raw)
+		// The nvCOMP ingest never populates host frames, and the replacement loop
+		// only ever reads one neighbour per (defect, frame). Downloading the whole
+		// movie to supply them cost a fresh movie-sized host allocation plus a full
+		// device-to-host copy per movie; fetch just those pixels instead.
+		const bool sparse_neighbours =
+			nvcomp_ingested && (Iframes.empty() || Iframes[0]().nzyxdim == 0);
+		if (host_frames_are_raw || nvcomp_ingested)
 			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
+
+		std::vector<int> sample_frame, sample_y, sample_x;
+		if (sparse_neighbours) {
+			const size_t n_samples = bad_xs.size() * (size_t)n_frames;
+			sample_frame.assign(n_samples, 0);
+			sample_y.assign(n_samples, -1);
+			sample_x.assign(n_samples, -1);
+		}
+		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
 		size_t bad_idx = 0;
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
+#ifdef _CUDA_ENABLED
+			// n_ok is a property of the mask and the bounds, never of the pixel
+			// values, so on the sparse path it is computed once per defect and the
+			// drawn index is resolved to a coordinate. rand() and rnd_gaus() are
+			// still called on exactly the same branches in the same defect-then-frame
+			// order, which is what keeps the stream and the chosen value identical.
+			const int sparse_n_ok = sparse_neighbours
+				? mc_defect::countValidNeighbours(bad_mask, nx, ny, i, j, D_MAX) : 0;
+#endif
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
+#ifdef _CUDA_ENABLED
+				if (sparse_neighbours) {
+					const size_t k = (size_t)iframe * bad_xs.size() + bad_idx;
+					if (sparse_n_ok > NUM_MIN_OK) {
+						const int rank = rand() % sparse_n_ok;
+						int sy = -1, sx = -1;
+						if (!mc_defect::nthValidNeighbour(bad_mask, nx, ny, i, j,
+						                                  D_MAX, rank, &sy, &sx)) {
+							discard_preprocessing_session("sparse defect neighbour");
+							REPORT_ERROR("Could not resolve a hot-pixel neighbour for sparse defect correction.");
+						}
+						sample_frame[k] = iframe;
+						sample_y[k] = sy;
+						sample_x[k] = sx;
+					} else {
+						resident_bad_replacements[k] = rnd_gaus(frame_mean, frame_std);
+					}
+					continue;
+				}
+#endif
 				RFLOAT pbuf[PBUF_SIZE];
 //				std::cout << "Frame: "<< iframe << std::endl;
 				int n_ok = 0;
@@ -1958,7 +2025,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else
 					replacement = rnd_gaus(frame_mean, frame_std);
 #ifdef _CUDA_ENABLED
-				if (host_frames_are_raw) {
+				if (host_frames_are_raw || nvcomp_ingested) {
 					resident_bad_replacements[(size_t)iframe * bad_xs.size() + bad_idx] = replacement;
 				} else
 #endif
@@ -1968,6 +2035,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
+		if (sparse_neighbours && !bad_xs.empty()) {
+			std::vector<float> gathered;
+			if (!movie_session->gatherFrameSamples(sample_frame, sample_y, sample_x, gathered)) {
+				discard_preprocessing_session("sparse defect neighbour gather");
+				REPORT_ERROR("Sparse hot-pixel neighbour gather failed for " + fn_mic);
+			}
+			for (size_t k = 0; k < gathered.size(); k++)
+				if (sample_y[k] >= 0) resident_bad_replacements[k] = gathered[k];
+		}
 		if (movie_session && !bad_xs.empty()) {
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
@@ -1977,6 +2053,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
 				discard_preprocessing_session("sparse defect update");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
+			}
+		}
+		if (nvcomp_ingested && !sparse_neighbours) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe].clear();
 			}
 		}
 #endif

@@ -2,9 +2,11 @@
 #define CUDA_MOVIE_SESSION_H_
 
 #include <vector>
+#include <string>
 #include <ostream>
 #include "src/image.h"
 #include "src/multidim_array.h"
+#include "src/acc/cuda/cuda_scratch_arena.h"
 #include "src/complex.h"
 #include "src/micrograph_model.h"
 
@@ -55,6 +57,47 @@ public:
         const MultidimArray<float> *gain_ref,
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
+    );
+
+#if defined(_NVCOMP_ENABLED)
+    // Direct GPU TIFF ingestion via nvCOMP Batched Deflate: reads compressed strips
+    // from disk, uploads only the compressed bytes over PCIe, decompresses on the
+    // device, and fuses the row flip, gain application and unaligned sum straight
+    // into the resident d_Iframes/d_Isum.
+    //
+    // Allocates no device memory for staging. Frames are processed in bounded
+    // batches whose entire working set -- compressed inputs, uint16 outputs, chunk
+    // descriptor arrays and the nvCOMP scratch -- is carved out of d_Fframes, which
+    // initialize() has already allocated and which holds nothing until
+    // computeGlobalForwardFFT() overwrites every element of it. The session's VRAM
+    // high-water mark is therefore unchanged from the host-read path. (d_gain is
+    // still allocated on demand, exactly as applyGainDefectsAndSum() does.)
+    //
+    // Claims the buffer through fourier_guard, so it is refused once the spectrum
+    // is in there, and the forward transform is refused while these views are live.
+    //
+    // Returns false on any geometry, I/O, zlib-wrapper or per-chunk nvCOMP failure,
+    // leaving the caller to fall back to the host reader. A partially written
+    // d_Iframes/d_Isum is safe: applyGainDefectsAndSum() overwrites both in full.
+    bool ingestCompressedTiffStrips(
+        const std::string &fn_mic,
+        const std::vector<int> &frames,
+        const MultidimArray<float> *gain_ref,
+        int n_threads
+    );
+#endif
+
+    // Fetch individual d_Iframes pixels: one neighbour value per (defect, frame).
+    // Replaces downloading the whole movie for hot-pixel replacement, which cost a
+    // fresh movie-sized host allocation plus a full device-to-host copy on every
+    // movie. sample_y[k] < 0 marks an entry the caller fills itself (the Gaussian
+    // branch) and leaves out[k] at zero. Uses the pre-FFT scratch arena, so it adds
+    // no device allocation.
+    bool gatherFrameSamples(
+        const std::vector<int> &sample_frame,
+        const std::vector<int> &sample_y,
+        const std::vector<int> &sample_x,
+        std::vector<float> &out
     );
 
     // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
@@ -182,6 +225,20 @@ private:
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
+
+    // What d_Fframes currently holds. The ingest path borrows that allocation as
+    // scratch instead of allocating its own staging, so the transition out of
+    // IngestScratch is what makes the forward transform safe to run.
+    mc_cuda::FourierStorageGuard fourier_guard;
+    cudaStream_t ingest_stream = 0;
+    // Points the ingest at the worker-lifetime pinned staging pool, growing it if
+    // this movie needs more. The pool deliberately outlives the session, which is
+    // constructed and destroyed once per movie.
+    bool ensurePinnedStage(size_t bytes);
+    // Synchronises and tears down the ingest stream, then declares every scratch
+    // view dead. Idempotent; called from a scope guard so it also runs on the
+    // HANDLE_ERROR early-return paths.
+    void endIngestScratch();
 
     // Cached patch resources to avoid allocations and plan recreation in patch loop
     cufftHandle plan_patch_r2c = 0;

@@ -57,6 +57,15 @@ DEFAULT_REQUIRED_TESTS = [
     # that can see the recenter call site still being wired up.
     "RunnerInterpolateRecenter",
     "RunnerInterpolateShifts",
+    # Added by the #85/#126 nvCOMP ingest composition. All three are device-free
+    # and deliberately registered outside if(CUDA): the aligned raw-Deflate layout
+    # rule, the zlib-wrapper and Adler-32 byte logic, the scratch-arena bound and
+    # the neighbour enumeration are integer and byte contracts that a successful
+    # A100 decode cannot observe. Without these entries the fast path could lose
+    # its eligibility predicate or its arena bound with the suite still green.
+    "DeflateLayout",
+    "ScratchArena",
+    "DefectNeighbours",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

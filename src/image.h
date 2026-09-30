@@ -152,6 +152,7 @@ inline void initTiffErrorHandlersOnce()
 #include "src/metadata_table.h"
 #include "src/fftw.h"
 #include "src/float16.h"
+#include "src/output_timing.h"
 
 /// @defgroup Images Images
 //@{
@@ -760,13 +761,17 @@ public:
 
 		const FileName &fname = (name == "") ? filename : name;
 		fImageHandler hFile;
+		OTIC(TIMING_W_OPEN);
 		hFile.openFile(name, mode);
+		OTOC(TIMING_W_OPEN);
 		_write(fname, hFile, select_img, isStack, mode, datatype);
 		// Close here rather than in the destructor. The payload is still in the
 		// stdio buffer at this point on small images, so a full disk or quota
 		// surfaces at this flush and nowhere earlier; the destructor cannot
 		// report it, and would call std::terminate if it tried.
+		OTIC(TIMING_W_CLOSE);
 		hFile.closeFile(fname);
+		OTOC(TIMING_W_CLOSE);
 	}
 
 	/** Cast a page of data from type dataType to type Tdest

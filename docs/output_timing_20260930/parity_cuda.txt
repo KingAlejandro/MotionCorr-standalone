@@ -1,0 +1,30 @@
+# Product comparison against the baseline, 4-gpu-vm, 24 tutorial movies, CUDA --j 8.
+# Both runs wrote to the SAME output path, one at a time (the path is embedded
+# in the STAR and EPS products), then the directory was moved aside.
+#
+# MRC: bytes 0-223 (amin/amax/amean at 76/80/84, arms at 216) and the payload
+#      from 1024 on, exactly. The 800-byte strftime label is not asserted.
+# PDF: rendered page rasters, because Ghostscript stamps /CreationDate and /ID.
+# log: exact after dropping lines carrying a measured duration.
+# everything else: exact bytes.
+
+################ instr vs t1
+
+--- summary ---
+  eps      30 matched,    0 differ
+  log      24 matched,    0 differ
+  lst       2 matched,    0 differ
+  mrc      24 matched,    0 differ
+  pdf       4 matched,    0 differ
+  star     25 matched,    0 differ
+VERDICT: MATCH
+################ instr vs t2
+
+--- summary ---
+  eps      30 matched,    0 differ
+  log      24 matched,    0 differ
+  lst       2 matched,    0 differ
+  mrc      24 matched,    0 differ
+  pdf       4 matched,    0 differ
+  star     25 matched,    0 differ
+VERDICT: MATCH

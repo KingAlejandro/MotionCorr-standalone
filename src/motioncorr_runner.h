@@ -27,7 +27,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <algorithm>
+#include <functional>
+#include <memory>
 #include <src/time.h>
+#include "src/output_writer.h"
 #include "src/metadata_table.h"
 #include "src/image.h"
 #include "src/micrograph_model.h"
@@ -235,8 +238,17 @@ public:
 	// Plot the shifts
 	void plotShifts(FileName fn_mic, Micrograph &mic);
 
-	// Save micrograph model
+	// Save micrograph model. Equivalent to stampModel() then writeModel().
 	void saveModel(Micrograph &mic);
+
+	// Copy the runner's current per-movie metadata onto the model. run()
+	// re-reads angpix and voltage from the optics table for every movie, so
+	// this has to happen on the thread that owns that state.
+	void stampModel(Micrograph &mic);
+
+	// Serialise an already-stamped model. Reads only setup-time state, so it
+	// is safe to run on the output writer thread.
+	void writeModel(Micrograph &mic);
 
 	// Make a PDF file with all the shifts and write output STAR files
 	void generateLogFilePDFAndWriteStarFiles();
@@ -264,6 +276,26 @@ public:
 	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
 
 private:
+	// Background output writer, created by run() for the duration of the movie
+	// loop. Null elsewhere -- including in a default-constructed runner -- and
+	// submitOutput() then runs the task inline, so every entry point that is
+	// not run() keeps the plain serial behaviour.
+	std::unique_ptr<OutputWriter> output_writer;
+	long int output_movie_index = -1;
+
+	// Hand one output product to the writer, or write it here when there is
+	// none. Products of one movie are written in submission order.
+	void submitOutput(std::function<void()> task);
+
+	// Drain the writer's deferred failures: report each one, mark its movie
+	// failed, and append the truth to that movie's log.
+	void collectWriteFailures(std::vector<char> &movie_failed);
+
+	// Take over @p image's pixels and write them to @p path. The caller's
+	// image is left empty: a micrograph is ~57 MB and copying one per output
+	// would cost more than the write it is trying to hide.
+	void submitImageWrite(Image<float> &image, const FileName &path, DataType datatype);
+
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 

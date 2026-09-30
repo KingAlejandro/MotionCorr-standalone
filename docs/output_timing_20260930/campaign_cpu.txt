@@ -1,0 +1,71 @@
+# CPU-path campaign, small-refmac-machine (64 cores, shared), taskset -c 56-63,
+# under flock /tmp/motioncorr-cpu64-bench.lock. 24 tutorial movies, --j 8, no GPU,
+# Release -O3, TIMING=ON. Three rounds, arm order rotated instr/t1/t2 ->
+# t1/t2/instr -> t2/instr/t1. One discarded warm-up run precedes round 1.
+#
+# The box carries two long-running ctffind processes at ~100% CPU each and a
+# baseline load1 near 9, outside the 56-63 mask. Within-arm spread reaches 6 s
+# here against 1 s on the GPU host, and n=3 is small: read the per-round signs,
+# not the medians to two decimals.
+#
+# Every '(in thread)' row below is unusable (unsynchronised accumulation, see
+# issue #9). They are left in only so the table is not silently filtered.
+
+arm        n  wall min  wall max    median    user     sys  peak RSS MiB
+instr      3    216.61    222.77    216.76  1513.4   115.0          3253
+t1         3    215.98    219.90    216.41  1515.8   115.3          3253
+t2         3    213.25    215.10    213.41  1504.7   114.7          3254
+
+paired t1 - instr: n=3  per-round [-2.87, -0.2, -0.78]
+  median -0.78 s (-0.4%), faster in 3/3 rounds, range -2.87 to -0.20 s
+  arm ranges overlap: True
+
+paired t2 - instr: n=3  per-round [-7.67, -3.2, -3.51]
+  median -3.51 s (-1.6%), faster in 3/3 rounds, range -7.67 to -3.20 s
+  arm ranges overlap: False
+
+--- median stage seconds ---
+stage                                  instr        t1        t2
+read gain                              0.120     0.122     0.123
+read movie                             5.569     5.594     5.723
+apply gain and initial sum             0.954     0.918     0.811
+detect hot pixels                      0.755     0.770     0.762
+fix defects                            1.026     1.028     0.972
+global FFT                            42.411    42.690    42.148
+power spectrum                         0.000     0.000     0.000
+global alignment                       6.138     6.050     6.036
+global iFFT                           45.640    45.985    45.681
+prepare patch                         24.597    24.613    24.508
+prep patch - clip (in thread)          4.640     4.604     4.630
+prep patch - FFT (in thread)          78.061    78.706    77.694
+patch alignment                        6.572     6.554     6.529
+align - prep weight                    0.051     0.053     0.051
+align - make reference                 0.623     0.618     0.614
+align - calc CCF (in thread)           3.301     3.297     3.292
+align - iFFT CCF (in thread)          12.914    12.517    12.995
+align - argmax CCF (in thread)         0.042     0.042     0.043
+align - shift in Fourier space         6.059     6.039     6.007
+fit polynomial                         0.038     0.038     0.041
+dose weighting                        73.717    73.760    73.161
+dw - calc weight                      11.758    11.811    11.788
+dw - iFFT                             43.321    43.421    43.043
+real space interpolation              18.489    18.433    18.352
+binning                                0.000     0.000     0.000
+write corrected image                  2.028     1.354     0.001
+write star and shift plot              0.084     0.084     0.000
+joint star and logfile pdf             0.813     0.504     0.500
+out - mrc open                         0.003     0.003     0.003
+out - mrc stats                        1.036     0.345     0.441
+out - mrc header                       0.000     0.000     0.000
+out - mrc payload                      0.985     1.002     1.039
+out - mrc close                        0.000     0.000     0.000
+out - per-movie star                   0.032     0.031         -
+out - per-movie eps                    0.052     0.052         -
+out - joint star scan                  0.005     0.005     0.005
+out - joint hist eps                   0.006     0.006     0.006
+out - gs header.pdf                    0.093         -         -
+out - gs batch.pdf                     0.239         -         -
+out - gs all_batches.pdf               0.222     0.000     0.000
+out - gs logfile.pdf                   0.246     0.246     0.247
+out - gs header+batch                      -     0.245     0.242
+out - gs batch.pdf (inner)                 -     0.245     0.242

@@ -12,16 +12,25 @@ rows=[('local5',[],[]),('global1',['--patch_x','1','--patch_y','1'],[]),('local3
 records=[]
 for name,extra,products in rows:
  opts=list(base)
+ if name in ("global1","local3"):
+  opts[opts.index("--patch_x")+1]=extra[1];opts[opts.index("--patch_y")+1]=extra[3];extra=[]
  if name=='no_gain':del opts[opts.index('--gainref'):opts.index('--gainref')+2]
  if name=='no_dose':del opts[opts.index('--dose_weighting')];del opts[opts.index('--dose_per_frame'):opts.index('--dose_per_frame')+2]
  expected_mrc={f'Movies/{stem}{suffix}.mrc' for suffix in ['',*products]};expected_star={f'Movies/{stem}.star','corrected_micrographs.star'};trees=[]
  for arm,binary in [('baseline',a.baseline),('candidate',a.candidate)]:
   out=a.root/(name+'-'+arm);out.mkdir();cmd=[str(binary.resolve()),*opts,*extra,'--o',str(out.resolve())+'/'];r=subprocess.run(cmd,cwd=inp,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180);(a.root/(name+'-'+arm+'.log')).write_text(r.stdout)
   assert r.returncode==0,f'{name}/{arm}: failed {r.returncode}'
-  assert 'Unrecognised' not in r.stdout and 'WARNING:' not in r.stdout,f'{name}/{arm}: warning'
+  logs=r.stdout+'\n'+'\n'.join(q.read_text() for q in out.rglob('*.log'))
+  assert 'Unrecognised' not in logs and 'WARNING:' not in logs,f'{name}/{arm}: warning'
+  expected_patches=0 if name=='global1' else 9 if name=='local3' else 25
+  assert logs.count('[CUDA Global Alignment] completed')==1 and logs.count('[CUDA Patch Alignment] completed')==expected_patches,f'{name}/{arm}: native alignment incomplete'
+  if name!='no_dose':assert '[CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]' in logs,f'{name}/{arm}: native DW missing'
   files={str(q.relative_to(out)):q for q in out.rglob('*') if q.is_file()}
   assert {q for q in files if q.endswith('.mrc')}==expected_mrc, f'{name}: requested MRC inventory'
   assert {q for q in files if q.endswith('.star')}==expected_star, f'{name}: STAR inventory'
+  assert cmp._read_star_tag(out/f'Movies/{stem}.star','general','_rlnMicrographMovieName')==movie,'wrong movie association'
+  joint=out/'corrected_micrographs.star';joint_rows=cmp._parse_joint_micrographs(joint);assert len(joint_rows)==1,'joint STAR row missing/duplicate'
+  cmp._path_inside_root(out,joint_rows[0][0],Path(f'Movies/{stem}.mrc'),joint);cmp._path_inside_root(out,joint_rows[0][1],Path(f'Movies/{stem}.star'),joint)
   digests={}
   for rel,q in files.items():
    if q.suffix=='.mrc':

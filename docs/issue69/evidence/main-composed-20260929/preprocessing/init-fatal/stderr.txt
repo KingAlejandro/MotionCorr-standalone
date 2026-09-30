@@ -1,0 +1,32 @@
+The number of patches is too small (<= 2). Patch based alignment will be skipped.
+[preprocessfault] injected cudaErrorIllegalAddress at initialize; pending slot cleared
+in: /home/alex/mc-pr115-enumeration-20260929/src/src/motioncorr_runner.cpp, line 1501
+ERROR: 
+CUDA device became unusable during session initialization for Movies/control.tiff: an illegal memory access was encountered (recorded at initialize buffers:306). First failure at initialize buffers:306. Refusing CPU fallback after a fatal device error.
+=== Backtrace  ===
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x61bc761b96d7]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x3fcb7) [0x61bc76184cb7]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_ZN16MotioncorrRunner26executeOwnMotionCorrectionER10Micrographi+0x61c7) [0x61bc7625ea57]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_ZN16MotioncorrRunner3runEv+0x210) [0x61bc762686a0]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(main+0x53) [0x61bc761aed53]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x71f6c522a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x71f6c522a28b]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_start+0x25) [0x61bc761af405]
+==================
+ERROR: 
+CUDA device became unusable during session initialization for Movies/control.tiff: an illegal memory access was encountered (recorded at initialize buffers:306). First failure at initialize buffers:306. Refusing CPU fallback after a fatal device error.
+Continuing with the remaining movies.
+in: /home/alex/mc-pr115-enumeration-20260929/src/src/motioncorr_runner.cpp, line 697
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_ZN11RelionErrorC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_l+0x77) [0x61bc761b96d7]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x4ae5a) [0x61bc7618fe5a]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(main+0x53) [0x61bc761aed53]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x71f6c522a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x71f6c522a28b]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(_start+0x25) [0x61bc761af405]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): Movies/control.tiff. Successful per-movie outputs were retained; joint output was not generated.
+[faultinject] remaining-owned=0 stale-releases=0

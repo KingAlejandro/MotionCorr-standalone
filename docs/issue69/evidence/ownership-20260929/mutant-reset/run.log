@@ -1,0 +1,37 @@
+Using CUDA acceleration on GPU device 0 for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * /home/alex/mc-pr115-ownership-20260929/src/test-data/synthetic/synthetic_movie.tiff
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo][retry-caller] injected nonconvergence with nonzero shifts
+in: /home/alex/mc-pr115-ownership-20260929/src/tests/cuda_retry_caller_shim.cpp, line 42
+ERROR: 
+retry-caller: stale first-attempt shift
+=== Backtrace  ===
+build/motioncorr_retry_caller(+0x519a7) [0x55f97c8449a7]
+build/motioncorr_retry_caller(+0xb7d0) [0x55f97c7fe7d0]
+build/motioncorr_retry_caller(+0xe5430) [0x55f97c8d8430]
+build/motioncorr_retry_caller(+0xf3bdf) [0x55f97c8e6bdf]
+build/motioncorr_retry_caller(+0x1000b0) [0x55f97c8f30b0]
+build/motioncorr_retry_caller(+0x47c73) [0x55f97c83ac73]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a81e0e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a81e0e2a28b]
+build/motioncorr_retry_caller(+0x482d5) [0x55f97c83b2d5]
+==================
+ERROR: 
+retry-caller: stale first-attempt shift
+Continuing with the remaining movies.
+   0/   0 sec ............................................................~~(,_,"> yum!
+in: /home/alex/mc-pr115-ownership-20260929/src/src/motioncorr_runner.cpp, line 697
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/mc-pr115-ownership-20260929/src/test-data/synthetic/synthetic_movie.tiff. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+build/motioncorr_retry_caller(+0x519a7) [0x55f97c8449a7]
+build/motioncorr_retry_caller(+0x28d7a) [0x55f97c81bd7a]
+build/motioncorr_retry_caller(+0x47c73) [0x55f97c83ac73]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7a81e0e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7a81e0e2a28b]
+build/motioncorr_retry_caller(+0x482d5) [0x55f97c83b2d5]
+==================
+ERROR: 
+Motion correction failed for 1 movie(s): /home/alex/mc-pr115-ownership-20260929/src/test-data/synthetic/synthetic_movie.tiff. Successful per-movie outputs were retained; joint output was not generated.

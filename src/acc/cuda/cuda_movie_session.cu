@@ -859,54 +859,14 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     return true;
 }
 
-#if defined(_NVCOMP_ENABLED)
-using mc_tiff_deflate::alignUp;
-using mc_tiff_deflate::stripSlotOffset;
-using mc_tiff_deflate::frameStageBytes;
-using mc_tiff_deflate::zlibWrapperIsUsable;
-
-namespace {
-// Worker-lifetime pinned staging for the compressed strips.
-//
-// CudaMovieSession is constructed and destroyed once per movie
-// (motioncorr_runner.cpp), so a session-owned buffer would pay cudaHostAlloc and
-// cudaFreeHost on every movie: measured at ~110 ms and ~43 ms for 126 MiB on an
-// A100 host, which is most of what the faster ingest buys back. The pool outlives
-// the session and is grown, never shrunk.
-//
-// thread_local, not a shared static: movies are dispatched one at a time here, but
-// a worker-per-thread arrangement must not share one pinned buffer. One device per
-// process is assumed, which is already how --gpu behaves.
-struct PinnedStagePool {
-    void *ptr = nullptr;
-    size_t bytes = 0;
-    // Destroyed at thread exit, possibly after the CUDA context has gone; the
-    // status is deliberately ignored because there is nowhere left to report it.
-    ~PinnedStagePool() { if (ptr) cudaFreeHost(ptr); }
-};
-thread_local PinnedStagePool t_pinned_stage;
-} // namespace
-
-bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
-    if (t_pinned_stage.ptr && t_pinned_stage.bytes >= bytes) return true;
-    if (t_pinned_stage.ptr) {
-        HANDLE_ERROR(cudaFreeHost(t_pinned_stage.ptr));
-        t_pinned_stage.ptr = nullptr;
-        t_pinned_stage.bytes = 0;
-    }
-    // Headroom, rounded to 32 MiB. Compressed size drifts by a few MiB between
-    // movies of the same geometry, so an exact fit reallocated on 7 of 24 tutorial
-    // movies; with slack the pool is allocated once for the run.
-    const size_t reserve = mc_tiff_deflate::pinnedReserveBytes(bytes);
-    HANDLE_ERROR(cudaHostAlloc(&t_pinned_stage.ptr, reserve, cudaHostAllocDefault));
-    t_pinned_stage.bytes = reserve;
-    // Logged only when the pool actually grows, so "allocated once across the run"
-    // is something the log can show rather than something the design merely claims.
-    logfile << "nvCOMP ingestion: pinned staging pool grown to " << reserve
-            << " bytes for a " << bytes << "-byte request (worker lifetime)" << std::endl;
-    return true;
-}
-
+// Sparse device read-back for hot-pixel replacement. Deliberately OUTSIDE the
+// nvCOMP guard: the declaration in the header is unconditional and the call site
+// in motioncorr_runner.cpp is guarded by _CUDA_ENABLED, not _NVCOMP_ENABLED, so a
+// CUDA build without nvCOMP must still provide this symbol. It previously sat
+// inside the guard and that configuration only linked because the optimiser could
+// prove nvcomp_ingested was always false and dropped the call; adding code near
+// the call site was enough to stop it doing so, and the link then failed.
+// Nothing here uses nvCOMP -- it is the shared pre-FFT arena and one plain kernel.
 bool CudaMovieSession::gatherFrameSamples(
     const std::vector<int> &sample_frame,
     const std::vector<int> &sample_y,
@@ -967,6 +927,55 @@ bool CudaMovieSession::gatherFrameSamples(
     HANDLE_ERROR(cudaStreamSynchronize(stream));
     return true;
 }
+
+#if defined(_NVCOMP_ENABLED)
+using mc_tiff_deflate::alignUp;
+using mc_tiff_deflate::stripSlotOffset;
+using mc_tiff_deflate::frameStageBytes;
+using mc_tiff_deflate::zlibWrapperIsUsable;
+
+namespace {
+// Worker-lifetime pinned staging for the compressed strips.
+//
+// CudaMovieSession is constructed and destroyed once per movie
+// (motioncorr_runner.cpp), so a session-owned buffer would pay cudaHostAlloc and
+// cudaFreeHost on every movie: measured at ~110 ms and ~43 ms for 126 MiB on an
+// A100 host, which is most of what the faster ingest buys back. The pool outlives
+// the session and is grown, never shrunk.
+//
+// thread_local, not a shared static: movies are dispatched one at a time here, but
+// a worker-per-thread arrangement must not share one pinned buffer. One device per
+// process is assumed, which is already how --gpu behaves.
+struct PinnedStagePool {
+    void *ptr = nullptr;
+    size_t bytes = 0;
+    // Destroyed at thread exit, possibly after the CUDA context has gone; the
+    // status is deliberately ignored because there is nowhere left to report it.
+    ~PinnedStagePool() { if (ptr) cudaFreeHost(ptr); }
+};
+thread_local PinnedStagePool t_pinned_stage;
+} // namespace
+
+bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
+    if (t_pinned_stage.ptr && t_pinned_stage.bytes >= bytes) return true;
+    if (t_pinned_stage.ptr) {
+        HANDLE_ERROR(cudaFreeHost(t_pinned_stage.ptr));
+        t_pinned_stage.ptr = nullptr;
+        t_pinned_stage.bytes = 0;
+    }
+    // Headroom, rounded to 32 MiB. Compressed size drifts by a few MiB between
+    // movies of the same geometry, so an exact fit reallocated on 7 of 24 tutorial
+    // movies; with slack the pool is allocated once for the run.
+    const size_t reserve = mc_tiff_deflate::pinnedReserveBytes(bytes);
+    HANDLE_ERROR(cudaHostAlloc(&t_pinned_stage.ptr, reserve, cudaHostAllocDefault));
+    t_pinned_stage.bytes = reserve;
+    // Logged only when the pool actually grows, so "allocated once across the run"
+    // is something the log can show rather than something the design merely claims.
+    logfile << "nvCOMP ingestion: pinned staging pool grown to " << reserve
+            << " bytes for a " << bytes << "-byte request (worker lifetime)" << std::endl;
+    return true;
+}
+
 
 void CudaMovieSession::endIngestScratch() {
     if (ingest_stream) {

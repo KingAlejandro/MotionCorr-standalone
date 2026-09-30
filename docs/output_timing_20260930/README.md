@@ -210,6 +210,24 @@ stage table: main-thread `write corrected image` 2.083 → 0.001 s and
 
 ## CPU path
 
-The same output stage on `small-refmac-machine` is 2.98 s of a 222.8 s
-baseline run — 1.3% — so there is little there to win and the background
-writer has no idle CPU to use at `--j 8`. Numbers in `campaign_cpu.txt`.
+The same output stage on `small-refmac-machine` is 2.93 s of a 216.8 s
+baseline run — 1.4% — so there is much less to win, and the changes are worth
+correspondingly less:
+
+| arm | median wall | vs baseline | rounds faster |
+|---|---|---|---|
+| baseline | 216.76 s | — | — |
+| t1 | 216.41 s | -0.78 s (-0.4%) | 3/3, ranges overlap |
+| t2 | 213.41 s | -3.51 s (-1.6%) | 3/3, no overlap |
+
+Read those as signs, not as magnitudes: the within-arm spread on that box is up
+to 6 s against 1 s on the GPU host, it carries two permanent `ctffind`
+processes and a baseline load1 near 9, and n=3. The useful statement is that
+neither change is a regression on the CPU path and the background writer is not
+one either, which was the open question — `--j 8` inside an 8-CPU `taskset`
+there gives the writer thread no CPU of its own.
+
+The stage breakdown matches the CUDA one in shape: `out - mrc stats`
+1.04 → 0.35 s, `out - gs all_batches.pdf` 0.222 → 0.000 s, main-thread
+`write corrected image` 2.03 → 0.001 s under the writer. Peak RSS 3253 →
+3254 MiB. Numbers in `campaign_cpu.txt`.

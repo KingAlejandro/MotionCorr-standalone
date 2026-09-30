@@ -2701,11 +2701,17 @@ public:
      * MRC header's amean and arms are built from, so reassociating them changes
      * published header bytes.
      *
-     * This is not computeStats(): that one tracks the minimum under an
-     * `else if`, so an element that raises the maximum can never lower the
-     * minimum, and it seeds min/max from the double range rather than from
-     * element 0. Its callers depend on those values; this routine is separate
-     * rather than a fix so that they keep them.
+     * This is not computeStats(). That routine seeds its minimum from
+     * numeric_limits<double>::max() and then tracks it under an `else if` on
+     * the maximum test, so the first element takes the maximum branch and
+     * leaves the minimum uninitialised; on a rising run every element does,
+     * and it returns DBL_MAX. (The `else if` on its own would be harmless
+     * here: with both extremes seeded from element 0, an element that raises
+     * the maximum is greater than a maximum that is already at least the
+     * minimum, so it can never be the new minimum. Mutation-tested -- see
+     * docs/output_timing_20260930/mutants.txt.) computeStats' callers depend
+     * on the values it returns, so this is a separate routine rather than a
+     * fix to that one.
      */
     void computeMinMaxAvgStddev(T &_minval, T &_maxval, RFLOAT &_avg, RFLOAT &_stddev) const
     {
@@ -2729,8 +2735,10 @@ public:
         FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY_ptr(*this, n, ptr)
         {
             const T Tval = *ptr;
-            // Same comparisons, in the same direction, as computeMin/computeMax:
-            // with NaN present both are false, so a NaN never becomes an extreme.
+            // Same comparisons, in the same direction, as computeMin and
+            // computeMax: with a NaN operand both are false, so a NaN never
+            // becomes an extreme. Reversing either test would keep the
+            // non-NaN answers and change that one.
             if (Tval > maxval)
                 maxval = Tval;
             if (Tval < minval)

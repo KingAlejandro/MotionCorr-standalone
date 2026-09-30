@@ -157,9 +157,11 @@ int main(int argc, char **argv)
                 // N/(N-1) is not 1 under integer division.
                 {"two elements", {-1.25f, 4.75f}},
                 {"three elements", {2.0f, -8.0f, 5.5f}},
-                // The discriminating case for a naive fusion: under an
-                // `else if` on the max test, a strictly increasing array never
-                // updates the minimum. Checked against computeStats below.
+                // The discriminating case for the naive fusion: seed the
+                // minimum from the type's maximum and track it under an
+                // `else if`, as computeStats does, and a strictly increasing
+                // array never updates it at all. Checked against computeStats
+                // below.
                 {"strictly increasing", {1.0f, 2.0f, 3.0f, 4.0f, 5.0f}},
                 {"strictly decreasing", {5.0f, 4.0f, 3.0f, 2.0f, 1.0f}},
                 {"constant", std::vector<float>(1000, -2.75f)},
@@ -203,7 +205,10 @@ int main(int argc, char **argv)
                 // Negative control: computeStats is the obvious thing to reuse
                 // and is wrong here. If it ever agreed on every case, this test
                 // would no longer be able to reject that mistake, so demand
-                // that at least one case separates them.
+                // that at least one case separates them. Five of the cases do;
+                // the full mutation record, including one mutation these cases
+                // deliberately do NOT reject because it is equivalent, is in
+                // docs/output_timing_20260930/mutants.txt.
                 if (!c.v.empty()) {
                     RFLOAT s_avg = 0, s_stddev = 0; float s_min = 0, s_max = 0;
                     a.computeStats(s_avg, s_stddev, s_min, s_max);

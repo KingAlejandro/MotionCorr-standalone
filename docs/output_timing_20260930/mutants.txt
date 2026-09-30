@@ -1,0 +1,39 @@
+# Mutation record for MultidimArray::computeMinMaxAvgStddev, 2026-09-30
+#
+# The claim under test: the fused routine reproduces computeMin, computeMax,
+# computeAvg and computeStddev bit-for-bit. The case list that backs it is the
+# one in tests/test_runner_numerics.cpp's `mrc_stats` mode; mutation_probe.cpp
+# runs the same list against the real headers in src/, so a mutant's verdict
+# here is the verdict the ctest case would give.
+#
+# Built on the laptop (AppleClang, arm64, -O3) with:
+#   g++ -std=gnu++17 -O3 -I. -I/opt/homebrew/include -L/opt/homebrew/lib \
+#       mutation_probe.cpp src/multidim_array.cpp src/error.cpp src/funcs.cpp \
+#       src/numerical_recipes.cpp src/filename.cpp src/strings.cpp -lfftw3 -lfftw3f
+#
+# Each mutation was applied to src/multidim_array.h, built, run, and reverted.
+
+unmutated                                                   agrees, 0 of 13 cases differ
+
+A   `else if` on the minimum test, element-0 seed kept       NOT DETECTED  <-- and correctly so
+B   two partial accumulators for both sums (reassociation)   DETECTED  262144 pseudo-random (stddev)
+C   Bessel factor size/(size-1) dropped                      DETECTED  two elements (stddev)
+A2  computeStats' seeding (type range) plus the `else if`    DETECTED  single, two, strictly
+                                                                       increasing, NaN first,
+                                                                       negative zero (min)
+E   NaN-transparent comparisons !(v<=max) / !(v>=min)        DETECTED  NaN first (min)
+F   average divided by size-1                                DETECTED  7 cases (avg)
+
+# On A. This is the interesting one, and it is not a gap in the case list.
+# With BOTH extremes seeded from element 0, an element that raises the maximum
+# is strictly greater than a maximum that is already at least the minimum, so
+# it can never be the new minimum; skipping the minimum test on that branch is
+# therefore equivalent, and no input can separate the two. computeStats is
+# wrong for a different reason, which A2 isolates: it seeds the minimum from
+# numeric_limits<double>::max(), so the first element takes the maximum branch
+# and the minimum is never initialised from the data at all.
+#
+# B is the mutation that matters for the parity claim, because reassociating
+# the sums is exactly what vectorising or parallelising this loop would do. It
+# is caught only by the 262144-element case -- every short case agrees to the
+# bit -- so that case is load-bearing and should not be dropped for speed.

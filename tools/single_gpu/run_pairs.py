@@ -79,7 +79,8 @@ for pair in range(1,a.pairs+1):
   if len(parsed)!=24 or any(len(x)!=2 or x[1]!='nvcomp' for x in parsed) or {x[0] for x in parsed}!=expected:raise RuntimeError('Incomplete/duplicate/foreign nvCOMP witnesses')
   warnings=[str(q) for q in [log,*out.rglob('*.log')] if 'WARNING:' in q.read_text()]
   native='\n'.join(q.read_text() for q in [log,*out.rglob('*.log')])
-  if native.count('[CUDA Global Alignment] completed')!=24 or native.count('[CUDA Local Alignment] completed')!=600:raise RuntimeError('Incomplete native alignment witnesses')
+  if native.count('[CUDA Global Alignment] completed')!=24 or native.count('[CUDA Patch Alignment] completed')!=600:raise RuntimeError('Incomplete native alignment witnesses')
+  if native.count('[CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]')!=24:raise RuntimeError('Incomplete native DW reconstruction witnesses')
   if warnings:raise RuntimeError('Unexpected fallback/warning '+str(warnings))
   record={'pair':pair,'arm':arm,'whole_process_wall_seconds':wall,'peak_sampled_payload_rss_bytes':peak,'resource':resource.read_text(),'directory':str(d),'actual_cpu_mask':actual,'payload_pid':ident['pid']}
   records.append(record);(root/'runs.json').write_text(json.dumps(records,indent=2))

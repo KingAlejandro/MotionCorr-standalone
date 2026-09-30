@@ -103,11 +103,23 @@ bool copyFileContents(const FileName &from, const FileName &to)
 	std::ifstream in(from.c_str(), std::ios::binary);
 	std::ofstream out(to.c_str(), std::ios::binary | std::ios::trunc);
 	if (!in || !out) return false;
+
 	out << in.rdbuf();
-	// Both are checked: a full disk shows up on the ofstream, a read error on
-	// the ifstream, and either would otherwise leave a truncated PDF behind.
+	// Inserting a streambuf does not update the source stream's state, so the
+	// destination is what carries a failure: failbit if nothing was inserted,
+	// badbit if the write broke part-way. The flush is where a full disk or an
+	// exhausted quota surfaces.
 	out.flush();
-	return in.good() || (in.eof() && out.good());
+	if (!out.good()) return false;
+
+	// And then the byte count, because a PDF that is merely shorter than its
+	// source is still a readable PDF -- it would be accepted downstream rather
+	// than reported. The caller has already established this file starts with
+	// %PDF, so an empty source is not a case here.
+	const std::streamoff written = out.tellp();
+	in.clear();
+	in.seekg(0, std::ios::end);
+	return written == in.tellg();
 }
 }
 

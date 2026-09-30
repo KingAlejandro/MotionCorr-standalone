@@ -37,3 +37,20 @@ F   average divided by size-1                                DETECTED  7 cases (
 # the sums is exactly what vectorising or parallelising this loop would do. It
 # is caught only by the 262144-element case -- every short case agrees to the
 # bit -- so that case is load-bearing and should not be dropped for speed.
+
+# Mutation record for the one-input concatenatePDFfiles shortcut
+#
+# Run the same way, against tests/test_pdf_concat.cpp.
+
+unmutated                                                   3 of 3 properties hold
+
+P1  copy truncated to the first 100 bytes                   DETECTED  not byte-identical,
+                                                                      and reported as failure
+P2  %PDF signature test dropped                             DETECTED  non-empty non-PDF copied
+                                                                      and reported as success
+
+# P2 was NOT detected by the first version of the test, which only offered the
+# empty placeholder as a non-PDF. An empty source makes the copy insert nothing,
+# which sets failbit on the destination, so the shortcut already fails closed on
+# it with or without the signature test -- the case could not see that test at
+# all. The non-empty non-PDF case was added for exactly that reason and does.

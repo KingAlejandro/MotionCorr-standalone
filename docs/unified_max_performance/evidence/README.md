@@ -31,3 +31,32 @@ sha256 `fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041`.
   wrapper, not the child. Use `max RSS from time -v`.
 - Everything here is same-backend byte equality and wall time on one dataset.
   No scientific-equivalence claim, no multi-GPU result.
+
+## Second venue — SCARF `gnx002`, job 3515730
+
+`scarf-3515730.log` is the full job output. Venue: A100-SXM4-40GB
+`GPU-d494a7db…` (4GPUs is A100 80GB PCIe), CUDA 12.8.61 (same version),
+Rocky 9, Python 3.9.25, numpy 1.22.4, allocation `Cpus_allowed_list: 0-3,16-19`.
+Configured without `-DPython3_EXECUTABLE`, which is the configuration that
+exposed the `NvcompGuards` registration bug.
+
+What it establishes:
+
+- the CUDA-without-nvCOMP link fix holds on a second toolchain (0 undefined
+  references);
+- `CudaNvcompReconstructionFailures` is not collected where nvCOMP is absent;
+- `taskset -c 96-103` fails outright on a SCARF allocation, which is why the
+  hardcoded mask had to become the optional `--cpus`;
+- both reconstruction-cleanup controls pass with the same injection, cleanup
+  attribution, refusal and zero-product evidence as on 4GPUs.
+
+`CiFailClosedControls` fails there, 3 of 8 subtests, from a canonical fixture
+hash mismatch. **Main fails identically on the same node**, and the generator
+files are untouched by this branch, so it is pre-existing and
+environment-dependent. The numpy version is not the cause: the generator's
+`np.random.default_rng(59).normal(0, 2, 9)` draw is byte-identical under
+1.22.4 and 2.5.3. The cause is not isolated.
+
+The 24-movie run there (25.74 s, 0.90 GiB, compact arm) is a functional sanity
+check on a different GPU model, not a timing result: one observation, and the
+`gpu-devel` node was not exclusive.

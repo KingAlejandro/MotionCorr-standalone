@@ -26,6 +26,7 @@
 #include <stdexcept>
 
 #include "src/motioncorr_runner.h"
+#include "src/tiff_movie_reader.h" // issue #85 lane B experiment
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
@@ -96,6 +97,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
+	persistent_tiff_readers = textToInteger(parser.getOption("--persistent_tiff_readers", "EXPERIMENTAL (issue #85): decode TIFF movies through this many persistent reader handles instead of one open per frame. 0 = off.", "0"));
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -167,6 +169,10 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
 	if (max_io_threads == 0 || max_io_threads < -1)
 		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
+	if (persistent_tiff_readers < 0)
+		REPORT_ERROR("--persistent_tiff_readers must be zero (off) or positive.");
+	if (persistent_tiff_readers > 0 && !do_own)
+		REPORT_ERROR("--persistent_tiff_readers only affects the own implementation; it needs --use_own.");
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -1443,6 +1449,23 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);
+	// Issue #85 lane B experiment: one pool of persistent TIFF handles per
+	// movie instead of one open/read/close per frame. Same decode routine and
+	// same error text; opt-in, and only for plain TIFF input. The else branch
+	// below is the unchanged original, left at its original indentation so the
+	// experiment is one contiguous block to delete.
+	const bool use_persistent_tiff = (persistent_tiff_readers > 0) && !isEER && !isCompressedMRC &&
+	                                 tiffMovieReaderApplies(fn_mic);
+	if (use_persistent_tiff) {
+		int n_readers = persistent_tiff_readers;
+		if (n_readers > n_frames) n_readers = n_frames;
+		logfile << "Persistent TIFF readers: " << n_readers << " (compute threads: " << n_threads
+		        << ", one-open-per-frame IO threads would be " << n_io_threads << ")." << std::endl;
+		// readFrames captures per frame and rethrows the lowest failing frame,
+		// so the behaviour on a damaged movie matches the loop below.
+		TiffMovieReader reader(fn_mic, n_readers);
+		reader.readFrames(frames, Iframes);
+	} else {
 	// Every reader here can REPORT_ERROR on a damaged movie, and an exception
 	// that leaves an OpenMP structured block is undefined behaviour: the runtime
 	// calls std::terminate, so one truncated movie used to abort the whole run
@@ -1467,6 +1490,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// so the error a user sees does not depend on the OpenMP schedule.
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+	}
 	}
 	RCTOC(TIMING_READ_MOVIE);
 

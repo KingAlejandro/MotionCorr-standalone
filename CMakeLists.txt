@@ -38,7 +38,8 @@ file(GLOB_RECURSE MOTIONCORR_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 list(REMOVE_ITEM MOTIONCORR_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/apps/run_motioncorr.cpp")
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/apps/run_motioncorr.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/apps/tiff_reader_bench.cpp")
 
 add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
@@ -87,10 +88,42 @@ add_executable(motioncorr src/apps/run_motioncorr.cpp)
 target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
+# Issue #85 lane B measurement tool. Not installed; measurement only, no
+# production-path behaviour change. Remove with the rest of the experiment.
+add_executable(tiff_reader_bench src/apps/tiff_reader_bench.cpp)
+target_link_libraries(tiff_reader_bench PRIVATE motioncorr_core)
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)
+    # Issue #85 lane B: the persistent TIFF reader pool must decode exactly what
+    # the per-frame Image::read path decodes, on every layout and reader count.
+    add_executable(tiff_persistent_reader tests/test_tiff_persistent_reader.cpp)
+    target_link_libraries(tiff_persistent_reader PRIVATE motioncorr_core)
+    add_test(NAME TiffPersistentReader COMMAND tiff_persistent_reader)
+    set_tests_properties(TiffPersistentReader PROPERTIES TIMEOUT 600)
+    # Both project hosts ship LibTIFF >= 4.5, so the pre-4.5 thread_local
+    # error-context path is never compiled by a normal build and a green run
+    # says nothing about it. -DTIFF_COMPAT_TEST=ON builds a second copy of the
+    # library with that path forced on and runs the same parity matrix through
+    # it. Off by default: it doubles the library compile.
+    option(TIFF_COMPAT_TEST "Also build the LibTIFF <4.5 error-context path and test it" OFF)
+    if(TIFF_COMPAT_TEST)
+        add_library(motioncorr_core_tiffcompat STATIC ${MOTIONCORR_SOURCES}
+            "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
+        target_include_directories(motioncorr_core_tiffcompat PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+        target_compile_definitions(motioncorr_core_tiffcompat
+            PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG
+            PUBLIC MOTIONCORR_DISABLE_TIFF_EXTR)
+        target_link_libraries(motioncorr_core_tiffcompat PUBLIC
+            PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
+            motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
+        add_executable(tiff_persistent_reader_compat tests/test_tiff_persistent_reader.cpp)
+        target_link_libraries(tiff_persistent_reader_compat PRIVATE motioncorr_core_tiffcompat)
+        add_test(NAME TiffPersistentReaderCompat COMMAND tiff_persistent_reader_compat)
+        set_tests_properties(TiffPersistentReaderCompat PROPERTIES TIMEOUT 600)
+    endif()
     add_executable(defect_parser tests/test_defect_parser.cpp)
     target_link_libraries(defect_parser PRIVATE motioncorr_core)
     # Pure C++ arithmetic regression (issue #97). Registered above the

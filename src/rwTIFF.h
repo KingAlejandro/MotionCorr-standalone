@@ -26,140 +26,29 @@
 #endif
 
 // I/O prototypes
-/** TIFF Reader
+/** Apply a resolved TIFF movie layout to this image.
+  *
+  * Sets the header metadata, checks the stack bounds, fixes the dimensions and
+  * reserves the pixel buffer, then returns the number of directories the caller
+  * should decode into it. Split out of readTIFF so a reader that resolves the
+  * layout once, for several handles, still gives every destination image the
+  * identical header state.
   * @ingroup TIFF
 */
-int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack=false, const FileName &name="", TiffErrorContext* err_ctx=nullptr)
+long int applyTiffLayout(const TiffMovieLayout &layout, long int img_select,
+                         bool readdata, bool isStack, const FileName &name)
 {
-//#define DEBUG_TIFF
-#ifdef DEBUG_TIFF
-	printf("DEBUG readTIFF: Reading TIFF file. img_select %d\n", img_select);
-#endif
+	const long int _xDim = layout.xDim;
+	const long int _yDim = layout.yDim;
+	long int _zDim = 1;
+	long int _nDim = layout.nDim;
 
-	long int _xDim,_yDim,_zDim;
-	long int _nDim;
+	MDMainHeader.setValue(EMDL_IMAGE_DATATYPE, (int)layout.datatype);
 
-	// These are libtiff's types.
-	uint32_t width, length; // apparent dimensions in the file
-	uint16_t sampleFormat, bitsPerSample, resolutionUnit;
-	float xResolution;
-	
-	if (!err_ctx)
-		err_ctx = g_tls_tiff_error_context;
-	TiffErrorScope scope(err_ctx);
-
-	if (err_ctx) err_ctx->clear();
-
-	if (TIFFGetField(ftiff, TIFFTAG_IMAGEWIDTH, &width) != 1 ||
-	    TIFFGetField(ftiff, TIFFTAG_IMAGELENGTH, &length) != 1)
+	if (layout.has_sampling_rate)
 	{
-		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
-		REPORT_ERROR(name + ": The input TIFF file does not have the width or height field" + detail + ".");
-	}
-
-	// true image dimensions
-	_xDim = width;
-	_yDim = length;
-	_zDim = 1;
-	_nDim = 1;
-	TIFFGetFieldDefaulted(ftiff, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
-	TIFFGetFieldDefaulted(ftiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
-
-	// Find the number of frames.
-	// TIFFNumberOfDirectories walks the IFD offset chain. If the file is truncated
-	// or has corrupted directory structures, LibTIFF reports an error and returns
-	// the count reached prior to the corruption. We intercept LibTIFF errors to
-	// distinguish legitimate EOF (error count == 0) from truncated/corrupted IFD chains.
-	if (err_ctx) err_ctx->clear();
-	_nDim = TIFFNumberOfDirectories(ftiff);
-	if (err_ctx && err_ctx->has_error)
-	{
-		REPORT_ERROR(name + ": Corrupted TIFF directory structure: " + err_ctx->last_error);
-	}
-	if (_nDim <= 0)
-	{
-		REPORT_ERROR(name + ": No valid TIFF directories found.");
-	}
-	// and go back to the start
-	if (err_ctx) err_ctx->clear();
-	if (TIFFSetDirectory(ftiff, 0) == 0 || (err_ctx && err_ctx->has_error))
-	{
-		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
-		REPORT_ERROR(name + ": Failed to set TIFF directory 0" + detail);
-	}
-
-#ifdef DEBUG_TIFF
-	printf("TIFF width %d, length %d, nDim %d, sample format %d, bits per sample %d\n", 
-	       width, length, _nDim, sampleFormat, bitsPerSample);
-#endif
-
-	// Detect 4-bit packed TIFFs. This is IMOD's own extension.
-	// It is not easy to detect this format. Here we check only the image size.
-	// See IMOD's iiTIFFCheck() in libiimod/iitif.c and sizeCanBe4BitK2SuperRes() in libiimod/mrcfiles.c.
-	bool packed_4bit = false;
-	if (bitsPerSample == 8 && ((width == 5760 && length == 8184)  || (width == 8184  && length == 5760) || // K3 SR: 11520 x 8184
-	                           (width == 4092 && length == 11520) || (width == 11520 && length == 4092) ||
-	                           (width == 3710 && length == 7676)  || (width == 7676  && length == 3710) || // K2 SR: 7676 x 7420
-	                           (width == 3838 && length == 7420)  || (width == 7420  && length == 3838)))
-	{
-		packed_4bit = true;
-        	_xDim *= 2;
-	}
-
-	DataType datatype;
-
-	if (packed_4bit)
-	{
-		datatype = UHalf;
-	}
-	else if (bitsPerSample == 8 && sampleFormat == SAMPLEFORMAT_UINT)
-	{
-		datatype = UChar;
-	}
-	else if (bitsPerSample == 8 && sampleFormat == SAMPLEFORMAT_INT)
-	{
-		datatype = SChar;
-	}
-	else if (bitsPerSample == 16 && sampleFormat == SAMPLEFORMAT_UINT)
-	{
-		datatype = UShort;
-	}
-	else if (bitsPerSample == 16 && sampleFormat == SAMPLEFORMAT_INT)
-	{
-		datatype = SShort;
-	}
-	else if (bitsPerSample == 32 && sampleFormat == SAMPLEFORMAT_IEEEFP)
-	{
-		datatype = Float;
-	}
-	else
-	{
-		std::cerr << "Unsupported TIFF format in " << name << ": sample format = " << sampleFormat << ", bits per sample = " << bitsPerSample << std::endl;
-		REPORT_ERROR("Unsupported TIFF format.\n");
-	}
-	
-	MDMainHeader.setValue(EMDL_IMAGE_DATATYPE, (int)datatype);
-
-	if (TIFFGetField(ftiff, TIFFTAG_RESOLUTIONUNIT, &resolutionUnit) == 1 &&
-	    TIFFGetField(ftiff, TIFFTAG_XRESOLUTION, &xResolution) == 1)
-	{
-		// We don't support anistropic pixel size
-		if (resolutionUnit == RESUNIT_INCH)
-		{
-			MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, RFLOAT(2.54E8 / xResolution)); // 1 inch = 2.54 cm
-			MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y, RFLOAT(2.54E8 / xResolution));
-		}
-		else if (resolutionUnit == RESUNIT_CENTIMETER)
-		{
-			MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, RFLOAT(1.00E8 / xResolution));
-			MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y, RFLOAT(1.00E8 / xResolution));
-		}
-#ifdef DEBUG_TIFF
-		std::cout << "resolutionUnit = " << resolutionUnit << " xResolution = " << xResolution << std::endl;
-		RFLOAT angpix;
-		MDMainHeader.getValue(EMDL_IMAGE_SAMPLINGRATE_X, angpix);
-		std::cout << "pixel size = " << angpix << std::endl;
-#endif
+		MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, layout.sampling_rate);
+		MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y, layout.sampling_rate);
 	}
 
 	// TODO: TIFF is always a stack, isn't it?
@@ -193,124 +82,180 @@ int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack
 	// unaffected. readMRC already allocates inside its own readdata guard.
 	if (readdata)
 		data.coreAllocateReuse();
-	
-	/*
-	if ( header->mx && header->a!=0)//ux
-		MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X,(RFLOAT)header->a/header->mx);
-	if ( header->my && header->b!=0)//yx
-		MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y,(RFLOAT)header->b/header->my);
-	if ( header->mz && header->c!=0)//zx
-		MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Z,(RFLOAT)header->c/header->mz);
-	*/
+
+	return _nDim;
+}
+
+/** Decode one TIFF directory into `frame_dest`, Y-flipped.
+  *
+  * `frame_dest` must have room for layout.xDim * layout.yDim samples. The
+  * handle is left on `img_select`. Strip validation and row placement live
+  * here only, so readTIFF and the persistent-handle reader used by issue #85
+  * lane B cannot drift apart.
+  * @ingroup TIFF
+*/
+void readTIFFDirectory(TIFF* ftiff, const TiffMovieLayout &layout, long int img_select,
+                       T* frame_dest, TiffStripScratch &scratch,
+                       const FileName &name, TiffErrorContext* err_ctx)
+{
+	if (err_ctx) err_ctx->clear();
+	if (TIFFSetDirectory(ftiff, img_select) == 0 || (err_ctx && err_ctx->has_error))
+	{
+		std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
+		REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select) + detail);
+	}
+
+	// Make sure image property is consistent for all frames
+	uint32_t cur_width, cur_length;
+	uint16_t cur_sampleFormat, cur_bitsPerSample;
+
+	if (TIFFGetField(ftiff, TIFFTAG_IMAGEWIDTH, &cur_width) != 1 ||
+	    TIFFGetField(ftiff, TIFFTAG_IMAGELENGTH, &cur_length) != 1)
+	{
+		REPORT_ERROR(name + ": The input TIFF file does not have the width or height field.");
+	}
+	TIFFGetFieldDefaulted(ftiff, TIFFTAG_BITSPERSAMPLE, &cur_bitsPerSample);
+	TIFFGetFieldDefaulted(ftiff, TIFFTAG_SAMPLEFORMAT, &cur_sampleFormat);
+	if ((cur_width != layout.width) || (cur_length != layout.length) ||
+	    (cur_bitsPerSample != layout.bitsPerSample) || (cur_sampleFormat != layout.sampleFormat))
+	{
+		REPORT_ERROR(name + ": All frames in a TIFF should have same width, height and pixel format.\n");
+	}
+
+	tsize_t stripSize = TIFFStripSize(ftiff);
+	tstrip_t numberOfStrips = TIFFNumberOfStrips(ftiff);
+	if (stripSize <= 0)
+		REPORT_ERROR(name + ": Invalid TIFF strip size.");
+	// The scratch owns the buffer and frees it when REPORT_ERROR throws past it.
+	if (!scratch.ensure(stripSize))
+		REPORT_ERROR(name + ": Failed to allocate TIFF strip buffer.");
+	tdata_t buf = scratch.ptr;
+#ifdef DEBUG_TIFF
+	std::cout << "TIFF stripSize=" << stripSize << " numberOfStrips=" << numberOfStrips << std::endl;
+#endif
+	const size_t row_bytes = layout.row_bytes;
+	size_t rows_read = 0;
+	for (tstrip_t strip = 0; strip < numberOfStrips; strip++)
+	{
+		if (err_ctx) err_ctx->clear();
+		tsize_t actually_read = TIFFReadEncodedStrip(ftiff, strip, buf, stripSize);
+		if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
+		    (size_t)actually_read % row_bytes != 0 || (err_ctx && err_ctx->has_error))
+		{
+			std::string detail = (err_ctx && err_ctx->has_error) ? (" (" + err_ctx->last_error + ")") : "";
+			REPORT_ERROR(name + ": Invalid decoded TIFF strip size" + detail + ".");
+		}
+#ifdef DEBUG_TIFF
+		std::cout << "Reading strip: " << strip << "actually read byte:" << actually_read << std::endl;
+#endif
+		// A strip always holds whole rows, so convert each one directly into
+		// its Y-flipped destination.
+		//
+		// In an MRC file, the origin is bottom-left, +X to the right, +Y to the top.
+		// (c.f. Fig. 2 of Heymann et al, JSB 2005 https://doi.org/10.1016/j.jsb.2005.06.001
+		// IMOD's interpretation http://bio3d.colorado.edu/imod/doc/mrc_format.txt)
+		// 3dmod (from IMOD) and e2display.py (from EMAN2) display like this.
+		//
+		// relion_display has the origin at top-left, +X to the right, +Y to the bottom.
+		// GIMP and ImageJ display in this way as well.
+		// A TIFF file, with TIFFTAG_ORIENTATION = 1 (default), shares this convention.
+		//
+		// So, the origin and the direction of the Y axis are the opposite between MRC and TIFF.
+		// IMOD, EMAN2, SerialEM and MotionCor2 flip the Y axis whenever they read or write a TIFF file.
+		// We follow this; applying the flip per row here produces the same image
+		// as the separate reversing pass it replaces.
+		const size_t first_row = rows_read;
+		const size_t n_rows = (size_t)actually_read / row_bytes;
+		if (first_row > (size_t)layout.yDim || n_rows > (size_t)layout.yDim - first_row)
+		{
+			REPORT_ERROR(name + ": Decoded TIFF strips exceed the frame height.");
+		}
+		for (size_t r = 0; r < n_rows; r++)
+		{
+			const size_t dest_row = layout.yDim - 1 - (first_row + r);
+			castPage2T((char*)buf + r * row_bytes,
+			           frame_dest + dest_row * layout.xDim,
+			           layout.datatype, layout.xDim);
+		}
+		rows_read += n_rows;
+	}
+
+	if (rows_read != (size_t)layout.yDim)
+		REPORT_ERROR(name + ": Decoded TIFF strips do not fill the frame.");
+}
+
+/** Decode one frame through a caller-owned, already-open TIFF handle.
+  *
+  * Equivalent to read(name, true, img_select, false, true) on a TIFF, with the
+  * open/close lifecycle and the layout resolution lifted out to the caller so
+  * they can be done once per movie instead of once per frame. The handle, the
+  * error context and the scratch must belong to the calling thread alone.
+  *
+  * Used by TiffMovieReader (issue #85 lane B). Nothing else calls it.
+  * @ingroup TIFF
+*/
+void readTIFFFrameFromHandle(TIFF* ftiff, const TiffMovieLayout &layout, long int img_select,
+                             TiffStripScratch &scratch, const FileName &name,
+                             TiffErrorContext* err_ctx)
+{
+	// The prologue Image::_read runs before dispatching to readTIFF. fimg and
+	// fhed are what _read copies out of a TIFF-only fImageHandler: both null.
+	dataflag = 1;
+	mmapOn = false;
+	fimg = NULL;
+	fhed = NULL;
+	filename = name;
+	MDMainHeader.clear();
+	MDMainHeader.addObject();
+
+	if (!err_ctx)
+		err_ctx = g_tls_tiff_error_context;
+	TiffErrorScope scope(err_ctx);
+
+	applyTiffLayout(layout, img_select, true, true, name);
+	readTIFFDirectory(ftiff, layout, img_select, MULTIDIM_ARRAY(data), scratch, name, err_ctx);
+}
+
+/** TIFF Reader
+  * @ingroup TIFF
+*/
+int readTIFF(TIFF* ftiff, long int img_select, bool readdata=false, bool isStack=false, const FileName &name="", TiffErrorContext* err_ctx=nullptr)
+{
+// DEBUG_TIFF is defined (commented out) at the top of src/rwTIFF_layout.h,
+// which is included before this file, so that one switch reaches every
+// guarded block in both.
+#ifdef DEBUG_TIFF
+	printf("DEBUG readTIFF: Reading TIFF file. img_select %d\n", img_select);
+#endif
+
+	if (!err_ctx)
+		err_ctx = g_tls_tiff_error_context;
+	TiffErrorScope scope(err_ctx);
+
+	TiffMovieLayout layout;
+	readTiffLayout(ftiff, layout, name, err_ctx);
+
+#ifdef DEBUG_TIFF
+	printf("TIFF width %d, length %d, nDim %d, sample format %d, bits per sample %d\n",
+	       layout.width, layout.length, (int)layout.nDim, layout.sampleFormat, layout.bitsPerSample);
+#endif
+
+	const long int n_to_read = applyTiffLayout(layout, img_select, readdata, isStack, name);
 
 	if (readdata)
 	{
 		if (img_select == -1) img_select = 0; // img_select starts from 0
 
-		for (int i = 0; i < _nDim; i++)
+		// One buffer for the whole call, grown on demand, instead of one
+		// allocation per directory.
+		TiffStripScratch scratch;
+		for (long int i = 0; i < n_to_read; i++)
 		{
-			if (err_ctx) err_ctx->clear();
-			if (TIFFSetDirectory(ftiff, img_select) == 0 || (err_ctx && err_ctx->has_error))
-			{
-				std::string detail = (err_ctx && err_ctx->has_error) ? (": " + err_ctx->last_error) : "";
-				REPORT_ERROR(name + ": Failed to select TIFF frame " + integerToString(img_select) + detail);
-			}
-
-			// Make sure image property is consistent for all frames
-			uint32_t cur_width, cur_length;
-			uint16_t cur_sampleFormat, cur_bitsPerSample;
-
-			if (TIFFGetField(ftiff, TIFFTAG_IMAGEWIDTH, &cur_width) != 1 ||
-			    TIFFGetField(ftiff, TIFFTAG_IMAGELENGTH, &cur_length) != 1)
-			{
-				REPORT_ERROR(name + ": The input TIFF file does not have the width or height field.");
-			}
-			TIFFGetFieldDefaulted(ftiff, TIFFTAG_BITSPERSAMPLE, &cur_bitsPerSample);
-			TIFFGetFieldDefaulted(ftiff, TIFFTAG_SAMPLEFORMAT, &cur_sampleFormat);
-			if ((cur_width != width) || (cur_length != length) || (cur_bitsPerSample != bitsPerSample) ||
-			    (cur_sampleFormat != sampleFormat))
-			{
-				REPORT_ERROR(name + ": All frames in a TIFF should have same width, height and pixel format.\n");
-			}
-
-			tsize_t stripSize = TIFFStripSize(ftiff);
-			tstrip_t numberOfStrips = TIFFNumberOfStrips(ftiff);
-			if (stripSize <= 0)
-				REPORT_ERROR(name + ": Invalid TIFF strip size.");
-			// Local ownership also frees the strip when REPORT_ERROR throws.
-			struct StripBuffer {
-				tdata_t ptr;
-				~StripBuffer() { _TIFFfree(ptr); }
-			} strip_buffer{_TIFFmalloc(stripSize)};
-			tdata_t buf = strip_buffer.ptr;
-			if (!buf)
-				REPORT_ERROR(name + ": Failed to allocate TIFF strip buffer.");
-#ifdef DEBUG_TIFF
-			size_t readsize_n = stripSize * 8 / bitsPerSample;
-			std::cout << "TIFF stripSize=" << stripSize << " numberOfStrips=" << numberOfStrips << " readsize_n=" << readsize_n << std::endl;
-#endif
-			// Bytes backing one decoded row. For packed 4-bit data the file
-			// reports 8 bits per sample but _xDim was doubled to the logical
-			// pixel count, so a logical pixel occupies 4 bits, not 8.
-			const size_t row_bytes = packed_4bit ? (size_t)_xDim / 2
-			                                     : (size_t)_xDim * bitsPerSample / 8;
-			const size_t frame_base = (size_t)i * _xDim * _yDim;
-			size_t rows_read = 0;
-			for (tstrip_t strip = 0; strip < numberOfStrips; strip++)
-			{
-				if (err_ctx) err_ctx->clear();
-				tsize_t actually_read = TIFFReadEncodedStrip(ftiff, strip, buf, stripSize);
-				if (actually_read <= 0 || actually_read > stripSize || row_bytes == 0 ||
-				    (size_t)actually_read % row_bytes != 0 || (err_ctx && err_ctx->has_error))
-				{
-					std::string detail = (err_ctx && err_ctx->has_error) ? (" (" + err_ctx->last_error + ")") : "";
-					REPORT_ERROR(name + ": Invalid decoded TIFF strip size" + detail + ".");
-				}
-				tsize_t actually_read_n = actually_read * 8 / bitsPerSample;
-#ifdef DEBUG_TIFF
-				std::cout << "Reading strip: " << strip << "actually read byte:" << actually_read << std::endl;
-#endif
-				if (packed_4bit)
-					actually_read_n *= 2; // convert physical size to logical size
-				// A strip always holds whole rows, so convert each one directly
-				// into its Y-flipped destination (see the axis note below).
-				const size_t first_row = rows_read;
-				const size_t n_rows = (size_t)actually_read / row_bytes;
-				if (first_row > (size_t)_yDim || n_rows > (size_t)_yDim - first_row)
-				{
-					REPORT_ERROR(name + ": Decoded TIFF strips exceed the frame height.");
-				}
-				for (size_t r = 0; r < n_rows; r++)
-				{
-					const size_t dest_row = _yDim - 1 - (first_row + r);
-					castPage2T((char*)buf + r * row_bytes,
-					           MULTIDIM_ARRAY(data) + frame_base + dest_row * _xDim,
-					           datatype, _xDim);
-				}
-				rows_read += n_rows;
-			}
-
-			if (rows_read != (size_t)_yDim)
-				REPORT_ERROR(name + ": Decoded TIFF strips do not fill the frame.");
+			readTIFFDirectory(ftiff, layout, img_select,
+			                  MULTIDIM_ARRAY(data) + (size_t)i * layout.xDim * layout.yDim,
+			                  scratch, name, err_ctx);
 			img_select++;
 		}
-
-		/* Flip the Y axis.
- 
-		   In an MRC file, the origin is bottom-left, +X to the right, +Y to the top.
-		   (c.f. Fig. 2 of Heymann et al, JSB 2005 https://doi.org/10.1016/j.jsb.2005.06.001
-		   IMOD's interpretation http://bio3d.colorado.edu/imod/doc/mrc_format.txt)
-		   3dmod (from IMOD) and e2display.py (from EMAN2) display like this.
-
-		   relion_display has the origin at top-left, +X to the right, +Y to the bottom.
-		   GIMP and ImageJ display in this way as well.
-		   A TIFF file, with TIFFTAG_ORIENTATION = 1 (default), shares this convention.
-
-		   So, the origin and the direction of the Y axis are the opposite between MRC and TIFF.
-		   IMOD, EMAN2, SerialEM and MotionCor2 flip the Y axis whenever they read or write a TIFF file.
-		   We follow this; the flip is applied per row as each strip is decoded above,
-		   which produces the same image as the separate reversing pass it replaces.
-		*/
 	}
 
 	return 0;

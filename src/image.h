@@ -71,7 +71,12 @@
 #endif
 #endif
 
-#if defined(TIFFLIB_AT_LEAST)
+// MOTIONCORR_DISABLE_TIFF_EXTR forces the pre-4.5 thread_local error-context
+// path on a modern LibTIFF. Nothing in a normal build defines it; it exists so
+// that path can be compiled and executed on hosts where every LibTIFF is >=
+// 4.5, instead of being asserted from a build that never reaches it. See the
+// TIFF_COMPAT_TEST option in CMakeLists.txt.
+#if defined(TIFFLIB_AT_LEAST) && !defined(MOTIONCORR_DISABLE_TIFF_EXTR)
 #if TIFFLIB_AT_LEAST(4, 5, 0)
 #define MOTIONCORR_USE_TIFF_EXTR 1
 #endif
@@ -176,6 +181,12 @@ typedef enum
 	Float16 = 12,     // Half precision floating point (2-byte)
 	LastEntry = 15    // This must be the last entry
 } DataType;
+
+// TIFF movie layout and strip scratch, shared by readTIFF and the persistent
+// reader in tiff_movie_reader.h. Placed here because it needs DataType and
+// TiffErrorContext, which are defined above, and must be visible before the
+// Image class body includes src/rwTIFF.h.
+#include "src/rwTIFF_layout.h"
 
 /** Write mode
  * This class defines the writing behavior.

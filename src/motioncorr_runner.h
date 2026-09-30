@@ -57,6 +57,13 @@ public:
 	int n_threads;
 	int max_io_threads;
 
+	// Issue #85 lane B experiment: size of the persistent TIFF reader pool.
+	// 0 keeps the one-open-per-frame path. Opt-in only. MotioncorrRunner has
+	// no constructor, so this is initialised here: a default-constructed
+	// runner in a test would otherwise reach the branch on an indeterminate
+	// value.
+	int persistent_tiff_readers = 0;
+
 	// Output rootname
 	FileName fn_in, fn_out, fn_movie;
 

@@ -1,0 +1,37 @@
+{
+  "label": "single_movie_00023_warm_final",
+  "movies": 1,
+  "first_movie": "/home/ubuntu/mc-issue26/data/20170629_00023_frameImage.tiff",
+  "nx": 3710, "ny": 3838, "frames_in_file": 24, "frames_read": 24,
+  "reps": 5,
+  "provenance": {"revision": "a75f873", "host": "small-refmac-machine", "optimized_build": true, "libtiff_runtime": "LIBTIFF, Version 4.5.1", "tiff_per_handle_error_context": true, "omp_max_threads": 64, "affinity_cpus": 64, "OMP_PROC_BIND": "unset", "OMP_PLACES": "unset", "first_movie_bytes": 131245904},
+  "digest_reference": "559d2492f25a5b66",
+  "image_read": [
+    {"threads": 1, "whole_read_median_s": 1.39226, "whole_read_min_s": 1.32239},
+    {"threads": 2, "whole_read_median_s": 0.722435, "whole_read_min_s": 0.718543},
+    {"threads": 4, "whole_read_median_s": 0.470011, "whole_read_min_s": 0.380547},
+    {"threads": 8, "whole_read_median_s": 0.252124, "whole_read_min_s": 0.247064},
+    {"threads": 16, "whole_read_median_s": 0.182335, "whole_read_min_s": 0.178346},
+    {"threads": 24, "whole_read_median_s": 0.104393, "whole_read_min_s": 0.102509}
+  ],
+  "persistent": [
+    {"readers": 1, "whole_read_median_s": 1.37685, "whole_read_min_s": 1.36749, "open_and_layout_median_s": 0.000469126, "decode_loop_median_s": 1.37637},
+    {"readers": 2, "whole_read_median_s": 0.71435, "whole_read_min_s": 0.710701, "open_and_layout_median_s": 0.000585251, "decode_loop_median_s": 0.71379},
+    {"readers": 4, "whole_read_median_s": 0.366078, "whole_read_min_s": 0.361985, "open_and_layout_median_s": 0.000720046, "decode_loop_median_s": 0.365341},
+    {"readers": 8, "whole_read_median_s": 0.248006, "whole_read_min_s": 0.245538, "open_and_layout_median_s": 0.00101366, "decode_loop_median_s": 0.247116},
+    {"readers": 16, "whole_read_median_s": 0.170123, "whole_read_min_s": 0.153363, "open_and_layout_median_s": 0.00119441, "decode_loop_median_s": 0.168958},
+    {"readers": 24, "whole_read_median_s": 0.0936712, "whole_read_min_s": 0.0928592, "open_and_layout_median_s": 0.00178728, "decode_loop_median_s": 0.0918797}
+  ],
+  "persistent_no_parse_once": [
+    {"readers": 1, "whole_read_median_s": 1.38086, "whole_read_min_s": 1.37093},
+    {"readers": 2, "whole_read_median_s": 0.713659, "whole_read_min_s": 0.708948},
+    {"readers": 4, "whole_read_median_s": 0.365746, "whole_read_min_s": 0.36308},
+    {"readers": 8, "whole_read_median_s": 0.244478, "whole_read_min_s": 0.240953},
+    {"readers": 16, "whole_read_median_s": 0.171913, "whole_read_min_s": 0.156349},
+    {"readers": 24, "whole_read_median_s": 0.0937612, "whole_read_min_s": 0.0930234}
+  ],
+  "stages_single_threaded_s": {"raw_pread": 0.0885237, "open_close": 0.0188461, "layout": 0.00429745, "set_directory": 0.00072724, "strip_decode": 0.63939, "convert_and_place": 0.0950622, "alloc_and_first_touch": 0.63167, "strips": 92112, "compressed_bytes": 131245904},
+  "peak_rss_kib": 1492576,
+  "injected_decode_fault": false,
+  "all_arms_decoded_identical_pixels": true
+}

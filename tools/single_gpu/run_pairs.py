@@ -3,6 +3,7 @@
 import argparse,hashlib,json,os,re,subprocess,time
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--candidate',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--input-dir',type=Path,required=True);p.add_argument('--cpus',required=True);p.add_argument('--gpu-uuid',required=True);p.add_argument('--phase',required=True);p.add_argument('--pairs',type=int,required=True);a=p.parse_args()
+if a.pairs<1: p.error("--pairs must be positive")
 
 def sha(path):
  h=hashlib.sha256()
@@ -24,6 +25,11 @@ root=a.root/a.phase;root.mkdir(parents=True,exist_ok=False)
 opts=['--i','movies.star','--use_own','--dose_weighting','--dose_per_frame','1.277','--patch_x','5','--patch_y','5','--bfactor','150','--gainref','Movies/gain.mrc','--seed','1','--gpu','0','--j','6','--max_io_threads','6','--ingest','nvcomp']
 meta={'baseline_binary':str(a.baseline),'candidate_binary':str(a.candidate),'baseline_sha256':sha(a.baseline),'candidate_sha256':sha(a.candidate),'cpu_mask_requested':a.cpus,'env':{k:v for k,v in os.environ.items() if k.startswith(('OMP_','CUDA_','MC_','SLURM_'))},'expected_gpu_uuid':a.gpu_uuid,'gpu':capture(['nvidia-smi','--query-gpu=index,uuid,name','--format=csv']),'cpu_topology':capture(['lscpu','-e=CPU,CORE,SOCKET,NODE']),'input_star_sha256':sha(a.input_dir/'movies.star'),'options':opts,'phase':a.phase,'source_stamp':(a.source/'SOURCE_PIN.json').read_text()}
 (root/'provenance.json').write_text(json.dumps(meta,indent=2))
+manifest=json.loads((a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text())
+expected=set(manifest['movies'])
+input_paths=[a.input_dir/'movies.star',a.input_dir/'Movies/gain.mrc',*[a.input_dir/q for q in sorted(expected)]]
+input_hashes={str(q):sha(q) for q in input_paths}
+(root/'inputs.json').write_text(json.dumps(input_hashes,indent=2))
 records=[]
 for pair in range(1,a.pairs+1):
  for arm in (['baseline','candidate'] if pair%2 else ['candidate','baseline']):
@@ -45,6 +51,8 @@ for pair in range(1,a.pairs+1):
       info=payload_info(int(child),binary,ident is None)
       if info and ident is None:ident=info
       if info:
+       nowmask=re.search(r'^Cpus_allowed_list:\s+(.*)$',info['status'],re.M)[1]
+       if ident and nowmask!=re.search(r'^Cpus_allowed_list:\s+(.*)$',ident['status'],re.M)[1]:raise RuntimeError('CPU affinity changed during run')
        m=re.search(r'^VmRSS:\s+(\d+) kB',info['status'],re.M)
        if m:peak=max(peak,int(m[1])*1024)
      time.sleep(.02)
@@ -67,7 +75,8 @@ for pair in range(1,a.pairs+1):
   if any(x[0].strip()!=str(ident['pid']) or x[1].strip()!=a.gpu_uuid for x in rows):raise RuntimeError('Competing or unexpected GPU process during controlled run')
   if rc:raise RuntimeError(f'{arm} returned {rc}')
   witnesses=(d/'ingest.witness').read_text().splitlines()
-  if sum('nvcomp' in x for x in witnesses)!=24:raise RuntimeError('Incomplete nvCOMP witness')
+  parsed=[x.split() for x in witnesses]
+  if len(parsed)!=24 or any(len(x)!=2 or x[1]!='nvcomp' for x in parsed) or {x[0] for x in parsed}!=expected:raise RuntimeError('Incomplete/duplicate/foreign nvCOMP witnesses')
   warnings=[str(q) for q in [log,*out.rglob('*.log')] if 'WARNING:' in q.read_text()]
   native='\n'.join(q.read_text() for q in [log,*out.rglob('*.log')])
   if native.count('[CUDA Global Alignment] completed')!=24 or native.count('[CUDA Local Alignment] completed')!=600:raise RuntimeError('Incomplete native alignment witnesses')
@@ -81,4 +90,5 @@ for pair in range(1,a.pairs+1):
  (root/f'exact-{pair}.log').write_text(result.stdout)
  if result.returncode:raise RuntimeError('Exact complete non-PDF tree comparison failed: '+result.stdout)
 if sha(a.baseline)!=meta['baseline_sha256'] or sha(a.candidate)!=meta['candidate_sha256']:raise RuntimeError('Binary changed during campaign')
+if {str(q):sha(q) for q in input_paths}!=input_hashes:raise RuntimeError('Input content changed during campaign')
 print('PAIRS_COMPLETE',flush=True)

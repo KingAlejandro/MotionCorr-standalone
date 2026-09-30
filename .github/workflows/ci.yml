@@ -97,6 +97,17 @@ jobs:
           python3 tools/test_known_motion_runner.py -v
           python3 tools/test_ci_fail_closed.py -v
 
+      - name: Canonical fixture digests are NumPy-version independent
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/numpy-old"
+          "$RUNNER_TEMP/numpy-old/bin/pip" install -q 'numpy==2.2.6'
+          portable="$RUNNER_TEMP/known_motion_portable"
+          mkdir -p "$portable"
+          cp test-data/known_motion/*.json test-data/known_motion/*.star "$portable/"
+          "$RUNNER_TEMP/numpy-old/bin/python" test-data/generate_known_motion_fixture.py \
+            --outdir "$portable" --canonical
+
       - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"
         run: |
           mkdir -p ci_smoke_out

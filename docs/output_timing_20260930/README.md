@@ -20,10 +20,11 @@ local disk; `/dev/shm` was used only for the filesystem probe below.
 | `t1` | + `cbf8dc7` | one MRC statistics pass; Ghostscript passes reduced |
 | `t2` | + `92e7662`, `b796441` | plus the background output writer |
 
-`instr` is the measurement baseline rather than `main`: the local `main` ref
-(`1d7e13f`) is 113 non-merge commits behind this branch's parent, and comparing against
-it credits this work with unrelated merged changes — a first paired run did
-exactly that, reporting -5.4 s where the gain cache alone accounted for 2.3 s.
+`6393547` is this branch's parent and is also `origin/main`, so the baseline is
+current main. The *local* `main` ref was stale at `1d7e13f`, 113 non-merge
+commits behind, and a first paired run used it: it reported -5.4 s where the
+gain-reference cache alone accounted for 2.3 s. Resolve the baseline from the
+branch or from `origin/main`, not from a local branch ref.
 
 ## Files
 
@@ -125,10 +126,9 @@ lines that carry a duration. Both runs wrote to the same output path, one at a
 time, because the path is embedded in the STAR and EPS products. Results in
 `parity_cuda.txt`.
 
-The reference is the branch's parent `6393547`, not the local `main` ref
-(`1d7e13f`), which is 113 non-merge commits behind it. Comparing against that
-ref would mix this work with everything already merged — the first paired run
-did exactly that and attributed 5.4 s to these changes, of which 2.3 s was the
+The reference is `6393547`, this branch's parent and `origin/main`. It is not
+the local `main` ref, which was stale at `1d7e13f`; the first paired run used
+that and attributed 5.4 s to these changes, of which 2.3 s was the
 gain-reference cache.
 
 **Fail-closed behaviour.** The property the background writer could plausibly

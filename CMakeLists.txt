@@ -258,15 +258,15 @@ if(BUILD_TESTING)
         # get weaker failure semantics.
         add_test(NAME WriteFaultsSync
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
-                --binary $<TARGET_FILE:motioncorr> --runner-arg --sync_output)
+                --binary $<TARGET_FILE:motioncorr> --runner-arg=--sync_output)
         # Several MRC products for one movie, so the rule under test is not merely
         # "the image write failed" but "the first failed product cancels the rest
         # of that movie's group, the per-movie STAR among them". With one product
         # per movie the ordering requirement is unobservable.
         add_test(NAME WriteFaultsMultiProduct
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
-                --binary $<TARGET_FILE:motioncorr> --runner-arg --save_noDW
-                --runner-arg --even_odd_split)
+                --binary $<TARGET_FILE:motioncorr> --runner-arg=--save_noDW
+                --runner-arg=--even_odd_split)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME OutputTreeComparator

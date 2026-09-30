@@ -1843,6 +1843,48 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					resident_bad_replacements[(size_t)iframe * n_bad + idx];
 		host_frames_are_raw = false;
 	};
+#ifdef _CUDA_ENABLED
+	// #126 arm only. After a device ingest there is no host movie at all:
+	// do_host_read was false and host_frames_are_raw is false, so
+	// materialize_host_frames() returns at its first line and never reaches its
+	// own "no longer available" guard. A recoverable failure that discards the
+	// session would therefore leave every later consumer reading zero-size
+	// images -- the forward FFT copies from a null pointer, and the CPU FFT then
+	// throws REPORT_ERROR out of an OpenMP region, which is std::terminate and
+	// kills the whole run, not just this movie.
+	//
+	// So take an exact copy of the device state BEFORE release() frees it.
+	// d_Iframes survives releasePreprocessingBuffers(), which frees only d_gain
+	// and d_Isum, so this is also correct at the forward-FFT boundary.
+	//
+	// Returns false when the copy itself fails; the guard before the forward FFT
+	// turns that into a clean failure of this movie rather than a corrupt one.
+	auto preserve_device_movie = [&]() -> bool {
+		if (!movie_session || !nvcomp_ingested) return true;   // host movie intact
+		if (!Iframes.empty() && Iframes[0]().nzyxdim != 0) return true;  // already copied
+		if (!movie_session->downloadRealFrames(Iframes)) {
+			logfile << "WARNING: could not copy the resident movie back before releasing the "
+			        << "CUDA session; this movie has no representation left to fall back on."
+			        << std::endl;
+			return false;
+		}
+		// The device frames are gain-corrected, which is what host_frames_are_raw
+		// == false already tells every consumer, so no gain pass is owed. The
+		// sparse replacements are applied here because the device update is
+		// exactly what may have failed; re-writing the ones that did land is an
+		// idempotent overwrite of the same value.
+		const size_t n_bad = resident_bad_xs.size();
+		if (n_bad != 0 && resident_bad_replacements.size() == n_bad * (size_t)n_frames) {
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				for (size_t idx = 0; idx < n_bad; idx++)
+					DIRECT_A2D_ELEM(Iframes[iframe](), resident_bad_ys[idx], resident_bad_xs[idx]) =
+						resident_bad_replacements[(size_t)iframe * n_bad + idx];
+		}
+		logfile << "Recovered the movie from device memory before releasing the resident "
+		        << "CUDA session." << std::endl;
+		return true;
+	};
+#endif
 	// Apply gain and build the initial sum in one pixel pass. This avoids a
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
 	RCTIC(TIMING_GAIN_AND_SUM);
@@ -2238,9 +2280,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
 			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
+				preserve_device_movie();
 				discard_preprocessing_session("sparse defect preparation");
 				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
+				preserve_device_movie();
 				discard_preprocessing_session("sparse defect update");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
 			}
@@ -2288,6 +2332,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// sends the corrected host movie through the legacy CUDA or CPU FFT path.
 	if (!movie_session && host_frames_are_raw)
 		materialize_host_frames();
+	// The #126 arm has no host movie by design, so "there is nothing to
+	// materialize" is not the same as "the movie is available". Fail this one
+	// movie here: run() records it, --only_do_unfinished reprocesses it, and
+	// the remaining movies still run. Transforming zero-size frames instead
+	// aborts the whole job.
+	if (!movie_session && nvcomp_ingested &&
+	    (Iframes.empty() || Iframes[0]().nzyxdim == 0))
+		REPORT_ERROR("The resident CUDA session for " + fn_mic + " was discarded after a "
+		             "device ingest and the movie could not be copied back, so no valid "
+		             "representation remains. Failing this movie rather than transforming "
+		             "empty frames.");
 	// The early-binning path crops a full-size Fourier transform, so keep that
 	// path on the CPU until the CUDA implementation supports the same operation.
 	if (movie_session) {
@@ -2317,6 +2372,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {
+			preserve_device_movie();
 			discard_preprocessing_session("resident forward FFT");
 			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
 			materialize_host_frames();

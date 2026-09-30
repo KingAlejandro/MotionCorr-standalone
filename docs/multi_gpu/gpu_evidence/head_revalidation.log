@@ -1,0 +1,136 @@
++ cd /home/alex/mc-i53-gpu/run
++ date -Is
+2026-09-28T08:01:07+00:00
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
++ echo my_device_compute_apps=0
+my_device_compute_apps=0
++ echo '=== concurrent occupancy (recorded) ==='
+=== concurrent occupancy (recorded) ===
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
++ cat /proc/loadavg
+0.07 0.11 0.42 1/2741 1232002
++ grep Cpus_allowed_list /proc/self/status
+Cpus_allowed_list:	0-123
++ cat /home/alex/mc-i53-gpu/head2_provenance.txt
+tooling_head=bceb30e058238aa51c7edd0eb597fbabb8cfc6b0
+arms_produced_at=f433662 (C++ identical since; only Python changed)
+binary=d4e3afb878eb847ac5ff16c73bfee5295002c126443fa37b663f7174f8d9d258
+porcelain:
+ M docs/multi_gpu/README.md
+ M docs/multi_gpu/pr_a_evidence/cpu64_validate.log
+ M docs/multi_gpu/pr_a_evidence/negative_controls.json
+ M docs/multi_gpu/pr_a_evidence/source_provenance.txt
+[end]
+++ find /home/alex/mc-i53-gpu/src-head2 -name '._*'
+++ wc -l
++ echo applefiles=0
+applefiles=0
++ echo '=== E1. PARTITION AT NEW HEAD, compared to the arm'\''s own manifest ==='
+=== E1. PARTITION AT NEW HEAD, compared to the arm's own manifest ===
++ rm -rf shards_head2
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-head2/tools/multi_gpu/partition_star.py --star movies.star --n 2 --outdir shards_head2 --prefix shard
+TOTAL	24
+shards_head2/shard_2way_0.star	12
+shards_head2/shard_2way_1.star	12
+manifest	shards_head2/shard_manifest.json
++ echo PARTITION_RC=0
+PARTITION_RC=0
++ /home/alex/mc-env/bin/python -
+SAME_ASSIGNMENT=1
+SAME_CANONICAL_MOVIES=1
+SAME_ROOTS=1
+SAME_SHARD_SHA=1
++ echo '=== E2. MERGE AT NEW HEAD over the same worker outputs ==='
+=== E2. MERGE AT NEW HEAD over the same worker outputs ===
++ rm -rf m3
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-head2/tools/multi_gpu/merge_workers.py --manifest shards_head2/shard_manifest.json --workers sh2/w0 sh2/w1 --status sh2/status.json --out m3 --report merge3.json --aggregate-with /home/alex/mc-i53-gpu/build-final/motioncorr --input-star movies.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 96,
+  "verdict": "PASS"
+}
++ echo MERGE3_RC=0
+MERGE3_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json;d=json.load(open('\''merge3.json'\''))
+print('\''M3=%s'\''%{k:d[k] for k in ('\''n_movies_expected'\'','\''n_files_staged'\'','\''launcher_verdict'\'','\''verdict'\'')})
+print('\''M3_AGG=%s %s'\''%(d['\''aggregate_star'\''].get('\''row_order'\''),d['\''aggregate_star'\''].get('\''n_rows'\'')))
+print('\''M3_PROBLEMS=%s'\''%d['\''problems'\''])'
+M3={'n_movies_expected': 24, 'n_files_staged': 96, 'launcher_verdict': 'PASS', 'verdict': 'PASS'}
+M3_AGG=canonical 24
+M3_PROBLEMS=[]
++ echo '=== E3. EXACT 24 PAIRS AT NEW HEAD ==='
+=== E3. EXACT 24 PAIRS AT NEW HEAD ===
++ rm -rf exact_head2
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-head2/tools/multi_gpu/compare24.py --ref serialG --test m3 --tool /home/alex/mc-i53-gpu/src-head2/tools/compare_motioncorr.py --manifest shards_head2/shard_manifest.json --out exact_head2 --python /home/alex/mc-env/bin/python
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo COMPARE3_RC=0
+COMPARE3_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json,glob;d=json.load(open('\''exact_head2/exact_summary.json'\''))
+print('\''E3=%s'\''%{k:d[k] for k in ('\''n_expected'\'','\''n_compared'\'','\''passed'\'','\''failed'\'','\''verdict'\'')})
+print('\''E3_reports_unique=%d/%d'\''%(len({r.get('\''report'\'') for r in d['\''results'\'']}),len(d['\''results'\''])))
+print('\''E3_sidecars=%d'\''%len(glob.glob('\''exact_head2/*.origin.json'\'')))'
+E3={'n_expected': 24, 'n_compared': 24, 'passed': 24, 'failed': 0, 'verdict': 'PASS'}
+E3_reports_unique=24/24
+E3_sidecars=24
++ echo '=== E4. --reuse must reproduce the same verdict, and refuse a tampered origin ==='
+=== E4. --reuse must reproduce the same verdict, and refuse a tampered origin ===
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-head2/tools/multi_gpu/compare24.py --ref serialG --test m3 --tool /home/alex/mc-i53-gpu/src-head2/tools/compare_motioncorr.py --manifest shards_head2/shard_manifest.json --out exact_head2 --python /home/alex/mc-env/bin/python --reuse
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ echo REUSE_RC=0
+REUSE_RC=0
++ /home/alex/mc-env/bin/python -c '
+import json,glob
+s=sorted(glob.glob('\''exact_head2/*.origin.json'\''))[0]
+d=json.load(open(s)); d['\''root'\'']='\''tampered/root'\''; json.dump(d,open(s,'\''w'\''))
+print('\''tampered'\'',s)'
+tampered exact_head2/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.origin.json
++ taskset -c 96-111 /home/alex/mc-env/bin/python /home/alex/mc-i53-gpu/src-head2/tools/multi_gpu/compare24.py --ref serialG --test m3 --tool /home/alex/mc-i53-gpu/src-head2/tools/compare_motioncorr.py --manifest shards_head2/shard_manifest.json --out exact_head2 --python /home/alex/mc-env/bin/python --reuse
+  FAIL 20170629_00021_frameImage --reuse origin mismatch for exact_head2/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.json: ['root'] differ from the run that produced it pixel_identical= None
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 23,
+  "failed": 1,
+  "verdict": "FAIL"
+}
++ echo REUSE_TAMPERED_RC=1
+REUSE_TAMPERED_RC=1
++ echo '=== RELEASE ==='
+=== RELEASE ===
++ date -Is
+2026-09-28T08:02:23+00:00
+++ pgrep -f mc-i53-gpu/build
+++ wc -l
++ echo final_strays=0
+final_strays=0
+++ nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader
+++ grep -cE 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54|GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d'
++ echo final_my_compute_apps=0
+final_my_compute_apps=0
++ nvidia-smi --query-gpu=index,uuid,memory.used --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB
+HEAD2_OUTER_RC=0

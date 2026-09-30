@@ -1,0 +1,408 @@
++ echo '=== OCCUPANCY RECHECK UNDER MUTEX ==='
+=== OCCUPANCY RECHECK UNDER MUTEX ===
++ date -Is
+2026-09-28T06:23:50+00:00
++ nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
+pid, gpu_uuid, used_gpu_memory [MiB]
+++ nvidia-smi --query-compute-apps=pid --format=csv,noheader
+++ grep -c .
++ n=0
++ '[' 0 -eq 0 ']'
++ pgrep -alf motioncorr
++ grep -v pgrep
++ grep -v mc-i53-gpu
++ cat /proc/loadavg
+0.08 0.04 0.01 2/2735 1191592
++ numactl --hardware
++ head -4
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61
+node 0 size: 221630 MB
+node 0 free: 1632 MB
++ echo '=== BUILD head (CUDA=ON, Release, sm80, -j8 on 96-103) ==='
+=== BUILD head (CUDA=ON, Release, sm80, -j8 on 96-103) ===
++ for V in head base
++ taskset -c 96-103 cmake -S /home/alex/mc-i53-gpu/src-head -B /home/alex/mc-i53-gpu/build-head -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+-- The CUDA compiler identification is NVIDIA 12.8.61
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda-12.8/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /usr/local/cuda-12.8/targets/x86_64-linux/include (found version "12.8.61") 
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found Python3: /home/alex/mc-env/bin/python (found version "3.12.3") found components: Interpreter 
+-- Configuring done (6.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/alex/mc-i53-gpu/build-head
++ taskset -c 96-103 cmake --build /home/alex/mc-i53-gpu/build-head -j 8 --target motioncorr
+[  2%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
+[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
+[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+[ 13%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 15%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
+[ 16%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
+[ 20%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/t_complex.cpp.o
+[ 21%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/damage.cpp.o
+[ 22%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/optics_data.cpp.o
+[ 23%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/nelder_mead.cpp.o
+[ 24%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/optimization.cpp.o
+[ 25%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/Fourier_helper.cpp.o
+[ 26%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/complex_io.cpp.o
+[ 28%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/ctf/tilt_helper.cpp.o
+[ 29%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyev2.c.o
+[ 30%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevc3.c.o
+[ 31%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevh3.c.o
+[ 32%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevq3.c.o
+[ 33%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsytrd3.c.o
+[ 34%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/image_log.cpp.o
+[ 35%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
+[ 37%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 38%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/interpolation.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
+[ 40%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/new_ft.cpp.o
+[ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/obs_model.cpp.o
+[ 43%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/parallel_ft.cpp.o
+[ 44%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/resampling_helper.cpp.o
+[ 46%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/slice_helper.cpp.o
+[ 47%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/stack_helper.cpp.o
+[ 48%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/t_complex.cpp.o
+[ 49%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/vtk_helper.cpp.o
+[ 50%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/Fourier_2D_deformation.cpp.o
+[ 51%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/linear_2D_deformation.cpp.o
+[ 52%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/Fourier_2D_deformation_model.cpp.o
+[ 53%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/linear_2D_deformation_model.cpp.o
+[ 55%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/spline_2D_deformation_model.cpp.o
+[ 56%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/spline_2D_deformation.cpp.o
+[ 57%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory.cpp.o
+[ 58%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory_set.cpp.o
+[ 59%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/particle_set.cpp.o
+[ 60%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/projection_IO.cpp.o
+[ 61%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomo_ctf_helper.cpp.o
+[ 62%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram.cpp.o
+[ 64%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram_set.cpp.o
+[ 65%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/ansi_codes.cpp.o
+[ 66%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/image_file_helper.cpp.o
+[ 67%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/log.cpp.o
+[ 68%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/zio.cpp.o
+[ 69%] Building CXX object CMakeFiles/motioncorr_core.dir/src/mask.cpp.o
+[ 70%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix1d.cpp.o
+[ 71%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix2d.cpp.o
+[ 73%] Building CXX object CMakeFiles/motioncorr_core.dir/src/memory.cpp.o
+[ 74%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_container.cpp.o
+[ 75%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_label.cpp.o
+[ 76%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_table.cpp.o
+[ 77%] Building CXX object CMakeFiles/motioncorr_core.dir/src/micrograph_model.cpp.o
+[ 78%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[ 79%] Building CXX object CMakeFiles/motioncorr_core.dir/src/multidim_array.cpp.o
+[ 80%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
+[ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
+[ 83%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
+[ 84%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+In file included from /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.h:48,
+                 from /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:49:
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’ at /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:594:25:
+/home/alex/mc-i53-gpu/src-head/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp: In function ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’:
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:579:13: note: declared here
+  579 |     RFLOAT *xt=NULL;
+      |             ^~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:767:25:
+/home/alex/mc-i53-gpu/src-head/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:703:24: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                        ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:768:25:
+/home/alex/mc-i53-gpu/src-head/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:703:18: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                  ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:769:25:
+/home/alex/mc-i53-gpu/src-head/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-head/src/numerical_recipes.cpp:703:13: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |             ^~
+[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
+/home/alex/mc-i53-gpu/src-head/src/time.cpp: In function ‘void progress_bar(long int)’:
+/home/alex/mc-i53-gpu/src-head/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+  191 |             fprintf(stdout, cheese);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~
+[ 92%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
+[ 93%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_alignpatch.cu.o
+[ 94%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_realspace_dw.cu.o
+[ 95%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+[ 96%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_movie_session.cu.o
+/home/alex/mc-i53-gpu/src-head/src/acc/cuda/cuda_fft_prep.cu(52): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 97%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr
++ for V in head base
++ taskset -c 96-103 cmake -S /home/alex/mc-i53-gpu/src-base -B /home/alex/mc-i53-gpu/build-base -DCMAKE_BUILD_TYPE=Release -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DPython3_EXECUTABLE=/home/alex/mc-env/bin/python
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'fftw3'
+--   Found fftw3, version 3.3.10
+-- Checking for module 'fftw3f'
+--   Found fftw3f, version 3.3.10
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+-- The CUDA compiler identification is NVIDIA 12.8.61
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda-12.8/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /usr/local/cuda-12.8/targets/x86_64-linux/include (found version "12.8.61") 
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found Python3: /home/alex/mc-env/bin/python (found version "3.12.3") found components: Interpreter 
+-- Configuring done (6.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/alex/mc-i53-gpu/build-base
++ taskset -c 96-103 cmake --build /home/alex/mc-i53-gpu/build-base -j 8 --target motioncorr
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/CPlot2D.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/error.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/args.cpp.o
+[  4%] Building CXX object CMakeFiles/motioncorr_core.dir/src/complex.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/ctf.cpp.o
+[  6%] Building CXX object CMakeFiles/motioncorr_core.dir/src/backprojector.cpp.o
+[  7%] Building CXX object CMakeFiles/motioncorr_core.dir/src/euler.cpp.o
+[  8%] Building CXX object CMakeFiles/motioncorr_core.dir/src/fftw.cpp.o
+[ 10%] Building CXX object CMakeFiles/motioncorr_core.dir/src/filename.cpp.o
+[ 11%] Building CXX object CMakeFiles/motioncorr_core.dir/src/funcs.cpp.o
+[ 12%] Building CXX object CMakeFiles/motioncorr_core.dir/src/image.cpp.o
+[ 13%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/d3x3/dsyev2.c.o
+[ 14%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/radial_avg.cpp.o
+[ 15%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/resampling.cpp.o
+[ 16%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/image/stack_helper.cpp.o
+[ 17%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/Zernike.cpp.o
+[ 19%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/fft.cpp.o
+[ 20%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/math/t_complex.cpp.o
+[ 21%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/damage.cpp.o
+[ 22%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optics/optics_data.cpp.o
+[ 23%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/nelder_mead.cpp.o
+[ 24%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/optimization/optimization.cpp.o
+[ 25%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/Fourier_helper.cpp.o
+[ 26%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/complex_io.cpp.o
+[ 28%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/ctf/tilt_helper.cpp.o
+[ 29%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyev2.c.o
+[ 30%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevc3.c.o
+[ 31%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevh3.c.o
+[ 32%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsyevq3.c.o
+[ 33%] Building C object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/d3x3/dsytrd3.c.o
+[ 34%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/image_log.cpp.o
+[ 35%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/filter_helper.cpp.o
+[ 37%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/img_proc/image_op.cpp.o
+[ 38%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/interpolation.cpp.o
+[ 39%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/io/star_converter.cpp.o
+[ 40%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/jaz_config.cpp.o
+[ 41%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/new_ft.cpp.o
+[ 42%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/obs_model.cpp.o
+[ 43%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/parallel_ft.cpp.o
+[ 44%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/resampling_helper.cpp.o
+[ 46%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/slice_helper.cpp.o
+[ 47%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/stack_helper.cpp.o
+[ 48%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/t_complex.cpp.o
+[ 49%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/single_particle/vtk_helper.cpp.o
+[ 50%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/Fourier_2D_deformation.cpp.o
+[ 51%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/linear_2D_deformation.cpp.o
+[ 52%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/Fourier_2D_deformation_model.cpp.o
+[ 53%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/linear_2D_deformation_model.cpp.o
+[ 55%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/modular_alignment/spline_2D_deformation_model.cpp.o
+[ 56%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/spline_2D_deformation.cpp.o
+[ 57%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory.cpp.o
+[ 58%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/motion/trajectory_set.cpp.o
+[ 59%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/particle_set.cpp.o
+[ 60%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/projection_IO.cpp.o
+[ 61%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomo_ctf_helper.cpp.o
+[ 62%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram.cpp.o
+[ 64%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/tomography/tomogram_set.cpp.o
+[ 65%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/ansi_codes.cpp.o
+[ 66%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/image_file_helper.cpp.o
+[ 67%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/log.cpp.o
+[ 68%] Building CXX object CMakeFiles/motioncorr_core.dir/src/jaz/util/zio.cpp.o
+[ 69%] Building CXX object CMakeFiles/motioncorr_core.dir/src/mask.cpp.o
+[ 70%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix1d.cpp.o
+[ 71%] Building CXX object CMakeFiles/motioncorr_core.dir/src/matrix2d.cpp.o
+[ 73%] Building CXX object CMakeFiles/motioncorr_core.dir/src/memory.cpp.o
+[ 74%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_container.cpp.o
+[ 75%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_label.cpp.o
+[ 76%] Building CXX object CMakeFiles/motioncorr_core.dir/src/metadata_table.cpp.o
+[ 77%] Building CXX object CMakeFiles/motioncorr_core.dir/src/micrograph_model.cpp.o
+[ 78%] Building CXX object CMakeFiles/motioncorr_core.dir/src/motioncorr_runner.cpp.o
+[ 79%] Building CXX object CMakeFiles/motioncorr_core.dir/src/multidim_array.cpp.o
+[ 80%] Building CXX object CMakeFiles/motioncorr_core.dir/src/numerical_recipes.cpp.o
+[ 82%] Building CXX object CMakeFiles/motioncorr_core.dir/src/parallel.cpp.o
+[ 83%] Building CXX object CMakeFiles/motioncorr_core.dir/src/pipeline_control.cpp.o
+In file included from /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.h:48,
+                 from /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:49:
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’ at /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:594:25:
+/home/alex/mc-i53-gpu/src-base/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp: In function ‘double brent(double, double, double, double (*)(double*, void*), void*, double, double*, int, double*, double*)’:
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:579:13: note: declared here
+  579 |     RFLOAT *xt=NULL;
+      |             ^~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:767:25:
+/home/alex/mc-i53-gpu/src-base/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘xit’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:703:24: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                        ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:768:25:
+/home/alex/mc-i53-gpu/src-base/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘ptt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:703:18: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |                  ^~~
+In function ‘void free_Tvector(T*&, int, int) [with T = double]’,
+    inlined from ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’ at /home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:769:25:
+/home/alex/mc-i53-gpu/src-base/src/memory.h:74:13: warning: ‘void free(void*)’ called on pointer ‘pt’ with nonzero offset 8 [-Wfree-nonheap-object]
+   74 |         free((char*)(v + nl));
+      |         ~~~~^~~~~~~~~~~~~~~~~
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp: In function ‘void powell(double*, double*, int, double, int&, double&, double (*)(double*, void*), void*, bool)’:
+/home/alex/mc-i53-gpu/src-base/src/numerical_recipes.cpp:703:13: note: declared here
+  703 |     RFLOAT *pt, *ptt, *xit;
+      |             ^~
+[ 84%] Building CXX object CMakeFiles/motioncorr_core.dir/src/projector.cpp.o
+[ 85%] Building CXX object CMakeFiles/motioncorr_core.dir/src/renderEER.cpp.o
+[ 86%] Building CXX object CMakeFiles/motioncorr_core.dir/src/strings.cpp.o
+[ 87%] Building CXX object CMakeFiles/motioncorr_core.dir/src/symmetries.cpp.o
+[ 88%] Building CXX object CMakeFiles/motioncorr_core.dir/src/tabfuncs.cpp.o
+[ 89%] Building CXX object CMakeFiles/motioncorr_core.dir/src/time.cpp.o
+[ 91%] Building CXX object CMakeFiles/motioncorr_core.dir/src/transformations.cpp.o
+/home/alex/mc-i53-gpu/src-base/src/time.cpp: In function ‘void progress_bar(long int)’:
+/home/alex/mc-i53-gpu/src-base/src/time.cpp:191:20: warning: format not a string literal and no format arguments [-Wformat-security]
+  191 |             fprintf(stdout, cheese);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~
+[ 92%] Building CXX object CMakeFiles/motioncorr_core.dir/macros.cpp.o
+[ 93%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_alignpatch.cu.o
+[ 94%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_realspace_dw.cu.o
+[ 95%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_fft_prep.cu.o
+[ 96%] Building CUDA object CMakeFiles/motioncorr_core.dir/src/acc/cuda/cuda_movie_session.cu.o
+/home/alex/mc-i53-gpu/src-base/src/acc/cuda/cuda_fft_prep.cu(52): warning #550-D: variable "s_cached_bytes" was set but never used
+  static size_t s_cached_bytes = 0;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 97%] Linking CXX static library libmotioncorr_core.a
+[ 97%] Built target motioncorr_core
+[ 98%] Building CXX object CMakeFiles/motioncorr.dir/src/apps/run_motioncorr.cpp.o
+[100%] Linking CXX executable motioncorr
+[100%] Built target motioncorr
++ echo BUILD_RC=0
+BUILD_RC=0
++ sha256sum /home/alex/mc-i53-gpu/build-head/motioncorr /home/alex/mc-i53-gpu/build-base/motioncorr
+7e71c66d226756ccc90db757426ce80cc18615f760dc50acb1fd607e1d70111f  /home/alex/mc-i53-gpu/build-head/motioncorr
+fa26e839300d3213e0418e0eb7ed114b0806e86c2f5850fca5fc11d90136af13  /home/alex/mc-i53-gpu/build-base/motioncorr
++ grep -m1 '^CMAKE_BUILD_TYPE' /home/alex/mc-i53-gpu/build-head/CMakeCache.txt
+CMAKE_BUILD_TYPE:STRING=Release
++ grep -m1 '^CUDA:' /home/alex/mc-i53-gpu/build-head/CMakeCache.txt
+CUDA:BOOL=ON
++ grep -m1 CXX_FLAGS /home/alex/mc-i53-gpu/build-head/CMakeFiles/motioncorr_core.dir/flags.make
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -fopenmp
++ nvcc --version
++ tail -2
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
++ g++ --version
++ head -1
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
++ cmake --version
++ head -1
+cmake version 3.28.3
++ /home/alex/mc-env/bin/python -c 'import sys,numpy;print('\''python'\'',sys.version.split()[0],'\''numpy'\'',numpy.__version__)'
+python 3.12.3 numpy 2.5.3
++ nvidia-smi --query-gpu=driver_version --format=csv,noheader
++ head -1
+570.86.10
+BUILD_OUTER_RC=0

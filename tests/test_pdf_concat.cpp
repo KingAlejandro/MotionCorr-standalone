@@ -4,18 +4,20 @@
  *   1. the copy is byte-identical and reports success -- a shortcut that
  *      produced a shorter file would still produce a readable PDF, which
  *      nothing downstream would notice;
- *   2. an input that is not a PDF is NOT copied. Before the shortcut,
- *      Ghostscript rejected such a file and concatenatePDFfiles returned
- *      false; the shortcut must not turn that into a silent success. Both the
- *      empty placeholder joinMultipleEPSIntoSinglePDF() leaves when it found
- *      no EPS, and a non-empty file that is not a PDF, are checked -- the
- *      empty one is refused by the write check even without the signature
- *      test, so only the non-empty case can see that test at all.
+ *   2. an input that is not a PDF is NOT copied. Ghostscript rejects such a
+ *      file and concatenatePDFfiles returns false; the shortcut must not turn
+ *      that into a silent success. The input has to be non-empty to test
+ *      this: an empty one is refused by the copy's own write check even with
+ *      the signature test removed, so it cannot see that test. (An empty
+ *      input is also not a failure case at all -- Ghostscript accepts it and
+ *      emits a valid zero-page PDF, exit 0. An earlier version of this file
+ *      asserted the opposite and failed on the first host that had gs
+ *      installed.)
  *
  * Property 2's assertion is that the copy branch was not taken, which holds
- * whether or not Ghostscript is installed: with gs present it rejects the
- * input, without gs system() fails. Either way the answer is false, and only
- * the copy branch could return true.
+ * whether or not Ghostscript is installed: with gs present it rejects a text
+ * file with exit 1, without gs system() fails. Either way the answer is
+ * false, and only the copy branch could return true.
  */
 #include "src/CPlot2D.h"
 
@@ -82,24 +84,8 @@ int main()
 		std::cout << "PASS one-input concatenation copied " << result.size()
 		          << " B exactly\n";
 
-	{
-		std::ofstream out((dir + "/empty.pdf").c_str(), std::ios::binary);
-	}
-	::remove((dir + "/from_empty.pdf").c_str());
-	std::vector<FileName> placeholder;
-	placeholder.push_back(FileName(dir + "/empty.pdf"));
-	if (concatenatePDFfiles(FileName(dir + "/from_empty.pdf"), placeholder))
-	{
-		std::cout << "FAIL: an empty placeholder was accepted as a PDF\n";
-		failures++;
-	}
-	else
-	{
-		std::cout << "PASS empty placeholder was not copied\n";
-	}
-
-	// The case that actually exercises the signature test: non-empty, so the
-	// copy would succeed and report success if the shortcut took it.
+	// The case that exercises the signature test: non-empty, so the copy would
+	// succeed and report success if the shortcut took it.
 	{
 		std::ofstream out((dir + "/notapdf.pdf").c_str(), std::ios::binary);
 		out << "This is not a PDF, but it is long enough to be copied.\n";

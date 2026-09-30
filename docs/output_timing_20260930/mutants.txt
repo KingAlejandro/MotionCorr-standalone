@@ -54,3 +54,13 @@ P2  %PDF signature test dropped                             DETECTED  non-empty 
 # which sets failbit on the destination, so the shortcut already fails closed on
 # it with or without the signature test -- the case could not see that test at
 # all. The non-empty non-PDF case was added for exactly that reason and does.
+#
+# That first version also asserted the wrong outcome for the empty placeholder.
+# It claimed Ghostscript rejects an empty input and concatenatePDFfiles
+# therefore returns false. Ghostscript 10.02.1 accepts it, emits a valid
+# 2119-byte zero-page PDF and exits 0, so the call succeeds -- and always did.
+# The assertion passed only on the laptop, where gs is not installed and
+# system() fails for a different reason, and failed on the first host with gs.
+# The case was removed rather than inverted: it discriminates nothing, and the
+# property worth stating ("an empty input takes the Ghostscript path, whatever
+# that path does") is now a comment in src/CPlot2D.cpp.

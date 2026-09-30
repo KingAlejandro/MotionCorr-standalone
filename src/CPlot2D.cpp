@@ -87,10 +87,13 @@ bool concatenatePDFfiles(FileName fn_pdf_out, FileName pdf1, FileName pdf2)
 namespace
 {
 // True when the file starts with a PDF signature. Used only to decide whether a
-// one-input "concatenation" may be served by a copy: on anything else --
-// notably the empty placeholder joinMultipleEPSIntoSinglePDF() leaves when it
-// found no EPS input -- we still hand the file to Ghostscript, so the diagnostic
-// and the false return stay exactly as they were.
+// one-input "concatenation" may be served by a copy: anything else still goes
+// to Ghostscript, so its outcome is whatever it was before the shortcut
+// existed. That matters for the empty placeholder joinMultipleEPSIntoSinglePDF()
+// leaves when it found no EPS input -- Ghostscript accepts it and emits a valid
+// zero-page PDF, exit 0, so the call SUCCEEDS. Copying the empty file instead
+// would leave a zero-byte "PDF" and, since inserting nothing sets failbit,
+// report failure: the opposite answer in both respects.
 bool looksLikePDF(const FileName &fn)
 {
 	std::ifstream in(fn.c_str(), std::ios::binary);

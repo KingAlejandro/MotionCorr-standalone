@@ -87,8 +87,8 @@ previous `all_batches.pdf`, `concatenatePDFfiles(all_batches.pdf, [batch.pdf])`
 is a one-input concatenation, and Ghostscript re-rendered `batch.pdf` to
 produce it: 0.30 s. It is now a copy when the single input starts with `%PDF`;
 anything else — including the empty placeholder written when no EPS was found —
-still goes to Ghostscript, so that diagnostic and its `false` return are
-unchanged. `out - gs all_batches.pdf` 0.295 → 0.001 s.
+still goes to Ghostscript, so its outcome is whatever it was before.
+`out - gs all_batches.pdf` 0.295 → 0.001 s.
 
 **The two independent Ghostscript passes in parallel** (`cbf8dc7`).
 `header.pdf` and `batch.pdf` read disjoint EPS sets and write different files.

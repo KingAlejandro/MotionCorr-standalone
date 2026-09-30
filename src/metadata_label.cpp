@@ -144,44 +144,60 @@ std::string  EMDL::label2Str(const EMDLabel &label)
 
 bool EMDL::isInt(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_INT && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_INT;
 }
 bool EMDL::isBool(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_BOOL && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_BOOL;
 }
 bool EMDL::isString(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_STRING && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_STRING;
 }
 bool EMDL::isDouble(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_DOUBLE && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_DOUBLE;
 }
 bool EMDL::isNumber(const EMDLabel &label)
 {
-    bool found; const EMDLabelType type = labelType(data, label, found);
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
     return found && (type == EMDL_DOUBLE || type == EMDL_INT);
 }
 bool EMDL::isIntVector(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_INT_VECTOR && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_INT_VECTOR;
 }
 bool EMDL::isDoubleVector(const EMDLabel &label)
 {
-    bool found; return labelType(data, label, found) == EMDL_DOUBLE_VECTOR && found;
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_DOUBLE_VECTOR;
 }
 bool EMDL::isVector(const EMDLabel &label)
 {
-    bool found; const EMDLabelType type = labelType(data, label, found);
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
     return found && (type == EMDL_DOUBLE_VECTOR || type == EMDL_INT_VECTOR);
 }
 bool EMDL::isUnknown(const EMDLabel &label)
 {
     // An unregistered label is not an EMDL_UNKNOWN-typed one: the caller asks
-    // whether the registry says "unknown type", and for a missing label it
-    // says nothing.
-    bool found; return labelType(data, label, found) == EMDL_UNKNOWN && found;
+    // what the registry says the type is, and for a missing label it says
+    // nothing.
+    bool found = false;
+    const EMDLabelType type = labelType(data, label, found);
+    return found && type == EMDL_UNKNOWN;
 }
 
 bool EMDL::isValidLabel(const EMDLabel &label)

@@ -167,12 +167,14 @@ void healthyAndKeys() {
         {80,64,4,2,1,3}, {80,72,4,2,1,4}, // independent X/Y geometry
         {80,72,3,2,1,5}, {80,72,3,5,1,6}, // group count, B-factor
         {80,72,3,5,.6,7}, {80,72,3,5,0,8}, // explicit and inferred downsample
-        {80,72,3,5,0,9}
+        {80,72,3,5,0,9},
+        {320,256,3,5,1,10}, {320,256,3,5,.6,11}, // actual CCF/search dimensions change
+        {320,256,3,5,.6,12}
     };
     for (size_t i = 0; i < sizeof(sequence)/sizeof(sequence[0]); ++i) {
         arm();
         const Result candidate = align(sequence[i], &workspace);
-        const bool reuse = i == 1 || i == 8;
+        const bool reuse = i == 1 || i == 8 || i == 11;
         require(workspace.isValid(), "successful path did not publish valid key");
         require(counts[MALLOC] == (reuse ? 0 : 8) &&
                 counts[EVENT_CREATE] == (reuse ? 0 : 8) &&
@@ -195,7 +197,7 @@ void healthyAndKeys() {
     require(second.releasePatchAlignmentWorkspace(), "second movie release failed");
     requireEmpty(); active = false;
     exact(second_result, align(sequence[0], nullptr));
-    std::cout << "PASS: 10 exact actual-path input/key/movie controls; 2 reuse calls had zero setup resources\n";
+    std::cout << "PASS: 13 exact actual-path input/key/movie controls; 3 reuse calls had zero setup resources\n";
 }
 void initializationFailures() {
     const Geometry g = {64,64,4,2,1,11};

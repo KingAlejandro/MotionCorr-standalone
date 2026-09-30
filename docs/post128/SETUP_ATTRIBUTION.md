@@ -114,6 +114,72 @@ amortise a fixed 1.78 s.
 The poor 4-GPU efficiency is a small-dataset artifact, not a property of
 process-per-GPU sharding.
 
+## The fixed cost is not fixed
+
+Fitting `wall = C + m·k` separately at each worker count, on the retained sweep
+points, gives intercepts that grow linearly with worker count:
+
+| workers | intercept | tail intercept | tail per movie |
+|--------:|----------:|---------------:|---------------:|
+| 1 | 1.099 s | 0.503 s | 17.8 ms |
+| 2 | 1.256 s | 0.549 s | 13.2 ms |
+| 4 | 1.800 s | 0.761 s | 4.5 ms |
+
+    fixed(n) = 0.826 + 0.239 · n        residuals <= 0.05 s
+
+**Each worker added costs 0.24 s of per-run time**, and a `C + W/n` model has no
+term that can express it, so its intercept silently absorbs the growth. That is
+why the three-point fit in `MULTIGPU_TIMING.md` reported C = 2.48 s when the
+n=4 fixed cost is actually 1.80 s.
+
+The probe ties the mechanism to that slope independently. Fitting its context
+cost the same way gives `ctx(n) = 0.040 + 0.203·n`, so **CUDA context creation
+accounts for 85 % of the per-worker growth** (0.203 of 0.239 s). The probe
+shares no code with MotionCorr, so this is confirmation of the mechanism rather
+than a restatement of the same measurement.
+
+The tail also turns out not to be purely fixed: it carries 17.8 ms per movie at
+one worker, and that component divides across workers (4.5 ms at four), which
+the earlier per-run tail figure did not separate.
+
+### Resulting model
+
+    T(n, M) = 0.826 + 0.239·n + (M/n)·w(n)      w measured: 0.466 0.471 0.485 0.516
+
+| n | predicted | measured | error |
+|--:|----------:|---------:|------:|
+| 1 | 12.25 s | 12.98 s | -0.73 |
+| 2 | 6.96 s | 7.23 s | -0.27 |
+| 3 | 5.42 s | 5.67 s | -0.25 |
+| 4 | 4.88 s | 5.06 s | -0.18 |
+
+It under-predicts by 0.2-0.7 s because it omits the launcher's own prologue and
+the movie-1 excess beyond context creation. The structure is the point, not the
+last 5 %.
+
+Because the `0.239·n` term grows while `(M/n)·w` shrinks, there is an optimal
+worker count rather than "more is better". At 24 movies it is around 7 — beyond
+the 4 GPUs available, which is why more GPUs still helped here. **Anything past
+n=4 is extrapolation**: `w(n)` is measured only to four workers and is itself
+rising, so the true optimum is lower than `sqrt(M·w/0.239)` suggests.
+
+## Correction: DIRECT does not measure what I claimed
+
+`MULTIGPU_TIMING.md` calls `--only_do_unfinished` over a complete tree a third
+independent route to the fixed cost. It is not the same quantity.
+
+`isMovieComplete` (`src/motioncorr_runner.cpp:659`) opens the corrected MRC
+header and parses the per-movie STAR **three times** — `general.read` at :669,
+`shifts.read` at :675, and a full `Micrograph` construction at :694. So DIRECT
+pays a 24-movie completion scan that a normal run does not, while skipping the
+CUDA initialisation that a normal run does pay. Its flatness across worker
+counts (0.97 s at 1, 0.95 s at 4) is consistent with that: no context creation,
+so none of the 0.203 s/worker growth.
+
+The two routes that do measure the fixed cost — the phase split and the sweep
+intercept — still agree. DIRECT remains useful as a bound on the non-CUDA part,
+which is what it actually measures.
+
 ## Reducing it
 
 Nothing cheap. One context per process is inherent to process-per-GPU, and the

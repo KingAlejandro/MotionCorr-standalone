@@ -1,0 +1,1572 @@
+{
+  "timestamp": "2026-09-23T15:37:20Z",
+  "hardware": {
+    "hostname": "4-gpu-vm",
+    "system": "Linux",
+    "release": "6.8.0-136-generic",
+    "machine": "x86_64",
+    "CPU(s)": "124",
+    "Model name": "AMD EPYC 7452 32-Core Processor",
+    "Thread(s) per core": "1",
+    "Core(s) per socket": "1",
+    "Socket(s)": "124",
+    "L3 cache": "1.9 GiB (124 instances)",
+    "NUMA node(s)": "2",
+    "total_ram_gib": 433.0,
+    "available_ram_gib": 384.6,
+    "gcc_version": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "cmake_version": "cmake version 3.28.3"
+  },
+  "inputs": {
+    "binary": "/home/alex/MotionCorr-standalone/build-timing/motioncorr",
+    "binary_sha256": "ad59f0db0f9f4c36d0c48f255515c0710faeb06a603bf6c66a9c9cf7bc9e824f",
+    "movie_tiff": "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/20170629_00021_frameImage.tiff",
+    "movie_tiff_sha256": "df298b1b7741b1e5c9ec3b3e4514745a405d38b997b77a920f9f6b1bf30b99c0",
+    "gain_mrc": "/home/alex/MotionCorr-standalone/relion30_tutorial/Movies/gain.mrc",
+    "gain_mrc_sha256": "8919cdc7bf0f481cdb3dd5bcb20d83c29e0263b2fcc78b212c74b33a81b1acd1",
+    "movies_star": "/home/alex/MotionCorr-standalone/relion30_tutorial/movies.star",
+    "movies_star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+  },
+  "repetitions": 3,
+  "cases": {
+    "global_j1": {
+      "config": {
+        "name": "Global-only, 1 thread",
+        "patch_x": 1,
+        "patch_y": 1,
+        "threads": 1,
+        "gate": "exact"
+      },
+      "wall_time_stats": {
+        "mean": 54.2833,
+        "std": 0.6596,
+        "min": 53.64,
+        "max": 55.19,
+        "cv_pct": 1.22
+      },
+      "user_time_stats": {
+        "mean": 48.7833,
+        "std": 0.5596,
+        "min": 48.23,
+        "max": 49.55,
+        "cv_pct": 1.15
+      },
+      "sys_time_stats": {
+        "mean": 5.49,
+        "std": 0.1003,
+        "min": 5.4,
+        "max": 5.63,
+        "cv_pct": 1.83
+      },
+      "peak_rss_stats_gib": {
+        "mean": 2.7324,
+        "std": 0.0001,
+        "min": 2.7323,
+        "max": 2.7325,
+        "cv_pct": 0.0
+      },
+      "stage_time_stats": {
+        "read gain": {
+          "mean": 0.1023,
+          "std": 0.0017,
+          "min": 0.1,
+          "max": 0.104,
+          "cv_pct": 1.66
+        },
+        "read movie": {
+          "mean": 1.8833,
+          "std": 0.0081,
+          "min": 1.872,
+          "max": 1.89,
+          "cv_pct": 0.43
+        },
+        "apply gain": {
+          "mean": 0.1953,
+          "std": 0.0119,
+          "min": 0.185,
+          "max": 0.212,
+          "cv_pct": 6.09
+        },
+        "initial sum": {
+          "mean": 0.2143,
+          "std": 0.0017,
+          "min": 0.212,
+          "max": 0.216,
+          "cv_pct": 0.79
+        },
+        "detect hot pixels": {
+          "mean": 0.0723,
+          "std": 0.0005,
+          "min": 0.072,
+          "max": 0.073,
+          "cv_pct": 0.65
+        },
+        "fix defects": {
+          "mean": 0.011,
+          "std": 0.0,
+          "min": 0.011,
+          "max": 0.011,
+          "cv_pct": 0.0
+        },
+        "global FFT": {
+          "mean": 14.4173,
+          "std": 0.0327,
+          "min": 14.379,
+          "max": 14.459,
+          "cv_pct": 0.23
+        },
+        "power spectrum": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        },
+        "global alignment": {
+          "mean": 0.9393,
+          "std": 0.0037,
+          "min": 0.935,
+          "max": 0.944,
+          "cv_pct": 0.39
+        },
+        "global iFFT": {
+          "mean": 16.0683,
+          "std": 0.4544,
+          "min": 15.669,
+          "max": 16.704,
+          "cv_pct": 2.83
+        },
+        "dose weighting": {
+          "mean": 19.1343,
+          "std": 0.2072,
+          "min": 18.865,
+          "max": 19.369,
+          "cv_pct": 1.08
+        },
+        "real space interpolation": {
+          "mean": 0.2097,
+          "std": 0.0012,
+          "min": 0.208,
+          "max": 0.211,
+          "cv_pct": 0.59
+        },
+        "binning": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        }
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "exit_status": 0,
+          "wall_time_sec": 53.64,
+          "user_time_sec": 48.23,
+          "sys_time_sec": 5.4,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2865040,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.104,
+              "microsec_per_op": 104982.0
+            },
+            "read movie": {
+              "seconds": 1.89,
+              "microsec_per_op": 1890864.0
+            },
+            "apply gain": {
+              "seconds": 0.212,
+              "microsec_per_op": 212110.0
+            },
+            "initial sum": {
+              "seconds": 0.215,
+              "microsec_per_op": 215794.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.072,
+              "microsec_per_op": 72186.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11165.0
+            },
+            "global FFT": {
+              "seconds": 14.414,
+              "microsec_per_op": 14414420.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            },
+            "global alignment": {
+              "seconds": 0.939,
+              "microsec_per_op": 939616.0
+            },
+            "global iFFT": {
+              "seconds": 15.669,
+              "microsec_per_op": 15669783.0
+            },
+            "dose weighting": {
+              "seconds": 18.865,
+              "microsec_per_op": 18865785.0
+            },
+            "real space interpolation": {
+              "seconds": 0.211,
+              "microsec_per_op": 211602.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "f81caf2dd338f85e4a6a1a2ea897b102c31e6e182bb060c89965416d69bbf6c3",
+            "star_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+            "joint_star_sha256": "3e15adabab52ca251943606ccd6b248c2cdb3fa80900af112fb920c7f34b7a53"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true
+          }
+        },
+        {
+          "repetition": 2,
+          "exit_status": 0,
+          "wall_time_sec": 55.19,
+          "user_time_sec": 49.55,
+          "sys_time_sec": 5.63,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2865076,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.103,
+              "microsec_per_op": 103155.0
+            },
+            "read movie": {
+              "seconds": 1.888,
+              "microsec_per_op": 1888192.0
+            },
+            "apply gain": {
+              "seconds": 0.185,
+              "microsec_per_op": 185229.0
+            },
+            "initial sum": {
+              "seconds": 0.212,
+              "microsec_per_op": 212235.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.073,
+              "microsec_per_op": 73345.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11125.0
+            },
+            "global FFT": {
+              "seconds": 14.459,
+              "microsec_per_op": 14459724.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            },
+            "global alignment": {
+              "seconds": 0.944,
+              "microsec_per_op": 944189.0
+            },
+            "global iFFT": {
+              "seconds": 16.704,
+              "microsec_per_op": 16704955.0
+            },
+            "dose weighting": {
+              "seconds": 19.369,
+              "microsec_per_op": 19369805.0
+            },
+            "real space interpolation": {
+              "seconds": 0.21,
+              "microsec_per_op": 210822.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "7774e20d821cd90b9eb3d328b20d1431e7b282ec8226d09014afa92893d0b2c0",
+            "star_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+            "joint_star_sha256": "3010ad207aa744a2d47a403601475b758dacd8236f022dd728924a805958b464"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true,
+            "stdout_snippet": " True\n   Image RMSE:           0.000000e+00 (threshold: 1.000000e-07)\n   Max absolute diff:    0.000000e+00 (threshold: 1.000000e-07)\n   Relative RMSE:        0.000000e+00 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 0 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 3,
+          "exit_status": 0,
+          "wall_time_sec": 54.02,
+          "user_time_sec": 48.57,
+          "sys_time_sec": 5.44,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2865196,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.1,
+              "microsec_per_op": 100333.0
+            },
+            "read movie": {
+              "seconds": 1.872,
+              "microsec_per_op": 1872821.0
+            },
+            "apply gain": {
+              "seconds": 0.189,
+              "microsec_per_op": 189052.0
+            },
+            "initial sum": {
+              "seconds": 0.216,
+              "microsec_per_op": 216285.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.072,
+              "microsec_per_op": 72443.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11170.0
+            },
+            "global FFT": {
+              "seconds": 14.379,
+              "microsec_per_op": 14379334.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            },
+            "global alignment": {
+              "seconds": 0.935,
+              "microsec_per_op": 935887.0
+            },
+            "global iFFT": {
+              "seconds": 15.832,
+              "microsec_per_op": 15832774.0
+            },
+            "dose weighting": {
+              "seconds": 19.169,
+              "microsec_per_op": 19169458.0
+            },
+            "real space interpolation": {
+              "seconds": 0.208,
+              "microsec_per_op": 208739.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "cbfde3f594b3489e8224bdd6c72c79efbf2540886a15e8fd244436c4b4b6a24a",
+            "star_sha256": "507c50c8d2e8ff0f14123142d5278c6e05fc2fb78738a58d76ee508b22ef9487",
+            "joint_star_sha256": "af77cb8710ced70bfacba575d9dcc9aa3a2e89467eb9c75f4f207598c414bfac"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true,
+            "stdout_snippet": " True\n   Image RMSE:           0.000000e+00 (threshold: 1.000000e-07)\n   Max absolute diff:    0.000000e+00 (threshold: 1.000000e-07)\n   Relative RMSE:        0.000000e+00 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 0 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        }
+      ]
+    },
+    "global_j4": {
+      "config": {
+        "name": "Global-only, 4 threads",
+        "patch_x": 1,
+        "patch_y": 1,
+        "threads": 4,
+        "gate": "relaxed"
+      },
+      "wall_time_stats": {
+        "mean": 24.2333,
+        "std": 0.1879,
+        "min": 24.0,
+        "max": 24.46,
+        "cv_pct": 0.78
+      },
+      "user_time_stats": {
+        "mean": 79.0967,
+        "std": 8.2993,
+        "min": 67.36,
+        "max": 85.04,
+        "cv_pct": 10.49
+      },
+      "sys_time_stats": {
+        "mean": 7.88,
+        "std": 0.5791,
+        "min": 7.22,
+        "max": 8.63,
+        "cv_pct": 7.35
+      },
+      "peak_rss_stats_gib": {
+        "mean": 2.8889,
+        "std": 0.0003,
+        "min": 2.8885,
+        "max": 2.8894,
+        "cv_pct": 0.01
+      },
+      "stage_time_stats": {
+        "read gain": {
+          "mean": 0.0997,
+          "std": 0.0012,
+          "min": 0.098,
+          "max": 0.101,
+          "cv_pct": 1.25
+        },
+        "read movie": {
+          "mean": 0.6103,
+          "std": 0.0033,
+          "min": 0.606,
+          "max": 0.614,
+          "cv_pct": 0.54
+        },
+        "apply gain": {
+          "mean": 0.067,
+          "std": 0.0022,
+          "min": 0.065,
+          "max": 0.07,
+          "cv_pct": 3.22
+        },
+        "initial sum": {
+          "mean": 0.074,
+          "std": 0.0014,
+          "min": 0.073,
+          "max": 0.076,
+          "cv_pct": 1.91
+        },
+        "detect hot pixels": {
+          "mean": 0.0507,
+          "std": 0.0012,
+          "min": 0.049,
+          "max": 0.052,
+          "cv_pct": 2.46
+        },
+        "fix defects": {
+          "mean": 0.019,
+          "std": 0.0036,
+          "min": 0.014,
+          "max": 0.022,
+          "cv_pct": 18.73
+        },
+        "global FFT": {
+          "mean": 6.712,
+          "std": 0.0569,
+          "min": 6.633,
+          "max": 6.765,
+          "cv_pct": 0.85
+        },
+        "power spectrum": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        },
+        "global alignment": {
+          "mean": 0.4957,
+          "std": 0.0165,
+          "min": 0.473,
+          "max": 0.512,
+          "cv_pct": 3.34
+        },
+        "global iFFT": {
+          "mean": 6.94,
+          "std": 0.0678,
+          "min": 6.852,
+          "max": 7.017,
+          "cv_pct": 0.98
+        },
+        "dose weighting": {
+          "mean": 7.9797,
+          "std": 0.056,
+          "min": 7.923,
+          "max": 8.056,
+          "cv_pct": 0.7
+        },
+        "real space interpolation": {
+          "mean": 0.123,
+          "std": 0.0079,
+          "min": 0.116,
+          "max": 0.134,
+          "cv_pct": 6.4
+        },
+        "binning": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        }
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "exit_status": 0,
+          "wall_time_sec": 24.46,
+          "user_time_sec": 84.89,
+          "sys_time_sec": 8.63,
+          "cpu_percent": 382,
+          "peak_rss_kb": 3029712,
+          "peak_rss_gib": 2.889,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.1,
+              "microsec_per_op": 100237.0
+            },
+            "read movie": {
+              "seconds": 0.614,
+              "microsec_per_op": 614086.0
+            },
+            "apply gain": {
+              "seconds": 0.066,
+              "microsec_per_op": 66302.0
+            },
+            "initial sum": {
+              "seconds": 0.073,
+              "microsec_per_op": 73895.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.051,
+              "microsec_per_op": 51819.0
+            },
+            "fix defects": {
+              "seconds": 0.022,
+              "microsec_per_op": 22252.0
+            },
+            "global FFT": {
+              "seconds": 6.765,
+              "microsec_per_op": 6765691.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            },
+            "global alignment": {
+              "seconds": 0.502,
+              "microsec_per_op": 502637.0
+            },
+            "global iFFT": {
+              "seconds": 7.017,
+              "microsec_per_op": 7017395.0
+            },
+            "dose weighting": {
+              "seconds": 8.056,
+              "microsec_per_op": 8056272.0
+            },
+            "real space interpolation": {
+              "seconds": 0.134,
+              "microsec_per_op": 134171.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "074e92a836a7bf727bc51d84c3a4bfd3b2c6af535e8653ea1890475ae5974bf9",
+            "star_sha256": "2f6c777686bce116dc4fe6ed6b3c7e7e7db660a1730eb30fb04039db8686c5f5",
+            "joint_star_sha256": "1b9de23a00d52f8cf6fe192afdc7d0d147bb516b219fb6ea6869205a05ba3954"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": true
+          }
+        },
+        {
+          "repetition": 2,
+          "exit_status": 0,
+          "wall_time_sec": 24.24,
+          "user_time_sec": 85.04,
+          "sys_time_sec": 7.79,
+          "cpu_percent": 382,
+          "peak_rss_kb": 3029184,
+          "peak_rss_gib": 2.889,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.101,
+              "microsec_per_op": 101235.0
+            },
+            "read movie": {
+              "seconds": 0.611,
+              "microsec_per_op": 611534.0
+            },
+            "apply gain": {
+              "seconds": 0.07,
+              "microsec_per_op": 70613.0
+            },
+            "initial sum": {
+              "seconds": 0.076,
+              "microsec_per_op": 76136.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.052,
+              "microsec_per_op": 52216.0
+            },
+            "fix defects": {
+              "seconds": 0.021,
+              "microsec_per_op": 21814.0
+            },
+            "global FFT": {
+              "seconds": 6.738,
+              "microsec_per_op": 6738113.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 20.0
+            },
+            "global alignment": {
+              "seconds": 0.473,
+              "microsec_per_op": 473919.0
+            },
+            "global iFFT": {
+              "seconds": 6.951,
+              "microsec_per_op": 6951407.0
+            },
+            "dose weighting": {
+              "seconds": 7.96,
+              "microsec_per_op": 7960773.0
+            },
+            "real space interpolation": {
+              "seconds": 0.119,
+              "microsec_per_op": 119775.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 33.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "fa996d45e65028a203f536858fb593cd04f6784435e38bfc1d5ad2c3d9b0cb60",
+            "star_sha256": "2ae047b085be6abcfc42da3a36a22f4060261d92c3e6e78bf1ec0c61f355cec6",
+            "joint_star_sha256": "8af11601c2ff159827d3775de352d1c721000232585df1710f2d2c1d1b523bec"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": false,
+            "stdout_snippet": " 2.000000e-02)\n   Max absolute diff:    2.524571e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        3.786215e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 7 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Relative image RMSE 3.786215e-03 > 1.000000e-03\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 3,
+          "exit_status": 0,
+          "wall_time_sec": 24.0,
+          "user_time_sec": 67.36,
+          "sys_time_sec": 7.22,
+          "cpu_percent": 310,
+          "peak_rss_kb": 3028860,
+          "peak_rss_gib": 2.889,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.098,
+              "microsec_per_op": 98859.0
+            },
+            "read movie": {
+              "seconds": 0.606,
+              "microsec_per_op": 606754.0
+            },
+            "apply gain": {
+              "seconds": 0.065,
+              "microsec_per_op": 65660.0
+            },
+            "initial sum": {
+              "seconds": 0.073,
+              "microsec_per_op": 73762.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.049,
+              "microsec_per_op": 49623.0
+            },
+            "fix defects": {
+              "seconds": 0.014,
+              "microsec_per_op": 14468.0
+            },
+            "global FFT": {
+              "seconds": 6.633,
+              "microsec_per_op": 6633969.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 17.0
+            },
+            "global alignment": {
+              "seconds": 0.512,
+              "microsec_per_op": 512737.0
+            },
+            "global iFFT": {
+              "seconds": 6.852,
+              "microsec_per_op": 6852255.0
+            },
+            "dose weighting": {
+              "seconds": 7.923,
+              "microsec_per_op": 7923513.0
+            },
+            "real space interpolation": {
+              "seconds": 0.116,
+              "microsec_per_op": 116820.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 31.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "466dd82a650b27112daca785a49c63a6c1d24173443a392e5ca563cde361ac1c",
+            "star_sha256": "5cfe6782a98390071e4a81b053172b30f07c65a3e4cf95c4568db8d65c87da11",
+            "joint_star_sha256": "502392d0c2cc768e223022f34932cc77d2a062ebf93a923dd28a1ac8ca2b3569"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": false,
+            "stdout_snippet": " 2.000000e-02)\n   Max absolute diff:    2.309358e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        7.347733e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 7 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Relative image RMSE 7.347733e-03 > 1.000000e-03\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        }
+      ]
+    },
+    "patch5x5_j1": {
+      "config": {
+        "name": "5x5 Patch, 1 thread",
+        "patch_x": 5,
+        "patch_y": 5,
+        "threads": 1,
+        "gate": "exact"
+      },
+      "wall_time_stats": {
+        "mean": 66.3633,
+        "std": 0.1543,
+        "min": 66.15,
+        "max": 66.51,
+        "cv_pct": 0.23
+      },
+      "user_time_stats": {
+        "mean": 60.44,
+        "std": 0.1061,
+        "min": 60.31,
+        "max": 60.57,
+        "cv_pct": 0.18
+      },
+      "sys_time_stats": {
+        "mean": 5.9033,
+        "std": 0.0624,
+        "min": 5.82,
+        "max": 5.97,
+        "cv_pct": 1.06
+      },
+      "peak_rss_stats_gib": {
+        "mean": 2.7323,
+        "std": 0.0001,
+        "min": 2.7322,
+        "max": 2.7323,
+        "cv_pct": 0.0
+      },
+      "stage_time_stats": {
+        "read gain": {
+          "mean": 0.1047,
+          "std": 0.0045,
+          "min": 0.099,
+          "max": 0.11,
+          "cv_pct": 4.3
+        },
+        "read movie": {
+          "mean": 1.9363,
+          "std": 0.0325,
+          "min": 1.892,
+          "max": 1.969,
+          "cv_pct": 1.68
+        },
+        "apply gain": {
+          "mean": 0.212,
+          "std": 0.0108,
+          "min": 0.197,
+          "max": 0.222,
+          "cv_pct": 5.09
+        },
+        "initial sum": {
+          "mean": 0.2227,
+          "std": 0.0123,
+          "min": 0.214,
+          "max": 0.24,
+          "cv_pct": 5.5
+        },
+        "detect hot pixels": {
+          "mean": 0.0737,
+          "std": 0.0012,
+          "min": 0.072,
+          "max": 0.075,
+          "cv_pct": 1.69
+        },
+        "fix defects": {
+          "mean": 0.011,
+          "std": 0.0,
+          "min": 0.011,
+          "max": 0.011,
+          "cv_pct": 0.0
+        },
+        "global FFT": {
+          "mean": 14.513,
+          "std": 0.0591,
+          "min": 14.445,
+          "max": 14.589,
+          "cv_pct": 0.41
+        },
+        "power spectrum": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        },
+        "global alignment": {
+          "mean": 0.9583,
+          "std": 0.0133,
+          "min": 0.94,
+          "max": 0.971,
+          "cv_pct": 1.39
+        },
+        "global iFFT": {
+          "mean": 15.7857,
+          "std": 0.0975,
+          "min": 15.652,
+          "max": 15.882,
+          "cv_pct": 0.62
+        },
+        "prepare patch": {
+          "mean": 6.266,
+          "std": 0.0188,
+          "min": 6.242,
+          "max": 6.288,
+          "cv_pct": 0.3
+        },
+        "patch alignment": {
+          "mean": 1.0877,
+          "std": 0.0075,
+          "min": 1.077,
+          "max": 1.093,
+          "cv_pct": 0.69
+        },
+        "fit polynomial": {
+          "mean": 0.001,
+          "std": 0.0,
+          "min": 0.001,
+          "max": 0.001,
+          "cv_pct": 0.0
+        },
+        "dose weighting": {
+          "mean": 19.2713,
+          "std": 0.0288,
+          "min": 19.231,
+          "max": 19.296,
+          "cv_pct": 0.15
+        },
+        "real space interpolation": {
+          "mean": 4.767,
+          "std": 0.0404,
+          "min": 4.736,
+          "max": 4.824,
+          "cv_pct": 0.85
+        },
+        "binning": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        }
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "exit_status": 0,
+          "wall_time_sec": 66.15,
+          "user_time_sec": 60.31,
+          "sys_time_sec": 5.82,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2865060,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.099,
+              "microsec_per_op": 99122.0
+            },
+            "read movie": {
+              "seconds": 1.892,
+              "microsec_per_op": 1892412.0
+            },
+            "apply gain": {
+              "seconds": 0.197,
+              "microsec_per_op": 197912.0
+            },
+            "initial sum": {
+              "seconds": 0.214,
+              "microsec_per_op": 214828.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.072,
+              "microsec_per_op": 72031.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11370.0
+            },
+            "global FFT": {
+              "seconds": 14.445,
+              "microsec_per_op": 14445021.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            },
+            "global alignment": {
+              "seconds": 0.94,
+              "microsec_per_op": 940635.0
+            },
+            "global iFFT": {
+              "seconds": 15.652,
+              "microsec_per_op": 15652255.0
+            },
+            "prepare patch": {
+              "seconds": 6.242,
+              "microsec_per_op": 249699.0
+            },
+            "patch alignment": {
+              "seconds": 1.077,
+              "microsec_per_op": 43105.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1534.0
+            },
+            "dose weighting": {
+              "seconds": 19.287,
+              "microsec_per_op": 19287810.0
+            },
+            "real space interpolation": {
+              "seconds": 4.824,
+              "microsec_per_op": 4824424.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "318c667d97f7254e0a9467c6c9b55b110d173c4a9efafef3cfc105c8f43e2ebe",
+            "star_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "joint_star_sha256": "bd9fa7bef9502b03fc2e903ab56ac8bd4d3992dbc7d7c0ee7d59f70d1c571c17"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true,
+            "stdout_snippet": " True\n   Image RMSE:           0.000000e+00 (threshold: 1.000000e-07)\n   Max absolute diff:    0.000000e+00 (threshold: 1.000000e-07)\n   Relative RMSE:        0.000000e+00 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 0 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 2,
+          "exit_status": 0,
+          "wall_time_sec": 66.43,
+          "user_time_sec": 60.44,
+          "sys_time_sec": 5.97,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2865056,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.11,
+              "microsec_per_op": 110618.0
+            },
+            "read movie": {
+              "seconds": 1.969,
+              "microsec_per_op": 1969967.0
+            },
+            "apply gain": {
+              "seconds": 0.222,
+              "microsec_per_op": 222427.0
+            },
+            "initial sum": {
+              "seconds": 0.214,
+              "microsec_per_op": 214273.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.075,
+              "microsec_per_op": 75126.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11271.0
+            },
+            "global FFT": {
+              "seconds": 14.505,
+              "microsec_per_op": 14505897.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            },
+            "global alignment": {
+              "seconds": 0.964,
+              "microsec_per_op": 964532.0
+            },
+            "global iFFT": {
+              "seconds": 15.823,
+              "microsec_per_op": 15823635.0
+            },
+            "prepare patch": {
+              "seconds": 6.268,
+              "microsec_per_op": 250734.0
+            },
+            "patch alignment": {
+              "seconds": 1.093,
+              "microsec_per_op": 43736.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1660.0
+            },
+            "dose weighting": {
+              "seconds": 19.296,
+              "microsec_per_op": 19296490.0
+            },
+            "real space interpolation": {
+              "seconds": 4.736,
+              "microsec_per_op": 4736668.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "af4271ed190cc28913d364dc927bf0d00b5df8fdf6ba097880e33bf0026c2389",
+            "star_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "joint_star_sha256": "a2ef79bee2fd5a43839eb9cd007abf93198e7355e1366b4242a7084685516c23"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true,
+            "stdout_snippet": " True\n   Image RMSE:           0.000000e+00 (threshold: 1.000000e-07)\n   Max absolute diff:    0.000000e+00 (threshold: 1.000000e-07)\n   Relative RMSE:        0.000000e+00 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 0 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 3,
+          "exit_status": 0,
+          "wall_time_sec": 66.51,
+          "user_time_sec": 60.57,
+          "sys_time_sec": 5.92,
+          "cpu_percent": 99,
+          "peak_rss_kb": 2864868,
+          "peak_rss_gib": 2.732,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.105,
+              "microsec_per_op": 105169.0
+            },
+            "read movie": {
+              "seconds": 1.948,
+              "microsec_per_op": 1948324.0
+            },
+            "apply gain": {
+              "seconds": 0.217,
+              "microsec_per_op": 217522.0
+            },
+            "initial sum": {
+              "seconds": 0.24,
+              "microsec_per_op": 240244.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.074,
+              "microsec_per_op": 74245.0
+            },
+            "fix defects": {
+              "seconds": 0.011,
+              "microsec_per_op": 11239.0
+            },
+            "global FFT": {
+              "seconds": 14.589,
+              "microsec_per_op": 14589908.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 10.0
+            },
+            "global alignment": {
+              "seconds": 0.971,
+              "microsec_per_op": 971531.0
+            },
+            "global iFFT": {
+              "seconds": 15.882,
+              "microsec_per_op": 15882350.0
+            },
+            "prepare patch": {
+              "seconds": 6.288,
+              "microsec_per_op": 251539.0
+            },
+            "patch alignment": {
+              "seconds": 1.093,
+              "microsec_per_op": 43739.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1611.0
+            },
+            "dose weighting": {
+              "seconds": 19.231,
+              "microsec_per_op": 19231387.0
+            },
+            "real space interpolation": {
+              "seconds": 4.741,
+              "microsec_per_op": 4741236.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 9.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "9a5a4bd31680ded1a850f22c2967bf233fee8551660cc22c8d5aea68c582a7e6",
+            "star_sha256": "3db4a9c282819f87d82390590105936daab7a3fffe666b5390fdbbf952322369",
+            "joint_star_sha256": "76053864938d85125466d42207c47abdbb8bfd03a02be67f7458e228d2e47c03"
+          },
+          "gate_eval": {
+            "gate": "exact",
+            "passed": true,
+            "stdout_snippet": " True\n   Image RMSE:           0.000000e+00 (threshold: 1.000000e-07)\n   Max absolute diff:    0.000000e+00 (threshold: 1.000000e-07)\n   Relative RMSE:        0.000000e+00 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 0 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               PASS\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        }
+      ]
+    },
+    "patch5x5_j4": {
+      "config": {
+        "name": "5x5 Patch, 4 threads",
+        "patch_x": 5,
+        "patch_y": 5,
+        "threads": 4,
+        "gate": "relaxed"
+      },
+      "wall_time_stats": {
+        "mean": 29.7067,
+        "std": 0.1919,
+        "min": 29.47,
+        "max": 29.94,
+        "cv_pct": 0.65
+      },
+      "user_time_stats": {
+        "mean": 98.8933,
+        "std": 9.5155,
+        "min": 85.44,
+        "max": 105.89,
+        "cv_pct": 9.62
+      },
+      "sys_time_stats": {
+        "mean": 8.6267,
+        "std": 0.5798,
+        "min": 7.91,
+        "max": 9.33,
+        "cv_pct": 6.72
+      },
+      "peak_rss_stats_gib": {
+        "mean": 2.9452,
+        "std": 0.0003,
+        "min": 2.9449,
+        "max": 2.9457,
+        "cv_pct": 0.01
+      },
+      "stage_time_stats": {
+        "read gain": {
+          "mean": 0.1027,
+          "std": 0.0009,
+          "min": 0.102,
+          "max": 0.104,
+          "cv_pct": 0.92
+        },
+        "read movie": {
+          "mean": 0.6203,
+          "std": 0.005,
+          "min": 0.615,
+          "max": 0.627,
+          "cv_pct": 0.8
+        },
+        "apply gain": {
+          "mean": 0.0743,
+          "std": 0.0083,
+          "min": 0.068,
+          "max": 0.086,
+          "cv_pct": 11.11
+        },
+        "initial sum": {
+          "mean": 0.0833,
+          "std": 0.0083,
+          "min": 0.076,
+          "max": 0.095,
+          "cv_pct": 10.01
+        },
+        "detect hot pixels": {
+          "mean": 0.0523,
+          "std": 0.0012,
+          "min": 0.051,
+          "max": 0.054,
+          "cv_pct": 2.38
+        },
+        "fix defects": {
+          "mean": 0.0197,
+          "std": 0.0042,
+          "min": 0.014,
+          "max": 0.024,
+          "cv_pct": 21.3
+        },
+        "global FFT": {
+          "mean": 6.7633,
+          "std": 0.0381,
+          "min": 6.712,
+          "max": 6.803,
+          "cv_pct": 0.56
+        },
+        "power spectrum": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        },
+        "global alignment": {
+          "mean": 0.5127,
+          "std": 0.021,
+          "min": 0.494,
+          "max": 0.542,
+          "cv_pct": 4.1
+        },
+        "global iFFT": {
+          "mean": 7.028,
+          "std": 0.0194,
+          "min": 7.001,
+          "max": 7.046,
+          "cv_pct": 0.28
+        },
+        "prepare patch": {
+          "mean": 2.7397,
+          "std": 0.0309,
+          "min": 2.705,
+          "max": 2.78,
+          "cv_pct": 1.13
+        },
+        "patch alignment": {
+          "mean": 0.5363,
+          "std": 0.0057,
+          "min": 0.529,
+          "max": 0.543,
+          "cv_pct": 1.07
+        },
+        "fit polynomial": {
+          "mean": 0.001,
+          "std": 0.0,
+          "min": 0.001,
+          "max": 0.001,
+          "cv_pct": 0.0
+        },
+        "dose weighting": {
+          "mean": 8.0373,
+          "std": 0.0862,
+          "min": 7.929,
+          "max": 8.14,
+          "cv_pct": 1.07
+        },
+        "real space interpolation": {
+          "mean": 1.9957,
+          "std": 0.0398,
+          "min": 1.967,
+          "max": 2.052,
+          "cv_pct": 2.0
+        },
+        "binning": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "cv_pct": 0.0
+        }
+      },
+      "runs": [
+        {
+          "repetition": 1,
+          "exit_status": 0,
+          "wall_time_sec": 29.94,
+          "user_time_sec": 105.35,
+          "sys_time_sec": 9.33,
+          "cpu_percent": 383,
+          "peak_rss_kb": 3088740,
+          "peak_rss_gib": 2.946,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.104,
+              "microsec_per_op": 104504.0
+            },
+            "read movie": {
+              "seconds": 0.627,
+              "microsec_per_op": 627470.0
+            },
+            "apply gain": {
+              "seconds": 0.069,
+              "microsec_per_op": 69866.0
+            },
+            "initial sum": {
+              "seconds": 0.079,
+              "microsec_per_op": 79878.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.054,
+              "microsec_per_op": 54216.0
+            },
+            "fix defects": {
+              "seconds": 0.024,
+              "microsec_per_op": 24533.0
+            },
+            "global FFT": {
+              "seconds": 6.775,
+              "microsec_per_op": 6775036.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            },
+            "global alignment": {
+              "seconds": 0.494,
+              "microsec_per_op": 494658.0
+            },
+            "global iFFT": {
+              "seconds": 7.046,
+              "microsec_per_op": 7046124.0
+            },
+            "prepare patch": {
+              "seconds": 2.78,
+              "microsec_per_op": 111212.0
+            },
+            "patch alignment": {
+              "seconds": 0.543,
+              "microsec_per_op": 21744.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1890.0
+            },
+            "dose weighting": {
+              "seconds": 8.14,
+              "microsec_per_op": 8140105.0
+            },
+            "real space interpolation": {
+              "seconds": 2.052,
+              "microsec_per_op": 2052702.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "de9a66ce8ad1d93e0210f45441913972a6dc61a2743a649cdc56bfad46a2fbcd",
+            "star_sha256": "61d5bcebbc413f17c9b7ca0c35b24e82fad204ba87672161c753b965e40928de",
+            "joint_star_sha256": "00977cbb87c6f596c52b669392be534a1bb89af8a3323ab11d04fd05419b4191"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": false,
+            "stdout_snippet": " 2.000000e-02)\n   Max absolute diff:    2.281339e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        4.654194e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 7 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Relative image RMSE 4.654194e-03 > 1.000000e-03\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 2,
+          "exit_status": 0,
+          "wall_time_sec": 29.71,
+          "user_time_sec": 105.89,
+          "sys_time_sec": 8.64,
+          "cpu_percent": 385,
+          "peak_rss_kb": 3087912,
+          "peak_rss_gib": 2.945,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.102,
+              "microsec_per_op": 102601.0
+            },
+            "read movie": {
+              "seconds": 0.619,
+              "microsec_per_op": 619708.0
+            },
+            "apply gain": {
+              "seconds": 0.068,
+              "microsec_per_op": 68153.0
+            },
+            "initial sum": {
+              "seconds": 0.076,
+              "microsec_per_op": 76626.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.052,
+              "microsec_per_op": 52989.0
+            },
+            "fix defects": {
+              "seconds": 0.021,
+              "microsec_per_op": 21641.0
+            },
+            "global FFT": {
+              "seconds": 6.803,
+              "microsec_per_op": 6803799.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            },
+            "global alignment": {
+              "seconds": 0.542,
+              "microsec_per_op": 542137.0
+            },
+            "global iFFT": {
+              "seconds": 7.037,
+              "microsec_per_op": 7037203.0
+            },
+            "prepare patch": {
+              "seconds": 2.705,
+              "microsec_per_op": 108202.0
+            },
+            "patch alignment": {
+              "seconds": 0.537,
+              "microsec_per_op": 21502.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1917.0
+            },
+            "dose weighting": {
+              "seconds": 8.043,
+              "microsec_per_op": 8043474.0
+            },
+            "real space interpolation": {
+              "seconds": 1.968,
+              "microsec_per_op": 1968522.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "76cb56125ee60a9a636785481c53121e7efab38cb0b4588bbb0301b1cba4abcd",
+            "star_sha256": "1858868f085a8f25ba0b552a6bdaee733fe66f8cc884ed41faf88edc7dd2a157",
+            "joint_star_sha256": "2a74b7789912fd4454e6255c404453cf384e428e47535c159d49676df3983a40"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": false,
+            "stdout_snippet": " 2.000000e-02)\n   Max absolute diff:    2.281148e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        7.969464e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 7 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Relative image RMSE 7.969464e-03 > 1.000000e-03\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        },
+        {
+          "repetition": 3,
+          "exit_status": 0,
+          "wall_time_sec": 29.47,
+          "user_time_sec": 85.44,
+          "sys_time_sec": 7.91,
+          "cpu_percent": 316,
+          "peak_rss_kb": 3088092,
+          "peak_rss_gib": 2.945,
+          "stage_times": {
+            "read gain": {
+              "seconds": 0.102,
+              "microsec_per_op": 102288.0
+            },
+            "read movie": {
+              "seconds": 0.615,
+              "microsec_per_op": 615460.0
+            },
+            "apply gain": {
+              "seconds": 0.086,
+              "microsec_per_op": 86562.0
+            },
+            "initial sum": {
+              "seconds": 0.095,
+              "microsec_per_op": 95379.0
+            },
+            "detect hot pixels": {
+              "seconds": 0.051,
+              "microsec_per_op": 51589.0
+            },
+            "fix defects": {
+              "seconds": 0.014,
+              "microsec_per_op": 14109.0
+            },
+            "global FFT": {
+              "seconds": 6.712,
+              "microsec_per_op": 6712221.0
+            },
+            "power spectrum": {
+              "seconds": 0.0,
+              "microsec_per_op": 27.0
+            },
+            "global alignment": {
+              "seconds": 0.502,
+              "microsec_per_op": 502666.0
+            },
+            "global iFFT": {
+              "seconds": 7.001,
+              "microsec_per_op": 7001591.0
+            },
+            "prepare patch": {
+              "seconds": 2.734,
+              "microsec_per_op": 109372.0
+            },
+            "patch alignment": {
+              "seconds": 0.529,
+              "microsec_per_op": 21175.0
+            },
+            "fit polynomial": {
+              "seconds": 0.001,
+              "microsec_per_op": 1510.0
+            },
+            "dose weighting": {
+              "seconds": 7.929,
+              "microsec_per_op": 7929752.0
+            },
+            "real space interpolation": {
+              "seconds": 1.967,
+              "microsec_per_op": 1967722.0
+            },
+            "binning": {
+              "seconds": 0.0,
+              "microsec_per_op": 11.0
+            }
+          },
+          "output_checksums": {
+            "mrc_sha256": "5344f91a6fc4627c9a8c2719fe027158e1a19a353ce860c6270f00e072a7c3b5",
+            "star_sha256": "628c3186782d11e88c06061c2446d717c347a520444517f3c6eac775035d5193",
+            "joint_star_sha256": "55831f1d5870e7204dc6d56821128e6363469fce1b974fb2aa9ea3f7e8a7b8e1"
+          },
+          "gate_eval": {
+            "gate": "relaxed",
+            "passed": false,
+            "stdout_snippet": " 2.000000e-02)\n   Max absolute diff:    2.279378e+00 (threshold: 5.000000e+00)\n   Relative RMSE:        6.797189e-03 (threshold: 1.000000e-03 in relaxed/custom gate)\n   Normalized headers:   Core metadata: 7 diff bytes, Non-timestamp labels: 0 diff bytes\n   Status:               FAIL\n     ! Relative image RMSE 6.797189e-03 > 1.000000e-03\n\n3. STAR FIELDS & METADATA:\n   Normalized diff count: 0\n   Status:                PASS\n========================================================================\n"
+          }
+        }
+      ]
+    }
+  },
+  "analytics": {
+    "global_speedup_4threads": {
+      "speedup": 2.24,
+      "parallel_efficiency_pct": 56.0
+    },
+    "patch5x5_speedup_4threads": {
+      "speedup": 2.23,
+      "parallel_efficiency_pct": 55.8
+    },
+    "patch_overhead_single_thread_sec": 12.08
+  }
+}

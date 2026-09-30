@@ -351,6 +351,7 @@ class ResourceSampler(threading.Thread):
         self.hwm_kib: dict[int, int] = {}
         self.cpus_allowed: dict[int, list[str]] = {}
         self.cpu_ticks: dict[int, tuple[int, int]] = {}
+        self.faults: dict[int, tuple[int, int]] = {}
         self.unavailable: str | None = None
         self._stop_event = threading.Event()
 
@@ -381,6 +382,14 @@ class ResourceSampler(threading.Thread):
                     raw = Path(f"/proc/{pid}/stat").read_text()
                     f = raw.rsplit(")", 1)[1].split()
                     self.cpu_ticks[pid] = (int(f[11]), int(f[12]))  # utime, stime
+                    # minflt (field 10) and majflt (field 12) -> indices 7 and 9.
+                    # Frame buffers are allocated and freed per movie and glibc
+                    # caps its mmap threshold at 32 MiB, so every 57 MB frame
+                    # mmaps and faults fresh. Under transparent_hugepage=madvise
+                    # that is 4 KiB pages, and concurrent workers then contend on
+                    # the kernel page allocator -- a host-side cost that looks
+                    # like slower per-movie GPU work.
+                    self.faults[pid] = (int(f[7]), int(f[9]))
                 except (OSError, ValueError, IndexError):
                     pass
             self._stop_event.wait(self.interval)
@@ -796,6 +805,8 @@ def main(argv: list[str] | None = None) -> int:
     ru1 = resource.getrusage(resource.RUSAGE_CHILDREN)
     cpu_seconds_total = round((ru1.ru_utime - ru0.ru_utime)
                               + (ru1.ru_stime - ru0.ru_stime), 3)
+    minor_faults_total = ru1.ru_minflt - ru0.ru_minflt
+    major_faults_total = ru1.ru_majflt - ru0.ru_majflt
 
     results = []
     affinity_problems: list[str] = []
@@ -870,6 +881,8 @@ def main(argv: list[str] | None = None) -> int:
                                     ("worker process only; ghostscript children "
                                      f"excluded; sampled every {a.sample_interval}s"),
                         "cpu_seconds_sampled": cpu_s,
+                        "minor_faults": (resources.faults.get(p.pid) or (None, None))[0],
+                        "major_faults": (resources.faults.get(p.pid) or (None, None))[1],
                         "mean_threads_running": round(cpu_s / wall_s, 2)
                                                 if cpu_s is not None and wall_s > 0
                                                 else None,
@@ -909,6 +922,12 @@ def main(argv: list[str] | None = None) -> int:
                     "OMP_NUM_THREADS and anything inherited from the environment, "
                     "is in that worker's command.json.",
         "cpu_seconds_total": cpu_seconds_total,
+        "minor_faults_total": minor_faults_total,
+        "major_faults_total": major_faults_total,
+        "faults_note": "exact, from getrusage(RUSAGE_CHILDREN). Per-run total "
+                       "should be near constant for a fixed dataset; if the rate "
+                       "per second falls as workers are added, fault handling is "
+                       "a shared bottleneck rather than per-process work.",
         "cpu_seconds_total_note": "getrusage(RUSAGE_CHILDREN) delta across the run: "
                                   "exact, unsampled, and includes the ghostscript "
                                   "grandchildren each worker reaps.",

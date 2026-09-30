@@ -267,6 +267,12 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_write_faults.py
                 --binary $<TARGET_FILE:motioncorr> --runner-arg=--save_noDW
                 --runner-arg=--even_odd_split)
+        # #127 Ghostscript overlap: a throw from the main-thread batch.pdf pass
+        # must fail the job, not unwind through a joinable std::thread. Needs no
+        # GPU, so it runs in every configuration.
+        add_test(NAME OutputStageFaults
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_output_stage_faults.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME OutputTreeComparator

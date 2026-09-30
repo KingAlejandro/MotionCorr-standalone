@@ -89,6 +89,11 @@ DEFAULT_REQUIRED_TESTS = [
     # (gatherFrameSamples) stayed green only because the optimiser removed the
     # call, and the second (endIngestScratch) appeared the moment that stopped.
     "NvcompGuards",
+    # Added with the #127 Ghostscript overlap fix. It distinguishes a job that
+    # reports failure from a job that dies on SIGABRT, which is the whole
+    # difference the scope guard makes; a check for "non-zero exit" would pass
+    # on the defect.
+    "OutputStageFaults",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

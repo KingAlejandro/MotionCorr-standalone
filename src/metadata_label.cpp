@@ -108,55 +108,80 @@ void EMDL::printDefinitions(std::ostream& out)
 }
 
 
+// The label registry is filled once by StaticInitialization and never written
+// again, so every lookup below goes through find(). std::map::operator[] does
+// not: on a label that was never registered it inserts a value-initialized
+// EMDLabelData, whose user-provided default constructor leaves `type`
+// indeterminate -- so the old isInt()/isDouble()/... answered from an
+// uninitialized enum, and did it by mutating a global that two threads may be
+// reading. Both are why these take a const_iterator now.
+namespace
+{
+EMDLabelType labelType(const std::map<EMDLabel, EMDLabelData> &data,
+                       const EMDLabel &label, bool &found)
+{
+    const std::map<EMDLabel, EMDLabelData>::const_iterator it = data.find(label);
+    found = (it != data.end());
+    return found ? it->second.type : EMDL_UNKNOWN;
+}
+}
+
 EMDLabel  EMDL::str2Label(const std::string &labelName)
 {
-	if (names.find(labelName) == names.end())
+    const std::map<std::string, EMDLabel>::const_iterator it = names.find(labelName);
+    if (it == names.end())
         return EMDL_UNDEFINED;
-    return names[labelName];
+    return it->second;
 }//close function str2Label
 
 std::string  EMDL::label2Str(const EMDLabel &label)
 {
-    if (data.find(label) == data.end())
+    const std::map<EMDLabel, EMDLabelData>::const_iterator it = data.find(label);
+    if (it == data.end())
             return "";
-    return data[label].str;
+    return it->second.str;
 }//close function label2Str
 
 bool EMDL::isInt(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_INT);
+    bool found; return labelType(data, label, found) == EMDL_INT && found;
 }
 bool EMDL::isBool(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_BOOL);
+    bool found; return labelType(data, label, found) == EMDL_BOOL && found;
 }
 bool EMDL::isString(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_STRING);
+    bool found; return labelType(data, label, found) == EMDL_STRING && found;
 }
 bool EMDL::isDouble(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_DOUBLE);
+    bool found; return labelType(data, label, found) == EMDL_DOUBLE && found;
 }
 bool EMDL::isNumber(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_DOUBLE || data[label].type == EMDL_INT);
+    bool found; const EMDLabelType type = labelType(data, label, found);
+    return found && (type == EMDL_DOUBLE || type == EMDL_INT);
 }
 bool EMDL::isIntVector(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_INT_VECTOR);
+    bool found; return labelType(data, label, found) == EMDL_INT_VECTOR && found;
 }
 bool EMDL::isDoubleVector(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_DOUBLE_VECTOR);
+    bool found; return labelType(data, label, found) == EMDL_DOUBLE_VECTOR && found;
 }
 bool EMDL::isVector(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_DOUBLE_VECTOR || data[label].type == EMDL_INT_VECTOR);
+    bool found; const EMDLabelType type = labelType(data, label, found);
+    return found && (type == EMDL_DOUBLE_VECTOR || type == EMDL_INT_VECTOR);
 }
 bool EMDL::isUnknown(const EMDLabel &label)
 {
-    return (data[label].type == EMDL_UNKNOWN);
+    // An unregistered label is not an EMDL_UNKNOWN-typed one: the caller asks
+    // whether the registry says "unknown type", and for a missing label it
+    // says nothing.
+    bool found; return labelType(data, label, found) == EMDL_UNKNOWN && found;
 }
 
 bool EMDL::isValidLabel(const EMDLabel &label)

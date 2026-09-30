@@ -645,15 +645,28 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
-	std::vector<FileName> failed_movies;
+	// One background thread writes the finished products of movie N while the
+	// main thread computes movie N+1. See src/output_writer.h for the order,
+	// fail-closed and memory-bound properties this relies on.
+	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(true));
+
+	// Indexed by movie, so the report below stays in input order however the
+	// deferred write failures arrive.
+	std::vector<char> movie_failed(fn_micrographs.size(), 0);
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
+		output_movie_index = imic;
 		if (verb > 0 && imic % barstep == 0)
 			progress_bar(imic);
 
 		// Abort through the pipeline_control system
 		if (pipeline_control_check_abort_job())
 		{
+			// exit() does not unwind, so the writer thread would be cut off
+			// mid-product. Resume would reject the truncated file, but there
+			// is no reason to leave one: the previous movie's writes are
+			// milliseconds from done.
+			if (output_writer) output_writer->drain();
 			exit(RELION_EXIT_ABORTED);
 		}
 
@@ -677,12 +690,19 @@ void MotioncorrRunner::run()
 			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
-				RCTIC(TIMING_W_STAR);
-				saveModel(mic);
-				RCTOC(TIMING_W_STAR);
-				RCTIC(TIMING_W_EPS);
-				plotShifts(fn_micrographs[imic], mic);
-				RCTOC(TIMING_W_EPS);
+				// Stamped here: run() reassigns angpix and voltage for every
+				// movie, so the writer thread must not read them. The copy
+				// then owns everything the two writes need -- Micrograph's
+				// copy constructor clones the motion model.
+				stampModel(mic);
+				std::shared_ptr<Micrograph> saved = std::make_shared<Micrograph>(mic);
+				const FileName fn_movie = fn_micrographs[imic];
+				// Submitted after the image writes, and cancelled with them if
+				// one failed: the STAR is the resume completion marker.
+				submitOutput([this, saved, fn_movie]() {
+					writeModel(*saved);
+					plotShifts(fn_movie, *saved);
+				});
 				RCTOC(TIMING_SAVE_MODEL_PLOT);
 			}
 		}
@@ -695,8 +715,20 @@ void MotioncorrRunner::run()
 			result = false;
 		}
 		if (!result)
-			failed_movies.push_back(fn_micrographs[imic]);
+			movie_failed[imic] = 1;
+		collectWriteFailures(movie_failed);
 	}
+
+	// Every product is on disk and closed after this, which the joint STAR
+	// scan below depends on: it decides membership from exists(fn_avg).
+	output_writer->drain();
+	collectWriteFailures(movie_failed);
+	output_writer.reset();
+	output_movie_index = -1;
+
+	std::vector<FileName> failed_movies;
+	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
+		if (movie_failed[imic]) failed_movies.push_back(fn_micrographs[imic]);
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
@@ -1066,11 +1098,18 @@ void MotioncorrRunner::plotShifts(FileName fn_mic, Micrograph &mic)
 }
 
 void MotioncorrRunner::saveModel(Micrograph &mic) {
+	stampModel(mic);
+	writeModel(mic);
+}
+
+void MotioncorrRunner::stampModel(Micrograph &mic) {
 	mic.angpix = angpix;
 	mic.voltage = voltage;
 	mic.dose_per_frame = dose_per_frame;
 	mic.fnDefect = fn_defect;
+}
 
+void MotioncorrRunner::writeModel(Micrograph &mic) {
 	FileName fn_avg = getOutputFileNames(mic.getMovieFilename());
 
 	// Alignment uses binned-pixel displacements internally. Export a copy in
@@ -1086,6 +1125,59 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 	}
 	else
 		mic.write(fn_avg.withoutExtension() + ".star");
+}
+
+void MotioncorrRunner::submitOutput(std::function<void()> task)
+{
+	if (!output_writer)
+	{
+		task();
+		return;
+	}
+	// Opening the group here rather than at the top of the movie loop is the
+	// whole point: the wait for the previous movie's products happens at the
+	// first write of this movie, by which time they have had that movie's
+	// entire computation to finish in.
+	output_writer->beginMovie(output_movie_index);
+	output_writer->submit(std::move(task));
+}
+
+void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &path,
+                                        DataType datatype)
+{
+	// shared_ptr, not a captured Image: std::function requires a copyable
+	// target, and copying would reintroduce the full-micrograph copy this
+	// exists to avoid.
+	std::shared_ptr<Image<float> > owned = std::make_shared<Image<float> >();
+	owned->data.takeBufferFrom(image.data);
+	owned->MDMainHeader = image.MDMainHeader;
+	submitOutput([owned, path, datatype]() {
+		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+	});
+}
+
+void MotioncorrRunner::collectWriteFailures(std::vector<char> &movie_failed)
+{
+	if (!output_writer) return;
+	for (const OutputWriter::Failure &failure : output_writer->takeFailures())
+	{
+		// Same two lines the synchronous path prints, so the failed product
+		// path and the movie are still named on stderr.
+		std::cerr << failure.message;
+		if (!failure.message.empty() && failure.message.back() != '\n') std::cerr << std::endl;
+		std::cerr << "Continuing with the remaining movies." << std::endl;
+		if (failure.movie_index >= 0 && failure.movie_index < (long int)movie_failed.size())
+		{
+			movie_failed[failure.movie_index] = 1;
+			// The per-movie log already claims the product was written: the
+			// line is emitted when the write is queued, not when it lands.
+			// Record the truth in the same file rather than leaving it.
+			const FileName fn_log =
+				getOutputFileNames(fn_micrographs[failure.movie_index]).withoutExtension() + ".log";
+			std::ofstream trailer(fn_log.c_str(), std::ios::app);
+			if (trailer) trailer << "ERROR: " << failure.message << std::endl;
+		}
+	}
 }
 
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
@@ -2574,7 +2666,11 @@ skip_fitting:
 		// shared predicate above.
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+			// Hands Iref's pixels to the writer and leaves it empty. The
+			// dose-weighting branch below reallocates it from scratch
+			// (reshape + initZeros), so nothing reads it in between.
+			submitImageWrite(Iref, !do_dose_weighting ? fn_avg : fn_avg_noDW,
+			                 write_float16 ? Float16: Float);
 			logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
 		}
 		// ODD-EVEN Output
@@ -2583,8 +2679,8 @@ skip_fitting:
 		Iref_odd.setSamplingRateInHeader(output_angpix, output_angpix);
 		Iref_even.setSamplingRateInHeader(output_angpix, output_angpix);
 
-		Iref_odd.write(fn_avg.withoutExtension() + "_ODD.mrc", -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
-		Iref_even.write(fn_avg.withoutExtension() + "_EVN.mrc", -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+		submitImageWrite(Iref_odd, fn_avg.withoutExtension() + "_ODD.mrc", write_float16 ? Float16: Float);
+		submitImageWrite(Iref_even, fn_avg.withoutExtension() + "_EVN.mrc", write_float16 ? Float16: Float);
 		logfile << "Written aligned but non-dose weighted sum of odd frames to " << (fn_avg.withoutExtension() + "_ODD.mrc") << std::endl;
 		logfile << "Written aligned but non-dose weighted sum of even frames to " << (fn_avg.withoutExtension() + "_EVN.mrc") << std::endl;
 		}
@@ -2675,7 +2771,7 @@ skip_fitting:
 		// Final output
 		RCTIC(TIMING_WRITE_RESULT);
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+		submitImageWrite(Iref, fn_avg, write_float16 ? Float16: Float);
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
 		RCTOC(TIMING_WRITE_RESULT);
 	}

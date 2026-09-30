@@ -775,6 +775,44 @@ public:
         nzyxdimAlloc = 0;
     }
 
+    /** Take over another array's buffer, leaving the source empty.
+     *
+     * Ownership transfer without a copy: afterwards the source is in the state
+     * of a default-constructed array, so its destructor frees nothing and the
+     * buffer has exactly one owner and one reader.
+     *
+     * Deliberately not moveFrom(), which leaves the source pointing at the
+     * same buffer with destroyData false. That is fine when the source dies
+     * immediately, but here the buffer is handed to another thread and the
+     * source is reused (reshape + initZeros) right afterwards -- a surviving
+     * alias would be written while the writer reads it.
+     */
+    void takeBufferFrom(MultidimArray<T> &source)
+    {
+        if (&source == this) return;
+        coreDeallocate();
+        data = source.data;
+        destroyData = source.destroyData;
+        ndim = source.ndim;
+        zdim = source.zdim;
+        ydim = source.ydim;
+        xdim = source.xdim;
+        yxdim = source.yxdim;
+        zyxdim = source.zyxdim;
+        nzyxdim = source.nzyxdim;
+        zinit = source.zinit;
+        yinit = source.yinit;
+        xinit = source.xinit;
+        mmapOn = source.mmapOn;
+        mapFile = source.mapFile;
+        mFd = source.mFd;
+        nzyxdimAlloc = source.nzyxdimAlloc;
+        // coreInit() clears data and the mmap flag, so the source's destructor
+        // neither frees the buffer nor unlinks a mapping this object now owns.
+        source.coreInit();
+        source.mapFile = "";
+    }
+
     /** Alias a multidimarray.
      *
      * Treat the multidimarray as if it were a volume. The data is not copied

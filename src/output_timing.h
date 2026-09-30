@@ -1,6 +1,15 @@
-/* Measurement-only sub-timers for the output stage (issue: output write speed).
- * Active only in a -DTIMING build; compiles to nothing otherwise.
- * The globals are defined in motioncorr_runner.cpp next to MCtimer. */
+/* Measurement-only sub-timers for the output stage.
+ *
+ * Active only in a -DTIMING build; compiles to nothing otherwise. The globals
+ * are defined in motioncorr_runner.cpp next to MCtimer.
+ *
+ * Caveat for the tags below: Image::write() is normally reached only from the
+ * OutputWriter thread, so each of these totals belongs to one thread and is
+ * sound. A synchronous image write on the main thread that overlaps a queued
+ * one -- the power spectrum under --grouping_for_ps, say -- would tick the
+ * same tags from both, and Timer's accumulation is unsynchronised, so those
+ * rows would then under-report. The stage totals in motioncorr_runner.cpp are
+ * unaffected: they are ticked from the main thread only. */
 #ifndef OUTPUT_TIMING_H_
 #define OUTPUT_TIMING_H_
 

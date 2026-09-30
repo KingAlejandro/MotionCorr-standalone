@@ -34,3 +34,37 @@ exactly that, reporting -5.4 s where the gain cache alone accounted for 2.3 s.
 - `compare_outputs.py` — the comparator: MRC core header and payload exactly,
   STAR/EPS exactly, PDF by rendered page raster, log ignoring timed lines.
 - `summarise_runs.py` — the campaign summariser.
+
+## Where the output time went (baseline, CUDA)
+
+24 movies, median of the six baseline runs in `campaign_cuda.txt`, 28.7 s wall.
+
+| stage | s | per movie | note |
+|---|---|---|---|
+| `write corrected image` | 2.98 | 124 ms | |
+| ⤷ `out - mrc stats` | 1.37 | 57 ms | four full traversals for amin/amax/amean/arms |
+| ⤷ `out - mrc payload` | 1.59 | 66 ms | one 57 MB `fwrite` |
+| ⤷ open / header / close | 0.004 | | close spiked to 1.05 s once, on writeback |
+| `write star and shift plot` | 0.13 | 5 ms | 0.049 STAR + 0.076 EPS |
+| `joint star and logfile pdf` | 1.08 | | of which 1.06 s is four Ghostscript processes |
+| ⤷ `gs header.pdf` | 0.13 | | 6 histogram/scatter EPS |
+| ⤷ `gs batch.pdf` | 0.31 | | 24 per-movie EPS |
+| ⤷ `gs all_batches.pdf` | 0.30 | | **re-encodes `batch.pdf` and nothing else** |
+| ⤷ `gs logfile.pdf` | 0.33 | | `header.pdf` + `all_batches.pdf` |
+| ⤷ joint STAR rescan, histogram EPS | 0.016 | | |
+| **total** | **4.19** | | **15% of wall** |
+
+Same output stage on the CPU path is ~2.8 s of a 210 s run, so it is a CUDA-path
+problem: the GPU shortens everything except the writing.
+
+The payload split between CPU and filesystem comes from `fs_probe.txt` — the
+identical run with `--o` on `/dev/shm`:
+
+| destination | `out - mrc payload` |
+|---|---|
+| local disk | 1.58 s |
+| tmpfs | 1.08 s |
+
+So 1.08 s is the cost of moving 1.37 GB into the page cache and 0.50 s is the
+filesystem underneath it. `out - mrc stats` is identical on both (1.31 vs
+1.31 s), as a pure-CPU stage should be.

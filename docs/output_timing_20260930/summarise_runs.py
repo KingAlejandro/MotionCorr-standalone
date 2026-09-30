@@ -15,7 +15,9 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-WALL = re.compile(r"Elapsed \(wall clock\) time [^:]*:\s*(?:(\d+):)?(\d+):([\d.]+)")
+# The label itself contains colons ("(h:mm:ss or m:ss)"), so anchor on the
+# end of the line rather than on the first colon.
+WALL = re.compile(r"Elapsed \(wall clock\).*?(?:(\d+):)?(\d+):([\d.]+)\s*$", re.M)
 RSS = re.compile(r"Maximum resident set size \(kbytes\):\s*(\d+)")
 USER = re.compile(r"User time \(seconds\):\s*([\d.]+)")
 SYS = re.compile(r"System time \(seconds\):\s*([\d.]+)")

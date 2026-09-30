@@ -1,0 +1,62 @@
+arm        n  wall min  wall max    median    user     sys  peak RSS MiB
+instr      6     28.10     29.05     28.73    40.1    38.3          1561
+t1         6     27.09     27.79     27.41    39.1    38.2          1560
+t2         6     25.07     27.11     26.88    39.5    41.0          1560
+
+paired t1 - instr: n=6  per-round [-1.01, -1.26, -1.17, -1.44, -1.3, -1.26]
+  median -1.26 s (-4.4%), faster in 6/6 rounds, range -1.44 to -1.01 s
+  arm ranges overlap: False
+
+paired t2 - instr: n=6  per-round [-3.03, -2.09, -1.62, -1.95, -1.8, -1.75]
+  median -1.88 s (-6.5%), faster in 6/6 rounds, range -3.03 to -1.62 s
+  arm ranges overlap: False
+
+--- median stage seconds ---
+stage                                  instr        t1        t2
+read gain                              0.102     0.102     0.103
+read movie                             7.091     7.103     7.301
+apply gain and initial sum             3.633     3.637     4.322
+detect hot pixels                      0.925     0.917     0.838
+fix defects                            1.143     1.153     1.159
+global FFT                             0.536     0.536     0.536
+power spectrum                         0.000     0.000     0.000
+global alignment                       0.261     0.261     0.282
+global iFFT                            0.555     0.548     0.546
+prepare patch                          0.147     0.147     0.147
+patch alignment                        1.524     1.525     1.527
+fit polynomial                         0.036     0.035     0.036
+dose weighting                         1.349     1.341     1.381
+binning                                0.000     0.000     0.000
+write corrected image                  2.976     2.033     0.001
+write star and shift plot              0.126     0.126     0.001
+joint star and logfile pdf             1.079     0.659     0.659
+out - mrc open                         0.003     0.003     0.005
+out - mrc stats                        1.367     0.402     0.426
+out - mrc header                       0.000     0.000     0.000
+out - mrc payload                      1.592     1.620     1.656
+out - mrc close                        0.001     0.001     0.001
+out - per-movie star                   0.049     0.049         -
+out - per-movie eps                    0.076     0.076         -
+out - joint star scan                  0.007     0.007     0.007
+out - joint hist eps                   0.009     0.009     0.009
+out - gs header.pdf                    0.126         -         -
+out - gs batch.pdf                     0.310         -         -
+out - gs all_batches.pdf               0.295     0.001     0.001
+out - gs logfile.pdf                   0.327     0.326     0.324
+out - gs header+batch                      -     0.315     0.317
+out - gs batch.pdf (inner)                 -     0.315     0.317
+
+# 4-gpu-vm (A100 80GB, GPU 0 by UUID), taskset -c 96-103, under flock
+# /tmp/motioncorr-bench.lock. 24 tutorial movies, --j 8 --gpu 0, Release -O3,
+# TIMING=ON. Six rounds; the arm order rotates instr/t1/t2 -> t1/t2/instr ->
+# t2/instr/t1 so the advantage of running later in a round lands on each arm
+# equally. One discarded warm-up run precedes round 1.
+#
+# Binaries: instr = 6393547 + c08fb29 (sub-timers only), t1 = + cbf8dc7,
+# t2 = + 92e7662 + b796441. The box is shared; no foreign compute app held
+# GPU 0 at the settle gate.
+#
+# The t2 column's 'out - mrc *' rows were collected before b796441, so they
+# come from a Timer whose end stamp was shared between the writer and main
+# threads; treat them as approximate. campaign_cuda_final.txt repeats them
+# with the fix.

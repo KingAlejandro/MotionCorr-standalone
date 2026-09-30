@@ -409,7 +409,8 @@ def validate_tree(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _normalise_text(path: Path, root: Path, raw: bytes) -> bytes:
+def _normalise_text(path: Path, root: Path, raw: bytes,
+                    drop_log_prefixes: Sequence[str] = ()) -> bytes:
     text = raw.decode("latin-1")
     # Replace both spellings because a symlinked temporary root can be printed
     # lexically by the producer while pathlib resolves it for containment checks.
@@ -417,12 +418,26 @@ def _normalise_text(path: Path, root: Path, raw: bytes) -> bytes:
         text = text.replace(spelling, "<OUTROOT>")
     if path.suffix.lower() == ".log":
         text = "\n".join(line for line in text.split("\n")
-                          if not any(marker in line for marker in TIMING_MARKERS))
+                          if not any(marker in line for marker in TIMING_MARKERS)
+                          and not any(line.lstrip().startswith(pref)
+                                      for pref in drop_log_prefixes))
     return text.encode("latin-1")
 
 
 def compare_trees(base: Path, candidate: Path, manifest: Dict[str, Any],
-                  compare_auxiliary: bool = True) -> Dict[str, Any]:
+                  compare_auxiliary: bool = True,
+                  drop_log_prefixes: Sequence[str] = ()) -> Dict[str, Any]:
+    """Compare two output trees.
+
+    drop_log_prefixes removes whole .log lines starting with one of the given
+    prefixes from BOTH arms before comparing. It exists for one situation: a
+    candidate that legitimately records something the base never could, such as
+    which movie ingest path ran. It is opt-in, empty by default, and applied
+    symmetrically, so it cannot hide a difference in a line the base also
+    writes -- and every other line of the log, and every non-log product, is
+    still compared in full. Passing a prefix does not weaken the comparison of
+    anything else; a pixel, header, STAR or EPS difference still fails.
+    """
     base_info = validate_tree(base, manifest)
     candidate_info = validate_tree(candidate, manifest)
     # Keep the caller's lexical spelling as well as validate_tree's canonical
@@ -458,8 +473,8 @@ def compare_trees(base: Path, candidate: Path, manifest: Dict[str, Any],
         else:
             br, cr = bx.read_bytes(), cx.read_bytes()
             if rel.suffix.lower() in TEXT_SUFFIXES:
-                br = _normalise_text(bx, b_root, br)
-                cr = _normalise_text(cx, c_root, cr)
+                br = _normalise_text(bx, b_root, br, drop_log_prefixes)
+                cr = _normalise_text(cx, c_root, cr, drop_log_prefixes)
             equal = br == cr
         if not equal:
             different.append(rel.as_posix())
@@ -492,6 +507,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help="JSON containing exact input movie inventory and corrected-image dimensions")
     parser.add_argument("--input-star", type=Path, default=None,
                         help="input STAR to verify against the manifest hash and movie list")
+    parser.add_argument("--allow-added-log-line", action="append", default=[],
+                        metavar="PREFIX",
+                        help="Drop .log lines beginning with PREFIX from BOTH arms before "
+                             "comparing. Use only for a line the candidate legitimately "
+                             "adds, such as the ingest-path record; every other line and "
+                             "every non-log product is still compared in full. Repeatable.")
     parser.add_argument("--products-only", action="store_true",
                         help="Compare validated MRC/STAR products only; omit logs/EPS/other auxiliary files")
     parser.add_argument("--json-out", type=Path, default=None,
@@ -504,7 +525,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if opts.input_star is not None:
             validate_input_star(opts.input_star, manifest)
         report = compare_trees(opts.base, opts.candidate, manifest,
-                               compare_auxiliary=not opts.products_only)
+                               compare_auxiliary=not opts.products_only,
+                               drop_log_prefixes=tuple(opts.allow_added_log_line))
     except ValidationError as exc:
         report = {"status": "FAIL", "reason": str(exc)}
         print(f"FAIL: {exc}", file=sys.stderr)
@@ -518,6 +540,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     b = report["base"]
     print(f"Validated {b['movie_count']} movies, {b['mrc_count']} MRC images, "
           f"{b['star_count']} STAR files, {b['pixel_count']} pixels per arm")
+    if opts.allow_added_log_line:
+        print("Allowed added .log line prefixes (dropped from BOTH arms): "
+              + ", ".join(repr(x) for x in opts.allow_added_log_line))
     print(f"Comparison: {report['comparison_scope']}; status={report['status']}; "
           f"different files={len(report['different_files'])}")
     for rel in report["different_files"][:20]:

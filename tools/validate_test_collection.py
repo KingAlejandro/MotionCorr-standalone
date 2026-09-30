@@ -50,6 +50,17 @@ DEFAULT_REQUIRED_TESTS = [
     # that can see the recenter call site still being wired up.
     "RunnerInterpolateRecenter",
     "RunnerInterpolateShifts",
+    # Added by the output-write optimisation group. MrcHeaderStats is the only
+    # test that compares the fused header-statistics routine against the four
+    # routines it replaces; every end-to-end comparator checks outputs against
+    # stored references, which a wrong amean or arms would simply become. Its
+    # 262144-element case is the only one that separates a reassociated sum,
+    # which is what vectorising or parallelising that loop would produce.
+    # PdfConcat is the only test that reaches concatenatePDFfiles' one-input
+    # path at all: no other test asserts anything about a PDF product, so a
+    # copy shortcut that truncated its output would be invisible.
+    "MrcHeaderStats",
+    "PdfConcat",
 ]
 
 

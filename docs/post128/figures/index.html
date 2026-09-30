@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8">
+<title>MotionCorr multi-GPU timing</title>
+<style>
+ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f9f9f7;color:#0b0b0b;margin:0;padding:32px}
+ figure{margin:0 0 24px;background:#fcfcfb;border:1px solid rgba(11,11,11,.10);
+   border-radius:10px;padding:8px;display:inline-block}
+ img{display:block;max-width:100%} .dk{display:none}
+ table{border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;
+   background:#fcfcfb;border:1px solid rgba(11,11,11,.10);border-radius:10px}
+ th,td{padding:7px 14px;text-align:right;border-bottom:1px solid #e1e0d9}
+ th:first-child,td:first-child{text-align:left} th{color:#52514e;font-weight:600}
+ caption{text-align:left;padding:10px 14px;color:#52514e;font-size:12px}
+ @media (prefers-color-scheme:dark){
+   body{background:#0d0d0d;color:#fff} .lt{display:none} .dk{display:block}
+   figure,table{background:#1a1a19;border-color:rgba(255,255,255,.10)}
+   th{color:#c3c2b7} td,th{border-color:#2c2c2a} caption{color:#c3c2b7}}
+</style>
+<h1 style="font-size:17px">MotionCorr static multi-GPU timing</h1>
+<figure><img class="lt" src="attribution-light.svg" alt="attribution"><img class="dk" src="attribution-dark.svg" alt="attribution"></figure><figure><img class="lt" src="speedup-light.svg" alt="speedup"><img class="dk" src="speedup-dark.svg" alt="speedup"></figure><figure><img class="lt" src="sweep-light.svg" alt="sweep"><img class="dk" src="sweep-dark.svg" alt="sweep"></figure><figure><img class="lt" src="timeline-light.svg" alt="timeline"><img class="dk" src="timeline-dark.svg" alt="timeline"></figure>
+<table><caption>Table view — every plotted value, medians across repeats.
+first-product spread is the stagger between workers reaching their first product.</caption>
+<tr><th>GPUs</th><th>wall s</th><th>speedup</th><th>eff.</th><th>setup s</th>
+<th>produce s</th><th>tail s</th><th>spread s</th></tr><tr><td>1</td><td>12.98</td><td>1.00</td><td>100%</td><td>0.99</td><td>10.95</td><td>0.94</td><td>0.000</td></tr><tr><td>2</td><td>7.23</td><td>1.80</td><td>90%</td><td>1.17</td><td>5.27</td><td>0.79</td><td>0.035</td></tr><tr><td>3</td><td>5.67</td><td>2.29</td><td>76%</td><td>1.39</td><td>3.48</td><td>0.79</td><td>0.029</td></tr><tr><td>4</td><td>5.06</td><td>2.56</td><td>64%</td><td>1.61</td><td>2.66</td><td>0.82</td><td>0.068</td></tr></table>

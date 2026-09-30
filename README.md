@@ -46,6 +46,12 @@ For a RELION-compatible movie STAR file, the command line follows RELION's CPU m
 ./build/motioncorr --i movies.star --o MotionCorr --use_own --j 4
 ```
 
+`--j` sets the size of the OpenMP pool. One further thread writes each movie's
+output products while the next movie is computed, so the process uses `--j`
+plus one; on the 24-movie tutorial set that is worth about 2% of wall when the
+pool already covers every available CPU and about 8% when a CPU is free
+(`docs/output_timing_20260930/`).
+
 The `--use_own` flag selects the native implementation. When built with CUDA support (`-DCUDA=ON`), passing `--gpu <id>` enables GPU acceleration for global alignment:
 
 ```sh

@@ -7,7 +7,11 @@ only at specific super-resolution geometries and stores two pixels per byte.
 Both must come out Y-flipped relative to the file, matching the MRC convention.
 
 Comparison is per-row sums, which are exact in double for integer samples and
-relocate as a unit under any row-striding or flip error.
+relocate as a unit under any row-striding or flip error, plus the ordered
+sample values themselves. Sums are blind to two pixels swapped inside one row,
+and for packed 4-bit they are blind to the two samples in a byte coming out in
+the wrong order, so only the values pin sample order. The large packed geometry
+has 57 M samples, so there the value check covers a bounded number of rows.
 """
 import argparse
 import os
@@ -72,6 +76,17 @@ def write_tiff(path, frame_rows, bits, compression, rows_per_strip, logical_widt
             prev_next_field = next_field
 
 
+def expected_row_samples(row, bits, logical_width):
+    """One file row's decoded samples, in order."""
+    if bits == 4:
+        out = []
+        for byte in row:
+            out.append(float(byte & 0x0F))   # low nibble is the first pixel
+            out.append(float((byte >> 4) & 0x0F))
+        return out
+    return [float(v) for v in struct.unpack("<%dH" % logical_width, row)]
+
+
 def expected_rowsums(frame_rows, bits, logical_width):
     """Reader flips Y, so file row r lands at height-1-r."""
     out = []
@@ -84,7 +99,50 @@ def expected_rowsums(frame_rows, bits, logical_width):
     return out
 
 
-def run_case(helper, name, frame_rows, bits, compression, rows_per_strip, logical_width, tmp):
+def check_samples(helper, name, tiff, frame_rows, bits, logical_width, tmp, max_rows):
+    """Exact ordered sample values, streamed a row at a time.
+
+    max_rows bounds both what the helper writes and what is compared, counted
+    over the whole stack in output order (frame-major, Y-flipped within a
+    frame); None takes every row. The dump's length is asserted first, so a
+    truncated dump cannot pass on the rows that happen to be present.
+    """
+    dump = os.path.join(tmp, name + ".raw")
+    cmd = [helper, "read_tiff_raw", tiff, dump]
+    height, n_frames = len(frame_rows[0]), len(frame_rows)
+    want_rows = height * n_frames if max_rows is None else min(max_rows, height * n_frames)
+    if max_rows is not None:
+        cmd.append(str(max_rows))
+    subprocess.run(cmd, check=True)
+    checked = 0
+    try:
+        # A short dump must fail here rather than pass on the rows that survive.
+        assert os.path.getsize(dump) == 24 + 4 * logical_width * want_rows, \
+            "%s: raw dump is %d bytes, expected %d" % (
+                name, os.path.getsize(dump), 24 + 4 * logical_width * want_rows)
+        with open(dump, "rb") as fh:
+            nx, ny, nn = struct.unpack("<qqq", fh.read(24))
+            assert (nx, ny, nn) == (logical_width, height, n_frames), \
+                "%s: raw dump dims %s" % (name, (nx, ny, nn))
+            for rows in frame_rows:                 # rows arrive frame-major
+                for row in reversed(rows):          # and the reader flips Y
+                    if checked == want_rows:
+                        return checked * nx
+                    got = struct.unpack("<%df" % nx, fh.read(4 * nx))
+                    want = expected_row_samples(row, bits, logical_width)
+                    if list(got) != want:
+                        i = next(k for k in range(nx) if got[k] != want[k])
+                        raise AssertionError(
+                            "%s: output row %d sample %d differs (%r != %r)" % (
+                                name, checked, i, got[i], want[i]))
+                    checked += 1
+    finally:
+        os.unlink(dump)
+    return checked * nx
+
+
+def run_case(helper, name, frame_rows, bits, compression, rows_per_strip, logical_width, tmp,
+             max_sample_rows=None):
     tiff = os.path.join(tmp, name + ".tif")
     dump = os.path.join(tmp, name + ".bin")
     write_tiff(tiff, frame_rows, bits, compression, rows_per_strip, logical_width)
@@ -101,7 +159,9 @@ def run_case(helper, name, frame_rows, bits, compression, rows_per_strip, logica
     bad = [i for i, (a, b) in enumerate(zip(got, want)) if a != b]
     assert not bad, "%s: %d/%d row sums differ, first at row %d (%r != %r)" % (
         name, len(bad), len(want), bad[0], got[bad[0]], want[bad[0]])
-    print("  %s: %d frame(s) %dx%d, %d row sums exact" % (name, nn, nx, ny, len(want)))
+    n = check_samples(helper, name, tiff, frame_rows, bits, logical_width, tmp, max_sample_rows)
+    print("  %s: %d frame(s) %dx%d, %d row sums and %d samples exact" % (
+        name, nn, nx, ny, len(want), n))
 
 
 def main():
@@ -128,7 +188,10 @@ def main():
         # invisible when every strip holds exactly one row.
         file_w, h = 3710, 7676
         frames = [[rng.randbytes(file_w) for _ in range(h)]]
-        run_case(args.helper, "packed4bit_k2sr", frames, 4, 1, 7, file_w * 2, tmp)
+        # 57 M samples in all; the value check covers the first 64 output rows,
+        # which is what pins the within-byte nibble order that sums cannot see.
+        run_case(args.helper, "packed4bit_k2sr", frames, 4, 1, 7, file_w * 2, tmp,
+                 max_sample_rows=64)
 
     print("TIFF read: all cases exact")
     return 0

@@ -213,6 +213,11 @@ exec "{sys.executable}" "$@"
             "NativeU16Staging",
         ]
 
+        def runnable(name: str) -> dict:
+            """A collected entry shaped like `ctest --show-only=json-v1` output,
+            so only the property a case is about can be what rejects it."""
+            return {"name": name, "command": [sys.executable, name + ".py"]}
+
         def drop_one(name: str):
             """Collection with exactly one required test removed, and a filler
             added so the count gate cannot be what rejects it.
@@ -239,7 +244,7 @@ exec "{sys.executable}" "$@"
                 res_missing = subprocess.run(
                     [sys.executable, str(VALIDATE_COLLECTION)],
                     input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
-                                      "tests": [{"name": n} for n in names]}),
+                                      "tests": [runnable(n) for n in names]}),
                     capture_output=True, text=True
                 )
                 self.assertEqual(res_missing.returncode, 1,
@@ -252,11 +257,26 @@ exec "{sys.executable}" "$@"
         res_full = subprocess.run(
             [sys.executable, str(VALIDATE_COLLECTION)],
             input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
-                              "tests": [{"name": n} for n in INTEGRATED_SUITE]}),
+                              "tests": [runnable(n) for n in INTEGRATED_SUITE]}),
             capture_output=True, text=True
         )
         self.assertEqual(res_full.returncode, 0,
                          f"Complete integrated collection must pass:\n{res_full.stdout}")
+
+        # Case D: the complete collection with one test whose command program is
+        # empty (BAD_COMMAND at run time) is rejected, and names that test.
+        for empty in ([], [""], ["", "script.py"]):
+            with self.subTest(command=empty):
+                tests = [runnable(n) for n in INTEGRATED_SUITE]
+                tests[INTEGRATED_SUITE.index("NvcompGuards")]["command"] = empty
+                res_bad = subprocess.run(
+                    [sys.executable, str(VALIDATE_COLLECTION)],
+                    input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
+                                      "tests": tests}),
+                    capture_output=True, text=True
+                )
+                self.assertEqual(res_bad.returncode, 1, "empty command program must fail validation")
+                self.assertIn("would report BAD_COMMAND: NvcompGuards\n", res_bad.stdout)
 
     def test_4_missing_fixture_or_truth_fails(self) -> None:
         """Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures."""

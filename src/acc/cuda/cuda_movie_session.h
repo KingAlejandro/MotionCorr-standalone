@@ -11,6 +11,7 @@
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_failure_state.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
@@ -19,6 +20,8 @@
  */
 class CudaMovieSession {
 public:
+    CudaMovieSession(const CudaMovieSession&) = delete;
+    CudaMovieSession& operator=(const CudaMovieSession&) = delete;
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
 
@@ -35,6 +38,20 @@ public:
     // or copy it later via downloadUnalignedSum() when falling back.
     bool applyGainDefectsAndSum(
         const std::vector<Image<float> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
+    // Issue #85 lane C: same contract as applyGainDefectsAndSum, but the host movie
+    // is held in its native unsigned 16-bit form and the uint16 -> float expansion
+    // happens on the device while the gain is applied. Halves the host payload and
+    // the PCIe bytes for unsigned-16-bit TIFF input. Products are bit-identical:
+    // uint16 -> float32 is exact, and the gain multiply, the store into d_Iframes
+    // and the ascending per-pixel accumulation are the same operations in the same
+    // order. Callers with any other input type must keep using the float overload.
+    bool applyGainDefectsAndSumU16(
+        const std::vector<Image<unsigned short> > &raw_frames,
         const MultidimArray<float> *gain_ref,
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
@@ -112,6 +129,15 @@ public:
     // Download real frames to host (used e.g. for fallback)
     bool downloadRealFrames(std::vector<Image<float> > &Iframes);
 
+    // Issue #69: the failure state this session observed, preserved across the helper
+    // boundary. The internal error handlers consume the CUDA error when they return
+    // false, so a later cudaGetLastError() reports cudaSuccess and proves nothing about
+    // context health. A caller deciding whether a retry is safe must use this, not a
+    // fresh last-error read. It carries both the first failure (diagnostic provenance)
+    // and a monotonically latched poisoning code that no later or earlier record can
+    // displace -- see CudaFailureState.
+    const CudaFailureState& getFailureState() const { return failure_state; }
+
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
     cufftComplex* getDeviceFourierFrames() { return d_Fframes; }
@@ -124,6 +150,16 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    cudaError_t releaseBuffer(void *&slot) noexcept;
+    template<class T> cudaError_t releaseBuffer(T *&slot) noexcept;
+    cufftResult releasePlan(cufftHandle &slot, bool &owned) noexcept;
+    void recordFailure(cudaError_t err, const char *stage, int line);
+    void recordCufftFailure(cufftResult res, const char *stage, int line);
+
+    // Sticky for the life of the session. Not reset by release(): a movie that failed
+    // stays failed for reporting purposes, and a poisoned context never un-poisons.
+    CudaFailureState failure_state;
+
     int nx;
     int ny;
     int n_frames;

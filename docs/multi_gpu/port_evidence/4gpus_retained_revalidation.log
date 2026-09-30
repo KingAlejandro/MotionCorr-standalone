@@ -1,0 +1,158 @@
++ RUN=/home/alex/mc-i53-gpu/run
++ SRC=/home/alex/mc-i53-port-20260928/src
++ OUT=/home/alex/mc-i53-port-20260928/reval
++ PY=/home/alex/.mc-venv/bin/python3
++ MASK=96-111
++ /home/alex/.mc-venv/bin/python3 -c 'import numpy; print("numpy", numpy.__version__)'
+numpy 2.5.3
++ mkdir -p /home/alex/mc-i53-port-20260928/reval
+=== PROVENANCE ===
++ cd /home/alex/mc-i53-gpu/run
++ echo '=== PROVENANCE ==='
++ git -C /home/alex/mc-i53-port-20260928/src rev-parse HEAD
+89a438051309e238bc721703e2577b7041714300
++ git -C /home/alex/mc-i53-port-20260928/src status --porcelain
++ date -Is
+2026-09-28T15:23:58+00:00
++ hostname
+4-gpu-vm
++ cat /proc/loadavg
+3.60 5.18 8.14 4/4936 1572568
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+--- compute apps before (must be empty of ours) ---
++ echo '--- compute apps before (must be empty of ours) ---'
++ nvidia-smi --query-compute-apps=pid,gpu_uuid --format=csv,noheader
+=== RETAINED WITNESS (read, not reproduced) ===
++ echo '=== RETAINED WITNESS (read, not reproduced) ==='
++ /home/alex/.mc-venv/bin/python3 -c '
+import json
+s = json.load(open('\''sh2/status.json'\''))
+w = s['\''gpu_witness'\'']
+print('\''launcher_verdict'\'', s['\''verdict'\''])
+print('\''distinct_devices_witnessed'\'', w['\''distinct_devices_witnessed'\''])
+print('\''uuids'\'', sorted(set(w['\''expected'\''].values())))
+print('\''unwitnessed'\'', w['\''unwitnessed_pids'\''], '\''wrong'\'', w['\''wrong_device'\''], '\''shared'\'', w['\''shared_devices'\''])
+print('\''cpu_masks'\'', s['\''cpu_masks'\''])
+assert w['\''all_pids_witnessed_on_intended_distinct_devices'\'']
+assert len(set(w['\''expected'\''].values())) == 2
+'
+launcher_verdict PASS
+distinct_devices_witnessed 2
+uuids ['GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d', 'GPU-eddb42fe-4f9a-adde-76d3-b924e14add54']
+unwitnessed [] wrong [] shared []
+cpu_masks ['96-103', '104-111']
+=== 1. PARTITION DETERMINISM AT THE PORT HEAD ===
++ echo '=== 1. PARTITION DETERMINISM AT THE PORT HEAD ==='
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/partition_star.py --star movies.star --n 2 --outdir /home/alex/mc-i53-port-20260928/reval/shards --prefix shard
+/home/alex/mc-i53-port-20260928/reval/shards/shard_2way_0.star	12
+/home/alex/mc-i53-port-20260928/reval/shards/shard_2way_1.star	12
+manifest	/home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json
+TOTAL	24
++ /home/alex/.mc-venv/bin/python3 - /home/alex/mc-i53-port-20260928/reval
+shard 0 sha256 fd76e36940f7cfcd617d28acbd77d4250f595d4a49e288739794b22479b0cd3a IDENTICAL
+shard 1 sha256 0eaffdbcdd2160da9c235a85b6c560f6d91664f5aa7df2f0ed29a1271902877c IDENTICAL
+PARTITION_IDENTICAL=1
+=== 2a. THE RETAINED STATUS IS REFUSED BY THE NEW BINDING ===
++ echo '=== 2a. THE RETAINED STATUS IS REFUSED BY THE NEW BINDING ==='
++ set +e
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/merge_workers.py --manifest /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json --workers sh2/w0 sh2/w1 --status sh2/status.json --out /home/alex/mc-i53-port-20260928/reval/merged_oldstatus
+FAIL: status file describes manifest sh2/shards/shard_manifest.json, not /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json; refusing to take exit codes from another run
+OLDSTATUS_RC=2  (2 expected: it predates manifest_sha256)
+=== 2b. MERGE WITH THE RETAINED RUN'S OWN FACTS, RE-RECORDED ===
++ OLDSTATUS_RC=2
++ set -e
++ echo 'OLDSTATUS_RC=2  (2 expected: it predates manifest_sha256)'
++ '[' 2 -eq 2 ']'
++ echo '=== 2b. MERGE WITH THE RETAINED RUN'\''S OWN FACTS, RE-RECORDED ==='
++ /home/alex/.mc-venv/bin/python3 - /home/alex/mc-i53-port-20260928/reval
+re-recorded exit codes: [0, 0]
+re-recorded verdict: PASS
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/merge_workers.py --manifest /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json --workers sh2/w0 sh2/w1 --status /home/alex/mc-i53-port-20260928/reval/status_upgraded.json --out /home/alex/mc-i53-port-20260928/reval/merged --report /home/alex/mc-i53-port-20260928/reval/merge_report.json --aggregate-with /home/alex/mc-i53-gpu/build-final/motioncorr --input-star movies.star '--aggregate-args=--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --j 4 --max_io_threads 4'
+{
+  "n_movies_expected": 24,
+  "n_files_staged": 96,
+  "verdict": "PASS"
+}
++ /home/alex/.mc-venv/bin/python3 -c '
+import json
+r = json.load(open('\''/home/alex/mc-i53-port-20260928/reval/merge_report.json'\''))
+print('\''verdict'\'', r['\''verdict'\''], '\''staged'\'', r['\''n_files_staged'\''], '\''expected'\'', r['\''n_movies_expected'\''])
+print('\''problems'\'', r['\''problems'\''])
+assert r['\''verdict'\''] == '\''PASS'\''
+assert r['\''n_movies_expected'\''] == 24
+assert r['\''aggregate_star'\'']['\''row_order'\''] == '\''canonical'\''
+'
+verdict PASS staged 96 expected 24
+problems []
+=== 3. EXACT COMPARISON, 24 PAIRS, SERIAL CUDA vs TWO-WORKER TWO-GPU ===
++ echo '=== 3. EXACT COMPARISON, 24 PAIRS, SERIAL CUDA vs TWO-WORKER TWO-GPU ==='
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/compare24.py --ref serialG --test /home/alex/mc-i53-port-20260928/reval/merged --tool /home/alex/mc-i53-port-20260928/src/tools/compare_motioncorr.py --manifest /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json --out /home/alex/mc-i53-port-20260928/reval/exact
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
++ /home/alex/.mc-venv/bin/python3 -c '
+import json
+s = json.load(open('\''/home/alex/mc-i53-port-20260928/reval/exact/exact_summary.json'\''))
+print('\''expected'\'', s['\''n_expected'\''], '\''compared'\'', s['\''n_compared'\''], '\''passed'\'', s['\''passed'\''], '\''failed'\'', s['\''failed'\''], s['\''verdict'\''])
+assert s['\''verdict'\''] == '\''PASS'\'' and s['\''passed'\''] == 24 and s['\''failed'\''] == 0
+ids = {r['\''report'\''] for r in s['\''results'\'']}
+assert len(ids) == 24, ids
+'
+expected 24 compared 24 passed 24 failed 0 PASS
+=== 4. REUSE ROUND TRIP, BOTH DIRECTIONS ===
++ echo '=== 4. REUSE ROUND TRIP, BOTH DIRECTIONS ==='
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/compare24.py --ref serialG --test /home/alex/mc-i53-port-20260928/reval/merged --tool /home/alex/mc-i53-port-20260928/src/tools/compare_motioncorr.py --manifest /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json --out /home/alex/mc-i53-port-20260928/reval/exact --reuse
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 24,
+  "failed": 0,
+  "verdict": "PASS"
+}
+++ head -1
+++ ls /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00022_frameImage-67e8263519b41d1f_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00023_frameImage-691345cfc5f8e351_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00024_frameImage-27e9b92d607177aa_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00025_frameImage-992aac3614825432_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00026_frameImage-509686128a3e2e5d_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00027_frameImage-1afa68e379d5aed0_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00028_frameImage-a7cd42101cbfde26_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00029_frameImage-8b185160c0884f91_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00030_frameImage-ad94a334a65ad832_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00031_frameImage-f128a832e86135a7_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00035_frameImage-9b729c21246ddc87_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00036_frameImage-26649892f00839a7_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00037_frameImage-1c89394db1c7dab6_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00039_frameImage-ca496b0156a8054c_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00040_frameImage-024a48e22b0d5624_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00042_frameImage-63e36ba6868e91f8_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00043_frameImage-e39433d0d8f18702_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00044_frameImage-3dfcc27180f2135c_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00045_frameImage-506553fbf59f3e10_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00046_frameImage-c81c1a046380e37a_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00047_frameImage-4480b145f65eb365_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00048_frameImage-9784d73e54f62e8e_exact.origin.json /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00049_frameImage-9a1e22cb8d93abdd_exact.origin.json
++ SIDE=/home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.origin.json
++ /home/alex/.mc-venv/bin/python3 -c '
+import json,sys
+p='\''/home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.origin.json'\''; d=json.load(open(p)); d['\''tool_sha256'\'']='\''0'\''*64
+open(p,'\''w'\'').write(json.dumps(d))
+print('\''tampered'\'', p)
+'
+tampered /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.origin.json
++ set +e
++ taskset -c 96-111 /home/alex/.mc-venv/bin/python3 /home/alex/mc-i53-port-20260928/src/tools/multi_gpu/compare24.py --ref serialG --test /home/alex/mc-i53-port-20260928/reval/merged --tool /home/alex/mc-i53-port-20260928/src/tools/compare_motioncorr.py --manifest /home/alex/mc-i53-port-20260928/reval/shards/shard_manifest.json --out /home/alex/mc-i53-port-20260928/reval/exact --reuse
+{
+  "n_expected": 24,
+  "n_compared": 24,
+  "passed": 23,
+  "failed": 1,
+  "verdict": "FAIL"
+}
+  FAIL 20170629_00021_frameImage --reuse origin mismatch for /home/alex/mc-i53-port-20260928/reval/exact/Movies_20170629_00021_frameImage-19688beb54090c8a_exact.json: ['tool_sha256'] differ from the run that produced it pixel_identical= None
+TAMPER_RC=1  (1 expected)
+=== RELEASE ===
++ TAMPER_RC=1
++ set -e
++ echo 'TAMPER_RC=1  (1 expected)'
++ '[' 1 -eq 1 ']'
++ echo '=== RELEASE ==='
++ date -Is
+2026-09-28T15:24:27+00:00
++ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv,noheader
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
++ nvidia-smi --query-compute-apps=pid,gpu_uuid --format=csv,noheader
++ cat /proc/loadavg
+8.27 6.06 8.34 4/4948 1590943
+REVALIDATION COMPLETE
++ echo 'REVALIDATION COMPLETE'

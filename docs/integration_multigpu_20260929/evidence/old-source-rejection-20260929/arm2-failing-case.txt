@@ -1,0 +1,30 @@
+ok   case_compare24_injective_report_identity
+ok   case_normalized_root_collision_refused
+ok   case_interior_double_slash_is_the_same_product
+ok   case_reuse_pins_the_trees_not_just_the_root
+ok   case_duplicate_coverage_and_zero_pairs_rejected
+ok   case_absolute_movie_roots_attributed
+ok   case_gpu_witness_logic
+ok   case_sampler_lifecycle
+ok   case_stale_status_is_refused
+ok   case_duplicate_movie_name_refused
+ok   case_worker_args_may_not_override_launcher_options
+ok   case_aggregate_may_not_rewrite_staged_products
+ok   case_stale_comparison_report_is_not_republished
+ok   case_launcher_verdict_follows_the_device_witness
+ok   case_launcher_signal_reaps_owned_process_group
+ok   case_launcher_signal_reaches_cooperative_worker
+ok   case_launcher_signal_during_spawn_keeps_child_owned
+ok   case_per_worker_timing_and_rss_recorded
+ok   case_aggregate_staging_namespace_reserved
+ok   case_comparator_exit_must_match_its_report
+FAIL case_device_list_rejected: --gpu 0:1:2:3: in: /home/ubuntu/mc-oldsource2-a90c42be/hybrid/src/motioncorr_runner.cpp, line 279
+ERROR: 
+ERROR: --gpu was specified with --use_own, but MotionCorr was built without CUDA support (-DCUDA=ON).
+=== Backtrace  ===
+build/motioncorr(+0x4cd77) [0x62aa23467d77]
+build/motioncorr(+0x26052) [0x62aa23441052]
+build/motioncorr(+0x438ab) [0x62aa2345e8ab]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x75876182a1c
+
+53/54 passed

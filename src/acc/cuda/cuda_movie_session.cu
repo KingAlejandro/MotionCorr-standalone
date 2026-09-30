@@ -10,13 +10,21 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+#include "src/acc/cuda/cuda_scoped_resources.h"
 
+// Issue #69. These handlers CONSUME the error: they read it, log it, and return false.
+// By the time the caller regains control, cudaGetLastError() has been reset and reports
+// cudaSuccess, which is not a certificate that the context is healthy -- it only means
+// nobody has recorded anything since. So each handler also records the code and the
+// stage on the session, and the caller decides from that recorded status rather than
+// from a later last-error read.
 #undef HANDLE_ERROR
 #define HANDLE_ERROR(cmd) do { \
     cudaError_t err = (cmd); \
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        recordFailure(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -27,6 +35,7 @@
     if (res != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << res << std::endl; \
+        recordCufftFailure(res, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -56,6 +65,42 @@ __global__ void fusedGainAndSumKernel(
         sum += val;
     }
     d_Isum[pixel] = sum;
+}
+
+// Issue #85 lane C: native uint16 staging. One frame per launch, so only a single
+// frame-sized uint16 staging buffer is ever resident instead of a second whole movie.
+//
+// Arithmetic is pinned to the fused float kernel above, term for term:
+//   (float)u16 is exact for every value in [0, 65535] (binary32 holds every integer
+//   up to 2^24), so the converted sample equals the float that castPage2T produced
+//   on the host and cudaMemcpy used to deliver.
+//   __fmul_rn / __fadd_rn are the same IEEE-754 round-to-nearest operations the
+//   compiler emits for `val *= gain` and `sum += val` there. They are written as
+//   intrinsics rather than operators so that no -fmad contraction can fuse the
+//   multiply into the accumulate: an FFMA rounds once where the reference rounds
+//   twice, which would move d_Isum and with it the hot-pixel threshold.
+//   d_Isum is memset to zero before frame 0 and accumulated in ascending frame
+//   order, so the addend sequence per pixel is identical to the single-kernel
+//   float accumulator. Spilling that accumulator to a float array between frames
+//   is exact because it is a float there too.
+__global__ void convertGainAndAccumulateU16Kernel(
+    const unsigned short *d_src,
+    float *d_frame_dst,
+    float *d_Isum,
+    const float *d_gain,
+    const size_t num_pixels,
+    const bool apply_gain
+) {
+    size_t pixel = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (pixel >= num_pixels) return;
+
+    float val = (float)d_src[pixel];
+    if (apply_gain) val = __fmul_rn(val, d_gain[pixel]);
+    // Unconditional, unlike the float kernel: there the H2D copy had already
+    // deposited the frame, so a no-gain movie needed no store. Here the device
+    // buffer holds nothing until this line runs.
+    d_frame_dst[pixel] = val;
+    d_Isum[pixel] = __fadd_rn(d_Isum[pixel], val);
 }
 
 // ---------------------------------------------------------------------------
@@ -220,11 +265,53 @@ CudaMovieSession::~CudaMovieSession() {
     release();
 }
 
+// Delegates to CudaFailureState, which keeps the first failure for diagnostics AND
+// latches any poisoning code monotonically. An earlier version of this function kept
+// only the first failure, so a recoverable allocation miss on one patch suppressed the
+// recording of a fatal fault on a later one -- PR107 review P1.
+void CudaMovieSession::recordFailure(cudaError_t err, const char *stage, int line) {
+    failure_state.record(err, stage, line);
+}
+
+void CudaMovieSession::recordCufftFailure(cufftResult res, const char *stage, int line) {
+    failure_state.recordCufft(res, stage, line);
+}
+
+cudaError_t CudaMovieSession::releaseBuffer(void *&slot) noexcept {
+    void *owned = slot;
+    slot = nullptr;
+    const cudaError_t err = owned ? cudaFree(owned) : cudaSuccess;
+    recordFailure(err, "releaseBuffer", __LINE__);
+    return err;
+}
+
+template<class T> cudaError_t CudaMovieSession::releaseBuffer(T *&slot) noexcept {
+    void *owned = slot;
+    slot = nullptr;
+    return releaseBuffer(owned);
+}
+
+cufftResult CudaMovieSession::releasePlan(cufftHandle &slot, bool &owned) noexcept {
+    const cufftHandle handle = slot;
+    const bool release = owned;
+    slot = 0;
+    owned = false;
+    const cufftResult err = release ? cufftDestroy(handle) : CUFFT_SUCCESS;
+    recordCufftFailure(err, "releasePlan", __LINE__);
+    // A cuFFT status alone does not certify context health.
+    if (err != CUFFT_SUCCESS) recordFailure(cudaPeekAtLastError(), "releasePlan", __LINE__);
+    return err;
+}
+
 bool CudaMovieSession::initialize() {
+    if (failure_state.isPoisoned()) return false;
     if (is_initialized) return true;
+    release();
+    if (failure_state.isPoisoned()) return false;
 
     int dev_count = 0;
     cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    recordFailure(count_err, __func__, __LINE__);
     if (count_err != cudaSuccess || dev_count == 0) {
         logfile << "ERROR: No CUDA devices found" << std::endl;
         return false;
@@ -252,6 +339,7 @@ bool CudaMovieSession::initialize() {
     if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
     if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
     if (cuda_result != cudaSuccess) {
+        recordFailure(cuda_result, "initialize buffers", __LINE__);
         logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
         release();
         return false;
@@ -275,6 +363,8 @@ bool CudaMovieSession::initialize() {
                                        NULL, 1, output_distance, type, 1, &work_bytes);
         }
         if (result != CUFFT_SUCCESS) {
+            recordCufftFailure(result, "initialize plan", __LINE__);
+            recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
             logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
                     << " batch=1 type=" << type
                     << " code=" << result << std::endl;
@@ -294,6 +384,7 @@ bool CudaMovieSession::initialize() {
     if (cuda_result == cudaSuccess)
         cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
     if (cuda_result != cudaSuccess) {
+        recordFailure(cuda_result, "initialize scratch", __LINE__);
         logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
                 << " workspace=" << fft_work_bytes << " tile=" << sz_comp
                 << ": " << cudaGetErrorString(cuda_result) << std::endl;
@@ -304,6 +395,8 @@ bool CudaMovieSession::initialize() {
         if (!has_plan) return true;
         cufftResult result = cufftSetWorkArea(plan, d_fft_work);
         if (result == CUFFT_SUCCESS) return true;
+        recordCufftFailure(result, "initialize work area", __LINE__);
+        recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
         logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
         return false;
     };
@@ -321,68 +414,23 @@ bool CudaMovieSession::initialize() {
 }
 
 void CudaMovieSession::release() {
-    if (has_plan_r2c || has_plan_c2r) {
-        cudaError_t result = cudaDeviceSynchronize();
-        if (result != cudaSuccess)
-            logfile << "ERROR: CUDA synchronization before movie FFT release: "
-                    << cudaGetErrorString(result) << std::endl;
-    }
-    if (has_plan_r2c) {
-        cufftDestroy(plan_r2c);
-        plan_r2c = 0;
-        has_plan_r2c = false;
-    }
-    if (has_plan_c2r) {
-        cufftDestroy(plan_c2r);
-        plan_c2r = 0;
-        has_plan_c2r = false;
-    }
-    if (d_fft_work) {
-        cudaFree(d_fft_work);
-        d_fft_work = nullptr;
-    }
-    if (d_inverse_tile) {
-        cudaFree(d_inverse_tile);
-        d_inverse_tile = nullptr;
-    }
-    fft_r2c_work_bytes = fft_c2r_work_bytes = 0;
-    fft_work_bytes = 0;
-    if (d_Iframes) {
-        cudaFree(d_Iframes);
-        d_Iframes = nullptr;
-    }
-    if (d_Fframes) {
-        cudaFree(d_Fframes);
-        d_Fframes = nullptr;
-    }
-    if (d_Isum) {
-        cudaFree(d_Isum);
-        d_Isum = nullptr;
-    }
-    if (d_gain) {
-        cudaFree(d_gain);
-        d_gain = nullptr;
-    }
-    if (has_plan_patch_r2c) {
-        cufftDestroy(plan_patch_r2c);
-        plan_patch_r2c = 0;
-        has_plan_patch_r2c = false;
-    }
-    if (d_Ipatches) {
-        cudaFree(d_Ipatches);
-        d_Ipatches = nullptr;
-    }
-    if (d_group_start) {
-        cudaFree(d_group_start);
-        d_group_start = nullptr;
-    }
-    if (d_group_size) {
-        cudaFree(d_group_size);
-        d_group_size = nullptr;
-    }
-    cached_patch_w = 0;
-    cached_patch_h = 0;
-    cached_patch_ngroups = 0;
+    if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
+        recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
+    // Destroy plans before their work areas; attempt all releases, even after error.
+    releasePlan(plan_patch_r2c, has_plan_patch_r2c);
+    releasePlan(plan_r2c, has_plan_r2c);
+    releasePlan(plan_c2r, has_plan_c2r);
+    releaseBuffer(d_fft_work);
+    releaseBuffer(d_inverse_tile);
+    releaseBuffer(d_Iframes);
+    releaseBuffer(d_Fframes);
+    releaseBuffer(d_Isum);
+    releaseBuffer(d_gain);
+    releaseBuffer(d_Ipatches);
+    releaseBuffer(d_group_start);
+    releaseBuffer(d_group_size);
+    fft_r2c_work_bytes = fft_c2r_work_bytes = fft_work_bytes = 0;
+    cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
     is_initialized = false;
@@ -394,7 +442,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     MultidimArray<float> &unaligned_sum,
     bool download_sum
 ) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t num_pixels = (size_t)ny * nx;
@@ -436,8 +484,74 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     return true;
 }
 
+bool CudaMovieSession::applyGainDefectsAndSumU16(
+    const std::vector<Image<unsigned short> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
+    if ((int)raw_frames.size() != n_frames) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    const size_t num_pixels = (size_t)ny * nx;
+    const size_t sz_real = num_pixels * sizeof(float);
+    const size_t sz_u16 = num_pixels * sizeof(unsigned short);
+
+    // One frame, not one movie. A whole-movie uint16 device buffer would add
+    // 0.637 GiB to the high-water mark for this geometry and turn a host-memory
+    // saving into a VRAM cost; a single frame adds 27 MiB for the duration of
+    // this call. Owned locally so the bare `return false` in HANDLE_ERROR frees it.
+    unsigned short *stage = nullptr;
+    mc_cuda::ScopedDeviceMemory<1> stage_owner(&failure_state);
+    HANDLE_ERROR(cudaMalloc((void**)&stage, sz_u16));
+    stage_owner.add(stage);
+
+    bool apply_gain = (gain_ref != nullptr);
+    if (apply_gain) {
+        if (!d_gain) {
+            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
+        }
+        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+    }
+
+    // The accumulator starts at +0.0f exactly as `float sum = 0.0f` does. Seeding
+    // frame 0 with a plain store instead would differ for a -0.0f product, which
+    // a zero sample against a negative gain entry can produce.
+    HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_real));
+
+    const int block = 256;
+    const int grid = (int)((num_pixels + block - 1) / block);
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        // Per-frame upload keeps the same failure granularity as the float path:
+        // a fault names a frame index and leaves the rest untransferred.
+        HANDLE_ERROR(cudaMemcpy(stage, raw_frames[iframe]().data, sz_u16,
+                                cudaMemcpyHostToDevice));
+        convertGainAndAccumulateU16Kernel<<<grid, block>>>(
+            stage, d_Iframes + (size_t)iframe * num_pixels, d_Isum, d_gain,
+            num_pixels, apply_gain);
+        HANDLE_ERROR(cudaGetLastError());
+        // The blocking cudaMemcpy above is the reuse barrier for stage.ptr: it is
+        // issued on the same (default) stream as the kernel, so frame i+1's copy
+        // cannot start writing the buffer until frame i's kernel has retired.
+    }
+
+    if (download_sum) {
+        unaligned_sum.reshape(ny, nx);
+        HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum, sz_real, cudaMemcpyDeviceToHost));
+    } else {
+        // Same argument as the float path: without the D2H there is no other
+        // synchronisation point, so a fault would surface at an unrelated later
+        // call and bypass the caller's reset-and-fall-back recovery.
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
+
+    HANDLE_ERROR(stage_owner.releaseAll());
+    return true;
+}
+
 bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     unaligned_sum.reshape(ny, nx);
     HANDLE_ERROR(cudaMemcpy(unaligned_sum.data, d_Isum,
@@ -450,20 +564,19 @@ namespace {
 struct StatsScratch {
     double *partials = nullptr;
     double *result = nullptr;
-    ~StatsScratch() {
-        if (partials) cudaFree(partials);
-        if (result) cudaFree(result);
-    }
 };
 } // namespace
 
 bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
+    mc_cuda::ScopedDeviceMemory<3> memory_cleanup(&failure_state);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, 2 * MC_STATS_BLOCKS * sizeof(double)));
+    memory_cleanup.add(scratch.partials);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.result, 2 * sizeof(double)));
+    memory_cleanup.add(scratch.result);
     sumUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(
         d_Isum, num_pixels, scratch.partials, scratch.partials + MC_STATS_BLOCKS);
     HANDLE_ERROR(cudaGetLastError());
@@ -474,21 +587,26 @@ bool CudaMovieSession::reduceUnalignedSum(double &sum1, double &sum_abs) {
     double host[2] = {0.0, 0.0};
     HANDLE_ERROR(cudaMemcpy(host, scratch.result, 2 * sizeof(double), cudaMemcpyDeviceToHost));
     sum1 = host[0]; sum_abs = host[1];
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return true;
 }
 
 bool CudaMovieSession::reduceUnalignedSumSqDev(double mean, double &sum2) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
     StatsScratch scratch;
+    mc_cuda::ScopedDeviceMemory<3> memory_cleanup(&failure_state);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.partials, MC_STATS_BLOCKS * sizeof(double)));
+    memory_cleanup.add(scratch.partials);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.result, sizeof(double)));
+    memory_cleanup.add(scratch.result);
     sumSqDevUnalignedKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(d_Isum, num_pixels, mean, scratch.partials);
     HANDLE_ERROR(cudaGetLastError());
     combinePartialsKernel<<<1, 1>>>(scratch.partials, MC_STATS_BLOCKS, scratch.result);
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaMemcpy(&sum2, scratch.result, sizeof(double), cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return true;
 }
 
@@ -498,7 +616,7 @@ bool CudaMovieSession::collectAboveThreshold(
     std::vector<int> &indices_ascending,
     size_t &guard_band_count
 ) {
-    if (!is_initialized || !d_Isum) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Isum) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t num_pixels = (size_t)ny * nx;
 
@@ -513,14 +631,13 @@ bool CudaMovieSession::collectAboveThreshold(
     struct CollectScratch {
         int *hits = nullptr;
         unsigned int *counters = nullptr;   // [count, band, overflow]
-        ~CollectScratch() {
-            if (hits) cudaFree(hits);
-            if (counters) cudaFree(counters);
-        }
     } scratch;
 
+    mc_cuda::ScopedDeviceMemory<3> memory_cleanup(&failure_state);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.hits, (size_t)capacity * sizeof(int)));
+    memory_cleanup.add(scratch.hits);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.counters, 3 * sizeof(unsigned int)));
+    memory_cleanup.add(scratch.counters);
     HANDLE_ERROR(cudaMemset(scratch.counters, 0, 3 * sizeof(unsigned int)));
 
     collectAboveThresholdKernel<<<MC_STATS_BLOCKS, MC_STATS_THREADS>>>(
@@ -547,6 +664,7 @@ bool CudaMovieSession::collectAboveThreshold(
         // Emission order is arbitrary; ascending order is what the host scan produced.
         std::sort(indices_ascending.begin(), indices_ascending.end());
     }
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return true;
 }
 
@@ -555,7 +673,7 @@ bool CudaMovieSession::updateDefectPixels(
     const std::vector<int> &bad_ys,
     const std::vector<float> &replacements
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     const int n_bad = (int)bad_xs.size();
     if (n_bad == 0) return true;
 
@@ -565,16 +683,15 @@ bool CudaMovieSession::updateDefectPixels(
         int *xs = nullptr;
         int *ys = nullptr;
         float *values = nullptr;
-        ~DefectScratch() {
-            if (xs) cudaFree(xs);
-            if (ys) cudaFree(ys);
-            if (values) cudaFree(values);
-        }
     } scratch;
 
+    mc_cuda::ScopedDeviceMemory<3> memory_cleanup(&failure_state);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.xs, n_bad * sizeof(int)));
+    memory_cleanup.add(scratch.xs);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.ys, n_bad * sizeof(int)));
+    memory_cleanup.add(scratch.ys);
     HANDLE_ERROR(cudaMalloc((void**)&scratch.values, (size_t)n_bad * n_frames * sizeof(float)));
+    memory_cleanup.add(scratch.values);
 
     HANDLE_ERROR(cudaMemcpy(scratch.xs, bad_xs.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
     HANDLE_ERROR(cudaMemcpy(scratch.ys, bad_ys.data(), n_bad * sizeof(int), cudaMemcpyHostToDevice));
@@ -586,26 +703,36 @@ bool CudaMovieSession::updateDefectPixels(
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
 
+    HANDLE_ERROR(memory_cleanup.releaseAll());
     return true;
 }
 
 bool CudaMovieSession::releasePreprocessingBuffers() {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaDeviceSynchronize());
+    // Issue #69: clear the member before the free, not after. HANDLE_ERROR returns on a
+    // failing cudaFree, and leaving the pointer set would have release() free it a
+    // second time at the end of the movie. A free that fails here means the context is
+    // already unusable; freeing the same pointer again cannot repair that.
+    cudaError_t free_error = cudaSuccess;
     if (d_gain) {
-        HANDLE_ERROR(cudaFree(d_gain));
+        float *owned_gain = d_gain;
         d_gain = nullptr;
+        free_error = releaseBuffer(owned_gain);
     }
     if (d_Isum) {
-        HANDLE_ERROR(cudaFree(d_Isum));
+        float *owned_sum = d_Isum;
         d_Isum = nullptr;
+        const cudaError_t sum_error = releaseBuffer(owned_sum);
+        if (free_error == cudaSuccess) free_error = sum_error;
     }
+    HANDLE_ERROR(free_error);
     return true;
 }
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
-    if (!is_initialized || !has_plan_r2c) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t real_stride = (size_t)nx * ny;
@@ -629,7 +756,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
 }
 
 bool CudaMovieSession::computeGlobalInverseFFT() {
-    if (!is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
@@ -653,23 +780,47 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (!is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    // Reuse or allocate cached scratch buffers
+    // Reuse or allocate cached scratch buffers.
+    //
+    // Issue #69. These members outlive the call: release() frees whatever they point at
+    // when the movie ends. So the cache must never describe a buffer that does not
+    // exist. Drop the claim (pointer and its size/count) before freeing, allocate into
+    // a local, and publish only after the allocation succeeded. A failure exit then
+    // leaves "no buffer, no claim" instead of a freed pointer release() would free a
+    // second time, or a stale size that makes the next patch in this movie skip the
+    // reallocation and copy into a null pointer.
     if (!d_Ipatches || sz_cached_Ipatches < sz_all_patch_real) {
-        if (d_Ipatches) cudaFree(d_Ipatches);
-        HANDLE_ERROR(cudaMalloc((void**)&d_Ipatches, sz_all_patch_real));
+        float *stale_patches = d_Ipatches;
+        d_Ipatches = nullptr;
+        sz_cached_Ipatches = 0;
+        HANDLE_ERROR(releaseBuffer(stale_patches));
+        float *fresh_patches = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_patches, sz_all_patch_real));
+        d_Ipatches = fresh_patches;
         sz_cached_Ipatches = sz_all_patch_real;
     }
-    if (!d_group_start || cached_ngroups_alloc < n_groups) {
-        if (d_group_start) cudaFree(d_group_start);
-        if (d_group_size) cudaFree(d_group_size);
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_start, n_groups * sizeof(int)));
-        HANDLE_ERROR(cudaMalloc((void**)&d_group_size, n_groups * sizeof(int)));
+    if (!d_group_start || !d_group_size || cached_ngroups_alloc < n_groups) {
+        int *stale_start = d_group_start;
+        int *stale_size = d_group_size;
+        d_group_start = nullptr;
+        d_group_size = nullptr;
+        cached_ngroups_alloc = 0;
+        const cudaError_t start_err = releaseBuffer(stale_start);
+        const cudaError_t size_err = releaseBuffer(stale_size);
+        HANDLE_ERROR(start_err);
+        HANDLE_ERROR(size_err);
+        int *fresh_start = nullptr;
+        int *fresh_size = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_start, n_groups * sizeof(int)));
+        d_group_start = fresh_start;
+        HANDLE_ERROR(cudaMalloc((void**)&fresh_size, n_groups * sizeof(int)));
+        d_group_size = fresh_size;
         cached_ngroups_alloc = n_groups;
     }
 
@@ -691,14 +842,17 @@ bool CudaMovieSession::preparePatchInVram(
 
     // Reuse cached batched cuFFT plan for patch transforms
     if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
-        if (has_plan_patch_r2c) {
-            cufftDestroy(plan_patch_r2c);
-            has_plan_patch_r2c = false;
-        }
-        int n[2] = {patch_h, patch_w};
-        CUFFT_CHECK(cufftPlanMany(&plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
-                                  NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups));
+        // Same rule as the buffers above: drop the geometry the cache claims before
+        // destroying the plan, and publish the new one only once it exists.
+        cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+        CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
+        CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
         has_plan_patch_r2c = true;
+        int n[2] = {patch_h, patch_w};
+        size_t work_bytes = 0;
+        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
+                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
+                                   &work_bytes));
         cached_patch_w = patch_w;
         cached_patch_h = patch_h;
         cached_patch_ngroups = n_groups;
@@ -722,7 +876,7 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile);
 }
 
@@ -732,12 +886,12 @@ bool CudaMovieSession::reconstructUnweighted(
     Image<float> *Isum_odd,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (!is_initialized) return false;
+    if (failure_state.isPoisoned() || !is_initialized) return false;
     return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile);
 }
 
 bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {
-    if (!is_initialized || !d_Fframes) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Fframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_comp_frame = (size_t)ny * nfx * sizeof(cufftComplex);
     Fframes.resize(n_frames);
@@ -750,7 +904,7 @@ bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex>
 }
 
 bool CudaMovieSession::downloadRealFrames(std::vector<Image<float> > &Iframes) {
-    if (!is_initialized || !d_Iframes) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_real_frame = (size_t)ny * nx * sizeof(float);
     Iframes.resize(n_frames);

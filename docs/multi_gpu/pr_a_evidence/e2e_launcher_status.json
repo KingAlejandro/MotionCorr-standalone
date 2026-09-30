@@ -1,0 +1,47 @@
+{
+  "input_star": "movies.star",
+  "binary": "/home/ubuntu/mc-issue53-round96/build/motioncorr",
+  "n_workers": 3,
+  "worker_args": [
+    "--use_own",
+    "--j",
+    "4",
+    "--dose_weighting",
+    "--dose_per_frame",
+    "1.0",
+    "--patch_x",
+    "3",
+    "--patch_y",
+    "3",
+    "--bfactor",
+    "150",
+    "--seed",
+    "1"
+  ],
+  "cpus": "32-63",
+  "wall_seconds": 0.581,
+  "wall_seconds_note": "bookkeeping only; this tool makes no throughput claim and is not a benchmark. #26 owns the measurement matrix.",
+  "manifest": "sharded/shards/shard_manifest.json",
+  "workers": [
+    {
+      "index": 0,
+      "pid": 3077337,
+      "returncode": 0,
+      "log": "sharded/w0/run.log"
+    },
+    {
+      "index": 1,
+      "pid": 3077338,
+      "returncode": 0,
+      "log": "sharded/w1/run.log"
+    },
+    {
+      "index": 2,
+      "pid": 3077339,
+      "returncode": 0,
+      "log": "sharded/w2/run.log"
+    }
+  ],
+  "devices": null,
+  "verdict": "PASS"
+}

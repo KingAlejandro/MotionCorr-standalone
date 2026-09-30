@@ -1,0 +1,88 @@
+[faultinject] cudaGetDeviceCount #1
+[faultinject] INJECTING cudaErrorIllegalAddress at cudaGetDeviceCount #1; last-error clean
+ERROR: an illegal memory access was encountered in /home/alex/mc-pr115-enumeration-20260929/src/src/motioncorr_runner.cpp at line 276 (error-code 700)
+in: /home/alex/mc-pr115-enumeration-20260929/src/src/acc/cuda/cuda_settings.h, line 65
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+=== Backtrace  ===
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x51e17) [0x58dff2c12e17]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0xd070f) [0x58dff2c9170f]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0xfd09e) [0x58dff2cbe09e]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x47cab) [0x58dff2c08cab]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7607f0a2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7607f0a2a28b]
+/home/alex/mc-pr115-enumeration-20260929/build/motioncorr_faultinject(+0x48365) [0x58dff2c09365]
+==================
+ERROR: 
+
+A GPU-function failed to execute.
+
+ If this occured at the start of a run, you might have GPUs which
+are incompatible with either the data or your installation of relion.
+If you 
+
+	-> INSTALLED RELION YOURSELF: if you e.g. specified -DCUDA_ARCH=50
+	   and are trying ot run on a compute 3.5 GPU (-DCUDA_ARCH=3.5), or 
+	   a similar mismatch on AMD or Intel GPUs, this may happen.
+
+	-> HAVE MULTIPLE GPUS OF DIFFERNT VERSIONS: relion needs at least NVIDIA 
+	   GPUs with compute 5.0 or AMD MI GPUs with archtiecture gfx906. 
+	   You may be trying to use a GPU architectures older than these. 
+	   If you have multiple generations, try specifying --gpu <X>
+	   with X=0. Then try X=1 in a new run, and so on. The numbering of
+	   GPUs may not be obvious from the driver or intuition. For a list
+	   of NVIDIA and AMD GPU compute generations and architectures, see 
+
+	   en.wikipedia.org/wiki/CUDA#Version_features_and_specifications and 
+	   docs.amd.com/bundle/Hardware_and_Software_Reference_Guide/page/Hardware_and_Software_Support.html
+
+	-> ARE USING DOUBLE-PRECISION GPU CODE: relion has been written so
+	   as to not require this, and may thus have unforeseen requirements
+	   when run in this mode. If you think it is nonetheless necessary,
+	   please consult the developers with this error.
+
+If this occurred at the middle or end of a run, it might be that
+
+	-> YOUR DATA OR PARAMETERS WERE UNEXPECTED: execution on GPUs is 
+	   subject to many restrictions, and relion is written to work within
+	   common restraints. If you have exotic data or settings, unexpected
+	   configurations may occur. See also above point regarding 
+	   double precision.
+If none of the above applies, please report the error to the relion
+developers at github.com/3dem/relion/issues.
+[faultinject] remaining-owned=0 stale-releases=0

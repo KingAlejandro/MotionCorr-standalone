@@ -1,0 +1,26 @@
++ git clone -q --branch t3code/integrate-cuda-multigpu-candidate --single-branch https://github.com/KingAlejandro/MotionCorr-standalone.git hybrid
++ cd hybrid
+++ git rev-parse HEAD
++ COMPOSED=b98c061134dc0bbab2027c6243187b146e20fe6e
++ git checkout 6393547e -- src/
++ git status --porcelain
++ echo 'composed=b98c061134dc0bbab2027c6243187b146e20fe6e base_src=6393547e'
+composed=b98c061134dc0bbab2027c6243187b146e20fe6e base_src=6393547e
++ cd ..
++ exec
++ flock -w 3600 9
++ taskset -c 32-47 numactl --membind=1 cmake -S hybrid -B build -DCMAKE_BUILD_TYPE=Release -DCUDA=OFF -DBUILD_TESTING=ON -DPython3_EXECUTABLE=/home/ubuntu/.mc-venv/bin/python
++ echo configure_rc=0
+configure_rc=0
++ taskset -c 32-47 numactl --membind=1 cmake --build build -j16
++ BR=2
++ echo build_rc=2
+build_rc=2
++ '[' 2 -ne 0 ']'
++ echo OLD_SOURCE_REJECTED_AT_COMPILE
+OLD_SOURCE_REJECTED_AT_COMPILE
++ grep -E error: build.log
++ head -12
+/home/ubuntu/mc-oldsource-a90c42be/hybrid/tests/test_patch_retry_state.cpp:52:33: error: ‘bool MotioncorrRunner::alignPatch(std::vector<MultidimArray<tComplex<float> > >&, int, int, double, std::vector<double>&, std::vector<double>&, std::ostream&, bool)’ is private within this context
++ echo OLDSOURCE_DONE
+OLDSOURCE_DONE

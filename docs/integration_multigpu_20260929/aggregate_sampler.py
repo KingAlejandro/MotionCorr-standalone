@@ -1,0 +1,329 @@
+#!/usr/bin/env python3
+"""Simultaneous aggregate host RSS and UUID-filtered sampled GPU memory.
+
+Why this exists rather than reusing what is already in the tree.
+
+`tools/multi_gpu/run_multi_gpu.py` records `rss_hwm_kib` per worker from
+`/proc/<pid>/status` VmHWM. VmHWM is a per-process *lifetime* peak and the
+launcher explicitly excludes the ghostscript children. Adding N of those
+together gives an upper bound on a quantity nobody observed: the workers need
+not have peaked at the same instant. A 1/2/4-worker comparison at a fixed total
+CPU budget is exactly the case where that distinction decides the answer, so the
+aggregate has to be sampled on one clock.
+
+`tools/envelope_runner.py` (#26) has the right RSS semantics but is structurally
+single-process -- one Popen, one blocking wait -- and its GPU sampler addresses
+devices by nvidia-smi ordinal (`--id=<n>`) and reads whole-device `memory.used`.
+An ordinal does not identify silicon once CUDA_VISIBLE_DEVICES is set, and a
+whole-device figure includes co-tenants. Both are disqualifying here.
+
+So: one sweep, one timestamp, every sampled figure published next to the
+interval that produced it.
+
+  host RSS   sum of /proc/<pid>/statm resident pages * page size over the whole
+             descendant tree of the watched roots, ghostscript children
+             included. Peak = max over sweeps of the *sweep total*, never a sum
+             of separately observed maxima. Shared pages are counted once per
+             process, so a sweep total is an upper bound on unique resident
+             bytes; it is the same upper bound in every arm.
+
+  GPU memory nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory via
+             tools/multi_gpu/gpu_witness, restricted to the UUIDs granted to
+             this arm. Per-process and UUID-addressed, so a co-tenant on the
+             same physical device is not attributed to us.
+
+Both figures are sampled lower bounds on the true peak: a spike entirely between
+two sweeps is invisible. `sweeps`, `interval_s` and the observed sweep spacing
+are emitted so that is checkable rather than implied. With zero successful
+sweeps no peak is emitted at all -- the field is null and `error` says why. A
+figure of 0 would read as "measured, and small".
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import threading
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "multi_gpu"))
+try:
+    import gpu_witness  # noqa: E402
+except ImportError as _exc:  # host RSS still works; GPU sampling reports why it did not
+    gpu_witness = None
+    _GPU_IMPORT_ERROR = f"gpu_witness unavailable: {_exc}"
+else:
+    _GPU_IMPORT_ERROR = None
+
+PAGE_SIZE = os.sysconf("SC_PAGE_SIZE")
+
+
+def _children_map() -> dict[int, list[int]]:
+    """ppid -> [pid] for every process visible in /proc, in one pass."""
+    kids: dict[int, list[int]] = {}
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            # Field 4 of /proc/<pid>/stat is ppid. comm (field 2) is parenthesised
+            # and may itself contain spaces and ')', so split after the LAST ')'.
+            stat = (entry / "stat").read_text()
+            after = stat[stat.rindex(")") + 2:].split()
+            kids.setdefault(int(after[1]), []).append(int(entry.name))
+        except (OSError, ValueError, IndexError):
+            continue
+    return kids
+
+
+def _descendants(roots: list[int], kids: dict[int, list[int]]) -> list[int]:
+    seen, stack = [], list(roots)
+    while stack:
+        pid = stack.pop()
+        if pid in seen:
+            continue
+        seen.append(pid)
+        stack.extend(kids.get(pid, ()))
+    return seen
+
+
+def _tree_rss_kib(pids: list[int]) -> tuple[int, int]:
+    """(summed resident KiB, number of pids that actually contributed)."""
+    total = counted = 0
+    for pid in pids:
+        try:
+            resident = int(Path(f"/proc/{pid}/statm").read_text().split()[1])
+        except (OSError, ValueError, IndexError):
+            continue  # exited between enumeration and read
+        total += resident * PAGE_SIZE // 1024
+        counted += 1
+    return total, counted
+
+
+def _tree_pss_kib(pids: list[int]) -> tuple[int | None, int]:
+    """(summed proportional set size KiB, contributing pids).
+
+    RSS counts a shared page once in every process mapping it, so an arm with
+    four workers re-counts the CUDA runtime, cuFFT, libtiff and the binary text
+    four times while a one-worker arm counts them once. That bias is not
+    constant across the very contrast a 1/2/4-worker comparison makes. Pss
+    divides each shared page by its number of sharers, so the sum over a set of
+    processes is additive and arm-neutral. smaps_rollup needs a kernel that
+    provides it and permission to read it; when it is absent the figure is None
+    rather than a silent fallback to RSS.
+    """
+    total = counted = 0
+    seen_any = False
+    for pid in pids:
+        try:
+            for line in Path(f"/proc/{pid}/smaps_rollup").read_text().splitlines():
+                if line.startswith("Pss:"):
+                    total += int(line.split()[1])
+                    counted += 1
+                    seen_any = True
+                    break
+        except (OSError, ValueError, IndexError):
+            continue
+    return (total if seen_any else None), counted
+
+
+def _placement(pid: int) -> dict | None:
+    """What this process was ACTUALLY given, read from the kernel.
+
+    The launcher records the taskset mask it requested. A mask that was not
+    applied, or an OMP setting the worker did not inherit, is invisible there,
+    and thread placement is a first-order effect on this workload -- so the
+    achieved values are read back from /proc rather than restated from the plan.
+    """
+    try:
+        status = Path(f"/proc/{pid}/status").read_text()
+    except OSError:
+        return None
+    rec: dict[str, object] = {"pid": pid}
+    for line in status.splitlines():
+        for key, field in (("Name:", "comm"), ("Cpus_allowed_list:", "cpus_allowed_list"),
+                           ("Mems_allowed_list:", "mems_allowed_list")):
+            if line.startswith(key):
+                rec[field] = line.split(None, 1)[1].strip() if len(line.split(None, 1)) > 1 else ""
+    try:
+        rec["exe"] = os.path.realpath(f"/proc/{pid}/exe")
+    except OSError:
+        rec["exe"] = None
+    try:
+        env = Path(f"/proc/{pid}/environ").read_bytes().split(b"\0")
+        wanted = ("OMP_PROC_BIND", "OMP_PLACES", "OMP_NUM_THREADS", "CUDA_VISIBLE_DEVICES")
+        rec["env"] = {k: v for k, v in
+                      (e.decode("utf-8", "replace").split("=", 1) for e in env if b"=" in e)
+                      if k in wanted}
+    except OSError:
+        rec["env"] = None
+    return rec
+
+
+class AggregateSampler(threading.Thread):
+    # The stop flag is _stop_event, not _stop: threading.Thread already has a
+    # private _stop(), and join() calls it through _wait_for_tstate_lock once
+    # the thread has finished. Shadowing it makes every join() raise
+    # "'Event' object is not callable" after the run has already completed.
+    def __init__(self, roots: list[int], uuids: list[str], interval: float):
+        super().__init__(daemon=True)
+        self.roots = roots
+        self.uuids = [u for u in uuids if u]
+        self.interval = interval
+        self.sweeps: list[dict] = []
+        # pid -> achieved placement, captured the first sweep the pid is seen in.
+        # Late capture would miss a worker that exits between sweeps, so the
+        # record says how many pids were ever seen against how many were placed.
+        self.placement: dict[int, dict] = {}
+        self.error: str | None = None
+        self._stop_event = threading.Event()
+
+    def run(self) -> None:
+        if not Path("/proc").is_dir():
+            self.error = "no /proc on this platform; no host RSS was sampled"
+            return
+        while not self._stop_event.is_set():
+            t = time.time()
+            try:
+                kids = _children_map()
+                pids = _descendants(self.roots, kids)
+                for pid in pids:
+                    if pid not in self.placement:
+                        got = _placement(pid)
+                        if got is not None:
+                            self.placement[pid] = got
+                rss_kib, counted = _tree_rss_kib(pids)
+                pss_kib, pss_counted = _tree_pss_kib(pids)
+            except Exception as exc:  # noqa: BLE001
+                # Record and stop. A sampler that dies silently would certify the
+                # whole arm on the sweeps it happened to take before dying.
+                self.error = f"host sweep failed: {type(exc).__name__}: {exc}"
+                return
+            gpu, gpu_err, foreign = {}, None, []
+            if self.uuids and gpu_witness is None:
+                gpu_err = _GPU_IMPORT_ERROR
+            elif self.uuids:
+                try:
+                    ours = set(pids)
+                    for app in gpu_witness.compute_apps():
+                        if app["gpu_uuid"] not in self.uuids:
+                            continue
+                        mib = int(app["used_gpu_memory"].split()[0])
+                        # Attribute only contexts held by our own descendants. A
+                        # co-tenant on a granted device is recorded separately, not
+                        # added to our figure -- the whole point of using
+                        # compute-apps over whole-device memory.used.
+                        if int(app["pid"]) in ours:
+                            gpu[app["gpu_uuid"]] = gpu.get(app["gpu_uuid"], 0) + mib
+                        else:
+                            foreign.append({"pid": app["pid"],
+                                            "gpu_uuid": app["gpu_uuid"],
+                                            "used_mib": mib})
+                except Exception as exc:  # noqa: BLE001
+                    gpu_err = f"{type(exc).__name__}: {exc}"
+            self.sweeps.append({"t": round(t, 3), "rss_kib": rss_kib,
+                                "pids": counted, "gpu_mib_by_uuid": gpu,
+                                "pss_kib": pss_kib, "pss_pids": pss_counted,
+                                "foreign_gpu_apps": foreign or None,
+                                "gpu_error": gpu_err})
+            self._stop_event.wait(self.interval)
+
+    def stop(self) -> None:
+        self._stop_event.set()
+
+    def record(self) -> dict:
+        n = len(self.sweeps)
+        base = {
+            "interval_s": self.interval,
+            "sweeps": n,
+            "roots": self.roots,
+            "uuids": self.uuids,
+            "error": self.error,
+            "achieved_placement": list(self.placement.values()),
+            "achieved_placement_note": (
+                "Cpus_allowed_list, Mems_allowed_list, realpath(/proc/pid/exe) and the "
+                "OMP/CUDA_VISIBLE_DEVICES values the process actually holds, captured "
+                "on the first sweep each pid was seen in. A process that started and "
+                "exited entirely between two sweeps has no entry."),
+            "semantics": (
+                "peak_simultaneous_host_rss_kib is the maximum over sweeps of one "
+                "sweep's total across the whole descendant tree, ghostscript "
+                "children included. It is NOT a sum of per-process high-water "
+                "marks. Both peaks are sampled lower bounds: a spike between two "
+                "sweeps is not observed."),
+        }
+        if n == 0:
+            base.update({"peak_simultaneous_host_rss_kib": None,
+                         "peak_simultaneous_host_pss_kib": None,
+                         "peak_gpu_mib_by_uuid": None,
+                         "peak_gpu_mib_all_uuids": None,
+                         "observed_sweep_spacing_s": None})
+            return base
+        spacing = [round(self.sweeps[i + 1]["t"] - self.sweeps[i]["t"], 3)
+                   for i in range(n - 1)]
+        by_uuid = {}
+        for u in self.uuids:
+            vals = [s["gpu_mib_by_uuid"].get(u) for s in self.sweeps
+                    if s["gpu_mib_by_uuid"].get(u) is not None]
+            by_uuid[u] = max(vals) if vals else None
+        all_sweep_totals = [sum(s["gpu_mib_by_uuid"].values())
+                            for s in self.sweeps if s["gpu_mib_by_uuid"]]
+        gpu_errors = sorted({s["gpu_error"] for s in self.sweeps if s["gpu_error"]})
+        peak = max(self.sweeps, key=lambda s: s["rss_kib"])
+        pss_sweeps = [sw for sw in self.sweeps if sw.get("pss_kib") is not None]
+        peak_pss = max(pss_sweeps, key=lambda sw: sw["pss_kib"]) if pss_sweeps else None
+        foreign = [f for sw in self.sweeps for f in (sw.get("foreign_gpu_apps") or [])]
+        base.update({
+            "peak_simultaneous_host_pss_kib": peak_pss["pss_kib"] if peak_pss else None,
+            "peak_simultaneous_host_pss_gib": (round(peak_pss["pss_kib"] / 1048576, 4)
+                                               if peak_pss else None),
+            "pss_note": ("Proportional set size: shared pages divided by their number "
+                         "of sharers, so the sum is additive across processes and does "
+                         "not over-count the shared CUDA/libtiff/text pages more in a "
+                         "4-worker arm than in a 1-worker arm. None if smaps_rollup is "
+                         "unavailable; compare arms on this figure, not on RSS."),
+            "foreign_gpu_contexts": foreign or None,
+            "foreign_gpu_note": ("processes holding a context on a granted UUID that "
+                                 "are NOT our descendants. Non-empty means the device "
+                                 "was shared and the arm is not isolated."),
+            "peak_simultaneous_host_rss_kib": peak["rss_kib"],
+            "peak_simultaneous_host_rss_gib": round(peak["rss_kib"] / 1048576, 4),
+            "peak_sweep_pid_count": peak["pids"],
+            "peak_sweep_t": peak["t"],
+            "peak_gpu_mib_by_uuid": by_uuid,
+            "peak_gpu_mib_all_uuids": max(all_sweep_totals) if all_sweep_totals else None,
+            "gpu_sample_errors": gpu_errors or None,
+            "observed_sweep_spacing_s": {
+                "min": min(spacing), "max": max(spacing),
+                "median": sorted(spacing)[len(spacing) // 2]} if spacing else None,
+            "sweeps_raw": self.sweeps,
+        })
+        return base
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--pid", type=int, action="append", required=True,
+                    help="root pid to watch; repeatable. Descendants are included.")
+    ap.add_argument("--uuid", action="append", default=[],
+                    help="GPU UUID granted to this arm; repeatable. Omit for CPU arms.")
+    ap.add_argument("--interval", type=float, default=0.25)
+    ap.add_argument("--out", required=True)
+    a = ap.parse_args(argv)
+    s = AggregateSampler(a.pid, a.uuid, a.interval)
+    s.start()
+    # Watch until every root has gone. The sampler owns no child, so this is the
+    # only termination condition that does not need the caller to time it.
+    while any(Path(f"/proc/{p}").exists() for p in a.pid):
+        time.sleep(a.interval)
+    s.stop()
+    s.join(timeout=10 * a.interval + 5)
+    Path(a.out).write_text(json.dumps(s.record(), indent=2) + "\n")
+    return 0 if s.error is None and s.sweeps else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

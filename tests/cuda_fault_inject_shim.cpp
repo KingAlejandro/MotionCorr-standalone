@@ -235,6 +235,16 @@ extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
         std::fprintf(stderr, "[preprocessfault] injected cudaErrorIllegalAddress after real session cudaFree\n");
         return cudaErrorIllegalAddress;
     }
+    // Reconstruction cleanup: the real free ran; only its returned status is
+    // replaced, after the helper's D2H copy has already succeeded.
+    if (result == cudaSuccess && !g_preprocess_injected) {
+        const char *stage = nullptr;
+        if (preprocess_mode("unweighted-release-fatal") && called_from("cudaRealSpaceInterpolationDevice"))
+            stage = "cudaRealSpaceInterpolationDevice";
+        else if (preprocess_mode("dw-release-fatal") && called_from("cudaDoseWeightAndInterpolateDevice"))
+            stage = "cudaDoseWeightAndInterpolateDevice";
+        if (stage) return inject_preprocess(true, stage);
+    }
     return result;
 }
 

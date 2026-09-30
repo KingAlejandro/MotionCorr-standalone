@@ -223,7 +223,6 @@ int main(int argc, char **argv)
             std::cout << "PASS fused MRC header statistics (" << cases.size() << " cases)\n";
             return 0;
         }
-        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output");
         if (std::string(argv[1]) == "read_tiff_raw") {
             // Dump decoded samples in index order. The row sums the read_tiff
             // mode writes cannot see sample order within a row: swapping the two
@@ -249,6 +248,8 @@ int main(int argc, char **argv)
             require(out.good(), "Failed writing raw samples");
             return 0;
         }
+
+        require(argc == 4, "Usage: runner_numerics bin|model|write_model|read|legacy_mtf|read_tiff input output");
         if (std::string(argv[1]) == "read_tiff") {
             // Dump per-row sums of a decoded TIFF stack. Row sums are exact in
             // double for integer sample values, and any row-striding or Y-flip

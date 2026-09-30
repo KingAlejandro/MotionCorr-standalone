@@ -92,7 +92,11 @@ private:
 	std::deque<Task> tasks;
 	std::vector<Failure> failures;
 	long int current_movie = -1;
-	long int cancelled_movie = -1;
+	// Set when a product of the open group failed. beginMovie() waits for the
+	// queue to empty before opening the next group, so the only tasks that
+	// exist or run while a group is open belong to it -- which is why one flag
+	// is enough, and why it cannot be confused with a movie index sentinel.
+	bool current_cancelled = false;
 	bool executing = false;
 	bool stopping = false;
 	std::thread worker;               // declared last: started once the rest is live

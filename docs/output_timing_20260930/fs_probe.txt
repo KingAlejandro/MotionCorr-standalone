@@ -1,0 +1,23 @@
+# Output destination probe: local disk (/home, QEMU HDD) vs tmpfs (/dev/shm)
+# Same binary (instr arm), alternating order, otherwise identical to the baseline runs.
+
+== disk_p1 (wall 0:28.59) ==
+write corrected image              : 2.906 sec (121122 microsec/operation)
+out - mrc stats                    : 1.313 sec (54711 microsec/operation)
+out - mrc payload                  : 1.583 sec (65968 microsec/operation)
+out - mrc close                    : 0.001 sec (58 microsec/operation)
+
+== shm_p1 (wall 0:28.15) ==
+write corrected image              : 2.397 sec (99885 microsec/operation)
+out - mrc stats                    : 1.306 sec (54441 microsec/operation)
+out - mrc payload                  : 1.082 sec (45101 microsec/operation)
+out - mrc close                    : 0 sec (40 microsec/operation)
+
+== shm_p2 (wall 0:28.11) ==
+write corrected image              : 2.409 sec (100376 microsec/operation)
+out - mrc stats                    : 1.316 sec (54843 microsec/operation)
+out - mrc payload                  : 1.083 sec (45164 microsec/operation)
+out - mrc close                    : 0.001 sec (46 microsec/operation)
+
+# probe_disk_p2 produced no stage table: the run was still writing when its
+# output directory was removed by the next iteration; excluded.

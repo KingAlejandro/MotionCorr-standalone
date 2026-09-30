@@ -42,6 +42,7 @@ void OutputWriter::beginMovie(long int movie_index)
 	if (current_movie == movie_index) return;
 	waitIdle(lock);
 	current_movie = movie_index;
+	current_cancelled = false;
 }
 
 void OutputWriter::submit(std::function<void()> task)
@@ -58,7 +59,7 @@ void OutputWriter::submit(std::function<void()> task)
 		std::lock_guard<std::mutex> lock(mutex);
 		// An earlier product of this movie already failed: everything after it
 		// is withheld, including the STAR completion marker.
-		if (current_movie == cancelled_movie) return;
+		if (current_cancelled) return;
 		tasks.push_back({current_movie, std::move(task)});
 	}
 	queued.notify_one();
@@ -94,7 +95,7 @@ void OutputWriter::workerLoop()
 
 		Task task = std::move(tasks.front());
 		tasks.pop_front();
-		const bool cancelled = (task.movie_index == cancelled_movie);
+		const bool cancelled = current_cancelled;
 		executing = true;
 		lock.unlock();
 
@@ -128,7 +129,7 @@ void OutputWriter::workerLoop()
 		executing = false;
 		if (!error.empty())
 		{
-			cancelled_movie = task.movie_index;
+			current_cancelled = true;
 			failures.push_back({task.movie_index, error});
 		}
 		if (tasks.empty()) idle.notify_all();

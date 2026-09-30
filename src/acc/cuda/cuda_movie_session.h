@@ -20,6 +20,23 @@
  * Eliminates redundant host<->device PCIe memory transfers by keeping real and Fourier frames
  * resident on the GPU throughout preprocessing, FFT, global alignment, patch alignment, and reconstruction.
  */
+// Outcome of an attempted device ingest, as the caller must act on it.
+//
+// A bare bool conflated three different situations that need three different
+// responses: "this build/encoding never uses the fast path" (use the fallback,
+// nothing happened), "the fast path tried and failed but the device is fine"
+// (use the fallback), and "the context is dead" (do not dispatch CUDA again).
+// It also could not express a failure discovered AFTER the success value was
+// chosen, which the ingest-scratch teardown can produce.
+enum class MovieIngestStatus
+{
+	NotApplicable,        // no nvCOMP, no session, or an encoding this path declines
+	Success,              // d_Iframes and d_Isum hold the whole movie
+	RecoverableFailure,   // fall back to a host reader; the device is still usable
+	InvalidInput,         // the movie itself is unusable; another reader will not help
+	FatalDeviceFailure    // the CUDA context is poisoned; no redispatch
+};
+
 class CudaMovieSession {
 public:
     CudaMovieSession(const CudaMovieSession&) = delete;
@@ -57,6 +74,32 @@ public:
         const MultidimArray<float> *gain_ref,
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
+    );
+
+    // Attempt the device ingest and report what actually happened.
+    //
+    // This is the boundary the runner uses. It wraps the worker below and adds
+    // the two things a bool cannot carry:
+    //
+    //  - classification. A decline on an unsupported encoding is not the same
+    //    event as a cudaMalloc failure, and neither is the same as a poisoned
+    //    context, but all three were "false".
+    //
+    //  - late failures. The worker's scratch scope synchronises and destroys
+    //    the ingest stream in its destructor, which runs AFTER the return value
+    //    has been chosen, and records any error into the session's failure
+    //    state. A stream synchronise that failed there would have been reported
+    //    as a successful ingest with a possibly incomplete d_Iframes. This
+    //    compares the failure state across the call and refuses to call that
+    //    success.
+    //
+    // Returns NotApplicable when the build has no nvCOMP, so the caller needs
+    // no #if of its own.
+    MovieIngestStatus ingestMovie(
+        const std::string &fn_mic,
+        const std::vector<int> &frames,
+        const MultidimArray<float> *gain_ref,
+        int n_threads
     );
 
 #if defined(_NVCOMP_ENABLED)

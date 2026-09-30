@@ -1678,15 +1678,40 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 	bool nvcomp_ingested = false;
-#if defined(_NVCOMP_ENABLED)
+	MovieIngestStatus ingest_status = MovieIngestStatus::NotApplicable;
 	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
-		if (movie_session->ingestCompressedTiffStrips(fn_mic, frames, gain_ptr, n_io_threads)) {
-			nvcomp_ingested = true;
-		}
+		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
 	}
-#endif
+	// Each outcome gets its own response. Collapsing them into one bool is what
+	// let a poisoned context and an unsupported encoding take the same path.
+	switch (ingest_status) {
+	case MovieIngestStatus::Success:
+		nvcomp_ingested = true;
+		break;
+	case MovieIngestStatus::FatalDeviceFailure:
+		// Do not fall back: a CPU or re-dispatched CUDA attempt after a fatal
+		// device error is exactly what #115's ownership model refuses.
+		discard_preprocessing_session("device movie ingestion");
+		REPORT_ERROR("The CUDA context became unusable during device ingestion of " + fn_mic
+		             + ". Refusing any fallback after a fatal device error.");
+		break;
+	case MovieIngestStatus::InvalidInput:
+		REPORT_ERROR("Device ingestion rejected " + fn_mic + " as unusable input. "
+		             "Another reader would reject it too; failing this movie.");
+		break;
+	case MovieIngestStatus::RecoverableFailure:
+		// The attempt touched the device and failed without poisoning it. The
+		// host reader below re-reads the movie from the immutable file, and
+		// applyGainDefectsAndSum overwrites d_Iframes and d_Isum in full, so a
+		// partially written device movie is not a hazard.
+		logfile << "Device ingestion failed recoverably for " << fn_mic
+		        << "; re-reading the movie with the host reader." << std::endl;
+		break;
+	case MovieIngestStatus::NotApplicable:
+		break;
+	}
 	if (ingest_mode == INGEST_NVCOMP && !nvcomp_ingested)
 		REPORT_ERROR("--ingest nvcomp was requested but the device ingest did not run for "
 		             + fn_mic + ". Either this build has no nvCOMP, there is no resident CUDA "

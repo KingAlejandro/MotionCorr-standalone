@@ -877,6 +877,67 @@ void CudaMovieSession::endIngestScratch() {
     fourier_guard.finishIngestScratch();
 }
 
+MovieIngestStatus CudaMovieSession::ingestMovie(
+    const std::string &fn_mic,
+    const std::vector<int> &frames,
+    const MultidimArray<float> *gain_ref,
+    int n_threads
+) {
+#if !defined(_NVCOMP_ENABLED)
+    (void)fn_mic; (void)frames; (void)gain_ref; (void)n_threads;
+    return MovieIngestStatus::NotApplicable;
+#else
+    if (!is_initialized) return MovieIngestStatus::NotApplicable;
+    if (failure_state.isPoisoned()) return MovieIngestStatus::FatalDeviceFailure;
+
+    // Snapshot, because CudaFailureState keeps the FIRST failure: without this
+    // a benign error recorded earlier in the movie would be read as this
+    // call's, and an error this call recorded would be invisible if one was
+    // already there.
+    const bool       was_poisoned = failure_state.isPoisoned();
+    const cudaError_t before_err  = failure_state.firstError();
+    const cufftResult before_cufft = failure_state.firstCufftError();
+
+    const bool worker_ok = ingestCompressedTiffStrips(fn_mic, frames, gain_ref, n_threads);
+
+    // By here the worker's ScratchScope has run: cudaStreamSynchronize and
+    // cudaStreamDestroy have been attempted and anything they returned is in
+    // the failure state. That is the whole reason this comparison happens
+    // after the call rather than inside it.
+    const bool now_poisoned = failure_state.isPoisoned();
+    const bool new_cuda_error  = (before_err == cudaSuccess &&
+                                  failure_state.firstError() != cudaSuccess);
+    const bool new_cufft_error = (before_cufft == CUFFT_SUCCESS &&
+                                  failure_state.firstCufftError() != CUFFT_SUCCESS);
+
+    if (now_poisoned && !was_poisoned) {
+        logfile << "ERROR: the CUDA context became unusable during device ingestion of "
+                << fn_mic << "; refusing to report a successful ingest." << std::endl;
+        return MovieIngestStatus::FatalDeviceFailure;
+    }
+    if (worker_ok && (new_cuda_error || new_cufft_error)) {
+        // The decode itself reported success, but the teardown did not. The
+        // resident movie cannot be trusted, so this is a failure even though
+        // every per-chunk check passed.
+        logfile << "WARNING: device ingestion of " << fn_mic << " reported success but its"
+                << " scratch teardown recorded an error (" 
+                << cudaGetErrorString(failure_state.firstError()) << " at "
+                << failure_state.firstStage() << ":" << failure_state.firstLine()
+                << "); treating the ingest as failed and using the host reader."
+                << std::endl;
+        return MovieIngestStatus::RecoverableFailure;
+    }
+    if (worker_ok) return MovieIngestStatus::Success;
+
+    // Declined. A CUDA error recorded during the attempt means the fast path
+    // tried and failed on the device; no new error means it refused the
+    // encoding, the pinned budget or the arena before touching anything, which
+    // is an ordinary "not applicable for this movie" and not a fault.
+    return (new_cuda_error || new_cufft_error) ? MovieIngestStatus::RecoverableFailure
+                                               : MovieIngestStatus::NotApplicable;
+#endif
+}
+
 // Sparse device read-back for hot-pixel replacement. Deliberately OUTSIDE the
 // nvCOMP guard: the declaration in the header is unconditional and the call site
 // in motioncorr_runner.cpp is guarded by _CUDA_ENABLED, not _NVCOMP_ENABLED, so a

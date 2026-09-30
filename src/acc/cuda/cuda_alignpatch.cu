@@ -253,6 +253,8 @@ struct PatchAlignmentWorkspace::Impl {
     mc_cuda::ScopedCudaEvents<ALIGN_MAX_EVENTS> events;
     mc_cuda::ScopedCufftPlan plan;
     bool valid = false;
+    // The ephemeral entry point reports completion only after checked teardown.
+    bool defer_completion = false;
     int resource_device = -1;
     float2 *d_Fref = nullptr, *d_Fccs = nullptr;
     float *d_weight = nullptr, *d_Iccs = nullptr;
@@ -571,8 +573,9 @@ bool cudaAlignPatchDeviceWithWorkspace(
     w.key = requested;
     w.valid = true;
 
-    logfile << " [CUDA " << stage_name << "] completed; converged="
-            << (converged ? "yes" : "no") << std::endl;
+    if (!w.defer_completion)
+        logfile << " [CUDA " << stage_name << "] completed; converged="
+                << (converged ? "yes" : "no") << std::endl;
     return converged;
     } catch (...) {
         // Failure invalidates the cache before cleanup. Any late fatal cleanup
@@ -596,10 +599,14 @@ bool cudaAlignPatchDevice(
     bool is_global)
 {
     PatchAlignmentWorkspace workspace;
+    workspace.impl_->defer_completion = true;
     const bool converged = cudaAlignPatchDeviceWithWorkspace(workspace, d_Fframes,
         n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter,
         ccf_downsample, device_id, logfile, is_global);
     if (!workspace.release()) REPORT_ERROR("CUDA patch alignment cleanup failed");
+    const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
+    logfile << " [CUDA " << stage_name << "] completed; converged="
+            << (converged ? "yes" : "no") << std::endl;
     return converged;
 }
 

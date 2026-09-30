@@ -24,6 +24,7 @@ std::set<cudaEvent_t> events;
 std::set<cufftHandle> plans;
 size_t stale = 0;
 bool late_fatal_free = false;
+std::string last_log;
 bool fail(Boundary boundary) {
     if (!active) return false;
     const int seen = ++counts[boundary];
@@ -129,6 +130,7 @@ Result align(const Geometry &g, PatchAlignmentWorkspace *workspace) {
     Result result = {false, std::vector<RFLOAT>(g.groups, 0),
                       std::vector<RFLOAT>(g.groups, 0), std::vector<cufftComplex>(n)};
     std::ostringstream log;
+    last_log.clear();
     active = armed;
     try {
         result.converged = workspace
@@ -137,11 +139,13 @@ Result align(const Geometry &g, PatchAlignmentWorkspace *workspace) {
             : cudaAlignPatchDevice(device, g.groups, g.x, g.y, g.B,
                 result.x, result.y, 4, g.downsample, 0, log);
     } catch (...) {
+        last_log = log.str();
         active = false;
         __real_cudaFree(device);
         active = armed;
         throw;
     }
+    last_log = log.str();
     active = false;
     require(cudaMemcpy(result.fourier.data(), device, n * sizeof(cufftComplex),
                        cudaMemcpyDeviceToHost) == cudaSuccess, "result download");
@@ -224,6 +228,65 @@ void initializationFailures() {
     }
     std::cout << "PASS: " << trials << " initialization failures and exact recovery controls\n";
 }
+void populatedReplacementFailures() {
+    const Geometry a = {64,64,4,2,1,17}, b = {80,72,3,5,.6,18};
+    {
+        CudaFailureState failure;
+        PatchAlignmentWorkspace workspace(&failure);
+        arm(); (void)align(a, &workspace);
+        arm(MALLOC, 3); bool threw = false;
+        try { (void)align(b, &workspace); } catch (const RelionError &) { threw = true; }
+        require(threw && fired && failure.hasFailed() && !failure.isPoisoned() &&
+                !workspace.isValid(), "populated replacement partial fault left valid state");
+        requireEmpty();
+        require(counts[FREE] == 10 && counts[EVENT_DESTROY] == 16 &&
+                counts[PLAN_DESTROY] == 1, "replacement did not release old and partial new resources");
+        arm();
+        const Result recovered = align(b, &workspace);
+        require(workspace.isValid() && counts[MALLOC] == 8 && counts[PLAN_MAKE] == 1,
+                "replacement recovery used stale geometry/resources");
+        require(workspace.release(), "replacement recovery cleanup failed");
+        requireEmpty(); active = false;
+        exact(recovered, align(b, nullptr));
+    }
+    {
+        CudaFailureState failure;
+        PatchAlignmentWorkspace workspace(&failure);
+        arm(); (void)align(a, &workspace);
+        arm(FREE, 1, true); bool threw = false;
+        try { (void)align(b, &workspace); } catch (const RelionError &) { threw = true; }
+        require(threw && fired && failure.isPoisoned() && !workspace.isValid(),
+                "populated replacement failed to retain fatal release status");
+        require(counts[MALLOC] == 0 && counts[EVENT_CREATE] == 0 &&
+                counts[PLAN_CREATE] == 0 && counts[FREE] == 8 &&
+                counts[EVENT_DESTROY] == 8 && counts[PLAN_DESTROY] == 1,
+                "replacement initialized B after fatal cleanup of A");
+        requireEmpty();
+        arm(); bool refused = false;
+        try { (void)align(b, &workspace); } catch (const RelionError &) { refused = true; }
+        require(refused && counts[MALLOC] == 0 && counts[EVENT_CREATE] == 0 &&
+                counts[PLAN_CREATE] == 0, "fatal replacement allowed later redispatch");
+        require(workspace.release(), "fatal replacement left stale owners");
+        active = false;
+    }
+    std::cout << "PASS: populated A->B partial-init exact recovery and fatal-release/no-redispatch controls\n";
+}
+void ephemeralCleanupMarkers() {
+    const Geometry g = {64,64,4,2,1,19};
+    for (Boundary boundary : {FREE, EVENT_DESTROY, PLAN_DESTROY}) {
+        arm(boundary, 1); bool threw = false;
+        try { (void)align(g, nullptr); } catch (const RelionError &) { threw = true; }
+        require(threw && fired, "ephemeral cleanup control did not fire/throw");
+        require(last_log.find("[CUDA Patch Alignment] completed;") == std::string::npos,
+                "ephemeral entry point emitted completion before failed cleanup");
+        requireEmpty(); active = false;
+    }
+    arm(); (void)align(g, nullptr);
+    require(last_log.find("[CUDA Patch Alignment] completed;") != std::string::npos,
+            "healthy ephemeral entry point omitted completion marker");
+    requireEmpty(); active = false;
+    std::cout << "PASS: 3 ephemeral cleanup failures withheld completion marker; healthy cleanup emitted it\n";
+}
 void releaseAndFatalFailures() {
     const Geometry g = {64,64,4,2,1,12};
     for (Boundary boundary : {FREE, EVENT_DESTROY, PLAN_DESTROY}) {
@@ -272,7 +335,8 @@ int main() {
         std::cerr << "Native CUDA device 0 is required\n"; return 1;
     }
     try {
-        healthyAndKeys(); initializationFailures(); releaseAndFatalFailures();
+        healthyAndKeys(); initializationFailures(); populatedReplacementFailures();
+        ephemeralCleanupMarkers(); releaseAndFatalFailures();
         requireEmpty();
     } catch (const std::exception &e) {
         std::cerr << "FAIL: " << e.what() << '\n'; return 1;

@@ -30,6 +30,9 @@ private:
         PatchAlignmentWorkspace&, cufftComplex*, int, int, int, RFLOAT,
         std::vector<RFLOAT>&, std::vector<RFLOAT>&, int, RFLOAT, int,
         std::ostream&, bool);
+    friend bool cudaAlignPatchDevice(
+        cufftComplex*, int, int, int, RFLOAT, std::vector<RFLOAT>&,
+        std::vector<RFLOAT>&, int, RFLOAT, int, std::ostream&, bool);
 };
 
 bool cudaAlignPatchDeviceWithWorkspace(

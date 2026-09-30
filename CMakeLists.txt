@@ -157,12 +157,27 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+        add_test(NAME OutputTreeComparator
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
+        set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)
     # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
     # so it needs POSIX resource limits and an ignorable SIGXFSZ.
     if(UNIX)
         add_executable(image_write_faults tests/test_image_write_faults.cpp)
         target_link_libraries(image_write_faults PRIVATE motioncorr_core)
         add_test(NAME ImageWriteFaults COMMAND image_write_faults)
+
+        # Issue #95: the native uint16 staging ownership contract. Device-free:
+        # it checks that the frames alias one mapping, that Image::read's
+        # coreAllocateReuse() keeps that slice, and that release() returns the
+        # payload to the operating system. The last assertion needs /proc and
+        # reports a skip elsewhere; CI runs on Linux.
+        add_executable(native_u16_staging tests/test_native_u16_staging.cpp)
+        target_link_libraries(native_u16_staging PRIVATE motioncorr_core)
+        add_test(NAME NativeU16Staging COMMAND native_u16_staging)
+        # Exit 77 when the resident-set arm could not run, so ctest reports NOTRUN
+        # rather than a Passed that hides a skipped assertion.
+        set_tests_properties(NativeU16Staging PROPERTIES SKIP_RETURN_CODE 77)
     endif()
 endif()
 if(BUILD_TESTING AND CUDA)
@@ -173,6 +188,14 @@ if(BUILD_TESTING AND CUDA)
         set_tests_properties(RunnerInterpolateShiftsCuda PROPERTIES LABELS "cuda;hardware")
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # Issue #85 lane C: uint16 staging must reproduce the float path's device
+        # state exactly, including the no-gain case where the float path never
+        # writes d_Iframes. Needs a real device.
+        add_executable(cuda_u16_staging_equivalence tests/cuda_u16_staging_equivalence.cpp)
+        target_link_libraries(cuda_u16_staging_equivalence PRIVATE motioncorr_core)
+        add_test(NAME CudaU16StagingEquivalence COMMAND cuda_u16_staging_equivalence)
+        set_tests_properties(CudaU16StagingEquivalence PROPERTIES LABELS "cuda;hardware")
+
         add_executable(cuda_wrapper_upload_failure tests/cuda_wrapper_upload_failure.cpp)
         target_link_libraries(cuda_wrapper_upload_failure PRIVATE motioncorr_core)
         target_link_options(cuda_wrapper_upload_failure PRIVATE
@@ -182,7 +205,6 @@ if(BUILD_TESTING AND CUDA)
         add_executable(cuda_fault_matrix tests/cuda_fault_matrix.cpp)
         target_link_libraries(cuda_fault_matrix PRIVATE motioncorr_core)
         target_link_options(cuda_fault_matrix PRIVATE
-            "LINKER:--wrap=cudaGetDeviceCount"
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
             "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaMemset"
             "LINKER:--wrap=cudaDeviceSynchronize"
@@ -190,7 +212,8 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
             "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftSetWorkArea"
             "LINKER:--wrap=cufftPlanMany" "LINKER:--wrap=cufftExecR2C"
-            "LINKER:--wrap=cufftExecC2R")
+            "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
         add_executable(motioncorr_retry_caller
@@ -207,15 +230,40 @@ if(BUILD_TESTING AND CUDA)
             src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp)
         target_link_libraries(motioncorr_faultinject PRIVATE motioncorr_core)
         target_link_libraries(motioncorr_faultinject PRIVATE ${CMAKE_DL_LIBS})
-        target_link_options(motioncorr_faultinject PRIVATE "-rdynamic"
-            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetDeviceCount"
-            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaDeviceSynchronize")
+        target_link_options(motioncorr_faultinject PRIVATE
+            "-rdynamic"
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaFree" "LINKER:--wrap=cudaGetLastError"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaPreprocessingFailurePaths
-            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
-                --binary $<TARGET_FILE:motioncorr_faultinject> --float-host)
-        set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject>)
+        set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 900)
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
+        # Optional Issue #85 lane C native failure matrix. Supplying the known
+        # uint16 TIFF fixture opts into this hardware test; ordinary CI and CPU-only
+        # CTest collection do not require the external data.
+        set(MOTIONCORR_U16_TEST_MOVIE "" CACHE FILEPATH
+            "Optional uint16 TIFF fixture for the native lane-C failure matrix")
+        set(MOTIONCORR_U16_TEST_STAGE_BYTES "28477960" CACHE STRING
+            "Bytes in one uint16 frame for MOTIONCORR_U16_TEST_MOVIE")
+        if(MOTIONCORR_U16_TEST_MOVIE)
+            if(NOT EXISTS "${MOTIONCORR_U16_TEST_MOVIE}")
+                message(FATAL_ERROR "MOTIONCORR_U16_TEST_MOVIE does not exist: ${MOTIONCORR_U16_TEST_MOVIE}")
+            endif()
+            find_program(BASH_EXECUTABLE bash REQUIRED)
+            add_test(NAME CudaU16FailurePaths
+                COMMAND ${BASH_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_u16_failure_controls.sh
+                    $<TARGET_FILE:motioncorr_faultinject>
+                    ${MOTIONCORR_U16_TEST_MOVIE} ${MOTIONCORR_U16_TEST_STAGE_BYTES}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/docs/issue85_laneC/compare_output_trees.py)
+            set_tests_properties(CudaU16FailurePaths PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 900)
+        endif()
         # Issue #69. Pure predicate over cudaError_t plus the host-only failure state:
         # needs the CUDA headers, needs no device.
         add_executable(cuda_error_class tests/cuda_error_class.cpp)

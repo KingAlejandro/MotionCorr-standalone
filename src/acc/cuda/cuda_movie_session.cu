@@ -859,6 +859,24 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     return true;
 }
 
+// Ingest-scratch teardown. Outside the nvCOMP guard for the same reason
+// gatherFrameSamples is: gatherFrameSamples calls it, the declaration in the
+// header is unconditional, and nothing in it touches nvCOMP -- it is a CUDA
+// stream and the Fourier-storage guard. Leaving it inside the guard is what
+// made the CUDA-without-nvCOMP link fail on CI run 317 after the previous
+// commit moved its only unguarded caller out.
+void CudaMovieSession::endIngestScratch() {
+    if (ingest_stream) {
+        // Nothing may still be reading or writing the arena when the FFT phase takes
+        // d_Fframes back. There is no host work worth overlapping at this boundary,
+        // so this synchronises rather than handing an event to a later stream.
+        recordFailure(cudaStreamSynchronize(ingest_stream), "ingest scratch sync", __LINE__);
+        recordFailure(cudaStreamDestroy(ingest_stream), "ingest scratch stream", __LINE__);
+        ingest_stream = 0;
+    }
+    fourier_guard.finishIngestScratch();
+}
+
 // Sparse device read-back for hot-pixel replacement. Deliberately OUTSIDE the
 // nvCOMP guard: the declaration in the header is unconditional and the call site
 // in motioncorr_runner.cpp is guarded by _CUDA_ENABLED, not _NVCOMP_ENABLED, so a
@@ -977,17 +995,6 @@ bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
 }
 
 
-void CudaMovieSession::endIngestScratch() {
-    if (ingest_stream) {
-        // Nothing may still be reading or writing the arena when the FFT phase takes
-        // d_Fframes back. There is no host work worth overlapping at this boundary,
-        // so this synchronises rather than handing an event to a later stream.
-        recordFailure(cudaStreamSynchronize(ingest_stream), "ingest scratch sync", __LINE__);
-        recordFailure(cudaStreamDestroy(ingest_stream), "ingest scratch stream", __LINE__);
-        ingest_stream = 0;
-    }
-    fourier_guard.finishIngestScratch();
-}
 
 bool CudaMovieSession::ingestCompressedTiffStrips(
     const std::string &fn_mic,

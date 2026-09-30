@@ -234,7 +234,13 @@ private:
     // Points the ingest at the worker-lifetime pinned staging pool, growing it if
     // this movie needs more. The pool deliberately outlives the session, which is
     // constructed and destroyed once per movie.
+#if defined(_NVCOMP_ENABLED)
+    // Genuinely nvCOMP-only: this is the pinned staging pool for compressed
+    // strips and has no caller outside ingestCompressedTiffStrips. Declared
+    // under the same guard as its definition, so the two cannot drift apart
+    // the way endIngestScratch's did.
     bool ensurePinnedStage(size_t bytes);
+#endif
     // Synchronises and tears down the ingest stream, then declares every scratch
     // view dead. Idempotent; called from a scope guard so it also runs on the
     // HANDLE_ERROR early-return paths.

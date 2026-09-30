@@ -192,6 +192,11 @@ if(BUILD_TESTING)
     add_executable(defect_neighbours tests/test_defect_neighbours.cpp)
     target_include_directories(defect_neighbours PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DefectNeighbours COMMAND defect_neighbours)
+    # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
+    # and deliberately outside if(CUDA): the whole point is a configuration this
+    # suite does not link, so no compiled test can observe it.
+    add_test(NAME NvcompGuards
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_nvcomp_guards.py)
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)

@@ -83,6 +83,12 @@ DEFAULT_REQUIRED_TESTS = [
     # observable at all.
     "WriteFaultsSync",
     "WriteFaultsMultiProduct",
+    # Added after the CUDA-without-nvCOMP link failure on CI run 317. The suite
+    # never links that configuration, so nothing in it could see a member
+    # defined inside the guard and declared outside; the first instance
+    # (gatherFrameSamples) stayed green only because the optimiser removed the
+    # call, and the second (endIngestScratch) appeared the moment that stopped.
+    "NvcompGuards",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

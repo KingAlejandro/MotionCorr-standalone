@@ -162,7 +162,7 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 30 tests: the 13 pre-existing ones, the
+        # The integrated suite registers 31 tests: the 13 pre-existing ones, the
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
         # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState,
         # #85 OutputTreeComparator, #97 recenter/interpolation contracts, and
@@ -208,6 +208,7 @@ exec "{sys.executable}" "$@"
             # #127 writer fail-closed variants.
             "WriteFaultsSync",
             "WriteFaultsMultiProduct",
+            "NvcompGuards",
             "NativeU16Staging",
         ]
 

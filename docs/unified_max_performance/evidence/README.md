@@ -52,10 +52,20 @@ What it establishes:
 
 `CiFailClosedControls` fails there, 3 of 8 subtests, from a canonical fixture
 hash mismatch. **Main fails identically on the same node**, and the generator
-files are untouched by this branch, so it is pre-existing and
-environment-dependent. The numpy version is not the cause: the generator's
-`np.random.default_rng(59).normal(0, 2, 9)` draw is byte-identical under
-1.22.4 and 2.5.3. The cause is not isolated.
+files are untouched by this branch, so it is pre-existing and not caused here.
+
+Root-caused in PR #129, not here. It *is* the NumPy version, and my note that
+it was not was wrong. Ruling out the RNG draw -- the generator's
+`np.random.default_rng(59).normal(0, 2, 9)` is byte-identical under 1.22.4 and
+2.5.3 -- does not rule out NumPy, and I over-read one negative result as a
+general one. #129 found that NumPy's `mean`/`std` reductions changed their last
+bits between 2.2 and 2.3: the float32 `stack.std()` goes into the MRC header
+RMS field, and the float64 `clean0.std()`/`.mean()` rescales the noise. It
+replaces both with `math.fsum`-based reductions and regenerates the canonical
+digests, with cross-version evidence for 1.26.4 / 2.2.6 / 2.4.1.
+
+#129 and this branch share no files, so it merges cleanly, and once it lands
+`CiFailClosedControls` should pass on SCARF here too.
 
 The 24-movie run there (25.74 s, 0.90 GiB, compact arm) is a functional sanity
 check on a different GPU model, not a timing result: one observation, and the

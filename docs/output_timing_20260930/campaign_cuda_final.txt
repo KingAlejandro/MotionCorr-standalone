@@ -1,0 +1,110 @@
+# Final-binary CUDA campaign (HEAD, i.e. with the Timer fix), 4-gpu-vm,
+# taskset -c 96-103, under flock. Three rounds per block, arm order rotated.
+#
+# NOTE the absolute walls are ~3.5 s higher than campaign_cuda.txt's, on the
+# same host with no foreign CPU or GPU tenant at the settle gate; ~30 GB of
+# output had been written to the same disk by then. The paired ordering is
+# unchanged, and campaign_cuda.txt is the cleaner run to quote.
+
+===== block 1: --j 8 (OpenMP pool already covers all 8 permitted CPUs) =====
+arm        n  wall min  wall max    median    user     sys  peak RSS MiB
+instr      3     29.51     32.76     32.43    41.6    44.2          1559
+t1         3     27.54     30.75     30.47    40.4    43.0          1559
+t2         3     27.01     28.50     28.42    40.1    43.7          1560
+
+paired t1 - instr: n=3  per-round [-1.97, -2.29, -1.68]
+  median -1.97 s (-6.1%), faster in 3/3 rounds, range -2.29 to -1.68 s
+  arm ranges overlap: True
+
+paired t2 - instr: n=3  per-round [-2.5, -4.34, -3.93]
+  median -3.93 s (-12.1%), faster in 3/3 rounds, range -4.34 to -2.50 s
+  arm ranges overlap: False
+
+--- median stage seconds ---
+stage                                  instr        t1        t2
+read gain                              0.100     0.102     0.103
+read movie                             7.579     7.523     7.460
+apply gain and initial sum             5.111     4.876     5.008
+detect hot pixels                      0.934     0.901     0.821
+fix defects                            1.157     1.170     1.169
+global FFT                             0.537     0.535     0.535
+power spectrum                         0.000     0.000     0.000
+global alignment                       0.288     0.286     0.288
+global iFFT                            0.546     0.546     0.547
+prepare patch                          0.151     0.150     0.151
+patch alignment                        1.527     1.540     1.531
+fit polynomial                         0.035     0.036     0.036
+dose weighting                         1.399     1.401     1.381
+binning                                0.000     0.000     0.000
+write corrected image                  3.219     2.083     0.001
+write star and shift plot              0.129     0.126     0.002
+joint star and logfile pdf             1.084     0.661     0.719
+out - mrc open                         0.003     0.003     0.005
+out - mrc stats                        1.561     0.431     0.426
+out - mrc header                       0.000     0.000     0.000
+out - mrc payload                      1.647     1.641     1.915
+out - mrc close                        0.001     0.001     0.001
+out - per-movie star                   0.051     0.049         -
+out - per-movie eps                    0.077     0.076         -
+out - joint star scan                  0.007     0.007     0.007
+out - joint hist eps                   0.009     0.009     0.009
+out - gs header.pdf                    0.126         -         -
+out - gs batch.pdf                     0.314         -         -
+out - gs all_batches.pdf               0.296     0.000     0.001
+out - gs logfile.pdf                   0.329     0.327     0.329
+out - gs header+batch                      -     0.314     0.377
+out - gs batch.pdf (inner)                 -     0.314     0.376
+
+===== block 2: --j 6 under the same 8-CPU cap (two CPUs spare) =====
+arm        n  wall min  wall max    median    user     sys  peak RSS MiB
+t1         3     33.48     34.01     33.49    39.0    42.9          1558
+t2         3     30.73     31.20     30.84    38.1    42.2          1559
+
+paired t2 - t1: n=3  per-round [-2.65, -3.28, -2.28]
+  median -2.65 s (-7.9%), faster in 3/3 rounds, range -3.28 to -2.28 s
+  arm ranges overlap: False
+
+--- median stage seconds ---
+stage                                     t1        t2
+read gain                              0.102     0.101
+read movie                             9.717     9.708
+apply gain and initial sum             5.243     5.155
+detect hot pixels                      0.928     0.806
+fix defects                            1.177     1.165
+global FFT                             0.536     0.536
+power spectrum                         0.000     0.000
+global alignment                       0.291     0.288
+global iFFT                            0.548     0.549
+prepare patch                          0.152     0.149
+patch alignment                        1.548     1.549
+fit polynomial                         0.036     0.036
+dose weighting                         1.424     1.406
+binning                                0.000     0.000
+write corrected image                  2.113     0.001
+write star and shift plot              0.127     0.001
+joint star and logfile pdf             0.658     0.733
+out - mrc open                         0.003     0.005
+out - mrc stats                        0.440     0.411
+out - mrc header                       0.000     0.000
+out - mrc payload                      1.662     1.851
+out - mrc close                        0.001     0.001
+out - per-movie star                   0.050         -
+out - per-movie eps                    0.076         -
+out - joint star scan                  0.007     0.007
+out - joint hist eps                   0.009     0.009
+out - gs header+batch                  0.313     0.381
+out - gs batch.pdf (inner)             0.313     0.381
+out - gs all_batches.pdf               0.001     0.000
+out - gs logfile.pdf                   0.326     0.332
+
+===== block 1 again, t2 against t1 (isolates the background writer) =====
+arm        n  wall min  wall max    median    user     sys  peak RSS MiB
+t1         3     27.54     30.75     30.47    40.4    43.0          1559
+t2         3     27.01     28.50     28.42    40.1    43.7          1560
+
+paired t2 - t1: n=3  per-round [-0.53, -2.05, -2.25]
+  median -2.05 s (-6.7%), faster in 3/3 rounds, range -2.25 to -0.53 s
+  arm ranges overlap: True
+
+--- median stage seconds ---
+stage                                     t1        t2

@@ -24,8 +24,13 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Per-movie .log lines that carry a measured duration. The unit list has to
+# include ms: the CUDA path reports kernel, cuFFT and transfer times in
+# milliseconds, and those differ run to run on identical inputs.
 TIMED_LOG_LINE = re.compile(
-    r"(wall time|elapsed|sec\b|seconds|took)", re.IGNORECASE)
+    r"(wall time|elapsed|took"
+    r"|[\d.]+\s*(?:ms|us|µs|ns|s|sec|secs|second|seconds|minutes)\b)",
+    re.IGNORECASE)
 
 
 def sha(b: bytes) -> str:
@@ -68,9 +73,12 @@ def compare_log(a: Path, b: Path):
     la, lb = strip(a), strip(b)
     if la == lb:
         return True, f"identical after dropping timed lines ({len(la)} lines kept)"
-    only_a = [l for l in la if l not in lb][:3]
-    only_b = [l for l in lb if l not in la][:3]
-    return False, f"differ; ref-only {only_a}, test-only {only_b}"
+    # Report the first positional divergence rather than set differences: a
+    # single inserted line otherwise prints as dozens of "only in" entries.
+    for i, (x, y) in enumerate(zip(la, lb)):
+        if x != y:
+            return False, f"differ from line {i + 1}: ref {x!r} vs test {y!r}"
+    return False, f"differ in length: {len(la)} vs {len(lb)} kept lines"
 
 
 def render_pdf(path: Path, outdir: Path, tag: str):

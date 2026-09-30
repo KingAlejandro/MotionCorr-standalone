@@ -174,3 +174,38 @@ Considered and not done:
 The largest remaining stages are not output at all: `read movie` at 7.1 s (26%
 of wall) and `apply gain and initial sum` at 3.6 s (13%). Those are issues #85,
 #94 and #95.
+
+## What the background writer is worth depends on CPU headroom
+
+The writer is one extra thread. Whether it buys the whole write back or only
+part of it depends on whether a CPU is free to run it. Isolating it (t2 against
+t1) at two `--j` values under the same 8-CPU `taskset`:
+
+| `--j` | spare CPUs | t2 - t1 | rounds faster | source |
+|---|---|---|---|---|
+| 8 | 0 | **-0.51 s (-1.8%)** | 6/6, ranges overlap | `campaign_cuda.txt` |
+| 8 | 0 | -2.05 s (-6.7%) | 3/3, ranges overlap | `campaign_cuda_final.txt` block 1 |
+| 6 | 2 | **-2.65 s (-7.9%)** | 3/3, no overlap | `campaign_cuda_final.txt` block 2 |
+
+The two `--j 8` estimates disagree by 1.5 s, and the cleaner six-round one is
+the conservative one; both have overlapping arm ranges, so at `--j 8` the
+honest statement is "faster in every round, somewhere between half a second and
+two". With two CPUs spare the effect is larger than the within-arm spread and
+the arms do not overlap.
+
+That is the expected shape. `--j 8` inside an 8-CPU allocation means the
+OpenMP pool already covers every CPU the process may use, so the writer takes
+its time back from the pipeline: the stage table for that block shows
+`apply gain and initial sum` and `read movie` absorbing part of what the write
+gave up. With a CPU free it does not have to.
+
+Direct evidence that the write did leave the critical path, from the same
+stage table: main-thread `write corrected image` 2.083 → 0.001 s and
+`write star and shift plot` 0.126 → 0.002 s, with the work reappearing as
+`out - mrc payload` 1.641 → 1.915 s, which the writer thread ticks.
+
+## CPU path
+
+The same output stage on `small-refmac-machine` is 2.98 s of a 222.8 s
+baseline run — 1.3% — so there is little there to win and the background
+writer has no idle CPU to use at `--j 8`. Numbers in `campaign_cpu.txt`.

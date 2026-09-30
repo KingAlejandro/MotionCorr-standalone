@@ -17,6 +17,17 @@ message for the same input (docs/multi_gpu/gpu_evidence/a0_device_list_witness.l
 
 With --binary pointing at a built motioncorr, the --gpu device-list rejection is
 also exercised against the real argument parser.
+
+compare24.py is deliberately absent from this port. Post-#128 main ships
+docs/issue85_laneC/compare_output_trees.py, which compares MRC header,
+extended-header and payload hashes plus normalised STAR/EPS/log bytes against a
+movie manifest and carries 18 of its own negative controls under the registered
+OutputTreeComparator test. The compare24 cases that used to live here tested its
+--reuse report cache -- report-identity keying, injectivity, staleness, and
+exit-code agreement -- and that cache has no counterpart in the replacement, so
+there is nothing left for them to protect. The one property that does generalise,
+that a comparator's exit code must agree with the report it writes, moved to
+tests/test_compare_output_trees.py rather than being dropped.
 """
 
 from __future__ import annotations
@@ -959,12 +970,117 @@ def case_per_worker_cpu_masks(tmp: Path) -> None:
         assert cmd["cpu_mask"] == mask, cmd
         assert cmd["command"][:3] == ["taskset", "-c", mask], cmd["command"]
 
-    # a single mask still applies to every worker
+    # a single mask still applies to every worker, and is recorded as shared
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_one",
               "--binary", FAKE, "--workers", "2", "--no-witness", "--cpus", "0-3"])
     assert cp.returncode == 0, cp.stderr
-    assert json.loads((tmp / "r_one" / "status.json").read_text())["cpu_masks"] == \
-        ["0-3", "0-3"]
+    one = json.loads((tmp / "r_one" / "status.json").read_text())
+    assert one["cpu_masks"] == ["0-3", "0-3"]
+    assert one["cpu_masks_disjoint"] is False, one
+
+
+def case_cpu_budget_gate(tmp: Path) -> None:
+    """--cpu-budget refuses anything that is not a witnessed disjoint partition.
+
+    A fixed-total-resource comparison is only fixed if the budget is checked at
+    every worker count. Union size alone cannot do it: four workers each on 0-7
+    cover exactly 8 cpus while oversubscribing the budget fourfold, so
+    overlapping masks are refused under --cpu-budget even though the union is
+    right. Sharing cores stays available without the flag, because that is a
+    real measurement -- just not a scaling point.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    def attempt(name, *extra):
+        return run([PY, TOOLS / "run_multi_gpu.py", "--star", star,
+                    "--out", tmp / name, "--binary", FAKE, "--workers", "2",
+                    "--no-witness", *extra])
+
+    cp = attempt("b_nomask", "--cpu-budget", "4")
+    assert cp.returncode == 2 and "only means something with --cpus" in cp.stderr, cp.stderr
+
+    if shutil.which("taskset") is None:
+        cp = attempt("b_nots", "--cpus", "0-1;2-3", "--cpu-budget", "4")
+        assert cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr
+        print("      (taskset absent: budget gate asserted only as a refusal here)")
+        return
+
+    # right union, but shared cores -- the case a union check alone would pass
+    cp = attempt("b_overlap", "--cpus", "0-3;0-3", "--cpu-budget", "4")
+    assert cp.returncode == 2 and "masks overlap" in cp.stderr, cp.stderr
+
+    # disjoint, but the wrong size
+    cp = attempt("b_wrong", "--cpus", "0-1;2-3", "--cpu-budget", "8")
+    assert cp.returncode == 2 and "masks cover 4 cpu" in cp.stderr, cp.stderr
+
+    # a cpu outside the allocation must be refused, not silently narrowed
+    allocation = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
+    if allocation:
+        outside = max(allocation) + 1
+        cp = attempt("b_outside", "--cpus", f"0;{outside}", "--cpu-budget", "2")
+        assert cp.returncode == 2 and "outside this process" in cp.stderr, cp.stderr
+
+    cp = attempt("b_ok", "--cpus", "0-1;2-3", "--cpu-budget", "4")
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    st = json.loads((tmp / "b_ok" / "status.json").read_text())
+    assert st["cpu_masks_disjoint"] is True and st["cpu_budget_covered"] == 4, st
+    assert st["verdict"] == "PASS", st
+    for k, mask in enumerate(["0-1", "2-3"]):
+        aff = st["workers"][k]["cpu_affinity"]
+        assert aff["verdict"] in ("MATCH", "EXITED_BEFORE_WITNESS"), aff
+        if aff["verdict"] == "MATCH":
+            # witnessed from /proc, not echoed back from the taskset argument.
+            # Compare cpu sets, not spelling: the kernel may print "0,1".
+            sys.path.insert(0, str(TOOLS))
+            import run_multi_gpu
+            assert run_multi_gpu.parse_cpu_list(aff["witnessed_at_launch"]) == \
+                run_multi_gpu.parse_cpu_list(mask), aff
+        # OMP_NUM_THREADS defaults to the mask width, so two workers on a
+        # partitioned budget do not each open a pool sized for the whole node.
+        cmd = json.loads((tmp / "b_ok" / f"w{k}" / "command.json").read_text())
+        assert cmd["omp"]["OMP_NUM_THREADS"] == "2", cmd["omp"]
+        assert cmd["cpu_mask_width"] == 2, cmd
+
+
+def case_per_worker_args_and_cpu_accounting(tmp: Path) -> None:
+    """Per-worker arguments reach only their worker, and CPU time is reported.
+
+    A single shared --j gives every worker the same thread count however wide
+    its mask is, which is wrong as soon as the budget is partitioned unevenly.
+    Accounting matters for the same reason: without cpu_seconds_total a run
+    cannot say whether the budget was used, so a flat scaling curve and an idle
+    machine look identical.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "x_count",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--worker-extra", "--j 2"])
+    assert cp.returncode == 2 and "1 --worker-extra value(s) for 2" in cp.stderr, cp.stderr
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "x_owned",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--worker-extra", "--j 2", "--worker-extra", "--o /tmp/elsewhere"])
+    assert cp.returncode == 2 and "--o" in cp.stderr, cp.stderr
+
+    cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "x_ok",
+              "--binary", FAKE, "--workers", "2", "--no-witness",
+              "--worker-extra", "--j 2", "--worker-extra", "--j 6",
+              "--", "--j", "8"])
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    for k, want in enumerate(["2", "6"]):
+        cmd = json.loads((tmp / "x_ok" / f"w{k}" / "command.json").read_text())["command"]
+        # shared --j 8 first, per-worker override last: IOParser takes the last
+        assert cmd[-2:] == ["--j", want], cmd
+        assert cmd.count("--j") == 2, cmd
+
+    st = json.loads((tmp / "x_ok" / "status.json").read_text())
+    assert st["cpu_seconds_total"] is not None and st["cpu_seconds_total"] > 0, st
+    assert st["mean_cores_busy"] is not None, st
+    for w in st["workers"]:
+        assert "cpu_seconds_sampled" in w and "mean_threads_running" in w, w
 
 
 def case_sampler_lifecycle(tmp: Path) -> None:
@@ -1047,28 +1163,6 @@ def case_sampler_lifecycle(tmp: Path) -> None:
         gpu_witness.compute_apps = real
 
 
-STUB_COMPARATOR = """#!/usr/bin/env python3
-# Minimal stand-in for tools/compare_motioncorr.py. Emits a FAIL report for any
-# movie whose reference MRC contains the token FAILME, a PASS report otherwise.
-import argparse, json, pathlib, sys
-ap = argparse.ArgumentParser()
-for f in ("--ref-mrc", "--test-mrc", "--ref-star", "--test-star", "--gate", "--json-out"):
-    ap.add_argument(f)
-a = ap.parse_args()
-bad = "FAILME" in pathlib.Path(a.ref_mrc).read_text()
-ok = not bad
-report = {
-    "overall_status": "PASS" if ok else "FAIL",
-    "coverage": {"complete": True},
-    "checks": {
-        "corrected_image": {"pixel_identical": ok, "image_rmse": 0.0, "passed": ok},
-        "motion_trajectory": {"max_shift_error": 0.0, "passed": ok},
-        "star_fields": {"difference_count": 0, "passed": ok},
-    },
-}
-pathlib.Path(a.json_out).write_text(json.dumps(report))
-sys.exit(0 if ok else 1)
-"""
 
 
 def _tree(base: Path, roots: list[str], failing: set[str]) -> None:
@@ -1078,60 +1172,6 @@ def _tree(base: Path, roots: list[str], failing: set[str]) -> None:
             f.parent.mkdir(parents=True, exist_ok=True)
             f.write_text("FAILME" if (r in failing and suffix == ".mrc") else "ok")
 
-
-def case_compare24_report_identity(tmp: Path) -> None:
-    """Reports are keyed by the complete root, so shared basenames cannot alias.
-
-    Movies/set1/a and Movies/set2/a both end in 'a'. Keying reports on the
-    basename makes the second comparison overwrite the first, and a later
-    --reuse then reads one movie's report for both entries -- turning a genuine
-    fail-then-pass pair into a false 2/2 exact PASS.
-    """
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    roots = ["Movies/set1/a", "Movies/set2/a"]
-    manifest = tmp / "manifest.json"
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": [r + ".tiff" for r in roots]}))
-    ref, test = tmp / "ref", tmp / "test"
-    # set1/a fails, set2/a passes -- ordered so a basename collision would let
-    # the passing report stand in for the failing one.
-    _tree(ref, roots, failing={"Movies/set1/a"})
-    _tree(test, roots, failing=set())
-
-    def run24(out: Path, reuse: bool = False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", tool, "--manifest", manifest, "--out", out]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    out = tmp / "exact"
-    cp = run24(out)
-    assert cp.returncode == 1, f"the failing movie was not reported (rc={cp.returncode})"
-    summary = json.loads((out / "exact_summary.json").read_text())
-    assert summary["verdict"] == "FAIL", summary
-    assert summary["passed"] == 1 and summary["failed"] == 1, summary
-
-    reports = sorted(p.name for p in out.glob("*_exact.json"))
-    assert len(reports) == 2, f"two movies produced {len(reports)} report(s): {reports}"
-    assert len(set(reports)) == 2, reports
-    for r in reports:
-        assert "set1" in r or "set2" in r, f"report name loses the directory: {r}"
-
-    # --reuse must reach the same verdict, not launder the fail into a pass
-    cp = run24(out, reuse=True)
-    assert cp.returncode == 1, f"--reuse turned a FAIL into rc={cp.returncode}"
-    summary = json.loads((out / "exact_summary.json").read_text())
-    assert summary["verdict"] == "FAIL", summary
-    assert summary["passed"] == 1 and summary["failed"] == 1, summary
-
-    # positive control: with both movies passing, both verdicts are PASS
-    _tree(ref, roots, failing=set())
-    out2 = tmp / "exact_ok"
-    assert run24(out2).returncode == 0
-    assert json.loads((out2 / "exact_summary.json").read_text())["verdict"] == "PASS"
-    assert run24(out2, reuse=True).returncode == 0
 
 
 def case_absolute_movie_roots_attributed(tmp: Path) -> None:
@@ -1265,70 +1305,6 @@ def case_merge_out_is_resolved(tmp: Path) -> None:
         assert (workdir / "relative_merged" / (root + ".mrc")).exists(), root
 
 
-def case_compare24_injective_report_identity(tmp: Path) -> None:
-    """Report identity is injective in the complete root, and validated on reuse.
-
-    Substituting separators is not injective: "a/b" and "a__b" both map to
-    "a__b". The second comparison overwrites the first report and a later
-    --reuse reads one movie's result for both, turning a genuine fail-then-pass
-    pair into a false 2/2 PASS. Ordered here so a non-injective encoding would
-    launder the failure.
-    """
-    import compare24
-    assert compare24.report_identifier("a/b") != compare24.report_identifier("a__b")
-
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    roots = ["a/b", "a__b"]          # collide under a separator substitution
-    manifest = tmp / "manifest.json"
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": [r + ".tiff" for r in roots]}))
-    ref, test = tmp / "ref", tmp / "test"
-    _tree(ref, roots, failing={"a/b"})   # first fails, second passes
-    _tree(test, roots, failing=set())
-
-    def run24(out, reuse=False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", tool, "--manifest", manifest, "--out", out]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    out = tmp / "exact"
-    cp = run24(out)
-    assert cp.returncode == 1, f"the failing movie was not reported (rc={cp.returncode})"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert (s["verdict"], s["passed"], s["failed"]) == ("FAIL", 1, 1), s
-    reports = sorted(p.name for p in out.glob("*_exact.json"))
-    assert len(reports) == 2 and len(set(reports)) == 2, reports
-
-    cp = run24(out, reuse=True)
-    assert cp.returncode == 1, f"--reuse laundered the failure (rc={cp.returncode})"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert (s["verdict"], s["passed"], s["failed"]) == ("FAIL", 1, 1), s
-
-    # a sidecar naming a different root must be refused, so report identity is
-    # validated independently of whatever the filename encoding happens to be
-    side = sorted(out.glob("*.origin.json"))[0]
-    tampered = json.loads(side.read_text())
-    tampered["root"] = "some/other/root"
-    side.write_text(json.dumps(tampered))
-    cp = run24(out, reuse=True)
-    assert cp.returncode == 1, cp.stdout
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
-    side.unlink()
-    cp = run24(out, reuse=True)
-    assert cp.returncode == 1
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("no origin sidecar" in (r.get("reason") or "") for r in s["results"]), s
-
-    # positive control: both passing gives PASS on the normal pass and on reuse
-    _tree(ref, roots, failing=set())
-    out2 = tmp / "exact_ok"
-    assert run24(out2).returncode == 0
-    assert run24(out2, reuse=True).returncode == 0
-
 
 def case_normalized_root_collision_refused(tmp: Path) -> None:
     """'/a/x.tif' and 'a/x.tif' collide once canonicalized, and are refused."""
@@ -1391,111 +1367,10 @@ def case_duplicate_coverage_and_zero_pairs_rejected(tmp: Path) -> None:
                            manifest=empty, workers=[w]))
     assert cp.returncode == 2 and "nothing to verify" in cp.stderr, cp.stderr
 
-    # compare24: zero pairs is a FAIL, not a vacuous PASS
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    cp = run([PY, TOOLS / "compare24.py", "--ref", tmp, "--test", tmp,
-              "--tool", tool, "--manifest", empty, "--out", tmp / "z"])
-    assert cp.returncode == 2 and "zero-pair" in cp.stderr, cp.stderr
+    # The two compare24 assertions that stood here are dropped with the tool;
+    # see the module docstring. The merge-side guards above are the ones that
+    # protect the products, and they are unchanged.
 
-    # compare24: a manifest whose roots collide after normalization is refused
-    cp = run([PY, TOOLS / "compare24.py", "--ref", tmp, "--test", tmp,
-              "--tool", tool, "--manifest", man, "--out", tmp / "z2"])
-    assert cp.returncode == 2 and "not distinct after normalization" in cp.stderr, cp.stderr
-
-
-def case_reuse_pins_the_trees_not_just_the_root(tmp: Path) -> None:
-    """A report may not be reused as the verdict for different inputs.
-
-    Recording only the output root lets a report produced against one pair of
-    trees stand in for the same root against completely different trees -- a
-    passing run reused to certify inputs it never saw.
-    """
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    roots = ["Movies/a"]
-    manifest = tmp / "manifest.json"
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": ["Movies/a.tiff"]}))
-    ref, good, bad = tmp / "ref", tmp / "good", tmp / "bad"
-    _tree(ref, roots, failing=set())
-    _tree(good, roots, failing=set())
-    _tree(bad, roots, failing=set())
-
-    def run24(test, out, reuse=False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", tool, "--manifest", manifest, "--out", out]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    out = tmp / "exact"
-    assert run24(good, out).returncode == 0, "baseline comparison should pass"
-
-    # same root, different --test tree: the stored report must not be reused
-    cp = run24(bad, out, reuse=True)
-    assert cp.returncode == 1, "a report was reused across a different test tree"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
-
-    # same trees but the reference file changed underneath: also refused
-    out2 = tmp / "exact2"
-    assert run24(good, out2).returncode == 0
-    (ref / "Movies" / "a.mrc").write_text("changed after the report was written")
-    cp = run24(good, out2, reuse=True)
-    assert cp.returncode == 1, "a report was reused after its inputs changed"
-    s = json.loads((out2 / "exact_summary.json").read_text())
-    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
-
-    # Content, not restored metadata, identifies every MRC/STAR input.
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": ["Movies/a.tiff"],
-                                    "marker": "1"}))
-    bound = tmp / "content_bound"
-    assert run24(good, bound).returncode == 0
-    assert run24(good, bound, reuse=True).returncode == 0, \
-        "unchanged content must remain reusable"
-
-    def reject_same_metadata_change(path: Path, replacement: bytes) -> None:
-        original = path.read_bytes()
-        assert len(replacement) == len(original) and replacement != original
-        old_stat = path.stat()
-        path.write_bytes(replacement)
-        os.utime(path, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
-        assert path.stat().st_size == old_stat.st_size
-        assert path.stat().st_mtime_ns == old_stat.st_mtime_ns
-        cp = run24(good, bound, reuse=True)
-        assert cp.returncode == 1, f"same-size/same-mtime edit was reused: {path}"
-        path.write_bytes(original)
-        os.utime(path, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
-        assert run24(good, bound, reuse=True).returncode == 0, \
-            f"restoring the original content should restore reuse: {path}"
-
-    for path in (ref / "Movies" / "a.mrc", good / "Movies" / "a.mrc",
-                 ref / "Movies" / "a.star", good / "Movies" / "a.star"):
-        original = path.read_bytes()
-        reject_same_metadata_change(path, b"X" + original[1:])
-
-    # The partition manifest and the comparator JSON report are content-bound too.
-    original_manifest = manifest.read_bytes()
-    manifest_stat = manifest.stat()
-    changed_manifest = original_manifest.replace(b'"marker": "1"', b'"marker": "2"')
-    assert len(changed_manifest) == len(original_manifest)
-    manifest.write_bytes(changed_manifest)
-    os.utime(manifest, ns=(manifest_stat.st_atime_ns, manifest_stat.st_mtime_ns))
-    assert run24(good, bound, reuse=True).returncode == 1, \
-        "same-size/same-mtime manifest edit was reused"
-    manifest.write_bytes(original_manifest)
-    os.utime(manifest, ns=(manifest_stat.st_atime_ns, manifest_stat.st_mtime_ns))
-    assert run24(good, bound, reuse=True).returncode == 0
-
-    report = next(bound.glob("*_exact.json"))
-    report_bytes = report.read_bytes()
-    report_stat = report.stat()
-    report.write_bytes(report_bytes + b" ")
-    os.utime(report, ns=(report_stat.st_atime_ns, report_stat.st_mtime_ns))
-    assert run24(good, bound, reuse=True).returncode == 1, \
-        "edited report JSON was reused under its unchanged origin sidecar"
 
 
 def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
@@ -1541,14 +1416,6 @@ def case_interior_double_slash_is_the_same_product(tmp: Path) -> None:
     # and it must not invent misroutes on top of the true finding
     assert not any(p.startswith("misrouted:") for p in rep["problems"]), \
         f"phantom misroute reported alongside the real duplicate: {rep['problems']}"
-
-    # compare24 must refuse the same manifest rather than counting one pair twice
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    cp = run([PY, TOOLS / "compare24.py", "--ref", w0, "--test", w0,
-              "--tool", tool, "--manifest", man, "--out", tmp / "z"])
-    assert cp.returncode == 2, f"duplicate normalized roots accepted (rc={cp.returncode})"
-    assert "not distinct after normalization" in cp.stderr, cp.stderr
 
 
 
@@ -1776,58 +1643,6 @@ def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
     assert any(f"rewrote {len(DEFAULT_ROWS)} staged" in p
                for p in rep["problems"]), rep["problems"]
 
-
-def case_stale_comparison_report_is_not_republished(tmp: Path) -> None:
-    """A report the current comparator did not produce may not be reused.
-
-    Writing the origin sidecar unconditionally after the comparator subprocess
-    binds whatever report happens to be on disk to the new inputs. A comparator
-    that exits without writing --json-out therefore leaves the previous run's
-    verdict looking freshly produced, and --reuse -- whose return code is zero
-    by construction -- accepts it.
-    """
-    tool = tmp / "stub_compare.py"
-    tool.write_text(STUB_COMPARATOR)
-    roots = ["Movies/a"]
-    manifest = tmp / "manifest.json"
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": ["Movies/a.tiff"]}))
-    ref, test = tmp / "ref", tmp / "test"
-    _tree(ref, roots, failing=set())
-    _tree(test, roots, failing=set())
-    out = tmp / "exact"
-
-    def run24(tool_path, reuse=False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", tool_path, "--manifest", manifest, "--out", out]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    assert run24(tool).returncode == 0, "baseline comparison should pass"
-
-    # the comparator now exits without producing a report; the stale PASS is
-    # still on disk from the run above
-    silent = tmp / "silent_compare.py"
-    silent.write_text("import sys\nsys.exit(7)\n")
-    cp = run24(silent)
-    assert cp.returncode == 1, "a comparator that produced nothing was accepted"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("produced no usable report" in (r.get("reason") or "")
-               for r in s["results"]), s
-
-    # and the stale report must not have been republished as fresh evidence
-    cp = run24(silent, reuse=True)
-    assert cp.returncode == 1, "a stale report was reused after a silent comparator"
-
-    # swapping the comparator in place also invalidates reuse: the recorded path
-    # is unchanged, so only its contents can tell the two apart
-    assert run24(tool).returncode == 0
-    tool.write_text(STUB_COMPARATOR + "\n# edited in place\n")
-    cp = run24(tool, reuse=True)
-    assert cp.returncode == 1, "a report was reused after the comparator changed"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("origin mismatch" in (r.get("reason") or "") for r in s["results"]), s
 
 
 def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
@@ -2308,73 +2123,6 @@ def case_aggregate_staging_namespace_reserved(tmp: Path) -> None:
     assert partition(star2, 1, tmp / "shards_ok").returncode == 0
 
 
-def case_comparator_exit_must_match_its_report(tmp: Path) -> None:
-    """A comparator that contradicts itself may not leave reusable evidence.
-
-    If the comparator writes a syntactically passing report and then exits
-    non-zero, the first pass fails on the return code -- correctly -- but
-    publishing the origin sidecar makes that report reusable, and --reuse
-    substitutes rc = 0. The same comparison then satisfies every gate and comes
-    back PASS.
-    """
-    liar = tmp / "liar.py"
-    liar.write_text(
-        "import argparse, json, pathlib, sys\n"
-        "ap = argparse.ArgumentParser()\n"
-        "for f in ('--ref-mrc','--test-mrc','--ref-star','--test-star','--gate','--json-out'):\n"
-        "    ap.add_argument(f)\n"
-        "a = ap.parse_args()\n"
-        "pathlib.Path(a.json_out).write_text(json.dumps({\n"
-        "  'overall_status':'PASS','coverage':{'complete':True},'checks':{\n"
-        "   'corrected_image':{'pixel_identical':True,'rmse':0.0,'passed':True},\n"
-        "   'motion_trajectory':{'max_shift_error':0.0,'passed':True},\n"
-        "   'star_fields':{'num_differences':0,'passed':True}}}))\n"
-        "sys.exit(3)\n")
-    roots = ["Movies/a"]
-    manifest = tmp / "manifest.json"
-    manifest.write_text(json.dumps({"canonical_output_roots": roots,
-                                    "canonical_movies": ["Movies/a.tiff"]}))
-    ref, test = tmp / "ref", tmp / "test"
-    _tree(ref, roots, failing=set())
-    _tree(test, roots, failing=set())
-    out = tmp / "exact"
-
-    def run24(tool, reuse=False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", tool, "--manifest", manifest, "--out", out]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    cp = run24(liar)
-    assert cp.returncode == 1, "a self-contradicting comparator was accepted"
-    s = json.loads((out / "exact_summary.json").read_text())
-    assert any("contradicts its report" in (r.get("reason") or "")
-               for r in s["results"]), s
-
-    # no reusable evidence may have been left behind
-    assert not list(out.glob("*.origin.json")), \
-        "a sidecar was published for a comparison the comparator contradicted"
-    cp = run24(liar, reuse=True)
-    assert cp.returncode == 1, "the contradicted report was reused as a pass"
-
-    # positive control: an honest comparator still publishes and still reuses,
-    # so the refusals above are about the contradiction and not about the gate
-    honest = tmp / "honest.py"
-    honest.write_text(STUB_COMPARATOR)
-    out2 = tmp / "exact_ok"
-
-    def run_ok(reuse=False):
-        cmd = [PY, TOOLS / "compare24.py", "--ref", ref, "--test", test,
-               "--tool", honest, "--manifest", manifest, "--out", out2]
-        if reuse:
-            cmd.append("--reuse")
-        return run(cmd)
-
-    assert run_ok().returncode == 0, "the honest comparator should pass"
-    assert list(out2.glob("*.origin.json")), "no sidecar published for a clean run"
-    assert run_ok(reuse=True).returncode == 0, "a clean report should reuse"
-
 
 CASES = [
     case_roundtrip_and_metadata,
@@ -2408,12 +2156,11 @@ CASES = [
     case_merge_out_is_resolved,
     case_launcher_refuses_cpu_gpu_confusion,
     case_per_worker_cpu_masks,
+    case_cpu_budget_gate,
+    case_per_worker_args_and_cpu_accounting,
     case_devices_with_no_witness_refused,
-    case_compare24_report_identity,
-    case_compare24_injective_report_identity,
     case_normalized_root_collision_refused,
     case_interior_double_slash_is_the_same_product,
-    case_reuse_pins_the_trees_not_just_the_root,
     case_duplicate_coverage_and_zero_pairs_rejected,
     case_absolute_movie_roots_attributed,
     case_gpu_witness_logic,
@@ -2422,14 +2169,12 @@ CASES = [
     case_duplicate_movie_name_refused,
     case_worker_args_may_not_override_launcher_options,
     case_aggregate_may_not_rewrite_staged_products,
-    case_stale_comparison_report_is_not_republished,
     case_launcher_verdict_follows_the_device_witness,
     case_launcher_signal_reaps_owned_process_group,
     case_launcher_signal_reaches_cooperative_worker,
     case_launcher_signal_during_spawn_keeps_child_owned,
     case_per_worker_timing_and_rss_recorded,
     case_aggregate_staging_namespace_reserved,
-    case_comparator_exit_must_match_its_report,
 ]
 
 

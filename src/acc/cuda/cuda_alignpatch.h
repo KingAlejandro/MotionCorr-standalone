@@ -8,6 +8,44 @@
 
 #ifdef _CUDA_ENABLED
 #include <cufft.h>
+#include <memory>
+#include "src/acc/cuda/cuda_failure_state.h"
+
+/** Resources reused only within one movie's local-patch loop. Each successful call
+ * overwrites every input-dependent buffer; only geometry-dependent weights persist.
+ * release() is checked before reconstruction, with a destructor backstop on errors.
+ */
+class PatchAlignmentWorkspace {
+public:
+    explicit PatchAlignmentWorkspace(CudaFailureState *failure = nullptr);
+    ~PatchAlignmentWorkspace();
+    PatchAlignmentWorkspace(const PatchAlignmentWorkspace&) = delete;
+    PatchAlignmentWorkspace& operator=(const PatchAlignmentWorkspace&) = delete;
+    bool release() noexcept;
+    bool isValid() const;
+private:
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
+    friend bool cudaAlignPatchDeviceWithWorkspace(
+        PatchAlignmentWorkspace&, cufftComplex*, int, int, int, RFLOAT,
+        std::vector<RFLOAT>&, std::vector<RFLOAT>&, int, RFLOAT, int,
+        std::ostream&, bool);
+};
+
+bool cudaAlignPatchDeviceWithWorkspace(
+    PatchAlignmentWorkspace &workspace,
+    cufftComplex *d_Fframes,
+    const int n_frames,
+    const int pnx, const int pny,
+    const RFLOAT scaled_B,
+    std::vector<RFLOAT> &xshifts,
+    std::vector<RFLOAT> &yshifts,
+    const int max_iter,
+    const RFLOAT ccf_downsample,
+    const int device_id,
+    std::ostream &logfile,
+    bool is_global = false
+);
 
 /**
  * Standalone CUDA implementation of global patch alignment (Issue #16).

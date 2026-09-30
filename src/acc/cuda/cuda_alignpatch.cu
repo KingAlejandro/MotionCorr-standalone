@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <sstream>
 #include <vector>
+#include <cstring>
 
 #define CUFFT_CHECK(cmd) do { \
     cufftResult err = (cmd); \
@@ -31,9 +32,8 @@
 // hot patch loop performs no host heap allocation for them (PR107 review P2).
 
 namespace {
-// Proved by counting call sites in cudaAlignPatchDevice below: eight cudaMalloc, eight
-// cudaEventCreate, one plan, none of them inside a loop. Overflow is checked after the
-// registrations rather than assumed.
+// Proved by counting the cold workspace initialization below: eight cudaMalloc,
+// eight cudaEventCreate and one plan. The fixed owners check every registration.
 const int ALIGN_MAX_BUFFERS = 8;
 const int ALIGN_MAX_EVENTS  = 8;
 } // namespace
@@ -232,7 +232,95 @@ __global__ void fourierShiftKernel(
     }
 }
 
-bool cudaAlignPatchDevice(
+// The implementation is allocated once per movie, never per local patch. The
+// existing fixed-capacity owners are the only release mechanism, including partial
+// initialization and exception paths; their failure sink is the movie's state.
+struct PatchAlignmentWorkspace::Impl {
+    struct Key {
+        int device, pnx, pny, n_frames, ccf_nx, ccf_ny, search_range;
+        RFLOAT scaled_B, downsample;
+        bool equals(const Key &other) const {
+            return device == other.device && pnx == other.pnx && pny == other.pny &&
+                n_frames == other.n_frames && ccf_nx == other.ccf_nx &&
+                ccf_ny == other.ccf_ny && search_range == other.search_range &&
+                std::memcmp(&scaled_B, &other.scaled_B, sizeof(RFLOAT)) == 0 &&
+                std::memcmp(&downsample, &other.downsample, sizeof(RFLOAT)) == 0;
+        }
+    } key = {};
+    CudaFailureState local_failure;
+    CudaFailureState *failure;
+    mc_cuda::ScopedDeviceMemory<ALIGN_MAX_BUFFERS> memory;
+    mc_cuda::ScopedCudaEvents<ALIGN_MAX_EVENTS> events;
+    mc_cuda::ScopedCufftPlan plan;
+    bool valid = false;
+    int resource_device = -1;
+    float2 *d_Fref = nullptr, *d_Fccs = nullptr;
+    float *d_weight = nullptr, *d_Iccs = nullptr;
+    float *d_cur_xshifts = nullptr, *d_cur_yshifts = nullptr;
+    float *d_shiftx = nullptr, *d_shifty = nullptr;
+    cudaEvent_t ev_start_total = nullptr, ev_stop_total = nullptr;
+    cudaEvent_t ev_start_kernel = nullptr, ev_stop_kernel = nullptr;
+    cudaEvent_t ev_start_cufft = nullptr, ev_stop_cufft = nullptr;
+    cudaEvent_t ev_start_d2h = nullptr, ev_stop_d2h = nullptr;
+    cufftHandle plan_c2r = 0;
+    size_t cufft_work_size = 0;
+    explicit Impl(CudaFailureState *state)
+        : failure(state ? state : &local_failure), memory(failure),
+          events(failure), plan(failure) {}
+
+    bool release() noexcept {
+        valid = false; // No exception/failure can leave an old key published.
+        cudaError_t device_error = cudaSuccess;
+        // A changed-device call must destroy events/plans in their owning context.
+        // On the usual session path the current device is already this device.
+        if (resource_device >= 0) {
+            device_error = cudaSetDevice(resource_device);
+            failure->record(device_error, "patch workspace release device", __LINE__);
+        }
+        const cufftResult plan_error = plan.releaseAll();
+        const cudaError_t memory_error = memory.releaseAll();
+        const cudaError_t event_error = events.releaseAll();
+        resource_device = -1;
+        d_Fref = d_Fccs = nullptr;
+        d_weight = d_Iccs = d_cur_xshifts = d_cur_yshifts = d_shiftx = d_shifty = nullptr;
+        ev_start_total = ev_stop_total = ev_start_kernel = ev_stop_kernel = nullptr;
+        ev_start_cufft = ev_stop_cufft = ev_start_d2h = ev_stop_d2h = nullptr;
+        plan_c2r = 0;
+        cufft_work_size = 0;
+        return device_error == cudaSuccess && plan_error == CUFFT_SUCCESS &&
+            memory_error == cudaSuccess && event_error == cudaSuccess;
+    }
+};
+
+PatchAlignmentWorkspace::PatchAlignmentWorkspace(CudaFailureState *failure)
+    : impl_(new Impl(failure)) {}
+PatchAlignmentWorkspace::~PatchAlignmentWorkspace() { (void)release(); }
+bool PatchAlignmentWorkspace::release() noexcept { return impl_->release(); }
+bool PatchAlignmentWorkspace::isValid() const { return impl_->valid; }
+
+// Preserve consumed statuses before the existing handlers throw. A later clean
+// last-error slot cannot permit a retry after a fatal initialization/execution fault.
+#define ALIGN_CUDA(cmd) do { \
+    const cudaError_t err = (cmd); \
+    w.failure->record(err, #cmd, __LINE__); \
+    HandleError(err, __FILE__, __LINE__); \
+} while (0)
+#define ALIGN_LAUNCH(cmd) do { \
+    const cudaError_t err = (cmd); \
+    w.failure->record(err, #cmd, __LINE__); \
+    LaunchHandleError(err, __FILE__, __LINE__); \
+} while (0)
+#define ALIGN_CUFFT(cmd) do { \
+    const cufftResult err = (cmd); \
+    w.failure->recordCufft(err, #cmd, __LINE__); \
+    if (err != CUFFT_SUCCESS) { \
+        w.failure->record(cudaPeekAtLastError(), #cmd, __LINE__); \
+        REPORT_ERROR("cuFFT error: code " + integerToString(err)); \
+    } \
+} while (0)
+
+bool cudaAlignPatchDeviceWithWorkspace(
+    PatchAlignmentWorkspace &workspace,
     cufftComplex *d_Fframes_in,
     const int n_frames,
     const int pnx, const int pny,
@@ -245,47 +333,20 @@ bool cudaAlignPatchDevice(
     std::ostream &logfile,
     bool is_global)
 {
+    auto &w = *workspace.impl_;
+    if (w.failure->isPoisoned())
+        REPORT_ERROR("Fatal CUDA state refuses patch workspace reuse");
+    try {
     int dev_count = 0;
     cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    w.failure->record(count_err, "patch alignment device count", __LINE__);
     if (count_err != cudaSuccess || dev_count == 0) {
         REPORT_ERROR("No CUDA capable devices found");
     }
     if (device_id < 0 || device_id >= dev_count) {
         REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
     }
-    HANDLE_ERROR(cudaSetDevice(device_id));
-
-    // Ownership (issue #69): everything registered below is owned by this call and is
-    // released on every exit path, including the throwing ones. d_Fframes_in is
-    // borrowed -- it is the resident Fourier stack or the caller's patch scratch -- and
-    // is modified in place but never freed here.
-    mc_cuda::ScopedDeviceMemory<ALIGN_MAX_BUFFERS> memory_cleanup;
-    mc_cuda::ScopedCudaEvents<ALIGN_MAX_EVENTS> event_cleanup;
-    mc_cuda::ScopedCufftPlan plan_cleanup;
-
-    cudaEvent_t ev_start_total, ev_stop_total;
-    cudaEvent_t ev_start_kernel, ev_stop_kernel;
-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
-    cudaEvent_t ev_start_d2h, ev_stop_d2h;
-
-    HANDLE_ERROR(cudaEventCreate(&ev_start_total));
-    event_cleanup.add(ev_start_total);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
-    event_cleanup.add(ev_stop_total);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_kernel));
-    event_cleanup.add(ev_start_kernel);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_kernel));
-    event_cleanup.add(ev_stop_kernel);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
-    event_cleanup.add(ev_start_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
-    event_cleanup.add(ev_stop_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_d2h));
-    event_cleanup.add(ev_start_d2h);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_d2h));
-    event_cleanup.add(ev_stop_d2h);
-
-    HANDLE_ERROR(cudaEventRecord(ev_start_total));
+    ALIGN_CUDA(cudaSetDevice(device_id));
 
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
@@ -324,58 +385,62 @@ bool cudaAlignPatchDevice(
     const size_t sz_iccs    = (size_t)n_frames * ccf_ny * ccf_nx * sizeof(float);
     const size_t sz_shifts  = (size_t)n_frames * sizeof(float);
 
-    float2 *d_Fref = nullptr;
-    float *d_weight = nullptr;
-    float2 *d_Fccs = nullptr;
-    float *d_Iccs = nullptr;
-    float *d_cur_xshifts = nullptr;
-    float *d_cur_yshifts = nullptr;
-    float *d_shiftx = nullptr;
-    float *d_shifty = nullptr;
-
-    // Register each allocation immediately, before the next one can throw.
-    HANDLE_ERROR(cudaMalloc(&d_Fref, sz_fref));
-    memory_cleanup.add(d_Fref);
-    HANDLE_ERROR(cudaMalloc(&d_weight, sz_weight));
-    memory_cleanup.add(d_weight);
-    HANDLE_ERROR(cudaMalloc(&d_Fccs, sz_fccs));
-    memory_cleanup.add(d_Fccs);
-    HANDLE_ERROR(cudaMalloc(&d_Iccs, sz_iccs));
-    memory_cleanup.add(d_Iccs);
-    HANDLE_ERROR(cudaMalloc(&d_cur_xshifts, sz_shifts));
-    memory_cleanup.add(d_cur_xshifts);
-    HANDLE_ERROR(cudaMalloc(&d_cur_yshifts, sz_shifts));
-    memory_cleanup.add(d_cur_yshifts);
-    HANDLE_ERROR(cudaMalloc(&d_shiftx, sz_shifts));
-    memory_cleanup.add(d_shiftx);
-    HANDLE_ERROR(cudaMalloc(&d_shifty, sz_shifts));
-    memory_cleanup.add(d_shifty);
-
-    // Capacity control. add() refuses rather than silently dropping, so a future edit
-    // that adds a ninth resource fails here instead of leaking it on a throwing path.
-    if (memory_cleanup.overflowed() || event_cleanup.overflowed()) {
-        REPORT_ERROR("Internal error: CUDA alignment resource registry exceeded its "
-                     "fixed capacity; a resource would not have been released");
+    const PatchAlignmentWorkspace::Impl::Key requested = {device_id, pnx, pny, n_frames, ccf_nx,
+        ccf_ny, search_range, scaled_B, ccf_downsample};
+    const bool setup_required = !w.valid || !w.key.equals(requested);
+    if (setup_required) {
+        if (!w.release()) REPORT_ERROR("CUDA patch workspace replacement cleanup failed");
+        // release() may have switched to the old resource device.
+        ALIGN_CUDA(cudaSetDevice(device_id));
+        w.resource_device = device_id;
+        ALIGN_CUDA(cudaEventCreate(&w.ev_start_total)); w.events.add(w.ev_start_total);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_stop_total)); w.events.add(w.ev_stop_total);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_start_kernel)); w.events.add(w.ev_start_kernel);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_stop_kernel)); w.events.add(w.ev_stop_kernel);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_start_cufft)); w.events.add(w.ev_start_cufft);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_stop_cufft)); w.events.add(w.ev_stop_cufft);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_start_d2h)); w.events.add(w.ev_start_d2h);
+        ALIGN_CUDA(cudaEventCreate(&w.ev_stop_d2h)); w.events.add(w.ev_stop_d2h);
     }
-
-    size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight + sz_fccs + sz_iccs + 4 * sz_shifts;
-
-    // Initialize cuFFT batched C2R plan
-    cufftHandle plan_c2r;
-    int n[2] = {ccf_ny, ccf_nx};
-    CUFFT_CHECK(cufftCreate(&plan_c2r));
-    plan_cleanup.take(plan_c2r);
-    size_t plan_work_bytes = 0;
-    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R, n_frames, &plan_work_bytes));
-    size_t cufft_work_size = 0;
-    CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
-    total_vram_allocated += cufft_work_size;
-
-    // Weights computation
-    dim3 blockWeights(16, 16);
-    dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
-    computeWeightsKernel<<<gridWeights, blockWeights>>>(d_weight, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
-    LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    // Includes initial allocations, planning and weights, as the predecessor did.
+    // Reused calls omit those operations, so this is per-call telemetry, not a
+    // setup-exclusive performance comparison. Complete unprofiled wall is the gate.
+    ALIGN_CUDA(cudaEventRecord(w.ev_start_total));
+    if (setup_required) {
+        ALIGN_CUDA(cudaMalloc(&w.d_Fref, sz_fref)); w.memory.add(w.d_Fref);
+        ALIGN_CUDA(cudaMalloc(&w.d_weight, sz_weight)); w.memory.add(w.d_weight);
+        ALIGN_CUDA(cudaMalloc(&w.d_Fccs, sz_fccs)); w.memory.add(w.d_Fccs);
+        ALIGN_CUDA(cudaMalloc(&w.d_Iccs, sz_iccs)); w.memory.add(w.d_Iccs);
+        ALIGN_CUDA(cudaMalloc(&w.d_cur_xshifts, sz_shifts)); w.memory.add(w.d_cur_xshifts);
+        ALIGN_CUDA(cudaMalloc(&w.d_cur_yshifts, sz_shifts)); w.memory.add(w.d_cur_yshifts);
+        ALIGN_CUDA(cudaMalloc(&w.d_shiftx, sz_shifts)); w.memory.add(w.d_shiftx);
+        ALIGN_CUDA(cudaMalloc(&w.d_shifty, sz_shifts)); w.memory.add(w.d_shifty);
+        int n[2] = {ccf_ny, ccf_nx};
+        ALIGN_CUFFT(cufftCreate(&w.plan_c2r)); w.plan.take(w.plan_c2r);
+        size_t plan_work_bytes = 0;
+        ALIGN_CUFFT(cufftMakePlanMany(w.plan_c2r, 2, n, NULL, 1,
+            ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R,
+            n_frames, &plan_work_bytes));
+        ALIGN_CUFFT(cufftGetSize(w.plan_c2r, &w.cufft_work_size));
+        dim3 blockWeights(16, 16);
+        dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+        computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
+            ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
+        ALIGN_LAUNCH(cudaGetLastError());
+    }
+    // Borrow aliases; only the workspace's scoped owners can release them.
+    float2 *d_Fref = w.d_Fref, *d_Fccs = w.d_Fccs;
+    float *d_weight = w.d_weight, *d_Iccs = w.d_Iccs;
+    float *d_cur_xshifts = w.d_cur_xshifts, *d_cur_yshifts = w.d_cur_yshifts;
+    float *d_shiftx = w.d_shiftx, *d_shifty = w.d_shifty;
+    const cudaEvent_t ev_start_total = w.ev_start_total, ev_stop_total = w.ev_stop_total;
+    const cudaEvent_t ev_start_kernel = w.ev_start_kernel, ev_stop_kernel = w.ev_stop_kernel;
+    const cudaEvent_t ev_start_cufft = w.ev_start_cufft, ev_stop_cufft = w.ev_stop_cufft;
+    const cudaEvent_t ev_start_d2h = w.ev_start_d2h, ev_stop_d2h = w.ev_stop_d2h;
+    const cufftHandle plan_c2r = w.plan_c2r;
+    const size_t cufft_work_size = w.cufft_work_size;
+    const size_t total_vram_allocated = sz_fframes + sz_fref + sz_weight +
+        sz_fccs + sz_iccs + 4 * sz_shifts + cufft_work_size;
 
     dim3 blockRef(16, 16);
     dim3 gridRef((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
@@ -396,50 +461,50 @@ bool cudaAlignPatchDevice(
 
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+        ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
-        LAUNCH_HANDLE_ERROR(cudaGetLastError());
+        ALIGN_LAUNCH(cudaGetLastError());
 
         // 2. CCF computation
         computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
-        LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+        ALIGN_LAUNCH(cudaGetLastError());
+        ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
         float k1_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
+        ALIGN_CUDA(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k1_ms;
 
         // 3. Batched cuFFT C2R
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
-        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+        ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+        ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+        ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
+        ALIGN_CUDA(cudaEventSynchronize(ev_stop_cufft));
         float iter_cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
+        ALIGN_CUDA(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
         accumulated_cufft_ms += iter_cufft_ms;
 
         // 4. Peak finding + subpixel quadratic interpolation
-        HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+        ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
             (float)ccf_scale_x, (float)ccf_scale_y, n_frames
         );
-        LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+        ALIGN_LAUNCH(cudaGetLastError());
+        ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
         float k2_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+        ALIGN_CUDA(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
         accumulated_kernel_ms += k2_ms;
 
         // Copy candidate shifts back to host
-        HANDLE_ERROR(cudaEventRecord(ev_start_d2h));
-        HANDLE_ERROR(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_d2h));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_d2h));
+        ALIGN_CUDA(cudaEventRecord(ev_start_d2h));
+        ALIGN_CUDA(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
+        ALIGN_CUDA(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
+        ALIGN_CUDA(cudaEventRecord(ev_stop_d2h));
+        ALIGN_CUDA(cudaEventSynchronize(ev_stop_d2h));
         float iter_d2h_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
+        ALIGN_CUDA(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
         accumulated_d2h_ms += iter_d2h_ms;
 
         // Update relative to frame 0
@@ -462,15 +527,15 @@ bool cudaAlignPatchDevice(
 
         // Apply Fourier phase shifts on GPU
         if (n_frames > 1) {
-            HANDLE_ERROR(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
-            HANDLE_ERROR(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
-            HANDLE_ERROR(cudaEventRecord(ev_start_kernel));
+            ALIGN_CUDA(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
+            ALIGN_CUDA(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
+            ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
             fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
-            LAUNCH_HANDLE_ERROR(cudaGetLastError());
-            HANDLE_ERROR(cudaEventRecord(ev_stop_kernel));
-            HANDLE_ERROR(cudaEventSynchronize(ev_stop_kernel));
+            ALIGN_LAUNCH(cudaGetLastError());
+            ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+            ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
             float shift_kernel_ms = 0.0f;
-            HANDLE_ERROR(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
+            ALIGN_CUDA(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
             accumulated_kernel_ms += shift_kernel_ms;
         }
 
@@ -483,10 +548,10 @@ bool cudaAlignPatchDevice(
         }
     }
 
-    HANDLE_ERROR(cudaEventRecord(ev_stop_total));
-    HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
+    ALIGN_CUDA(cudaEventRecord(ev_stop_total));
+    ALIGN_CUDA(cudaEventSynchronize(ev_stop_total));
     float total_ms = 0.0f;
-    HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
+    ALIGN_CUDA(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
     // Profile logging
     const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
@@ -500,18 +565,41 @@ bool cudaAlignPatchDevice(
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
 
-    // Cleanup. Release through the same objects that own the throwing paths, so there
-    // is exactly one release mechanism and no path can free twice. Every resource is
-    // attempted even if an earlier one fails; the first failure is still reported.
-    const cufftResult plan_release = plan_cleanup.releaseAll();
-    const cudaError_t memory_release = memory_cleanup.releaseAll();
-    const cudaError_t event_release = event_cleanup.releaseAll();
-    CUFFT_CHECK(plan_release);
-    HANDLE_ERROR(memory_release);
-    HANDLE_ERROR(event_release);
+    // Publish only after all initialization and the complete alignment succeeded.
+    // The input-dependent scratch is overwritten by the next call's unchanged
+    // kernels; the weights are invariant under the full key above.
+    w.key = requested;
+    w.valid = true;
 
     logfile << " [CUDA " << stage_name << "] completed; converged="
             << (converged ? "yes" : "no") << std::endl;
+    return converged;
+    } catch (...) {
+        // Failure invalidates the cache before cleanup. Any late fatal cleanup
+        // status remains latched in the same failure state as the original error.
+        (void)workspace.release();
+        throw;
+    }
+}
+
+#undef ALIGN_CUDA
+#undef ALIGN_LAUNCH
+#undef ALIGN_CUFFT
+
+// Keep the existing signature/symbol for global alignment, host fallback and the
+// retry interposition ABI. These callers retain the original per-call lifetime.
+bool cudaAlignPatchDevice(
+    cufftComplex *d_Fframes, const int n_frames, const int pnx, const int pny,
+    const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts,
+    std::vector<RFLOAT> &yshifts, const int max_iter,
+    const RFLOAT ccf_downsample, const int device_id, std::ostream &logfile,
+    bool is_global)
+{
+    PatchAlignmentWorkspace workspace;
+    const bool converged = cudaAlignPatchDeviceWithWorkspace(workspace, d_Fframes,
+        n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter,
+        ccf_downsample, device_id, logfile, is_global);
+    if (!workspace.release()) REPORT_ERROR("CUDA patch alignment cleanup failed");
     return converged;
 }
 

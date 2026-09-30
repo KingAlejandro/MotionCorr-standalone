@@ -120,6 +120,13 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
+	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
+	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
+	if      (ingest_arg == "auto")    ingest_mode = INGEST_AUTO;
+	else if (ingest_arg == "nvcomp")  ingest_mode = INGEST_NVCOMP;
+	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
+	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
+	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -191,6 +198,22 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
 	if (max_io_threads == 0 || max_io_threads < -1)
 		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
+	if (ingest_mode != INGEST_AUTO && !do_own)
+		REPORT_ERROR("--ingest is valid only for --use_own.");
+	// Refuse here, not per movie: on a build without the backend the per-movie
+	// guard below is inside #ifdef _CUDA_ENABLED and would never be compiled, so
+	// the flag would be accepted and ignored -- the same silent no-op IOParser
+	// gives an unrecognised flag, which is exactly what a pinned --ingest exists
+	// to rule out.
+#ifndef _CUDA_ENABLED
+	if (ingest_mode == INGEST_NVCOMP || ingest_mode == INGEST_COMPACT)
+		REPORT_ERROR("--ingest nvcomp and --ingest compact need a CUDA build; this binary has none.");
+#else
+#ifndef _NVCOMP_ENABLED
+	if (ingest_mode == INGEST_NVCOMP)
+		REPORT_ERROR("--ingest nvcomp needs a build configured with USE_NVCOMP=ON; this one is not.");
+#endif
+#endif
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -1644,13 +1667,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	bool nvcomp_ingested = false;
 #if defined(_NVCOMP_ENABLED)
-	if (movie_session && !isEER && !isCompressedMRC) {
+	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
+	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		if (movie_session->ingestCompressedTiffStrips(fn_mic, frames, gain_ptr, n_io_threads)) {
 			nvcomp_ingested = true;
 		}
 	}
 #endif
+	if (ingest_mode == INGEST_NVCOMP && !nvcomp_ingested)
+		REPORT_ERROR("--ingest nvcomp was requested but the device ingest did not run for "
+		             + fn_mic + ". Either this build has no nvCOMP, there is no resident CUDA "
+		             "session, or the encoding is not one the fast path accepts. Refusing to "
+		             "continue on a different path under a pinned --ingest.");
 
 	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
 	// one of three paths runs for a healthy movie:
@@ -1663,7 +1692,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// which bound and released a movie-sized mapping for nothing. Only UShort is
 	// safe: SShort shares bitsPerSample == 16 but wraps negatives, and the packed
 	// 4-bit K2/K3 format reports bitsPerSample == 8 while doubling the logical width.
-	if (!nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
+	if (ingest_mode != INGEST_FLOAT &&
+	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
 	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
 	    Ihead.dataType() == UShort) {
 		stage_u16 = true;
@@ -1677,7 +1707,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		        << " x " << nx << " x " << ny << " samples, released before any float "
 		        << "movie is materialized." << std::endl;
 	}
+	if (ingest_mode == INGEST_COMPACT && !stage_u16)
+		REPORT_ERROR("--ingest compact was requested but the compact uint16 staging did not "
+		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
+		             "this movie is not an unsigned-16-bit TIFF. Refusing to continue on a "
+		             "different path under a pinned --ingest.");
 #endif
+
+	// Which path this movie actually took. Written only when asked for, to a file
+	// that is not one of the products, so --ingest auto over a mixed-format set
+	// can be checked to have routed every movie correctly without changing a
+	// single byte any comparator reads.
+	if (fn_ingest_witness != "") {
+		const char *taken = "float";
+#ifdef _CUDA_ENABLED
+		if (nvcomp_ingested)   taken = "nvcomp";
+		else if (stage_u16)    taken = "compact";
+#endif
+		std::ofstream witness(fn_ingest_witness.c_str(), std::ios::app);
+		if (!witness) REPORT_ERROR("Cannot open --ingest_witness file " + fn_ingest_witness);
+		witness << fn_mic << " " << taken << std::endl;
+	}
 
 	// Read images
 	RCTIC(TIMING_READ_MOVIE);

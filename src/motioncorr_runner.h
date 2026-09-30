@@ -46,6 +46,22 @@ class EERRenderer;
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #endif
 
+// Which movie ingest path executeOwnMotionCorrection() may use.
+//
+// INGEST_AUTO is production: the fastest applicable path is chosen per movie.
+// The other three exist so an ablation arm, or a support-matrix row, can pin
+// the path and FAIL when it is unavailable rather than quietly running on a
+// different one. IOParser treats an unrecognised flag as a warning, so an arm
+// that merely passes a flag proves nothing; an arm that errors when its path
+// did not run proves the path ran.
+enum MovieIngestMode
+{
+	INGEST_AUTO = 0,
+	INGEST_NVCOMP,   // require the nvCOMP device ingest
+	INGEST_COMPACT,  // require the compact host uint16 staging
+	INGEST_FLOAT     // require main's float host reader
+};
+
 class MotioncorrRunner
 {
 public:
@@ -66,6 +82,15 @@ public:
 	// otherwise identical binary, and as an escape hatch on a host where the
 	// extra thread costs more CPU than the overlap buys.
 	bool sync_output = false;
+
+	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
+	MovieIngestMode ingest_mode = INGEST_AUTO;
+
+	// Opt-in diagnostic: append "<movie> <path>" per movie. Empty by default, so
+	// a normal run writes nothing extra and no product changes. This is how an
+	// --ingest auto run over a mixed-format set is checked to have routed each
+	// movie to the path it should have.
+	FileName fn_ingest_witness;
 
 	// Output rootname
 	FileName fn_in, fn_out, fn_movie;

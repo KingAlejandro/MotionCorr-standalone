@@ -41,6 +41,7 @@ from test_gain_cache import NX, NY, synthetic_frames, write_star  # noqa: E402
 FIXED = None
 MUTANT = None
 ROOT = None
+CPUS = None
 
 
 def write_deflate_tiff(path: Path, frames) -> None:
@@ -104,7 +105,8 @@ def run(binary: Path, label: str, fault: str, extra=()) -> tuple[int, str, Path,
         env.pop(k, None)
     if fault != "none":
         env["MC_PREPROCESS_FAULT"] = fault
-    cmd = ["taskset", "-c", "96-103", str(binary), "--i", "movies.star",
+    cmd = (["taskset", "-c", CPUS] if CPUS else []) + [
+           str(binary), "--i", "movies.star",
            "--o", str(out) + "/", "--use_own", "--gpu", "0", "--j", "4",
            "--max_io_threads", "2", "--patch_x", "2", "--patch_y", "2",
            "--max_iter", "1", "--bfactor", "150", "--seed", "1",
@@ -119,7 +121,7 @@ def run(binary: Path, label: str, fault: str, extra=()) -> tuple[int, str, Path,
 
 
 def main() -> int:
-    global FIXED, MUTANT, ROOT
+    global FIXED, MUTANT, ROOT, CPUS
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--binary", type=Path, required=True,
                     help="motioncorr_faultinject from the build under test")
@@ -128,7 +130,11 @@ def main() -> int:
                          "rows below show the guard firing but not that it can stay silent, "
                          "so the mutant rows are reported UNRUN rather than skipped quietly.")
     ap.add_argument("--workdir", type=Path, default=None)
+    ap.add_argument("--cpus", default=None,
+                    help="optional taskset CPU list for every run, e.g. 96-103; "
+                         "unpinned by default")
     a = ap.parse_args()
+    CPUS = a.cpus
     FIXED = a.binary.resolve()
     MUTANT = a.mutant_binary.resolve() if a.mutant_binary else None
     ROOT = (a.workdir.resolve() if a.workdir
@@ -157,7 +163,6 @@ def main() -> int:
             if "nvCOMP" in line or "ERROR" in line:
                 print("   ", line[:150])
         return 1
-    fails += [] if ok else ["healthy"]
 
     # 1-2. The two controls on the nvCOMP arm.
     for fault, extra in (("unweighted-release-fatal", ()), ("dw-release-fatal", dw)):

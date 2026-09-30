@@ -374,12 +374,14 @@ if(BUILD_TESTING AND CUDA)
         # CudaPreprocessingFailurePaths is not: it needs a GPU and a USE_NVCOMP
         # build, and a CPU-only configuration would fail the collection gate on
         # a test it cannot run.
-        add_test(NAME CudaNvcompReconstructionFailures
-            COMMAND ${Python3_EXECUTABLE}
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_reconstruction_controls.py
-                --binary $<TARGET_FILE:motioncorr_faultinject>)
-        set_tests_properties(CudaNvcompReconstructionFailures PROPERTIES
-            LABELS "cuda;hardware" TIMEOUT 900)
+        if(USE_NVCOMP)
+            add_test(NAME CudaNvcompReconstructionFailures
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_reconstruction_controls.py
+                    --binary $<TARGET_FILE:motioncorr_faultinject>)
+            set_tests_properties(CudaNvcompReconstructionFailures PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 900)
+        endif()
         # Driven by tests/run_fallback_boundary_control.sh, which needs a device and a
         # movie, so it is not registered as a bare ctest case.
         # Optional Issue #85 lane C native failure matrix. Supplying the known

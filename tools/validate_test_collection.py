@@ -131,12 +131,29 @@ def validate_tests(
     req = list(required_tests) if required_tests is not None else list(DEFAULT_REQUIRED_TESTS)
     missing = [name for name in req if name not in collected_names]
 
+    # A test whose command starts with an empty argument is registered but
+    # cannot run: CTest reports BAD_COMMAND at execution time. That happened to
+    # NvcompGuards, which used ${Python3_EXECUTABLE} before
+    # find_package(Python3) had set it. It was invisible to every local build
+    # here because those pass -DPython3_EXECUTABLE explicitly, which defines the
+    # cache variable up front; only CI, which does not, saw it. Collection is
+    # the right place to catch it -- the name IS in the list, so the
+    # missing-test check above passes while the test cannot execute.
+    unrunnable = []
+    for entry in tests:
+        if not isinstance(entry, dict):
+            continue
+        cmd = entry.get("command") or []
+        if not cmd or not str(cmd[0]).strip():
+            unrunnable.append(entry.get("name", "<unnamed>"))
+
     report: Dict[str, Any] = {
         "collected_count": len(collected_names),
         "collected_tests": collected_names,
         "min_count": min_count,
         "required_tests": req,
         "missing_tests": missing,
+        "unrunnable_tests": unrunnable,
         "status": "PASS",
     }
 
@@ -148,6 +165,12 @@ def validate_tests(
     if len(collected_names) < min_count:
         report["status"] = "FAIL"
         report["reason"] = f"Test count {len(collected_names)} is less than minimum {min_count}"
+        return False, report
+
+    if unrunnable:
+        report["status"] = "FAIL"
+        report["reason"] = ("Test(s) registered with an empty command program, so CTest "
+                            f"would report BAD_COMMAND: {', '.join(unrunnable)}")
         return False, report
 
     if missing:

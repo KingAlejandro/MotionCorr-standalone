@@ -32,6 +32,7 @@ Asserted here, in one three-phase sequence:
 import argparse
 import hashlib
 import os
+import re
 import resource
 import shutil
 import signal
@@ -109,7 +110,18 @@ def run(binary: Path, cwd: Path, star: str, out: Path, extra=(), limited=False,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--binary", type=Path, required=True)
+    ap.add_argument("--runner-arg", action="append", default=[], metavar="OPT",
+                    help="Extra option passed to every invocation. Used to run this "
+                         "same sequence against the synchronous output writer "
+                         "(--sync_output) and against a movie with several MRC "
+                         "products, where the fail-closed rule is not just 'the "
+                         "image failed' but 'the first failed product cancels the "
+                         "rest of that movie, the STAR among them'. Repeatable.")
     args = ap.parse_args()
+    global COMMON_ARGS
+    COMMON_ARGS = list(COMMON_ARGS) + list(args.runner_arg)
+    if args.runner_arg:
+        print(f"extra runner options: {' '.join(args.runner_arg)}")
     repo = Path(__file__).resolve().parent.parent
     source = repo / "test-data" / "synthetic" / "synthetic_movie.tiff"
     if not source.is_file():
@@ -167,6 +179,46 @@ def main():
                 "the joint STAR was republished by a failed batch")
             assert "b.mrc" not in joint.read_text(), (
                 "the failed movie was added to the joint STAR")
+        # The per-movie log must not be left claiming success for a product that
+        # failed. "Written ..." is emitted when the write is QUEUED, not when it
+        # lands -- deliberately, because the text and its position are compared
+        # against main byte for byte and making it truthful in background mode
+        # would change a product. The safety property is therefore not that the
+        # claim is never premature, but that a deferred failure always corrects
+        # it in the same file. Nothing asserted that until now.
+        b_log = out / "Movies" / "b.log"
+        assert b_log.is_file(), "the failed movie has no log at all"
+        log_text = b_log.read_text()
+        # The property is "the log never claims a product was written when it
+        # was not", and the two writer modes satisfy it differently.
+        #
+        # Background: "Written ..." is emitted when the write is QUEUED, so the
+        # claim is already in the file when the write later fails. The deferred
+        # failure must append the correction.
+        #
+        # Inline (--sync_output): the write throws before that line is reached,
+        # so the claim is never made and there is nothing to correct. An
+        # unconditional assertion for the correction fails here -- which is how
+        # this was found -- and would have been asserting the wrong thing.
+        claimed = "Written" in log_text and "b.mrc" in log_text
+        if claimed:
+            assert "ERROR:" in log_text, (
+                "the log claims b.mrc was written and carries no correction; a reader of "
+                f"this file alone would believe it succeeded:\n{log_text[-800:]}")
+            assert "b.mrc" in log_text.split("ERROR:", 1)[1], (
+                "the correction does not name the product that failed")
+        else:
+            # No claim was made, which is the inline path. Assert that directly
+            # rather than asserting nothing: the log must not say the product
+            # was written.
+            assert not re.search(r"Written[^\n]*b\.mrc", log_text), (
+                "the log claims b.mrc was written on a path that should not have "
+                f"reached that line:\n{log_text[-800:]}")
+        print(f"    log check: claim_present={claimed} corrected={'ERROR:' in log_text}")
+        a_log_text = (out / "Movies" / "a.log").read_text()
+        assert "ERROR:" not in a_log_text, (
+            "the healthy movie's log was given a failure it did not have")
+
         leftover = b_mrc.stat().st_size if b_mrc.is_file() else 0
         assert leftover < OUTPUT_BYTES, (
             f"b.mrc is {leftover} bytes: the fault did not truncate anything, so the "

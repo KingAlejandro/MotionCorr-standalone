@@ -162,10 +162,12 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 20 tests: the 13 pre-existing ones, the
+        # The integrated suite registers 32 tests: the 13 pre-existing ones, the
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
-        # #98 DefectParser, the #26 GlobalIfftElision, and the #97
-        # RunnerInterpolateRecenter / RunnerInterpolateShifts.
+        # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState,
+        # #85 OutputTreeComparator, #97 recenter/interpolation contracts, and
+        # the #95 NativeU16Staging, and the #126 DeflateLayout / ScratchArena /
+        # DefectNeighbours device-free ingest contracts.
         #
         # This list restates DEFAULT_REQUIRED_TESTS, so it has to be updated in
         # the same commit that adds a required test. It is deliberately a
@@ -192,9 +194,29 @@ exec "{sys.executable}" "$@"
             "ImageWriteFaults",
             "DefectParser",
             "GlobalIfftElision",
+            "PatchRetryState",
+            "OutputTreeComparator",
             "RunnerInterpolateRecenter",
             "RunnerInterpolateShifts",
+            # #126 nvCOMP ingest, device-free contracts.
+            "DeflateLayout",
+            "ScratchArena",
+            "DefectNeighbours",
+            # #127 output stage.
+            "MrcHeaderStats",
+            "PdfConcat",
+            # #127 writer fail-closed variants.
+            "WriteFaultsSync",
+            "WriteFaultsMultiProduct",
+            "NvcompGuards",
+            "OutputStageFaults",
+            "NativeU16Staging",
         ]
+
+        def runnable(name: str) -> dict:
+            """A collected entry shaped like `ctest --show-only=json-v1` output,
+            so only the property a case is about can be what rejects it."""
+            return {"name": name, "command": [sys.executable, name + ".py"]}
 
         def drop_one(name: str):
             """Collection with exactly one required test removed, and a filler
@@ -212,7 +234,8 @@ exec "{sys.executable}" "$@"
         # Case B: a required test is absent, the count gate is satisfied, so the
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
-                        "DefectParser", "GlobalIfftElision",
+                        "DefectParser", "GlobalIfftElision", "PatchRetryState",
+                        "OutputTreeComparator", "NativeU16Staging",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
@@ -221,7 +244,7 @@ exec "{sys.executable}" "$@"
                 res_missing = subprocess.run(
                     [sys.executable, str(VALIDATE_COLLECTION)],
                     input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
-                                      "tests": [{"name": n} for n in names]}),
+                                      "tests": [runnable(n) for n in names]}),
                     capture_output=True, text=True
                 )
                 self.assertEqual(res_missing.returncode, 1,
@@ -234,11 +257,26 @@ exec "{sys.executable}" "$@"
         res_full = subprocess.run(
             [sys.executable, str(VALIDATE_COLLECTION)],
             input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
-                              "tests": [{"name": n} for n in INTEGRATED_SUITE]}),
+                              "tests": [runnable(n) for n in INTEGRATED_SUITE]}),
             capture_output=True, text=True
         )
         self.assertEqual(res_full.returncode, 0,
                          f"Complete integrated collection must pass:\n{res_full.stdout}")
+
+        # Case D: the complete collection with one test whose command program is
+        # empty (BAD_COMMAND at run time) is rejected, and names that test.
+        for empty in ([], [""], ["", "script.py"]):
+            with self.subTest(command=empty):
+                tests = [runnable(n) for n in INTEGRATED_SUITE]
+                tests[INTEGRATED_SUITE.index("NvcompGuards")]["command"] = empty
+                res_bad = subprocess.run(
+                    [sys.executable, str(VALIDATE_COLLECTION)],
+                    input=json.dumps({"kind": "ctestInfo", "version": {"major": 1, "minor": 0},
+                                      "tests": tests}),
+                    capture_output=True, text=True
+                )
+                self.assertEqual(res_bad.returncode, 1, "empty command program must fail validation")
+                self.assertIn("would report BAD_COMMAND: NvcompGuards\n", res_bad.stdout)
 
     def test_4_missing_fixture_or_truth_fails(self) -> None:
         """Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures."""

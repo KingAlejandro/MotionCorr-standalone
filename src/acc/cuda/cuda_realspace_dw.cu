@@ -6,6 +6,7 @@
 
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_scoped_resources.h"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
@@ -18,6 +19,7 @@
     if (err != cudaSuccess) { \
         logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
+        if (failure) failure->record(err, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
@@ -30,44 +32,10 @@
     if (result != CUFFT_SUCCESS) { \
         logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ \
                 << " : code " << result << std::endl; \
+        if (failure) failure->recordCufft(result, __func__, __LINE__); \
         return false; \
     } \
 } while (0)
-
-class CudaMemoryCleanup {
-public:
-    ~CudaMemoryCleanup() {
-        for (size_t i = 0; i < allocations.size(); ++i) {
-            if (allocations[i] != nullptr) cudaFree(allocations[i]);
-        }
-    }
-    void add(void *allocation) { allocations.push_back(allocation); }
-
-private:
-    std::vector<void *> allocations;
-};
-
-class CudaEventCleanup {
-public:
-    ~CudaEventCleanup() {
-        for (size_t i = 0; i < events.size(); ++i) cudaEventDestroy(events[i]);
-    }
-    void add(cudaEvent_t event) { events.push_back(event); }
-
-private:
-    std::vector<cudaEvent_t> events;
-};
-
-class CufftPlanCleanup {
-public:
-    CufftPlanCleanup() : owns_plan(false) {}
-    ~CufftPlanCleanup() { if (owns_plan) cufftDestroy(plan); }
-    void take(cufftHandle handle) { plan = handle; owns_plan = true; }
-
-private:
-    cufftHandle plan;
-    bool owns_plan;
-};
 
 namespace {
 struct FramePolynomial {
@@ -210,7 +178,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     if (n_frames == 0) return true;
 
@@ -224,9 +193,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    CudaMemoryCleanup memory_cleanup;
-    CudaEventCleanup event_cleanup;
-    CufftPlanCleanup plan_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
+    mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
+    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
     const int nfx = nx / 2 + 1, nfy = ny;
     const int nfy_half = nfy / 2;
@@ -288,8 +257,10 @@ bool cudaDoseWeightAndInterpolateDevice(
 
     cufftHandle plan_c2r;
     int n[2] = {ny, nx};
-    CUFFT_CHECK(cufftPlanMany(&plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1));
+    CUFFT_CHECK(cufftCreate(&plan_c2r));
     plan_cleanup.take(plan_c2r);
+    size_t plan_work_bytes = 0;
+    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -371,6 +342,12 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
+    const cufftResult plan_release = plan_cleanup.releaseAll();
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    const cudaError_t event_release = event_cleanup.releaseAll();
+    CUFFT_CHECK(plan_release);
+    HANDLE_ERROR(memory_release);
+    HANDLE_ERROR(event_release);
     return true;
 }
 
@@ -381,7 +358,8 @@ bool cudaDoseWeightAndInterpolate(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     const int n_frames = Fframes.size();
     if (n_frames == 0) return true;
@@ -390,7 +368,7 @@ bool cudaDoseWeightAndInterpolate(
     const int nx = (nfx - 1) * 2, ny = nfy;
     const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
 
-    CudaMemoryCleanup memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     float2 *d_Fframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Fframes, sz_fframes));
@@ -406,9 +384,11 @@ bool cudaDoseWeightAndInterpolate(
     }
 
     bool res = cudaDoseWeightAndInterpolateDevice(
-        (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile
+        (const cufftComplex*)d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, failure
     );
 
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    HANDLE_ERROR(memory_release);
     return res;
 }
 
@@ -420,7 +400,8 @@ bool cudaRealSpaceInterpolationDevice(
     const int nx, const int ny, const int n_frames,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     if (n_frames == 0) return true;
 
@@ -434,8 +415,8 @@ bool cudaRealSpaceInterpolationDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    CudaMemoryCleanup memory_cleanup;
-    CudaEventCleanup event_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
+    mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
 
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
@@ -514,6 +495,10 @@ bool cudaRealSpaceInterpolationDevice(
             << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
 
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    const cudaError_t event_release = event_cleanup.releaseAll();
+    HANDLE_ERROR(memory_release);
+    HANDLE_ERROR(event_release);
     return true;
 }
 
@@ -524,7 +509,8 @@ bool cudaRealSpaceInterpolation(
     const std::vector<Image<float> > &Iframes,
     const ThirdOrderPolynomialModel *model,
     const int device_id,
-    std::ostream &logfile)
+    std::ostream &logfile,
+    CudaFailureState *failure)
 {
     const int n_frames = Iframes.size();
     if (n_frames == 0) return true;
@@ -532,7 +518,7 @@ bool cudaRealSpaceInterpolation(
     const int nx = XSIZE(Iframes[0]()), ny = YSIZE(Iframes[0]());
     const size_t sz_iframes = (size_t)n_frames * ny * nx * sizeof(float);
 
-    CudaMemoryCleanup memory_cleanup;
+    mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     float *d_Iframes = nullptr;
     HANDLE_ERROR(cudaSetDevice(device_id));
     HANDLE_ERROR(cudaMalloc((void**)&d_Iframes, sz_iframes));
@@ -548,9 +534,11 @@ bool cudaRealSpaceInterpolation(
     }
 
     bool res = cudaRealSpaceInterpolationDevice(
-        d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile
+        d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile, failure
     );
 
+    const cudaError_t memory_release = memory_cleanup.releaseAll();
+    HANDLE_ERROR(memory_release);
     return res;
 }
 

@@ -44,12 +44,59 @@ DEFAULT_REQUIRED_TESTS = [
     # dropped from CMakeLists.txt with the collected count still at the
     # minimum and CI still green.
     "GlobalIfftElision",
+    # Added by the #69 CUDA reliability port. Device-free, so it is always
+    # collected; the CUDA-only CudaErrorClass is not listed here, matching
+    # the existing exclusion of CudaWrapperUploadFailure.
+    "PatchRetryState",
+    # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
+    # independently before pairwise image equality is considered.
+    "OutputTreeComparator",
     # Added by the #97 interpolate-shift recentering fix (PR100/PR114).
     # RunnerInterpolateRecenter is the helper-level arithmetic regression;
     # RunnerInterpolateShifts drives the binary end to end and is the only test
     # that can see the recenter call site still being wired up.
     "RunnerInterpolateRecenter",
     "RunnerInterpolateShifts",
+    # Added by the #85/#126 nvCOMP ingest composition. All three are device-free
+    # and deliberately registered outside if(CUDA): the aligned raw-Deflate layout
+    # rule, the zlib-wrapper and Adler-32 byte logic, the scratch-arena bound and
+    # the neighbour enumeration are integer and byte contracts that a successful
+    # A100 decode cannot observe. Without these entries the fast path could lose
+    # its eligibility predicate or its arena bound with the suite still green.
+    "DeflateLayout",
+    "ScratchArena",
+    "DefectNeighbours",
+    # Added by the #127 output-stage group. MrcHeaderStats is the only test that
+    # compares the fused single-traversal header statistics against the four
+    # separate reductions they replace; without it the fused path could drift in
+    # any of amin/amax/amean/arms and every product comparator would still pass,
+    # because both sides would be reading the same drifted header.
+    "MrcHeaderStats",
+    "PdfConcat",
+    # Added with the #127 background output writer. WriteFaults exercises the
+    # deferred path (failure raised on the worker thread, collected afterwards);
+    # WriteFaultsSync runs the identical sequence on the inline path that
+    # --sync_output selects, so the measurement control cannot also be a route to
+    # weaker failure semantics. WriteFaultsMultiProduct gives one movie several
+    # MRC products, which is the only configuration in which "the first failed
+    # product cancels the rest of that movie's group, the STAR among them" is
+    # observable at all.
+    "WriteFaultsSync",
+    "WriteFaultsMultiProduct",
+    # Added after the CUDA-without-nvCOMP link failure on CI run 317. The suite
+    # never links that configuration, so nothing in it could see a member
+    # defined inside the guard and declared outside; the first instance
+    # (gatherFrameSamples) stayed green only because the optimiser removed the
+    # call, and the second (endIngestScratch) appeared the moment that stopped.
+    "NvcompGuards",
+    # Added with the #127 Ghostscript overlap fix. It distinguishes a job that
+    # reports failure from a job that dies on SIGABRT, which is the whole
+    # difference the scope guard makes; a check for "non-zero exit" would pass
+    # on the defect.
+    "OutputStageFaults",
+    # Issue #95: the only test that can observe the native uint16 staging
+    # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
+    "NativeU16Staging",
 ]
 
 
@@ -84,12 +131,29 @@ def validate_tests(
     req = list(required_tests) if required_tests is not None else list(DEFAULT_REQUIRED_TESTS)
     missing = [name for name in req if name not in collected_names]
 
+    # A test whose command starts with an empty argument is registered but
+    # cannot run: CTest reports BAD_COMMAND at execution time. That happened to
+    # NvcompGuards, which used ${Python3_EXECUTABLE} before
+    # find_package(Python3) had set it. It was invisible to every local build
+    # here because those pass -DPython3_EXECUTABLE explicitly, which defines the
+    # cache variable up front; only CI, which does not, saw it. Collection is
+    # the right place to catch it -- the name IS in the list, so the
+    # missing-test check above passes while the test cannot execute.
+    unrunnable = []
+    for entry in tests:
+        if not isinstance(entry, dict):
+            continue
+        cmd = entry.get("command") or []
+        if not cmd or not str(cmd[0]).strip():
+            unrunnable.append(entry.get("name", "<unnamed>"))
+
     report: Dict[str, Any] = {
         "collected_count": len(collected_names),
         "collected_tests": collected_names,
         "min_count": min_count,
         "required_tests": req,
         "missing_tests": missing,
+        "unrunnable_tests": unrunnable,
         "status": "PASS",
     }
 
@@ -101,6 +165,12 @@ def validate_tests(
     if len(collected_names) < min_count:
         report["status"] = "FAIL"
         report["reason"] = f"Test count {len(collected_names)} is less than minimum {min_count}"
+        return False, report
+
+    if unrunnable:
+        report["status"] = "FAIL"
+        report["reason"] = ("Test(s) registered with an empty command program, so CTest "
+                            f"would report BAD_COMMAND: {', '.join(unrunnable)}")
         return False, report
 
     if missing:
@@ -120,8 +190,8 @@ def main() -> int:
                         help="Build directory to inspect via ctest")
     parser.add_argument("--json", type=Path, default=None,
                         help="Path to pre-dumped ctest json-v1 output")
-    parser.add_argument("--min-count", type=int, default=20,
-                        help="Minimum number of tests that must be collected (default: 20)")
+    parser.add_argument("--min-count", type=int, default=23,
+                        help="Minimum number of tests that must be collected (default: 23)")
     parser.add_argument("--required-tests", nargs="*", default=None,
                         help="Explicit list of required test names (default: standard MotionCorr suite)")
     parser.add_argument("--quiet", action="store_true",

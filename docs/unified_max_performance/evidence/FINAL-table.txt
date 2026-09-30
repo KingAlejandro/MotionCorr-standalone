@@ -1,0 +1,23 @@
+
+===== CONTENDERS, EACH ARM AT ITS OWN BEST OPERATING POINT =====
+arm                         n  median s     min     max   RSS GiB   CPU%  fail  raw
+best_D_cand_nvcomp          5     15.31   12.66   15.59     0.542    171     0  12.66 15.11 15.31 15.55 15.59
+best_E_cand_nvcomp_sync     5     17.27   14.72   17.88     0.488    150     0  14.72 15.54 17.27 17.29 17.88
+best_C_cand_compact         5     23.82   20.56   24.16     0.887    302     0  20.56 20.74 23.82 24.11 24.16
+best_B_cand_float           5     27.68   24.41   29.42     1.524    315     0  24.41 24.55 27.68 28.92 29.42
+best_A_main                 5     31.40   29.22   32.75     1.523    288     0  29.22 30.35 31.40 31.90 32.75
+
+  relative to best_A_main (median 31.40 s):
+    best_D_cand_nvcomp           15.31 s   x 2.05    -16.09 s
+    best_E_cand_nvcomp_sync      17.27 s   x 1.82    -14.13 s
+    best_C_cand_compact          23.82 s   x 1.32     -7.58 s
+    best_B_cand_float            27.68 s   x 1.13     -3.73 s
+    best_A_main                  31.40 s   x 1.00     +0.00 s
+
+===== IDENTITY =====
+  binary=f0c03b7ac32f src=6393547e star=fb998f70 dirty=False
+    gpu=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 cpus=96-103 thp=always [madvise] never
+    arms: 1 distinct
+  binary=4ef7dc68f6bc src=154e8aa1 star=fb998f70 dirty=False
+    gpu=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 cpus=96-103 thp=always [madvise] never
+    arms: 4 distinct

@@ -1,0 +1,116 @@
+cpu-bind=MASK - gnx002, task  0  0 [147757]: mask 0xf000f set
+=== VENUE ===
+2026-09-30T17:12:00+01:00
+gnx002.scarf.rl.ac.uk
+0, GPU-d494a7db-70f4-8c6b-ffc2-753da1ae801e, NVIDIA A100-SXM4-40GB
+Cpus_allowed_list:	0-3,16-19
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+python 3.9.25 numpy 1.22.4
+abd682776f26913a9998141009a4726775c8e83b
+
+=== BUILD: CUDA without nvCOMP ===
+configure rc=0
+-- Configuring done (8.8s)
+-- Generating done (2.5s)
+-- Build files have been written to: /home/vol05/scarf1415/mc-unified-20260930/build-cuda
+build rc=0
+0
+
+=== BUILD: CPU only ===
+configure rc=0
+build rc=0
+
+=== GUARD FIX abd6827: the nvCOMP-only test must not be collected here ===
+collected in the no-nvCOMP CUDA build (must be 0): 0
+collected in the CPU build (must be 0): 0
+collection gate, CUDA build:
+    - CudaFaultMatrix                [ADDITIVE]
+    - CudaPreprocessingFailurePaths  [ADDITIVE]
+    - CudaErrorClass                 [ADDITIVE]
+collection gate, CPU build:
+    - OutputTreeComparator           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - NativeU16Staging               [REQUIRED]
+
+=== CPU-PINNING FIX abd6827: why the hardcoded mask had to go ===
+taskset -c 96-103 on this allocation: taskset: failed to set pid 149365's affinity: Invalid argument
+<- fails, which is what the old hardcoded mask did to every run
+unpinned (the new default): runs
+
+=== FULL CTEST: CUDA without nvCOMP ===
+32/38 Test #32: NativeU16Staging .................   Passed    0.10 sec
+      Start 33: RunnerInterpolateShiftsCuda
+33/38 Test #33: RunnerInterpolateShiftsCuda ......   Passed    2.24 sec
+      Start 34: CudaU16StagingEquivalence
+34/38 Test #34: CudaU16StagingEquivalence ........   Passed    0.66 sec
+      Start 35: CudaWrapperUploadFailure
+35/38 Test #35: CudaWrapperUploadFailure .........   Passed    0.47 sec
+      Start 36: CudaFaultMatrix
+36/38 Test #36: CudaFaultMatrix ..................   Passed    2.59 sec
+      Start 37: CudaPreprocessingFailurePaths
+37/38 Test #37: CudaPreprocessingFailurePaths ....   Passed    5.82 sec
+      Start 38: CudaErrorClass
+38/38 Test #38: CudaErrorClass ...................   Passed    0.05 sec
+
+97% tests passed, 1 tests failed out of 38
+
+Label Time Summary:
+cuda        =  11.84 sec*proc (6 tests)
+hardware    =  11.79 sec*proc (5 tests)
+
+Total Test time (real) =  47.25 sec
+
+The following tests FAILED:
+	 29 - CiFailClosedControls (Failed)
+Errors while running CTest
+
+=== FULL CTEST: CPU only ===
+
+----------------------------------------------------------------------
+Ran 8 tests in 14.314s
+
+FAILED (failures=3)
+
+      Start 30: OutputTreeComparator
+30/32 Test #30: OutputTreeComparator .............   Passed    0.21 sec
+      Start 31: ImageWriteFaults
+31/32 Test #31: ImageWriteFaults .................   Passed    0.04 sec
+      Start 32: NativeU16Staging
+32/32 Test #32: NativeU16Staging .................   Passed    0.06 sec
+
+97% tests passed, 1 tests failed out of 32
+
+Total Test time (real) =  38.59 sec
+
+The following tests FAILED:
+	 29 - CiFailClosedControls (Failed)
+Errors while running CTest
+
+=== 74988fb reconstruction-cleanup controls, second venue ===
+PASS preprocessing failure controls; artifacts: /home/vol05/scarf1415/mc-unified-20260930/prepfault
+Injected status codes only; genuine device poisoning remains untested.
+cases executed:
+  dw-release-fatal
+  sparse-release-fatal
+  unweighted-release-fatal
+-- unweighted-release-fatal --
+     Refusing CPU fallback after a fatal device error.
+     injected cudaErrorIllegalAddress at cudaRealSpaceInterpolationDevice;
+     recorded at scoped cudaFree:64). Firs
+     products (must be 0): 0
+-- dw-release-fatal --
+     Refusing CPU fallback after a fatal device error.
+     injected cudaErrorIllegalAddress at cudaDoseWeightAndInterpolateDevic
+     recorded at scoped cudaFree:64). Firs
+     products (must be 0): 0
+
+=== real-data sanity: 24 movies on the compact arm ===
+exit=0
+routing witness:      24 compact 
+products: 24
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:25.74
+  	Maximum resident set size (kbytes): 945768
+
+SCARF_JOB_DONE
+2026-09-30T17:15:31+01:00

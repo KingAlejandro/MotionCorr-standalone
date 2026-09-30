@@ -66,6 +66,12 @@ DEFAULT_REQUIRED_TESTS = [
     "DeflateLayout",
     "ScratchArena",
     "DefectNeighbours",
+    # Added by the #127 output-stage group. MrcHeaderStats is the only test that
+    # compares the fused single-traversal header statistics against the four
+    # separate reductions they replace; without it the fused path could drift in
+    # any of amin/amax/amean/arms and every product comparator would still pass,
+    # because both sides would be reading the same drifted header.
+    "MrcHeaderStats",
     # Issue #95: the only test that can observe the native uint16 staging
     # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
     "NativeU16Staging",

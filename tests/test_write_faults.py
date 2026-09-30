@@ -32,6 +32,7 @@ Asserted here, in one three-phase sequence:
 import argparse
 import hashlib
 import os
+import re
 import resource
 import shutil
 import signal
@@ -186,14 +187,34 @@ def main():
         # claim is never premature, but that a deferred failure always corrects
         # it in the same file. Nothing asserted that until now.
         b_log = out / "Movies" / "b.log"
-        assert b_log.is_file(), "the failed movie has no log to correct"
+        assert b_log.is_file(), "the failed movie has no log at all"
         log_text = b_log.read_text()
-        assert "ERROR:" in log_text, (
-            "the failed movie's log still claims the product was written and carries no "
-            f"correction; a reader of this file alone would believe it succeeded:\n"
-            f"{log_text[-800:]}")
-        assert "b.mrc" in log_text, (
-            "the log correction does not name the product that failed")
+        # The property is "the log never claims a product was written when it
+        # was not", and the two writer modes satisfy it differently.
+        #
+        # Background: "Written ..." is emitted when the write is QUEUED, so the
+        # claim is already in the file when the write later fails. The deferred
+        # failure must append the correction.
+        #
+        # Inline (--sync_output): the write throws before that line is reached,
+        # so the claim is never made and there is nothing to correct. An
+        # unconditional assertion for the correction fails here -- which is how
+        # this was found -- and would have been asserting the wrong thing.
+        claimed = "Written" in log_text and "b.mrc" in log_text
+        if claimed:
+            assert "ERROR:" in log_text, (
+                "the log claims b.mrc was written and carries no correction; a reader of "
+                f"this file alone would believe it succeeded:\n{log_text[-800:]}")
+            assert "b.mrc" in log_text.split("ERROR:", 1)[1], (
+                "the correction does not name the product that failed")
+        else:
+            # No claim was made, which is the inline path. Assert that directly
+            # rather than asserting nothing: the log must not say the product
+            # was written.
+            assert not re.search(r"Written[^\n]*b\.mrc", log_text), (
+                "the log claims b.mrc was written on a path that should not have "
+                f"reached that line:\n{log_text[-800:]}")
+        print(f"    log check: claim_present={claimed} corrected={'ERROR:' in log_text}")
         a_log_text = (out / "Movies" / "a.log").read_text()
         assert "ERROR:" not in a_log_text, (
             "the healthy movie's log was given a failure it did not have")

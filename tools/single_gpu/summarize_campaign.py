@@ -6,7 +6,7 @@ p=argparse.ArgumentParser();p.add_argument('root',type=Path);p.add_argument('--p
 def percentile(xs,q):
  x=sorted(xs);pos=(len(x)-1)*q;lo=math.floor(pos);hi=math.ceil(pos);return x[lo]+(x[hi]-x[lo])*(pos-lo)
 def stats(xs):return {'observations':xs,'median':statistics.median(xs),'range':[min(xs),max(xs)],'iqr':percentile(xs,.75)-percentile(xs,.25)}
-out={'wall_scope':'uninstrumented wrapper-inclusive complete process, including output/PDF; 24-movie polling lag <=20ms, one-movie <=1ms; raw GNU time elapsed retained','quartiles':'linear interpolation (n-1)*q','phases':{}}
+out={'wall_scope':'wrapper-inclusive complete process with matching resource samplers, including output/PDF; nominal poll intervals20ms/tutorial and1ms/one-movie, scheduling delay not bounded; raw GNU time elapsed retained','quartiles':'linear interpolation (n-1)*q','phases':{}}
 for phase in a.phases:
  root=a.root/phase
  provenance=json.loads((root/'provenance.json').read_text());complete=json.loads((root/'COMPLETE.json').read_text());expected=provenance['expected_pair_count']

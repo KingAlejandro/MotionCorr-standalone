@@ -28,8 +28,8 @@ int main(int argc,char**argv) {
   TIFFSetField(out,TIFFTAG_BITSPERSAMPLE,16);TIFFSetField(out,TIFFTAG_SAMPLESPERPIXEL,1);
   TIFFSetField(out,TIFFTAG_SAMPLEFORMAT,SAMPLEFORMAT_UINT);TIFFSetField(out,TIFFTAG_PHOTOMETRIC,PHOTOMETRIC_MINISBLACK);
   TIFFSetField(out,TIFFTAG_PLANARCONFIG,PLANARCONFIG_CONTIG);TIFFSetField(out,TIFFTAG_COMPRESSION,COMPRESSION_ADOBE_DEFLATE);
-  TIFFSetField(out,TIFFTAG_PREDICTOR,1);TIFFSetField(out,TIFFTAG_ROWSPERSTRIP,128);TIFFSetField(out,TIFFTAG_ZIPQUALITY,1);
-  for(uint32_t r=0,s=0;r<ny;r+=128,++s){uint32_t rows=ny-r<128?ny-r:128;
+  TIFFSetField(out,TIFFTAG_PREDICTOR,1);TIFFSetField(out,TIFFTAG_ROWSPERSTRIP,1);TIFFSetField(out,TIFFTAG_ZIPQUALITY,1);
+  for(uint32_t r=0,s=0;r<ny;r+=1,++s){uint32_t rows=1;
    if(TIFFWriteEncodedStrip(out,s,pages[f%24].data()+(size_t)r*nx,(tmsize_t)rows*nx*2)<0)throw std::runtime_error("output strip");}
   if(!TIFFWriteDirectory(out))throw std::runtime_error("output directory");
  }
@@ -39,12 +39,12 @@ int main(int argc,char**argv) {
  std::vector<uint16_t> row(nx);int f=0;
  do {
   uint32_t rows;uint16_t comp;TIFFGetField(check,TIFFTAG_ROWSPERSTRIP,&rows);TIFFGetField(check,TIFFTAG_COMPRESSION,&comp);
-  if(rows!=128||comp!=COMPRESSION_ADOBE_DEFLATE)throw std::runtime_error("encoding contract");
+  if(rows!=1||comp!=COMPRESSION_ADOBE_DEFLATE)throw std::runtime_error("encoding contract");
   if(f>=frames)throw std::runtime_error("extra output page");
   for(uint32_t r=0;r<ny;++r){if(TIFFReadScanline(check,row.data(),r,0)<0)throw std::runtime_error("roundtrip scanline");
    for(uint32_t c=0;c<nx;++c)if(row[c]!=pages[f%24][(size_t)r*nx+c])throw std::runtime_error("roundtrip bytes");}
   ++f;
  }while(TIFFReadDirectory(check));TIFFClose(check);if(f!=frames)throw std::runtime_error("missing output page");
- std::cout<<"PASS synthetic cycle source24 frames="<<frames<<" geometry="<<nx<<"x"<<ny<<" rowsperstrip128 predictor1 deflate1\n";
+ std::cout<<"PASS synthetic cycle source24 frames="<<frames<<" geometry="<<nx<<"x"<<ny<<" rowsperstrip1 predictor1 deflate1\n";
  }catch(const std::exception&e){std::cerr<<"FAIL "<<e.what()<<"\n";return 1;}
 }

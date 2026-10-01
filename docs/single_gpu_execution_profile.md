@@ -324,6 +324,19 @@ strips and inflate scratch. Neither arm exceeds 4% of an 80 GB card.
 
 ---
 
+## 9. Acting on it
+
+Two changes measured against the `a294f3b` tip (197 commits ahead of main, already
+carrying PR130's alignment workspace reuse): `OMP_WAIT_POLICY=PASSIVE` gives −18 % CPU-
+seconds at no wall cost on the nvCOMP path, and retaining the device gain across movies
+gives −4.5 % wall, bit-exact. Together −4.7 % wall, −21.9 % CPU-seconds. Detail and raw
+data: [`profiling_20261001/OPTIMISATION_RESULTS.md`](profiling_20261001/OPTIMISATION_RESULTS.md).
+
+Note that this moves the baseline: section 7's recommendations were written against
+`main`, where `patch align` costs 4.21 s. On the tip it costs 1.63 s.
+
+---
+
 ## 9. Artifacts and how to reproduce
 
 All charts are committed as both SVG (interactive tooltips, re-renderable) and PNG.

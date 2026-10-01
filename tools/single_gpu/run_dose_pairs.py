@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Matched complete-process runs, payload identity, exact products, no stage extrapolation."""
-import argparse,hashlib,json,os,re,subprocess,time
+import argparse,hashlib,json,os,re,signal,subprocess,time
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--candidate',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--input-dir',type=Path,required=True);p.add_argument('--cpus',required=True);p.add_argument('--gpu-uuid',required=True);p.add_argument('--phase',required=True);p.add_argument('--movies',type=int,choices=(1,24),default=24);p.add_argument('--pairs',type=int,required=True);p.add_argument('--manifest',type=Path);p.add_argument('--expected-frames',type=int,default=24);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--candidate',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--input-dir',type=Path,required=True);p.add_argument('--cpus',required=True);p.add_argument('--gpu-uuid',required=True);p.add_argument('--phase',required=True);p.add_argument('--movies',type=int,choices=(1,24),default=24);p.add_argument('--pairs',type=int,required=True);p.add_argument('--manifest',type=Path);p.add_argument('--expected-frames',type=int,default=24);p.add_argument('--timeout',type=float,default=300);a=p.parse_args()
 if a.pairs<1: p.error("--pairs must be positive")
 
 def sha(path):
@@ -20,6 +20,31 @@ def payload_info(pid,binary,full=True):
   status=q.joinpath('status').read_text();stat=q.joinpath('stat').read_text().rsplit(')',1)[1].split()
   return {'pid':pid,'start_ticks':stat[19],'executable':str(q.joinpath('exe').resolve()),'status':status,'numa_maps':q.joinpath('numa_maps').read_text() if full else None,'cmdline':q.joinpath('cmdline').read_bytes().replace(b'\0',b' ').decode()}
  except OSError:return None
+
+def group_members(pgid,start_ticks):
+ members=[]
+ for path in Path('/proc').iterdir():
+  if not path.name.isdigit():continue
+  try:
+   stat=(path/'stat').read_text().rsplit(')',1)[1].split()
+   if int(stat[2])==pgid and int(stat[3])==pgid and int(stat[19])>=start_ticks:
+    members.append(int(path.name))
+  except (OSError,ValueError,IndexError):pass
+ return members
+
+def stop_owned_group(proc,start_ticks):
+ # New session isolates this payload and its helpers from unrelated processes.
+ for sig,seconds in [(signal.SIGTERM,2),(signal.SIGKILL,3)]:
+  if group_members(proc.pid,start_ticks):
+   try:os.killpg(proc.pid,sig)
+   except ProcessLookupError:pass
+  end=time.monotonic()+seconds
+  while time.monotonic()<end:
+   proc.poll()
+   if not group_members(proc.pid,start_ticks):break
+   time.sleep(.05)
+ proc.wait(timeout=5)
+ if group_members(proc.pid,start_ticks):raise RuntimeError('owned payload group survives cleanup')
 
 root=a.root/a.phase;root.mkdir(parents=True,exist_ok=False)
 manifest=json.loads((a.manifest or a.source/'docs/issue85_laneC/tutorial_24_movie_manifest.json').read_text())
@@ -46,13 +71,15 @@ for pair in range(1,a.pairs+1):
   occupants=capture(['nvidia-smi','--query-compute-apps=pid,gpu_uuid,process_name','--format=csv,noheader'])
   if occupants:raise RuntimeError('GPU occupancy before controlled run: '+occupants)
   smi_log=open(d/'gpu-apps.csv','w');smi=subprocess.Popen(['nvidia-smi','--query-compute-apps=pid,gpu_uuid,used_memory','--format=csv,noheader,nounits','-lms','200'],stdout=smi_log,stderr=subprocess.STDOUT)
-  devices=open(d/'device.csv','w');dev=subprocess.Popen(['nvidia-smi','-i','0','--query-gpu=timestamp,uuid,utilization.gpu,memory.used','--format=csv,noheader,nounits','-lms','200'],stdout=devices,stderr=subprocess.STDOUT)
+  devices=open(d/'device.csv','w');dev=subprocess.Popen(['nvidia-smi','-i',a.gpu_uuid,'--query-gpu=timestamp,uuid,utilization.gpu,memory.used','--format=csv,noheader,nounits','-lms','200'],stdout=devices,stderr=subprocess.STDOUT)
   cmd=['/usr/bin/time','-v','-o',str(resource),'taskset','-c',a.cpus,str(binary),*opts,'--o',str(out)+'/', '--ingest_witness',str(d/'ingest.witness')]
   t=time.monotonic();ident=None;peak=0
   with open(log,'w') as lf:
-   proc=subprocess.Popen(cmd,cwd=a.input_dir,stdout=lf,stderr=subprocess.STDOUT)
+   proc=subprocess.Popen(cmd,cwd=a.input_dir,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True)
+   group_start=int(Path(f'/proc/{proc.pid}/stat').read_text().rsplit(')',1)[1].split()[19])
    try:
     while proc.poll() is None:
+     if time.monotonic()-t>a.timeout:raise RuntimeError('bounded payload deadline exceeded')
      try:children=Path(f'/proc/{proc.pid}/task/{proc.pid}/children').read_text().split()
      except OSError:children=[]
      for child in children:
@@ -65,6 +92,10 @@ for pair in range(1,a.pairs+1):
        if m:peak=max(peak,int(m[1])*1024)
      time.sleep(.001 if a.movies==1 else .02)
     wall=time.monotonic()-t;rc=proc.returncode
+    if group_members(proc.pid,group_start):raise RuntimeError('owned helper survives successful parent exit')
+   except BaseException:
+    stop_owned_group(proc,group_start)
+    raise
    finally:
     for observer in (smi,dev):observer.terminate();observer.wait(timeout=10)
     smi_log.close();devices.close()
@@ -81,6 +112,8 @@ for pair in range(1,a.pairs+1):
   rows=[x.split(',') for x in gpu_text.splitlines() if x.strip()]
   if not any(x[0].strip()==str(ident['pid']) and x[1].strip()==a.gpu_uuid for x in rows):raise RuntimeError('No allocated physical GPU process witness')
   if any(x[0].strip()!=str(ident['pid']) or x[1].strip()!=a.gpu_uuid for x in rows):raise RuntimeError('Competing or unexpected GPU process during controlled run')
+  samples=[q.split(',') for q in (d/'device.csv').read_text().splitlines() if q.strip()]
+  if not samples or any(len(q)!=4 or q[1].strip()!=a.gpu_uuid for q in samples):raise RuntimeError('device resource samples not from allocated UUID')
   if rc:raise RuntimeError(f'{arm} returned {rc}')
   witnesses=(d/'ingest.witness').read_text().splitlines()
   parsed=[x.split() for x in witnesses]

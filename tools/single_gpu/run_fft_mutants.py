@@ -14,9 +14,11 @@ sync='HANDLE_ERROR(cudaDeviceSynchronize());'
 assert forward.count(sync)==3 and inverse.count(sync)==3,'Expected frozen boundary inventory changed'
 # Select occurrences in each actual method. Forward: failure drain, FFT boundary,
 # scaling boundary. Inverse: D2D-error drain, Exec-error drain, success boundary.
-changes=[('missing-forward-boundary','healthy',forward_start,forward,1),('missing-inverse-boundary','healthy',inverse_start,inverse,2),('missing-forward-drain','forward-immediate',forward_start,forward,0),('missing-inverse-exec-drain','inverse-immediate',inverse_start,inverse,1),('missing-inverse-copy-drain','inverse-copy',inverse_start,inverse,0)]
+changes=[('missing-forward-boundary','forward-boundary',forward_start,forward,1),('missing-inverse-boundary','inverse-boundary',inverse_start,inverse,2),('missing-forward-drain','forward-immediate',forward_start,forward,0),('missing-inverse-exec-drain','inverse-immediate',inverse_start,inverse,1),('missing-inverse-copy-drain','inverse-copy',inverse_start,inverse,0)]
+expected_failures={'forward-boundary':'forward boundary fault did not stop at correct stage','inverse-boundary':'inverse boundary fault not observed','forward-immediate':'immediate transform/copy failure returned without draining earlier queued work','inverse-immediate':'immediate transform/copy failure returned without draining earlier queued work','inverse-copy':'immediate transform/copy failure returned without draining earlier queued work'}
 records=[]
 for name,case,start,body,ordinal in changes:
+ positive=subprocess.run([str((a.build/'cuda_global_fft_sync').resolve()),'--case',case],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=120);assert positive.returncode==0 and 'PASS: actual production global FFT synchronization matrix' in positive.stdout,'Positive control failed before mutation: '+positive.stdout
  positions=[m.start() for m in re.finditer(re.escape(sync),body)];at=start+positions[ordinal]
  mutated=text[:at]+'/* negative control: omit this checked completion boundary */'+text[at+len(sync):]
  d=a.root/name;d.mkdir();mut=d/'cuda_movie_session.cu';mut.write_text(mutated);obj=d/'cuda_movie_session.cu.o'
@@ -25,6 +27,6 @@ for name,case,start,body,ordinal in changes:
  assert subprocess.check_output(['ar','t',str(lib)],text=True).splitlines().count('cuda_movie_session.cu.o')==1
  link=shlex.split((a.build/'CMakeFiles/cuda_global_fft_sync.dir/link.txt').read_text());binary=d/'cuda_global_fft_sync';link[link.index('-o')+1]=str(binary.resolve());link=[str(lib.resolve()) if q=='libmotioncorr_core.a' else q for q in link];assert str(lib.resolve()) in link;subprocess.run(link,cwd=a.build,check=True)
  command=[str(binary.resolve()),'--case',case];r=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=120);(d/'run.log').write_text(r.stdout)
- assert r.returncode==1 and 'FAIL' in r.stdout,'Actual-session test did not discriminate '+name+': '+r.stdout
+ assert r.returncode==1 and ('FAIL: '+expected_failures[case]) in r.stdout,'Actual-session test did not discriminate '+name+': '+r.stdout
  records.append({'case':name,'selected_control':case,'returncode':r.returncode,'status':'REJECTED','mutant_source_sha256':hashlib.sha256(mut.read_bytes()).hexdigest(),'binary_sha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'compile_command':compile_cmd,'link_command':link,'test_command':command});print(name,'REJECTED',flush=True)
 (a.root/'result.json').write_text(json.dumps(records,indent=2))

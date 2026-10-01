@@ -343,6 +343,19 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        add_executable(cuda_alignment_sync tests/cuda_alignment_sync.cpp)
+        target_link_libraries(cuda_alignment_sync PRIVATE motioncorr_core)
+        target_link_options(cuda_alignment_sync PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cudaEventRecord" "LINKER:--wrap=cudaEventSynchronize"
+            "LINKER:--wrap=cudaEventElapsedTime"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
+            "LINKER:--wrap=cufftExecC2R" "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cudaGetLastError")
+        add_test(NAME CudaAlignmentSync COMMAND cuda_alignment_sync)
+        set_tests_properties(CudaAlignmentSync PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

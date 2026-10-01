@@ -1,0 +1,19 @@
+settled 1s
+=== ARM 1: probe alone (3 reps over 24 movies, paced 340 ms) ===
+SUMMARY movies=72 threads=8 pace=340ms scan=1.3ms/movie read=17.4ms/movie stageable=18.7ms/movie bytes=9511280004 wall=24.50s
+
+=== ARMS 2-4: job wall, paired round-robin, order reversed on even rounds ===
+round,order,arm,wall_s,cpu_s,rc,hash
+1,fwd,solo,11.779934846,18.74,0,3ebed4b9cf62c46f
+1,fwd,along,12.099537472,19.16,0,3ebed4b9cf62c46f
+1,fwd,along_pas,12.524211090,16.23,0,3ebed4b9cf62c46f
+2,rev,along_pas,12.079488237,15.92,0,3ebed4b9cf62c46f
+2,rev,along,12.190624517,19.05,0,3ebed4b9cf62c46f
+2,rev,solo,11.863236237,18.99,0,3ebed4b9cf62c46f
+3,fwd,solo,11.962672138,19.16,0,3ebed4b9cf62c46f
+3,fwd,along,12.258956976,18.77,0,3ebed4b9cf62c46f
+3,fwd,along_pas,12.078996505,15.10,0,3ebed4b9cf62c46f
+4,rev,along_pas,12.423210941,16.28,0,3ebed4b9cf62c46f
+4,rev,along,12.044403233,18.89,0,3ebed4b9cf62c46f
+4,rev,solo,11.997294401,19.08,0,3ebed4b9cf62c46f
+DONE 2026-10-01T13:50:27+00:00

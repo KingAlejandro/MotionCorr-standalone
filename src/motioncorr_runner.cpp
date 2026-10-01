@@ -2016,6 +2016,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 		// Attempt 0 uses GPU statistics; attempt 1 is the original host scan, run
 		// verbatim. Any exactness guard failure falls through to attempt 1.
+		std::vector<int> bad_xs, bad_ys;
 		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
 			bool used_gpu_stats = false;
@@ -2097,28 +2098,47 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
-			bBad.initZeros();
+			const bool premask_hit = defect_premask_valid &&
+			                         defect_premask_fn == fn_defect &&
+			                         defect_premask_gain_fn == fn_gain_reference &&
+			                         defect_premask_gain_gen == gain_cache_generation &&
+			                         defect_premask_nx == nx &&
+			                         defect_premask_ny == ny;
+			if (!premask_hit)
+			{
+				defect_premask.resize(ny, nx);
+				defect_premask.initZeros();
+				if (fn_defect != "")
+				{
+					fillDefectMask(defect_premask, fn_defect, n_threads);
+				}
+				if (fn_gain_reference != "")
+				{
+					FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
+					{
+						if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
+						{
+							DIRECT_MULTIDIM_ELEM(defect_premask, n) = true;
+						}
+					}
+				}
+				defect_premask_fn = fn_defect;
+				defect_premask_gain_fn = fn_gain_reference;
+				defect_premask_gain_gen = gain_cache_generation;
+				defect_premask_nx = nx;
+				defect_premask_ny = ny;
+				defect_premask_valid = true;
+			}
+			bBad = defect_premask;
+#ifdef DEBUG_HOTPIXELS
 			if (fn_defect != "")
 			{
-				fillDefectMask(bBad, fn_defect, n_threads);
-#ifdef DEBUG_HOTPIXELS
 				Image<RFLOAT> tmp(nx, ny);
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
 					DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
 				tmp.write("defect.mrc");
+			}
 #endif
-			}
-
-			if (fn_gain_reference != "")
-			{
-				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
-				{
-					if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
-					{
-						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
-					}
-				}
-			}
 
 			if (used_gpu_stats)
 			{
@@ -2147,6 +2167,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				}
 			}
 
+			bad_xs.clear();
+			bad_ys.clear();
+			bad_xs.reserve(1024);
+			bad_ys.reserve(1024);
+			FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				if (DIRECT_A2D_ELEM(bBad, i, j)) {
+					bad_xs.push_back(j);
+					bad_ys.push_back(i);
+				}
+
 			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
 			// If it is reachable, use the original host statistics rather than
 			// depending on a second floating-point error bound for RNG parameters.
@@ -2154,9 +2184,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			if (used_gpu_stats)
 			{
 				bool gaus_reachable = false;
-				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				for (size_t idx = 0; idx < bad_xs.size(); idx++)
 				{
-					if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+					const int i = bad_ys[idx];
+					const int j = bad_xs[idx];
 					int n_ok = 0;
 					for (int dy = -D_MAX; dy <= D_MAX && n_ok <= NUM_MIN_OK; dy++) {
 						int y = i + dy;
@@ -2202,14 +2233,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		init_random_generator(random_seed);
 
 		const int PBUF_SIZE = 100;
-		std::vector<int> bad_xs, bad_ys;
-		bad_xs.reserve(1024);
-		bad_ys.reserve(1024);
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
-			if (DIRECT_A2D_ELEM(bBad, i, j)) {
-				bad_xs.push_back(j);
-				bad_ys.push_back(i);
-			}
 #ifdef _CUDA_ENABLED
 		// The nvCOMP ingest never populates host frames, and the replacement loop
 		// only ever reads one neighbour per (defect, frame). Downloading the whole
@@ -2229,10 +2252,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
-		size_t bad_idx = 0;
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+		for (size_t bad_idx = 0; bad_idx < bad_xs.size(); bad_idx++)
 		{
-			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+			const int i = bad_ys[bad_idx];
+			const int j = bad_xs[bad_idx];
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
 #ifdef _CUDA_ENABLED
 			// n_ok is a property of the mask and the bounds, never of the pixel
@@ -2313,7 +2336,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = replacement;
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
-			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
 		if (sparse_neighbours && !bad_xs.empty()) {

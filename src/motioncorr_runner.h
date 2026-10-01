@@ -194,6 +194,14 @@ public:
 	// hashing 54 MiB per movie. Starts at 1 so that 0 can mean "not supplied".
 	unsigned long long gain_cache_generation = 1;
 
+	// Defect pre-mask cache: avoids scanning Igain == 0 and parsing fn_defect every movie.
+	MultidimArray<bool> defect_premask;
+	FileName defect_premask_fn;
+	FileName defect_premask_gain_fn;
+	unsigned long long defect_premask_gain_gen = 0;
+	int defect_premask_nx = 0, defect_premask_ny = 0;
+	bool defect_premask_valid = false;
+
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must
 	// not mutate shared state that every later movie will reuse.

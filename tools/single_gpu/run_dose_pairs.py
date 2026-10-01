@@ -133,7 +133,8 @@ for pair in range(1,a.pairs+1):
  from dose_log_contract import validate_vram_delta
  allocation=validate_vram_delta(b,c,*manifest['expected_shape_xyz'][:2]);(root/f'allocations-{pair}.json').write_text(json.dumps(allocation,indent=2))
  compare=[os.environ.get('MC_PYTHON','python3'),str(a.source/'docs/issue85_laneC/compare_output_trees.py'),str(b),str(c),'--manifest',str(manifest_path),'--input-star',str(a.input_dir/'movies.star'),'--json-out',str(root/f'exact-{pair}.json')]
- raw=subprocess.run(compare,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
+ raw_command=list(compare);raw_command[-1]=str(root/f'raw-artifacts-{pair}.json')
+ raw=subprocess.run(raw_command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
  (root/f'raw-artifacts-{pair}.log').write_text(raw.stdout)
  compare += ['--allow-added-log-line','Peak VRAM:'] # Numeric/stage deltas independently checked above.
  result=subprocess.run(compare,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)

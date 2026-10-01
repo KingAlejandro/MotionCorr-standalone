@@ -189,6 +189,10 @@ public:
 	bool gain_cache_is_eer = false;
 	int gain_cache_eer_upsampling = 0;
 	bool gain_cache_filled = false;
+	// Bumped on every refill of gain_cache. Lets the CUDA session tell "same gain
+	// array as last movie" from "refilled, possibly different contents" without
+	// hashing 54 MiB per movie. Starts at 1 so that 0 can mean "not supplied".
+	unsigned long long gain_cache_generation = 1;
 
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must

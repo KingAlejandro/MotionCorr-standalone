@@ -252,6 +252,7 @@ public:
     // and a monotonically latched poisoning code that no later or earlier record can
     // displace -- see CudaFailureState.
     const CudaFailureState& getFailureState() const { return failure_state; }
+    CudaFailureState& getFailureState() { return failure_state; }
 
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
@@ -330,9 +331,9 @@ private:
     // HANDLE_ERROR early-return paths.
     void endIngestScratch();
 
-    // Cached patch resources to avoid allocations and plan recreation in patch loop
+    // Borrowed alias to the worker-lifetime patch plan (owned by CudaWorkerPlanPool).
+    // The session holds no destroy authority over this handle.
     cufftHandle plan_patch_r2c = 0;
-    bool has_plan_patch_r2c = false;
     int cached_patch_w = 0;
     int cached_patch_h = 0;
     int cached_patch_ngroups = 0;

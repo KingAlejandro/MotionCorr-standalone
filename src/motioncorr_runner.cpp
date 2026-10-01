@@ -25,6 +25,9 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <atomic>
+
+static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
 #include "src/native_u16_staging.h"
@@ -1454,6 +1457,58 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
+const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
+	int nx, int ny,
+	const FileName &fn_defect,
+	const FileName &fn_gain_reference,
+	const MultidimArray<float> &Igain,
+	int n_threads
+) {
+	const bool premask_hit = defect_premask_valid &&
+	                         defect_premask_fn == fn_defect &&
+	                         defect_premask_gain_fn == fn_gain_reference &&
+	                         defect_premask_gain_gen == gain_cache_generation &&
+	                         defect_premask_nx == nx &&
+	                         defect_premask_ny == ny;
+	if (!premask_hit)
+	{
+		// Invalidate cache keys before any work to guarantee that an exception
+		// leaves no stale or corrupt premask advertised as valid.
+		defect_premask_valid = false;
+		defect_premask_fn = "";
+		defect_premask_gain_fn = "";
+		defect_premask_gain_gen = 0;
+		defect_premask_nx = 0;
+		defect_premask_ny = 0;
+		defect_premask.clear();
+
+		MultidimArray<bool> new_premask(ny, nx);
+		new_premask.initZeros();
+		if (fn_defect != "")
+		{
+			fillDefectMask(new_premask, fn_defect, n_threads);
+		}
+		if (fn_gain_reference != "")
+		{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
+			{
+				if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
+				{
+					DIRECT_MULTIDIM_ELEM(new_premask, n) = true;
+				}
+			}
+		}
+		defect_premask = new_premask;
+		defect_premask_fn = fn_defect;
+		defect_premask_gain_fn = fn_gain_reference;
+		defect_premask_gain_gen = gain_cache_generation;
+		defect_premask_nx = nx;
+		defect_premask_ny = ny;
+		defect_premask_valid = true;
+	}
+	return defect_premask;
+}
+
 const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERRenderer &renderer,
                                                               int nx, int ny)
 {
@@ -1482,7 +1537,7 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		gain_cache_ny = ny;
 		gain_cache_eer_upsampling = eer_upsampling;
 		gain_cache_filled = true;
-		++gain_cache_generation;
+		gain_cache_generation = s_global_gain_generation.fetch_add(1, std::memory_order_relaxed);
 	}
 	return gain_cache();
 }
@@ -1676,7 +1731,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies.
-		movie_session->setGainGeneration(gain_cache_generation);
+		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
@@ -2098,38 +2153,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
-			const bool premask_hit = defect_premask_valid &&
-			                         defect_premask_fn == fn_defect &&
-			                         defect_premask_gain_fn == fn_gain_reference &&
-			                         defect_premask_gain_gen == gain_cache_generation &&
-			                         defect_premask_nx == nx &&
-			                         defect_premask_ny == ny;
-			if (!premask_hit)
-			{
-				defect_premask.resize(ny, nx);
-				defect_premask.initZeros();
-				if (fn_defect != "")
-				{
-					fillDefectMask(defect_premask, fn_defect, n_threads);
-				}
-				if (fn_gain_reference != "")
-				{
-					FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
-					{
-						if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
-						{
-							DIRECT_MULTIDIM_ELEM(defect_premask, n) = true;
-						}
-					}
-				}
-				defect_premask_fn = fn_defect;
-				defect_premask_gain_fn = fn_gain_reference;
-				defect_premask_gain_gen = gain_cache_generation;
-				defect_premask_nx = nx;
-				defect_premask_ny = ny;
-				defect_premask_valid = true;
-			}
-			bBad = defect_premask;
+			bBad = getDefectPremask(nx, ny, fn_defect, fn_gain_reference, Igain, n_threads);
 #ifdef DEBUG_HOTPIXELS
 			if (fn_defect != "")
 			{

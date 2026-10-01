@@ -343,6 +343,14 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        add_executable(cuda_plan_pool tests/cuda_plan_pool.cpp)
+        target_link_libraries(cuda_plan_pool PRIVATE motioncorr_core)
+        target_link_options(cuda_plan_pool PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaPlanPool COMMAND cuda_plan_pool)
+        set_tests_properties(CudaPlanPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(cuda_alignment_sync tests/cuda_alignment_sync.cpp)
         target_link_libraries(cuda_alignment_sync PRIVATE motioncorr_core)
         target_link_options(cuda_alignment_sync PRIVATE

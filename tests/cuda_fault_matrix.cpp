@@ -28,6 +28,7 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include "src/error.h"
 
 #include <cuda_runtime.h>
@@ -502,6 +503,8 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
     out.last_stage = movie_result.last_stage;
     out.exit_mechanism = movie_result.exit_mechanism;
 
+    g_in_teardown = true;
+    mc_cuda::getWorkerPlanPool().dropAll();
     g_in_teardown = false;
     g_active = false;
     out.fault_fired = g_fault_fired;
@@ -569,6 +572,7 @@ int runOwnershipControls() {
                 if (out) cudaFree(out);
                 session.release(); session.release();
             }
+            mc_cuda::getWorkerPlanPool().dropAll();
             if (!ok) { ++failures; std::fprintf(stderr,"FAIL ownership re-entry mode=%d\n",mode); }
         }
         g_active = false;
@@ -608,6 +612,7 @@ int runEnumerationControls() {
                     ok = ok && session.initialize();
                 }
                 session.release();
+                mc_cuda::getWorkerPlanPool().dropAll();
             } else {
                 CudaFailureState state;
                 std::vector<MultidimArray<fComplex> > output;
@@ -642,6 +647,7 @@ int runEnumerationControls() {
 } // namespace
 
 int main() {
+    mc_cuda::getWorkerPlanPool().dropAll();
     if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
         std::fprintf(stderr, "CUDA device 0 is required for this control\n");
         return 1;
@@ -718,8 +724,29 @@ int main() {
     // failing for an unexplained reason.
     std::printf("\nSuccessive-movie trials (3 movies, fault on the last call of that\n"
                 "kind in the third movie):\n");
+    // Run 3 clean movies to find the exact last ordinal in the 3rd movie with pooling active
+    long three_movie_budget[FAULT_KIND_COUNT] = {0};
+    {
+        HostInputs in_count; buildHostInputs(in_count);
+        std::ostringstream log_count;
+        resetCounters(); g_fault_kind = FAULT_NONE; g_fault_at = 0;
+        g_outstanding.clear(); g_outstanding_events.clear(); g_outstanding_plans.clear();
+        g_in_teardown = false; g_active = true;
+        TrialResult mr;
+        for (int m = 0; m < 3; m++) { runOneMovie(in_count, log_count, mr); }
+        for (int k = 0; k < FAULT_KIND_COUNT; k++) three_movie_budget[k] = g_counts[k];
+        g_in_teardown = true;
+        mc_cuda::getWorkerPlanPool().dropAll();
+        g_in_teardown = false;
+        g_active = false;
+        for (std::set<void *>::iterator it = g_outstanding.begin(); it != g_outstanding.end(); ++it) __real_cudaFree(*it);
+        for (std::set<cudaEvent_t>::iterator it = g_outstanding_events.begin(); it != g_outstanding_events.end(); ++it) __real_cudaEventDestroy(*it);
+        for (std::set<int>::iterator it = g_outstanding_plans.begin(); it != g_outstanding_plans.end(); ++it) __real_cufftDestroy((cufftHandle)*it);
+        g_outstanding.clear(); g_outstanding_events.clear(); g_outstanding_plans.clear();
+    }
+
     for (int k = FAULT_MALLOC; k <= FAULT_D2H; k++) {
-        const long n = budget[k] * 3;
+        const long n = three_movie_budget[k];
         if (n == 0) continue;
         const TrialResult r = runTrial((FaultKind)k, n, 3);
         trials++;

@@ -141,6 +141,17 @@ public:
         owns_plan_ = true;
     }
 
+    cufftHandle get() const { return plan_; }
+    bool owns() const { return owns_plan_; }
+
+    // Yields ownership without destroying the underlying plan handle.
+    cufftHandle disown() {
+        owns_plan_ = false;
+        const cufftHandle ret = plan_;
+        plan_ = 0;
+        return ret;
+    }
+
     cufftResult releaseAll() {
         if (!owns_plan_) return CUFFT_SUCCESS;
         owns_plan_ = false;

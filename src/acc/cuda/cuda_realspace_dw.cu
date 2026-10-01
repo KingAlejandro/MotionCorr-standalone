@@ -7,6 +7,7 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
@@ -38,16 +39,6 @@
 } while (0)
 
 namespace {
-struct DeviceDoseWeightPlanPool {
-    cufftHandle plan_c2r = 0;
-    int nx = 0, ny = 0, device_id = -1;
-    ~DeviceDoseWeightPlanPool() { drop(); }
-    void drop() {
-        if (plan_c2r) { cufftDestroy(plan_c2r); plan_c2r = 0; }
-        nx = ny = 0; device_id = -1;
-    }
-};
-thread_local DeviceDoseWeightPlanPool t_dw_plan_pool;
 
 struct FramePolynomial {
     float x[6];
@@ -204,9 +195,19 @@ bool cudaDoseWeightAndInterpolateDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // Ensure DW pool is retired on any failure, including early-return macros
+    struct DwFailureGuard {
+        CudaFailureState *failure;
+        bool completed = false;
+        ~DwFailureGuard() {
+            if (!completed || (failure && (failure->hasFailed() || failure->isPoisoned()))) {
+                mc_cuda::getWorkerPlanPool().dw.drop(failure);
+            }
+        }
+    } dw_failure_guard{failure};
+
     mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
-    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
     const int nfx = nx / 2 + 1, nfy = ny;
     const int nfy_half = nfy / 2;
@@ -267,22 +268,32 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
     cufftHandle plan_c2r = 0;
-    const bool dw_plan_hit = t_dw_plan_pool.plan_c2r != 0 &&
-                             t_dw_plan_pool.nx == nx &&
-                             t_dw_plan_pool.ny == ny &&
-                             t_dw_plan_pool.device_id == device_id;
+    const bool dw_plan_hit = mc_cuda::getWorkerPlanPool().dw.valid &&
+                             mc_cuda::getWorkerPlanPool().dw.plan_c2r != 0 &&
+                             mc_cuda::getWorkerPlanPool().dw.nx == nx &&
+                             mc_cuda::getWorkerPlanPool().dw.ny == ny &&
+                             mc_cuda::getWorkerPlanPool().dw.device_id == device_id;
     if (dw_plan_hit) {
-        plan_c2r = t_dw_plan_pool.plan_c2r;
+        plan_c2r = mc_cuda::getWorkerPlanPool().dw.plan_c2r;
     } else {
-        t_dw_plan_pool.drop();
-        CUFFT_CHECK(cufftCreate(&plan_c2r));
+        mc_cuda::getWorkerPlanPool().dw.drop(failure);
+
+        cufftHandle raw_plan = 0;
+        CUFFT_CHECK(cufftCreate(&raw_plan));
+        mc_cuda::ScopedCufftPlan scoped_plan(failure);
+        scoped_plan.take(raw_plan);
+
         int n[2] = {ny, nx};
         size_t plan_work_bytes = 0;
-        CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
-        t_dw_plan_pool.plan_c2r = plan_c2r;
-        t_dw_plan_pool.nx = nx;
-        t_dw_plan_pool.ny = ny;
-        t_dw_plan_pool.device_id = device_id;
+        CUFFT_CHECK(cufftMakePlanMany(raw_plan, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+
+        mc_cuda::getWorkerPlanPool().dw.plan_c2r = scoped_plan.disown();
+        mc_cuda::getWorkerPlanPool().dw.nx = nx;
+        mc_cuda::getWorkerPlanPool().dw.ny = ny;
+        mc_cuda::getWorkerPlanPool().dw.device_id = device_id;
+        mc_cuda::getWorkerPlanPool().dw.valid = true;
+
+        plan_c2r = mc_cuda::getWorkerPlanPool().dw.plan_c2r;
     }
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
@@ -324,7 +335,7 @@ bool cudaDoseWeightAndInterpolateDevice(
         HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
         total_cufft_ms += cufft_ms;
 
-        // Interpolate and accumulate
+        // Bilinear interpolation and accumulation
         HANDLE_ERROR(cudaEventRecord(ev_start_interp));
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
@@ -365,13 +376,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
-    if (failure && (failure->isPoisoned() || failure->hasFailed())) {
-        t_dw_plan_pool.drop();
-    }
-    const cufftResult plan_release = plan_cleanup.releaseAll();
+    dw_failure_guard.completed = true;
     const cudaError_t memory_release = memory_cleanup.releaseAll();
     const cudaError_t event_release = event_cleanup.releaseAll();
-    CUFFT_CHECK(plan_release);
     HANDLE_ERROR(memory_release);
     HANDLE_ERROR(event_release);
     return true;

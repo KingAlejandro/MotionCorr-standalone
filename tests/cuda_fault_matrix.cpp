@@ -375,6 +375,24 @@ void runOneMovie(HostInputs &in, std::ostream &log, TrialResult &out) {
         ~PatchBufferGuard() { if (*p) { cudaFree(*p); *p = nullptr; } }
     } guard{&d_patch_fourier};
 
+    // Mirrors MovieFrameCacheGuard in executeOwnMotionCorrection
+    // (src/motioncorr_runner.cpp:1660). cudaAlignPatchDevice now retains eight
+    // device buffers and a cuFFT plan in a file-scope cache across the patches of
+    // one movie, and production releases that cache at every exit from a movie.
+    // This harness is the other movie boundary in the codebase, and without the
+    // same release a clean run ends with nine tracked resources outstanding --
+    // which the baseline gate in main() reads as leaked=9 and aborts on before
+    // running a single trial, and which later trials would then free behind the
+    // cache's back and reuse as dangling pointers.
+    //
+    // Declared BEFORE mark_teardown so it is destroyed AFTER it: the release then
+    // runs with g_in_teardown set, like the other best-effort frees at this
+    // boundary, so a fault injected into it scores as survived teardown rather
+    // than as a production failure.
+    struct AlignPatchCacheGuard {
+        ~AlignPatchCacheGuard() { cudaReleaseAlignPatchCache(); }
+    } align_patch_cache_guard;
+
     // Declared after the session, so it is destroyed *before* it: ~CudaMovieSession
     // then runs with g_in_teardown set, on the normal path and during unwinding alike.
     // release() performs a deliberately non-fatal cudaDeviceSynchronize that only

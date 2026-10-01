@@ -1,0 +1,125 @@
+{
+  "wall_scope": "uninstrumented wrapper-inclusive complete process, including output/PDF; 24-movie polling lag <=20ms, one-movie <=1ms; raw GNU time elapsed retained",
+  "quartiles": "linear interpolation (n-1)*q",
+  "phases": {
+    "alignment-screen": {
+      "baseline": {
+        "observations": [
+          14.414269326021895,
+          13.052470872877166,
+          15.014125163899735
+        ],
+        "median": 14.414269326021895,
+        "range": [
+          13.052470872877166,
+          15.014125163899735
+        ],
+        "iqr": 0.9808271455112845
+      },
+      "candidate": {
+        "observations": [
+          14.629913566168398,
+          14.760892791906372,
+          14.883623942965642
+        ],
+        "median": 14.760892791906372,
+        "range": [
+          14.629913566168398,
+          14.883623942965642
+        ],
+        "iqr": 0.12685518839862198
+      },
+      "paired_savings_seconds": {
+        "observations": [
+          -0.21564424014650285,
+          -1.708421919029206,
+          0.130501220934093
+        ],
+        "median": -0.21564424014650285,
+        "range": [
+          -1.708421919029206,
+          0.130501220934093
+        ],
+        "iqr": 0.9194615699816495
+      },
+      "median_wall_improvement_percent": -2.404724499345395,
+      "faster_pairs": 1,
+      "pair_count": 3,
+      "exact_non_PDF_tree_pairs": "PASS",
+      "resource_observations": [
+        {
+          "pair": 1,
+          "arm": "baseline",
+          "wall_seconds": 14.414269326021895,
+          "gnu_time_elapsed": "0:14.39",
+          "payload_rss_peak_KiB": 578320,
+          "payload_rss_peak_GiB": 0.5515289306640625,
+          "cpu_percent": 151,
+          "sampled_GPU_util_mean_percent": 43.57534246575342,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        },
+        {
+          "pair": 1,
+          "arm": "candidate",
+          "wall_seconds": 14.629913566168398,
+          "gnu_time_elapsed": "0:14.59",
+          "payload_rss_peak_KiB": 578528,
+          "payload_rss_peak_GiB": 0.551727294921875,
+          "cpu_percent": 151,
+          "sampled_GPU_util_mean_percent": 42.95945945945946,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        },
+        {
+          "pair": 2,
+          "arm": "candidate",
+          "wall_seconds": 14.760892791906372,
+          "gnu_time_elapsed": "0:14.73",
+          "payload_rss_peak_KiB": 578700,
+          "payload_rss_peak_GiB": 0.5518913269042969,
+          "cpu_percent": 150,
+          "sampled_GPU_util_mean_percent": 41.373333333333335,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        },
+        {
+          "pair": 2,
+          "arm": "baseline",
+          "wall_seconds": 13.052470872877166,
+          "gnu_time_elapsed": "0:13.03",
+          "payload_rss_peak_KiB": 579284,
+          "payload_rss_peak_GiB": 0.5524482727050781,
+          "cpu_percent": 153,
+          "sampled_GPU_util_mean_percent": 47.803030303030305,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        },
+        {
+          "pair": 3,
+          "arm": "baseline",
+          "wall_seconds": 15.014125163899735,
+          "gnu_time_elapsed": "0:15.00",
+          "payload_rss_peak_KiB": 578460,
+          "payload_rss_peak_GiB": 0.5516624450683594,
+          "cpu_percent": 150,
+          "sampled_GPU_util_mean_percent": 40.73684210526316,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        },
+        {
+          "pair": 3,
+          "arm": "candidate",
+          "wall_seconds": 14.883623942965642,
+          "gnu_time_elapsed": "0:14.85",
+          "payload_rss_peak_KiB": 579928,
+          "payload_rss_peak_GiB": 0.5530624389648438,
+          "cpu_percent": 150,
+          "sampled_GPU_util_mean_percent": 41.306666666666665,
+          "sampled_device_memory_peak_MiB": 3497.0,
+          "actual_payload_cpu_mask": "0-7"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,129 @@
+# nsys / ncu analysis scripts
+
+Post-processing for Nsight Systems and Nsight Compute captures of MotionCorr. Each
+script takes its input as an argument and works against any profile — nothing is
+specific to the 2026-10-01 campaign that produced
+[`docs/single_gpu_execution_profile.md`](../../docs/single_gpu_execution_profile.md).
+
+Python 3, standard library only (`sqlite3`, `csv`, `json`). No numpy — `4GPUs` has none.
+
+## Capture
+
+Permissions first. On a host with `kernel.perf_event_paranoid > 2`, nsys prints
+`CPU IP/backtrace sampling not supported, disabling` and `--cudabacktrace` silently
+dies with it; GPU counters give `ERR_NVGPUCTRPERM`. Run **the profiler** under `sudo`
+rather than lowering the sysctl box-wide on a shared machine:
+
+```sh
+sudo -n env CUDA_VISIBLE_DEVICES=GPU-<uuid> OMP_NUM_THREADS=8 PATH=$PATH \
+  nsys profile --output=p1 --force-overwrite=true --stats=false \
+  --trace=cuda,nvtx --sample=process-tree --backtrace=fp --sampling-period=250000 \
+  ./motioncorr --i movies.star --o out/ ... --gpu 0
+sudo -n chown -R "$USER" .           # outputs come back root-owned
+nsys export --type sqlite --force-overwrite true --output p1.sqlite p1.nsys-rep
+```
+
+Pick the trace set for the quantity you want. Instrumentation changes host-side
+numbers substantially while leaving device-side counts invariant:
+
+| want | use |
+|---|---|
+| kernel time, byte counts, grid/block | any profile — these are invariant |
+| host stage walls | `--trace=nvtx,osrt` (no CUDA; CUPTI inflates CUDA-heavy stages) |
+| GPU busy/idle, per-stage GPU attribution | `--trace=cuda,nvtx` |
+| flame graph | `--trace=cuda,nvtx --sample=process-tree --backtrace=fp` |
+| H2D rate | the lightest CUDA trace you have |
+
+Build with `-g -fno-omit-frame-pointer` (host) and `-lineinfo` (device) so stacks
+unwind and kernels attribute to source. Measured cost of those flags: none.
+
+**Cross-check anything host-side against an unsampled profile.** In the campaign,
+`cuModuleLoadData` read 732 ms under CPU sampling and 27-58 ms everywhere else.
+`compare.py` exists to make that check cheap.
+
+## NVTX stage annotation
+
+`patch_nvtx.py` turns the 35 existing `RCTIC`/`RCTOC` markers in
+`src/motioncorr_runner.cpp` into NVTX ranges via one `#elif defined(MC_NVTX)` branch,
+so the whole pipeline is annotated without scattering edits. NVTX3 is header-only and
+is a no-op when no tool is attached. Run it against a **copy** of the tree and build
+with `-DMC_NVTX`:
+
+```sh
+cp -a src-base src-nvtx
+python3 patch_nvtx.py src-nvtx/src/motioncorr_runner.cpp
+cmake -S src-nvtx -B build-nvtx -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -g -fno-omit-frame-pointer -DMC_NVTX" \
+  -DCMAKE_CUDA_FLAGS_RELEASE="-O3 -DNDEBUG -lineinfo -Xcompiler=-fno-omit-frame-pointer"
+```
+
+The script asserts its anchors and will fail loudly rather than patch the wrong place.
+`nvtxRangePush`/`Pop` is a stack: verify the pairs are balanced before trusting the
+output (they were 35/35, non-interleaved, at `1d7e13f`). Spans with an early `return`
+use an RAII guard, not bare push/pop.
+
+## Analysis
+
+```sh
+python3 analyze.py   p1.sqlite    # session, GPU busy/idle + gaps, kernels, transfers,
+                                  # API census, syncs, NVTX stages, VRAM, threads, OSRT
+python3 stages.py    p8.sqlite    # per-stage wall with GPU kernel/memcpy clipped in
+python3 gaps2.py     p8.sqlite    # GPU-idle split at stage boundaries and charged per stage
+python3 syncs.py     p8.sqlite    # streams/contexts, host-blocked vs GPU-working, sizes
+python3 compare.py  'nsys/*.sqlite'   # cross-profile invariants — run this first
+python3 xfer.py     'nsys/*.sqlite'   # H2D bytes (fixed) vs rate (not)
+python3 ncu_sum.py   ncu_all.csv  # per-kernel SM%/MEM%/occupancy
+python3 folded.py    p9.sqlite out.folded [main]   # folded stacks; 'main' = target process only
+python3 flamesum.py  out.folded   # self and inclusive leaders
+```
+
+`gaps2.py` splits every idle interval at stage boundaries. An earlier version charged
+each gap to the stage at its *start*, which put the whole ~800 ms tail on whichever
+stage happened to contain the last GPU op — if you adapt this, keep the splitting.
+
+`ncu_sum.py` filters metrics by **unit**: `Memory Throughput` is reported both as `%`
+and as `Gbyte/s`, and summing across them produces values like `168242228298%`.
+`Duration` comes back in `ns`. ncu serialises kernels and flushes caches, so its
+durations run ~1.1-1.8x the nsys wall figure — take counters from ncu, timing from nsys.
+
+For `ncu --kernel-name`, only one `regex:` prefix is allowed per string and matching is
+against the mangled name unless `--kernel-name-base demangled` is given. A filter that
+matches nothing prints `==WARNING== No kernels were profiled` and **exits 0**.
+
+## Charts
+
+```sh
+python3 timeline_json.py p8.sqlite timeline.json && python3 mktimeline.py out.svg timeline.json
+python3 vram_json.py     p3.sqlite vram.json     && python3 mkvram.py     out.svg vram.json
+python3 folded.py p9.sqlite f.folded main        && python3 mkflame.py    f.folded out.svg "title"
+```
+
+`vram_json.py` needs a capture taken with `--cuda-memory-usage=true`. Colours are the
+validated default data-viz palette (blue `#2a78d6` kernel, orange `#eb6834` transfer,
+neutral idle). Rasterise with headless Chrome — `qlmanage` pads SVGs to a square:
+
+```sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
+  --screenshot=out.png --window-size=1480,617 --force-device-scale-factor=1.5 \
+  --default-background-color=FFFFFFFF "file://$PWD/out.svg"
+```
+
+## bwtest.cu
+
+Measures H2D for a given payload and chunking, pageable vs pinned, on the device
+selected by `CUDA_VISIBLE_DEVICES`, using the same synchronous `cudaMemcpy` the
+application uses. Edit `CHUNK`/`N` to match the workload rather than quoting a spec
+sheet at it.
+
+```sh
+nvcc -O3 -arch=sm_80 -o bwtest bwtest.cu && CUDA_VISIBLE_DEVICES=GPU-<uuid> ./bwtest
+```
+
+## Shared-host discipline
+
+Take `flock /tmp/motioncorr-bench.lock` around anything that touches a GPU or loads the
+CPU — profiling perturbs whoever is measuring next, and that is invisible to them
+afterwards. After acquiring, gate on quiescence (no `cc1plus`/`nvcc`/`cicc`/`ptxas` by
+exact name, zero foreign compute apps on the **target GPU by UUID**, load1 < 2.0) and
+log how long you waited. Never background a sampler with `&` inside the locked region:
+it inherits the lock fd and can hold the mutex after the driver dies.

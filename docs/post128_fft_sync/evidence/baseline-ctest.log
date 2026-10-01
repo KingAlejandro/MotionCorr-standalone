@@ -1,0 +1,88 @@
+Internal ctest changing into directory: /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build
+Test project /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build
+      Start  1: PatchRetryState
+ 1/39 Test  #1: PatchRetryState ....................   Passed    0.06 sec
+      Start  2: RunnerInterpolateRecenter
+ 2/39 Test  #2: RunnerInterpolateRecenter ..........   Passed    0.03 sec
+      Start  3: MrcHeaderStats
+ 3/39 Test  #3: MrcHeaderStats .....................   Passed    0.05 sec
+      Start  4: PdfConcat
+ 4/39 Test  #4: PdfConcat ..........................   Passed    0.16 sec
+      Start  5: DefectParser
+ 5/39 Test  #5: DefectParser .......................   Passed    0.03 sec
+      Start  6: DeflateLayout
+ 6/39 Test  #6: DeflateLayout ......................   Passed    0.01 sec
+      Start  7: ScratchArena
+ 7/39 Test  #7: ScratchArena .......................   Passed    0.01 sec
+      Start  8: DefectNeighbours
+ 8/39 Test  #8: DefectNeighbours ...................   Passed    0.02 sec
+      Start  9: NvcompGuards
+ 9/39 Test  #9: NvcompGuards .......................   Passed    0.03 sec
+      Start 10: SyntheticRegression
+10/39 Test #10: SyntheticRegression ................   Passed    1.04 sec
+      Start 11: HotPixelRngDeterminism
+11/39 Test #11: HotPixelRngDeterminism .............   Passed    0.92 sec
+      Start 12: RunnerExposure
+12/39 Test #12: RunnerExposure .....................   Passed    0.78 sec
+      Start 13: Runner_failure
+13/39 Test #13: Runner_failure .....................   Passed    0.19 sec
+      Start 14: Runner_invalid
+14/39 Test #14: Runner_invalid .....................   Passed    0.24 sec
+      Start 15: Runner_resume
+15/39 Test #15: Runner_resume ......................   Passed    3.12 sec
+      Start 16: Runner_tomography
+16/39 Test #16: Runner_tomography ..................   Passed    0.61 sec
+      Start 17: RunnerLateBin
+17/39 Test #17: RunnerLateBin ......................   Passed    1.15 sec
+      Start 18: RunnerExportedUnits
+18/39 Test #18: RunnerExportedUnits ................   Passed    0.16 sec
+      Start 19: GainCache
+19/39 Test #19: GainCache ..........................   Passed    2.01 sec
+      Start 20: TiffRead
+20/39 Test #20: TiffRead ...........................   Passed    0.86 sec
+      Start 21: DamagedMovie
+21/39 Test #21: DamagedMovie .......................   Passed    4.48 sec
+      Start 22: GlobalIfftElision
+22/39 Test #22: GlobalIfftElision ..................   Passed    2.08 sec
+      Start 23: RunnerModelParser
+23/39 Test #23: RunnerModelParser ..................   Passed    0.41 sec
+      Start 24: RunnerInterpolateShifts
+24/39 Test #24: RunnerInterpolateShifts ............   Passed    0.86 sec
+      Start 25: WriteFaults
+25/39 Test #25: WriteFaults ........................   Passed    0.72 sec
+      Start 26: WriteFaultsSync
+26/39 Test #26: WriteFaultsSync ....................   Passed    0.70 sec
+      Start 27: WriteFaultsMultiProduct
+27/39 Test #27: WriteFaultsMultiProduct ............   Passed    0.75 sec
+      Start 28: OutputStageFaults
+28/39 Test #28: OutputStageFaults ..................   Passed    0.66 sec
+      Start 29: CiFailClosedControls
+29/39 Test #29: CiFailClosedControls ...............   Passed   21.87 sec
+      Start 30: OutputTreeComparator
+30/39 Test #30: OutputTreeComparator ...............   Passed    0.20 sec
+      Start 31: ImageWriteFaults
+31/39 Test #31: ImageWriteFaults ...................   Passed    0.07 sec
+      Start 32: NativeU16Staging
+32/39 Test #32: NativeU16Staging ...................   Passed    0.08 sec
+      Start 33: RunnerInterpolateShiftsCuda
+33/39 Test #33: RunnerInterpolateShiftsCuda ........   Passed    4.09 sec
+      Start 34: CudaU16StagingEquivalence
+34/39 Test #34: CudaU16StagingEquivalence ..........   Passed    1.62 sec
+      Start 35: CudaWrapperUploadFailure
+35/39 Test #35: CudaWrapperUploadFailure ...........   Passed    1.58 sec
+      Start 36: CudaFaultMatrix
+36/39 Test #36: CudaFaultMatrix ....................   Passed    3.55 sec
+      Start 37: CudaPreprocessingFailurePaths
+37/39 Test #37: CudaPreprocessingFailurePaths ......   Passed   17.17 sec
+      Start 38: CudaNvcompReconstructionFailures
+38/39 Test #38: CudaNvcompReconstructionFailures ...   Passed   11.29 sec
+      Start 39: CudaErrorClass
+39/39 Test #39: CudaErrorClass .....................   Passed    0.10 sec
+
+100% tests passed, 0 tests failed out of 39
+
+Label Time Summary:
+cuda        =  39.41 sec*proc (7 tests)
+hardware    =  39.31 sec*proc (6 tests)
+
+Total Test time (real) =  83.93 sec

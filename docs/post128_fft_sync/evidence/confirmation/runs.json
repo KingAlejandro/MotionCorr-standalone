@@ -1,0 +1,102 @@
+[
+  {
+    "pair": 1,
+    "arm": "baseline",
+    "whole_process_wall_seconds": 13.76533911912702,
+    "peak_sampled_payload_rss_bytes": 591659008,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-1/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-1/ingest.witness\"\n\tUser time (seconds): 10.21\n\tSystem time (seconds): 10.40\n\tPercent of CPU this job got: 150%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.73\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 579756\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 69\n\tMinor (reclaiming a frame) page faults: 1117100\n\tVoluntary context switches: 6281\n\tInvoluntary context switches: 286\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-1",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397193
+  },
+  {
+    "pair": 1,
+    "arm": "candidate",
+    "whole_process_wall_seconds": 13.467003955040127,
+    "peak_sampled_payload_rss_bytes": 591446016,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/fft-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-1/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-1/ingest.witness\"\n\tUser time (seconds): 10.23\n\tSystem time (seconds): 10.20\n\tPercent of CPU this job got: 151%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.45\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 579072\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 57\n\tMinor (reclaiming a frame) page faults: 1046825\n\tVoluntary context switches: 6225\n\tInvoluntary context switches: 252\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-1",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397246
+  },
+  {
+    "pair": 2,
+    "arm": "candidate",
+    "whole_process_wall_seconds": 13.877512868028134,
+    "peak_sampled_payload_rss_bytes": 593625088,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/fft-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-2/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-2/ingest.witness\"\n\tUser time (seconds): 10.22\n\tSystem time (seconds): 10.61\n\tPercent of CPU this job got: 150%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.84\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 581136\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 68\n\tMinor (reclaiming a frame) page faults: 1137933\n\tVoluntary context switches: 6225\n\tInvoluntary context switches: 302\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-2",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397289
+  },
+  {
+    "pair": 2,
+    "arm": "baseline",
+    "whole_process_wall_seconds": 13.416360893053934,
+    "peak_sampled_payload_rss_bytes": 593645568,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-2/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-2/ingest.witness\"\n\tUser time (seconds): 10.21\n\tSystem time (seconds): 10.07\n\tPercent of CPU this job got: 151%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.40\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 579340\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 70\n\tMinor (reclaiming a frame) page faults: 1021365\n\tVoluntary context switches: 6290\n\tInvoluntary context switches: 211\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-2",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397329
+  },
+  {
+    "pair": 3,
+    "arm": "baseline",
+    "whole_process_wall_seconds": 13.688090465031564,
+    "peak_sampled_payload_rss_bytes": 591429632,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-3/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-3/ingest.witness\"\n\tUser time (seconds): 10.18\n\tSystem time (seconds): 10.52\n\tPercent of CPU this job got: 151%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.66\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 579544\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 46\n\tMinor (reclaiming a frame) page faults: 1120772\n\tVoluntary context switches: 6392\n\tInvoluntary context switches: 313\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-3",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397372
+  },
+  {
+    "pair": 3,
+    "arm": "candidate",
+    "whole_process_wall_seconds": 13.828280182089657,
+    "peak_sampled_payload_rss_bytes": 595918848,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/fft-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-3/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-3/ingest.witness\"\n\tUser time (seconds): 10.22\n\tSystem time (seconds): 10.49\n\tPercent of CPU this job got: 149%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:13.81\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 581148\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 99\n\tMinor (reclaiming a frame) page faults: 1112527\n\tVoluntary context switches: 6256\n\tInvoluntary context switches: 329\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-3",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397408
+  },
+  {
+    "pair": 4,
+    "arm": "candidate",
+    "whole_process_wall_seconds": 14.467583528952673,
+    "peak_sampled_payload_rss_bytes": 592375808,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/fft-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-4/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-4/ingest.witness\"\n\tUser time (seconds): 10.34\n\tSystem time (seconds): 9.59\n\tPercent of CPU this job got: 137%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:14.44\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 577628\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 214\n\tMinor (reclaiming a frame) page faults: 1109781\n\tVoluntary context switches: 6580\n\tInvoluntary context switches: 284\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-4",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397506
+  },
+  {
+    "pair": 4,
+    "arm": "baseline",
+    "whole_process_wall_seconds": 14.82926845503971,
+    "peak_sampled_payload_rss_bytes": 589811712,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-4/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-4/ingest.witness\"\n\tUser time (seconds): 10.40\n\tSystem time (seconds): 11.49\n\tPercent of CPU this job got: 147%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:14.80\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 579336\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 72\n\tMinor (reclaiming a frame) page faults: 1485517\n\tVoluntary context switches: 6288\n\tInvoluntary context switches: 183\n\tSwaps: 0\n\tFile system inputs: 32\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-4",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397542
+  },
+  {
+    "pair": 5,
+    "arm": "baseline",
+    "whole_process_wall_seconds": 12.923519448842853,
+    "peak_sampled_payload_rss_bytes": 592887808,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/baseline-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-5/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-5/ingest.witness\"\n\tUser time (seconds): 9.99\n\tSystem time (seconds): 9.68\n\tPercent of CPU this job got: 152%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:12.89\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 578344\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 69\n\tMinor (reclaiming a frame) page faults: 889235\n\tVoluntary context switches: 6328\n\tInvoluntary context switches: 273\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/baseline-5",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397587
+  },
+  {
+    "pair": 5,
+    "arm": "candidate",
+    "whole_process_wall_seconds": 12.940495932940394,
+    "peak_sampled_payload_rss_bytes": 595558400,
+    "resource": "\tCommand being timed: \"taskset -c 0-7 /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/fft-build/motioncorr --i movies.star --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 6 --max_io_threads 6 --ingest nvcomp --o /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-5/output/ --ingest_witness /work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-5/ingest.witness\"\n\tUser time (seconds): 9.97\n\tSystem time (seconds): 9.79\n\tPercent of CPU this job got: 153%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:12.91\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 581128\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 59\n\tMinor (reclaiming a frame) page faults: 895704\n\tVoluntary context switches: 6272\n\tInvoluntary context switches: 247\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 2681032\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0\n",
+    "directory": "/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001/confirmation/candidate-5",
+    "actual_cpu_mask": "0-7",
+    "payload_pid": 1397624
+  }
+]

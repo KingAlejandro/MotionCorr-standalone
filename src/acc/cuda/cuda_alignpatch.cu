@@ -1,6 +1,7 @@
 #ifdef _CUDA_ENABLED
 
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include <cstdlib>
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
@@ -274,6 +275,25 @@ struct AlignPatchEvents {
 };
 
 } // anonymous namespace
+
+// Ablation switch for the workspace cache.
+//
+// Set MOTIONCORR_ALIGN_CACHE=0 to release the cached buffers, plan and events
+// after every call, which reproduces the per-call allocate-and-free behaviour
+// this cache replaced. It exists so an A/B runs ONE binary against itself: two
+// builds differ in more than the change under test (this project's binaries are
+// not bit-reproducible across builds), and that difference would sit inside the
+// measured effect.
+//
+// Read once. Reading getenv per call would put a libc lookup inside the thing
+// being timed.
+static bool alignCacheEnabled() {
+    static const bool enabled = [] {
+        const char *v = getenv("MOTIONCORR_ALIGN_CACHE");
+        return !(v && v[0] == '0' && v[1] == '\0');
+    }();
+    return enabled;
+}
 
 void cudaReleaseAlignPatchCache() {
     s_align_cache.release();
@@ -788,6 +808,10 @@ bool cudaAlignPatchDevice(
     logfile << " [CUDA " << stage_name << "] completed; converged="
             << (converged ? "yes" : "no") << std::endl;
     cache_cleanup.completed = true;
+    // With the cache ablated, drop it here so the next call reallocates exactly
+    // as the pre-cache code did. Placed after completed=true so the normal
+    // failure cleanup has already been disarmed and this is the only release.
+    if (!alignCacheEnabled()) cudaReleaseAlignPatchCache();
     return converged;
 }
 

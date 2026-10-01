@@ -27,6 +27,18 @@ Baseline-minus-candidate paired differences:
 - FFT confirmation: +0.298335, −0.461152, −0.140190, +0.361685, −0.016976.
 - Workspace+FFT screen: −0.117863, −0.030801, +0.229503.
 
+Ranges/IQRs, using linear-interpolated quartiles:
+
+| Series | Baseline range / IQR, s | Candidate range / IQR, s |
+|---|---|---|
+| FFT screen | 13.516513–13.835840 /0.159663 | 13.350520–13.429851 /0.039665 |
+| FFT confirmation | 12.923519–14.829268 /0.348978 | 12.940496–14.467584 /0.410509 |
+| Workspace+FFT screen | 14.323398–14.640636 /0.158619 | 14.411133–14.555250 /0.072058 |
+
+[Campaign summary](evidence/campaign-summary.json) contains every CPU-use,
+maximum-process RSS, sampled GPU-utilization and device-memory observation;
+these are not process-tree RSS or allocator-only VRAM figures.
+
 Three alternating screens followed by five interleaved FFT confirmations.
 The combination was independently screened; five combination confirmations
 remain **UNRUN** because its screen was not promising. One-movie FFT timing

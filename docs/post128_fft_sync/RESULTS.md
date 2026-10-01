@@ -94,3 +94,6 @@ Raw campaign: `/work4/scd/scarf1415/motioncorr/post128-fft-sync-20261001`.
 Retain all failures, superseded observations and unrun rows. Historical scientific
 truth failures and physical-context/cross-device acceptance gaps remain separate.
 No merge is authorized or performed.
+
+Allocation3516852 completed0:0 and released at2026-10-01T02:25:23+01:00;
+release compute-app inventory was empty. Evidence remains retained remotely.

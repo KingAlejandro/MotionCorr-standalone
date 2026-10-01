@@ -302,6 +302,7 @@ private:
     cufftHandle plan_c2r = 0;
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
+    bool plans_borrowed = false;
     size_t fft_r2c_work_bytes = 0;
     size_t fft_c2r_work_bytes = 0;
     size_t fft_work_bytes = 0;

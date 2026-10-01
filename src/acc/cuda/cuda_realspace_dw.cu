@@ -38,6 +38,17 @@
 } while (0)
 
 namespace {
+struct DeviceDoseWeightPlanPool {
+    cufftHandle plan_c2r = 0;
+    int nx = 0, ny = 0, device_id = -1;
+    ~DeviceDoseWeightPlanPool() { drop(); }
+    void drop() {
+        if (plan_c2r) { cufftDestroy(plan_c2r); plan_c2r = 0; }
+        nx = ny = 0; device_id = -1;
+    }
+};
+thread_local DeviceDoseWeightPlanPool t_dw_plan_pool;
+
 struct FramePolynomial {
     float x[6];
     float y[6];
@@ -255,12 +266,24 @@ bool cudaDoseWeightAndInterpolateDevice(
     for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
     HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
-    cufftHandle plan_c2r;
-    int n[2] = {ny, nx};
-    CUFFT_CHECK(cufftCreate(&plan_c2r));
-    plan_cleanup.take(plan_c2r);
-    size_t plan_work_bytes = 0;
-    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+    cufftHandle plan_c2r = 0;
+    const bool dw_plan_hit = t_dw_plan_pool.plan_c2r != 0 &&
+                             t_dw_plan_pool.nx == nx &&
+                             t_dw_plan_pool.ny == ny &&
+                             t_dw_plan_pool.device_id == device_id;
+    if (dw_plan_hit) {
+        plan_c2r = t_dw_plan_pool.plan_c2r;
+    } else {
+        t_dw_plan_pool.drop();
+        CUFFT_CHECK(cufftCreate(&plan_c2r));
+        int n[2] = {ny, nx};
+        size_t plan_work_bytes = 0;
+        CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+        t_dw_plan_pool.plan_c2r = plan_c2r;
+        t_dw_plan_pool.nx = nx;
+        t_dw_plan_pool.ny = ny;
+        t_dw_plan_pool.device_id = device_id;
+    }
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -342,6 +365,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
+    if (failure && (failure->isPoisoned() || failure->hasFailed())) {
+        t_dw_plan_pool.drop();
+    }
     const cufftResult plan_release = plan_cleanup.releaseAll();
     const cudaError_t memory_release = memory_cleanup.releaseAll();
     const cudaError_t event_release = event_cleanup.releaseAll();

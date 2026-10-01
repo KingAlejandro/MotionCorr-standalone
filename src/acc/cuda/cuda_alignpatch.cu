@@ -338,6 +338,8 @@ bool cudaAlignPatchDeviceWithWorkspace(
     auto &w = *workspace.impl_;
     if (w.failure->isPoisoned())
         REPORT_ERROR("Fatal CUDA state refuses patch workspace reuse");
+    bool device_selected = false;
+    bool work_may_be_pending = false;
     try {
     int dev_count = 0;
     cudaError_t count_err = cudaGetDeviceCount(&dev_count);
@@ -349,6 +351,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
         REPORT_ERROR_STR("Invalid CUDA device ID: " << device_id << " (system has " << dev_count << " devices)");
     }
     ALIGN_CUDA(cudaSetDevice(device_id));
+    device_selected = true;
 
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
@@ -391,9 +394,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
         ccf_ny, search_range, scaled_B, ccf_downsample};
     const bool setup_required = !w.valid || !w.key.equals(requested);
     if (setup_required) {
+        device_selected = false; // replacement teardown can select the old device
         if (!w.release()) REPORT_ERROR("CUDA patch workspace replacement cleanup failed");
         // release() may have switched to the old resource device.
         ALIGN_CUDA(cudaSetDevice(device_id));
+        device_selected = true;
         w.resource_device = device_id;
         ALIGN_CUDA(cudaEventCreate(&w.ev_start_total)); w.events.add(w.ev_start_total);
         ALIGN_CUDA(cudaEventCreate(&w.ev_stop_total)); w.events.add(w.ev_stop_total);
@@ -426,6 +431,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
         ALIGN_CUFFT(cufftGetSize(w.plan_c2r, &w.cufft_work_size));
         dim3 blockWeights(16, 16);
         dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+        work_may_be_pending = true;
         computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
             ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, (float)scaled_B);
         ALIGN_LAUNCH(cudaGetLastError());
@@ -464,6 +470,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
         ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+        work_may_be_pending = true;
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
 
@@ -471,22 +478,25 @@ bool cudaAlignPatchDeviceWithWorkspace(
         computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
         ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
-        float k1_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k1_ms;
 
         // 3. Batched cuFFT C2R
         ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
         ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
         ALIGN_CUDA(cudaEventSynchronize(ev_stop_cufft));
+        work_may_be_pending = false;
+        // This checked same-stream boundary also completes reference/CCF. Read
+        // their event generation before peak finding re-records the shared pair.
+        float k1_ms = 0.0f;
+        ALIGN_CUDA(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
+        accumulated_kernel_ms += k1_ms;
         float iter_cufft_ms = 0.0f;
         ALIGN_CUDA(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
         accumulated_cufft_ms += iter_cufft_ms;
 
         // 4. Peak finding + subpixel quadratic interpolation
         ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+        work_may_be_pending = true;
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
@@ -494,10 +504,6 @@ bool cudaAlignPatchDeviceWithWorkspace(
         );
         ALIGN_LAUNCH(cudaGetLastError());
         ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
-        float k2_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k2_ms;
 
         // Copy candidate shifts back to host
         ALIGN_CUDA(cudaEventRecord(ev_start_d2h));
@@ -505,6 +511,12 @@ bool cudaAlignPatchDeviceWithWorkspace(
         ALIGN_CUDA(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
         ALIGN_CUDA(cudaEventRecord(ev_stop_d2h));
         ALIGN_CUDA(cudaEventSynchronize(ev_stop_d2h));
+        work_may_be_pending = false;
+        // Peak events are complete here; consume this generation before the
+        // phase-shift kernel re-records the pair. Host convergence is unchanged.
+        float k2_ms = 0.0f;
+        ALIGN_CUDA(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+        accumulated_kernel_ms += k2_ms;
         float iter_d2h_ms = 0.0f;
         ALIGN_CUDA(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
         accumulated_d2h_ms += iter_d2h_ms;
@@ -529,6 +541,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
         // Apply Fourier phase shifts on GPU
         if (n_frames > 1) {
+            work_may_be_pending = true;
             ALIGN_CUDA(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
@@ -536,6 +549,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
             ALIGN_LAUNCH(cudaGetLastError());
             ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
             ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
+            work_may_be_pending = false;
             float shift_kernel_ms = 0.0f;
             ALIGN_CUDA(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
             accumulated_kernel_ms += shift_kernel_ms;
@@ -552,6 +566,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
 
     ALIGN_CUDA(cudaEventRecord(ev_stop_total));
     ALIGN_CUDA(cudaEventSynchronize(ev_stop_total));
+    work_may_be_pending = false;
     float total_ms = 0.0f;
     ALIGN_CUDA(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
 
@@ -578,6 +593,14 @@ bool cudaAlignPatchDeviceWithWorkspace(
                 << (converged ? "yes" : "no") << std::endl;
     return converged;
     } catch (...) {
+        if (device_selected) {
+            w.failure->record(cudaPeekAtLastError(), "alignment exception pending", __LINE__);
+            // Removed telemetry waits can leave prior work queued when an API
+            // fails immediately. Drain before destroying its plan/buffers, and
+            // retain a late fatal return even when the runtime slot was cleared.
+            if (work_may_be_pending)
+                w.failure->record(cudaDeviceSynchronize(), "alignment exception drain", __LINE__);
+        }
         // Failure invalidates the cache before cleanup. Any late fatal cleanup
         // status remains latched in the same failure state as the original error.
         (void)workspace.release();

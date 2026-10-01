@@ -44,6 +44,11 @@ bool cudaAlignPatchDevice(
     std::ostream &logfile,
     bool is_global = false
 );
+
+/**
+ * Release persistent GPU scratch buffers and cuFFT plans cached across patches.
+ */
+void cudaReleaseAlignPatchCache();
 #endif
 
 #endif // CUDA_ALIGNPATCH_H_

@@ -1643,11 +1643,27 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
-    // cache. Its normal release at skip_fitting is insufficient if a patch throws.
-    // Keep ownership bounded to this movie even on the final failed movie.
+    // cache, and patch alignment retains device scratch, a cuFFT plan and events
+    // across this movie's patches (PR93). The normal release of both at
+    // skip_fitting is insufficient if a patch throws. Keep ownership bounded to
+    // this movie even on the final failed movie: run() catches the RelionError
+    // and starts the next movie, so a cache allocated on a context that has just
+    // been poisoned must not be reachable from it. release() invalidates its
+    // pointers whether or not the frees succeed, so that holds for a dead context
+    // too. Released in the skip_fitting order, and neither callee throws, which
+    // this destructor requires.
+    //
+    // use_gpu is captured rather than released unconditionally: unlike
+    // cudaReleaseCachedFrames(), the align-patch release calls into the runtime
+    // (cudaGetDevice/cudaSetDevice) even with nothing cached, and a CPU run of a
+    // CUDA build must not touch the device.
     struct MovieFrameCacheGuard {
-        ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
-    } movie_frame_cache_guard;
+        bool release_align_cache;
+        ~MovieFrameCacheGuard() noexcept {
+            cudaReleaseCachedFrames();
+            if (release_align_cache) cudaReleaseAlignPatchCache();
+        }
+    } movie_frame_cache_guard{use_gpu};
 	std::unique_ptr<CudaMovieSession> movie_session;
 	// A preprocessing failure may be recoverable, but releasing its resources can
 	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
@@ -3111,7 +3127,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 skip_fitting:
 #ifdef _CUDA_ENABLED
 	// The retained full-frame cache is only needed while preparing local patches.
-	if (use_gpu) cudaReleaseCachedFrames();
+	if (use_gpu) {
+		cudaReleaseCachedFrames();
+		cudaReleaseAlignPatchCache();
+	}
 #endif
 	if (pre_dw_sum_needed) {
 		Iref().reshape(ny, nx);

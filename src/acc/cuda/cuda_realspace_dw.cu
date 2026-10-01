@@ -64,6 +64,14 @@ __global__ void applyDoseWeightKernel(
     const float * __restrict__ d_doses,
     int n_frames, int iframe)
 {
+    __shared__ float s_doses[64];
+
+    int tid = threadIdx.y * blockDim.x + threadIdx.x;
+    if (tid < n_frames && tid < 64) {
+        s_doses[tid] = d_doses[tid];
+    }
+    __syncthreads();
+
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     if (x >= nfx || y >= nfy) return;
@@ -73,8 +81,10 @@ __global__ void applyDoseWeightKernel(
 
     if (x == 0 && ly == 0) {
         float norm_weight = 1.0f / sqrtf((float)n_frames);
-        d_Fframe[idx].x *= norm_weight;
-        d_Fframe[idx].y *= norm_weight;
+        float2 val = d_Fframe[idx];
+        val.x *= norm_weight;
+        val.y *= norm_weight;
+        d_Fframe[idx] = val;
         return;
     }
 
@@ -84,16 +94,19 @@ __global__ void applyDoseWeightKernel(
     float Ne = (0.245f * powf(dinv, -1.665f) + 2.81f) * 2.0f;
 
     float sum_weight_sq = 0.0f;
+    const float *doses_ptr = (n_frames <= 64) ? s_doses : d_doses;
     for (int j = 0; j < n_frames; j++) {
-        float w = expf(-d_doses[j] / Ne);
+        float w = expf(-doses_ptr[j] / Ne);
         sum_weight_sq += w * w;
     }
 
-    float cur_weight = expf(-d_doses[iframe] / Ne);
+    float cur_weight = expf(-doses_ptr[iframe] / Ne);
     float norm_weight = cur_weight / sqrtf(sum_weight_sq);
 
-    d_Fframe[idx].x *= norm_weight;
-    d_Fframe[idx].y *= norm_weight;
+    float2 val = d_Fframe[idx];
+    val.x *= norm_weight;
+    val.y *= norm_weight;
+    d_Fframe[idx] = val;
 }
 
 // Polynomial real-space bilinear interpolation & accumulation kernel
@@ -131,15 +144,17 @@ __global__ void interpolateAndAccumulatePolynomialKernel(
 
     float val;
     if (!valid) {
-        val = d_Iframe[(size_t)y0 * nx + x0];
+        val = __ldg(&d_Iframe[(size_t)y0 * nx + x0]);
     } else {
         float fx = x_target - (float)x0;
         float fy = y_target - (float)y0;
 
-        float d00 = d_Iframe[(size_t)y0 * nx + x0];
-        float d01 = d_Iframe[(size_t)y0 * nx + x1];
-        float d10 = d_Iframe[(size_t)y1 * nx + x0];
-        float d11 = d_Iframe[(size_t)y1 * nx + x1];
+        size_t row0 = (size_t)y0 * nx;
+        size_t row1 = (size_t)y1 * nx;
+        float d00 = __ldg(&d_Iframe[row0 + x0]);
+        float d01 = __ldg(&d_Iframe[row0 + x1]);
+        float d10 = __ldg(&d_Iframe[row1 + x0]);
+        float d11 = __ldg(&d_Iframe[row1 + x1]);
 
         float dx0 = d00 + (d01 - d00) * fx;
         float dx1 = d10 + (d11 - d10) * fx;
@@ -162,7 +177,7 @@ __global__ void accumulateDirectKernel(
 {
     size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < total_pixels) {
-        float val = d_Iframe[idx];
+        float val = __ldg(&d_Iframe[idx]);
         d_Isum[idx] += val;
         if (d_Isum_sub != nullptr) {
             d_Isum_sub[idx] += val;
@@ -205,26 +220,28 @@ bool cudaDoseWeightAndInterpolateDevice(
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
 
     cudaEvent_t ev_start_total, ev_stop_total;
-    cudaEvent_t ev_start_dw, ev_stop_dw;
-    cudaEvent_t ev_start_cufft, ev_stop_cufft;
-    cudaEvent_t ev_start_interp, ev_stop_interp;
-
     HANDLE_ERROR(cudaEventCreate(&ev_start_total));
     event_cleanup.add(ev_start_total);
     HANDLE_ERROR(cudaEventCreate(&ev_stop_total));
     event_cleanup.add(ev_stop_total);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_dw));
-    event_cleanup.add(ev_start_dw);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_dw));
-    event_cleanup.add(ev_stop_dw);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_cufft));
-    event_cleanup.add(ev_start_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft));
-    event_cleanup.add(ev_stop_cufft);
-    HANDLE_ERROR(cudaEventCreate(&ev_start_interp));
-    event_cleanup.add(ev_start_interp);
-    HANDLE_ERROR(cudaEventCreate(&ev_stop_interp));
-    event_cleanup.add(ev_stop_interp);
+
+    std::vector<cudaEvent_t> ev_start_dw(n_frames), ev_stop_dw(n_frames);
+    std::vector<cudaEvent_t> ev_start_cufft(n_frames), ev_stop_cufft(n_frames);
+    std::vector<cudaEvent_t> ev_start_interp(n_frames), ev_stop_interp(n_frames);
+    for (int i = 0; i < n_frames; i++) {
+        HANDLE_ERROR(cudaEventCreate(&ev_start_dw[i]));
+        event_cleanup.add(ev_start_dw[i]);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_dw[i]));
+        event_cleanup.add(ev_stop_dw[i]);
+        HANDLE_ERROR(cudaEventCreate(&ev_start_cufft[i]));
+        event_cleanup.add(ev_start_cufft[i]);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_cufft[i]));
+        event_cleanup.add(ev_stop_cufft[i]);
+        HANDLE_ERROR(cudaEventCreate(&ev_start_interp[i]));
+        event_cleanup.add(ev_start_interp[i]);
+        HANDLE_ERROR(cudaEventCreate(&ev_stop_interp[i]));
+        event_cleanup.add(ev_stop_interp[i]);
+    }
 
     HANDLE_ERROR(cudaEventRecord(ev_start_total));
 
@@ -265,44 +282,33 @@ bool cudaDoseWeightAndInterpolateDevice(
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
 
-    dim3 blockDW(16, 16);
-    dim3 gridDW((nfx + 15) / 16, (nfy + 15) / 16);
+    dim3 blockDW(32, 8);
+    dim3 gridDW((nfx + 31) / 32, (nfy + 7) / 8);
 
-    dim3 blockInterp(16, 16);
-    dim3 gridInterp((nx + 15) / 16, (ny + 15) / 16);
-
-    float total_dw_ms = 0.0f;
-    float total_cufft_ms = 0.0f;
-    float total_interp_ms = 0.0f;
+    dim3 blockInterp(32, 8);
+    dim3 gridInterp((nx + 31) / 32, (ny + 7) / 8);
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Copy frame from resident buffer in VRAM
         const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
-        HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
+        // Same-stream copy/weight/FFT/interpolation ordering protects reused tiles.
+        HANDLE_ERROR(cudaMemcpyAsync(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice, 0));
 
         // Dose weighting
-        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+        HANDLE_ERROR(cudaEventRecord(ev_start_dw[iframe]));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
             d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
-        float dw_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
-        total_dw_ms += dw_ms;
+        HANDLE_ERROR(cudaEventRecord(ev_stop_dw[iframe]));
 
         // Inverse FFT
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        HANDLE_ERROR(cudaEventRecord(ev_start_cufft[iframe]));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
-        float cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
-        total_cufft_ms += cufft_ms;
+        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft[iframe]));
 
         // Interpolate and accumulate
-        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
+        HANDLE_ERROR(cudaEventRecord(ev_start_interp[iframe]));
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
@@ -318,11 +324,7 @@ bool cudaDoseWeightAndInterpolateDevice(
             accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, nullptr, d_Iframe, total_pixels);
         }
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
-        float interp_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
-        total_interp_ms += interp_ms;
+        HANDLE_ERROR(cudaEventRecord(ev_stop_interp[iframe]));
     }
 
     // Single D2H download of reconstructed image
@@ -332,6 +334,19 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
     float total_ms = 0.0f;
     HANDLE_ERROR(cudaEventElapsedTime(&total_ms, ev_start_total, ev_stop_total));
+
+    float total_dw_ms = 0.0f;
+    float total_cufft_ms = 0.0f;
+    float total_interp_ms = 0.0f;
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        float dw_ms = 0.0f, cufft_ms = 0.0f, interp_ms = 0.0f;
+        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw[iframe], ev_stop_dw[iframe]));
+        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft[iframe], ev_stop_cufft[iframe]));
+        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp[iframe], ev_stop_interp[iframe]));
+        total_dw_ms += dw_ms;
+        total_cufft_ms += cufft_ms;
+        total_interp_ms += interp_ms;
+    }
 
     logfile << " [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
@@ -449,8 +464,8 @@ bool cudaRealSpaceInterpolationDevice(
         HANDLE_ERROR(cudaMemset(d_Isum_odd, 0, sz_iframe));
     }
 
-    dim3 blockInterp(16, 16);
-    dim3 gridInterp((nx + 15) / 16, (ny + 15) / 16);
+    dim3 blockInterp(32, 8);
+    dim3 gridInterp((nx + 31) / 32, (ny + 7) / 8);
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         const float *d_Iframe = d_Iframes + (size_t)iframe * ny * nx;

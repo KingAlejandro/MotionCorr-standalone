@@ -10,10 +10,12 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+// memcmp keys the patch-descriptor cache below and is not nvCOMP-specific, so
+// <cstring> is included unconditionally rather than inside the guard.
+#include <cstring>
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
-#include <cstring>
 #include <cstdint>
 #include <cstdlib>
 #include "nvcomp.h"
@@ -53,9 +55,9 @@
 namespace {
 
 __global__ void fusedGainAndSumKernel(
-    float *d_Iframes,
-    float *d_Isum,
-    const float *d_gain,
+    float * __restrict__ d_Iframes,
+    float * __restrict__ d_Isum,
+    const float * __restrict__ d_gain,
     const size_t num_pixels,
     const int n_frames,
     const bool apply_gain
@@ -63,8 +65,9 @@ __global__ void fusedGainAndSumKernel(
     size_t pixel = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     if (pixel >= num_pixels) return;
 
-    float gain_val = apply_gain ? d_gain[pixel] : 1.0f;
+    float gain_val = apply_gain ? __ldg(&d_gain[pixel]) : 1.0f;
     float sum = 0.0f;
+    #pragma unroll 4
     for (int iframe = 0; iframe < n_frames; iframe++) {
         size_t offset = (size_t)iframe * num_pixels + pixel;
         float val = d_Iframes[offset];
@@ -340,21 +343,31 @@ __global__ void updateDefectKernel(
     }
 }
 
-__global__ void scaleComplexKernel(cufftComplex *d_data, const size_t count, const float scale) {
-    size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < count) {
-        d_data[idx].x *= scale;
-        d_data[idx].y *= scale;
+__global__ void scaleComplexKernel(cufftComplex * __restrict__ d_data, const size_t count, const float scale) {
+    size_t idx = ((size_t)blockIdx.x * blockDim.x + threadIdx.x) * 2;
+    if (idx + 1 < count) {
+        float4 v = *reinterpret_cast<const float4*>(&d_data[idx]);
+        v.x *= scale;
+        v.y *= scale;
+        v.z *= scale;
+        v.w *= scale;
+        *reinterpret_cast<float4*>(&d_data[idx]) = v;
+    } else if (idx < count) {
+        float2 v = *reinterpret_cast<const float2*>(&d_data[idx]);
+        v.x *= scale;
+        v.y *= scale;
+        *reinterpret_cast<float2*>(&d_data[idx]) = v;
     }
 }
 
 __global__ void cropAndGroupPatchResidentKernel(
-    const float *d_Iframes,
-    float *d_Ipatches,
+    const float * __restrict__ d_Iframes,
+    float * __restrict__ d_Ipatches,
     const int nx, const int ny,
     const int x_start, const int y_start,
     const int patch_w, const int patch_h,
-    const int *d_group_start, const int *d_group_size,
+    const int * __restrict__ d_group_start,
+    const int * __restrict__ d_group_size,
     const int n_groups
 ) {
     int px = blockIdx.x * blockDim.x + threadIdx.x;
@@ -371,11 +384,12 @@ __global__ void cropAndGroupPatchResidentKernel(
     int g_start = d_group_start[igroup];
     int g_size  = d_group_size[igroup];
 
+    size_t base_pixel = (size_t)src_y * nx + src_x;
     float sum = 0.0f;
+    #pragma unroll 4
     for (int i = 0; i < g_size; i++) {
         int iframe = g_start + i;
-        size_t src_idx = (size_t)iframe * frame_stride + (size_t)src_y * nx + src_x;
-        sum += d_Iframes[src_idx];
+        sum += __ldg(&d_Iframes[(size_t)iframe * frame_stride + base_pixel]);
     }
 
     size_t dst_idx = (size_t)igroup * patch_stride + (size_t)py * patch_w + px;
@@ -473,8 +487,10 @@ bool CudaMovieSession::initialize() {
     }
 
     // cuFFT's automatic allocation must be disabled before either plan is made.
-    // Two transforms share one work area because all executions use the default stream
-    // and each frame is synchronized before the next execution.
+    // Two transforms share one work area because no plan here is ever given a stream,
+    // so every execution runs on the default stream and the next one cannot start
+    // until the previous has finished with the work area. That, not the per-frame
+    // cudaDeviceSynchronize the forward loop used to do, is what makes sharing safe.
     // A single-frame batch keeps the inverse preservation tile to one frame.
     // The A100 batch-two sample exceeded the whole-process VRAM target.
     int n[2] = {ny, nx};
@@ -561,6 +577,8 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    cached_group_start.clear();
+    cached_group_size.clear();
     is_initialized = false;
 }
 
@@ -1468,14 +1486,13 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     for (int iframe = 0; iframe < n_frames; iframe++) {
         CUFFT_CHECK(cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
                                  d_Fframes + (size_t)iframe * complex_stride));
-        // The next plan reuses the same work area; execution failures surface here.
-        HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
     const float inv_size = 1.0f / ((float)nx * ny);
     const size_t total_comp_elems = (size_t)n_frames * ny * nfx;
+    const size_t num_pairs = (total_comp_elems + 1) / 2;
     const int block = 256;
-    const int grid = (int)((total_comp_elems + block - 1) / block);
+    const int grid = (int)((num_pairs + block - 1) / block);
     scaleComplexKernel<<<grid, block>>>(d_Fframes, total_comp_elems, inv_size);
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
@@ -1487,18 +1504,18 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
-    // and only reuse the tile after that transform has completed.
+    // C2R can overwrite its input. Copies and transforms use the same default
+    // stream, so each transform finishes before the next copy reuses its tile.
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
-                                complex_stride * sizeof(cufftComplex),
-                                cudaMemcpyDeviceToDevice));
+        HANDLE_ERROR(cudaMemcpyAsync(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
+                                     complex_stride * sizeof(cufftComplex),
+                                     cudaMemcpyDeviceToDevice, 0));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, d_inverse_tile,
                                  (cufftReal*)(d_Iframes + (size_t)iframe * real_stride)));
-        HANDLE_ERROR(cudaDeviceSynchronize());
     }
+    HANDLE_ERROR(cudaDeviceSynchronize());
     return true;
 }
 
@@ -1508,13 +1525,17 @@ bool CudaMovieSession::preparePatchInVram(
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches
 ) {
-    if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    // isPoisoned() first: a cached buffer or plan from an earlier patch must never be
+    // handed to a dead context. n_groups <= 0 and the two descriptor pointers are
+    // checked because the cache key below dereferences group_start/group_size.
+    if (failure_state.isPoisoned() || !is_initialized || n_groups <= 0 ||
+        !d_out_fpatches || !group_start || !group_size) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
-    // Reuse or allocate cached scratch buffers.
+    // Reuse or allocate the cached patch scratch.
     //
     // Issue #69. These members outlive the call: release() frees whatever they point at
     // when the movie ends. So the cache must never describe a buffer that does not
@@ -1533,30 +1554,82 @@ bool CudaMovieSession::preparePatchInVram(
         d_Ipatches = fresh_patches;
         sz_cached_Ipatches = sz_all_patch_real;
     }
-    if (!d_group_start || !d_group_size || cached_ngroups_alloc < n_groups) {
-        int *stale_start = d_group_start;
-        int *stale_size = d_group_size;
-        d_group_start = nullptr;
-        d_group_size = nullptr;
-        cached_ngroups_alloc = 0;
-        const cudaError_t start_err = releaseBuffer(stale_start);
-        const cudaError_t size_err = releaseBuffer(stale_size);
-        HANDLE_ERROR(start_err);
-        HANDLE_ERROR(size_err);
-        int *fresh_start = nullptr;
-        int *fresh_size = nullptr;
-        HANDLE_ERROR(cudaMalloc((void**)&fresh_start, n_groups * sizeof(int)));
-        d_group_start = fresh_start;
-        HANDLE_ERROR(cudaMalloc((void**)&fresh_size, n_groups * sizeof(int)));
-        d_group_size = fresh_size;
-        cached_ngroups_alloc = n_groups;
+
+    // Group descriptors. Allocation is folded into the upload below rather than done
+    // separately, so the common case -- the same grouping for every patch of a movie --
+    // performs neither the allocation nor the two H2D copies.
+    //
+    // PR93's cross-call reuse: cached_group_start/cached_group_size are the host-side
+    // key for what the device pair already holds. They are assigned ONLY after both
+    // copies have returned cudaSuccess and are cleared before any copy starts, so a
+    // skipped upload is licensed by a completed one, never by a partial one. A size
+    // mismatch forces the upload before either memcmp runs, so an exact-length
+    // comparison is what the skip rests on.
+    //
+    // Issue #69 ownership, adapted to PR93's allocate-then-free order: cudaMalloc and
+    // cudaMemcpy results are recorded on the session rather than discarded, every free
+    // goes through releaseBuffer() so its status is recorded too, and the members are
+    // republished before the stale pair is freed -- so d_group_start/d_group_size never
+    // name a buffer that does not exist, on any exit from this block.
+    const size_t group_bytes = (size_t)n_groups * sizeof(int);
+    const bool replace_groups = !d_group_start || !d_group_size || cached_ngroups_alloc < n_groups;
+    const bool upload_groups = replace_groups ||
+        cached_group_start.size() != (size_t)n_groups ||
+        cached_group_size.size() != (size_t)n_groups ||
+        memcmp(cached_group_start.data(), group_start, group_bytes) != 0 ||
+        memcmp(cached_group_size.data(), group_size, group_bytes) != 0;
+    if (upload_groups) {
+        int *new_start = d_group_start;
+        int *new_size = d_group_size;
+        if (replace_groups) {
+            new_start = nullptr;
+            new_size = nullptr;
+            cudaError_t alloc_error = cudaMalloc((void**)&new_start, group_bytes);
+            if (alloc_error == cudaSuccess)
+                alloc_error = cudaMalloc((void**)&new_size, group_bytes);
+            if (alloc_error != cudaSuccess) {
+                recordFailure(alloc_error, __func__, __LINE__);
+                // Locals only. The members still own the previous pair, which is intact,
+                // and cached_ngroups_alloc and the host key still describe it.
+                releaseBuffer(new_start);
+                releaseBuffer(new_size);
+                logfile << "CUDA group allocation failed: " << cudaGetErrorString(alloc_error) << std::endl;
+                return false;
+            }
+        }
+        // Invalidate before either upload. A failed second copy must not leave
+        // the old host key describing a partially overwritten device pair.
+        cached_group_start.clear();
+        cached_group_size.clear();
+        cudaError_t copy_error = cudaMemcpy(new_start, group_start, group_bytes, cudaMemcpyHostToDevice);
+        if (copy_error == cudaSuccess)
+            copy_error = cudaMemcpy(new_size, group_size, group_bytes, cudaMemcpyHostToDevice);
+        if (copy_error != cudaSuccess) {
+            recordFailure(copy_error, __func__, __LINE__);
+            if (replace_groups) { releaseBuffer(new_start); releaseBuffer(new_size); }
+            logfile << "CUDA group upload failed: " << cudaGetErrorString(copy_error) << std::endl;
+            return false;
+        }
+        if (replace_groups) {
+            // Publish first, then free the stale pair: at no point do the members name
+            // freed memory, and the host key is already empty, so an early return from
+            // a failing free leaves "real buffers, no key" and the next patch re-uploads.
+            int *stale_start = d_group_start;
+            int *stale_size = d_group_size;
+            d_group_start = new_start;
+            d_group_size = new_size;
+            cached_ngroups_alloc = n_groups;
+            const cudaError_t start_free = releaseBuffer(stale_start);
+            const cudaError_t size_free = releaseBuffer(stale_size);
+            HANDLE_ERROR(start_free);
+            HANDLE_ERROR(size_free);
+        }
+        cached_group_start.assign(group_start, group_start + n_groups);
+        cached_group_size.assign(group_size, group_size + n_groups);
     }
 
-    HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-
-    dim3 block(16, 16);
-    dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
+    dim3 block(32, 8);
+    dim3 grid((patch_w + 31) / 32, (patch_h + 7) / 8, n_groups);
     cropAndGroupPatchResidentKernel<<<grid, block>>>(
         d_Iframes,
         d_Ipatches,
@@ -1590,8 +1663,9 @@ bool CudaMovieSession::preparePatchInVram(
 
     const float inv_patch_size = 1.0f / ((float)patch_w * patch_h);
     const size_t total_comp_elems = (size_t)n_groups * patch_h * patch_nfx;
+    const size_t num_pairs = (total_comp_elems + 1) / 2;
     const int block_scale = 256;
-    const int grid_scale = (int)((total_comp_elems + block_scale - 1) / block_scale);
+    const int grid_scale = (int)((num_pairs + block_scale - 1) / block_scale);
     scaleComplexKernel<<<grid_scale, block_scale>>>(d_out_fpatches, total_comp_elems, inv_patch_size);
     HANDLE_ERROR(cudaGetLastError());
 

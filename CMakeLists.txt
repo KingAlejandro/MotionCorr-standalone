@@ -337,10 +337,13 @@ if(BUILD_TESTING AND CUDA)
         # Actual session transforms, ordered tile preservation and retained errors
         # when an immediate API failure follows already queued FFT work.
         add_executable(cuda_global_fft_sync tests/cuda_global_fft_sync.cpp)
+        set_source_files_properties(tests/cuda_global_fft_sync.cpp PROPERTIES LANGUAGE CUDA)
         target_link_libraries(cuda_global_fft_sync PRIVATE motioncorr_core)
         target_link_options(cuda_global_fft_sync PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy"
             "LINKER:--wrap=cudaDeviceSynchronize"
-            "LINKER:--wrap=cudaPeekAtLastError"
+            "LINKER:--wrap=cudaGetLastError"
             "LINKER:--wrap=cudaMemcpy"
             "LINKER:--wrap=cufftExecR2C"
             "LINKER:--wrap=cufftExecC2R")

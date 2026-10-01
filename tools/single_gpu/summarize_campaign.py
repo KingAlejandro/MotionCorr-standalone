@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""Retain observations and scope: paired process walls, resource samples, exact gates."""
+import argparse,csv,json,math,re,statistics
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('root',type=Path);a=p.parse_args()
+def percentile(xs,q):
+ x=sorted(xs);pos=(len(x)-1)*q;lo=math.floor(pos);hi=math.ceil(pos);return x[lo]+(x[hi]-x[lo])*(pos-lo)
+def stats(xs):return {'observations':xs,'median':statistics.median(xs),'range':[min(xs),max(xs)],'iqr':percentile(xs,.75)-percentile(xs,.25)}
+out={'wall_scope':'uninstrumented wrapper-inclusive complete process, including output/PDF; 24-movie polling lag <=20ms, one-movie <=1ms; raw GNU time elapsed retained','quartiles':'linear interpolation (n-1)*q','phases':{}}
+for phase in ['screen','confirmation','one-movie-confirmation']:
+ root=a.root/phase;records=json.loads((root/'runs.json').read_text());arms={k:[x['whole_process_wall_seconds'] for x in records if x['arm']==k] for k in ['baseline','candidate']};assert len(arms['baseline'])==len(arms['candidate'])>0
+ details=[]
+ for record in records:
+  d=Path(record['directory']);dev=list(csv.reader((d/'device.csv').open()));values=[]
+  for row in dev:
+   try:values.append([float(row[2]),float(row[3])])
+   except (ValueError,IndexError):continue
+  assert values,'no valid device samples'
+  resource=record['resource'];peak=int(re.search(r'Maximum resident set size \(kbytes\): (\d+)',resource)[1]);cpu=int(re.search(r'Percent of CPU this job got: (\d+)%',resource)[1]);elapsed=re.search(r'Elapsed \(wall clock\) time.*: (\S+)',resource)[1]
+  details.append({'pair':record['pair'],'arm':record['arm'],'wall_seconds':record['whole_process_wall_seconds'],'gnu_time_elapsed':elapsed,'payload_rss_peak_KiB':peak,'payload_rss_peak_GiB':peak/1024**2,'cpu_percent':cpu,'sampled_GPU_util_mean_percent':statistics.mean(x[0] for x in values),'sampled_device_memory_peak_MiB':max(x[1] for x in values),'actual_payload_cpu_mask':record['actual_cpu_mask']})
+ pairs=[]
+ for n in sorted({x['pair'] for x in records}):
+  b=next(x['whole_process_wall_seconds'] for x in records if x['pair']==n and x['arm']=='baseline');c=next(x['whole_process_wall_seconds'] for x in records if x['pair']==n and x['arm']=='candidate');pairs.append(b-c)
+ exact=[json.loads((root/f'exact-{n}.json').read_text()) for n in sorted({x['pair'] for x in records})];assert all(x['status']=='PASS' for x in exact)
+ out['phases'][phase]={'baseline':stats(arms['baseline']),'candidate':stats(arms['candidate']),'paired_savings_seconds':stats(pairs),'median_wall_improvement_percent':100*(statistics.median(arms['baseline'])-statistics.median(arms['candidate']))/statistics.median(arms['baseline']),'faster_pairs':sum(x>0 for x in pairs),'pair_count':len(pairs),'exact_non_PDF_tree_pairs':'PASS','resource_observations':details}
+print(json.dumps(out,indent=2))

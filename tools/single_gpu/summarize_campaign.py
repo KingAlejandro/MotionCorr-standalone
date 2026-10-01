@@ -16,7 +16,7 @@ for phase in ['screen','confirmation','one-movie-confirmation']:
    try:values.append([float(row[2]),float(row[3])])
    except (ValueError,IndexError):continue
   assert values,'no valid device samples'
-  resource=record['resource'];peak=int(re.search(r'Maximum resident set size \(kbytes\): (\d+)',resource)[1]);cpu=int(re.search(r'Percent of CPU this job got: (\d+)%',resource)[1]);elapsed=re.search(r'Elapsed \(wall clock\) time.*: (\S+)',resource)[1]
+  resource=record['resource'];peak=int(re.search(r'Maximum resident set size \(kbytes\): (\d+)',resource)[1]);cpu=int(re.search(r'Percent of CPU this job got: (\d+)%',resource)[1]);elapsed=re.search(r'Elapsed \(wall clock\) time \(h:mm:ss or m:ss\): (\S+)',resource)[1]
   details.append({'pair':record['pair'],'arm':record['arm'],'wall_seconds':record['whole_process_wall_seconds'],'gnu_time_elapsed':elapsed,'payload_rss_peak_KiB':peak,'payload_rss_peak_GiB':peak/1024**2,'cpu_percent':cpu,'sampled_GPU_util_mean_percent':statistics.mean(x[0] for x in values),'sampled_device_memory_peak_MiB':max(x[1] for x in values),'actual_payload_cpu_mask':record['actual_cpu_mask']})
  pairs=[]
  for n in sorted({x['pair'] for x in records}):

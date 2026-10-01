@@ -35,7 +35,8 @@ for rel in ['src/motioncorr_runner.cpp','src/acc/cuda/cuda_movie_session.cu','sr
   t=t.replace('size_t stage_used = 0;', 'nvtxRangePushA("compressed read/repack");\n        size_t stage_used = 0;')
   t=t.replace('nvtxRangePushA("compressed H2D");','nvtxRangePop();\n        nvtxRangePushA("compressed H2D");')
  elif rel.endswith('cuda_alignpatch.cu'):
-  start=t.index('bool cudaAlignPatchDevice(');brace=t.index('{',start);t=t[:brace+1]+'\n McProfileScope mc_profile_scope(is_global ? "global align" : "patch align");'+t[brace+1:]
+  entry='bool cudaAlignPatchDeviceWithWorkspace(' if 'bool cudaAlignPatchDeviceWithWorkspace(' in t else 'bool cudaAlignPatchDevice('
+  start=t.index(entry);brace=t.index('{',start);t=t[:brace+1]+'\n McProfileScope mc_profile_scope(is_global ? "global align" : "patch align");'+t[brace+1:]
 
  elif rel.endswith('cuda_realspace_dw.cu'):
   line = 'HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));'

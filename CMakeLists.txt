@@ -334,6 +334,19 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        # Independent predecessor arithmetic and actual reconstruction ownership
+        # for the experimental dose-denominator plane. Needs a real device.
+        set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)
+        add_executable(cuda_dose_normalization tests/cuda_dose_normalization.cpp)
+        target_link_libraries(cuda_dose_normalization PRIVATE motioncorr_core)
+        target_link_options(cuda_dose_normalization PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaGetLastError" "LINKER:--wrap=cudaEventSynchronize"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)
+        set_tests_properties(CudaDoseNormalization PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

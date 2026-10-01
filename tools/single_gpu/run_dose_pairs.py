@@ -27,7 +27,7 @@ def group_members(pgid,start_ticks):
   if not path.name.isdigit():continue
   try:
    stat=(path/'stat').read_text().rsplit(')',1)[1].split()
-   if int(stat[2])==pgid and int(stat[3])==pgid and int(stat[19])>=start_ticks:
+   if stat[0]!='Z' and int(stat[2])==pgid and int(stat[3])==pgid and int(stat[19])>=start_ticks:
     members.append(int(path.name))
   except (OSError,ValueError,IndexError):pass
  return members
@@ -57,7 +57,7 @@ if a.movies==1:
 manifest_path=root/'manifest.json';manifest_path.write_text(json.dumps(manifest,indent=2))
 
 opts=['--i','movies.star','--use_own','--dose_weighting','--dose_per_frame','1.277','--patch_x','5','--patch_y','5','--bfactor','150','--gainref','Movies/gain.mrc','--seed','1','--gpu','0','--j','6','--max_io_threads','6','--ingest','nvcomp']
-meta={'baseline_binary':str(a.baseline),'candidate_binary':str(a.candidate),'baseline_sha256':sha(a.baseline),'candidate_sha256':sha(a.candidate),'cpu_mask_requested':a.cpus,'env':{k:v for k,v in os.environ.items() if k.startswith(('OMP_','CUDA_','MC_','SLURM_'))},'expected_gpu_uuid':a.gpu_uuid,'gpu':capture(['nvidia-smi','--query-gpu=index,uuid,name','--format=csv']),'cpu_topology':capture(['lscpu','-e=CPU,CORE,SOCKET,NODE']),'input_star_sha256':sha(a.input_dir/'movies.star'),'options':opts,'phase':a.phase,'source_stamp':(a.source/'SOURCE_PIN.json').read_text()}
+meta={'baseline_binary':str(a.baseline),'candidate_binary':str(a.candidate),'baseline_sha256':sha(a.baseline),'candidate_sha256':sha(a.candidate),'cpu_mask_requested':a.cpus,'env':{k:v for k,v in os.environ.items() if k.startswith(('OMP_','CUDA_','MC_','SLURM_'))},'expected_gpu_uuid':a.gpu_uuid,'gpu':capture(['nvidia-smi','--query-gpu=index,uuid,name','--format=csv']),'cpu_topology':capture(['lscpu','-e=CPU,CORE,SOCKET,NODE']),'input_star_sha256':sha(a.input_dir/'movies.star'),'options':opts,'phase':a.phase,'expected_pair_count':a.pairs,'source_stamp':(a.source/'SOURCE_PIN.json').read_text()}
 (root/'provenance.json').write_text(json.dumps(meta,indent=2))
 expected=set(manifest['movies'])
 input_paths=[a.input_dir/'movies.star',a.input_dir/'Movies/gain.mrc',*[a.input_dir/q for q in sorted(expected)]]
@@ -142,4 +142,5 @@ for pair in range(1,a.pairs+1):
  if result.returncode:raise RuntimeError('Exact complete non-PDF tree comparison failed: '+result.stdout)
 if sha(a.baseline)!=meta['baseline_sha256'] or sha(a.candidate)!=meta['candidate_sha256']:raise RuntimeError('Binary changed during campaign')
 if {str(q):sha(q) for q in input_paths}!=input_hashes:raise RuntimeError('Input content changed during campaign')
+(root/'COMPLETE.json').write_text(json.dumps({'expected_pair_count':a.pairs,'runs_sha256':sha(root/'runs.json'),'provenance_sha256':sha(root/'provenance.json'),'exact_sha256':{str(n):sha(root/f'exact-{n}.json') for n in range(1,a.pairs+1)}},indent=2))
 print('PAIRS_COMPLETE',flush=True)

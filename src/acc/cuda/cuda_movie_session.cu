@@ -473,8 +473,8 @@ bool CudaMovieSession::initialize() {
     }
 
     // cuFFT's automatic allocation must be disabled before either plan is made.
-    // Two transforms share one work area because all executions use the default stream
-    // and each frame is synchronized before the next execution.
+    // Two transforms share one work area because their executions are ordered on
+    // the same default stream; a checked boundary completes each transform stage.
     // A single-frame batch keeps the inverse preservation tile to one frame.
     // The A100 batch-two sample exceeded the whole-process VRAM target.
     int n[2] = {ny, nx};
@@ -1466,11 +1466,25 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        CUFFT_CHECK(cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
-                                 d_Fframes + (size_t)iframe * complex_stride));
-        // The next plan reuses the same work area; execution failures surface here.
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        const cufftResult result = cufftExecR2C(plan_r2c,
+            (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
+            d_Fframes + (size_t)iframe * complex_stride);
+        if (result != CUFFT_SUCCESS) {
+            recordCufftFailure(result, __func__, __LINE__);
+            recordFailure(cudaPeekAtLastError(), __func__, __LINE__);
+            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__
+                    << " : " << result << std::endl;
+            // Earlier frames may still be queued. Drain before a recoverable
+            // return can let a caller read data or fall back; latch any late fatal
+            // status in this stage, even with a clean runtime last-error slot.
+            HANDLE_ERROR(cudaDeviceSynchronize());
+            return false;
+        }
     }
+    // cuFFT 12.8 section 2.7: an unassociated plan uses stream 0. Sequential
+    // same-stream executions are ordered and may reuse this single work area.
+    // Surface execution failure before scaling, not in a later consuming stage.
+    HANDLE_ERROR(cudaDeviceSynchronize());
 
     const float inv_size = 1.0f / ((float)nx * ny);
     const size_t total_comp_elems = (size_t)n_frames * ny * nfx;
@@ -1487,18 +1501,35 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
-    // and only reuse the tile after that transform has completed.
+    // C2R can overwrite its input. The default-stream D2D copy and following C2R
+    // are ordered with the next copy, so one tile is safe without a host wait per
+    // frame. The resident Fourier stack remains untouched for dose weighting.
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
-                                complex_stride * sizeof(cufftComplex),
-                                cudaMemcpyDeviceToDevice));
-        CUFFT_CHECK(cufftExecC2R(plan_c2r, d_inverse_tile,
-                                 (cufftReal*)(d_Iframes + (size_t)iframe * real_stride)));
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        const cudaError_t copy_result = cudaMemcpy(d_inverse_tile,
+            d_Fframes + (size_t)iframe * complex_stride,
+            complex_stride * sizeof(cufftComplex), cudaMemcpyDeviceToDevice);
+        if (copy_result != cudaSuccess) {
+            recordFailure(copy_result, __func__, __LINE__);
+            recordFailure(cudaPeekAtLastError(), __func__, __LINE__);
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__
+                    << " : " << cudaGetErrorString(copy_result) << std::endl;
+            HANDLE_ERROR(cudaDeviceSynchronize());
+            return false;
+        }
+        const cufftResult result = cufftExecC2R(plan_c2r, d_inverse_tile,
+            (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+        if (result != CUFFT_SUCCESS) {
+            recordCufftFailure(result, __func__, __LINE__);
+            recordFailure(cudaPeekAtLastError(), __func__, __LINE__);
+            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__
+                    << " : " << result << std::endl;
+            HANDLE_ERROR(cudaDeviceSynchronize());
+            return false;
+        }
     }
+    HANDLE_ERROR(cudaDeviceSynchronize());
     return true;
 }
 

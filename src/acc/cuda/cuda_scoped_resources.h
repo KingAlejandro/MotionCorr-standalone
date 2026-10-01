@@ -6,6 +6,7 @@
 #include <cufft.h>
 #include "src/error.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include <vector>
 
 /**
  * Issue #69: scoped owners for CUDA resources with a statically proved maximum.
@@ -122,6 +123,56 @@ private:
     cudaEvent_t slots_[Capacity];
     int count_;
     bool overflowed_;
+    CudaFailureState *failure_;
+};
+
+// Same contract as ScopedCudaEvents, but the count is only known at run time.
+//
+// ScopedCudaEvents fixes its capacity at compile time, which is right when the
+// event set is a fixed list. The dose-weighting path registers 2 + 6*n_frames
+// events, and n_frames is an input. Sizing the template to a worst case would
+// be a silent cap: exceeding it is a REPORT_ERROR that fails the movie, and
+// "enough for the movies we tried" is not a bound.
+//
+// Semantics are deliberately identical to the fixed-capacity owner: every event
+// is attempted even after one fails, the first error is returned, each
+// destroy is recorded against the failure state, and releaseAll() is
+// idempotent so the destructor stays a backstop for throwing paths rather than
+// a second release mechanism.
+class ScopedCudaEventList {
+public:
+    explicit ScopedCudaEventList(CudaFailureState *failure = nullptr,
+                                 size_t reserve = 0)
+        : failure_(failure) { if (reserve) slots_.reserve(reserve); }
+    ~ScopedCudaEventList() { (void)releaseAll(); }
+
+    bool add(cudaEvent_t event) {
+        slots_.push_back(event);
+        return true;
+    }
+
+    bool overflowed() const { return false; }  // no capacity to exceed
+    int count() const { return (int)slots_.size(); }
+
+    cudaError_t releaseAll() {
+        cudaError_t first_error = cudaSuccess;
+        for (size_t i = 0; i < slots_.size(); ++i) {
+            if (slots_[i] == nullptr) continue;
+            cudaEvent_t owned = slots_[i];
+            slots_[i] = nullptr;
+            const cudaError_t err = cudaEventDestroy(owned);
+            if (failure_) failure_->record(err, "scoped cudaEventDestroy", __LINE__);
+            if (err != cudaSuccess && first_error == cudaSuccess) first_error = err;
+        }
+        slots_.clear();
+        return first_error;
+    }
+
+private:
+    ScopedCudaEventList(const ScopedCudaEventList &);
+    ScopedCudaEventList &operator=(const ScopedCudaEventList &);
+
+    std::vector<cudaEvent_t> slots_;
     CudaFailureState *failure_;
 };
 

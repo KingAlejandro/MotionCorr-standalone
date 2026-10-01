@@ -209,7 +209,11 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
-    mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
+    // 2 + 6*n_frames events: #128 sized this owner at 8 for the scalar event
+    // set that preceded per-frame profiling. Both changes merge cleanly on
+    // their own and overflow together, which fails every movie with
+    // "CUDA event owner capacity exceeded".
+    mc_cuda::ScopedCudaEventList event_cleanup(failure, 2 + 6 * (size_t)n_frames);
     mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
     const int nfx = nx / 2 + 1, nfy = ny;

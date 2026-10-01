@@ -246,10 +246,40 @@ int main()
     check(rc == 0 && count_set(m) == 0,
           "LLONG_MAX x+w does not overflow or crash, paints 0 px");
 
+    std::cout << "== defect premask cache invalidation and sequence test ==\n";
+    {
+        MotioncorrRunner runner;
+        MultidimArray<float> empty_gain;
+        std::string fn_a = tmpfile_with("0 0 2 2\n", "pma");
+        std::string fn_b = tmpfile_with("0 0 1 1\nBAD\n", "pmb");
+
+        // 1. Initial lookup with valid A
+        const MultidimArray<bool> &mask_a = runner.getDefectPremask(64, 64, fn_a, "", empty_gain, 1);
+        check(runner.isDefectPremaskValid(), "premask A cached validly");
+        check(count_set(const_cast<MultidimArray<bool>&>(mask_a)) == 4, "premask A has 4 defect pixels");
+
+        // 2. Lookup with malformed B should throw and leave cache invalid
+        bool threw = false;
+        try {
+            runner.getDefectPremask(64, 64, fn_b, "", empty_gain, 1);
+        } catch (const RelionError &) {
+            threw = true;
+        }
+        check(threw, "premask B threw RelionError on malformed file");
+        check(!runner.isDefectPremaskValid(), "premask cache invalidated after failure on B");
+        check(runner.defect_premask_nx == 0 && runner.defect_premask_fn == "",
+              "premask cache keys cleared after failure on B");
+
+        // 3. Repeat lookup with valid A must reparse and not read corrupt/stale data
+        const MultidimArray<bool> &mask_a2 = runner.getDefectPremask(64, 64, fn_a, "", empty_gain, 1);
+        check(runner.isDefectPremaskValid(), "premask A re-cached validly after recovery");
+        check(count_set(const_cast<MultidimArray<bool>&>(mask_a2)) == 4, "premask A has 4 defect pixels after recovery");
+    }
+
     // Remove the fixtures we created, then the directory.
     for (const char *tag : {"v1","v2","v3","v4","v5","e1","e2","m1","m2","m3","m4","m5","m6",
                             "c1","c2","c3","d1","d2","d3","d4","d5","d6","z1","z2","z3",
-                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1","d7"}) {
+                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1","d7","pma","pmb"}) {
         std::remove((scratch_dir() + "/" + tag + ".txt").c_str());
     }
     ::rmdir(scratch_dir().c_str());

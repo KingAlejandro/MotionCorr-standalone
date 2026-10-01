@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <climits>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
 #include <cstring>
@@ -382,6 +383,7 @@ __global__ void cropAndGroupPatchResidentKernel(
     d_Ipatches[dst_idx] = sum;
 }
 
+
 } // anonymous namespace
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
@@ -450,6 +452,13 @@ bool CudaMovieSession::initialize() {
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    if (!mc_cuda::getWorkerPlanPool().acquireLease(this)) {
+        recordFailure(cudaErrorInvalidDevice, "concurrent session lease on same thread", __LINE__);
+        logfile << "ERROR: Concurrent active CUDA sessions on the same thread are not permitted." << std::endl;
+        release();
+        return false;
+    }
+
     const size_t sz_real = (size_t)ny * nx * sizeof(float);
     const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
     const size_t total_real_bytes = sz_real * n_frames;
@@ -473,64 +482,114 @@ bool CudaMovieSession::initialize() {
         return false;
     }
 
-    // cuFFT's automatic allocation must be disabled before either plan is made.
-    // Two transforms share one work area because all executions use the default stream
-    // and each frame is synchronized before the next execution.
-    // A single-frame batch keeps the inverse preservation tile to one frame.
-    // The A100 batch-two sample exceeded the whole-process VRAM target.
-    int n[2] = {ny, nx};
-    auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,
-                         cufftType type) -> bool {
-        cufftResult result = cufftCreate(&plan);
-        if (result == CUFFT_SUCCESS) has_plan = true;
-        if (result == CUFFT_SUCCESS) result = cufftSetAutoAllocation(plan, 0);
-        if (result == CUFFT_SUCCESS) {
-            const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
-            const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
-            result = cufftMakePlanMany(plan, 2, n, NULL, 1, input_distance,
-                                       NULL, 1, output_distance, type, 1, &work_bytes);
-        }
-        if (result != CUFFT_SUCCESS) {
-            recordCufftFailure(result, "initialize plan", __LINE__);
-            recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
-            logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
-                    << " batch=1 type=" << type
-                    << " code=" << result << std::endl;
+    const bool pool_hit = mc_cuda::getWorkerPlanPool().global.valid &&
+                          mc_cuda::getWorkerPlanPool().global.plan_r2c != 0 &&
+                          mc_cuda::getWorkerPlanPool().global.plan_c2r != 0 &&
+                          mc_cuda::getWorkerPlanPool().global.nx == nx &&
+                          mc_cuda::getWorkerPlanPool().global.ny == ny &&
+                          mc_cuda::getWorkerPlanPool().global.device_id == device_id;
+    if (pool_hit) {
+        plan_r2c = mc_cuda::getWorkerPlanPool().global.plan_r2c;
+        plan_c2r = mc_cuda::getWorkerPlanPool().global.plan_c2r;
+        has_plan_r2c = true;
+        has_plan_c2r = true;
+        d_fft_work = mc_cuda::getWorkerPlanPool().global.d_fft_work;
+        d_inverse_tile = mc_cuda::getWorkerPlanPool().global.d_inverse_tile;
+        fft_r2c_work_bytes = mc_cuda::getWorkerPlanPool().global.fft_r2c_work_bytes;
+        fft_c2r_work_bytes = mc_cuda::getWorkerPlanPool().global.fft_c2r_work_bytes;
+        fft_work_bytes = mc_cuda::getWorkerPlanPool().global.fft_work_bytes;
+        plans_borrowed = true;
+    } else {
+        mc_cuda::getWorkerPlanPool().global.drop(&failure_state);
+        plans_borrowed = false;
+
+        mc_cuda::ScopedCufftPlan scoped_r2c(&failure_state);
+        mc_cuda::ScopedCufftPlan scoped_c2r(&failure_state);
+        cufftHandle raw_r2c = 0, raw_c2r = 0;
+
+        int n[2] = {ny, nx};
+        auto make_plan = [&](cufftHandle &raw_plan, mc_cuda::ScopedCufftPlan &scoped,
+                             size_t &work_bytes, cufftType type) -> bool {
+            cufftResult result = cufftCreate(&raw_plan);
+            if (result != CUFFT_SUCCESS) {
+                recordCufftFailure(result, "initialize plan", __LINE__);
+                recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
+                return false;
+            }
+            scoped.take(raw_plan);
+            result = cufftSetAutoAllocation(raw_plan, 0);
+            if (result == CUFFT_SUCCESS) {
+                const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
+                const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
+                result = cufftMakePlanMany(raw_plan, 2, n, NULL, 1, input_distance,
+                                           NULL, 1, output_distance, type, 1, &work_bytes);
+            }
+            if (result != CUFFT_SUCCESS) {
+                recordCufftFailure(result, "initialize plan", __LINE__);
+                recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
+                logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+                        << " batch=1 type=" << type
+                        << " code=" << result << std::endl;
+                return false;
+            }
+            return true;
+        };
+        if (!make_plan(raw_r2c, scoped_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
+            !make_plan(raw_c2r, scoped_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
+            release();
             return false;
         }
-        return true;
-    };
-    if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
-        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
-        release();
-        return false;
-    }
 
-    fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
-    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
-    if (cuda_result == cudaSuccess)
-        cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
-    if (cuda_result != cudaSuccess) {
-        recordFailure(cuda_result, "initialize scratch", __LINE__);
-        logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
-                << " workspace=" << fft_work_bytes << " tile=" << sz_comp
-                << ": " << cudaGetErrorString(cuda_result) << std::endl;
-        release();
-        return false;
-    }
-    auto attach_work = [&](cufftHandle plan, bool has_plan) -> bool {
-        if (!has_plan) return true;
-        cufftResult result = cufftSetWorkArea(plan, d_fft_work);
-        if (result == CUFFT_SUCCESS) return true;
-        recordCufftFailure(result, "initialize work area", __LINE__);
-        recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
-        logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
-        return false;
-    };
-    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
-        release();
-        return false;
+        fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
+        void *fresh_work = nullptr;
+        cufftComplex *fresh_tile = nullptr;
+        cuda_result = cudaMalloc(&fresh_work, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess)
+            cuda_result = cudaMalloc((void**)&fresh_tile, sz_comp);
+        if (cuda_result != cudaSuccess) {
+            if (fresh_work) cudaFree(fresh_work);
+            if (fresh_tile) cudaFree(fresh_tile);
+            recordFailure(cuda_result, "initialize scratch", __LINE__);
+            logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
+                    << " workspace=" << fft_work_bytes << " tile=" << sz_comp
+                    << ": " << cudaGetErrorString(cuda_result) << std::endl;
+            release();
+            return false;
+        }
+        auto attach_work = [&](cufftHandle plan) -> bool {
+            cufftResult result = cufftSetWorkArea(plan, fresh_work);
+            if (result == CUFFT_SUCCESS) return true;
+            recordCufftFailure(result, "initialize work area", __LINE__);
+            recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
+            logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
+            return false;
+        };
+        if (!attach_work(raw_r2c) || !attach_work(raw_c2r)) {
+            cudaFree(fresh_work);
+            cudaFree(fresh_tile);
+            release();
+            return false;
+        }
+        mc_cuda::getWorkerPlanPool().global.plan_r2c = scoped_r2c.disown();
+        mc_cuda::getWorkerPlanPool().global.plan_c2r = scoped_c2r.disown();
+        mc_cuda::getWorkerPlanPool().global.d_fft_work = fresh_work;
+        mc_cuda::getWorkerPlanPool().global.d_inverse_tile = fresh_tile;
+        mc_cuda::getWorkerPlanPool().global.fft_r2c_work_bytes = fft_r2c_work_bytes;
+        mc_cuda::getWorkerPlanPool().global.fft_c2r_work_bytes = fft_c2r_work_bytes;
+        mc_cuda::getWorkerPlanPool().global.fft_work_bytes = fft_work_bytes;
+        mc_cuda::getWorkerPlanPool().global.sz_comp = sz_comp;
+        mc_cuda::getWorkerPlanPool().global.nx = nx;
+        mc_cuda::getWorkerPlanPool().global.ny = ny;
+        mc_cuda::getWorkerPlanPool().global.device_id = device_id;
+        mc_cuda::getWorkerPlanPool().global.valid = true;
+
+        plan_r2c = mc_cuda::getWorkerPlanPool().global.plan_r2c;
+        plan_c2r = mc_cuda::getWorkerPlanPool().global.plan_c2r;
+        d_fft_work = fresh_work;
+        d_inverse_tile = fresh_tile;
+        has_plan_r2c = true;
+        has_plan_c2r = true;
+        plans_borrowed = true;
     }
     logfile << "Movie FFT: batch=1"
             << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
@@ -543,17 +602,38 @@ bool CudaMovieSession::initialize() {
 }
 
 void CudaMovieSession::release() {
+    // Drop all worker pools if the context was poisoned or failed during this session
+    struct ReleaseFailureGuard {
+        CudaFailureState &failure;
+        ~ReleaseFailureGuard() {
+            if (failure.isPoisoned() || failure.hasFailed()) {
+                mc_cuda::getWorkerPlanPool().dropAll(&failure);
+            }
+        }
+    } failure_guard{failure_state};
+
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
     (void)releasePatchAlignmentWorkspace();
-    if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
+    if (has_plan_r2c || has_plan_c2r || plan_patch_r2c != 0)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
-    // Destroy plans before their work areas; attempt all releases, even after error.
-    releasePlan(plan_patch_r2c, has_plan_patch_r2c);
-    releasePlan(plan_r2c, has_plan_r2c);
-    releasePlan(plan_c2r, has_plan_c2r);
-    releaseBuffer(d_fft_work);
-    releaseBuffer(d_inverse_tile);
+
+    if (!plans_borrowed) {
+        releasePlan(plan_r2c, has_plan_r2c);
+        releasePlan(plan_c2r, has_plan_c2r);
+        releaseBuffer(d_fft_work);
+        releaseBuffer(d_inverse_tile);
+    } else {
+        plan_r2c = 0;
+        has_plan_r2c = false;
+        plan_c2r = 0;
+        has_plan_c2r = false;
+        d_fft_work = nullptr;
+        d_inverse_tile = nullptr;
+    }
+    plan_patch_r2c = 0;
+    cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+
     releaseBuffer(d_Iframes);
     releaseBuffer(d_Fframes);
     releaseBuffer(d_Isum);
@@ -568,6 +648,7 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    mc_cuda::getWorkerPlanPool().releaseLease(this);
     is_initialized = false;
 }
 
@@ -1652,19 +1733,42 @@ bool CudaMovieSession::preparePatchInVram(
     );
     HANDLE_ERROR(cudaGetLastError());
 
-    // Reuse cached batched cuFFT plan for patch transforms
-    if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
-        // Same rule as the buffers above: drop the geometry the cache claims before
-        // destroying the plan, and publish the new one only once it exists.
+    // Reuse pooled/cached batched cuFFT plan for patch transforms across movies
+    const bool patch_plan_hit = mc_cuda::getWorkerPlanPool().patch.valid &&
+                                mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c != 0 &&
+                                mc_cuda::getWorkerPlanPool().patch.patch_w == patch_w &&
+                                mc_cuda::getWorkerPlanPool().patch.patch_h == patch_h &&
+                                mc_cuda::getWorkerPlanPool().patch.n_groups == n_groups &&
+                                mc_cuda::getWorkerPlanPool().patch.device_id == device_id;
+    if (patch_plan_hit) {
+        plan_patch_r2c = mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c;
+        cached_patch_w = patch_w;
+        cached_patch_h = patch_h;
+        cached_patch_ngroups = n_groups;
+    } else {
         cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
-        CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
-        CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
-        has_plan_patch_r2c = true;
+        plan_patch_r2c = 0;
+        if (!mc_cuda::getWorkerPlanPool().patch.drop(&failure_state)) return false;
+
+        cufftHandle raw_plan = 0;
+        CUFFT_CHECK(cufftCreate(&raw_plan));
+        mc_cuda::ScopedCufftPlan scoped_patch(&failure_state);
+        scoped_patch.take(raw_plan);
+
         int n[2] = {patch_h, patch_w};
         size_t work_bytes = 0;
-        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
-                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
-                                   &work_bytes));
+        CUFFT_CHECK(cufftMakePlanMany(raw_plan, 2, n, NULL, 1, patch_h * patch_w,
+                                      NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
+                                      &work_bytes));
+
+        mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c = scoped_patch.disown();
+        mc_cuda::getWorkerPlanPool().patch.patch_w = patch_w;
+        mc_cuda::getWorkerPlanPool().patch.patch_h = patch_h;
+        mc_cuda::getWorkerPlanPool().patch.n_groups = n_groups;
+        mc_cuda::getWorkerPlanPool().patch.device_id = device_id;
+        mc_cuda::getWorkerPlanPool().patch.valid = true;
+
+        plan_patch_r2c = mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c;
         cached_patch_w = patch_w;
         cached_patch_h = patch_h;
         cached_patch_ngroups = n_groups;

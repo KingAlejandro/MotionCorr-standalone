@@ -25,6 +25,9 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <atomic>
+
+static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
 #include "src/native_u16_staging.h"
@@ -1454,6 +1457,58 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
+const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
+	int nx, int ny,
+	const FileName &fn_defect,
+	const FileName &fn_gain_reference,
+	const MultidimArray<float> &Igain,
+	int n_threads
+) {
+	const bool premask_hit = defect_premask_valid &&
+	                         defect_premask_fn == fn_defect &&
+	                         defect_premask_gain_fn == fn_gain_reference &&
+	                         defect_premask_gain_gen == gain_cache_generation &&
+	                         defect_premask_nx == nx &&
+	                         defect_premask_ny == ny;
+	if (!premask_hit)
+	{
+		// Invalidate cache keys before any work to guarantee that an exception
+		// leaves no stale or corrupt premask advertised as valid.
+		defect_premask_valid = false;
+		defect_premask_fn = "";
+		defect_premask_gain_fn = "";
+		defect_premask_gain_gen = 0;
+		defect_premask_nx = 0;
+		defect_premask_ny = 0;
+		defect_premask.clear();
+
+		MultidimArray<bool> new_premask(ny, nx);
+		new_premask.initZeros();
+		if (fn_defect != "")
+		{
+			fillDefectMask(new_premask, fn_defect, n_threads);
+		}
+		if (fn_gain_reference != "")
+		{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
+			{
+				if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
+				{
+					DIRECT_MULTIDIM_ELEM(new_premask, n) = true;
+				}
+			}
+		}
+		defect_premask = new_premask;
+		defect_premask_fn = fn_defect;
+		defect_premask_gain_fn = fn_gain_reference;
+		defect_premask_gain_gen = gain_cache_generation;
+		defect_premask_nx = nx;
+		defect_premask_ny = ny;
+		defect_premask_valid = true;
+	}
+	return defect_premask;
+}
+
 const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERRenderer &renderer,
                                                               int nx, int ny)
 {
@@ -1482,7 +1537,7 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		gain_cache_ny = ny;
 		gain_cache_eer_upsampling = eer_upsampling;
 		gain_cache_filled = true;
-		++gain_cache_generation;
+		gain_cache_generation = s_global_gain_generation.fetch_add(1, std::memory_order_relaxed);
 	}
 	return gain_cache();
 }
@@ -1676,7 +1731,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies.
-		movie_session->setGainGeneration(gain_cache_generation);
+		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
@@ -2016,6 +2071,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 		// Attempt 0 uses GPU statistics; attempt 1 is the original host scan, run
 		// verbatim. Any exactness guard failure falls through to attempt 1.
+		std::vector<int> bad_xs, bad_ys;
 		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
 			bool used_gpu_stats = false;
@@ -2097,28 +2153,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
-			bBad.initZeros();
+			bBad = getDefectPremask(nx, ny, fn_defect, fn_gain_reference, Igain, n_threads);
+#ifdef DEBUG_HOTPIXELS
 			if (fn_defect != "")
 			{
-				fillDefectMask(bBad, fn_defect, n_threads);
-#ifdef DEBUG_HOTPIXELS
 				Image<RFLOAT> tmp(nx, ny);
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
 					DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
 				tmp.write("defect.mrc");
+			}
 #endif
-			}
-
-			if (fn_gain_reference != "")
-			{
-				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
-				{
-					if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
-					{
-						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
-					}
-				}
-			}
 
 			if (used_gpu_stats)
 			{
@@ -2147,6 +2191,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				}
 			}
 
+			bad_xs.clear();
+			bad_ys.clear();
+			bad_xs.reserve(1024);
+			bad_ys.reserve(1024);
+			FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				if (DIRECT_A2D_ELEM(bBad, i, j)) {
+					bad_xs.push_back(j);
+					bad_ys.push_back(i);
+				}
+
 			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
 			// If it is reachable, use the original host statistics rather than
 			// depending on a second floating-point error bound for RNG parameters.
@@ -2154,9 +2208,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			if (used_gpu_stats)
 			{
 				bool gaus_reachable = false;
-				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				for (size_t idx = 0; idx < bad_xs.size(); idx++)
 				{
-					if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+					const int i = bad_ys[idx];
+					const int j = bad_xs[idx];
 					int n_ok = 0;
 					for (int dy = -D_MAX; dy <= D_MAX && n_ok <= NUM_MIN_OK; dy++) {
 						int y = i + dy;
@@ -2202,14 +2257,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		init_random_generator(random_seed);
 
 		const int PBUF_SIZE = 100;
-		std::vector<int> bad_xs, bad_ys;
-		bad_xs.reserve(1024);
-		bad_ys.reserve(1024);
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
-			if (DIRECT_A2D_ELEM(bBad, i, j)) {
-				bad_xs.push_back(j);
-				bad_ys.push_back(i);
-			}
 #ifdef _CUDA_ENABLED
 		// The nvCOMP ingest never populates host frames, and the replacement loop
 		// only ever reads one neighbour per (defect, frame). Downloading the whole
@@ -2229,10 +2276,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
-		size_t bad_idx = 0;
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+		for (size_t bad_idx = 0; bad_idx < bad_xs.size(); bad_idx++)
 		{
-			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+			const int i = bad_ys[bad_idx];
+			const int j = bad_xs[bad_idx];
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
 #ifdef _CUDA_ENABLED
 			// n_ok is a property of the mask and the bounds, never of the pixel
@@ -2313,7 +2360,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = replacement;
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
-			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
 		if (sparse_neighbours && !bad_xs.empty()) {

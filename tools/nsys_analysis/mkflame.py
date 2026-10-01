@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Minimal self-contained flame graph renderer (folded stacks -> SVG)."""
-import sys, collections, html
+import sys, zlib, collections, html
 
 folded, out, title = sys.argv[1], sys.argv[2], sys.argv[3]
 inverted = len(sys.argv) > 4 and sys.argv[4] == "icicle"
+# optional 5th arg: cap rendered stack depth. Omitted => unchanged output,
+# so charts made without it stay byte-reproducible.
+MAXD = int(sys.argv[5]) if len(sys.argv) > 5 else None
 
 root = {"c": 0, "k": {}}
 total = 0
@@ -12,7 +15,10 @@ for ln in open(folded):
     if not ln: continue
     st, n = ln.rsplit(" ", 1); n = int(n); total += n
     node = root; node["c"] += n
-    for f in st.split(";"):
+    frames = st.split(";")
+    if MAXD is not None and len(frames) > MAXD:
+        frames = frames[:MAXD] + ["[... %d more frames]" % (len(frames) - MAXD)]
+    for f in frames:
         node = node["k"].setdefault(f, {"c": 0, "k": {}})
         node["c"] += n
 
@@ -42,7 +48,9 @@ def color(name, depth):
         base = (70, 110, 180)
     else:
         base = (150, 110, 70)
-    j = (hash(name) % 28) - 14
+    # zlib.crc32, not hash(): str hashing is salted per process (PYTHONHASHSEED),
+    # which made the rendered colours differ between identical runs.
+    j = (zlib.crc32(name.encode()) % 28) - 14
     return "#%02x%02x%02x" % tuple(max(0, min(255, v+j)) for v in base)
 
 o = []

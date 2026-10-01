@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="504" viewBox="0 0 1480 504" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">
+<rect width="1480" height="504" fill="#fcfcfb"/>
+<text x="16.0" y="32.0" font-size="18" fill="#0b0b0b" text-anchor="start" font-weight="bold">24 movies on one A100: what the ingest path is worth</text>
+<text x="16.0" y="52.0" font-size="11.5" fill="#52514e" text-anchor="start" font-weight="normal">Mean of 2 unprofiled runs each, same host, same 8-CPU mask, same 24 movies. Bars split by what the GPU was doing.</text>
+<text x="16.0" y="69.0" font-size="11.5" fill="#52514e" text-anchor="start" font-weight="normal">The three candidate arms are the SAME binary with --ingest forced, so the differences between them are the ingest path alone.</text>
+<rect x="16" y="86" width="12" height="12" rx="2" fill="#2a78d6" stroke="#c3c2b7" stroke-width="0.6"/>
+<text x="33.0" y="96.5" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">GPU kernel</text>
+<rect x="113.0" y="86" width="12" height="12" rx="2" fill="#eb6834" stroke="#c3c2b7" stroke-width="0.6"/>
+<text x="130.0" y="96.5" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">GPU transfer</text>
+<rect x="222.2" y="86" width="12" height="12" rx="2" fill="#e6e5e0" stroke="#c3c2b7" stroke-width="0.6"/>
+<text x="239.2" y="96.5" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">GPU idle (host-only work)</text>
+<line x1="206.0" y1="114" x2="206.0" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="206.0" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">0</text>
+<line x1="344.8" y1="114" x2="344.8" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="344.8" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">5</text>
+<line x1="483.6" y1="114" x2="483.6" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="483.6" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">10</text>
+<line x1="622.5" y1="114" x2="622.5" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="622.5" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">15</text>
+<line x1="761.3" y1="114" x2="761.3" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="761.3" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">20</text>
+<line x1="900.1" y1="114" x2="900.1" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="900.1" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">25</text>
+<line x1="1038.9" y1="114" x2="1038.9" y2="372" stroke="#c3c2b7" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>
+<text x="1038.9" y="108.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">30</text>
+<text x="678.0" y="90.0" font-size="10.5" fill="#898781" text-anchor="middle" font-weight="normal">wall-clock seconds for all 24 movies</text>
+<text x="196.0" y="146.0" font-size="12.5" fill="#0b0b0b" text-anchor="end" font-weight="normal">main @1d7e13f</text>
+<text x="196.0" y="161.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">31.7 / 31.0 s</text>
+<rect x="206" y="128" width="870.7" height="40" rx="3" fill="#e6e5e0" stroke="#c3c2b7" stroke-width="0.6"/>
+<rect x="206" y="128" width="72.8" height="40" rx="3" fill="#2a78d6"/>
+<rect x="280.3" y="128" width="100.0" height="40" rx="3" fill="#eb6834"/>
+<text x="212.0" y="153.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">2.6</text>
+<text x="285.8" y="153.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">3.6</text>
+<text x="1086.7" y="146.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">31.4 s</text>
+<text x="1464.0" y="146.0" font-size="11.5" fill="#52514e" text-anchor="end" font-weight="normal">34.2 GB over PCIe</text>
+<text x="1464.0" y="161.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">25470 kernel launches</text>
+<text x="196.0" y="212.0" font-size="12.5" fill="#0b0b0b" text-anchor="end" font-weight="normal">cand --ingest float</text>
+<text x="196.0" y="227.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">26.1 / 25.4 s</text>
+<rect x="206" y="194" width="714.9" height="40" rx="3" fill="#e6e5e0" stroke="#c3c2b7" stroke-width="0.6"/>
+<rect x="206" y="194" width="72.8" height="40" rx="3" fill="#2a78d6"/>
+<rect x="280.3" y="194" width="126.6" height="40" rx="3" fill="#eb6834"/>
+<text x="212.0" y="219.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">2.6</text>
+<text x="285.8" y="219.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">4.6</text>
+<text x="930.9" y="212.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">25.7 s</text>
+<text x="930.9" y="227.0" font-size="10.5" fill="#52514e" text-anchor="start" font-weight="normal">1.22x faster than main</text>
+<text x="1464.0" y="212.0" font-size="11.5" fill="#52514e" text-anchor="end" font-weight="normal">34.2 GB over PCIe</text>
+<text x="1464.0" y="227.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">25470 kernel launches</text>
+<text x="196.0" y="278.0" font-size="12.5" fill="#0b0b0b" text-anchor="end" font-weight="normal">cand --ingest compact</text>
+<text x="196.0" y="293.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">20.9 / 21.0 s</text>
+<rect x="206" y="260" width="581.5" height="40" rx="3" fill="#e6e5e0" stroke="#c3c2b7" stroke-width="0.6"/>
+<text x="797.5" y="278.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">20.9 s</text>
+<text x="797.5" y="293.0" font-size="10.5" fill="#52514e" text-anchor="start" font-weight="normal">1.50x faster than main</text>
+<text x="1464.0" y="278.0" font-size="10.5" fill="#898781" text-anchor="end" font-weight="normal">not traced</text>
+<text x="196.0" y="344.0" font-size="12.5" fill="#0b0b0b" text-anchor="end" font-weight="bold">cand --ingest nvcomp</text>
+<text x="196.0" y="359.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">12.8 / 12.6 s</text>
+<rect x="206" y="326" width="352.8" height="40" rx="3" fill="#e6e5e0" stroke="#c3c2b7" stroke-width="0.6"/>
+<rect x="206" y="326" width="89.2" height="40" rx="3" fill="#2a78d6"/>
+<rect x="296.7" y="326" width="32.4" height="40" rx="3" fill="#eb6834"/>
+<text x="212.0" y="351.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">3.2</text>
+<text x="302.2" y="351.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">1.2</text>
+<text x="568.8" y="344.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="bold">12.7 s</text>
+<text x="568.8" y="359.0" font-size="10.5" fill="#52514e" text-anchor="start" font-weight="normal">2.47x faster than main</text>
+<text x="1464.0" y="344.0" font-size="11.5" fill="#0b0b0b" text-anchor="end" font-weight="bold">4.6 GB over PCIe</text>
+<text x="1464.0" y="359.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">25542 kernel launches</text>
+<line x1="16" y1="430" x2="1464" y2="430" stroke="#c3c2b7" stroke-width="1"/>
+<text x="16.0" y="450.0" font-size="11.5" fill="#52514e" text-anchor="start" font-weight="normal">nvcomp wins twice. It moves Deflate decode onto the GPU (+0.59 s of inflate_kernel, 24 launches — one per movie),</text>
+<text x="16.0" y="466.0" font-size="11.5" fill="#52514e" text-anchor="start" font-weight="normal">and because the compressed strips go over PCIe instead of decompressed floats, H2D drops 34.2 GB → 4.6 GB (7.4x).</text>
+<text x="16.0" y="482.0" font-size="11.5" fill="#0b0b0b" text-anchor="start" font-weight="normal">Net: +0.59 s of GPU kernel buys −8.6 s of host decode and −2.4 s of transfer. CPU samples fall 93,399 → 21,685.</text>
+</svg>

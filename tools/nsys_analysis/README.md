@@ -98,9 +98,19 @@ python3 vram_json.py     p3.sqlite vram.json     && python3 mkvram.py     out.sv
 python3 folded.py p9.sqlite f.folded main        && python3 mkflame.py    f.folded out.svg "title"
 ```
 
+For a multi-arm comparison (e.g. 24 movies across ingest paths), `arms24_json.py` folds
+several sqlite exports into one payload that `mkarms24.py`, `mktl24.py` and `mkvram24.py`
+all read; `cmp24.py` prints the same comparison as a table. `mkflame.py` takes an optional
+5th argument capping rendered stack depth, for traces with a few very deep stacks.
+
 `vram_json.py` needs a capture taken with `--cuda-memory-usage=true`. Colours are the
 validated default data-viz palette (blue `#2a78d6` kernel, orange `#eb6834` transfer,
-neutral idle). Rasterise with headless Chrome — `qlmanage` pads SVGs to a square:
+neutral idle). Chart rendering is deterministic: the same folded/JSON input gives a byte-identical SVG.
+`mkflame.py` originally jittered colours with `hash()`, which Python salts per process
+(`PYTHONHASHSEED`), so successive runs differed; it uses `zlib.crc32` now. If you add a
+renderer, avoid `hash()` on strings for anything that reaches the output.
+
+Rasterise with headless Chrome — `qlmanage` pads SVGs to a square:
 
 ```sh
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \

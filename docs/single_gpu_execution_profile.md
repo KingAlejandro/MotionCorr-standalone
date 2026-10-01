@@ -3,7 +3,9 @@
 **Date** 2026-10-01 · **Host** `4GPUs` (4-gpu-vm), CPU mask `96-103`, THP `madvise`
 **Device** GPU 0 = `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, A100 80GB PCIe, 108 SMs, driver 570.86.10, CUDA 12.8
 **Source** `main` @ `1d7e13f` (tree `fbe9469`, clean) · **Build** Release `-O3`, `sm_80`, `-lineinfo`, `-g -fno-omit-frame-pointer`
-**Workload** 1 movie `20170629_00022_frameImage.tiff` (3838×5760, 24 frames), canonical options:
+**Workload** sections 1–7: 1 movie `20170629_00022_frameImage.tiff` (3838×5760, 24 frames).
+Section 8: all 24 tutorial movies, with the unmerged nvcomp ingest candidate alongside.
+Canonical options:
 `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8`
 
 Every run took `flock /tmp/motioncorr-bench.lock` and passed a settle gate
@@ -41,7 +43,8 @@ Unprofiled baseline wall, 3 reps each, same binary source:
 
 ## 2. The headline
 
-**The GPU is idle for 83 % of the run.** Not because the kernels are bad — because
+**The GPU is idle for 83 % of the run.** (Section 8 repeats this at 24 movies, where it
+is 84 %.) Not because the kernels are bad — because
 almost nothing in the pipeline is on the GPU, and what is on it runs strictly serially.
 
 | | one movie |
@@ -223,9 +226,105 @@ or tuning the small kernels (<1 ms total).
 because 00021 is documented as unrepresentative. Items 1–5 are per-movie costs and
 should scale; the ghostscript 790 ms is per-job and must not be counted per movie.
 
+**Read this list against section 8 before acting on it.** At 24 movies the ranking
+changes. The unmerged nvcomp ingest path already takes the largest single win — moving
+Deflate decode to the GPU, 2.47x end to end — and it does so partly by cutting PCIe
+traffic 7.4x, which overlaps with item 1 here: pinning buys much less once there are
+4.6 GB to move instead of 34.2 GB. Items 2, 3 and 5 are untouched by it and still stand,
+and item 5 gets *more* valuable, not less, because the OpenMP spin becomes a fifth of a
+much smaller CPU total.
+
 ---
 
-## 8. Artifacts and how to reproduce
+## 8. The same job at 24 movies, and what the ingest path is worth
+
+Everything above is one movie. At dataset scale the per-job costs amortise and a
+different lever dominates. Measured the same day, same host, same 8-CPU mask, same 24
+tutorial movies, 2 unprofiled runs per arm:
+
+| arm | wall, 24 movies | per movie | vs main |
+|---|---|---|---|
+| `main` @ `1d7e13f` | 31.7 / 31.0 s | 1.50 s (median, traced) | — |
+| cand `--ingest float` | 26.1 / 25.4 s | | 1.22x |
+| cand `--ingest compact` | 20.9 / 21.0 s | | 1.50x |
+| cand `--ingest nvcomp` | **12.8 / 12.6 s** | 0.627 s (median, traced) | **2.47x** |
+
+`main` has no `--ingest` option at all; the three candidate arms are the **same binary**
+with the path forced, so the differences between them are the ingest path alone. One
+movie costs 2.55 s standalone but 1.29 s inside a 24-movie job — the ~790 ms of
+ghostscript is per *job*, and the CUDA context and cuFFT modules stay warm.
+
+![24-movie arm comparison](profiling_20261001/charts24/arms24.png)
+
+**nvcomp wins twice, and the second way is the larger one.** It moves Deflate decode onto
+the GPU — `inflate_kernel`, 24 launches, one per movie, 568 ms total, present in the
+nvcomp trace and in no other. And because the *compressed* strips cross PCIe instead of
+decompressed floats, **H2D drops from 34.2 GB to 4.6 GB (7.4x)** and transfer time from
+3.60 s to 1.17 s. Net: **+0.59 s of GPU kernel buys −8.6 s of host decode and −2.4 s of
+transfer.**
+
+![24-movie GPU timeline](profiling_20261001/charts24/timeline24.png)
+
+Steady state is 1.50 s/movie on main against 0.627 s/movie with nvcomp. Movie 1 costs
++0.28 s / +0.43 s over median in the two arms — the SM clock ramps from 210 MHz with
+persistence mode off, and the page cache is cold. The 2.42 s spike at movie 15 is
+main-lane only; the same movie is dead-median (0.634 s) in the nvcomp lane, so it is a
+transient in that run rather than a property of the movie.
+
+The GPU lane gets *denser*, not just shorter: busy share rises 16% → 26%. It is still
+idle three-quarters of the time.
+
+### The flame graph is where it is most obvious
+
+![24-movie flame graph, main](profiling_20261001/charts24/flamegraph24_main.png)
+![24-movie flame graph, nvcomp](profiling_20261001/charts24/flamegraph24_nvcomp.png)
+
+Identical sampling rate, so the sample counts are directly comparable:
+
+| | main | nvcomp |
+|---|---|---|
+| total CPU samples | 93,399 | **21,685** |
+| in `libdeflate` | 54,003 (57.8%) | **1 (0.0%)** |
+| with `libtiff` on stack | 55,540 (59.5%) | 3,857 (17.8%) |
+| with `libgomp` on stack | 63,767 (68.3%) | 5,909 (27.2%) |
+
+Deflate decompression is gone, and it accounts for 75% of the 71,714 CPU samples
+eliminated. This is the §3 finding at dataset scale: `libdeflate` was the single largest
+consumer of CPU time, and moving it to the device is the largest available win.
+
+**It also makes an earlier recommendation more urgent, not less.** `libgomp` holds 4,435
+self samples in the nvcomp arm against 4,808 on main — essentially unchanged in absolute
+terms, but now **20.5% of a four-times-smaller total**. The idle OpenMP workers spinning
+through the serial GPU phases were 5% of main's CPU; after nvcomp they are a fifth of it.
+
+### Device memory across the job
+
+![24-movie device memory](profiling_20261001/charts24/vram24.png)
+
+24 complete allocate/release cycles — the ~3 GiB reservation is built and torn down once
+per movie and never pooled, though its size is identical every time. Measured directly on
+the 24-movie trace, session setup plus teardown is **283 ms per movie (median), 7.0 s
+across the traced job**. (The one-movie figures of ~250 ms in and ~192 ms out would
+extrapolate to ~10.6 s; they do not, because the CUDA context and cuFFT modules are
+already warm after movie 1. The unprofiled run is 19% shorter overall, so the real figure
+is nearer 5–7 s.) nvcomp peaks 0.15 GiB higher (3.13 vs 2.98 GiB) for the compressed
+strips and inflate scratch. Neither arm exceeds 4% of an 80 GB card.
+
+### What this does and does not establish
+
+- The candidate branch (`src-cand`, HEAD `abd6827`) is **unmerged**. Nothing here is a
+  claim about its correctness, parity or readiness — only about where its time goes.
+- The float-vs-compact-vs-nvcomp comparison is clean (one binary, flag forced). The
+  `main` → candidate step is **not** attributable to any single change: the branch
+  differs in more than ingest, and the 31.4 → 25.7 s gap between main and the float arm
+  is that residue, not nvcomp.
+- `--ingest auto` is the default and already selects nvcomp on a `USE_NVCOMP=ON` build,
+  so "default vs `--ingest nvcomp`" is **not** a control — both measured 12.6 s. The
+  controls that isolate the path are `--ingest float` and `--ingest compact`.
+
+---
+
+## 9. Artifacts and how to reproduce
 
 All charts are committed as both SVG (interactive tooltips, re-renderable) and PNG.
 
@@ -242,6 +341,12 @@ All charts are committed as both SVG (interactive tooltips, re-renderable) and P
 | `profiling_20261001/data/ncu_summary.txt` | per-kernel hardware counters |
 | `profiling_20261001/data/flame_main.folded` | folded stacks |
 | `profiling_20261001/data/*.json` | chart inputs |
+| `profiling_20261001/charts24/arms24.*` | 24-movie ingest-path comparison |
+| `profiling_20261001/charts24/timeline24.*` | 24-movie GPU lanes, three arms |
+| `profiling_20261001/charts24/flamegraph24_{main,nvcomp}.*` | 24-movie CPU flame graphs |
+| `profiling_20261001/charts24/vram24.*` | 24-movie device memory |
+| `profiling_20261001/data24/arms24.json` | input for all three 24-movie charts |
+| `profiling_20261001/data24/flame24_*.folded` | 24-movie folded stacks |
 
 The analysis scripts are in [`tools/nsys_analysis/`](../tools/nsys_analysis/) and are
 parameterised — they take an nsys SQLite export (or the ncu CSV) as an argument and work
@@ -252,7 +357,15 @@ against any MotionCorr profile, not just this one. The three charts here regener
 python3 tools/nsys_analysis/mktimeline.py out.svg docs/profiling_20261001/data/timeline_p8.json
 python3 tools/nsys_analysis/mkvram.py     out.svg docs/profiling_20261001/data/vram.json
 python3 tools/nsys_analysis/mkflame.py docs/profiling_20261001/data/flame_main.folded out.svg "title"
+python3 tools/nsys_analysis/mkarms24.py out.svg docs/profiling_20261001/data24/arms24.json
+python3 tools/nsys_analysis/mktl24.py   out.svg docs/profiling_20261001/data24/arms24.json
+python3 tools/nsys_analysis/mkvram24.py out.svg docs/profiling_20261001/data24/arms24.json
 ```
+
+All seven charts were re-rendered from the committed data and `cmp`-checked. One fix was
+needed to get there: `mkflame.py` jittered its colours with `hash()`, which Python salts
+per process, so the flame graphs were not reproducible between runs. It now uses
+`zlib.crc32`.
 
 See [`tools/nsys_analysis/README.md`](../tools/nsys_analysis/README.md) for the full
 capture recipe, including the `sudo`-scoped profiling needed on hosts with

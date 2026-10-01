@@ -334,6 +334,19 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        # Actual session transforms, ordered tile preservation and retained errors
+        # when an immediate API failure follows already queued FFT work.
+        add_executable(cuda_global_fft_sync tests/cuda_global_fft_sync.cpp)
+        target_link_libraries(cuda_global_fft_sync PRIVATE motioncorr_core)
+        target_link_options(cuda_global_fft_sync PRIVATE
+            "LINKER:--wrap=cudaDeviceSynchronize"
+            "LINKER:--wrap=cudaPeekAtLastError"
+            "LINKER:--wrap=cudaMemcpy"
+            "LINKER:--wrap=cufftExecR2C"
+            "LINKER:--wrap=cufftExecC2R")
+        add_test(NAME CudaGlobalFftSync COMMAND cuda_global_fft_sync)
+        set_tests_properties(CudaGlobalFftSync PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

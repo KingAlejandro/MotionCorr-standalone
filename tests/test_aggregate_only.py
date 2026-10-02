@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import shutil
 import subprocess
+import struct
 import tempfile
 from pathlib import Path
 
@@ -48,11 +49,38 @@ def run(binary: Path, tmp: Path, out: Path, extra: list[str] = [], env=None):
                           cwd=tmp, text=True, capture_output=True, env=env)
 
 
+def literal_controls(binary, tmp):
+    original=(tmp/'in.star').read_text()
+    (tmp/'in.star').write_text(original.replace('Movies/b.tiff','Movies/b[1].tiff'))
+    shutil.copyfile(tmp/'Movies/b.tiff',tmp/'Movies/b[1].tiff')
+    out=tmp/'literal-baseline';r=run(binary,tmp,out)
+    require(r.returncode==0,'literal movie processing fixture failed: '+r.stderr)
+    literal=out/'Movies/b[1]_shifts.eps';stale=out/'Movies/b1_shifts.eps'
+    expected=[str(literal),str(out/'Movies/a_shifts.eps')]
+    failures=[]
+    for mode in ['literal-only','stale-match','missing-literal']:
+        if mode=='stale-match':shutil.copyfile(literal,stale)
+        if mode=='missing-literal':literal.unlink()
+        for name in ['corrected_micrographs.star','logfile.pdf']:
+            (out/name).unlink(missing_ok=True)
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only'])
+        if mode=='missing-literal':
+            ok=r.returncode>0 and not (out/'corrected_micrographs.star').exists() and 'b[1]' in r.stderr
+        else:
+            ok=r.returncode==0 and (out/'batch.pdf.lst').read_text().splitlines()==expected
+        ok=ok and products(out)==before
+        print(('PASS ' if ok else 'FAIL ')+'strict '+mode+' selects/refuses exact original literal movie path')
+        if not ok:failures.append(mode+': '+r.stderr[-800:])
+    (tmp/'in.star').write_text(original)
+    require(not failures,'literal report selection controls: '+str(failures))
+
+
 def main() -> int:
     import os
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
+    ap.add_argument('--only',choices=['literal'])
     ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
     a = ap.parse_args()
     binary = a.binary.resolve()
@@ -76,6 +104,8 @@ def main() -> int:
         baseline = tmp/'baseline'
         control = run(binary,tmp,baseline)
         require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
+        if a.only=='literal':literal_controls(binary,tmp);return 0
+        literal_controls(binary,tmp)
         before = products(baseline)
         # A stale unrelated plot must not be admitted by a directory wildcard.
         (baseline/'Movies/unassigned.eps').write_text('%!PS\nshowpage\n')

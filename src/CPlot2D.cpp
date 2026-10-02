@@ -37,10 +37,15 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps,
     bool have_at_least_one = false;
     for (int i = 0; i < fn_eps.size(); i++)
     {
-        // fn_eps[i] could be a Linux wildcard...
+        // Strict aggregation supplies literal movie paths in input order.
+        // Legacy callers retain wildcard expansion for their batch expressions.
     	std::vector<FileName> all_eps_files;
-        fn_eps[i].globFiles(all_eps_files);
-        if (strict && all_eps_files.empty()) REPORT_ERROR("Missing aggregate EPS: " + fn_eps[i]);
+        if (strict) {
+            if (!exists(fn_eps[i])) REPORT_ERROR("Missing aggregate EPS: " + fn_eps[i]);
+            all_eps_files.push_back(fn_eps[i]);
+        } else {
+            fn_eps[i].globFiles(all_eps_files);
+        }
         for (long int j= 0; j < all_eps_files.size(); j++)
         {
         	if (exists(all_eps_files[j]))

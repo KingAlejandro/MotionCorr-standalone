@@ -238,6 +238,35 @@ route. It is a single cold-binary first run — the candidate executable's first
 execution of the campaign — and the per-movie table above shows the same arm
 3.0% *faster* in steady state. §4.4 measures it directly.
 
+### 4.4 Paired process wall, 9 repeats
+
+Six movies per run, arm order alternating between repeats, both binaries built
+from scratch in the same lock acquisition. Positive delta = the branch is
+faster.
+
+| variant | route change | n | main median | branch median | delta median | delta range | branch faster |
+|---|---|---|---|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp → nvcomp | 8 | 4.62 s | 4.90 s | **−0.00 s** | −0.76 .. +0.45 | 4/8 |
+| `u8_lzw_rps1` | float → compact | 8 | 8.87 s | 6.24 s | **+2.41 s** (−27%) | +1.90 .. +3.38 | 8/8 |
+| `u8_deflate_rps1` | float → nvcomp | 8 | 8.63 s | 4.49 s | **+4.05 s** (−48%) | +3.37 .. +4.41 | 8/8 |
+| `u16_deflate_rps8` | compact → nvcomp | 7 | 7.05 s | 4.69 s | **+2.32 s** (−33%) | +1.73 .. +3.09 | 7/7 |
+
+The null control sits at zero with the pairs split 4/8, so the series has no
+systematic arm bias; the three changed arms are unanimous with no overlap
+between their ranges and the null's.
+
+An earlier 5-repeat series put the same null control 0.5-1.0 s against the
+branch in both orders. That was a cold-binary artifact: the baseline had been
+built hours earlier and the candidate was an incremental rebuild first executed
+during the series. Rebuilding both arms from scratch in one lock acquisition
+removed it, and the per-movie figures in §4.1 showed no device-side difference
+at any point. The earlier series is superseded, not reconciled.
+
+Process wall and per-movie wall disagree by design: a six-movie run spends
+about a second on process and CUDA-context startup, which §4.1 excludes and
+this table includes. Both are reported because both are real — the first is
+what a small job costs, the second is what scales.
+
 ### 4.3 Transcoding as an operational mode
 
 Measured on one core of the same host with `imagecodecs`, which wraps the same

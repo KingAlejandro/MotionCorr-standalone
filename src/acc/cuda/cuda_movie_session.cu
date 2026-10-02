@@ -134,17 +134,32 @@ __global__ void convertGainAndAccumulateNativeKernel(
 // back reproduces the same left-to-right float accumulation order as the
 // single-launch whole-movie kernel. Re-associating it per batch would not.
 //
-// src_row_stride_u16 is the padded row pitch of the staging arena in uint16 elements,
-// not nx: nvCOMP requires each per-chunk output pointer to meet its own alignment,
-// and nx*2 bytes is not guaranteed to be a multiple of it.
-__global__ void fusedU16FlipGainAndSumKernel(
-    const uint16_t *src_u16,
+// Source addressing is by strip, not by row. One TIFF strip holds rows_per_strip
+// consecutive rows and is one independent Deflate stream, so it is one nvCOMP
+// chunk with one output pointer that must meet the library's output alignment;
+// rows inside a strip are then plain row_bytes apart with no padding, because
+// they are inside a single decompressed buffer. strip_pitch_bytes is the padded
+// distance between consecutive strips' output slots.
+//
+// For the one-row-per-strip case this reduces to the previous arithmetic exactly:
+// rows_per_strip is 1, the strip index is the row index and strip_pitch_bytes is
+// the padded row pitch. The last strip of a frame may be short; it is never read
+// past ny, so its rows are addressed the same way as any other strip's.
+//
+// T is the file's own unsigned sample type. (float)T is exact for 8- and 16-bit
+// unsigned samples, so the converted value is the one castPage2T produces on the
+// host; signed sample types are refused by the eligibility gate, not here.
+template <typename T>
+__global__ void fusedNativeFlipGainAndSumKernel(
+    const T *src,
     float *dst_Iframes,
     float *dst_Isum,
     const float *d_gain,
     int nx,
     int ny,
-    size_t src_row_stride_u16,
+    int rows_per_strip,
+    int strips_per_frame,
+    size_t strip_pitch_bytes,
     int frame_offset,
     int batch_frames,
     bool first_batch,
@@ -155,13 +170,19 @@ __global__ void fusedU16FlipGainAndSumKernel(
     if (x >= (size_t)nx || dest_y >= (size_t)ny) return;
 
     const size_t dest_pixel = dest_y * (size_t)nx + x;
-    const size_t src_y = (size_t)(ny - 1 - dest_y);
+    const int src_y = ny - 1 - (int)dest_y;
+    const int strip = src_y / rows_per_strip;
+    const int row_in_strip = src_y - strip * rows_per_strip;
+    const size_t row_bytes = (size_t)nx * sizeof(T);
     const float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
     float sum = first_batch ? 0.0f : dst_Isum[dest_pixel];
 
+    const unsigned char *base = (const unsigned char *)src;
     for (int b = 0; b < batch_frames; b++) {
-        const size_t src_idx = ((size_t)b * (size_t)ny + src_y) * src_row_stride_u16 + x;
-        const float val = (float)src_u16[src_idx] * gain_val;
+        const size_t off = ((size_t)b * (size_t)strips_per_frame + (size_t)strip)
+                               * strip_pitch_bytes
+                           + (size_t)row_in_strip * row_bytes;
+        const float val = (float)(*(const T *)(base + off + x * sizeof(T))) * gain_val;
         dst_Iframes[((size_t)(frame_offset + b) * (size_t)ny + dest_y) * (size_t)nx + x] = val;
         sum += val;
     }
@@ -180,17 +201,29 @@ __global__ void fusedU16FlipGainAndSumKernel(
 // One block per strip. The serial recurrence is avoided by using the closed forms
 //   A = 1 + sum(d_i),   B = n + sum((n - i) * d_i)
 // which are ordinary reductions; the modulo is applied once at the end. The
-// weighted sum needs 64 bits: for a 7420-byte row it reaches ~1.4e10.
+// weighted sum needs 64 bits: for a 7420-byte row it reaches ~1.4e10, and for a
+// multi-row strip it scales with the strip, so the bound is restated against
+// strip_bytes rather than a row.
+//
+// The length is per chunk, not global: the last strip of a frame holds
+// ny % rows_per_strip rows when that is non-zero. Checksumming the full strip
+// length there would read padding bytes nvCOMP never wrote and fail every
+// movie whose height is not a multiple of its RowsPerStrip.
 __global__ void adler32StripsKernel(
     const unsigned char *decomp_base,
-    size_t row_pitch_bytes,
-    size_t row_bytes,
+    size_t strip_pitch_bytes,
+    size_t full_strip_bytes,
+    size_t last_strip_bytes,
+    int strips_per_frame,
     uint32_t *out_adler,
     size_t n_chunks
 ) {
     const size_t chunk = blockIdx.x;
     if (chunk >= n_chunks) return;
-    const unsigned char *row = decomp_base + chunk * row_pitch_bytes;
+    const unsigned char *row = decomp_base + chunk * strip_pitch_bytes;
+    const int strip_in_frame = (int)(chunk % (size_t)strips_per_frame);
+    const size_t row_bytes =
+        (strip_in_frame == strips_per_frame - 1) ? last_strip_bytes : full_strip_bytes;
 
     unsigned long long sum_d = 0, sum_w = 0;
     for (size_t i = threadIdx.x; i < row_bytes; i += blockDim.x) {
@@ -1110,6 +1143,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // a single byte is staged.
     // ------------------------------------------------------------------
     std::vector<std::vector<uint32_t> > raw_sizes(num_req_frames);
+    // Filled from the first directory and required equal on every later one.
+    int bytes_per_sample = 0;
+    int rows_per_strip = 0;
+    int strips_per_frame = 0;
     {
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
@@ -1140,31 +1177,59 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             // path hands the inflated bytes straight to the cast, so predictor 2
             // would silently produce differences instead of samples.
             if (predictor != PREDICTOR_NONE)             reject = "TIFFTAG_PREDICTOR != 1";
-            // The cast kernel reads uint16. Signed or float samples of the same
-            // width would be reinterpreted rather than converted.
+            // The cast kernel reads an unsigned integer sample. Signed or float
+            // samples of the same width would be reinterpreted rather than converted.
             else if (sample_format != SAMPLEFORMAT_UINT) reject = "TIFFTAG_SAMPLEFORMAT != UINT";
             else if (fill_order != FILLORDER_MSB2LSB)    reject = "non-native TIFFTAG_FILLORDER";
+            // Also what keeps IMOD's packed 4-bit K2/K3 format out: rwTIFF doubles
+            // the logical width for it, so the session's nx is twice the stored
+            // TIFFTAG_IMAGEWIDTH and this comparison fails.
             else if ((int)width != nx || (int)height != ny) reject = "frame geometry differs";
-            else if (bits != 16)                         reject = "bits per sample != 16";
+            else if (bits != 16 && bits != 8)            reject = "bits per sample is not 8 or 16";
             else if (samples != 1)                       reject = "samples per pixel != 1";
             else if (planar != PLANARCONFIG_CONTIG)      reject = "planar configuration not contiguous";
             else if (compression != COMPRESSION_DEFLATE &&
                      compression != COMPRESSION_ADOBE_DEFLATE) reject = "compression is not Deflate";
             if (reject) break;
-            // One row per strip is what makes a strip a self-contained Deflate stream
-            // of exactly nx uint16 samples. Anything else changes the chunk geometry.
-            if ((int)TIFFNumberOfStrips(tif) != ny ||
-                TIFFStripSize(tif) != (tmsize_t)((size_t)nx * sizeof(uint16_t))) {
-                reject = "strip layout is not one full row per strip";
+
+            // Strip geometry. Each TIFF strip is one self-contained Deflate
+            // stream, whatever its row count, so it maps to exactly one nvCOMP
+            // chunk; the only thing RowsPerStrip changes is how many rows that
+            // chunk decodes to. Nothing here concatenates or splits a stream.
+            uint32_t rps_tag = 0;
+            TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rps_tag);
+            // LibTIFF reports (uint32)-1 for "the whole image in one strip".
+            const int rps = (rps_tag == 0 || rps_tag > (uint32_t)ny) ? ny : (int)rps_tag;
+            const int n_strips = (ny + rps - 1) / rps;
+            const int last_rows = ny - (n_strips - 1) * rps;
+            if (f == 0) {
+                bytes_per_sample = bits / 8;
+                rows_per_strip = rps;
+                strips_per_frame = n_strips;
+            } else if (bits / 8 != bytes_per_sample || rps != rows_per_strip) {
+                // The staging layout and both kernels are planned once for the
+                // movie, so a directory that changed either would be decoded
+                // against the wrong geometry.
+                reject = "sample width or RowsPerStrip differs between frames";
                 break;
             }
-            raw_sizes[f].resize(ny);
-            for (int s = 0; s < ny; s++) {
+            // TIFFStripSize reports the size of a full strip; the final one is
+            // short whenever ny is not a multiple of RowsPerStrip, and
+            // TIFFVStripSize is the row-count-aware form.
+            if ((int)TIFFNumberOfStrips(tif) != n_strips ||
+                TIFFStripSize(tif) != (tmsize_t)((size_t)rps * (size_t)nx * (size_t)bytes_per_sample) ||
+                TIFFVStripSize(tif, last_rows) !=
+                    (tmsize_t)((size_t)last_rows * (size_t)nx * (size_t)bytes_per_sample)) {
+                reject = "strip layout does not match RowsPerStrip x width x sample width";
+                break;
+            }
+            raw_sizes[f].resize(n_strips);
+            for (int s = 0; s < n_strips; s++) {
                 const tmsize_t rs = TIFFRawStripSize(tif, s);
                 if (rs < 7 || (uint64_t)rs > 0xFFFFFFFFull) { ok = false; break; }
                 raw_sizes[f][s] = (uint32_t)rs;
             }
-            if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
+            if (!ok || (int)raw_sizes[f].size() != n_strips) { ok = false; break; }
         }
         TIFFClose(tif);
         if (reject) {
@@ -1190,13 +1255,18 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         return false;
     }
     const size_t in_align  = std::max<size_t>((size_t)align_req.input, 1);
-    const size_t out_align = std::max<size_t>((size_t)align_req.output, sizeof(uint16_t));
+    const size_t out_align = std::max<size_t>((size_t)align_req.output, (size_t)bytes_per_sample);
     const size_t tmp_align = std::max<size_t>((size_t)align_req.temp, 256);
 
-    const size_t row_bytes = (size_t)nx * sizeof(uint16_t);
-    const size_t row_pitch_bytes = alignUp(row_bytes, out_align);
-    if (row_pitch_bytes % sizeof(uint16_t) != 0) return false;
-    const size_t row_pitch_u16 = row_pitch_bytes / sizeof(uint16_t);
+    const size_t row_bytes = (size_t)nx * (size_t)bytes_per_sample;
+    const size_t full_strip_bytes = (size_t)rows_per_strip * row_bytes;
+    const int last_strip_rows = ny - (strips_per_frame - 1) * rows_per_strip;
+    const size_t last_strip_bytes = (size_t)last_strip_rows * row_bytes;
+    // Only strip starts are padded. Rows inside a strip are consecutive in the
+    // single buffer nvCOMP writes for that chunk, so the kernel's row step is
+    // row_bytes and only the strip step carries the alignment.
+    const size_t strip_pitch_bytes = alignUp(full_strip_bytes, out_align);
+    if (strip_pitch_bytes % (size_t)bytes_per_sample != 0) return false;
 
     // Compressed bytes a single frame occupies once every payload is placed so that
     // its raw Deflate start (strip start + 2) is in_align-aligned.
@@ -1259,7 +1329,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 
     // Views into the arena. None of these owns memory; none may be freed.
     struct BatchViews {
-        uint8_t *comp; uint16_t *u16;
+        uint8_t *comp; uint8_t *native;
         void **cptr; size_t *csize; void **dptr; size_t *dsize; size_t *asize;
         nvcompStatus_t *status; uint32_t *adler; void *temp;
         size_t comp_capacity, temp_bytes;
@@ -1269,10 +1339,10 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     int batch_frames = 0;
 
     for (int candidate = n_frames; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
-        const size_t chunks = (size_t)candidate * (size_t)ny;
+        const size_t chunks = (size_t)candidate * (size_t)strips_per_frame;
         size_t temp_bytes = 0;
         if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
-                chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
+                chunks, full_strip_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
                 &temp_bytes, (size_t)candidate * (size_t)ny * row_bytes) != nvcompSuccess) {
             break;
         }
@@ -1289,7 +1359,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         }
         c.temp_bytes = temp_bytes;
         c.comp   = (uint8_t *)arena.alloc(c.comp_capacity, in_align);
-        c.u16    = (uint16_t *)arena.alloc((size_t)candidate * (size_t)ny * row_pitch_bytes, out_align);
+        c.native = (uint8_t *)arena.alloc(
+            (size_t)candidate * (size_t)strips_per_frame * strip_pitch_bytes, out_align);
         c.cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
         c.csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
         c.dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
@@ -1297,7 +1368,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         c.asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
         c.status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
         c.adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
-        bool fits = c.comp && c.u16 && c.cptr && c.csize && c.dptr && c.dsize && c.asize
+        bool fits = c.comp && c.native && c.cptr && c.csize && c.dptr && c.dsize && c.asize
                     && c.status && c.adler;
         if (fits && temp_bytes) {
             c.temp = arena.alloc(temp_bytes, tmp_align);
@@ -1319,7 +1390,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // decodes correctly often enough to pass a pixel comparison.
     if (((uintptr_t)v.comp % in_align) != 0) return false;
 
-    logfile << "nvCOMP ingestion: batch=" << batch_frames << "/" << n_frames
+    logfile << "nvCOMP ingestion: " << (bytes_per_sample * 8) << "-bit samples, "
+            << rows_per_strip << " rows/strip x " << strips_per_frame << " strips, batch="
+            << batch_frames << "/" << n_frames
             << " frames, scratch=" << arena.used() << "/" << arena.capacity()
             << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
             << ", pinned staging=" << mc_tiff_deflate::pinnedReserveBytes(v.comp_capacity)
@@ -1333,11 +1406,16 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     if (!ensurePinnedStage(v.comp_capacity)) return false;
     uint8_t *const h_stage = (uint8_t *)t_pinned_stage.ptr;
 
-    const size_t max_chunks = (size_t)batch_frames * (size_t)ny;
+    const size_t max_chunks = (size_t)batch_frames * (size_t)strips_per_frame;
     std::vector<void *>         h_comp_ptrs(max_chunks);
     std::vector<size_t>         h_comp_size(max_chunks);
     std::vector<void *>         h_dec_ptrs(max_chunks);
-    std::vector<size_t>         h_dec_size(max_chunks, row_bytes);
+    // Per chunk: the last strip of each frame is short whenever ny is not a
+    // multiple of RowsPerStrip. Declaring the full size for it would ask nvCOMP
+    // for more output than the stream holds and then check the wrong length.
+    std::vector<size_t>         h_dec_size(max_chunks, full_strip_bytes);
+    for (size_t c = (size_t)strips_per_frame - 1; c < max_chunks; c += (size_t)strips_per_frame)
+        h_dec_size[c] = last_strip_bytes;
     std::vector<size_t>         h_act_size(max_chunks);
     std::vector<nvcompStatus_t> h_statuses(max_chunks);
     std::vector<uint32_t>       h_adler_expected(max_chunks);
@@ -1359,7 +1437,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // ------------------------------------------------------------------
     for (int f0 = 0; f0 < n_frames; f0 += batch_frames) {
         const int bf = std::min(batch_frames, n_frames - f0);
-        const size_t chunks = (size_t)bf * (size_t)ny;
+        const size_t chunks = (size_t)bf * (size_t)strips_per_frame;
 
         std::vector<size_t> frame_base(bf);
         size_t stage_used = 0;
@@ -1395,7 +1473,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                     uint8_t *fb = h_stage + frame_base[i];
                     size_t cursor = 0;
                     bool ok = true;
-                    for (int s = 0; s < ny && ok; s++) {
+                    for (int s = 0; s < strips_per_frame && ok; s++) {
                         const size_t raw_sz = raw_sizes[f][s];
                         const size_t slot = stripSlotOffset(cursor, in_align);
                         if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)raw_sz) != (tmsize_t)raw_sz) {
@@ -1413,12 +1491,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                             ok = false;
                             break;
                         }
-                        const size_t chunk = (size_t)i * (size_t)ny + (size_t)s;
+                        const size_t chunk = (size_t)i * (size_t)strips_per_frame + (size_t)s;
                         // Payload only: the 2-byte zlib header and the 4-byte Adler32
                         // trailer are not part of the RFC 1951 stream nvCOMP consumes.
                         h_comp_ptrs[chunk] = v.comp + frame_base[i] + slot + 2;
                         h_comp_size[chunk] = raw_sz - 6;
-                        h_dec_ptrs[chunk]  = (uint8_t *)v.u16 + chunk * row_pitch_bytes;
+                        h_dec_ptrs[chunk]  = (uint8_t *)v.native + chunk * strip_pitch_bytes;
                         // Stored Adler-32: the last four bytes of the strip, big-endian.
                         const uint8_t *tr = fb + slot + raw_sz - 4;
                         h_adler_expected[chunk] = ((uint32_t)tr[0] << 24) | ((uint32_t)tr[1] << 16) |
@@ -1448,7 +1526,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         // cudaMalloc garbage on the first batch, would be cast to float, gain-applied
         // and aligned as if it were image data, and the function would return success.
         adler32StripsKernel<<<(unsigned)chunks, 256, 0, stream>>>(
-            (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, v.adler, chunks);
+            (const unsigned char *)v.native, strip_pitch_bytes, full_strip_bytes,
+            last_strip_bytes, strips_per_frame, v.adler, chunks);
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
@@ -1463,10 +1542,14 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                         << "; falling back to the host reader." << std::endl;
                 return false;
             }
-            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
+            // Against this chunk's own declared length, not a single movie-wide
+            // one: with multi-row strips the final strip of every frame is short,
+            // and comparing it against the full strip size would reject every
+            // healthy movie whose height is not a multiple of RowsPerStrip.
+            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != h_dec_size[c]) {
                 logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
                         << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]
-                        << " bytes=" << h_act_size[c] << " expected=" << row_bytes
+                        << " bytes=" << h_act_size[c] << " expected=" << h_dec_size[c]
                         << "; falling back to the host reader." << std::endl;
                 return false;
             }
@@ -1474,9 +1557,17 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 
         dim3 block(16, 16);
         dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
-        fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
-            v.u16, d_Iframes, d_Isum, d_gain, nx, ny, row_pitch_u16,
-            f0, bf, f0 == 0, apply_gain);
+        if (bytes_per_sample == 2) {
+            fusedNativeFlipGainAndSumKernel<uint16_t><<<grid, block, 0, stream>>>(
+                (const uint16_t *)v.native, d_Iframes, d_Isum, d_gain, nx, ny,
+                rows_per_strip, strips_per_frame, strip_pitch_bytes,
+                f0, bf, f0 == 0, apply_gain);
+        } else {
+            fusedNativeFlipGainAndSumKernel<uint8_t><<<grid, block, 0, stream>>>(
+                (const uint8_t *)v.native, d_Iframes, d_Isum, d_gain, nx, ny,
+                rows_per_strip, strips_per_frame, strip_pitch_bytes,
+                f0, bf, f0 == 0, apply_gain);
+        }
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaStreamSynchronize(stream));
     }

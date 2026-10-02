@@ -1,0 +1,1688 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="512" viewBox="0 0 1600 512" font-family="Helvetica,Arial,sans-serif">
+<rect width="1600" height="512" fill="#ffffff"/>
+<text x="800" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">MotionCorr a6_final - CPU samples, 24 movies (nsys --sample=process-tree --backtrace=fp)</text>
+<text x="800" y="38" text-anchor="middle" font-size="11" fill="#666">14876 wall-clock CPU samples &#183; width = share of CPU time</text>
+<g><title>all &#8212; 14876 samples (100.00%)</title><rect x="10.00" y="485" width="1580.00" height="16" fill="#997149" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="497" font-size="11" fill="#fff">all</text>
+</g>
+<g><title>motioncorr &#8212; 14876 samples (100.00%)</title><rect x="10.00" y="468" width="1580.00" height="16" fill="#946c44" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="480" font-size="11" fill="#fff">motioncorr</text>
+</g>
+<g><title>[Broken backtraces] &#8212; 14846 samples (99.80%)</title><rect x="10.00" y="451" width="1576.81" height="16" fill="#6c6c80" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="463" font-size="11" fill="#fff">[Broken backtraces]</text>
+</g>
+<g><title>_start &#8212; 7428 samples (49.93%)</title><rect x="10.00" y="434" width="788.94" height="16" fill="#8f673f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="446" font-size="11" fill="#fff">_start</text>
+</g>
+<g><title>__libc_start_main &#8212; 7428 samples (49.93%)</title><rect x="10.00" y="417" width="788.94" height="16" fill="#8e663e" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="429" font-size="11" fill="#fff">__libc_start_main</text>
+</g>
+<g><title>[libc.so.6] &#8212; 7427 samples (49.93%)</title><rect x="10.00" y="400" width="788.83" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="412" font-size="11" fill="#fff">[libc.so.6]</text>
+</g>
+<g><title>main &#8212; 7419 samples (49.87%)</title><rect x="10.00" y="383" width="787.98" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="395" font-size="11" fill="#fff">main</text>
+</g>
+<g><title>MotioncorrRunner::run &#8212; 7121 samples (47.87%)</title><rect x="10.00" y="366" width="756.33" height="16" fill="#446cb2" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="378" font-size="11" fill="#fff">MotioncorrRunner::run</text>
+</g>
+<g><title>MotioncorrRunner::executeOwnMotionCorrection &#8212; 5361 samples (36.04%)</title><rect x="10.00" y="349" width="569.40" height="16" fill="#3c64aa" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="361" font-size="11" fill="#fff">MotioncorrRunner::executeOwnMotionCorrection</text>
+</g>
+<g><title>cudaAlignPatchDeviceWithWorkspace &#8212; 1745 samples (11.73%)</title><rect x="10.00" y="332" width="185.34" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="344" font-size="11" fill="#fff">cudaAlignPatchDeviceWithWork…</text>
+</g>
+<g><title>cudaEventRecord &#8212; 668 samples (4.49%)</title><rect x="10.00" y="315" width="70.95" height="16" fill="#389c60" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="327" font-size="11" fill="#fff">cudaEvent…</text>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 528 samples (3.55%)</title><rect x="10.00" y="298" width="56.08" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="310" font-size="11" fill="#fff">[libcud…</text>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 514 samples (3.46%)</title><rect x="10.00" y="281" width="54.59" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="13.00" y="293" font-size="11" fill="#fff">[libcud…</text>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 239 samples (1.61%)</title><rect x="10.00" y="264" width="25.38" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 134 samples (0.90%)</title><rect x="10.00" y="247" width="14.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 36 samples (0.24%)</title><rect x="10.00" y="230" width="3.82" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__libc_malloc &#8212; 15 samples (0.10%)</title><rect x="24.23" y="247" width="1.59" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 8 samples (0.05%)</title><rect x="24.23" y="230" width="0.85" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 7 samples (0.05%)</title><rect x="25.83" y="247" width="0.74" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 38 samples (0.26%)</title><rect x="35.38" y="264" width="4.04" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 8 samples (0.05%)</title><rect x="39.42" y="264" width="0.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 7 samples (0.05%)</title><rect x="40.27" y="264" width="0.74" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_rwlock_wrlock &#8212; 4 samples (0.03%)</title><rect x="41.01" y="264" width="0.42" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 134 samples (0.90%)</title><rect x="66.08" y="298" width="14.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 129 samples (0.87%)</title><rect x="66.08" y="281" width="13.70" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 103 samples (0.69%)</title><rect x="66.08" y="264" width="10.94" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 96 samples (0.65%)</title><rect x="66.08" y="247" width="10.20" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 93 samples (0.63%)</title><rect x="66.08" y="230" width="9.88" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 93 samples (0.63%)</title><rect x="66.08" y="213" width="9.88" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 84 samples (0.56%)</title><rect x="66.08" y="196" width="8.92" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 84 samples (0.56%)</title><rect x="66.08" y="179" width="8.92" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="75.00" y="196" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 4 samples (0.03%)</title><rect x="76.28" y="247" width="0.42" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 4 samples (0.03%)</title><rect x="77.02" y="264" width="0.42" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventSynchronize &#8212; 316 samples (2.12%)</title><rect x="80.95" y="315" width="33.56" height="16" fill="#35995d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 214 samples (1.44%)</title><rect x="80.95" y="298" width="22.73" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 213 samples (1.43%)</title><rect x="80.95" y="281" width="22.62" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 77 samples (0.52%)</title><rect x="80.95" y="264" width="8.18" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 61 samples (0.41%)</title><rect x="80.95" y="247" width="6.48" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 58 samples (0.39%)</title><rect x="80.95" y="230" width="6.16" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 58 samples (0.39%)</title><rect x="80.95" y="213" width="6.16" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 58 samples (0.39%)</title><rect x="80.95" y="196" width="6.16" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 54 samples (0.36%)</title><rect x="80.95" y="179" width="5.74" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 54 samples (0.36%)</title><rect x="80.95" y="162" width="5.74" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="86.68" y="179" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 18 samples (0.12%)</title><rect x="89.13" y="264" width="1.91" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 18 samples (0.12%)</title><rect x="89.13" y="247" width="1.91" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 17 samples (0.11%)</title><rect x="89.13" y="230" width="1.81" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 17 samples (0.11%)</title><rect x="89.13" y="213" width="1.81" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 6 samples (0.04%)</title><rect x="91.04" y="264" width="0.64" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 101 samples (0.68%)</title><rect x="103.68" y="298" width="10.73" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 101 samples (0.68%)</title><rect x="103.68" y="281" width="10.73" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 80 samples (0.54%)</title><rect x="103.68" y="264" width="8.50" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 77 samples (0.52%)</title><rect x="103.68" y="247" width="8.18" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 76 samples (0.51%)</title><rect x="103.68" y="230" width="8.07" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 76 samples (0.51%)</title><rect x="103.68" y="213" width="8.07" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 70 samples (0.47%)</title><rect x="103.68" y="196" width="7.43" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 70 samples (0.47%)</title><rect x="103.68" y="179" width="7.43" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="111.11" y="196" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_getspecific &#8212; 4 samples (0.03%)</title><rect x="112.18" y="264" width="0.42" height="16" fill="#976f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 287 samples (1.93%)</title><rect x="114.51" y="315" width="30.48" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 235 samples (1.58%)</title><rect x="114.51" y="298" width="24.96" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 233 samples (1.57%)</title><rect x="114.51" y="281" width="24.75" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 52 samples (0.35%)</title><rect x="114.51" y="264" width="5.52" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 11 samples (0.07%)</title><rect x="114.51" y="247" width="1.17" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 11 samples (0.07%)</title><rect x="114.51" y="230" width="1.17" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 10 samples (0.07%)</title><rect x="114.51" y="213" width="1.06" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 10 samples (0.07%)</title><rect x="114.51" y="196" width="1.06" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 10 samples (0.07%)</title><rect x="114.51" y="179" width="1.06" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 10 samples (0.07%)</title><rect x="114.51" y="162" width="1.06" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 8 samples (0.05%)</title><rect x="115.68" y="247" width="0.85" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 14 samples (0.09%)</title><rect x="120.03" y="264" width="1.49" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 7 samples (0.05%)</title><rect x="121.52" y="264" width="0.74" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 7 samples (0.05%)</title><rect x="121.52" y="247" width="0.74" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 7 samples (0.05%)</title><rect x="121.52" y="230" width="0.74" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="122.27" y="264" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="122.27" y="247" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="122.27" y="230" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="122.27" y="213" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 52 samples (0.35%)</title><rect x="139.47" y="298" width="5.52" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 51 samples (0.34%)</title><rect x="139.47" y="281" width="5.42" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 39 samples (0.26%)</title><rect x="139.47" y="264" width="4.14" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 37 samples (0.25%)</title><rect x="139.47" y="247" width="3.93" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 36 samples (0.24%)</title><rect x="139.47" y="230" width="3.82" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 36 samples (0.24%)</title><rect x="139.47" y="213" width="3.82" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 33 samples (0.22%)</title><rect x="139.47" y="196" width="3.50" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 33 samples (0.22%)</title><rect x="139.47" y="179" width="3.50" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 280 samples (1.88%)</title><rect x="144.99" y="315" width="29.74" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 231 samples (1.55%)</title><rect x="144.99" y="298" width="24.53" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 220 samples (1.48%)</title><rect x="144.99" y="281" width="23.37" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 75 samples (0.50%)</title><rect x="144.99" y="264" width="7.97" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 10 samples (0.07%)</title><rect x="144.99" y="247" width="1.06" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__libc_malloc &#8212; 6 samples (0.04%)</title><rect x="146.06" y="247" width="0.64" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 20 samples (0.13%)</title><rect x="152.96" y="264" width="2.12" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 6 samples (0.04%)</title><rect x="155.08" y="264" width="0.64" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 42 samples (0.28%)</title><rect x="169.53" y="298" width="4.46" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 42 samples (0.28%)</title><rect x="169.53" y="281" width="4.46" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 32 samples (0.22%)</title><rect x="169.53" y="264" width="3.40" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 32 samples (0.22%)</title><rect x="169.53" y="247" width="3.40" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 32 samples (0.22%)</title><rect x="169.53" y="230" width="3.40" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 32 samples (0.22%)</title><rect x="169.53" y="213" width="3.40" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 27 samples (0.18%)</title><rect x="169.53" y="196" width="2.87" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 27 samples (0.18%)</title><rect x="169.53" y="179" width="2.87" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="172.40" y="196" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventElapsedTime &#8212; 120 samples (0.81%)</title><rect x="174.73" y="315" width="12.75" height="16" fill="#41a569" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 82 samples (0.55%)</title><rect x="174.73" y="298" width="8.71" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 78 samples (0.52%)</title><rect x="174.73" y="281" width="8.28" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 23 samples (0.15%)</title><rect x="174.73" y="264" width="2.44" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 32 samples (0.22%)</title><rect x="183.44" y="298" width="3.40" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 30 samples (0.20%)</title><rect x="183.44" y="281" width="3.19" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 14 samples (0.09%)</title><rect x="183.44" y="264" width="1.49" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 14 samples (0.09%)</title><rect x="183.44" y="247" width="1.49" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 14 samples (0.09%)</title><rect x="183.44" y="230" width="1.49" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 14 samples (0.09%)</title><rect x="183.44" y="213" width="1.49" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 13 samples (0.09%)</title><rect x="183.44" y="196" width="1.38" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 13 samples (0.09%)</title><rect x="183.44" y="179" width="1.38" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 4 samples (0.03%)</title><rect x="184.93" y="264" width="0.42" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaGetLastError &#8212; 23 samples (0.15%)</title><rect x="187.48" y="315" width="2.44" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 21 samples (0.14%)</title><rect x="187.48" y="298" width="2.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 21 samples (0.14%)</title><rect x="187.48" y="281" width="2.23" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 14 samples (0.09%)</title><rect x="187.48" y="264" width="1.49" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 12 samples (0.08%)</title><rect x="187.48" y="247" width="1.27" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 12 samples (0.08%)</title><rect x="187.48" y="230" width="1.27" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 12 samples (0.08%)</title><rect x="187.48" y="213" width="1.27" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 10 samples (0.07%)</title><rect x="187.48" y="196" width="1.06" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 10 samples (0.07%)</title><rect x="187.48" y="179" width="1.06" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 17 samples (0.11%)</title><rect x="189.92" y="315" width="1.81" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 13 samples (0.09%)</title><rect x="189.92" y="298" width="1.38" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 13 samples (0.09%)</title><rect x="189.92" y="281" width="1.38" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="191.30" y="298" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 4 samples (0.03%)</title><rect x="191.30" y="281" width="0.42" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream::flush &#8212; 16 samples (0.11%)</title><rect x="191.73" y="315" width="1.70" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::sync &#8212; 16 samples (0.11%)</title><rect x="191.73" y="298" width="1.70" height="16" fill="#956d45" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::overflow &#8212; 15 samples (0.10%)</title><rect x="191.73" y="281" width="1.59" height="16" fill="#997149" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::_M_convert_to_exter &#8212; 15 samples (0.10%)</title><rect x="191.73" y="264" width="1.59" height="16" fill="#966e46" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::__basic_file&lt;char&gt;::xsputn &#8212; 15 samples (0.10%)</title><rect x="191.73" y="247" width="1.59" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__write &#8212; 15 samples (0.10%)</title><rect x="191.73" y="230" width="1.59" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 15 samples (0.10%)</title><rect x="191.73" y="213" width="1.59" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 15 samples (0.10%)</title><rect x="191.73" y="196" width="1.59" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 8 samples (0.05%)</title><rect x="193.43" y="315" width="0.85" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 6 samples (0.04%)</title><rect x="194.28" y="315" width="0.64" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 5 samples (0.03%)</title><rect x="194.28" y="298" width="0.53" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 5 samples (0.03%)</title><rect x="194.28" y="281" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__vsnprintf &#8212; 4 samples (0.03%)</title><rect x="194.28" y="264" width="0.42" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="194.28" y="247" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::ingestMovie &#8212; 1130 samples (7.60%)</title><rect x="195.34" y="332" width="120.02" height="16" fill="#3b63a9" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="344" font-size="11" fill="#fff">CudaMovieSession::…</text>
+</g>
+<g><title>CudaMovieSession::ingestCompressedTiffStrips &#8212; 1127 samples (7.58%)</title><rect x="195.34" y="315" width="119.70" height="16" fill="#456db3" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="327" font-size="11" fill="#fff">CudaMovieSession:…</text>
+</g>
+<g><title>cudaMemcpyAsync &#8212; 492 samples (3.31%)</title><rect x="195.34" y="298" width="52.26" height="16" fill="#369a5e" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="310" font-size="11" fill="#fff">cudaMe…</text>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 489 samples (3.29%)</title><rect x="195.34" y="281" width="51.94" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="293" font-size="11" fill="#fff">[libcu…</text>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 489 samples (3.29%)</title><rect x="195.34" y="264" width="51.94" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="276" font-size="11" fill="#fff">[libcu…</text>
+</g>
+<g><title>__clock_gettime &#8212; 405 samples (2.72%)</title><rect x="195.34" y="247" width="43.02" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="259" font-size="11" fill="#fff">__clo…</text>
+</g>
+<g><title>[vdso] &#8212; 397 samples (2.67%)</title><rect x="195.34" y="230" width="42.17" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="242" font-size="11" fill="#fff">[vdso]</text>
+</g>
+<g><title>[Unknown] &#8212; 342 samples (2.30%)</title><rect x="195.34" y="213" width="36.32" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="225" font-size="11" fill="#fff">[Unk…</text>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 342 samples (2.30%)</title><rect x="195.34" y="196" width="36.32" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="198.34" y="208" font-size="11" fill="#fff">[ker…</text>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 44 samples (0.30%)</title><rect x="231.66" y="213" width="4.67" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 9 samples (0.06%)</title><rect x="238.35" y="247" width="0.96" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="239.31" y="247" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 6 samples (0.04%)</title><rect x="239.31" y="230" width="0.64" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 6 samples (0.04%)</title><rect x="239.31" y="213" width="0.64" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="239.31" y="196" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>GOMP_parallel &#8212; 381 samples (2.56%)</title><rect x="247.59" y="298" width="40.47" height="16" fill="#8b633b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="250.59" y="310" font-size="11" fill="#fff">GOMP…</text>
+</g>
+<g><title>CudaMovieSession::ingestCompressedTiffStrips &#8212; 380 samples (2.55%)</title><rect x="247.59" y="281" width="40.36" height="16" fill="#456db3" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="250.59" y="293" font-size="11" fill="#fff">Cuda…</text>
+</g>
+<g><title>[libc.so.6] &#8212; 289 samples (1.94%)</title><rect x="247.59" y="264" width="30.70" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 11 samples (0.07%)</title><rect x="247.59" y="247" width="1.17" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 11 samples (0.07%)</title><rect x="247.59" y="230" width="1.17" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="248.76" y="247" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libgomp.so.1.0.0] &#8212; 34 samples (0.23%)</title><rect x="278.29" y="264" width="3.61" height="16" fill="#b18925" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 11 samples (0.07%)</title><rect x="281.90" y="264" width="1.17" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetDirectory &#8212; 6 samples (0.04%)</title><rect x="283.07" y="264" width="0.64" height="16" fill="#da6c44" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 6 samples (0.04%)</title><rect x="283.07" y="247" width="0.64" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 5 samples (0.03%)</title><rect x="283.07" y="230" width="0.53" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libgomp.so.1.0.0] &#8212; 79 samples (0.53%)</title><rect x="288.06" y="298" width="8.39" height="16" fill="#b18925" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetDirectory &#8212; 27 samples (0.18%)</title><rect x="296.45" y="298" width="2.87" height="16" fill="#da6c44" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 26 samples (0.17%)</title><rect x="296.45" y="281" width="2.76" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 19 samples (0.13%)</title><rect x="296.45" y="264" width="2.02" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>qsort_r &#8212; 4 samples (0.03%)</title><rect x="296.45" y="247" width="0.42" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="296.45" y="230" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetField &#8212; 7 samples (0.05%)</title><rect x="298.47" y="264" width="0.74" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 7 samples (0.05%)</title><rect x="298.47" y="247" width="0.74" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>qsort_r &#8212; 7 samples (0.05%)</title><rect x="298.47" y="230" width="0.74" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 7 samples (0.05%)</title><rect x="298.47" y="213" width="0.74" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaStreamSynchronize &#8212; 26 samples (0.17%)</title><rect x="299.32" y="298" width="2.76" height="16" fill="#41a569" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 26 samples (0.17%)</title><rect x="299.32" y="281" width="2.76" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 26 samples (0.17%)</title><rect x="299.32" y="264" width="2.76" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 21 samples (0.14%)</title><rect x="299.32" y="247" width="2.23" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 21 samples (0.14%)</title><rect x="299.32" y="230" width="2.23" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 18 samples (0.12%)</title><rect x="299.32" y="213" width="1.91" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 18 samples (0.12%)</title><rect x="299.32" y="196" width="1.91" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFOpenExt &#8212; 19 samples (0.13%)</title><rect x="302.08" y="298" width="2.02" height="16" fill="#db6d45" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFFdOpenExt &#8212; 18 samples (0.12%)</title><rect x="302.08" y="281" width="1.91" height="16" fill="#d3653d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFClientOpenExt &#8212; 16 samples (0.11%)</title><rect x="302.08" y="264" width="1.70" height="16" fill="#c65830" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 14 samples (0.09%)</title><rect x="302.08" y="247" width="1.49" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetField &#8212; 8 samples (0.05%)</title><rect x="302.08" y="230" width="0.85" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 7 samples (0.05%)</title><rect x="302.08" y="213" width="0.74" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>qsort_r &#8212; 5 samples (0.03%)</title><rect x="302.08" y="196" width="0.53" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 5 samples (0.03%)</title><rect x="302.08" y="179" width="0.53" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 6 samples (0.04%)</title><rect x="302.93" y="230" width="0.64" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 15 samples (0.10%)</title><rect x="304.10" y="298" width="1.59" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title> &#8212; 13 samples (0.09%)</title><rect x="305.69" y="298" width="1.38" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 13 samples (0.09%)</title><rect x="305.69" y="281" width="1.38" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 12 samples (0.08%)</title><rect x="305.69" y="264" width="1.27" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 12 samples (0.08%)</title><rect x="305.69" y="247" width="1.27" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 10 samples (0.07%)</title><rect x="305.69" y="230" width="1.06" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 10 samples (0.07%)</title><rect x="305.69" y="213" width="1.06" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 10 samples (0.07%)</title><rect x="305.69" y="196" width="1.06" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 10 samples (0.07%)</title><rect x="305.69" y="179" width="1.06" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::ensureDeviceGain &#8212; 10 samples (0.07%)</title><rect x="307.07" y="298" width="1.06" height="16" fill="#436bb1" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 10 samples (0.07%)</title><rect x="307.07" y="281" width="1.06" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 10 samples (0.07%)</title><rect x="307.07" y="264" width="1.06" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 10 samples (0.07%)</title><rect x="307.07" y="247" width="1.06" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFRawStripSize &#8212; 9 samples (0.06%)</title><rect x="308.14" y="298" width="0.96" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFRawStripSize64 &#8212; 7 samples (0.05%)</title><rect x="308.14" y="281" width="0.74" height="16" fill="#ce6038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 5 samples (0.03%)</title><rect x="308.14" y="264" width="0.53" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="309.09" y="298" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 4 samples (0.03%)</title><rect x="309.52" y="298" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::reconstructDoseWeighted &#8212; 988 samples (6.64%)</title><rect x="315.36" y="332" width="104.94" height="16" fill="#5179bf" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="318.36" y="344" font-size="11" fill="#fff">CudaMovieSessio…</text>
+</g>
+<g><title>cudaDoseWeightAndInterpolateDevice &#8212; 988 samples (6.64%)</title><rect x="315.36" y="315" width="104.94" height="16" fill="#48ac70" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="318.36" y="327" font-size="11" fill="#fff">cudaDoseWeightA…</text>
+</g>
+<g><title>cudaMemcpy &#8212; 358 samples (2.41%)</title><rect x="315.36" y="298" width="38.02" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="318.36" y="310" font-size="11" fill="#fff">cuda…</text>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 340 samples (2.29%)</title><rect x="315.36" y="281" width="36.11" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="318.36" y="293" font-size="11" fill="#fff">[lib…</text>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 339 samples (2.28%)</title><rect x="315.36" y="264" width="36.01" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="318.36" y="276" font-size="11" fill="#fff">[lib…</text>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 32 samples (0.22%)</title><rect x="315.36" y="247" width="3.40" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 7 samples (0.05%)</title><rect x="315.36" y="230" width="0.74" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 7 samples (0.05%)</title><rect x="315.36" y="213" width="0.74" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 7 samples (0.05%)</title><rect x="315.36" y="196" width="0.74" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 7 samples (0.05%)</title><rect x="315.36" y="179" width="0.74" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 7 samples (0.05%)</title><rect x="315.36" y="162" width="0.74" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 7 samples (0.05%)</title><rect x="315.36" y="145" width="0.74" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__libc_malloc &#8212; 4 samples (0.03%)</title><rect x="316.10" y="230" width="0.42" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 25 samples (0.17%)</title><rect x="318.76" y="247" width="2.66" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 18 samples (0.12%)</title><rect x="351.47" y="281" width="1.91" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 18 samples (0.12%)</title><rect x="351.47" y="264" width="1.91" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 16 samples (0.11%)</title><rect x="351.47" y="247" width="1.70" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 16 samples (0.11%)</title><rect x="351.47" y="230" width="1.70" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 16 samples (0.11%)</title><rect x="351.47" y="213" width="1.70" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 16 samples (0.11%)</title><rect x="351.47" y="196" width="1.70" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 15 samples (0.10%)</title><rect x="351.47" y="179" width="1.59" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 15 samples (0.10%)</title><rect x="351.47" y="162" width="1.59" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventSynchronize &#8212; 325 samples (2.18%)</title><rect x="353.38" y="298" width="34.52" height="16" fill="#35995d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 279 samples (1.88%)</title><rect x="353.38" y="281" width="29.63" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 279 samples (1.88%)</title><rect x="353.38" y="264" width="29.63" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 187 samples (1.26%)</title><rect x="353.38" y="247" width="19.86" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 185 samples (1.24%)</title><rect x="353.38" y="230" width="19.65" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 163 samples (1.10%)</title><rect x="353.38" y="213" width="17.31" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 163 samples (1.10%)</title><rect x="353.38" y="196" width="17.31" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 19 samples (0.13%)</title><rect x="370.69" y="213" width="2.02" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 35 samples (0.24%)</title><rect x="373.24" y="247" width="3.72" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 29 samples (0.19%)</title><rect x="373.24" y="230" width="3.08" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 28 samples (0.19%)</title><rect x="373.24" y="213" width="2.97" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 28 samples (0.19%)</title><rect x="373.24" y="196" width="2.97" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 28 samples (0.19%)</title><rect x="373.24" y="179" width="2.97" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 25 samples (0.17%)</title><rect x="373.24" y="162" width="2.66" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 25 samples (0.17%)</title><rect x="373.24" y="145" width="2.66" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 9 samples (0.06%)</title><rect x="376.96" y="247" width="0.96" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="376.96" y="230" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="377.92" y="247" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="377.92" y="230" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="377.92" y="213" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="377.92" y="196" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 46 samples (0.31%)</title><rect x="383.01" y="281" width="4.89" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 46 samples (0.31%)</title><rect x="383.01" y="264" width="4.89" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 35 samples (0.24%)</title><rect x="383.01" y="247" width="3.72" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 32 samples (0.22%)</title><rect x="383.01" y="230" width="3.40" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 32 samples (0.22%)</title><rect x="383.01" y="213" width="3.40" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 32 samples (0.22%)</title><rect x="383.01" y="196" width="3.40" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 31 samples (0.21%)</title><rect x="383.01" y="179" width="3.29" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 31 samples (0.21%)</title><rect x="383.01" y="162" width="3.29" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventRecord &#8212; 108 samples (0.73%)</title><rect x="387.90" y="298" width="11.47" height="16" fill="#389c60" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 76 samples (0.51%)</title><rect x="387.90" y="281" width="8.07" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 72 samples (0.48%)</title><rect x="387.90" y="264" width="7.65" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 39 samples (0.26%)</title><rect x="387.90" y="247" width="4.14" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 21 samples (0.14%)</title><rect x="387.90" y="230" width="2.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 9 samples (0.06%)</title><rect x="387.90" y="213" width="0.96" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__libc_malloc &#8212; 4 samples (0.03%)</title><rect x="390.13" y="230" width="0.42" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="392.04" y="247" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 29 samples (0.19%)</title><rect x="395.97" y="281" width="3.08" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 28 samples (0.19%)</title><rect x="395.97" y="264" width="2.97" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 23 samples (0.15%)</title><rect x="395.97" y="247" width="2.44" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 22 samples (0.15%)</title><rect x="395.97" y="230" width="2.34" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 20 samples (0.13%)</title><rect x="395.97" y="213" width="2.12" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 20 samples (0.13%)</title><rect x="395.97" y="196" width="2.12" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 20 samples (0.13%)</title><rect x="395.97" y="179" width="2.12" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 20 samples (0.13%)</title><rect x="395.97" y="162" width="2.12" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventElapsedTime &#8212; 51 samples (0.34%)</title><rect x="399.37" y="298" width="5.42" height="16" fill="#41a569" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 30 samples (0.20%)</title><rect x="399.37" y="281" width="3.19" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 28 samples (0.19%)</title><rect x="399.37" y="264" width="2.97" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="399.37" y="247" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 17 samples (0.11%)</title><rect x="402.56" y="281" width="1.81" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 17 samples (0.11%)</title><rect x="402.56" y="264" width="1.81" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 11 samples (0.07%)</title><rect x="402.56" y="247" width="1.17" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 11 samples (0.07%)</title><rect x="402.56" y="230" width="1.17" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 11 samples (0.07%)</title><rect x="402.56" y="213" width="1.17" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 11 samples (0.07%)</title><rect x="402.56" y="196" width="1.17" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 11 samples (0.07%)</title><rect x="402.56" y="179" width="1.17" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 11 samples (0.07%)</title><rect x="402.56" y="162" width="1.17" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 38 samples (0.26%)</title><rect x="404.79" y="298" width="4.04" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 38 samples (0.26%)</title><rect x="404.79" y="281" width="4.04" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 38 samples (0.26%)</title><rect x="404.79" y="264" width="4.04" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>ioctl &#8212; 10 samples (0.07%)</title><rect x="404.79" y="247" width="1.06" height="16" fill="#8c643c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 9 samples (0.06%)</title><rect x="404.79" y="230" width="0.96" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="404.79" y="213" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>applyDoseWeightKernel &#8212; 35 samples (0.24%)</title><rect x="408.82" y="298" width="3.72" height="16" fill="#8c643c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 35 samples (0.24%)</title><rect x="408.82" y="281" width="3.72" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 30 samples (0.20%)</title><rect x="408.82" y="264" width="3.19" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 30 samples (0.20%)</title><rect x="408.82" y="247" width="3.19" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 8 samples (0.05%)</title><rect x="408.82" y="230" width="0.85" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="412.01" y="264" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="412.01" y="247" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 5 samples (0.03%)</title><rect x="412.01" y="230" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="412.01" y="213" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="412.01" y="196" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="412.01" y="179" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 4 samples (0.03%)</title><rect x="412.01" y="162" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="412.01" y="145" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>interpolateAndAccumulatePolynomialKernel &#8212; 16 samples (0.11%)</title><rect x="412.54" y="298" width="1.70" height="16" fill="#a27a52" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 16 samples (0.11%)</title><rect x="412.54" y="281" width="1.70" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 13 samples (0.09%)</title><rect x="412.54" y="264" width="1.38" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 13 samples (0.09%)</title><rect x="412.54" y="247" width="1.38" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="412.54" y="230" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>mc_cuda::ScopedDeviceMemory&lt;8&gt;::releaseAll &#8212; 12 samples (0.08%)</title><rect x="414.24" y="298" width="1.27" height="16" fill="#8e663e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaFree &#8212; 12 samples (0.08%)</title><rect x="414.24" y="281" width="1.27" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 11 samples (0.07%)</title><rect x="414.24" y="264" width="1.17" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 11 samples (0.07%)</title><rect x="414.24" y="247" width="1.17" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>mc_cuda::ScopedCudaEvents&lt;8&gt;::releaseAll &#8212; 12 samples (0.08%)</title><rect x="415.51" y="298" width="1.27" height="16" fill="#8e663e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventDestroy &#8212; 12 samples (0.08%)</title><rect x="415.51" y="281" width="1.27" height="16" fill="#3da165" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 10 samples (0.07%)</title><rect x="415.51" y="264" width="1.06" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 9 samples (0.06%)</title><rect x="415.51" y="247" width="0.96" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 6 samples (0.04%)</title><rect x="415.51" y="230" width="0.64" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 6 samples (0.04%)</title><rect x="415.51" y="213" width="0.64" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 6 samples (0.04%)</title><rect x="415.51" y="196" width="0.64" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 6 samples (0.04%)</title><rect x="415.51" y="179" width="0.64" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="415.51" y="162" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="415.51" y="145" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaGetLastError &#8212; 7 samples (0.05%)</title><rect x="416.79" y="298" width="0.74" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 6 samples (0.04%)</title><rect x="416.79" y="281" width="0.64" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 6 samples (0.04%)</title><rect x="416.79" y="264" width="0.64" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventCreate &#8212; 6 samples (0.04%)</title><rect x="417.53" y="298" width="0.64" height="16" fill="#32965a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemset &#8212; 6 samples (0.04%)</title><rect x="418.17" y="298" width="0.64" height="16" fill="#3a9e62" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 5 samples (0.03%)</title><rect x="418.17" y="281" width="0.53" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="418.17" y="264" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>computeDoseNormalizationKernel &#8212; 5 samples (0.03%)</title><rect x="418.81" y="298" width="0.53" height="16" fill="#8b633b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 5 samples (0.03%)</title><rect x="418.81" y="281" width="0.53" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaAlignPatchDevice &#8212; 263 samples (1.77%)</title><rect x="420.29" y="332" width="27.93" height="16" fill="#48ac70" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaAlignPatchDeviceWithWorkspace &#8212; 238 samples (1.60%)</title><rect x="420.29" y="315" width="25.28" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventSynchronize &#8212; 91 samples (0.61%)</title><rect x="420.29" y="298" width="9.67" height="16" fill="#35995d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 84 samples (0.56%)</title><rect x="420.29" y="281" width="8.92" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 84 samples (0.56%)</title><rect x="420.29" y="264" width="8.92" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 68 samples (0.46%)</title><rect x="420.29" y="247" width="7.22" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 66 samples (0.44%)</title><rect x="420.29" y="230" width="7.01" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 58 samples (0.39%)</title><rect x="420.29" y="213" width="6.16" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 58 samples (0.39%)</title><rect x="420.29" y="196" width="6.16" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="426.45" y="213" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="281" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="264" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 7 samples (0.05%)</title><rect x="429.22" y="247" width="0.74" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="230" width="0.74" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 7 samples (0.05%)</title><rect x="429.22" y="213" width="0.74" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="196" width="0.74" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="179" width="0.74" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 7 samples (0.05%)</title><rect x="429.22" y="162" width="0.74" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 39 samples (0.26%)</title><rect x="429.96" y="298" width="4.14" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 36 samples (0.24%)</title><rect x="429.96" y="281" width="3.82" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 36 samples (0.24%)</title><rect x="429.96" y="264" width="3.82" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventRecord &#8212; 34 samples (0.23%)</title><rect x="434.10" y="298" width="3.61" height="16" fill="#389c60" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 25 samples (0.17%)</title><rect x="434.10" y="281" width="2.66" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 25 samples (0.17%)</title><rect x="434.10" y="264" width="2.66" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 6 samples (0.04%)</title><rect x="434.10" y="247" width="0.64" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="434.10" y="230" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 8 samples (0.05%)</title><rect x="436.76" y="281" width="0.85" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="436.76" y="264" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 6 samples (0.04%)</title><rect x="436.76" y="247" width="0.64" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="436.76" y="230" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="436.76" y="213" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="436.76" y="196" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="436.76" y="179" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="436.76" y="162" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 32 samples (0.22%)</title><rect x="437.71" y="298" width="3.40" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 25 samples (0.17%)</title><rect x="437.71" y="281" width="2.66" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 25 samples (0.17%)</title><rect x="437.71" y="264" width="2.66" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 4 samples (0.03%)</title><rect x="437.71" y="247" width="0.42" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="440.37" y="281" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="440.37" y="264" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 5 samples (0.03%)</title><rect x="440.37" y="247" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="440.37" y="230" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="440.37" y="213" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="440.37" y="196" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="440.37" y="179" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="440.37" y="162" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 16 samples (0.11%)</title><rect x="441.11" y="298" width="1.70" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 12 samples (0.08%)</title><rect x="441.11" y="281" width="1.27" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 12 samples (0.08%)</title><rect x="441.11" y="264" width="1.27" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventElapsedTime &#8212; 7 samples (0.05%)</title><rect x="442.81" y="298" width="0.74" height="16" fill="#41a569" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 6 samples (0.04%)</title><rect x="442.81" y="281" width="0.64" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 6 samples (0.04%)</title><rect x="442.81" y="264" width="0.64" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaSetDevice &#8212; 6 samples (0.04%)</title><rect x="443.55" y="298" width="0.64" height="16" fill="#33975b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaFree &#8212; 20 samples (0.13%)</title><rect x="445.57" y="315" width="2.12" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 11 samples (0.07%)</title><rect x="445.57" y="298" width="1.17" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 11 samples (0.07%)</title><rect x="445.57" y="281" width="1.17" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 9 samples (0.06%)</title><rect x="446.74" y="298" width="0.96" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 9 samples (0.06%)</title><rect x="446.74" y="281" width="0.96" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 5 samples (0.03%)</title><rect x="446.74" y="264" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="446.74" y="247" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="446.74" y="230" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="446.74" y="213" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 4 samples (0.03%)</title><rect x="446.74" y="196" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="446.74" y="179" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::preparePatchInVram &#8212; 201 samples (1.35%)</title><rect x="448.23" y="332" width="21.35" height="16" fill="#3d65ab" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 97 samples (0.65%)</title><rect x="448.23" y="315" width="10.30" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 91 samples (0.61%)</title><rect x="448.23" y="298" width="9.67" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 90 samples (0.61%)</title><rect x="448.23" y="281" width="9.56" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 30 samples (0.20%)</title><rect x="448.23" y="264" width="3.19" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 12 samples (0.08%)</title><rect x="448.23" y="247" width="1.27" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 11 samples (0.07%)</title><rect x="448.23" y="230" width="1.17" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 9 samples (0.06%)</title><rect x="448.23" y="213" width="0.96" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 9 samples (0.06%)</title><rect x="448.23" y="196" width="0.96" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 9 samples (0.06%)</title><rect x="448.23" y="179" width="0.96" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="448.23" y="162" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 5 samples (0.03%)</title><rect x="451.41" y="264" width="0.53" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="457.89" y="298" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="457.89" y="281" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title> &#8212; 74 samples (0.50%)</title><rect x="458.53" y="315" width="7.86" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 73 samples (0.49%)</title><rect x="458.53" y="298" width="7.75" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 52 samples (0.35%)</title><rect x="458.53" y="281" width="5.52" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 51 samples (0.34%)</title><rect x="458.53" y="264" width="5.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 26 samples (0.17%)</title><rect x="458.53" y="247" width="2.76" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="458.53" y="230" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 4 samples (0.03%)</title><rect x="461.29" y="247" width="0.42" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 21 samples (0.14%)</title><rect x="464.05" y="281" width="2.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 20 samples (0.13%)</title><rect x="464.05" y="264" width="2.12" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 17 samples (0.11%)</title><rect x="464.05" y="247" width="1.81" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 17 samples (0.11%)</title><rect x="464.05" y="230" width="1.81" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 16 samples (0.11%)</title><rect x="464.05" y="213" width="1.70" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 16 samples (0.11%)</title><rect x="464.05" y="196" width="1.70" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 16 samples (0.11%)</title><rect x="464.05" y="179" width="1.70" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 16 samples (0.11%)</title><rect x="464.05" y="162" width="1.70" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaGetLastError &#8212; 16 samples (0.11%)</title><rect x="466.39" y="315" width="1.70" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 16 samples (0.11%)</title><rect x="466.39" y="298" width="1.70" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 15 samples (0.10%)</title><rect x="466.39" y="281" width="1.59" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 9 samples (0.06%)</title><rect x="466.39" y="264" width="0.96" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 9 samples (0.06%)</title><rect x="466.39" y="247" width="0.96" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 8 samples (0.05%)</title><rect x="466.39" y="230" width="0.85" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 8 samples (0.05%)</title><rect x="466.39" y="213" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 8 samples (0.05%)</title><rect x="466.39" y="196" width="0.85" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 8 samples (0.05%)</title><rect x="466.39" y="179" width="0.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 7 samples (0.05%)</title><rect x="468.09" y="315" width="0.74" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="468.09" y="298" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="468.09" y="281" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::computeGlobalInverseFFT &#8212; 195 samples (1.31%)</title><rect x="469.58" y="332" width="20.71" height="16" fill="#3b63a9" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaDeviceSynchronize &#8212; 158 samples (1.06%)</title><rect x="469.58" y="315" width="16.78" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 157 samples (1.06%)</title><rect x="469.58" y="298" width="16.68" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 157 samples (1.06%)</title><rect x="469.58" y="281" width="16.68" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 133 samples (0.89%)</title><rect x="469.58" y="264" width="14.13" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 131 samples (0.88%)</title><rect x="469.58" y="247" width="13.91" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 114 samples (0.77%)</title><rect x="469.58" y="230" width="12.11" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 114 samples (0.77%)</title><rect x="469.58" y="213" width="12.11" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 15 samples (0.10%)</title><rect x="481.68" y="230" width="1.59" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="483.70" y="264" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 5 samples (0.03%)</title><rect x="483.70" y="247" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="483.70" y="230" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="483.70" y="213" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="483.70" y="196" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="483.70" y="179" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="483.70" y="162" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 30 samples (0.20%)</title><rect x="486.36" y="315" width="3.19" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 27 samples (0.18%)</title><rect x="486.36" y="298" width="2.87" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 26 samples (0.17%)</title><rect x="486.36" y="281" width="2.76" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="486.36" y="264" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaSetDevice &#8212; 5 samples (0.03%)</title><rect x="489.54" y="315" width="0.53" height="16" fill="#33975b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::gainReferenceFor &#8212; 66 samples (0.44%)</title><rect x="490.29" y="332" width="7.01" height="16" fill="#4068ae" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Image&lt;float&gt;::read &#8212; 66 samples (0.44%)</title><rect x="490.29" y="315" width="7.01" height="16" fill="#4068ae" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 66 samples (0.44%)</title><rect x="490.29" y="298" width="7.01" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 37 samples (0.25%)</title><rect x="490.29" y="281" width="3.93" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 37 samples (0.25%)</title><rect x="490.29" y="264" width="3.93" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="494.22" y="281" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::initialize &#8212; 57 samples (0.38%)</title><rect x="497.30" y="332" width="6.05" height="16" fill="#426ab0" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaSetDevice &#8212; 51 samples (0.34%)</title><rect x="497.30" y="315" width="5.42" height="16" fill="#33975b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 51 samples (0.34%)</title><rect x="497.30" y="298" width="5.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 51 samples (0.34%)</title><rect x="497.30" y="281" width="5.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 16 samples (0.11%)</title><rect x="497.30" y="264" width="1.70" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 12 samples (0.08%)</title><rect x="497.30" y="247" width="1.27" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="497.30" y="230" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="497.30" y="213" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="498.57" y="247" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="499.00" y="264" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 4 samples (0.03%)</title><rect x="499.00" y="247" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="499.00" y="230" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 4 samples (0.03%)</title><rect x="502.71" y="315" width="0.42" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="502.71" y="298" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="502.71" y="281" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::getDefectPremask &#8212; 54 samples (0.36%)</title><rect x="503.35" y="332" width="5.74" height="16" fill="#5179bf" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MultidimArray&lt;bool&gt;::resize &#8212; 33 samples (0.22%)</title><rect x="503.35" y="315" width="3.50" height="16" fill="#8b633b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 18 samples (0.12%)</title><rect x="503.35" y="298" width="1.91" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 9 samples (0.06%)</title><rect x="505.26" y="298" width="0.96" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="505.26" y="281" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="506.86" y="315" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>void solve&lt;double&gt; &#8212; 53 samples (0.36%)</title><rect x="509.09" y="332" width="5.63" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>svdcmp &#8212; 52 samples (0.35%)</title><rect x="509.09" y="315" width="5.52" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="509.09" y="298" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 51 samples (0.34%)</title><rect x="514.72" y="332" width="5.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::computeGlobalForwardFFT &#8212; 37 samples (0.25%)</title><rect x="520.13" y="332" width="3.93" height="16" fill="#4c74ba" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaDeviceSynchronize &#8212; 36 samples (0.24%)</title><rect x="520.13" y="315" width="3.82" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 36 samples (0.24%)</title><rect x="520.13" y="298" width="3.82" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 36 samples (0.24%)</title><rect x="520.13" y="281" width="3.82" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 34 samples (0.23%)</title><rect x="520.13" y="264" width="3.61" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 34 samples (0.23%)</title><rect x="520.13" y="247" width="3.61" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 30 samples (0.20%)</title><rect x="520.13" y="230" width="3.19" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 30 samples (0.20%)</title><rect x="520.13" y="213" width="3.19" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 26 samples (0.17%)</title><rect x="524.06" y="332" width="2.76" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 9 samples (0.06%)</title><rect x="524.06" y="315" width="0.96" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 8 samples (0.05%)</title><rect x="524.06" y="298" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 8 samples (0.05%)</title><rect x="524.06" y="281" width="0.85" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 8 samples (0.05%)</title><rect x="524.06" y="264" width="0.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 24 samples (0.16%)</title><rect x="526.82" y="332" width="2.55" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 14 samples (0.09%)</title><rect x="526.82" y="315" width="1.49" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 14 samples (0.09%)</title><rect x="526.82" y="298" width="1.49" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="528.31" y="315" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::~CudaMovieSession &#8212; 22 samples (0.15%)</title><rect x="529.37" y="332" width="2.34" height="16" fill="#3860a6" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::release &#8212; 22 samples (0.15%)</title><rect x="529.37" y="315" width="2.34" height="16" fill="#4c74ba" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaFree &#8212; 21 samples (0.14%)</title><rect x="529.37" y="298" width="2.23" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 14 samples (0.09%)</title><rect x="529.37" y="281" width="1.49" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 14 samples (0.09%)</title><rect x="529.37" y="264" width="1.49" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="530.86" y="281" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 7 samples (0.05%)</title><rect x="530.86" y="264" width="0.74" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 5 samples (0.03%)</title><rect x="530.86" y="247" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 5 samples (0.03%)</title><rect x="530.86" y="230" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 5 samples (0.03%)</title><rect x="530.86" y="213" width="0.53" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="530.86" y="196" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="530.86" y="179" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="530.86" y="162" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>PatchAlignmentWorkspace::release &#8212; 21 samples (0.14%)</title><rect x="531.71" y="332" width="2.23" height="16" fill="#8d653d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaFree &#8212; 13 samples (0.09%)</title><rect x="531.71" y="315" width="1.38" height="16" fill="#40a468" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 11 samples (0.07%)</title><rect x="531.71" y="298" width="1.17" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 11 samples (0.07%)</title><rect x="531.71" y="281" width="1.17" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventDestroy &#8212; 7 samples (0.05%)</title><rect x="533.09" y="315" width="0.74" height="16" fill="#3da165" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="533.09" y="298" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="533.09" y="281" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 17 samples (0.11%)</title><rect x="533.94" y="332" width="1.81" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 17 samples (0.11%)</title><rect x="533.94" y="315" width="1.81" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 17 samples (0.11%)</title><rect x="533.94" y="298" width="1.81" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Image&lt;float&gt;::read &#8212; 17 samples (0.11%)</title><rect x="535.75" y="332" width="1.81" height="16" fill="#4068ae" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetDirectory &#8212; 11 samples (0.07%)</title><rect x="535.75" y="315" width="1.17" height="16" fill="#da6c44" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 11 samples (0.07%)</title><rect x="535.75" y="298" width="1.17" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 11 samples (0.07%)</title><rect x="535.75" y="281" width="1.17" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::reduceUnalignedSum &#8212; 17 samples (0.11%)</title><rect x="537.55" y="332" width="1.81" height="16" fill="#5078be" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 5 samples (0.03%)</title><rect x="537.55" y="315" width="0.53" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 5 samples (0.03%)</title><rect x="537.55" y="298" width="0.53" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="537.55" y="281" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title> &#8212; 4 samples (0.03%)</title><rect x="538.08" y="315" width="0.42" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 4 samples (0.03%)</title><rect x="538.08" y="298" width="0.42" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="538.08" y="281" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="538.08" y="264" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::updateDefectPixels &#8212; 13 samples (0.09%)</title><rect x="539.36" y="332" width="1.38" height="16" fill="#4971b7" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMalloc &#8212; 7 samples (0.05%)</title><rect x="539.36" y="315" width="0.74" height="16" fill="#3b9f63" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 7 samples (0.05%)</title><rect x="539.36" y="298" width="0.74" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="539.36" y="281" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 4 samples (0.03%)</title><rect x="540.10" y="315" width="0.42" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::collectAboveThreshold &#8212; 12 samples (0.08%)</title><rect x="540.74" y="332" width="1.27" height="16" fill="#476fb5" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title> &#8212; 6 samples (0.04%)</title><rect x="540.74" y="315" width="0.64" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaLaunchKernel &#8212; 6 samples (0.04%)</title><rect x="540.74" y="298" width="0.64" height="16" fill="#2f9357" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 6 samples (0.04%)</title><rect x="540.74" y="281" width="0.64" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="540.74" y="264" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::gatherFrameSamples &#8212; 11 samples (0.07%)</title><rect x="542.01" y="332" width="1.17" height="16" fill="#4b73b9" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpyAsync &#8212; 6 samples (0.04%)</title><rect x="542.01" y="315" width="0.64" height="16" fill="#369a5e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 6 samples (0.04%)</title><rect x="542.01" y="298" width="0.64" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 6 samples (0.04%)</title><rect x="542.01" y="281" width="0.64" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream::flush &#8212; 10 samples (0.07%)</title><rect x="543.18" y="332" width="1.06" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::sync &#8212; 10 samples (0.07%)</title><rect x="543.18" y="315" width="1.06" height="16" fill="#956d45" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::overflow &#8212; 10 samples (0.07%)</title><rect x="543.18" y="298" width="1.06" height="16" fill="#997149" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::_M_convert_to_exter &#8212; 7 samples (0.05%)</title><rect x="543.18" y="281" width="0.74" height="16" fill="#966e46" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::__basic_file&lt;char&gt;::xsputn &#8212; 7 samples (0.05%)</title><rect x="543.18" y="264" width="0.74" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__write &#8212; 7 samples (0.05%)</title><rect x="543.18" y="247" width="0.74" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 7 samples (0.05%)</title><rect x="543.18" y="230" width="0.74" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 7 samples (0.05%)</title><rect x="543.18" y="213" width="0.74" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::submitImageWrite &#8212; 8 samples (0.05%)</title><rect x="544.24" y="332" width="0.85" height="16" fill="#4068ae" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::reduceUnalignedSumSqDev &#8212; 7 samples (0.05%)</title><rect x="545.09" y="332" width="0.74" height="16" fill="#3860a6" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 4 samples (0.03%)</title><rect x="545.09" y="315" width="0.42" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="545.09" y="298" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="545.09" y="281" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::vector&lt;Image&lt;float&gt;, std::allocator&lt;Image&lt;float&gt; &gt; &gt;::~vector &#8212; 6 samples (0.04%)</title><rect x="545.84" y="332" width="0.64" height="16" fill="#4971b7" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::clear &#8212; 5 samples (0.03%)</title><rect x="545.84" y="315" width="0.53" height="16" fill="#896139" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::vector&lt;Image&lt;float&gt;, std::allocator&lt;Image&lt;float&gt; &gt; &gt;::_M_default_ &#8212; 5 samples (0.03%)</title><rect x="546.47" y="332" width="0.53" height="16" fill="#446cb2" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::releasePreprocessingBuffers &#8212; 4 samples (0.03%)</title><rect x="547.00" y="332" width="0.42" height="16" fill="#3d65ab" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 1714 samples (11.52%)</title><rect x="579.40" y="349" width="182.05" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="582.40" y="361" font-size="11" fill="#fff">[libc.so.6]</text>
+</g>
+<g><title>[Unknown] &#8212; 1232 samples (8.28%)</title><rect x="579.40" y="332" width="130.85" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="582.40" y="344" font-size="11" fill="#fff">[Unknown]</text>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 1232 samples (8.28%)</title><rect x="579.40" y="315" width="130.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="582.40" y="327" font-size="11" fill="#fff">[kernel.kallsyms]</text>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 87 samples (0.58%)</title><rect x="710.25" y="332" width="9.24" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::generateLogFilePDFAndWriteStarFiles &#8212; 22 samples (0.15%)</title><rect x="761.45" y="349" width="2.34" height="16" fill="#5078be" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::OutputPostScriptPlot &#8212; 11 samples (0.07%)</title><rect x="761.45" y="332" width="1.17" height="16" fill="#926a42" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::DrawYAxisGridLinesPostScript &#8212; 6 samples (0.04%)</title><rect x="761.45" y="315" width="0.64" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 5 samples (0.03%)</title><rect x="761.45" y="298" width="0.53" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 4 samples (0.03%)</title><rect x="761.45" y="281" width="0.42" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 4 samples (0.03%)</title><rect x="761.45" y="264" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::DrawXAxisGridLinesPostScript &#8212; 4 samples (0.03%)</title><rect x="762.08" y="315" width="0.42" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 4 samples (0.03%)</title><rect x="762.08" y="298" width="0.42" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 4 samples (0.03%)</title><rect x="762.08" y="281" width="0.42" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 4 samples (0.03%)</title><rect x="762.08" y="264" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__vsnprintf &#8212; 4 samples (0.03%)</title><rect x="762.08" y="247" width="0.42" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="762.08" y="230" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Micrograph::Micrograph &#8212; 9 samples (0.06%)</title><rect x="762.61" y="332" width="0.96" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Micrograph::read &#8212; 8 samples (0.05%)</title><rect x="762.61" y="315" width="0.85" height="16" fill="#8e663e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::readStar &#8212; 6 samples (0.04%)</title><rect x="762.61" y="298" width="0.64" height="16" fill="#976f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::readStarLoop &#8212; 5 samples (0.03%)</title><rect x="762.61" y="281" width="0.53" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Micrograph::Micrograph &#8212; 20 samples (0.13%)</title><rect x="763.78" y="349" width="2.12" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Micrograph::setMovie &#8212; 18 samples (0.12%)</title><rect x="763.78" y="332" width="1.91" height="16" fill="#a27a52" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>fImageHandler::openFile &#8212; 13 samples (0.09%)</title><rect x="763.78" y="315" width="1.38" height="16" fill="#896139" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFOpenExt &#8212; 12 samples (0.08%)</title><rect x="763.78" y="298" width="1.27" height="16" fill="#db6d45" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFFdOpenExt &#8212; 11 samples (0.07%)</title><rect x="763.78" y="281" width="1.17" height="16" fill="#d3653d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFClientOpenExt &#8212; 11 samples (0.07%)</title><rect x="763.78" y="264" width="1.17" height="16" fill="#c65830" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 11 samples (0.07%)</title><rect x="763.78" y="247" width="1.17" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 8 samples (0.05%)</title><rect x="763.78" y="230" width="0.85" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Image&lt;float&gt;::readTIFF &#8212; 4 samples (0.03%)</title><rect x="765.16" y="315" width="0.42" height="16" fill="#d96b43" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::initialise &#8212; 296 samples (1.99%)</title><rect x="766.33" y="366" width="31.44" height="16" fill="#3860a6" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaGetDeviceCount &#8212; 296 samples (1.99%)</title><rect x="766.33" y="349" width="31.44" height="16" fill="#2e9256" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 296 samples (1.99%)</title><rect x="766.33" y="332" width="31.44" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 296 samples (1.99%)</title><rect x="766.33" y="315" width="31.44" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 296 samples (1.99%)</title><rect x="766.33" y="298" width="31.44" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 294 samples (1.98%)</title><rect x="766.33" y="281" width="31.23" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 279 samples (1.88%)</title><rect x="766.33" y="264" width="29.63" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 258 samples (1.73%)</title><rect x="766.33" y="247" width="27.40" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 252 samples (1.69%)</title><rect x="766.33" y="230" width="26.77" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 252 samples (1.69%)</title><rect x="766.33" y="213" width="26.77" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjectionMemoryAllocator.so] &#8212; 11 samples (0.07%)</title><rect x="793.73" y="247" width="1.17" height="16" fill="#76768a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="795.96" y="264" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[ld-linux-x86-64.so.2] &#8212; 4 samples (0.03%)</title><rect x="797.98" y="383" width="0.42" height="16" fill="#6c6c80" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 5265 samples (35.39%)</title><rect x="798.94" y="434" width="559.20" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="801.94" y="446" font-size="11" fill="#fff">[libc.so.6]</text>
+</g>
+<g><title>[libgomp.so.1.0.0] &#8212; 4574 samples (30.75%)</title><rect x="798.94" y="417" width="485.81" height="16" fill="#b18925" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="801.94" y="429" font-size="11" fill="#fff">[libgomp.so.1.0.0]</text>
+</g>
+<g><title>CudaMovieSession::ingestCompressedTiffStrips &#8212; 1852 samples (12.45%)</title><rect x="798.94" y="400" width="196.70" height="16" fill="#456db3" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="801.94" y="412" font-size="11" fill="#fff">CudaMovieSession::ingestCompre…</text>
+</g>
+<g><title>[libc.so.6] &#8212; 1294 samples (8.70%)</title><rect x="798.94" y="383" width="137.44" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="801.94" y="395" font-size="11" fill="#fff">[libc.so.6]</text>
+</g>
+<g><title>[Unknown] &#8212; 64 samples (0.43%)</title><rect x="798.94" y="366" width="6.80" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 64 samples (0.43%)</title><rect x="798.94" y="349" width="6.80" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 42 samples (0.28%)</title><rect x="805.74" y="366" width="4.46" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libgomp.so.1.0.0] &#8212; 162 samples (1.09%)</title><rect x="936.38" y="383" width="17.21" height="16" fill="#b18925" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="936.38" y="366" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetDirectory &#8212; 109 samples (0.73%)</title><rect x="953.58" y="383" width="11.58" height="16" fill="#da6c44" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 95 samples (0.64%)</title><rect x="953.58" y="366" width="10.09" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 65 samples (0.44%)</title><rect x="953.58" y="349" width="6.90" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>qsort_r &#8212; 9 samples (0.06%)</title><rect x="953.58" y="332" width="0.96" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 8 samples (0.05%)</title><rect x="953.58" y="315" width="0.85" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__fstat64 &#8212; 6 samples (0.04%)</title><rect x="954.54" y="332" width="0.64" height="16" fill="#8e663e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="954.54" y="315" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="954.54" y="298" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 6 samples (0.04%)</title><rect x="955.17" y="332" width="0.64" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetField &#8212; 4 samples (0.03%)</title><rect x="955.81" y="332" width="0.42" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFSetField &#8212; 25 samples (0.17%)</title><rect x="960.49" y="349" width="2.66" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 25 samples (0.17%)</title><rect x="960.49" y="332" width="2.66" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>qsort_r &#8212; 21 samples (0.14%)</title><rect x="960.49" y="315" width="2.23" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 20 samples (0.13%)</title><rect x="960.49" y="298" width="2.12" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 4 samples (0.03%)</title><rect x="960.49" y="281" width="0.42" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 8 samples (0.05%)</title><rect x="963.67" y="366" width="0.85" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 6 samples (0.04%)</title><rect x="964.52" y="366" width="0.64" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 4 samples (0.03%)</title><rect x="964.52" y="349" width="0.42" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="964.52" y="332" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 81 samples (0.54%)</title><rect x="965.16" y="383" width="8.60" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadRawStrip &#8212; 33 samples (0.22%)</title><rect x="973.76" y="383" width="3.50" height="16" fill="#dd6f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 24 samples (0.16%)</title><rect x="973.76" y="366" width="2.55" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFOpenExt &#8212; 27 samples (0.18%)</title><rect x="977.27" y="383" width="2.87" height="16" fill="#db6d45" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFFdOpenExt &#8212; 27 samples (0.18%)</title><rect x="977.27" y="366" width="2.87" height="16" fill="#d3653d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFClientOpenExt &#8212; 27 samples (0.18%)</title><rect x="977.27" y="349" width="2.87" height="16" fill="#c65830" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFReadDirectory &#8212; 26 samples (0.17%)</title><rect x="977.27" y="332" width="2.76" height="16" fill="#cc5e36" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libtiff.so.6.0.1] &#8212; 25 samples (0.17%)</title><rect x="977.27" y="315" width="2.66" height="16" fill="#6e6e82" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 6 samples (0.04%)</title><rect x="977.27" y="298" width="0.64" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>TIFFGetStrileOffset &#8212; 5 samples (0.03%)</title><rect x="980.13" y="383" width="0.53" height="16" fill="#d5673f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 93 samples (0.63%)</title><rect x="995.64" y="400" width="9.88" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 690 samples (4.64%)</title><rect x="1284.75" y="417" width="73.29" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1287.75" y="429" font-size="11" fill="#fff">[libstdc++…</text>
+</g>
+<g><title>OutputWriter::workerLoop &#8212; 689 samples (4.63%)</title><rect x="1284.75" y="400" width="73.18" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1287.75" y="412" font-size="11" fill="#fff">OutputWrit…</text>
+</g>
+<g><title>std::_Function_handler&lt;void  &#8212; 687 samples (4.62%)</title><rect x="1284.75" y="383" width="72.97" height="16" fill="#8b633b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1287.75" y="395" font-size="11" fill="#fff">std::_Func…</text>
+</g>
+<g><title>Image&lt;float&gt;::_write &#8212; 519 samples (3.49%)</title><rect x="1284.75" y="366" width="55.12" height="16" fill="#4068ae" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1287.75" y="378" font-size="11" fill="#fff">Image&lt;f…</text>
+</g>
+<g><title>Image&lt;float&gt;::writeMRC &#8212; 518 samples (3.48%)</title><rect x="1284.75" y="349" width="55.02" height="16" fill="#446cb2" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1287.75" y="361" font-size="11" fill="#fff">Image&lt;f…</text>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 33 samples (0.22%)</title><rect x="1284.75" y="332" width="3.50" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::plotShifts &#8212; 95 samples (0.64%)</title><rect x="1339.87" y="366" width="10.09" height="16" fill="#446cb2" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::OutputPostScriptPlot &#8212; 92 samples (0.62%)</title><rect x="1339.87" y="349" width="9.77" height="16" fill="#926a42" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::DrawDataPostScript &#8212; 37 samples (0.25%)</title><rect x="1339.87" y="332" width="3.93" height="16" fill="#a17951" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 33 samples (0.22%)</title><rect x="1339.87" y="315" width="3.50" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 30 samples (0.20%)</title><rect x="1339.87" y="298" width="3.19" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 27 samples (0.18%)</title><rect x="1339.87" y="281" width="2.87" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__vsnprintf &#8212; 26 samples (0.17%)</title><rect x="1339.87" y="264" width="2.76" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 26 samples (0.17%)</title><rect x="1339.87" y="247" width="2.76" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::DrawXAxisGridLinesPostScript &#8212; 27 samples (0.18%)</title><rect x="1343.80" y="332" width="2.87" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 22 samples (0.15%)</title><rect x="1343.80" y="315" width="2.34" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 15 samples (0.10%)</title><rect x="1343.80" y="298" width="1.59" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 12 samples (0.08%)</title><rect x="1343.80" y="281" width="1.27" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__vsnprintf &#8212; 12 samples (0.08%)</title><rect x="1343.80" y="264" width="1.27" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 12 samples (0.08%)</title><rect x="1343.80" y="247" width="1.27" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_inse &#8212; 5 samples (0.03%)</title><rect x="1346.14" y="315" width="0.53" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CPlot2D::DrawYAxisGridLinesPostScript &#8212; 24 samples (0.16%)</title><rect x="1346.67" y="332" width="2.55" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; &#8212; 20 samples (0.13%)</title><rect x="1346.67" y="315" width="2.12" height="16" fill="#a37b53" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;c &#8212; 13 samples (0.09%)</title><rect x="1346.67" y="298" width="1.38" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libstdc++.so.6.0.33] &#8212; 11 samples (0.07%)</title><rect x="1346.67" y="281" width="1.17" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__vsnprintf &#8212; 11 samples (0.07%)</title><rect x="1346.67" y="264" width="1.17" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 11 samples (0.07%)</title><rect x="1346.67" y="247" width="1.17" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 5 samples (0.03%)</title><rect x="1348.05" y="298" width="0.53" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_inse &#8212; 4 samples (0.03%)</title><rect x="1348.79" y="315" width="0.42" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::writeModel &#8212; 71 samples (0.48%)</title><rect x="1349.96" y="366" width="7.54" height="16" fill="#4a72b8" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>Micrograph::write &#8212; 65 samples (0.44%)</title><rect x="1349.96" y="349" width="6.90" height="16" fill="#926a42" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::write &#8212; 46 samples (0.31%)</title><rect x="1349.96" y="332" width="4.89" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::getValueToString &#8212; 31 samples (0.21%)</title><rect x="1349.96" y="315" width="3.29" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__snprintf_chk &#8212; 20 samples (0.13%)</title><rect x="1349.96" y="298" width="2.12" height="16" fill="#9d754d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 20 samples (0.13%)</title><rect x="1349.96" y="281" width="2.12" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1349.96" y="264" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>bool MetaDataTable::getValue&lt;double&gt; &#8212; 4 samples (0.03%)</title><rect x="1352.09" y="298" width="0.42" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_inse &#8212; 7 samples (0.05%)</title><rect x="1353.25" y="315" width="0.74" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataTable::addObject &#8212; 7 samples (0.05%)</title><rect x="1354.85" y="332" width="0.74" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MetaDataContainer::MetaDataContainer &#8212; 5 samples (0.03%)</title><rect x="1354.85" y="315" width="0.53" height="16" fill="#8c643c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::open &#8212; 7 samples (0.05%)</title><rect x="1355.59" y="332" width="0.74" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcufft.so.11.3.3.41] &#8212; 1331 samples (8.95%)</title><rect x="1358.14" y="434" width="141.37" height="16" fill="#358553" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1361.14" y="446" font-size="11" fill="#fff">[libcufft.so.11.3.3.4…</text>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 1318 samples (8.86%)</title><rect x="1358.14" y="417" width="139.99" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1361.14" y="429" font-size="11" fill="#fff">[libcuda.so.570.86.10]</text>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 494 samples (3.32%)</title><rect x="1358.14" y="400" width="52.47" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1361.14" y="412" font-size="11" fill="#fff">[libcu…</text>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 172 samples (1.16%)</title><rect x="1358.14" y="383" width="18.27" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 160 samples (1.08%)</title><rect x="1358.14" y="366" width="16.99" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 155 samples (1.04%)</title><rect x="1358.14" y="349" width="16.46" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 154 samples (1.04%)</title><rect x="1358.14" y="332" width="16.36" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 134 samples (0.90%)</title><rect x="1358.14" y="315" width="14.23" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 134 samples (0.90%)</title><rect x="1358.14" y="298" width="14.23" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 18 samples (0.12%)</title><rect x="1372.37" y="315" width="1.91" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 5 samples (0.03%)</title><rect x="1374.60" y="349" width="0.53" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 7 samples (0.05%)</title><rect x="1375.13" y="366" width="0.74" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 26 samples (0.17%)</title><rect x="1376.41" y="383" width="2.76" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 15 samples (0.10%)</title><rect x="1379.17" y="383" width="1.59" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__libc_malloc &#8212; 13 samples (0.09%)</title><rect x="1380.76" y="383" width="1.38" height="16" fill="#8a623a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 8 samples (0.05%)</title><rect x="1380.76" y="366" width="0.85" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_getspecific &#8212; 10 samples (0.07%)</title><rect x="1382.14" y="383" width="1.06" height="16" fill="#976f47" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 9 samples (0.06%)</title><rect x="1383.21" y="383" width="0.96" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 6 samples (0.04%)</title><rect x="1384.16" y="383" width="0.64" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 4 samples (0.03%)</title><rect x="1384.80" y="383" width="0.42" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 117 samples (0.79%)</title><rect x="1410.61" y="400" width="12.43" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 21 samples (0.14%)</title><rect x="1423.04" y="400" width="2.23" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 16 samples (0.11%)</title><rect x="1425.27" y="400" width="1.70" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_rwlock_wrlock &#8212; 8 samples (0.05%)</title><rect x="1426.97" y="400" width="0.85" height="16" fill="#9b734b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_rwlock_unlock &#8212; 5 samples (0.03%)</title><rect x="1427.82" y="400" width="0.53" height="16" fill="#9f774f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="1428.35" y="400" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>getenv &#8212; 5 samples (0.03%)</title><rect x="1498.13" y="417" width="0.53" height="16" fill="#987048" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="1498.66" y="417" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 744 samples (5.00%)</title><rect x="1499.51" y="434" width="79.02" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+<text x="1502.51" y="446" font-size="11" fill="#fff">[Unknown]</text>
+</g>
+<g><title>[vdso] &#8212; 218 samples (1.47%)</title><rect x="1499.51" y="417" width="23.15" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 218 samples (1.47%)</title><rect x="1499.51" y="400" width="23.15" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcufft.so.11.3.3.41] &#8212; 167 samples (1.12%)</title><rect x="1522.66" y="417" width="17.74" height="16" fill="#358553" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 145 samples (0.97%)</title><rect x="1522.66" y="400" width="15.40" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 32 samples (0.22%)</title><rect x="1522.66" y="383" width="3.40" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 25 samples (0.17%)</title><rect x="1522.66" y="366" width="2.66" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 25 samples (0.17%)</title><rect x="1522.66" y="349" width="2.66" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 24 samples (0.16%)</title><rect x="1522.66" y="332" width="2.55" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 24 samples (0.16%)</title><rect x="1522.66" y="315" width="2.55" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 21 samples (0.14%)</title><rect x="1522.66" y="298" width="2.23" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 21 samples (0.14%)</title><rect x="1522.66" y="281" width="2.23" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 6 samples (0.04%)</title><rect x="1526.06" y="383" width="0.64" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>snprintf &#8212; 5 samples (0.03%)</title><rect x="1526.70" y="383" width="0.53" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 5 samples (0.03%)</title><rect x="1526.70" y="366" width="0.53" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1527.23" y="383" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="1538.06" y="400" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcufft.so.11.3.3.41] &#8212; 6 samples (0.04%)</title><rect x="1538.06" y="383" width="0.64" height="16" fill="#358553" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 121 samples (0.81%)</title><rect x="1540.40" y="417" width="12.85" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 75 samples (0.50%)</title><rect x="1540.40" y="400" width="7.97" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 75 samples (0.50%)</title><rect x="1540.40" y="383" width="7.97" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 75 samples (0.50%)</title><rect x="1540.40" y="366" width="7.97" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 75 samples (0.50%)</title><rect x="1540.40" y="349" width="7.97" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 75 samples (0.50%)</title><rect x="1540.40" y="332" width="7.97" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 25 samples (0.17%)</title><rect x="1548.37" y="400" width="2.66" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 8 samples (0.05%)</title><rect x="1551.02" y="400" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 8 samples (0.05%)</title><rect x="1551.02" y="383" width="0.85" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 8 samples (0.05%)</title><rect x="1551.02" y="366" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 8 samples (0.05%)</title><rect x="1551.02" y="349" width="0.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="1551.87" y="400" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 4 samples (0.03%)</title><rect x="1552.61" y="400" width="0.42" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 4 samples (0.03%)</title><rect x="1552.61" y="383" width="0.42" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1552.61" y="366" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 88 samples (0.59%)</title><rect x="1553.25" y="417" width="9.35" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 75 samples (0.50%)</title><rect x="1553.25" y="400" width="7.97" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 6 samples (0.04%)</title><rect x="1561.22" y="400" width="0.64" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 4 samples (0.03%)</title><rect x="1561.22" y="383" width="0.42" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1561.22" y="366" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 85 samples (0.57%)</title><rect x="1562.60" y="417" width="9.03" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 82 samples (0.55%)</title><rect x="1562.60" y="400" width="8.71" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 82 samples (0.55%)</title><rect x="1562.60" y="383" width="8.71" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 82 samples (0.55%)</title><rect x="1562.60" y="366" width="8.71" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libnvcomp.so.5.3.0.16] &#8212; 12 samples (0.08%)</title><rect x="1571.63" y="417" width="1.27" height="16" fill="#6f6f83" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 10 samples (0.07%)</title><rect x="1571.63" y="400" width="1.06" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libnvcomp.so.5.3.0.16] &#8212; 10 samples (0.07%)</title><rect x="1571.63" y="383" width="1.06" height="16" fill="#6f6f83" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 10 samples (0.07%)</title><rect x="1571.63" y="366" width="1.06" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 9 samples (0.06%)</title><rect x="1571.63" y="349" width="0.96" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cuptiGetTimestamp &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="332" width="0.85" height="16" fill="#906840" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjection64.so] &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="315" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="298" width="0.85" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="281" width="0.85" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="264" width="0.85" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 8 samples (0.05%)</title><rect x="1571.63" y="247" width="0.85" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 9 samples (0.06%)</title><rect x="1572.90" y="417" width="0.96" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 9 samples (0.06%)</title><rect x="1572.90" y="400" width="0.96" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_lock &#8212; 7 samples (0.05%)</title><rect x="1573.86" y="417" width="0.74" height="16" fill="#9a724a" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 6 samples (0.04%)</title><rect x="1573.86" y="400" width="0.64" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_once &#8212; 4 samples (0.03%)</title><rect x="1574.60" y="417" width="0.42" height="16" fill="#966e46" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1574.60" y="400" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__pthread_mutex_unlock &#8212; 4 samples (0.03%)</title><rect x="1575.02" y="417" width="0.42" height="16" fill="#a07850" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 4 samples (0.03%)</title><rect x="1575.02" y="400" width="0.42" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 4 samples (0.03%)</title><rect x="1575.45" y="417" width="0.42" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>MotioncorrRunner::executeOwnMotionCorrection &#8212; 38 samples (0.26%)</title><rect x="1578.53" y="434" width="4.04" height="16" fill="#3c64aa" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>CudaMovieSession::reconstructDoseWeighted &#8212; 37 samples (0.25%)</title><rect x="1578.53" y="417" width="3.93" height="16" fill="#5179bf" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaDoseWeightAndInterpolateDevice &#8212; 37 samples (0.25%)</title><rect x="1578.53" y="400" width="3.93" height="16" fill="#48ac70" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaMemcpy &#8212; 13 samples (0.09%)</title><rect x="1578.53" y="383" width="1.38" height="16" fill="#379b5f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 12 samples (0.08%)</title><rect x="1578.53" y="366" width="1.27" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 11 samples (0.07%)</title><rect x="1578.53" y="349" width="1.17" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventSynchronize &#8212; 11 samples (0.07%)</title><rect x="1579.91" y="383" width="1.17" height="16" fill="#35995d" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 10 samples (0.07%)</title><rect x="1579.91" y="366" width="1.06" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 10 samples (0.07%)</title><rect x="1579.91" y="349" width="1.06" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>__clock_gettime &#8212; 6 samples (0.04%)</title><rect x="1579.91" y="332" width="0.64" height="16" fill="#886038" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[vdso] &#8212; 6 samples (0.04%)</title><rect x="1579.91" y="315" width="0.64" height="16" fill="#7a7a8e" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[Unknown] &#8212; 5 samples (0.03%)</title><rect x="1579.91" y="298" width="0.53" height="16" fill="#707084" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[kernel.kallsyms] &#8212; 5 samples (0.03%)</title><rect x="1579.91" y="281" width="0.53" height="16" fill="#604c88" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>cudaEventRecord &#8212; 6 samples (0.04%)</title><rect x="1581.08" y="383" width="0.64" height="16" fill="#389c60" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 4 samples (0.03%)</title><rect x="1581.08" y="366" width="0.42" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 4 samples (0.03%)</title><rect x="1581.08" y="349" width="0.42" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[ld-linux-x86-64.so.2] &#8212; 14 samples (0.09%)</title><rect x="1582.57" y="434" width="1.49" height="16" fill="#6c6c80" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libToolsInjectionProxy64.so] &#8212; 5 samples (0.03%)</title><rect x="1582.57" y="417" width="0.53" height="16" fill="#78788c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libnvcomp.so.5.3.0.16] &#8212; 8 samples (0.05%)</title><rect x="1584.05" y="434" width="0.85" height="16" fill="#6f6f83" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 8 samples (0.05%)</title><rect x="1584.05" y="417" width="0.85" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcupti.so.12.8] &#8212; 5 samples (0.03%)</title><rect x="1584.05" y="400" width="0.53" height="16" fill="#77778b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 7 samples (0.05%)</title><rect x="1584.90" y="434" width="0.74" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcudart.so.12.8.57] &#8212; 5 samples (0.03%)</title><rect x="1585.65" y="434" width="0.53" height="16" fill="#3e8e5c" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcuda.so.570.86.10] &#8212; 5 samples (0.03%)</title><rect x="1585.65" y="417" width="0.53" height="16" fill="#3d8d5b" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libcufft.so.11.3.3.41] &#8212; 10 samples (0.07%)</title><rect x="1586.81" y="451" width="1.06" height="16" fill="#358553" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+<g><title>[libc.so.6] &#8212; 8 samples (0.05%)</title><rect x="1587.88" y="451" width="0.85" height="16" fill="#7b7b8f" stroke="#fff" stroke-width="0.4" rx="1"/>
+</g>
+</svg>

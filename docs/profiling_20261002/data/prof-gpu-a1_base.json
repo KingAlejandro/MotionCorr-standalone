@@ -1,0 +1,142 @@
+{
+  "sqlite": "/home/alex/mc-release-20261002/prof/gpu-a1_base/prof.sqlite",
+  "traced_span_s": 15.428227869,
+  "device": {
+    "kernel_union_s": 3.05845836,
+    "copy_union_s": 1.173923065,
+    "busy_union_s": 4.232381425,
+    "launches": 24990,
+    "memcpys": 8878,
+    "h2d_bytes": 4623292754,
+    "d2h_bytes": 1402714636,
+    "traced": true,
+    "idle_in_trace_s": 11.195846444
+  },
+  "stages": {
+    "MOVIE (executeOwnMotionCorrection)": {
+      "union_s": 14.369026077,
+      "instances": 24,
+      "inclusive_sum_s": 14.369026077
+    },
+    "read gain": {
+      "union_s": 0.098110248,
+      "instances": 24,
+      "inclusive_sum_s": 0.098110248
+    },
+    "read movie": {
+      "union_s": 0.001481749,
+      "instances": 24,
+      "inclusive_sum_s": 0.001481749
+    },
+    "gain and sum": {
+      "union_s": 0.000674662,
+      "instances": 24,
+      "inclusive_sum_s": 0.000674662
+    },
+    "detect hot": {
+      "union_s": 0.967257131,
+      "instances": 24,
+      "inclusive_sum_s": 0.967257131
+    },
+    "fix defect": {
+      "union_s": 1.742540123,
+      "instances": 24,
+      "inclusive_sum_s": 1.742540123
+    },
+    "global fft": {
+      "union_s": 0.654858449,
+      "instances": 24,
+      "inclusive_sum_s": 0.654858449
+    },
+    "power spectrum": {
+      "union_s": 0.000387761,
+      "instances": 24,
+      "inclusive_sum_s": 0.000387761
+    },
+    "global alignment": {
+      "union_s": 0.390728474,
+      "instances": 24,
+      "inclusive_sum_s": 0.390728474
+    },
+    "global ifft": {
+      "union_s": 0.589604339,
+      "instances": 24,
+      "inclusive_sum_s": 0.589604339
+    },
+    "prep patch": {
+      "union_s": 0.499737861,
+      "instances": 600,
+      "inclusive_sum_s": 0.499737861
+    },
+    "patch align": {
+      "union_s": 1.93029586,
+      "instances": 600,
+      "inclusive_sum_s": 1.93029586
+    },
+    "fit polynomial": {
+      "union_s": 0.044557066,
+      "instances": 24,
+      "inclusive_sum_s": 0.044557066
+    },
+    "dose weighting": {
+      "union_s": 1.559486386,
+      "instances": 24,
+      "inclusive_sum_s": 1.559486386
+    },
+    "binning": {
+      "union_s": 0.000294167,
+      "instances": 24,
+      "inclusive_sum_s": 0.000294167
+    },
+    "write result": {
+      "union_s": 0.003033907,
+      "instances": 24,
+      "inclusive_sum_s": 0.003033907
+    },
+    "submit output": {
+      "union_s": 0.001647136,
+      "instances": 24,
+      "inclusive_sum_s": 0.001647136
+    },
+    "save model plot": {
+      "union_s": 0.000897322,
+      "instances": 24,
+      "inclusive_sum_s": 0.000897322
+    },
+    "logfile pdf": {
+      "union_s": 0.848971134,
+      "instances": 1,
+      "inclusive_sum_s": 0.848971134
+    },
+    "w scan": {
+      "union_s": 0.012204904,
+      "instances": 1,
+      "inclusive_sum_s": 0.012204904
+    },
+    "w histeps": {
+      "union_s": 0.014306848,
+      "instances": 1,
+      "inclusive_sum_s": 0.014306848
+    },
+    "w gs header": {
+      "union_s": 0.404155048,
+      "instances": 1,
+      "inclusive_sum_s": 0.404155048
+    },
+    "w gs batch": {
+      "union_s": 0.402614907,
+      "instances": 1,
+      "inclusive_sum_s": 0.402614907
+    },
+    "w gs allb": {
+      "union_s": 0.001149867,
+      "instances": 1,
+      "inclusive_sum_s": 0.001149867
+    },
+    "w gs logfile": {
+      "union_s": 0.416664461,
+      "instances": 1,
+      "inclusive_sum_s": 0.416664461
+    }
+  }
+}

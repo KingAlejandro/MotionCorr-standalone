@@ -151,15 +151,13 @@ __global__ void convertGainAndAccumulateNativeKernel(
 // host; signed sample types are refused by the eligibility gate, not here.
 template <typename T>
 __global__ void fusedNativeFlipGainAndSumKernel(
-    const T *src,
+    const unsigned char *src,
     float *dst_Iframes,
     float *dst_Isum,
     const float *d_gain,
     int nx,
     int ny,
-    int rows_per_strip,
-    int strips_per_frame,
-    size_t strip_pitch_bytes,
+    mc_tiff_deflate::StripGeometry geom,
     int frame_offset,
     int batch_frames,
     bool first_batch,
@@ -171,18 +169,12 @@ __global__ void fusedNativeFlipGainAndSumKernel(
 
     const size_t dest_pixel = dest_y * (size_t)nx + x;
     const int src_y = ny - 1 - (int)dest_y;
-    const int strip = src_y / rows_per_strip;
-    const int row_in_strip = src_y - strip * rows_per_strip;
-    const size_t row_bytes = (size_t)nx * sizeof(T);
     const float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
     float sum = first_batch ? 0.0f : dst_Isum[dest_pixel];
 
-    const unsigned char *base = (const unsigned char *)src;
     for (int b = 0; b < batch_frames; b++) {
-        const size_t off = ((size_t)b * (size_t)strips_per_frame + (size_t)strip)
-                               * strip_pitch_bytes
-                           + (size_t)row_in_strip * row_bytes;
-        const float val = (float)(*(const T *)(base + off + x * sizeof(T))) * gain_val;
+        const size_t off = geom.rowOffset(b, src_y);
+        const float val = (float)(*(const T *)(src + off + x * sizeof(T))) * gain_val;
         dst_Iframes[((size_t)(frame_offset + b) * (size_t)ny + dest_y) * (size_t)nx + x] = val;
         sum += val;
     }
@@ -1258,14 +1250,15 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const size_t out_align = std::max<size_t>((size_t)align_req.output, (size_t)bytes_per_sample);
     const size_t tmp_align = std::max<size_t>((size_t)align_req.temp, 256);
 
-    const size_t row_bytes = (size_t)nx * (size_t)bytes_per_sample;
-    const size_t full_strip_bytes = (size_t)rows_per_strip * row_bytes;
-    const int last_strip_rows = ny - (strips_per_frame - 1) * rows_per_strip;
-    const size_t last_strip_bytes = (size_t)last_strip_rows * row_bytes;
-    // Only strip starts are padded. Rows inside a strip are consecutive in the
-    // single buffer nvCOMP writes for that chunk, so the kernel's row step is
-    // row_bytes and only the strip step carries the alignment.
-    const size_t strip_pitch_bytes = alignUp(full_strip_bytes, out_align);
+    // One definition, shared with tests/test_deflate_layout.cpp. A restated copy
+    // here would be the thing the device-free control stops observing.
+    const mc_tiff_deflate::StripGeometry geom = mc_tiff_deflate::withOutputAlignment(
+        mc_tiff_deflate::planStrips(nx, ny, rows_per_strip, bytes_per_sample), out_align);
+    if (geom.strips_per_frame != strips_per_frame) return false;
+    const size_t row_bytes = geom.row_bytes;
+    const size_t full_strip_bytes = geom.full_strip_bytes;
+    const size_t last_strip_bytes = geom.last_strip_bytes;
+    const size_t strip_pitch_bytes = geom.strip_pitch;
     if (strip_pitch_bytes % (size_t)bytes_per_sample != 0) return false;
 
     // Compressed bytes a single frame occupies once every payload is placed so that
@@ -1413,9 +1406,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // Per chunk: the last strip of each frame is short whenever ny is not a
     // multiple of RowsPerStrip. Declaring the full size for it would ask nvCOMP
     // for more output than the stream holds and then check the wrong length.
-    std::vector<size_t>         h_dec_size(max_chunks, full_strip_bytes);
-    for (size_t c = (size_t)strips_per_frame - 1; c < max_chunks; c += (size_t)strips_per_frame)
-        h_dec_size[c] = last_strip_bytes;
+    std::vector<size_t>         h_dec_size(max_chunks);
+    for (size_t c = 0; c < max_chunks; c++) h_dec_size[c] = geom.chunkBytes(c);
     std::vector<size_t>         h_act_size(max_chunks);
     std::vector<nvcompStatus_t> h_statuses(max_chunks);
     std::vector<uint32_t>       h_adler_expected(max_chunks);
@@ -1559,13 +1551,11 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
         if (bytes_per_sample == 2) {
             fusedNativeFlipGainAndSumKernel<uint16_t><<<grid, block, 0, stream>>>(
-                (const uint16_t *)v.native, d_Iframes, d_Isum, d_gain, nx, ny,
-                rows_per_strip, strips_per_frame, strip_pitch_bytes,
+                v.native, d_Iframes, d_Isum, d_gain, nx, ny, geom,
                 f0, bf, f0 == 0, apply_gain);
         } else {
             fusedNativeFlipGainAndSumKernel<uint8_t><<<grid, block, 0, stream>>>(
-                (const uint8_t *)v.native, d_Iframes, d_Isum, d_gain, nx, ny,
-                rows_per_strip, strips_per_frame, strip_pitch_bytes,
+                v.native, d_Iframes, d_Isum, d_gain, nx, ny, geom,
                 f0, bf, f0 == 0, apply_gain);
         }
         HANDLE_ERROR(cudaGetLastError());

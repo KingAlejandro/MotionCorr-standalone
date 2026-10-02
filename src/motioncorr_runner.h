@@ -34,6 +34,8 @@
 #include "src/metadata_table.h"
 #include "src/image.h"
 #include "src/micrograph_model.h"
+#include "src/movie_processing_identity.h"
+#include "src/processing_file_digest.h"
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
 
@@ -313,6 +315,21 @@ public:
 	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
 
 private:
+	// Original source names and snapshots never follow prepareGainReference's
+	// mutation of fn_gain_reference into an output path.
+	FileName original_gain_reference;
+	bool processing_sources_ready = false;
+	std::string processing_executable, processing_runtime;
+	motioncorr_identity::FileDigest processing_engine, processing_gain, processing_defect;
+	void initialiseProcessingSources();
+	void requireProcessingSourcesUnchanged() const;
+	void effectiveMovieMetadata(int optics_group, RFLOAT row_exposure,
+	                            double &pixel_size, double &kv, RFLOAT &exposure) const;
+	motioncorr_identity::MovieProcessingIdentity processingIdentity(
+	    const Micrograph &mic, const motioncorr_identity::FileDigest &input,
+	    int optics_group, RFLOAT row_exposure);
+	bool canResumeMovie(const FileName &movie, int expected_count, int optics_group, RFLOAT row_exposure);
+	void invalidateCompletion(const FileName &movie);
 	// Background output writer, created by run() for the duration of the movie
 	// loop. Null elsewhere -- including in a default-constructed runner -- and
 	// submitOutput() then runs the task inline, so every entry point that is

@@ -102,6 +102,7 @@ DEFAULT_REQUIRED_TESTS = [
     # Issue142: receipt parsing, bounded file identity and actual resume refusal.
     "ProcessingFileDigest",
     "MovieProcessingIdentity",
+    "ResumeProcessingIdentity",
 ]
 
 

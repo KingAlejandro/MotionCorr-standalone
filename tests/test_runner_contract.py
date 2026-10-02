@@ -22,7 +22,7 @@ def read_local_shifts(star):
     labels, patches, in_block = [], {}, False
     for line in star.read_text().splitlines():
         fields = line.split()
-        if not fields:
+        if not fields or fields[0].startswith('#'):
             continue
         if fields[0].startswith('data_'):
             in_block = fields[0] == 'data_local_shift'
@@ -279,6 +279,12 @@ _rlnMicrographShiftY #5
         assert 'duplicate local-shift row' in str(error), error
     else:
         raise AssertionError('duplicate local-shift rows must not be silently overwritten')
+    trailing_block = work / 'local_shift_with_receipt.star'
+    trailing_block.write_text(duplicate.read_text().split('0 0 2 1.0 2.0')[0] +
+                             '0 0 2 1.0 2.0\n\n# version 50001\n\n' +
+                             'data_motioncorr_processing\n_rlnMotioncorrProcessingVersion 1\n')
+    assert read_local_shifts(trailing_block) == {(0.0, 0.0): {2: (1.0, 2.0)}}, (
+        'following STAR block/comment changed local shift parsing')
     arms = {}
     backend = [] if gpu is None else ['--gpu', str(gpu)]
     for arm, extra in (('off', []), ('on', ['--interpolate_shifts'])):

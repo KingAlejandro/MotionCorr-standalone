@@ -208,6 +208,10 @@ if(BUILD_TESTING)
     add_executable(movie_processing_identity tests/test_movie_processing_identity.cpp src/movie_processing_identity.cpp)
     target_include_directories(movie_processing_identity PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME MovieProcessingIdentity COMMAND movie_processing_identity)
+    add_test(NAME ResumeProcessingIdentity
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_processing_identity.py
+            --binary $<TARGET_FILE:motioncorr>)
+    set_tests_properties(ResumeProcessingIdentity PROPERTIES TIMEOUT 180)
     # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
     # and deliberately outside if(CUDA): the whole point is a configuration this
     # suite does not link, so no compiled test can observe it.

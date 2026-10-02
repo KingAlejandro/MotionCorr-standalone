@@ -25,11 +25,20 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <sstream>
+#include <cerrno>
+#include <cstring>
+#include <sys/utsname.h>
+#include <fftw3.h>
+#ifdef __GLIBC__
+#include <gnu/libc-version.h>
+#endif
 
 #include "src/motioncorr_runner.h"
 #include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
+#include <cufft.h>
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
@@ -127,7 +136,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
 	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
 	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
-	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
+	continue_old = parser.checkOption("--only_do_unfinished", "Resume matching own-engine processing receipts; incomplete movies are retried. Complete legacy or incompatible outputs are refused; use a fresh non-resume run to migrate them.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
 	ps_size = textToInteger(parser.getOption("--ps_size", "Output size of power spectrum", "512"));
@@ -147,6 +156,8 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	bin_factor =  textToFloat(parser.getOption("--bin_factor", "Binning factor (can be non-integer)", "1"));
 	bfactor =  textToFloat(parser.getOption("--bfactor", "B-factor (in pix^2) that will be used inside MOTIONCOR2", "150"));
 	fn_gain_reference = parser.getOption("--gainref","Location of MRC file with the gain reference to be applied","");
+	original_gain_reference = fn_gain_reference;
+	processing_sources_ready = false;
 	gain_rotation = textToInteger(parser.getOption("--gain_rot", "Rotate the gain reference this number times 90 degrees clock-wise (in relion_display). This is same as MotionCor2's RotGain. 0, 1, 2 or 3", "0"));
 	gain_flip = textToInteger(parser.getOption("--gain_flip", "Flip the gain reference. This is same as MotionCor2's FlipGain. 0, 1 (flip Y == upside down) or 2 (flip X == left to right)", "0"));
 	patch_x = textToInteger(parser.getOption("--patch_x", "Patching in X-direction for MOTIONCOR2", "1"));
@@ -462,7 +473,8 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old && isMovieComplete(fn_mic_given_all[imic], expected_frames_given_all[imic]))
+		if (continue_old && canResumeMovie(fn_mic_given_all[imic], expected_frames_given_all[imic],
+		                               optics_group_given_all[imic], pre_exposure_given_all[imic]))
 			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
@@ -539,6 +551,14 @@ void MotioncorrRunner::prepareGainReference(bool write_gain)
 	FileName fn_new_gain = fn_out + "gain.mrc";
 	if (write_gain)
 	{
+		// Rotation/flipping writes a derived file. Never overwrite the source
+		// whose content identity was captured for every movie in this run.
+		if (do_own && exists(fn_new_gain))
+		{
+			const auto output = motioncorr_identity::snapshotFile(fn_new_gain);
+			if (output.device == processing_gain.snapshot.device && output.inode == processing_gain.snapshot.inode)
+				REPORT_ERROR("Cannot prepare gain: derived destination aliases immutable gain source " + original_gain_reference);
+		}
 		Image<RFLOAT> Iin, Iout;
 		Iin.read(fn_gain_reference);
 
@@ -659,9 +679,199 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expe
 	}
 }
 
+void MotioncorrRunner::initialiseProcessingSources()
+{
+	if (processing_sources_ready) return;
+	processing_executable = motioncorr_identity::executablePath();
+	processing_engine = motioncorr_identity::digestFile(processing_executable);
+	if (!original_gain_reference.empty()) processing_gain = motioncorr_identity::digestFile(original_gain_reference);
+	if (!fn_defect.empty()) processing_defect = motioncorr_identity::digestFile(fn_defect);
+	struct utsname platform;
+	if (uname(&platform) != 0) throw std::runtime_error("Cannot identify processing platform");
+	processing_runtime = std::string(platform.sysname) + "/" + platform.release + "/" + platform.machine +
+	    "/RFLOAT" + std::to_string(sizeof(RFLOAT)) + "/" + fftw_version + "/" + fftwf_version;
+#ifdef __GLIBC__
+	processing_runtime += std::string("/glibc") + gnu_get_libc_version();
+#endif
+#ifdef _CUDA_ENABLED
+	if (use_gpu)
+	{
+		int runtime = 0, fft = 0;
+		if (cudaRuntimeGetVersion(&runtime) != cudaSuccess || cufftGetVersion(&fft) != CUFFT_SUCCESS)
+			throw std::runtime_error("Cannot identify CUDA processing libraries");
+		processing_runtime += "/CUDA" + std::to_string(runtime) + "/cuFFT" + std::to_string(fft);
+	}
+#endif
+	processing_sources_ready = true;
+}
+
+void MotioncorrRunner::requireProcessingSourcesUnchanged() const
+{
+	motioncorr_identity::requireUnchanged(processing_executable, processing_engine.snapshot);
+	if (!original_gain_reference.empty())
+		motioncorr_identity::requireUnchanged(original_gain_reference, processing_gain.snapshot);
+	if (!fn_defect.empty()) motioncorr_identity::requireUnchanged(fn_defect, processing_defect.snapshot);
+}
+
+void MotioncorrRunner::effectiveMovieMetadata(int optics_group, RFLOAT row_exposure,
+	                                         double &pixel_size, double &kv, RFLOAT &exposure) const
+{
+	if (!obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, pixel_size, optics_group - 1) ||
+	    !obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, kv, optics_group - 1))
+		REPORT_ERROR("Missing effective optics for group " + integerToString(optics_group));
+	exposure = pre_exposure + row_exposure;
+}
+
+motioncorr_identity::MovieProcessingIdentity MotioncorrRunner::processingIdentity(
+	const Micrograph &mic, const motioncorr_identity::FileDigest &input, int optics_group, RFLOAT row_exposure)
+{
+	initialiseProcessingSources();
+	using Identity = motioncorr_identity::MovieProcessingIdentity;
+	Identity::Fields values;
+	double pixel_size, kv;
+	RFLOAT exposure;
+	effectiveMovieMetadata(optics_group, row_exposure, pixel_size, kv, exposure);
+	const int last = last_frame_sum > 0 ? std::min(last_frame_sum, mic.getNframes()) : mic.getNframes();
+	// Existing own-engine selection is ascending and contiguous. Normalise the
+	// all-frame spellings; never infer selection from NOT_OBSERVED model rows.
+	values["selected_frames"] = std::to_string(first_frame_sum) + ":" + std::to_string(last);
+	values["width"] = std::to_string(mic.getWidth()); values["height"] = std::to_string(mic.getHeight());
+	values["frames"] = std::to_string(mic.getNframes());
+	values["input_digest"] = input.sha256; values["input_bytes"] = std::to_string(input.snapshot.size);
+	values["engine"] = use_gpu ? "own-cuda" : "own-cpu";
+	values["engine_digest"] = processing_engine.sha256; values["runtime"] = processing_runtime;
+	values["gain_digest"] = original_gain_reference.empty() ? "none" : processing_gain.sha256;
+	values["defect_digest"] = fn_defect.empty() ? "none" : processing_defect.sha256;
+	values["other_args_digest"] = "none"; // External adapter resume is not certified by v1.
+	values["angpix"] = Identity::real(pixel_size); values["voltage"] = Identity::real(kv);
+	values["pre_exposure"] = Identity::real(exposure); values["dose_per_frame"] = Identity::real(dose_per_frame);
+	values["bin_factor"] = Identity::real(bin_factor); values["bfactor"] = Identity::real(bfactor);
+	values["ccf_downsample"] = Identity::real(ccf_downsample);
+	values["patch_x"] = std::to_string(patch_x); values["patch_y"] = std::to_string(patch_y);
+	values["group_frames"] = std::to_string(group); values["max_iter"] = std::to_string(max_iter);
+	values["seed"] = std::to_string(random_seed);
+	values["gain_rotation"] = std::to_string(gain_rotation); values["gain_flip"] = std::to_string(gain_flip);
+	values["eer_grouping"] = EERRenderer::isEER(mic.getMovieFilename()) ? std::to_string(eer_grouping) : "none";
+	values["eer_upsampling"] = EERRenderer::isEER(mic.getMovieFilename()) ? std::to_string(eer_upsampling) : "none";
+	values["ps_grouping"] = std::to_string(grouping_for_ps > 0 ? grouping_for_ps : 0);
+	values["ps_size"] = grouping_for_ps > 0 ? std::to_string(ps_size) : "none";
+	for (const auto &flag : std::vector<std::pair<std::string, bool>>{
+	    {"dose_weighting", do_dose_weighting}, {"early_binning", early_binning},
+	    {"interpolate_shifts", interpolate_shifts}, {"skip_defect", skip_defect},
+	    {"write_float16", write_float16}, {"save_noDW", do_dose_weighting && save_noDW},
+	    {"even_odd_split", even_odd_split}}) values[flag.first] = flag.second ? "1" : "0";
+	return Identity(values);
+}
+
+void MotioncorrRunner::invalidateCompletion(const FileName &movie)
+{
+	const FileName marker = getOutputFileNames(movie).withoutExtension() + ".star";
+	if (std::remove(marker.c_str()) != 0 && errno != ENOENT)
+		REPORT_ERROR("Movie " + movie + ": cannot invalidate old completion marker " + marker + ": " + std::strerror(errno));
+}
+
+namespace
+{
+void requireResultGeometry(const FileName &path, int nx, int ny, DataType expected_type, double sampling,
+	                      bool power_spectrum = false)
+{
+	std::ifstream in(path.c_str(), std::ios::binary);
+	Image<float>::MRChead header;
+	if (!in.read(reinterpret_cast<char*>(&header), sizeof(header)))
+		REPORT_ERROR("Cannot read accepted product header: " + path);
+	Image<float> image;
+	const DataType type = image.parseMRCHeader(&header, -1, false, path);
+	if (header.nx != nx || header.ny != ny || header.nz != 1 || type != expected_type ||
+	    (!power_spectrum && (header.mx != nx || header.my != ny ||
+	      header.a != static_cast<float>(sampling) * nx || header.b != static_cast<float>(sampling) * ny)))
+		REPORT_ERROR("Processing receipt/product geometry or sampling mismatch: " + path);
+}
+}
+
+bool MotioncorrRunner::canResumeMovie(const FileName &movie, int expected_count, int optics_group, RFLOAT row_exposure)
+{
+	const FileName root = getOutputFileNames(movie).withoutExtension();
+	if (!exists(root + ".star")) return false;
+	try
+	{
+		const std::string payload = motioncorr_identity::readProcessingReceipt(root + ".star");
+		if (!do_own)
+		{
+			if (isMovieComplete(movie, expected_count))
+				REPORT_ERROR("Movie " + movie + ": verified resume of the external MotionCor2 engine is unsupported; use a fresh non-resume run.");
+			return false;
+		}
+		if (payload.empty())
+		{
+			if (isMovieComplete(movie, expected_count))
+				REPORT_ERROR("Movie " + movie + ": complete legacy output has no processing receipt; use a fresh non-resume run to migrate it.");
+			return false;
+		}
+		Micrograph input_model(movie, original_gain_reference, bin_factor, eer_upsampling, eer_grouping);
+		if (expected_count > 0 && input_model.getNframes() != expected_count)
+			REPORT_ERROR("Movie " + movie + " frame count mismatch: expected " + integerToString(expected_count) +
+			             " frames, but decoded " + integerToString(input_model.getNframes()) + " frames.");
+		const auto input = motioncorr_identity::digestFile(movie);
+		const auto saved = motioncorr_identity::MovieProcessingIdentity::parse(payload);
+		const auto requested = processingIdentity(input_model, input, optics_group, row_exposure);
+		const std::string mismatch = saved.mismatch(requested);
+		if (!mismatch.empty())
+			REPORT_ERROR("Movie " + movie + ": incompatible processing receipt (" + mismatch + " differs); use a fresh non-resume run.");
+		requireProcessingSourcesUnchanged();
+		motioncorr_identity::requireUnchanged(movie, input.snapshot);
+		if (!isMovieComplete(movie, expected_count)) return false; // Same config, damaged/missing products: retry.
+		if (random_seed < 0 && !skip_defect)
+			REPORT_ERROR("Movie " + movie + ": complete time-seeded defect correction cannot be verified for resume; use a fresh non-resume run or an explicit nonnegative seed.");
+		MetaDataTable general, expected;
+		general.read(root + ".star", "general");
+		double pixel_size, kv; RFLOAT exposure;
+		effectiveMovieMetadata(optics_group, row_exposure, pixel_size, kv, exposure);
+		expected.addObject();
+		expected.setValue(EMDL_IMAGE_SIZE_X, input_model.getWidth());
+		expected.setValue(EMDL_IMAGE_SIZE_Y, input_model.getHeight());
+		expected.setValue(EMDL_IMAGE_SIZE_Z, input_model.getNframes());
+		expected.setValue(EMDL_MICROGRAPH_BINNING, bin_factor);
+		expected.setValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, pixel_size);
+		expected.setValue(EMDL_CTF_VOLTAGE, kv);
+		expected.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, exposure);
+		expected.setValue(EMDL_MICROGRAPH_DOSE_RATE, dose_per_frame);
+		expected.setValue(EMDL_MICROGRAPH_START_FRAME, first_frame_sum);
+		for (EMDLabel label : expected.getActiveLabels())
+		{
+			std::string actual, wanted;
+			if (!general.getValueToString(label, actual) || !expected.getValueToString(label, wanted) || actual != wanted)
+				REPORT_ERROR("Movie " + movie + ": saved model disagrees with processing receipt (" + EMDL::label2Str(label) + ").");
+		}
+		if (!std::isfinite(bin_factor) || bin_factor <= 0 || input_model.getWidth() / bin_factor > INT_MAX ||
+		    input_model.getHeight() / bin_factor > INT_MAX)
+			REPORT_ERROR("Movie " + movie + ": invalid output binning geometry.");
+		const int nx = static_cast<int>(input_model.getWidth() / bin_factor);
+		const int ny = static_cast<int>(input_model.getHeight() / bin_factor);
+		const DataType type = write_float16 ? Float16 : Float;
+		requireResultGeometry(root + ".mrc", nx, ny, type, pixel_size * bin_factor);
+		if (do_dose_weighting && save_noDW) requireResultGeometry(root + "_noDW.mrc", nx, ny, type, pixel_size * bin_factor);
+		if (even_odd_split)
+		{
+			requireResultGeometry(root + "_EVN.mrc", nx, ny, type, pixel_size * bin_factor);
+			requireResultGeometry(root + "_ODD.mrc", nx, ny, type, pixel_size * bin_factor);
+		}
+		if (grouping_for_ps > 0) requireResultGeometry(root + "_PS.mrc", ps_size, ps_size, Float, 0, true);
+		return true;
+	}
+	catch (const std::exception &error)
+	{
+		REPORT_ERROR("Movie " + movie + ": unverifiable processing receipt: " + error.what());
+	}
+	return false;
+}
+
 void MotioncorrRunner::run()
 {
-	prepareGainReference(true);
+	if (!fn_micrographs.empty())
+	{
+		if (do_own) initialiseProcessingSources(); // Before gain/output mutation.
+		prepareGainReference(true);
+	}
 
 	int barstep;
 	if (verb > 0)
@@ -716,9 +926,26 @@ void MotioncorrRunner::run()
 				             integerToString(exp_frames) + " frames, but decoded " +
 				             integerToString(mic.getNframes()) + " frames.");
 			}
-			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
-			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
-			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
+			effectiveMovieMetadata(optics_group_micrographs[imic], pre_exposure_micrographs[imic],
+			                       angpix, voltage, mic.pre_exposure);
+			motioncorr_identity::FileDigest input_identity;
+			if (do_own)
+			{
+				try
+				{
+					input_identity = motioncorr_identity::digestFile(fn_micrographs[imic]);
+					mic.processing_identity = processingIdentity(mic, input_identity,
+					    optics_group_micrographs[imic], pre_exposure_micrographs[imic]).serialize();
+					requireProcessingSourcesUnchanged();
+				}
+				catch (const std::exception &error)
+				{
+					REPORT_ERROR("Movie " + fn_micrographs[imic] + ": " + error.what());
+				}
+			}
+			// Old products may remain as failure evidence, but their old completion
+			// marker must not certify any image this attempt can overwrite.
+			invalidateCompletion(fn_micrographs[imic]);
 			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
@@ -731,7 +958,12 @@ void MotioncorrRunner::run()
 				const FileName fn_movie = fn_micrographs[imic];
 				// Submitted after the image writes, and cancelled with them if
 				// one failed: the STAR is the resume completion marker.
-				submitOutput([this, saved, fn_movie]() {
+				submitOutput([this, saved, fn_movie, input_identity]() {
+					if (do_own)
+					{
+						motioncorr_identity::requireUnchanged(fn_movie, input_identity.snapshot);
+						requireProcessingSourcesUnchanged();
+					}
 					writeModel(*saved);
 					plotShifts(fn_movie, *saved);
 				});

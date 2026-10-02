@@ -83,6 +83,9 @@ public:
 	static const RFLOAT NOT_OBSERVED;
 	RFLOAT angpix, voltage, dose_per_frame, pre_exposure;
 	FileName fnDefect;
+	// Empty on historical/library-created models. Own-engine runner results carry
+	// a fixed receipt; downstream readers can still read legacy motion models.
+	std::string processing_identity;
 
 	int first_frame; // First frame for local motion model. 1-indexed.
 	MotionModel *model;

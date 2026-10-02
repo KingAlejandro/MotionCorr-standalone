@@ -266,6 +266,8 @@ enum EMDLabel
 	EMDL_MICROGRAPH_BINNING,
 	EMDL_MICROGRAPH_FRAME_NUMBER,
 	EMDL_MICROGRAPH_MOTION_MODEL_VERSION,
+	EMDL_MOTIONCORR_PROCESSING_VERSION,
+	EMDL_MOTIONCORR_PROCESSING_IDENTITY,
 	EMDL_MICROGRAPH_START_FRAME,
 	EMDL_MICROGRAPH_END_FRAME,
 	EMDL_MICROGRAPH_SHIFT_X,
@@ -1005,6 +1007,8 @@ private:
 		EMDL::addLabel(EMDL_MICROGRAPH_BINNING, EMDL_DOUBLE, "rlnMicrographBinning", "Micrograph binning factor");
 		EMDL::addLabel(EMDL_MICROGRAPH_FRAME_NUMBER, EMDL_INT, "rlnMicrographFrameNumber", "Micrograph frame number");
 		EMDL::addLabel(EMDL_MICROGRAPH_MOTION_MODEL_VERSION, EMDL_INT, "rlnMotionModelVersion", "Version of micrograph motion model");
+		EMDL::addLabel(EMDL_MOTIONCORR_PROCESSING_VERSION, EMDL_INT, "rlnMotioncorrProcessingVersion", "Version of MotionCorr's per-movie processing receipt");
+		EMDL::addLabel(EMDL_MOTIONCORR_PROCESSING_IDENTITY, EMDL_STRING, "rlnMotioncorrProcessingIdentity", "Canonical fixed processing identity; required for verified own-engine resume");
 		EMDL::addLabel(EMDL_MICROGRAPH_START_FRAME, EMDL_INT, "rlnMicrographStartFrame", "Start frame of a motion model");
 		EMDL::addLabel(EMDL_MICROGRAPH_END_FRAME, EMDL_INT, "rlnMicrographEndFrame", "End frame of a motion model");
 		EMDL::addLabel(EMDL_MICROGRAPH_SHIFT_X, EMDL_DOUBLE, "rlnMicrographShiftX", "X shift of a (patch of) micrograph");

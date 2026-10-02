@@ -18,12 +18,18 @@ Needs no capture, no GPU and no network. Run from the repository root:
 Not registered with CTest: this directory is a documentation/tooling lane that
 touches no build files. Whoever next edits CMakeLists.txt should register it.
 """
-import ast, json, os, pathlib, re, subprocess, sys, tempfile
+import ast, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 PY = sys.executable
 fails = []
+# Internal child mode runs the ordinary suite in a temporary no-remote-ref
+# fixture without recursively creating another fixture. It checks that property
+# below rather than allowing a caller to silently skip the portability control.
+NO_REMOTE_FIXTURE = '--no-remote-ref-fixture'
+if sys.argv[1:] not in ([], [NO_REMOTE_FIXTURE]):
+    raise SystemExit('usage: selftest.py [' + NO_REMOTE_FIXTURE + ']')
 
 def check(name, cond, detail=""):
     print(("  ok   " if cond else "  FAIL ") + name + (("  -- " + detail) if detail and not cond else ""))
@@ -62,8 +68,11 @@ with tempfile.TemporaryDirectory() as td:
 
 print("3. patch_nvtx.py: patches known sources, refuses unknown ones, survives -O")
 samples = {}
-for tag, rev in (("historical", "1d7e13f"), ("retained-current", "c499"),
-                 ("current-main", "origin/main"), ("working", "HEAD")):
+for tag, rev in (
+        ("historical", "1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26"),
+        ("retained-current", "c499b1d3bf1cceec5c3b194f356844d6f493e7f2"),
+        ("merged-main", "2aa2886d217e0ac1388d5d448a9ae77efddd9e18"),
+        ("working", "HEAD")):
     g = subprocess.run(["git", "-C", str(ROOT), "show", rev + ":src/motioncorr_runner.cpp"],
                        capture_output=True, text=True)
     check(tag + " source is reachable", g.returncode == 0 and bool(g.stdout),
@@ -168,6 +177,42 @@ else:
         check("profiled span and unprofiled wall genuinely differ (so keeping them apart matters)",
               bool(mixed),
               "no arm differs; the separation would be untestable here")
+
+print('5. retained source fixtures need no remote-tracking refs')
+if sys.argv[1:] == [NO_REMOTE_FIXTURE]:
+    refs = subprocess.run(['git', '-C', str(ROOT), 'for-each-ref', '--format=%(refname)',
+                           'refs/remotes/'], capture_output=True, text=True)
+    check('child fixture has no remote-tracking refs', refs.returncode == 0 and not refs.stdout.strip())
+else:
+    with tempfile.TemporaryDirectory() as td:
+        clone = pathlib.Path(td) / 'no-remotes'
+        # Share local objects and avoid checking out large retained artifacts.
+        # Copy only the inputs this CPU tooling suite uses. No network access,
+        # and every ref deletion is scoped to this throwaway clone.
+        copied = subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout',
+                                 str(ROOT), str(clone)], capture_output=True, text=True)
+        check('temporary local clone created', copied.returncode == 0, copied.stderr.strip()[:140])
+        if copied.returncode == 0:
+            refs = subprocess.run(['git', '-C', str(clone), 'for-each-ref',
+                                   '--format=%(refname)', 'refs/remotes/'],
+                                  capture_output=True, text=True)
+            check('temporary remote refs enumerated', refs.returncode == 0)
+            all_removed = refs.returncode == 0
+            for ref in refs.stdout.splitlines():
+                dropped = subprocess.run(['git', '-C', str(clone), 'update-ref', '--no-deref', '-d', ref],
+                                         capture_output=True, text=True)
+                all_removed = all_removed and dropped.returncode == 0
+            check('all temporary remote refs removed', all_removed)
+            shutil.copytree(HERE, clone / 'tools/nsys_analysis')
+            clone_data = clone / 'docs/profiling_20261001/data24/arms24.json'
+            clone_data.parent.mkdir(parents=True, exist_ok=True)
+            if data.exists():
+                shutil.copyfile(data, clone_data)
+            for flags in ([], ['-O']):
+                r = run(flags + [str(clone / 'tools/nsys_analysis/selftest.py'), NO_REMOTE_FIXTURE])
+                check('no-remote-ref suite passes' + (' under -O' if flags else ''),
+                      r.returncode == 0 and 'all nsys_analysis CLI checks passed' in r.stdout,
+                      (r.stderr + r.stdout)[-500:])
 
 print()
 if fails:

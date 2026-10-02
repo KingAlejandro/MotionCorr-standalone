@@ -28,8 +28,13 @@ uses, `arms24_json.py` reaches its input handling and creates its output directo
 unsupported, unbalanced, misordered or already-patched one with a non-zero exit.
 It also rejects deleted, added, renamed or reordered whole marker pairs even when
 their nesting and counts remain valid, and verifies rejected files stay unchanged
-(including under `python -O`). The positive fixtures are retained `1d7e13f`, retained
-`c499`, local `origin/main` and `HEAD`; run with those Git revisions available.
+(including under `python -O`). The positive fixtures use full source commit IDs:
+retained `1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26`, retained
+`c499b1d3bf1cceec5c3b194f356844d6f493e7f2`, merged main
+`2aa2886d217e0ac1388d5d448a9ae77efddd9e18`, and the working `HEAD`; run with
+those Git objects available. No remote name or moving remote-tracking ref is
+required. The suite repeats its checks in a temporary local clone with every
+remote-tracking ref removed, in normal and optimized Python.
 The test also checks that `mkarms24.py` emits both charts without reinstating the
 cross-run idle label. No
 capture, GPU or network needed. It fails on the first version of this directory.

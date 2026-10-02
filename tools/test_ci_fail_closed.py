@@ -211,6 +211,7 @@ exec "{sys.executable}" "$@"
             "NvcompGuards",
             "OutputStageFaults",
             "NativeMovieStaging",
+            "GainCacheOwnership",
         ]
 
         def runnable(name: str) -> dict:

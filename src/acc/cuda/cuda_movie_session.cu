@@ -471,6 +471,29 @@ bool CudaMovieSession::initialize() {
         return false;
     }
 
+    mc_cuda::CudaWorkerPlanPool &gain_pool = mc_cuda::getWorkerPlanPool();
+    const cudaError_t retired_error = gain_pool.retiredErrorFor(device_id);
+    if (retired_error != cudaSuccess) {
+        recordFailure(retired_error, "initialize retired gain cache", __LINE__);
+        return false;
+    }
+    if (gain_generation != 0 && !gain_pool.acquireLease(this, device_id)) {
+        recordFailure(cudaErrorNotReady, "initialize gain cache lease busy", __LINE__);
+        return false;
+    }
+    // Discard an unused or mismatching entry BEFORE admitting the new movie.
+    // Retiring it only during upload is too late: its bytes could already have
+    // denied the movie buffers. A different live lease refuses this eviction.
+    const mc_cuda::CudaWorkerPlanPool::GainPool &gain_entry = gain_pool.gain;
+    if (gain_entry.ptr != nullptr &&
+        (gain_generation == 0 || gain_entry.generation != gain_generation ||
+         gain_entry.nx != nx || gain_entry.ny != ny || gain_entry.device_id != device_id)) {
+        if (!gain_pool.dropAll(&failure_state, this)) {
+            (void)gain_pool.releaseLease(this);
+            return false;
+        }
+    }
+
     // Allocate persistent movie buffers
     cudaError_t cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
     if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
@@ -558,11 +581,16 @@ void CudaMovieSession::release() {
     // dropped its own aliases, so nothing still points at a freed buffer.
     struct ReleaseFailureGuard {
         CudaFailureState &failure;
+        const void *holder;
+        int device;
         ~ReleaseFailureGuard() {
-            if (failure.isPoisoned() || failure.hasFailed())
-                (void)mc_cuda::getWorkerPlanPool().dropAll(&failure);
+            mc_cuda::CudaWorkerPlanPool &pool = mc_cuda::getWorkerPlanPool();
+            if (failure.isPoisoned())
+                (void)pool.retire(device, &failure, holder);
+            else if (failure.hasFailed())
+                (void)pool.dropAll(&failure, holder);
         }
-    } failure_guard{failure_state};
+    } failure_guard{failure_state, this, device_id};
 
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
@@ -590,6 +618,7 @@ void CudaMovieSession::release() {
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
     is_initialized = false;
+    (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
 }
 
 // Point d_gain at a device copy of gain_ref, reusing the worker-lifetime pooled
@@ -603,8 +632,8 @@ void CudaMovieSession::release() {
 // already knows when the contents could have changed, so a generation counter on
 // that refill is an exact identity and costs nothing -- no hashing of 54 MiB.
 //
-// Returns false on a CUDA error, leaving d_gain null and the pool empty: a
-// partially replaced pool must never stay marked valid.
+// Returns false on a CUDA error. Failed owning-device selection retains an
+// invalidated owned entry for checked retry; it cannot serve a cache hit.
 bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real) {
     mc_cuda::CudaWorkerPlanPool::GainPool &pool = mc_cuda::getWorkerPlanPool().gain;
 
@@ -614,6 +643,7 @@ bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, si
         d_gain = nullptr;
         d_gain_borrowed = false;
     }
+    (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
     // Releasing a session-owned copy is checked: a free that fails is evidence
     // about the context, not something to discard.
     auto release_owned = [&]() -> bool {
@@ -640,6 +670,13 @@ bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, si
         HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
         d_gain_borrowed = false;
         return true;
+    }
+
+    if (!mc_cuda::getWorkerPlanPool().acquireLease(this, device_id)) {
+        const cudaError_t retired_error = mc_cuda::getWorkerPlanPool().retiredErrorFor(device_id);
+        recordFailure(retired_error == cudaSuccess ? cudaErrorNotReady : retired_error,
+                      "gain cache lease unavailable", __LINE__);
+        return false;
     }
 
     const bool hit = pool.ptr != nullptr &&

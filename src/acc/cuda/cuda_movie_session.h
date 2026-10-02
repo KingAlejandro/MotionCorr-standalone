@@ -321,9 +321,10 @@ private:
     unsigned long long gain_generation = 0;
 
     // Points d_gain at a device copy of gain_ref, reusing the worker-lifetime
-    // pooled copy when (generation, bytes, nx, ny, device) matches. False on a
-    // CUDA error, with d_gain left null and the pool left empty. A null gain_ref
-    // releases any session-owned copy and leaves d_gain null.
+    // pooled copy when (generation, bytes, nx, ny, device) matches. A failed
+    // owning-device selection retains invalidated ownership for checked retry;
+    // no stale cache hit or replacement is allowed. A null gain_ref releases
+    // any session-owned copy and leaves d_gain null.
     bool ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real);
 
     cufftHandle plan_r2c = 0;

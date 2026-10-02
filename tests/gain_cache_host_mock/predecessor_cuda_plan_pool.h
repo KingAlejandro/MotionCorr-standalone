@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
 #ifndef CUDA_PLAN_POOL_H_
 #define CUDA_PLAN_POOL_H_
 
@@ -23,11 +22,9 @@ namespace mc_cuda {
  * dispatched one at a time, but a worker-per-thread arrangement must not share
  * one buffer. One device per process is assumed, which is how --gpu behaves.
  *
- * Only one gain entry is retained; this port contains no retained FFT plans or
- * work areas. Retirement invalidates its key, selects the owning device before
- * releasing, and restores the caller's device. Failed selection retains owned
- * bytes for checked retry. A live session lease excludes replacement by another
- * session, and a fatal worker remains retired even after cleanup succeeds.
+ * Every retirement path is checked against CudaFailureState, invalidates the
+ * cache key before destroying anything, selects the owning device and restores
+ * the caller's device, and is idempotent so a second drop() cannot double-free.
  */
 
 /**
@@ -40,11 +37,7 @@ class RetirementContext {
 public:
     RetirementContext(int target_device, CudaFailureState *failure, const char *stage)
         : caller_device_(-1), restore_(false), ok_(true), failure_(failure), stage_(stage) {
-        if (target_device < 0) {
-            ok_ = false;
-            if (failure_) failure_->record(cudaErrorInvalidDevice, stage_, __LINE__);
-            return;
-        }
+        if (target_device < 0) return;
         const cudaError_t get_err = cudaGetDevice(&caller_device_);
         if (get_err != cudaSuccess) {
             ok_ = false;
@@ -91,9 +84,6 @@ private:
 
 class CudaWorkerPlanPool {
 public:
-    CudaWorkerPlanPool() = default;
-    CudaWorkerPlanPool(const CudaWorkerPlanPool &) = delete;
-    CudaWorkerPlanPool &operator=(const CudaWorkerPlanPool &) = delete;
     /**
      * The device gain copy.
      *
@@ -103,9 +93,6 @@ public:
      * behaviour it had before.
      */
     struct GainPool {
-        GainPool() = default;
-        GainPool(const GainPool &) = delete;
-        GainPool &operator=(const GainPool &) = delete;
         float *ptr = nullptr;
         size_t bytes = 0;
         unsigned long long generation = 0;
@@ -124,14 +111,12 @@ public:
             }
             const int target_device = device_id;
             float *owned = ptr;
-            // Invalidate reuse, but keep ownership and byte accounting until the
-            // owning device is selected. A failed selection must not free on an
-            // unrelated context or lose the only handle for checked retry.
-            generation = 0;
+            // Invalidate the key before the free so no later lookup can match a
+            // buffer that is being retired.
+            ptr = nullptr; bytes = 0; generation = 0; nx = ny = 0; device_id = -1;
+
             RetirementContext context(target_device, failure, "dropGain");
-            if (!context.selected()) return false;
-            ptr = nullptr; bytes = 0; nx = ny = 0; device_id = -1;
-            bool ok = true;
+            bool ok = context.selected();
             const cudaError_t err = cudaFree(owned);
             if (err != cudaSuccess) {
                 ok = false;
@@ -141,46 +126,9 @@ public:
         }
     } gain;
 
-    // One live session may borrow this worker's single gain entry. Thread-local
-    // storage alone does not prevent two sessions interleaving on one thread.
-    bool acquireLease(const void *holder, int device) {
-        if (holder == nullptr || retiredFor(device)) return false;
-        if (lease_holder_ != nullptr && lease_holder_ != holder) return false;
-        lease_holder_ = holder;
-        return true;
-    }
-    bool releaseLease(const void *holder) {
-        if (holder == nullptr || lease_holder_ != holder) return false;
-        lease_holder_ = nullptr;
-        return true;
-    }
-    bool retiredFor(int device) const {
-        // The static worker has one device/context ownership domain. Once any
-        // fatal context was observed it must restart, not forget that retirement
-        // after a later session supplies another device number.
-        (void)device;
-        return retired_;
-    }
-    cudaError_t retiredErrorFor(int device) const {
-        return retiredFor(device) ? retired_error_ : cudaSuccess;
-    }
-    bool retire(int device, CudaFailureState *failure, const void *holder) {
-        if (!retired_) {
-            retired_ = true;
-            retired_device_ = device;
-            retired_error_ = failure && failure->isPoisoned()
-                ? failure->fatalError() : cudaErrorContextIsDestroyed;
-        }
-        return dropAll(failure, holder);
-    }
-
     ~CudaWorkerPlanPool() { (void)dropAll(nullptr); }
 
-    bool dropAll(CudaFailureState *failure = nullptr, const void *holder = nullptr) {
-        if (lease_holder_ != nullptr && lease_holder_ != holder) {
-            if (failure) failure->record(cudaErrorNotReady, "gain cache lease busy", __LINE__);
-            return false;
-        }
+    bool dropAll(CudaFailureState *failure = nullptr) {
         bool ok = true;
         if (!gain.drop(failure)) ok = false;
         return ok;
@@ -188,12 +136,6 @@ public:
 
     // Device bytes this worker keeps resident between movies.
     size_t retainedBytes() const { return gain.retainedBytes(); }
-
-private:
-    const void *lease_holder_ = nullptr;
-    bool retired_ = false;
-    int retired_device_ = -1;
-    cudaError_t retired_error_ = cudaSuccess;
 };
 
 inline CudaWorkerPlanPool &getWorkerPlanPool() {

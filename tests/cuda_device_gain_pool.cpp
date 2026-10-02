@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 // Native controls for the worker-lifetime device gain pool.
 //
 // The pool is the one retained resource whose contents are read by every
@@ -25,6 +26,12 @@ std::map<void *, size_t> buffers;
 size_t allocated_bytes = 0;
 size_t freed_bytes = 0;
 size_t stale_frees = 0;
+size_t free_attempts = 0;
+bool reject_alloc_while_retained = false;
+size_t blocked_allocations = 0;
+bool virtual_device_mode = false;
+int virtual_device = 0;
+bool fail_owner_selection = false;
 
 // Host gain arrays being watched, and how many host-to-device copies have been
 // issued out of each. Pointer identity of the device buffer is not an oracle:
@@ -50,9 +57,15 @@ extern "C" {
 cudaError_t __real_cudaMalloc(void **, size_t);
 cudaError_t __real_cudaFree(void *);
 cudaError_t __real_cudaSetDevice(int);
+cudaError_t __real_cudaGetDevice(int *);
 cudaError_t __real_cudaMemcpy(void *, const void *, size_t, cudaMemcpyKind);
 
 cudaError_t __wrap_cudaMalloc(void **ptr, size_t bytes) {
+    if (reject_alloc_while_retained && mc_cuda::getWorkerPlanPool().gain.ptr != nullptr) {
+        ++blocked_allocations;
+        *ptr = nullptr;
+        return cudaErrorMemoryAllocation;
+    }
     const cudaError_t status = __real_cudaMalloc(ptr, bytes);
     if (active && status == cudaSuccess) {
         buffers[*ptr] = bytes;
@@ -62,6 +75,7 @@ cudaError_t __wrap_cudaMalloc(void **ptr, size_t bytes) {
 }
 
 cudaError_t __wrap_cudaFree(void *ptr) {
+    if (active && ptr != nullptr) ++free_attempts;
     size_t bytes = 0;
     if (active && ptr != nullptr) {
         std::map<void *, size_t>::iterator it = buffers.find(ptr);
@@ -81,7 +95,21 @@ cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t bytes, cudaMemc
     return __real_cudaMemcpy(dst, src, bytes, kind);
 }
 
+cudaError_t __wrap_cudaGetDevice(int *device) {
+    if (virtual_device_mode) { *device = virtual_device; return cudaSuccess; }
+    return __real_cudaGetDevice(device);
+}
+
 cudaError_t __wrap_cudaSetDevice(int device) {
+    if (fail_owner_selection && device == 0) {
+        // Returned failure survives even though the runtime last-error slot is clear.
+        (void)cudaGetLastError();
+        return cudaErrorInvalidDevice;
+    }
+    if (virtual_device_mode) {
+        virtual_device = device;
+        return device == 0 ? __real_cudaSetDevice(0) : cudaSuccess;
+    }
     if (intercept_set_device) {
         device_selections.push_back(device);
         // Only device 0 physically exists here; a fabricated id is accepted so
@@ -97,7 +125,9 @@ namespace {
 void reset() {
     (void)mc_cuda::getWorkerPlanPool().dropAll();
     buffers.clear();
-    allocated_bytes = freed_bytes = stale_frees = 0;
+    allocated_bytes = freed_bytes = stale_frees = free_attempts = 0;
+    blocked_allocations = 0;
+    reject_alloc_while_retained = virtual_device_mode = fail_owner_selection = false;
     watched_gain_sources.clear();
     gain_uploads = 0;
     active = true;
@@ -219,8 +249,8 @@ void testGainSequenceABA() {
     std::cout << "  PASS: A -> B -> A, reuse, geometry change" << std::endl;
 }
 
-// gain -> no gain -> gain. The middle movie must not leak a session-owned copy
-// and must not leave the retained buffer aliased by a dead session.
+// gain -> no gain -> gain. No-gain admission intentionally retires an unused
+// cached gain before movie allocation; returning to gain uploads again.
 void testGainThenNoGainThenGain() {
     std::cout << "Testing gain -> no gain -> gain..." << std::endl;
     const int nx = 48, ny = 32;
@@ -236,22 +266,21 @@ void testGainThenNoGainThenGain() {
 
     requireSameBytes(runMovie(nx, ny, frames, nullptr, 0, "no-gain movie"),
                      hostSum(frames, nullptr, nx, ny), "no-gain movie applied a gain");
-    require(mc_cuda::getWorkerPlanPool().gain.ptr == pooled,
-            "a no-gain movie retired another movie's retained gain");
+    require(mc_cuda::getWorkerPlanPool().gain.ptr == nullptr,
+            "no-gain admission kept an unused retained gain");
 
     requireSameBytes(runMovie(nx, ny, frames, &gain, 21, "gain movie again"),
                      hostSum(frames, &gain, nx, ny), "gain movie after a no-gain movie produced wrong sum");
-    require(gain_uploads == 1, "a no-gain movie invalidated the retained gain");
+    require(gain_uploads == 2, "gain after no-gain admission was not uploaded again");
     require(stale_frees == 0, "double free observed across gain -> no gain -> gain");
 
     // generation 0 with a gain keeps the original upload-every-movie behaviour
     // and must own its copy rather than touch the pool.
-    const float *before = mc_cuda::getWorkerPlanPool().gain.ptr;
     requireSameBytes(runMovie(nx, ny, frames, &gain, 0, "unidentified gain movie"),
                      hostSum(frames, &gain, nx, ny), "generation 0 gain produced wrong sum");
-    require(mc_cuda::getWorkerPlanPool().gain.ptr == before,
-            "generation 0 modified the retained gain pool");
-    require(gain_uploads == 2, "generation 0 did not upload its own copy");
+    require(mc_cuda::getWorkerPlanPool().gain.ptr == nullptr,
+            "generation 0 admission retained an unused gain");
+    require(gain_uploads == 3, "generation 0 did not upload its own copy");
     require(stale_frees == 0, "double free observed on the generation 0 path");
 
     (void)mc_cuda::getWorkerPlanPool().dropAll();
@@ -297,6 +326,15 @@ void testInvalidationAfterFailure() {
     require(freed_bytes >= retained, "the retired gain bytes were never freed");
     require(stale_frees == 0, "double free observed on the failure path");
     require(buffers.empty(), "device buffers leaked after the failed session");
+    std::ostringstream retry_log;
+    CudaMovieSession retry(nx, ny, 2, 0, retry_log);
+    retry.setGainGeneration(32);
+    const size_t allocated_before_retry = allocated_bytes;
+    require(!retry.initialize(), "fresh session redispatched after worker fatal retirement");
+    require(allocated_bytes == allocated_before_retry, "retired worker attempted fresh buffer allocation");
+    require(retry.getFailureState().fatalError() == cudaErrorIllegalAddress,
+            "fresh session lost retired worker original fatal code");
+    require(mc_cuda::getWorkerPlanPool().retiredFor(1), "retired worker revived on another device identity");
     active = false;
     std::cout << "  PASS: failed session retires the retained gain" << std::endl;
 }
@@ -348,6 +386,110 @@ void testDeviceSelectionRestoredAfterDrop() {
     std::cout << "  PASS: owning device selected, caller's device restored" << std::endl;
 }
 
+// Actual production pool drop, owner0/current1. With one visible device, only
+// the device-selection identity is simulated; allocation/free still run on GPU0.
+void testOwnerSelectionFailure() {
+    reset();
+    int devices = 0;
+    require(cudaGetDeviceCount(&devices) == cudaSuccess, "selection device count");
+    require(__real_cudaSetDevice(0) == cudaSuccess, "selection owner reset");
+    auto &pool = mc_cuda::getWorkerPlanPool().gain;
+    void *buffer = nullptr;
+    require(cudaMalloc(&buffer, 4096) == cudaSuccess, "failed-selection gain allocation");
+    pool.ptr = static_cast<float *>(buffer); pool.bytes = 4096;
+    pool.generation = 91; pool.nx = pool.ny = 32; pool.device_id = 0;
+    if (devices >= 2) {
+        require(__real_cudaSetDevice(1) == cudaSuccess, "selection caller device1");
+        std::cout << "Testing actual two-device gain cleanup owner0/current1...\n";
+    } else {
+        virtual_device_mode = true; virtual_device = 1;
+        std::cout << "Testing one-GPU logic-only selection owner0/current1; actual device1 UNRUN...\n";
+    }
+    const size_t before = free_attempts;
+    fail_owner_selection = true;
+    CudaFailureState failure;
+    const bool dropped = pool.drop(&failure);
+    fail_owner_selection = false;
+    require(!dropped && failure.firstError() == cudaErrorInvalidDevice,
+            "owning-device selection failure not retained");
+    require(cudaPeekAtLastError() == cudaSuccess, "selection control did not clear runtime slot");
+    require(free_attempts == before, "failed owner selection issued gain free");
+    require(pool.ptr == buffer && pool.bytes == 4096 && pool.generation == 0,
+            "failed owner selection lost invalidated gain ownership");
+    int current = -1;
+    require(cudaGetDevice(&current) == cudaSuccess && current == 1,
+            "failed owner selection changed caller device");
+    require(pool.drop(&failure), "owning-device checked release retry failed");
+    require(cudaGetDevice(&current) == cudaSuccess && current == 1,
+            "checked release retry did not restore caller device");
+    require(pool.drop(&failure) && free_attempts == before + 1 && pool.retainedBytes() == 0,
+            "checked release retry was not idempotent");
+    require(failure.firstError() == cudaErrorInvalidDevice, "checked retry erased original failure");
+    virtual_device_mode = false;
+    require(__real_cudaSetDevice(0) == cudaSuccess, "selection final device reset");
+    require(buffers.empty() && stale_frees == 0, "selection retry leaked or freed stale gain");
+    active = false;
+}
+
+void testInterleavedSessions() {
+    std::cout << "Testing interleaved session gain leases...\n";
+    const int nx = 32, ny = 24;
+    reset();
+    const auto frames = makeFrames(nx, ny, 2);
+    const auto gain_a = makeGain(nx, ny, 1.25f);
+    const auto gain_b = makeGain(nx, ny, -0.875f);
+    std::ostringstream log_a, log_b;
+    CudaMovieSession a(nx, ny, 2, 0, log_a), b(nx, ny, 2, 0, log_b);
+    a.setGainGeneration(201); b.setGainGeneration(202);
+    require(a.initialize(), "session A initialization");
+    MultidimArray<float> sum_a, sum_b;
+    require(a.applyGainDefectsAndSum(frames, &gain_a, sum_a, true), "session A first gain use");
+    requireSameBytes(sum_a, hostSum(frames, &gain_a, nx, ny), "session A initial gain sum");
+    const float *borrowed = mc_cuda::getWorkerPlanPool().gain.ptr;
+    const size_t bytes = mc_cuda::getWorkerPlanPool().retainedBytes();
+    require(!b.initialize(), "session B initialized through another live gain lease");
+    require(!b.applyGainDefectsAndSum(frames, &gain_b, sum_b, true),
+            "refused session B published gain output");
+    require(NZYXSIZE(sum_b) == 0, "refused session B changed output array");
+    b.release();
+    require(mc_cuda::getWorkerPlanPool().gain.ptr == borrowed &&
+            mc_cuda::getWorkerPlanPool().retainedBytes() == bytes,
+            "refused session B evicted session A gain");
+    require(a.applyGainDefectsAndSum(frames, &gain_a, sum_a, true), "session A after refused B");
+    requireSameBytes(sum_a, hostSum(frames, &gain_a, nx, ny), "session A stale gain after refused B");
+    a.release();
+    require(mc_cuda::getWorkerPlanPool().dropAll() && buffers.empty() && stale_frees == 0,
+            "interleaved gain lease leaked or freed stale gain");
+    active = false;
+}
+
+void testStaleGainAdmission() {
+    std::cout << "Testing early stale-gain retirement before movie admission...\n";
+    reset();
+    const auto frames = makeFrames(64, 48, 2);
+    const auto gain = makeGain(64, 48, 1.125f);
+    (void)runMovie(64, 48, frames, &gain, 301, "old large gain fixture");
+    require(mc_cuda::getWorkerPlanPool().gain.ptr != nullptr, "admission fixture lacks stale gain");
+    std::ostringstream log;
+    CudaMovieSession smaller(32, 24, 2, 0, log);
+    smaller.setGainGeneration(302);
+    reject_alloc_while_retained = true;
+    const bool initialized = smaller.initialize();
+    reject_alloc_while_retained = false;
+    require(initialized, "unused stale gain denied smaller movie admission");
+    require(blocked_allocations == 0 && mc_cuda::getWorkerPlanPool().gain.ptr == nullptr,
+            "stale gain was not retired before first movie allocation");
+    const auto small_frames = makeFrames(32, 24, 2);
+    const auto small_gain = makeGain(32, 24, 0.875f);
+    MultidimArray<float> sum;
+    require(smaller.applyGainDefectsAndSum(small_frames, &small_gain, sum, true), "smaller gain output");
+    requireSameBytes(sum, hostSum(small_frames, &small_gain, 32, 24), "smaller admitted gain sum");
+    smaller.release();
+    require(mc_cuda::getWorkerPlanPool().dropAll() && buffers.empty() && stale_frees == 0,
+            "early admission leaked or freed stale gain");
+    active = false;
+}
+
 // Two runners on one host thread must not mint the same gain identity, and the
 // identity must not be readable before gainReferenceFor() has resolved it.
 void testRunnerGenerationIdentity() {
@@ -383,17 +525,29 @@ void testRunnerGenerationIdentity() {
 
 } // namespace
 
-int main() {
+int main(int argc, char **argv) {
     if (__real_cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
         std::cerr << "Native CUDA device 0 is required\n";
         return 1;
     }
     try {
-        testGainSequenceABA();
-        testGainThenNoGainThenGain();
-        testInvalidationAfterFailure();
-        testDeviceSelectionRestoredAfterDrop();
-        testRunnerGenerationIdentity();
+        require(argc == 1 || (argc == 3 && std::string(argv[1]) == "--case"),
+                "invalid native case arguments");
+        const std::string which = argc == 3 && std::string(argv[1]) == "--case"
+            ? argv[2] : "all";
+        require(which == "all" || which == "selection" || which == "lease" ||
+                which == "admission" || which == "fatal", "unknown native case selector");
+        if (which == "all") {
+            testGainSequenceABA();
+            testGainThenNoGainThenGain();
+            testDeviceSelectionRestoredAfterDrop();
+        }
+        if (which == "all" || which == "selection") testOwnerSelectionFailure();
+        if (which == "all" || which == "lease") testInterleavedSessions();
+        if (which == "all" || which == "admission") testStaleGainAdmission();
+        if (which == "all") testRunnerGenerationIdentity();
+        // Retirement is sticky for the worker lifetime: this test must run last.
+        if (which == "all" || which == "fatal") testInvalidationAfterFailure();
     } catch (const std::exception &e) {
         std::cerr << "FAIL: " << e.what() << '\n';
         return 1;

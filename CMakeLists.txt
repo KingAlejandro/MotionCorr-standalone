@@ -196,6 +196,10 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME GainCacheOwnership
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
+            --cxx ${CMAKE_CXX_COMPILER})
+    set_tests_properties(GainCacheOwnership PROPERTIES TIMEOUT 120)
     # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
     # and deliberately outside if(CUDA): the whole point is a configuration this
     # suite does not link, so no compiled test can observe it.
@@ -349,7 +353,8 @@ if(BUILD_TESTING AND CUDA)
         target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
         target_link_options(cuda_device_gain_pool PRIVATE
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
-            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaSetDevice")
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaSetDevice"
+            "LINKER:--wrap=cudaGetDevice")
         add_test(NAME CudaDeviceGainPool COMMAND cuda_device_gain_pool)
         set_tests_properties(CudaDeviceGainPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         # Independent predecessor arithmetic and actual reconstruction ownership

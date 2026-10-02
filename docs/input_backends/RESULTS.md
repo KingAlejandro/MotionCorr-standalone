@@ -194,6 +194,50 @@ MRC was not even in the differing list. The control above is run
 `--products-only` with the joint STAR rewritten, and carries the unmutated
 positive leg, so the FAIL is attributable to the pixel.
 
+### 3.4 The route contract, exercised rather than assumed
+
+`--ingest {nvcomp,compact,float}` must fail a movie that cannot take the named
+route rather than quietly using another. Without that, "this variant took
+nvcomp" is an observation about defaults, not about eligibility. Ten variants,
+three pinned modes each, candidate binary:
+
+| variant | `--ingest nvcomp` | `--ingest compact` | `--ingest float` |
+|---|---|---|---|
+| uint16 Deflate, 1 row/strip | OK | OK | OK |
+| uint16 Deflate, 8 rows/strip | OK | OK | OK |
+| uint16 Deflate, 512 rows/strip | OK | OK | OK |
+| uint8 Deflate, 1 row/strip | OK | OK | OK |
+| uint8 Deflate, 16 rows/strip | OK | OK | OK |
+| uint16 LZW | **REFUSED** | OK | OK |
+| uint16 Deflate, predictor 2 | **REFUSED** | OK | OK |
+| uint16 uncompressed | **REFUSED** | OK | OK |
+| uint8 LZW, 1 row/strip | **REFUSED** | OK | OK |
+| uint8 LZW, 3837 rows/strip | **REFUSED** | OK | OK |
+
+Every refusal is a codec or predictor nvCOMP genuinely cannot take, and every
+one of those still has both host routes. No variant silently changed route
+under a pin.
+
+### 3.5 Selected frames and grouping
+
+`--first_frame_sum`, `--last_frame_sum`, `--group_frames` and a combination of
+all three, run on the uint16 Deflate reference and on both uint8 variants, both
+arms. The three inputs hold identical sample values, so all three product trees
+must match.
+
+**28 of 28 comparisons PASS** across seven option sets (`all`, `first3`,
+`last20`, `sub3to20`, `group2`, `group5`, and
+`--first_frame_sum 2 --last_frame_sum 21 --group_frames 4`). The route does not
+change which frames are used, how they are numbered, or what the dose weighting
+does.
+
+### 3.6 MRC route witness
+
+The compact gate requires a `tif` file format and the nvCOMP gate opens the file
+with `TIFFOpen`, so an MRC movie must take the float route. Observed rather than
+read: `synthetic_fallback.mrc` runs with `--ingest_witness` and the witness
+records `float`.
+
 ## 4. Measured
 
 Venue: `4GPUs` (`4-gpu-vm`), 4x A100 80GB PCIe, 124 logical CPUs. Every run
@@ -273,6 +317,50 @@ Three things this makes explicit that a wall-clock number cannot:
   The uint16 LZW null reads 100.5 vs 115.6 ms for the same 751 MB — that is the
   spread of this measurement on a shared box, and it is the scale against which
   the changed rows should be read.
+
+### 4.0b Where the input path spends host time
+
+![host ingest stages](charts/host-stages.png)
+
+Separate `TIMING=ON` builds of both arms, median of 3 repetitions, whole-run
+stage totals. **These walls are not comparable with the production figures
+elsewhere** — an instrumented build is a different binary — but the stage
+*attribution* is what this is for.
+
+| variant | arm | route | host decode | device ingest | gain + sum + upload | input total |
+|---|---|---|---|---|---|---|
+| uint8 LZW, 24f x 6 | main | float | 2.19 s | — | 1.41 s | **3.60 s** |
+| | branch | compact | 1.83 s | — | 0.45 s | **2.28 s** |
+| uint8 LZW, 48f x 2 | main | float | 1.45 s | — | 0.95 s | **2.40 s** |
+| | branch | compact | 1.05 s | — | 0.27 s | **1.32 s** |
+| uint8 Deflate, 24f x 6 | main | float | 1.94 s | — | 1.55 s | **3.48 s** |
+| | branch | nvcomp | — | 0.69 s | — | **0.69 s** |
+| uint8 Deflate, 48f x 2 | main | float | 1.29 s | — | 1.00 s | **2.28 s** |
+| | branch | nvcomp | — | 0.49 s | — | **0.49 s** |
+| uint16 Deflate rps8, 24f x 6 | main | compact | 1.61 s | — | 0.72 s | **2.34 s** |
+| | branch | nvcomp | — | 0.72 s | — | **0.72 s** |
+| uint16 LZW (null), 24f x 6 | main | compact | 2.59 s | — | 0.73 s | **3.32 s** |
+| | branch | compact | 2.57 s | — | 0.76 s | **3.33 s** |
+
+`main` predates the device-ingest timer, so on the one variant where main
+itself takes nvCOMP that stage is untagged and reads as zero; that row is
+marked on the chart and not compared.
+
+What this separates that §4.0 could not:
+
+* **The compact route splits its win across two stages.** For uint8 LZW the
+  host decode falls 2.19 → 1.83 s because it no longer materialises floats, and
+  the gain-and-sum stage falls 1.41 → 0.45 s because the device does the
+  widening and the upload is a quarter of the bytes. Neither alone is the
+  change; together they are 3.60 → 2.28 s.
+* **The nvCOMP route deletes both stages outright.** uint8 Deflate goes from
+  1.94 s of host decode plus 1.55 s of gain-and-sum to a single 0.69 s device
+  ingest — **5.0x less host time on the input path**.
+* **The remaining LZW cost is now a measured number, not a residual.** On the
+  compact route the host decode is **1.83 s / 6 movies = 0.305 s per movie** for
+  uint8 and **2.57 s / 6 = 0.428 s per movie** for uint16. That is exactly the
+  work a GPU LZW decoder would remove, and it is the budget recorded in #141.
+* **The null control is flat**: 3.32 vs 3.33 s on the unchanged compact route.
 
 ### 4.1 Per-movie wall, from the runner's own log
 
@@ -556,6 +644,11 @@ a faithful codec and geometry workload and not a second specimen.
 * **EER and compressed MRC are untouched and unmeasured.**
 * **No bounded slot queue, no pinning of the compact staging, no prefetch.**
   §6 states why and what each would cost.
+* **No GPU LZW.** nvCOMP has no LZW codec, so LZW keeps its host decode —
+  0.305 s/movie (uint8) and 0.428 s/movie (uint16) by §4.0b. nvTIFF is the only
+  supported route to move it and is evaluated separately in #141; nothing here
+  installed or ran it.
+
 
 ### Compact staging subunit (#137)
 
@@ -577,6 +670,4 @@ frame byte for byte; one-count input and changed-frame controls must fail the
 same comparison. The test name is retained, so no required registration is
 lost in the workspace/dose composition.
 
-This is a new control on the combined source, not a rerun of the retained
-campaign. Native execution and a production signed-uint8-conversion mutant
-remain pending until the allocated acceptance run records their results.
+This control was executed on compact-only source `49ea9c2` in SCARF3521631: unsigned8/16 public-entry equivalence passed and the production signed-uint8-conversion mutant failed. That validates the compact staging subunit; the widened-route checksum/status repair in this PR still requires its own combined native execution.

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <climits>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
 #include <cstring>
@@ -543,6 +544,18 @@ bool CudaMovieSession::initialize() {
 }
 
 void CudaMovieSession::release() {
+    // A session that failed or poisoned the context may have left a retained
+    // resource in an unknown state, so the worker pool is retired with it
+    // rather than handed to the next movie. Runs last, after this session has
+    // dropped its own aliases, so nothing still points at a freed buffer.
+    struct ReleaseFailureGuard {
+        CudaFailureState &failure;
+        ~ReleaseFailureGuard() {
+            if (failure.isPoisoned() || failure.hasFailed())
+                (void)mc_cuda::getWorkerPlanPool().dropAll(&failure);
+        }
+    } failure_guard{failure_state};
+
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
     (void)releasePatchAlignmentWorkspace();
@@ -557,7 +570,10 @@ void CudaMovieSession::release() {
     releaseBuffer(d_Iframes);
     releaseBuffer(d_Fframes);
     releaseBuffer(d_Isum);
-    releaseBuffer(d_gain);
+    // Only free a gain this session owns; a pooled one outlives it.
+    if (!d_gain_borrowed) releaseBuffer(d_gain);
+    d_gain = nullptr;
+    d_gain_borrowed = false;
     releaseBuffer(d_Ipatches);
     releaseBuffer(d_group_start);
     releaseBuffer(d_group_size);
@@ -566,6 +582,107 @@ void CudaMovieSession::release() {
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
     is_initialized = false;
+}
+
+// Point d_gain at a device copy of gain_ref, reusing the worker-lifetime pooled
+// copy when its identity matches.
+//
+// CudaMovieSession is constructed per movie, so d_gain was cudaMalloc'd,
+// uploaded and freed once per movie for an array whose contents cannot change
+// unless the host gain cache is refilled. Measured on an A100 with the tutorial
+// gain (3710x3838 float = 56,955,920 B), 24 movies, --ingest nvcomp: 24 uploads,
+// 719.5 ms, which is 98.5% of all pageable H2D traffic in that arm. The runner
+// already knows when the contents could have changed, so a generation counter on
+// that refill is an exact identity and costs nothing -- no hashing of 54 MiB.
+//
+// Returns false on a CUDA error, leaving d_gain null and the pool empty: a
+// partially replaced pool must never stay marked valid.
+bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real) {
+    mc_cuda::CudaWorkerPlanPool::GainPool &pool = mc_cuda::getWorkerPlanPool().gain;
+
+    // Drop any alias this session holds before deciding anything, so a borrowed
+    // pointer can never be mistaken for an owned one on the paths below.
+    if (d_gain_borrowed) {
+        d_gain = nullptr;
+        d_gain_borrowed = false;
+    }
+    // Releasing a session-owned copy is checked: a free that fails is evidence
+    // about the context, not something to discard.
+    auto release_owned = [&]() -> bool {
+        if (d_gain == nullptr) return true;
+        float *owned = d_gain;
+        d_gain = nullptr;
+        return releaseBuffer(owned) == cudaSuccess;
+    };
+
+    if (gain_ref == nullptr) {
+        // No gain on this call. A copy this session owns from an earlier call
+        // would otherwise stay allocated with nothing pointing at it.
+        const bool ok = release_owned();
+        d_gain = nullptr;
+        d_gain_borrowed = false;
+        return ok;
+    }
+
+    if (gain_generation == 0) {
+        // No identity supplied: keep the original per-movie behaviour exactly.
+        if (!d_gain) {
+            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
+        }
+        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+        d_gain_borrowed = false;
+        return true;
+    }
+
+    const bool hit = pool.ptr != nullptr &&
+                     pool.generation == gain_generation &&
+                     pool.bytes == sz_real &&
+                     pool.nx == nx && pool.ny == ny &&
+                     pool.device_id == device_id;
+    if (!hit) {
+        // Retire the stale entry BEFORE allocating the replacement: an old large
+        // geometry must not be able to deny a smaller valid movie, and a failure
+        // below must not leave a stale buffer advertised under the new key.
+        const bool dropped = pool.drop(&failure_state);
+        const bool released = release_owned();
+        if (!dropped || !released) {
+            d_gain = nullptr;
+            d_gain_borrowed = false;
+            return false;
+        }
+        float *fresh = nullptr;
+        // Not HANDLE_ERROR: the fresh buffer has to be freed before returning.
+        const cudaError_t alloc_err = cudaMalloc((void **)&fresh, sz_real);
+        if (alloc_err != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+                    << cudaGetErrorString(alloc_err) << std::endl;
+            recordFailure(alloc_err, __func__, __LINE__);
+            return false;
+        }
+        const cudaError_t copy_err = cudaMemcpy(fresh, gain_ref->data, sz_real, cudaMemcpyHostToDevice);
+        if (copy_err != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+                    << cudaGetErrorString(copy_err) << std::endl;
+            // The original cause is recorded first so it stays the first error;
+            // a fatal cleanup code recorded after it still latches separately.
+            recordFailure(copy_err, __func__, __LINE__);
+            recordFailure(cudaFree(fresh), "ensureDeviceGain cleanup", __LINE__);
+            return false;
+        }
+        pool.ptr = fresh;
+        pool.bytes = sz_real;
+        pool.generation = gain_generation;
+        pool.nx = nx;
+        pool.ny = ny;
+        pool.device_id = device_id;
+    } else if (!release_owned()) {
+        d_gain = nullptr;
+        d_gain_borrowed = false;
+        return false;
+    }
+    d_gain = pool.ptr;
+    d_gain_borrowed = true;
+    return true;
 }
 
 bool CudaMovieSession::applyGainDefectsAndSum(
@@ -586,14 +703,9 @@ bool CudaMovieSession::applyGainDefectsAndSum(
         HANDLE_ERROR(cudaMemcpy(dst, raw_frames[iframe]().data, sz_real, cudaMemcpyHostToDevice));
     }
 
-    // Upload gain reference if provided
+    // Upload the gain reference if provided, or reuse the retained device copy.
     bool apply_gain = (gain_ref != nullptr);
-    if (apply_gain) {
-        if (!d_gain) {
-            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
-        }
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
-    }
+    if (!ensureDeviceGain(gain_ref, sz_real)) return false;
 
     // Launch fused gain and sum kernel
     const int block = 256;
@@ -640,12 +752,7 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     stage_owner.add(stage);
 
     bool apply_gain = (gain_ref != nullptr);
-    if (apply_gain) {
-        if (!d_gain) {
-            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
-        }
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
-    }
+    if (!ensureDeviceGain(gain_ref, sz_real)) return false;
 
     // The accumulator starts at +0.0f exactly as `float sum = 0.0f` does. Seeding
     // frame 0 with a plain store instead would differ for a -0.0f product, which
@@ -848,11 +955,15 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     // second time at the end of the movie. A free that fails here means the context is
     // already unusable; freeing the same pointer again cannot repair that.
     cudaError_t free_error = cudaSuccess;
-    if (d_gain) {
+    if (d_gain && !d_gain_borrowed) {
         float *owned_gain = d_gain;
         d_gain = nullptr;
         free_error = releaseBuffer(owned_gain);
+    } else {
+        // Pooled: drop the alias, keep the buffer for the next movie.
+        d_gain = nullptr;
     }
+    d_gain_borrowed = false;
     if (d_Isum) {
         float *owned_sum = d_Isum;
         d_Isum = nullptr;
@@ -1316,8 +1427,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
         const size_t sz_real = (size_t)ny * (size_t)nx * sizeof(float);
-        if (!d_gain) HANDLE_ERROR(cudaMalloc((void **)&d_gain, sz_real));
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+        if (!ensureDeviceGain(gain_ref, sz_real)) return false;
     }
 
     HANDLE_ERROR(cudaStreamCreate(&ingest_stream));

@@ -25,6 +25,12 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <atomic>
+
+// Process-wide, so a generation minted by one runner can never collide with a
+// generation minted by another runner on the same worker thread. Starts at 1;
+// 0 is reserved for "no identity resolved".
+static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
 #include "src/native_u16_staging.h"
@@ -1482,8 +1488,16 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		gain_cache_ny = ny;
 		gain_cache_eer_upsampling = eer_upsampling;
 		gain_cache_filled = true;
+		gain_cache_generation = s_global_gain_generation.fetch_add(1, std::memory_order_relaxed);
 	}
 	return gain_cache();
+}
+
+bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
+{
+	return gain_cache_filled && gain_cache_generation != 0 &&
+	       gain_cache_name == fn_gain_reference &&
+	       gain_cache_nx == nx && gain_cache_ny == ny;
 }
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
@@ -1673,6 +1687,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	};
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		// The device gain copy may outlive this session; the generation is what
+		// makes reusing it safe across movies. It is only an identity because
+		// gainReferenceFor() ran earlier in this function, for this movie's
+		// geometry. Assert that ordering rather than rely on line order.
+		if (fn_gain_reference != "" && !gainIdentityResolvedFor(nx, ny))
+			REPORT_ERROR("Gain identity was not resolved before the CUDA session was given a gain generation for "
+			             + fn_mic + ". The device gain retention key would not describe this movie's gain.");
+		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;

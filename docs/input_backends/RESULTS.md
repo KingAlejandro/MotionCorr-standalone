@@ -342,3 +342,58 @@ The compact route uses pageable host memory with a blocking per-frame copy.
 Pinning it would cost 0.32-1.27 GiB of pinned memory per worker — the same
 resource this change exists to reduce — to recover at most the H2D time in
 §4.4. That trade is stated, not taken.
+
+## 7. The question this answers
+
+> Can original real-world acquisition formats reach the resident GPU engine
+> efficiently, without changing MotionCorr's result or requiring a huge host
+> float movie?
+
+For TIFF, yes, and the host float movie is the part that goes away first.
+
+An 8-bit LZW movie — the shape the deposited files take — now reaches the
+resident engine through LibTIFF and a native-sample host mapping. Host resident
+set for a 48-frame movie falls from 2.80 GiB to 0.89 GiB, per-movie wall by
+27%, and the products are unchanged. Nothing is transcoded and no FP32 movie is
+built. The LZW decode itself still happens on the host, because LZW is not a
+codec nvCOMP offers; that is the remaining cost and it is a real one.
+
+If the same content is Deflate, the decode moves to the GPU as well: 0.66 GiB
+resident and 60% less per-movie wall at 48 frames. That now holds for 8-bit
+samples and for any `RowsPerStrip`, where before it needed 16-bit samples and
+exactly one row per strip.
+
+Converting deposited LZW to Deflate to reach that is an operational choice with
+a measured break-even of about 21 full repeated passes (§4.3), and it is not
+assumed by any number above.
+
+What this does **not** answer: nothing here touches EER or compressed MRC, and
+no figure is a measurement of the deposited collection itself — the uint8 LZW
+inputs are value-lossless re-encodes of real tutorial content, which makes them
+a faithful codec and geometry workload and not a second specimen.
+
+## 8. Limitations and what is not established
+
+* **One collection, one geometry, one detector.** Everything is 3710x3838
+  counting-mode data from the RELION tutorial, re-encoded. A collection whose
+  samples do not fit in a byte cannot use the uint8 arms at all, and its
+  compression ratios and therefore its nvCOMP transfer sizes will differ.
+* **Warm cache only.** No cold or network-storage figure; dropping the page
+  cache needs root on this host. The uint8 files are 13-27% smaller than their
+  uint16 equivalents, so a cold read would favour the new routes further, but
+  that is arithmetic, not a measurement.
+* **A shared host.** Two other MotionCorr sessions built and ran throughout.
+  Timings are paired with alternating order, a null control and per-run load
+  recorded; they are not clean-room figures.
+* **The nvCOMP trust boundary moves for the inputs change B admits.** See
+  `FAILURE_POLICY.md`. No fault injection against the decoder was performed for
+  this branch; the existing in-tree nvCOMP failure controls
+  (`CudaNvcompReconstructionFailures`, `CudaPreprocessingFailurePaths`) pass
+  unchanged, which establishes the recovery paths still behave, not that the
+  decoder is safe on malformed input.
+* **`CiFailClosedControls` fails in both arms** on this host. It needs `.git`
+  metadata and these trees were staged with `git archive`; the failure is
+  identical on `main` and on the branch and is unrelated to this work.
+* **EER and compressed MRC are untouched and unmeasured.**
+* **No bounded slot queue, no pinning of the compact staging, no prefetch.**
+  §6 states why and what each would cost.

@@ -59,15 +59,14 @@ __global__ void scale(cufftComplex *p, size_t n, float s) {
     if (i < n) { p[i].x *= s; p[i].y *= s; }
 }
 struct Difference {
-    unsigned long long bits = 0, nonfinite = 0;
-    unsigned long long digest = 0;
-    unsigned max_abs = 0;
-    double sum_sq = 0;
+    unsigned long long bits, nonfinite, digest;
+    unsigned max_abs;
+    double sum_sq;
 };
 __global__ void compare(const float *p, const float *q, size_t n, Difference *d) {
     size_t i = size_t(blockIdx.x)*blockDim.x + threadIdx.x;
     __shared__ Difference block[256];
-    Difference v;
+    Difference v{};
     if (i < n) {
         float a = p[i], b = q ? q[i] : signal(i);
         v.nonfinite = !isfinite(a) || !isfinite(b);

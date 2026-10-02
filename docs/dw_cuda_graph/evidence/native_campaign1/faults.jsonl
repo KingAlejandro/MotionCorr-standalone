@@ -1,0 +1,12 @@
+{"section":"config","nx":1024,"ny":1024,"frames":4,"model":"poly","apix":0.885000,"dose":"ramp","reps":5,"device":0}
+{"section":"failure_controls","cases":[
+  {"case":"event_synchronize_inside_capture","detected_at":"cudaEventSynchronize","rc":901,"error":"operation failed due to a previous error during capture","publish_allowed":"no","note":"null graph returned"}
+, {"case":"sync_memcpy_during_capture_nonblocking_stream","detected_at":"undetected","rc":0,"error":"no error","publish_allowed":"allowed-by-contract","note":"memcpy_rc=0 captured_nodes=5"}
+, {"case":"sync_memcpy_during_capture_blocking_stream","detected_at":"cudaMemcpy","rc":901,"error":"operation failed due to a previous error during capture","publish_allowed":"no","note":"memcpy_rc=906 captured_nodes=0"}
+, {"case":"instantiate_invalid_flags","detected_at":"cudaGraphInstantiateWithFlags","rc":1,"error":"invalid argument","publish_allowed":"no","note":"injected, not a natural failure"}
+, {"case":"launch_into_capturing_stream","detected_at":"cudaGraphLaunch","rc":900,"error":"operation not permitted when stream is capturing","publish_allowed":"no","note":"instantiate ok"}
+, {"case":"cufft_plan_on_foreign_stream_during_capture","detected_at":"undetected","rc":0,"error":"cufft=0 captured_nodes=0","publish_allowed":"SILENT-ESCAPE","note":"non-null graph"}
+, {"case":"zero_grid_kernel_during_capture","detected_at":"cudaGetLastError","rc":9,"error":"invalid configuration argument","publish_allowed":"no","note":""}
+, {"case":"memcpy_node_update_invalid_pointer","detected_at":"cudaGraphExecMemcpyNodeSetParams","rc":1,"error":"invalid argument","publish_allowed":"no","note":""}
+, {"case":"device_fault_inside_replay","detected_at":"cudaStreamSynchronize","rc":700,"error":"an illegal memory access was encountered","publish_allowed":"no","note":"node update accepted"}
+]}

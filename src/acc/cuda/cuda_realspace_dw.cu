@@ -8,7 +8,10 @@
 #include <cufft.h>
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #include "src/acc/cuda/cuda_plan_pool.h"
+#include <chrono>
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -39,6 +42,51 @@
 } while (0)
 
 namespace {
+
+// EXPERIMENT (issue: CUDA Graph replay for the dose-weighted reconstruction).
+// Selects how the per-frame device sequence is submitted. The operation order is
+// identical in all three; only the submission mechanism differs.
+//   product  the shipped loop: legacy stream, blocking D2D copy, per-frame event
+//            telemetry read back on the host
+//   async    one non-blocking stream, async copies, one synchronization at the end.
+//            This is the control for the graph arm: stream capture forbids
+//            cudaEventSynchronize, so a graph arm necessarily drops that telemetry
+//            and a graph-vs-product comparison would confound the two changes.
+//   graph    the async sequence captured, instantiated, launched and destroyed per
+//            movie. Per-movie construction is deliberate: caching the executable
+//            across movies would be a worker-lifetime change.
+enum class DwSubmitMode { Product, Async, Graph };
+
+DwSubmitMode dwSubmitMode() {
+    const char *mode = getenv("MC_DW_MODE");
+    if (mode == nullptr) return DwSubmitMode::Product;
+    if (strcmp(mode, "async") == 0) return DwSubmitMode::Async;
+    if (strcmp(mode, "graph") == 0) return DwSubmitMode::Graph;
+    return DwSubmitMode::Product;
+}
+
+struct ScopedCudaStream {
+    cudaStream_t stream = nullptr;
+    // Drain before destroying. A submission that fails part way through leaves
+    // work queued on this stream, and the device buffers it reads are freed by
+    // the scoped owners immediately after this object goes out of scope.
+    // cudaStreamDestroy does not wait, so skipping the drain would let the
+    // queued kernels run against freed memory on the error path.
+    ~ScopedCudaStream() {
+        if (!stream) return;
+        (void)cudaStreamSynchronize(stream);
+        (void)cudaStreamDestroy(stream);
+    }
+};
+
+struct ScopedCudaGraph {
+    cudaGraph_t graph = nullptr;
+    cudaGraphExec_t exec = nullptr;
+    ~ScopedCudaGraph() {
+        if (exec) cudaGraphExecDestroy(exec);
+        if (graph) cudaGraphDestroy(graph);
+    }
+};
 
 struct FramePolynomial {
     float x[6];
@@ -309,6 +357,102 @@ bool cudaDoseWeightAndInterpolateDevice(
     float total_cufft_ms = 0.0f;
     float total_interp_ms = 0.0f;
 
+    const DwSubmitMode submit_mode = dwSubmitMode();
+    double graph_capture_ms = 0.0, graph_instantiate_ms = 0.0, graph_destroy_ms = 0.0;
+
+    if (submit_mode != DwSubmitMode::Product) {
+    ScopedCudaStream owned_stream;
+    HANDLE_ERROR(cudaStreamCreateWithFlags(&owned_stream.stream, cudaStreamNonBlocking));
+    cudaStream_t stream = owned_stream.stream;
+    CUFFT_CHECK(cufftSetStream(plan_c2r, stream));
+
+    // Same operations, same order, stream-ordered. Returns false on the first
+    // failure, having already recorded it.
+    auto submit_all_frames = [&]() -> bool {
+        for (int iframe = 0; iframe < n_frames; iframe++) {
+            const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
+            HANDLE_ERROR(cudaMemcpyAsync(d_Fframe, src_frame, sz_fframe,
+                                         cudaMemcpyDeviceToDevice, stream));
+
+            applyDoseWeightKernel<<<gridDW, blockDW, 0, stream>>>(
+                d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
+            );
+            LAUNCH_HANDLE_ERROR(cudaGetLastError());
+
+            CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+
+            if (model != nullptr) {
+                const FramePolynomial coeff = polynomialForFrame(*model, iframe);
+                interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp, 0, stream>>>(
+                    d_Isum, nullptr, d_Iframe, nx, ny,
+                    coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
+                    coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
+                );
+            } else {
+                size_t total_pixels = (size_t)ny * nx;
+                int block1D = 256;
+                int grid1D = (total_pixels + block1D - 1) / block1D;
+                accumulateDirectKernel<<<grid1D, block1D, 0, stream>>>(
+                    d_Isum, nullptr, d_Iframe, total_pixels);
+            }
+            LAUNCH_HANDLE_ERROR(cudaGetLastError());
+        }
+        return true;
+    };
+
+    if (submit_mode == DwSubmitMode::Graph) {
+        using clock = std::chrono::steady_clock;
+        ScopedCudaGraph g;
+        const clock::time_point t_capture_begin = clock::now();
+        HANDLE_ERROR(cudaStreamBeginCapture(stream, cudaStreamCaptureModeThreadLocal));
+        const bool submitted = submit_all_frames();
+        // End capture unconditionally: leaving the stream in capture mode after a
+        // failed submission would make every later use of it invalid.
+        const cudaError_t end_err = cudaStreamEndCapture(stream, &g.graph);
+        graph_capture_ms = std::chrono::duration<double, std::milli>(
+            clock::now() - t_capture_begin).count();
+        if (!submitted) {
+            if (failure) failure->record(end_err, __func__, __LINE__);
+            return false;
+        }
+        HANDLE_ERROR(end_err);
+
+        // A cuFFT plan left on another stream executes immediately instead of
+        // being captured, and does so without reporting an error. Refuse a graph
+        // that is missing the per-frame nodes rather than publish a sum built by
+        // a partially captured sequence.
+        size_t captured_nodes = 0;
+        HANDLE_ERROR(cudaGraphGetNodes(g.graph, nullptr, &captured_nodes));
+        if ((int)captured_nodes < 3 * n_frames) {
+            logfile << "CUDA Error: dose-weighting capture produced " << captured_nodes
+                    << " nodes for " << n_frames << " frames; work escaped the graph"
+                    << std::endl;
+            if (failure) failure->record(cudaErrorStreamCaptureInvalidated, __func__, __LINE__);
+            return false;
+        }
+
+        const clock::time_point t_inst_begin = clock::now();
+        HANDLE_ERROR(cudaGraphInstantiate(&g.exec, g.graph, 0));
+        graph_instantiate_ms = std::chrono::duration<double, std::milli>(
+            clock::now() - t_inst_begin).count();
+
+        HANDLE_ERROR(cudaGraphLaunch(g.exec, stream));
+        HANDLE_ERROR(cudaStreamSynchronize(stream));
+
+        const clock::time_point t_destroy_begin = clock::now();
+        HANDLE_ERROR(cudaGraphExecDestroy(g.exec));
+        g.exec = nullptr;
+        HANDLE_ERROR(cudaGraphDestroy(g.graph));
+        g.graph = nullptr;
+        graph_destroy_ms = std::chrono::duration<double, std::milli>(
+            clock::now() - t_destroy_begin).count();
+    } else {
+        if (!submit_all_frames()) return false;
+        HANDLE_ERROR(cudaStreamSynchronize(stream));
+    }
+
+    CUFFT_CHECK(cufftSetStream(plan_c2r, 0));
+    } else {
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Copy frame from resident buffer in VRAM
         const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
@@ -358,6 +502,7 @@ bool cudaDoseWeightAndInterpolateDevice(
         HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
         total_interp_ms += interp_ms;
     }
+    }
 
     // Single D2H download of reconstructed image
     HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
@@ -374,6 +519,15 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
     logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
     logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+    if (submit_mode != DwSubmitMode::Product) {
+        logfile << "  DW submission mode: "
+                << (submit_mode == DwSubmitMode::Graph ? "graph" : "async") << std::endl;
+    }
+    if (submit_mode == DwSubmitMode::Graph) {
+        logfile << "  Graph capture: " << graph_capture_ms << " ms, instantiate: "
+                << graph_instantiate_ms << " ms, destroy: " << graph_destroy_ms
+                << " ms" << std::endl;
+    }
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
     dw_failure_guard.completed = true;

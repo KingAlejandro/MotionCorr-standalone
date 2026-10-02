@@ -34,7 +34,9 @@ TS = re.compile(rb"(?<=Relion    )[0-9]{2}-[A-Za-z]{3}-[0-9]{2}  [0-9]{2}:[0-9]{
 NOISE = ("Full movie wall time", "execution time:", "transfer time:", "Kernel:",
          "Total GPU alignment time:", " ms", '~~(,_,"', "nvCOMP ingestion:",
          "Staging this movie as native unsigned 16-bit",
+         "Staging this movie as native unsigned 8-bit",
          "Released native uint16 host staging",
+         "Released native uint8 host staging",
          "Recovered the movie from device memory")
 
 def digest_tree(root: Path) -> dict:

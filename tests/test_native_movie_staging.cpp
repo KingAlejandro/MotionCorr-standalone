@@ -1,4 +1,11 @@
-/* Issue #95: ownership contract for the native uint16 movie staging.
+/* Issue #95: ownership contract for the native movie staging.
+ *
+ * Run for both sample types the compact ingest route admits. The contract is
+ * written once and instantiated twice: a uint8 movie is half the bytes of a
+ * uint16 one at the same geometry, and sizeof(T) appears in the stride, the
+ * overflow guard and the page-rounding in discardThrough() -- so a width used
+ * in one of those and not the others is a defect this second instantiation can
+ * see and the first cannot.
  *
  * Two things have to hold for the compact-ingest path to be memory-neutral on the
  * degraded no-gain route, and both are checked here without a GPU:
@@ -23,7 +30,7 @@
 #include <string>
 #include <vector>
 
-#include "src/native_u16_staging.h"
+#include "src/native_movie_staging.h"
 
 namespace {
 
@@ -61,17 +68,20 @@ const int kFrames = 16;
 const int kNx = 1534;
 const int kNy = 2046;
 const size_t kPixels = (size_t)kNx * kNy;
-const long kPayloadKb = (long)((kPixels * sizeof(unsigned short) * kFrames) / 1024);
+template <typename T>
+long payloadKb() { return (long)((kPixels * sizeof(T) * kFrames) / 1024); }
 
-void touch(unsigned short *p, size_t n, unsigned short seed)
+template <typename T>
+void touch(T *p, size_t n, T seed)
 {
-	for (size_t i = 0; i < n; i += 2048 / sizeof(unsigned short))
-		p[i] = (unsigned short)(seed + i);
+	for (size_t i = 0; i < n; i += 2048 / sizeof(T))
+		p[i] = (T)(seed + i);
 }
 
-// What Image<unsigned short>::readData does to the destination array before the
+// What Image<T>::readData does to the destination array before the
 // decoder writes into it: set the frame shape, then ask for storage.
-void reader_would_allocate(MultidimArray<unsigned short> &a)
+template <typename T>
+void reader_would_allocate(MultidimArray<T> &a)
 {
 	a.setDimensions(kNx, kNy, 1, 1);
 	a.coreAllocateReuse();
@@ -79,16 +89,17 @@ void reader_would_allocate(MultidimArray<unsigned short> &a)
 
 // Diagnostic: the allocation shape this change replaced -- one heap buffer per
 // frame, sized so glibc's dynamic mmap threshold has already ratcheted past it.
+template <typename T>
 long retained_by_per_frame_heap_kb()
 {
-	void *warm = malloc(kPixels * sizeof(unsigned short));
+	void *warm = malloc(kPixels * sizeof(T));
 	if (warm) { std::memset(warm, 1, 4096); free(warm); }   // ratchet the threshold
 	const long before = rss_kb();
-	std::vector<unsigned short *> frames(kFrames, NULL);
+	std::vector<T *> frames(kFrames, NULL);
 	for (int i = 0; i < kFrames; i++) {
-		frames[i] = (unsigned short *)RELION_ALIGNED_MALLOC(kPixels * sizeof(unsigned short));
+		frames[i] = (T *)RELION_ALIGNED_MALLOC(kPixels * sizeof(T));
 		if (!frames[i]) return -1;
-		std::memset(frames[i], i + 1, kPixels * sizeof(unsigned short));
+		std::memset(frames[i], i + 1, kPixels * sizeof(T));
 	}
 	const long peak = rss_kb();
 	for (int i = 0; i < kFrames; i++) RELION_ALIGNED_FREE(frames[i]);
@@ -101,29 +112,33 @@ long retained_by_per_frame_heap_kb()
 
 } // namespace
 
-int main()
+// Returns 77 when the resident-set arm could not be observed on this platform,
+// 1 on failure, 0 on success -- the same convention main() reports to CTest.
+template <typename T>
+int run_contract(const char *label)
 {
-	std::printf("native uint16 staging contract: %d frames of %dx%d (%ld kB payload)\n",
-	            kFrames, kNx, kNy, kPayloadKb);
+	const long kPayloadKb = payloadKb<T>();
+	std::printf("\nnative %s staging contract: %d frames of %dx%d (%ld kB payload)\n",
+	            label, kFrames, kNx, kNy, kPayloadKb);
 
-	std::vector<Image<unsigned short> > frames;
-	NativeU16MovieStaging staging;
+	std::vector<Image<T> > frames;
+	NativeMovieStaging<T> staging;
 
 	// --- 1. aliasing and the reader's reuse contract -------------------------
 	staging.bind(frames, kFrames, kNy, kNx);
 	check(frames.size() == (size_t)kFrames, "bind() sizes the frame vector");
-	check(staging.bytes() >= kPixels * sizeof(unsigned short) * kFrames,
+	check(staging.bytes() >= kPixels * sizeof(T) * kFrames,
 	      "mapping covers the whole movie");
 
 	bool shape_ok = true, owned_ok = true, ordered_ok = true, reuse_ok = true;
-	unsigned short *prev = NULL;
+	T *prev = NULL;
 	for (int i = 0; i < kFrames; i++) {
-		MultidimArray<unsigned short> &a = frames[i]();
+		MultidimArray<T> &a = frames[i]();
 		if (XSIZE(a) != kNx || YSIZE(a) != kNy || NSIZE(a) != 1 || ZSIZE(a) != 1) shape_ok = false;
 		if (a.destroyData || a.nzyxdimAlloc != (long int)kPixels || a.data == NULL) owned_ok = false;
 		if (prev != NULL && !(a.data > prev)) ordered_ok = false;
 		prev = a.data;
-		unsigned short *before = a.data;
+		T *before = a.data;
 		reader_would_allocate(a);                      // what Image::read will do
 		if (a.data != before) reuse_ok = false;
 	}
@@ -135,16 +150,16 @@ int main()
 	// --- 2. the alias is real storage ----------------------------------------
 	for (int i = 0; i < kFrames; i++)
 		for (size_t p = 0; p < kPixels; p += 4096)
-			DIRECT_MULTIDIM_ELEM(frames[i](), p) = (unsigned short)(i * 7 + 1);
+			DIRECT_MULTIDIM_ELEM(frames[i](), p) = (T)(i * 7 + 1);
 	bool readback_ok = true;
 	for (int i = 0; i < kFrames; i++)
 		for (size_t p = 0; p < kPixels; p += 4096)
-			if (DIRECT_MULTIDIM_ELEM(frames[i](), p) != (unsigned short)(i * 7 + 1))
+			if (DIRECT_MULTIDIM_ELEM(frames[i](), p) != (T)(i * 7 + 1))
 				readback_ok = false;
 	check(readback_ok, "writes through the alias read back per frame");
 
 	// --- 3. incremental release keeps later frames intact ---------------------
-	for (int i = 0; i < kFrames; i++) touch(frames[i]().data, kPixels, (unsigned short)(i + 1));
+	for (int i = 0; i < kFrames; i++) touch<T>(frames[i]().data, kPixels, (T)(i + 1));
 	const int kept_from = kFrames / 2;
 	const long before_discard = rss_kb();
 	for (int i = 0; i < kept_from; i++) frames[i].clear();
@@ -161,10 +176,10 @@ int main()
 	}
 	bool tail_intact = true;
 	for (int i = kept_from; i < kFrames; i++) {
-		unsigned short *p = frames[i]().data;
+		T *p = frames[i]().data;
 		if (p == NULL) { tail_intact = false; break; }
-		for (size_t q = 0; q < kPixels; q += 2048 / sizeof(unsigned short))
-			if (p[q] != (unsigned short)((i + 1) + q)) { tail_intact = false; break; }
+		for (size_t q = 0; q < kPixels; q += 2048 / sizeof(T))
+			if (p[q] != (T)((i + 1) + q)) { tail_intact = false; break; }
 		if (!tail_intact) break;
 	}
 	check(tail_intact, "discardThrough() leaves unconsumed frames byte-intact");
@@ -177,15 +192,14 @@ int main()
 
 	if (!kCanMeasureRss) {
 		std::printf("SKIP   resident-set assertions need /proc; not run on this platform\n");
-		std::printf("%s (%d failures), resident-set arm SKIPPED\n", failures ? "FAILED" : "PASSED", failures);
 		return failures ? 1 : 77;   // 77 = CTest SKIP_RETURN_CODE
 	} else {
 		const long base = rss_kb();
-		std::vector<Image<unsigned short> > f2;
-		NativeU16MovieStaging s2;
+		std::vector<Image<T> > f2;
+		NativeMovieStaging<T> s2;
 		s2.bind(f2, kFrames, kNy, kNx);
 		for (int i = 0; i < kFrames; i++)
-			std::memset(f2[i]().data, i + 3, kPixels * sizeof(unsigned short));
+			std::memset(f2[i]().data, i + 3, kPixels * sizeof(T));
 		const long peak = rss_kb();
 		const long grew = peak - base;
 		// Instrument self-check: if the sampler cannot see the payload arrive, an
@@ -199,7 +213,7 @@ int main()
 		      "release() returns the payload (" + std::to_string(retained)
 		      + " kB retained of " + std::to_string(kPayloadKb) + " kB)");
 
-		const long control = retained_by_per_frame_heap_kb();
+		const long control = retained_by_per_frame_heap_kb<T>();
 		if (control < 0) {
 			std::printf("       [control] per-frame heap arm could not be measured\n");
 		} else if (control < kPayloadKb / 10) {
@@ -213,6 +227,16 @@ int main()
 		}
 	}
 
-	std::printf("%s (%d failures)\n", failures ? "FAILED" : "PASSED", failures);
 	return failures ? 1 : 0;
+}
+
+int main()
+{
+	const int u16 = run_contract<unsigned short>("uint16");
+	const int u8  = run_contract<unsigned char>("uint8");
+	const bool skipped = (u16 == 77 || u8 == 77);
+	std::printf("\n%s (%d failures)%s\n", failures ? "FAILED" : "PASSED", failures,
+	            skipped ? ", resident-set arm SKIPPED" : "");
+	if (failures) return 1;
+	return skipped ? 77 : 0;
 }

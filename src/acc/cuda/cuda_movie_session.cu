@@ -77,13 +77,15 @@ __global__ void fusedGainAndSumKernel(
     d_Isum[pixel] = sum;
 }
 
-// Issue #85 lane C: native uint16 staging. One frame per launch, so only a single
-// frame-sized uint16 staging buffer is ever resident instead of a second whole movie.
+// Issue #85 lane C: native sample staging. One frame per launch, so only a single
+// frame-sized native staging buffer is ever resident instead of a second whole movie.
+// T is the file's own unsigned sample type: unsigned short for a 16-bit TIFF,
+// unsigned char for an 8-bit one.
 //
 // Arithmetic is pinned to the fused float kernel above, term for term:
-//   (float)u16 is exact for every value in [0, 65535] (binary32 holds every integer
-//   up to 2^24), so the converted sample equals the float that castPage2T produced
-//   on the host and cudaMemcpy used to deliver.
+//   (float)T is exact for every value an 8- or 16-bit unsigned sample can hold
+//   (binary32 holds every integer up to 2^24), so the converted sample equals the
+//   float that castPage2T produced on the host and cudaMemcpy used to deliver.
 //   __fmul_rn / __fadd_rn are the same IEEE-754 round-to-nearest operations the
 //   compiler emits for `val *= gain` and `sum += val` there. They are written as
 //   intrinsics rather than operators so that no -fmad contraction can fuse the
@@ -93,8 +95,14 @@ __global__ void fusedGainAndSumKernel(
 //   order, so the addend sequence per pixel is identical to the single-kernel
 //   float accumulator. Spilling that accumulator to a float array between frames
 //   is exact because it is a float there too.
-__global__ void convertGainAndAccumulateU16Kernel(
-    const unsigned short *d_src,
+//
+// Signed sample types must never reach this kernel: (float)(signed char)0xFF is
+// -1.0f where the reader's own cast produces the same -1.0f only because
+// castPage2T went through the same signed type. The runner admits UChar and
+// UShort by name, not by width, which is what keeps SChar/SShort out.
+template <typename T>
+__global__ void convertGainAndAccumulateNativeKernel(
+    const T *d_src,
     float *d_frame_dst,
     float *d_Isum,
     const float *d_gain,
@@ -612,8 +620,14 @@ bool CudaMovieSession::applyGainDefectsAndSum(
     return true;
 }
 
-bool CudaMovieSession::applyGainDefectsAndSumU16(
-    const std::vector<Image<unsigned short> > &raw_frames,
+// One definition for both native sample widths; the two public overloads below
+// are the only entry points. Written as a template rather than copied because a
+// copy would have to restate the memset-then-ascending-accumulate order that is
+// what makes the products bit-identical to the float path, and a restated
+// invariant drifts without the compiler or any test noticing.
+template <typename T>
+bool CudaMovieSession::applyGainDefectsAndSumNative(
+    const std::vector<Image<T> > &raw_frames,
     const MultidimArray<float> *gain_ref,
     MultidimArray<float> &unaligned_sum,
     bool download_sum
@@ -624,15 +638,15 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
 
     const size_t num_pixels = (size_t)ny * nx;
     const size_t sz_real = num_pixels * sizeof(float);
-    const size_t sz_u16 = num_pixels * sizeof(unsigned short);
+    const size_t sz_native = num_pixels * sizeof(T);
 
-    // One frame, not one movie. A whole-movie uint16 device buffer would add
-    // 0.637 GiB to the high-water mark for this geometry and turn a host-memory
-    // saving into a VRAM cost; a single frame adds 27 MiB for the duration of
-    // this call. Owned locally so the bare `return false` in HANDLE_ERROR frees it.
-    unsigned short *stage = nullptr;
+    // One frame, not one movie. A whole-movie native device buffer would add
+    // 0.637 GiB (uint16) to the high-water mark for this geometry and turn a host
+    // -memory saving into a VRAM cost; a single frame adds 27 MiB for the duration
+    // of this call. Owned locally so the bare `return false` in HANDLE_ERROR frees it.
+    T *stage = nullptr;
     mc_cuda::ScopedDeviceMemory<1> stage_owner(&failure_state);
-    HANDLE_ERROR(cudaMalloc((void**)&stage, sz_u16));
+    HANDLE_ERROR(cudaMalloc((void**)&stage, sz_native));
     stage_owner.add(stage);
 
     bool apply_gain = (gain_ref != nullptr);
@@ -653,9 +667,9 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Per-frame upload keeps the same failure granularity as the float path:
         // a fault names a frame index and leaves the rest untransferred.
-        HANDLE_ERROR(cudaMemcpy(stage, raw_frames[iframe]().data, sz_u16,
+        HANDLE_ERROR(cudaMemcpy(stage, raw_frames[iframe]().data, sz_native,
                                 cudaMemcpyHostToDevice));
-        convertGainAndAccumulateU16Kernel<<<grid, block>>>(
+        convertGainAndAccumulateNativeKernel<T><<<grid, block>>>(
             stage, d_Iframes + (size_t)iframe * num_pixels, d_Isum, d_gain,
             num_pixels, apply_gain);
         HANDLE_ERROR(cudaGetLastError());
@@ -676,6 +690,26 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
 
     HANDLE_ERROR(stage_owner.releaseAll());
     return true;
+}
+
+bool CudaMovieSession::applyGainDefectsAndSumU16(
+    const std::vector<Image<unsigned short> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    return applyGainDefectsAndSumNative<unsigned short>(raw_frames, gain_ref,
+                                                        unaligned_sum, download_sum);
+}
+
+bool CudaMovieSession::applyGainDefectsAndSumU8(
+    const std::vector<Image<unsigned char> > &raw_frames,
+    const MultidimArray<float> *gain_ref,
+    MultidimArray<float> &unaligned_sum,
+    bool download_sum
+) {
+    return applyGainDefectsAndSumNative<unsigned char>(raw_frames, gain_ref,
+                                                       unaligned_sum, download_sum);
 }
 
 bool CudaMovieSession::downloadUnalignedSum(MultidimArray<float> &unaligned_sum) {

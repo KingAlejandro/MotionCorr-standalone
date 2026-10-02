@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install Linux system dependencies
         run: |
@@ -40,7 +40,7 @@ jobs:
             ghostscript
 
       - name: Install required numerical validation dependencies
-        run: python3 -m pip install 'numpy>=1.24,<3'
+        run: python3 -m pip install 'numpy>=2.4.0,<3'
 
       - name: Comparator failure controls
         run: python3 tools/test_compare_motioncorr.py -v
@@ -51,6 +51,7 @@ jobs:
           cmake --version
           gcc --version
           python3 --version
+          python3 -c "import numpy; print('NumPy version:', numpy.__version__)"
           echo "=== Library Versions via pkg-config ==="
           for pkg in fftw3 fftw3f libtiff-4 libpng libjpeg zlib; do
             echo -n "$pkg: "
@@ -74,21 +75,38 @@ jobs:
 
       - name: "Smoke Test 2: Automated CTest Suite"
         run: |
-          ctest --test-dir build --show-only | grep SyntheticRegression
+          python3 tools/validate_test_collection.py --test-dir build
           ctest --test-dir build --output-on-failure --verbose
 
-      - name: Known-motion validation (when included by the source branch)
+      - name: Known-motion validation and canonical fixture preflight
         shell: bash
         run: |
-          if [[ ! -f tools/run_known_motion_gates.py ]]; then
-            echo "Known-motion suite is absent from this revision; PR #63 adds it."
-            exit 0
-          fi
-          python3 tools/run_known_motion_gates.py --binary "$PWD/build/motioncorr" \
-            --outdir "$PWD/ci_known_motion" --json "$PWD/ci_known_motion/summary.json"
+          python3 tools/ci_preflight.py
+          python3 test-data/generate_known_motion_fixture.py \
+            --outdir "$PWD/test-data/known_motion" --canonical
+          python3 tools/verify_fixtures.py \
+            --fixtures-dir "$PWD/test-data/known_motion"
+          python3 tools/run_known_motion_gates.py \
+            --binary "$PWD/build/motioncorr" \
+            --fixtures "$PWD/test-data/known_motion" \
+            --outdir "$PWD/ci_known_motion" \
+            --no-regenerate \
+            --json "$PWD/ci_known_motion/summary.json"
           python3 tools/test_known_motion.py --binary "$PWD/build/motioncorr"
           python3 tools/test_known_motion_verdicts.py -v
           python3 tools/test_known_motion_runner.py -v
+          python3 tools/test_ci_fail_closed.py -v
+
+      - name: Canonical fixture digests are NumPy-version independent
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/numpy-old"
+          "$RUNNER_TEMP/numpy-old/bin/pip" install -q 'numpy==2.2.6'
+          portable="$RUNNER_TEMP/known_motion_portable"
+          mkdir -p "$portable"
+          cp test-data/known_motion/*.json test-data/known_motion/*.star "$portable/"
+          "$RUNNER_TEMP/numpy-old/bin/python" test-data/generate_known_motion_fixture.py \
+            --outdir "$portable" --canonical
 
       - name: "Smoke Test 3: Standalone Fixture Execution & Output Validation"
         run: |
@@ -176,7 +194,7 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             git cmake build-essential pkg-config libfftw3-dev libtiff-dev \
-            libpng-dev libjpeg-dev zlib1g-dev python3
+            libpng-dev libjpeg-dev zlib1g-dev python3 python3-numpy
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Configure CUDA
@@ -186,5 +204,32 @@ jobs:
             -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
       - name: Compile CUDA and linked controls
         run: cmake --build build-cuda --parallel 4
+      - name: Configure with no explicit architecture
+        # Regression guard for issue #18. Every other CUDA configure in this
+        # repo passes -DCMAKE_CUDA_ARCHITECTURES=80, so none of them could
+        # observe a fresh configure failing at the generate step, or silently
+        # resolving to nvcc's own default. Asserts the exact generated flag
+        # set, not the cache, which the project default deliberately shadows.
+        # Both arms matter: an exported-but-empty CUDAARCHS is a second route
+        # to nvcc's default. Configure only, no GPU required, and this runs
+        # under the container's /bin/sh, so no bashisms.
+        run: |
+          set -eu
+          expected='--generate-code=arch=compute_80,code=[compute_80,sm_80]'
+          unset CUDAARCHS
+          check_default_arch() {
+            rm -rf build-cuda-default
+            cmake -S . -B build-cuda-default -DCMAKE_BUILD_TYPE=Release \
+              -DCUDA=ON -DBUILD_TESTING=OFF
+            actual=$(grep -o -- '--generate-code=[^" ]*' \
+              build-cuda-default/CMakeFiles/motioncorr_core.dir/flags.make | sort -u)
+            if [ "$actual" != "$expected" ]; then
+              echo "$1: expected [$expected], generated [$actual]" >&2
+              exit 1
+            fi
+          }
+          check_default_arch "CUDAARCHS unset"
+          CUDAARCHS=; export CUDAARCHS
+          check_default_arch "CUDAARCHS exported empty"
       - name: Record scope
         run: echo "CUDA compilation passed. This job has no GPU and provides no hardware or numerical gate result."

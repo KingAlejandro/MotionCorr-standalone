@@ -29,9 +29,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import difflib
+import itertools
 import json
+import math
 import struct
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -216,7 +221,30 @@ def particle_boxes(cx, cy, sigma, shift_xy, nx, ny, slack=3.0):
 
 # --- MRC ------------------------------------------------------------------------------------
 
+def mean_std(values: np.ndarray, chunk: int = 1 << 20) -> tuple[float, float]:
+    """Population mean and standard deviation, independent of the NumPy version.
+
+    NumPy's float32 and float64 reductions change between releases (2.2 and 2.3 differ in the
+    last bits of ``std`` and ``mean``), and these statistics feed the noise scale, the hot-pixel
+    value and the MRC header, all of which are covered by the canonical digests. ``math.fsum``
+    is correctly rounded, so every step below is a fixed IEEE-754 operation on the same inputs.
+    """
+    flat = np.ascontiguousarray(values).ravel()
+    n = flat.size
+
+    def chunks(square: bool):
+        for i in range(0, n, chunk):
+            c = flat[i:i + chunk].astype(np.float64)
+            yield (c * c if square else c).tolist()
+
+    s1 = math.fsum(itertools.chain.from_iterable(chunks(False)))
+    s2 = math.fsum(itertools.chain.from_iterable(chunks(True)))
+    mean = s1 / n
+    return mean, math.sqrt(max(s2 / n - mean * mean, 0.0))
+
+
 def write_mrc_stack(path: Path, stack: np.ndarray, pixel_size: float) -> None:
+    mean, rms = mean_std(stack)
     ny, nx = stack.shape[1], stack.shape[2]
     nz = stack.shape[0]
     header = bytearray(1024)
@@ -226,11 +254,11 @@ def write_mrc_stack(path: Path, stack: np.ndarray, pixel_size: float) -> None:
     struct.pack_into("<3f", header, 40, nx * pixel_size, ny * pixel_size, nz * pixel_size)
     struct.pack_into("<3f", header, 52, 90.0, 90.0, 90.0)
     struct.pack_into("<3i", header, 64, 1, 2, 3)
-    struct.pack_into("<3f", header, 76, float(stack.min()), float(stack.max()), float(stack.mean()))
+    struct.pack_into("<3f", header, 76, float(stack.min()), float(stack.max()), mean)
     struct.pack_into("<2i", header, 88, 0, 0)
     header[208:212] = b"MAP "
     header[212:216] = bytes((0x44, 0x41, 0, 0))
-    struct.pack_into("<f", header, 216, float(stack.std()))
+    struct.pack_into("<f", header, 216, rms)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as fh:
         fh.write(header)
@@ -283,7 +311,8 @@ def git_commit(repo_root: Path) -> str:
 
 def generate_case(name: str, outdir: Path, repo_root: Path,
                   noise_rel: float | None = None, noise_seed_offset: int = 0,
-                  label: str | None = None) -> dict:
+                  label: str | None = None, write_manifest: bool = False,
+                  canonical: bool = False, refuse_conflicting: bool = False) -> dict:
     """Generate one case.
 
     ``noise_rel`` and ``noise_seed_offset`` exist for the noise response curve and the
@@ -305,6 +334,29 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     # hash randomisation, and unchanged when other cases are added or renamed. An index into
     # sorted(CASES) would silently re-roll every existing fixture the moment a case is added.
     seed = BASE_SEED + int(hashlib.sha256(name.encode()).hexdigest()[:8], 16) % 100000
+
+    gt_path = outdir / f"{out_name}_ground_truth.json"
+    mrcs = outdir / f"{out_name}.mrcs"
+    star = outdir / f"{out_name}.star"
+
+    # Preflight 1: canonical mode requires existing ground truth
+    if canonical and not gt_path.is_file():
+        raise RuntimeError(f"Canonical mode: missing required ground-truth JSON {gt_path}")
+
+    # Preflight 2: refuse_conflicting checks parameters before writing or staging any files
+    if gt_path.is_file() and refuse_conflicting:
+        try:
+            existing_gt = json.loads(gt_path.read_text())
+        except Exception as exc:
+            raise RuntimeError(
+                f"Refusing to overwrite {gt_path.name}: malformed or unreadable existing ground truth: {exc}"
+            ) from exc
+        if (existing_gt.get("noise", {}).get("relative_sigma") != cfg["noise_rel"] or
+            existing_gt.get("noise_seed_offset") != noise_seed_offset or
+            existing_gt.get("seed") != seed):
+            raise RuntimeError(
+                f"Refusing to overwrite {gt_path.name}: conflicting parameters with existing ground truth"
+            )
     rng = np.random.default_rng(seed)
 
     cx, cy, sig, amp = make_particles(rng, nx, ny)
@@ -312,14 +364,14 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     iy_grid, ix_grid = np.mgrid[0:ny, 0:nx].astype(np.float64)
     clean0 = render(cx, cy, sig, amp, ix_grid, iy_grid, nx, ny,
                     boxes=particle_boxes(cx, cy, sig, (0.0, 0.0), nx, ny))
-    base_std = float(clean0.std())
+    base_mean, base_std = mean_std(clean0)
     noise_sigma = cfg["noise_rel"] * base_std
 
     # Fixed detector-coordinate hot pixels (not warped: a detector defect does not move).
     hot_rng = np.random.default_rng(seed + 977)
     hot_x = hot_rng.integers(8, nx - 8, cfg["n_hot"])
     hot_y = hot_rng.integers(8, ny - 8, cfg["n_hot"])
-    hot_val = float(clean0.mean() + 40.0 * base_std)
+    hot_val = base_mean + 40.0 * base_std
 
     frames = np.arange(n_frames)
     field = injected_motion(frames, ix_grid, iy_grid, nx, ny, n_frames, local_scale)
@@ -341,12 +393,6 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
             warped[hy, hx] = hot_val
         stack[f] = warped.astype(np.float32)
 
-    outdir.mkdir(parents=True, exist_ok=True)
-    mrcs = outdir / f"{out_name}.mrcs"
-    write_mrc_stack(mrcs, stack, PIXEL_SIZE)
-    star = outdir / f"{out_name}.star"
-    star.write_text(STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
-                                         movie=mrcs.name))
 
     # Declared evaluation grid: endpoint-inclusive, so the four corners and all four edges are
     # sampled. Corners are where the local polynomial is largest and where a sign or axis defect
@@ -359,84 +405,141 @@ def generate_case(name: str, outdir: Path, repo_root: Path,
     grid_y = gyy.ravel()
     grid_field = injected_motion(frames, grid_x, grid_y, nx, ny, n_frames, local_scale)
 
-    gt = {
-        "schema": SCHEMA_VERSION,
-        "case": out_name,
-        "base_case": name,
-        "movie_file": mrcs.name,
-        "input_star": star.name,
-        "movie_sha256": sha256(mrcs),
-        "source_commit": git_commit(repo_root),
-        "generator": Path(__file__).name,
-        "seed": seed,
-        "noise_seed_offset": noise_seed_offset,
-        "geometry": {
-            "nx": nx, "ny": ny, "n_frames": n_frames,
-            "pixel_size_angstrom": PIXEL_SIZE,
-            "voltage_kv": VOLTAGE,
-            "dose_per_frame": DOSE_PER_FRAME,
-        },
-        "recommended_run": {
-            "patch_x": cfg["patch_x"], "patch_y": cfg["patch_y"],
-            "bin_factor": 1, "first_frame_sum": 1,
-            # Hot-pixel replacement draws from rand(); on the defect-free cases it would only
-            # mangle bright particle centres, so it is switched off there. km_local_noisy keeps
-            # it on so the defect path is exercised against six known injected hot pixels.
-            "skip_defect": bool(cfg["skip_defect"]),
-            "heavy": bool(cfg.get("heavy", False)),
-            "role": cfg.get("role", "gate"),
-            "expected_hot_pixels_detected": 0 if cfg["skip_defect"] else int(cfg["n_hot"]),
-        },
-        "conventions": {
-            "frame_index": "0-based z in this file; the output STAR uses 1-based "
-                           "rlnMicrographFrameNumber, z = frame - rlnMicrographStartFrame",
-            "axes": "x = column = fast axis, y = row = slow axis, origin at pixel (0,0)",
-            "normalised_position": "u = ix/nx - 0.5, v = iy/ny - 0.5",
-            "units": "pixels of the unbinned grid; angstrom = pixel * pixel_size_angstrom",
-            "injected_motion": "displacement of specimen content in frame f relative to frame 0",
-            "expected_applied_field": "-injected_motion; equals MotionCorr's "
-                                      "globalShift[f] + ThirdOrderPolynomialModel(z,u,v)",
-        },
-        "motion_spec": {
-            "global": GLOBAL_SPEC,
-            "local_terms_x": LOCAL_TERMS_X,
-            "local_terms_y": LOCAL_TERMS_Y,
-            "local_scale": local_scale,
-            "tau": "z / (n_frames - 1)",
-            "term_form": "coeff * tau**p_tau * u**p_u * v**p_v",
-        },
-        "noise": {
-            "relative_sigma": cfg["noise_rel"],
-            "absolute_sigma": noise_sigma,
-            "noise_free_image_std": base_std,
-            "per_pixel_snr": (1.0 / cfg["noise_rel"]) if cfg["noise_rel"] > 0 else None,
-            "model": "i.i.d. Gaussian in detector coordinates, not warped",
-        },
-        "periodicity": {
-            "base_image_periodic": True,
-            "why": "a Fourier shift is cyclic; non-wrapping content puts a mismatched band of "
-                   "width |shift| along two edges and biases any full-frame cross-correlation "
-                   "toward zero shift (measured at 1.2 % on a non-periodic build of this "
-                   "fixture)",
-        },
-        "defects": {
-            "n_hot_pixels": int(cfg["n_hot"]),
-            "hot_pixels_xy": [[int(a), int(b)] for a, b in zip(hot_x, hot_y)],
-            "hot_pixel_value": hot_val,
-        },
-        "grid": {
-            "n_per_axis": GRID_N,
-            "layout": "endpoint-inclusive: linspace(0, n-1, GRID_N) on each axis",
-            "x": grid_x.tolist(),
-            "y": grid_y.tolist(),
-        },
-        # [frame][position][x,y], in pixels
-        "injected_motion_field": np.round(grid_field, 12).tolist(),
-        "expected_applied_field": np.round(-grid_field, 12).tolist(),
-    }
-    gt_path = outdir / f"{out_name}_ground_truth.json"
-    gt_path.write_text(json.dumps(gt, indent=2) + "\n")
+    outdir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=outdir, prefix=f".stage_{out_name}_") as tmpdir_str:
+        stage_dir = Path(tmpdir_str)
+        staged_mrcs = stage_dir / f"{out_name}.mrcs"
+        staged_star = stage_dir / f"{out_name}.star"
+        staged_gt = stage_dir / f"{out_name}_ground_truth.json"
 
+        write_mrc_stack(staged_mrcs, stack, PIXEL_SIZE)
+        staged_star.write_text(STAR_TEMPLATE.format(pixel_size=PIXEL_SIZE, voltage=VOLTAGE,
+                                                    movie=mrcs.name))
+        movie_hash = sha256(staged_mrcs)
+        movie_bytes = staged_mrcs.stat().st_size
+        gt = {
+            "schema": SCHEMA_VERSION,
+            "case": out_name,
+            "base_case": name,
+            "movie_file": mrcs.name,
+            "input_star": star.name,
+            "movie_sha256": movie_hash,
+            "source_commit": git_commit(repo_root),
+            "generator": Path(__file__).name,
+            "seed": seed,
+            "noise_seed_offset": noise_seed_offset,
+            "geometry": {
+                "nx": nx, "ny": ny, "n_frames": n_frames,
+                "pixel_size_angstrom": PIXEL_SIZE,
+                "voltage_kv": VOLTAGE,
+                "dose_per_frame": DOSE_PER_FRAME,
+            },
+            "recommended_run": {
+                "patch_x": cfg["patch_x"], "patch_y": cfg["patch_y"],
+                "bin_factor": 1, "first_frame_sum": 1,
+                # Hot-pixel replacement draws from rand(); on the defect-free cases it would only
+                # mangle bright particle centres, so it is switched off there. km_local_noisy keeps
+                # it on so the defect path is exercised against six known injected hot pixels.
+                "skip_defect": bool(cfg["skip_defect"]),
+                "heavy": bool(cfg.get("heavy", False)),
+                "role": cfg.get("role", "gate"),
+                "expected_hot_pixels_detected": 0 if cfg["skip_defect"] else int(cfg["n_hot"]),
+            },
+            "conventions": {
+                "frame_index": "0-based z in this file; the output STAR uses 1-based "
+                               "rlnMicrographFrameNumber, z = frame - rlnMicrographStartFrame",
+                "axes": "x = column = fast axis, y = row = slow axis, origin at pixel (0,0)",
+                "normalised_position": "u = ix/nx - 0.5, v = iy/ny - 0.5",
+                "units": "pixels of the unbinned grid; angstrom = pixel * pixel_size_angstrom",
+                "injected_motion": "displacement of specimen content in frame f relative to frame 0",
+                "expected_applied_field": "-injected_motion; equals MotionCorr's "
+                                          "globalShift[f] + ThirdOrderPolynomialModel(z,u,v)",
+            },
+            "motion_spec": {
+                "global": GLOBAL_SPEC,
+                "local_terms_x": LOCAL_TERMS_X,
+                "local_terms_y": LOCAL_TERMS_Y,
+                "local_scale": local_scale,
+                "tau": "z / (n_frames - 1)",
+                "term_form": "coeff * tau**p_tau * u**p_u * v**p_v",
+            },
+            "noise": {
+                "relative_sigma": cfg["noise_rel"],
+                "absolute_sigma": noise_sigma,
+                "noise_free_image_std": base_std,
+                "per_pixel_snr": (1.0 / cfg["noise_rel"]) if cfg["noise_rel"] > 0 else None,
+                "model": "i.i.d. Gaussian in detector coordinates, not warped",
+            },
+            "periodicity": {
+                "base_image_periodic": True,
+                "why": "a Fourier shift is cyclic; non-wrapping content puts a mismatched band of "
+                       "width |shift| along two edges and biases any full-frame cross-correlation "
+                       "toward zero shift (measured at 1.2 % on a non-periodic build of this "
+                       "fixture)",
+            },
+            "defects": {
+                "n_hot_pixels": int(cfg["n_hot"]),
+                "hot_pixels_xy": [[int(a), int(b)] for a, b in zip(hot_x, hot_y)],
+                "hot_pixel_value": hot_val,
+            },
+            "grid": {
+                "n_per_axis": GRID_N,
+                "layout": "endpoint-inclusive: linspace(0, n-1, GRID_N) on each axis",
+                "x": grid_x.tolist(),
+                "y": grid_y.tolist(),
+            },
+            # [frame][position][x,y], in pixels
+            "injected_motion_field": np.round(grid_field, 12).tolist(),
+            "expected_applied_field": np.round(-grid_field, 12).tolist(),
+        }
+
+        if canonical:
+            existing_gt = json.loads(gt_path.read_text())
+            if existing_gt.get("movie_sha256") != movie_hash:
+                raise RuntimeError(
+                    f"Canonical mode disagreement for {out_name}: generated movie sha256 {movie_hash} "
+                    f"!= expected canonical {existing_gt.get('movie_sha256')}"
+                )
+            # The committed .star is a trusted gate INPUT, not a regenerable artifact, so
+            # canonical mode compares it and refuses rather than replacing it.
+            #
+            # Replacing it -- even atomically -- is not benign. A STAR_TEMPLATE edit that
+            # changes the optics (a different _rlnMicrographOriginalPixelSize, _rlnVoltage or
+            # _rlnMicrographMovieName) moves no pixel, so the movie check immediately above
+            # still passes and verify_fixtures.py still reports VERIFIED.
+            # run_known_motion_gates.py would then consume freshly generated metadata under a
+            # green canonical verification. Measured on cpu64 against the pre-fix generator:
+            # VOLTAGE 300.0 -> 200.0 rewrote the committed STAR, kept movie sha256
+            # f9da4668... unchanged, and verification still reported
+            # "VERIFIED: 1 canonical fixtures match trusted manifest".
+            if not star.is_file():
+                raise RuntimeError(f"Canonical mode: missing required committed STAR input {star}")
+            committed_star_text = star.read_text()
+            staged_star_text = staged_star.read_text()
+            if committed_star_text != staged_star_text:
+                diff = "\n".join(difflib.unified_diff(
+                    committed_star_text.splitlines(), staged_star_text.splitlines(),
+                    fromfile=f"committed {star.name}", tofile="generated", lineterm="", n=1))
+                raise RuntimeError(
+                    f"Canonical mode STAR disagreement for {out_name}: the committed STAR input "
+                    f"does not match what this generator would write. Nothing was modified: the "
+                    f"movie and the STAR were both left as committed. The generated movie digest "
+                    f"is {movie_hash}, which equals the canonical digest, so this drift is "
+                    f"invisible to the movie check and to verify_fixtures' movie hash -- it is "
+                    f"caught here and by the manifest's star_sha256. If the change is intended, "
+                    f"update the fixture and its manifest digest as an explicit maintenance "
+                    f"step.\n{diff}"
+                )
+            # Verified; the movie is regenerable and is replaced, the committed STAR stands.
+            # The replace happens only after BOTH checks pass, so their transactional
+            # property is preserved: a rejected run leaves the tree exactly as it was.
+            os.replace(staged_mrcs, mrcs)
+        else:
+            # Normal generation: stage matching truth and atomically replace all files
+            staged_gt.write_text(json.dumps(gt, indent=2) + "\n")
+            os.replace(staged_mrcs, mrcs)
+            os.replace(staged_star, star)
+            os.replace(staged_gt, gt_path)
     return {
         "case": out_name, "mrcs": str(mrcs), "star": str(star), "ground_truth": str(gt_path),
         "sha256": gt["movie_sha256"], "bytes": mrcs.stat().st_size,
@@ -456,6 +559,12 @@ def main() -> None:
     ap.add_argument("--noise-seed-offset", type=int, default=0,
                     help="change only the detector-noise stream; for replicate studies")
     ap.add_argument("--label", default=None, help="output file stem (defaults to the case name)")
+    ap.add_argument("--canonical", action="store_true", default=False,
+                    help="canonical mode: verify generated movie matches canonical truth and refuse disagreement")
+    ap.add_argument("--refuse-conflicting", action="store_true", default=False,
+                    help="refuse to overwrite existing ground truth if parameters conflict")
+    ap.add_argument("--write-manifest", action="store_true", default=False,
+                    help="write/update MANIFEST.json in the output directory (explicit maintenance operation)")
     ap.add_argument("--include-heavy", action="store_true",
                     help=f"with --case all, also build the large opt-in cases: "
                          f"{', '.join(sorted(HEAVY))}")
@@ -463,6 +572,8 @@ def main() -> None:
 
     if (args.noise_rel is not None or args.noise_seed_offset) and args.case == "all":
         ap.error("--noise-rel / --noise-seed-offset require an explicit --case")
+    if args.canonical and (args.noise_rel is not None or args.noise_seed_offset != 0):
+        ap.error("--canonical cannot be combined with noise overrides")
 
     if args.case == "all":
         names = [n for n in sorted(CASES) if args.include_heavy or n not in HEAVY]
@@ -471,7 +582,9 @@ def main() -> None:
     infos = []
     for name in names:
         info = generate_case(name, args.outdir, repo_root, noise_rel=args.noise_rel,
-                             noise_seed_offset=args.noise_seed_offset, label=args.label)
+                             noise_seed_offset=args.noise_seed_offset, label=args.label,
+                             write_manifest=args.write_manifest, canonical=args.canonical,
+                             refuse_conflicting=args.refuse_conflicting)
         infos.append(info)
         print(f"{info['case']}: {info['mrcs']} ({info['bytes']} bytes, "
               f"sha256 {info['sha256'][:16]}...)")
@@ -481,7 +594,7 @@ def main() -> None:
     # The .mrcs files are not versioned -- they are reproducible from this script in seconds.
     # The manifest is, so a regenerated fixture that does not match the recorded hash is a
     # visible change rather than a silent one.
-    if args.case == "all" and args.noise_rel is None and not args.noise_seed_offset:
+    if args.write_manifest and args.case == "all" and args.noise_rel is None and not args.noise_seed_offset:
         manifest = args.outdir / "MANIFEST.json"
         existing = json.loads(manifest.read_text()) if manifest.exists() else {"cases": {}}
         existing.setdefault("cases", {})
@@ -491,6 +604,9 @@ def main() -> None:
                 "movie_bytes": info["bytes"],
                 "ground_truth_sha256": hashlib.sha256(
                     Path(info["ground_truth"]).read_bytes()).hexdigest(),
+                # The STAR is a gate input, so it is digested like the movie and the truth.
+                "star_sha256": hashlib.sha256(
+                    Path(info["star"]).read_bytes()).hexdigest(),
             }
         existing["generator"] = Path(__file__).name
         existing["generator_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -498,7 +614,10 @@ def main() -> None:
         existing["note"] = ("regenerate with: python3 test-data/generate_known_motion_fixture.py "
                             "[--include-heavy]; hashes must match on any platform with the same "
                             "NumPy IEEE-754 double arithmetic")
-        manifest.write_text(json.dumps(existing, indent=2, sort_keys=True) + "\n")
+        with tempfile.NamedTemporaryFile("w", dir=args.outdir, delete=False) as tmp:
+            tmp.write(json.dumps(existing, indent=2, sort_keys=True) + "\n")
+            tmp_path = Path(tmp.name)
+        os.replace(tmp_path, manifest)
         print(f"manifest: {manifest}")
 
 

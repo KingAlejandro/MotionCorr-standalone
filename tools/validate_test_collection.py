@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Validate CTest test suite collection via ctest --show-only=json-v1.
+
+Ensures that CTest collection is fail-closed:
+- Fails if 0 tests are collected.
+- Fails if the suite contains fewer than the expected minimum number of tests.
+- Fails if any declared required test is missing from the collected test list.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+DEFAULT_REQUIRED_TESTS = [
+    "SyntheticRegression",
+    "HotPixelRngDeterminism",
+    "RunnerExposure",
+    "Runner_failure",
+    "Runner_invalid",
+    "Runner_resume",
+    "Runner_tomography",
+    "RunnerLateBin",
+    "RunnerExportedUnits",
+    "GainCache",
+    "TiffRead",
+    "DamagedMovie",
+    "RunnerModelParser",
+    "CiFailClosedControls",
+    # Added by the #99 fail-closed write group (PR105). WriteFaults is the
+    # end-to-end runner control; ImageWriteFaults is the unit-level
+    # RLIMIT_FSIZE injection and is registered under if(UNIX).
+    "WriteFaults",
+    "ImageWriteFaults",
+    # Added by the #98 malformed-defect-parser group (PR101).
+    "DefectParser",
+    # Added by the #26 global inverse-FFT elision (PR111). This is the only
+    # test in the suite that can observe a wrong elision predicate: both parity
+    # comparators skip _EVN/_ODD, so without this entry the guard could be
+    # dropped from CMakeLists.txt with the collected count still at the
+    # minimum and CI still green.
+    "GlobalIfftElision",
+    # Added by the #69 CUDA reliability port. Device-free, so it is always
+    # collected; the CUDA-only CudaErrorClass is not listed here, matching
+    # the existing exclusion of CudaWrapperUploadFailure.
+    "PatchRetryState",
+    # Issue #85 lane C: each arm's MRC/STAR inventory and structure is checked
+    # independently before pairwise image equality is considered.
+    "OutputTreeComparator",
+    # Added by the #97 interpolate-shift recentering fix (PR100/PR114).
+    # RunnerInterpolateRecenter is the helper-level arithmetic regression;
+    # RunnerInterpolateShifts drives the binary end to end and is the only test
+    # that can see the recenter call site still being wired up.
+    "RunnerInterpolateRecenter",
+    "RunnerInterpolateShifts",
+    # Added by the #85/#126 nvCOMP ingest composition. All three are device-free
+    # and deliberately registered outside if(CUDA): the aligned raw-Deflate layout
+    # rule, the zlib-wrapper and Adler-32 byte logic, the scratch-arena bound and
+    # the neighbour enumeration are integer and byte contracts that a successful
+    # A100 decode cannot observe. Without these entries the fast path could lose
+    # its eligibility predicate or its arena bound with the suite still green.
+    "DeflateLayout",
+    "ScratchArena",
+    "DefectNeighbours",
+    # Added by the #127 output-stage group. MrcHeaderStats is the only test that
+    # compares the fused single-traversal header statistics against the four
+    # separate reductions they replace; without it the fused path could drift in
+    # any of amin/amax/amean/arms and every product comparator would still pass,
+    # because both sides would be reading the same drifted header.
+    "MrcHeaderStats",
+    "PdfConcat",
+    # Added with the #127 background output writer. WriteFaults exercises the
+    # deferred path (failure raised on the worker thread, collected afterwards);
+    # WriteFaultsSync runs the identical sequence on the inline path that
+    # --sync_output selects, so the measurement control cannot also be a route to
+    # weaker failure semantics. WriteFaultsMultiProduct gives one movie several
+    # MRC products, which is the only configuration in which "the first failed
+    # product cancels the rest of that movie's group, the STAR among them" is
+    # observable at all.
+    "WriteFaultsSync",
+    "WriteFaultsMultiProduct",
+    # Added after the CUDA-without-nvCOMP link failure on CI run 317. The suite
+    # never links that configuration, so nothing in it could see a member
+    # defined inside the guard and declared outside; the first instance
+    # (gatherFrameSamples) stayed green only because the optimiser removed the
+    # call, and the second (endIngestScratch) appeared the moment that stopped.
+    "NvcompGuards",
+    # Added with the #127 Ghostscript overlap fix. It distinguishes a job that
+    # reports failure from a job that dies on SIGABRT, which is the whole
+    # difference the scope guard makes; a check for "non-zero exit" would pass
+    # on the defect.
+    "OutputStageFaults",
+    # Issue #95: the only test that can observe the native uint16 staging
+    # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
+    "NativeU16Staging",
+]
+
+
+def load_ctest_json(
+    test_dir: Optional[Path] = None,
+    json_path: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Retrieve CTest JSON report either by executing ctest or reading file/stdin."""
+    if test_dir is not None:
+        cmd = ["ctest", "--test-dir", str(test_dir), "--show-only=json-v1"]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"ctest --show-only=json-v1 failed (exit {proc.returncode}):\n{proc.stderr}"
+            )
+        return json.loads(proc.stdout)
+    if json_path is not None:
+        return json.loads(json_path.read_text())
+    if not sys.stdin.isatty():
+        return json.load(sys.stdin)
+    raise ValueError("Must provide --test-dir, --json, or pipe JSON to stdin")
+
+
+def validate_tests(
+    ctest_data: Dict[str, Any],
+    min_count: int = 1,
+    required_tests: Optional[Sequence[str]] = None,
+) -> Tuple[bool, Dict[str, Any]]:
+    tests = ctest_data.get("tests", [])
+    collected_names = [t.get("name", "") for t in tests if isinstance(t, dict)]
+
+    req = list(required_tests) if required_tests is not None else list(DEFAULT_REQUIRED_TESTS)
+    missing = [name for name in req if name not in collected_names]
+
+    # A test whose command starts with an empty argument is registered but
+    # cannot run: CTest reports BAD_COMMAND at execution time. That happened to
+    # NvcompGuards, which used ${Python3_EXECUTABLE} before
+    # find_package(Python3) had set it. It was invisible to every local build
+    # here because those pass -DPython3_EXECUTABLE explicitly, which defines the
+    # cache variable up front; only CI, which does not, saw it. Collection is
+    # the right place to catch it -- the name IS in the list, so the
+    # missing-test check above passes while the test cannot execute.
+    unrunnable = []
+    for entry in tests:
+        if not isinstance(entry, dict):
+            continue
+        cmd = entry.get("command") or []
+        if not cmd or not str(cmd[0]).strip():
+            unrunnable.append(entry.get("name", "<unnamed>"))
+
+    report: Dict[str, Any] = {
+        "collected_count": len(collected_names),
+        "collected_tests": collected_names,
+        "min_count": min_count,
+        "required_tests": req,
+        "missing_tests": missing,
+        "unrunnable_tests": unrunnable,
+        "status": "PASS",
+    }
+
+    if len(collected_names) == 0:
+        report["status"] = "FAIL"
+        report["reason"] = "Empty test collection: 0 tests found"
+        return False, report
+
+    if len(collected_names) < min_count:
+        report["status"] = "FAIL"
+        report["reason"] = f"Test count {len(collected_names)} is less than minimum {min_count}"
+        return False, report
+
+    if unrunnable:
+        report["status"] = "FAIL"
+        report["reason"] = ("Test(s) registered with an empty command program, so CTest "
+                            f"would report BAD_COMMAND: {', '.join(unrunnable)}")
+        return False, report
+
+    if missing:
+        report["status"] = "FAIL"
+        report["reason"] = f"Missing required test(s): {', '.join(missing)}"
+        return False, report
+
+    return True, report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--test-dir", type=Path, default=None,
+                        help="Build directory to inspect via ctest")
+    parser.add_argument("--json", type=Path, default=None,
+                        help="Path to pre-dumped ctest json-v1 output")
+    parser.add_argument("--min-count", type=int, default=23,
+                        help="Minimum number of tests that must be collected (default: 23)")
+    parser.add_argument("--required-tests", nargs="*", default=None,
+                        help="Explicit list of required test names (default: standard MotionCorr suite)")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Quiet output")
+    parser.add_argument("--dump-json", type=Path, default=None,
+                        help="Write validation result to JSON file")
+    opts = parser.parse_args()
+
+    try:
+        data = load_ctest_json(opts.test_dir, opts.json)
+    except Exception as exc:
+        print(f"ERROR: Failed to obtain CTest JSON data: {exc}", file=sys.stderr)
+        return 2
+
+    success, report = validate_tests(
+        ctest_data=data,
+        min_count=opts.min_count,
+        required_tests=opts.required_tests,
+    )
+
+    if opts.dump_json:
+        opts.dump_json.parent.mkdir(parents=True, exist_ok=True)
+        opts.dump_json.write_text(json.dumps(report, indent=2) + "\n")
+
+    if not opts.quiet:
+        print(f"=== CTest Collection Validation: {report['status']} === ")
+        print(f"  Collected tests: {report['collected_count']}")
+        for t in report["collected_tests"]:
+            mark = "REQUIRED" if t in report["required_tests"] else "ADDITIVE"
+            print(f"    - {t:<30} [{mark}]")
+        if report["missing_tests"]:
+            print(f"  MISSING REQUIRED TESTS:\n    " + "\n    ".join(report["missing_tests"]))
+        if not success:
+            print(f"  FAILURE REASON: {report.get('reason')}")
+
+    if not success:
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

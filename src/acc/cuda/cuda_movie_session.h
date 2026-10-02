@@ -2,23 +2,64 @@
 #define CUDA_MOVIE_SESSION_H_
 
 #include <vector>
+#include <string>
 #include <ostream>
 #include "src/image.h"
 #include "src/multidim_array.h"
+#include "src/acc/cuda/cuda_scratch_arena.h"
 #include "src/complex.h"
 #include "src/micrograph_model.h"
 
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_alignpatch.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
  * Eliminates redundant host<->device PCIe memory transfers by keeping real and Fourier frames
  * resident on the GPU throughout preprocessing, FFT, global alignment, patch alignment, and reconstruction.
  */
+// Outcome of an attempted device ingest, as the caller must act on it.
+//
+// A bare bool conflated three different situations that need three different
+// responses: "this build/encoding never uses the fast path" (use the fallback,
+// nothing happened), "the fast path tried and failed but the device is fine"
+// (use the fallback), and "the context is dead" (do not dispatch CUDA again).
+// It also could not express a failure discovered AFTER the success value was
+// chosen, which the ingest-scratch teardown can produce.
+enum class MovieIngestStatus
+{
+	NotApplicable,        // no nvCOMP, no session, or an encoding this path declines
+	Success,              // d_Iframes and d_Isum hold the whole movie
+	RecoverableFailure,   // fall back to a host reader; the device is still usable
+	FatalDeviceFailure    // the CUDA context is poisoned; no redispatch
+};
+
+// There is deliberately no InvalidInput state.
+//
+// It was declared, and the runner handled it, but no code path could produce
+// it -- a documented contract that nothing implements is worse than a smaller
+// one. The question is whether this path can ever know that a movie is bad
+// rather than merely unsuitable for it, and it cannot:
+//
+//   Unsupported encodings (predictor, byte order, bits per sample, a zlib
+//   wrapper this path does not accept) say nothing about the movie's validity.
+//   The ordinary reader handles all of them. That is NotApplicable.
+//
+//   An Adler-32 mismatch looks like proof of corrupt input, and it is the one
+//   case that tempted the state. But that checksum is computed over the output
+//   of OUR OWN decompression, so a mismatch is equally consistent with a defect
+//   in this path. Classifying it as bad input would skip the fallback, turn a
+//   bug here into a reported data error, and lose the run that the host reader
+//   would have completed correctly. It is RecoverableFailure: fall back, and
+//   let the reader that verifies the same checksum for itself decide.
+
 class CudaMovieSession {
 public:
+    CudaMovieSession(const CudaMovieSession&) = delete;
+    CudaMovieSession& operator=(const CudaMovieSession&) = delete;
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
 
@@ -38,6 +79,87 @@ public:
         const MultidimArray<float> *gain_ref,
         MultidimArray<float> &unaligned_sum,
         bool download_sum = true
+    );
+
+    // Issue #85 lane C: same contract as applyGainDefectsAndSum, but the host movie
+    // is held in its native unsigned 16-bit form and the uint16 -> float expansion
+    // happens on the device while the gain is applied. Halves the host payload and
+    // the PCIe bytes for unsigned-16-bit TIFF input. Products are bit-identical:
+    // uint16 -> float32 is exact, and the gain multiply, the store into d_Iframes
+    // and the ascending per-pixel accumulation are the same operations in the same
+    // order. Callers with any other input type must keep using the float overload.
+    bool applyGainDefectsAndSumU16(
+        const std::vector<Image<unsigned short> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
+    // Attempt the device ingest and report what actually happened.
+    //
+    // This is the boundary the runner uses. It wraps the worker below and adds
+    // the two things a bool cannot carry:
+    //
+    //  - classification. A decline on an unsupported encoding is not the same
+    //    event as a cudaMalloc failure, and neither is the same as a poisoned
+    //    context, but all three were "false".
+    //
+    //  - late failures. The worker's scratch scope synchronises and destroys
+    //    the ingest stream in its destructor, which runs AFTER the return value
+    //    has been chosen, and records any error into the session's failure
+    //    state. A stream synchronise that failed there would have been reported
+    //    as a successful ingest with a possibly incomplete d_Iframes. This
+    //    compares the failure state across the call and refuses to call that
+    //    success.
+    //
+    // Returns NotApplicable when the build has no nvCOMP, so the caller needs
+    // no #if of its own.
+    MovieIngestStatus ingestMovie(
+        const std::string &fn_mic,
+        const std::vector<int> &frames,
+        const MultidimArray<float> *gain_ref,
+        int n_threads
+    );
+
+#if defined(_NVCOMP_ENABLED)
+    // Direct GPU TIFF ingestion via nvCOMP Batched Deflate: reads compressed strips
+    // from disk, uploads only the compressed bytes over PCIe, decompresses on the
+    // device, and fuses the row flip, gain application and unaligned sum straight
+    // into the resident d_Iframes/d_Isum.
+    //
+    // Allocates no device memory for staging. Frames are processed in bounded
+    // batches whose entire working set -- compressed inputs, uint16 outputs, chunk
+    // descriptor arrays and the nvCOMP scratch -- is carved out of d_Fframes, which
+    // initialize() has already allocated and which holds nothing until
+    // computeGlobalForwardFFT() overwrites every element of it. The session's VRAM
+    // high-water mark is therefore unchanged from the host-read path. (d_gain is
+    // still allocated on demand, exactly as applyGainDefectsAndSum() does.)
+    //
+    // Claims the buffer through fourier_guard, so it is refused once the spectrum
+    // is in there, and the forward transform is refused while these views are live.
+    //
+    // Returns false on any geometry, I/O, zlib-wrapper or per-chunk nvCOMP failure,
+    // leaving the caller to fall back to the host reader. A partially written
+    // d_Iframes/d_Isum is safe: applyGainDefectsAndSum() overwrites both in full.
+    bool ingestCompressedTiffStrips(
+        const std::string &fn_mic,
+        const std::vector<int> &frames,
+        const MultidimArray<float> *gain_ref,
+        int n_threads
+    );
+#endif
+
+    // Fetch individual d_Iframes pixels: one neighbour value per (defect, frame).
+    // Replaces downloading the whole movie for hot-pixel replacement, which cost a
+    // fresh movie-sized host allocation plus a full device-to-host copy on every
+    // movie. sample_y[k] < 0 marks an entry the caller fills itself (the Gaussian
+    // branch) and leaves out[k] at zero. Uses the pre-FFT scratch arena, so it adds
+    // no device allocation.
+    bool gatherFrameSamples(
+        const std::vector<int> &sample_frame,
+        const std::vector<int> &sample_y,
+        const std::vector<int> &sample_x,
+        std::vector<float> &out
     );
 
     // Copy the resident unaligned sum to the host. Used by the hot-pixel fallback
@@ -90,6 +212,10 @@ public:
         cufftComplex *d_out_fpatches
     );
 
+    PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
+    // Must succeed before any reconstruction or output publication.
+    bool releasePatchAlignmentWorkspace() { return patch_alignment_workspace.release(); }
+
     // In-VRAM Dose-weighted reconstruction: applies DW and polynomial interpolation into Isum
     bool reconstructDoseWeighted(
         Image<float> &Isum,
@@ -112,6 +238,15 @@ public:
     // Download real frames to host (used e.g. for fallback)
     bool downloadRealFrames(std::vector<Image<float> > &Iframes);
 
+    // Issue #69: the failure state this session observed, preserved across the helper
+    // boundary. The internal error handlers consume the CUDA error when they return
+    // false, so a later cudaGetLastError() reports cudaSuccess and proves nothing about
+    // context health. A caller deciding whether a retry is safe must use this, not a
+    // fresh last-error read. It carries both the first failure (diagnostic provenance)
+    // and a monotonically latched poisoning code that no later or earlier record can
+    // displace -- see CudaFailureState.
+    const CudaFailureState& getFailureState() const { return failure_state; }
+
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
     cufftComplex* getDeviceFourierFrames() { return d_Fframes; }
@@ -124,6 +259,17 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    cudaError_t releaseBuffer(void *&slot) noexcept;
+    template<class T> cudaError_t releaseBuffer(T *&slot) noexcept;
+    cufftResult releasePlan(cufftHandle &slot, bool &owned) noexcept;
+    void recordFailure(cudaError_t err, const char *stage, int line);
+    void recordCufftFailure(cufftResult res, const char *stage, int line);
+
+    // Sticky for the life of the session. Not reset by release(): a movie that failed
+    // stays failed for reporting purposes, and a poisoned context never un-poisons.
+    CudaFailureState failure_state;
+    PatchAlignmentWorkspace patch_alignment_workspace;
+
     int nx;
     int ny;
     int n_frames;
@@ -146,6 +292,26 @@ private:
     void *d_fft_work = nullptr;
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
+
+    // What d_Fframes currently holds. The ingest path borrows that allocation as
+    // scratch instead of allocating its own staging, so the transition out of
+    // IngestScratch is what makes the forward transform safe to run.
+    mc_cuda::FourierStorageGuard fourier_guard;
+    cudaStream_t ingest_stream = 0;
+    // Points the ingest at the worker-lifetime pinned staging pool, growing it if
+    // this movie needs more. The pool deliberately outlives the session, which is
+    // constructed and destroyed once per movie.
+#if defined(_NVCOMP_ENABLED)
+    // Genuinely nvCOMP-only: this is the pinned staging pool for compressed
+    // strips and has no caller outside ingestCompressedTiffStrips. Declared
+    // under the same guard as its definition, so the two cannot drift apart
+    // the way endIngestScratch's did.
+    bool ensurePinnedStage(size_t bytes);
+#endif
+    // Synchronises and tears down the ingest stream, then declares every scratch
+    // view dead. Idempotent; called from a scope guard so it also runs on the
+    // HANDLE_ERROR early-return paths.
+    void endIngestScratch();
 
     // Cached patch resources to avoid allocations and plan recreation in patch loop
     cufftHandle plan_patch_r2c = 0;

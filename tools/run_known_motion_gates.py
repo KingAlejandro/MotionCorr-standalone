@@ -92,9 +92,41 @@ def select_cases(fixtures: Path, requested: list[str] | None, include_heavy: boo
         if gt["recommended_run"].get("role", "gate") not in ("gate", "characterization"):
             raise ValueError(f"invalid fixture role: {case}")
         cases[case] = (path, gt)
-    missing = set(requested or []) - cases.keys()
-    if missing:
-        raise ValueError("requested fixtures missing: " + ", ".join(sorted(missing)))
+
+    if requested is not None:
+        missing = set(requested) - cases.keys()
+        if missing:
+            raise ValueError("requested fixtures missing: " + ", ".join(sorted(missing)))
+    else:
+        manifest_path = fixtures / "MANIFEST.json"
+        repo_root = Path(__file__).resolve().parents[1]
+        default_fixtures = (repo_root / "test-data" / "known_motion").resolve()
+
+        if fixtures.resolve() == default_fixtures and not manifest_path.exists():
+            raise ValueError(f"required fixture manifest missing from canonical fixtures directory: {manifest_path}")
+
+        if manifest_path.exists():
+            if not manifest_path.is_file():
+                raise ValueError(f"fixture manifest {manifest_path} is not a regular file")
+            try:
+                manifest_content = manifest_path.read_text()
+                manifest_data = json.loads(manifest_content)
+            except Exception as exc:
+                raise ValueError(f"malformed or unreadable fixture manifest {manifest_path}: {exc}") from exc
+            if not isinstance(manifest_data, dict) or not isinstance(manifest_data.get("cases"), dict) or not manifest_data["cases"]:
+                raise ValueError(f"fixture manifest {manifest_path} 'cases' inventory is empty or malformed")
+            manifest_cases = manifest_data["cases"]
+            expected = set()
+            for cname in manifest_cases.keys():
+                if not include_heavy and cname in ("km_local_realscale",):
+                    continue
+                expected.add(cname)
+            if not expected:
+                raise ValueError(f"fixture manifest {manifest_path} contains no executable cases")
+            missing = expected - cases.keys()
+            if missing:
+                raise ValueError("required fixtures missing: " + ", ".join(sorted(missing)))
+
     if not cases:
         raise ValueError("no fixtures selected; run the generator first")
     return list(cases.values())

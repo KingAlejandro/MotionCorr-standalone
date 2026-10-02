@@ -292,6 +292,13 @@ void Micrograph::write(FileName filename)
 	MD.write(fh);
 
 	fh.close();
+
+	// This STAR is the per-movie completion record MotioncorrRunner::isMovieComplete
+	// consults, so a silently short write here would leave a movie looking done
+	// while its metadata is truncated. ofstream swallows write errors unless the
+	// state is read back, and the buffer is only flushed by close().
+	if (fh.fail())
+		REPORT_ERROR((std::string)"Micrograph::write: failed to write file: " + filename);
 }
 
 FileName Micrograph::getGainFilename() const

@@ -27,12 +27,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <algorithm>
+#include <functional>
+#include <memory>
 #include <src/time.h>
+#include "src/output_writer.h"
 #include "src/metadata_table.h"
 #include "src/image.h"
 #include "src/micrograph_model.h"
 #include <src/jaz/single_particle/obs_model.h>
 #include "src/jaz/tomography/tomogram_set.h"
+
+class EERRenderer;
 
 #ifdef _CUDA_ENABLED
 #include <cufft.h>
@@ -40,6 +45,22 @@
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #endif
+
+// Which movie ingest path executeOwnMotionCorrection() may use.
+//
+// INGEST_AUTO is production: the fastest applicable path is chosen per movie.
+// The other three exist so an ablation arm, or a support-matrix row, can pin
+// the path and FAIL when it is unavailable rather than quietly running on a
+// different one. IOParser treats an unrecognised flag as a warning, so an arm
+// that merely passes a flag proves nothing; an arm that errors when its path
+// did not run proves the path ran.
+enum MovieIngestMode
+{
+	INGEST_AUTO = 0,
+	INGEST_NVCOMP,   // require the nvCOMP device ingest
+	INGEST_COMPACT,  // require the compact host uint16 staging
+	INGEST_FLOAT     // require main's float host reader
+};
 
 class MotioncorrRunner
 {
@@ -55,6 +76,22 @@ public:
 	int n_threads;
 	int max_io_threads;
 
+	// Write each movie's products on the calling thread instead of handing them
+	// to the background OutputWriter. The two paths produce the same products in
+	// the same order; this exists so the writer can be ablated against an
+	// otherwise identical binary, and as an escape hatch on a host where the
+	// extra thread costs more CPU than the overlap buys.
+	bool sync_output = false;
+
+	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
+	MovieIngestMode ingest_mode = INGEST_AUTO;
+
+	// Opt-in diagnostic: append "<movie> <path>" per movie. Empty by default, so
+	// a normal run writes nothing extra and no product changes. This is how an
+	// --ingest auto run over a mixed-format set is checked to have routed each
+	// movie to the path it should have.
+	FileName fn_ingest_witness;
+
 	// Output rootname
 	FileName fn_in, fn_out, fn_movie;
 
@@ -66,6 +103,9 @@ public:
 
     // Pre-exposure for each micrograph (mainly used for tomography)
     std::vector<RFLOAT> pre_exposure_micrographs, pre_exposure_ori_micrographs;
+
+    // Expected frame count per micrograph (from STAR metadata or --expected_frames)
+    std::vector<int> expected_frames_micrographs;
 
 	// Information about the optics groups
 	ObservationModel obsModel;
@@ -98,6 +138,9 @@ public:
 
 	// First and last movie frames to use in alignment and written-out corrected average and movie (default: do all)
 	int first_frame_ali, last_frame_ali, first_frame_sum, last_frame_sum;
+
+	// Expected number of frames per movie (from --expected_frames, default: -1)
+	int expected_frames = -1;
 
 	// Group this number of frames and write summed power spectrum. -1 == do not write
 	int grouping_for_ps;
@@ -132,6 +175,26 @@ public:
 
 	// Gain reference file
 	FileName fn_gain_reference;
+
+	// The gain reference is fixed for a whole run (prepareGainReference resolves
+	// fn_gain_reference once, before the movie loop), so it is read from disk on
+	// the first movie and reused afterwards. Keyed on the geometry as well as the
+	// path: a movie of different dimensions, or a different EER upsampling, must
+	// miss and reload rather than silently reuse a wrongly sized array.
+	// A member rather than a file-static: the movie loop is serial, so this needs
+	// no synchronisation, and that reasoning stays checkable.
+	Image<float> gain_cache;
+	FileName gain_cache_name;
+	int gain_cache_nx = 0, gain_cache_ny = 0;
+	bool gain_cache_is_eer = false;
+	int gain_cache_eer_upsampling = 0;
+	bool gain_cache_filled = false;
+
+	// Returns the gain for this movie, reading it only on a cache miss.
+	// Const so the read-only invariant is enforced by the compiler: callers must
+	// not mutate shared state that every later movie will reuse.
+	const MultidimArray<float>& gainReferenceFor(bool is_eer, EERRenderer &renderer,
+	                                             int nx, int ny);
 	int gain_rotation, gain_flip;
 
 	// Defect file
@@ -193,7 +256,7 @@ public:
 
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
-	bool isMovieComplete(const FileName &movie);
+	bool isMovieComplete(const FileName &movie, int effective_expected_frames = -1);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);
@@ -202,13 +265,22 @@ public:
 	void getShiftsMotioncor2(FileName fn_log, Micrograph &mic);
 
 	// Execute our own implementation for a single micrograph
-	bool executeOwnMotionCorrection(Micrograph &mic);
+	bool executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames = -1);
 
 	// Plot the shifts
 	void plotShifts(FileName fn_mic, Micrograph &mic);
 
-	// Save micrograph model
+	// Save micrograph model. Equivalent to stampModel() then writeModel().
 	void saveModel(Micrograph &mic);
+
+	// Copy the runner's current per-movie metadata onto the model. run()
+	// re-reads angpix and voltage from the optics table for every movie, so
+	// this has to happen on the thread that owns that state.
+	void stampModel(Micrograph &mic);
+
+	// Serialise an already-stamped model. Reads only setup-time state, so it
+	// is safe to run on the output writer thread.
+	void writeModel(Micrograph &mic);
 
 	// Make a PDF file with all the shifts and write output STAR files
 	void generateLogFilePDFAndWriteStarFiles();
@@ -222,7 +294,45 @@ public:
 	// Check if fn_defect is Serial EM's defect file
 	static bool detectSerialEMDefectText(FileName fn_defect);
 
+	// Test-only access to the private alignment entry point. Used by
+	// tests/test_patch_retry_state.cpp to characterise the shift-accumulation
+	// contract behind issue #69 against the production function rather than a copy
+	// of it. A friend declaration emits no code and changes no behaviour.
+	friend struct MotioncorrRunnerTestAccess;
+	// Inter-/extrapolate per-group local shifts onto every frame.
+	// Pure function of its arguments (reads no member state), hence static; public
+	// so the motion-model arithmetic can be unit tested directly.
+	static void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
+	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+	                       int n_frames,
+	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
+
+	// Recenter per-frame shifts so that frame 0 becomes the origin.
+	// The first-frame offset MUST be saved before the in-place subtraction begins,
+	// otherwise iteration zero zeroes the origin that later iterations still need.
+	static void recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts);
+
 private:
+	// Background output writer, created by run() for the duration of the movie
+	// loop. Null elsewhere -- including in a default-constructed runner -- and
+	// submitOutput() then runs the task inline, so every entry point that is
+	// not run() keeps the plain serial behaviour.
+	std::unique_ptr<OutputWriter> output_writer;
+	long int output_movie_index = -1;
+
+	// Hand one output product to the writer, or write it here when there is
+	// none. Products of one movie are written in submission order.
+	void submitOutput(std::function<void()> task);
+
+	// Drain the writer's deferred failures: report each one, mark its movie
+	// failed, and append the truth to that movie's log.
+	void collectWriteFailures(std::vector<char> &movie_failed);
+
+	// Take over @p image's pixels and write them to @p path. The caller's
+	// image is left empty: a micrograph is ~57 MB and copying one per output
+	// would cost more than the write it is trying to hide.
+	void submitImageWrite(Image<float> &image, const FileName &path, DataType datatype);
+
 	// shiftx, shifty is relative to the (real space) image size
 	void shiftNonSquareImageInFourierTransform(MultidimArray<fComplex> &frame, RFLOAT shiftx, RFLOAT shifty);
 
@@ -245,10 +355,6 @@ private:
 
 	void realSpaceInterpolation_ThirdOrderPolynomial_withoutsum(std::vector<Image<float> > &Ialignedframes, std::vector<Image<float> > &Iframes, ThirdOrderPolynomialModel &model, std::ostream &logfile);
 
-	void interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
-	                       std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
-	                       int n_frames,
-	                       std::vector<RFLOAT> &interpolated_xshifts, std::vector<RFLOAT> &interpolated_yshifts);
 };
 
 

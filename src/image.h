@@ -50,12 +50,100 @@
 #define IMAGE_H
 
 #include <cstdint>
+#include <cerrno>
+#include <cstring>
+#include <string>
+#include <system_error>
 #include <typeinfo>
+#include <string>
+#include <vector>
+#include <memory>
+#include <mutex>
+#include <atomic>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <tiffio.h>
+#if defined(__has_include)
+#if __has_include(<tiffvers.h>)
+#include <tiffvers.h>
+#endif
+#endif
+
+#if defined(TIFFLIB_AT_LEAST)
+#if TIFFLIB_AT_LEAST(4, 5, 0)
+#define MOTIONCORR_USE_TIFF_EXTR 1
+#endif
+#endif
+
+struct TiffErrorContext {
+	bool has_error = false;
+	std::string last_error;
+
+	void clear() {
+		has_error = false;
+		last_error.clear();
+	}
+};
+
+inline thread_local TiffErrorContext* g_tls_tiff_error_context = nullptr;
+
+struct TiffErrorScope {
+	TiffErrorContext* prev;
+	TiffErrorScope(TiffErrorContext* ctx) : prev(g_tls_tiff_error_context) {
+		g_tls_tiff_error_context = ctx;
+	}
+	~TiffErrorScope() { g_tls_tiff_error_context = prev; }
+};
+
+// LibTIFF invokes these through C: even allocation failure must not throw.
+inline void captureTiffError(TiffErrorContext* ctx, const char* module,
+                             const char* fmt, va_list ap) noexcept
+{
+	ctx->has_error = true;
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	try {
+		ctx->last_error = module ? (std::string(module) + ": " + buf) : std::string(buf);
+	} catch (...) {
+		// The error flag still makes the caller fail closed without a message.
+	}
+}
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+inline int motioncorr_tiff_error_ext_r(TIFF*, void* user_data, const char* module,
+                                      const char* fmt, va_list ap) noexcept
+{
+	captureTiffError(static_cast<TiffErrorContext*>(user_data), module, fmt, ap);
+	return 1;
+}
+#else
+inline std::atomic<TIFFErrorHandler> previous_tiff_error_handler{nullptr};
+
+inline void motioncorr_tiff_error_compat(const char* module, const char* fmt, va_list ap) noexcept
+{
+	if (g_tls_tiff_error_context) {
+		captureTiffError(g_tls_tiff_error_context, module, fmt, ap);
+	} else if (TIFFErrorHandler previous = previous_tiff_error_handler.load()) {
+		previous(module, fmt, ap);
+	} else {
+		// Preserve diagnostics while the previous handler is being published.
+		if (module) fprintf(stderr, "%s: ", module);
+		vfprintf(stderr, fmt, ap);
+		fprintf(stderr, "\n");
+	}
+}
+
+inline void initTiffErrorHandlersOnce()
+{
+	static std::once_flag initialized;
+	std::call_once(initialized, [] {
+		previous_tiff_error_handler.store(TIFFSetErrorHandler(motioncorr_tiff_error_compat));
+	});
+}
+#endif
+
 #include "src/funcs.h"
 #include "src/memory.h"
 #include "src/filename.h"
@@ -64,6 +152,7 @@
 #include "src/metadata_table.h"
 #include "src/fftw.h"
 #include "src/float16.h"
+#include "src/output_timing.h"
 
 /// @defgroup Images Images
 //@{
@@ -208,6 +297,9 @@ public:
 	FileName  ext_name; // Filename extension
 	bool	  exist;    // Shows if the file exists
 	bool	  isTiff;   // Shows if this is a TIFF file
+	bool	  writable; // Opened for writing, so it has buffers worth flushing
+	FileName  open_name; // Path currently held, so a deferred error can name it
+	std::shared_ptr<TiffErrorContext> tiff_err_ctx;
 
 	/** Empty constructor
 	 */
@@ -219,13 +311,22 @@ public:
 		ext_name="";
 		exist=false;
 		isTiff=false;
+		writable=false;
+		open_name="";
+		tiff_err_ctx = std::make_shared<TiffErrorContext>();
 	}
 
 	/** Destructor: closes file (if it still open)
+	 *
+	 * This cannot report a failure. A destructor is implicitly noexcept, so
+	 * throwing here would call std::terminate and take the whole batch down
+	 * without naming the file -- which is what a deferred flush error used to
+	 * do. Writers must therefore call closeFile() explicitly and let that
+	 * throw; see Image::write().
 	 */
 	~fImageHandler()
 	{
-		closeFile();
+		releaseHandles();
 	}
 
 	void openFile(const FileName &name, int mode = WRITE_READONLY)
@@ -240,8 +341,10 @@ public:
 				return SIZE_MAX;
 		}();
 
-		// Close any file that was left open in this handler
-		if (!(fimg ==NULL && fhed == NULL))
+		// Close any file that was left open in this handler. ftiff is included:
+		// leaving it out skipped the close entirely for a TIFF-only handler, and
+		// the TIFFOpen below would then overwrite and leak the old handle.
+		if (!(fimg == NULL && fhed == NULL && ftiff == NULL))
 			closeFile();
 
 		FileName fileName, headName = "";
@@ -290,6 +393,11 @@ public:
 			break;
 		}
 
+		// Only a stream we wrote to has buffered bytes that a later flush can
+		// fail on; read streams are closed without flushing, so read behaviour
+		// is unchanged by the checked close below.
+		writable = (mode != WRITE_READONLY);
+
 		if (ext_name.contains("img") || ext_name.contains("hed"))
 		{
 			fileName = fileName.withoutExtension();
@@ -314,14 +422,40 @@ public:
 
 		isTiff = ext_name.contains("tif");
 
+		// Recorded after the extension rewrites above, so a deferred error names
+		// the path actually opened.
+		open_name = fileName;
+
 		// Open image file
 		if (isTiff) 
 		{
 			if (mode != WRITE_READONLY)
 				REPORT_ERROR((std::string)"TIFF is supported only for reading");
 
-			if ((ftiff = TIFFOpen(fileName.c_str(), "r")) == NULL)
-				REPORT_ERROR((std::string)"Image::openFile cannot open: " + name);
+#if !defined(MOTIONCORR_USE_TIFF_EXTR)
+			initTiffErrorHandlersOnce();
+#endif
+			if (!tiff_err_ctx)
+				tiff_err_ctx = std::make_shared<TiffErrorContext>();
+			tiff_err_ctx->clear();
+			TiffErrorScope scope(tiff_err_ctx.get());
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+			TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
+			if (!opts) REPORT_ERROR("Cannot allocate TIFF open options for " + name);
+			TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, tiff_err_ctx.get());
+			ftiff = TIFFOpenExt(fileName.c_str(), "r", opts);
+			TIFFOpenOptionsFree(opts);
+#else
+			ftiff = TIFFOpen(fileName.c_str(), "r");
+#endif
+
+			if (ftiff == NULL || tiff_err_ctx->has_error)
+			{
+				if (ftiff) { TIFFClose(ftiff); ftiff = nullptr; }
+				std::string detail = tiff_err_ctx->has_error ? (": " + tiff_err_ctx->last_error) : "";
+				REPORT_ERROR((std::string)"Image::openFile cannot open: " + name + detail);
+			}
 		}
 		else
 		{
@@ -356,29 +490,86 @@ public:
 
 	}
 
-	void closeFile()
+	/** Flush and close every handle, never throwing.
+	 *
+	 * Returns the errno of the first failure, or 0. Handles are released and
+	 * nulled even when a close fails, so neither the caller nor the destructor
+	 * can close them twice.
+	 *
+	 * Flushing matters: stdio buffers writes, so ENOSPC, EDQUOT or EIO can
+	 * first become visible here, after every fwrite has already reported its
+	 * full item count. Checking write counts alone therefore does not cover
+	 * the contract.
+	 */
+	int releaseHandles()
 	{
 		ext_name="";
 		exist=false;
+		open_name="";
 
-		// Check whether the file was closed already
-		if (fimg == NULL && fhed == NULL && ftiff == NULL)
-			return;
+		int first_errno = 0;
 
-		if (isTiff && ftiff != NULL) {
+		if (ftiff != NULL)
+		{
+			// #92 routes LibTIFF's close-time diagnostics to this handle's own
+			// error context instead of the process-global handler. #99 widened
+			// this guard from `isTiff && ftiff` to `ftiff` alone, which closed a
+			// pre-existing descriptor leak on handle reuse; the wider guard is
+			// kept, so the scope is entered for any live TIFF handle.
+			TiffErrorScope scope(tiff_err_ctx ? tiff_err_ctx.get() : nullptr);
 			TIFFClose(ftiff);
 			ftiff = NULL;
 		}
 
-		if (!isTiff && fclose(fimg) != 0)
-			REPORT_ERROR((std::string)"Can not close image file ");
-		else
+		if (fimg != NULL)
+		{
+			if (writable)
+			{
+				errno = 0;
+				if (fflush(fimg) != 0 || ferror(fimg) != 0)
+					first_errno = (errno != 0) ? errno : EIO;
+			}
+			errno = 0;
+			if (fclose(fimg) != 0 && first_errno == 0)
+				first_errno = (errno != 0) ? errno : EIO;
 			fimg = NULL;
+		}
 
-		if (fhed != NULL &&  fclose(fhed) != 0)
-			REPORT_ERROR((std::string)"Can not close header file ");
-		else
+		if (fhed != NULL)
+		{
+			if (writable)
+			{
+				errno = 0;
+				if ((fflush(fhed) != 0 || ferror(fhed) != 0) && first_errno == 0)
+					first_errno = (errno != 0) ? errno : EIO;
+			}
+			errno = 0;
+			if (fclose(fhed) != 0 && first_errno == 0)
+				first_errno = (errno != 0) ? errno : EIO;
 			fhed = NULL;
+		}
+
+		writable = false;
+		return first_errno;
+	}
+
+	/** Close the file and report a deferred write error as a named failure.
+	 *
+	 * Writers call this instead of relying on the destructor, so that a flush
+	 * error becomes a per-movie RelionError naming the product rather than a
+	 * std::terminate.
+	 */
+	void closeFile(const FileName &name = "")
+	{
+		// Captured before releaseHandles() clears it. Falling back to the path
+		// recorded at open time matters for the handler-reuse branch above,
+		// which has no name to pass but is closing a file we did write.
+		const FileName reported = (name != "") ? name : open_name;
+		const int err = releaseHandles();
+		if (err != 0)
+			REPORT_ERROR("Failed to flush and close image file " +
+			             (std::string)(reported == "" ? FileName("(unnamed)") : reported) +
+			             ": " + std::generic_category().message(err));
 	}
 
 };
@@ -570,10 +761,17 @@ public:
 
 		const FileName &fname = (name == "") ? filename : name;
 		fImageHandler hFile;
+		OTIC(TIMING_W_OPEN);
 		hFile.openFile(name, mode);
+		OTOC(TIMING_W_OPEN);
 		_write(fname, hFile, select_img, isStack, mode, datatype);
-		// the destructor of fImageHandler will close the file
-
+		// Close here rather than in the destructor. The payload is still in the
+		// stdio buffer at this point on small images, so a full disk or quota
+		// surfaces at this flush and nowhere earlier; the destructor cannot
+		// report it, and would call std::terminate if it tried.
+		OTIC(TIMING_W_CLOSE);
+		hFile.closeFile(fname);
+		OTOC(TIMING_W_CLOSE);
 	}
 
 	/** Cast a page of data from type dataType to type Tdest
@@ -1383,11 +1581,34 @@ public:
 		MDMainHeader.clear();
 		MDMainHeader.addObject();
 
+#if !defined(MOTIONCORR_USE_TIFF_EXTR)
+		initTiffErrorHandlersOnce();
+#endif
+		TiffErrorContext mem_tiff_ctx;
+		TiffErrorScope scope(&mem_tiff_ctx);
+
+#if defined(MOTIONCORR_USE_TIFF_EXTR)
+		TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();
+		if (!opts) REPORT_ERROR("Cannot allocate in-memory TIFF open options");
+		TIFFOpenOptionsSetErrorHandlerExtR(opts, motioncorr_tiff_error_ext_r, &mem_tiff_ctx);
+		TIFF* ftiff = TIFFClientOpenExt("in-memory-tiff", "r", (thandle_t)&handle,
+		                                TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
+		                                TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
+		                                TiffInMemoryUnmapFileProc, opts);
+		TIFFOpenOptionsFree(opts);
+#else
 		TIFF* ftiff = TIFFClientOpen("in-memory-tiff", "r", (thandle_t)&handle,
 		                             TiffInMemoryReadProc, TiffInMemoryWriteProc, TiffInMemorySeekProc,
 		                             TiffInMemoryCloseProc, TiffInMemorySizeProc, TiffInMemoryMapFileProc,
 		                             TiffInMemoryUnmapFileProc);
-		err = readTIFF(ftiff, select_img, readdata, true, "in-memory-tiff");
+#endif
+		if (!ftiff || mem_tiff_ctx.has_error)
+		{
+			if (ftiff) TIFFClose(ftiff);
+			std::string detail = mem_tiff_ctx.has_error ? (": " + mem_tiff_ctx.last_error) : "";
+			REPORT_ERROR("readFromMemory cannot open in-memory TIFF" + detail);
+		}
+		err = readTIFF(ftiff, select_img, readdata, true, "in-memory-tiff", &mem_tiff_ctx);
 		TIFFClose(ftiff);
 
 		return err;
@@ -1443,7 +1664,7 @@ private:
 				ext_name.contains("st")) //stk stack MUST go BEFORE plain st
 			err = readMRC(select_img, true, name);
 		else if (ext_name.contains("tif"))
-			err = readTIFF(hFile.ftiff, select_img, readdata, true, name);
+			err = readTIFF(hFile.ftiff, select_img, readdata, true, name, hFile.tiff_err_ctx.get());
 		else if (select_img >= 0 && ext_name.contains("mrc"))
 			REPORT_ERROR("Image::read ERROR: stacks of images in MRC-format should have extension .mrcs; .mrc extensions are reserved for 3D maps.");
 		else if (ext_name.contains("mrc") || ext_name.contains("map")) // mrc 3D map
@@ -1565,9 +1786,9 @@ private:
 		   ext_name.contains("stk") || ext_name.contains("vol"))
 			err = writeSPIDER(select_img, isStack, mode, datatype);
 		else if (ext_name.contains("mrcs"))
-			writeMRC(select_img, true, mode, datatype);
+			err = writeMRC(select_img, true, mode, datatype);
 		else if (ext_name.contains("mrc"))
-			writeMRC(select_img, false, mode, datatype);
+			err = writeMRC(select_img, false, mode, datatype);
 		else if (ext_name.contains("img") || ext_name.contains("hed"))
 			writeIMAGIC(select_img, mode);
 		else

@@ -1,0 +1,114 @@
+##### PHASE 2 START #####
+UTC 2026-09-28T02:21:57Z
+Cpus_allowed_list:	32-63
+physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+membind: 1 
+cmake on PATH: /home/ubuntu/.mc-venv/bin/cmake
+
+##### (a) FAIL-CLOSED CHAIN, cmake on PATH #####
+--- $ tools/test_ci_fail_closed.py -v
+test_1_absent_truth_script_and_missing_binary (__main__.TestCiFailClosedControls.test_1_absent_truth_script_and_missing_binary)
+Control 1: Missing truth script fails CI preflight; missing binary fails gate runner. ... ok
+test_2_absent_dependency_fails_cmake (__main__.TestCiFailClosedControls.test_2_absent_dependency_fails_cmake)
+Control 2: BUILD_TESTING=ON must fail if python or numpy is missing in MotionCorr CMakeLists.txt. ... ok
+test_3_zero_or_missing_collected_tests_fails (__main__.TestCiFailClosedControls.test_3_zero_or_missing_collected_tests_fails)
+Control 3: Empty test suite or missing required test fails collection validation. ... ok
+test_4_missing_fixture_or_truth_fails (__main__.TestCiFailClosedControls.test_4_missing_fixture_or_truth_fails)
+Control 4: Missing fixture movie, missing truth file, or malformed manifest fails verify_fixtures. ... ok
+test_5_byte_flipped_fixture_fails (__main__.TestCiFailClosedControls.test_5_byte_flipped_fixture_fails)
+Control 5: Baseline fixture must pass first, then fail after corrupting one byte. ... ok
+test_6_trusted_git_lookup_and_tampered_disk_manifest (__main__.TestCiFailClosedControls.test_6_trusted_git_lookup_and_tampered_disk_manifest)
+Control 6: Git-backed verification rejects tampered disk manifest and fails closed on invalid ref. ... ok
+test_7_reused_stem_and_canonical_generator_protection (__main__.TestCiFailClosedControls.test_7_reused_stem_and_canonical_generator_protection)
+Control 7: Generator protects canonical truth and refuses conflicting stem overwrite. ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 7.090s
+
+OK
+--- $ ctest (full suite) ---
+ 6/16 Test  #3: RunnerExposure ...................   Passed    0.52 sec
+      Start  7: Runner_tomography
+ 7/16 Test #11: TiffRead .........................   Passed    0.52 sec
+      Start 14: WriteFaults
+ 8/16 Test  #7: Runner_tomography ................   Passed    0.39 sec
+      Start  9: RunnerExportedUnits
+ 9/16 Test  #9: RunnerExportedUnits ..............   Passed    0.10 sec
+      Start 13: RunnerModelParser
+10/16 Test #13: RunnerModelParser ................   Passed    0.15 sec
+      Start  4: Runner_failure
+11/16 Test #14: WriteFaults ......................   Passed    0.44 sec
+      Start  5: Runner_invalid
+12/16 Test  #4: Runner_failure ...................   Passed    0.16 sec
+      Start 16: ImageWriteFaults
+13/16 Test #16: ImageWriteFaults .................   Passed    0.01 sec
+14/16 Test  #5: Runner_invalid ...................   Passed    0.11 sec
+15/16 Test #12: DamagedMovie .....................   Passed    4.54 sec
+16/16 Test #15: CiFailClosedControls .............   Passed    7.22 sec
+
+100% tests passed out of 16
+
+Total Test time (real) =   7.23 sec
+
+##### (b) NEGATIVE CONTROLS on the candidate #####
+--- N1a: required test CiFailClosedControls de-registered -> collection must fail
+    - ImageWriteFaults               [REQUIRED]
+  MISSING REQUIRED TESTS:
+    CiFailClosedControls
+  FAILURE REASON: Test count 15 is less than minimum 16
+N1a exit=1 (expected 1)
+--- N1b: required test WriteFaults de-registered -> collection must fail (union bites)
+    - ImageWriteFaults               [REQUIRED]
+  MISSING REQUIRED TESTS:
+    WriteFaults
+  FAILURE REASON: Test count 15 is less than minimum 16
+N1b exit=1 (expected 1)
+--- N2: required script tools/verify_fixtures.py removed -> preflight must fail
+=== CI PREFLIGHT FAILURE: Required validation files missing ===
+  MISSING: tools/verify_fixtures.py
+N2 exit=1 (expected 1)
+--- N3: one byte flipped in a canonical fixture -> verification must fail
+    baseline verify exit=0 (expected 0, must pass BEFORE corruption)
+    flipped byte at offset 6291968: 0x86 -> 0x87
+      expected bytes:  12583936
+      observed bytes:  12583936
+             PASS  km_local_hisnr
+             PASS  km_local_noisy
+             PASS  km_local_nonsquare
+   EXCLUDED_HEAVY  km_local_realscale
+N3 exit=1 (expected nonzero)
+
+##### (c) DISCRIMINATING CONTROL: candidate tests against BASE main source #####
+Base src/ (unfixed) + candidate tests/, tools/, CMakeLists.txt, test-data/.
+The three integrated groups' new tests MUST fail here, or they are green by construction.
+--- confirm src/ is base and tests/ is candidate ---
+src/image.h      sha256: 4b953f05d2bd3a72  (base 4b953f05d2bd3a72)
+src/rwMRC.h      sha256: 79c5ef3b64f10f88  (base 79c5ef3b64f10f88)
+src/rwTIFF.h     sha256: 1f1cc62b6da103cf  (base 1f1cc62b6da103cf)
+negative-control configure exit=0
+negative-control build exit=0
+negative-control ctest exit=8
+ 1/16 Test  #4: Runner_failure ...................   Passed    0.16 sec
+ 2/16 Test  #5: Runner_invalid ...................   Passed    0.16 sec
+ 3/16 Test  #3: RunnerExposure ...................   Passed    0.56 sec
+ 4/16 Test  #2: HotPixelRngDeterminism ...........   Passed    0.64 sec
+ 5/16 Test  #7: Runner_tomography ................   Passed    0.48 sec
+ 6/16 Test  #9: RunnerExportedUnits ..............   Passed    0.11 sec
+ 7/16 Test  #1: SyntheticRegression ..............   Passed    1.18 sec
+ 8/16 Test  #8: RunnerLateBin ....................   Passed    0.70 sec
+ 9/16 Test #11: TiffRead .........................   Passed    0.52 sec
+10/16 Test #13: RunnerModelParser ................   Passed    0.14 sec
+11/16 Test #12: DamagedMovie .....................***Failed    0.70 sec
+12/16 Test #14: WriteFaults ......................***Failed    0.40 sec
+13/16 Test #10: GainCache ........................   Passed    1.41 sec
+14/16 Test  #6: Runner_resume ....................   Passed    2.27 sec
+15/16 Test #16: ImageWriteFaults .................Subprocess aborted***Exception:   1.13 sec
+16/16 Test #15: CiFailClosedControls .............   Passed    6.83 sec
+81% tests passed, 3 tests failed out of 16
+--- which tests FAILED on base source (these are the ones that detect the defects) ---
+11/16 Test #12: DamagedMovie .....................***Failed    0.70 sec
+12/16 Test #14: WriteFaults ......................***Failed    0.40 sec
+15/16 Test #16: ImageWriteFaults .................Subprocess aborted***Exception:   1.13 sec
+
+##### DONE PHASE 2 #####
+UTC 2026-09-28T02:22:43Z

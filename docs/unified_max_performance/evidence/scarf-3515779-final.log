@@ -1,0 +1,71 @@
+=== VENUE ===
+2026-09-30T19:19:09+01:00
+gn3002.scarf.rl.ac.uk
+GPU-7e062742-81c2-4e12-743c-24d2b196032a, NVIDIA A100-SXM4-80GB, 81920 MiB
+GPU-3c9c438e-a1cd-abf9-814e-e5b9936ceb29, NVIDIA A100-SXM4-80GB, 81920 MiB
+GPU-0c25691b-81a2-dc59-333b-053cca13d2f7, NVIDIA A100-SXM4-80GB, 81920 MiB
+GPU-5365f504-dc36-b598-9727-5c3b0274f202, NVIDIA A100-SXM4-80GB, 81920 MiB
+Cpus_allowed_list:	0-63
+FINAL SOURCE f41460ee573f7d5c388fc9eb14f8288ff10cc065
+
+=== BUILDS ===
+nvcomp   rc=0
+nonvcomp rc=0
+cpu      rc=0
+
+=== FULL CTEST, ALL THREE ===
+nvcomp     100% tests passed, 0 tests failed out of 39
+nonvcomp   100% tests passed, 0 tests failed out of 38
+cpu        100% tests passed, 0 tests failed out of 32
+
+=== SUPPORT MATRIX ===
+PASS                 float16                  15 products identical, exit 0
+PASS                 skip_logfile             10 products identical, exit 0
+PASS                 preexposure              14 products identical, exit 0
+PASS                 dose_cutoff              14 products identical, exit 0
+UNSUPPORTED-BY-MAIN  reject_gain_rot_90       both arms exit 1 with the same 2 retained products and the same reason: Motion correction failed for 1 movie(s): Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retain
+UNSUPPORTED-BY-MAIN  reject_bin2_early        both arms exit 1 with the same 1 retained products and the same reason: Motion correction failed for 1 movie(s): Movies/20170629_00021_frameImage.tiff. Successful per-movie outputs were retain
+
+MATRIX: 26/31 PASS, 0 FAIL, 5 UNSUPPORTED-BY-MAIN
+
+=== IDENTITY ===
+cand 3b5158083221c0f7  main 675fccf3f45efbb3  star fb998f70b375a4eb
+
+=== PER-ARM OPERATING SWEEP (2 reps) ===
+ARM op_main_j8_r1              rc=0 wall=30.12 rss_gib=1.537 mrc=24
+ARM op_nvcomp_j8_r1            rc=0 wall=12.79 rss_gib=0.550 mrc=24
+ARM op_main_j6max_io_threads6_r1 rc=0 wall=26.65 rss_gib=1.536 mrc=24
+ARM op_nvcomp_j6max_io_threads6_r1 rc=0 wall=13.00 rss_gib=0.552 mrc=24
+ARM op_main_j4max_io_threads4_r1 rc=0 wall=31.11 rss_gib=1.536 mrc=24
+ARM op_nvcomp_j4max_io_threads4_r1 rc=0 wall=13.02 rss_gib=0.550 mrc=24
+ARM op_main_j8_r2              rc=0 wall=24.76 rss_gib=1.537 mrc=24
+ARM op_nvcomp_j8_r2            rc=0 wall=12.84 rss_gib=0.551 mrc=24
+ARM op_main_j6max_io_threads6_r2 rc=0 wall=26.68 rss_gib=1.536 mrc=24
+ARM op_nvcomp_j6max_io_threads6_r2 rc=0 wall=12.95 rss_gib=0.551 mrc=24
+ARM op_main_j4max_io_threads4_r2 rc=0 wall=31.49 rss_gib=1.536 mrc=24
+ARM op_nvcomp_j4max_io_threads4_r2 rc=0 wall=12.98 rss_gib=0.550 mrc=24
+
+=== CONTENDERS, 5 reps, interleaved ===
+ARM fin_B_float_r1             rc=0 wall=20.39 rss_gib=1.538 mrc=24
+ARM fin_C_compact_r1           rc=0 wall=21.52 rss_gib=0.901 mrc=24
+ARM fin_D_nvcomp_r1            rc=0 wall=12.92 rss_gib=0.554 mrc=24
+ARM fin_A_main_r1              rc=0 wall=24.51 rss_gib=1.536 mrc=24
+ARM fin_C_compact_r2           rc=0 wall=20.36 rss_gib=0.901 mrc=24
+ARM fin_D_nvcomp_r2            rc=0 wall=12.99 rss_gib=0.551 mrc=24
+ARM fin_A_main_r2              rc=0 wall=24.57 rss_gib=1.535 mrc=24
+ARM fin_B_float_r2             rc=0 wall=20.45 rss_gib=1.537 mrc=24
+ARM fin_D_nvcomp_r3            rc=0 wall=12.93 rss_gib=0.551 mrc=24
+ARM fin_A_main_r3              rc=0 wall=24.57 rss_gib=1.536 mrc=24
+ARM fin_B_float_r3             rc=0 wall=20.35 rss_gib=1.537 mrc=24
+ARM fin_C_compact_r3           rc=0 wall=20.20 rss_gib=0.903 mrc=24
+ARM fin_A_main_r4              rc=0 wall=24.59 rss_gib=1.536 mrc=24
+ARM fin_B_float_r4             rc=0 wall=20.40 rss_gib=1.536 mrc=24
+ARM fin_C_compact_r4           rc=0 wall=20.28 rss_gib=0.904 mrc=24
+ARM fin_D_nvcomp_r4            rc=0 wall=12.87 rss_gib=0.551 mrc=24
+ARM fin_B_float_r5             rc=0 wall=20.51 rss_gib=1.536 mrc=24
+ARM fin_C_compact_r5           rc=0 wall=20.26 rss_gib=0.901 mrc=24
+ARM fin_D_nvcomp_r5            rc=0 wall=12.93 rss_gib=0.551 mrc=24
+ARM fin_A_main_r5              rc=0 wall=24.60 rss_gib=1.535 mrc=24
+
+SCARF_FINAL_DONE f41460ee573f7d5c388fc9eb14f8288ff10cc065
+2026-09-30T19:41:13+01:00

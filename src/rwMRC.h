@@ -283,6 +283,47 @@ int readMRC(long int img_select, bool isStack=false, const FileName &name="")
 /** MRC Writer
   * @ingroup MRC
 */
+/** Write one block of an MRC file, failing closed.
+ *
+ * stdio signals a short or failed write only through the returned item count
+ * and the stream error indicator. An unchecked fwrite turns a full disk, a
+ * quota or an I/O error into a silently truncated micrograph that the runner
+ * then publishes as a completed movie, so every write below goes through here.
+ *
+ * Returns an empty string on success, otherwise a diagnostic naming the output
+ * path and the stage. A successful return is not yet durable: the same error
+ * can instead surface at flush time, which fImageHandler::closeFile checks.
+ */
+std::string mrcWriteBlock(FILE *fimg, const void *buffer, size_t bytes, const std::string &stage)
+{
+	if (bytes == 0) return "";
+
+	errno = 0;
+	// A single-item fwrite returns 1 only if every byte was accepted, so the
+	// count is the whole test. The stream error indicator is deliberately not
+	// consulted: it is sticky, so an earlier failure on a reused "r+" stream
+	// would condemn a write that actually succeeded.
+	if (fwrite(buffer, bytes, 1, fimg) == 1) return "";
+
+	const int saved_errno = errno;
+	return "Failed to write " + stage + " (" + std::to_string(bytes) +
+	       " bytes) to " + (std::string)filename + ": " +
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("short write"));
+}
+
+/** Seek within an MRC file being written, failing closed. */
+std::string mrcSeek(FILE *fimg, long int offset, int whence, const std::string &stage)
+{
+	errno = 0;
+	if (fseek(fimg, offset, whence) == 0) return "";
+
+	const int saved_errno = errno;
+	return "Failed to seek to " + stage + " in " + (std::string)filename + ": " +
+	       (saved_errno != 0 ? std::generic_category().message(saved_errno) :
+	                           std::string("seek failed"));
+}
+
 int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERWRITE, const DataType datatype=Unknown_Type) /* TODO: add type */
 {
 	MRChead *header = (MRChead *) askMemory(sizeof(MRChead));
@@ -378,7 +419,7 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	header->mapc = 1;
 	header->mapr = 2;
 	header->maps = 3;
-	RFLOAT aux,aux2;
+	RFLOAT aux2;
 
 	// TODO: fix this!
 	header->a = header->nx; // ua;
@@ -394,27 +435,32 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	header->nyStart = (int)0;
 	header->nzStart = (int)0;
 
+	OTIC(TIMING_W_STATS);
 	if (!MDMainHeader.isEmpty())
 	{
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, aux))
-			header->amin = (float)aux;
-		else
-			header->amin = (float)data.computeMin();
-
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX, aux))
-			header->amax = (float)aux;
-		else
-			header->amax = (float)data.computeMax();
-
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_AVG, aux))
-			header->amean = (float)aux;
-		else
-			header->amean = (float)data.computeAvg();
-
-		if (MDMainHeader.getValue(EMDL_IMAGE_STATS_STDDEV, aux))
-			header->arms = (float)aux;
-		else
-			header->arms = (float)data.computeStddev();
+		// Whichever of the four the caller did not supply comes from one
+		// traversal. Asking for them one at a time read the whole image up to
+		// four times, which on a 3710x3838 float micrograph was 45% of the
+		// cost of writing the file.
+		RFLOAT stat_min = 0., stat_max = 0., stat_avg = 0., stat_stddev = 0.;
+		const bool have_min = MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, stat_min);
+		const bool have_max = MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX, stat_max);
+		const bool have_avg = MDMainHeader.getValue(EMDL_IMAGE_STATS_AVG, stat_avg);
+		const bool have_stddev = MDMainHeader.getValue(EMDL_IMAGE_STATS_STDDEV, stat_stddev);
+		if (!(have_min && have_max && have_avg && have_stddev))
+		{
+			T computed_min, computed_max;
+			RFLOAT computed_avg, computed_stddev;
+			data.computeMinMaxAvgStddev(computed_min, computed_max, computed_avg, computed_stddev);
+			if (!have_min) stat_min = (RFLOAT)computed_min;
+			if (!have_max) stat_max = (RFLOAT)computed_max;
+			if (!have_avg) stat_avg = computed_avg;
+			if (!have_stddev) stat_stddev = computed_stddev;
+		}
+		header->amin = (float)stat_min;
+		header->amax = (float)stat_max;
+		header->amean = (float)stat_avg;
+		header->arms = (float)stat_stddev;
 
 		//if(MDMainHeader.getValue(EMDL_ORIENT_ORIGIN_X, aux))
 		//	SAFESET(header->nxStart,(int)(aux-0.5));
@@ -446,6 +492,8 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	}
 
 	header->nsymbt = 0;
+
+	OTOC(TIMING_W_STATS);
 
 	//Create label "Relion version    date time"
 #define MRC_LABEL_LEN 80
@@ -497,41 +545,80 @@ int writeMRC(long int img_select, bool isStack=false, const int mode=WRITE_OVERW
 	fl.l_type   = F_WRLCK;
 	fcntl(fileno(fimg), F_SETLKW, &fl); /* locked */
 
+	// The first write error wins; the rest of the routine then skips straight to
+	// releasing the lock and the buffers before reporting it, so a failed write
+	// frees exactly what a successful one does.
+	std::string write_error;
+
 	// Write header
+	OTIC(TIMING_W_HEADER);
 	if(mode == WRITE_OVERWRITE || mode == WRITE_APPEND)
-		fwrite(header, MRCSIZE, 1, fimg);
+		write_error = mrcWriteBlock(fimg, header, MRCSIZE, "MRC header");
 	freeMemory(header, sizeof(MRChead));
+	OTOC(TIMING_W_HEADER);
+
+	// When the file type already matches the in-memory type, castPage2Datatype
+	// is a straight memcpy into a scratch buffer that is then written and
+	// freed. Write from the array instead: same bytes, without allocating and
+	// first-touching a second full-size image per output file.
+	const bool write_in_place = (output_type == Float && typeid(T) == typeid(float));
 
 	//write only once, ignore select_img
-	char* fdata = (char*)askMemory(datasize);
 	//think about writing in several chunks
+	char* fdata = NULL;
 
-	if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
+	OTIC(TIMING_W_PAYLOAD);
+	if (write_error.empty())
 	{
-		castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
-		fwrite(fdata, datasize, 1, fimg);
-	}
-	else
-	{
-		if (mode == WRITE_APPEND)
-			fseek(fimg, 0, SEEK_END);
-		else if (mode == WRITE_REPLACE)
+		if (write_in_place && NSIZE(data) == 1 && mode == WRITE_OVERWRITE)
 		{
-			fseek(fimg, offset + datasize * img_select, SEEK_SET);
+			write_error = mrcWriteBlock(fimg, MULTIDIM_ARRAY(data), datasize, "image data");
 		}
+		else if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
+		{
+			fdata = (char*)askMemory(datasize);
+			castPage2Datatype(MULTIDIM_ARRAY(data), fdata, output_type, datasize_n);
+			write_error = mrcWriteBlock(fimg, fdata, datasize, "image data");
+		}
+		else
+		{
+			if (mode == WRITE_APPEND)
+				write_error = mrcSeek(fimg, 0, SEEK_END, "the end of the stack");
+			else if (mode == WRITE_REPLACE)
+			{
+				write_error = mrcSeek(fimg, offset + datasize * img_select, SEEK_SET,
+				                      "image " + std::to_string(img_select));
+			}
 
-		for (size_t i = imgStart; i < imgEnd; i++)
-		{
-			castPage2Datatype(MULTIDIM_ARRAY(data) + i * datasize_n, fdata, output_type, datasize_n);
-			fwrite(fdata, datasize, 1, fimg);
+			if (write_error.empty())
+			{
+				fdata = (char*)askMemory(datasize);
+				for (size_t i = imgStart; i < imgEnd && write_error.empty(); i++)
+				{
+					castPage2Datatype(MULTIDIM_ARRAY(data) + i * datasize_n, fdata, output_type, datasize_n);
+					// The slice label is appended only on failure, so the success
+					// path of a long stack write allocates nothing extra per frame.
+					write_error = mrcWriteBlock(fimg, fdata, datasize, "image data");
+					if (!write_error.empty())
+						write_error += " (slice " + std::to_string(i) + ")";
+				}
+			}
 		}
 	}
+
+	OTOC(TIMING_W_PAYLOAD);
 
 	// Unlock the file
 	fl.l_type = F_UNLCK;
 	fcntl(fileno(fimg), F_SETLK, &fl); /* unlocked */
 
-	freeMemory(fdata, datasize);
+	if (fdata != NULL)
+		freeMemory(fdata, datasize);
+
+	// Reported only after the lock and the scratch buffer are released, so the
+	// throw cannot leak them.
+	if (!write_error.empty())
+		REPORT_ERROR(write_error);
 
 	return(0);
 }

@@ -1,0 +1,36 @@
+index, uuid, name
+0, GPU-57be2e4e-89de-a352-97d2-f65f0722338f, NVIDIA A100-SXM4-40GB
+1, GPU-4620d639-b5b8-8bac-1b3a-ce19e8d6f9c0, NVIDIA A100-SXM4-40GB
+2, GPU-96cac13d-de21-297b-f61e-7f83a3d927c4, NVIDIA A100-SXM4-40GB
+3, GPU-a357135b-972c-edcd-8b55-b460f0cb486e, NVIDIA A100-SXM4-40GB
+JobId=3516844 JobName=mc-sgpu-ablation
+   UserId=scarf1415(101415) GroupId=cseg(101004) MCS_label=N/A
+   Priority=26 Nice=0 Account=scd QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:00 TimeLimit=03:00:00 TimeMin=N/A
+   SubmitTime=2026-10-01T00:58:44 EligibleTime=2026-10-01T00:58:44
+   AccrueTime=2026-10-01T00:58:45
+   StartTime=2026-10-01T00:58:45 EndTime=2026-10-01T03:58:45 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-01T00:58:45 Scheduler=Main
+   Partition=gpu-devel AllocNode:Sid=cn1052:392996
+   ReqNodeList=gn0004 ExcNodeList=(null)
+   NodeList=gn0004
+   BatchHost=gn0004
+   NumNodes=1 NumCPUs=64 NumTasks=1 CPUs/Task=16 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=16,mem=62.50G,node=1,billing=1000,gres/gpu=1
+   AllocTRES=cpu=64,mem=250G,node=1,billing=4000,gres/gpu=4,gres/gpu:a100=4
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=16 MinMemoryCPU=4000M MinTmpDiskNode=0
+   Features=amd DelayBoot=00:00:00
+   OverSubscribe=NO Contiguous=0 Licenses=(null) Network=(null)
+   Command=/work4/scd/scarf1415/motioncorr/post128-sgpu-20261001/mc-sgpu-control.sbatch
+   WorkDir=/work4/scd/scarf1415/motioncorr/post128-sgpu-20261001
+   StdErr=/work4/scd/scarf1415/motioncorr/post128-sgpu-20261001/control-3516844.out
+   StdIn=/dev/null
+   StdOut=/work4/scd/scarf1415/motioncorr/post128-sgpu-20261001/control-3516844.out
+   Power=
+   TresPerNode=gres:gpu:1
+   
+
+Cpus_allowed_list:	0-63

@@ -1,0 +1,30 @@
+PASS                 star_input_cuda          14 products identical, exit 0
+UNSUPPORTED-BY-MAIN  wildcard_input           both arms exit 1/1
+PASS                 cpu_backend              14 products identical, exit 0
+PASS                 j1                       14 products identical, exit 0
+PASS                 j8_io2                   14 products identical, exit 0
+PASS                 do_at_most_2             18 products identical, exit 0
+PASS                 first_last_frame_sum     14 products identical, exit 0
+PASS                 group_frames_3           14 products identical, exit 0
+PASS                 group_frames_5_unequal   14 products identical, exit 0
+PASS                 expected_frames_ok       14 products identical, exit 0
+PASS                 no_gain                  14 products identical, exit 0
+UNSUPPORTED-BY-MAIN  gain_rot_90              both arms exit 1/1
+PASS                 gain_flip_1              15 products identical, exit 0
+PASS                 skip_defect              14 products identical, exit 0
+PASS                 seed_7                   14 products identical, exit 0
+PASS                 global_only_1x1          14 products identical, exit 0
+PASS                 patch_3x3                14 products identical, exit 0
+PASS                 interpolate_shifts       14 products identical, exit 0
+UNSUPPORTED-BY-MAIN  bin2_early               both arms exit 1/1
+UNSUPPORTED-BY-MAIN  bin2_no_early            both arms exit 1/1
+PASS                 max_iter_1               14 products identical, exit 0
+PASS                 save_noDW                15 products identical, exit 0
+PASS                 even_odd_split           16 products identical, exit 0
+PASS                 ps_512                   15 products identical, exit 0
+PASS                 float16                  15 products identical, exit 0
+PASS                 skip_logfile             10 products identical, exit 0
+PASS                 preexposure              14 products identical, exit 0
+PASS                 dose_cutoff              14 products identical, exit 0
+
+MATRIX: 24/28 PASS, 0 FAIL, 4 UNSUPPORTED-BY-MAIN

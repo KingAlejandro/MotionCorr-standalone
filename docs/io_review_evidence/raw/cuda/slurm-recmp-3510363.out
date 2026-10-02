@@ -1,0 +1,42 @@
+cpu-bind=MASK - cn043, task  0  0 [2748026]: mask 0x100000001 set
+slurmstepd: error: Unable to create TMPDIR [/scratch/scarf1415/relion-container-tests/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+2026-09-27T18:53:57+01:00
+cn043.scarf.rl.ac.uk
+e2dfd9c828be5303243a7d82c30ecf62  /scratch/scarf1415/mc-io-split-evidence/harness/compare_outputs.py
+=== pr90 vs main, CUDA backend, 24 movies, re-graded ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 105,
+  "artifacts_fail": 4,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 4,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: PASS overall_auxiliary: FAIL overall: FAIL
+pr90 exit=1
+=== pr91 vs main, CUDA backend, 24 movies, re-graded ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 54,
+  "artifacts_fail": 55,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "auxiliary_fail": 54,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall_graded: FAIL overall_auxiliary: FAIL overall: FAIL
+pr91 exit=1
+=== RECOMPARE DONE ===
+2026-09-27T18:57:09+01:00

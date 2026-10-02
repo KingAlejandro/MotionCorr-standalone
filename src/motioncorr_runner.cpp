@@ -19,14 +19,29 @@
  ***************************************************************************/
 #include <omp.h>
 #include <cmath>
+#include <exception>
 #include <limits>
+#include <climits>
+#include <cctype>
+#include <stdexcept>
+#include <thread>
 
 #include "src/motioncorr_runner.h"
+#include "src/native_u16_staging.h"
+#include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_fft_prep.h"
+#include "src/acc/cuda/cuda_error_class.h"
+#include "src/acc/cuda/cuda_failure_state.h"
+// REPORT_ERROR_STR expands to a std::stringstream, and this file's only use of it is
+// in the CUDA-guarded patch block below. Keeping the include inside the guard too
+// preserves the invariant that a CPU-only build sees no change from this port except
+// a friend declaration that emits no code. Measured on cpu64: base and port produce
+// identical MRC pixels, STAR and EPS; only a wall-time line differs.
+#include <sstream>
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -73,6 +88,21 @@
 	int TIMING_DW_IFFT = MCtimer.setNew("dw - iFFT");
 	int TIMING_REAL_SPACE_INTERPOLATION = MCtimer.setNew("real space interpolation");
 	int TIMING_BINNING = MCtimer.setNew("binning");
+	int TIMING_WRITE_RESULT = MCtimer.setNew("write corrected image");
+	int TIMING_SAVE_MODEL_PLOT = MCtimer.setNew("write star and shift plot");
+	int TIMING_LOGFILE_PDF = MCtimer.setNew("joint star and logfile pdf");
+	// Measurement-only decomposition of the output stage.
+	int TIMING_W_OPEN = MCtimer.setNew("out - mrc open");
+	int TIMING_W_STATS = MCtimer.setNew("out - mrc stats");
+	int TIMING_W_HEADER = MCtimer.setNew("out - mrc header");
+	int TIMING_W_PAYLOAD = MCtimer.setNew("out - mrc payload");
+	int TIMING_W_CLOSE = MCtimer.setNew("out - mrc close");
+	int TIMING_W_SCAN = MCtimer.setNew("out - joint star scan");
+	int TIMING_W_HISTEPS = MCtimer.setNew("out - joint hist eps");
+	int TIMING_W_GS_HEADER = MCtimer.setNew("out - gs header+batch");
+	int TIMING_W_GS_BATCH = MCtimer.setNew("out - gs batch.pdf (inner)");
+	int TIMING_W_GS_ALLB = MCtimer.setNew("out - gs all_batches.pdf");
+	int TIMING_W_GS_LOGFILE = MCtimer.setNew("out - gs logfile.pdf");
 //	int TIMING_ = MCtimer.setNew("");
 
 #else
@@ -89,6 +119,14 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
+	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
+	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
+	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
+	if      (ingest_arg == "auto")    ingest_mode = INGEST_AUTO;
+	else if (ingest_arg == "nvcomp")  ingest_mode = INGEST_NVCOMP;
+	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
+	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
+	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -97,6 +135,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	first_frame_sum =  textToInteger(parser.getOption("--first_frame_sum", "First movie frame used in output sum (start at 1)", "1"));
 	if (first_frame_sum < 1) first_frame_sum = 1;
 	last_frame_sum =  textToInteger(parser.getOption("--last_frame_sum", "Last movie frame used in output sum (0 or negative: use all)", "-1"));
+	expected_frames = textToInteger(parser.getOption("--expected_frames", "Expected decoded frames per movie (-1: unchecked; per-movie STAR count overrides this fallback)", "-1"));
+	if (expected_frames != -1 && expected_frames <= 0)
+		REPORT_ERROR("--expected_frames must be positive or -1 (unchecked).");
 	eer_grouping = textToInteger(parser.getOption("--eer_grouping", "EER grouping", "40"));
 	eer_upsampling = textToInteger(parser.getOption("--eer_upsampling", "EER upsampling (1 = physical or 2 = 2x super-resolution)", "1"));
 
@@ -111,7 +152,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	patch_x = textToInteger(parser.getOption("--patch_x", "Patching in X-direction for MOTIONCOR2", "1"));
 	patch_y = textToInteger(parser.getOption("--patch_y", "Patching in Y-direction for MOTIONCOR2", "1"));
 	group = textToInteger(parser.getOption("--group_frames", "Average together this many frames before calculating the beam-induced shifts", "1"));
-	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file (x y w h) or a defect map (1 means bad)", "");
+	fn_defect = parser.getOption("--defect_file","Location of a MOTIONCOR2-style detector defect file or a defect map (1 means bad). A .txt defect file holds whitespace-separated integer quadruples (x y w h), conventionally one rectangle per line; comments, headers and a UTF-8 BOM are not supported. Blank lines are ignored, an empty file masks nothing, rectangles with width or height <= 0 are skipped, and rectangles are clipped to the image.", "");
 	fn_archive = parser.getOption("--archive","Location of the directory for archiving movies in 4-byte MRC format","");
  	even_odd_split = parser.checkOption("--even_odd_split", "Generate two images summed from odd and even movie frames. Later used for denoising in tomography.");
 	fn_other_motioncor2_args = parser.getOption("--other_motioncor2_args", "Additional arguments to MOTIONCOR2", "");
@@ -157,6 +198,22 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	if (n_threads <= 0) REPORT_ERROR("--j must be positive.");
 	if (max_io_threads == 0 || max_io_threads < -1)
 		REPORT_ERROR("--max_io_threads must be positive or -1 (no limit).");
+	if (ingest_mode != INGEST_AUTO && !do_own)
+		REPORT_ERROR("--ingest is valid only for --use_own.");
+	// Refuse here, not per movie: on a build without the backend the per-movie
+	// guard below is inside #ifdef _CUDA_ENABLED and would never be compiled, so
+	// the flag would be accepted and ignored -- the same silent no-op IOParser
+	// gives an unrecognised flag, which is exactly what a pinned --ingest exists
+	// to rule out.
+#ifndef _CUDA_ENABLED
+	if (ingest_mode == INGEST_NVCOMP || ingest_mode == INGEST_COMPACT)
+		REPORT_ERROR("--ingest nvcomp and --ingest compact need a CUDA build; this binary has none.");
+#else
+#ifndef _NVCOMP_ENABLED
+	if (ingest_mode == INGEST_NVCOMP)
+		REPORT_ERROR("--ingest nvcomp needs a build configured with USE_NVCOMP=ON; this one is not.");
+#endif
+#endif
 	// Initialise verb for non-parallel execution
 	verb = 1;
 
@@ -296,6 +353,7 @@ void MotioncorrRunner::initialise()
 
 		fn_micrographs.clear();
         pre_exposure_micrographs.clear();
+        expected_frames_micrographs.clear();
 		optics_group_micrographs.clear();
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDin)
 		{
@@ -317,6 +375,31 @@ void MotioncorrRunner::initialise()
                 pre_exposure_micrographs.push_back(0.0);
             }
 
+            // Frame indices (rlnMicrographFrameNumber) are not total counts.
+            int row_count = -1;
+            for (EMDLabel label : {EMDL_PARTICLE_NR_FRAMES, EMDL_TOMO_TILT_MOVIE_FRAMECOUNT})
+            {
+                int count;
+                if (!MDin.getValue(label, count)) continue;
+                if (count <= 0)
+                    REPORT_ERROR("Movie " + fn_mic + ": STAR expected frame count must be positive.");
+                if (row_count > 0 && row_count != count)
+                    REPORT_ERROR("Movie " + fn_mic + ": conflicting STAR expected frame counts.");
+                row_count = count;
+            }
+            // TomogramSet assigns one optics group per original global row.
+            if (row_count == -1 && is_tomo)
+            {
+                int count;
+                if (tomogramSet.globalTable.getValue(EMDL_TOMO_TILT_MOVIE_FRAMECOUNT, count, optics_group - 1))
+                {
+                    if (count <= 0)
+                        REPORT_ERROR("Movie " + fn_mic + ": global STAR expected frame count must be positive.");
+                    row_count = count;
+                }
+            }
+            expected_frames_micrographs.push_back(row_count > 0 ? row_count : expected_frames);
+
 		}
 	}
 	else
@@ -324,6 +407,7 @@ void MotioncorrRunner::initialise()
 		fn_in.globFiles(fn_micrographs);
 		optics_group_micrographs.resize(fn_micrographs.size(), 1);
 		pre_exposure_micrographs.resize(fn_micrographs.size(), 0.0);
+		expected_frames_micrographs.resize(fn_micrographs.size(), expected_frames);
 		obsModel.opticsMdt.clear();
 		obsModel.opticsMdt.addObject();
 	}
@@ -357,6 +441,7 @@ void MotioncorrRunner::initialise()
 		fn_out += "/";
 
 	// First backup the given list of all micrographs
+	std::vector<int> expected_frames_given_all = expected_frames_micrographs;
 	std::vector<int> optics_group_given_all = optics_group_micrographs;
 	std::vector<RFLOAT> pre_exposure_given_all = pre_exposure_micrographs;
 	std::vector<FileName> fn_mic_given_all = fn_micrographs;
@@ -365,6 +450,7 @@ void MotioncorrRunner::initialise()
 	optics_group_ori_micrographs.clear();
 	pre_exposure_ori_micrographs.clear();
 	// These are micrographs to be processed
+	expected_frames_micrographs.clear();
 	fn_micrographs.clear();
 	optics_group_micrographs.clear();
 	pre_exposure_micrographs.clear();
@@ -376,7 +462,7 @@ void MotioncorrRunner::initialise()
 		bool ignore_this = false;
 		bool process_this = true;
 
-		if (continue_old && isMovieComplete(fn_mic_given_all[imic]))
+		if (continue_old && isMovieComplete(fn_mic_given_all[imic], expected_frames_given_all[imic]))
 			process_this = false;
 
 		if (do_at_most >= 0 && fn_micrographs.size() >= do_at_most)
@@ -396,6 +482,7 @@ void MotioncorrRunner::initialise()
 
 		if (process_this)
 		{
+			expected_frames_micrographs.push_back(expected_frames_given_all[imic]);
 			fn_micrographs.push_back(fn_mic_given_all[imic]);
 			optics_group_micrographs.push_back(optics_group_given_all[imic]);
 			pre_exposure_micrographs.push_back(pre_exposure_given_all[imic]);
@@ -528,7 +615,7 @@ bool completeMrc(const FileName &filename)
 }
 }
 
-bool MotioncorrRunner::isMovieComplete(const FileName &movie)
+bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expected_frames)
 {
 	const FileName average = getOutputFileNames(movie);
 	const FileName root = average.withoutExtension();
@@ -551,7 +638,8 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie)
 		    !general.getValue(EMDL_IMAGE_SIZE_X, width) || width <= 0 ||
 		    !general.getValue(EMDL_IMAGE_SIZE_Y, height) || height <= 0 ||
 		    !general.getValue(EMDL_MICROGRAPH_MOVIE_NAME, saved_movie) || saved_movie != movie ||
-		    shifts.numberOfObjects() != nframes) return false;
+		    shifts.numberOfObjects() != nframes ||
+		    (effective_expected_frames > 0 && nframes != effective_expected_frames)) return false;
 		std::vector<bool> seen(nframes, false);
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(shifts)
 		{
@@ -589,40 +677,90 @@ void MotioncorrRunner::run()
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
 
-	std::vector<FileName> failed_movies;
+	// One background thread writes the finished products of movie N while the
+	// main thread computes movie N+1. See src/output_writer.h for the order,
+	// fail-closed and memory-bound properties this relies on.
+	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
+
+	// Indexed by movie, so the report below stays in input order however the
+	// deferred write failures arrive.
+	std::vector<char> movie_failed(fn_micrographs.size(), 0);
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 	{
+		output_movie_index = imic;
 		if (verb > 0 && imic % barstep == 0)
 			progress_bar(imic);
 
 		// Abort through the pipeline_control system
 		if (pipeline_control_check_abort_job())
+		{
+			// exit() does not unwind, so the writer thread would be cut off
+			// mid-product. Resume would reject the truncated file, but there
+			// is no reason to leave one: the previous movie's writes are
+			// milliseconds from done.
+			if (output_writer) output_writer->drain();
 			exit(RELION_EXIT_ABORTED);
-
-		Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
-
-        // Set per-micrograph pre_exposure
-        mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
-
-        // Get angpix and voltage from the optics groups:
-		obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
-		obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
-
-		bool result = false;
-		if (do_own)
-			result = executeOwnMotionCorrection(mic);
-		else if (do_motioncor2)
-			result = executeMotioncor2(mic);
-		else
-			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
-
-		if (result) {
-			saveModel(mic);
-			plotShifts(fn_micrographs[imic], mic);
-		} else {
-			failed_movies.push_back(fn_micrographs[imic]);
 		}
+
+		if (!do_own && !do_motioncor2)
+			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
+		bool result = false;
+		try
+		{
+			// Header parsing is also a per-movie failure, not a batch abort.
+			Micrograph mic(fn_micrographs[imic], fn_gain_reference, bin_factor, eer_upsampling, eer_grouping);
+			int exp_frames = (imic < (long int)expected_frames_micrographs.size()) ? expected_frames_micrographs[imic] : expected_frames;
+			if (exp_frames > 0 && mic.getNframes() != exp_frames)
+			{
+				REPORT_ERROR("Movie " + fn_micrographs[imic] + " frame count mismatch: expected " +
+				             integerToString(exp_frames) + " frames, but decoded " +
+				             integerToString(mic.getNframes()) + " frames.");
+			}
+			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
+			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
+			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
+			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
+			if (result) {
+				RCTIC(TIMING_SAVE_MODEL_PLOT);
+				// Stamped here: run() reassigns angpix and voltage for every
+				// movie, so the writer thread must not read them. The copy
+				// then owns everything the two writes need -- Micrograph's
+				// copy constructor clones the motion model.
+				stampModel(mic);
+				std::shared_ptr<Micrograph> saved = std::make_shared<Micrograph>(mic);
+				const FileName fn_movie = fn_micrographs[imic];
+				// Submitted after the image writes, and cancelled with them if
+				// one failed: the STAR is the resume completion marker.
+				submitOutput([this, saved, fn_movie]() {
+					writeModel(*saved);
+					plotShifts(fn_movie, *saved);
+				});
+				RCTOC(TIMING_SAVE_MODEL_PLOT);
+			}
+		}
+		catch (RelionError &XE)
+		{
+			// Retain successful per-movie outputs, but fail the job and withhold
+			// joint STAR/PDF outputs if any movie failed.
+			std::cerr << XE;
+			std::cerr << "Continuing with the remaining movies." << std::endl;
+			result = false;
+		}
+		if (!result)
+			movie_failed[imic] = 1;
+		collectWriteFailures(movie_failed);
 	}
+
+	// Every product is on disk and closed after this, which the joint STAR
+	// scan below depends on: it decides membership from exists(fn_avg).
+	output_writer->drain();
+	collectWriteFailures(movie_failed);
+	output_writer.reset();
+	output_movie_index = -1;
+
+	std::vector<FileName> failed_movies;
+	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
+		if (movie_failed[imic]) failed_movies.push_back(fn_micrographs[imic]);
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
@@ -635,7 +773,9 @@ void MotioncorrRunner::run()
 	}
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
+	RCTIC(TIMING_LOGFILE_PDF);
 	generateLogFilePDFAndWriteStarFiles();
+	RCTOC(TIMING_LOGFILE_PDF);
 
 #ifdef TIMING
         MCtimer.printTimes(false);
@@ -990,11 +1130,18 @@ void MotioncorrRunner::plotShifts(FileName fn_mic, Micrograph &mic)
 }
 
 void MotioncorrRunner::saveModel(Micrograph &mic) {
+	stampModel(mic);
+	writeModel(mic);
+}
+
+void MotioncorrRunner::stampModel(Micrograph &mic) {
 	mic.angpix = angpix;
 	mic.voltage = voltage;
 	mic.dose_per_frame = dose_per_frame;
 	mic.fnDefect = fn_defect;
+}
 
+void MotioncorrRunner::writeModel(Micrograph &mic) {
 	FileName fn_avg = getOutputFileNames(mic.getMovieFilename());
 
 	// Alignment uses binned-pixel displacements internally. Export a copy in
@@ -1012,6 +1159,59 @@ void MotioncorrRunner::saveModel(Micrograph &mic) {
 		mic.write(fn_avg.withoutExtension() + ".star");
 }
 
+void MotioncorrRunner::submitOutput(std::function<void()> task)
+{
+	if (!output_writer)
+	{
+		task();
+		return;
+	}
+	// Opening the group here rather than at the top of the movie loop is the
+	// whole point: the wait for the previous movie's products happens at the
+	// first write of this movie, by which time they have had that movie's
+	// entire computation to finish in.
+	output_writer->beginMovie(output_movie_index);
+	output_writer->submit(std::move(task));
+}
+
+void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &path,
+                                        DataType datatype)
+{
+	// shared_ptr, not a captured Image: std::function requires a copyable
+	// target, and copying would reintroduce the full-micrograph copy this
+	// exists to avoid.
+	std::shared_ptr<Image<float> > owned = std::make_shared<Image<float> >();
+	owned->data.takeBufferFrom(image.data);
+	owned->MDMainHeader = image.MDMainHeader;
+	submitOutput([owned, path, datatype]() {
+		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+	});
+}
+
+void MotioncorrRunner::collectWriteFailures(std::vector<char> &movie_failed)
+{
+	if (!output_writer) return;
+	for (const OutputWriter::Failure &failure : output_writer->takeFailures())
+	{
+		// Same two lines the synchronous path prints, so the failed product
+		// path and the movie are still named on stderr.
+		std::cerr << failure.message;
+		if (!failure.message.empty() && failure.message.back() != '\n') std::cerr << std::endl;
+		std::cerr << "Continuing with the remaining movies." << std::endl;
+		if (failure.movie_index >= 0 && failure.movie_index < (long int)movie_failed.size())
+		{
+			movie_failed[failure.movie_index] = 1;
+			// The per-movie log already claims the product was written: the
+			// line is emitted when the write is queued, not when it lands.
+			// Record the truth in the same file rather than leaving it.
+			const FileName fn_log =
+				getOutputFileNames(fn_micrographs[failure.movie_index]).withoutExtension() + ".log";
+			std::ofstream trailer(fn_log.c_str(), std::ios::app);
+			if (trailer) trailer << "ERROR: " << failure.message << std::endl;
+		}
+	}
+}
+
 void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 {
 
@@ -1026,6 +1226,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	MDavg.clear();
 	MDmov.clear();
 
+	RCTIC(TIMING_W_SCAN);
 	for (long int imic = 0; imic < fn_ori_micrographs.size(); imic++)
 	{
 		// For output STAR file
@@ -1098,6 +1299,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 	}
 
+    RCTOC(TIMING_W_SCAN);
     if (verb > 0) progress_bar(fn_ori_micrographs.size());
 
 	// Write out STAR files at the end
@@ -1140,6 +1342,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_LATE);
 	FileName fn_eps, fn_eps_root = fn_out + "corrected_micrographs";
 	std::vector<FileName> all_fn_eps;
+	RCTIC(TIMING_W_HISTEPS);
 	for (int i = 0; i < plot_labels.size(); i++)
 	{
 		EMDLabel label = plot_labels[i];
@@ -1166,18 +1369,24 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 	}
+	RCTOC(TIMING_W_HISTEPS);
 	if (do_skip_logfile)
 	{
 
 		// Just have the overall headers only in the output PDF file
+		RCTIC(TIMING_W_GS_LOGFILE);
 		joinMultipleEPSIntoSinglePDF(fn_out + "logfile.pdf", all_fn_eps);
+		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 	else
 	{
 
-		// Always calculate the new overall headers at the top of the PDF file
-		joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", all_fn_eps);
+		// header.pdf and batch.pdf read disjoint EPS sets and write different
+		// files, so the two Ghostscript passes run at the same time. Each is a
+		// separate single-threaded process; the shorter one (header) then costs
+		// nothing.
+		const std::vector<FileName> header_fn_eps = all_fn_eps;
 
 		// Combine all EPS into a single logfile.pdf
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
@@ -1192,16 +1401,49 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 			}
 		}
 
+		RCTIC(TIMING_W_GS_HEADER);
+		// joinMultipleEPSIntoSinglePDF reports its own failures and falls back
+		// to an empty PDF, so it has no result to return; anything that does
+		// escape it is captured here rather than reaching a std::thread
+		// boundary, where it would be std::terminate.
+		std::exception_ptr header_failure;
+		std::thread header_thread([&]() {
+			try { joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", header_fn_eps); }
+			catch (...) { header_failure = std::current_exception(); }
+		});
+		// The batch pass below is not noexcept: joinMultipleEPSIntoSinglePDF
+		// falls back to touch() when Ghostscript fails, and touch() REPORT_ERRORs
+		// if the ofstream will not open. Unwinding through a still-joinable
+		// std::thread is an unconditional std::terminate, so the job would abort
+		// instead of reporting a failed PDF -- with every micrograph and STAR
+		// already correctly written. joinable() means "not yet joined", not
+		// "still running", so this is needed even when the header pass finished
+		// long ago.
+		struct HeaderThreadJoiner {
+			std::thread &t;
+			~HeaderThreadJoiner() { if (t.joinable()) t.join(); }
+		} header_joiner{header_thread};
+
+		RCTIC(TIMING_W_GS_BATCH);
 		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
+		RCTOC(TIMING_W_GS_BATCH);
+
+		header_thread.join();
+		RCTOC(TIMING_W_GS_HEADER);
+		if (header_failure) std::rethrow_exception(header_failure);
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
 		if (exists(fn_out + "all_batches.pdf")) fn_pdfs.push_back(fn_out + "all_batches.pdf");
 		fn_pdfs.push_back(fn_out + "batch.pdf");
+		RCTIC(TIMING_W_GS_ALLB);
 		concatenatePDFfiles(fn_out + "all_batches.pdf", fn_pdfs);
+		RCTOC(TIMING_W_GS_ALLB);
 
 		// Put header in front of comabined batches
+		RCTIC(TIMING_W_GS_LOGFILE);
 		concatenatePDFfiles(fn_out + "logfile.pdf", fn_out + "header.pdf", fn_out + "all_batches.pdf");
+		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 
@@ -1212,7 +1454,39 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
-bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
+const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERRenderer &renderer,
+                                                              int nx, int ny)
+{
+	// Miss on anything that changes what the gain array should contain. The EER
+	// gain is derived from the renderer's detector geometry and the upsampling
+	// factor, so it is only reusable when both match as well as the path.
+	const bool hit = gain_cache_filled &&
+	                 gain_cache_name == fn_gain_reference &&
+	                 gain_cache_is_eer == is_eer &&
+	                 gain_cache_nx == nx && gain_cache_ny == ny &&
+	                 (!is_eer || gain_cache_eer_upsampling == eer_upsampling);
+	if (!hit)
+	{
+		// Only ever refilled here, at the top of a movie, so the raw pointers
+		// taken into this array further down cannot be invalidated under them.
+		gain_cache_filled = false;
+		if (is_eer)
+			renderer.loadEERGain(fn_gain_reference, gain_cache());
+		else
+			gain_cache.read(fn_gain_reference);
+		if (XSIZE(gain_cache()) != nx || YSIZE(gain_cache()) != ny)
+			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
+		gain_cache_name = fn_gain_reference;
+		gain_cache_is_eer = is_eer;
+		gain_cache_nx = nx;
+		gain_cache_ny = ny;
+		gain_cache_eer_upsampling = eer_upsampling;
+		gain_cache_filled = true;
+	}
+	return gain_cache();
+}
+
+bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
 	FileName fn_mic = mic.getMovieFilename();
@@ -1238,9 +1512,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		logfile << "Limitted the number of IO threads per movie to " << n_io_threads << " thread(s)." << std::endl;
 	}
 
-	Image<float> Ihead, Igain, Iref, Iref_odd, Iref_even;
+	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
+	// Issue #85 lane C: native uint16 staging for unsigned-16-bit TIFF input on the
+	// resident CUDA path. Holds the decoded movie in its file sample type (half the
+	// bytes of Iframes) until the device has expanded it. Empty on every other path.
+	std::vector<Image<unsigned short> > Iframes_u16;
+	// Owns those frames' pixels as one mapping; see NativeU16MovieStaging. Movie
+	// scoped, so a throw anywhere below still returns the pages. Declared AFTER
+	// Iframes_u16 on purpose: release() writes through the frames it bound, so it
+	// has to run before that vector is destroyed.
+	NativeU16MovieStaging u16_staging;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -1268,6 +1551,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	{
 		Ihead.read(fn_mic, false, -1, false, true); // select_img -1, mmap false, is_2D true
 		nx = XSIZE(Ihead()); ny = YSIZE(Ihead()); nn = NSIZE(Ihead());
+
+	}
+
+	if (effective_expected_frames > 0 && nn != effective_expected_frames)
+	{
+		REPORT_ERROR("Movie " + fn_mic + " frame count mismatch: expected " +
+		             integerToString(effective_expected_frames) + " frames, but decoded " +
+		             integerToString(nn) + " frames.");
 	}
 
 	// Which frame to use?
@@ -1328,42 +1619,228 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 	// Read gain reference
 	RCTIC(TIMING_READ_GAIN);
+	// Bound to the cached array; empty when no gain was requested.
+	static const MultidimArray<float> no_gain;
+	const MultidimArray<float> &Igain = (fn_gain_reference != "")
+	                                  ? gainReferenceFor(isEER, renderer, nx, ny)
+	                                  : no_gain;
 	if (fn_gain_reference != "") {
-		if (isEER)
-			renderer.loadEERGain(fn_gain_reference, Igain());
-		else
-			Igain.read(fn_gain_reference);
-
-		if (XSIZE(Igain()) != nx || YSIZE(Igain()) != ny) {
-			std::cerr << "fn_mic: " << fn_mic << " nx = " << nx << " ny = " << ny << " gain nx = " << XSIZE(Igain()) << " gain ny = " << YSIZE(Igain()) <<  std::endl;
+		// Checked on every movie, hit or miss. This is the only guard that the
+		// gain matches this movie, and the fused gain-and-sum loop below indexes
+		// it through a raw pointer, so a stale size would read out of bounds.
+		if (XSIZE(Igain) != nx || YSIZE(Igain) != ny) {
+			std::cerr << "fn_mic: " << fn_mic << " nx = " << nx << " ny = " << ny << " gain nx = " << XSIZE(Igain) << " gain ny = " << YSIZE(Igain) <<  std::endl;
 			REPORT_ERROR("The size of the image and the size of the gain reference do not match. Make sure the gain reference has been rotated if necessary.");
 		}
 	}
 	RCTOC(TIMING_READ_GAIN);
 
-	// Read images
-	RCTIC(TIMING_READ_MOVIE);
-	#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
-	for (int iframe = 0; iframe < n_frames; iframe++) {
-		if (isEER)
-			renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
-		else if (isCompressedMRC)
-			compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
-		else
-			Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
-	}
-	RCTOC(TIMING_READ_MOVIE);
+	// Issue #85 lane C. Set below, once the CUDA session state is known: the
+	// compact arm is only worth its host mapping when a resident session will
+	// actually consume it. Declared out here because expand_u16_to_float() reads
+	// it on the CPU-only path too.
+	bool stage_u16 = false;
 
 #ifdef _CUDA_ENABLED
+    // Legacy early-binning/nonresident FFT preparation may retain a real-frame
+    // cache. Its normal release at skip_fitting is insufficient if a patch throws.
+    // Keep ownership bounded to this movie even on the final failed movie.
+    struct MovieFrameCacheGuard {
+        ~MovieFrameCacheGuard() { cudaReleaseCachedFrames(); }
+    } movie_frame_cache_guard;
 	std::unique_ptr<CudaMovieSession> movie_session;
+	// A preprocessing failure may be recoverable, but releasing its resources can
+	// itself expose a fatal asynchronous error. Inspect the retained state AFTER
+	// release and BEFORE destroying it or materializing/re-dispatching the movie.
+	auto refuse_fallback_if_fatal = [&](const CudaFailureState &failure, const char *boundary) {
+		const CudaRetryDecision decision = cudaRetryDecisionFor(failure, cudaGetLastError());
+		if (decision.verdict == CUDA_RETRY_FATAL) {
+			const std::string origin = failure.isPoisoned()
+			    ? std::string(failure.fatalStage()) + ":" + integerToString(failure.fatalLine())
+			    : "pending on this thread";
+			REPORT_ERROR_STR("CUDA device became unusable during " << boundary << " for " << fn_mic
+			                 << ": " << cudaGetErrorString(decision.decisive)
+			                 << " (recorded at " << origin << "). First failure at "
+			                 << failure.firstStage() << ":" << failure.firstLine()
+			                 << ". Refusing CPU fallback after a fatal device error.");
+		}
+	};
+	auto discard_preprocessing_session = [&](const char *boundary) {
+		if (!movie_session) return;
+		movie_session->release();
+		refuse_fallback_if_fatal(movie_session->getFailureState(), boundary);
+		movie_session.reset();
+	};
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		if (!movie_session->initialize()) {
+			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
-			movie_session.reset();
 		}
 	}
+
+	bool nvcomp_ingested = false;
+	MovieIngestStatus ingest_status = MovieIngestStatus::NotApplicable;
+	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
+	    movie_session && !isEER && !isCompressedMRC) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
+	}
+	// Each outcome gets its own response. Collapsing them into one bool is what
+	// let a poisoned context and an unsupported encoding take the same path.
+	switch (ingest_status) {
+	case MovieIngestStatus::Success:
+		nvcomp_ingested = true;
+		break;
+	case MovieIngestStatus::FatalDeviceFailure:
+		// Do not fall back: a CPU or re-dispatched CUDA attempt after a fatal
+		// device error is exactly what #115's ownership model refuses.
+		discard_preprocessing_session("device movie ingestion");
+		REPORT_ERROR("The CUDA context became unusable during device ingestion of " + fn_mic
+		             + ". Refusing any fallback after a fatal device error.");
+		break;
+	case MovieIngestStatus::RecoverableFailure:
+		// The attempt touched the device and failed without poisoning it. The
+		// host reader below re-reads the movie from the immutable file, and
+		// applyGainDefectsAndSum overwrites d_Iframes and d_Isum in full, so a
+		// partially written device movie is not a hazard.
+		logfile << "Device ingestion failed recoverably for " << fn_mic
+		        << "; re-reading the movie with the host reader." << std::endl;
+		break;
+	case MovieIngestStatus::NotApplicable:
+		break;
+	}
+	if (ingest_mode == INGEST_NVCOMP && !nvcomp_ingested)
+		REPORT_ERROR("--ingest nvcomp was requested but the device ingest did not run for "
+		             + fn_mic + ". Either this build has no nvCOMP, there is no resident CUDA "
+		             "session, or the encoding is not one the fast path accepts. Refusing to "
+		             "continue on a different path under a pinned --ingest.");
+
+	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
+	// one of three paths runs for a healthy movie:
+	//   eligible Deflate TIFF and nvCOMP available -> device ingest, above;
+	//   otherwise eligible unsigned-16-bit TIFF    -> compact host uint16 staging;
+	//   otherwise                                  -> main's float host reader.
+	// Deciding the compact arm here, after the session exists, is what lets it
+	// require a live session. PR125 had to approximate that with
+	// use_gpu && !early_binning and then widen again when initialize() failed,
+	// which bound and released a movie-sized mapping for nothing. Only UShort is
+	// safe: SShort shares bitsPerSample == 16 but wraps negatives, and the packed
+	// 4-bit K2/K3 format reports bitsPerSample == 8 while doubling the logical width.
+	if (ingest_mode != INGEST_FLOAT &&
+	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
+	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
+	    Ihead.dataType() == UShort) {
+		stage_u16 = true;
+		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+		// One line, and it keeps the exact prefix docs/issue85_laneC/compare_movie_logs.py
+		// filters on. A second line would make every u16-staged log differ under that
+		// retained comparator for a reason that is not a product difference.
+		logfile << "Staging this movie as native unsigned 16-bit; the uint16 to float "
+		        << "expansion and the gain are applied on the device; host staging is one "
+		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << " x " << nx << " x " << ny << " samples, released before any float "
+		        << "movie is materialized." << std::endl;
+	}
+	if (ingest_mode == INGEST_COMPACT && !stage_u16)
+		REPORT_ERROR("--ingest compact was requested but the compact uint16 staging did not "
+		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
+		             "this movie is not an unsigned-16-bit TIFF. Refusing to continue on a "
+		             "different path under a pinned --ingest.");
 #endif
+
+	// Which path this movie actually took. Written only when asked for, to a file
+	// that is not one of the products, so --ingest auto over a mixed-format set
+	// can be checked to have routed every movie correctly without changing a
+	// single byte any comparator reads.
+	if (fn_ingest_witness != "") {
+		const char *taken = "float";
+#ifdef _CUDA_ENABLED
+		if (nvcomp_ingested)   taken = "nvcomp";
+		else if (stage_u16)    taken = "compact";
+#endif
+		std::ofstream witness(fn_ingest_witness.c_str(), std::ios::app);
+		if (!witness) REPORT_ERROR("Cannot open --ingest_witness file " + fn_ingest_witness);
+		witness << fn_mic << " " << taken << std::endl;
+	}
+
+	// Read images
+	RCTIC(TIMING_READ_MOVIE);
+	bool do_host_read = true;
+#ifdef _CUDA_ENABLED
+	if (nvcomp_ingested) do_host_read = false;
+#endif
+	if (do_host_read) {
+		// Every reader here can REPORT_ERROR on a damaged movie, and an exception
+		// that leaves an OpenMP structured block is undefined behaviour: the runtime
+		// calls std::terminate, so one truncated movie used to abort the whole run
+		// with SIGABRT instead of failing just that movie. Capture per frame and
+		// rethrow on the serial path, where run()'s caller records the failure and
+		// continues with the remaining movies.
+		std::vector<std::exception_ptr> read_errors(n_frames);
+		#pragma omp parallel for num_threads(isCompressedMRC ? 1 : n_io_threads)
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			try {
+				if (isEER)
+					renderer.renderFrames(frames[iframe] * eer_grouping + 1, (frames[iframe] + 1) * eer_grouping, Iframes[iframe]());
+				else if (isCompressedMRC)
+					compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
+#ifdef _CUDA_ENABLED
+				else if (stage_u16)
+					// Same reader, same guards, same per-row Y-flip; only the destination
+					// sample type differs, and castPage2T's UShort branch is then a memcpy.
+					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+#endif
+				else
+					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
+			} catch (...) {
+				read_errors[iframe] = std::current_exception();
+			}
+		}
+		// Report the lowest frame index rather than whichever thread failed first,
+		// so the error a user sees does not depend on the OpenMP schedule.
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			if (read_errors[iframe]) std::rethrow_exception(read_errors[iframe]);
+		}
+	}
+	RCTOC(TIMING_READ_MOVIE);
+
+	// Issue #85 lane C: every path other than the resident device one consumes float
+	// frames, so a uint16-staged movie has to be widened before it can reach them.
+	// (float)u16 is exact, so the expanded frames are the same bits the float reader
+	// would have produced -- this only costs the memory the staging saved, and only
+	// on a path that has already lost the device.
+	auto expand_u16_to_float = [&]() {
+		if (!stage_u16) return;
+		const size_t num_pixels = (size_t)nx * ny;
+		for (int iframe = 0; iframe < n_frames; iframe++) {
+			Iframes[iframe]().reshape(ny, nx);
+			const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
+			float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+			#pragma omp parallel for num_threads(n_threads) schedule(static)
+			for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
+				dst[pixel] = (float)src[pixel];
+			Iframes_u16[iframe].clear();
+			u16_staging.discardThrough(iframe + 1);
+		}
+		u16_staging.release();
+		stage_u16 = false;
+		logfile << "Materialized native uint16 frames as float for CPU fallback." << std::endl;
+	};
+	// Release the native movie once no reader can still want it in its raw form.
+	// Bounding the lifetime this way matters on the degraded paths: a patch that
+	// does not converge downloads the aligned float frames, and that 1.27 GiB
+	// allocation should not have to sit alongside the 0.64 GiB it replaces.
+	auto drop_u16_staging = [&]() {
+		if (!stage_u16) return;
+		// Returning the pages matters here, not just freeing them: a non-converging
+		// patch downloads the full float movie afterwards, and anything the staging
+		// still holds is added to that. munmap makes the release unconditional, so
+		// this no longer depends on an allocator returning arena pages.
+		u16_staging.release();
+		stage_u16 = false;
+		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
+	};
 
 	MultidimArray<float> Isum(ny, nx);
 	Isum.initZeros();
@@ -1375,10 +1852,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	std::vector<float> resident_bad_replacements;
 	auto materialize_host_frames = [&]() {
 		if (!host_frames_are_raw) return;
+		// A uint16-staged movie is raw in the file's sample type; widen it first so
+		// the gain pass below is the same in-place float multiply as ever.
+		expand_u16_to_float();
+		// expand_u16_to_float is a no-op once the staging has been dropped, and that
+		// is only sound while no raw reader remains. Both call sites of this lambda
+		// run at or before the global forward FFT, which is where the drop happens.
+		// Fail here rather than run the gain pass over an unallocated array.
+		if (Iframes.empty() || Iframes[0]().nzyxdim == 0)
+			REPORT_ERROR("materialize_host_frames: the raw host movie is no longer available.");
 		const bool apply_gain = (fn_gain_reference != "");
 		#pragma omp parallel for num_threads(n_threads)
 		for (long int pixel = 0; pixel < (long int)nx * ny; pixel++) {
-			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain(), pixel) : 1.0f;
+			const float gain_val = apply_gain ? DIRECT_MULTIDIM_ELEM(Igain, pixel) : 1.0f;
 			for (int iframe = 0; iframe < n_frames; iframe++)
 				DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel) *= gain_val;
 		}
@@ -1392,40 +1878,120 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 					resident_bad_replacements[(size_t)iframe * n_bad + idx];
 		host_frames_are_raw = false;
 	};
+#ifdef _CUDA_ENABLED
+	// #126 arm only. After a device ingest there is no host movie at all:
+	// do_host_read was false and host_frames_are_raw is false, so
+	// materialize_host_frames() returns at its first line and never reaches its
+	// own "no longer available" guard. A recoverable failure that discards the
+	// session would therefore leave every later consumer reading zero-size
+	// images -- the forward FFT copies from a null pointer, and the CPU FFT then
+	// throws REPORT_ERROR out of an OpenMP region, which is std::terminate and
+	// kills the whole run, not just this movie.
+	//
+	// So take an exact copy of the device state BEFORE release() frees it.
+	// d_Iframes survives releasePreprocessingBuffers(), which frees only d_gain
+	// and d_Isum, so this is also correct at the forward-FFT boundary.
+	//
+	// Returns false when the copy itself fails. EVERY caller must act on that:
+	// a discarded return leaves the same zero-size frames the copy existed to
+	// prevent, and discard_preprocessing_session only throws for a POISONING
+	// code, so a copy that fails with an ordinary error would otherwise fall
+	// straight through to the transform.
+	auto preserve_device_movie = [&]() -> bool {
+		if (!movie_session || !nvcomp_ingested) return true;   // host movie intact
+		if (!Iframes.empty() && Iframes[0]().nzyxdim != 0) return true;  // already copied
+		if (!movie_session->downloadRealFrames(Iframes)) {
+			// downloadRealFrames reshapes then copies frame by frame, so a
+			// failure part way leaves frames 0..k-1 valid, frame k allocated but
+			// uninitialised and the rest zero-size. The "already copied" test
+			// above inspects only Iframes[0] and would read that as a finished
+			// copy. Clear it, so a partial result cannot be mistaken for a
+			// complete one by this lambda or by any later emptiness check.
+			for (size_t i = 0; i < Iframes.size(); i++) Iframes[i].clear();
+			logfile << "WARNING: could not copy the resident movie back before releasing the "
+			        << "CUDA session; this movie has no representation left to fall back on."
+			        << std::endl;
+			return false;
+		}
+		// The device frames are gain-corrected, which is what host_frames_are_raw
+		// == false already tells every consumer, so no gain pass is owed. The
+		// sparse replacements are applied here because the device update is
+		// exactly what may have failed; re-writing the ones that did land is an
+		// idempotent overwrite of the same value.
+		const size_t n_bad = resident_bad_xs.size();
+		if (n_bad != 0 && resident_bad_replacements.size() == n_bad * (size_t)n_frames) {
+			for (int iframe = 0; iframe < n_frames; iframe++)
+				for (size_t idx = 0; idx < n_bad; idx++)
+					DIRECT_A2D_ELEM(Iframes[iframe](), resident_bad_ys[idx], resident_bad_xs[idx]) =
+						resident_bad_replacements[(size_t)iframe * n_bad + idx];
+		}
+		logfile << "Recovered the movie from device memory before releasing the resident "
+		        << "CUDA session." << std::endl;
+		return true;
+	};
+#endif
 	// Apply gain and build the initial sum in one pixel pass. This avoids a
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
 	RCTIC(TIMING_GAIN_AND_SUM);
 #ifdef _CUDA_ENABLED
 	bool cuda_gain_sum_done = false;
-	if (movie_session) {
-		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain() : nullptr;
+	if (nvcomp_ingested) {
+		cuda_gain_sum_done = true;
+		host_frames_are_raw = false;
+	} else if (movie_session) {
+		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
 		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
-		if (movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false)) {
+		const bool gain_sum_ok = stage_u16
+		    ? movie_session->applyGainDefectsAndSumU16(Iframes_u16, gain_ptr, Isum, false)
+		    : movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false);
+		if (gain_sum_ok) {
 			cuda_gain_sum_done = true;
 			host_frames_are_raw = true;
 		} else {
+			discard_preprocessing_session("gain and sum preprocessing");
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
-			movie_session.reset();
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
 			Isum.initZeros();
+			// The CPU pass below reads float frames in place.
+			expand_u16_to_float();
 		}
 	}
 	if (!cuda_gain_sum_done)
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
-		#pragma omp parallel for num_threads(n_threads)
-		for (long int pixel = 0; pixel < YXSIZE(Isum); pixel++) {
-			float sum = 0.0f;
+		const long int n_pixels = YXSIZE(Isum);
+		// Walk a tile of pixels through every frame before moving to the next
+		// tile. Frame-minor traversal of the whole image touches n_frames
+		// separate multi-MB buffers per pixel, so each inner step lands on a
+		// different page; tiling turns that into one sequential run per frame
+		// while the tile's slice of Isum and the gain stay in cache.
+		//
+		// Each pixel still accumulates frames 0..n_frames-1 in that order into
+		// a float, so every stored sum is bit-identical to the untiled loop.
+		const long int tile = 4096;
+		float *const sum_ptr = &DIRECT_MULTIDIM_ELEM(Isum, 0);
+		const float *const gain_ptr = apply_gain ? &DIRECT_MULTIDIM_ELEM(Igain, 0) : nullptr;
+		#pragma omp parallel for num_threads(n_threads) schedule(static)
+		for (long int base = 0; base < n_pixels; base += tile) {
+			const long int end = XMIPP_MIN(base + tile, n_pixels);
+			for (long int pixel = base; pixel < end; pixel++)
+				sum_ptr[pixel] = 0.0f;
 			for (int iframe = 0; iframe < n_frames; iframe++) {
-				float &value = DIRECT_MULTIDIM_ELEM(Iframes[iframe](), pixel);
-				if (apply_gain) value *= DIRECT_MULTIDIM_ELEM(Igain(), pixel);
-				sum += value;
+				float *const frame_ptr = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
+				if (apply_gain) {
+					for (long int pixel = base; pixel < end; pixel++) {
+						frame_ptr[pixel] *= gain_ptr[pixel];
+						sum_ptr[pixel] += frame_ptr[pixel];
+					}
+				} else {
+					for (long int pixel = base; pixel < end; pixel++)
+						sum_ptr[pixel] += frame_ptr[pixel];
+				}
 			}
-			DIRECT_MULTIDIM_ELEM(Isum, pixel) = sum;
 		}
 	}
 	RCTOC(TIMING_GAIN_AND_SUM);
@@ -1541,9 +2107,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 			if (fn_gain_reference != "")
 			{
-				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain())
+				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
 				{
-					if (DIRECT_MULTIDIM_ELEM(Igain(), n) == 0)
+					if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
 					{
 						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
 					}
@@ -1641,16 +2207,60 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				bad_ys.push_back(i);
 			}
 #ifdef _CUDA_ENABLED
-		if (host_frames_are_raw)
+		// The nvCOMP ingest never populates host frames, and the replacement loop
+		// only ever reads one neighbour per (defect, frame). Downloading the whole
+		// movie to supply them cost a fresh movie-sized host allocation plus a full
+		// device-to-host copy per movie; fetch just those pixels instead.
+		const bool sparse_neighbours =
+			nvcomp_ingested && (Iframes.empty() || Iframes[0]().nzyxdim == 0);
+		if (host_frames_are_raw || nvcomp_ingested)
 			resident_bad_replacements.resize(bad_xs.size() * (size_t)n_frames);
+
+		std::vector<int> sample_frame, sample_y, sample_x;
+		if (sparse_neighbours) {
+			const size_t n_samples = bad_xs.size() * (size_t)n_frames;
+			sample_frame.assign(n_samples, 0);
+			sample_y.assign(n_samples, -1);
+			sample_x.assign(n_samples, -1);
+		}
+		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
 		size_t bad_idx = 0;
 		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
 		{
 			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
+#ifdef _CUDA_ENABLED
+			// n_ok is a property of the mask and the bounds, never of the pixel
+			// values, so on the sparse path it is computed once per defect and the
+			// drawn index is resolved to a coordinate. rand() and rnd_gaus() are
+			// still called on exactly the same branches in the same defect-then-frame
+			// order, which is what keeps the stream and the chosen value identical.
+			const int sparse_n_ok = sparse_neighbours
+				? mc_defect::countValidNeighbours(bad_mask, nx, ny, i, j, D_MAX) : 0;
+#endif
 			for (int iframe = 0; iframe < n_frames; iframe++)
 			{
+#ifdef _CUDA_ENABLED
+				if (sparse_neighbours) {
+					const size_t k = (size_t)iframe * bad_xs.size() + bad_idx;
+					if (sparse_n_ok > NUM_MIN_OK) {
+						const int rank = rand() % sparse_n_ok;
+						int sy = -1, sx = -1;
+						if (!mc_defect::nthValidNeighbour(bad_mask, nx, ny, i, j,
+						                                  D_MAX, rank, &sy, &sx)) {
+							discard_preprocessing_session("sparse defect neighbour");
+							REPORT_ERROR("Could not resolve a hot-pixel neighbour for sparse defect correction.");
+						}
+						sample_frame[k] = iframe;
+						sample_y[k] = sy;
+						sample_x[k] = sx;
+					} else {
+						resident_bad_replacements[k] = rnd_gaus(frame_mean, frame_std);
+					}
+					continue;
+				}
+#endif
 				RFLOAT pbuf[PBUF_SIZE];
 //				std::cout << "Frame: "<< iframe << std::endl;
 				int n_ok = 0;
@@ -1665,10 +2275,20 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 //						std::cout << " " << DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
-						float neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
+						// Issue #85 lane C: on the uint16-staged path the raw host
+						// movie lives in Iframes_u16. (float)u16 is the same value
+						// the float reader stored, so the gain multiply below and
+						// every RNG draw that follows are unchanged.
+						float neighbor;
+#ifdef _CUDA_ENABLED
+						if (stage_u16)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u16[iframe](), y, x);
+						else
+#endif
+							neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 #ifdef _CUDA_ENABLED
 						if (host_frames_are_raw && fn_gain_reference != "")
-							neighbor *= DIRECT_A2D_ELEM(Igain(), y, x);
+							neighbor *= DIRECT_A2D_ELEM(Igain, y, x);
 #endif
 						pbuf[n_ok] = neighbor;
 						n_ok++;
@@ -1682,7 +2302,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				else
 					replacement = rnd_gaus(frame_mean, frame_std);
 #ifdef _CUDA_ENABLED
-				if (host_frames_are_raw) {
+				if (host_frames_are_raw || nvcomp_ingested) {
 					resident_bad_replacements[(size_t)iframe * bad_xs.size() + bad_idx] = replacement;
 				} else
 #endif
@@ -1692,15 +2312,37 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
+		if (sparse_neighbours && !bad_xs.empty()) {
+			std::vector<float> gathered;
+			if (!movie_session->gatherFrameSamples(sample_frame, sample_y, sample_x, gathered)) {
+				discard_preprocessing_session("sparse defect neighbour gather");
+				REPORT_ERROR("Sparse hot-pixel neighbour gather failed for " + fn_mic);
+			}
+			for (size_t k = 0; k < gathered.size(); k++)
+				if (sample_y[k] >= 0) resident_bad_replacements[k] = gathered[k];
+		}
 		if (movie_session && !bad_xs.empty()) {
 			resident_bad_xs = bad_xs;
 			resident_bad_ys = bad_ys;
 			if (resident_bad_replacements.size() != bad_xs.size() * (size_t)n_frames) {
+				const bool kept_prep = preserve_device_movie();
+				discard_preprocessing_session("sparse defect preparation");
+				if (!kept_prep)
+					REPORT_ERROR("Sparse defect preparation failed for " + fn_mic + " and the "
+					             "device movie could not be copied back.");
 				logfile << "WARNING: Incomplete sparse CUDA defect values; discarding resident session." << std::endl;
-				movie_session.reset();
 			} else if (!movie_session->updateDefectPixels(bad_xs, bad_ys, resident_bad_replacements)) {
+				const bool kept_update = preserve_device_movie();
+				discard_preprocessing_session("sparse defect update");
+				if (!kept_update)
+					REPORT_ERROR("The sparse defect update failed for " + fn_mic + " and the "
+					             "device movie could not be copied back.");
 				logfile << "WARNING: CUDA defect update failed; falling back from intact raw host frames." << std::endl;
-				movie_session.reset();
+			}
+		}
+		if (nvcomp_ingested && !sparse_neighbours) {
+			for (int iframe = 0; iframe < n_frames; iframe++) {
+				Iframes[iframe].clear();
 			}
 		}
 #endif
@@ -1741,6 +2383,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// sends the corrected host movie through the legacy CUDA or CPU FFT path.
 	if (!movie_session && host_frames_are_raw)
 		materialize_host_frames();
+	// The #126 arm has no host movie by design, so "there is nothing to
+	// materialize" is not the same as "the movie is available". Fail this one
+	// movie here: run() records it, --only_do_unfinished reprocesses it, and
+	// the remaining movies still run. Transforming zero-size frames instead
+	// aborts the whole job.
+	if (!movie_session && nvcomp_ingested &&
+	    (Iframes.empty() || Iframes[0]().nzyxdim == 0))
+		REPORT_ERROR("The resident CUDA session for " + fn_mic + " was discarded after a "
+		             "device ingest and the movie could not be copied back, so no valid "
+		             "representation remains. Failing this movie rather than transforming "
+		             "empty frames.");
 	// The early-binning path crops a full-size Fourier transform, so keep that
 	// path on the CPU until the CUDA implementation supports the same operation.
 	if (movie_session) {
@@ -1760,11 +2413,30 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				Iframes[iframe].clear(); // save some memory (global alignment use the most memory)
 			}
 		}
+#ifdef _CUDA_ENABLED
+		// Resident path: the device holds the transformed movie and both
+		// materialize sites are behind us, so the raw host movie is dead. The
+		// float path cannot do this -- its Iframes are still the fallback source
+		// -- which is why main only clears them when there is no session.
+		if (movie_session) drop_u16_staging();
+#endif
 	} else {
 	#ifdef _CUDA_ENABLED
 		if (movie_session) {
+			// Checked, unlike the two defect-block sites: the pre-FFT guard above
+			// is gated on !movie_session and has already run by the time we get
+			// here, so nothing downstream would catch a failed copy. Without
+			// this, a copy that fails with a non-poisoning code reaches the CPU
+			// transform with zero-size frames and REPORT_ERROR leaves an OpenMP
+			// region, which is std::terminate for the whole job.
+			const bool recovered = preserve_device_movie();
+			discard_preprocessing_session("resident forward FFT");
+			if (!recovered)
+				REPORT_ERROR("The resident forward FFT failed for " + fn_mic + " and the "
+				             "device movie could not be copied back, so no valid "
+				             "representation remains. Failing this movie rather than "
+				             "transforming empty frames.");
 			logfile << "WARNING: Resident CUDA forward FFT failed; materializing host frames for fallback." << std::endl;
-			movie_session.reset();
 			materialize_host_frames();
 		}
 	#endif
@@ -1912,6 +2584,26 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	Iref_even().reshape(ny, nx);
 	Iref_odd().reshape(ny, nx);
 	Iref().initZeros();
+
+	// The real-space frames reconstructed below have exactly two readers:
+	// patch clipping (do_local) and the "before dose weighting" sum further
+	// down (pre_dw_sum_needed). When neither runs, nothing reads them before
+	// they are replaced, so the inverse transform is dead work and eliding it
+	// is bit-exact rather than an approximation.
+	//
+	// Both predicates are declared once, here, and used at every site that
+	// depends on them. Restating either condition at its consumer lets the two
+	// drift apart silently, and that is not hypothetical: the prototype in
+	// PR #57 held a copy of this guard, 0f508e0 widened the original with
+	// even_odd_split, and the copy did not follow. Compiling that prototype
+	// predicate against current main corrupts EVN/ODD -- measured, on a
+	// deliberately built control, not something that shipped -- and it does so
+	// with no merge conflict, no warning and no failing test.
+	// See agents/designs/issue_26_cpu_global_ifft_skip.md.
+	const bool do_local = (patch_x > 2) && (patch_y > 2);
+	const bool pre_dw_sum_needed = !do_dose_weighting || save_noDW || even_odd_split;
+	const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;
+
 	RCTIC(TIMING_GLOBAL_IFFT);
 	bool cuda_global_ifft_done = false;
 #ifdef _CUDA_ENABLED
@@ -1938,7 +2630,15 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	#pragma omp parallel for num_threads(n_threads)
 	for (int iframe = 0; iframe < n_frames; iframe++) {
 		Iframes[iframe]().reshape(ny, nx);
-		NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
+		// The reshape is kept unconditionally as the conservative choice, not
+		// because anything downstream requires it: the post-dose-weighting
+		// transform would resize on its own, and every site that sizes a buffer
+		// from Iframes[0]() sits inside pre_dw_sum_needed, i.e. a case where
+		// this transform ran. Keeping it does mean the emptiness test further
+		// down cannot detect an elided buffer, so need_real_space_before_dw is
+		// the only guard.
+		if (need_real_space_before_dw)
+			NewFFT::inverseFourierTransform(Fframes[iframe], Iframes[iframe]());
 		// Unfortunately, we cannot deallocate Fframes here because of dose-weighting
 	}
 	}
@@ -1947,7 +2647,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 	// Patch based alignment
 	logfile << std::endl << "Local alignments:" << std::endl;
 	logfile << "Patches: X = " << patch_x << " Y = " << patch_y << std::endl;
-	bool do_local = (patch_x > 2) && (patch_y > 2);
 	if (!do_local) {
 		logfile << "Too few patches to do local alignments. Local alignment is skipped." << std::endl;
 	}
@@ -1960,6 +2659,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 #ifdef _CUDA_ENABLED
 		cufftComplex *d_patch_fcomplex_buffer = nullptr;
 		size_t sz_cached_patch_fcomplex = 0;
+		// Movie-local scratch is borrowed by alignment. The guard owns only this
+		// allocation; alignment owns its separate per-call resources.
+
+		struct PatchFourierScratchGuard {
+			cufftComplex **slot;
+			~PatchFourierScratchGuard() {
+				cufftComplex *owned = *slot; *slot = nullptr;
+				if (owned) cudaFree(owned);
+			}
+		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
 		int ipatch = 1;
@@ -1992,33 +2701,143 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				bool converged = false;
 
 #ifdef _CUDA_ENABLED
+				// Distinguishes the two ways the device attempt can decline to produce
+				// shifts (issue #69): device_prep_ok == false is a resource failure
+				// that happened before any shift existed, whereas prep_ok with
+				// converged == false is a completed alignment reporting its
+				// convergence verdict. Only the first is a fallback candidate.
+				bool device_prep_ok = false;
 				if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
-						if (d_patch_fcomplex_buffer) cudaFree(d_patch_fcomplex_buffer);
-						if (cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches) != cudaSuccess) {
+						cufftComplex *stale = d_patch_fcomplex_buffer;
+                        d_patch_fcomplex_buffer = nullptr;
+                        sz_cached_patch_fcomplex = 0;
+                        if (stale && cudaFree(stale) != cudaSuccess)
+                            REPORT_ERROR("Failed to release patch Fourier scratch");
+						const cudaError_t patch_alloc_error = cudaMalloc((void**)&d_patch_fcomplex_buffer, sz_fpatches);
+                        if (cudaErrorPoisonsContext(patch_alloc_error))
+                            REPORT_ERROR("Fatal CUDA allocation failure preparing patch Fourier scratch");
+                        if (patch_alloc_error != cudaSuccess) {
 							d_patch_fcomplex_buffer = nullptr;
 							sz_cached_patch_fcomplex = 0;
 						} else {
 							sz_cached_patch_fcomplex = sz_fpatches;
 						}
 					}
-					bool prep_ok = false;
 					if (d_patch_fcomplex_buffer) {
-						prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
+						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
-					if (prep_ok) {
+					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
-						converged = alignPatchDevice(d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
+				}
+				if (movie_session && !device_prep_ok) {
+					// Issue #69, corrected after review. The question here is whether a
+					// retry is safe, and it must NOT be answered from a later
+					// cudaGetLastError() read.
+					//
+					// preparePatchInVram's own error handler consumes the code: it
+					// reads it, logs it, and returns false. cudaGetLastError() is the
+					// host thread's last-error slot and that read resets it, so by the
+					// time we get here it reports cudaSuccess. Absence of a pending
+					// error is not a certificate that the context is healthy -- it only
+					// means nothing has been recorded since. Treating it as one turns a
+					// fatal, already-consumed failure into a permitted retry, which is
+					// exactly the lost-error contract this branch was pulled up on.
+					//
+					// So the session preserves the status of the stage that actually
+					// failed, and BOTH that and the pending slot are consulted: either
+					// can independently prove the context is dead. Preferring only the
+					// recorded status would reintroduce the same bug from the other
+					// side, because the session keeps the FIRST failure -- a benign
+					// early allocation miss would then mask a fatal fault on a later
+					// patch of the same movie.
+					const CudaFailureState &failure = movie_session->getFailureState();
+					const cudaError_t recorded = failure.firstError();
+					const cufftResult recorded_cufft = failure.firstCufftError();
+					const cudaError_t pending = cudaGetLastError();
+					const CudaRetryDecision decision = cudaRetryDecisionFor(failure, pending);
+
+					if (decision.verdict == CUDA_RETRY_FATAL) {
+						// Attribute to the stage that recorded the poisoning code when
+						// there is one. If the verdict came from the pending slot
+						// instead, no stage recorded it, and saying so is better than
+						// printing the location of some earlier unrelated failure.
+						std::string origin;
+						if (failure.isPoisoned()) {
+							origin = std::string(", recorded at ") + failure.fatalStage()
+							       + ":" + integerToString(failure.fatalLine());
+						} else {
+							origin = ", pending on this thread; no stage recorded it";
+						}
+						REPORT_ERROR_STR("CUDA device context is unusable for " << fn_mic
+						                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+						                 << cudaGetErrorString(decision.decisive)
+						                 << origin
+						                 << ". Refusing to retry alignment on a poisoned context.");
+					}
+
+					// Permitted. Say precisely what is about to happen: alignPatch()
+					// dispatches cudaAlignPatch() again while use_gpu is true, so on a
+					// GPU run this is a CUDA re-dispatch on the same device, NOT a CPU
+					// fallback. It is only a CPU fallback when the CPU backend is
+					// selected. Reporting it as a fallback would overstate the recovery
+					// this branch supports.
+					logfile << "WARNING: resident patch preparation did not complete for patch ("
+					        << iy + 1 << ", " << ix + 1 << ")";
+					if (recorded != cudaSuccess) {
+						logfile << "; recorded CUDA error " << cudaGetErrorString(recorded)
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
+					} else if (recorded_cufft != CUFFT_SUCCESS) {
+						logfile << "; recorded cuFFT error code " << recorded_cufft
+						        << " at " << failure.firstStage()
+						        << ":" << failure.firstLine();
+					} else if (pending != cudaSuccess) {
+						logfile << "; pending CUDA error " << cudaGetErrorString(pending)
+						        << " (no stage recorded one)";
+					} else {
+						logfile << "; no CUDA or cuFFT error was recorded by any stage";
+					}
+					logfile << ". Classified recoverable, so this patch is re-attempted through "
+					        << (use_gpu ? "alignPatch(), which re-dispatches CUDA on the same "
+					                      "device -- this is not a CPU fallback"
+					                    : "the CPU path")
+					        << "." << std::endl;
 				}
 				if (!converged)
 #endif
 				{
+#ifdef _CUDA_ENABLED
+					// Issue #69: restart the shift state before the second attempt.
+					//
+					// alignPatch() and cudaAlignPatchDevice() both *accumulate*
+					// (xshifts[i] += cur_xshifts[i]) and neither reads the incoming
+					// values to pre-shift its input. The caller owes them the invariant
+					// that the incoming shifts already describe the supplied Fframes.
+					//
+					// A resident attempt that ran and did not converge leaves its
+					// estimate S1 in these vectors, and applied its Fourier phase
+					// shifts only to d_patch_fcomplex_buffer -- its own scratch, which
+					// the next preparePatchInVram overwrites wholesale. The resident
+					// real frames and the host Iframes are untouched by a patch
+					// attempt. So the retry below re-extracts exactly the same
+					// unshifted data and would add an independent second estimate S2
+					// on top of S1, publishing roughly twice the true local shift for
+					// this patch.
+					//
+					// Because the first attempt modified nothing else, zeroing these
+					// two vectors restores everything it touched, and the retry starts
+					// from the same state the first attempt started from.
+					local_xshifts.assign(local_xshifts.size(), (RFLOAT)0);
+					local_yshifts.assign(local_yshifts.size(), (RFLOAT)0);
+#endif
 					// Host frames are deliberately raw on the resident path. If a
 					// device patch attempt falls back, download the aligned real frames
 					// before either CUDA staging or CPU patch preparation reads them.
@@ -2027,17 +2846,59 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 						if (!movie_session->downloadRealFrames(Iframes))
 							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 						host_frames_are_raw = false;
+					} else if (movie_session && (Iframes.empty() || Iframes[0]().nzyxdim == 0)) {
+						// The #126 arm never set host_frames_are_raw, because there is no
+						// raw host movie to mark: the device ingest skipped the host read
+						// entirely. Without this the gate above is false, nothing is
+						// downloaded, and cudaPreparePatch/the CPU patch path read
+						// XSIZE(Iframes[0]()) == 0. The unweighted-reconstruction
+						// fallback below already carries exactly this arm; the patch
+						// retry was missing it.
+						if (!movie_session->downloadRealFrames(Iframes))
+							REPORT_ERROR("Failed to download resident real frames for patch fallback");
 					}
 #endif
 					RCTIC(TIMING_PREP_PATCH);
 					bool cuda_patch_prep_done = false;
 #ifdef _CUDA_ENABLED
+					// Issue #69, second boundary. The health check above runs BEFORE
+					// this preparation, so it cannot see a fatal error raised HERE --
+					// and cudaPreparePatch's own handler consumes the code and returns
+					// false, clearing the last-error slot. alignPatch() below then
+					// re-dispatches CUDA whenever use_gpu is set, so without this the
+					// retry can land on a context this very stage just killed.
+					// Peeking at the cleared slot afterwards is not sufficient; the
+					// status has to be carried out of the helper.
+					CudaFailureState fallback_prep_failure;
 					if (use_gpu) {
 						cuda_patch_prep_done = cudaPreparePatch(
 							Iframes, x_start, x_end, y_start, y_end,
 							n_groups, group_start, group_size, Fpatches,
-							gpu_id, logfile
+							gpu_id, logfile, &fallback_prep_failure
 						);
+						if (!cuda_patch_prep_done) {
+							const CudaRetryDecision after_prep = cudaRetryDecisionFor(
+								fallback_prep_failure, cudaGetLastError());
+							if (after_prep.verdict == CUDA_RETRY_FATAL) {
+								std::string origin;
+								if (fallback_prep_failure.isPoisoned()) {
+									origin = std::string(", recorded at ")
+									       + fallback_prep_failure.fatalStage() + ":"
+									       + integerToString(fallback_prep_failure.fatalLine());
+								} else {
+									origin = ", pending on this thread; no stage recorded it";
+								}
+								REPORT_ERROR_STR("CUDA device context is unusable after fallback patch "
+								                 "preparation for " << fn_mic
+								                 << " (patch " << iy + 1 << ", " << ix + 1 << "): "
+								                 << cudaGetErrorString(after_prep.decisive) << origin
+								                 << ". Refusing to re-dispatch alignment on a poisoned "
+								                    "context; the host path would return to the same device.");
+							}
+							logfile << "WARNING: CUDA patch preparation declined for patch ("
+							        << iy + 1 << ", " << ix + 1 << "); classified recoverable, "
+							        << "continuing with host patch preparation." << std::endl;
+						}
 					}
 #endif
 					if (!cuda_patch_prep_done) {
@@ -2074,10 +2935,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 				interpolateShifts(group_start, group_size, local_xshifts, local_yshifts, n_frames, interpolated_xshifts, interpolated_yshifts);
 				if (interpolate_shifts) {
 					// Recenter to the first frame
-					for (int iframe = 0; iframe < n_frames; iframe++) {
-						interpolated_xshifts[iframe] -= interpolated_xshifts[0];
-						interpolated_yshifts[iframe] -= interpolated_yshifts[0];
-					}
+					recenterShiftsToFirstFrame(interpolated_xshifts, interpolated_yshifts);
 					// Store shifts
 					for (int iframe = 0; iframe < n_frames; iframe++) {
 						patch_xshifts.push_back(interpolated_xshifts[iframe]);
@@ -2101,9 +2959,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 		Fpatches.clear();
 #ifdef _CUDA_ENABLED
 		if (d_patch_fcomplex_buffer) {
-			cudaFree(d_patch_fcomplex_buffer);
-			d_patch_fcomplex_buffer = nullptr;
-		}
+            cufftComplex *owned = d_patch_fcomplex_buffer;
+            d_patch_fcomplex_buffer = nullptr;
+            if (cudaFree(owned) != cudaSuccess)
+                REPORT_ERROR("Failed to release patch Fourier scratch");
+        }
 #endif
 
 		// Fit polynomial model
@@ -2250,10 +3110,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {
 
 skip_fitting:
 #ifdef _CUDA_ENABLED
+	// Local alignment scratch belongs to this movie, but reconstruction no longer
+	// needs it. Check late release errors before any image can be submitted.
+	if (movie_session && !movie_session->releasePatchAlignmentWorkspace())
+		REPORT_ERROR("CUDA patch alignment workspace cleanup failed before reconstruction; refusing movie output.");
 	// The retained full-frame cache is only needed while preparing local patches.
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif
-	if (!do_dose_weighting || save_noDW || even_odd_split) {
+	if (pre_dw_sum_needed) {
 		Iref().reshape(ny, nx);
 		Iref().initZeros();
 		Iref_odd().reshape(ny, nx);
@@ -2274,6 +3138,8 @@ skip_fitting:
 			logfile << "Summing frames before dose weighting (CUDA in-VRAM)..." << std::endl;
 			cuda_unweighted_done = movie_session->reconstructUnweighted(Iref, p_even, p_odd, poly_model);
 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			if (!cuda_unweighted_done)
+				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident unweighted reconstruction");
 		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
@@ -2283,8 +3149,11 @@ skip_fitting:
 			Image<float> *p_odd = even_odd_split ? &Iref_odd : nullptr;
 			RCTIC(TIMING_REAL_SPACE_INTERPOLATION);
 			logfile << "Summing frames before dose weighting (CUDA)..." << std::endl;
-			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile);
+			CudaFailureState reconstruction_failure;
+			cuda_unweighted_done = cudaRealSpaceInterpolation(Iref, p_even, p_odd, Iframes, poly_model, gpu_id, logfile, &reconstruction_failure);
 			RCTOC(TIMING_REAL_SPACE_INTERPOLATION);
+			if (!cuda_unweighted_done)
+				refuse_fallback_if_fatal(reconstruction_failure, "unweighted reconstruction");
 		}
 		if (!cuda_unweighted_done)
 #endif
@@ -2356,9 +3225,20 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
+		// NOT pre_dw_sum_needed. This decides whether an unweighted micrograph
+		// is written, and it must exclude even_odd_split: with --even_odd_split
+		// --dose_weighting the unweighted sum is computed for EVN/ODD only, and
+		// writing a _noDW.mrc here would add an output the run never requested.
+		// Same three variables, different question -- do not unify with the
+		// shared predicate above.
 		if (!do_dose_weighting || save_noDW) {
 			Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-			Iref.write(!do_dose_weighting ? fn_avg : fn_avg_noDW, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+			// Hands Iref's pixels to the writer and leaves it empty. The
+			// dose-weighting branch below reallocates it from scratch
+			// (reshape + initZeros), so nothing reads it in between.
+			submitImageWrite(Iref, !do_dose_weighting ? fn_avg : fn_avg_noDW,
+			                 write_float16 ? Float16: Float);
 			logfile << "Written aligned but non-dose weighted sum to " << (!do_dose_weighting ? fn_avg : fn_avg_noDW) << std::endl;
 		}
 		// ODD-EVEN Output
@@ -2367,11 +3247,12 @@ skip_fitting:
 		Iref_odd.setSamplingRateInHeader(output_angpix, output_angpix);
 		Iref_even.setSamplingRateInHeader(output_angpix, output_angpix);
 
-		Iref_odd.write(fn_avg.withoutExtension() + "_ODD.mrc", -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
-		Iref_even.write(fn_avg.withoutExtension() + "_EVN.mrc", -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+		submitImageWrite(Iref_odd, fn_avg.withoutExtension() + "_ODD.mrc", write_float16 ? Float16: Float);
+		submitImageWrite(Iref_even, fn_avg.withoutExtension() + "_EVN.mrc", write_float16 ? Float16: Float);
 		logfile << "Written aligned but non-dose weighted sum of odd frames to " << (fn_avg.withoutExtension() + "_ODD.mrc") << std::endl;
 		logfile << "Written aligned but non-dose weighted sum of even frames to " << (fn_avg.withoutExtension() + "_EVN.mrc") << std::endl;
 		}
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Dose weighting
@@ -2406,13 +3287,18 @@ skip_fitting:
 			}
 			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
 			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+			if (!cuda_dw_done)
+				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident dose-weighted reconstruction");
 		} else if (use_gpu) {
 			const ThirdOrderPolynomialModel *poly_model = nullptr;
 			if (mic.model != nullptr && mic.model->getModelVersion() == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL) {
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
 			}
 			logfile << "Dose weighting and summing frames (CUDA)..." << std::endl;
-			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile);
+			CudaFailureState reconstruction_failure;
+			cuda_dw_done = cudaDoseWeightAndInterpolate(Fframes, Iref, doses, angpix * prescaling, poly_model, gpu_id, logfile, &reconstruction_failure);
+			if (!cuda_dw_done)
+				refuse_fallback_if_fatal(reconstruction_failure, "dose-weighted reconstruction");
 		}
 		if (!cuda_dw_done)
 #endif
@@ -2456,9 +3342,11 @@ skip_fitting:
 		RCTOC(TIMING_BINNING);
 
 		// Final output
+		RCTIC(TIMING_WRITE_RESULT);
                 Iref.setSamplingRateInHeader(output_angpix, output_angpix);
-		Iref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);
+		submitImageWrite(Iref, fn_avg, write_float16 ? Float16: Float);
 		logfile << "Written aligned and dose-weighted sum to " << fn_avg << std::endl;
+		RCTOC(TIMING_WRITE_RESULT);
 	}
 
 	// Set the start frame for the local motion model.
@@ -2471,6 +3359,23 @@ skip_fitting:
 	logfile << "Full movie wall time: " << std::fixed << std::setprecision(3) << movie_wall_sec << " s" << std::endl;
 
 	return true;
+}
+
+void MotioncorrRunner::recenterShiftsToFirstFrame(std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts) {
+	if (xshifts.size() != yshifts.size())
+		REPORT_ERROR("Assert failed for xshifts.size() == yshifts.size() in recenterShiftsToFirstFrame");
+	if (xshifts.empty()) return;
+
+	// Save the origin BEFORE mutating the arrays. Subtracting xshifts[0] in place while
+	// iterating upwards zeroes the origin on the very first iteration, so every later
+	// frame would subtract zero and keep its un-recentered absolute value.
+	const RFLOAT origin_x = xshifts[0];
+	const RFLOAT origin_y = yshifts[0];
+
+	for (size_t iframe = 0; iframe < xshifts.size(); iframe++) {
+		xshifts[iframe] -= origin_x;
+		yshifts[iframe] -= origin_y;
+	}
 }
 
 void MotioncorrRunner::interpolateShifts(std::vector<int> &group_start, std::vector<int> &group_size,
@@ -3241,18 +4146,119 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// TODO: error handling !!
-		while (!f_defect.eof()) {
-			int x, y, w, h;
-			f_defect >> x >> y >> w >> h;
-			for (int iy = y, ylim = y + h; iy < ylim; iy++)
-			{
-				if (iy < 0 || iy >= ny) continue;
-				for (int ix = x, xlim = x + w; ix < xlim; ix++)
-				{
-					if (ix < 0 || ix >= nx) continue;
-					DIRECT_A2D_ELEM(bBad, iy, ix) = true;
+		// Extraction-checked parse (issue #98). The supported contract is the
+		// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
+		// Comments, headers and a UTF-8 BOM are NOT part of that format and are
+		// rejected with a specific diagnostic rather than silently mis-parsed.
+		// Blank lines and surrounding whitespace are ignored; an empty file is
+		// valid and masks nothing; non-positive w/h is a no-op rectangle.
+		if (f_defect.peek() == 0xEF) {
+			REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
+			             "mark. The MotionCor2 txt defect format is plain ASCII "
+			             "'x y w h' records; re-save the file without a BOM.");
+		}
+
+		long long record_num = 0, line = 1;
+
+		// Consume whitespace by hand, counting newlines, so a diagnostic can name
+		// the line the offending field is actually on. Doing this before every
+		// field -- not just before each record -- keeps the count exact even when
+		// a record's fields straddle a line break, which this format permits.
+		auto skip_ws = [&]() {
+			int c;
+			while ((c = f_defect.peek()) != EOF && isspace(c)) {
+				if (c == '\n') line++;
+				f_defect.get();
+			}
+		};
+		// Built only on an error path; the happy path never pays for it.
+		// A malformed field names its own line; a record truncated by end of
+		// file names where the record started, because the whitespace skip has
+		// by then already stepped past the last content line.
+		auto where = [&](long long at_line) {
+			return " (record " + std::to_string(record_num + 1) +
+			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
+		};
+		// A path can open and still fail to be read -- a directory whose name ends
+		// .txt is the reachable case. peek() returns EOF for that too, so end of
+		// input is only "clean" when the stream really did reach end of file
+		// without an error. Treating a read failure as an empty file would mask
+		// nothing and let the movie publish as if correction had succeeded.
+		// Platforms differ in how much they expose: libstdc++ sets badbit for a
+		// directory, libc++ reports an ordinary EOF and the distinction is simply
+		// not observable there.
+		auto fail_if_unreadable = [&]() {
+			if (f_defect.bad() || !f_defect.eof()) {
+				REPORT_ERROR("Failed to read the defect file " + fn_defect +
+				             ": the path opened but could not be read. If it is a "
+				             "directory, pass the defect file itself.");
+			}
+		};
+
+		while (true) {
+			skip_ws();
+			if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
+			const long long record_line = line;
+
+			// Read each field as a token and convert it explicitly. Streaming
+			// straight into integers cannot attribute a failure: an out-of-range
+			// value sets failbit *after* consuming its digits, so a recovery read
+			// would name the following field.
+			static const char *const FIELD[4] = { "x", "y", "w", "h" };
+			long long field[4] = { 0, 0, 0, 0 };
+			for (int i = 0; i < 4; i++) {
+				if (i > 0) skip_ws();
+				std::string token;
+				if (f_defect.peek() == EOF || !(f_defect >> token)) {
+					// A read error mid-record must not be reported as truncation.
+					fail_if_unreadable();
+					REPORT_ERROR("Truncated defect record" + where(record_line) +
+					             ": expected four integers 'x y w h', but the file ended "
+					             "after " + std::to_string(i) + " of 4 fields.");
 				}
+
+				// Classify syntax before range, so a token that is both malformed
+				// and huge is reported as malformed rather than out-of-range.
+				size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
+				bool integral = (d < token.size());
+				for (size_t j = d; j < token.size(); j++) {
+					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
+				}
+				if (!integral) {
+					REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which is not an integer. The MotionCor2 txt defect "
+					             "format does not support comments, headers or "
+					             "non-integer fields.");
+				}
+				try {
+					field[i] = std::stoll(token);
+				} catch (const std::out_of_range &) {
+					REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
+					             std::string(FIELD[i]) + "' is \"" + token +
+					             "\", which does not fit in a 64-bit integer.");
+				}
+			}
+			const long long x = field[0], y = field[1], w = field[2], h = field[3];
+			++record_num;
+
+			if (w <= 0 || h <= 0) continue;
+
+			auto safe_add = [](long long a, long long b) -> long long {
+				if (b <= 0) return a;
+				if (a > LLONG_MAX - b) return LLONG_MAX;
+				return a + b;
+			};
+			long long x0 = std::max(0LL, x);
+			long long x1 = std::min((long long)nx, safe_add(x, w));
+			long long y0 = std::max(0LL, y);
+			long long y1 = std::min((long long)ny, safe_add(y, h));
+			if (x0 >= x1 || y0 >= y1) continue;
+
+			for (long long iy = y0; iy < y1; ++iy)
+			{
+				for (long long ix = x0; ix < x1; ++ix)
+					DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
 			}
 		}
 

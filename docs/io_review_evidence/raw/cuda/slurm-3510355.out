@@ -1,0 +1,182 @@
+cpu-bind=MASK - gn3000, task  0  0 [471300]: mask 0xffffffffffffffff set
+slurmstepd: error: Unable to create TMPDIR [/scratch/scarf1415/relion-container-tests/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+=== allocation and host ===
+2026-09-27T18:44:32+01:00
+gn3000.scarf.rl.ac.uk
+SLURM_JOB_ID=3510355 SLURM_JOB_NODELIST=gn3000 EXCLUSIVE=unset
+JobId=3510355 JobName=mc-io-split
+   NumNodes=1 NumCPUs=64 NumTasks=1 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=32000M,node=1,billing=1000,gres/gpu=1
+   AllocTRES=cpu=64,mem=250G,node=1,billing=4000,gres/gpu=4,gres/gpu:a100=4
+   OverSubscribe=NO Contiguous=0 Licenses=(null) Network=(null)
+Cpus_allowed_list:	0-63
+ 18:44:32 up 16 days, 18:44,  0 users,  load average: 0.00, 0.21, 0.27
+8
+=== device ===
+Sun Sep 27 18:44:32 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   26C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA A100-SXM4-40GB          On  |   00000000:41:00.0 Off |                    0 |
+| N/A   26C    P0             50W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA A100-SXM4-40GB          On  |   00000000:81:00.0 Off |                    0 |
+| N/A   25C    P0             49W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA A100-SXM4-40GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   27C    P0             53W /  400W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA A100-SXM4-40GB, GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d, 580.178.04, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, GPU-2e1b6776-2dce-cad6-5e4c-9d0d58849616, 580.178.04, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, GPU-69bdbeb9-d502-8487-0f78-98e7d4b6c73a, 580.178.04, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, GPU-0ade54fe-adbf-ca88-2135-90cbf33b2cbb, 580.178.04, 40960 MiB
+=== other compute apps on this device at job start (must be empty) ===
+pid, process_name, used_gpu_memory [MiB]
+=== bundles ===
+0dd98191b5c35a5c643a4d7649050f694d4587252d17994a7f18e222ad56cf66  /home/vol05/scarf1415/mc-io-perf.bundle
+b22f673d4b33dbd49dbc9ce56bff15c5bf54d475a3fc3cde2f058d81641d32f4  /home/vol05/scarf1415/mc-io-dmg.bundle
+--- stage main @ 1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26 ---
+HEAD=1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26 expected=1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26
+TREE=fbe9469af3401d618fca0698ccd6f120d335679f
+STATUS: 0 modified files (must be 0)
+--- stage pr90 @ 676f7632822b86bba25ead05a824084c2c0631d5 ---
+HEAD=676f7632822b86bba25ead05a824084c2c0631d5 expected=676f7632822b86bba25ead05a824084c2c0631d5
+TREE=d55bcf870c8944999a0b23005f08d1b3cc381d4a
+STATUS: 0 modified files (must be 0)
+--- stage pr91 @ cb9c0a202d2fb12649560ff683c866a6679b13df ---
+HEAD=cb9c0a202d2fb12649560ff683c866a6679b13df expected=cb9c0a202d2fb12649560ff683c866a6679b13df
+TREE=f826d8bbae56c533fb9190294ecf2f3962eb2f06
+STATUS: 0 modified files (must be 0)
+=== build main (CUDA=ON sm80, Release, TIMING=ON, 8 jobs, inside allocation) ===
+build main OK
+=== build pr90 (CUDA=ON sm80, Release, TIMING=ON, 8 jobs, inside allocation) ===
+build pr90 OK
+=== build pr91 (CUDA=ON sm80, Release, TIMING=ON, 8 jobs, inside allocation) ===
+build pr91 OK
+=== binaries ===
+1d4dd13cb675b6bb563787070ed209e9479f9b4b9f0a7f1a170c816f387d80b8  /scratch/scarf1415/mc-io-split-evidence/src-main/build-cuda/motioncorr
+6bbc260628a056d63bb37dd0e0f3563f7e7176a8704d068b87753158d7973699  /scratch/scarf1415/mc-io-split-evidence/src-pr90/build-cuda/motioncorr
+e8de1cb7fc3e0ca2734abf9c4579d463605c481ddb7957400c00bb66f231abc1  /scratch/scarf1415/mc-io-split-evidence/src-pr91/build-cuda/motioncorr
+=== CUDA linkage witness (compile-only CI cannot produce this) ===
+--- main ---
+	libcudart.so.12 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcudart.so.12 (0x000014a763800000)
+	libcufft.so.11 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcufft.so.11 (0x000014a752600000)
+--- pr90 ---
+	libcudart.so.12 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcudart.so.12 (0x000014aba4a00000)
+	libcufft.so.11 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcufft.so.11 (0x000014ab93800000)
+--- pr91 ---
+	libcudart.so.12 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcudart.so.12 (0x0000147d72c00000)
+	libcufft.so.11 => /apps20/sw/easybuilt/rocky/9/amd/zen2/software/CUDA/12.8.0/lib/libcufft.so.11 (0x0000147d61a00000)
+=== CUDA hardware unit controls ===
+ctest cuda pr90 exit=0
+Internal ctest changing into directory: /scratch/scarf1415/mc-io-split-evidence/src-pr90/build-cuda
+Test project /scratch/scarf1415/mc-io-split-evidence/src-pr90/build-cuda
+    Start 13: CudaWrapperUploadFailure
+1/1 Test #13: CudaWrapperUploadFailure .........   Passed    1.63 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+cuda        =   1.63 sec*proc (1 test)
+hardware    =   1.63 sec*proc (1 test)
+
+Total Test time (real) =   1.65 sec
+=== GPU run main ===
+main exit=0
+--- runtime CUDA selection marker ---
+1
+Using CUDA acceleration on GPU device 0 for global alignment.
+--- device samples naming this run ---
+15
+run_gpu main rc=0
+=== GPU run pr90 ===
+pr90 exit=0
+--- runtime CUDA selection marker ---
+1
+Using CUDA acceleration on GPU device 0 for global alignment.
+--- device samples naming this run ---
+12
+run_gpu pr90 rc=0
+=== GPU run pr91 ===
+pr91 exit=0
+--- runtime CUDA selection marker ---
+1
+Using CUDA acceleration on GPU device 0 for global alignment.
+--- device samples naming this run ---
+14
+run_gpu pr91 rc=0
+=== negative control: CUDA build asked for a device that does not exist ===
+bad-device exit=1 (must be nonzero)
+/lib64/libc.so.6(__libc_start_main+0x80) [0x1484a8c2a6c0]
+/scratch/scarf1415/mc-io-split-evidence/src-pr90/build-cuda/motioncorr() [0x450165]
+==================
+ERROR: 
+Invalid GPU device ID 99. Found 4 CUDA device(s).
+=== PR90 vs main, CUDA backend, 24 movies ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 81,
+  "artifacts_fail": 28,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall: FAIL
+pr90 cuda compare exit=1
+=== PR91 vs main, CUDA backend, 24 movies ===
+{
+  "artifacts_total": 109,
+  "artifacts_pass": 54,
+  "artifacts_fail": 55,
+  "corrected_images_compared": 24,
+  "corrected_images_pass": 24,
+  "total_pixels_compared": 341735520,
+  "star_files_compared": 25,
+  "auxiliary_compared": 60,
+  "per_movie_exact_gate_pass": 24,
+  "per_movie_exact_gate_total": 24,
+  "controls_all_detected": true
+}
+overall: FAIL
+pr91 cuda compare exit=1
+=== decoded buffer ordered-pixel identity, CUDA-enabled builds ===
+{
+  "cases": 4,
+  "pass": 4,
+  "fail": 0,
+  "unrun": 0,
+  "total_pixels_matched": 398696259,
+  "total_pixels_compared": 398696259
+}
+overall: PASS
+decoded compare exit=0
+=== device at job end ===
+pid, process_name, used_gpu_memory [MiB]
+2026-09-27T18:51:36+01:00
+=== SCARF GPU JOB DONE ===

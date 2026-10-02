@@ -1,0 +1,84 @@
+##### CUDA COMPILE, CORRECTED ARMS #####
+UTC 2026-09-28T02:28:07Z
+Cpus_allowed_list:	96-111
+head: 6f2965962c92daffd05b1198a6bae7b9b9fb8fc6
+
+##### ARM 2: explicit sm80, BUILD_TESTING=OFF (product CUDA compile) #####
+arm2 configure exit=0
+-- Found Threads: TRUE  
+-- Configuring done (5.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/alex/mc-i96-cuda/src/build-sm80
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=80
+CUDA:BOOL=ON
+arm2 build exit=0
+arm2 compile errors: 0
+arm2 warnings in the integrated files:
+  (none)
+-rwxrwxr-x 1 alex alex 2669904 Sep 28 02:28 build-sm80/motioncorr
+8c4bcde7a5f5de288cedb970edbf2585cfc5b948802d9b96a8c2f47e689dacfe  build-sm80/motioncorr
+--- CUDA runtime actually linked? ---
+	libcudart.so.12 => /usr/local/cuda-12.8/lib64/libcudart.so.12 (0x000077243a800000)
+	libcufft.so.11 => /usr/local/cuda-12.8/lib64/libcufft.so.11 (0x0000772429600000)
+--- device code architectures actually embedded ---
+ELF file    1: motioncorr.1.sm_80.cubin
+ELF file    2: motioncorr.2.sm_80.cubin
+ELF file    3: motioncorr.3.sm_80.cubin
+ELF file    4: motioncorr.4.sm_80.cubin
+ELF file    1: motioncorr.1.sm_80.cubin
+ELF file    2: motioncorr.2.sm_80.cubin
+ELF file    3: motioncorr.3.sm_80.cubin
+ELF file    4: motioncorr.4.sm_80.cubin
+ELF file    1: motioncorr.1.sm_80.cubin
+ELF file    2: motioncorr.2.sm_80.cubin
+ELF file    3: motioncorr.3.sm_80.cubin
+ELF file    4: motioncorr.4.sm_80.cubin
+
+##### ARM 3: explicit sm80, BUILD_TESTING=ON with a numpy-providing python #####
+Records the new #72 numpy requirement's effect on a CUDA host.
+venv numpy 2.5.3
+arm3 configure exit=0
+-- Found Python3: /home/alex/.mc-i96-venv/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Configuring done (6.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/alex/mc-i96-cuda/src/build-sm80-tests
+arm3 build exit=0
+arm3 compile errors: 0
+--- CUDA test target built? ---
+-rwxrwxr-x 1 alex alex 731696 Sep 28 02:29 build-sm80-tests/cuda_wrapper_upload_failure
+--- collected tests in the CUDA configuration ---
+17
+  SyntheticRegression
+  HotPixelRngDeterminism
+  RunnerExposure
+  Runner_failure
+  Runner_invalid
+  Runner_resume
+  Runner_tomography
+  RunnerLateBin
+  RunnerExportedUnits
+  GainCache
+  TiffRead
+  DamagedMovie
+  RunnerModelParser
+  WriteFaults
+  CiFailClosedControls
+  ImageWriteFaults
+  CudaWrapperUploadFailure
+--- required-inventory check under the CUDA configuration ---
+    - DamagedMovie                   [REQUIRED]
+    - RunnerModelParser              [REQUIRED]
+    - WriteFaults                    [REQUIRED]
+    - CiFailClosedControls           [REQUIRED]
+    - ImageWriteFaults               [REQUIRED]
+    - CudaWrapperUploadFailure       [ADDITIVE]
+validate exit=0
+
+##### NO GPU EXECUTION #####
+(empty = nothing ran on a device)
+0, GPU-eddb42fe-4f9a-adde-76d3-b924e14add54, 1 MiB, 0 %
+1, GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d, 1 MiB, 0 %
+2, GPU-063e5232-7fc5-f1e6-7a0d-260577c4e598, 1 MiB, 0 %
+3, GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d, 1 MiB, 0 %
+UTC 2026-09-28T02:29:30Z

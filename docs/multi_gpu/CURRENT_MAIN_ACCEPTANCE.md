@@ -1,6 +1,6 @@
 # Current-main static workers and complete dataset endpoint
 
-This candidate starts at `57e98666` (130/131/132/137 included) and ports the
+This candidate includes main `6c87441d` (130/131/132/137/145) and ports the
 reviewed process-per-device tools from post 128 `7bc2168b`. Original commits and
 cherry-pick provenance are retained. No CUDA kernel, pool 136/140, old 122 driver,
 reader-pool 121 or experimental 93 code is imported.
@@ -21,9 +21,9 @@ filesystem transaction against unrelated concurrent mutation of movie files.
 
 ## Current host controls and remaining gates
 
-- Required test collection: **33**, preserving current `NativeMovieStaging` and
-  adding `MultiGpuScheduling`. Collection is not an execution verdict.
-- Scheduler: 55 CPU/device-free/actual-CLI controls. Aggregate controls use an
+- Required test collection: **34**, preserving `NativeMovieStaging` and
+  `JointStarPublication`, and adding `MultiGpuScheduling`. Collection is not an execution verdict.
+- Scheduler: 56 CPU/device-free/actual-CLI controls. Aggregate controls use an
   **explicit fake Ghostscript** on hosts without the renderer; they prove
   command/failure/publication behavior, not real PDF rendering.
 - Owned tree-RSS and coordinator controls run normally and with `python -O`.
@@ -34,8 +34,10 @@ filesystem transaction against unrelated concurrent mutation of movie files.
 - Mac full-suite `SyntheticRegression` fails its historical Linux output
   reference; the exact unchanged-main control reproduces the same metrics.
   `NativeMovieStaging` skips on this platform. No gate is relaxed.
-- **UNRUN:** full Linux 33 execution, CUDA compile/native 41/42 collection and
-  execution, real Ghostscript report rendering/content, current-source native
+- Composed Mac full suite: 32 passed, inherited `SyntheticRegression` failed,
+  and Linux-only `NativeMovieStaging` skipped, out of 34 collected tests.
+- **UNRUN:** full Linux execution, current-source CUDA compilation/native
+  inventory and execution, real Ghostscript report rendering/content, current-source native
   serial/2/4 products/failure/resume, Linux live process-tree memory and timing.
   Collect the actual configuration's native inventory; do not infer a PASS
   from a predicted count or previous-source evidence.
@@ -57,25 +59,25 @@ ctest --test-dir "$TASK_BUILD" --output-on-failure
 
 python3 tools/multi_gpu/run_dataset.py \
   --binary "$TASK_BINARY" --star "$TASK_STAR" --out "$TASK_OUT/w1" \
-  --launcher-args="--devices $TASK_UUID1 --cpus $TASK_CPU24 --cpu-budget24" \
+  --launcher-args="--devices $TASK_UUID1 --cpus $TASK_CPU24 --cpu-budget 24" \
   --required-products='.mrc,.star,_shifts.eps' -- \
-  --use_own --j24 --max_io_threads24 --ingest auto \
+  --use_own --j 24 --max_io_threads 24 --ingest auto \
   --angpix "$TASK_ANGPIX" --voltage "$TASK_VOLTAGE" \
   --dose_weighting --dose_per_frame "$TASK_DOSE" --gainref "$TASK_GAIN"
 
 python3 tools/multi_gpu/run_dataset.py \
   --binary "$TASK_BINARY" --star "$TASK_STAR" --out "$TASK_OUT/w2" \
-  --launcher-args="--devices $TASK_UUID1,$TASK_UUID2 --cpus $TASK_CPU12_A;$TASK_CPU12_B --cpu-budget24" \
+  --launcher-args="--devices $TASK_UUID1,$TASK_UUID2 --cpus $TASK_CPU12_A;$TASK_CPU12_B --cpu-budget 24" \
   --required-products='.mrc,.star,_shifts.eps' -- \
-  --use_own --j12 --max_io_threads12 --ingest auto \
+  --use_own --j 12 --max_io_threads 12 --ingest auto \
   --angpix "$TASK_ANGPIX" --voltage "$TASK_VOLTAGE" \
   --dose_weighting --dose_per_frame "$TASK_DOSE" --gainref "$TASK_GAIN"
 
 python3 tools/multi_gpu/run_dataset.py \
   --binary "$TASK_BINARY" --star "$TASK_STAR" --out "$TASK_OUT/w4" \
-  --launcher-args="--devices $TASK_UUID1,$TASK_UUID2,$TASK_UUID3,$TASK_UUID4 --cpus $TASK_CPU6_A;$TASK_CPU6_B;$TASK_CPU6_C;$TASK_CPU6_D --cpu-budget24" \
+  --launcher-args="--devices $TASK_UUID1,$TASK_UUID2,$TASK_UUID3,$TASK_UUID4 --cpus $TASK_CPU6_A;$TASK_CPU6_B;$TASK_CPU6_C;$TASK_CPU6_D --cpu-budget 24" \
   --required-products='.mrc,.star,_shifts.eps' -- \
-  --use_own --j6 --max_io_threads6 --ingest auto \
+  --use_own --j 6 --max_io_threads 6 --ingest auto \
   --angpix "$TASK_ANGPIX" --voltage "$TASK_VOLTAGE" \
   --dose_weighting --dose_per_frame "$TASK_DOSE" --gainref "$TASK_GAIN"
 ```
@@ -112,3 +114,16 @@ inputs and 100–240 repeated tutorial movies answer different questions; label
 repeated-input throughput honestly. Gain/no-gain and storage/wait-policy arms
 remain separate. Do not combine historical venues, multiply single-GPU gains
 or interpret a worker-only timer as completed dataset throughput.
+
+## Reviewed current-main composition
+
+`088e29593b7e15e0020e8e990421c705e2e9f692` combines reviewed
+`de18b678` with main145, preserving both histories and the required-test union.
+Independent source/spec/license review passed; no CUDA arithmetic changed.
+The effective input optics, rather than a conflicting raw CLI value, govern
+aggregate sampling checks. Actual contradictory-CLI and multiple-optics controls
+fail the predecessor and pass the candidate normally and with Python `-O`.
+Binning and MRC geometry/sampling mismatches still refuse publication. Ordinary
+resume and complete processing/content identity remain open Issue142 work.
+This documentation correction adds spaces in command arguments and does not
+turn the native plan into executed evidence.

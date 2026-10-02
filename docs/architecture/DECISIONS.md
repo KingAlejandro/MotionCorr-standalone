@@ -4,6 +4,14 @@ Issue [#142](https://github.com/KingAlejandro/MotionCorr-standalone/issues/142).
 Reviewed baseline: `57e98666a6225a8fdb6dafbdbc356478c21cea3a`, 2 October 2026.
 Experiment design and limits: [EXPERIMENTS.md](EXPERIMENTS.md).
 Measured results: [RESULTS.md](RESULTS.md).
+Workload coverage and unresolved interactions: [WORKLOADS.md](WORKLOADS.md).
+
+Publication update: while these experiments ran, main advanced to `6c87441`
+through [PR #145](https://github.com/KingAlejandro/MotionCorr-standalone/pull/145),
+which addresses the reproduced single-particle aggregate STAR publication
+failure. The measurements below remain pinned to their recorded earlier
+sources; they do not validate a combined tree with #145. Configuration-bound
+resume remains a separate concern.
 
 ## Recommendation
 
@@ -29,7 +37,7 @@ an existing PR or replacing the scientific acceptance criteria.
 
 | Workflow | User's successful outcome | Architectural consequence | Current evidence/gap |
 |---|---|---|---|
-| Pipeline/HPC batch (initial priority) | Supply movie STAR and resources; get complete outputs; safely resume after interruption | Stable CLI/metadata, resource limits, configuration-bound completion, explicit partial failure, one aggregate publisher | STAR/optics support and per-movie output checks exist. Earlier #142 probes reproduced stale resume after changing binning and false success on aggregate rename failure. These are product blockers before more speed work. |
+| Pipeline/HPC batch (initial priority) | Supply movie STAR and resources; get complete outputs; safely resume after interruption | Stable CLI/metadata, resource limits, configuration-bound completion, explicit partial failure, one aggregate publisher | Earlier #142 probes reproduced stale resume after changing binning and false success on aggregate rename failure. #145 subsequently addresses the single-particle publication failure; configuration-bound resume remains a priority. |
 | Facility acquisition | Keep up with arrivals and deliver useful motion/QC feedback quickly | Bounded intake, complete-file detection, latency metrics, per-movie records and worker replacement | No arrival-service/latency acceptance established. Integrate with existing pipeline control first; do not make the correction engine watch directories or manage a database. |
 | Individual researcher | Install once, run a single GPU, understand unsupported input and failures | Honest capability/help output, explicit backend choice, useful errors, straightforward packaging and examples | CPU defaults are clear; CUDA remains experimental. Native GPU-list syntax suggests more capability than main executes. A successful compile is not a support guarantee. |
 | Developer/maintainer | Locate a stage, reproduce a bug quickly, review a small numerical or lifetime change | Stage entry points, tiny native probes, independent CPU tests, one resource owner, narrow source targets and durable experiment records | Useful session/failure/workspace abstractions already exist. The 4,336-line runner and broad source glob make unrelated concepts hard to separate; CUDA runtime CI and nvCOMP build coverage remain gaps. |
@@ -120,8 +128,9 @@ its reference and leaves production kernels and orchestration unchanged.
 
 Before another backend, improve four interfaces in separate changes:
 
-1. Checked aggregate publication and configuration-bound resume, with negative
-   workflow tests. These protect users independently of CUDA speed.
+1. Configuration-bound resume with negative workflow tests, retaining the
+   checked aggregate publication introduced by #145 and verifying it on the
+   eventual combined tree. These protect users independently of CUDA speed.
 2. Movie-local specification/result extraction, first demonstrated on mixed
    optics and heterogeneous sizes. Preserve CLI and numerical behavior.
 3. Worker-owned health/resources, building on #136/#140 rather than another pool.

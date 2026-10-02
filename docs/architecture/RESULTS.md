@@ -5,7 +5,9 @@
 **Keep multi-movie worker processes. Do not promote a universal FFT batch size
 or another synchronization-only production change from this experiment.**
 Keep the minimal probes for future resource-policy decisions. Production
-numerics and processing behavior were not changed.
+numerics and processing behavior are unchanged in this experiment PR. A
+follow-up input screen found a compressed-reader lifetime defect, repaired and
+validated separately in [PR #146](https://github.com/KingAlejandro/MotionCorr-standalone/pull/146).
 
 The [decision report](DECISIONS.md) connects these results to end-user workflows,
 developer experience, other software and the proposed ownership boundaries.
@@ -146,6 +148,74 @@ This experiment does not test poisoned-device replacement, changing gains,
 mixed optics/geometries, long-lived pool growth, multiple GPUs, concurrent
 processes on one GPU, network-storage throughput or experimental scientific
 diversity. Those are the next discriminating tests for #117/#136/#140.
+
+## 3. Heterogeneous inputs: test worker transitions, not just fast paths
+
+The follow-up screen uses **49 input cases** from seven synthetic families,
+with 4/12/17/24/80/160 frames, two geometries and two optics groups. It covers
+classic TIFF U8/U16 raw/Deflate with different strip heights; MRC U16/F32/F16;
+and XZ-compressed F32 MRC. Signed fractional samples and U16 values above 255
+prevent equivalence from depending only on an eight-bit, nonnegative range.
+See the [coverage table](WORKLOADS.md) for the deliberate gaps.
+
+Three mixed profiles process all 49 cases: forced float ingest, automatic
+ingest, and reversed order with automatic ingest. Two additional profiles
+process the 41 compatible-geometry cases with spatially varying gain and a
+2×2 defect region. This is **229 movies per backend**, using global alignment,
+dose weighting and both weighted/unweighted outputs. It is a correctness
+screen, not a throughput measurement or an independent scientific dataset.
+
+Canonical samples are compared in full with the production reader helper for
+42 cases; the seven XZ inputs are independently decompressed to verify their
+encoded bytes, then exercised through the application's compressed reader.
+All corrected MRC header/payload bytes except timestamp labels and all parsed
+per-movie metadata except the deliberately different input name must match
+across encodings within a family and across route/order choices. The separate
+audit verifies every input/output association, dimensions, frame count, optics,
+pixel size/voltage and aggregate membership. GPU logs must show resident CUDA
+execution without failure/fallback; ingest witnesses must show the expected
+compact versus float path.
+
+**A real lifecycle failure:** on unmodified main, later XZ inputs failed on
+macOS despite being valid and working individually. The minimal actual-CLI
+regression fails on five of six compressed movies after a plain movie. The
+reader paired `popen` with `fclose`; it now uses `pclose` in separate PR #146,
+which closes and reaps the decoder. This follows the
+[documented stream lifetime](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/popen.3.html).
+The decoder's exit status is not treated as a complete-file integrity result
+in the destructor because header-only reads intentionally stop early. The
+broader compressed-input and EER requirements in #8 remain open.
+
+Validation of production fix **`47b20d37239a6e8efdce941c85a62c8c6e1bfda0`**:
+
+- macOS: the new regression passes; **all 229 matrix movies pass**. Full suite
+  has 31 passes, one Linux-specific skip and the unchanged pre-existing
+  `SyntheticRegression` failure (image RMSE 0.3119288). No threshold changed.
+- SCARF job **3522238**, `gn0001`, A100-SXM4-40GB, CUDA 12.8, nvCOMP off:
+  **41/41 CTests pass**, then **all 229 matrix movies pass** with native resident
+  CUDA confirmed for each movie. All five association audits pass.
+- The second job requested and received one GPU, four CPUs and 8 GiB host RAM,
+  without node exclusivity; affinity was 0–1,32–33. It completed in 3m30s with
+  exit 0. No timing comparison is drawn from this functional run.
+- The local/remote patch and all tested source hashes match. The patch over
+  baseline `57e9866` is SHA256
+  `e99dfc818dc4d10ef382334c5c62d0038206a631658f1fc0ea5da92c650ce3af`.
+  The screen/audit tools are pinned by their source hashes separately.
+
+All 49 canonical sample hashes match between platforms. Some generated MRC
+file hashes differ: the only uncompressed differences are in the header's mean
+field (byte 84), and XZ preserves those differences. Complete uncompressed
+payloads match. Both manifests are retained; no cross-platform byte-identical
+input or CPU-versus-GPU corrected-output claim is made.
+
+**Decision:** keep reusable movie workers and test their ownership transitions
+across real input capabilities. Repair lifetime defects at their source instead
+of hiding them behind one-process-per-movie execution. These small synthetic
+successes do not establish EER, nvCOMP, detector-sized I/O/memory behavior,
+long-lived resource eviction, or independent scientific outcomes.
+
+The [follow-up evidence index](workload-evidence/README.md) links the source,
+binary, input and output identities, venue, logs, audits and reproduction.
 
 ## Reproduce
 

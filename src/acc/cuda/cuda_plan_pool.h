@@ -85,6 +85,113 @@ private:
 class CudaWorkerPlanPool {
 public:
     /**
+     * Exclusive lease, one active CudaMovieSession per worker thread.
+     *
+     * The retained global plans and scratch are aliased by whichever session
+     * holds them, so a second concurrent session on the same thread would
+     * share one work area between two movies. acquireLease() refuses that, and
+     * only the session that actually acquired it may retire the pool.
+     */
+    const void *active_session = nullptr;
+
+    bool acquireLease(const void *session) {
+        if (active_session != nullptr && active_session != session) return false;
+        active_session = session;
+        return true;
+    }
+
+    void releaseLease(const void *session) {
+        if (active_session == session) active_session = nullptr;
+    }
+
+    /**
+     * The movie-geometry R2C/C2R plan pair, their shared work area and the
+     * inverse preservation tile. Keyed on (nx, ny, device).
+     */
+    struct GlobalPool {
+        cufftHandle plan_r2c = 0;
+        cufftHandle plan_c2r = 0;
+        void *d_fft_work = nullptr;
+        cufftComplex *d_inverse_tile = nullptr;
+        size_t fft_r2c_work_bytes = 0;
+        size_t fft_c2r_work_bytes = 0;
+        size_t fft_work_bytes = 0;
+        size_t sz_comp = 0;
+        int nx = 0, ny = 0, device_id = -1;
+        bool valid = false;
+
+        ~GlobalPool() { (void)drop(nullptr); }
+
+        size_t retainedBytes() const {
+            if (!valid) return 0;
+            size_t bytes = 0;
+            if (d_fft_work != nullptr) bytes += fft_work_bytes;
+            if (d_inverse_tile != nullptr) bytes += sz_comp;
+            return bytes;
+        }
+
+        bool drop(CudaFailureState *failure = nullptr) {
+            if (!valid && plan_r2c == 0 && plan_c2r == 0 &&
+                d_fft_work == nullptr && d_inverse_tile == nullptr) {
+                return true;
+            }
+            const int target_device = device_id;
+            const cufftHandle owned_r2c = plan_r2c;
+            const cufftHandle owned_c2r = plan_c2r;
+            void *owned_work = d_fft_work;
+            void *owned_tile = d_inverse_tile;
+            // Invalidate the key before destroying anything, so no later lookup
+            // can match an entry that is being retired.
+            valid = false;
+            plan_r2c = plan_c2r = 0;
+            d_fft_work = nullptr;
+            d_inverse_tile = nullptr;
+            nx = ny = 0;
+            device_id = -1;
+            fft_r2c_work_bytes = fft_c2r_work_bytes = fft_work_bytes = sz_comp = 0;
+
+            RetirementContext context(target_device, failure, "dropGlobal");
+            bool ok = context.selected();
+            // Destroy the plans before the work area they point at.
+            if (owned_r2c != 0) {
+                const cufftResult res = cufftDestroy(owned_r2c);
+                if (res != CUFFT_SUCCESS) {
+                    ok = false;
+                    if (failure) {
+                        failure->recordCufft(res, "dropGlobal plan_r2c", __LINE__);
+                        failure->record(cudaPeekAtLastError(), "dropGlobal plan_r2c", __LINE__);
+                    }
+                }
+            }
+            if (owned_c2r != 0) {
+                const cufftResult res = cufftDestroy(owned_c2r);
+                if (res != CUFFT_SUCCESS) {
+                    ok = false;
+                    if (failure) {
+                        failure->recordCufft(res, "dropGlobal plan_c2r", __LINE__);
+                        failure->record(cudaPeekAtLastError(), "dropGlobal plan_c2r", __LINE__);
+                    }
+                }
+            }
+            if (owned_work != nullptr) {
+                const cudaError_t err = cudaFree(owned_work);
+                if (err != cudaSuccess) {
+                    ok = false;
+                    if (failure) failure->record(err, "dropGlobal d_fft_work", __LINE__);
+                }
+            }
+            if (owned_tile != nullptr) {
+                const cudaError_t err = cudaFree(owned_tile);
+                if (err != cudaSuccess) {
+                    ok = false;
+                    if (failure) failure->record(err, "dropGlobal d_inverse_tile", __LINE__);
+                }
+            }
+            return context.finish(ok);
+        }
+    } global;
+
+    /**
      * The device gain copy.
      *
      * The key is (generation, bytes, nx, ny, device). generation==0 means the
@@ -130,12 +237,13 @@ public:
 
     bool dropAll(CudaFailureState *failure = nullptr) {
         bool ok = true;
+        if (!global.drop(failure)) ok = false;
         if (!gain.drop(failure)) ok = false;
         return ok;
     }
 
     // Device bytes this worker keeps resident between movies.
-    size_t retainedBytes() const { return gain.retainedBytes(); }
+    size_t retainedBytes() const { return global.retainedBytes() + gain.retainedBytes(); }
 };
 
 inline CudaWorkerPlanPool &getWorkerPlanPool() {

@@ -307,6 +307,12 @@ private:
     cufftHandle plan_c2r = 0;
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
+    // True while plan_r2c/plan_c2r/d_fft_work/d_inverse_tile are aliases into
+    // the worker-lifetime pool. The session holds no destroy authority then.
+    bool plans_borrowed = false;
+    // True only after a successful acquireLease(). A session that was refused
+    // the lease owns nothing in the pool and must not retire it.
+    bool holds_lease = false;
     size_t fft_r2c_work_bytes = 0;
     size_t fft_c2r_work_bytes = 0;
     size_t fft_work_bytes = 0;

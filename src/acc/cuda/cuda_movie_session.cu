@@ -451,6 +451,18 @@ bool CudaMovieSession::initialize() {
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // The retained plans and work area are aliased by whichever session holds
+    // them, so two concurrent sessions on one thread would share one work area
+    // between two movies. A rejected session owns nothing and, in particular,
+    // has no authority to retire the pool the active owner is still using.
+    if (!mc_cuda::getWorkerPlanPool().acquireLease(this)) {
+        recordFailure(cudaErrorInvalidDevice, "concurrent session lease on same thread", __LINE__);
+        logfile << "ERROR: Concurrent active CUDA sessions on the same thread are not permitted." << std::endl;
+        release();
+        return false;
+    }
+    holds_lease = true;
+
     const size_t sz_real = (size_t)ny * nx * sizeof(float);
     const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
     const size_t total_real_bytes = sz_real * n_frames;
@@ -461,6 +473,27 @@ bool CudaMovieSession::initialize() {
         logfile << "ERROR: Invalid movie dimensions for cuFFT: "
                 << nx << "x" << ny << "x" << n_frames << std::endl;
         return false;
+    }
+
+    mc_cuda::CudaWorkerPlanPool::GlobalPool &pool = mc_cuda::getWorkerPlanPool().global;
+    const bool pool_hit = pool.valid &&
+                          pool.plan_r2c != 0 && pool.plan_c2r != 0 &&
+                          pool.nx == nx && pool.ny == ny &&
+                          pool.device_id == device_id;
+    if (!pool_hit) {
+        // Retire the stale geometry BEFORE this movie's buffers are allocated:
+        // an old large geometry must not be able to deny a smaller valid movie.
+        // A cleanup that reports failure stops the movie rather than being
+        // followed by a replacement built on an unknown context.
+        if (!pool.drop(&failure_state)) {
+            logfile << "ERROR: Retiring the stale pooled movie FFT plans failed." << std::endl;
+            release();
+            return false;
+        }
+        // drop() restores the caller's device, but the replacement below must
+        // be built on the device this session was asked for, not merely on
+        // whichever one happened to be current.
+        HANDLE_ERROR(cudaSetDevice(device_id));
     }
 
     // Allocate persistent movie buffers
@@ -474,64 +507,124 @@ bool CudaMovieSession::initialize() {
         return false;
     }
 
-    // cuFFT's automatic allocation must be disabled before either plan is made.
-    // Two transforms share one work area because all executions use the default stream
-    // and each frame is synchronized before the next execution.
-    // A single-frame batch keeps the inverse preservation tile to one frame.
-    // The A100 batch-two sample exceeded the whole-process VRAM target.
-    int n[2] = {ny, nx};
-    auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,
-                         cufftType type) -> bool {
-        cufftResult result = cufftCreate(&plan);
-        if (result == CUFFT_SUCCESS) has_plan = true;
-        if (result == CUFFT_SUCCESS) result = cufftSetAutoAllocation(plan, 0);
-        if (result == CUFFT_SUCCESS) {
-            const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
-            const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
-            result = cufftMakePlanMany(plan, 2, n, NULL, 1, input_distance,
-                                       NULL, 1, output_distance, type, 1, &work_bytes);
-        }
-        if (result != CUFFT_SUCCESS) {
-            recordCufftFailure(result, "initialize plan", __LINE__);
-            recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
-            logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
-                    << " batch=1 type=" << type
-                    << " code=" << result << std::endl;
+    if (pool_hit) {
+        // Borrowed for this movie: the pool owns the handles and the buffers.
+        plan_r2c = pool.plan_r2c;
+        plan_c2r = pool.plan_c2r;
+        d_fft_work = pool.d_fft_work;
+        d_inverse_tile = pool.d_inverse_tile;
+        fft_r2c_work_bytes = pool.fft_r2c_work_bytes;
+        fft_c2r_work_bytes = pool.fft_c2r_work_bytes;
+        fft_work_bytes = pool.fft_work_bytes;
+        has_plan_r2c = true;
+        has_plan_c2r = true;
+        plans_borrowed = true;
+    } else {
+        // cuFFT's automatic allocation must be disabled before either plan is made.
+        // Two transforms share one work area because all executions use the default stream
+        // and each frame is synchronized before the next execution.
+        // A single-frame batch keeps the inverse preservation tile to one frame.
+        // The A100 batch-two sample exceeded the whole-process VRAM target.
+        //
+        // Nothing here is published to the pool until every step has succeeded.
+        // Until then the scoped owners hold the handles and the buffers, so a
+        // failure releases them through the error-recording paths rather than
+        // leaking them or advertising a half-built entry.
+        mc_cuda::ScopedCufftPlan scoped_r2c(&failure_state);
+        mc_cuda::ScopedCufftPlan scoped_c2r(&failure_state);
+        mc_cuda::ScopedDeviceMemory<2> scratch_owner(&failure_state);
+        cufftHandle raw_r2c = 0, raw_c2r = 0;
+
+        int n[2] = {ny, nx};
+        auto make_plan = [&](cufftHandle &raw_plan, mc_cuda::ScopedCufftPlan &scoped,
+                             size_t &work_bytes, cufftType type) -> bool {
+            cufftResult result = cufftCreate(&raw_plan);
+            if (result != CUFFT_SUCCESS) {
+                recordCufftFailure(result, "initialize plan", __LINE__);
+                recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
+                logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+                        << " batch=1 type=" << type
+                        << " code=" << result << std::endl;
+                return false;
+            }
+            // Adopted immediately, so a failure below destroys it.
+            scoped.take(raw_plan);
+            result = cufftSetAutoAllocation(raw_plan, 0);
+            if (result == CUFFT_SUCCESS) {
+                const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
+                const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
+                result = cufftMakePlanMany(raw_plan, 2, n, NULL, 1, input_distance,
+                                           NULL, 1, output_distance, type, 1, &work_bytes);
+            }
+            if (result != CUFFT_SUCCESS) {
+                recordCufftFailure(result, "initialize plan", __LINE__);
+                recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
+                logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+                        << " batch=1 type=" << type
+                        << " code=" << result << std::endl;
+                return false;
+            }
+            return true;
+        };
+        if (!make_plan(raw_r2c, scoped_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
+            !make_plan(raw_c2r, scoped_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
+            release();
             return false;
         }
-        return true;
-    };
-    if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
-        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
-        release();
-        return false;
-    }
 
-    fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
-    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
-    if (cuda_result == cudaSuccess)
-        cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
-    if (cuda_result != cudaSuccess) {
-        recordFailure(cuda_result, "initialize scratch", __LINE__);
-        logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
-                << " workspace=" << fft_work_bytes << " tile=" << sz_comp
-                << ": " << cudaGetErrorString(cuda_result) << std::endl;
-        release();
-        return false;
-    }
-    auto attach_work = [&](cufftHandle plan, bool has_plan) -> bool {
-        if (!has_plan) return true;
-        cufftResult result = cufftSetWorkArea(plan, d_fft_work);
-        if (result == CUFFT_SUCCESS) return true;
-        recordCufftFailure(result, "initialize work area", __LINE__);
-        recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
-        logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
-        return false;
-    };
-    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
-        release();
-        return false;
+        fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
+        void *fresh_work = nullptr;
+        cufftComplex *fresh_tile = nullptr;
+        // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
+        cuda_result = cudaMalloc(&fresh_work, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess) {
+            scratch_owner.add(fresh_work);
+            cuda_result = cudaMalloc((void**)&fresh_tile, sz_comp);
+            if (cuda_result == cudaSuccess) scratch_owner.add(fresh_tile);
+        }
+        if (cuda_result != cudaSuccess) {
+            recordFailure(cuda_result, "initialize scratch", __LINE__);
+            logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
+                    << " workspace=" << fft_work_bytes << " tile=" << sz_comp
+                    << ": " << cudaGetErrorString(cuda_result) << std::endl;
+            release();
+            return false;
+        }
+        auto attach_work = [&](cufftHandle plan) -> bool {
+            cufftResult result = cufftSetWorkArea(plan, fresh_work);
+            if (result == CUFFT_SUCCESS) return true;
+            recordCufftFailure(result, "initialize work area", __LINE__);
+            recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
+            logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
+            return false;
+        };
+        if (!attach_work(raw_r2c) || !attach_work(raw_c2r)) {
+            release();
+            return false;
+        }
+
+        // Fully built: publish, then yield ownership to the pool.
+        pool.plan_r2c = scoped_r2c.disown();
+        pool.plan_c2r = scoped_c2r.disown();
+        scratch_owner.disown();
+        pool.d_fft_work = fresh_work;
+        pool.d_inverse_tile = fresh_tile;
+        pool.fft_r2c_work_bytes = fft_r2c_work_bytes;
+        pool.fft_c2r_work_bytes = fft_c2r_work_bytes;
+        pool.fft_work_bytes = fft_work_bytes;
+        pool.sz_comp = sz_comp;
+        pool.nx = nx;
+        pool.ny = ny;
+        pool.device_id = device_id;
+        pool.valid = true;
+
+        plan_r2c = pool.plan_r2c;
+        plan_c2r = pool.plan_c2r;
+        d_fft_work = fresh_work;
+        d_inverse_tile = fresh_tile;
+        has_plan_r2c = true;
+        has_plan_c2r = true;
+        plans_borrowed = true;
     }
     logfile << "Movie FFT: batch=1"
             << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
@@ -548,13 +641,18 @@ void CudaMovieSession::release() {
     // resource in an unknown state, so the worker pool is retired with it
     // rather than handed to the next movie. Runs last, after this session has
     // dropped its own aliases, so nothing still points at a freed buffer.
+    //
+    // Only the lease holder may do this. A session whose lease was REFUSED
+    // never owned any of it, and retiring the pool from here would destroy the
+    // active owner's plans and free the work area it is still aliasing.
     struct ReleaseFailureGuard {
         CudaFailureState &failure;
+        bool owner;
         ~ReleaseFailureGuard() {
-            if (failure.isPoisoned() || failure.hasFailed())
+            if (owner && (failure.isPoisoned() || failure.hasFailed()))
                 (void)mc_cuda::getWorkerPlanPool().dropAll(&failure);
         }
-    } failure_guard{failure_state};
+    } failure_guard{failure_state, holds_lease};
 
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
@@ -563,10 +661,21 @@ void CudaMovieSession::release() {
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
     // Destroy plans before their work areas; attempt all releases, even after error.
     releasePlan(plan_patch_r2c, has_plan_patch_r2c);
-    releasePlan(plan_r2c, has_plan_r2c);
-    releasePlan(plan_c2r, has_plan_c2r);
-    releaseBuffer(d_fft_work);
-    releaseBuffer(d_inverse_tile);
+    if (!plans_borrowed) {
+        releasePlan(plan_r2c, has_plan_r2c);
+        releasePlan(plan_c2r, has_plan_c2r);
+        releaseBuffer(d_fft_work);
+        releaseBuffer(d_inverse_tile);
+    } else {
+        // Pooled: drop the aliases, the pool keeps the handles and buffers.
+        plan_r2c = 0;
+        has_plan_r2c = false;
+        plan_c2r = 0;
+        has_plan_c2r = false;
+        d_fft_work = nullptr;
+        d_inverse_tile = nullptr;
+        plans_borrowed = false;
+    }
     releaseBuffer(d_Iframes);
     releaseBuffer(d_Fframes);
     releaseBuffer(d_Isum);
@@ -581,6 +690,10 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    mc_cuda::getWorkerPlanPool().releaseLease(this);
+    // The guard above copied the lease state at entry, so clearing it here
+    // cannot suppress the retirement this session owes.
+    holds_lease = false;
     is_initialized = false;
 }
 

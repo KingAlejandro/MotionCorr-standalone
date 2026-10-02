@@ -54,6 +54,14 @@ public:
     bool overflowed() const { return overflowed_; }
     int count() const { return count_; }
 
+    // Yields ownership of every held allocation without freeing any of them.
+    // Mirrors ScopedCufftPlan::disown(): the slots are cleared so the
+    // destructor is a no-op and the caller owns what it has published.
+    void disown() {
+        for (int i = 0; i < count_; ++i) slots_[i] = nullptr;
+        count_ = 0;
+    }
+
     cudaError_t releaseAll() {
         cudaError_t first_error = cudaSuccess;
         for (int i = 0; i < count_; ++i) {
@@ -139,6 +147,17 @@ public:
         if (owns_plan_) REPORT_ERROR("CUDA plan owner already occupied");
         plan_ = handle;
         owns_plan_ = true;
+    }
+
+    cufftHandle get() const { return plan_; }
+    bool owns() const { return owns_plan_; }
+
+    // Yields ownership without destroying the underlying plan handle.
+    cufftHandle disown() {
+        owns_plan_ = false;
+        const cufftHandle ret = plan_;
+        plan_ = 0;
+        return ret;
     }
 
     cufftResult releaseAll() {

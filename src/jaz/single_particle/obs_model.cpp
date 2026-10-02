@@ -1489,22 +1489,44 @@ void ObservationModel::saveNew(
 
 void ObservationModel::save(MetaDataTable &particlesMdt, std::string filename, std::string tablename)
 {
-	std::string tmpfilename = filename + ".tmp";
+	const std::string tmpfilename = filename + ".tmp";
 	std::ofstream of(tmpfilename);
+	if (!of.is_open())
+		REPORT_ERROR("Failed to open temporary STAR file: " + tmpfilename);
 
-    if (generalMdt.numberOfObjects() > 0)
-    {
-        generalMdt.setName("general");
-        generalMdt.write(of);
-    }
+	try
+	{
+		if (generalMdt.numberOfObjects() > 0)
+		{
+			generalMdt.setName("general");
+			generalMdt.write(of);
+		}
 
-	opticsMdt.setName("optics");
-	opticsMdt.write(of);
+		opticsMdt.setName("optics");
+		opticsMdt.write(of);
 
-	particlesMdt.setName(tablename);
-	particlesMdt.write(of);
+		particlesMdt.setName(tablename);
+		particlesMdt.write(of);
+		if (!of)
+			REPORT_ERROR("Failed to write temporary STAR file: " + tmpfilename);
 
-	std::rename(tmpfilename.c_str(), filename.c_str());
+		of.flush();
+		if (!of)
+			REPORT_ERROR("Failed to flush temporary STAR file: " + tmpfilename);
+		of.close();
+		if (!of)
+			REPORT_ERROR("Failed to close temporary STAR file: " + tmpfilename);
+
+		// Publish only after all bytes have reached the checked, closed stream.
+		if (std::rename(tmpfilename.c_str(), filename.c_str()) != 0)
+			REPORT_ERROR("Failed to rename temporary STAR file " + tmpfilename + " to " + filename);
+	}
+	catch (...)
+	{
+		if (of.is_open()) of.close();
+		std::remove(tmpfilename.c_str());
+		throw;
+	}
 }
 
 bool ObservationModel::containsAllColumnsNeededForPrediction(const MetaDataTable& partMdt)

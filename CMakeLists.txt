@@ -281,6 +281,12 @@ if(BUILD_TESTING)
     # Injects short and deferred write failures with setrlimit(RLIMIT_FSIZE),
     # so it needs POSIX resource limits and an ignorable SIGXFSZ.
     if(UNIX)
+        add_executable(observation_model_save tests/test_observation_model_save.cpp)
+        target_link_libraries(observation_model_save PRIVATE motioncorr_core)
+        add_test(NAME JointStarPublication
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_joint_star_publication.py
+                --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:observation_model_save>)
+
         add_executable(image_write_faults tests/test_image_write_faults.cpp)
         target_link_libraries(image_write_faults PRIVATE motioncorr_core)
         add_test(NAME ImageWriteFaults COMMAND image_write_faults)

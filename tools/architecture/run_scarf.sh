@@ -10,6 +10,7 @@ export OMP_NUM_THREADS=4
 mkdir -p evidence
 {
     date -Is; hostname; git -C src rev-parse HEAD
+    git -C src diff | sha256sum
     nvidia-smi --query-gpu=index,uuid,name,memory.total,memory.used,utilization.gpu --format=csv
     nvidia-smi --query-compute-apps=pid,gpu_uuid,used_gpu_memory --format=csv
     nvcc --version; cmake --version; c++ --version
@@ -30,4 +31,6 @@ for shape in '256 256 24' '256 256 160' '512 511 25' '1024 768 24' \
     build/movie_fft_bench "$x" "$y" "$f" 7 > "evidence/fft-${x}-${y}-${f}.jsonl" \
         2> "evidence/fft-${x}-${y}-${f}.err"
 done
+python3 src/tools/architecture/job_granularity.py --binary build/motioncorr \
+    --output evidence/job-granularity-gpu --gpu > evidence/job-granularity.log 2>&1
 date -Is > evidence/DONE

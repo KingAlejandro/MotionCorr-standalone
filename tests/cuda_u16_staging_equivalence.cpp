@@ -1,20 +1,20 @@
 // CUDA hardware control for Issue #85 lane C.
 //
-// applyGainDefectsAndSumU16 stages the movie in its native unsigned 16-bit form and
-// expands it on the device; applyGainDefectsAndSum takes the same movie already
+// applyGainDefectsAndSumU8/U16 stage a movie in its native unsigned sample type and
+// expand it on the device; applyGainDefectsAndSum takes the same movie already
 // widened to float on the host. The claim is that the two produce bit-identical
 // device state, so this compares BOTH outputs of the preprocessing stage -- the
 // unaligned sum and the resident frame buffer -- as raw bytes.
 //
 // Downloading the frames is the part that matters and the part no other test covers.
 // The float kernel writes back to d_Iframes only when a gain is applied; without one
-// the H2D copy is the sole writer. The uint16 path has no such copy, so a missing
+// the H2D copy is the sole writer. The native paths have no such copy, so a missing
 // unconditional store would leave d_Iframes uninitialised while the sum stayed
 // correct -- invisible to any sum-based check, and consumed by the FFT.
 //
 // Case 3 uses a gain containing zero, a negative entry and a subnormal entry. The
 // negative entry is there for the zero-sample product: 0.0f * -1.5f is -0.0f. The
-// reference accumulator starts at +0.0f, and +0.0f + (-0.0f) is +0.0f, so the uint16
+// reference accumulator starts at +0.0f, and +0.0f + (-0.0f) is +0.0f, so each native
 // path must memset d_Isum rather than seed it with frame 0's value -- a seeded store
 // would keep -0.0f. That distinction is only observable if the fixture actually
 // contains a zero sample under a negative gain entry, which assertFixture() checks.
@@ -27,6 +27,7 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <vector>
 
@@ -41,15 +42,17 @@ const long int PIX_GAIN_ZERO     = 101;
 const long int PIX_GAIN_NEGATIVE = 103;
 const long int PIX_GAIN_SUBNORMAL = 107;
 
-unsigned short sample(int iframe, long int pixel) {
-    // Spans the whole uint16 range and pins the endpoints, so the widening is
-    // exercised at 0 and 65535 rather than only in the middle.
+template <typename T>
+T sample(int iframe, long int pixel) {
+    // Pin 0/max/midpoint for both unsigned widths: the uint8 case observes
+    // 255 (and values above 127), so signed reinterpretation cannot pass.
+    const unsigned long range = (unsigned long)std::numeric_limits<T>::max() + 1;
     if (pixel == 0) return 0;
-    if (pixel == 1) return 65535;
-    if (pixel == 2) return 32768;
+    if (pixel == 1) return std::numeric_limits<T>::max();
+    if (pixel == 2) return (T)(range / 2);
     // A zero sample on the negative-gain pixel, so the -0.0f product exists.
     if (pixel == PIX_GAIN_NEGATIVE) return 0;
-    return (unsigned short)((pixel * 7919 + iframe * 104729) % 65536);
+    return (T)((pixel * 7919 + iframe * 104729) % range);
 }
 
 bool poisonFrames(CudaMovieSession &s);
@@ -70,21 +73,34 @@ bool runFloatArm(const std::vector<Image<float> > &in, const MultidimArray<float
 
 // Both arms poison the resident frame buffer before running. Without this the frame
 // comparison can be vacuous: the two arms run back to back, cudaMalloc does not zero
-// reused memory, and the uint16 arm's d_Iframes is likely to come back holding the
+// reused memory, and the native arm's d_Iframes is likely to come back holding the
 // float arm's just-freed contents -- which are exactly the expected answer. Dropping
-// the uint16 kernel's unconditional store would then still pass. 0xA5A5A5A5 is a
+// the native kernel's unconditional store would then still pass. 0xA5A5A5A5 is a
 // finite float that no legitimate value here can equal.
 bool poisonFrames(CudaMovieSession &s) {
     return cudaMemset(s.getDeviceRealFrames(), 0xA5,
-                      (size_t)NX * NY * NFRAMES * sizeof(float)) == cudaSuccess;
+                      (size_t)NX * NY * NFRAMES * sizeof(float)) == cudaSuccess &&
+           cudaMemset(s.getDeviceUnalignedSum(), 0xA5,
+                      (size_t)NX * NY * sizeof(float)) == cudaSuccess;
 }
 
-bool runU16Arm(const std::vector<Image<unsigned short> > &in, const MultidimArray<float> *gain,
-               Arm &out, std::ostream &log) {
+// Overloads select the actual public production entry point for each width.
+bool applyNative(CudaMovieSession &s, const std::vector<Image<unsigned short> > &in,
+                 const MultidimArray<float> *gain, MultidimArray<float> &sum) {
+    return s.applyGainDefectsAndSumU16(in, gain, sum, true);
+}
+bool applyNative(CudaMovieSession &s, const std::vector<Image<unsigned char> > &in,
+                 const MultidimArray<float> *gain, MultidimArray<float> &sum) {
+    return s.applyGainDefectsAndSumU8(in, gain, sum, true);
+}
+
+template <typename T>
+bool runNativeArm(const std::vector<Image<T> > &in, const MultidimArray<float> *gain,
+                  Arm &out, std::ostream &log) {
     CudaMovieSession s(NX, NY, NFRAMES, 0, log);
     if (!s.initialize()) return false;
     if (!poisonFrames(s)) return false;
-    if (!s.applyGainDefectsAndSumU16(in, gain, out.sum, true)) return false;
+    if (!applyNative(s, in, gain, out.sum)) return false;
     return s.downloadRealFrames(out.frames);
 }
 
@@ -110,23 +126,21 @@ bool identical(const Arm &a, const Arm &b, std::string &why) {
 
 } // namespace
 
-int main() {
-    if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
-        std::cerr << "CUDA device 0 is required for this control\n";
-        return 1;
-    }
+template <typename T>
+int runContract(const char *width) {
+    std::cout << "Native staging contract: " << width << "\n";
     std::ostringstream log;
     const long int n = (long int)NX * NY;
 
-    std::vector<Image<unsigned short> > u16(NFRAMES);
+    std::vector<Image<T> > native(NFRAMES);
     std::vector<Image<float> > f32(NFRAMES);
     for (int i = 0; i < NFRAMES; i++) {
-        u16[i]().reshape(NY, NX);
+        native[i]().reshape(NY, NX);
         f32[i]().reshape(NY, NX);
         for (long int p = 0; p < n; p++) {
-            const unsigned short v = sample(i, p);
-            DIRECT_MULTIDIM_ELEM(u16[i](), p) = v;
-            // This is exactly what castPage2T's UShort branch does for T=float.
+            const T v = sample<T>(i, p);
+            DIRECT_MULTIDIM_ELEM(native[i](), p) = v;
+            // Exactly the unsigned reader's conversion to float.
             DIRECT_MULTIDIM_ELEM(f32[i](), p) = (float)v;
         }
     }
@@ -147,7 +161,7 @@ int main() {
         long int neg_zero_products = 0, zero_gain = 0, subnormal_products = 0;
         for (int i = 0; i < NFRAMES; i++) {
             for (long int p = 0; p < n; p++) {
-                const float v = (float)DIRECT_MULTIDIM_ELEM(u16[i](), p);
+                const float v = (float)DIRECT_MULTIDIM_ELEM(native[i](), p);
                 const float g = DIRECT_MULTIDIM_ELEM(gain_hostile, p);
                 const float prod = v * g;
                 if (prod == 0.0f && std::signbit(prod)) neg_zero_products++;
@@ -155,7 +169,7 @@ int main() {
                 if (prod != 0.0f && std::fabs(prod) < 1.17549435e-38f) subnormal_products++;
             }
         }
-        std::cout << "fixture: " << neg_zero_products << " negative-zero products, "
+        std::cout << width << " fixture: " << neg_zero_products << " negative-zero products, "
                   << zero_gain << " zero-gain pixels, "
                   << subnormal_products << " subnormal products\n";
         if (neg_zero_products == 0 || zero_gain == 0 || subnormal_products == 0) {
@@ -176,19 +190,19 @@ int main() {
     for (const Case &c : cases) {
         Arm a, b;
         if (!runFloatArm(f32, c.gain, a, log)) {
-            std::cerr << "FAIL " << c.name << ": float arm did not complete\n" << log.str();
+            std::cerr << "FAIL " << width << " " << c.name << ": float arm did not complete\n" << log.str();
             return 1;
         }
-        if (!runU16Arm(u16, c.gain, b, log)) {
-            std::cerr << "FAIL " << c.name << ": uint16 arm did not complete\n" << log.str();
+        if (!runNativeArm(native, c.gain, b, log)) {
+            std::cerr << "FAIL " << width << " " << c.name << ": native arm did not complete\n" << log.str();
             return 1;
         }
         std::string why;
         if (identical(a, b, why)) {
-            std::cout << "PASS " << c.name << ": sum and all " << NFRAMES
+            std::cout << "PASS " << width << " " << c.name << ": sum and all " << NFRAMES
                       << " resident frames are byte-identical\n";
         } else {
-            std::cerr << "FAIL " << c.name << ": " << why << "\n";
+            std::cerr << "FAIL " << width << " " << c.name << ": " << why << "\n";
             failures++;
         }
     }
@@ -196,12 +210,12 @@ int main() {
     // Negative control. A comparison that cannot fail proves nothing, so perturb one
     // sample of one frame by one count and require the same comparison to report it.
     {
-        std::vector<Image<unsigned short> > tampered = u16;
-        unsigned short &v = DIRECT_MULTIDIM_ELEM(tampered[NFRAMES / 2](), n / 2);
-        v = (unsigned short)(v ^ 1u);
+        std::vector<Image<T> > tampered = native;
+        T &v = DIRECT_MULTIDIM_ELEM(tampered[NFRAMES / 2](), n / 2);
+        v = (T)(v ^ 1u);
         Arm a, b;
         if (!runFloatArm(f32, &gain_plain, a, log) ||
-            !runU16Arm(tampered, &gain_plain, b, log)) {
+            !runNativeArm(tampered, &gain_plain, b, log)) {
             std::cerr << "FAIL negative control: an arm did not complete\n" << log.str();
             return 1;
         }
@@ -220,7 +234,7 @@ int main() {
     // Perturb one downloaded frame value directly and require that branch to report it.
     {
         Arm a, b;
-        if (!runFloatArm(f32, &gain_plain, a, log) || !runU16Arm(u16, &gain_plain, b, log)) {
+        if (!runFloatArm(f32, &gain_plain, a, log) || !runNativeArm(native, &gain_plain, b, log)) {
             std::cerr << "FAIL frame-oracle control: an arm did not complete\n" << log.str();
             return 1;
         }
@@ -248,6 +262,16 @@ int main() {
         std::cerr << failures << " check(s) failed\n";
         return 1;
     }
-    std::cout << "All uint16 staging equivalence checks passed\n";
+    std::cout << "All " << width << " staging equivalence checks passed\n";
     return 0;
+}
+
+int main() {
+    if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
+        std::cerr << "CUDA device 0 is required for this control\n";
+        return 1;
+    }
+    const int u16 = runContract<unsigned short>("uint16");
+    const int u8 = runContract<unsigned char>("uint8");
+    return u16 || u8 ? 1 : 0;
 }

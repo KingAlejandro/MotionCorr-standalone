@@ -124,3 +124,20 @@ This change moves no input onto the GPU decoder: `compact` is LibTIFF, exactly
 as `float` is, with the same codec validation and the same failure behaviour.
 Widening the nvCOMP route to 8-bit samples and to multi-row strips is a
 separate, stacked change, because that one does move the trust boundary.
+
+
+## Combined-tree native acceptance control
+
+The existing `CudaU16StagingEquivalence` registration now calls both public
+`applyGainDefectsAndSumU16` and `applyGainDefectsAndSumU8` entry points against
+the float production path. Each width uses five distinct 61x47 frames, the
+unsigned endpoints (including uint8 0/255), no gain, ordinary gain, and a gain
+with zero, negative and subnormal products. Device frame and sum arrays are
+poisoned before every arm. The oracle compares the sum and every resident
+frame byte for byte; one-count input and changed-frame controls must fail the
+same comparison. The test name is retained, so no required registration is
+lost in the workspace/dose composition.
+
+This is a new control on the combined source, not a rerun of the retained
+campaign. Native execution and a production signed-uint8-conversion mutant
+remain pending until the allocated acceptance run records their results.

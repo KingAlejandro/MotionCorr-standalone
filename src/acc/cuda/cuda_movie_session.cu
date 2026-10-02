@@ -489,7 +489,9 @@ bool CudaMovieSession::initialize() {
         (gain_generation == 0 || gain_entry.generation != gain_generation ||
          gain_entry.nx != nx || gain_entry.ny != ny || gain_entry.device_id != device_id)) {
         if (!gain_pool.dropAll(&failure_state, this)) {
-            (void)gain_pool.releaseLease(this);
+            // Cleanup can be the first operation that reports a fatal context.
+            // Retire it now, before another session can borrow this worker.
+            release();
             return false;
         }
     }
@@ -585,10 +587,12 @@ void CudaMovieSession::release() {
         int device;
         ~ReleaseFailureGuard() {
             mc_cuda::CudaWorkerPlanPool &pool = mc_cuda::getWorkerPlanPool();
+            if (!failure.isPoisoned() && failure.hasFailed())
+                (void)pool.dropAll(&failure, holder);
+            // A checked drop may have promoted a recoverable error to fatal.
+            // Test the updated state rather than only the state before cleanup.
             if (failure.isPoisoned())
                 (void)pool.retire(device, &failure, holder);
-            else if (failure.hasFailed())
-                (void)pool.dropAll(&failure, holder);
         }
     } failure_guard{failure_state, this, device_id};
 

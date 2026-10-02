@@ -357,6 +357,10 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaGetDevice")
         add_test(NAME CudaDeviceGainPool COMMAND cuda_device_gain_pool)
         set_tests_properties(CudaDeviceGainPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Cleanup-origin fatal retirement is sticky; isolate this transition
+        # from the other selector's earlier fatal retirement in its own process.
+        add_test(NAME CudaDeviceGainCleanupFatal COMMAND cuda_device_gain_pool --case cleanup-fatal)
+        set_tests_properties(CudaDeviceGainCleanupFatal PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

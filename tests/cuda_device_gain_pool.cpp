@@ -11,7 +11,9 @@
 #include "src/motioncorr_runner.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
+#include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <set>
@@ -27,11 +29,19 @@ size_t allocated_bytes = 0;
 size_t freed_bytes = 0;
 size_t stale_frees = 0;
 size_t free_attempts = 0;
+// Cumulative ledger survives per-case resets, so --case all cannot hide a leak
+// or stale release in an earlier case by clearing its observations.
+size_t process_allocated_bytes = 0;
+size_t process_freed_bytes = 0;
+size_t process_stale_frees = 0;
 bool reject_alloc_while_retained = false;
 size_t blocked_allocations = 0;
 bool virtual_device_mode = false;
 int virtual_device = 0;
 bool fail_owner_selection = false;
+void *fatal_gain_cleanup_pointer = nullptr;
+bool fail_gain_cleanup = false;
+size_t fatal_gain_cleanup_calls = 0;
 
 // Host gain arrays being watched, and how many host-to-device copies have been
 // issued out of each. Pointer identity of the device buffer is not an oracle:
@@ -70,12 +80,21 @@ cudaError_t __wrap_cudaMalloc(void **ptr, size_t bytes) {
     if (active && status == cudaSuccess) {
         buffers[*ptr] = bytes;
         allocated_bytes += bytes;
+        process_allocated_bytes += bytes;
     }
     return status;
 }
 
 cudaError_t __wrap_cudaFree(void *ptr) {
     if (active && ptr != nullptr) ++free_attempts;
+    if (active && fail_gain_cleanup && ptr == fatal_gain_cleanup_pointer) {
+        // A returned asynchronous fatal code must survive a clean runtime slot.
+        // Do not poison the physical device or lose our fixture's allocation:
+        // it stays in buffers until this control explicitly releases it.
+        ++fatal_gain_cleanup_calls;
+        (void)cudaGetLastError();
+        return cudaErrorIllegalAddress;
+    }
     size_t bytes = 0;
     if (active && ptr != nullptr) {
         std::map<void *, size_t>::iterator it = buffers.find(ptr);
@@ -83,8 +102,8 @@ cudaError_t __wrap_cudaFree(void *ptr) {
     }
     const cudaError_t status = __real_cudaFree(ptr);
     if (active && ptr != nullptr && status == cudaSuccess) {
-        if (buffers.erase(ptr) == 0) ++stale_frees;
-        else freed_bytes += bytes;
+        if (buffers.erase(ptr) == 0) { ++stale_frees; ++process_stale_frees; }
+        else { freed_bytes += bytes; process_freed_bytes += bytes; }
     }
     return status;
 }
@@ -123,14 +142,55 @@ cudaError_t __wrap_cudaSetDevice(int device) {
 namespace {
 
 void reset() {
-    (void)mc_cuda::getWorkerPlanPool().dropAll();
-    buffers.clear();
+    require(mc_cuda::getWorkerPlanPool().dropAll(), "previous case retained gain cleanup failed");
+    require(buffers.empty() && allocated_bytes == freed_bytes && stale_frees == 0,
+            "previous case tracked allocation ledger did not close");
     allocated_bytes = freed_bytes = stale_frees = free_attempts = 0;
     blocked_allocations = 0;
     reject_alloc_while_retained = virtual_device_mode = fail_owner_selection = false;
+    fatal_gain_cleanup_pointer = nullptr;
+    fail_gain_cleanup = false;
+    fatal_gain_cleanup_calls = 0;
     watched_gain_sources.clear();
     gain_uploads = 0;
     active = true;
+}
+
+void printVisibleDevices() {
+    int count = 0;
+    require(cudaGetDeviceCount(&count) == cudaSuccess && count > 0,
+            "visible device identity enumeration failed");
+    const char *mask = std::getenv("CUDA_VISIBLE_DEVICES");
+    std::cout << "CUDA_VISIBLE_DEVICES=" << (mask ? mask : "<unset>")
+              << " visible_count=" << count << '\n';
+    for (int device = 0; device < count; ++device) {
+        cudaDeviceProp properties{};
+        require(cudaGetDeviceProperties(&properties, device) == cudaSuccess,
+                "visible device UUID query failed");
+        std::ostringstream uuid;
+        uuid << "GPU-" << std::hex << std::setfill('0');
+        bool any_nonzero = false;
+        for (int byte = 0; byte < 16; ++byte) {
+            if (byte == 4 || byte == 6 || byte == 8 || byte == 10) uuid << '-';
+            const unsigned value = static_cast<unsigned char>(properties.uuid.bytes[byte]);
+            any_nonzero = any_nonzero || value != 0;
+            uuid << std::setw(2) << value;
+        }
+        require(any_nonzero, "visible device UUID is unavailable/zero");
+        std::cout << "CUDA device index=" << device << " UUID=" << uuid.str()
+                  << " name=" << properties.name << '\n';
+    }
+}
+
+void requireClosedProcessLedger(const std::string &selector) {
+    std::cout << "Tracked allocation ledger selector=" << selector
+              << " allocated_bytes=" << process_allocated_bytes
+              << " freed_bytes=" << process_freed_bytes
+              << " stale_frees=" << process_stale_frees
+              << " live_buffers=" << buffers.size() << '\n';
+    require(buffers.empty() && process_allocated_bytes == process_freed_bytes &&
+            process_stale_frees == 0,
+            "final per-process tracked allocation ledger did not close");
 }
 
 MultidimArray<float> makeGain(int nx, int ny, float base) {
@@ -339,6 +399,71 @@ void testInvalidationAfterFailure() {
     std::cout << "  PASS: failed session retires the retained gain" << std::endl;
 }
 
+// A fatal error first observed while dropping an otherwise recoverable failed
+// session must retire the worker before release() returns. Keep that old session
+// alive: its destructor must not be the operation that finally closes the gate.
+// Run in a separate process because worker retirement intentionally never resets.
+void testFatalGainCleanupTransition() {
+    std::cout << "Testing recoverable session -> fatal retained-gain cleanup...\n";
+    reset();
+    const int nx = 32, ny = 24;
+    const auto frames = makeFrames(nx, ny, 2);
+    const auto gain = makeGain(nx, ny, 1.125f);
+    watched_gain_sources.insert(gain.data);
+    std::ostringstream failed_log, retry_log;
+    CudaMovieSession failed(nx, ny, 2, 0, failed_log);
+    failed.setGainGeneration(401);
+    require(failed.initialize(), "cleanup-fatal fixture initialization");
+    MultidimArray<float> sum;
+    require(failed.applyGainDefectsAndSum(frames, &gain, sum, true),
+            "cleanup-fatal fixture preprocessing");
+    requireSameBytes(sum, hostSum(frames, &gain, nx, ny),
+                     "cleanup-fatal healthy fixture changed pixels");
+    void *owned_gain = mc_cuda::getWorkerPlanPool().gain.ptr;
+    require(owned_gain != nullptr && buffers.count(owned_gain) == 1,
+            "cleanup-fatal fixture lacks tracked retained gain");
+    // Drain the injected allocation even on a discriminating assertion failure.
+    struct FixtureCleanup {
+        void *pointer;
+        ~FixtureCleanup() {
+            fail_gain_cleanup = false;
+            fatal_gain_cleanup_pointer = nullptr;
+            if (buffers.count(pointer) != 0) (void)cudaFree(pointer);
+        }
+    } fixture_cleanup{owned_gain};
+    failed.getFailureState().record(cudaErrorMemoryAllocation, "recoverable before cleanup", 401);
+    fatal_gain_cleanup_pointer = owned_gain;
+    fail_gain_cleanup = true;
+    failed.release();
+    fail_gain_cleanup = false;
+    require(fatal_gain_cleanup_calls == 1, "retained gain cleanup fault was not reached exactly once");
+    require(cudaPeekAtLastError() == cudaSuccess, "cleanup fatal control left a runtime error slot");
+    require(failed.getFailureState().firstError() == cudaErrorMemoryAllocation &&
+            failed.getFailureState().fatalError() == cudaErrorIllegalAddress,
+            "gain cleanup fatal displaced first failure or lost original fatal");
+    require(std::string(failed.getFailureState().fatalStage()) == "dropGain cudaFree",
+            "gain cleanup fatal lost its production origin");
+    require(mc_cuda::getWorkerPlanPool().retiredErrorFor(0) == cudaErrorIllegalAddress,
+            "gain cleanup fatal did not retire worker before release returned");
+    require(mc_cuda::getWorkerPlanPool().gain.ptr == nullptr &&
+            mc_cuda::getWorkerPlanPool().retainedBytes() == 0,
+            "failed gain cleanup advertised reusable bytes");
+    require(buffers.size() == 1 && buffers.count(owned_gain) == 1,
+            "failed gain cleanup lost fixture ownership or leaked session buffers");
+    const size_t allocated_before_retry = allocated_bytes;
+    CudaMovieSession retry(nx, ny, 2, 0, retry_log);
+    retry.setGainGeneration(402);
+    require(!retry.initialize(), "fresh session redispatched after cleanup-origin fatal");
+    require(allocated_bytes == allocated_before_retry,
+            "cleanup-retired worker allocated fresh movie buffers");
+    require(retry.getFailureState().fatalError() == cudaErrorIllegalAddress,
+            "fresh session lost original cleanup-origin fatal");
+    require(cudaFree(owned_gain) == cudaSuccess, "cleanup-fatal fixture owned gain release failed");
+    require(buffers.empty() && stale_frees == 0, "cleanup-fatal fixture leaked or double-freed");
+    fatal_gain_cleanup_pointer = nullptr;
+    std::cout << "  PASS: cleanup-origin fatal retires before a fresh session; tracked fixture released\n";
+}
+
 // Logic-only: the retiring device is selected and the caller's device restored.
 // Genuine cross-device execution is UNRUN -- it needs two visible devices.
 void testDeviceSelectionRestoredAfterDrop() {
@@ -536,7 +661,9 @@ int main(int argc, char **argv) {
         const std::string which = argc == 3 && std::string(argv[1]) == "--case"
             ? argv[2] : "all";
         require(which == "all" || which == "selection" || which == "lease" ||
-                which == "admission" || which == "fatal", "unknown native case selector");
+                which == "admission" || which == "fatal" || which == "cleanup-fatal",
+                "unknown native case selector");
+        printVisibleDevices();
         if (which == "all") {
             testGainSequenceABA();
             testGainThenNoGainThenGain();
@@ -548,6 +675,8 @@ int main(int argc, char **argv) {
         if (which == "all") testRunnerGenerationIdentity();
         // Retirement is sticky for the worker lifetime: this test must run last.
         if (which == "all" || which == "fatal") testInvalidationAfterFailure();
+        if (which == "cleanup-fatal") testFatalGainCleanupTransition();
+        requireClosedProcessLedger(which);
     } catch (const std::exception &e) {
         std::cerr << "FAIL: " << e.what() << '\n';
         return 1;

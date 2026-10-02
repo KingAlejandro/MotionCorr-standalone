@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 		Image<float> head;
 		head.read(argv[1], false, -1, false, true);
 		const int n_frames = (int)NSIZE(head());
-		const DataType dt = head.dataType();
+		const DataType dt = (DataType)head.dataType();
 		if (dt == UChar)  return dump<unsigned char>(argv[1], argv[2], n_frames);
 		if (dt == UShort) return dump<unsigned short>(argv[1], argv[2], n_frames);
 		std::cerr << "dump_native_samples: sample type " << (int)dt

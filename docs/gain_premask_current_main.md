@@ -1,6 +1,7 @@
 # Gain and premask reuse on current main
 
-Base: `57e98666a6225a8fdb6dafbdbc356478c21cea3a` (130/131/132/137 merged).
+Current composition includes main `6c87441d3e44e977994bd26175601092cc344a21`
+(130/131/132/137/145 merged); original gain source was based on `57e98666`.
 Port the original gain and sparse premask commits `bc695da` / `2dfcc14`, then
 the exact-content repair `d3ab07d`, preserving authorship and cherry-pick links.
 The remaining PR136 FFT-plan retention and PR140 alternative pool are not imported.
@@ -39,7 +40,8 @@ retirement. Exact predecessor source and guard-removal mutants must compile and
 fail at named runtime assertions. The entire driver repeats under Python `-O`;
 its pinned in-tree predecessor fixture works in a shallow checkout.
 
-Local AppleClang/ARM64 collection has 33 required CPU tests. The synthetic
+Local AppleClang/ARM64 original gain collection has 33 required CPU tests; the main145
+composition preserves the union of 34, including `JointStarPublication`. The synthetic
 historical-reference test fails identically on unchanged main and the candidate
 (max pixel difference 23.649856567, RMSE 0.3119288, shift RMSD 0.003305323 px).
 NativeMovieStaging is skipped on this platform. These are not a full CPU PASS;
@@ -56,3 +58,12 @@ existing timing campaigns and configured allocation limits.
 The historical full PR136 speedup is not a result for this smaller composition.
 No fresh performance, CPU–GPU agreement, scientific truth or PDF-content claim
 is made here. A later matched benchmark must time and grade the complete product.
+
+Main145 composition `b78709b322fe301b2558ae4d62275995c20998bf` preserves
+reviewed gain/CUDA/premask production unchanged, imports checked joint STAR
+publication exactly from main, and retains both missing-name negative controls.
+SCARF3522232 is queued at the frozen earlier `4cdbc796` source. Its result must
+remain pinned there; current-composition native acceptance is still unrun.
+The earlier pending job3522120 was cancelled before allocation after a harness
+PID/birth ownership flaw was found; corrected host controls and independent
+harness review passed before one standard resubmission. No quota limits changed.

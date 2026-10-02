@@ -2190,6 +2190,17 @@ def case_aggregate_staging_namespace_reserved(tmp: Path) -> None:
 
 
 
+def case_dataset_endpoint(_tmp: Path) -> None:
+    result = subprocess.run([PY, str(ROOT / "tests/test_dataset_endpoint.py")],
+                            text=True, capture_output=True)
+    if result.returncode != 0: raise AssertionError(result.stdout + result.stderr)
+
+
+def case_owned_tree_rss(_tmp: Path) -> None:
+    result = subprocess.run([PY, str(ROOT / "tests/test_tree_rss.py")],
+                            text=True, capture_output=True)
+    if result.returncode != 0: raise AssertionError(result.stdout + result.stderr)
+
 CASES = [
     case_roundtrip_and_metadata,
     case_empty_required_products_refused,
@@ -2242,6 +2253,8 @@ CASES = [
     case_launcher_signal_during_spawn_keeps_child_owned,
     case_per_worker_timing_and_rss_recorded,
     case_aggregate_staging_namespace_reserved,
+    case_dataset_endpoint,
+    case_owned_tree_rss,
 ]
 
 

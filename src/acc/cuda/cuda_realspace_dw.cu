@@ -56,13 +56,48 @@ FramePolynomial polynomialForFrame(const ThirdOrderPolynomialModel &model, int i
 }
 } // namespace
 
+// Reconstruction-scoped normalization: identical ascending dose sum and sqrt.
+__global__ void computeDoseNormalizationKernel(
+    float * __restrict__ d_normalization,
+    int nfx, int nfy, int nfy_half,
+    float nfx2, float nfy2, float apix,
+    const float * __restrict__ d_doses,
+    int n_frames)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= nfx || y >= nfy) return;
+
+    size_t idx = (size_t)y * nfx + x;
+    int ly = (y > nfy_half) ? (y - nfy) : y;
+
+    if (x == 0 && ly == 0) {
+        d_normalization[idx] = sqrtf((float)n_frames);
+        return;
+    }
+
+    float ly2 = (float)ly * (float)ly / nfy2;
+    float dinv2 = ly2 + (float)x * (float)x / nfx2;
+    float dinv = sqrtf(dinv2) / apix;
+    float Ne = (0.245f * powf(dinv, -1.665f) + 2.81f) * 2.0f;
+
+    float sum_weight_sq = 0.0f;
+    for (int j = 0; j < n_frames; j++) {
+        float w = expf(-d_doses[j] / Ne);
+        sum_weight_sq += w * w;
+    }
+
+    d_normalization[idx] = sqrtf(sum_weight_sq);
+}
+
 // Dose weighting kernel implementing Grant & Grigorieff (2015) model
 __global__ void applyDoseWeightKernel(
     float2 * __restrict__ d_Fframe,
     int nfx, int nfy, int nfy_half,
     float nfx2, float nfy2, float apix,
     const float * __restrict__ d_doses,
-    int n_frames, int iframe)
+    int n_frames, int iframe,
+    const float * __restrict__ d_normalization)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -83,14 +118,8 @@ __global__ void applyDoseWeightKernel(
     float dinv = sqrtf(dinv2) / apix;
     float Ne = (0.245f * powf(dinv, -1.665f) + 2.81f) * 2.0f;
 
-    float sum_weight_sq = 0.0f;
-    for (int j = 0; j < n_frames; j++) {
-        float w = expf(-d_doses[j] / Ne);
-        sum_weight_sq += w * w;
-    }
-
     float cur_weight = expf(-d_doses[iframe] / Ne);
-    float norm_weight = cur_weight / sqrtf(sum_weight_sq);
+    float norm_weight = cur_weight / d_normalization[idx];
 
     d_Fframe[idx].x *= norm_weight;
     d_Fframe[idx].y *= norm_weight;
@@ -203,6 +232,7 @@ bool cudaDoseWeightAndInterpolateDevice(
     const float nfx2 = (float)(nfx - 1) * (float)(nfx - 1) * 4.0f;
     const size_t sz_fframe = (size_t)nfy * nfx * sizeof(float2);
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
+    const size_t sz_normalization = (size_t)nfy * nfx * sizeof(float);
 
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_dw, ev_stop_dw;
@@ -232,6 +262,7 @@ bool cudaDoseWeightAndInterpolateDevice(
     float *d_Iframe = nullptr;
     float *d_Isum = nullptr;
     float *d_doses = nullptr;
+    float *d_normalization = nullptr;
 
     size_t total_vram_allocated = 0;
     HANDLE_ERROR(cudaMalloc((void**)&d_Fframe, sz_fframe));
@@ -250,6 +281,10 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaMalloc((void**)&d_doses, n_frames * sizeof(float)));
     memory_cleanup.add(d_doses);
     total_vram_allocated += n_frames * sizeof(float);
+
+    HANDLE_ERROR(cudaMalloc((void**)&d_normalization, sz_normalization));
+    memory_cleanup.add(d_normalization);
+    total_vram_allocated += sz_normalization;
 
     std::vector<float> h_doses(n_frames);
     for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
@@ -271,7 +306,17 @@ bool cudaDoseWeightAndInterpolateDevice(
     dim3 blockInterp(16, 16);
     dim3 gridInterp((nx + 15) / 16, (ny + 15) / 16);
 
+    // Complete normalization before any frame consumes its plane. This stays
+    // inside setup-inclusive reconstruction timing and dose-kernel telemetry.
+    HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+    computeDoseNormalizationKernel<<<gridDW, blockDW>>>(
+        d_normalization, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames
+    );
+    LAUNCH_HANDLE_ERROR(cudaGetLastError());
+    HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+    HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
     float total_dw_ms = 0.0f;
+    HANDLE_ERROR(cudaEventElapsedTime(&total_dw_ms, ev_start_dw, ev_stop_dw));
     float total_cufft_ms = 0.0f;
     float total_interp_ms = 0.0f;
 
@@ -283,7 +328,7 @@ bool cudaDoseWeightAndInterpolateDevice(
         // Dose weighting
         HANDLE_ERROR(cudaEventRecord(ev_start_dw));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
-            d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe
+            d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe, d_normalization
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaEventRecord(ev_stop_dw));

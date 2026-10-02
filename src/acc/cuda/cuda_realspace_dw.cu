@@ -7,6 +7,7 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
@@ -199,6 +200,23 @@ __global__ void accumulateDirectKernel(
     }
 }
 
+namespace {
+// Device bytes this worker keeps resident between movies, reported with the
+// reconstruction profile so the retained residency is visible in the same
+// place as the per-movie peak. Appended to the existing "Peak VRAM:" line
+// rather than emitted as a new one.
+void logRetainedResidency(std::ostream &logfile) {
+    const mc_cuda::CudaWorkerPlanPool &pool = mc_cuda::getWorkerPlanPool();
+    logfile << "; retained across movies: "
+            << (pool.retainedBytes() / (1024.0 * 1024.0)) << " MiB"
+            << " (global workspace " << pool.global.workspaceBytes()
+            << " B, inverse tile " << pool.global.inverseTileBytes()
+            << " B, patch plan " << pool.patch.retainedBytes()
+            << " B, DW plan " << pool.dw.retainedBytes()
+            << " B, gain " << pool.gain.retainedBytes() << " B)";
+}
+} // namespace
+
 bool cudaDoseWeightAndInterpolateDevice(
     const cufftComplex *d_Fframes,
     Image<float> &Isum,
@@ -222,9 +240,20 @@ bool cudaDoseWeightAndInterpolateDevice(
     }
     HANDLE_ERROR(cudaSetDevice(device_id));
 
+    // Any exit other than a clean completion retires the pooled plan: the
+    // early-return macros below cannot hand a plan of unknown state to the
+    // next movie.
+    struct DwFailureGuard {
+        CudaFailureState *failure;
+        bool completed;
+        ~DwFailureGuard() {
+            if (!completed || (failure && (failure->hasFailed() || failure->isPoisoned())))
+                (void)mc_cuda::getWorkerPlanPool().dw.drop(failure);
+        }
+    } dw_failure_guard{failure, false};
+
     mc_cuda::ScopedDeviceMemory<8> memory_cleanup(failure);
     mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
-    mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
     const int nfx = nx / 2 + 1, nfy = ny;
     const int nfy_half = nfy / 2;
@@ -233,6 +262,24 @@ bool cudaDoseWeightAndInterpolateDevice(
     const size_t sz_fframe = (size_t)nfy * nfx * sizeof(float2);
     const size_t sz_iframe = (size_t)ny * nx * sizeof(float);
     const size_t sz_normalization = (size_t)nfy * nfx * sizeof(float);
+
+    // The pooled plan is keyed only on the geometry, which is known here, so a
+    // stale entry is retired BEFORE this reconstruction's buffers are
+    // allocated: an old large geometry must not be able to deny a smaller
+    // valid movie. A cleanup that reports failure stops the reconstruction.
+    mc_cuda::CudaWorkerPlanPool::DwPool &dw_pool = mc_cuda::getWorkerPlanPool().dw;
+    const bool dw_plan_hit = dw_pool.valid && dw_pool.plan_c2r != 0 &&
+                             dw_pool.nx == nx && dw_pool.ny == ny &&
+                             dw_pool.device_id == device_id;
+    if (!dw_plan_hit) {
+        if (!dw_pool.drop(failure)) {
+            logfile << "ERROR: Retiring the stale pooled dose-weighting plan failed." << std::endl;
+            return false;
+        }
+        // drop() restores the caller's device; the replacement must be built
+        // on the device this reconstruction was asked for.
+        HANDLE_ERROR(cudaSetDevice(device_id));
+    }
 
     cudaEvent_t ev_start_total, ev_stop_total;
     cudaEvent_t ev_start_dw, ev_stop_dw;
@@ -290,12 +337,27 @@ bool cudaDoseWeightAndInterpolateDevice(
     for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
     HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
-    cufftHandle plan_c2r;
-    int n[2] = {ny, nx};
-    CUFFT_CHECK(cufftCreate(&plan_c2r));
-    plan_cleanup.take(plan_c2r);
-    size_t plan_work_bytes = 0;
-    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+    cufftHandle plan_c2r = 0;
+    if (dw_plan_hit) {
+        plan_c2r = dw_pool.plan_c2r;
+    } else {
+        cufftHandle raw_plan = 0;
+        CUFFT_CHECK(cufftCreate(&raw_plan));
+        // Adopted immediately, so a planning failure destroys it rather than
+        // leaking it, and nothing is published until the plan is complete.
+        mc_cuda::ScopedCufftPlan scoped_plan(failure);
+        scoped_plan.take(raw_plan);
+        int n[2] = {ny, nx};
+        size_t plan_work_bytes = 0;
+        CUFFT_CHECK(cufftMakePlanMany(raw_plan, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+        dw_pool.plan_c2r = scoped_plan.disown();
+        dw_pool.work_bytes = plan_work_bytes;
+        dw_pool.nx = nx;
+        dw_pool.ny = ny;
+        dw_pool.device_id = device_id;
+        dw_pool.valid = true;
+        plan_c2r = dw_pool.plan_c2r;
+    }
     size_t cufft_work_size = 0;
     CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
     total_vram_allocated += cufft_work_size;
@@ -381,18 +443,23 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << " [CUDA Dose-Weighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB";
+    logRetainedResidency(logfile);
+    logfile << std::endl;
     logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
     logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
     logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
-    const cufftResult plan_release = plan_cleanup.releaseAll();
+    // The plan stays in the pool for the next movie; only this reconstruction's
+    // own owners are released here. The guard is stood down last, so a cleanup
+    // that fails after this point still retires the plan even when the caller
+    // supplied no failure state to record it in.
     const cudaError_t memory_release = memory_cleanup.releaseAll();
     const cudaError_t event_release = event_cleanup.releaseAll();
-    CUFFT_CHECK(plan_release);
     HANDLE_ERROR(memory_release);
     HANDLE_ERROR(event_release);
+    dw_failure_guard.completed = true;
     return true;
 }
 
@@ -537,7 +604,9 @@ bool cudaRealSpaceInterpolationDevice(
     logfile << " [CUDA Unweighted Reconstruction Profile (Resident VRAM)]" << std::endl;
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
-            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+            << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB";
+    logRetainedResidency(logfile);
+    logfile << std::endl;
     logfile << "  Total Unweighted Reconstruction Time: " << total_ms << " ms" << std::endl;
 
     const cudaError_t memory_release = memory_cleanup.releaseAll();

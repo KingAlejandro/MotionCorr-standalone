@@ -8,6 +8,7 @@
 // cannot tell a live buffer from a recycled one.
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_plan_pool.h"
+#include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_failure_state.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
@@ -614,6 +615,151 @@ void testPatchPlanPooling() {
     std::cout << "  PASS: patch plan reuse, retire-before-allocate, failure paths" << std::endl;
 }
 
+// The pooled dose-weighting C2R plan: reuse across reconstructions, retirement
+// ordering on a geometry change, and the failure paths. The oracle is the
+// reconstructed image, so a dead or wrong plan is visible rather than inferred.
+void testDoseWeightPlanPooling() {
+    std::cout << "Testing retained dose-weighting plan across movies..." << std::endl;
+
+    auto reconstruct = [](int nx, int ny, int n_frames, std::vector<float> &out,
+                          CudaFailureState &failure, const char *what, bool expect_ok) {
+        const int nfx = nx / 2 + 1;
+        const size_t tile = (size_t)nfx * ny;
+        std::vector<cufftComplex> host(tile * n_frames);
+        unsigned state = 7u;
+        for (size_t i = 0; i < host.size(); ++i) {
+            state = 1664525u * state + 1013904223u;
+            host[i].x = (float)((int)(state & 65535u) - 32768) / 4096.0f;
+            state = 1664525u * state + 1013904223u;
+            host[i].y = (float)((int)(state & 65535u) - 32768) / 4096.0f;
+        }
+        cufftComplex *resident = nullptr;
+        require(__real_cudaMalloc((void **)&resident, host.size() * sizeof(cufftComplex)) == cudaSuccess, what);
+        require(cudaMemcpy(resident, host.data(), host.size() * sizeof(cufftComplex),
+                           cudaMemcpyHostToDevice) == cudaSuccess, what);
+        Image<float> image;
+        image().resize(ny, nx);
+        std::vector<RFLOAT> doses(n_frames);
+        for (int f = 0; f < n_frames; ++f) doses[f] = 1.277 * (f + 1);
+        std::ostringstream log;
+        const bool ok = cudaDoseWeightAndInterpolateDevice(resident, image, nx, ny, n_frames,
+                                                           doses, 1.12, nullptr, 0, log, &failure);
+        if (ok) {
+            out.assign(image().data, image().data + (size_t)nx * ny);
+            require(log.str().find("retained across movies:") != std::string::npos,
+                    "the reconstruction profile did not report retained residency");
+        }
+        require(__real_cudaFree(resident) == cudaSuccess, what);
+        require(ok == expect_ok, what);
+    };
+
+    resetPool();
+    std::vector<float> first, second;
+    cufftHandle pooled = 0;
+    {
+        CudaFailureState failure;
+        reconstruct(64, 48, 3, first, failure, "dw reconstruction 1", true);
+        require(!failure.hasFailed(), "dw reconstruction 1 recorded a failure");
+        require(mc_cuda::getWorkerPlanPool().dw.valid, "dw pool not populated");
+        require(mc_cuda::getWorkerPlanPool().dw.retainedBytes() ==
+                mc_cuda::getWorkerPlanPool().dw.work_bytes,
+                "dw retained byte count does not report the plan work area");
+        pooled = mc_cuda::getWorkerPlanPool().dw.plan_c2r;
+    }
+    {
+        arm();
+        plans.clear();
+        CudaFailureState failure;
+        reconstruct(64, 48, 3, second, failure, "dw reconstruction 2", true);
+        require(plans.empty(), "a pooled dw geometry still created a cuFFT plan");
+        require(mc_cuda::getWorkerPlanPool().dw.plan_c2r == pooled,
+                "a pooled dw geometry replaced the retained plan");
+        require(second.size() == first.size() &&
+                std::memcmp(second.data(), first.data(), first.size() * sizeof(float)) == 0,
+                "the reused dw plan produced different pixels");
+        disarm();
+    }
+
+    // Geometry change: retire the stale plan before this reconstruction's buffers.
+    {
+        events.clear();
+        recording = true;
+        CudaFailureState failure;
+        std::vector<float> third;
+        reconstruct(96, 64, 2, third, failure, "dw geometry change", true);
+        recording = false;
+        const size_t frame_bytes = (size_t)96 * 64 * sizeof(float);
+        long destroy_at = -1, alloc_at = -1;
+        for (size_t k = 0; k < events.size(); ++k) {
+            if (events[k].kind == EV_PLAN_DESTROY && destroy_at < 0) destroy_at = (long)k;
+            if (events[k].kind == EV_MALLOC && events[k].value >= frame_bytes && alloc_at < 0)
+                alloc_at = (long)k;
+        }
+        require(destroy_at >= 0, "the stale dw plan was never retired on a geometry change");
+        require(alloc_at >= 0, "the new dw buffers were never allocated");
+        require(destroy_at < alloc_at,
+                "the stale dw plan was retired only after the new buffers were allocated");
+    }
+
+    // Create succeeds, planning fails: no handle leaks and nothing is published.
+    resetPool();
+    {
+        arm(PLAN_MAKE, 1);
+        plans.clear();
+        CudaFailureState failure;
+        std::vector<float> unused;
+        reconstruct(64, 48, 2, unused, failure, "dw planning failure", false);
+        require(fired, "the dw planning fault never fired");
+        require(plans.empty(), "a cuFFT handle leaked when dw planning failed");
+        require(!mc_cuda::getWorkerPlanPool().dw.valid,
+                "a failed dw plan build was published to the pool");
+        require(mc_cuda::getWorkerPlanPool().dw.plan_c2r == 0,
+                "a failed dw plan build left a handle in the pool");
+        require(failure.hasFailed(), "a dw planning failure was not recorded");
+        disarm();
+        require(stale == 0, "a failed dw plan build double-destroyed a handle");
+    }
+
+    // A retirement that reports failure must not be followed by a replacement.
+    resetPool();
+    {
+        CudaFailureState seed_failure;
+        std::vector<float> seed;
+        reconstruct(64, 48, 2, seed, seed_failure, "dw retirement seed", true);
+        require(mc_cuda::getWorkerPlanPool().dw.valid, "dw retirement seed did not populate the pool");
+
+        arm(PLAN_DESTROY, 1);
+        CudaFailureState failure;
+        std::vector<float> unused;
+        reconstruct(48, 32, 2, unused, failure, "dw retirement failure", false);
+        require(fired, "the dw retirement fault never fired");
+        require(counts[PLAN_CREATE] == 0,
+                "a replacement dw plan was created after a failed retirement");
+        require(!mc_cuda::getWorkerPlanPool().dw.valid,
+                "a failed dw retirement left the pool advertised as valid");
+        require(failure.firstCufftError() == CUFFT_INTERNAL_ERROR,
+                "the dw retirement failure was not recorded");
+        disarm();
+    }
+
+    // A reconstruction that failed must not hand its plan to the next movie.
+    resetPool();
+    {
+        CudaFailureState failure;
+        std::vector<float> seed;
+        reconstruct(64, 48, 2, seed, failure, "dw failure retirement seed", true);
+        require(mc_cuda::getWorkerPlanPool().dw.valid, "dw pool not populated before the failure");
+        failure.record(cudaErrorIllegalAddress, "injected fatal", 7);
+        std::vector<float> unused;
+        reconstruct(64, 48, 2, unused, failure, "dw reconstruction on a poisoned state", true);
+        require(!mc_cuda::getWorkerPlanPool().dw.valid,
+                "a poisoned reconstruction left its plan in the pool");
+    }
+    resetPool();
+    require(buffers.empty() && plans.empty(), "resources outlived the dw controls");
+    std::cout << "  PASS: dw plan reuse, retire-before-allocate, failure paths" << std::endl;
+}
+
 // Logic only: the owning device is selected for the retirement and the caller's
 // device is restored. Genuine cross-device retirement is UNRUN here -- it needs
 // two visible devices, and gpu_id is a single process-wide value.
@@ -688,6 +834,7 @@ int main() {
         testDropFailureBlocksRebuild();
         testGlobalPlanMakeFailureNoLeak();
         testPatchPlanPooling();
+        testDoseWeightPlanPooling();
         testGlobalDropRestoresDevice();
         testPoisonRetiresEverything();
     } catch (const std::exception &e) {

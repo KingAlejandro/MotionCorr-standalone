@@ -28,3 +28,19 @@ observations. PID/birth checks narrow signalling to verified owned identities;
 portable group signalling still has a syscall race between the final identity
 check and the signal. Native Linux worker/aggregate failure acceptance is a
 separate required row; the host controls are not GPU execution evidence.
+
+Every launched-worker outcome, including an ordinary nonzero return and a zero
+return, reaches checked cleanup while the identity observer is still active.
+Only after cleanup and bounded waiter completion does the observer stop and the
+launcher publish its verdict. An unexpected recorded live descendant makes the
+outcome FAIL even if cleanup drains it and the original worker returned zero.
+The original worker return code and diagnostic remain visible separately from
+the cleanup result. Observation errors refuse every signal and fail closed.
+
+The process-ownership suite also executes the actual launcher with a worker
+that returns 7 or 0 while its observed TERM-ignoring child survives reparenting;
+the zero-return case gives that child a separate session. It requires the same
+birth identity, checked TERM receipt, no surviving owned child, FAIL without
+worker completion, and preservation of the original return and diagnostic. A
+quiescent zero-return worker still passes. These are device-free lifecycle
+controls: they support no CUDA, movie-output, throughput, or unseen-child claim.

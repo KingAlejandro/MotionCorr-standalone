@@ -141,7 +141,7 @@ def _terminate_process_groups(procs: list[tuple[int, subprocess.Popen, Path]],
     def signal_owned(group, signum):
         if not live(group):
             return
-        if ownership is None or not ownership.verified_group(group):
+        if ownership is None or ownership.errors or not ownership.verified_group(group):
             errors.append(f"Refusing signal {signum} to group {group}: original PID/birth ownership unverified")
             unverified_groups.add(group)
             return
@@ -672,6 +672,9 @@ def main(argv: list[str] | None = None) -> int:
     resources_started = False
     products_started = False
     interrupted_signal: int | None = None
+    cleanup_error: str | None = None
+    cleanup_observed: list[dict] = []
+    cleanup_complete = False
     # Exact, unsampled CPU total for everything this launcher reaps, including
     # the ghostscript grandchildren the per-worker /proc sampling cannot see: a
     # worker's own cutime/cstime roll into its rusage when the launcher reaps it.
@@ -768,15 +771,31 @@ def main(argv: list[str] | None = None) -> int:
     except LauncherInterrupted as exc:
         interrupted_signal = exc.signum
         _ignore_launcher_signals()
-        _terminate_process_groups(procs, ownership=ownership)
+    except BaseException:
+        _ignore_launcher_signals()
+        raise
+    finally:
+        # Ordinary worker failure is also a cleanup boundary. Keep observing
+        # births while checking/draining every exit path, including exit0 with
+        # an unexpected live descendant. Worker return codes stay the original
+        # result; cleanup can only add a failure, never replace or erase it.
+        try:
+            ownership.refresh()
+            cleanup_observed = ownership.known_live()
+            _ignore_launcher_signals()
+            _terminate_process_groups(procs, ownership=ownership)
+            ownership.refresh()
+            if ownership.errors or ownership.known_live():
+                raise RuntimeError("Owned PID/birth descendants or observation errors remain after cleanup")
+            cleanup_complete = True
+        except Exception as exc:
+            cleanup_error = f"{type(exc).__name__}: {exc}"
         for waiter in waiters:
             if waiter.ident is not None:
                 waiter.join(timeout=_KILL_REAP_SECONDS)
-    except BaseException:
-        _ignore_launcher_signals()
-        _terminate_process_groups(procs, ownership=ownership)
-        raise
-    finally:
+            if waiter.is_alive():
+                cleanup_error = (cleanup_error + "; " if cleanup_error else "") + "Worker waiter did not stop after cleanup"
+                cleanup_complete = False
         ownership.stop()
         if ownership.ident is not None:
             ownership.join(timeout=10)
@@ -990,8 +1009,15 @@ def main(argv: list[str] | None = None) -> int:
         status["gpu_witness"] = "skipped by --no-witness; no device claim is supported"
         verdict_ok = False
 
-    if ownership.errors or ownership.is_alive():
+    if ownership.errors or ownership.is_alive() or cleanup_error or not cleanup_complete or cleanup_observed:
         verdict_ok = False
+    status["process_cleanup"] = {
+        "complete": cleanup_complete,
+        "observed_live_before_cleanup": cleanup_observed,
+        "unexpected_descendants": bool(cleanup_observed) and interrupted_signal is None,
+        "error": cleanup_error,
+        "scope": "Checked PID/birth ownership before every TERM/KILL; no recorded live descendants before verdict. Original worker return codes preserved.",
+    }
     status["process_ownership_errors"] = ownership.errors
     status["workers_complete"] = verdict_ok
     status["dataset_ready"] = False  # staging/aggregate/report are a separate endpoint

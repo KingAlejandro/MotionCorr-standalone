@@ -7,8 +7,9 @@ in the first version of this directory:
 
   1. a script that dies at its first executable statement (missing `import sys`);
   2. a script that writes into a directory it never creates;
-  3. an instrumentation patcher whose literal source anchors have gone stale, and
-     whose `assert`-based refusal disappears under `python -O`.
+  3. an instrumentation patcher whose source anchors or exact ordered stage
+     inventory have gone stale, including balanced whole-pair mutations, and whose
+     `assert`-based refusal disappears under `python -O`.
 
 Needs no capture, no GPU and no network. Run from the repository root:
 
@@ -61,23 +62,32 @@ with tempfile.TemporaryDirectory() as td:
 
 print("3. patch_nvtx.py: patches known sources, refuses unknown ones, survives -O")
 samples = {}
-for tag, rev in (("historical", "1d7e13f"), ("current", "HEAD")):
+for tag, rev in (("historical", "1d7e13f"), ("retained-current", "c499"),
+                 ("current-main", "origin/main"), ("working", "HEAD")):
     g = subprocess.run(["git", "-C", str(ROOT), "show", rev + ":src/motioncorr_runner.cpp"],
                        capture_output=True, text=True)
+    check(tag + " source is reachable", g.returncode == 0 and bool(g.stdout),
+          "git show " + rev + ":src/motioncorr_runner.cpp failed")
     if g.returncode == 0 and g.stdout: samples[tag] = g.stdout
 if not samples:
     check("a motioncorr_runner.cpp revision is reachable", False, "no git revision available")
 for tag, src in samples.items():
     with tempfile.TemporaryDirectory() as td:
         f = pathlib.Path(td) / "motioncorr_runner.cpp"; f.write_text(src)
-        r = run([str(HERE / "patch_nvtx.py"), str(f)])
-        check(tag + " source patches", r.returncode == 0 and "patched:" in r.stdout, r.stderr.strip()[:140])
-        out = f.read_text()
-        check(tag + " push/pop balanced",
-              out.count("RCTIC(") == out.count("RCTOC("),
-              "%d push vs %d pop" % (out.count("RCTIC("), out.count("RCTOC(")))
-        r2 = run([str(HERE / "patch_nvtx.py"), str(f)])
-        check(tag + " refuses to double-patch", r2.returncode != 0, "re-patched an already patched tree")
+        for flags in ([], ['-O']):
+            suffix = ' under -O' if flags else ''
+            f.write_text(src)
+            r = run(flags + [str(HERE / "patch_nvtx.py"), str(f)])
+            check(tag + " source patches" + suffix,
+                  r.returncode == 0 and "patched:" in r.stdout, r.stderr.strip()[:140])
+            out = f.read_text()
+            check(tag + " preserves marker call counts" + suffix,
+                  out.count("RCTIC(") == src.count("RCTIC(") + 1 and
+                  out.count("RCTOC(") == src.count("RCTOC(") + 1)
+            r2 = run(flags + [str(HERE / "patch_nvtx.py"), str(f)])
+            check(tag + " refuses to double-patch" + suffix,
+                  r2.returncode != 0 and f.read_text() == out,
+                  "re-patched or modified an already patched tree")
         first = re.search(r'RCTIC\((TIMING_[A-Z0-9_]+)\);', src)
         if first:
             start, end = first.group(0), 'RCTOC(' + first.group(1) + ');'
@@ -85,7 +95,31 @@ for tag, src in samples.items():
                 'missing-end': src.replace(end, '/* omitted end */', 1),
                 'misordered': src.replace(start, '__START__', 1).replace(end, start, 1).replace('__START__', end, 1),
                 'wrong-label': src.replace(end, 'RCTOC(TIMING_REVIEW_WRONG_LABEL);', 1),
+                # These mutations remain balanced, so a stack or total-count
+                # check cannot establish the supported source generation.
+                'missing-whole-pair': src.replace(start, '', 1).replace(end, '', 1),
+                'extra-existing-whole-pair': src.replace(end, end + '\n' + start + '\n' + end, 1),
+                'extra-new-whole-pair': src.replace(end, end + '\nRCTIC(TIMING_REVIEW_EXTRA);'
+                                                  '\nRCTOC(TIMING_REVIEW_EXTRA);', 1),
+                'replaced-whole-pair': src.replace(start, 'RCTIC(TIMING_REVIEW_REPLACED);', 1)
+                                         .replace(end, 'RCTOC(TIMING_REVIEW_REPLACED);', 1),
+                'nonliteral-whole-pair': src.replace(end, end + '\nRCTIC(review_label);'
+                                                     '\nRCTOC(review_label);', 1),
             }
+            events = list(re.finditer(r'\bRCT(?:IC|OC)\((TIMING_[A-Z0-9_]+)\);', src))
+            leaf_pairs = (len(events) >= 4 and events[0].group(0) == start and
+                          events[1].group(0) == end and
+                          events[2].group(0).startswith('RCTIC(') and
+                          events[3].group(0) == 'RCTOC(' + events[2].group(1) + ');')
+            check(tag + ' whole-pair order control has two distinct leaf pairs',
+                  leaf_pairs and events[0].group(1) != events[2].group(1))
+            if leaf_pairs:
+                # Swap only the two pairs' labels/calls, keeping their source
+                # positions, total counts and textual nesting valid.
+                bad = src
+                for i in reversed(range(4)):
+                    bad = bad[:events[i].start()] + events[(i + 2) % 4].group(0) + bad[events[i].end():]
+                bad_sources['reordered-whole-pairs'] = bad
             for name, bad in bad_sources.items():
                 for flags in ([], ['-O']):
                     f.write_text(bad)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Add NVTX ranges to MotionCorr by reusing the existing RCTIC/RCTOC stage
-markers. Marker labels are checked for balanced, properly nested textual order
-before writing. This is not a proof of every runtime control-flow path.
+markers. The exact ordered marker inventory for a supported source generation,
+including balanced textual nesting, is checked before writing. This is not a
+proof of every runtime control-flow path.
 Enabled only under -DMC_NVTX;
 the stock TIMING path and the no-op path are untouched."""
 import sys, re, pathlib
@@ -10,14 +11,77 @@ p = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/motioncorr_runner.cp
 s = p.read_text()
 orig = s
 
+# These inventories were recorded from 1d7e13f (blocking writer) and c499's
+# async-writer generation, which current main preserves. Keep them independent
+# of the input: deriving an expected inventory from that input would accept a
+# deleted or added whole pair as another supported variant.
+EXPECTED_STAGE_ORDER = {
+    "historical": """
+        +READ_GAIN -READ_GAIN +READ_MOVIE -READ_MOVIE
+        +GAIN_AND_SUM -GAIN_AND_SUM +DETECT_HOT -DETECT_HOT
+        +FIX_DEFECT -FIX_DEFECT +GLOBAL_FFT -GLOBAL_FFT
+        +POWER_SPECTRUM +POWER_SPECTRUM_SUM -POWER_SPECTRUM_SUM
+        +POWER_SPECTRUM_SQUARE -POWER_SPECTRUM_SQUARE
+        +POWER_SPECTRUM_CROP -POWER_SPECTRUM_CROP
+        +POWER_SPECTRUM_RESIZE -POWER_SPECTRUM_RESIZE -POWER_SPECTRUM
+        +GLOBAL_ALIGNMENT -GLOBAL_ALIGNMENT +GLOBAL_IFFT -GLOBAL_IFFT
+        +PREP_PATCH -PREP_PATCH +PATCH_ALIGN -PATCH_ALIGN
+        +PREP_PATCH +CLIP_PATCH -CLIP_PATCH +PATCH_FFT -PATCH_FFT -PREP_PATCH
+        +PATCH_ALIGN -PATCH_ALIGN +FIT_POLYNOMIAL -FIT_POLYNOMIAL
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +BINNING -BINNING +DOSE_WEIGHTING +DW_WEIGHT -DW_WEIGHT
+        +DW_IFFT -DW_IFFT +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        -DOSE_WEIGHTING +BINNING -BINNING
+        +PREP_WEIGHT -PREP_WEIGHT +MAKE_REF -MAKE_REF
+        +CCF_CALC -CCF_CALC +CCF_IFFT -CCF_IFFT
+        +CCF_FIND_MAX -CCF_FIND_MAX +FOURIER_SHIFT -FOURIER_SHIFT
+    """,
+    "async-writer": """
+        +SAVE_MODEL_PLOT -SAVE_MODEL_PLOT +LOGFILE_PDF -LOGFILE_PDF
+        +W_SCAN -W_SCAN +W_HISTEPS -W_HISTEPS +W_GS_LOGFILE -W_GS_LOGFILE
+        +W_GS_HEADER +W_GS_BATCH -W_GS_BATCH -W_GS_HEADER
+        +W_GS_ALLB -W_GS_ALLB +W_GS_LOGFILE -W_GS_LOGFILE
+        +READ_GAIN -READ_GAIN +READ_MOVIE -READ_MOVIE
+        +GAIN_AND_SUM -GAIN_AND_SUM +DETECT_HOT -DETECT_HOT
+        +FIX_DEFECT -FIX_DEFECT +GLOBAL_FFT -GLOBAL_FFT
+        +POWER_SPECTRUM +POWER_SPECTRUM_SUM -POWER_SPECTRUM_SUM
+        +POWER_SPECTRUM_SQUARE -POWER_SPECTRUM_SQUARE
+        +POWER_SPECTRUM_CROP -POWER_SPECTRUM_CROP
+        +POWER_SPECTRUM_RESIZE -POWER_SPECTRUM_RESIZE -POWER_SPECTRUM
+        +GLOBAL_ALIGNMENT -GLOBAL_ALIGNMENT +GLOBAL_IFFT -GLOBAL_IFFT
+        +PREP_PATCH -PREP_PATCH +PATCH_ALIGN -PATCH_ALIGN
+        +PREP_PATCH +CLIP_PATCH -CLIP_PATCH +PATCH_FFT -PATCH_FFT -PREP_PATCH
+        +PATCH_ALIGN -PATCH_ALIGN +FIT_POLYNOMIAL -FIT_POLYNOMIAL
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION
+        +BINNING -BINNING +WRITE_RESULT -WRITE_RESULT
+        +DOSE_WEIGHTING +DW_WEIGHT -DW_WEIGHT +DW_IFFT -DW_IFFT
+        +REAL_SPACE_INTERPOLATION -REAL_SPACE_INTERPOLATION -DOSE_WEIGHTING
+        +BINNING -BINNING +WRITE_RESULT -WRITE_RESULT
+        +PREP_WEIGHT -PREP_WEIGHT +MAKE_REF -MAKE_REF
+        +CCF_CALC -CCF_CALC +CCF_IFFT -CCF_IFFT
+        +CCF_FIND_MAX -CCF_FIND_MAX +FOURIER_SHIFT -FOURIER_SHIFT
+    """,
+}
+
 # Ignore comments, string/character literals and preprocessor definitions: only
 # literal stage call sites participate in the textual push/pop contract.
 code = re.sub(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
               lambda m: '\n' * m.group(0).count('\n'), s)
 code = re.sub(r'(?m)^[ \t]*#.*$', '', code)
 stack = []
-for marker in re.finditer(r'\bRCT(IC|OC)\(\s*(TIMING_[A-Z0-9_]+)\s*\)', code):
+markers = []
+for call in re.finditer(r'\bRCT(IC|OC)\s*\(', code):
+    marker = re.match(r'RCT(IC|OC)\s*\(\s*(TIMING_[A-Z0-9_]+)\s*\)',
+                      code[call.start():])
+    if marker is None:
+        raise SystemExit('patch_nvtx: unsupported nonliteral stage marker; '
+                         'refusing without modifying source')
     kind, label = marker.groups()
+    markers.append((kind, label))
     if kind == 'IC':
         stack.append(label)
     elif not stack or stack.pop() != label:
@@ -27,8 +91,18 @@ if stack:
     raise SystemExit('patch_nvtx: unclosed stage marker ' + stack[-1] +
                      '; refusing without modifying source')
 
+stage_order = tuple(('+' if kind == 'IC' else '-') + label[len('TIMING_'):]
+                    for kind, label in markers)
+generation = next((name for name, order in EXPECTED_STAGE_ORDER.items()
+                   if stage_order == tuple(order.split())), None)
+if generation is None:
+    raise SystemExit('patch_nvtx: stage inventory/order does not match a supported '
+                     'source generation (found %d calls; expected historical 70 '
+                     'or async-writer 92); refusing without modifying source'
+                     % len(markers))
+
 # 1. Insert the MC_NVTX macro branch before the final #else of the TIMING block.
-labels = sorted(set(re.findall(r'\bRCT(?:IC|OC)\((TIMING_[A-Z0-9_]+)\)', s)))
+labels = sorted({label for _, label in markers})
 defs = "\n".join('\t#define %s "%s"' % (l, l[len("TIMING_"):].lower().replace("_"," "))
                  for l in labels)
 branch = '''#elif defined(MC_NVTX)
@@ -95,11 +169,19 @@ if site is None:
                      + "\n  ".join(w.strip() for _, w in OUT_SITES)
                      + "\nThis source is not supported; refusing rather than emitting a half-patched tree.")
 oname, wr = site
+expected_variant = {
+    'historical': (MOVIE_SIGS[1], 'write output'),
+    'async-writer': (MOVIE_SIGS[0], 'submit output'),
+}
+if (sig, oname) != expected_variant[generation]:
+    raise SystemExit('patch_nvtx: source anchors do not match the ' + generation +
+                     ' stage inventory; refusing without modifying source')
 s = s.replace(wr, "\t\t{ MC_SCOPE(\"" + oname + "\");\n" + wr + "\n\t\t}", 1)
 matched.append("output-scope: " + oname)
 
 if s == orig:
     raise SystemExit("patch_nvtx: no change applied")
 p.write_text(s)
-print("patched: %d stage labels; %s" % (len(labels), "; ".join(matched)))
+print("patched: %d stage labels; generation=%s; %s" %
+      (len(labels), generation, "; ".join(matched)))
 for l in labels: print("   ", l)

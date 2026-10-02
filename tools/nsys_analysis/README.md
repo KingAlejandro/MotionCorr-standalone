@@ -25,9 +25,13 @@ python3 tools/nsys_analysis/selftest.py
 Runs every script's CLI against throwaway inputs: each one parses and imports what it
 uses, `arms24_json.py` reaches its input handling and creates its output directory,
 `patch_nvtx.py` patches each known `motioncorr_runner.cpp` generation and refuses an
-unsupported, unbalanced, misordered or already-patched one with a non-zero exit
-(including under `python -O`),
-and `mkarms24.py` emits both charts without reinstating the cross-run idle label. No
+unsupported, unbalanced, misordered or already-patched one with a non-zero exit.
+It also rejects deleted, added, renamed or reordered whole marker pairs even when
+their nesting and counts remain valid, and verifies rejected files stay unchanged
+(including under `python -O`). The positive fixtures are retained `1d7e13f`, retained
+`c499`, local `origin/main` and `HEAD`; run with those Git revisions available.
+The test also checks that `mkarms24.py` emits both charts without reinstating the
+cross-run idle label. No
 capture, GPU or network needed. It fails on the first version of this directory.
 
 Not registered with CTest: this is a documentation/tooling lane that touches no build
@@ -89,15 +93,19 @@ and under `-O` would print a success line while inserting nothing. It reports wh
 signature variant it matched, so the profile records which source generation was
 instrumented.
 
-Known variants: 29 stage labels and a blocking `Iref.write` at `1d7e13f`; 38 labels
-and an async `submitImageWrite` on current main. On current main the scope at that
+Known variants: the exact ordered 70 marker calls (29 stage labels) and a blocking
+`Iref.write` at `1d7e13f`; the exact ordered 92 calls (38 labels) and an async
+`submitImageWrite` in the `c499` generation, preserved on current main. Unknown
+inventories require an explicit reviewed inventory update; matching a label count
+or a function signature is insufficient. On current main the scope at that
 position is therefore named **`submit output`**, because it measures the handoff to
 the writer thread, not the write. The writer drain lies inside the process wall but
 inside no NVTX range — it cannot be read off the stage table.
 
-`nvtxRangePush`/`Pop` is a stack. Before writing, the script rejects missing,
-misordered and mismatched literal stage markers using explicit checks. This is a
-textual nesting check, not proof of every runtime branch or exception path. Verify
+`nvtxRangePush`/`Pop` is a stack. Before writing, the script checks the exact known
+ordered call inventory and rejects missing, added, reordered, renamed or nonliteral
+stage markers using explicit checks, alongside balanced textual nesting. These
+are textual source checks, not proof of every runtime branch or exception path. Verify
 runtime ranges before trusting a new capture. The per-movie range uses an RAII
 guard for early returns; existing RCTIC/RCTOC stages remain explicit push/pop pairs.
 

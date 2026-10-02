@@ -212,6 +212,48 @@ Six movies for the 24-frame single-row variants, two for the rest. All reads are
 No cold or network-storage figure is given; dropping the page cache needs root
 on this host.
 
+### 4.0 Where the input path spends device time
+
+![device ingest stages](charts/ingest-stages.png)
+
+Device intervals from one Nsight capture per arm per variant, movie
+`20170629_00021`. Only the four stages the ingest owns are drawn; the
+alignment, FFT and dose work that follows is excluded and is **104 ms
+(24 frames) / 230 ms (48 frames) in every arm**, which is the internal control
+that these columns are the only thing that changed.
+
+| input | arm | route | deflate decode | Adler-32 | convert+gain+sum | H2D copy | ingest total |
+|---|---|---|---|---|---|---|---|
+| uint8 LZW, 24f | main | float | — | — | 2.8 ms | 249.8 ms | **252.6 ms** |
+| | branch | compact | — | — | 3.7 ms | 59.3 ms | **63.0 ms** |
+| uint8 LZW, 48f | main | float | — | — | 6.5 ms | 496.4 ms | **502.9 ms** |
+| | branch | compact | — | — | 7.4 ms | 112.2 ms | **119.6 ms** |
+| uint8 Deflate, 24f | main | float | — | — | 2.8 ms | 211.2 ms | **214.0 ms** |
+| | branch | nvcomp | 24.7 ms | 1.1 ms | 1.8 ms | 15.6 ms | **43.2 ms** |
+| uint8 Deflate, 48f | main | float | — | — | 6.5 ms | 499.9 ms | **506.4 ms** |
+| | branch | nvcomp | 49.2 ms | 2.1 ms | 3.7 ms | 19.3 ms | **74.3 ms** |
+| uint16 Deflate, rps8 | main | compact | — | — | 3.9 ms | 103.2 ms | **107.1 ms** |
+| | branch | nvcomp | 21.4 ms | 1.8 ms | 2.0 ms | 16.6 ms | **41.8 ms** |
+| uint16 LZW (null) | main | compact | — | — | 3.9 ms | 100.5 ms | **104.4 ms** |
+| | branch | compact | — | — | 3.9 ms | 115.6 ms | **119.5 ms** |
+| uint16 Deflate, rps1 (null) | main | nvcomp | 22.9 ms | 1.9 ms | 1.9 ms | 16.2 ms | **42.9 ms** |
+| | branch | nvcomp | 22.9 ms | 1.9 ms | 2.0 ms | 16.9 ms | **43.7 ms** |
+
+Three things this makes explicit that a wall-clock number cannot:
+
+* **The GPU Deflate decode is cheap relative to the copy it removes.** For
+  uint8 Deflate at 24 frames, decoding on the device costs 24.7 ms and saves a
+  211.2 ms copy. The whole ingest goes 214.0 → 43.2 ms, **80% less device time**,
+  and the decode is the largest single piece of what remains.
+* **The Adler-32 recomputation is not what costs anything.** 1.1-2.1 ms per
+  movie buys back the integrity check that handing nvCOMP a raw Deflate stream
+  would otherwise discard.
+* **The null rows copy byte-identical payloads on both arms** (197 MB and
+  751 MB, §4.5), so their copy segments differ only in achieved PCIe bandwidth.
+  The uint16 LZW null reads 100.5 vs 115.6 ms for the same 751 MB — that is the
+  spread of this measurement on a shared box, and it is the scale against which
+  the changed rows should be read.
+
 ### 4.1 Per-movie wall, from the runner's own log
 
 This is the headline metric, not process wall. A 6-movie run at this geometry
@@ -271,6 +313,8 @@ route. It is a single cold-binary first run — the candidate executable's first
 execution of the campaign — and the per-movie table above shows the same arm
 3.0% *faster* in steady state. §4.4 measures it directly.
 
+![per-movie wall](charts/per-movie-wall.png)
+
 ### 4.3 Transcoding as an operational mode
 
 Measured on one core of the same host with `imagecodecs`, which wraps the same
@@ -326,6 +370,8 @@ Process wall and per-movie wall disagree by design: a six-movie run spends
 about a second on process and CUDA-context startup, which §4.1 excludes and
 this table includes. Both are reported because both are real — the first is
 what a small job costs, the second is what scales.
+
+![host resident set](charts/host-rss.png)
 
 ### 4.5 Host-to-device bytes and time, from Nsight
 
@@ -384,6 +430,8 @@ It also closes the §4.2 anomaly. The candidate shows no startup regression at
 all once its binary is warm; the +1.1 CPU-seconds and the 1.755 s first movie
 in the earlier series were the candidate executable's first execution, not its
 code.
+
+![host-to-device bytes](charts/h2d-bytes.png)
 
 ## 5. What is still unsupported, and by what
 

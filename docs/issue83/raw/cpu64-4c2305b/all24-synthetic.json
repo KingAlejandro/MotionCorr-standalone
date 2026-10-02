@@ -1,0 +1,2895 @@
+{
+  "all24_equal": true,
+  "errors": [],
+  "expected_movies": 24,
+  "finished_utc": "2026-09-28T09:36:24Z",
+  "metadata_not_asserted": [
+    "original_pixel_size",
+    "image_geometry"
+  ],
+  "missing_required_schedules": [],
+  "movies_in_star": 24,
+  "partial_screen": false,
+  "provenance": {
+    "binary": "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+    "binary_sha256": "90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4",
+    "common_args": [
+      "--use_own",
+      "--j",
+      "16",
+      "--seed",
+      "1",
+      "--dose_weighting",
+      "--dose_per_frame",
+      "1.277",
+      "--patch_x",
+      "5",
+      "--patch_y",
+      "5",
+      "--bfactor",
+      "150",
+      "--gainref",
+      "Movies/gain.mrc",
+      "--skip_logfile"
+    ],
+    "comparator_sha256": "cb37991af515c5529f31ac48adb157771b1ac21b8308ba28735362f36085e46b",
+    "gpu": null,
+    "hostname": "small-refmac-machine",
+    "inputs": {
+      "gainref": {
+        "path": "Movies/gain.mrc",
+        "sha256": "fd55df0a8798877101e33f63526e5a97af7c336174d6f9ebd14c27e66b10d61a"
+      },
+      "harness": {
+        "products.py": "3592c92f7419ed5bbf793a1dee3a300288f6529574edd3077df5714e0d1d3223",
+        "run_all24_schedules.py": "0ac3d39558259921fd6a97a77f018ee0a04c4e1e78623ce672832ad9aff622ac",
+        "run_matrix.py": "be34300c54008b39c42bf5a373296149fbf407f9b7a2e41e4aa7826a8f6d5561"
+      },
+      "movies": {
+        "Movies/km_global_hisnr_m01.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m02.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m03.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m04.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m05.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m06.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m07.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m08.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m09.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m10.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m11.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m12.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m13.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m14.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m15.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m16.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m17.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m18.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m19.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m20.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m21.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m22.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m23.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        },
+        "Movies/km_global_hisnr_m24.mrcs": {
+          "bytes": 12583936,
+          "sha256": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990"
+        }
+      },
+      "movies_hashed": 24,
+      "movies_missing": [],
+      "star": {
+        "path": "/home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star",
+        "sha256": "1070f00aa1a49db62b6cf165c2d496c88ed05204d9e318eb6081f453466df292"
+      }
+    },
+    "runroot": "/home/ubuntu/mc-i83-cpu/runroot24-synthetic",
+    "source": {
+      "commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999",
+      "dirty": true,
+      "dirty_paths": [
+        "?? build-cpu/",
+        "?? evidence-cpu-025908a/",
+        "?? evidence-cpu-2a8d13a/",
+        "?? evidence-cpu-4c2305b/",
+        "?? evidence-cpu-705d2c7/",
+        "?? evidence-cpu-7ba584e/",
+        "?? evidence-cpu-8298158/",
+        "?? evidence-cpu-89e7a93/",
+        "?? evidence-cpu-93d427e/",
+        "?? evidence/",
+        "?? evidence2/",
+        "?? evidence3-run.log",
+        "?? evidence3/",
+        "?? evidence4/",
+        "?? fixtures/",
+        "?? runroot24-synthetic/",
+        "?? tools/validation_issue83/stage_synthetic_runroot.py"
+      ]
+    },
+    "star": "/home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star",
+    "started_utc": "2026-09-28T09:36:01Z"
+  },
+  "required_schedules": [
+    "repeat",
+    "batch",
+    "resume"
+  ],
+  "schedules": {
+    "base": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/km_global_hisnr_m01",
+          "Movies/km_global_hisnr_m02",
+          "Movies/km_global_hisnr_m03",
+          "Movies/km_global_hisnr_m04",
+          "Movies/km_global_hisnr_m05",
+          "Movies/km_global_hisnr_m06",
+          "Movies/km_global_hisnr_m07",
+          "Movies/km_global_hisnr_m08",
+          "Movies/km_global_hisnr_m09",
+          "Movies/km_global_hisnr_m10",
+          "Movies/km_global_hisnr_m11",
+          "Movies/km_global_hisnr_m12",
+          "Movies/km_global_hisnr_m13",
+          "Movies/km_global_hisnr_m14",
+          "Movies/km_global_hisnr_m15",
+          "Movies/km_global_hisnr_m16",
+          "Movies/km_global_hisnr_m17",
+          "Movies/km_global_hisnr_m18",
+          "Movies/km_global_hisnr_m19",
+          "Movies/km_global_hisnr_m20",
+          "Movies/km_global_hisnr_m21",
+          "Movies/km_global_hisnr_m22",
+          "Movies/km_global_hisnr_m23",
+          "Movies/km_global_hisnr_m24"
+        ],
+        "invocations": 1,
+        "native_cuda_proven": false,
+        "per_movie": {
+          "Movies/km_global_hisnr_m01": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m02": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m03": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m04": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m05": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m06": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m07": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m08": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m09": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m10": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m11": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m12": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m13": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m14": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m15": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m16": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m17": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m18": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m19": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m20": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m21": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m22": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m23": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m24": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          }
+        },
+        "requested": "cpu",
+        "startup_marker_found": false,
+        "unexpected_cuda_marker": false,
+        "vacuous": false
+      },
+      "command": [
+        "/home/ubuntu/mc-i83-cpu/build-cpu/motioncorr",
+        "--i",
+        "/home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star",
+        "--o",
+        "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/",
+        "--use_own",
+        "--j",
+        "16",
+        "--seed",
+        "1",
+        "--dose_weighting",
+        "--dose_per_frame",
+        "1.277",
+        "--patch_x",
+        "5",
+        "--patch_y",
+        "5",
+        "--bfactor",
+        "150",
+        "--gainref",
+        "Movies/gain.mrc",
+        "--skip_logfile"
+      ],
+      "elapsed_sec": 3.008,
+      "inventory_errors": [],
+      "movies_present": 24,
+      "returncode": 0
+    },
+    "batch": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/km_global_hisnr_m01",
+          "Movies/km_global_hisnr_m02",
+          "Movies/km_global_hisnr_m03",
+          "Movies/km_global_hisnr_m04",
+          "Movies/km_global_hisnr_m05",
+          "Movies/km_global_hisnr_m06",
+          "Movies/km_global_hisnr_m07",
+          "Movies/km_global_hisnr_m08",
+          "Movies/km_global_hisnr_m09",
+          "Movies/km_global_hisnr_m10",
+          "Movies/km_global_hisnr_m11",
+          "Movies/km_global_hisnr_m12",
+          "Movies/km_global_hisnr_m13",
+          "Movies/km_global_hisnr_m14",
+          "Movies/km_global_hisnr_m15",
+          "Movies/km_global_hisnr_m16",
+          "Movies/km_global_hisnr_m17",
+          "Movies/km_global_hisnr_m18",
+          "Movies/km_global_hisnr_m19",
+          "Movies/km_global_hisnr_m20",
+          "Movies/km_global_hisnr_m21",
+          "Movies/km_global_hisnr_m22",
+          "Movies/km_global_hisnr_m23",
+          "Movies/km_global_hisnr_m24"
+        ],
+        "invocations": 24,
+        "native_cuda_proven": false,
+        "per_movie": {
+          "Movies/km_global_hisnr_m01": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m02": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m03": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m04": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m05": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m06": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m07": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m08": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m09": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m10": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m11": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m12": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m13": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m14": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m15": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m16": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m17": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m18": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m19": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m20": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m21": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m22": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m23": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m24": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          }
+        },
+        "requested": "cpu",
+        "startup_marker_found": false,
+        "unexpected_cuda_marker": false,
+        "vacuous": false
+      },
+      "byte_identical_products": 24,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": false,
+      "passed": true,
+      "per_movie": {
+        "Movies/km_global_hisnr_m01": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m01.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m01.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m01_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m02": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m02.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m02.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m02_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m03": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m03.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m03.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m03_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m04": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m04.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m04.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m04_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m05": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m05.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m05.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m05_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m06": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m06.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m06.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m06_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m07": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m07.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m07.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m07_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m08": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m08.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m08.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m08_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m09": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m09.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m09.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m09_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m10": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m10.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m10.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m10_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m11": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m11.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m11.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m11_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m12": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m12.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m12.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m12_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m13": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m13.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m13.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m13_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m14": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m14.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m14.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m14_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m15": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m15.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m15.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m15_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m16": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m16.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m16.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m16_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m17": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m17.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m17.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m17_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m18": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m18.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m18.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m18_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m19": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m19.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m19.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m19_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m20": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m20.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m20.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m20_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m21": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m21.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m21.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m21_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m22": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m22.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m22.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m22_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m23": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m23.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m23.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m23_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m24": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m24.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/Movies/km_global_hisnr_m24.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/batch/compare/Movies__km_global_hisnr_m24_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 0.24,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.239,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.228,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.228,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.245,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.241,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.242,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.242,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.234,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.235,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.245,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.246,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.244,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.243,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.235,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.239,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.233,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.241,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.238,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.244,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.249,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.226,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.236,
+          "returncode": 0
+        },
+        {
+          "elapsed_sec": 0.229,
+          "returncode": 0
+        }
+      ]
+    },
+    "repeat": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/km_global_hisnr_m01",
+          "Movies/km_global_hisnr_m02",
+          "Movies/km_global_hisnr_m03",
+          "Movies/km_global_hisnr_m04",
+          "Movies/km_global_hisnr_m05",
+          "Movies/km_global_hisnr_m06",
+          "Movies/km_global_hisnr_m07",
+          "Movies/km_global_hisnr_m08",
+          "Movies/km_global_hisnr_m09",
+          "Movies/km_global_hisnr_m10",
+          "Movies/km_global_hisnr_m11",
+          "Movies/km_global_hisnr_m12",
+          "Movies/km_global_hisnr_m13",
+          "Movies/km_global_hisnr_m14",
+          "Movies/km_global_hisnr_m15",
+          "Movies/km_global_hisnr_m16",
+          "Movies/km_global_hisnr_m17",
+          "Movies/km_global_hisnr_m18",
+          "Movies/km_global_hisnr_m19",
+          "Movies/km_global_hisnr_m20",
+          "Movies/km_global_hisnr_m21",
+          "Movies/km_global_hisnr_m22",
+          "Movies/km_global_hisnr_m23",
+          "Movies/km_global_hisnr_m24"
+        ],
+        "invocations": 1,
+        "native_cuda_proven": false,
+        "per_movie": {
+          "Movies/km_global_hisnr_m01": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m02": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m03": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m04": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m05": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m06": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m07": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m08": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m09": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m10": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m11": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m12": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m13": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m14": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m15": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m16": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m17": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m18": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m19": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m20": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m21": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m22": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m23": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m24": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          }
+        },
+        "requested": "cpu",
+        "startup_marker_found": false,
+        "unexpected_cuda_marker": false,
+        "vacuous": false
+      },
+      "byte_identical_products": 24,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": false,
+      "passed": true,
+      "per_movie": {
+        "Movies/km_global_hisnr_m01": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m01.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m01.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m01_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m02": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m02.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m02.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m02_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m03": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m03.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m03.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m03_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m04": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m04.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m04.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m04_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m05": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m05.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m05.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m05_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m06": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m06.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m06.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m06_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m07": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m07.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m07.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m07_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m08": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m08.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m08.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m08_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m09": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m09.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m09.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m09_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m10": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m10.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m10.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m10_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m11": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m11.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m11.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m11_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m12": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m12.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m12.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m12_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m13": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m13.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m13.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m13_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m14": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m14.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m14.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m14_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m15": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m15.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m15.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m15_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m16": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m16.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m16.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m16_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m17": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m17.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m17.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m17_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m18": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m18.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m18.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m18_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m19": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m19.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m19.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m19_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m20": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m20.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m20.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m20_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m21": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m21.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m21.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m21_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m22": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m22.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m22.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m22_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m23": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m23.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m23.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m23_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m24": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m24.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/Movies/km_global_hisnr_m24.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/repeat/compare/Movies__km_global_hisnr_m24_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 3.036,
+          "returncode": 0
+        }
+      ]
+    },
+    "resume": {
+      "backend_evidence": {
+        "executed_movies": [
+          "Movies/km_global_hisnr_m01",
+          "Movies/km_global_hisnr_m03",
+          "Movies/km_global_hisnr_m04",
+          "Movies/km_global_hisnr_m06",
+          "Movies/km_global_hisnr_m07",
+          "Movies/km_global_hisnr_m09",
+          "Movies/km_global_hisnr_m10",
+          "Movies/km_global_hisnr_m12",
+          "Movies/km_global_hisnr_m13",
+          "Movies/km_global_hisnr_m15",
+          "Movies/km_global_hisnr_m16",
+          "Movies/km_global_hisnr_m18",
+          "Movies/km_global_hisnr_m19",
+          "Movies/km_global_hisnr_m21",
+          "Movies/km_global_hisnr_m22",
+          "Movies/km_global_hisnr_m24"
+        ],
+        "invocations": 1,
+        "native_cuda_proven": false,
+        "per_movie": {
+          "Movies/km_global_hisnr_m01": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m03": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m04": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m06": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m07": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m09": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m10": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m12": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m13": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m15": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m16": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m18": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m19": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m21": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m22": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          },
+          "Movies/km_global_hisnr_m24": {
+            "cuda_stage_marker": false,
+            "log_present": true
+          }
+        },
+        "requested": "cpu",
+        "startup_marker_found": false,
+        "unexpected_cuda_marker": false,
+        "vacuous": false
+      },
+      "byte_identical_products": 32,
+      "failed_movies": [],
+      "missing_pairs": [],
+      "movies_compared": 24,
+      "movies_passed": 24,
+      "native_cuda_required": false,
+      "passed": true,
+      "per_movie": {
+        "Movies/km_global_hisnr_m01": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m01.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m01.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m01.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m01_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m02": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m02.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m02.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m02.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m02_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m03": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m03.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m03.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m03.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m03_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m04": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m04.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m04.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m04.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m04_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m05": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m05.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m05.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m05.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m05_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m06": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m06.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m06.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m06.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m06_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m07": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m07.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m07.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m07.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m07_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m08": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m08.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m08.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m08.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m08_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m09": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m09.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m09.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m09.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m09_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m10": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m10.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m10.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m10.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m10_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m11": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m11.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m11.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m11.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m11_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m12": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m12.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m12.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m12.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m12_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m13": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m13.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m13.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m13.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m13_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m14": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m14.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m14.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m14.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m14_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m15": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m15.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m15.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m15.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m15_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m16": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m16.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m16.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m16.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m16_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m17": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m17.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m17.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m17.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m17_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m18": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m18.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m18.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m18.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m18_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m19": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m19.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m19.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m19.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m19_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m20": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m20.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m20.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m20.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m20_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m21": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m21.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m21.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m21.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m21_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m22": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m22.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m22.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m22.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m22_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m23": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m23.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m23.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m23.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m23_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        },
+        "Movies/km_global_hisnr_m24": {
+          "checks": {
+            "corrected_image": true,
+            "motion_trajectory": true,
+            "star_fields": true
+          },
+          "command": [
+            "/usr/bin/python3",
+            "/home/ubuntu/mc-i83-cpu/tools/compare_motioncorr.py",
+            "--ref-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.mrc",
+            "--test-mrc",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m24.mrc",
+            "--ref-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/base/Movies/km_global_hisnr_m24.star",
+            "--test-star",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/Movies/km_global_hisnr_m24.star",
+            "--gate",
+            "exact",
+            "--json-out",
+            "/home/ubuntu/mc-i83-cpu/evidence-cpu-4c2305b/all24-synthetic/resume/compare/Movies__km_global_hisnr_m24_exact.json"
+          ],
+          "coverage_complete": true,
+          "differences": {},
+          "overall_status": "PASS",
+          "passed": true,
+          "returncode": 0
+        }
+      },
+      "preserved_seeded_outputs": true,
+      "products_compared_by_digest": 48,
+      "runs": [
+        {
+          "elapsed_sec": 2.06,
+          "returncode": 0
+        }
+      ],
+      "seeded_movies": [
+        "Movies/km_global_hisnr_m02",
+        "Movies/km_global_hisnr_m05",
+        "Movies/km_global_hisnr_m08",
+        "Movies/km_global_hisnr_m11",
+        "Movies/km_global_hisnr_m14",
+        "Movies/km_global_hisnr_m17",
+        "Movies/km_global_hisnr_m20",
+        "Movies/km_global_hisnr_m23"
+      ]
+    }
+  },
+  "schedules_passed": [
+    "batch",
+    "repeat",
+    "resume"
+  ],
+  "schedules_requested": [
+    "repeat",
+    "batch",
+    "resume"
+  ],
+  "schema": "issue83-all24-schedules/2",
+  "star_metadata_asserted": {
+    "binning": 1.0,
+    "dose_per_frame": 1.277,
+    "first_frame": 1,
+    "pre_exposure": 0.0
+  }
+}

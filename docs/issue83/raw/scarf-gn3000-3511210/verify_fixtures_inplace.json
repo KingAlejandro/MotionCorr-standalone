@@ -1,0 +1,226 @@
+{
+  "cases": {
+    "km_global_hisnr": {
+      "ground_truth": {
+        "content_comparison": {
+          "content_equivalent": true,
+          "declared_at": {
+            "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+          },
+          "differing_leaf_count": 1,
+          "differing_leaves": [
+            "/source_commit"
+          ],
+          "float_rounding_leaves": [],
+          "float_rounding_max_relative": 0.0,
+          "float_rounding_tolerance_ulps": 4,
+          "generated_at": {
+            "source_commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999"
+          },
+          "leaves_compared": 4132,
+          "provenance_leaves": [
+            "/source_commit"
+          ],
+          "unexpected_leaves": []
+        },
+        "expected": "ce4a8df71201c933e340b458ea4a81adeae45a787181e88aea86303a5493b2a3",
+        "file": "km_global_hisnr_ground_truth.json",
+        "observed": "7758c1bc1ce2af2f6f9b269937df273521e01cfe41b337fd01f099011bf326e7",
+        "observed_bytes": 127802,
+        "status": "content_equal"
+      },
+      "movie": {
+        "expected": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990",
+        "expected_bytes": 12583936,
+        "file": "km_global_hisnr.mrcs",
+        "observed": "f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990",
+        "observed_bytes": 12583936,
+        "status": "match"
+      },
+      "status": "content_equal"
+    },
+    "km_local_hisnr": {
+      "ground_truth": {
+        "content_comparison": {
+          "content_equivalent": true,
+          "declared_at": {
+            "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+          },
+          "differing_leaf_count": 3,
+          "differing_leaves": [
+            "/noise/absolute_sigma",
+            "/noise/noise_free_image_std",
+            "/source_commit"
+          ],
+          "float_rounding_leaves": [
+            "/noise/absolute_sigma",
+            "/noise/noise_free_image_std"
+          ],
+          "float_rounding_max_relative": 1.840467826221118e-16,
+          "float_rounding_tolerance_ulps": 4,
+          "generated_at": {
+            "source_commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999"
+          },
+          "leaves_compared": 4132,
+          "provenance_leaves": [
+            "/source_commit"
+          ],
+          "unexpected_leaves": []
+        },
+        "expected": "e76efb9e009aa89cead2620db99a945e59c17a70550e8ddb83543d9b78e0174c",
+        "file": "km_local_hisnr_ground_truth.json",
+        "observed": "35b5c623e2fe3ffe0ceacf035606a14522002082cdb13d271b126260547d4606",
+        "observed_bytes": 128052,
+        "status": "content_equal"
+      },
+      "movie": {
+        "expected": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092",
+        "expected_bytes": 12583936,
+        "file": "km_local_hisnr.mrcs",
+        "observed": "2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092",
+        "observed_bytes": 12583936,
+        "status": "match"
+      },
+      "status": "content_equal"
+    },
+    "km_local_noisy": {
+      "ground_truth": {
+        "content_comparison": {
+          "content_equivalent": true,
+          "declared_at": {
+            "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+          },
+          "differing_leaf_count": 1,
+          "differing_leaves": [
+            "/source_commit"
+          ],
+          "float_rounding_leaves": [],
+          "float_rounding_max_relative": 0.0,
+          "float_rounding_tolerance_ulps": 4,
+          "generated_at": {
+            "source_commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999"
+          },
+          "leaves_compared": 4144,
+          "provenance_leaves": [
+            "/source_commit"
+          ],
+          "unexpected_leaves": []
+        },
+        "expected": "bd4cf8ebe1dfbb6ba41aab47bc5a77230f50b45f9dd04d53af71933f4a70c4c7",
+        "file": "km_local_noisy_ground_truth.json",
+        "observed": "d7329038bd4d2ed75d3720fc129ec84111de9f7c14a93761bd212f6ddfef6f60",
+        "observed_bytes": 128318,
+        "status": "content_equal"
+      },
+      "movie": {
+        "expected": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668",
+        "expected_bytes": 12583936,
+        "file": "km_local_noisy.mrcs",
+        "observed": "98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668",
+        "observed_bytes": 12583936,
+        "status": "match"
+      },
+      "status": "content_equal"
+    },
+    "km_local_nonsquare": {
+      "ground_truth": {
+        "content_comparison": {
+          "content_equivalent": true,
+          "declared_at": {
+            "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+          },
+          "differing_leaf_count": 1,
+          "differing_leaves": [
+            "/source_commit"
+          ],
+          "float_rounding_leaves": [],
+          "float_rounding_max_relative": 0.0,
+          "float_rounding_tolerance_ulps": 4,
+          "generated_at": {
+            "source_commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999"
+          },
+          "leaves_compared": 4132,
+          "provenance_leaves": [
+            "/source_commit"
+          ],
+          "unexpected_leaves": []
+        },
+        "expected": "88d04b9dc4ee99e3764fc6d7c286c2a4e3ad17c1da84ba6e78e46e8139f50f59",
+        "file": "km_local_nonsquare_ground_truth.json",
+        "observed": "bf5c402ff81b40c298b92153f6a6de762ac70d7ecbe85ece94490a9ef89c39f3",
+        "observed_bytes": 128010,
+        "status": "content_equal"
+      },
+      "movie": {
+        "expected": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8",
+        "expected_bytes": 18875392,
+        "file": "km_local_nonsquare.mrcs",
+        "observed": "9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8",
+        "observed_bytes": 18875392,
+        "status": "match"
+      },
+      "status": "content_equal"
+    },
+    "km_local_realscale": {
+      "ground_truth": {
+        "content_comparison": {
+          "content_equivalent": true,
+          "declared_at": {
+            "source_commit": "e07fdec235d38f152356b136fb7038394eb8c919"
+          },
+          "differing_leaf_count": 1,
+          "differing_leaves": [
+            "/source_commit"
+          ],
+          "float_rounding_leaves": [],
+          "float_rounding_max_relative": 0.0,
+          "float_rounding_tolerance_ulps": 4,
+          "generated_at": {
+            "source_commit": "4c2305b380ce224e700f3af4732da6e2d7d6b999"
+          },
+          "leaves_compared": 8032,
+          "provenance_leaves": [
+            "/source_commit"
+          ],
+          "unexpected_leaves": []
+        },
+        "expected": "3482147587e020ccaf36e8274d939cce87a9a7fb4f58d8f3aea5fc979491d242",
+        "file": "km_local_realscale_ground_truth.json",
+        "observed": "4f7200ceb02b6678b8674a452e57b92a6c61a7a8f98f83d3da289458908b6937",
+        "observed_bytes": 254814,
+        "status": "content_equal"
+      },
+      "movie": {
+        "expected": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7",
+        "expected_bytes": 402654208,
+        "file": "km_local_realscale.mrcs",
+        "observed": "886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7",
+        "observed_bytes": 402654208,
+        "status": "match"
+      },
+      "status": "content_equal"
+    }
+  },
+  "compared": {
+    "ground_truth": 5,
+    "movie": 5
+  },
+  "content_equal": [
+    "km_global_hisnr (ground_truth)",
+    "km_local_hisnr (ground_truth)",
+    "km_local_noisy (ground_truth)",
+    "km_local_nonsquare (ground_truth)",
+    "km_local_realscale (ground_truth)"
+  ],
+  "declared_cases": 5,
+  "fixtures_dir": "test-data/known_motion",
+  "manifest_ref": "HEAD",
+  "manifest_source_commit": "e07fdec235d38f152356b136fb7038394eb8c919",
+  "mismatched": [],
+  "missing": [],
+  "schema": "issue83-fixture-verify/5",
+  "undeclared": [],
+  "vacuous": false,
+  "verified": true,
+  "verifier_numpy_version": "2.3.1"
+}

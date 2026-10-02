@@ -1,0 +1,203 @@
+=== queued for project lock at 2026-09-28T09:34:47Z
+ 09:34:47 up 299 days, 23:32, 21 users,  load average: 3.72, 2.88, 2.54
+=== acquired project lock at 2026-09-28T09:34:47Z
+4c2305b fix(issue83): stop the gates that quantified over nothing
+?? build-cpu/
+?? evidence-cpu-025908a/
+?? evidence-cpu-2a8d13a/
+?? evidence-cpu-4c2305b/
+?? evidence-cpu-705d2c7/
+?? evidence-cpu-7ba584e/
+?? evidence-cpu-8298158/
+?? evidence-cpu-89e7a93/
+?? evidence-cpu-93d427e/
+?? evidence/
+?? evidence2/
+?? evidence3-run.log
+?? evidence3/
+?? evidence4/
+?? fixtures/
+?? tools/validation_issue83/stage_synthetic_runroot.py
+90d683dd0e406d2d8feeea39051557fb15eac0045fa0aae9af8347ada11ac5e4  /home/ubuntu/mc-i83-cpu/build-cpu/motioncorr
+2ff2095d0d7a6be4807c0d627b9ffd7c8fcbce85f68f561af383846211ed8f58 matrix.py
+e303c89d3229cc539c61f20ed73537df8b32d367b34a07fac6c2091934302ae9 measure_capacity.py
+579f20405739831e1da25ead684e29fff0eb6d9b17e0bd2d0ff8ce632ab9a7a2 negative_controls.py
+3592c92f7419ed5bbf793a1dee3a300288f6529574edd3077df5714e0d1d3223 products.py
+8e2321dfc7a29db09845e622719e84a807c266116e6ae38db1b49a54b78d904a record_payload_env.py
+71dbbd870f0fbfe31acf030174964116a1bac30b634043a450282c3b538f4d4a report.py
+0ac3d39558259921fd6a97a77f018ee0a04c4e1e78623ce672832ad9aff622ac run_all24_schedules.py
+be34300c54008b39c42bf5a373296149fbf407f9b7a2e41e4aa7826a8f6d5561 run_matrix.py
+fdc93fe3294ecce30f2af41af7c6e22b3eeac18d4287e5bbc6b78cd7a2c88ed8 stage_synthetic_runroot.py
+2e8601c1db00ddfd090ba987a38cd5ebb5d189c368644be0376268a5d7993c09 verify_fixtures.py
+# affinity of a child launched exactly as the gates below were
+# (the launcher shell above is unpinned; the gates are not)
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+
+=== (a) verify_fixtures against the committed manifest  2026-09-28T09:34:47Z
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 4 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth)
+--- verify_fixtures exit=0
+
+=== (a2) the same verification over an EMPTY directory  2026-09-28T09:34:48Z
+# The published defect: nothing to mismatch, so 'verified' with nothing
+# compared. Must now refuse. A nonzero exit here is the expected result.
+NOT VERIFIED: no digests were compared (0 movie, 0 ground truth, over 5 declared case(s))
+ missing  km_global_hisnr
+           missing  movie
+           missing  ground_truth
+ missing  km_local_hisnr
+           missing  movie
+           missing  ground_truth
+ missing  km_local_noisy
+           missing  movie
+           missing  ground_truth
+ missing  km_local_nonsquare
+           missing  movie
+           missing  ground_truth
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+NOT VERIFIED
+--- verify_fixtures(empty) exit=1  (expected nonzero)
+
+=== (b) negative controls WITH real fixtures  2026-09-28T09:34:48Z
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  report_states_input_coverage
+    pass  report_attributes_each_section
+    pass  partial_schedules
+    pass  matrix_schedule_witness
+    pass  rejection_names_option
+    pass  aggregate_needs_every_leg
+    pass  comparator_coverage
+    pass  all24_asserts_metadata
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+{
+  "pass": 17,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+
+=== (c) CPU support matrix (real pixels)  2026-09-28T09:34:49Z
+[issue83] global_square ...
+[issue83] global_square: pass
+[issue83] local_square ...
+[issue83] local_square: pass
+[issue83] global_nonsquare ...
+[issue83] global_nonsquare: pass
+[issue83] local_nonsquare ...
+[issue83] local_nonsquare: pass
+[issue83] gain_none ...
+[issue83] gain_none: pass
+[issue83] gain_unity ...
+[issue83] gain_unity: pass
+[issue83] gain_nonunity ...
+[issue83] gain_nonunity: pass
+[issue83] defect_skip ...
+[issue83] defect_skip: pass
+[issue83] defect_detect ...
+[issue83] defect_detect: pass
+[issue83] defect_file ...
+[issue83] defect_file: pass
+[issue83] dose_off ...
+[issue83] dose_off: pass
+[issue83] dose_on ...
+[issue83] dose_on: pass
+[issue83] dose_on_savenoDW ...
+[issue83] dose_on_savenoDW: pass
+[issue83] dose_on_preexposure ...
+[issue83] dose_on_preexposure: pass
+[issue83] evenodd ...
+[issue83] evenodd: pass
+[issue83] evenodd_dose_noDW ...
+[issue83] evenodd_dose_noDW: pass
+[issue83] frames_subset ...
+[issue83] frames_subset: pass
+[issue83] group_frames_2 ...
+[issue83] group_frames_2: pass
+[issue83] group_frames_invalid ...
+[issue83] group_frames_invalid: pass
+[issue83] threads_invalid ...
+[issue83] threads_invalid: pass
+[issue83] bin1 ...
+[issue83] bin1: pass
+[issue83] early_bin2 ...
+[issue83] early_bin2: pass
+[issue83] late_bin2 ...
+[issue83] late_bin2: pass
+[issue83] power_spectrum ...
+[issue83] power_spectrum: pass
+{
+  "declared": 25,
+  "attempted": 24,
+  "pass": 24,
+  "fail": 0,
+  "error": 0
+}
+UNRUN rows: realscale_local
+--- run_matrix exit=1
+
+=== (d) stage a synthetic 24-movie runroot  2026-09-28T09:36:00Z
+# 24 names over one generated fixture. This exercises the integrated
+# screen's STAR metadata assertion, which had never executed; it says
+# nothing about the RELION tutorial dataset.
+runroot /home/ubuntu/mc-i83-cpu/runroot24-synthetic
+movies  24 (one fixture under 24 names)
+star    /home/ubuntu/mc-i83-cpu/runroot24-synthetic/movies.star
+--- stage exit=0
+
+=== (e) integrated schedules on the synthetic runroot  2026-09-28T09:36:00Z
+{
+  "all24_equal": true,
+  "partial_screen": false,
+  "schedules_passed": [
+    "batch",
+    "repeat",
+    "resume"
+  ],
+  "missing_required_schedules": [],
+  "errors": []
+}
+--- run_all24_schedules exit=0
+--- recorder exit=0
+
+=== done 2026-09-28T09:36:24Z
+verify_fixtures 0
+verify_fixtures_empty 1
+negative_controls 0
+run_matrix 1
+stage_synthetic_runroot 0
+run_all24_schedules 0

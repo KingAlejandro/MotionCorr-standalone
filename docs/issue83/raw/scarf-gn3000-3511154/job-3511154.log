@@ -1,0 +1,195 @@
+=== provenance ===
+2026-09-28T09:16:10+01:00
+gn3000.scarf.rl.ac.uk
+7ba584eaf5eae28661d80880fdf220c130c235dc
+ M test-data/known_motion/MANIFEST.json
+ M test-data/known_motion/km_global_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_noisy_ground_truth.json
+ M test-data/known_motion/km_local_nonsquare_ground_truth.json
+ M test-data/known_motion/km_local_realscale_ground_truth.json
+?? build-cuda/
+?? evidence-native/
+?? evidence-native2/
+?? fixtures/
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA A100-SXM4-40GB, GPU-c6c43d6a-aa2e-af46-022c-aa4a4735638d, 580.178.04, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, GPU-2e1b6776-2dce-cad6-5e4c-9d0d58849616, 580.178.04, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, GPU-69bdbeb9-d502-8487-0f78-98e7d4b6c73a, 580.178.04, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, GPU-0ade54fe-adbf-ca88-2135-90cbf33b2cbb, 580.178.04, 40960 MiB
+CUDA_VISIBLE_DEVICES=0,1,2,3
+SLURM_JOB_ID=3511154 SLURM_JOB_NODELIST=gn3000
+Cpus_allowed_list:	0-63
+Mems_allowed_list:	0-7
+ 09:16:11 up 17 days,  9:15,  0 users,  load average: 1.14, 1.80, 2.12
+8
+=== binary reused from the first allocation, identified by digest ===
+0c5246675175ba4dc52e1c95a99046711a5d67e8e1eb1d829c33fb09e4335b0e  /work4/scd/scarf1415/motioncorr/mc-i83b/build-cuda/motioncorr
+=== fixtures: interpreter checked before anything is generated ===
+generator python: /apps20/sw/easybuilt/rocky/9/amd/zen2/software/Python/3.13.1-GCCcore-14.2.0/bin/python3
+numpy 2.3.1
+f9da46682b8466c70c6d8814ca944ae073f8fd4f20d040efc490963f648ad990  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_global_hisnr.mrcs
+2ae3c87938545aafae71e3e51d7f9040e8f3de6e1cd8a1f14e1c27980272d092  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_hisnr.mrcs
+98930a070a9da7b172c940a2e6bcf95044dcd2070f4637dba2e8b3635ac6a668  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_noisy.mrcs
+9ef410b8cf70bfafddd1659bfc3fae5c17ef802ea57d301f93434f1f89a598d8  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_nonsquare.mrcs
+886b277be567e8ae310f3ec3b7bca95cb4e1776a71217e862e9abe0ef162abf7  /work4/scd/scarf1415/motioncorr/mc-i83b/fixtures2/km_local_realscale.mrcs
+=== (a) verify_fixtures against the committed manifest ===
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_realscale
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 8032 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+verifier numpy 2.3.1; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 5 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth), km_local_realscale (ground_truth)
+--- verify_fixtures exit=0
+=== (b) negative controls WITH real fixtures ===
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  partial_schedules
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+{
+  "pass": 10,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+--- tracked known_motion restored; status above
+=== (c) motion truth gates (separate verdict, existing tool) ===
+--- truth exit=0
+   metric                              value A    limit A   loss@3A  B_eq A^2  verdict
+   global_component_rms                0.05313    0.10000     0.31%     0.111  PASS
+   local_component_rms                 0.14544    0.20000     2.29%     0.835  PASS
+   total_rms_interior                  0.15430    0.20000     2.58%     0.940  PASS
+   total_p95_interior                  0.26158    0.40000     7.23%     2.701  PASS
+   total_max_interior                  0.52260    0.80000    25.88%    10.782  PASS
+   frame_to_frame_rms_interior         0.08302    0.20000     0.75%     0.272  PASS
+   constant_offset                     0.05670    0.10000     0.35%     0.127  PASS
+   total_rms_interior_with_offset      0.13923                2.10%            report
+   border_rms_reported_not_gated       0.23664                                 report
+   dose_weighting_invariance           0.00000    0.00000                      PASS
+
+OVERALL: PASS  (8/8 gated metrics passed)
+==============================================================================
+
+  field difference j1 vs j4: 0.000e+00 px -> IDENTICAL
+
+======================================================================================
+ case                   role              status   global A   local A   total A
+ km_global_hisnr        gate              PASS       0.0079    0.0000    0.0079
+ km_local_hisnr         gate              PASS       0.0078    0.0513    0.0526
+ km_local_noisy         characterization  FAIL       0.2608    0.6228    0.6602
+ km_local_nonsquare     gate              PASS       0.0075    0.0401    0.0421
+ km_local_realscale     gate              PASS       0.0531    0.1454    0.1543
+
+ Characterization accuracy failures remain visible. Execution, backend, applied-image
+ and thread/dose-invariance failures always block the aggregate.
+
+ OVERALL: PASS
+======================================================================================
+=== (c2) the fixtures the truth gates actually read ===
+ M test-data/known_motion/MANIFEST.json
+ M test-data/known_motion/km_global_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_hisnr_ground_truth.json
+ M test-data/known_motion/km_local_noisy_ground_truth.json
+ M test-data/known_motion/km_local_nonsquare_ground_truth.json
+ M test-data/known_motion/km_local_realscale_ground_truth.json
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+content_equal  km_local_realscale
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 8032 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 7ba584eaf5eae28661d80880fdf220c130c235dc
+verifier numpy 2.3.1; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 5 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth), km_local_realscale (ground_truth)
+--- verify_fixtures (in-place) exit=0
+=== (d) declared matrix, native CUDA on device 0 ===
+--- run_matrix exit=0
+[issue83] defect_detect: pass
+[issue83] defect_file ...
+[issue83] defect_file: pass
+[issue83] dose_off ...
+[issue83] dose_off: pass
+[issue83] dose_on ...
+[issue83] dose_on: pass
+[issue83] dose_on_savenoDW ...
+[issue83] dose_on_savenoDW: pass
+[issue83] dose_on_preexposure ...
+[issue83] dose_on_preexposure: pass
+[issue83] evenodd ...
+[issue83] evenodd: pass
+[issue83] evenodd_dose_noDW ...
+[issue83] evenodd_dose_noDW: pass
+[issue83] frames_subset ...
+[issue83] frames_subset: pass
+[issue83] group_frames_2 ...
+[issue83] group_frames_2: pass
+[issue83] group_frames_invalid ...
+[issue83] group_frames_invalid: pass
+[issue83] threads_invalid ...
+[issue83] threads_invalid: pass
+[issue83] bin1 ...
+[issue83] bin1: pass
+[issue83] early_bin2 ...
+[issue83] early_bin2: pass
+[issue83] late_bin2 ...
+[issue83] late_bin2: pass
+[issue83] power_spectrum ...
+[issue83] power_spectrum: pass
+[issue83] realscale_local ...
+[issue83] realscale_local: pass
+{
+  "declared": 25,
+  "attempted": 25,
+  "pass": 25,
+  "fail": 0,
+  "error": 0
+}
+--- recorder exit=0
+2026-09-28T09:26:50+01:00

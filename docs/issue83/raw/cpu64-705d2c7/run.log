@@ -1,0 +1,69 @@
+=== queued for project lock at 2026-09-28T08:36:28Z
+ 08:36:28 up 299 days, 22:34, 21 users,  load average: 3.92, 4.26, 3.84
+=== acquired project lock at 2026-09-28T08:36:28Z
+abe96cc55f26172c2eea2de5ceaaa264b881a02f75311a43d554a5e960ec29a6 matrix.py
+e303c89d3229cc539c61f20ed73537df8b32d367b34a07fac6c2091934302ae9 measure_capacity.py
+d0d8ddd98100853c9a01f428c82c471a3ef55d4bd60520f89e97ee023647ae53 negative_controls.py
+3592c92f7419ed5bbf793a1dee3a300288f6529574edd3077df5714e0d1d3223 products.py
+8e2321dfc7a29db09845e622719e84a807c266116e6ae38db1b49a54b78d904a record_payload_env.py
+ac3d336518995e84020fb3afd23f154e4fd5730a5f82f1be63c48aba853c9643 report.py
+768f1f71aebf059ea4936d2235f2032bf4d808bdaa082ad72b38ac836aa7c0be run_all24_schedules.py
+b3a86b9e19363943591c4d890e985eb899350cc0d065e235697dbb846e3d9643 run_matrix.py
+eaefb16babbb133a9d5eb7b82e7383d1867fe6276cc81d474042462d4bdffc79 verify_fixtures.py
+# affinity of a child launched exactly as the two gates were
+# (the launcher shell above is unpinned; the gates are not)
+Cpus_allowed_list:	32-63
+Mems_allowed_list:	0-1
+
+=== (a) verify_fixtures against the committed manifest  2026-09-28T08:36:29Z
+content_equal  km_global_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_hisnr
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /noise/absolute_sigma, /noise/noise_free_image_std, /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+                    2 float leaf/leaves agree to within 4 ULP (max 1.84e-16 relative): /noise/absolute_sigma, /noise/noise_free_image_std
+content_equal  km_local_noisy
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4144 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+content_equal  km_local_nonsquare
+             match  movie
+          content_equal  ground_truth
+                    content equivalent across 4132 leaves; differs only in /source_commit
+                    stamped at e07fdec235d38f152356b136fb7038394eb8c919, regenerated at 9ca8f0dc58afb4c3462d23b8a129ca2581080f25
+ missing  km_local_realscale
+           missing  movie
+           missing  ground_truth
+verifier numpy 1.26.4; manifest from HEAD (e07fdec235d38f152356b136fb7038394eb8c919)
+VERIFIED (content) -- 4 truth file(s) differ from the committed bytes only in the commit stamp and/or in the last bit of a derived float; every motion value is the same number: km_global_hisnr (ground_truth), km_local_hisnr (ground_truth), km_local_noisy (ground_truth), km_local_nonsquare (ground_truth)
+--- verify_fixtures exit=0
+
+=== (b) negative controls WITH real fixtures  2026-09-28T08:36:29Z
+    pass  ground_truth_mutation
+    pass  ps_wrong_dimension
+    pass  resume_native_witness
+    pass  witness_is_consumed
+    pass  report_renders_witness
+    pass  report_states_input_coverage
+    pass  report_attributes_each_section
+    pass  partial_schedules
+    pass  input_hashes
+    pass  cross_row_consumed
+    pass  provenance_allowance
+    pass  truth_provenance
+{
+  "pass": 12,
+  "skipped": 0,
+  "failed": 0
+}
+--- negative_controls exit=0
+
+=== done 2026-09-28T08:36:30Z
+verify_fixtures 0
+negative_controls 0

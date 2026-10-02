@@ -52,6 +52,11 @@ implement is a refusal, not a default:
 Nothing downstream consumes a batch that failed any post-decode check: the
 status, length and Adler-32 loops all run before the conversion kernel for that
 batch is launched, and a refusal returns before it.
+The Adler kernel itself reads a chunk's output only after its decoder status and
+actual size are accepted; the complete host status/length pass precedes checksum
+diagnostics. The bounded modular arithmetic and scoped controls are documented in
+[`CHECKSUM_REPAIR.md`](CHECKSUM_REPAIR.md); prepared native controls remain unrun
+by the repair owner.
 
 ## Trust boundary
 

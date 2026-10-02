@@ -196,6 +196,18 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_executable(processing_file_digest tests/test_processing_file_digest.cpp src/processing_file_digest.cpp)
+    target_include_directories(processing_file_digest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # Exercise production read/fstat/stat error boundaries without a GPU.
+        target_compile_definitions(processing_file_digest PRIVATE PROCESSING_FILE_DIGEST_FAULT_WRAPS)
+        target_link_options(processing_file_digest PRIVATE
+            "-Wl,--wrap=read" "-Wl,--wrap=fstat" "-Wl,--wrap=stat")
+    endif()
+    add_test(NAME ProcessingFileDigest COMMAND processing_file_digest)
+    add_executable(movie_processing_identity tests/test_movie_processing_identity.cpp src/movie_processing_identity.cpp)
+    target_include_directories(movie_processing_identity PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME MovieProcessingIdentity COMMAND movie_processing_identity)
     # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
     # and deliberately outside if(CUDA): the whole point is a configuration this
     # suite does not link, so no compiled test can observe it.

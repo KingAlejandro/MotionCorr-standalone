@@ -212,6 +212,8 @@ exec "{sys.executable}" "$@"
             "OutputStageFaults",
             "NativeMovieStaging",
             "JointStarPublication",
+            "ProcessingFileDigest",
+            "MovieProcessingIdentity",
         ]
 
         def runnable(name: str) -> dict:
@@ -238,6 +240,7 @@ exec "{sys.executable}" "$@"
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
                         "OutputTreeComparator", "NativeMovieStaging",
                         "JointStarPublication",
+                        "ProcessingFileDigest", "MovieProcessingIdentity",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)

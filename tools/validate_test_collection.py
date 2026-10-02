@@ -99,6 +99,9 @@ DEFAULT_REQUIRED_TESTS = [
     # under if(UNIX) beside ImageWriteFaults.
     "NativeMovieStaging",
     "JointStarPublication",
+    # Issue142: receipt parsing, bounded file identity and actual resume refusal.
+    "ProcessingFileDigest",
+    "MovieProcessingIdentity",
 ]
 
 

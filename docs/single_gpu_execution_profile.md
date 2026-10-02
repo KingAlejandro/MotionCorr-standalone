@@ -284,8 +284,9 @@ persistence mode off, and the page cache is cold. The 2.42 s spike at movie 15 i
 main-lane only; the same movie is dead-median (0.634 s) in the nvcomp lane, so it is a
 transient in that run rather than a property of the movie.
 
-The GPU lane gets *denser*, not just shorter: busy share rises 16% → 26%. It is still
-idle three-quarters of the time.
+The upper bound on device busy share rises 16% → 26% in these captures. With kernel
+and memcpy unioned separately, the nvcomp capture is idle for at least about 74%
+of its traced span; an exact busy/idle fraction requires their joint union.
 
 ### The flame graph is where it is most obvious
 
@@ -319,8 +320,9 @@ per movie and never pooled, though its size is identical every time. Measured di
 the 24-movie trace, session setup plus teardown is **283 ms per movie (median), 7.0 s
 across the traced job**. (The one-movie figures of ~250 ms in and ~192 ms out would
 extrapolate to ~10.6 s; they do not, because the CUDA context and cuFFT modules are
-already warm after movie 1. The unprofiled run is 19% shorter overall, so the real figure
-is nearer 5–7 s.) nvcomp peaks 0.15 GiB higher (3.13 vs 2.98 GiB) for the compressed
+already warm after movie 1. The unprofiled run is 19% shorter overall; that does not
+establish an unprofiled setup/teardown cost, because profiler overhead is not uniform
+across stages.) nvcomp peaks 0.15 GiB higher (3.13 vs 2.98 GiB) for the compressed
 strips and inflate scratch. Neither arm exceeds 4% of an 80 GB card.
 
 ### What this does and does not establish
@@ -341,7 +343,8 @@ strips and inflate scratch. Neither arm exceeds 4% of an 80 GB card.
 
 ## 9. Acting on it
 
-Two changes measured against the `a294f3b` tip (197 commits ahead of main, already
+Two changes measured against the `a294f3b` tip (197 commits ahead of the historical
+baseline `1d7e13f`, already
 carrying PR130's alignment workspace reuse): `OMP_WAIT_POLICY=PASSIVE` gives −18 % CPU-
 seconds at no wall cost on the nvCOMP path, and retaining the device gain across movies
 gives −4.5 % wall, bit-exact. Together −4.7 % wall, −21.9 % CPU-seconds. Detail and raw

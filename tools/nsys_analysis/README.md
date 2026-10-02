@@ -25,7 +25,8 @@ python3 tools/nsys_analysis/selftest.py
 Runs every script's CLI against throwaway inputs: each one parses and imports what it
 uses, `arms24_json.py` reaches its input handling and creates its output directory,
 `patch_nvtx.py` patches each known `motioncorr_runner.cpp` generation and refuses an
-unsupported or already-patched one with a non-zero exit (including under `python -O`),
+unsupported, unbalanced, misordered or already-patched one with a non-zero exit
+(including under `python -O`),
 and `mkarms24.py` emits both charts without reinstating the cross-run idle label. No
 capture, GPU or network needed. It fails on the first version of this directory.
 
@@ -94,9 +95,11 @@ position is therefore named **`submit output`**, because it measures the handoff
 the writer thread, not the write. The writer drain lies inside the process wall but
 inside no NVTX range — it cannot be read off the stage table.
 
-`nvtxRangePush`/`Pop` is a stack: verify the pairs are balanced before trusting the
-output (38/38 at `1d7e13f`, 49/49 on current main, non-interleaved). Spans with an
-early `return` use an RAII guard, not bare push/pop.
+`nvtxRangePush`/`Pop` is a stack. Before writing, the script rejects missing,
+misordered and mismatched literal stage markers using explicit checks. This is a
+textual nesting check, not proof of every runtime branch or exception path. Verify
+runtime ranges before trusting a new capture. The per-movie range uses an RAII
+guard for early returns; existing RCTIC/RCTOC stages remain explicit push/pop pairs.
 
 ## Analysis
 

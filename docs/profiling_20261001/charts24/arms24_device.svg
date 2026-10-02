@@ -36,7 +36,7 @@
 <rect x="288.9" y="120" width="67.2" height="40" rx="3" fill="#eb6834"/>
 <text x="247.0" y="145.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">2.62</text>
 <text x="295.9" y="145.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">3.60</text>
-<text x="974.2" y="138.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">kernel+memcpy &lt;= 16.1% of span</text>
+<text x="974.2" y="138.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">device busy &lt;= 16.1% of span</text>
 <text x="974.2" y="153.0" font-size="10" fill="#898781" text-anchor="start" font-weight="normal">25470 launches, 34.2 GB H2D</text>
 <text x="228.0" y="202.0" font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="normal">cand --ingest float</text>
 <text x="228.0" y="217.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">span 32.058 s</text>
@@ -45,7 +45,7 @@
 <rect x="288.9" y="184" width="85.1" height="40" rx="3" fill="#eb6834"/>
 <text x="247.0" y="209.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">2.62</text>
 <text x="295.9" y="209.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">4.56</text>
-<text x="850.2" y="202.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">kernel+memcpy &lt;= 22.4% of span</text>
+<text x="850.2" y="202.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">device busy &lt;= 22.4% of span</text>
 <text x="850.2" y="217.0" font-size="10" fill="#898781" text-anchor="start" font-weight="normal">25470 launches, 34.2 GB H2D</text>
 <text x="228.0" y="266.0" font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="normal">cand --ingest compact</text>
 <text x="228.0" y="281.0" font-size="10" fill="#898781" text-anchor="end" font-weight="normal">no capture</text>
@@ -57,10 +57,10 @@
 <rect x="240" y="312" width="60.0" height="40" rx="3" fill="#2a78d6"/>
 <rect x="300.0" y="312" width="21.8" height="40" rx="3" fill="#eb6834"/>
 <text x="247.0" y="337.0" font-size="11" fill="#fff" text-anchor="start" font-weight="bold">3.21</text>
-<text x="563.1" y="330.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">kernel+memcpy &lt;= 26.3% of span</text>
+<text x="563.1" y="330.0" font-size="12" fill="#0b0b0b" text-anchor="start" font-weight="bold">device busy &lt;= 26.3% of span</text>
 <text x="563.1" y="345.0" font-size="10" fill="#898781" text-anchor="start" font-weight="normal">25542 launches, 4.6 GB H2D</text>
 <line x1="26" y1="404" x2="1294" y2="404" stroke="#c3c2b7"/>
-<text x="26.0" y="426.0" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">Kernel and memcpy are unioned separately and may overlap each other, so busy time is AT MOST their sum and the remainder is an UPPER bound on idle.</text>
+<text x="26.0" y="426.0" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">Kernel and memcpy are unioned separately and may overlap each other, so busy time is AT MOST their sum and the remainder is a LOWER bound on idle.</text>
 <text x="26.0" y="444.0" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">The remainder is therefore shown only as remainder of span. Quantifying device inactivity needs a union over kernel and memcpy together within one trace.</text>
 <text x="26.0" y="462.0" font-size="11" fill="#52514e" text-anchor="start" font-weight="normal">An arm with no capture is hatched. Absence of a trace is not absence of GPU work.</text>
 

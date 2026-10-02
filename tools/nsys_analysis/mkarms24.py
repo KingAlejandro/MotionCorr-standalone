@@ -113,12 +113,12 @@ for a in arms:
     o.append(f'<rect x="{L+kw:.1f}" y="{y}" width="{mw:.1f}" height="{ROWH}" rx="3" fill="{MCPY}"/>')
     if kw > 30: o.append(T(L+7, y+25, "%.2f" % kern, 11, "#fff", "start", "bold"))
     if mw > 30: o.append(T(L+kw+7, y+25, "%.2f" % mcpy, 11, "#fff", "start", "bold"))
-    o.append(T(x(span)+12, y+18, "kernel+memcpy <= %.1f%% of span" % (100.0*(kern+mcpy)/span), 12, INK, "start", "bold"))
+    o.append(T(x(span)+12, y+18, "device busy <= %.1f%% of span" % (100.0*(kern+mcpy)/span), 12, INK, "start", "bold"))
     o.append(T(x(span)+12, y+33, "%d launches, %.1f GB H2D" % (a["launches"], a["h2d_bytes"]/1e9), 10, MUTED))
     y += ROWH + GAP
 o.append(f'<line x1="26" y1="{H-104}" x2="{W-26}" y2="{H-104}" stroke="{AXIS}"/>')
 o.append(T(26, H-82, "Kernel and memcpy are unioned separately and may overlap each other, so busy time is AT MOST "
-                     "their sum and the remainder is an UPPER bound on idle.", 11, INK2))
+                     "their sum and the remainder is a LOWER bound on idle.", 11, INK2))
 o.append(T(26, H-64, "The remainder is therefore shown only as remainder of span. Quantifying device inactivity needs a "
                      "union over kernel and memcpy together within one trace.", 11, INK2))
 o.append(T(26, H-46, "An arm with no capture is hatched. Absence of a trace is not absence of GPU work.", 11, INK2))

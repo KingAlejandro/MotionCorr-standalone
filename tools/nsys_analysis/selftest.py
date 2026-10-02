@@ -17,7 +17,7 @@ Needs no capture, no GPU and no network. Run from the repository root:
 Not registered with CTest: this directory is a documentation/tooling lane that
 touches no build files. Whoever next edits CMakeLists.txt should register it.
 """
-import ast, json, os, pathlib, subprocess, sys, tempfile
+import ast, json, os, pathlib, re, subprocess, sys, tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
@@ -78,6 +78,21 @@ for tag, src in samples.items():
               "%d push vs %d pop" % (out.count("RCTIC("), out.count("RCTOC(")))
         r2 = run([str(HERE / "patch_nvtx.py"), str(f)])
         check(tag + " refuses to double-patch", r2.returncode != 0, "re-patched an already patched tree")
+        first = re.search(r'RCTIC\((TIMING_[A-Z0-9_]+)\);', src)
+        if first:
+            start, end = first.group(0), 'RCTOC(' + first.group(1) + ');'
+            bad_sources = {
+                'missing-end': src.replace(end, '/* omitted end */', 1),
+                'misordered': src.replace(start, '__START__', 1).replace(end, start, 1).replace('__START__', end, 1),
+                'wrong-label': src.replace(end, 'RCTOC(TIMING_REVIEW_WRONG_LABEL);', 1),
+            }
+            for name, bad in bad_sources.items():
+                for flags in ([], ['-O']):
+                    f.write_text(bad)
+                    rr = run(flags + [str(HERE / 'patch_nvtx.py'), str(f)])
+                    check(tag + ' refuses ' + name + (' under -O' if flags else ''),
+                          rr.returncode != 0 and f.read_text() == bad,
+                          'accepted or modified invalid stage order')
 with tempfile.TemporaryDirectory() as td:
     f = pathlib.Path(td) / "bogus.cpp"; f.write_text("int main(){return 0;}\n")
     before = f.read_text()
@@ -109,8 +124,9 @@ else:
             check("device chart does not reinstate the old idle label",
                   "GPU idle (host-only work)" not in dv and ">GPU idle<" not in dv)
             check("device chart never calls the remainder idle",
-                  "idle" not in dv.lower().replace("upper bound on idle", "")
+                  "idle" not in dv.lower().replace("lower bound on idle", "")
                                          .replace("establishing real idle", ""))
+            check("device remainder has the correct idle bound", "LOWER bound on idle" in dv and "UPPER bound on idle" not in dv)
             check("device chart marks the untraced arm unknown", "not traced" in dv)
             check("device chart bounds busy rather than asserting it", "&lt;=" in dv or "<=" in dv)
         arms = json.loads(data.read_text())["arms"]

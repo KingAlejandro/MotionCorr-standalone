@@ -1,13 +1,31 @@
 #!/usr/bin/env python3
 """Add NVTX ranges to MotionCorr by reusing the existing RCTIC/RCTOC stage
-markers. 35 RCTIC/RCTOC pairs, verified balanced and non-interleaved, so
-nvtxRangePush/Pop maps onto them one-for-one. Enabled only under -DMC_NVTX;
+markers. Marker labels are checked for balanced, properly nested textual order
+before writing. This is not a proof of every runtime control-flow path.
+Enabled only under -DMC_NVTX;
 the stock TIMING path and the no-op path are untouched."""
-import sys, re, sys, pathlib
+import sys, re, pathlib
 
 p = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/motioncorr_runner.cpp")
 s = p.read_text()
 orig = s
+
+# Ignore comments, string/character literals and preprocessor definitions: only
+# literal stage call sites participate in the textual push/pop contract.
+code = re.sub(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+              lambda m: '\n' * m.group(0).count('\n'), s)
+code = re.sub(r'(?m)^[ \t]*#.*$', '', code)
+stack = []
+for marker in re.finditer(r'\bRCT(IC|OC)\(\s*(TIMING_[A-Z0-9_]+)\s*\)', code):
+    kind, label = marker.groups()
+    if kind == 'IC':
+        stack.append(label)
+    elif not stack or stack.pop() != label:
+        raise SystemExit('patch_nvtx: unbalanced/misordered stage marker ' + label +
+                         '; refusing without modifying source')
+if stack:
+    raise SystemExit('patch_nvtx: unclosed stage marker ' + stack[-1] +
+                     '; refusing without modifying source')
 
 # 1. Insert the MC_NVTX macro branch before the final #else of the TIMING block.
 labels = sorted(set(re.findall(r'\bRCT(?:IC|OC)\((TIMING_[A-Z0-9_]+)\)', s)))

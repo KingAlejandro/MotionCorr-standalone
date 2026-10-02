@@ -274,6 +274,50 @@ Three things this makes explicit that a wall-clock number cannot:
   spread of this measurement on a shared box, and it is the scale against which
   the changed rows should be read.
 
+### 4.0b Where the input path spends host time
+
+![host ingest stages](charts/host-stages.png)
+
+Separate `TIMING=ON` builds of both arms, median of 3 repetitions, whole-run
+stage totals. **These walls are not comparable with the production figures
+elsewhere** — an instrumented build is a different binary — but the stage
+*attribution* is what this is for.
+
+| variant | arm | route | host decode | device ingest | gain + sum + upload | input total |
+|---|---|---|---|---|---|---|
+| uint8 LZW, 24f x 6 | main | float | 2.19 s | — | 1.41 s | **3.60 s** |
+| | branch | compact | 1.83 s | — | 0.45 s | **2.28 s** |
+| uint8 LZW, 48f x 2 | main | float | 1.45 s | — | 0.95 s | **2.40 s** |
+| | branch | compact | 1.05 s | — | 0.27 s | **1.32 s** |
+| uint8 Deflate, 24f x 6 | main | float | 1.94 s | — | 1.55 s | **3.48 s** |
+| | branch | nvcomp | — | 0.69 s | — | **0.69 s** |
+| uint8 Deflate, 48f x 2 | main | float | 1.29 s | — | 1.00 s | **2.28 s** |
+| | branch | nvcomp | — | 0.49 s | — | **0.49 s** |
+| uint16 Deflate rps8, 24f x 6 | main | compact | 1.61 s | — | 0.72 s | **2.34 s** |
+| | branch | nvcomp | — | 0.72 s | — | **0.72 s** |
+| uint16 LZW (null), 24f x 6 | main | compact | 2.59 s | — | 0.73 s | **3.32 s** |
+| | branch | compact | 2.57 s | — | 0.76 s | **3.33 s** |
+
+`main` predates the device-ingest timer, so on the one variant where main
+itself takes nvCOMP that stage is untagged and reads as zero; that row is
+marked on the chart and not compared.
+
+What this separates that §4.0 could not:
+
+* **The compact route splits its win across two stages.** For uint8 LZW the
+  host decode falls 2.19 → 1.83 s because it no longer materialises floats, and
+  the gain-and-sum stage falls 1.41 → 0.45 s because the device does the
+  widening and the upload is a quarter of the bytes. Neither alone is the
+  change; together they are 3.60 → 2.28 s.
+* **The nvCOMP route deletes both stages outright.** uint8 Deflate goes from
+  1.94 s of host decode plus 1.55 s of gain-and-sum to a single 0.69 s device
+  ingest — **5.0x less host time on the input path**.
+* **The remaining LZW cost is now a measured number, not a residual.** On the
+  compact route the host decode is **1.83 s / 6 movies = 0.305 s per movie** for
+  uint8 and **2.57 s / 6 = 0.428 s per movie** for uint16. That is exactly the
+  work a GPU LZW decoder would remove, and it is the budget recorded in #141.
+* **The null control is flat**: 3.32 vs 3.33 s on the unchanged compact route.
+
 ### 4.1 Per-movie wall, from the runner's own log
 
 This is the headline metric, not process wall. A 6-movie run at this geometry

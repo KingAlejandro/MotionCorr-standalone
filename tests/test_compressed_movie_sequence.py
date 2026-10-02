@@ -4,6 +4,10 @@
 Exercises both header-only and full reads through the actual CLI, including a
 mixed plain/compressed sequence. The old fclose implementation fails on macOS
 after the first compressed movie. Linux runs retain portable pipeline coverage.
+
+Grades core MRC header bytes [0,224), float payload bytes, and STAR existence.
+It does not compare label/extended-header or STAR contents, or decoder integrity.
+The required suite must fail, not skip, when the xz dependency is unavailable.
 """
 import argparse
 import lzma
@@ -21,8 +25,7 @@ def main():
     p.add_argument('--binary',type=Path,required=True)
     a = p.parse_args()
     if not shutil.which('xz'):
-        print('SKIP: xz is required for compressed-MRC sequence coverage')
-        return 77
+        raise RuntimeError('xz is required for compressed-MRC sequence coverage')
     with tempfile.TemporaryDirectory() as tmp:
         root=Path(tmp)
         write_movie(root/'plain.mrc',seed=17,block_origin=None,isolated=[])
@@ -50,7 +53,7 @@ def main():
                 raise AssertionError('missing per-movie metadata')
         if not (root/'out/corrected_micrographs.star').is_file():
             raise AssertionError('missing aggregate metadata')
-    print('PASS: six compressed movies following a plain movie, exact image products')
+    print('PASS: six compressed movies after a plain movie; exact core headers/pixels, STAR files present')
     return 0
 
 

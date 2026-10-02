@@ -29,6 +29,8 @@ DEFAULT_REQUIRED_TESTS = [
     "GainCache",
     "TiffRead",
     "DamagedMovie",
+    # Sequential compressed readers must close/reap their decoder before reuse.
+    "CompressedMovieSequence",
     "RunnerModelParser",
     "CiFailClosedControls",
     # Added by the #99 fail-closed write group (PR105). WriteFaults is the

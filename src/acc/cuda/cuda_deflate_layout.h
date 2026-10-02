@@ -19,6 +19,15 @@ namespace mc_tiff_deflate {
 
 using mc_cuda::alignUp;   // single definition, shared with the scratch arena
 
+// The two strip-addressing accessors below run both on the host, where the
+// device-free control exercises them, and inside the ingest kernel. Annotating
+// them is what lets the kernel call the tested code instead of a copy of it.
+#if defined(__CUDACC__)
+#define MC_TIFF_HOST_DEVICE __host__ __device__
+#else
+#define MC_TIFF_HOST_DEVICE
+#endif
+
 /**
  * Offset at which a strip must be placed so that its raw Deflate payload, which
  * starts 2 bytes into the stored strip, meets nvCOMP's input alignment.
@@ -52,6 +61,68 @@ inline bool zlibWrapperIsUsable(const uint8_t *p, size_t n) {
     if (((cmf << 8) | flg) % 31u != 0u) return false;   // FCHECK
     if ((flg >> 5) & 1u) return false;                  // FDICT: preset dictionaries unsupported
     return true;
+}
+
+/**
+ * Decompressed-output geometry of one TIFF frame's strips.
+ *
+ * A strip is one independent Deflate stream and therefore one nvCOMP chunk, so
+ * the number of chunks and the bytes each one produces are set entirely by
+ * RowsPerStrip, the width and the sample width. Only strip starts are padded:
+ * rows inside a strip are consecutive in the single buffer nvCOMP writes for
+ * that chunk.
+ *
+ * Here rather than inline in the ingest function because every field is a
+ * silent-defect site that a successful decode cannot expose. Declaring the full
+ * strip length for a short final strip, or padding between rows inside a strip,
+ * produces a buffer that still decodes and still passes a status check; the
+ * image is simply wrong in the last rows_per_strip rows of every frame, which
+ * on a 3838-row movie is under 0.3% of the pixels.
+ */
+struct StripGeometry {
+    int rows_per_strip;      ///< rows in every strip but possibly the last
+    int strips_per_frame;    ///< ceil(ny / rows_per_strip)
+    int last_strip_rows;     ///< rows in the final strip, in [1, rows_per_strip]
+    size_t row_bytes;        ///< nx * bytes_per_sample
+    size_t full_strip_bytes; ///< decompressed bytes of a full strip
+    size_t last_strip_bytes; ///< decompressed bytes of the final strip
+    size_t strip_pitch;      ///< padded distance between strip output slots
+
+    /// Declared decompressed length of chunk @p c, counted within a batch whose
+    /// frames each contribute strips_per_frame chunks in order.
+    MC_TIFF_HOST_DEVICE size_t chunkBytes(size_t c) const {
+        return ((int)(c % (size_t)strips_per_frame) == strips_per_frame - 1)
+                   ? last_strip_bytes : full_strip_bytes;
+    }
+
+    /// Byte offset of row @p y of frame-in-batch @p b from the output base.
+    MC_TIFF_HOST_DEVICE size_t rowOffset(int b, int y) const {
+        const int strip = y / rows_per_strip;
+        return ((size_t)b * (size_t)strips_per_frame + (size_t)strip) * strip_pitch
+               + (size_t)(y - strip * rows_per_strip) * row_bytes;
+    }
+};
+
+/**
+ * Plan the strip geometry for one movie. @p rows_per_strip is the TIFF tag value
+ * already clamped to [1, ny]; @p bytes_per_sample is 1 or 2.
+ */
+inline StripGeometry planStrips(int nx, int ny, int rows_per_strip, int bytes_per_sample) {
+    StripGeometry g;
+    g.rows_per_strip = rows_per_strip;
+    g.strips_per_frame = (ny + rows_per_strip - 1) / rows_per_strip;
+    g.last_strip_rows = ny - (g.strips_per_frame - 1) * rows_per_strip;
+    g.row_bytes = (size_t)nx * (size_t)bytes_per_sample;
+    g.full_strip_bytes = (size_t)rows_per_strip * g.row_bytes;
+    g.last_strip_bytes = (size_t)g.last_strip_rows * g.row_bytes;
+    g.strip_pitch = 0;   // set by withOutputAlignment
+    return g;
+}
+
+/// Apply nvCOMP's reported output alignment to the strip slots.
+inline StripGeometry withOutputAlignment(StripGeometry g, size_t out_align) {
+    g.strip_pitch = alignUp(g.full_strip_bytes, out_align);
+    return g;
 }
 
 /**

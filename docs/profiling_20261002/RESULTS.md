@@ -328,5 +328,9 @@ to `1d7e13f`, and the per-movie replacement body re-emitted the old
 Its gates were bare `assert` and vanished under `python -O`. Those fixes are in PR132,
 not here.
 
-Raw `.nsys-rep` and `.sqlite` captures are not committed — 8–18 MB each. They are
-retained on the host at `/home/alex/mc-release-20261002/prof/`.
+Raw captures are not committed — 8–18 MB each. Retained on the host:
+`/home/alex/mc-release-20261002/prof/` holds the six NVTX captures as both `.nsys-rep`
+and `.sqlite`; `/home/alex/mc-release-20261002/vprof/` holds the seven per-arm
+`--cuda-memory-usage` captures as `.sqlite` only (the `.nsys-rep` files were deleted
+after export to keep the shared host's scratch down). Everything the charts and tables
+here are derived from is in the committed `data/` directory.

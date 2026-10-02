@@ -1945,7 +1945,12 @@ class CompressedMRCReader
 	~CompressedMRCReader()
 	{
 		if (pipe != NULL)
-			fclose(pipe);
+			// popen streams must be closed by pclose, which also reaps the
+			// decoder. fclose leaves stale process-pipe state on macOS and
+			// later compressed movies can fail before reading their header.
+			// Header-only reads intentionally stop the decoder early, so its
+			// exit status is not a complete-file integrity check here.
+			pclose(pipe);
 	}
 
 	CompressedMRCReader(const CompressedMRCReader&) = delete;

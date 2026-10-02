@@ -189,6 +189,19 @@ public:
 	bool gain_cache_is_eer = false;
 	int gain_cache_eer_upsampling = 0;
 	bool gain_cache_filled = false;
+	// Bumped on every refill of gain_cache, from a process-wide counter. Lets the
+	// CUDA session tell "same gain array as last movie" from "refilled, possibly
+	// different contents" without hashing 54 MiB per movie. 0 means "no identity
+	// resolved yet", which disables device-side retention. The counter is global
+	// rather than per-runner so that two runners on one worker thread cannot mint
+	// the same generation for different gain contents.
+	unsigned long long gain_cache_generation = 0;
+
+	// True when gain_cache_generation is a valid identity for a movie of this
+	// geometry, i.e. gainReferenceFor() has already resolved the gain for this
+	// movie. The device retention key is only sound under that ordering, so the
+	// caller asserts this instead of leaving the ordering implicit.
+	bool gainIdentityResolvedFor(int nx, int ny) const;
 
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must

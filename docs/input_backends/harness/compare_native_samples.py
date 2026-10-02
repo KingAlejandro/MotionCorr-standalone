@@ -89,15 +89,29 @@ def main():
     x0, x1 = 1, flipped.shape[2] - 2
     if perm[f, y, x0] == perm[f, y, x1]:
         # Two equal samples would make the "permutation" a no-op and the control
-        # vacuous; find a pair that actually differs.
-        row = perm[f, y]
-        neq = np.argwhere(row != row[0])
-        x0, x1 = 0, int(neq[0][0]) if neq.size else (0, 0)
-    perm[f, y, x0], perm[f, y, x1] = perm[f, y, x1], perm[f, y, x0]
-    c = compare(staged, perm)
+        # vacuous; find a pair that actually differs. If no row in the frame has
+        # two different samples there is nothing to permute, and the control is
+        # reported as not applicable rather than silently passing on a no-op.
+        x0, x1 = None, None
+        for yy in range(flipped.shape[1]):
+            row = perm[f, yy]
+            neq = np.flatnonzero(row != row[0])
+            if neq.size:
+                y, x0, x1 = yy, 0, int(neq[0])
+                break
+    if x0 is None:
+        report_perm_applicable = False
+        c = dict(shape_match=True, compared=int(staged.size), differing=0,
+                 note="no row in frame 0 holds two different samples")
+    else:
+        report_perm_applicable = True
+        perm[f, y, x0], perm[f, y, x1] = perm[f, y, x1], perm[f, y, x0]
+        c = compare(staged, perm)
     report["controls"]["row_sums_unchanged"] = bool(
         (perm.sum(axis=2, dtype=np.int64) == flipped.sum(axis=2, dtype=np.int64)).all())
-    report["controls"]["within_row_permutation_detected"] = c["differing"] != 0
+    report["controls"]["within_row_permutation_applicable"] = report_perm_applicable
+    report["controls"]["within_row_permutation_detected"] = (
+        c["differing"] != 0 if report_perm_applicable else False)
     report["controls"]["within_row_permutation"] = c
 
     # One-bit flip in the last frame.

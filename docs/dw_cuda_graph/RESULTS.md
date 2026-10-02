@@ -3,13 +3,15 @@
 **Question.** Once resources are stable, can CUDA Graph replay reduce host
 submission overhead enough to matter without changing operation order?
 
-**Answer.** Operation order is preservable and output is bit-exact, but there is
-nothing to recover. The whole host submission cost of the region is **1.2 ms per
-movie**, of which replay removes about **1.0 ms of host CPU and 0 ms of wall**,
-because the region is device-bound. Building the graph per movie costs
-**1.12 ms**, so the per-movie graph arm is a measured **+0.94 ms/movie
-regression** against its own control (157/168 paired movies slower). Replay does
-pay where per-operation device work is small — −9.9% at 256×256 × 160 frames,
+**Answer.** Operation order is preservable and output is bit-exact, but the prize
+is too small to collect. The entire host submission cost of the region is
+**1.0 ms per movie**; replay removes **0.72 ms of it** and returns at most
+**0.25 ms of wall** (−0.6% of a 42.9 ms region, 15/20 reps faster) — and only if
+an executable graph is cached on the worker. Building the graph per movie costs
+**1.12 ms**, four times what replay returns, so the shape that is actually
+implementable today is a measured **+0.935 ms/movie regression** in the complete
+application (147 of 168 paired movies slower than its own control). Replay does
+pay where per-operation device work is small — −11.4% at 256×256 × 160 frames,
 20/20 reps — and MotionCorr's geometry is two orders of magnitude away from that.
 
 This result is independent of the earlier alignment-synchronization no-go and does
@@ -94,17 +96,19 @@ Native harness, same quantity, by frame count at 3710×3838 (capture + instantia
 
 | frames | nodes | capture | instantiate | ≈ per node |
 |---:|---:|---:|---:|---:|
-| 24 | 241 | 0.505 ms | 1.097 ms | 6.6 µs |
-| 80 | 801 | 1.640 ms | 4.909 ms | 8.2 µs |
-| 160 | 1601 | 4.947 ms | 12.052 ms | 10.6 µs |
+| 24 | 241 | 0.489 ms | 1.115 ms | 6.7 µs |
+| 80 | 801 | 2.168 ms | 5.614 ms | 9.7 µs |
+| 160 | 1601 | 3.312 ms | 10.908 ms | 8.9 µs |
 
-Construction scales slightly worse than linearly in node count, so **G0 gets worse
-with longer movies, not better** — the opposite of the direction that would make
-per-movie graphs viable for the 160-frame workload.
+Construction cost is roughly linear in node count at ~9 µs/node, so it grows with
+frame count while the submission it saves grows no faster — **G0 gets worse with
+longer movies, not better**, the opposite of the direction that would make
+per-movie graphs viable for a 160-frame workload.
 
 G0 loses at every frame count tested. Paired against the `async` control in the
-native harness, the `g0` arm is +2.86 ms (24 frames), +4.92 ms (80), +6.88 ms (160)
-at 3710×3838 — each matching that geometry's build cost. **Graph construction is
+native harness, the `g0` arm is +1.50 ms (24 frames, 2/20 faster), +3.89 ms
+(80, 0/14), +9.88 ms (160, 0/10) at 3710×3838 — each matching that geometry's
+build cost. **Graph construction is
 not hidden anywhere in these numbers; it is inside the candidate's timed region.**
 
 ## REPLAY_COST — experiment G1
@@ -113,28 +117,35 @@ Native harness, graph built once outside the timed region and replayed per movie
 with stable buffers and a stable plan (`greuse`), against the `async` control.
 Medians over paired reps, cold first rep dropped.
 
-| geometry × frames | host submit CPU, async → greuse | region wall, greuse − async | reps faster |
-|---|---|---:|---|
-| 3710×3838 × 24 | 1.245 → 0.278 ms | +0.465 ms | 8/20 |
-| 3710×3838 × 80 | 3.451 → 0.557 ms | −0.652 ms | 8/14 |
-| 3710×3838 × 160 | 204.98 → 0.832 ms | −1.204 ms | 7/10 |
-| 3838×5760 × 24 | 1.157 → 0.283 ms | +0.361 ms | 8/20 |
-| 512×512 × 160 | 3.828 → 0.971 ms | +0.200 ms | 1/20 |
-| **256×256 × 160** | 2.744 → 0.352 ms | **−0.325 ms (−4.9%)** | **19/20** |
-| 256×256 × 160, no updates | 2.744 → 0.029 ms | **−0.652 ms (−9.9%)** | **20/20** |
-| 512×512 × 160, no updates | 3.828 → 0.050 ms | **−0.726 ms (−5.3%)** | **20/20** |
+| geometry × frames | region wall, async | host submit CPU, async → greuse | wall, greuse − async | reps faster |
+|---|---:|---|---:|---|
+| 3710×3838 × 24 | 42.88 ms | 1.007 → 0.287 ms | −0.246 ms (−0.6%) | 15/20 |
+| 3710×3838 × 24, no updates | 42.88 ms | 1.007 → 0.072 ms | −0.463 ms (−1.1%) | 15/20 |
+| 3710×3838 × 24, null model | 41.38 ms | 1.008 → 0.199 ms | −0.229 ms (−0.6%) | 13/20 |
+| 3710×3838 × 80 | 175.47 ms | 3.011 → 0.598 ms | −0.243 ms (−0.1%) | 9/14 |
+| 3710×3838 × 160 | 498.29 ms | 205.34 → 1.050 ms | −0.988 ms (−0.2%) | 6/10 |
+| 512×512 × 160 | 12.23 ms | 3.295 → 0.713 ms | −0.061 ms (−0.5%) | 11/20 |
+| 512×512 × 160, no updates | 12.23 ms | 3.295 → 0.040 ms | **−0.733 ms (−6.0%)** | **20/20** |
+| **256×256 × 160** | 6.31 ms | 2.721 → 0.329 ms | **−0.426 ms (−6.8%)** | **19/20** |
+| 256×256 × 160, no updates | 6.31 ms | 2.721 → 0.030 ms | **−0.717 ms (−11.4%)** | **20/20** |
+
+The harness's 42.88 ms region at tutorial geometry and the application's own
+43.61 ms for the same arm agree to 2%, which is the cross-check that the harness
+is measuring the thing the product measures.
 
 Reading of this table:
 
-- **Host submission CPU is genuinely removed** — 1.2 ms → 0.3 ms at tutorial
-  geometry — and **does not appear in the wall**, because the host is never the
-  thing the region is waiting for.
+- **Host submission CPU is genuinely removed** — 1.01 ms → 0.29 ms at tutorial
+  geometry — and **almost none of it appears in the wall**: 0.72 ms of host CPU
+  returns ≤0.25 ms, because the host is rarely the thing the region waits on.
 - **Node updates cost about half the available saving.** 72 updates at 24 frames
-  take 0.178 ms (2.5 µs each); 480 at 160 frames take 0.713 ms (1.5 µs each). The
+  take 0.191 ms (2.7 µs each); 480 at 160 frames take 0.901 ms (1.9 µs each). The
   `no updates` rows are an upper bound on replay, not a usable arm: a real movie
   changes the frame offsets and the polynomial coefficients.
 - **Replay only pays when per-operation device work is small.** The effect is
-  clean and repeatable at 256×256 (20/20) and vanishes by 3710×3838.
+  clean and repeatable at 256×256 (20/20 without updates, 19/20 with) and decays
+  to a fraction of a percent by 3710×3838, where it is of the same size as the
+  run-to-run spread on this shared host.
 - At 160 frames the `async` submit-CPU figure (205 ms) is **launch-queue
   back-pressure**, not submission work: the device falls far enough behind that the
   host blocks inside the launch call. A graph avoids that blocking entirely and the
@@ -191,8 +202,9 @@ samples ≥1300 MHz.
 Bit-exact, by `memcmp` of the full reconstructed image against the product arm —
 no RMSE substitution anywhere.
 
-Native harness, **42 configurations** across two campaigns, all five arms
-(`prod`, `async`, `g0`, `g1`, `greuse`) identical in every one:
+Native harness, **52 runs over 32 distinct configurations** across two campaigns;
+all five arms (`prod`, `async`, `g0`, `g1`, `greuse`) were identical in every
+single run:
 
 - frames 1, 2, 8, 24, 80, 160 × {polynomial model, null model} at 3710×3838 and
   3838×5760;
@@ -202,18 +214,31 @@ Native harness, **42 configurations** across two campaigns, all five arms
 **Node-update control.** A reused graph that silently ignored updates would still
 produce the right answer if it were built with the right parameters, so the
 control builds it with the *wrong* ones: every frame slot carries frame 0's
-parameters. Replaying without updates must differ from the reference, and
-replaying after updates must match it. Both held in all 38 applicable
-configurations. At `frames=1` that graph is already correct, so the control cannot
-observe anything and is reported **inapplicable**, not as a pass — 4 configurations.
+parameters. Replaying without updates must differ from the reference; replaying
+after updates must match it. Applicable in 42 of the 52 runs and passing in 41.
 
-Complete application: all 24 MRCs, STARs, trajectories, metadata, EPS and logs
-compared between the product and candidate arms with
-`docs/issue85_laneC/compare_output_trees.py`. **This comparison is currently
-re-running**: the first pass invoked bare `python3`, which has no numpy on this
-host, so all 14 comparisons errored before reading a byte. No PASS is claimed from
-it yet. The arms' per-movie reconstruction numbers above come from the run logs
-and are unaffected.
+The one exception is a defect in the control, not in the graph path, and it is
+why the control was redesigned. The first version discriminated by swapping the
+motion model, which has two blind spots: it says nothing at all for the null model
+(no per-frame kernel parameter varies), and at `frames=1` the frame-0 polynomial
+is identically zero for *any* model, so no model change is observable. Campaign 1
+reported that `frames=1` case as applicable and it failed, correctly — the check
+could not see what it asserted. The present control uses the fixed-frame graph
+above, which discriminates for the null model too, and reports `frames=1` as
+**inapplicable** rather than as a pass.
+
+Complete application: **14/14 PASS** (7 rounds × {async, graph} against the
+product arm of the same round) with `docs/issue85_laneC/compare_output_trees.py`,
+scope *complete non-PDF tree* — 109 files, 24 MRCs, 25 STARs, **341 735 520
+pixels** per arm, all 24 MRC payload digests and normalised headers identical,
+`different_files` and `different_products` both empty. The only normalisation in
+force beyond the tool's standard timing/path masking is
+`--allow-added-log-line 'DW submission mode:'`, which is dropped from both arms
+and so cannot conceal a difference.
+
+A first pass of this comparison invoked bare `python3`, which has no numpy on this
+host, and errored before reading a byte; it is superseded by the run above, not
+averaged with it.
 
 A positive witness confirms the path ran: all 24 logs in every async round carry
 `DW submission mode: async`, all 24 in every graph round carry
@@ -268,8 +293,8 @@ synchronizes before destroying.
 - **One venue, one device.** A100 80GB PCIe, CUDA 12.8, cuFFT 11.3.3.41. Nothing
   here transfers to another toolkit or architecture without re-measurement; graph
   launch and instantiate costs are driver-version properties.
-- **The box was shared.** Load average was 11–14 during campaign 2 from two other
-  sessions, which is why several native paired ranges span ±100 ms around a
+- **The box was shared.** Load average was 9–14 during campaigns 2 and 3 from two
+  other sessions, which is why several native paired ranges span ±100 ms around a
   sub-millisecond median. The medians are over 10–20 paired reps with arms
   interleaved, and the small-geometry rows (20/20 one way) are unaffected by it,
   but no native figure here is a clean-room number. The application region
@@ -285,11 +310,12 @@ synchronizes before destroying.
   artifact — the staged tree has no `.git`, so a control asserting on a git-ref
   error message gets the archive-mode message instead. 41/42 other tests pass,
   including all 10 CUDA tests. Not caused by this change.
-- The harness's first wall measurement included an 88 MB host-side digest inside
-  the timed region, inflating absolute region walls roughly fourfold. Paired
-  deltas and submission-CPU figures were unaffected. The fix is in the probe and a
-  re-measurement of the absolute walls is queued; the tables above quote deltas,
-  and absolute region size comes from the application's own measurement (46 ms).
+- The harness's first two campaigns included an 88 MB host-side digest inside the
+  timed region, inflating absolute region walls roughly fourfold; paired deltas
+  and submission-CPU figures were unaffected. All wall figures quoted here are
+  from the corrected third campaign, whose region wall now agrees with the
+  application's own measurement to 2%. Campaigns 1 and 2 are retained under
+  `evidence/` as superseded for absolute wall only.
 
 ## INTEGRATION_REQUIREMENTS
 
@@ -313,8 +339,10 @@ are what the experiment actually established, not as a recommendation to proceed
 
 ## NEXT
 
-1. **Do not pursue graphs for this region.** The ceiling is 1.2 ms of host CPU per
-   movie that does not convert to wall, against a 1.12 ms construction cost.
+1. **Do not pursue graphs for this region.** The ceiling is 0.72 ms of host CPU
+   per movie, of which at most 0.25 ms reaches the wall, against a 1.12 ms
+   construction cost that only a worker-lifetime graph cache could avoid. Even if
+   that cache existed, 0.25 ms is 0.06% of a ~400 ms/movie steady state.
 2. **The telemetry removal is worth a separate, properly scoped change**: −2.31 ms
    per movie, 161/168 paired movies faster, bit-exact, and it needs no graph, no
    stream capture and no worker-lifetime change. It does delete the per-stage

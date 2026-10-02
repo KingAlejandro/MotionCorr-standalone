@@ -129,6 +129,26 @@ These are this workload's and this venue's numbers. The differences are not
 additive with PR130's own 5.84%, PR131's dose-normalization result or PR133's
 figure: those were measured against different bases on different trees.
 
+### Binary warmth, and why the null control can be trusted
+
+A binary's first execution on this hardware costs around a second more than its
+steady state, and an alternating arm order does not cancel that: the cold
+binary is whichever arm was built last, so the bias attaches to an arm and
+survives the alternation a paired design exists to protect against. It is the
+one artifact that could manufacture the null control's answer either way.
+
+Two things rule it out here. All six arms were built from scratch by one
+script in one job (`build-arms4.sbatch`), from the same flags, before any
+measured run. And the mechanism-witness phase ran all six binaries on three
+movies before the campaign began, so no arm's first *timed* run was its first
+*execution*. Round 1 is consequently not an outlier for any arm — A0's round-1
+wall of 10.916 s is in fact the fastest of its eight.
+
+The earlier, superseded campaign shows what the artifact looks like when that
+precaution is missing: its round-1 A0 was 15.793 s against a 11.017 s median.
+Those records are retained in `campaign2-runs.jsonl` rather than discarded, and
+that campaign is not the one reported above.
+
 ### Exact output on every run
 
 Every one of the 48 runs produced the identical product inventory digest

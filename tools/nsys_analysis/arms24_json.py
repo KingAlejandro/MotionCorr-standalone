@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build the 24-movie comparison payload for the charts."""
-import sqlite3, json, collections
+import sqlite3, json, collections, os, sys
 W = sys.argv[1] if len(sys.argv) > 1 else "./"
 ARMS = [("main @1d7e13f",        "nsys24/r1_cuda_nvtx.sqlite", [31.705, 31.013]),
         ("cand --ingest float",  "nsys24/c5_cand_float.sqlite", [26.137, 25.357]),
@@ -55,9 +55,12 @@ for nm, db, walls in ARMS:
             pts.append([(hi-lo)/1e9, cur])
             out["vram"][key] = pts
             rec["peak_vram"] = max(p[1] for p in pts)
-        except Exception: pass
+        except Exception as e:
+            # a missing VRAM series must be visible, not silently absent
+            print("WARNING: no VRAM series for %s: %s" % (key, e), file=sys.stderr)
     out["arms"].append(rec)
-json.dump(out, open(W+"results24/arms24.json", "w"))
+os.makedirs(os.path.join(W, "results24"), exist_ok=True)
+json.dump(out, open(os.path.join(W, "results24", "arms24.json"), "w"))
 for a in out["arms"]:
     print("%-24s wall=%5.1fs span=%s kern=%s mcpy=%s h2d=%s" %
           (a["name"], a["wall"],

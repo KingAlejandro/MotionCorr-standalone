@@ -3,8 +3,10 @@
 **Date** 2026-10-01 · **Host** `4GPUs` (4-gpu-vm), CPU mask `96-103`, THP `madvise`
 **Device** GPU 0 = `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, A100 80GB PCIe, 108 SMs, driver 570.86.10, CUDA 12.8
 **Source** `main` @ `1d7e13f` (tree `fbe9469`, clean) · **Build** Release `-O3`, `sm_80`, `-lineinfo`, `-g -fno-omit-frame-pointer`
-**Workload** sections 1–7: 1 movie `20170629_00022_frameImage.tiff` (3838×5760, 24 frames).
-Section 8: all 24 tutorial movies, with the unmerged nvcomp ingest candidate alongside.
+**Workload** sections 1–7: 1 movie `20170629_00022_frameImage.tiff` (3710×3838, 24 frames).
+Section 8: all 24 tutorial movies, with the nvcomp ingest candidate alongside. That candidate
+was unmerged at the profiled baseline `1d7e13f`; it has since landed and `abd6827` is an
+ancestor of current main `c499b1d`.
 Canonical options:
 `--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8`
 
@@ -227,7 +229,8 @@ because 00021 is documented as unrepresentative. Items 1–5 are per-movie costs
 should scale; the ghostscript 790 ms is per-job and must not be counted per movie.
 
 **Read this list against section 8 before acting on it.** At 24 movies the ranking
-changes. The unmerged nvcomp ingest path already takes the largest single win — moving
+changes. The nvcomp ingest path — unmerged when this was profiled, in main since #128 — already
+takes the largest single win by moving
 Deflate decode to the GPU, 2.47x end to end — and it does so partly by cutting PCIe
 traffic 7.4x, which overlaps with item 1 here: pinning buys much less once there are
 4.6 GB to move instead of 34.2 GB. Items 2, 3 and 5 are untouched by it and still stand,
@@ -254,7 +257,17 @@ with the path forced, so the differences between them are the ingest path alone.
 movie costs 2.55 s standalone but 1.29 s inside a 24-movie job — the ~790 ms of
 ghostscript is per *job*, and the CUDA context and cuFFT modules stay warm.
 
-![24-movie arm comparison](profiling_20261001/charts24/arms24.png)
+![24-movie wall clock, unprofiled production runs](profiling_20261001/charts24/arms24_wall.png)
+
+![GPU occupancy inside each arm's own profiled capture](profiling_20261001/charts24/arms24_device.png)
+
+These are two charts on purpose. The first holds only unprofiled production walls;
+the second holds only intervals measured inside each arm's own capture, with that
+capture's span as the denominator. They are different executions — `main` is a
+31.359 s unprofiled wall against a 38.705 s profiled span — so no quantity from one
+may be subtracted from the other. Kernel and memcpy are unioned separately and can
+overlap, so the device chart bounds busy time from above rather than asserting an
+idle figure, and the untraced `compact` arm is hatched rather than drawn at zero.
 
 **nvcomp wins twice, and the second way is the larger one.** It moves Deflate decode onto
 the GPU — `inflate_kernel`, 24 launches, one per movie, 568 ms total, present in the
@@ -312,7 +325,9 @@ strips and inflate scratch. Neither arm exceeds 4% of an 80 GB card.
 
 ### What this does and does not establish
 
-- The candidate branch (`src-cand`, HEAD `abd6827`) is **unmerged**. Nothing here is a
+- The candidate branch (`src-cand`, HEAD `abd6827`) was **unmerged at the time of this capture**
+  (2026-10-01, baseline `1d7e13f`). It has since merged: `abd6827` is an ancestor of current
+  main `c499b1d`. Nothing here is a
   claim about its correctness, parity or readiness — only about where its time goes.
 - The float-vs-compact-vs-nvcomp comparison is clean (one binary, flag forced). The
   `main` → candidate step is **not** attributable to any single change: the branch
@@ -333,11 +348,12 @@ gives −4.5 % wall, bit-exact. Together −4.7 % wall, −21.9 % CPU-seconds. D
 data: [`profiling_20261001/OPTIMISATION_RESULTS.md`](profiling_20261001/OPTIMISATION_RESULTS.md).
 
 Note that this moves the baseline: section 7's recommendations were written against
-`main`, where `patch align` costs 4.21 s. On the tip it costs 1.63 s.
+the profiled baseline `1d7e13f`, where `patch align` costs 4.21 s. On the candidate tip
+`abd6827` it costs 1.63 s. Both numbers come from that campaign; neither is current main.
 
 ---
 
-## 9. Artifacts and how to reproduce
+## 10. Artifacts and how to reproduce
 
 All charts are committed as both SVG (interactive tooltips, re-renderable) and PNG.
 
@@ -370,7 +386,8 @@ against any MotionCorr profile, not just this one. The three charts here regener
 python3 tools/nsys_analysis/mktimeline.py out.svg docs/profiling_20261001/data/timeline_p8.json
 python3 tools/nsys_analysis/mkvram.py     out.svg docs/profiling_20261001/data/vram.json
 python3 tools/nsys_analysis/mkflame.py docs/profiling_20261001/data/flame_main.folded out.svg "title"
-python3 tools/nsys_analysis/mkarms24.py out.svg docs/profiling_20261001/data24/arms24.json
+python3 tools/nsys_analysis/mkarms24.py docs/profiling_20261001/charts24/arms24 \\
+        docs/profiling_20261001/data24/arms24.json   # -> arms24_wall.svg + arms24_device.svg
 python3 tools/nsys_analysis/mktl24.py   out.svg docs/profiling_20261001/data24/arms24.json
 python3 tools/nsys_analysis/mkvram24.py out.svg docs/profiling_20261001/data24/arms24.json
 ```

@@ -29,8 +29,12 @@ branch = '''#elif defined(MC_NVTX)
 \t#define RCTOC(label)
 ''' % defs
 
+matched = []
 old_else = "#else\n\t#define RCTIC(label)\n\t#define RCTOC(label)\n#endif"
-assert s.count(old_else) == 1, "RCTIC #else block not found exactly once"
+if s.count(old_else) != 1:
+    raise SystemExit("patch_nvtx: anchor RCTIC-#else matched %d times, expected 1. "
+                     "This source is not supported; refusing rather than emitting a half-patched tree."
+                     % s.count(old_else))
 s = s.replace(old_else, branch + "#endif")
 
 # MC_SCOPE must exist (as a no-op) on the TIMING and plain paths too.
@@ -38,20 +42,46 @@ s = s.replace("#endif\n\nvoid MotioncorrRunner::read(",
               "#endif\n#ifndef MC_SCOPE\n#define MC_SCOPE(n)\n#endif\n\nvoid MotioncorrRunner::read(", 1)
 
 # 2. Per-movie range. RAII, so the early `return false` stays balanced.
-anchor = ("bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {\n"
-          "\ttimeval movie_start_time;")
-assert s.count(anchor) == 1, "executeOwnMotionCorrection anchor not found"
+# The signature changed after 1d7e13f (effective_expected_frames was added), so try
+# each known variant and record which one matched. Both the search text and the
+# replacement text have to carry the same signature or the patched tree declares a
+# function that matches no declaration.
+MOVIE_SIGS = [
+    "bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {",
+    "bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {",
+]
+sig = next((g for g in MOVIE_SIGS if s.count(g + "\n\ttimeval movie_start_time;") == 1), None)
+if sig is None:
+    raise SystemExit("patch_nvtx: no known executeOwnMotionCorrection signature found. Tried:\n  "
+                     + "\n  ".join(MOVIE_SIGS)
+                     + "\nThis source is not supported; refusing rather than emitting a half-patched tree.")
+anchor = sig + "\n\ttimeval movie_start_time;"
 s = s.replace(anchor,
-              "bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic) {\n"
+              sig + "\n"
               "\tMC_SCOPE(\"MOVIE (executeOwnMotionCorrection)\");\n"
               "\ttimeval movie_start_time;", 1)
+matched.append("movie-scope: " + sig.split("(")[1].rstrip(" {"))
 
-# 3. Final output write -- the one real stage with no RCTIC marker.
-wr = "\t\tIref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);"
-assert s.count(wr) == 1, "final Iref.write not found exactly once"
-s = s.replace(wr, "\t\t{ MC_SCOPE(\"write output\");\n" + wr + "\n\t\t}", 1)
+# 3. Output handoff -- the one real stage with no RCTIC marker.
+# Before the async writer landed this was a direct blocking Iref.write, so the scope
+# measured the write. Current main queues to a writer thread, so the same position
+# measures only the handoff and the scope is named accordingly. The writer drain is
+# inside the process wall but inside no NVTX stage; do not read it off this scope.
+OUT_SITES = [
+    ("submit output", "\t\tsubmitImageWrite(Iref, fn_avg, write_float16 ? Float16: Float);"),
+    ("write output",  "\t\tIref.write(fn_avg, -1, false, WRITE_OVERWRITE, write_float16 ? Float16: Float);"),
+]
+site = next(((nm, w) for nm, w in OUT_SITES if s.count(w) == 1), None)
+if site is None:
+    raise SystemExit("patch_nvtx: no known output-write site found. Tried:\n  "
+                     + "\n  ".join(w.strip() for _, w in OUT_SITES)
+                     + "\nThis source is not supported; refusing rather than emitting a half-patched tree.")
+oname, wr = site
+s = s.replace(wr, "\t\t{ MC_SCOPE(\"" + oname + "\");\n" + wr + "\n\t\t}", 1)
+matched.append("output-scope: " + oname)
 
-assert s != orig
+if s == orig:
+    raise SystemExit("patch_nvtx: no change applied")
 p.write_text(s)
-print("patched: %d stage labels, +movie scope, +write scope" % len(labels))
+print("patched: %d stage labels; %s" % (len(labels), "; ".join(matched)))
 for l in labels: print("   ", l)

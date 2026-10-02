@@ -5,8 +5,11 @@ Venue identical: `4GPUs`, A100 80GB PCIe `GPU-eddb42fe`, CPU mask `96-103`, THP 
 CUDA 12.8, nvCOMP 5.3, Release/sm80, 24 tutorial movies, `--j 8`.
 
 Baseline here is **`a294f3b`** (tip of `experiment/post128-alignment-sync`), not `main`.
-That branch is 197 commits ahead of main and already contains PR130's per-movie
-alignment workspace reuse, which is why `patch align` costs 1.63 s here against 4.21 s
+That branch is 197 commits ahead of the profiled baseline `1d7e13f`, which is what this
+campaign labelled `main`. Against current main `c499b1d` the distance is 23 commits.
+It already contains PR130's per-movie
+alignment workspace reuse, which is why `patch align` costs 1.63 s here against 4.21 s at
+the profiled baseline `1d7e13f`
 in the stale `abd6827` trace quoted in the main report.
 
 Raw data: [`data_opt/`](data_opt/).

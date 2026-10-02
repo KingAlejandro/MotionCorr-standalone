@@ -1,11 +1,36 @@
 # nsys / ncu analysis scripts
 
-Post-processing for Nsight Systems and Nsight Compute captures of MotionCorr. Each
-script takes its input as an argument and works against any profile — nothing is
-specific to the 2026-10-01 campaign that produced
-[`docs/single_gpu_execution_profile.md`](../../docs/single_gpu_execution_profile.md).
+Post-processing for Nsight Systems and Nsight Compute captures of MotionCorr. Most
+scripts take their input and output paths as arguments and work against any profile.
+
+Two are not generic, and the difference matters:
+
+* `arms24_json.py` hardcodes the arm list, the capture filenames and the two
+  unprofiled wall observations of the 2026-10-01 campaign. It takes only a root
+  directory. Re-point it by editing `ARMS`.
+* `patch_nvtx.py` matches literal source anchors. It carries one variant per known
+  `motioncorr_runner.cpp` generation and refuses with a non-zero exit, naming what it
+  tried, when none matches. It does not guess.
+
+The remaining scripts are parameterised and campaign-independent.
 
 Python 3, standard library only (`sqlite3`, `csv`, `json`). No numpy — `4GPUs` has none.
+
+## Self-test
+
+```sh
+python3 tools/nsys_analysis/selftest.py
+```
+
+Runs every script's CLI against throwaway inputs: each one parses and imports what it
+uses, `arms24_json.py` reaches its input handling and creates its output directory,
+`patch_nvtx.py` patches each known `motioncorr_runner.cpp` generation and refuses an
+unsupported or already-patched one with a non-zero exit (including under `python -O`),
+and `mkarms24.py` emits both charts without reinstating the cross-run idle label. No
+capture, GPU or network needed. It fails on the first version of this directory.
+
+Not registered with CTest: this is a documentation/tooling lane that touches no build
+files. Whoever next edits `CMakeLists.txt` should register it.
 
 ## Capture
 
@@ -43,7 +68,7 @@ unwind and kernels attribute to source. Measured cost of those flags: none.
 
 ## NVTX stage annotation
 
-`patch_nvtx.py` turns the 35 existing `RCTIC`/`RCTOC` markers in
+`patch_nvtx.py` turns the existing `RCTIC`/`RCTOC` markers in
 `src/motioncorr_runner.cpp` into NVTX ranges via one `#elif defined(MC_NVTX)` branch,
 so the whole pipeline is annotated without scattering edits. NVTX3 is header-only and
 is a no-op when no tool is attached. Run it against a **copy** of the tree and build
@@ -57,10 +82,21 @@ cmake -S src-nvtx -B build-nvtx -DCMAKE_BUILD_TYPE=Release -DCUDA=ON \
   -DCMAKE_CUDA_FLAGS_RELEASE="-O3 -DNDEBUG -lineinfo -Xcompiler=-fno-omit-frame-pointer"
 ```
 
-The script asserts its anchors and will fail loudly rather than patch the wrong place.
+The script checks its anchors with explicit `raise SystemExit`, not `assert`, so the
+refusal survives `python -O` / `PYTHONOPTIMIZE`; an earlier version used bare asserts
+and under `-O` would print a success line while inserting nothing. It reports which
+signature variant it matched, so the profile records which source generation was
+instrumented.
+
+Known variants: 29 stage labels and a blocking `Iref.write` at `1d7e13f`; 38 labels
+and an async `submitImageWrite` on current main. On current main the scope at that
+position is therefore named **`submit output`**, because it measures the handoff to
+the writer thread, not the write. The writer drain lies inside the process wall but
+inside no NVTX range — it cannot be read off the stage table.
+
 `nvtxRangePush`/`Pop` is a stack: verify the pairs are balanced before trusting the
-output (they were 35/35, non-interleaved, at `1d7e13f`). Spans with an early `return`
-use an RAII guard, not bare push/pop.
+output (38/38 at `1d7e13f`, 49/49 on current main, non-interleaved). Spans with an
+early `return` use an RAII guard, not bare push/pop.
 
 ## Analysis
 

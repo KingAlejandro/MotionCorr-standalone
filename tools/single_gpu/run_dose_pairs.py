@@ -142,5 +142,5 @@ for pair in range(1,a.pairs+1):
  if result.returncode:raise RuntimeError('Exact complete non-PDF tree comparison failed: '+result.stdout)
 if sha(a.baseline)!=meta['baseline_sha256'] or sha(a.candidate)!=meta['candidate_sha256']:raise RuntimeError('Binary changed during campaign')
 if {str(q):sha(q) for q in input_paths}!=input_hashes:raise RuntimeError('Input content changed during campaign')
-(root/'COMPLETE.json').write_text(json.dumps({'expected_pair_count':a.pairs,'runs_sha256':sha(root/'runs.json'),'provenance_sha256':sha(root/'provenance.json'),'exact_sha256':{str(n):sha(root/f'exact-{n}.json') for n in range(1,a.pairs+1)}},indent=2))
+(root/'COMPLETE.json').write_text(json.dumps({'expected_pair_count':a.pairs,'runs_sha256':sha(root/'runs.json'),'provenance_sha256':sha(root/'provenance.json'),'exact_sha256':{str(n):sha(root/f'exact-{n}.json') for n in range(1,a.pairs+1)},'device_sha256':{f"{r['arm']}-{r['pair']}":sha(Path(r['directory'])/'device.csv') for r in records}},indent=2))
 print('PAIRS_COMPLETE',flush=True)

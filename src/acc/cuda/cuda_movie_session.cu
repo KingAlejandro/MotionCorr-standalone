@@ -1266,7 +1266,9 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     std::vector<size_t> frame_stage_bytes(num_req_frames, 0);
     size_t max_frame_stage = 0;
     for (int f = 0; f < num_req_frames; f++) {
-        const size_t cursor = frameStageBytes(raw_sizes[f].data(), ny, in_align);
+        // strips_per_frame, not ny: with multi-row strips raw_sizes[f] holds one
+        // entry per strip, and walking ny of them reads past the vector.
+        const size_t cursor = frameStageBytes(raw_sizes[f].data(), strips_per_frame, in_align);
         frame_stage_bytes[f] = cursor;
         max_frame_stage = std::max(max_frame_stage, cursor);
     }

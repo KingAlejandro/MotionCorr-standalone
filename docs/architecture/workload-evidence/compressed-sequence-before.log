@@ -1,0 +1,112 @@
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-compressed-fix/tests/test_compressed_movie_sequence.py", line 58, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-compressed-fix/tests/test_compressed_movie_sequence.py", line 40, in main
+    raise AssertionError(result.stdout+'\n'+result.stderr)
+AssertionError:  Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * plain.mrc
+  * compressed0.mrc.xz
+  * compressed1.mrc.xz
+  * compressed2.mrc.xz
+  * compressed3.mrc.xz
+  * compressed4.mrc.xz
+  * compressed5.mrc.xz
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]
+   0/   0 sec ........~~(,_,">                                                [oo]
+   1/   3 sec .................~~(,_,">                                       [oo]
+   1/   2 sec .........................~~(,_,">                               [oo]
+   1/   1 sec ..................................~~(,_,">                      [oo]
+   1/   1 sec ..........................................~~(,_,">              [oo]
+   1/   1 sec ...................................................~~(,_,">     [oo]
+   1/   1 sec ............................................................~~(,_,"> yum!
+
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/image.h, line 1914
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed1.mrc.xzCommand line for the pipe: xz -cdk compressed1.mrc.xz 2>/dev/null
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x000000010069078c _ZN19CompressedMRCReader4readE8FileNamei + 1280
+2   motioncorr                          0x000000010068cf94 _ZN10Micrograph8setMovieE8FileNameS0_d + 828
+3   motioncorr                          0x000000010068bb78 _ZN10MicrographC2E8FileNameS0_dii + 568
+4   motioncorr                          0x00000001006a128c _ZN16MotioncorrRunner3runEv + 920
+5   motioncorr                          0x00000001005b2de0 main + 72
+6   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed1.mrc.xzCommand line for the pipe: xz -cdk compressed1.mrc.xz 2>/dev/null
+Continuing with the remaining movies.
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/image.h, line 1914
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed2.mrc.xzCommand line for the pipe: xz -cdk compressed2.mrc.xz 2>/dev/null
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x000000010069078c _ZN19CompressedMRCReader4readE8FileNamei + 1280
+2   motioncorr                          0x000000010068cf94 _ZN10Micrograph8setMovieE8FileNameS0_d + 828
+3   motioncorr                          0x000000010068bb78 _ZN10MicrographC2E8FileNameS0_dii + 568
+4   motioncorr                          0x00000001006a128c _ZN16MotioncorrRunner3runEv + 920
+5   motioncorr                          0x00000001005b2de0 main + 72
+6   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed2.mrc.xzCommand line for the pipe: xz -cdk compressed2.mrc.xz 2>/dev/null
+Continuing with the remaining movies.
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/image.h, line 1914
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed3.mrc.xzCommand line for the pipe: xz -cdk compressed3.mrc.xz 2>/dev/null
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x000000010069078c _ZN19CompressedMRCReader4readE8FileNamei + 1280
+2   motioncorr                          0x000000010068cf94 _ZN10Micrograph8setMovieE8FileNameS0_d + 828
+3   motioncorr                          0x000000010068bb78 _ZN10MicrographC2E8FileNameS0_dii + 568
+4   motioncorr                          0x00000001006a128c _ZN16MotioncorrRunner3runEv + 920
+5   motioncorr                          0x00000001005b2de0 main + 72
+6   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed3.mrc.xzCommand line for the pipe: xz -cdk compressed3.mrc.xz 2>/dev/null
+Continuing with the remaining movies.
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/image.h, line 1914
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed4.mrc.xzCommand line for the pipe: xz -cdk compressed4.mrc.xz 2>/dev/null
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x000000010069078c _ZN19CompressedMRCReader4readE8FileNamei + 1280
+2   motioncorr                          0x000000010068cf94 _ZN10Micrograph8setMovieE8FileNameS0_d + 828
+3   motioncorr                          0x000000010068bb78 _ZN10MicrographC2E8FileNameS0_dii + 568
+4   motioncorr                          0x00000001006a128c _ZN16MotioncorrRunner3runEv + 920
+5   motioncorr                          0x00000001005b2de0 main + 72
+6   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed4.mrc.xzCommand line for the pipe: xz -cdk compressed4.mrc.xz 2>/dev/null
+Continuing with the remaining movies.
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/image.h, line 1914
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed5.mrc.xzCommand line for the pipe: xz -cdk compressed5.mrc.xz 2>/dev/null
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x000000010069078c _ZN19CompressedMRCReader4readE8FileNamei + 1280
+2   motioncorr                          0x000000010068cf94 _ZN10Micrograph8setMovieE8FileNameS0_d + 828
+3   motioncorr                          0x000000010068bb78 _ZN10MicrographC2E8FileNameS0_dii + 568
+4   motioncorr                          0x00000001006a128c _ZN16MotioncorrRunner3runEv + 920
+5   motioncorr                          0x00000001005b2de0 main + 72
+6   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+CompressedMRCReader: error in reading header of image compressed5.mrc.xzCommand line for the pipe: xz -cdk compressed5.mrc.xz 2>/dev/null
+Continuing with the remaining movies.
+in: /Users/alex.konstantinov/Documents/Codex/2026-10-02/re/work/motioncorr-review/src/motioncorr_runner.cpp, line 772
+ERROR: 
+Motion correction failed for 5 movie(s): compressed1.mrc.xz compressed2.mrc.xz compressed3.mrc.xz compressed4.mrc.xz compressed5.mrc.xz. Successful per-movie outputs were retained; joint output was not generated.
+=== Backtrace  ===
+0   motioncorr                          0x00000001005c5d98 _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80
+1   motioncorr                          0x00000001006a1fcc _ZN16MotioncorrRunner3runEv + 4312
+2   motioncorr                          0x00000001005b2de0 main + 72
+3   dyld                                0x0000000180c984e4 start + 6992
+==================
+ERROR: 
+Motion correction failed for 5 movie(s): compressed1.mrc.xz compressed2.mrc.xz compressed3.mrc.xz compressed4.mrc.xz compressed5.mrc.xz. Successful per-movie outputs were retained; joint output was not generated.
+

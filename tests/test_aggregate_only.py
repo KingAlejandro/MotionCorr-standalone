@@ -75,6 +75,34 @@ def literal_controls(binary, tmp):
     require(not failures,'literal report selection controls: '+str(failures))
 
 
+def effective_optics_controls(binary,tmp):
+    original=(tmp/'in.star').read_text()
+    variants=[
+        ('optics-overrides-cli',original.replace('one 1 1.0','one 1 2.0')),
+        ('multiple-optics',original.replace('one 1 1.0 300 2.7 0.1',
+            'one 1 1.0 300 2.7 0.1\ntwo 2 2.0 300 2.7 0.1').replace('Movies/a.tiff 1','Movies/a.tiff 2'))]
+    failures=[]
+    for name,star in variants:
+        (tmp/'in.star').write_text(star);out=tmp/name
+        r=run(binary,tmp,out)
+        require(r.returncode==0,name+' processing fixture failed: '+r.stderr)
+        for movie,expected in [('a',2.0),('b',2.0 if name=='optics-overrides-cli' else 1.0)]:
+            data=(out/'Movies'/f'{movie}.mrc').read_bytes()
+            sampling=struct.unpack_from('<f',data,40)[0]/struct.unpack_from('<i',data,28)[0]
+            require(sampling==expected,name+' did not establish actual effective '+movie+' sampling')
+        # The worker invocation retains --angpix1 in ARGS; input optics supply
+        # effective2 for the contradictory case and1/2 for the two groups.
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only'])
+        ok=r.returncode==0 and products(out)==before
+        if ok:
+            text=(out/'corrected_micrographs.star').read_text()
+            ok='2.000000' in text and (name!='multiple-optics' or '1.000000' in text)
+        print(('PASS ' if ok else 'FAIL ')+name+' accepts same effective per-movie optics without rewriting')
+        if not ok:failures.append(name+': '+r.stderr[-800:])
+    (tmp/'in.star').write_text(original)
+    require(not failures,'effective optics controls: '+str(failures))
+
+
 def geometry_controls(binary,tmp,baseline):
     failures=[]
     for name,extra,mutation in [
@@ -111,7 +139,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
-    ap.add_argument('--only',choices=['literal','geometry'])
+    ap.add_argument('--only',choices=['literal','effective-optics','geometry'])
     ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
     a = ap.parse_args()
     binary = a.binary.resolve()
@@ -136,9 +164,11 @@ def main() -> int:
         control = run(binary,tmp,baseline)
         require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
         if a.only=='literal':literal_controls(binary,tmp);return 0
+        if a.only=='effective-optics':effective_optics_controls(binary,tmp);return 0
         if a.only=='geometry':geometry_controls(binary,tmp,baseline);return 0
         literal_controls(binary,tmp)
         geometry_controls(binary,tmp,baseline)
+        effective_optics_controls(binary,tmp)
         before = products(baseline)
         # A stale unrelated plot must not be admitted by a directory wildcard.
         (baseline/'Movies/unassigned.eps').write_text('%!PS\nshowpage\n')

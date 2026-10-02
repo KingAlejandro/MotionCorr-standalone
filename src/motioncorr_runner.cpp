@@ -712,7 +712,9 @@ void MotioncorrRunner::requireAggregateGeometry(const FileName &movie, int optic
 		}
 		if (!found) REPORT_ERROR("Aggregate-only missing declared optics for movie: " + movie);
 	}
-	if (!same(input_angpix, saved.angpix) || (angpix > 0 && !same(angpix, saved.angpix)))
+	// initialise fills absent optics from CLI; processing then uses each
+	// movie's effective optics. A contradictory raw CLI value is not authority.
+	if (!same(input_angpix, saved.angpix))
 		REPORT_ERROR("Aggregate-only incompatible sampling for movie: " + movie);
 	const RFLOAT width = saved.getWidth() / bin_factor, height = saved.getHeight() / bin_factor;
 	if (!std::isfinite(width) || !std::isfinite(height) || width < 1 || height < 1 ||

@@ -46,8 +46,14 @@ implement is a refusal, not a default:
 | valid stream, wrong Adler-32 trailer | after decode | Adler-32 recomputed on the device over each decompressed strip and compared to the stored trailer | batch refused, delegate to the host reader |
 | pinned-memory budget exceeded | before allocation | `pinnedReserveBytes` against `MOTIONCORR_NVCOMP_PINNED_MAX_MB`, on the bytes actually pinned | decline, delegate to the host reader |
 | device scratch too small for a one-frame batch | before allocation | arena fit loop | decline, delegate to the host reader |
-| recoverable CUDA failure | at the call | `MovieIngestStatus::RecoverableFailure` | session discarded, movie re-read by the host reader from the immutable file |
+| recoverable device-ingest failure | at the call | `MovieIngestStatus::RecoverableFailure` | live session retained; `auto` re-reads the immutable movie through the eligible host route and fully overwrites raw frames and sum; pinned `nvcomp` fails the movie |
 | fatal device/context failure | at the call | `MovieIngestStatus::FatalDeviceFailure` / `cudaRetryDecisionFor` | run fails; **no** CPU fallback and no re-dispatch |
+
+Host-route delegation in the table applies to `--ingest auto`. With
+`--ingest nvcomp`, a decline or recoverable ingest failure refuses the movie
+before a host re-read because the requested route did not succeed. Under `auto`,
+the successful host re-read's gain/sum preprocessing overwrites the retained
+session's `d_Iframes` and `d_Isum` in full before they can be consumed.
 
 Nothing downstream consumes a batch that failed any post-decode check: the
 status, length and Adler-32 loops all run before the conversion kernel for that

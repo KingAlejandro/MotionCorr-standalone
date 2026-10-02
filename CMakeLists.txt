@@ -238,6 +238,10 @@ if(BUILD_TESTING)
         add_test(NAME DamagedMovie
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_damaged_movie.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME CompressedMovieSequence
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compressed_movie_sequence.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(CompressedMovieSequence PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 120)
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)

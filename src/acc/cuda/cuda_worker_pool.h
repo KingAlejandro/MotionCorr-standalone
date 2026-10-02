@@ -38,8 +38,8 @@
  *
  *  3. Keys are published only after complete successful construction. Every
  *     entry is invalidated BEFORE the destructive part of its replacement
- *     begins, so a failure part-way through leaves "no resource, no key"
- *     rather than an old key attached to a half-built or freed resource.
+ *     begins. A failed owning-device selection keeps an unpublished owned entry
+ *     for checked cleanup retry; it cannot serve a hit or be overwritten.
  *
  *  4. Checked release. Every cufftDestroy and cudaFree result is recorded in
  *     the caller's CudaFailureState and returned. A drop that fails FAILS THE
@@ -48,14 +48,15 @@
  *     cleanup code both have to survive into the caller's retry verdict.
  *
  *  5. Device-correct cleanup. Each entry records the device it was built on.
- *     A drop selects that device before destroying, which means the requested
+ *     A drop successfully selects that device before destroying. If selection
+ *     fails, no destroy/free is issued and ownership is retained. The requested
  *     device must be selected AGAIN before the replacement is constructed. A
  *     device id in a cache key does not by itself make cleanup context-correct.
  *
  *  6. A fatal context retires the pool. retireForFatalContext() attempts the
  *     same checked release every other path uses -- recording each status
  *     rather than trusting it, exactly as the session's own releaseBuffer()
- *     does on a poisoned context -- then discards the entries and refuses every
+ *     does on a poisoned context -- then invalidates the entries and refuses every
  *     later acquire for that device. The refusal is sticky and independent of
  *     any session's failure state: the next movie starts with a clean
  *     CudaFailureState, and that must not make handles from a dead context
@@ -155,9 +156,9 @@ public:
 
     // ------------------------------------------------------- fatal contexts --
 
-    // Attempt cleanup, record what it returned, then make the entries
-    // unreachable whatever it returned. Returns whether every release reported
-    // success, which on a poisoned context it generally will not; the caller
+    // Attempt cleanup and invalidate reuse. An entry whose device cannot be
+    // selected remains owned for a later dropAll() retry. Reports whether every
+    // release succeeded, which on a poisoned context it generally will not; the caller
     // already has a fatal error and this cannot make it worse. Skipping the
     // release instead would leak the pool's bytes for the life of the process
     // and break the contract every other owner in this codebase keeps.
@@ -223,10 +224,10 @@ public:
 
     RetainedBytes retainedBytes() const {
         RetainedBytes bytes;
-        if (gain_.valid) bytes.gain = gain_.bytes;
-        if (global_.valid) bytes.global_fft = global_.work_bytes + global_.tile_bytes;
-        if (patch_.valid) bytes.patch_plan = patch_.work_bytes;
-        if (dw_.valid) bytes.dw_plan = dw_.work_bytes;
+        if (gain_.d_gain) bytes.gain = gain_.bytes;
+        if (global_.work || global_.inverse_tile) bytes.global_fft = global_.work_bytes + global_.tile_bytes;
+        if (patch_.has_plan) bytes.patch_plan = patch_.work_bytes;
+        if (dw_.has_plan) bytes.dw_plan = dw_.work_bytes;
         return bytes;
     }
 
@@ -311,8 +312,9 @@ private:
         return err == cudaSuccess;
     }
 
-    // Each drop invalidates its entry FIRST, then destroys what the entry used to
-    // own, and reports whether every destroy succeeded.
+    // Each drop invalidates reuse FIRST. Failure to select the owning device
+    // retains ownership for checked retry and issues no destroy/free. After
+    // successful selection, disown and attempt every checked release.
     bool dropGain(CudaFailureState *failure);
     bool dropGlobalFft(CudaFailureState *failure);
     bool dropPatchPlan(CudaFailureState *failure);

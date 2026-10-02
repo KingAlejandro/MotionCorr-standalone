@@ -8,30 +8,33 @@ namespace mc_cuda {
 
 // ---------------------------------------------------------------- drops -----
 //
-// Shape shared by all four: copy out what the entry owns, reset the entry so no
-// key can match a resource that is about to stop existing, select the device
-// that resource belongs to, then destroy and report. An entry is never left
-// describing something half-destroyed, whatever any individual destroy returns.
+// Invalidate reuse first, but keep ownership until the owning device is selected.
+// A selection failure performs no release on the unrelated current context and
+// leaves the unpublished entry available to a later checked cleanup attempt.
+// Once selected, disown before the checked releases, as on the existing path.
 
 bool CudaWorkerPool::dropGain(CudaFailureState *failure)
 {
     float *owned = gain_.d_gain;
     const int device = gain_.device;
-    gain_ = GainEntry();
+    gain_.valid = gain_.borrowed = false;
     if (owned == nullptr) return true;
-    const bool selected = selectDevice(device, "worker pool gain drop setDevice", failure);
+    if (!selectDevice(device, "worker pool gain drop setDevice", failure)) return false;
+    gain_ = GainEntry();
     const bool freed = freeBuffer(owned, "worker pool gain cudaFree", failure);
-    return selected && freed;
+    return freed;
 }
 
 bool CudaWorkerPool::dropGlobalFft(CudaFailureState *failure)
 {
     const GlobalFftEntry owned = global_;
-    global_ = GlobalFftEntry();
+    global_.valid = global_.borrowed = false;
     if (!owned.has_r2c && !owned.has_c2r && owned.work == nullptr &&
         owned.inverse_tile == nullptr)
         return true;
-    bool ok = selectDevice(owned.device, "worker pool global drop setDevice", failure);
+    if (!selectDevice(owned.device, "worker pool global drop setDevice", failure)) return false;
+    global_ = GlobalFftEntry();
+    bool ok = true;
     // Plans before the work area they point at, and keep going after the first
     // failure so one bad handle cannot strand the rest.
     ok &= destroyPlan(owned.plan_r2c, owned.has_r2c, "worker pool global r2c destroy", failure);
@@ -44,23 +47,25 @@ bool CudaWorkerPool::dropGlobalFft(CudaFailureState *failure)
 bool CudaWorkerPool::dropPatchPlan(CudaFailureState *failure)
 {
     const PatchPlanEntry owned = patch_;
-    patch_ = PatchPlanEntry();
+    patch_.valid = patch_.borrowed = false;
     if (!owned.has_plan) return true;
-    const bool selected = selectDevice(owned.device, "worker pool patch drop setDevice", failure);
+    if (!selectDevice(owned.device, "worker pool patch drop setDevice", failure)) return false;
+    patch_ = PatchPlanEntry();
     const bool destroyed = destroyPlan(owned.plan, owned.has_plan,
                                        "worker pool patch plan destroy", failure);
-    return selected && destroyed;
+    return destroyed;
 }
 
 bool CudaWorkerPool::dropDwPlan(CudaFailureState *failure)
 {
     const DwPlanEntry owned = dw_;
-    dw_ = DwPlanEntry();
+    dw_.valid = dw_.borrowed = false;
     if (!owned.has_plan) return true;
-    const bool selected = selectDevice(owned.device, "worker pool dw drop setDevice", failure);
+    if (!selectDevice(owned.device, "worker pool dw drop setDevice", failure)) return false;
+    dw_ = DwPlanEntry();
     const bool destroyed = destroyPlan(owned.plan, owned.has_plan,
                                        "worker pool dw plan destroy", failure);
-    return selected && destroyed;
+    return destroyed;
 }
 
 bool CudaWorkerPool::dropAllEntries(CudaFailureState *failure)
@@ -74,8 +79,8 @@ bool CudaWorkerPool::dropAllEntries(CudaFailureState *failure)
 
 bool CudaWorkerPool::dropAll(CudaFailureState *failure)
 {
-    // A retired pool has already released and discarded its entries, so these
-    // drops are all no-ops; going through them anyway keeps one path.
+    // Retry unpublished ownership retained after failed device selection, even
+    // on a retired pool. This cannot make that pool reusable.
     return dropAllEntries(failure);
 }
 
@@ -85,10 +90,21 @@ bool CudaWorkerPool::evictUnused(CudaFailureState *failure, bool *released_any)
     if (poisoned_) return false;
     bool ok = true;
     bool released_anything = false;
-    if (gain_.valid && !gain_.borrowed) { released_anything = true; ok &= dropGain(failure); }
-    if (global_.valid && !global_.borrowed) { released_anything = true; ok &= dropGlobalFft(failure); }
-    if (patch_.valid && !patch_.borrowed) { released_anything = true; ok &= dropPatchPlan(failure); }
-    if (dw_.valid && !dw_.borrowed) { released_anything = true; ok &= dropDwPlan(failure); }
+    if (gain_.d_gain && !gain_.borrowed) {
+        const bool clean = dropGain(failure);
+        released_anything |= clean; ok &= clean;
+    }
+    if ((global_.has_r2c || global_.has_c2r || global_.work || global_.inverse_tile) && !global_.borrowed) {
+        const bool clean = dropGlobalFft(failure); released_anything |= clean; ok &= clean;
+    }
+    if (patch_.has_plan && !patch_.borrowed) {
+        const bool clean = dropPatchPlan(failure);
+        released_anything |= clean; ok &= clean;
+    }
+    if (dw_.has_plan && !dw_.borrowed) {
+        const bool clean = dropDwPlan(failure);
+        released_anything |= clean; ok &= clean;
+    }
     if (released_anything) ++counters_.evictions;
     if (released_any) *released_any = released_anything;
     return ok;

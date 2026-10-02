@@ -28,7 +28,7 @@
 namespace {
 
 enum Boundary { NONE, MALLOC, FREE, PLAN_CREATE, PLAN_MAKE, PLAN_DESTROY,
-                SET_WORK_AREA, MEMCPY, BOUNDARIES };
+                SET_WORK_AREA, MEMCPY, SET_DEVICE, BOUNDARIES };
 
 bool active = false, fired = false, fatal = false;
 Boundary fault = NONE;
@@ -108,6 +108,10 @@ cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t bytes, cudaMemc
 }
 cudaError_t __wrap_cudaSetDevice(int device) {
     if (active) device_selections.push_back(device);
+    if (fail(SET_DEVICE)) {
+        (void)cudaGetLastError();
+        return cudaErrorInvalidDevice; // No real selection: current device stays put.
+    }
     return __real_cudaSetDevice(device);
 }
 cufftResult __wrap_cufftCreate(cufftHandle *plan) {
@@ -812,9 +816,104 @@ void deviceRestoration(int device_count) {
     pass("cross-device replacement: cleanup selects the owning device, construction re-selects the requested one");
 }
 
+// Selection failure must not destroy under the unrelated current context or
+// abandon owned handles. One device powers the returned-status boundary; with
+// two devices the current context is physically distinct from the owner.
+void failedDeviceSelectionRetainsOwnership(int device_count) {
+    std::vector<float> gain(80 * 64, 1.0f);
+    int trials = 0;
+    for (int resource = 0; resource < 4; ++resource) {
+        for (int action = 0; action < 4; ++action) {
+            mc_cuda::CudaWorkerPool pool;
+            const int token = 0;
+            auto acquire = [&](bool replacement, CudaFailureState *failure) {
+                const int nx = replacement ? 80 : 64, ny = replacement ? 64 : 48;
+                cufftHandle plan = 0; size_t work = 0;
+                mc_cuda::GlobalFftLease global;
+                if (resource == 0) return pool.acquireGain(&token, 0, nx, ny,
+                    replacement ? 2 : 1, gain.data(), failure) != nullptr;
+                if (resource == 1) return pool.acquireGlobalFft(&token, 0, nx, ny,
+                    nx / 2 + 1, global, failure);
+                if (resource == 2) return pool.acquirePatchPlan(&token, 0, nx / 2,
+                    ny / 2, 3, plan, failure);
+                return pool.acquireDwPlan(&token, 0, nx, ny, plan, work, failure);
+            };
+            arm();
+            require(pool.acquireLease(&token) && acquire(false, nullptr), "selection-fault warm-up");
+            require(pool.releaseLease(&token), "selection-fault warm lease release");
+            const auto owned_buffers = buffers;
+            const auto owned_plans = plans;
+            const size_t retained = pool.retainedBytes().total();
+            require(!owned_buffers.empty() || !owned_plans.empty(),
+                    "selection-fault needs an owned resource");
+            const int current = device_count > 1 ? 1 : 0;
+            require(__real_cudaSetDevice(current) == cudaSuccess, "set unrelated current device");
+            CudaFailureState failure;
+            bool released = false, clean = false;
+            arm(SET_DEVICE, 1);
+            if (action == 0) {
+                require(pool.acquireLease(&token), "replacement lease");
+                clean = acquire(true, &failure);
+                require(pool.releaseLease(&token), "replacement lease release");
+            } else if (action == 1) clean = pool.evictUnused(&failure, &released);
+            else if (action == 2) clean = pool.dropAll(&failure);
+            else {
+                failure.record(cudaErrorIllegalAddress, "injected fatal before retirement", 1);
+                clean = pool.retireForFatalContext(0, &failure);
+                require(pool.retiredFor(0), "selection-failed retirement not sticky");
+            }
+            require(fired && !clean, "owning-device selection failure did not fail cleanup");
+            require(counts[FREE] == 0 && counts[PLAN_DESTROY] == 0,
+                    "selection failure issued wrong-context release");
+            require(buffers == owned_buffers && plans == owned_plans &&
+                    pool.retainedBytes().total() == retained,
+                    "selection failure discarded pending ownership");
+            require(!released && pool.counters().evictions == 0,
+                    "selection failure falsely reported eviction");
+            require(failure.hasFailed(), "selection failure status lost");
+            int actual = -1;
+            require(cudaGetDevice(&actual) == cudaSuccess && actual == current,
+                    "failure control accidentally selected the owning device");
+            // An invalidated old key must not serve a hit even while its
+            // resources are still owned and a fresh caller's state is clean.
+            if (action != 3) {
+                require(pool.acquireLease(&token), "pending ownership lease");
+                CudaFailureState retry_failure;
+                arm(SET_DEVICE, 1);
+                require(!acquire(false, &retry_failure) && fired,
+                        "selection failure left a reusable published key");
+                require(counts[FREE] == 0 && counts[PLAN_DESTROY] == 0 &&
+                        counts[MALLOC] == 0 && counts[PLAN_CREATE] == 0,
+                        "pending ownership was overwritten or released without selection");
+                require(pool.releaseLease(&token), "pending ownership lease release");
+            }
+            arm();
+            if (action == 1) {
+                require(pool.evictUnused(nullptr, &released) && released,
+                        "eviction did not retry unpublished owned entry");
+            } else require(pool.dropAll(nullptr), "checked pending-owner retry failed");
+            requireEmpty("selection-failure checked retry");
+            require(pool.retainedBytes().total() == 0, "retry left retained bytes");
+            if (action == 3) require(pool.retiredFor(0), "cleanup retry resurrected retired pool");
+            require(pool.dropAll(nullptr), "pending cleanup retry not idempotent");
+            require(__real_cudaSetDevice(0) == cudaSuccess, "restore device0");
+            disarm(); ++trials;
+        }
+    }
+    std::ostringstream result;
+    result << trials << " owning-device selection failures retain ownership, refuse reuse, "
+              "and retry checked cleanup; " << (device_count > 1 ? "two real device contexts" : "one-device returned-status control");
+    pass(result.str());
+}
+
 } // namespace
 
-int main() {
+int main(int argc, char **argv) {
+    const bool cleanup_only = argc == 3 && std::string(argv[1]) == "--case" &&
+                              std::string(argv[2]) == "device-cleanup";
+    if (argc != 1 && !cleanup_only) {
+        std::cerr << "Usage: cuda_worker_pool [--case device-cleanup]\n"; return 1;
+    }
     int device_count = 0;
     if (cudaGetDeviceCount(&device_count) != cudaSuccess || device_count == 0) {
         std::cerr << "FAIL: no CUDA device; these controls assert nothing without one\n";
@@ -833,6 +932,10 @@ int main() {
     cudaFree(warm);
 
     try {
+        failedDeviceSelectionRetainsOwnership(device_count);
+        if (cleanup_only) {
+            std::cout << "ALL PASS: owning-device cleanup control\n"; return 0;
+        }
         warmReuseIsExact();
         geometryTransition();
         frameAndGroupCounts();

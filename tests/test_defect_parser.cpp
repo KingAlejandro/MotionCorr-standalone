@@ -4,6 +4,7 @@
 // MotioncorrRunner::fillDefectMask on a real temporary defect file and
 // inspects the resulting mask or the thrown RelionError.
 #include "src/motioncorr_runner.h"
+#include "src/defect_neighbours.h"
 #include <chrono>
 #include <cstdio>
 #include <fstream>
@@ -246,10 +247,133 @@ int main()
     check(rc == 0 && count_set(m) == 0,
           "LLONG_MAX x+w does not overflow or crash, paints 0 px");
 
+    std::cout << "== defect premask cache controls ==\n";
+    {
+        // The premask caches only the static part of the hot-pixel mask: the
+        // external defect file and the gain-zero pixels. Every key component
+        // below has its own miss case, and the detected-hot-pixel case proves
+        // that the per-movie part never reaches the cache.
+        MotioncorrRunner runner;
+        MultidimArray<float> no_gain;
+        const std::string fn_a = tmpfile_with("0 0 2 2\n", "pma");
+        const std::string fn_bad = tmpfile_with("0 0 1 1\nBAD\n", "pmb");
+
+        // 1. No external defect file and no gain: an all-false mask, still cached.
+        const MultidimArray<bool> &none = runner.getDefectPremask(nx, ny, "", "", no_gain, 1);
+        check(runner.isDefectPremaskValid(), "premask with no defect file and no gain is cached");
+        check(count_set(const_cast<MultidimArray<bool>&>(none)) == 0,
+              "premask with no defect file and no gain is empty");
+
+        // 2. A valid defect file.
+        const MultidimArray<bool> &mask_a = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        check(runner.isDefectPremaskValid(), "premask A cached validly");
+        check(count_set(const_cast<MultidimArray<bool>&>(mask_a)) == 4, "premask A has 4 defect pixels");
+
+        // 3. A malformed file must throw and leave the cache invalid, not stale.
+        bool threw = false;
+        try { runner.getDefectPremask(nx, ny, fn_bad, "", no_gain, 1); }
+        catch (RelionError &) { threw = true; }
+        check(threw, "premask B threw RelionError on a malformed file");
+        check(!runner.isDefectPremaskValid(), "premask cache invalidated after failure on B");
+        check(runner.defect_premask_nx == 0 && runner.defect_premask_fn == "",
+              "premask cache keys cleared after failure on B");
+
+        // 4. Recovery: A must be reparsed, not read back from corrupt state.
+        const MultidimArray<bool> &mask_a2 = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        check(runner.isDefectPremaskValid(), "premask A re-cached validly after recovery");
+        check(count_set(const_cast<MultidimArray<bool>&>(mask_a2)) == 4,
+              "premask A has 4 defect pixels after recovery");
+
+        // 5. Changed geometry must miss.
+        const MultidimArray<bool> &mask_small = runner.getDefectPremask(32, 32, fn_a, "", no_gain, 1);
+        check(XSIZE(mask_small) == 32 && YSIZE(mask_small) == 32,
+              "premask follows a changed geometry instead of reusing the old mask");
+        check(runner.defect_premask_nx == 32 && runner.defect_premask_ny == 32,
+              "premask geometry key follows the new geometry");
+        (void)runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+
+        // 6. A rewritten defect file under the SAME name must miss. main re-read
+        //    and re-validated the file for every movie, so a filename-only key
+        //    would silently keep the old parse.
+        {
+            // mtime has one-second resolution on some filesystems, so the
+            // rewrite also changes the size, which the key includes.
+            const std::string rewritten = tmpfile_with("0 0 3 3\n0 0 1 1\n", "pma");
+            (void)rewritten;
+            const MultidimArray<bool> &rewrote = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+            check(count_set(const_cast<MultidimArray<bool>&>(rewrote)) == 9,
+                  "a rewritten defect file under the same name is reparsed");
+            // Restore the original fixture for the cases below.
+            (void)tmpfile_with("0 0 2 2\n", "pma");
+            const MultidimArray<bool> &restored = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+            check(count_set(const_cast<MultidimArray<bool>&>(restored)) == 4,
+                  "restoring the original defect file is reparsed again");
+        }
+
+        // 7. The gain-zero mask, and a changed gain under a new generation.
+        MultidimArray<float> gain_one(ny, nx), gain_two(ny, nx);
+        gain_one.initConstant(1.0f);
+        gain_two.initConstant(1.0f);
+        DIRECT_A2D_ELEM(gain_one, 10, 10) = 0.0f;
+        DIRECT_A2D_ELEM(gain_two, 20, 20) = 0.0f;
+        DIRECT_A2D_ELEM(gain_two, 21, 21) = 0.0f;
+        runner.gain_cache_generation = 5;
+        const MultidimArray<bool> &with_gain = runner.getDefectPremask(nx, ny, fn_a, "gain.mrc", gain_one, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(with_gain)) == 5,
+              "premask unions the defect file with the gain-zero pixels");
+        runner.gain_cache_generation = 6;
+        const MultidimArray<bool> &with_gain2 = runner.getDefectPremask(nx, ny, fn_a, "gain.mrc", gain_two, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(with_gain2)) == 6,
+              "a new gain generation rebuilds the gain-zero part of the premask");
+        check(!DIRECT_A2D_ELEM(with_gain2, 10, 10),
+              "the previous gain's zero pixel did not survive into the new premask");
+        const MultidimArray<bool> &no_gain_again = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(no_gain_again)) == 4,
+              "dropping the gain rebuilds the premask without the gain-zero pixels");
+
+        // 8. Detected hot pixels belong to one movie and must never be cached.
+        MultidimArray<bool> movie_mask;
+        movie_mask = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        DIRECT_A2D_ELEM(movie_mask, 40, 40) = true;
+        DIRECT_A2D_ELEM(movie_mask, 41, 41) = true;
+        check(count_set(movie_mask) == 6, "the movie's own copy carries its detected hot pixels");
+        const MultidimArray<bool> &next_movie = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(next_movie)) == 4,
+              "detected hot pixels did not leak into the cached static premask");
+
+        // 9. Dense defects: the cached premask must still reach the Gaussian
+        //    replacement branch. A solid 5x5 block leaves exactly the five
+        //    plus-shaped centre cells with n_ok <= NUM_MIN_OK for D_MAX = 2.
+        const std::string fn_dense = tmpfile_with("8 8 5 5\n", "pmd");
+        const MultidimArray<bool> &dense = runner.getDefectPremask(nx, ny, fn_dense, "", no_gain, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(dense)) == 25, "dense premask paints 25 px");
+        {
+            auto bad = [&dense](int y, int x) { return DIRECT_A2D_ELEM(dense, y, x); };
+            int gaussian = 0;
+            for (int i = 0; i < ny; i++)
+                for (int j = 0; j < nx; j++) {
+                    if (!DIRECT_A2D_ELEM(dense, i, j)) continue;
+                    if (mc_defect::countValidNeighbours(bad, nx, ny, i, j, 2) <= 6) gaussian++;
+                }
+            check(gaussian == 5, "dense cached premask reaches Gaussian replacement for 5 pixels");
+        }
+
+        // 10. A second runner on this thread must not see the first one's cache.
+        MotioncorrRunner other;
+        check(!other.isDefectPremaskValid(), "a second runner starts with no cached premask");
+        const MultidimArray<bool> &other_mask = other.getDefectPremask(nx, ny, "", "", no_gain, 1);
+        check(count_set(const_cast<MultidimArray<bool>&>(other_mask)) == 0,
+              "a second runner builds its own premask rather than inheriting one");
+        check(count_set(const_cast<MultidimArray<bool>&>(
+                  runner.getDefectPremask(nx, ny, fn_dense, "", no_gain, 1))) == 25,
+              "the first runner's premask is unaffected by the second runner");
+    }
+
     // Remove the fixtures we created, then the directory.
     for (const char *tag : {"v1","v2","v3","v4","v5","e1","e2","m1","m2","m3","m4","m5","m6",
                             "c1","c2","c3","d1","d2","d3","d4","d5","d6","z1","z2","z3",
-                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1","d7"}) {
+                            "k1","k2","k3","k4","h1","h2","o1","o2","o3","o4","o5","s1","d7",
+                            "pma","pmb","pmd"}) {
         std::remove((scratch_dir() + "/" + tag + ".txt").c_str());
     }
     ::rmdir(scratch_dir().c_str());

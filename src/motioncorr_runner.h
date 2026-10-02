@@ -203,6 +203,29 @@ public:
 	// caller asserts this instead of leaving the ordering implicit.
 	bool gainIdentityResolvedFor(int nx, int ny) const;
 
+	// Static defect pre-mask cache: the external defect file and the gain-zero
+	// pixels, which cannot change between movies of the same geometry. Keyed on
+	// the defect path AND its size and mtime, because main re-read and
+	// re-validated the file per movie and a filename alone would not notice a
+	// rewrite. Automatically detected hot pixels are never cached here.
+	MultidimArray<bool> defect_premask;
+	FileName defect_premask_fn;
+	unsigned long long defect_premask_defect_size = 0;
+	unsigned long long defect_premask_defect_mtime = 0;
+	FileName defect_premask_gain_fn;
+	unsigned long long defect_premask_gain_gen = 0;
+	int defect_premask_nx = 0, defect_premask_ny = 0;
+	bool defect_premask_valid = false;
+
+	// Returns the static pre-mask, rebuilding it on a key miss. The returned
+	// reference is owned by this runner; callers that add detected hot pixels
+	// must copy it first.
+	const MultidimArray<bool>& getDefectPremask(int nx, int ny, const FileName &fn_defect,
+	                                            const FileName &fn_gain_reference,
+	                                            const MultidimArray<float> &Igain,
+	                                            int n_threads);
+	bool isDefectPremaskValid() const { return defect_premask_valid; }
+
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must
 	// not mutate shared state that every later movie will reuse.

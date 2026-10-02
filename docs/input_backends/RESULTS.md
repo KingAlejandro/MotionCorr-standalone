@@ -212,6 +212,26 @@ Six movies for the 24-frame single-row variants, two for the rest. All reads are
 No cold or network-storage figure is given; dropping the page cache needs root
 on this host.
 
+### Provenance of the measured binaries
+
+Every performance figure in §4.1-4.6 comes from a tree **one commit behind this
+branch head**: the measured candidate is the head minus
+`perf(timing): give the device ingest its own TIMING stage`.
+
+That commit adds one `Timer::setNew` registration and two `RCTIC`/`RCTOC` call
+sites. Without `-DTIMING` the macros expand to nothing, but `setNew` does not —
+it runs once per `MotioncorrRunner` construction, as every other timer
+registration in that file already does. Compiling `motioncorr_runner.cpp` from
+both trees to assembly at the measured configuration
+(`-O3 -DNDEBUG -D_CUDA_ENABLED -D_NVCOMP_ENABLED`, no `TIMING`) gives
+**161,492 lines each**, differing only in immediate constants — string-table
+offsets and timer ordinals shifted by the one added entry. No instruction is
+added to the per-movie path. The stage-breakdown figures in §4.0 come from
+Nsight captures of the measured tree and are unaffected either way.
+
+This is stated rather than waved at because "the binary I measured is the tree
+I am proposing" is the one provenance claim that cannot be recovered later.
+
 ### 4.0 Where the input path spends device time
 
 ![device ingest stages](charts/ingest-stages.png)

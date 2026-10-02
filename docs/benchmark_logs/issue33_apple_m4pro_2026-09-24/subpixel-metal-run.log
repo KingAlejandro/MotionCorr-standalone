@@ -1,0 +1,38 @@
+Using Metal acceleration on device [Apple M4 Pro] for global alignment.
+ Using our own implementation based on MOTIONCOR2 algorithm
+ to correct beam-induced motion for the following micrographs: 
+  * synthetic_128x128_8frames_subpixel.mrcs
+ Correcting beam-induced motions using our own implementation ...
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Generating joint STAR file ... 
+000/??? sec ~~(,_,">                                                          [oo]   0/   0 sec ............................................................~~(,_,"> yum!
+ Written: /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/corrected_micrographs.star
+ Now generating logfile.pdf ... 
+sh: gs: command not found
+ ERROR in executing: gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/header.pdf @/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/header.pdf.lst > /dev/null
+ + Will make an empty PDF-file in /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/header.pdf
+ Did not find any of the expected EPS files to generate a PDF file
+ + Will make an empty PDF-file in /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/batch.pdf
+sh: gs: command not found
+ ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/all_batches.pdf -dBATCH /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/batch.pdf  > /dev/null
+sh: gs: command not found
+ ERROR in executing: gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/logfile.pdf -dBATCH /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/header.pdf /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/all_batches.pdf  > /dev/null
+ Done! Written: /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/logfile.pdf
+read gain                          : 0 sec (0 microsec/operation)
+read movie                         : 0 sec (384 microsec/operation)
+apply gain                         : 0 sec (0 microsec/operation)
+initial sum                        : 0 sec (18 microsec/operation)
+detect hot pixels                  : 0 sec (300 microsec/operation)
+fix defects                        : 0 sec (8 microsec/operation)
+global FFT                         : 0 sec (947 microsec/operation)
+power spectrum                     : 0 sec (0 microsec/operation)
+global alignment                   : 0.001 sec (1904 microsec/operation)
+global iFFT                        : 0 sec (826 microsec/operation)
+align - prep weight                : 0 sec (35 microsec/operation)
+align - make reference             : 0 sec (38 microsec/operation)
+align - calc CCF (in thread)       : 0 sec (3 microsec/operation)
+align - iFFT CCF (in thread)       : 0.001 sec (87 microsec/operation)
+align - argmax CCF (in thread)     : 0 sec (7 microsec/operation)
+align - shift in Fourier space     : 0 sec (94 microsec/operation)
+real space interpolation           : 0 sec (45 microsec/operation)
+binning                            : 0 sec (0 microsec/operation)

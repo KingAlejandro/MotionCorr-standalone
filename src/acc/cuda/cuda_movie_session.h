@@ -14,6 +14,7 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_alignpatch.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
@@ -223,6 +224,10 @@ public:
         cufftComplex *d_out_fpatches
     );
 
+    PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
+    // Must succeed before any reconstruction or output publication.
+    bool releasePatchAlignmentWorkspace() { return patch_alignment_workspace.release(); }
+
     // In-VRAM Dose-weighted reconstruction: applies DW and polynomial interpolation into Isum
     bool reconstructDoseWeighted(
         Image<float> &Isum,
@@ -286,6 +291,7 @@ private:
     // Sticky for the life of the session. Not reset by release(): a movie that failed
     // stays failed for reporting purposes, and a poisoned context never un-poisons.
     CudaFailureState failure_state;
+    PatchAlignmentWorkspace patch_alignment_workspace;
 
     int nx;
     int ny;

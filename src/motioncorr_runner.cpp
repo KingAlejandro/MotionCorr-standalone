@@ -2787,7 +2787,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
-						converged = alignPatchDevice(d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, logfile);
+						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
 				}
@@ -3164,6 +3164,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 skip_fitting:
 #ifdef _CUDA_ENABLED
+	// Local alignment scratch belongs to this movie, but reconstruction no longer
+	// needs it. Check late release errors before any image can be submitted.
+	if (movie_session && !movie_session->releasePatchAlignmentWorkspace())
+		REPORT_ERROR("CUDA patch alignment workspace cleanup failed before reconstruction; refusing movie output.");
 	// The retained full-frame cache is only needed while preparing local patches.
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif

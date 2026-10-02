@@ -334,11 +334,34 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaGetDeviceCount")
         add_test(NAME CudaFaultMatrix COMMAND cuda_fault_matrix)
         set_tests_properties(CudaFaultMatrix PROPERTIES LABELS "cuda;hardware")
+        add_executable(cuda_patch_workspace tests/cuda_patch_workspace.cpp)
+        target_link_libraries(cuda_patch_workspace PRIVATE motioncorr_core)
+        target_link_options(cuda_patch_workspace PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
+        set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Independent predecessor arithmetic and actual reconstruction ownership
+        # for the experimental dose-denominator plane. Needs a real device.
+        set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)
+        add_executable(cuda_dose_normalization tests/cuda_dose_normalization.cpp)
+        target_link_libraries(cuda_dose_normalization PRIVATE motioncorr_core)
+        target_link_options(cuda_dose_normalization PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaGetLastError" "LINKER:--wrap=cudaEventSynchronize"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)
+        set_tests_properties(CudaDoseNormalization PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)
         target_link_options(motioncorr_retry_caller PRIVATE
             "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
+            "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
             "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement

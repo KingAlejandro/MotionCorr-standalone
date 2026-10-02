@@ -161,6 +161,39 @@ retention, incremental `discardThrough` with a measured resident-set drop, and
 self-check (the sampler must see the mapping arrive before an assertion about
 it leaving means anything) and a per-frame-heap diagnostic control.
 
+### 3.3 Complete output trees
+
+`docs/issue85_laneC/compare_output_trees.py`: pixels, every MRC header byte
+including the extended header, trajectories, per-movie STAR, combined STAR and
+auxiliary products. Only declared variation is normalised — the output-root
+prefix, measured-duration lines in `.log`, the date token in an MRC label, and
+the ingest route's own log lines, which are declared with
+`--allow-added-log-line` and therefore dropped from **both** arms. PDFs are
+inventoried, not content-compared.
+
+**26 of 26 comparisons PASS.**
+
+| comparison | arms | n |
+|---|---|---|
+| main vs branch, same variant | every one of the 14 variants | 14 PASS |
+| branch, each variant vs the uint16 Deflate reference | the 6-movie and 2-movie sets, and the 48-frame set | 12 PASS |
+| main, uint8 LZW vs uint16 Deflate | positive control: the cross-format identity already holds on main | PASS |
+
+The cross-format comparisons are the strong ones: the variants hold identical
+sample values, so a route that decoded, oriented, converted or accumulated
+anything differently would show here. 85,433,880 pixels per arm on the
+six-movie set.
+
+**Negative control.** An exact copy of one candidate tree compares PASS against
+the reference; changing **one pixel** of the 85,433,880 — the first float of
+one corrected image, 5.162257 to 6.162257 — turns the same comparison FAIL and
+names that file. A first attempt at this control failed for the wrong reason:
+`cp -a` leaves absolute paths inside the per-movie `.log` and `.eps` products,
+so the comparison rejected the copy before reaching any pixel and the mutated
+MRC was not even in the differing list. The control above is run
+`--products-only` with the joint STAR rewritten, and carries the unmutated
+positive leg, so the FAIL is attributable to the pixel.
+
 ## 4. Measured
 
 Venue: `4GPUs` (`4-gpu-vm`), 4x A100 80GB PCIe, 124 logical CPUs. Every run

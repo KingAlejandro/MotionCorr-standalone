@@ -384,10 +384,11 @@ __global__ void cropAndGroupPatchResidentKernel(
 
 } // anonymous namespace
 
-CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
+CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log,
+                                   mc_cuda::CudaWorkerPool *pool)
     : patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
-      nfx(nx / 2 + 1), logfile(log) {}
+      nfx(nx / 2 + 1), logfile(log), worker_pool(pool) {}
 
 CudaMovieSession::~CudaMovieSession() {
     release();
@@ -462,10 +463,54 @@ bool CudaMovieSession::initialize() {
         return false;
     }
 
-    // Allocate persistent movie buffers
-    cudaError_t cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    // Exclusive lease before any pooled resource is touched. A refusal is not a
+    // resource failure and must not disturb whoever holds the lease: this session
+    // simply owns everything itself, exactly as it did before the pool existed.
+    if (worker_pool != nullptr && !holds_pool_lease) {
+        if (worker_pool->acquireLease(this)) {
+            holds_pool_lease = true;
+        } else {
+            worker_pool->noteLeaseRefusal();
+            logfile << "WARNING: CUDA worker pool already leased to another live "
+                       "session; this movie allocates its own plans and gain."
+                    << std::endl;
+        }
+    }
+
+    // Allocate persistent movie buffers. On an allocation miss, release the
+    // resources the pool is retaining but nobody is using and retry ONCE: a
+    // previous, larger movie's retained buffers must not be what makes a later
+    // smaller movie fail. A genuine shortage still fails, with its real error.
+    auto allocate_movie_buffers = [&]() -> cudaError_t {
+        cudaError_t err = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+        if (err == cudaSuccess) err = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (err == cudaSuccess) err = cudaMalloc((void**)&d_Isum, sz_real);
+        if (err != cudaSuccess) {
+            // Give back whatever did succeed before the retry asks for it again.
+            releaseBuffer(d_Iframes);
+            releaseBuffer(d_Fframes);
+            releaseBuffer(d_Isum);
+        }
+        return err;
+    };
+    cudaError_t cuda_result = allocate_movie_buffers();
+    if (cuda_result == cudaErrorMemoryAllocation && worker_pool != nullptr &&
+        holds_pool_lease && !failure_state.isPoisoned()) {
+        const size_t retained_before = worker_pool->retainedBytes().total();
+        bool released_any = false;
+        if (retained_before > 0 &&
+            worker_pool->evictUnused(&failure_state, &released_any) && released_any &&
+            !failure_state.isPoisoned()) {
+            // evictUnused destroyed on the OWNING device of each entry it
+            // released, which need not be this movie's. Re-select before asking
+            // for memory again, for the same reason every pool acquire does.
+            HANDLE_ERROR(cudaSetDevice(device_id));
+            logfile << "Movie buffer allocation failed with " << retained_before
+                    << " retained worker-pool bytes; released them and retrying once."
+                    << std::endl;
+            cuda_result = allocate_movie_buffers();
+        }
+    }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
         logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
@@ -473,11 +518,60 @@ bool CudaMovieSession::initialize() {
         return false;
     }
 
-    // cuFFT's automatic allocation must be disabled before either plan is made.
-    // Two transforms share one work area because all executions use the default stream
-    // and each frame is synchronized before the next execution.
-    // A single-frame batch keeps the inverse preservation tile to one frame.
-    // The A100 batch-two sample exceeded the whole-process VRAM target.
+    if (!setupGlobalFftResources()) {
+        release();
+        return false;
+    }
+    logfile << "Movie FFT: batch=1"
+            << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
+            << " shared work=" << fft_work_bytes
+            << " inverse tile=" << sz_comp << " bytes" << std::endl;
+
+    fourier_guard.reset();
+    is_initialized = true;
+    return true;
+}
+
+// The whole-frame R2C/C2R pair, their shared work area and the inverse
+// preservation tile. These depend only on (device, nx, ny), so a worker that
+// processes movies of one geometry builds them once instead of once per movie.
+//
+// cuFFT's automatic allocation must be disabled before either plan is made.
+// Two transforms share one work area because all executions use the default stream
+// and each frame is synchronized before the next execution.
+// A single-frame batch keeps the inverse preservation tile to one frame.
+// The A100 batch-two sample exceeded the whole-process VRAM target.
+bool CudaMovieSession::setupGlobalFftResources() {
+    const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+
+    if (MC_POOL_GLOBAL_FFT && worker_pool != nullptr && holds_pool_lease) {
+        mc_cuda::GlobalFftLease lease;
+        const FailureDelta delta(failure_state);
+        if (worker_pool->acquireGlobalFft(this, device_id, nx, ny, nfx, lease,
+                                          &failure_state)) {
+            // Borrowed. has_plan_r2c/has_plan_c2r stay false: they mean "this
+            // session destroys it", and this session must not.
+            plan_r2c = lease.plan_r2c;
+            plan_c2r = lease.plan_c2r;
+            d_fft_work = lease.work;
+            d_inverse_tile = lease.inverse_tile;
+            fft_r2c_work_bytes = lease.r2c_work_bytes;
+            fft_c2r_work_bytes = lease.c2r_work_bytes;
+            fft_work_bytes = lease.work_bytes;
+            global_plans_borrowed = true;
+            return true;
+        }
+        // A pool failure is a real failure: the pool has already recorded its
+        // status in failure_state and invalidated whatever it could not build.
+        if (delta.newFailure(failure_state)) {
+            logfile << "ERROR: worker-pool whole-frame FFT resources unavailable for "
+                    << nx << "x" << ny << std::endl;
+            return false;
+        }
+        // Declined without a failure (retired pool, or no lease). Fall through
+        // and own the resources here instead.
+    }
+
     int n[2] = {ny, nx};
     auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,
                          cufftType type) -> bool {
@@ -501,14 +595,12 @@ bool CudaMovieSession::initialize() {
         return true;
     };
     if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
-        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
-        release();
+        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R))
         return false;
-    }
 
     fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
     // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
-    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
+    cudaError_t cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
     if (cuda_result == cudaSuccess)
         cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
     if (cuda_result != cudaSuccess) {
@@ -516,7 +608,6 @@ bool CudaMovieSession::initialize() {
         logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
                 << " workspace=" << fft_work_bytes << " tile=" << sz_comp
                 << ": " << cudaGetErrorString(cuda_result) << std::endl;
-        release();
         return false;
     }
     auto attach_work = [&](cufftHandle plan, bool has_plan) -> bool {
@@ -528,17 +619,8 @@ bool CudaMovieSession::initialize() {
         logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
         return false;
     };
-    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
-        release();
+    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r))
         return false;
-    }
-    logfile << "Movie FFT: batch=1"
-            << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
-            << " shared work=" << fft_work_bytes
-            << " inverse tile=" << sz_comp << " bytes" << std::endl;
-
-    fourier_guard.reset();
-    is_initialized = true;
     return true;
 }
 
@@ -546,8 +628,31 @@ void CudaMovieSession::release() {
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
     (void)releasePatchAlignmentWorkspace();
-    if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
+    // Deliberately an OR over each individual claim, not over the "usable"
+    // predicates: a partially built pair -- R2C created, C2R failed -- still
+    // has a plan to destroy, and the base revision synchronised before that.
+    if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c ||
+        global_plans_borrowed || patch_plan_borrowed)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
+
+    // Borrowed pool resources: drop the alias, destroy nothing. The pool is the
+    // single owner, and destroying through an alias here is exactly the
+    // double-free a geometry transition would then produce.
+    if (patch_plan_borrowed) {
+        plan_patch_r2c = 0;
+        patch_plan_borrowed = false;
+    }
+    if (global_plans_borrowed) {
+        plan_r2c = plan_c2r = 0;
+        d_fft_work = nullptr;
+        d_inverse_tile = nullptr;
+        global_plans_borrowed = false;
+    }
+    if (gain_borrowed) {
+        d_gain = nullptr;
+        gain_borrowed = false;
+    }
+
     // Destroy plans before their work areas; attempt all releases, even after error.
     releasePlan(plan_patch_r2c, has_plan_patch_r2c);
     releasePlan(plan_r2c, has_plan_r2c);
@@ -566,6 +671,74 @@ void CudaMovieSession::release() {
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
     is_initialized = false;
+
+    // Last, so the pool still owns everything above while it is being released.
+    // A context this session poisoned retires the pool's resources too: they
+    // belong to that context, and the next movie's clean failure state must not
+    // make them look reusable.
+    if (worker_pool != nullptr && holds_pool_lease) {
+        if (failure_state.isPoisoned())
+            (void)worker_pool->retireForFatalContext(device_id, &failure_state);
+        else (void)worker_pool->releaseLease(this);
+        holds_pool_lease = false;
+    }
+}
+
+// The device gain, retained across movies when the caller gave the host contents
+// an identity and the pool accepted it.
+//
+// The gain is the largest thing the old per-movie session re-uploaded: at the
+// tutorial geometry it is a 54.3 MiB pageable host-to-device copy plus a
+// cudaMalloc and a cudaFree, once per movie, for an array whose contents cannot
+// change unless MotioncorrRunner refills its host gain cache.
+//
+// gain_borrowed decides who frees it. A borrowed pointer is nulled, never freed,
+// by releasePreprocessingBuffers() and release(); the pool is its only owner.
+bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real)
+{
+    if (gain_ref == nullptr) return true;
+    if (MC_POOL_GAIN && worker_pool != nullptr && holds_pool_lease) {
+        const FailureDelta delta(failure_state);
+        float *pooled = worker_pool->acquireGain(this, device_id, nx, ny,
+                                                 gain_generation, gain_ref->data,
+                                                 &failure_state);
+        if (pooled != nullptr) {
+            // Anything this session had allocated for itself goes first: it must
+            // not be leaked by the switch to a borrowed pointer.
+            if (!gain_borrowed && d_gain != nullptr) {
+                const cudaError_t err = releaseBuffer(d_gain);
+                if (err != cudaSuccess) return false;
+            }
+            d_gain = pooled;
+            gain_borrowed = true;
+            return true;
+        }
+        // The pool declines (no identity) or failed. Only a NEW failure is real.
+        if (delta.newFailure(failure_state)) return false;
+    }
+    if (gain_borrowed) {
+        // Was borrowed, is not any more: drop the alias before owning one.
+        d_gain = nullptr;
+        gain_borrowed = false;
+    }
+    if (!d_gain) {
+        const cudaError_t err = cudaMalloc((void**)&d_gain, sz_real);
+        if (err != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+                    << cudaGetErrorString(err) << std::endl;
+            recordFailure(err, "device gain cudaMalloc", __LINE__);
+            d_gain = nullptr;
+            return false;
+        }
+    }
+    const cudaError_t err = cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+                << cudaGetErrorString(err) << std::endl;
+        recordFailure(err, "device gain upload", __LINE__);
+        return false;
+    }
+    return true;
 }
 
 bool CudaMovieSession::applyGainDefectsAndSum(
@@ -588,12 +761,7 @@ bool CudaMovieSession::applyGainDefectsAndSum(
 
     // Upload gain reference if provided
     bool apply_gain = (gain_ref != nullptr);
-    if (apply_gain) {
-        if (!d_gain) {
-            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
-        }
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
-    }
+    if (!ensureDeviceGain(gain_ref, sz_real)) return false;
 
     // Launch fused gain and sum kernel
     const int block = 256;
@@ -640,12 +808,7 @@ bool CudaMovieSession::applyGainDefectsAndSumU16(
     stage_owner.add(stage);
 
     bool apply_gain = (gain_ref != nullptr);
-    if (apply_gain) {
-        if (!d_gain) {
-            HANDLE_ERROR(cudaMalloc((void**)&d_gain, sz_real));
-        }
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
-    }
+    if (!ensureDeviceGain(gain_ref, sz_real)) return false;
 
     // The accumulator starts at +0.0f exactly as `float sum = 0.0f` does. Seeding
     // frame 0 with a plain store instead would differ for a -0.0f product, which
@@ -848,7 +1011,11 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
     // second time at the end of the movie. A free that fails here means the context is
     // already unusable; freeing the same pointer again cannot repair that.
     cudaError_t free_error = cudaSuccess;
-    if (d_gain) {
+    if (gain_borrowed) {
+        // Retained for the next movie. Drop the alias; the pool owns the buffer.
+        d_gain = nullptr;
+        gain_borrowed = false;
+    } else if (d_gain) {
         float *owned_gain = d_gain;
         d_gain = nullptr;
         free_error = releaseBuffer(owned_gain);
@@ -1316,8 +1483,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
         const size_t sz_real = (size_t)ny * (size_t)nx * sizeof(float);
-        if (!d_gain) HANDLE_ERROR(cudaMalloc((void **)&d_gain, sz_real));
-        HANDLE_ERROR(cudaMemcpy(d_gain, gain_ref->data, sz_real, cudaMemcpyHostToDevice));
+        if (!ensureDeviceGain(gain_ref, sz_real)) return false;
     }
 
     HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
@@ -1456,7 +1622,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 #endif
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
-    if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !globalPlansUsable()) return false;
     // Takes d_Fframes for the spectrum. Refused while ingest scratch views into the
     // same allocation are still live: the transform would otherwise overwrite
     // staging bytes that something is still reading, with no error anywhere.
@@ -1488,7 +1654,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
 }
 
 bool CudaMovieSession::computeGlobalInverseFFT() {
-    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
+    if (failure_state.isPoisoned() || !is_initialized || !globalPlansUsable() || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
@@ -1572,19 +1738,45 @@ bool CudaMovieSession::preparePatchInVram(
     );
     HANDLE_ERROR(cudaGetLastError());
 
-    // Reuse cached batched cuFFT plan for patch transforms
-    if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
+    // Reuse the batched patch cuFFT plan. Within a movie the geometry is constant
+    // across the whole patch grid; across movies it is constant too whenever the
+    // movie dimensions and --patch_x/--patch_y/--group_frames are, which is what
+    // the pool keys on.
+    if (!patchPlanUsable() || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
         // Same rule as the buffers above: drop the geometry the cache claims before
         // destroying the plan, and publish the new one only once it exists.
         cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+        if (patch_plan_borrowed) {
+            // Borrowed: drop the alias only. acquirePatchPlan below is what
+            // replaces the pooled plan, under the pool's own checked drop.
+            plan_patch_r2c = 0;
+            patch_plan_borrowed = false;
+        }
         CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
-        CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
-        has_plan_patch_r2c = true;
-        int n[2] = {patch_h, patch_w};
-        size_t work_bytes = 0;
-        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
-                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
-                                   &work_bytes));
+        bool pooled = false;
+        if (MC_POOL_PATCH_PLAN && worker_pool != nullptr && holds_pool_lease) {
+            cufftHandle borrowed = 0;
+            const FailureDelta delta(failure_state);
+            pooled = worker_pool->acquirePatchPlan(this, device_id, patch_w, patch_h,
+                                                   n_groups, borrowed, &failure_state);
+            if (pooled) {
+                plan_patch_r2c = borrowed;
+                patch_plan_borrowed = true;
+            } else if (delta.newFailure(failure_state)) {
+                logfile << "ERROR: worker-pool patch plan unavailable for "
+                        << patch_w << "x" << patch_h << " groups=" << n_groups << std::endl;
+                return false;
+            }
+        }
+        if (!pooled) {
+            CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
+            has_plan_patch_r2c = true;
+            int n[2] = {patch_h, patch_w};
+            size_t work_bytes = 0;
+            CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
+                                       NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
+                                       &work_bytes));
+        }
         cached_patch_w = patch_w;
         cached_patch_h = patch_h;
         cached_patch_ngroups = n_groups;
@@ -1609,7 +1801,24 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized) return false;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state);
+    // The reconstruction plan depends only on (device, nx, ny), so a worker
+    // processing movies of one geometry builds it once. A borrowed handle is
+    // passed by value; cudaDoseWeightAndInterpolateDevice never destroys one.
+    cufftHandle pooled_plan = 0;
+    size_t pooled_work_size = 0;
+    if (MC_POOL_DW_PLAN && worker_pool != nullptr && holds_pool_lease) {
+        const FailureDelta delta(failure_state);
+        if (!worker_pool->acquireDwPlan(this, device_id, nx, ny, pooled_plan,
+                                        pooled_work_size, &failure_state)) {
+            if (delta.newFailure(failure_state)) {
+                logfile << "ERROR: worker-pool reconstruction plan unavailable for "
+                        << nx << "x" << ny << std::endl;
+                return false;
+            }
+            pooled_plan = 0;
+        }
+    }
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, pooled_plan, pooled_work_size);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

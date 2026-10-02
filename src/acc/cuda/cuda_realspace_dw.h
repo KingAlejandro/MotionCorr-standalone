@@ -42,7 +42,13 @@ bool cudaDoseWeightAndInterpolateDevice(
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
     std::ostream &logfile,
-    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
+    CudaFailureState *failure = nullptr, // receives every consumed CUDA/cuFFT status, cleanup included
+    // A C2R plan for (nx, ny) the CALLER owns, or 0 to build and destroy one here.
+    // This function never destroys a borrowed plan: whoever retains it across
+    // movies is its only owner. @p borrowed_work_size is that plan's cufftGetSize,
+    // so the reported VRAM total stays the same number either way.
+    cufftHandle borrowed_plan_c2r = 0,
+    size_t borrowed_work_size = 0
 );
 
 /**

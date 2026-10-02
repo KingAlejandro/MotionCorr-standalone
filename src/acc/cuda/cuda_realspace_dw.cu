@@ -179,7 +179,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     const ThirdOrderPolynomialModel *model,
     const int device_id,
     std::ostream &logfile,
-    CudaFailureState *failure)
+    CudaFailureState *failure,
+    cufftHandle borrowed_plan_c2r,
+    size_t borrowed_work_size)
 {
     if (n_frames == 0) return true;
 
@@ -256,13 +258,20 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaMemcpy(d_doses, h_doses.data(), n_frames * sizeof(float), cudaMemcpyHostToDevice));
 
     cufftHandle plan_c2r;
-    int n[2] = {ny, nx};
-    CUFFT_CHECK(cufftCreate(&plan_c2r));
-    plan_cleanup.take(plan_c2r);
-    size_t plan_work_bytes = 0;
-    CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
     size_t cufft_work_size = 0;
-    CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
+    if (borrowed_plan_c2r != 0) {
+        // Borrowed. plan_cleanup stays empty on purpose: destroying through this
+        // alias would leave the retaining owner holding a dead handle.
+        plan_c2r = borrowed_plan_c2r;
+        cufft_work_size = borrowed_work_size;
+    } else {
+        int n[2] = {ny, nx};
+        CUFFT_CHECK(cufftCreate(&plan_c2r));
+        plan_cleanup.take(plan_c2r);
+        size_t plan_work_bytes = 0;
+        CUFFT_CHECK(cufftMakePlanMany(plan_c2r, 2, n, NULL, 1, 0, NULL, 1, 0, CUFFT_C2R, 1, &plan_work_bytes));
+        CUFFT_CHECK(cufftGetSize(plan_c2r, &cufft_work_size));
+    }
     total_vram_allocated += cufft_work_size;
 
     dim3 blockDW(16, 16);

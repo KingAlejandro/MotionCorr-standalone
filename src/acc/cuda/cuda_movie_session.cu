@@ -385,7 +385,8 @@ __global__ void cropAndGroupPatchResidentKernel(
 } // anonymous namespace
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
-    : nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
+    : patch_alignment_workspace(&failure_state),
+      nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
       nfx(nx / 2 + 1), logfile(log) {}
 
 CudaMovieSession::~CudaMovieSession() {
@@ -542,6 +543,9 @@ bool CudaMovieSession::initialize() {
 }
 
 void CudaMovieSession::release() {
+    // Alignment resources must also unwind after a patch throws. Its owners retain
+    // both first-error provenance and any later poisoning cleanup code.
+    (void)releasePatchAlignmentWorkspace();
     if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
     // Destroy plans before their work areas; attempt all releases, even after error.

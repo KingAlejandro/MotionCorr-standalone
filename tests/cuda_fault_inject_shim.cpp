@@ -69,6 +69,7 @@ bool g_u16_stage_upload_seen = false;
 const char *g_preprocess_fault = nullptr;
 bool g_preprocess_injected = false;
 bool g_preprocess_release_injected = false;
+bool g_workspace_cleanup_injected = false;
 
 // Test binary only, exported with -rdynamic. Resolve the real production caller
 // rather than relying on a fixture-specific allocation ordinal or byte count.
@@ -265,6 +266,20 @@ extern "C" cudaError_t __wrap_cudaFree(void *ptr) {
     if (stage_free && result == cudaSuccess) {
         std::fprintf(stderr, "[u16fault] stage-free-ok ptr=%p\n", ptr);
         g_u16_stage_ptr = nullptr;
+    }
+    // Test-only returned status after an actual free at the movie-owned
+    // workspace boundary. Ephemeral global calls are deliberately excluded.
+    const char *workspace_fault = std::getenv("MC_WORKSPACE_CLEANUP_FAULT");
+    if (result == cudaSuccess && ptr && workspace_fault &&
+        !g_workspace_cleanup_injected && called_from("PatchAlignmentWorkspace") &&
+        !called_from("cudaAlignPatchDevice")) {
+        g_workspace_cleanup_injected = true;
+        (void)cudaGetLastError();
+        const cudaError_t code = std::strcmp(workspace_fault, "fatal") == 0
+            ? cudaErrorIllegalAddress : cudaErrorMemoryAllocation;
+        std::fprintf(stderr, "[workspacefault] after real movie-workspace cudaFree: %s; slot cleared\n",
+                     cudaGetErrorName(code));
+        return code;
     }
     if (result == cudaSuccess && g_preprocess_injected &&
         !g_preprocess_release_injected && preprocess_mode("sparse-release-fatal") &&

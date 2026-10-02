@@ -65,6 +65,18 @@ You can also supply a movie file or quoted file wildcard directly when `--angpix
 ./build/motioncorr --i 'Movies/*.mrcs' --o MotionCorr --use_own --angpix 1.0 --voltage 300 --j 4
 ```
 
+## Resuming a run
+
+`--only_do_unfinished` skips matching own-engine processing receipts and retries
+incomplete movies. **Complete legacy outputs without a receipt, incompatible
+settings/input/gain/defect content, complete external MotionCor2 outputs, and
+time-seeded defect correction are refused before output mutation.** To migrate
+legacy results, process afresh without the resume flag; use a new output directory
+to retain the previous results. Keep the same executable, runtime, numerical
+options and immutable source files for a matching resume. Thread/IO budgets,
+shards and input ordering may change. See the [receipt contract and validation
+limits](docs/resume_processing_identity/README.md).
+
 ## Status
 
 The experimental [RELION SPA tutorial movie dataset](test-data/README.md) is

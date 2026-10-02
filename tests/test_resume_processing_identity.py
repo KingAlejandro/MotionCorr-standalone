@@ -208,6 +208,25 @@ def main():
         refused(binary, work, base, {}, 'angpix')
         (work / 'movies.star').write_text(original_star)
 
+        # Bind the sum actually used by dose weighting, allowing equivalent
+        # CLI/row spellings and refusing a change to effective pre-exposure.
+        head, rows = original_star.split('data_movies', 1)
+        row_star = work / 'row-exposure.star'
+        row_star.write_text(head + 'data_movies' + rows.replace('_rlnOpticsGroup #2',
+                            '_rlnOpticsGroup #2\n_rlnMicrographPreExposure #3')
+                            .replace('a.mrc 1', 'a.mrc 1 2'))
+        row_out = work / 'row-exposure'
+        healthy(binary, work, row_out, {'--dose_weighting': True, '--preexposure': '3'}, 'row-exposure.star')
+        before = snapshot(row_out)
+        row_star.write_text(row_star.read_text().replace('a.mrc 1 2', 'a.mrc 1 4'))
+        healthy(binary, work, row_out, {'--dose_weighting': True, '--preexposure': '1',
+                                      '--only_do_unfinished': True}, 'row-exposure.star')
+        require(all(snapshot(row_out)[name] == value for name, value in before.items() if name.startswith('a.')),
+                'equivalent effective pre-exposure rewrote products')
+        row_star.write_text(row_star.read_text().replace('a.mrc 1 4', 'a.mrc 1 5'))
+        refused(binary, work, row_out, {'--dose_weighting': True, '--preexposure': '1'},
+                'pre_exposure', 'row-exposure.star')
+
         original = (work / 'a.mrc').read_bytes()
         replace_same_metadata(work / 'a.mrc', changed_movie(work / 'a.mrc'))
         refused(binary, work, base, {}, 'input_digest')
@@ -273,6 +292,20 @@ def main():
         require(result.returncode > 0 and 'aliases immutable gain source' in result.stderr,
                 'fresh gain alias was not refused')
         require(snapshot(out) == before, 'gain alias refusal overwrote source')
+
+        out = work / 'legacy-incomplete'; shutil.copytree(base, out)
+        path = out / 'a.star'; path.write_text(path.read_text().split('data_motioncorr_processing')[0])
+        (out / 'a.mrc').unlink()
+        healthy(binary, work, out, {'--only_do_unfinished': True})
+        require('data_motioncorr_processing' in path.read_text(), 'incomplete legacy retry failed to migrate')
+        out = work / 'engine-receipt'; shutil.copytree(base, out)
+        path = out / 'a.star'; text = path.read_text()
+        match = re.search(r'(_rlnMotioncorrProcessingIdentity\s+)([0-9a-f]+)', text)
+        require(match is not None, 'engine receipt fixture lacks payload')
+        raw = bytes.fromhex(match.group(2)).decode()
+        raw = re.sub(r'engine_digest=[0-9a-f]{64}', 'engine_digest=' + '0' * 64, raw)
+        path.write_text(text[:match.start(2)] + raw.encode().hex() + text[match.end(2):])
+        refused(binary, work, out, {}, 'engine_digest')
 
         geometry = work / 'geometry'; shutil.copytree(base, geometry)
         p = geometry / 'a.mrc'; data = bytearray(p.read_bytes()); struct.pack_into('<i', data, 0, 48); p.write_bytes(data)

@@ -308,11 +308,15 @@ struct Timing {
     int graph_nodes = 0, graph_edges = 0;
 };
 
-static void finish_and_read(Ctx &c, Timing &t, cudaStream_t s) {
+// Closes the submitted region and downloads the sum. `wall` is stopped before the
+// host-side digest: hashing the image is harness bookkeeping, not part of the
+// reconstruction, and at tutorial geometry it costs more than the region itself.
+static void finish_and_read(Ctx &c, Timing &t, cudaStream_t s, double w0) {
     double t0 = wall_s();
     CK(cudaStreamSynchronize(s));
     t.sync += wall_s() - t0;
     CK(cudaMemcpy(c.h_out.data(), c.d_Isum, c.sz_iframe, cudaMemcpyDeviceToHost));
+    t.wall = wall_s() - w0;
     t.digest = fnv1a(c.h_out.data(), c.sz_iframe);
 }
 
@@ -359,8 +363,7 @@ static Timing run_prod(Ctx &c) {
         CK(cudaEventElapsedTime(&ms, e[4], e[5]));
     }
     t.submit_cpu = cpu_s() - p0;
-    finish_and_read(c, t, 0);
-    t.wall = wall_s() - w0;
+    finish_and_read(c, t, 0, w0);
     for (int i = 0; i < 6; ++i) CK(cudaEventDestroy(e[i]));
     return t;
 }
@@ -372,8 +375,7 @@ static Timing run_async(Ctx &c, cudaStream_t s) {
     CK(cudaMemsetAsync(c.d_Isum, 0, c.sz_iframe, s));
     for (int f = 0; f < c.n_frames; ++f) submit_frame(c, f, s, false);
     t.submit_cpu = cpu_s() - p0;
-    finish_and_read(c, t, s);
-    t.wall = wall_s() - w0;
+    finish_and_read(c, t, s, w0);
     FK(cufftSetStream(c.plan, 0));
     return t;
 }
@@ -444,12 +446,12 @@ static Timing run_g0(Ctx &c, cudaStream_t s) {
     CK(cudaGraphLaunch(exec, s));
     t.launch = wall_s() - a;
     t.submit_cpu = cpu_s() - p0;
-    finish_and_read(c, t, s);
+    finish_and_read(c, t, s, w0);
     a = wall_s();
     CK(cudaGraphExecDestroy(exec));
     CK(cudaGraphDestroy(g));
     t.destroy = wall_s() - a;
-    t.wall = wall_s() - w0;
+    t.wall += t.destroy;
     FK(cufftSetStream(c.plan, 0));
     return t;
 }
@@ -482,8 +484,7 @@ static Timing run_g1(Ctx &c, cudaStream_t s, OneFrameGraph &G) {
         t.launch += wall_s() - l;
     }
     t.submit_cpu = cpu_s() - p0;
-    finish_and_read(c, t, s);
-    t.wall = wall_s() - w0;
+    finish_and_read(c, t, s, w0);
     return t;
 }
 
@@ -517,8 +518,7 @@ static Timing run_greuse(Ctx &c, cudaStream_t s, MovieGraph &G, bool do_update) 
     CK(cudaGraphLaunch(G.exec, s));
     t.launch = wall_s() - l;
     t.submit_cpu = cpu_s() - p0;
-    finish_and_read(c, t, s);
-    t.wall = wall_s() - w0;
+    finish_and_read(c, t, s, w0);
     return t;
 }
 

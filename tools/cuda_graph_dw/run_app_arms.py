@@ -5,7 +5,7 @@ One binary, three arms selected by MC_DW_MODE (product / async / graph), run
 round-robin with the arm order rotated per round so run-order bias is spread
 across all three. Products are compared exactly between arms.
 """
-import argparse, hashlib, json, os, subprocess, time
+import argparse, hashlib, json, os, subprocess, sys, time
 from pathlib import Path
 
 ARMS = ["prod", "async", "graph"]
@@ -90,7 +90,9 @@ def main():
         for arm in ('async', 'graph'):
             cand = a.root / f'{arm}-{r}' / 'output'
             js = a.root / f'cmp-{arm}-{r}.json'
-            cmd = ['python3', str(cmp_tool), str(base), str(cand),
+            # sys.executable, not bare python3: the comparator needs numpy,
+            # which only the venv interpreter on these hosts has.
+            cmd = [sys.executable, str(cmp_tool), str(base), str(cand),
                    '--manifest', str(manifest), '--input-star', str(a.input_dir / 'movies.star'),
                    '--allow-added-log-line', 'DW submission mode:',
                    '--json-out', str(js)]

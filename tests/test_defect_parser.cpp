@@ -12,6 +12,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <utime.h>
 
 static int failures = 0, passed = 0;
 
@@ -292,22 +293,93 @@ int main()
               "premask geometry key follows the new geometry");
         (void)runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
 
-        // 6. A rewritten defect file under the SAME name must miss. main re-read
-        //    and re-validated the file for every movie, so a filename-only key
-        //    would silently keep the old parse.
+        // 6. Metadata is NOT content identity. Both valid rectangles have
+        // exactly the same byte length/count, but different coordinates. Force
+        // the same timestamp before every lookup, including malformed content.
         {
-            // mtime has one-second resolution on some filesystems, so the
-            // rewrite also changes the size, which the key includes.
-            const std::string rewritten = tmpfile_with("0 0 3 3\n0 0 1 1\n", "pma");
-            (void)rewritten;
+            const struct utimbuf fixed_time = {1234567890, 1234567890};
+            auto rewrite = [&](const std::string &body) {
+                (void)tmpfile_with(body, "pma");
+                check(::utime(fn_a.c_str(), &fixed_time) == 0,
+                      "same-size rewrite timestamp fixture is established");
+            };
+            rewrite("0 0 2 2\n");
+            struct stat original{};
+            check(::stat(fn_a.c_str(), &original) == 0,
+                  "original content identity fixture is readable");
+            const MultidimArray<bool> &initial = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+            check(count_set(const_cast<MultidimArray<bool>&>(initial)) == 4 &&
+                  DIRECT_A2D_ELEM(initial, 0, 0) && !DIRECT_A2D_ELEM(initial, 4, 4),
+                  "original exact-content mask has the original coordinates");
+            const MultidimArray<bool> &repeat = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+            check(runner.isDefectPremaskValid() && count_set(const_cast<MultidimArray<bool>&>(repeat)) == 4 &&
+                  DIRECT_A2D_ELEM(repeat, 0, 0), "unchanged text content repeats successfully");
+            rewrite("4 4 2 2\n");
+            struct stat changed{};
+            check(::stat(fn_a.c_str(), &changed) == 0 && changed.st_size == original.st_size &&
+                  changed.st_mtime == original.st_mtime,
+                  "valid rewrite has identical size and whole-second mtime");
             const MultidimArray<bool> &rewrote = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
-            check(count_set(const_cast<MultidimArray<bool>&>(rewrote)) == 9,
-                  "a rewritten defect file under the same name is reparsed");
-            // Restore the original fixture for the cases below.
-            (void)tmpfile_with("0 0 2 2\n", "pma");
+            check(count_set(const_cast<MultidimArray<bool>&>(rewrote)) == 4 &&
+                  !DIRECT_A2D_ELEM(rewrote, 0, 0) && DIRECT_A2D_ELEM(rewrote, 4, 4),
+                  "same-size same-mtime valid rewrite invalidates old mask coordinates");
+            rewrite("4 4 X 2\n");
+            check(::stat(fn_a.c_str(), &changed) == 0 && changed.st_size == original.st_size &&
+                  changed.st_mtime == original.st_mtime,
+                  "malformed rewrite has identical size and whole-second mtime");
+            bool bad_threw = false;
+            try { runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1); }
+            catch (RelionError &) { bad_threw = true; }
+            check(bad_threw, "same-size same-mtime malformed rewrite cannot reuse old success");
+            check(!runner.isDefectPremaskValid() && runner.defect_premask_fn == "" &&
+                  runner.defect_premask_nx == 0 && runner.defect_premask_ny == 0,
+                  "malformed rewrite clears cache validity and keys");
+            rewrite("0 0 2 2\n");
             const MultidimArray<bool> &restored = runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
-            check(count_set(const_cast<MultidimArray<bool>&>(restored)) == 4,
-                  "restoring the original defect file is reparsed again");
+            check(runner.isDefectPremaskValid() && count_set(const_cast<MultidimArray<bool>&>(restored)) == 4 &&
+                  DIRECT_A2D_ELEM(restored, 0, 0) && !DIRECT_A2D_ELEM(restored, 4, 4),
+                  "restoring original same-size same-mtime content recovers exact coordinates");
+
+            // A previously cached successful path must not hide a read failure.
+            check(std::remove(fn_a.c_str()) == 0 && ::mkdir(fn_a.c_str(), 0700) == 0,
+                  "unreadable TXT directory fixture replaces the cached path");
+            bool read_threw = false;
+            try { runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1); }
+            catch (RelionError &) { read_threw = true; }
+            check(read_threw && !runner.isDefectPremaskValid(),
+                  "snapshot read failure invalidates the previously successful cache");
+            check(::rmdir(fn_a.c_str()) == 0, "unreadable snapshot fixture is removed");
+            rewrite("0 0 2 2\n");
+            (void)runner.getDefectPremask(nx, ny, fn_a, "", no_gain, 1);
+        }
+
+        // Image readers reopen filenames, so image defect maps deliberately
+        // retain per-movie reads rather than an unsafe metadata cache.
+        {
+            const std::string image_path = scratch_dir() + "/premask.mrc";
+            Image<float> map(nx, ny);
+            map().initZeros();
+            DIRECT_A2D_ELEM(map(), 0, 0) = 1;
+            map.write(image_path, -1, false, WRITE_OVERWRITE, Float);
+            const struct utimbuf fixed_time = {1234567890, 1234567890};
+            check(::utime(image_path.c_str(), &fixed_time) == 0, "image timestamp fixture is established");
+            struct stat original{};
+            check(::stat(image_path.c_str(), &original) == 0, "original image fixture is readable");
+            const MultidimArray<bool> &first = runner.getDefectPremask(nx, ny, image_path, "", no_gain, 1);
+            check(DIRECT_A2D_ELEM(first, 0, 0) && !DIRECT_A2D_ELEM(first, 4, 4),
+                  "original image defect mask has original coordinates");
+            map().initZeros();
+            DIRECT_A2D_ELEM(map(), 4, 4) = 1;
+            map.write(image_path, -1, false, WRITE_OVERWRITE, Float);
+            check(::utime(image_path.c_str(), &fixed_time) == 0, "rewritten image timestamp fixture is established");
+            struct stat changed{};
+            check(::stat(image_path.c_str(), &changed) == 0 && changed.st_size == original.st_size &&
+                  changed.st_mtime == original.st_mtime, "image rewrite has identical size and mtime");
+            const MultidimArray<bool> &second = runner.getDefectPremask(nx, ny, image_path, "", no_gain, 1);
+            check(!DIRECT_A2D_ELEM(second, 0, 0) && DIRECT_A2D_ELEM(second, 4, 4),
+                  "same-size same-mtime image rewrite does not reuse an old mask");
+            check(!runner.isDefectPremaskValid(), "filename-based image defect masks are not advertised reusable");
+            check(std::remove(image_path.c_str()) == 0, "image defect fixture is removed");
         }
 
         // 7. The gain-zero mask, and a changed gain under a new generation.

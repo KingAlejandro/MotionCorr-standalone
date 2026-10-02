@@ -203,15 +203,13 @@ public:
 	// caller asserts this instead of leaving the ordering implicit.
 	bool gainIdentityResolvedFor(int nx, int ny) const;
 
-	// Static defect pre-mask cache: the external defect file and the gain-zero
-	// pixels, which cannot change between movies of the same geometry. Keyed on
-	// the defect path AND its size and mtime, because main re-read and
-	// re-validated the file per movie and a filename alone would not notice a
-	// rewrite. Automatically detected hot pixels are never cached here.
+	// Static defect pre-mask cache: exact TXT bytes, path, gain generation and
+	// geometry. TXT parsing consumes the keyed snapshot. Image defect maps use
+	// the original per-movie reader and are not cached. Detected hot pixels are
+	// never cached here.
 	MultidimArray<bool> defect_premask;
 	FileName defect_premask_fn;
-	unsigned long long defect_premask_defect_size = 0;
-	unsigned long long defect_premask_defect_mtime = 0;
+	std::string defect_premask_defect_bytes;
 	FileName defect_premask_gain_fn;
 	unsigned long long defect_premask_gain_gen = 0;
 	int defect_premask_nx = 0, defect_premask_ny = 0;

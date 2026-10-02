@@ -2196,6 +2196,12 @@ def case_dataset_endpoint(_tmp: Path) -> None:
     if result.returncode != 0: raise AssertionError(result.stdout + result.stderr)
 
 
+def case_pid_birth_cleanup(_tmp: Path) -> None:
+    result = subprocess.run([PY, str(ROOT / "tests/test_process_ownership.py")],
+                            text=True, capture_output=True)
+    if result.returncode != 0: raise AssertionError(result.stdout + result.stderr)
+
+
 def case_owned_tree_rss(_tmp: Path) -> None:
     result = subprocess.run([PY, str(ROOT / "tests/test_tree_rss.py")],
                             text=True, capture_output=True)
@@ -2255,6 +2261,7 @@ CASES = [
     case_aggregate_staging_namespace_reserved,
     case_dataset_endpoint,
     case_owned_tree_rss,
+    case_pid_birth_cleanup,
 ]
 
 

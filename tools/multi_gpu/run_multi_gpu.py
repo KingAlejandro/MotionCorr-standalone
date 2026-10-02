@@ -51,6 +51,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gpu_witness  # noqa: E402
 import partition_star  # noqa: E402
+from process_ownership import ProcessOwnership, ProcessTable  # noqa: E402
 
 _LAUNCHER_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 _TERMINATE_GRACE_SECONDS = 5.0
@@ -115,83 +116,72 @@ def _defer_launcher_signals():
 
 
 def _process_group_exists(pgid: int) -> bool:
-    try:
-        os.killpg(pgid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    if sys.platform == "linux":
-        # killpg(..., 0) includes zombies. A container's PID 1 can leave adopted
-        # grandchildren in that state indefinitely; they cannot run or receive
-        # signals, and this launcher can only reap its own direct children.
-        # Refuse to declare cleanup complete if /proc cannot establish the
-        # member's PID, original session/group and state from one stat record.
-        try:
-            for entry in Path("/proc").iterdir():
-                if not entry.name.isdigit():
-                    continue
-                try:
-                    raw = (entry / "stat").read_text()
-                except FileNotFoundError:
-                    continue  # exited while taking this snapshot
-                fields = raw.rsplit(")", 1)[1].split()
-                if int(raw.split(" ", 1)[0]) != int(entry.name):
-                    return True
-                if int(fields[2]) != pgid:
-                    continue
-                if int(fields[3]) != pgid or int(fields[19]) <= 0:
-                    return True  # not demonstrably a member of our session
-                if fields[0] != "Z":
-                    return True
-        except (OSError, ValueError, IndexError):
-            return True  # unavailable/ambiguous process evidence is not success
-        return False
-    return True
+    return ProcessTable().group_live(pgid)
 
 
 def _terminate_process_groups(procs: list[tuple[int, subprocess.Popen, Path]],
-                              grace_seconds: float | None = None) -> None:
-    """Terminate and reap only the process groups started by this launcher.
+                              grace_seconds: float | None = None,
+                              ownership: ProcessOwnership | None = None) -> None:
+    """Reap groups only while original/observed PID-birth ownership is proven.
 
-    A worker's session/process-group id is its PID because it was started with
-    ``start_new_session=True``. Signal the group even if its leader has already
-    exited: grandchildren may still be running in that owned group.
+    Historical Popen.pid alone cannot authorize a signal after that root exits.
+    Known descendants retain their identities across reparenting and group moves.
+    Missing evidence fails cleanup rather than signalling an unrelated recycled
+    group. Every TERM/KILL performs a new immediate ownership check.
     """
-    groups = sorted({proc.pid for _, proc, _ in procs})
+    groups = {proc.pid for _, proc, _ in procs}
     if grace_seconds is None:
         grace_seconds = _TERMINATE_GRACE_SECONDS
-    for pgid in groups:
+    errors = []
+    unverified_groups = set()
+
+    def live(group):
+        return ownership.table.group_live(group) if ownership else _process_group_exists(group)
+
+    def signal_owned(group, signum):
+        if not live(group):
+            return
+        if ownership is None or not ownership.verified_group(group):
+            errors.append(f"Refusing signal {signum} to group {group}: original PID/birth ownership unverified")
+            unverified_groups.add(group)
+            return
+        if group == os.getpgrp():
+            errors.append(f"Refusing signal to launcher's own group {group}")
+            return
+        unverified_groups.discard(group)
         try:
-            os.killpg(pgid, signal.SIGTERM)
+            os.killpg(group, signum)
         except ProcessLookupError:
             pass
 
+    if ownership:
+        ownership.refresh()
+        groups |= {r['pgid'] for r in ownership.known_live() if r['pgid'] != os.getpgrp()}
+    for group in sorted(groups):
+        signal_owned(group, signal.SIGTERM)
     deadline = time.monotonic() + max(0.0, grace_seconds)
-    while time.monotonic() < deadline and any(_process_group_exists(g) for g in groups):
+    while time.monotonic() < deadline and any(g not in unverified_groups and live(g) for g in groups):
         for _, proc, _ in procs:
             proc.poll()
         time.sleep(0.05)
-
-    for pgid in groups:
-        if _process_group_exists(pgid):
-            try:
-                os.killpg(pgid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-
+    if ownership:
+        ownership.refresh()
+        groups |= {r['pgid'] for r in ownership.known_live() if r['pgid'] != os.getpgrp()}
+    for group in sorted(groups):
+        signal_owned(group, signal.SIGKILL)
     for _, proc, _ in procs:
         try:
             proc.wait(timeout=_KILL_REAP_SECONDS)
         except subprocess.TimeoutExpired:
-            raise RuntimeError(f"could not reap owned worker PID {proc.pid}")
-
+            errors.append(f"could not reap owned worker PID {proc.pid}")
     deadline = time.monotonic() + _KILL_REAP_SECONDS
-    while time.monotonic() < deadline and any(_process_group_exists(g) for g in groups):
+    while time.monotonic() < deadline and any(g not in unverified_groups and live(g) for g in groups):
         time.sleep(0.05)
-    remaining = [g for g in groups if _process_group_exists(g)]
+    remaining = [g for g in groups if live(g)]
     if remaining:
-        raise RuntimeError(f"owned worker process groups remain after SIGKILL: {remaining}")
+        errors.append(f"process groups remain after checked cleanup: {remaining}")
+    if errors:
+        raise RuntimeError("; ".join(errors))
 
 
 def _iso(epoch: float) -> str:
@@ -669,6 +659,7 @@ def main(argv: list[str] | None = None) -> int:
     # nothing and changes no production source. This is bookkeeping, not a
     # benchmark: see docs/multi_gpu/SCALING_EXPERIMENT.md for what an
     # interpretable measurement additionally requires.
+    ownership = ProcessOwnership()
     resources = ResourceSampler(a.sample_interval)
     products = ProductSampler(a.product_interval)
     procs: list[tuple[int, subprocess.Popen, Path]] = []
@@ -690,6 +681,8 @@ def main(argv: list[str] | None = None) -> int:
     started = time.time()
     try:
         previous_handlers = _install_signal_handlers()
+        with _defer_launcher_signals():
+            ownership.start()
         if devices and not a.no_witness:
             sampler = Sampler(a.sample_interval)
             with _defer_launcher_signals():
@@ -742,6 +735,7 @@ def main(argv: list[str] | None = None) -> int:
                 resources.watch(p.pid, k)
                 products.watch(k, wdir, shard_roots[k])
                 procs.append((k, p, wdir))
+                ownership.watch(p.pid)
             if masks[k]:
                 confirmed[k] = confirm_affinity(p.pid, masks[k])
             (wdir / "command.json").write_text(json.dumps({
@@ -774,15 +768,18 @@ def main(argv: list[str] | None = None) -> int:
     except LauncherInterrupted as exc:
         interrupted_signal = exc.signum
         _ignore_launcher_signals()
-        _terminate_process_groups(procs)
+        _terminate_process_groups(procs, ownership=ownership)
         for waiter in waiters:
             if waiter.ident is not None:
                 waiter.join(timeout=_KILL_REAP_SECONDS)
     except BaseException:
         _ignore_launcher_signals()
-        _terminate_process_groups(procs)
+        _terminate_process_groups(procs, ownership=ownership)
         raise
     finally:
+        ownership.stop()
+        if ownership.ident is not None:
+            ownership.join(timeout=10)
         if resources_started:
             resources.stop()
             resources.join(timeout=10)
@@ -993,6 +990,9 @@ def main(argv: list[str] | None = None) -> int:
         status["gpu_witness"] = "skipped by --no-witness; no device claim is supported"
         verdict_ok = False
 
+    if ownership.errors or ownership.is_alive():
+        verdict_ok = False
+    status["process_ownership_errors"] = ownership.errors
     status["workers_complete"] = verdict_ok
     status["dataset_ready"] = False  # staging/aggregate/report are a separate endpoint
     status["verdict"] = "PASS" if verdict_ok else "FAIL"

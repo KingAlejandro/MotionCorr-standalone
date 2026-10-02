@@ -19,32 +19,14 @@ from pathlib import Path
 
 import run_multi_gpu
 from tree_rss import OwnedTreeSampler
+from process_ownership import ProcessOwnership
 
 
-def cleanup(owned, sampler):
-    # Let the nested worker launcher finish its own bounded group cleanup and
-    # sampler shutdown before escalating its leader. Aggregate children share
-    # their owner's fresh session and receive the same termination signal.
-    run_multi_gpu._terminate_process_groups(owned, grace_seconds=60.0)
-    if sampler.unavailable:
-        return 'Owned launcher/aggregate groups reaped; no /proc descendant witness'
-    def survivors():
-        return [p for p in sampler.known_live() if p['pid'] != os.getpid()
-                and p['pgid'] != os.getpgrp()]
-    pending=survivors()
-    for sig in (signal.SIGTERM,signal.SIGKILL):
-        groups={p['pgid'] for p in pending}
-        for group in groups:
-            # Recheck an exact owned PID/start member immediately before signal.
-            if any(p['pgid']==group for p in survivors()):
-                try:os.killpg(group,sig)
-                except ProcessLookupError:pass
-        deadline=time.monotonic()+2
-        while pending and time.monotonic()<deadline:
-            time.sleep(0.05);pending=survivors()
-        if not pending:break
-    if pending:raise RuntimeError(f'Owned descendants remain after cleanup: {pending}')
-    return 'Owned groups reaped; observed PID/start descendants absent or zombies'
+def cleanup(owned, ownership):
+    # Let the nested launcher complete its checked cleanup before escalating
+    # observed descendants. Historical numeric groups alone never authorize it.
+    run_multi_gpu._terminate_process_groups(owned, grace_seconds=60.0, ownership=ownership)
+    return 'Owned PID/birth groups reaped; observed descendants absent or zombies'
 
 
 def main(argv=None) -> int:
@@ -76,6 +58,7 @@ def main(argv=None) -> int:
         if not union <= os.sched_getaffinity(0):ap.error('CPU masks exceed actual allocation')
         os.sched_setaffinity(0,union)  # coordinator, sampler and every descendant share the fixed union
     sampler=OwnedTreeSampler(a.sample_interval)
+    ownership=ProcessOwnership()
     input_digest=hashlib.sha256(Path(a.star).read_bytes()).hexdigest()
     out.mkdir(parents=True)
     started=time.monotonic()
@@ -91,9 +74,11 @@ def main(argv=None) -> int:
         with (out/(name+'.log')).open('w') as log, run_multi_gpu._defer_launcher_signals():
             process=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
             owned.append((len(owned),process,out));sampler.watch(process.pid)
+            ownership.watch(process.pid)
         return process.wait()
     sampler.watch(os.getpid())
     sampler.start()
+    ownership.start()
     try:
         begin=time.monotonic()
         rc=child([sys.executable,str(Path(__file__).with_name('run_multi_gpu.py')),
@@ -137,31 +122,37 @@ def main(argv=None) -> int:
         if aggregate.get('verdict')!='PASS' or not aggregate.get('dataset_ready'):
             status['failure']='Complete dataset aggregate did not pass'
             return 3
-        survivors=[p for p in sampler.known_live() if p['pid'] != os.getpid()]
+        ownership.refresh()
+        survivors=[p for p in ownership.known_live() if p['pid'] != os.getpid()]
         if survivors:
             status['failure']='Owned descendants remained after dataset publication'
-            status['cleanup']=cleanup(owned,sampler)
+            status['cleanup']=cleanup(owned,ownership)
             return 3
-        status['cleanup']='No observed live descendants; /proc unavailable' if sampler.unavailable else 'No observed live PID/start descendants'
+        status['cleanup']='No observed live PID/birth descendants'
+        if ownership.errors:
+            status['failure']='Process ownership observation failed: '+str(ownership.errors)
+            return 3
         status['dataset_ready']=True;status['verdict']='PASS'
         return 0
     except run_multi_gpu.LauncherInterrupted as exc:
         run_multi_gpu._ignore_launcher_signals()
         status['failure']=f'Interrupted by signal {exc.signum}'
-        status['cleanup']=cleanup(owned,sampler)
+        status['cleanup']=cleanup(owned,ownership)
         return 128+exc.signum
     except Exception as exc:
         run_multi_gpu._ignore_launcher_signals()
         status['failure']=f'{type(exc).__name__}: {exc}'
-        status['cleanup']=cleanup(owned,sampler)
+        status['cleanup']=cleanup(owned,ownership)
         return 3
     finally:
         if owned and not status['dataset_ready'] and 'cleanup' not in status:
             try:
-                status['cleanup']=cleanup(owned,sampler)
+                status['cleanup']=cleanup(owned,ownership)
             except Exception as exc:
                 status['cleanup_error']=f'{type(exc).__name__}: {exc}'
         status['dataset_wall_s']=time.monotonic()-started
+        ownership.stop();ownership.join(timeout=10)
+        status['process_ownership_errors']=ownership.errors
         sampler.stop();sampler.join(timeout=10)
         if sampler.is_alive():sampler.errors.append('Sampler did not stop')
         status['tree_rss']=sampler.report()

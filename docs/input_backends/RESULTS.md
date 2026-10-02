@@ -364,6 +364,27 @@ PCIe. Pinning that staging could recover at most ~42 ms of a 766 ms movie
 resource §4.2 exists to reduce. The nvCOMP arms already transfer from a pinned
 pool and are at 15-23 ms.
 
+### 4.6 Process startup, and why §4.1 reports per-movie wall
+
+One movie per run, seven paired repeats, arm order alternating, both binaries
+already warm:
+
+| | main | branch |
+|---|---|---|
+| process wall, median | 1.938 s | **1.886 s** |
+| movie wall, median | 0.954 s | **0.941 s** |
+| pairs the branch wins | — | 6/7 |
+
+A one-movie process spends about **0.95 s** outside the movie — CUDA context
+creation, first-use module loading, gain read, output setup. That is why §4.1
+reports per-movie wall separately: on a six-movie run that fixed second is a
+fifth of the process wall and it belongs to neither arm.
+
+It also closes the §4.2 anomaly. The candidate shows no startup regression at
+all once its binary is warm; the +1.1 CPU-seconds and the 1.755 s first movie
+in the earlier series were the candidate executable's first execution, not its
+code.
+
 ## 5. What is still unsupported, and by what
 
 | input | route | why |

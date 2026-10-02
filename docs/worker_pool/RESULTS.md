@@ -71,6 +71,9 @@ hits. All six arms produced the same corrected-image digest on that witness run.
 
 ## Measured
 
+![each mechanism measured on its own](charts/arms.png)
+
+
 Eight interleaved rounds. Within a round every arm runs exactly once, in a
 rotated order that is reversed on even rounds, so no arm sits permanently in a
 fast or slow slot and a slow period is shared. Paired differences are taken
@@ -157,34 +160,98 @@ E   1.619 1.553 1.562 1.603 1.570 1.567
 
 ## What the retained resources stop the process doing
 
-One profiled run per arm (`nsys profile -t cuda`, sampling off). A profiled run
-is not a timing claim — the uninstrumented campaign above is — but it attributes
-the saving to specific calls.
+One `nsys profile -t cuda --cuda-memory-usage` capture per arm, on the
+`4-gpu-vm` host (A100 80GB PCIe, `GPU-eddb42fe`, exclusively locked, no
+co-tenant on any device) — a **different venue from the timing campaign above**,
+chosen because it is the box PR136 profiled on, so the two sets of memory
+figures are directly comparable. All six arms produced the identical
+corrected-image digest `3ebed4b9cf62c46f` in these captures too.
 
-| CUDA API | A0 | E | change |
-|---|---|---|---|
-| `cudaMemcpy` | 7700 calls, 929.4 ms | 7677 calls, 222.5 ms | −23 calls, **−706.9 ms** |
-| `cudaMalloc` | 936 calls, 160.9 ms | 867 calls, 88.2 ms | −69 calls, −72.7 ms |
-| `cudaFree` | 936 calls, 125.8 ms | 867 calls, 137.5 ms | −69 calls, +11.7 ms |
+A profiled run is attribution. It is not a timing claim; the uninstrumented
+SCARF campaign is.
 
-The 23 removed `cudaMemcpy` calls are 23 gain uploads: 24 movies, one build. At
-56,955,920 B each, synchronous and from pageable host memory, they were 707 ms
-of the 929 ms this arm spent in `cudaMemcpy`. The 69 removed allocation pairs
-are three per movie for 23 movies — the gain buffer, the shared FFT work area
-and the inverse preservation tile.
+| arm | peak | floor between movies | allocs | frees | kernels | kernel union | copy union | H2D |
+|---|---|---|---|---|---|---|---|---|
+| A0 | 3208.6 MiB | 170.4 MiB | 3008 | 1155 | 24,966 | 3.211 s | 1.096 s | 4.62 GB |
+| A1 | 3208.6 MiB | 170.4 MiB | 3008 | 1155 | 24,966 | 3.212 s | 1.101 s | 4.62 GB |
+| B | 3262.9 MiB | 224.7 MiB | 2985 | 1132 | 24,966 | 3.212 s | 0.488 s | 3.31 GB |
+| C | 3262.9 MiB | 333.4 MiB | 2111 | 1086 | 24,966 | 3.212 s | 0.489 s | 3.31 GB |
+| D | 3262.9 MiB | 385.6 MiB | 1697 | 948 | 24,851 | 3.211 s | 0.484 s | 3.31 GB |
+| E | **3313.1 MiB** | **439.9 MiB** | **1260** | **925** | 24,851 | 3.211 s | 0.488 s | 3.31 GB |
 
-`nsys` does not trace cuFFT library entry points, so the plan savings are not
-in this table. Their evidence is the pool's own counters (four plan builds for
-the whole run instead of ninety-six) and the C, D and E wall increments.
+### The null control holds at the device level too
+
+A1 is not merely *close* to A0 — it is identical in every device counter:
+same peak, same floor, same 3008 allocations and 1155 frees, same 24,966
+kernels, same 4.62 GB of host-to-device traffic. The pool, the lease and every
+ownership rule are present and allocate nothing. That is a stronger statement
+than the wall-clock tie, and it is what licenses attributing the −0.98 s to the
+four mechanisms rather than to incidental restructuring.
+
+### Peak barely moves; the floor is what rises
+
+![device memory per arm](charts/vram-arms.png)
+
+Peak rises **104.5 MiB**; the floor between movies rises **269.5 MiB**. The
+pooled buffers were already live during a movie, so holding them barely lifts
+the high-water mark — it stops the trough returning to baseline. A budget sized
+on peak sees +104 MiB; a second concurrent worker on the same card sees
++269.5 MiB.
+
+That 269.5 MiB from profiler allocation events matches the 282,626,576 B
+(269.53 MiB) the pool reports on its own `CUDA worker pool: retained` line, by
+an entirely independent path.
+
+![floor attribution](charts/floor-steps.png)
+
+Every step in the floor is one named buffer, to within 0.02 MiB.
+
+### Most of the churn the plan pools remove is cuFFT's own
+
+![allocation churn](charts/alloc-churn.png)
+
+The pools retain four buffers but remove 1748 allocations. The gain accounts
+for 23 of them — one per avoided movie. The other 1725 are cuFFT's: each plan
+build that no longer happens also avoids that plan's internal allocations,
+roughly 19 per plan. That is a second-order reason these arms are faster,
+independent of the bytes retained, and it is the part that would be missed by
+reasoning only about the four buffers the pool names.
+
+The kernel count drops 24,966 → 24,851 at arm D. Those 115 are cuFFT
+plan-construction kernels (5 per avoided patch-plan build), not compute: the
+**kernel union is unchanged at 3.211 s** and the outputs are bit-identical.
+
+### Copies
+
+`cudaMemcpy` falls 929.4 ms → 222.5 ms over 23 fewer calls, and host-to-device
+traffic falls **4.62 → 3.31 GB**. The 1.31 GB difference is exactly
+56,955,920 B × 23 avoided gain uploads — the mechanism confirmed from device
+counters rather than from the wall clock. Copy union falls 1.096 → 0.488 s.
+
+### The GPU is not busier, the gaps are shorter
+
+![GPU execution profile](charts/gpu-profile.png)
+
+Kernel union is flat across all six arms (3.211–3.212 s): the device does
+exactly the same work. The trace span contracts 13.88 → 12.35 s and the pattern
+compresses horizontally without getting denser. Mean occupancy reads 33.2, 33.4,
+30.1, 31.0, 31.5, 32.1% for A0…E — single captures with CUPTI inflation, so the
+direction matters and the decimals do not; note it does **not** rise
+monotonically, which is the honest shape of "the same work in less time".
+
+This branch shortens host-side gaps between unchanged GPU work. It leaves the
+device idle roughly two thirds of the span. The overlap problem is untouched
+and remains the largest single opportunity — and it belongs to the
+concurrency workstream, not here.
 
 ### Large movie buffers: measured, not pursued
 
 The handoff asks for `d_Iframes` / `d_Fframes` / `d_Isum` reuse to be
 investigated only if movie-level `cudaMalloc`/`cudaFree` is still material after
 plan and workspace reuse. It is not, on this workload. Arm E still spends
-225.7 ms across 867 allocations and 867 frees for the whole 24-movie run — 2.3%
+225.7 ms across 1260 allocations and 925 frees for the whole 24-movie run — 2.3%
 of a 10.0 s run — and reusing the three big buffers would remove 72 of those
-1734 calls. Even attributing all of `cudaMalloc` to them puts the ceiling below
+2185 calls. Even attributing all of `cudaMalloc` to them puts the ceiling below
 0.15 s, against a permanent 3.2 GiB device reservation and a VRAM footprint that
 would stop being a function of the current movie. That is not a trade this
 evidence supports, so it was not implemented. `cudaMallocAsync` was not compared
@@ -458,12 +525,21 @@ requires cluster access):
 | `strict4/strict-report.json` | manifest-validated strict product gate |
 | `vram3/*.csv` | device-memory traces and the physical-GPU witness |
 | `ctest4-*.log` | the three build shapes, candidate and baseline |
-| `profile3/*` | CUDA API attribution |
+| `profile3/*` | CUDA API attribution (SCARF) |
 | `logs4/`, `arms4/` | configure/build logs and binary digests per arm |
 | `campaign2-runs.jsonl`, `ctest-*.log`, `vram/`, `profile/` | the superseded pre-review-fix campaign, retained |
 
-Mutant campaign under `/home/alex/mc-worker-20261002/mutants-v3/` on the
-`4-gpu-vm` host (A100 80GB PCIe, GPUs 2 and 3), `summary-final.json`.
+Mutant campaign under `/home/alex/mc-worker-20261002/mutants-v4/` on the
+`4-gpu-vm` host (A100 80GB PCIe, GPUs 2 and 3), `summary.json`.
+
+Device-memory and GPU-execution profiling under
+`/home/alex/mc-worker-20261002/prof/` on the same host (A100 80GB PCIe,
+`GPU-eddb42fe`, bench lock held): six `.nsys-rep` captures, their SQLite
+exports, `profile-summary.json`, `profile-series.json` and `charts/`. The
+capture script, the analysis and the chart code are committed as
+`tools/worker_pool/capture_profiles.sh`, `analyse_profile.py` and
+`make_charts.py`; `docs/worker_pool/profile/profile-summary.json` is the
+retained per-arm result.
 
 Source tarball digests: candidate `mcwp4.tar.gz`
 `0bfb1bd275223985ded0c81dd4c02db441b2cf0857fb8917414266091534d971`,

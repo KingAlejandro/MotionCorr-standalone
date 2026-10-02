@@ -1,0 +1,29 @@
+=== issue26 tooling controls (CPU-only; not a benchmark) ===
+utc            : 2026-09-28T02:14:01Z
+host           : small-refmac-machine
+lock           : /tmp/motioncorr-issue96-cpu-validation.lock (held)
+requested lane : 32-63
+inherited cpus : 32-63
+inherited mems : 0-1
+lane NUMA node : 1 
+nproc visible  : 32
+loadavg        : 2.83 3.21 3.69 4/7975 3166628
+runner sha256  : b05260dbf9b4ddbd76c8e248dc1bb503b911ec5d1aef11d16ef699005443bdcd
+controls sha256: 6b3e0f38a7cdd10def7afc366fd8894c79a94d522a5d0108d237d0416f39b96e
+ctffind (recorded as interference, NOT altered):
+                 pid=1156942 pcpu=99.9 psr=35
+                 pid=1635429 pcpu=99.9 psr=28
+
+platform=linux /proc=True
+  PASS  two sequential 100 MiB stages are not a 200 MiB peak  n=2 max=100.0 sum=None
+  PASS  time-like tags still expose a meaningful sum  sum=7.0
+  PASS  payload identified via /proc/<pid>/exe  {'pid': 3166638, 'exe': '/usr/bin/python3.12', 'starttime_ticks': 2589190376, 'session': 3166638, 'launcher_pid': 3166638, 'resolved_after_s': 0.033}
+  PASS  payload residency reflects the child's 256 MiB allocation  payload=266.05 MiB
+  PASS  units are bytes from numa_maps, not numastat MB  bytes, from numa_maps page counts x that mapping
+  PASS  naive proc.kill() demonstrably leaves the child running  survivors=[3166643]
+  PASS  group termination reaps the child that outlived its parent  survivors=[] log=after termination: group_alive=False survivors=[]
+  PASS  adopted payload does not appear in its own foreign list  python3 hits=0  (other in-mask commands seen: {'ctffind': 12})
+  PASS  without adoption the same payload IS seen (control is not vacuous)  python3 hits=10
+
+all runner controls passed
+rc=0

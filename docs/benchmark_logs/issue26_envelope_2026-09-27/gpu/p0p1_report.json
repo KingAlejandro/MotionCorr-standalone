@@ -1,0 +1,2384 @@
+{
+  "series": "issue26-phase0-phase1",
+  "source_commit": "4c952b3f54479653512c4d208e09c9a8c02f3726",
+  "reference_arm": [
+    "p0_base_24_j8",
+    "p1_j8_io8"
+  ],
+  "failed_runs": [],
+  "product_equality": {
+    "p0_base_24_j8": {
+      "runs": {
+        "p0_base_24_j8_pair0_ord0_rep1": {
+          "payloads": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 81,
+            "n_test": 81,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "movies.star",
+      "effective_settings_witness": {
+        "p0_base_24_j8_pair0_ord0_rep1": {
+          "movies_with_logs": 24,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 8,
+          "requested_effective_io": 8,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p0_base_24_j8_pair0_ord0_rep1",
+      "all_equal": true,
+      "product_counts": [
+        109
+      ]
+    },
+    "p0_profiled_24_j8": {
+      "runs": {
+        "p0_profiled_24_j8_pair0_ord1_rep1": {
+          "payloads": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 24,
+            "n_test": 24,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 81,
+            "n_test": 81,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "movies.star",
+      "effective_settings_witness": {
+        "p0_profiled_24_j8_pair0_ord1_rep1": {
+          "movies_with_logs": 24,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 8,
+          "requested_effective_io": 8,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p0_base_24_j8_pair0_ord0_rep1",
+      "all_equal": true,
+      "product_counts": [
+        109
+      ]
+    },
+    "p1_j1_io1": {
+      "runs": {
+        "p1_j1_io1_pair101_ord0_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j1_io1_pair102_ord9_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j1_io1_pair103_ord0_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j1_io1_pair101_ord0_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            1
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 1,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j1_io1_pair102_ord9_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            1
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 1,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j1_io1_pair103_ord0_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            1
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 1,
+          "requested_effective_io": 1,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j2_io1": {
+      "runs": {
+        "p1_j2_io1_pair101_ord1_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j2_io1_pair102_ord8_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j2_io1_pair103_ord1_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j2_io1_pair101_ord1_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 2,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j2_io1_pair102_ord8_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 2,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j2_io1_pair103_ord1_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 2,
+          "requested_effective_io": 1,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j2_io2": {
+      "runs": {
+        "p1_j2_io2_pair101_ord2_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j2_io2_pair102_ord7_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j2_io2_pair103_ord2_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j2_io2_pair101_ord2_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 2,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j2_io2_pair102_ord7_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 2,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j2_io2_pair103_ord2_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            2
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 2,
+          "requested_effective_io": 2,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j4_io1": {
+      "runs": {
+        "p1_j4_io1_pair101_ord3_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io1_pair102_ord6_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io1_pair103_ord3_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j4_io1_pair101_ord3_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j4_io1_pair102_ord6_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j4_io1_pair103_ord3_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 1,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j4_io2": {
+      "runs": {
+        "p1_j4_io2_pair101_ord4_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io2_pair102_ord5_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io2_pair103_ord4_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j4_io2_pair101_ord4_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j4_io2_pair102_ord5_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j4_io2_pair103_ord4_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 4,
+          "requested_effective_io": 2,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j4_io4": {
+      "runs": {
+        "p1_j4_io4_pair101_ord5_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io4_pair102_ord4_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j4_io4_pair103_ord5_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [
+              "all_batches.pdf",
+              "batch.pdf",
+              "logfile.pdf"
+            ],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j4_io4_pair101_ord5_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 4,
+          "requested_effective_io": 4,
+          "matches_request": true
+        },
+        "p1_j4_io4_pair102_ord4_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 4,
+          "requested_effective_io": 4,
+          "matches_request": true
+        },
+        "p1_j4_io4_pair103_ord5_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            4
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 4,
+          "requested_effective_io": 4,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j8_io1": {
+      "runs": {
+        "p1_j8_io1_pair101_ord6_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io1_pair102_ord3_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io1_pair103_ord6_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j8_io1_pair101_ord6_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j8_io1_pair102_ord3_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 1,
+          "matches_request": true
+        },
+        "p1_j8_io1_pair103_ord6_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            1
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 1,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j8_io2": {
+      "runs": {
+        "p1_j8_io2_pair101_ord7_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io2_pair102_ord2_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io2_pair103_ord7_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j8_io2_pair101_ord7_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j8_io2_pair102_ord2_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 2,
+          "matches_request": true
+        },
+        "p1_j8_io2_pair103_ord7_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            2
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 2,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j8_io4": {
+      "runs": {
+        "p1_j8_io4_pair101_ord8_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io4_pair102_ord1_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io4_pair103_ord8_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j8_io4_pair101_ord8_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            4
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 4,
+          "matches_request": true
+        },
+        "p1_j8_io4_pair102_ord1_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            4
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 4,
+          "matches_request": true
+        },
+        "p1_j8_io4_pair103_ord8_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [
+            4
+          ],
+          "movies_without_io_cap_line": 0,
+          "requested_j": 8,
+          "requested_effective_io": 4,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    },
+    "p1_j8_io8": {
+      "runs": {
+        "p1_j8_io8_pair101_ord9_rep1": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io8_pair102_ord0_rep2": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        },
+        "p1_j8_io8_pair103_ord9_rep3": {
+          "payloads": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "core_headers": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "labels": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "others": {
+            "n_ref": 21,
+            "n_test": 21,
+            "missing": [],
+            "extra": [],
+            "differing": [],
+            "equal": true
+          },
+          "timestamped": {
+            "n_ref": 4,
+            "n_test": 4,
+            "missing": [],
+            "extra": [],
+            "size_differs_beyond_64B": [],
+            "equal": true,
+            "note": "presence gates the verdict; content and size do not. Ghostscript embeds a generation date and its output length is nondeterministic here, which is the project's separately tracked PDF difference, not a result difference."
+          },
+          "not_normalisable": [],
+          "unparseable": [],
+          "verdict": "EQUAL"
+        }
+      },
+      "input_set": "subset4.star",
+      "effective_settings_witness": {
+        "p1_j8_io8_pair101_ord9_rep1": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 8,
+          "requested_effective_io": 8,
+          "matches_request": true
+        },
+        "p1_j8_io8_pair102_ord0_rep2": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 8,
+          "requested_effective_io": 8,
+          "matches_request": true
+        },
+        "p1_j8_io8_pair103_ord9_rep3": {
+          "movies_with_logs": 4,
+          "reported_j": [
+            8
+          ],
+          "reported_io_cap": [],
+          "movies_without_io_cap_line": 1,
+          "requested_j": 8,
+          "requested_effective_io": 8,
+          "matches_request": true
+        }
+      },
+      "verdicts": [
+        "EQUAL"
+      ],
+      "reference": "p1_j8_io8_pair101_ord9_rep1",
+      "all_equal": true,
+      "product_counts": [
+        29
+      ]
+    }
+  },
+  "timing": {
+    "p1_j8_io8": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 6.19,
+      "min_s": 6.128,
+      "max_s": 6.384,
+      "spread_pct": 4.135702746365109,
+      "walls": [
+        6.128,
+        6.19,
+        6.384
+      ],
+      "median_cpu_s": 14.27,
+      "peak_rss_mib": 1557,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 8
+      }
+    },
+    "p1_j4_io4": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 6.998,
+      "min_s": 6.887,
+      "max_s": 7.336,
+      "spread_pct": 6.416118891111757,
+      "walls": [
+        6.887,
+        6.998,
+        7.336
+      ],
+      "median_cpu_s": 13.26,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 4,
+        "io_threads": 4
+      }
+    },
+    "p1_j8_io4": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 7.157,
+      "min_s": 7.151,
+      "max_s": 7.457,
+      "spread_pct": 4.275534441805226,
+      "walls": [
+        7.151,
+        7.157,
+        7.457
+      ],
+      "median_cpu_s": 13.7,
+      "peak_rss_mib": 1557,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 4
+      }
+    },
+    "p1_j4_io2": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 8.595,
+      "min_s": 8.293,
+      "max_s": 9.204,
+      "spread_pct": 10.599185573007578,
+      "walls": [
+        8.293,
+        8.595,
+        9.204
+      ],
+      "median_cpu_s": 12.21,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3335,
+      "effective": {
+        "j": 4,
+        "io_threads": 2
+      }
+    },
+    "p1_j8_io2": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 8.807,
+      "min_s": 8.417,
+      "max_s": 8.808,
+      "spread_pct": 4.4396502781878056,
+      "walls": [
+        8.417,
+        8.807,
+        8.808
+      ],
+      "median_cpu_s": 12.44,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 2
+      }
+    },
+    "p1_j2_io2": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 8.921,
+      "min_s": 8.053,
+      "max_s": 8.953,
+      "spread_pct": 10.088555094720308,
+      "walls": [
+        8.053,
+        8.921,
+        8.953
+      ],
+      "median_cpu_s": 12.59,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 2,
+        "io_threads": 2
+      }
+    },
+    "p1_j1_io1": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 11.758,
+      "min_s": 11.756,
+      "max_s": 12.742,
+      "spread_pct": 8.385779894539894,
+      "walls": [
+        11.756,
+        11.758,
+        12.742
+      ],
+      "median_cpu_s": 11.719999999999999,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 1,
+        "io_threads": 1
+      }
+    },
+    "p1_j2_io1": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 11.802,
+      "min_s": 11.775,
+      "max_s": 12.227,
+      "spread_pct": 3.8298593458735803,
+      "walls": [
+        11.775,
+        11.802,
+        12.227
+      ],
+      "median_cpu_s": 11.74,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 2,
+        "io_threads": 1
+      }
+    },
+    "p1_j4_io1": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 11.819,
+      "min_s": 11.66,
+      "max_s": 12.324,
+      "spread_pct": 5.618072594974191,
+      "walls": [
+        11.66,
+        11.819,
+        12.324
+      ],
+      "median_cpu_s": 11.75,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3335,
+      "effective": {
+        "j": 4,
+        "io_threads": 1
+      }
+    },
+    "p1_j8_io1": {
+      "input_set": "subset4.star",
+      "n": 3,
+      "median_s": 12.125,
+      "min_s": 11.919,
+      "max_s": 12.152,
+      "spread_pct": 1.9216494845360723,
+      "walls": [
+        11.919,
+        12.125,
+        12.152
+      ],
+      "median_cpu_s": 12.05,
+      "peak_rss_mib": 1556,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 1
+      }
+    },
+    "p0_profiled_24_j8": {
+      "input_set": "movies.star",
+      "n": 1,
+      "median_s": 29.779,
+      "min_s": 29.779,
+      "max_s": 29.779,
+      "spread_pct": 0.0,
+      "walls": [
+        29.779
+      ],
+      "median_cpu_s": 78.80000000000001,
+      "peak_rss_mib": 1558,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 8
+      }
+    },
+    "p0_base_24_j8": {
+      "input_set": "movies.star",
+      "n": 1,
+      "median_s": 31.069,
+      "min_s": 31.069,
+      "max_s": 31.069,
+      "spread_pct": 0.0,
+      "walls": [
+        31.069
+      ],
+      "median_cpu_s": 84.36,
+      "peak_rss_mib": 1558,
+      "peak_vram_mib_sampled": 3493,
+      "effective": {
+        "j": 8,
+        "io_threads": 8
+      }
+    }
+  },
+  "paired_contrasts": {
+    "p0_profiled_24_j8 - p0_base_24_j8": [
+      {
+        "pair": 0,
+        "d": -1.2899999999999991,
+        "first": "p0_base_24_j8",
+        "ta": 31.069,
+        "tb": 29.779
+      }
+    ]
+  },
+  "positional": {
+    "0": 1.0287571435912333,
+    "1": 1.0082211894233521,
+    "2": 1.0011956806038187,
+    "3": 1.0142426037171786,
+    "4": 1.0183311578592804,
+    "5": 1.004387602252961,
+    "6": 0.9905947328679519,
+    "7": 0.9528440267227385,
+    "8": 1.0139723347771412,
+    "9": 0.996604582651961
+  }
+}

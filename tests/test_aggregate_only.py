@@ -134,12 +134,90 @@ def geometry_controls(binary,tmp,baseline):
     require(not failures,'geometry/sampling controls: '+str(failures))
 
 
+def tomography_controls(binary,tmp):
+    import sys
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/multi_gpu'))
+    import star_io
+    original=(tmp/'in.star').read_text()
+    for name in ['c','d']:shutil.copyfile(tmp/'Movies/a.tiff',tmp/'Movies'/f'{name}.tiff')
+    (tmp/'tilt_series').mkdir(exist_ok=True)
+    (tmp/'in.star').write_text('data_global\nloop_\n_rlnTomoName #1\n'
+        '_rlnTomoTiltSeriesStarFile #2\n_rlnMicrographOriginalPixelSize #3\n'
+        '_rlnVoltage #4\n_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n'
+        'one tilt_series/one.star 1.0 300 2.7 0.1\n'
+        'two tilt_series/two.star 1.0 300 2.7 0.1\n')
+    for name,rows in [('one',[('b',0),('a',5)]),('two',[('d',11),('c',17)])]:
+        (tmp/'tilt_series'/f'{name}.star').write_text('data_'+name+'\nloop_\n'
+            '_rlnMicrographMovieName #1\n_rlnMicrographPreExposure #2\n'+
+            ''.join('Movies/'+movie+'.tiff '+str(dose)+'\n' for movie,dose in rows))
+    try:
+        out=tmp/'tomo-baseline';r=run(binary,tmp,out)
+        require(r.returncode==0,'tomographic processing fixture failed: '+r.stderr[-2000:])
+        before=products(out)
+        (out/'corrected_tilt_series.star').unlink()
+        shutil.rmtree(out/'tilt_series') # Fresh worker-product assembly has no aggregate sidecars.
+        for repeat in range(2):
+            r=run(binary,tmp,out,['--aggregate_only'])
+            require(r.returncode==0,'tomographic aggregate failed: '+r.stderr[-2000:])
+            joint=star_io.parse(out/'corrected_tilt_series.star')
+            global_block=joint.block_with_label('rlnTomoTiltSeriesStarFile')
+            reference_col=global_block.column('rlnTomoTiltSeriesStarFile')
+            name_col=global_block.column('rlnTomoName')
+            require(len(global_block.rows)==2,'tomographic joint coverage incomplete')
+            got=[]
+            for row in global_block.rows:
+                path=Path(row.values[reference_col]);name=row.values[name_col]
+                require('.aggregate-' not in str(path) and path.is_file(),
+                        'tomographic aggregate falsely succeeded with dangling staged reference: '+str(path))
+                require(path.resolve()==(out/'tilt_series'/f'{name}.star').resolve(),
+                        'tomographic final reference points outside declared per-series output')
+                table=star_io.parse(path);block=table.block_with_label('rlnMicrographName')
+                movie_col=block.column('rlnMicrographName');metadata_col=block.column('rlnMicrographMetadata')
+                exposure_col=block.column('rlnMicrographPreExposure')
+                expected={'one':[('b',0),('a',5)],'two':[('d',11),('c',17)]}[name]
+                values=[]
+                for tilt in block.rows:
+                    image=Path(tilt.values[movie_col]);metadata=Path(tilt.values[metadata_col])
+                    require(image.is_file() and metadata.is_file(),'nested tomographic movie/metadata reference unreadable')
+                    require(image.resolve()==(out/'Movies'/image.name).resolve() and
+                            metadata.resolve()==(out/'Movies'/metadata.name).resolve(),
+                            'nested tomographic movie/model association points outside worker products')
+                    values.append((image.stem,float(tilt.values[exposure_col])))
+                require(values==expected,'nested tomographic row order/exposure association changed')
+                got.append(name)
+            require(got==['one','two'],'tomogram joint order changed')
+            require(products(out)==before,'tomographic aggregate rewrote complete movie pixels/headers/STAR/EPS/mtimes')
+            require(not list(out.glob('.aggregate-*')),'tomographic private staging leaked')
+            print('PASS tomography final nested references/readable row associations, unchanged movie bytes/mtimes repeat'+str(repeat))
+        tomo_input=(tmp/'in.star').read_text()
+        for mode in ['partial-movie','reference-publication-failure','joint-reference-collision']:
+            target=tmp/('tomo-'+mode);shutil.copytree(out,target)
+            (target/'corrected_tilt_series.star').unlink();(target/'logfile.pdf').unlink()
+            if mode=='partial-movie':(target/'Movies/c.star').unlink()
+            elif mode=='reference-publication-failure':
+                path=target/'tilt_series/one.star';path.unlink();path.mkdir();(path/'owned-sentinel').write_text('do not overwrite')
+            else:
+                shutil.copyfile(tmp/'tilt_series/one.star',tmp/'corrected_tilt_series.star')
+                (tmp/'in.star').write_text(tomo_input.replace('tilt_series/one.star','corrected_tilt_series.star'))
+            retained=products(target);r=run(binary,tmp,target,['--aggregate_only'])
+            require(r.returncode>0,'tomographic '+mode+' must fail normally')
+            require(not (target/'corrected_tilt_series.star').exists() and not (target/'logfile.pdf').exists(),
+                    'tomographic '+mode+' published a success marker/report')
+            require(('c.tiff' if mode=='partial-movie' else 'corrected_tilt_series.star' if mode=='joint-reference-collision' else 'one.star') in r.stderr,
+                    'tomographic '+mode+' failure did not name its input/reference')
+            require(products(target)==retained and not list(target.glob('.aggregate-*')),
+                    'tomographic failure rewrote movie products or leaked staging')
+            print('PASS tomography '+mode+' withholds joint success without movie rewriting')
+            (tmp/'in.star').write_text(tomo_input)
+    finally:(tmp/'in.star').write_text(original)
+
+
 def main() -> int:
     import os
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
-    ap.add_argument('--only',choices=['literal','effective-optics','geometry'])
+    ap.add_argument('--only',choices=['literal','effective-optics','geometry','tomography'])
     ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
     a = ap.parse_args()
     binary = a.binary.resolve()
@@ -163,12 +241,14 @@ def main() -> int:
         baseline = tmp/'baseline'
         control = run(binary,tmp,baseline)
         require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
+        if a.only=='tomography':tomography_controls(binary,tmp);return 0
         if a.only=='literal':literal_controls(binary,tmp);return 0
         if a.only=='effective-optics':effective_optics_controls(binary,tmp);return 0
         if a.only=='geometry':geometry_controls(binary,tmp,baseline);return 0
         literal_controls(binary,tmp)
         geometry_controls(binary,tmp,baseline)
         effective_optics_controls(binary,tmp)
+        tomography_controls(binary,tmp)
         before = products(baseline)
         # A stale unrelated plot must not be admitted by a directory wildcard.
         (baseline/'Movies/unassigned.eps').write_text('%!PS\nshowpage\n')

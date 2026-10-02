@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <thread>
 #include <filesystem>
+#include <set>
 
 #include "src/motioncorr_runner.h"
 #include "src/native_movie_staging.h"
@@ -808,10 +809,37 @@ void MotioncorrRunner::run()
 		const std::string joint = is_tomo ? "corrected_tilt_series.star" : "corrected_micrographs.star";
 		try {
 			std::vector<std::filesystem::path> files;
-			for (const auto &file : std::filesystem::directory_iterator(stage)) files.push_back(file.path());
+			for (const auto &file : std::filesystem::recursive_directory_iterator(stage))
+				if (file.is_regular_file()) files.push_back(file.path());
+			auto publish = [&](const std::filesystem::path &file) {
+				const auto target = std::filesystem::path(fn_out.c_str()) / file.lexically_relative(stage);
+				std::filesystem::create_directories(target.parent_path());
+				std::filesystem::rename(file, target);
+			};
+			std::set<std::filesystem::path> series_files;
+			if (is_tomo) {
+				MetaDataTable global;
+				global.read(FileName((stage / joint).string()), "global");
+				FOR_ALL_OBJECTS_IN_METADATA_TABLE(global) {
+					FileName reference;
+					if (!global.getValue(EMDL_TOMO_TILT_SERIES_STARFILE, reference))
+						REPORT_ERROR("Aggregate-only missing final tomogram STAR reference.");
+					const auto relative = std::filesystem::path(reference.c_str()).lexically_normal().lexically_relative(
+						std::filesystem::path(fn_out.c_str()).lexically_normal());
+					if (relative.empty() || relative.is_absolute() || *relative.begin() == "..")
+						REPORT_ERROR("Aggregate-only invalid final tomogram STAR reference: " + reference);
+					const auto file = stage / relative;
+					if (file == stage / joint || !std::filesystem::is_regular_file(file) || !series_files.insert(file).second)
+						REPORT_ERROR("Aggregate-only missing or duplicate staged tomogram STAR: " + reference);
+				}
+				// Resolve nested references before exposing any canonical report/joint STAR.
+				for (const auto &file : series_files) publish(file);
+				TomogramSet published(FileName((stage / joint).string()), false);
+				if (published.size() != tomogramSet.size())
+					REPORT_ERROR("Aggregate-only incomplete published tomogram references.");
+			}
 			for (const auto &file : files)
-				if (file.filename() != joint)
-					std::filesystem::rename(file, std::filesystem::path(fn_out.c_str()) / file.filename());
+				if (file != stage / joint && !series_files.count(file)) publish(file);
 			std::filesystem::rename(stage / joint, std::filesystem::path(fn_out.c_str()) / joint);
 		} catch (const std::filesystem::filesystem_error &error) {
 			REPORT_ERROR("Aggregate-only publication failed: " + std::string(error.what()));
@@ -1490,7 +1518,10 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
         if (tomogramSet.globalTable.containsLabel(EMDL_MICROGRAPH_PIXEL_SIZE))
             tomogramSet.globalTable.deactivateLabel(EMDL_MICROGRAPH_PIXEL_SIZE);
         tomogramSet.convertBackFromSingleMetaDataTable(MDavg);
-        tomogramSet.write(report_out+"corrected_tilt_series.star");
+        if (aggregate_only)
+            tomogramSet.write(report_out+"corrected_tilt_series.star", fn_out);
+        else
+            tomogramSet.write(report_out+"corrected_tilt_series.star");
         if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_tilt_series.star" << std::endl;
     }
     else

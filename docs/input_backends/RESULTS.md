@@ -194,6 +194,50 @@ MRC was not even in the differing list. The control above is run
 `--products-only` with the joint STAR rewritten, and carries the unmutated
 positive leg, so the FAIL is attributable to the pixel.
 
+### 3.4 The route contract, exercised rather than assumed
+
+`--ingest {nvcomp,compact,float}` must fail a movie that cannot take the named
+route rather than quietly using another. Without that, "this variant took
+nvcomp" is an observation about defaults, not about eligibility. Ten variants,
+three pinned modes each, candidate binary:
+
+| variant | `--ingest nvcomp` | `--ingest compact` | `--ingest float` |
+|---|---|---|---|
+| uint16 Deflate, 1 row/strip | OK | OK | OK |
+| uint16 Deflate, 8 rows/strip | OK | OK | OK |
+| uint16 Deflate, 512 rows/strip | OK | OK | OK |
+| uint8 Deflate, 1 row/strip | OK | OK | OK |
+| uint8 Deflate, 16 rows/strip | OK | OK | OK |
+| uint16 LZW | **REFUSED** | OK | OK |
+| uint16 Deflate, predictor 2 | **REFUSED** | OK | OK |
+| uint16 uncompressed | **REFUSED** | OK | OK |
+| uint8 LZW, 1 row/strip | **REFUSED** | OK | OK |
+| uint8 LZW, 3837 rows/strip | **REFUSED** | OK | OK |
+
+Every refusal is a codec or predictor nvCOMP genuinely cannot take, and every
+one of those still has both host routes. No variant silently changed route
+under a pin.
+
+### 3.5 Selected frames and grouping
+
+`--first_frame_sum`, `--last_frame_sum`, `--group_frames` and a combination of
+all three, run on the uint16 Deflate reference and on both uint8 variants, both
+arms. The three inputs hold identical sample values, so all three product trees
+must match.
+
+**28 of 28 comparisons PASS** across seven option sets (`all`, `first3`,
+`last20`, `sub3to20`, `group2`, `group5`, and
+`--first_frame_sum 2 --last_frame_sum 21 --group_frames 4`). The route does not
+change which frames are used, how they are numbered, or what the dose weighting
+does.
+
+### 3.6 MRC route witness
+
+The compact gate requires a `tif` file format and the nvCOMP gate opens the file
+with `TIFFOpen`, so an MRC movie must take the float route. Observed rather than
+read: `synthetic_fallback.mrc` runs with `--ingest_witness` and the witness
+records `float`.
+
 ## 4. Measured
 
 Venue: `4GPUs` (`4-gpu-vm`), 4x A100 80GB PCIe, 124 logical CPUs. Every run
@@ -600,3 +644,7 @@ a faithful codec and geometry workload and not a second specimen.
 * **EER and compressed MRC are untouched and unmeasured.**
 * **No bounded slot queue, no pinning of the compact staging, no prefetch.**
   §6 states why and what each would cost.
+* **No GPU LZW.** nvCOMP has no LZW codec, so LZW keeps its host decode —
+  0.305 s/movie (uint8) and 0.428 s/movie (uint16) by §4.0b. nvTIFF is the only
+  supported route to move it and is evaluated separately in #141; nothing here
+  installed or ran it.

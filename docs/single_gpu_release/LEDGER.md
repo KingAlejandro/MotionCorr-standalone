@@ -79,3 +79,75 @@ is read; converts all 16 bare asserts in the summary and control harness to expl
 Executed on 4GPUs: new controls vs unfixed tools rc=1 (`actual summary accepted changed-device`);
 vs fixed tools rc=0; fixed tools under `PYTHONOPTIMIZE=1` rc=0. Production byte-identical to
 the native-tested `2fe51dd`.
+
+## PR133 clean successor — built, validated, not proposed
+
+Branch `perf/single-gpu-pools`, head `054ed6d`, base `b4536e2` (= main + PR130 + PR131).
+Pushed to origin to preserve it. **No PR opened**: its base does not exist on origin until PR130
+and PR131 land. PR133 `bed17cd8` and `perf/nvcomp-next` `e3ba798e` are untouched and retain their
+evidence.
+
+Five reviewable commits, each building on its own:
+
+| # | commit | mechanism | origin |
+|---|---|---|---|
+| 1 | `12b9599` | worker-lifetime device-gain retention | `7dbf963` (precondition: all four parent blobs identical to `1420c8cc`) |
+| 2 | `761617b` | static defect premask cache + sparse defect traversal | `bed17cd8` end state, **not** `c801f72` |
+| 3 | `9903c68` | global cuFFT plans + shared work area + inverse tile | `bed17cd8`, repaired |
+| 4 | `6a20636` | batched patch R2C plan | `bed17cd8`, repaired |
+| 5 | `054ed6d` | dose-weighted C2R plan + retained accounting | `bed17cd8` hunks applied **on top of** the PR131 file |
+
+Excluded and verified absent from `git diff --name-only b4536e2 054ed6d`: `cuda_alignpatch.cu`
+(PR130 owns it), `tests/cuda_alignment_sync.cpp`, `tools/single_gpu/run_alignment_mutants.py`,
+`docs/post128_alignment_sync/**`, the FFT-sync experiment, prefetch and old profiling patches.
+
+### Repairs folded in
+
+(A) `holds_lease` is set only on a successful `acquireLease`; `ReleaseFailureGuard` captures it and
+is a no-op for a non-owner, so a refused session can no longer retire the owner's pool.
+(B) all three `drop()` sites check the result; no replacement plan and no publication after failed
+cleanup, with a later-fatal-after-recoverable case covered.
+(C) a `RetirementContext` selects the owning device and restores the caller's; each rebuild site
+re-selects its requested `device_id`.
+(D) `ScopedDeviceMemory::disown()` added; `fresh_work`/`fresh_tile` adopted immediately and published
+only after full construction. No discarded-status raw `cudaFree` left on that path.
+(E) device gain: checked frees, owning-device select, retirement on session failure,
+`ensureDeviceGain(nullptr)` releases an owned buffer, and the `gainReferenceFor` →
+`setGainGeneration` ordering is now asserted.
+(F) stale geometry retired **before** the new movie's buffers are allocated at all four sites.
+(G) premask invalidate-before-rebuild, traversal order, neighbour order and RNG draw counts
+preserved; defect key strengthened to path + size + mtime.
+(H) PR131's `computeDoseNormalizationKernel` and `applyDoseWeightKernel` verified byte-identical to
+`3c2282fa`; `cuda_dose_normalization.cpp` retires the pool before each `empty()` without relaxing the
+leak oracle.
+
+Two powered negative controls were run: removing the `owner &&` gate fails `CudaPlanPool` on
+"a refused session retired the owner's pooled entry", and restoring the allocate-before-drop order
+fails it on "the stale geometry was retired only after the new movie's buffers were allocated".
+
+### Validation (executed on 4GPUs at `054ed6d`)
+
+ctest, independently rerun by the coordinator: CPU-only 32/32, CUDA 42/42, CUDA+nvCOMP **43/43**.
+Base was 32/40/41; the two additions are `CudaDeviceGainPool` and `CudaPlanPool`. No NAME lost.
+24-movie exact non-PDF tree vs main: **PASS, 0 different files**, 24 MRC / 25 STAR /
+341,735,520 pixels per arm; both arms 24 global / 600 patch / 24 DW / 24 nvCOMP witnesses, 0 warnings,
+109 products.
+
+### Retained residency — the number to decide on
+
+**269.53 MiB held per worker thread between movies**: global workspace 56,986,624 B, inverse tile
+56,986,624 B, patch plan 54,710,784 B, DW plan 56,986,624 B, gain 56,955,920 B.
+
+It is now accounted and logged, and the stale-geometry ordering defect is fixed, so an old large
+geometry can no longer deny a smaller valid movie. There is still **no byte cap, no `cudaMemGetInfo`
+admission check and no eviction** — the bound is observable, not enforced. The figure is appended to
+the `Peak VRAM:` line, which the exactness gate drops from both arms, so it has no automated
+regression guard.
+
+### UNRUN
+
+Genuine cross-device retirement and execution (`gpu_id` is process-wide; device-selection controls are
+logic-only with an injected `cudaSetDevice`). No timed benchmarks and no speedup claim — the
+"719.5 ms" figure in commit 1's message is inherited verbatim from `7dbf963` and was not re-measured.
+Intermediate commits had targeted test subsets; only the head has the full three-config matrix.
+Host-memory cost of the premask cache was not measured.

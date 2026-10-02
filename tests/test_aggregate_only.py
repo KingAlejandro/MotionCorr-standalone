@@ -75,12 +75,43 @@ def literal_controls(binary, tmp):
     require(not failures,'literal report selection controls: '+str(failures))
 
 
+def geometry_controls(binary,tmp,baseline):
+    failures=[]
+    for name,extra,mutation in [
+        ('binning-mismatch',['--bin_factor','2'],None),
+        ('declared-optics-sampling',[], 'optics'),
+        ('accepted-mrc-sampling',[], 'sampling'),
+        ('accepted-mrc-geometry',[], 'geometry')]:
+        out=tmp/name;shutil.copytree(baseline,out)
+        original=(tmp/'in.star').read_text()
+        if mutation=='optics':(tmp/'in.star').write_text(original.replace('one 1 1.0','one 1 2.0'))
+        if mutation in ('sampling','geometry'):
+            file=out/'Movies/a.mrc';data=bytearray(file.read_bytes())
+            if mutation=='sampling':struct.pack_into('<f',data,40,2*struct.unpack_from('<f',data,40)[0])
+            else:struct.pack_into('<i',data,0,struct.unpack_from('<i',data,0)[0]//2)
+            file.write_bytes(data)
+        for f in ['corrected_micrographs.star','logfile.pdf']:(out/f).unlink(missing_ok=True)
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only',*extra])
+        ok=r.returncode>0 and not (out/'corrected_micrographs.star').exists() and not (out/'logfile.pdf').exists() and products(out)==before
+        ok=ok and ('a.tiff' in r.stderr or 'b.tiff' in r.stderr) and ('sampling' in r.stderr or 'geometry' in r.stderr or 'binning' in r.stderr)
+        print(('PASS ' if ok else 'FAIL ')+name+' refuses named movie without rewriting/publication')
+        if not ok:failures.append(name+': '+r.stderr[-800:])
+        (tmp/'in.star').write_text(original)
+    # A genuine bin2 result is accepted; no special-case blanket bin2 refusal.
+    out=tmp/'healthy-bin2';r=run(binary,tmp,out,['--bin_factor','2'])
+    require(r.returncode==0,'healthy bin2 processing control failed: '+r.stderr)
+    before=products(out);r=run(binary,tmp,out,['--aggregate_only','--bin_factor','2'])
+    require(r.returncode==0 and products(out)==before,'matching bin2 aggregate refused or rewrote products: '+r.stderr)
+    print('PASS matching bin2 geometry/sampling accepts without rewriting')
+    require(not failures,'geometry/sampling controls: '+str(failures))
+
+
 def main() -> int:
     import os
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
-    ap.add_argument('--only',choices=['literal'])
+    ap.add_argument('--only',choices=['literal','geometry'])
     ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
     a = ap.parse_args()
     binary = a.binary.resolve()
@@ -105,7 +136,9 @@ def main() -> int:
         control = run(binary,tmp,baseline)
         require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
         if a.only=='literal':literal_controls(binary,tmp);return 0
+        if a.only=='geometry':geometry_controls(binary,tmp,baseline);return 0
         literal_controls(binary,tmp)
+        geometry_controls(binary,tmp,baseline)
         before = products(baseline)
         # A stale unrelated plot must not be admitted by a directory wildcard.
         (baseline/'Movies/unassigned.eps').write_text('%!PS\nshowpage\n')

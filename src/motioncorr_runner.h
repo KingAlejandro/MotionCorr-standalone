@@ -260,6 +260,7 @@ public:
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
 	bool isMovieComplete(const FileName &movie, int effective_expected_frames = -1);
+	void requireAggregateGeometry(const FileName &movie, int optics_group);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);

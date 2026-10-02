@@ -508,6 +508,7 @@ void MotioncorrRunner::initialise()
 		{
 			if (!isMovieComplete(fn_mic_given_all[i], expected_frames_given_all[i]))
 				REPORT_ERROR("Aggregate-only incomplete movie: " + fn_mic_given_all[i]);
+			requireAggregateGeometry(fn_mic_given_all[i], optics_group_given_all[i]);
 			if (!do_skip_logfile)
 			{
 				const FileName plot = fn_out + fn_mic_given_all[i].withoutExtension() + "_shifts.eps";
@@ -676,6 +677,69 @@ bool completeMrc(const FileName &filename)
 	const uint64_t pixels = static_cast<uint64_t>(header.nx) * header.ny;
 	return pixels <= static_cast<uint64_t>(length - offset) / gettypesize(type);
 }
+}
+
+void MotioncorrRunner::requireAggregateGeometry(const FileName &movie, int optics_group)
+{
+	const FileName average = getOutputFileNames(movie);
+	const FileName root = average.withoutExtension();
+	Micrograph saved(root + ".star");
+	// STAR decimal serialization and MRC float32 sampling round independently.
+	// This is a representation check, not a tolerance for scientific pixels.
+	auto same = [](RFLOAT a, RFLOAT b) {
+		return std::isfinite(a) && std::isfinite(b) && a > 0 && b > 0 &&
+		       std::abs(a - b) <= 1e-6 * std::max(RFLOAT(1), std::max(std::abs(a), std::abs(b)));
+	};
+	if (!same(bin_factor, saved.getBinningFactor()))
+		REPORT_ERROR("Aggregate-only incompatible binning for movie: " + movie);
+	RFLOAT input_angpix = -1;
+	if (is_tomo) {
+		if (optics_group < 1 || optics_group > tomogramSet.globalTable.numberOfObjects() ||
+		    !tomogramSet.globalTable.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix, optics_group - 1))
+			REPORT_ERROR("Aggregate-only missing declared sampling for movie: " + movie);
+	} else {
+		bool found = false;
+		if (!obsModel.opticsMdt.containsLabel(EMDL_IMAGE_OPTICS_GROUP) &&
+		    optics_group == 1 && obsModel.opticsMdt.numberOfObjects() == 1)
+			found = obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix, 0);
+		FOR_ALL_OBJECTS_IN_METADATA_TABLE(obsModel.opticsMdt) {
+			int group;
+			if (obsModel.opticsMdt.getValue(EMDL_IMAGE_OPTICS_GROUP, group) && group == optics_group) {
+				if (found || !obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, input_angpix))
+					REPORT_ERROR("Aggregate-only ambiguous declared sampling for movie: " + movie);
+				found = true;
+			}
+		}
+		if (!found) REPORT_ERROR("Aggregate-only missing declared optics for movie: " + movie);
+	}
+	if (!same(input_angpix, saved.angpix) || (angpix > 0 && !same(angpix, saved.angpix)))
+		REPORT_ERROR("Aggregate-only incompatible sampling for movie: " + movie);
+	const RFLOAT width = saved.getWidth() / bin_factor, height = saved.getHeight() / bin_factor;
+	if (!std::isfinite(width) || !std::isfinite(height) || width < 1 || height < 1 ||
+	    width > std::numeric_limits<int>::max() || height > std::numeric_limits<int>::max())
+		REPORT_ERROR("Aggregate-only invalid declared geometry for movie: " + movie);
+	const RFLOAT output_angpix = input_angpix * bin_factor;
+	auto check = [&](const FileName &file, int nx, int ny, bool check_sampling) {
+		std::ifstream in(file.c_str(), std::ios::binary);
+		Image<float>::MRChead h;
+		if (!in.read(reinterpret_cast<char*>(&h), sizeof(h)))
+			REPORT_ERROR("Aggregate-only unreadable geometry for movie " + movie + ": " + file);
+		Image<float> image;
+		image.parseMRCHeader(&h, -1, false, file); // also normalizes byte order
+		if (h.nx != nx || h.ny != ny || h.nz != 1 ||
+		    (check_sampling && (h.mx <= 0 || h.my <= 0 ||
+		     !same(h.a / h.mx, output_angpix) || !same(h.b / h.my, output_angpix))))
+			REPORT_ERROR("Aggregate-only incompatible output geometry/sampling for movie " + movie + ": " + file);
+	};
+	check(average, int(width), int(height), true);
+	if (do_dose_weighting && save_noDW) check(root + "_noDW.mrc", int(width), int(height), true);
+	if (even_odd_split) {
+		check(root + "_EVN.mrc", int(width), int(height), true);
+		check(root + "_ODD.mrc", int(width), int(height), true);
+	}
+	if (grouping_for_ps > 0) check(root + "_PS.mrc", ps_size, ps_size, false);
+	// Full option/input/gain identity is deliberately still Issue142. This
+	// gate prevents inconsistent declared binning/sampling at this new endpoint.
 }
 
 bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expected_frames)

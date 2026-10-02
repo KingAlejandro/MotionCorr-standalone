@@ -134,7 +134,8 @@ if(CUDA)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_realspace_dw.cu"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_fft_prep.cu"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_worker_pool.cu")
     target_link_libraries(motioncorr_core PUBLIC CUDA::toolkit CUDA::cudart CUDA::cufft)
 
     option(USE_NVCOMP "Enable GPU Deflate decompression via NVIDIA nvCOMP" OFF)
@@ -343,6 +344,15 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        add_executable(cuda_worker_pool tests/cuda_worker_pool.cpp)
+        target_link_libraries(cuda_worker_pool PRIVATE motioncorr_core)
+        target_link_options(cuda_worker_pool PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaSetDevice"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftSetWorkArea" "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaWorkerPool COMMAND cuda_worker_pool)
+        set_tests_properties(CudaWorkerPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

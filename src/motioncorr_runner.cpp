@@ -758,12 +758,21 @@ void MotioncorrRunner::run()
 	output_writer.reset();
 	output_movie_index = -1;
 
+
+
 	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
 		if (movie_failed[imic]) failed_movies.push_back(fn_micrographs[imic]);
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
+
+#ifdef _CUDA_ENABLED
+	// After the progress bar is terminated, and on stdout rather than in a movie
+	// log: what the worker retained is a property of the whole loop, and the
+	// per-movie logs are compared byte for byte between builds.
+	if (verb > 0 && use_gpu && do_own) cuda_worker_pool.logRetained(std::cout);
+#endif
 
 	if (!failed_movies.empty())
 	{
@@ -1482,6 +1491,11 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		gain_cache_ny = ny;
 		gain_cache_eer_upsampling = eer_upsampling;
 		gain_cache_filled = true;
+		// New contents, so any device copy taken under the previous value is
+		// stale. Bumped after the read succeeded: a throw above leaves the old
+		// generation attached to the old (still valid) retained upload, and
+		// gain_cache_filled false, so the next call re-reads.
+		++gain_cache_generation;
 	}
 	return gain_cache();
 }
@@ -1672,7 +1686,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session.reset();
 	};
 	if (use_gpu && !early_binning) {
-		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile,
+		                                                   &cuda_worker_pool);
+		movie_session->setGainIdentity(gain_cache_generation);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;

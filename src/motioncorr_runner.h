@@ -44,6 +44,7 @@ class EERRenderer;
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/acc/cuda/cuda_worker_pool.h"
 #endif
 
 // Which movie ingest path executeOwnMotionCorrection() may use.
@@ -189,6 +190,16 @@ public:
 	bool gain_cache_is_eer = false;
 	int gain_cache_eer_upsampling = 0;
 	bool gain_cache_filled = false;
+	// Identity of the current gain_cache contents, for device-side retention.
+	// Incremented on every refill above, which is the only place the contents can
+	// change. Starts at 0, which means "no identity" to CudaMovieSession, so a
+	// runner that never fills the cache can never match a retained upload.
+	//
+	// Runner-local is enough BECAUSE the pool it is compared against is also
+	// runner-local: two MotioncorrRunner objects cannot collide on generation 1,
+	// since neither can see the other's pool. A process-wide pool would need a
+	// process-wide counter.
+	unsigned long long gain_cache_generation = 0;
 
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must
@@ -319,6 +330,14 @@ private:
 	// not run() keeps the plain serial behaviour.
 	std::unique_ptr<OutputWriter> output_writer;
 	long int output_movie_index = -1;
+
+#ifdef _CUDA_ENABLED
+	// Worker-lifetime CUDA resources shared by the movies this runner processes.
+	// Owned here, not in a thread_local or a process static: the movie loop in
+	// run() is serial and belongs to this object, so this object's lifetime is
+	// exactly the worker lifetime, and "which pool" is never ambiguous.
+	mc_cuda::CudaWorkerPool cuda_worker_pool;
+#endif
 
 	// Hand one output product to the writer, or write it here when there is
 	// none. Products of one movie are written in submission order.

@@ -141,6 +141,19 @@ public:
         owns_plan_ = true;
     }
 
+    cufftHandle get() const { return owns_plan_ ? plan_ : 0; }
+
+    // Hand the handle to a longer-lived owner. Used only after the whole
+    // construction the handle belongs to has succeeded: until then this owner is
+    // what destroys it on any early return or throw.
+    cufftHandle disown() {
+        const cufftHandle owned = owns_plan_ ? plan_ : 0;
+        plan_ = 0;
+        owns_plan_ = false;
+        return owned;
+    }
+    bool owns() const { return owns_plan_; }
+
     cufftResult releaseAll() {
         if (!owns_plan_) return CUFFT_SUCCESS;
         owns_plan_ = false;
@@ -161,6 +174,49 @@ private:
 
     cufftHandle plan_;
     bool owns_plan_;
+    CudaFailureState *failure_;
+};
+
+/**
+ * One device allocation, adopted the instant cudaMalloc returns it.
+ *
+ * ScopedDeviceMemory<N> covers the call sites with a provable maximum and no
+ * handover. This covers the other shape: a resource that is created, has more
+ * fallible work done on it, and is only then transferred to a longer-lived
+ * owner. Between those two points something must own the cleanup, which is the
+ * window PR133 review item 2 found open in the pool construction paths.
+ */
+class ScopedDeviceBuffer {
+public:
+    explicit ScopedDeviceBuffer(CudaFailureState *failure = nullptr)
+        : ptr_(nullptr), failure_(failure) {}
+    ~ScopedDeviceBuffer() { (void)releaseAll(); }
+
+    void take(void *allocation) {
+        if (ptr_ == allocation) return;
+        if (ptr_ != nullptr) REPORT_ERROR("CUDA buffer owner already occupied");
+        ptr_ = allocation;
+    }
+    void *get() const { return ptr_; }
+    void *disown() {
+        void *owned = ptr_;
+        ptr_ = nullptr;
+        return owned;
+    }
+    cudaError_t releaseAll() {
+        if (ptr_ == nullptr) return cudaSuccess;
+        void *owned = ptr_;
+        ptr_ = nullptr;
+        const cudaError_t err = cudaFree(owned);
+        if (failure_) failure_->record(err, "scoped buffer cudaFree", __LINE__);
+        return err;
+    }
+
+private:
+    ScopedDeviceBuffer(const ScopedDeviceBuffer &);
+    ScopedDeviceBuffer &operator=(const ScopedDeviceBuffer &);
+
+    void *ptr_;
     CudaFailureState *failure_;
 };
 

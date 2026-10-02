@@ -15,6 +15,7 @@
 #include <cufft.h>
 #include "src/acc/cuda/cuda_failure_state.h"
 #include "src/acc/cuda/cuda_alignpatch.h"
+#include "src/acc/cuda/cuda_worker_pool.h"
 
 /**
  * CudaMovieSession: Manages persistent GPU VRAM allocations across the entire movie lifecycle (Issue #50).
@@ -60,8 +61,22 @@ class CudaMovieSession {
 public:
     CudaMovieSession(const CudaMovieSession&) = delete;
     CudaMovieSession& operator=(const CudaMovieSession&) = delete;
-    CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
+    // @p pool, when non-null, owns the resources this session may reuse across
+    // movies: the device gain, the whole-frame plans and their work area, the
+    // batched patch plan and the reconstruction plan. The session takes the
+    // pool's exclusive lease in initialize() and gives it back in release(),
+    // and holds only borrowed aliases in between -- it never destroys one.
+    // A null pool is the original behaviour: this session allocates, owns and
+    // frees everything itself.
+    CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log,
+                     mc_cuda::CudaWorkerPool *pool = nullptr);
     ~CudaMovieSession();
+
+    // The caller's identity for the host gain contents. Non-zero enables device
+    // gain retention across movies; 0 (the default) keeps the upload-per-movie
+    // path, so a caller that does not track gain identity cannot acquire
+    // retention by accident. Must be set before the first preprocessing call.
+    void setGainIdentity(unsigned long long generation) { gain_generation = generation; }
 
     // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
@@ -265,6 +280,39 @@ private:
     void recordFailure(cudaError_t err, const char *stage, int line);
     void recordCufftFailure(cufftResult res, const char *stage, int line);
 
+    // Borrowed pool resources are nulled, never destroyed, by release(): the pool
+    // is their only owner. Each flag covers the whole group acquired in one call,
+    // so no handle is ever simultaneously reachable as "owned" and "borrowed".
+    bool globalPlansUsable() const {
+        return global_plans_borrowed || (has_plan_r2c && has_plan_c2r);
+    }
+    bool patchPlanUsable() const { return patch_plan_borrowed || has_plan_patch_r2c; }
+
+    // Did the pool fail, or did it merely decline?
+    //
+    // Both are "the acquire returned nothing", and the difference decides
+    // whether this movie fails or quietly owns the resource itself. It cannot be
+    // read off failure_state directly: that state is sticky for the whole movie,
+    // so a recoverable failure recorded earlier -- a declined nvCOMP ingest that
+    // fell back to the host reader, for instance -- would make every later
+    // decline look like a fresh failure and kill a movie that was fine.
+    // Comparing across the call is what separates the two.
+    struct FailureDelta {
+        explicit FailureDelta(const CudaFailureState &state) : before(state.hasFailed()) {}
+        bool newFailure(const CudaFailureState &state) const {
+            return !before && state.hasFailed();
+        }
+        bool before;
+    };
+
+    // Acquire the whole-frame plans, shared work area and inverse tile, from the
+    // pool when there is one and by direct construction when there is not.
+    bool setupGlobalFftResources();
+
+    // Returns the device gain to use, uploading it if the pool declines or there
+    // is no pool. Sets d_gain and gain_borrowed. False on any checked failure.
+    bool ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real);
+
     // Sticky for the life of the session. Not reset by release(): a movie that failed
     // stays failed for reporting purposes, and a poisoned context never un-poisons.
     CudaFailureState failure_state;
@@ -293,6 +341,13 @@ private:
     cufftComplex *d_inverse_tile = nullptr;
     bool is_initialized = false;
 
+    // Worker-lifetime resources. Null when this session owns everything itself.
+    mc_cuda::CudaWorkerPool *worker_pool = nullptr;
+    bool holds_pool_lease = false;
+    bool global_plans_borrowed = false;
+    bool gain_borrowed = false;
+    unsigned long long gain_generation = 0;
+
     // What d_Fframes currently holds. The ingest path borrows that allocation as
     // scratch instead of allocating its own staging, so the transition out of
     // IngestScratch is what makes the forward transform safe to run.
@@ -316,6 +371,7 @@ private:
     // Cached patch resources to avoid allocations and plan recreation in patch loop
     cufftHandle plan_patch_r2c = 0;
     bool has_plan_patch_r2c = false;
+    bool patch_plan_borrowed = false;
     int cached_patch_w = 0;
     int cached_patch_h = 0;
     int cached_patch_ngroups = 0;

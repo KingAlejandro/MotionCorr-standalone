@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""CLI smoke test for the nsys analysis scripts.
+
+Checks the scripts actually run, rather than trusting the JSON and SVGs that were
+generated once by hand and committed. Covers the three defect classes that shipped
+in the first version of this directory:
+
+  1. a script that dies at its first executable statement (missing `import sys`);
+  2. a script that writes into a directory it never creates;
+  3. an instrumentation patcher whose source anchors or exact ordered stage
+     inventory have gone stale, including balanced whole-pair mutations, and whose
+     `assert`-based refusal disappears under `python -O`.
+
+Needs no capture, no GPU and no network. Run from the repository root:
+
+    python3 tools/nsys_analysis/selftest.py
+
+Not registered with CTest: this directory is a documentation/tooling lane that
+touches no build files. Whoever next edits CMakeLists.txt should register it.
+"""
+import ast, json, os, pathlib, re, shutil, subprocess, sys, tempfile
+
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
+PY = sys.executable
+fails = []
+# Internal child mode runs the ordinary suite in a temporary no-remote-ref
+# fixture without recursively creating another fixture. It checks that property
+# below rather than allowing a caller to silently skip the portability control.
+NO_REMOTE_FIXTURE = '--no-remote-ref-fixture'
+if sys.argv[1:] not in ([], [NO_REMOTE_FIXTURE]):
+    raise SystemExit('usage: selftest.py [' + NO_REMOTE_FIXTURE + ']')
+
+def check(name, cond, detail=""):
+    print(("  ok   " if cond else "  FAIL ") + name + (("  -- " + detail) if detail and not cond else ""))
+    if not cond: fails.append(name)
+
+def run(args, **kw):
+    return subprocess.run([PY] + args, capture_output=True, text=True, **kw)
+
+print("1. every script parses and has no name used before import")
+for f in sorted(HERE.glob("*.py")):
+    src = f.read_text()
+    try:
+        tree = ast.parse(src)
+    except SyntaxError as e:
+        check(f.name + " parses", False, str(e)); continue
+    imported = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Import): imported |= {(a.asname or a.name).split(".")[0] for a in n.names}
+        elif isinstance(n, ast.ImportFrom): imported |= {(a.asname or a.name) for a in n.names}
+    bound = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)}
+    bound |= {n.name for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.ClassDef))}
+    bound |= {a.arg for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.Lambda)) for a in n.args.args}
+    STD = {"sys","os","json","csv","re","math","sqlite3","collections","statistics",
+           "pathlib","zlib","html","subprocess","shutil","time","hashlib","argparse","ast","tempfile"}
+    used = {n.value.id for n in ast.walk(tree) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)}
+    missing = sorted((used & STD) - imported - bound)
+    check(f.name + " imports what it uses", not missing, "missing: " + ",".join(missing))
+
+print("2. arms24_json.py reaches input handling and creates its output directory")
+with tempfile.TemporaryDirectory() as td:
+    r = run([str(HERE / "arms24_json.py"), td + "/"])
+    check("gets past argv without NameError", "NameError" not in r.stderr, r.stderr.strip()[:120])
+    check("fails on the missing capture, not on itself",
+          "sqlite3" in r.stderr or "unable to open database" in r.stderr or r.returncode == 0,
+          r.stderr.strip()[:120])
+
+print("3. patch_nvtx.py: patches known sources, refuses unknown ones, survives -O")
+samples = {}
+for tag, rev in (
+        ("historical", "1d7e13f41b6eaf64b367d49ff0f0f5a3e09c0a26"),
+        ("retained-current", "c499b1d3bf1cceec5c3b194f356844d6f493e7f2"),
+        ("merged-main", "2aa2886d217e0ac1388d5d448a9ae77efddd9e18"),
+        ("working", "HEAD")):
+    g = subprocess.run(["git", "-C", str(ROOT), "show", rev + ":src/motioncorr_runner.cpp"],
+                       capture_output=True, text=True)
+    check(tag + " source is reachable", g.returncode == 0 and bool(g.stdout),
+          "git show " + rev + ":src/motioncorr_runner.cpp failed")
+    if g.returncode == 0 and g.stdout: samples[tag] = g.stdout
+if not samples:
+    check("a motioncorr_runner.cpp revision is reachable", False, "no git revision available")
+for tag, src in samples.items():
+    with tempfile.TemporaryDirectory() as td:
+        f = pathlib.Path(td) / "motioncorr_runner.cpp"; f.write_text(src)
+        for flags in ([], ['-O']):
+            suffix = ' under -O' if flags else ''
+            f.write_text(src)
+            r = run(flags + [str(HERE / "patch_nvtx.py"), str(f)])
+            check(tag + " source patches" + suffix,
+                  r.returncode == 0 and "patched:" in r.stdout, r.stderr.strip()[:140])
+            out = f.read_text()
+            check(tag + " preserves marker call counts" + suffix,
+                  out.count("RCTIC(") == src.count("RCTIC(") + 1 and
+                  out.count("RCTOC(") == src.count("RCTOC(") + 1)
+            r2 = run(flags + [str(HERE / "patch_nvtx.py"), str(f)])
+            check(tag + " refuses to double-patch" + suffix,
+                  r2.returncode != 0 and f.read_text() == out,
+                  "re-patched or modified an already patched tree")
+        first = re.search(r'RCTIC\((TIMING_[A-Z0-9_]+)\);', src)
+        if first:
+            start, end = first.group(0), 'RCTOC(' + first.group(1) + ');'
+            bad_sources = {
+                'missing-end': src.replace(end, '/* omitted end */', 1),
+                'misordered': src.replace(start, '__START__', 1).replace(end, start, 1).replace('__START__', end, 1),
+                'wrong-label': src.replace(end, 'RCTOC(TIMING_REVIEW_WRONG_LABEL);', 1),
+                # These mutations remain balanced, so a stack or total-count
+                # check cannot establish the supported source generation.
+                'missing-whole-pair': src.replace(start, '', 1).replace(end, '', 1),
+                'extra-existing-whole-pair': src.replace(end, end + '\n' + start + '\n' + end, 1),
+                'extra-new-whole-pair': src.replace(end, end + '\nRCTIC(TIMING_REVIEW_EXTRA);'
+                                                  '\nRCTOC(TIMING_REVIEW_EXTRA);', 1),
+                'replaced-whole-pair': src.replace(start, 'RCTIC(TIMING_REVIEW_REPLACED);', 1)
+                                         .replace(end, 'RCTOC(TIMING_REVIEW_REPLACED);', 1),
+                'nonliteral-whole-pair': src.replace(end, end + '\nRCTIC(review_label);'
+                                                     '\nRCTOC(review_label);', 1),
+            }
+            events = list(re.finditer(r'\bRCT(?:IC|OC)\((TIMING_[A-Z0-9_]+)\);', src))
+            leaf_pairs = (len(events) >= 4 and events[0].group(0) == start and
+                          events[1].group(0) == end and
+                          events[2].group(0).startswith('RCTIC(') and
+                          events[3].group(0) == 'RCTOC(' + events[2].group(1) + ');')
+            check(tag + ' whole-pair order control has two distinct leaf pairs',
+                  leaf_pairs and events[0].group(1) != events[2].group(1))
+            if leaf_pairs:
+                # Swap only the two pairs' labels/calls, keeping their source
+                # positions, total counts and textual nesting valid.
+                bad = src
+                for i in reversed(range(4)):
+                    bad = bad[:events[i].start()] + events[(i + 2) % 4].group(0) + bad[events[i].end():]
+                bad_sources['reordered-whole-pairs'] = bad
+            for name, bad in bad_sources.items():
+                for flags in ([], ['-O']):
+                    f.write_text(bad)
+                    rr = run(flags + [str(HERE / 'patch_nvtx.py'), str(f)])
+                    check(tag + ' refuses ' + name + (' under -O' if flags else ''),
+                          rr.returncode != 0 and f.read_text() == bad,
+                          'accepted or modified invalid stage order')
+with tempfile.TemporaryDirectory() as td:
+    f = pathlib.Path(td) / "bogus.cpp"; f.write_text("int main(){return 0;}\n")
+    before = f.read_text()
+    r = run([str(HERE / "patch_nvtx.py"), str(f)])
+    check("refuses an unsupported source", r.returncode != 0, "accepted an unsupported source")
+    check("leaves an unsupported source untouched", f.read_text() == before)
+    rO = run(["-O", str(HERE / "patch_nvtx.py"), str(f)])
+    check("refusal survives python -O", rO.returncode != 0,
+          "under -O it exited 0; the gate was compiled out")
+
+print("4. mkarms24.py emits two charts and keeps the time domains apart")
+data = ROOT / "docs/profiling_20261001/data24/arms24.json"
+if not data.exists():
+    check("committed arms24.json present", False, str(data))
+else:
+    with tempfile.TemporaryDirectory() as td:
+        pre = os.path.join(td, "sub", "arms24")      # a directory it must create
+        r = run([str(HERE / "mkarms24.py"), pre, str(data)])
+        check("runs", r.returncode == 0, r.stderr.strip()[:140])
+        wall, dev = pathlib.Path(pre + "_wall.svg"), pathlib.Path(pre + "_device.svg")
+        check("writes arms24_wall.svg", wall.exists())
+        check("writes arms24_device.svg", dev.exists())
+        if wall.exists():
+            w = wall.read_text()
+            check("wall chart carries no device series", "kernel" not in w and "memcpy" not in w)
+            check("wall chart says it is unprofiled", "unprofiled" in w)
+        if dev.exists():
+            dv = dev.read_text()
+            check("device chart does not reinstate the old idle label",
+                  "GPU idle (host-only work)" not in dv and ">GPU idle<" not in dv)
+            check("device chart never calls the remainder idle",
+                  "idle" not in dv.lower().replace("lower bound on idle", "")
+                                         .replace("establishing real idle", ""))
+            check("device remainder has the correct idle bound", "LOWER bound on idle" in dv and "UPPER bound on idle" not in dv)
+            check("device chart marks the untraced arm unknown", "not traced" in dv)
+            check("device chart bounds busy rather than asserting it", "&lt;=" in dv or "<=" in dv)
+        arms = json.loads(data.read_text())["arms"]
+        mixed = [a for a in arms if "span" in a and abs(a["span"] - a["wall"]) > 0.5]
+        check("profiled span and unprofiled wall genuinely differ (so keeping them apart matters)",
+              bool(mixed),
+              "no arm differs; the separation would be untestable here")
+
+print('5. retained source fixtures need no remote-tracking refs')
+if sys.argv[1:] == [NO_REMOTE_FIXTURE]:
+    refs = subprocess.run(['git', '-C', str(ROOT), 'for-each-ref', '--format=%(refname)',
+                           'refs/remotes/'], capture_output=True, text=True)
+    check('child fixture has no remote-tracking refs', refs.returncode == 0 and not refs.stdout.strip())
+else:
+    with tempfile.TemporaryDirectory() as td:
+        clone = pathlib.Path(td) / 'no-remotes'
+        # Share local objects and avoid checking out large retained artifacts.
+        # Copy only the inputs this CPU tooling suite uses. No network access,
+        # and every ref deletion is scoped to this throwaway clone.
+        copied = subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout',
+                                 str(ROOT), str(clone)], capture_output=True, text=True)
+        check('temporary local clone created', copied.returncode == 0, copied.stderr.strip()[:140])
+        if copied.returncode == 0:
+            refs = subprocess.run(['git', '-C', str(clone), 'for-each-ref',
+                                   '--format=%(refname)', 'refs/remotes/'],
+                                  capture_output=True, text=True)
+            check('temporary remote refs enumerated', refs.returncode == 0)
+            all_removed = refs.returncode == 0
+            for ref in refs.stdout.splitlines():
+                dropped = subprocess.run(['git', '-C', str(clone), 'update-ref', '--no-deref', '-d', ref],
+                                         capture_output=True, text=True)
+                all_removed = all_removed and dropped.returncode == 0
+            check('all temporary remote refs removed', all_removed)
+            shutil.copytree(HERE, clone / 'tools/nsys_analysis')
+            clone_data = clone / 'docs/profiling_20261001/data24/arms24.json'
+            clone_data.parent.mkdir(parents=True, exist_ok=True)
+            if data.exists():
+                shutil.copyfile(data, clone_data)
+            for flags in ([], ['-O']):
+                r = run(flags + [str(clone / 'tools/nsys_analysis/selftest.py'), NO_REMOTE_FIXTURE])
+                check('no-remote-ref suite passes' + (' under -O' if flags else ''),
+                      r.returncode == 0 and 'all nsys_analysis CLI checks passed' in r.stdout,
+                      (r.stderr + r.stdout)[-500:])
+
+print()
+if fails:
+    print("FAILED %d check(s): %s" % (len(fails), "; ".join(fails)))
+    sys.exit(1)
+print("all nsys_analysis CLI checks passed")

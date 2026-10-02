@@ -1,0 +1,13 @@
+reference (base, nvcomp, default options): 0 24 3ebed4b9cf62c46f4112
+
+variant                                      varies?  base                   cand                   verdict
+--ingest compact (U16 gain site)             NO-OP    3ebed4b9cf62c46f4112   3ebed4b9cf62c46f4112   EXACT
+--ingest float                               NO-OP    3ebed4b9cf62c46f4112   3ebed4b9cf62c46f4112   EXACT
+--save_noDW                                  yes      431ea07fda129dcffad7   431ea07fda129dcffad7   EXACT
+--group_frames 3                             yes      70f2dc62299a61e0ca86   70f2dc62299a61e0ca86   EXACT
+--bin_factor 2                               yes      e3b0c44298fc1c149afb   e3b0c44298fc1c149afb   NO OUTPUT
+--first/--last_frame_sum                     yes      945733b68c83a31c58a6   945733b68c83a31c58a6   EXACT
+
+'varies?' = NO-OP means the arm produced the reference hash, so it exercised
+nothing new and its EXACT verdict carries no information.
+DONE 2026-10-01T12:54:43+00:00

@@ -1,0 +1,25 @@
+settled 1s
+--- correctness: exact output across arms and option variants ---
+  EXACT   ingest=nvcomp extra=''  n=24 mrc=3ebed4b9cf62c46f4112 star=cde2b6407a6f
+  EXACT   ingest=float extra=''  n=24 mrc=3ebed4b9cf62c46f4112 star=cde2b6407a6f
+  EXACT   ingest=nvcomp extra='--no_dose_weighting'  n=24 mrc=3ebed4b9cf62c46f4112 star=cde2b6407a6f
+  EXACT   ingest=nvcomp extra='--first_frame_sum 3 --last_frame_sum 20'  n=24 mrc=945733b68c83a31c58a6 star=f18e50f57019
+--- gain-change control: two different gains in one process must not reuse ---
+    (single-gain dataset here, so this is covered by the no-gain arm below)
+    no-gain base rc=0 hash=cbd7697f550acd78224b
+    no-gain cand rc=0 hash=cbd7697f550acd78224b
+--- paired wall A/B, 24 movies, --ingest nvcomp ---
+round,order,arm,wall_s,cpu_s,maxrss_kb,rc,hash
+1,fwd,base,11.907526917,18.94,567708,0,3ebed4b9cf62c46f
+1,fwd,cand,11.141336527,18.07,567980,0,3ebed4b9cf62c46f
+2,rev,cand,11.233055619,18.37,568604,0,3ebed4b9cf62c46f
+2,rev,base,12.089707547,19.84,567404,0,3ebed4b9cf62c46f
+3,fwd,base,11.830314701,18.80,568080,0,3ebed4b9cf62c46f
+3,fwd,cand,11.451146568,19.14,568308,0,3ebed4b9cf62c46f
+4,rev,cand,11.227978888,18.35,568180,0,3ebed4b9cf62c46f
+4,rev,base,11.940771269,19.60,568152,0,3ebed4b9cf62c46f
+5,fwd,base,12.974378554,20.58,568408,0,3ebed4b9cf62c46f
+5,fwd,cand,11.227612670,18.25,568708,0,3ebed4b9cf62c46f
+6,rev,cand,11.475627509,18.70,568756,0,3ebed4b9cf62c46f
+6,rev,base,12.699950225,20.45,568620,0,3ebed4b9cf62c46f
+DONE 2026-10-01T12:51:12+00:00

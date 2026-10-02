@@ -1,0 +1,22 @@
+total traced 2733.1 ms = GPU busy 505.0 ms + GPU idle 2228.1 ms
+
+stage                               gpu_busy_msgpu_idle_ms   wall_ms   idle%
+after movie                                 0.0      626.1     626.1   100.0
+MOVIE: unmarked                             2.6      518.4     521.0    99.5
+read movie                                  0.0      428.6     428.6   100.0
+gain and sum                              383.1       12.4     395.5     3.1
+write output                                0.0      191.5     191.5   100.0
+patch align                                18.1      162.1     180.2    90.0
+read gain                                   0.0      121.5     121.5   100.0
+dose weighting                             43.2       29.3      72.5    40.5
+fix defect                                  0.0       58.4      58.5   100.0
+detect hot                                  0.3       43.4      43.7    99.3
+global fft                                 21.5        3.0      24.5    12.3
+global ifft                                21.7        2.7      24.4    10.9
+prep patch                                  7.5       13.7      21.2    64.6
+global alignment                            7.1        9.6      16.7    57.3
+before movie                                0.0        5.7       5.7   100.0
+fit polynomial                              0.0        1.6       1.6   100.0
+power spectrum                              0.0        0.0       0.0   100.0
+binning                                     0.0        0.0       0.0   100.0
+TOTAL                                     505.0     2228.1    2733.1

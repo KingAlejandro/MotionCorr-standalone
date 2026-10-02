@@ -23,6 +23,9 @@
 #include "src/image.h"
 #include "src/motioncorr_runner.h"
 #include "src/renderEER.h"
+#include <limits>
+#include <memory>
+#include <set>
 
 // TODO: Think about first frame for local model
 
@@ -343,7 +346,12 @@ int Micrograph::getEERGrouping() const
 
 void Micrograph::fillDefectAndHotpixels(MultidimArray<bool> &mask) const
 {
-	checkReadyFlag("getShiftAt");
+	checkReadyFlag("fillDefectAndHotpixels");
+	if (hotpixelX.size() != hotpixelY.size())
+		REPORT_ERROR("Logic error: hotpixelX.size() != hotpixelY.size()");
+	for (size_t i = 0; i < hotpixelX.size(); i++)
+		if (hotpixelX[i] < 0 || hotpixelX[i] >= width || hotpixelY[i] < 0 || hotpixelY[i] >= height)
+			REPORT_ERROR("Micrograph::fillDefectAndHotpixels: hot pixel out of range");
 
 	mask.initZeros(height, width);
 
@@ -357,10 +365,7 @@ void Micrograph::fillDefectAndHotpixels(MultidimArray<bool> &mask) const
 	if (fix_defect)
 		MotioncorrRunner::fillDefectMask(mask, fnDefect);
 
-	if (hotpixelX.size() != hotpixelY.size())
-		REPORT_ERROR("Logic error: hotpixelX.size() != hotpixelY.size()");
-
-	for (int i = 0, ilim = hotpixelX.size(); i < ilim; i++)
+	for (size_t i = 0; i < hotpixelX.size(); i++)
 	{
 		DIRECT_A2D_ELEM(mask, hotpixelY[i], hotpixelX[i]) = true;
 	}
@@ -369,6 +374,11 @@ void Micrograph::fillDefectAndHotpixels(MultidimArray<bool> &mask) const
 int Micrograph::getShiftAt(RFLOAT frame, RFLOAT x, RFLOAT y, RFLOAT &shiftx, RFLOAT &shifty, bool use_local, bool normalise) const
 {
 	checkReadyFlag("getShiftAt");
+	if (!std::isfinite(frame) || frame < 1 || frame > n_frames)
+		REPORT_ERROR("Micrograph::getShiftAt: frame out of range");
+	// Preserve fractional local-model queries and the existing truncation of
+	// their global component, but validate before converting to an index.
+	const size_t frame_index = static_cast<size_t>(frame - 1);
 
 	if (normalise)
 	{
@@ -376,7 +386,7 @@ int Micrograph::getShiftAt(RFLOAT frame, RFLOAT x, RFLOAT y, RFLOAT &shiftx, RFL
 		y = y / height - 0.5;
 	}
 
-	if (globalShiftX[frame - 1] == NOT_OBSERVED || globalShiftX[frame - 1] == NOT_OBSERVED)
+	if (globalShiftX[frame_index] == NOT_OBSERVED || globalShiftY[frame_index] == NOT_OBSERVED)
 	{
 		// Find the shift of the closest observed frame.
 		// If the given 'frame' is unobserved due to initial frame truncation (--first_frame),
@@ -384,7 +394,7 @@ int Micrograph::getShiftAt(RFLOAT frame, RFLOAT x, RFLOAT y, RFLOAT &shiftx, RFL
 		// is zero by definition. So we don't have to search after the 'frame'.
 		shiftx = shifty = 0;
 
-		for (int i = frame - 1; i >= 0; i--)
+		for (int i = static_cast<int>(frame_index); i >= 0; i--)
 		{
 			if (globalShiftX[i] != NOT_OBSERVED && globalShiftY[i] != NOT_OBSERVED)
 			{
@@ -408,8 +418,8 @@ int Micrograph::getShiftAt(RFLOAT frame, RFLOAT x, RFLOAT y, RFLOAT &shiftx, RFL
 	}
 
 	// frame is 1-indexed!
-	shiftx += globalShiftX[frame - 1];
-	shifty += globalShiftY[frame - 1];
+	shiftx += globalShiftX[frame_index];
+	shifty += globalShiftY[frame_index];
 
 	return 0;
 }
@@ -452,16 +462,28 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 	// Read Image metadata
 	MDglobal.readStar(in, "general");
 
-	if (!MDglobal.getValue(EMDL_IMAGE_SIZE_X, width) ||
-	    !MDglobal.getValue(EMDL_IMAGE_SIZE_Y, height) ||
-	    !MDglobal.getValue(EMDL_IMAGE_SIZE_Z, n_frames) ||
+	// Read STAR integer fields without narrowing first: an out-of-range long
+	// must not wrap into an apparently valid int dimension or frame index.
+	long saved_width, saved_height, saved_frames;
+	if (!MDglobal.getValue(EMDL_IMAGE_SIZE_X, saved_width) ||
+	    !MDglobal.getValue(EMDL_IMAGE_SIZE_Y, saved_height) ||
+	    !MDglobal.getValue(EMDL_IMAGE_SIZE_Z, saved_frames) ||
 	    !MDglobal.getValue(EMDL_MICROGRAPH_MOVIE_NAME, fnMovie))
 	{
 		REPORT_ERROR("MicrographModel::read: insufficient general information in " + fn_in);
 	}
 
-	globalShiftX.resize(n_frames, NOT_OBSERVED);
-	globalShiftY.resize(n_frames, NOT_OBSERVED);
+	if (saved_width <= 0 || saved_height <= 0 || saved_frames <= 0 ||
+	    saved_width > std::numeric_limits<int>::max() || saved_height > std::numeric_limits<int>::max() ||
+	    saved_frames > std::numeric_limits<int>::max() ||
+	    saved_width > std::numeric_limits<long>::max() / saved_height ||
+	    static_cast<size_t>(saved_width) > std::numeric_limits<size_t>::max() / saved_height ||
+	    static_cast<size_t>(saved_frames) > globalShiftX.max_size() ||
+	    static_cast<size_t>(saved_frames) > globalShiftY.max_size())
+		REPORT_ERROR("MicrographModel::read: invalid dimensions in " + fn_in);
+	width = static_cast<int>(saved_width);
+	height = static_cast<int>(saved_height);
+	n_frames = static_cast<int>(saved_frames);
 
 	if (!MDglobal.getValue(EMDL_MICROGRAPH_GAIN_NAME, fnGain))
 		fnGain = "";
@@ -484,8 +506,11 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 	if (!MDglobal.getValue(EMDL_CTF_VOLTAGE, voltage))
 		voltage = -1;
 
-	if (!MDglobal.getValue(EMDL_MICROGRAPH_START_FRAME, first_frame))
-		first_frame = 1; // 1-indexed
+	long saved_first_frame = 1;
+	MDglobal.getValue(EMDL_MICROGRAPH_START_FRAME, saved_first_frame);
+	if (saved_first_frame < 1 || saved_first_frame > n_frames)
+		REPORT_ERROR("MicrographModel::read: start frame out of range in " + fn_in);
+	first_frame = static_cast<int>(saved_first_frame);
 
 	if (EERRenderer::isEER(fnMovie))
 	{
@@ -497,12 +522,14 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 	}
 
 	int model_version;
-	model = NULL;
+	// Constructor failure does not invoke ~Micrograph. Keep a parsed model
+	// owned locally until every table has been accepted.
+	std::unique_ptr<MotionModel> parsed_model;
 	if (MDglobal.getValue(EMDL_MICROGRAPH_MOTION_MODEL_VERSION, model_version))
 	{
 		if (model_version == MOTION_MODEL_THIRD_ORDER_POLYNOMIAL)
 		{
-			model = new ThirdOrderPolynomialModel();
+			parsed_model.reset(new ThirdOrderPolynomialModel());
 		}
 		else if (model_version == (int)MOTION_MODEL_NULL)
 		{
@@ -518,16 +545,17 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
         	std::cerr << "Warning: local motion model is absent in the micrograph star file." << std::endl;
 	}
 
-	if (model != NULL)
+	if (parsed_model != NULL)
 	{
-		model->read(in, "local_motion_model");
+		parsed_model->read(in, "local_motion_model");
 	}
 
 	// Read global shifts
-	int frame;
+	long frame;
 	RFLOAT shiftX, shiftY;
 
 	MDglobal.readStar(in, "global_shift");
+	std::set<long> seen_frames;
 
 	FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDglobal)
 	{
@@ -537,6 +565,23 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 		{
 			REPORT_ERROR("MicrographModel::read: incorrect global_shift table in " + fn_in);
 		}
+		if (frame < 1 || frame > n_frames)
+			REPORT_ERROR("MicrographModel::read: global_shift frame out of range in " + fn_in);
+		if (!seen_frames.insert(frame).second)
+			REPORT_ERROR("MicrographModel::read: duplicate global_shift frame in " + fn_in);
+		if (!std::isfinite(shiftX) || !std::isfinite(shiftY))
+			REPORT_ERROR("MicrographModel::read: nonfinite global_shift in " + fn_in);
+	}
+
+	// Sparse tables remain valid: absent frames retain NOT_OBSERVED. Validate
+	// all indices before allocating or assigning the dense shift vectors.
+	globalShiftX.resize(n_frames, NOT_OBSERVED);
+	globalShiftY.resize(n_frames, NOT_OBSERVED);
+	FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDglobal)
+	{
+		MDglobal.getValue(EMDL_MICROGRAPH_FRAME_NUMBER, frame);
+		MDglobal.getValue(EMDL_MICROGRAPH_SHIFT_X, shiftX);
+		MDglobal.getValue(EMDL_MICROGRAPH_SHIFT_Y, shiftY);
 
 		// frame is 1-indexed!
 		globalShiftX[frame - 1] = shiftX;
@@ -546,17 +591,20 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 	if (read_hotpixels)
 	{
 		MDhot.readStar(in, "hot_pixels");
-		RFLOAT x, y;
+		double x, y;
 		FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDhot)
 		{
 			if (!MDhot.getValue(EMDL_IMAGE_COORD_X, x) ||
 			    !MDhot.getValue(EMDL_IMAGE_COORD_Y, y))
 				REPORT_ERROR("MicrographModel::read: incorrect hot_pixels table in " + fn_in);
+			if (!std::isfinite(x) || !std::isfinite(y) || x < 0 || x >= width || y < 0 || y >= height)
+				REPORT_ERROR("MicrographModel::read: hot pixel out of range in " + fn_in);
 
 			hotpixelX.push_back((int)x);
 			hotpixelY.push_back((int)y);
 		}
 	}
+	model = parsed_model.release();
 }
 
 void Micrograph::setMovie(FileName fnMovie, FileName fnGain, RFLOAT binning)

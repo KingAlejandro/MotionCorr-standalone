@@ -26,7 +26,9 @@
 #include <stdexcept>
 #include <thread>
 #include <atomic>
-#include <sys/stat.h>
+#include <sstream>
+#include <cstdio>
+#include <memory>
 
 // Process-wide, so a generation minted by one runner can never collide with a
 // generation minted by another runner on the same worker thread. Starts at 1;
@@ -49,6 +51,8 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 // a friend declaration that emits no code. Measured on cpu64: base and port produce
 // identical MRC pixels, STAR and EPS; only a wall-time line differs.
 #include <sstream>
+#include <cstdio>
+#include <memory>
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -1461,6 +1465,32 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
+// The text parser consumes the exact bytes that form the cache key. Keeping the
+// stream parser separate avoids reopening a mutable path after checking its key.
+static void fillTextDefectMask(MultidimArray<bool> &bBad,
+                              const FileName &fn_defect, std::istream &f_defect);
+
+static std::string readDefectTextSnapshot(const FileName &fn_defect)
+{
+	// std::filebuf on libc++ can turn a directory read error into ordinary
+	// EOF. fread/ferror preserve that distinction for the snapshot reader.
+	std::unique_ptr<FILE, decltype(&std::fclose)> input(
+		std::fopen(fn_defect.c_str(), "rb"), &std::fclose);
+	if (!input)
+		REPORT_ERROR("Failed to open a defect file: " + fn_defect);
+	std::string bytes;
+	char buffer[8192];
+	while (true) {
+		const size_t count = std::fread(buffer, 1, sizeof(buffer), input.get());
+		bytes.append(buffer, count);
+		if (std::ferror(input.get()))
+			REPORT_ERROR("Failed to read the defect file " + fn_defect + ": the path opened but could not be read.");
+		if (std::feof(input.get())) break;
+	}
+
+	return bytes;
+}
+
 const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 	int nx, int ny,
 	const FileName &fn_defect,
@@ -1473,28 +1503,34 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 	// this movie's unaligned sum and are added by the caller to its own copy,
 	// which operator= deep-copies, so they can never enter the cache.
 	//
-	// The external file is keyed on content identity as well as path. Keying on
-	// the filename alone would reuse a parse of a file that had been rewritten
-	// under the same name, which main could not do because it re-read and
-	// re-validated the file for every movie.
-	unsigned long long defect_size = 0, defect_mtime = 0;
-	bool defect_identity_known = (fn_defect == "");
-	if (fn_defect != "")
-	{
-		struct stat info;
-		if (stat(fn_defect.c_str(), &info) == 0)
-		{
-			defect_size = (unsigned long long)info.st_size;
-			defect_mtime = (unsigned long long)info.st_mtime;
-			defect_identity_known = true;
-		}
+	// Text files are keyed by exact content, read once and parsed from that same
+	// snapshot. Size and timestamps cannot establish content identity. Image
+	// maps keep the original per-movie reader path and are not reused: those
+	// readers reopen paths (and some formats have a separate header/data file).
+	const bool text_defect = fn_defect != "" && fn_defect.getExtension() == "txt";
+	const bool defect_identity_known = fn_defect == "" || text_defect;
+	auto invalidate = [&]() {
+		defect_premask_valid = false;
+		defect_premask_fn = "";
+		std::string().swap(defect_premask_defect_bytes);
+		defect_premask_gain_fn = "";
+		defect_premask_gain_gen = 0;
+		defect_premask_nx = 0;
+		defect_premask_ny = 0;
+		defect_premask.clear();
+	};
+	std::string defect_bytes;
+	try {
+		if (text_defect) defect_bytes = readDefectTextSnapshot(fn_defect);
+	} catch (...) {
+		invalidate();
+		throw;
 	}
 
 	const bool premask_hit = defect_premask_valid &&
 	                         defect_identity_known &&
 	                         defect_premask_fn == fn_defect &&
-	                         defect_premask_defect_size == defect_size &&
-	                         defect_premask_defect_mtime == defect_mtime &&
+	                         defect_premask_defect_bytes == defect_bytes &&
 	                         defect_premask_gain_fn == fn_gain_reference &&
 	                         defect_premask_gain_gen == gain_cache_generation &&
 	                         defect_premask_nx == nx &&
@@ -1503,19 +1539,16 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 	{
 		// Invalidate the keys before any work, so an exception leaves no stale
 		// or half-built premask advertised as valid.
-		defect_premask_valid = false;
-		defect_premask_fn = "";
-		defect_premask_defect_size = 0;
-		defect_premask_defect_mtime = 0;
-		defect_premask_gain_fn = "";
-		defect_premask_gain_gen = 0;
-		defect_premask_nx = 0;
-		defect_premask_ny = 0;
-		defect_premask.clear();
+		invalidate();
 
 		MultidimArray<bool> new_premask(ny, nx);
 		new_premask.initZeros();
-		if (fn_defect != "")
+		if (text_defect)
+		{
+			std::istringstream snapshot(defect_bytes);
+			fillTextDefectMask(new_premask, fn_defect, snapshot);
+		}
+		else if (fn_defect != "")
 		{
 			fillDefectMask(new_premask, fn_defect, n_threads);
 		}
@@ -1532,8 +1565,7 @@ const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
 		// Published only once the mask is complete.
 		defect_premask = new_premask;
 		defect_premask_fn = fn_defect;
-		defect_premask_defect_size = defect_size;
-		defect_premask_defect_mtime = defect_mtime;
+		defect_premask_defect_bytes = std::move(defect_bytes);
 		defect_premask_gain_fn = fn_gain_reference;
 		defect_premask_gain_gen = gain_cache_generation;
 		defect_premask_nx = nx;
@@ -4237,6 +4269,128 @@ bool MotioncorrRunner::detectSerialEMDefectText(FileName fn_defect)
 	return ret;
 }
 
+static void fillTextDefectMask(MultidimArray<bool> &bBad,
+                              const FileName &fn_defect, std::istream &f_defect)
+{
+	const int ny = YSIZE(bBad), nx = XSIZE(bBad);
+	// Extraction-checked parse (issue #98). The supported contract is the
+	// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
+	// Comments, headers and a UTF-8 BOM are NOT part of that format and are
+	// rejected with a specific diagnostic rather than silently mis-parsed.
+	// Blank lines and surrounding whitespace are ignored; an empty file is
+	// valid and masks nothing; non-positive w/h is a no-op rectangle.
+	if (f_defect.peek() == 0xEF) {
+		REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
+		             "mark. The MotionCor2 txt defect format is plain ASCII "
+		             "'x y w h' records; re-save the file without a BOM.");
+	}
+
+	long long record_num = 0, line = 1;
+
+	// Consume whitespace by hand, counting newlines, so a diagnostic can name
+	// the line the offending field is actually on. Doing this before every
+	// field -- not just before each record -- keeps the count exact even when
+	// a record's fields straddle a line break, which this format permits.
+	auto skip_ws = [&]() {
+		int c;
+		while ((c = f_defect.peek()) != EOF && isspace(c)) {
+			if (c == '\n') line++;
+			f_defect.get();
+		}
+	};
+	// Built only on an error path; the happy path never pays for it.
+	// A malformed field names its own line; a record truncated by end of
+	// file names where the record started, because the whitespace skip has
+	// by then already stepped past the last content line.
+	auto where = [&](long long at_line) {
+		return " (record " + std::to_string(record_num + 1) +
+		       ", line " + std::to_string(at_line) + ") of " + fn_defect;
+	};
+	// A path can open and still fail to be read -- a directory whose name ends
+	// .txt is the reachable case. peek() returns EOF for that too, so end of
+	// input is only "clean" when the stream really did reach end of file
+	// without an error. Treating a read failure as an empty file would mask
+	// nothing and let the movie publish as if correction had succeeded.
+	// Platforms differ in how much they expose: libstdc++ sets badbit for a
+	// directory, libc++ reports an ordinary EOF and the distinction is simply
+	// not observable there.
+	auto fail_if_unreadable = [&]() {
+		if (f_defect.bad() || !f_defect.eof()) {
+			REPORT_ERROR("Failed to read the defect file " + fn_defect +
+			             ": the path opened but could not be read. If it is a "
+			             "directory, pass the defect file itself.");
+		}
+	};
+
+	while (true) {
+		skip_ws();
+		if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
+		const long long record_line = line;
+
+		// Read each field as a token and convert it explicitly. Streaming
+		// straight into integers cannot attribute a failure: an out-of-range
+		// value sets failbit *after* consuming its digits, so a recovery read
+		// would name the following field.
+		static const char *const FIELD[4] = { "x", "y", "w", "h" };
+		long long field[4] = { 0, 0, 0, 0 };
+		for (int i = 0; i < 4; i++) {
+			if (i > 0) skip_ws();
+			std::string token;
+			if (f_defect.peek() == EOF || !(f_defect >> token)) {
+				// A read error mid-record must not be reported as truncation.
+				fail_if_unreadable();
+				REPORT_ERROR("Truncated defect record" + where(record_line) +
+				             ": expected four integers 'x y w h', but the file ended "
+				             "after " + std::to_string(i) + " of 4 fields.");
+			}
+
+			// Classify syntax before range, so a token that is both malformed
+			// and huge is reported as malformed rather than out-of-range.
+			size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
+			bool integral = (d < token.size());
+			for (size_t j = d; j < token.size(); j++) {
+				if (!isdigit((unsigned char)token[j])) { integral = false; break; }
+			}
+			if (!integral) {
+				REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
+				             std::string(FIELD[i]) + "' is \"" + token +
+				             "\", which is not an integer. The MotionCor2 txt defect "
+				             "format does not support comments, headers or "
+				             "non-integer fields.");
+			}
+			try {
+				field[i] = std::stoll(token);
+			} catch (const std::out_of_range &) {
+				REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
+				             std::string(FIELD[i]) + "' is \"" + token +
+				             "\", which does not fit in a 64-bit integer.");
+			}
+		}
+		const long long x = field[0], y = field[1], w = field[2], h = field[3];
+		++record_num;
+
+		if (w <= 0 || h <= 0) continue;
+
+		auto safe_add = [](long long a, long long b) -> long long {
+			if (b <= 0) return a;
+			if (a > LLONG_MAX - b) return LLONG_MAX;
+			return a + b;
+		};
+		long long x0 = std::max(0LL, x);
+		long long x1 = std::min((long long)nx, safe_add(x, w));
+		long long y0 = std::max(0LL, y);
+		long long y1 = std::min((long long)ny, safe_add(y, h));
+		if (x0 >= x1 || y0 >= y1) continue;
+
+		for (long long iy = y0; iy < y1; ++iy)
+		{
+			for (long long ix = x0; ix < x1; ++ix)
+				DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
+		}
+	}
+
+}
+
 void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_defect, int n_threads)
 {
 	const int ny = YSIZE(bBad), nx = XSIZE(bBad);
@@ -4249,121 +4403,7 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// Extraction-checked parse (issue #98). The supported contract is the
-		// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
-		// Comments, headers and a UTF-8 BOM are NOT part of that format and are
-		// rejected with a specific diagnostic rather than silently mis-parsed.
-		// Blank lines and surrounding whitespace are ignored; an empty file is
-		// valid and masks nothing; non-positive w/h is a no-op rectangle.
-		if (f_defect.peek() == 0xEF) {
-			REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
-			             "mark. The MotionCor2 txt defect format is plain ASCII "
-			             "'x y w h' records; re-save the file without a BOM.");
-		}
-
-		long long record_num = 0, line = 1;
-
-		// Consume whitespace by hand, counting newlines, so a diagnostic can name
-		// the line the offending field is actually on. Doing this before every
-		// field -- not just before each record -- keeps the count exact even when
-		// a record's fields straddle a line break, which this format permits.
-		auto skip_ws = [&]() {
-			int c;
-			while ((c = f_defect.peek()) != EOF && isspace(c)) {
-				if (c == '\n') line++;
-				f_defect.get();
-			}
-		};
-		// Built only on an error path; the happy path never pays for it.
-		// A malformed field names its own line; a record truncated by end of
-		// file names where the record started, because the whitespace skip has
-		// by then already stepped past the last content line.
-		auto where = [&](long long at_line) {
-			return " (record " + std::to_string(record_num + 1) +
-			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
-		};
-		// A path can open and still fail to be read -- a directory whose name ends
-		// .txt is the reachable case. peek() returns EOF for that too, so end of
-		// input is only "clean" when the stream really did reach end of file
-		// without an error. Treating a read failure as an empty file would mask
-		// nothing and let the movie publish as if correction had succeeded.
-		// Platforms differ in how much they expose: libstdc++ sets badbit for a
-		// directory, libc++ reports an ordinary EOF and the distinction is simply
-		// not observable there.
-		auto fail_if_unreadable = [&]() {
-			if (f_defect.bad() || !f_defect.eof()) {
-				REPORT_ERROR("Failed to read the defect file " + fn_defect +
-				             ": the path opened but could not be read. If it is a "
-				             "directory, pass the defect file itself.");
-			}
-		};
-
-		while (true) {
-			skip_ws();
-			if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
-			const long long record_line = line;
-
-			// Read each field as a token and convert it explicitly. Streaming
-			// straight into integers cannot attribute a failure: an out-of-range
-			// value sets failbit *after* consuming its digits, so a recovery read
-			// would name the following field.
-			static const char *const FIELD[4] = { "x", "y", "w", "h" };
-			long long field[4] = { 0, 0, 0, 0 };
-			for (int i = 0; i < 4; i++) {
-				if (i > 0) skip_ws();
-				std::string token;
-				if (f_defect.peek() == EOF || !(f_defect >> token)) {
-					// A read error mid-record must not be reported as truncation.
-					fail_if_unreadable();
-					REPORT_ERROR("Truncated defect record" + where(record_line) +
-					             ": expected four integers 'x y w h', but the file ended "
-					             "after " + std::to_string(i) + " of 4 fields.");
-				}
-
-				// Classify syntax before range, so a token that is both malformed
-				// and huge is reported as malformed rather than out-of-range.
-				size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
-				bool integral = (d < token.size());
-				for (size_t j = d; j < token.size(); j++) {
-					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
-				}
-				if (!integral) {
-					REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
-					             std::string(FIELD[i]) + "' is \"" + token +
-					             "\", which is not an integer. The MotionCor2 txt defect "
-					             "format does not support comments, headers or "
-					             "non-integer fields.");
-				}
-				try {
-					field[i] = std::stoll(token);
-				} catch (const std::out_of_range &) {
-					REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
-					             std::string(FIELD[i]) + "' is \"" + token +
-					             "\", which does not fit in a 64-bit integer.");
-				}
-			}
-			const long long x = field[0], y = field[1], w = field[2], h = field[3];
-			++record_num;
-
-			if (w <= 0 || h <= 0) continue;
-
-			auto safe_add = [](long long a, long long b) -> long long {
-				if (b <= 0) return a;
-				if (a > LLONG_MAX - b) return LLONG_MAX;
-				return a + b;
-			};
-			long long x0 = std::max(0LL, x);
-			long long x1 = std::min((long long)nx, safe_add(x, w));
-			long long y0 = std::max(0LL, y);
-			long long y1 = std::min((long long)ny, safe_add(y, h));
-			if (x0 >= x1 || y0 >= y1) continue;
-
-			for (long long iy = y0; iy < y1; ++iy)
-			{
-				for (long long ix = x0; ix < x1; ++ix)
-					DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
-			}
-		}
+		fillTextDefectMask(bBad, fn_defect, f_defect);
 
 		f_defect.close();
 	}

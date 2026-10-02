@@ -1,0 +1,72 @@
+[
+  {
+    "case": "Y-only",
+    "arm": "baseline-asan",
+    "exit": 0,
+    "stdout": "0 9 -9999\n",
+    "stderr": ""
+  },
+  {
+    "case": "Y-only",
+    "arm": "candidate-asan",
+    "exit": 0,
+    "stdout": "-1 1.25 -2.5\n",
+    "stderr": ""
+  },
+  {
+    "case": "invalid-frame",
+    "arm": "baseline-asan",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "=================================================================\n==8==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50300001c7d8 at pc 0x560c93a4dac8 bp 0x7ffc76af9c70 sp 0x7ffc76af9c60\nWRITE of size 8 at 0x50300001c7d8 thread T0\n    #0 0x560c93a4dac7 in Micrograph::read(FileName, bool) /workspace/scratch/4d99fce6c5db/model-controls/baseline.cpp:542\n    #1 0x560c93a55f81 in Micrograph::Micrograph(FileName, FileName, double, int, int) /workspace/scratch/4d99fce6c5db/model-controls/baseline.cpp:156\n    #2 0x560c93985b5f in main (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x117b5f) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)\n    #3 0x7f3ac82671c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: 274eec488d230825a136fa9c4d85370fed7a0a5e)\n    #4 0x7f3ac826728a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: 274eec488d230825a136fa9c4d85370fed7a0a5e)\n    #5 0x560c93988394 in _start (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x11a394) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)\n\n0x50300001c7d8 is located 8 bytes before 32-byte region [0x50300001c7e0,0x50300001c800)\nallocated by thread T0 here:\n    #0 0x7f3ac92ee548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95\n    #1 0x560c93a21ae5 in std::vector<double, std::allocator<double> >::_M_fill_insert(__gnu_cxx::__normal_iterator<double*, std::vector<double, std::allocator<double> > >, unsigned long, double const&) (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x1b3ae5) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)\n\nSUMMARY: AddressSanitizer: heap-buffer-overflow /workspace/scratch/4d99fce6c5db/model-controls/baseline.cpp:542 in Micrograph::read(FileName, bool)\nShadow bytes around the buggy address:\n  0x50300001c500: fa fa fd fd fd fa fa fa fd fd fd fa fa fa fd fd\n  0x50300001c580: fd fd fa fa fd fd fd fa fa fa fd fd fd fd fa fa\n  0x50300001c600: fd fd fd fa fa fa 00 00 00 00 fa fa fd fd fd fa\n  0x50300001c680: fa fa fd fd fd fa fa fa fd fd fd fa fa fa fd fd\n  0x50300001c700: fd fa fa fa fd fd fd fa fa fa fd fd fd fa fa fa\n=>0x50300001c780: fd fd fd fa fa fa fd fd fd fa fa[fa]00 00 00 00\n  0x50300001c800: fa fa 00 00 00 00 fa fa fd fd fd fd fa fa fd fd\n  0x50300001c880: fd fd fa fa fd fd fd fd fa fa fd fd fd fd fa fa\n  0x50300001c900: fd fd fd fd fa fa fd fd fd fd fa fa fd fd fd fd\n  0x50300001c980: fa fa fd fd fd fd fa fa fd fd fd fa fa fa fd fd\n  0x50300001ca00: fd fa fa fa fd fd fd fd fa fa fd fd fd fd fa fa\nShadow byte legend (one shadow byte represents 8 application bytes):\n  Addressable:           00\n  Partially addressable: 01 02 03 04 05 06 07 \n  Heap left redzone:       fa\n  Freed heap region:       fd\n  Stack left redzone:      f1\n  Stack mid redzone:       f2\n  Stack right redzone:     f3\n  Stack after return:      f5\n  Stack use after scope:   f8\n  Global redzone:          f9\n  Global init order:       f6\n  Poisoned by user:        f7\n  Container overflow:      fc\n  Array cookie:            ac\n  Intra object redzone:    bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n==8==ABORTING\n"
+  },
+  {
+    "case": "invalid-frame",
+    "arm": "candidate-asan",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "in: /workspace/scratch/4d99fce6c5db/MotionCorr-standalone/src/micrograph_model.cpp, line 569\nERROR: \nMicrographModel::read: global_shift frame out of range in /tmp/tmpa45sorxx/invalid-frame.star\n=== Backtrace  ===\n/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0) [0x7f5c1e6cd1e0]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x137c77) [0x560075a95c77]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1eae3b) [0x560075b48e3b]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1f53dc) [0x560075b533dc]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x121b80) [0x560075a7fb80]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f5c1d6c11ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f5c1d6c128b]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1243b5) [0x560075a823b5]\n==================\nERROR: \nMicrographModel::read: global_shift frame out of range in /tmp/tmpa45sorxx/invalid-frame.star\n"
+  },
+  {
+    "case": "duplicate-frame",
+    "arm": "baseline-asan",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "duplicate-frame",
+    "arm": "candidate-asan",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "in: /workspace/scratch/4d99fce6c5db/MotionCorr-standalone/src/micrograph_model.cpp, line 571\nERROR: \nMicrographModel::read: duplicate global_shift frame in /tmp/tmpa45sorxx/duplicate-frame.star\n=== Backtrace  ===\n/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0) [0x7f270756e1e0]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x137c77) [0x5588202e1c77]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1eb1a2) [0x5588203951a2]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1f53dc) [0x55882039f3dc]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x121b80) [0x5588202cbb80]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f27065621ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f270656228b]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1243b5) [0x5588202ce3b5]\n==================\nERROR: \nMicrographModel::read: duplicate global_shift frame in /tmp/tmpa45sorxx/duplicate-frame.star\n"
+  },
+  {
+    "case": "hotpixel-bounds",
+    "arm": "baseline-asan",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "hotpixel-bounds",
+    "arm": "candidate-asan",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "in: /workspace/scratch/4d99fce6c5db/MotionCorr-standalone/src/micrograph_model.cpp, line 601\nERROR: \nMicrographModel::read: hot pixel out of range in /tmp/tmpa45sorxx/hotpixel-bounds.star\n=== Backtrace  ===\n/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0) [0x7f2c2e1491e0]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x137c77) [0x55ddb09f2c77]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1ec2ce) [0x55ddb0aa72ce]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1f53dc) [0x55ddb0ab03dc]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x121b80) [0x55ddb09dcb80]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f2c2d13d1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f2c2d13d28b]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1243b5) [0x55ddb09df3b5]\n==================\nERROR: \nMicrographModel::read: hot pixel out of range in /tmp/tmpa45sorxx/hotpixel-bounds.star\n"
+  },
+  {
+    "case": "dimension-narrowing",
+    "arm": "baseline-asan",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "dimension-narrowing",
+    "arm": "candidate-asan",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "in: /workspace/scratch/4d99fce6c5db/MotionCorr-standalone/src/micrograph_model.cpp, line 483\nERROR: \nMicrographModel::read: invalid dimensions in /tmp/tmpa45sorxx/dimension-narrowing.star\n=== Backtrace  ===\n/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0) [0x7fc7e7ce71e0]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x137c77) [0x5559e04b9c77]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1e8a33) [0x5559e056aa33]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1f53dc) [0x5559e05773dc]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x121b80) [0x5559e04a3b80]\n/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7fc7e6cdb1ca]\n/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7fc7e6cdb28b]\n/workspace/scratch/4d99fce6c5db/model-controls/candidate-asan/runner_numerics(+0x1243b5) [0x5559e04a63b5]\n==================\nERROR: \nMicrographModel::read: invalid dimensions in /tmp/tmpa45sorxx/dimension-narrowing.star\n"
+  }
+]

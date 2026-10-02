@@ -1,0 +1,47 @@
+=================================================================
+==6==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50300001c838 at pc 0x55d42c0cc6c3 bp 0x7ffe03c8dcb0 sp 0x7ffe03c8dca0
+READ of size 8 at 0x50300001c838 thread T0
+    #0 0x55d42c0cc6c2 in Micrograph::getShiftAt(double, double, double, double&, double&, bool, bool) const /workspace/scratch/4d99fce6c5db/model-controls/baseline.cpp:379
+    #1 0x55d42c017082 in main (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x118082) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)
+    #2 0x7f99ba1c31c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: 274eec488d230825a136fa9c4d85370fed7a0a5e)
+    #3 0x7f99ba1c328a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: 274eec488d230825a136fa9c4d85370fed7a0a5e)
+    #4 0x55d42c019394 in _start (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x11a394) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)
+
+0x50300001c838 is located 8 bytes before 32-byte region [0x50300001c840,0x50300001c860)
+allocated by thread T0 here:
+    #0 0x7f99bb24a548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x55d42c0b2ae5 in std::vector<double, std::allocator<double> >::_M_fill_insert(__gnu_cxx::__normal_iterator<double*, std::vector<double, std::allocator<double> > >, unsigned long, double const&) (/workspace/scratch/4d99fce6c5db/model-controls/baseline-asan/runner_numerics+0x1b3ae5) (BuildId: 33a688b740fd1e96c13f8f95a4b5f18df3545048)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /workspace/scratch/4d99fce6c5db/model-controls/baseline.cpp:379 in Micrograph::getShiftAt(double, double, double, double&, double&, bool, bool) const
+Shadow bytes around the buggy address:
+  0x50300001c580: fd fa fa fa fd fd fd fa fa fa fd fd fd fd fa fa
+  0x50300001c600: fd fd fd fa fa fa fd fd fd fd fa fa fd fd fd fa
+  0x50300001c680: fa fa fd fd fd fd fa fa fd fd fd fa fa fa fd fd
+  0x50300001c700: fd fa fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+  0x50300001c780: fd fd fd fa fa fa fd fd fd fa fa fa fd fd fd fa
+=>0x50300001c800: fa fa fd fd fd fa fa[fa]00 00 00 00 fa fa 00 00
+  0x50300001c880: 00 00 fa fa fd fd fd fd fa fa fd fd fd fd fa fa
+  0x50300001c900: fd fd fd fd fa fa fd fd fd fd fa fa fd fd fd fd
+  0x50300001c980: fa fa fd fd fd fd fa fa fd fd fd fd fa fa fd fd
+  0x50300001ca00: fd fd fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+  0x50300001ca80: fd fd fd fd fa fa fd fd fd fd fa fa fd fd fd fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==6==ABORTING

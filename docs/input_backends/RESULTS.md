@@ -74,6 +74,22 @@ header, trajectories, per-movie STAR, combined STAR and auxiliary products. The
 tutorial samples max at 68, so the uint8 re-encode is value-lossless and the
 trees must be identical; the comparison is exact, not an RMSE.
 
+### Where the device time goes
+
+![device ingest stages](charts/ingest-stages.png)
+
+Device intervals from one Nsight capture per arm per variant. For uint8 LZW the
+compact route takes the ingest from **252.6 ms to 63.0 ms per movie** at 24
+frames and **502.9 ms to 119.6 ms** at 48, entirely by not copying a float
+movie: 1,435 MB becomes 410 MB, and 2,802 MB becomes 751 MB. The conversion
+itself moves from 2.8 ms to 3.7 ms, because it now also widens the samples.
+
+The alignment, FFT and dose work that follows is excluded from the chart and is
+104 ms (24 frames) / 230 ms (48) in every arm — the internal control that these
+columns are the only thing that changed.
+
+![host resident set](charts/host-rss.png)
+
 ### Measured
 
 Per-movie wall is the median of the movies after the first; a six-movie run at

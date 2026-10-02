@@ -43,6 +43,15 @@ def svg(w, h, title, body):
             f'viewBox="0 0 {w} {h}"><title>{esc(title)}</title>' + "".join(body) + "</svg>")
 
 
+def _fmt(v, unit):
+    """Two decimals for seconds, whole numbers for milliseconds and bytes.
+
+    The same integer format that reads cleanly for a 250 ms segment turns a
+    2.19 s one into "2", which is how a stage chart silently loses its point.
+    """
+    return f"{v:.2f}" if unit == "s" else f"{v:,.0f}"
+
+
 def stacked_stages(path, pairs, stages, colors, title, subs, notes, unit="ms",
                    label_w=250, rowh=30, width=1180):
     """Horizontal stacked bars, two arms per variant.
@@ -64,7 +73,7 @@ def stacked_stages(path, pairs, stages, colors, title, subs, notes, unit="ms",
         x = plot_x + plot_w * i / ticks
         b.append(f'<line x1="{x:.1f}" y1="{top+18}" x2="{x:.1f}" y2="{top+24+rowh*len(rows)}" '
                  f'stroke="{GRID}" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.6"/>')
-        b.append(txt(x, top + 12, f"{v:.0f}", 10.5, MUTED, "middle"))
+        b.append(txt(x, top + 12, _fmt(v, unit), 10.5, MUTED, "middle"))
     b.append(txt(plot_x + plot_w / 2, top - 4, unit + " (lower is better)", 10.5, MUTED, "middle"))
     # alternating band per variant, and the variant label centred on its pair
     i = 0
@@ -94,11 +103,11 @@ def stacked_stages(path, pairs, stages, colors, title, subs, notes, unit="ms",
             # 2px surface gap between segments
             b.append(f'<rect x="{x:.1f}" y="{y-9}" width="{max(bw-2,0.8):.1f}" height="18" '
                      f'rx="3" fill="{colors[s]}"/>')
-            if bw > 40:
-                b.append(txt(x + bw / 2 - 1, y + 4, f"{v:.0f}", 10, "#ffffff", "middle", "bold"))
+            if bw > 46:
+                b.append(txt(x + bw / 2 - 1, y + 4, _fmt(v, unit), 10, "#ffffff", "middle", "bold"))
             x += bw
             total += v
-        b.append(txt(x + 10, y + 4, f"{total:.0f} {unit}", 12.5, INK, "start", "bold"))
+        b.append(txt(x + 10, y + 4, f"{_fmt(total, unit)} {unit}", 12.5, INK, "start", "bold"))
     b += footer(width, top + 24 + rowh * len(rows) + 40, notes)
     open(path, "w").write(svg(width, h, title, b))
     return path

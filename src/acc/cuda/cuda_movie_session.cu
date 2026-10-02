@@ -172,8 +172,13 @@ __global__ void fusedNativeFlipGainAndSumKernel(
     const float gain_val = apply_gain ? d_gain[dest_pixel] : 1.0f;
     float sum = first_batch ? 0.0f : dst_Isum[dest_pixel];
 
+    // Hoisted: the strip index costs an integer division and is the same for
+    // every frame of the batch. geom.rowOffset(b, y) is the same expression and
+    // is what the device-free control checks.
+    const size_t row_off = geom.rowOffsetInFrame(src_y);
+    const size_t slab = geom.frameSlabBytes();
     for (int b = 0; b < batch_frames; b++) {
-        const size_t off = geom.rowOffset(b, src_y);
+        const size_t off = (size_t)b * slab + row_off;
         const float val = (float)(*(const T *)(src + off + x * sizeof(T))) * gain_val;
         dst_Iframes[((size_t)(frame_offset + b) * (size_t)ny + dest_y) * (size_t)nx + x] = val;
         sum += val;

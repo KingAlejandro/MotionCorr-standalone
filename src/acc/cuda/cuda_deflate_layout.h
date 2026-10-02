@@ -95,11 +95,25 @@ struct StripGeometry {
                    ? last_strip_bytes : full_strip_bytes;
     }
 
+    /// Bytes one frame's strip slots occupy in the output buffer.
+    MC_TIFF_HOST_DEVICE size_t frameSlabBytes() const {
+        return (size_t)strips_per_frame * strip_pitch;
+    }
+
+    /// Byte offset of row @p y within one frame's slab.
+    ///
+    /// Split from rowOffset so the kernel can hoist it out of its frame loop:
+    /// the strip index needs an integer division, which does not depend on the
+    /// frame and is expensive enough on the device to show up as a per-movie
+    /// cost when it is repeated once per frame per pixel.
+    MC_TIFF_HOST_DEVICE size_t rowOffsetInFrame(int y) const {
+        const int strip = y / rows_per_strip;
+        return (size_t)strip * strip_pitch + (size_t)(y - strip * rows_per_strip) * row_bytes;
+    }
+
     /// Byte offset of row @p y of frame-in-batch @p b from the output base.
     MC_TIFF_HOST_DEVICE size_t rowOffset(int b, int y) const {
-        const int strip = y / rows_per_strip;
-        return ((size_t)b * (size_t)strips_per_frame + (size_t)strip) * strip_pitch
-               + (size_t)(y - strip * rows_per_strip) * row_bytes;
+        return (size_t)b * frameSlabBytes() + rowOffsetInFrame(y);
     }
 };
 

@@ -25,6 +25,7 @@
 #include <cctype>
 #include <stdexcept>
 #include <thread>
+#include <filesystem>
 
 #include "src/motioncorr_runner.h"
 #include "src/native_movie_staging.h"
@@ -127,6 +128,7 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
 	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
 	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
+	aggregate_only = parser.checkOption("--aggregate_only", "Regenerate the full dataset STAR/report from complete per-movie outputs; never process or rewrite a movie.");
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -496,6 +498,26 @@ void MotioncorrRunner::initialise()
 	optics_group_micrographs.clear();
 	pre_exposure_micrographs.clear();
 
+	if (aggregate_only)
+	{
+		if (do_at_most >= 0) REPORT_ERROR("--aggregate_only cannot be combined with --do_at_most.");
+		if (fn_mic_given_all.empty()) REPORT_ERROR("--aggregate_only requires at least one movie.");
+		// Complete the entire preflight before publishing anything. A missing movie
+		// is an error, not permission to compute it as ordinary resume would do.
+		for (size_t i = 0; i < fn_mic_given_all.size(); ++i)
+		{
+			if (!isMovieComplete(fn_mic_given_all[i], expected_frames_given_all[i]))
+				REPORT_ERROR("Aggregate-only incomplete movie: " + fn_mic_given_all[i]);
+			if (!do_skip_logfile)
+			{
+				const FileName plot = fn_out + fn_mic_given_all[i].withoutExtension() + "_shifts.eps";
+				std::ifstream in(plot.c_str(), std::ios::binary | std::ios::ate);
+				if (!in || in.tellg() <= 0) REPORT_ERROR("Aggregate-only missing movie report: " + plot);
+			}
+		}
+		continue_old = true;
+	}
+
 	bool warned = false;
 
 	for (long int imic = 0; imic < fn_mic_given_all.size(); imic++)
@@ -702,6 +724,35 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expe
 
 void MotioncorrRunner::run()
 {
+	if (aggregate_only)
+	{
+		// Scientific products are read from fn_out; aggregate products are first
+		// written in a private sibling directory. Publish the joint STAR last, only
+		// after the full report closes successfully. Ordinary resume is unchanged.
+		std::string pattern = fn_out + ".aggregate-XXXXXX";
+		std::vector<char> name(pattern.begin(), pattern.end()); name.push_back('\0');
+		char *created = mkdtemp(name.data());
+		if (!created) REPORT_ERROR("Cannot create aggregate report staging directory in " + fn_out);
+		const std::filesystem::path stage(created);
+		struct StageCleanup {
+			std::filesystem::path path;
+			~StageCleanup() { std::error_code error; std::filesystem::remove_all(path, error); }
+		} cleanup{stage};
+		generateLogFilePDFAndWriteStarFiles(FileName(stage.string() + "/"));
+		const std::string joint = is_tomo ? "corrected_tilt_series.star" : "corrected_micrographs.star";
+		try {
+			std::vector<std::filesystem::path> files;
+			for (const auto &file : std::filesystem::directory_iterator(stage)) files.push_back(file.path());
+			for (const auto &file : files)
+				if (file.filename() != joint)
+					std::filesystem::rename(file, std::filesystem::path(fn_out.c_str()) / file.filename());
+			std::filesystem::rename(stage / joint, std::filesystem::path(fn_out.c_str()) / joint);
+		} catch (const std::filesystem::filesystem_error &error) {
+			REPORT_ERROR("Aggregate-only publication failed: " + std::string(error.what()));
+		}
+		if (verb > 0) std::cout << "Aggregate-only dataset ready in " << fn_out << std::endl;
+		return;
+	}
 	prepareGainReference(true);
 
 	int barstep;
@@ -1253,8 +1304,23 @@ void MotioncorrRunner::collectWriteFailures(std::vector<char> &movie_failed)
 	}
 }
 
-void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
+namespace {
+void requireAggregatePdf(const FileName &filename) {
+	std::ifstream input(filename.c_str(), std::ios::binary | std::ios::ate);
+	const std::streamoff length = input ? static_cast<std::streamoff>(input.tellg()) : 0;
+	if (length < 10) REPORT_ERROR("Aggregate-only incomplete PDF: " + filename);
+	input.seekg(0); char magic[5] = {};
+	input.read(magic, 5);
+	if (std::string(magic, 5) != "%PDF-") REPORT_ERROR("Aggregate-only invalid PDF: " + filename);
+	input.seekg(std::max<std::streamoff>(0, length - 1024));
+	std::string tail((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+	if (tail.find("%%EOF") == std::string::npos) REPORT_ERROR("Aggregate-only truncated PDF: " + filename);
+}
+}
+
+void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 {
+	if (report_out.empty()) report_out = fn_out;
 
 	long int barstep = XMIPP_MAX(1, fn_ori_micrographs.size() / 60);
 	if (verb > 0)
@@ -1358,8 +1424,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
         if (tomogramSet.globalTable.containsLabel(EMDL_MICROGRAPH_PIXEL_SIZE))
             tomogramSet.globalTable.deactivateLabel(EMDL_MICROGRAPH_PIXEL_SIZE);
         tomogramSet.convertBackFromSingleMetaDataTable(MDavg);
-        tomogramSet.write(fn_out+"corrected_tilt_series.star");
-        if (verb > 0) std::cout << " Written: " << fn_out << "corrected_tilt_series.star" << std::endl;
+        tomogramSet.write(report_out+"corrected_tilt_series.star");
+        if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_tilt_series.star" << std::endl;
     }
     else
     {
@@ -1370,8 +1436,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
             my_angpix *= bin_factor;
             obsModel.opticsMdt.setValue(EMDL_MICROGRAPH_PIXEL_SIZE, my_angpix);
     	}
-        obsModel.save(MDavg, fn_out + "corrected_micrographs.star", "micrographs");
-        if (verb > 0) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
+        obsModel.save(MDavg, report_out + "corrected_micrographs.star", "micrographs");
+        if (verb > 0 && !aggregate_only) std::cout << " Written: " << fn_out << "corrected_micrographs.star" << std::endl;
     }
 
 	if (verb > 0) std::cout << " Now generating logfile.pdf ... " << std::endl;
@@ -1381,7 +1447,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_TOTAL);
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_EARLY);
 	plot_labels.push_back(EMDL_MICROGRAPH_ACCUM_MOTION_LATE);
-	FileName fn_eps, fn_eps_root = fn_out + "corrected_micrographs";
+	FileName fn_eps, fn_eps_root = report_out + "corrected_micrographs";
 	std::vector<FileName> all_fn_eps;
 	RCTIC(TIMING_W_HISTEPS);
 	for (int i = 0; i < plot_labels.size(); i++)
@@ -1416,7 +1482,8 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 		// Just have the overall headers only in the output PDF file
 		RCTIC(TIMING_W_GS_LOGFILE);
-		joinMultipleEPSIntoSinglePDF(fn_out + "logfile.pdf", all_fn_eps);
+		joinMultipleEPSIntoSinglePDF(report_out + "logfile.pdf", all_fn_eps, aggregate_only);
+		if (aggregate_only) requireAggregatePdf(report_out + "logfile.pdf");
 		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
@@ -1433,7 +1500,13 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		// Only loop over fn_micrographs, not fn_ori_micrographs, so only the new ones for do_at_most or only_do_unfinished
 		all_fn_eps.clear();
 		FileName fn_prev="";
-		for (long int i = 0; i < fn_micrographs.size(); i++)
+		if (aggregate_only) {
+			// Exact original order, with no directory glob admitting stale/unassigned
+			// plots. Complete preflight already verified every requested movie.
+			for (const FileName &movie : fn_ori_micrographs)
+				all_fn_eps.push_back(fn_out + movie.withoutExtension() + "_shifts.eps");
+		}
+		for (long int i = 0; !aggregate_only && i < fn_micrographs.size(); i++)
 		{
 			if (fn_prev != fn_micrographs[i].beforeLastOf("/"))
 			{
@@ -1449,7 +1522,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		// boundary, where it would be std::terminate.
 		std::exception_ptr header_failure;
 		std::thread header_thread([&]() {
-			try { joinMultipleEPSIntoSinglePDF(fn_out + "header.pdf", header_fn_eps); }
+			try { joinMultipleEPSIntoSinglePDF(report_out + "header.pdf", header_fn_eps, aggregate_only); }
 			catch (...) { header_failure = std::current_exception(); }
 		});
 		// The batch pass below is not noexcept: joinMultipleEPSIntoSinglePDF
@@ -1466,7 +1539,7 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 		} header_joiner{header_thread};
 
 		RCTIC(TIMING_W_GS_BATCH);
-		joinMultipleEPSIntoSinglePDF(fn_out + "batch.pdf", all_fn_eps);
+		joinMultipleEPSIntoSinglePDF(report_out + "batch.pdf", all_fn_eps, aggregate_only);
 		RCTOC(TIMING_W_GS_BATCH);
 
 		header_thread.join();
@@ -1475,21 +1548,28 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 
 		// Concatenate all PDFs of the batches
 		std::vector<FileName> fn_pdfs;
-		if (exists(fn_out + "all_batches.pdf")) fn_pdfs.push_back(fn_out + "all_batches.pdf");
-		fn_pdfs.push_back(fn_out + "batch.pdf");
+		if (!aggregate_only && exists(report_out + "all_batches.pdf")) fn_pdfs.push_back(report_out + "all_batches.pdf");
+		fn_pdfs.push_back(report_out + "batch.pdf");
 		RCTIC(TIMING_W_GS_ALLB);
-		concatenatePDFfiles(fn_out + "all_batches.pdf", fn_pdfs);
+		if (!concatenatePDFfiles(report_out + "all_batches.pdf", fn_pdfs) && aggregate_only)
+			REPORT_ERROR("Aggregate-only batch PDF concatenation failed.");
 		RCTOC(TIMING_W_GS_ALLB);
 
 		// Put header in front of comabined batches
 		RCTIC(TIMING_W_GS_LOGFILE);
-		concatenatePDFfiles(fn_out + "logfile.pdf", fn_out + "header.pdf", fn_out + "all_batches.pdf");
+		if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf") && aggregate_only)
+			REPORT_ERROR("Aggregate-only full PDF concatenation failed.");
+		if (aggregate_only) {
+			requireAggregatePdf(report_out + "header.pdf");
+			requireAggregatePdf(report_out + "batch.pdf");
+			requireAggregatePdf(report_out + "logfile.pdf");
+		}
 		RCTOC(TIMING_W_GS_LOGFILE);
 
 	}
 
 
-	if (verb > 0 )
+	if (verb > 0 && !aggregate_only)
 	{
 		std::cout << " Done! Written: " << fn_out << "logfile.pdf" << std::endl;
 	}

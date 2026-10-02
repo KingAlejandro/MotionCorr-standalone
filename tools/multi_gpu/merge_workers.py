@@ -13,17 +13,12 @@ Order is taken from the manifest's canonical movie list -- the input STAR's row
 order -- not from completion order, so the staged tree and the aggregate row
 order do not depend on which worker finished first.
 
-The authoritative aggregate `corrected_micrographs.star` is produced by the
-stock binary, not synthesized here. generateLogFilePDFAndWriteStarFiles()
-re-reads every per-movie STAR from disk (src/motioncorr_runner.cpp:1097-1150),
-so running the binary over the full input with --only_do_unfinished against the
-staged tree regenerates it exactly, with no source change and no re-serialized
-metadata. Pass --aggregate-with to do that.
-
-`logfile.pdf` is deliberately NOT reproduced. The PDF batch loop globs only the
-movies in the current pending list, so a merged run's PDF is not equivalent to a
-serial run's, by construction; producing one that is needs a source change and
-is out of scope here. This tool neither writes it nor claims it.
+The authoritative dataset STAR and full report are produced by the stock
+binary's explicit --aggregate_only mode. Every requested movie is preflighted
+as complete; aggregation cannot process a missing movie or rewrite its products.
+Per-worker aggregate reports remain retained as provenance, not substitutes for
+the final canonical dataset report. Without --aggregate-with, staging PASS is
+not dataset readiness.
 """
 
 from __future__ import annotations
@@ -168,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--report", default=None, help="write the verdict JSON here")
     ap.add_argument("--aggregate-with", default=None, metavar="BINARY",
                     help="regenerate corrected_micrographs.star by running BINARY over the "
-                         "full input STAR with --only_do_unfinished against the merged tree")
+                         "full input STAR with --aggregate_only against the merged tree")
     ap.add_argument("--input-star", default=None,
                     help="full input STAR, required with --aggregate-with")
     ap.add_argument("--aggregate-args", default="",
@@ -495,18 +490,19 @@ def main(argv: list[str] | None = None) -> int:
             print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
             return 2
         cmd = [a.aggregate_with, "--i", str(Path(a.input_star).resolve()),
-               "--o", str(out) + os.sep, "--only_do_unfinished"] + aggregate_extra
-        # The aggregate step exists only to have the stock binary regenerate the
-        # dataset STAR over the staged tree. It is a full --only_do_unfinished run,
+               "--o", str(out) + os.sep, "--aggregate_only"] + aggregate_extra
+        # The stock binary verifies every movie before generating the complete
+        # dataset STAR/report. --aggregate_only cannot process an incomplete movie,
         # and isMovieComplete() is option-dependent -- do_dose_weighting/save_noDW,
         # even_odd_split, grouping_for_ps, and since PR110 the per-movie expected
         # frame count (src/motioncorr_runner.cpp:596-620). If --aggregate-args does
-        # not match what the workers ran, a movie this merge just certified is
-        # judged incomplete and REPROCESSED on top of the staged product, and the
-        # report would then describe bytes the workers never wrote. Digest the
+        # not match what the workers ran, the binary refuses. Independently check
+        # contents AND mtimes so even a same-byte accidental rewrite is detected.
+        # Digest the
         # staged per-movie products first and require every one of them to survive
         # untouched.
-        staged_before = {rel: hashlib.sha256((out / rel).read_bytes()).hexdigest()
+        staged_before = {rel: (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
+                              (out / rel).stat().st_mtime_ns)
                          for rel in sorted(produced)}
         proc = subprocess.run(cmd, capture_output=True, text=True)
         try:
@@ -519,14 +515,14 @@ def main(argv: list[str] | None = None) -> int:
         rewritten = sorted(
             rel for rel, digest in staged_before.items()
             if not (out / rel).exists()
-            or hashlib.sha256((out / rel).read_bytes()).hexdigest() != digest)
+            or (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
+                (out / rel).stat().st_mtime_ns) != digest)
         if rewritten:
             problems.append(
                 f"aggregate step rewrote {len(rewritten)} staged worker product(s) "
                 f"instead of only regenerating the dataset STAR: {rewritten[:5]}"
                 + (" ..." if len(rewritten) > 5 else "")
-                + ". --only_do_unfinished judged them incomplete, so --aggregate-args "
-                  "does not match the options the workers ran under.")
+                + ". --aggregate_only must not process or rewrite per-movie products.")
         (out / "_workers" / "merge.log").parent.mkdir(parents=True, exist_ok=True)
         (out / "_workers" / "merge.log").write_text(proc.stdout + proc.stderr)
         agg = {"command": cmd, "returncode": proc.returncode}
@@ -561,6 +557,17 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 else:
                     agg["row_order"] = "canonical"
+        pdf = out / "logfile.pdf"
+        if proc.returncode == 0:
+            try:
+                data = pdf.read_bytes()
+                if not data.startswith(b"%PDF-") or b"%%EOF" not in data[-1024:]:
+                    problems.append("aggregate produced an invalid/truncated logfile.pdf")
+                else:
+                    report["logfile_pdf"] = "complete canonical report generated by aggregate-only binary"
+            except OSError as exc:
+                problems.append(f"aggregate report missing/unreadable: {exc}")
+        report["dataset_ready"] = not problems
         report["aggregate_star"] = agg
         report["problems"] = problems
         report["verdict"] = "PASS" if not problems else "FAIL"

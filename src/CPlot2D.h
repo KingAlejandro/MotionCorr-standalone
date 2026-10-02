@@ -35,7 +35,7 @@
 /* SHWS: join multiple eps files into a single pdf
  *
  */
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps);
+void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false);
 
 /* SHWS: concatenate multiple PDF files into a single one
  *

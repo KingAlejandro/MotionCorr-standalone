@@ -993,6 +993,8 @@ def main(argv: list[str] | None = None) -> int:
         status["gpu_witness"] = "skipped by --no-witness; no device claim is supported"
         verdict_ok = False
 
+    status["workers_complete"] = verdict_ok
+    status["dataset_ready"] = False  # staging/aggregate/report are a separate endpoint
     status["verdict"] = "PASS" if verdict_ok else "FAIL"
     (out / "status.json").write_text(json.dumps(status, indent=2) + "\n")
 

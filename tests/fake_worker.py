@@ -77,6 +77,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--i", dest="inp", required=True)
     ap.add_argument("--o", dest="out", required=True)
     ap.add_argument("--only_do_unfinished", action="store_true")
+    ap.add_argument("--aggregate_only", action="store_true")
+    ap.add_argument("--fake_missing_report", action="store_true")
     ap.add_argument("--gpu", default=None)
     ap.add_argument("--fake_skip", default=None,
                     help="comma-separated movie names to silently not produce")
@@ -129,7 +131,7 @@ def main(argv: list[str] | None = None) -> int:
         if movie in skip:
             continue
         root = star_io.worker_relative_root(star_io.output_root(movie))
-        if (a.only_do_unfinished and not a.fake_reprocess
+        if ((a.only_do_unfinished or a.aggregate_only) and not a.fake_reprocess
                 and all((outdir / (root + s)).exists() for s in PRODUCTS)):
             continue
         write_products(outdir, movie,
@@ -164,7 +166,8 @@ def main(argv: list[str] | None = None) -> int:
                      f"{star_quote(prefix + root + '.star')}\n")
     lines.append("\n")
     (outdir / "corrected_micrographs.star").write_text("".join(lines))
-    (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n")
+    if not a.fake_missing_report:
+        (outdir / "logfile.pdf").write_text("%PDF-1.4 fake\n%%EOF\n")
     (outdir / "logfile.pdf.lst").write_text("fake\n")
     (outdir / "corrected_micrographs_all_accum.eps").write_text("%!PS fake\n")
 

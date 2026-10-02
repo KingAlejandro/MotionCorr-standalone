@@ -83,6 +83,9 @@ public:
 	// extra thread costs more CPU than the overlap buys.
 	bool sync_output = false;
 
+	// Rebuild only complete dataset STAR/report products; never process a movie.
+	bool aggregate_only = false;
+
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;
 
@@ -283,7 +286,7 @@ public:
 	void writeModel(Micrograph &mic);
 
 	// Make a PDF file with all the shifts and write output STAR files
-	void generateLogFilePDFAndWriteStarFiles();
+	void generateLogFilePDFAndWriteStarFiles(FileName report_out = "");
 
 	// Write out final STAR file
 	void writeSTAR();

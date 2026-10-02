@@ -1706,7 +1706,7 @@ def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
                for p in rep["problems"]), rep["problems"]
     # every movie was rewritten, so the count must say so rather than reporting
     # a single incidental file
-    assert any(f"rewrote {len(DEFAULT_ROWS)} staged" in p
+    assert any(f"rewrote {2 * len(DEFAULT_ROWS)} staged" in p
                for p in rep["problems"]), rep["problems"]
 
 
@@ -2256,6 +2256,12 @@ def main(argv: list[str] | None = None) -> int:
     if a.binary:
         cases.append(lambda tmp: case_device_list_rejected(tmp, a.binary))
         cases[-1].__name__ = "case_device_list_rejected"  # type: ignore[attr-defined]
+        def aggregate_control(_tmp):
+            result = subprocess.run([PY, str(ROOT / "tests/test_aggregate_only.py"),
+                                     "--binary", a.binary, "--fake-gs"], text=True, capture_output=True)
+            if result.returncode != 0:
+                raise AssertionError(result.stdout + result.stderr)
+        cases.append(aggregate_control)
     else:
         print("NOTE: --binary not given; the --gpu device-list rejection case is "
               "NOT run and is not claimed to pass.")

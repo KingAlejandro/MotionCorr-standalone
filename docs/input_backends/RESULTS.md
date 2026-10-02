@@ -294,6 +294,43 @@ about a second on process and CUDA-context startup, which §4.1 excludes and
 this table includes. Both are reported because both are real — the first is
 what a small job costs, the second is what scales.
 
+### 4.5 Host-to-device bytes and time, from Nsight
+
+One movie per arm, `nsys profile --trace=cuda`. Byte counts are
+contention-immune — the same payload reports the same number whatever else the
+box is doing — so these are given as exact figures while the times are not.
+
+| variant | main route | main H2D | branch route | branch H2D | reduction |
+|---|---|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp | 196.778 MB | nvcomp | 196.778 MB | 0 (null) |
+| `u16_deflate_rps1_48f` | nvcomp | 328.293 MB | nvcomp | 328.293 MB | 0 (null) |
+| `u16_lzw_rps1` | compact | 751.336 MB | compact | 751.336 MB | 0 (null) |
+| `u16_deflate_rps8` | compact | 751.336 MB | nvcomp | 191.968 MB | **−74%** |
+| `u8_lzw_rps1` | float | 1,434.807 MB | compact | 409.600 MB | **−71%** |
+| `u8_lzw_rps1_48f` | float | 2,801.773 MB | compact | 751.360 MB | **−73%** |
+| `u8_deflate_rps1` | float | 1,434.807 MB | nvcomp | 162.985 MB | **−89%** |
+| `u8_deflate_rps1_48f` | float | 2,801.773 MB | nvcomp | 258.129 MB | **−91%** |
+
+The three unchanged-route rows are byte-identical across arms, to the byte.
+
+Transfer time from the same captures, which is not contention-immune and is
+given to bound the pinning question only:
+
+| variant | main H2D time | branch H2D time |
+|---|---|---|
+| `u8_lzw_rps1` | 249.7 ms | 59.3 ms |
+| `u8_lzw_rps1_48f` | 496.4 ms | 112.1 ms |
+| `u8_deflate_rps1` | 211.2 ms | 15.5 ms |
+| `u8_deflate_rps1_48f` | 499.9 ms | 19.3 ms |
+| `u16_deflate_rps8` | 103.1 ms | 16.5 ms |
+| `u16_lzw_rps1` | 100.4 ms | 115.6 ms |
+
+The compact route's 59.3 ms for 409.6 MB is about 6.9 GB/s, which is pageable
+PCIe. Pinning that staging could recover at most ~42 ms of a 766 ms movie
+(5.5%), and would cost 0.32-1.27 GiB of pinned memory per worker — the same
+resource §4.2 exists to reduce. The nvCOMP arms already transfer from a pinned
+pool and are at 15-23 ms.
+
 ## 5. What is still unsupported, and by what
 
 | input | route | why |

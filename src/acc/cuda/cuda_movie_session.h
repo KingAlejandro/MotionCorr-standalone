@@ -95,6 +95,18 @@ public:
         bool download_sum = true
     );
 
+    // Same contract for an 8-bit unsigned TIFF. (float)uint8 is exact, so the
+    // products are bit-identical to the float path for the same file, and the
+    // host payload and the PCIe bytes are a quarter of the float movie's rather
+    // than a half. Signed 8-bit samples are a different conversion and must not
+    // reach this overload; the runner admits UChar by name.
+    bool applyGainDefectsAndSumU8(
+        const std::vector<Image<unsigned char> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum = true
+    );
+
     // Attempt the device ingest and report what actually happened.
     //
     // This is the boundary the runner uses. It wraps the worker below and adds
@@ -259,6 +271,17 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    // The shared body of the two native-sample overloads above. Private: callers
+    // name the sample type through the overloads, which is what keeps SChar and
+    // SShort from instantiating it by accident.
+    template <typename T>
+    bool applyGainDefectsAndSumNative(
+        const std::vector<Image<T> > &raw_frames,
+        const MultidimArray<float> *gain_ref,
+        MultidimArray<float> &unaligned_sum,
+        bool download_sum
+    );
+
     cudaError_t releaseBuffer(void *&slot) noexcept;
     template<class T> cudaError_t releaseBuffer(T *&slot) noexcept;
     cufftResult releasePlan(cufftHandle &slot, bool &owned) noexcept;

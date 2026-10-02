@@ -166,7 +166,7 @@ exec "{sys.executable}" "$@"
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
         # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState,
         # #85 OutputTreeComparator, #97 recenter/interpolation contracts, and
-        # the #95 NativeU16Staging, and the #126 DeflateLayout / ScratchArena /
+        # the #95 NativeMovieStaging, and the #126 DeflateLayout / ScratchArena /
         # DefectNeighbours device-free ingest contracts.
         #
         # This list restates DEFAULT_REQUIRED_TESTS, so it has to be updated in
@@ -210,7 +210,7 @@ exec "{sys.executable}" "$@"
             "WriteFaultsMultiProduct",
             "NvcompGuards",
             "OutputStageFaults",
-            "NativeU16Staging",
+            "NativeMovieStaging",
         ]
 
         def runnable(name: str) -> dict:
@@ -235,7 +235,7 @@ exec "{sys.executable}" "$@"
         # only thing that can reject the collection is the missing-name check.
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
-                        "OutputTreeComparator", "NativeU16Staging",
+                        "OutputTreeComparator", "NativeMovieStaging",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)

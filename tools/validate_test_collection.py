@@ -94,9 +94,10 @@ DEFAULT_REQUIRED_TESTS = [
     # difference the scope guard makes; a check for "non-zero exit" would pass
     # on the defect.
     "OutputStageFaults",
-    # Issue #95: the only test that can observe the native uint16 staging
-    # ownership contract. Registered under if(UNIX) beside ImageWriteFaults.
-    "NativeU16Staging",
+    # Issue #95: the only test that can observe the native sample staging
+    # ownership contract, for both widths the compact route admits. Registered
+    # under if(UNIX) beside ImageWriteFaults.
+    "NativeMovieStaging",
 ]
 
 

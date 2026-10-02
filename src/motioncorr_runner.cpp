@@ -27,7 +27,7 @@
 #include <thread>
 
 #include "src/motioncorr_runner.h"
-#include "src/native_u16_staging.h"
+#include "src/native_movie_staging.h"
 #include "src/defect_neighbours.h"
 #ifdef _CUDA_ENABLED
 #include "src/acc/cuda/cuda_mem_utils.h"
@@ -1515,15 +1515,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Image<float> Ihead, Iref, Iref_odd, Iref_even;
 	std::vector<MultidimArray<fComplex> > Fframes;
 	std::vector<Image<float> > Iframes;
-	// Issue #85 lane C: native uint16 staging for unsigned-16-bit TIFF input on the
+	// Issue #85 lane C: native sample staging for unsigned TIFF input on the
 	// resident CUDA path. Holds the decoded movie in its file sample type (half the
-	// bytes of Iframes) until the device has expanded it. Empty on every other path.
+	// bytes of Iframes for a 16-bit file, a quarter for an 8-bit one) until the
+	// device has expanded it. Exactly one of these is non-empty, and only on the
+	// compact route; both are empty on every other path.
 	std::vector<Image<unsigned short> > Iframes_u16;
-	// Owns those frames' pixels as one mapping; see NativeU16MovieStaging. Movie
+	std::vector<Image<unsigned char> > Iframes_u8;
+	// Own those frames' pixels as one mapping each; see NativeMovieStaging. Movie
 	// scoped, so a throw anywhere below still returns the pages. Declared AFTER
-	// Iframes_u16 on purpose: release() writes through the frames it bound, so it
-	// has to run before that vector is destroyed.
+	// the frame vectors on purpose: release() writes through the frames it bound,
+	// so it has to run before those vectors are destroyed.
 	NativeU16MovieStaging u16_staging;
+	NativeU8MovieStaging u8_staging;
 	std::vector<Image<float> > Irefframes;
 	std::vector<int> frames; // 0-indexed
 
@@ -1637,9 +1641,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 
 	// Issue #85 lane C. Set below, once the CUDA session state is known: the
 	// compact arm is only worth its host mapping when a resident session will
-	// actually consume it. Declared out here because expand_u16_to_float() reads
-	// it on the CPU-only path too.
-	bool stage_u16 = false;
+	// actually consume it. Declared out here because expand_compact_to_float()
+	// reads it on the CPU-only path too.
+	//
+	// One variable rather than one bool per width: the sites below all ask "is a
+	// compact movie live, and in which sample type", and two independent bools
+	// would make "both set" representable and silently wrong.
+	enum CompactStage { COMPACT_NONE, COMPACT_U8, COMPACT_U16 };
+	CompactStage compact_stage = COMPACT_NONE;
 
 #ifdef _CUDA_ENABLED
     // Legacy early-binning/nonresident FFT preparation may retain a real-frame
@@ -1719,34 +1728,54 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Composed ingest routing (#126 fast path over the #118/#125 fallback). Exactly
 	// one of three paths runs for a healthy movie:
 	//   eligible Deflate TIFF and nvCOMP available -> device ingest, above;
-	//   otherwise eligible unsigned-16-bit TIFF    -> compact host uint16 staging;
+	//   otherwise eligible unsigned 8/16-bit TIFF  -> compact host native staging;
 	//   otherwise                                  -> main's float host reader.
 	// Deciding the compact arm here, after the session exists, is what lets it
 	// require a live session. PR125 had to approximate that with
 	// use_gpu && !early_binning and then widen again when initialize() failed,
-	// which bound and released a movie-sized mapping for nothing. Only UShort is
-	// safe: SShort shares bitsPerSample == 16 but wraps negatives, and the packed
-	// 4-bit K2/K3 format reports bitsPerSample == 8 while doubling the logical width.
+	// which bound and released a movie-sized mapping for nothing.
+	//
+	// The admitted types are named, not derived from a width. SShort shares
+	// bitsPerSample == 16 and SChar shares bitsPerSample == 8, but both wrap
+	// negatives through a different cast; the packed 4-bit K2/K3 format also
+	// reports bitsPerSample == 8 while doubling the logical width, and rwTIFF
+	// gives it its own UHalf type rather than UChar. Whatever LibTIFF can decode
+	// into one of these two sample types is eligible here regardless of codec,
+	// strip geometry or predictor -- the decode is LibTIFF's, so this route
+	// inherits its codec semantics instead of reimplementing them.
 	if (ingest_mode != INGEST_FLOAT &&
 	    !nvcomp_ingested && movie_session && !isEER && !isCompressedMRC &&
 	    ((FileName)fn_mic.getFileFormat()).contains("tif") &&
-	    Ihead.dataType() == UShort) {
-		stage_u16 = true;
-		u16_staging.bind(Iframes_u16, n_frames, ny, nx);
-		// One line, and it keeps the exact prefix docs/issue85_laneC/compare_movie_logs.py
-		// filters on. A second line would make every u16-staged log differ under that
-		// retained comparator for a reason that is not a product difference.
-		logfile << "Staging this movie as native unsigned 16-bit; the uint16 to float "
+	    (Ihead.dataType() == UShort || Ihead.dataType() == UChar)) {
+		size_t staged_bytes = 0;
+		const char *width_name = "";
+		if (Ihead.dataType() == UShort) {
+			compact_stage = COMPACT_U16;
+			u16_staging.bind(Iframes_u16, n_frames, ny, nx);
+			staged_bytes = u16_staging.bytes();
+			width_name = "16-bit";
+		} else {
+			compact_stage = COMPACT_U8;
+			u8_staging.bind(Iframes_u8, n_frames, ny, nx);
+			staged_bytes = u8_staging.bytes();
+			width_name = "8-bit";
+		}
+		// One line, and the 16-bit wording keeps the exact prefix
+		// tools/support_matrix.py filters on. A second line would make every
+		// compact-staged log differ under that retained comparator for a reason
+		// that is not a product difference.
+		logfile << "Staging this movie as native unsigned " << width_name
+		        << "; the integer to float "
 		        << "expansion and the gain are applied on the device; host staging is one "
-		        << "mapping of " << u16_staging.bytes() << " bytes for " << n_frames
+		        << "mapping of " << staged_bytes << " bytes for " << n_frames
 		        << " x " << nx << " x " << ny << " samples, released before any float "
 		        << "movie is materialized." << std::endl;
 	}
-	if (ingest_mode == INGEST_COMPACT && !stage_u16)
-		REPORT_ERROR("--ingest compact was requested but the compact uint16 staging did not "
+	if (ingest_mode == INGEST_COMPACT && compact_stage == COMPACT_NONE)
+		REPORT_ERROR("--ingest compact was requested but the compact native staging did not "
 		             "apply to " + fn_mic + ". Either there is no resident CUDA session, or "
-		             "this movie is not an unsigned-16-bit TIFF. Refusing to continue on a "
-		             "different path under a pinned --ingest.");
+		             "this movie is not an unsigned 8- or 16-bit TIFF. Refusing to continue "
+		             "on a different path under a pinned --ingest.");
 #endif
 
 	// Which path this movie actually took. Written only when asked for, to a file
@@ -1757,7 +1786,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		const char *taken = "float";
 #ifdef _CUDA_ENABLED
 		if (nvcomp_ingested)   taken = "nvcomp";
-		else if (stage_u16)    taken = "compact";
+		else if (compact_stage != COMPACT_NONE) taken = "compact";
 #endif
 		std::ofstream witness(fn_ingest_witness.c_str(), std::ios::app);
 		if (!witness) REPORT_ERROR("Cannot open --ingest_witness file " + fn_ingest_witness);
@@ -1786,10 +1815,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				else if (isCompressedMRC)
 					compressedMRCreader.readFrameInto(Iframes[iframe], frames[iframe]);
 #ifdef _CUDA_ENABLED
-				else if (stage_u16)
+				else if (compact_stage == COMPACT_U16)
 					// Same reader, same guards, same per-row Y-flip; only the destination
 					// sample type differs, and castPage2T's UShort branch is then a memcpy.
 					Iframes_u16[iframe].read(fn_mic, true, frames[iframe], false, true);
+				else if (compact_stage == COMPACT_U8)
+					// As above; castPage2T's UChar branch is the memcpy here.
+					Iframes_u8[iframe].read(fn_mic, true, frames[iframe], false, true);
 #endif
 				else
 					Iframes[iframe].read(fn_mic, true, frames[iframe], false, true); // mmap false, is_2D true
@@ -1806,40 +1838,56 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTOC(TIMING_READ_MOVIE);
 
 	// Issue #85 lane C: every path other than the resident device one consumes float
-	// frames, so a uint16-staged movie has to be widened before it can reach them.
-	// (float)u16 is exact, so the expanded frames are the same bits the float reader
-	// would have produced -- this only costs the memory the staging saved, and only
-	// on a path that has already lost the device.
-	auto expand_u16_to_float = [&]() {
-		if (!stage_u16) return;
+	// frames, so a compact-staged movie has to be widened before it can reach them.
+	// (float)uint8 and (float)uint16 are both exact, so the expanded frames are the
+	// same bits the float reader would have produced -- this only costs the memory
+	// the staging saved, and only on a path that has already lost the device.
+	//
+	// Frames are widened and released in ascending order so the peak stays where
+	// one allocation per frame left it; see NativeMovieStaging::discardThrough.
+	auto expand_compact_to_float = [&]() {
+		if (compact_stage == COMPACT_NONE) return;
 		const size_t num_pixels = (size_t)nx * ny;
+		const bool is_u8 = (compact_stage == COMPACT_U8);
 		for (int iframe = 0; iframe < n_frames; iframe++) {
 			Iframes[iframe]().reshape(ny, nx);
-			const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
 			float *dst = &DIRECT_MULTIDIM_ELEM(Iframes[iframe](), 0);
-			#pragma omp parallel for num_threads(n_threads) schedule(static)
-			for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
-				dst[pixel] = (float)src[pixel];
-			Iframes_u16[iframe].clear();
-			u16_staging.discardThrough(iframe + 1);
+			if (is_u8) {
+				const unsigned char *src = &DIRECT_MULTIDIM_ELEM(Iframes_u8[iframe](), 0);
+				#pragma omp parallel for num_threads(n_threads) schedule(static)
+				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
+					dst[pixel] = (float)src[pixel];
+				Iframes_u8[iframe].clear();
+				u8_staging.discardThrough(iframe + 1);
+			} else {
+				const unsigned short *src = &DIRECT_MULTIDIM_ELEM(Iframes_u16[iframe](), 0);
+				#pragma omp parallel for num_threads(n_threads) schedule(static)
+				for (long int pixel = 0; pixel < (long int)num_pixels; pixel++)
+					dst[pixel] = (float)src[pixel];
+				Iframes_u16[iframe].clear();
+				u16_staging.discardThrough(iframe + 1);
+			}
 		}
-		u16_staging.release();
-		stage_u16 = false;
-		logfile << "Materialized native uint16 frames as float for CPU fallback." << std::endl;
+		if (is_u8) u8_staging.release(); else u16_staging.release();
+		logfile << "Materialized native " << (is_u8 ? "uint8" : "uint16")
+		        << " frames as float for CPU fallback." << std::endl;
+		compact_stage = COMPACT_NONE;
 	};
 	// Release the native movie once no reader can still want it in its raw form.
 	// Bounding the lifetime this way matters on the degraded paths: a patch that
 	// does not converge downloads the aligned float frames, and that 1.27 GiB
 	// allocation should not have to sit alongside the 0.64 GiB it replaces.
-	auto drop_u16_staging = [&]() {
-		if (!stage_u16) return;
+	auto drop_compact_staging = [&]() {
+		if (compact_stage == COMPACT_NONE) return;
 		// Returning the pages matters here, not just freeing them: a non-converging
 		// patch downloads the full float movie afterwards, and anything the staging
 		// still holds is added to that. munmap makes the release unconditional, so
 		// this no longer depends on an allocator returning arena pages.
-		u16_staging.release();
-		stage_u16 = false;
-		logfile << "Released native uint16 host staging after device forward FFT." << std::endl;
+		const bool was_u8 = (compact_stage == COMPACT_U8);
+		if (was_u8) u8_staging.release(); else u16_staging.release();
+		compact_stage = COMPACT_NONE;
+		logfile << "Released native " << (was_u8 ? "uint8" : "uint16")
+		        << " host staging after device forward FFT." << std::endl;
 	};
 
 	MultidimArray<float> Isum(ny, nx);
@@ -1852,10 +1900,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	std::vector<float> resident_bad_replacements;
 	auto materialize_host_frames = [&]() {
 		if (!host_frames_are_raw) return;
-		// A uint16-staged movie is raw in the file's sample type; widen it first so
+		// A compact-staged movie is raw in the file's sample type; widen it first so
 		// the gain pass below is the same in-place float multiply as ever.
-		expand_u16_to_float();
-		// expand_u16_to_float is a no-op once the staging has been dropped, and that
+		expand_compact_to_float();
+		// expand_compact_to_float is a no-op once the staging has been dropped, and that
 		// is only sound while no raw reader remains. Both call sites of this lambda
 		// run at or before the global forward FFT, which is where the drop happens.
 		// Fail here rather than run the gain pass over an unallocated array.
@@ -1943,8 +1991,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// Keep the sum resident: hot-pixel statistics are computed on the device and
 		// only a sparse index list returns. downloadUnalignedSum() re-supplies the host
 		// copy if any exactness guard fails, or if skip_defect makes the sum dead.
-		const bool gain_sum_ok = stage_u16
+		const bool gain_sum_ok =
+		    compact_stage == COMPACT_U16
 		    ? movie_session->applyGainDefectsAndSumU16(Iframes_u16, gain_ptr, Isum, false)
+		    : compact_stage == COMPACT_U8
+		    ? movie_session->applyGainDefectsAndSumU8(Iframes_u8, gain_ptr, Isum, false)
 		    : movie_session->applyGainDefectsAndSum(Iframes, gain_ptr, Isum, false);
 		if (gain_sum_ok) {
 			cuda_gain_sum_done = true;
@@ -1956,7 +2007,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			// original CPU pass from raw frames and a known-zero accumulator.
 			Isum.initZeros();
 			// The CPU pass below reads float frames in place.
-			expand_u16_to_float();
+			expand_compact_to_float();
 		}
 	}
 	if (!cuda_gain_sum_done)
@@ -2275,14 +2326,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 //						std::cout << " " << DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
 						if (DIRECT_A2D_ELEM(bBad, y, x)) continue;
 //						std::cout << "o";
-						// Issue #85 lane C: on the uint16-staged path the raw host
-						// movie lives in Iframes_u16. (float)u16 is the same value
-						// the float reader stored, so the gain multiply below and
-						// every RNG draw that follows are unchanged.
+						// Issue #85 lane C: on a compact-staged path the raw host
+						// movie lives in Iframes_u16 or Iframes_u8. (float)u16 and
+						// (float)u8 are the same values the float reader stored, so
+						// the gain multiply below and every RNG draw that follows
+						// are unchanged.
 						float neighbor;
 #ifdef _CUDA_ENABLED
-						if (stage_u16)
+						if (compact_stage == COMPACT_U16)
 							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u16[iframe](), y, x);
+						else if (compact_stage == COMPACT_U8)
+							neighbor = (float)DIRECT_A2D_ELEM(Iframes_u8[iframe](), y, x);
 						else
 #endif
 							neighbor = DIRECT_A2D_ELEM(Iframes[iframe](), y, x);
@@ -2418,7 +2472,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// materialize sites are behind us, so the raw host movie is dead. The
 		// float path cannot do this -- its Iframes are still the fallback source
 		// -- which is why main only clears them when there is no session.
-		if (movie_session) drop_u16_staging();
+		if (movie_session) drop_compact_staging();
 #endif
 	} else {
 	#ifdef _CUDA_ENABLED

@@ -1,0 +1,13 @@
+report                nH2D       H2D bytes     H2D ms     GB/s     pageable/pinned (src)
+p1_base_1movie         274   1,434,806,904     176.59     8.13              Pageable:274
+p2_syncbt_1movie       274   1,434,806,904     255.11     5.62              Pageable:274
+p3_nvtx_1movie         274   1,434,806,904     187.98     7.63              Pageable:274
+p4_nvtx_3movie         814   4,282,647,512     548.05     7.81              Pageable:814
+p5_sampled_nvtx        274   1,434,806,904     311.60     4.60              Pageable:274
+p6_cudabt              274   1,434,806,904     272.86     5.26              Pageable:274
+p7_minimal             274   1,434,806,904     283.09     5.07              Pageable:274
+p8_nvtx_minimal        274   1,434,806,904     383.44     3.74              Pageable:274
+p9_flame               274   1,434,806,904     365.40     3.93              Pageable:274
+
+The byte count is identical in every profile; the rate is not.
+A100 80GB PCIe is gen4 x16 = 31.5 GB/s theoretical, ~24 GB/s achievable PINNED.

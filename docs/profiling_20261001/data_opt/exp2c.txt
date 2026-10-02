@@ -1,0 +1,12 @@
+variant                            rc    n     mrc-hash               witnessed path(s)            verdict
+ingest=nvcomp                      0     24    3ebed4b9cf62c46f4112        24 nvcomp               EXACT
+ingest=compact                     0     24    3ebed4b9cf62c46f4112        24 compact              EXACT
+ingest=float                       0     24    3ebed4b9cf62c46f4112        24 float                EXACT
+ingest=auto                        0     24    3ebed4b9cf62c46f4112        24 nvcomp               EXACT
+bin_factor2+auto                   1     0     e3b0c44298fc1c149afb        24 float                base rc=1
+nogain+auto                        0     24    3ebed4b9cf62c46f4112        24 nvcomp               EXACT
+
+witness file sample (cand, nvcomp):
+Movies/20170629_00021_frameImage.tiff nvcomp
+Movies/20170629_00022_frameImage.tiff nvcomp
+DONE 2026-10-01T12:58:51+00:00

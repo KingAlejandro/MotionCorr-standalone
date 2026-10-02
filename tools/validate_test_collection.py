@@ -99,6 +99,7 @@ DEFAULT_REQUIRED_TESTS = [
     # under if(UNIX) beside ImageWriteFaults.
     "MultiGpuScheduling",
     "NativeMovieStaging",
+    "JointStarPublication",
 ]
 
 

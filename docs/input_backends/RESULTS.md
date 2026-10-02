@@ -238,6 +238,33 @@ route. It is a single cold-binary first run — the candidate executable's first
 execution of the campaign — and the per-movie table above shows the same arm
 3.0% *faster* in steady state. §4.4 measures it directly.
 
+### 4.3 Transcoding as an operational mode
+
+Measured on one core of the same host with `imagecodecs`, which wraps the same
+C codecs LibTIFF uses, over the 683 MB of samples in one 24-frame movie:
+
+| operation | throughput | per 24-frame movie, 1 core |
+|---|---|---|
+| Deflate decode, uint16 | 227 MB/s | 3.0 s |
+| Deflate encode, uint16 | 9.0 MB/s | 75.7 s |
+| Deflate encode, uint8 | 6.9 MB/s | 49.6 s |
+| LZW encode, uint8 | 99 MB/s | 3.4 s |
+
+Converting a uint8 LZW movie to uint8 Deflate therefore costs **~50 s of core
+time per movie**, about 6-7 s wall at 8 cores. The per-pass saving it buys is
+the compact-to-nvCOMP step for that movie: 0.766 s → 0.452 s, i.e. 0.314 s.
+
+**Break-even is about 21 full repeated passes at 8 cores** (160 single-core).
+Disk is not a cost here — uint8 Deflate is 13% *smaller* than uint8 LZW for this
+content — but keeping the deposited original means holding both copies, and the
+converted copy needs its own losslessness check (the decoded-sample oracle takes
+about two minutes per movie on this host).
+
+For a one-pass or two-pass workflow, transcoding does not pay. For a facility
+that reprocesses the same collection tens of times it does. Either way it is an
+operational decision made outside MotionCorr, and no performance figure in §4.1
+or §4.2 includes or assumes a conversion.
+
 ### 4.4 Paired process wall, 9 repeats
 
 Six movies per run, arm order alternating between repeats, both binaries built
@@ -266,33 +293,6 @@ Process wall and per-movie wall disagree by design: a six-movie run spends
 about a second on process and CUDA-context startup, which §4.1 excludes and
 this table includes. Both are reported because both are real — the first is
 what a small job costs, the second is what scales.
-
-### 4.3 Transcoding as an operational mode
-
-Measured on one core of the same host with `imagecodecs`, which wraps the same
-C codecs LibTIFF uses, over the 683 MB of samples in one 24-frame movie:
-
-| operation | throughput | per 24-frame movie, 1 core |
-|---|---|---|
-| Deflate decode, uint16 | 227 MB/s | 3.0 s |
-| Deflate encode, uint16 | 9.0 MB/s | 75.7 s |
-| Deflate encode, uint8 | 6.9 MB/s | 49.6 s |
-| LZW encode, uint8 | 99 MB/s | 3.4 s |
-
-Converting a uint8 LZW movie to uint8 Deflate therefore costs **~50 s of core
-time per movie**, about 6-7 s wall at 8 cores. The per-pass saving it buys is
-the compact-to-nvCOMP step for that movie: 0.766 s → 0.452 s, i.e. 0.314 s.
-
-**Break-even is about 21 full repeated passes at 8 cores** (160 single-core).
-Disk is not a cost here — uint8 Deflate is 13% *smaller* than uint8 LZW for this
-content — but keeping the deposited original means holding both copies, and the
-converted copy needs its own losslessness check (the decoded-sample oracle takes
-about two minutes per movie on this host).
-
-For a one-pass or two-pass workflow, transcoding does not pay. For a facility
-that reprocesses the same collection tens of times it does. Either way it is an
-operational decision made outside MotionCorr, and no performance figure in §4.1
-or §4.2 includes or assumes a conversion.
 
 ## 5. What is still unsupported, and by what
 

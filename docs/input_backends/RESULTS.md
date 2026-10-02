@@ -1,126 +1,658 @@
-# Compact native ingest for unsigned 8-bit TIFF
+# Input backends: census, routes, correctness and performance
 
-Branch base: `main` at `c499b1d` (merged #128).
+Branch `experiment/input-backends-v2`, based on `main` at `c499b1d` (merged
+#128). Not based on #133's ancestry: that PR rewrites the same CUDA session for
+plan pooling, and keeping the input work off it is what lets the two be
+reviewed apart.
 
-## The gap
+## 0. Format census
 
-MotionCorr's resident CUDA path has three movie ingest routes for a TIFF:
+Every variant is generated losslessly from the RELION tutorial movies by
+`harness/gen_matrix.py` — one decode per source movie, every variant written
+from the same in-memory sample array. The tutorial data is counting-mode: the
+maximum sample over `20170629_00021` is **68**, so a uint8 re-encode is
+value-lossless and the generator refuses it outright if any sample would not
+fit. That is what makes "the same movie in another format must produce the same
+products" an exact gate rather than an approximation.
 
-| route | decoder | admitted on main |
-|---|---|---|
-| `nvcomp` | nvCOMP batched Deflate, on the device | 16-bit Deflate, one row per strip, predictor 1, native byte order |
-| `compact` | LibTIFF on the host, into native-sample host staging, expanded on the device | `UShort` only |
-| `float` | LibTIFF on the host, into a host float movie | everything else |
+Dimensions are read independently with `tifffile`, not inferred from the
+filename. All variants: 3710 x 3838, 1 sample/pixel, contiguous planar,
+little-endian native, `FillOrder` absent (MSB2LSB), 24 frames unless stated.
 
-An **8-bit unsigned TIFF has no route but `float`** — and 8-bit LZW is the
-sample type and codec most deposited movies are stored in. For a 48-frame
-3710x3838 movie that means building and uploading a 2.55 GiB host float movie
-whose own samples occupy 0.64 GiB.
+| variant | codec | sample | bits | predictor | rows/strip | strips/frame | frames | bytes (movie 00021) |
+|---|---|---|---|---|---|---|---|---|
+| `u16_deflate_rps1` *(the tutorial files, unmodified)* | Deflate | uint | 16 | 1 | 1 | 3838 | 24 | 126,550,106 |
+| `u8_lzw_rps1` | LZW | uint | 8 | 1 | 1 | 3838 | 24 | 106,902,076 |
+| `u8_lzw_rps64` | LZW | uint | 8 | 1 | 64 | 60 (last 2 rows) | 24 | 95,181,204 |
+| `u8_deflate_rps1` | Deflate | uint | 8 | 1 | 1 | 3838 | 24 | 92,573,485 |
+| `u8_deflate_rps16` | Deflate | uint | 8 | 1 | 16 | 240 (last 14 rows) | 24 | 92,629,682 |
+| `u16_lzw_rps1` | LZW | uint | 16 | 1 | 1 | 3838 | 24 | 128,052,925 |
+| `u16_deflate_rps2` | Deflate | uint | 16 | 1 | 2 | 1919 (exact) | 24 | 125,726,947 |
+| `u16_deflate_rps8` | Deflate | uint | 16 | 1 | 8 | 480 (last 6 rows) | 24 | 123,795,665 |
+| `u16_deflate_rps512` | Deflate | uint | 16 | 1 | 512 | 8 (last 254 rows) | 24 | 123,084,401 |
+| `u16_deflate_pred2` | Deflate | uint | 16 | **2** | 1 | 3838 | 24 | 149,825,412 |
+| `u16_raw_rps1` | none | uint | 16 | 1 | 1 | 3838 | 24 | 684,029,576 |
+| `u16_deflate_rps1_48f` | Deflate | uint | 16 | 1 | 1 | 3838 | **48** | 255,681,005 |
+| `u8_lzw_rps1_48f` | LZW | uint | 8 | 1 | 1 | 3838 | **48** | 213,804,156 |
+| `u8_deflate_rps1_48f` | Deflate | uint | 8 | 1 | 1 | 3838 | **48** | 185,146,973 |
 
-The compact route already does the right thing; it was gated on one sample
-type. This change admits the other.
+Two format classes are **out of scope and unchanged**: EER (rendered by
+`renderEER`, never offered to either accelerated route) and compressed MRC
+(`isCompressedMRC`, same). Nothing here was run on EER or MRC input and nothing
+here claims anything about them.
 
-## The change
+The 48-frame variants are the 24 frames tiled twice. They exercise frame count,
+the nvCOMP batch selector and the staging mapping; they are not a second
+specimen and the per-frame content repeats.
 
-The staging class, the conversion kernel and the gain/sum entry point are
-written once over the sample type and instantiated for `unsigned char` and
-`unsigned short`:
+### What a deposited uint8 LZW movie is, and is not, represented by
 
-* `src/native_u16_staging.h` → `src/native_movie_staging.h`, now
-  `NativeMovieStaging<T>` with the two typedefs the runner uses.
-* `convertGainAndAccumulateU16Kernel` → `convertGainAndAccumulateNativeKernel<T>`.
-* `applyGainDefectsAndSumU16` keeps its signature; `applyGainDefectsAndSumU8`
-  is added; both call one private template, so the memset-then-ascending-
-  accumulate order that makes the products bit-identical to the float path is
-  stated once.
-* The runner's `bool stage_u16` becomes a three-valued `compact_stage`, so
-  "both widths staged" is not representable.
+The deposited real-data files that motivated this work are LZW uint8. The
+`u8_lzw_*` variants above hold **real cryo-EM counting-mode content at a real
+detector geometry in exactly that encoding**, but they are re-encodes of the
+tutorial collection, not the deposited files. Codec work, sample width, strip
+geometry and frame count are faithful; the specimen, the detector and the
+compression ratio a different collection would reach are not. No performance
+figure here is a measurement of the deposited collection.
 
-Admission is by sample-type name, not by width. `SChar` shares
-`BitsPerSample == 8` with `UChar` and converts differently; rwTIFF gives IMOD's
-packed 4-bit K2/K3 format its own `UHalf` type. Neither is admitted.
+## 1. What changed
 
-`(float)uint8` is exact, so the device arithmetic is the same operations in the
-same order as the float path and the products are unchanged.
+Two changes, separable and separately reviewable.
 
-## Evidence
+**A. The compact route admits unsigned 8-bit TIFF.** The compact route decodes
+with LibTIFF into host staging held in the file's own sample type, then expands
+to float on the device together with the gain and the unaligned sum. It existed
+for `UShort` only, so an 8-bit TIFF — the sample type most deposited LZW movies
+use — materialised a host float movie four times the size of its own samples
+and uploaded it. The staging class, the conversion kernel and the gain/sum entry
+point are now written once over the sample type and instantiated for
+`unsigned char` and `unsigned short`. Admission is by sample-type name, not by
+width: `SChar` shares `BitsPerSample == 8` and converts differently, and rwTIFF
+gives IMOD's packed 4-bit K2/K3 format its own `UHalf` type.
 
-Venue, inputs, oracle and the full measurement campaign are described in
-`RESULTS.md` on the stacked follow-up branch; this section states what bears on
-this change alone.
+**B. The nvCOMP route admits 8-bit samples and any `RowsPerStrip`.** Both
+restrictions lived in the staging arithmetic, not in anything the decoder
+requires: a TIFF strip is one independent Deflate stream whatever its row count,
+so it is one nvCOMP chunk either way. Strip slots carry the output alignment and
+rows inside a strip are contiguous, which reduces to the released one-row
+arithmetic exactly when `RowsPerStrip` is 1. No stream is concatenated or split.
+The per-chunk declared length, the Adler-32 recomputation and the decoded-length
+check all follow the short final strip.
 
-### Decoded-sample oracle
+A defect found while building B is worth recording because the device could not
+have shown it: `frameStageBytes` sized the compressed staging by walking `ny`
+entries of a per-strip vector. With one row per strip those are the same number.
+With any larger `RowsPerStrip` it read past the vector, and the resulting
+nonsense size made every multi-row movie decline the fast path on the pinned
+budget — a silent fallback to a correct slower route, with correct products.
+
+## 2. Route matrix
+
+`--ingest_witness` records the route every movie actually took; these are the
+recorded values, not the intended ones. `main` is `c499b1d`; the candidate is
+this branch.
+
+| variant | route on main | route on this branch | changed by |
+|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp | nvcomp | — (null control) |
+| `u16_lzw_rps1` | compact | compact | — (null control) |
+| `u16_deflate_pred2` | compact | compact | — (null control) |
+| `u16_raw_rps1` | compact | compact | — (null control) |
+| `u8_lzw_rps1` | **float** | **compact** | A |
+| `u8_lzw_rps64` | **float** | **compact** | A |
+| `u8_deflate_rps1` | **float** | **nvcomp** | A + B |
+| `u8_deflate_rps16` | **float** | **nvcomp** | A + B |
+| `u16_deflate_rps2` | compact | **nvcomp** | B |
+| `u16_deflate_rps8` | compact | **nvcomp** | B |
+| `u16_deflate_rps512` | compact | **nvcomp** | B |
+| `u16_deflate_rps1_48f` | nvcomp | nvcomp | — |
+| `u8_lzw_rps1_48f` | **float** | **compact** | A |
+| `u8_deflate_rps1_48f` | **float** | **nvcomp** | A + B |
+
+Four variants keep their route on both arms and are the null controls for
+everything below. Predictor 2 and uncompressed input are *not* newly accepted
+by the fast path: they were already served by the compact route, and still are.
+
+## 3. Correctness
+
+### 3.1 Decoded-sample oracle
 
 `harness/dump_native_samples` dumps the movie exactly as the compact route
-stages it and `harness/compare_native_samples.py` compares every sample against
-an independent `tifffile`/`imagecodecs` decode. For the uint8 LZW and uint8
-Deflate variants of a real tutorial movie: **341,735,520 samples compared, 0
-differing**, with four controls firing on each — unflipped row order, a
-within-row transposition that leaves every row sum unchanged, a one-bit flip,
-and a dropped frame.
+stages it — same `Image<T>::read`, same sample type, same memory order — and
+`harness/compare_native_samples.py` compares every sample against an
+independent `tifffile`/`imagecodecs` decode, a different codec implementation
+from LibTIFF.
 
-### Ownership contract
+All 11 single-frame-count variants, movie `20170629_00021`:
+**341,735,520 samples compared per variant, 0 differing, 11/11 PASS.**
 
-`tests/test_native_movie_staging.cpp` now runs for both sample types: aliasing,
-`coreAllocateReuse` retention, incremental `discardThrough` with a measured
-resident-set drop, and `release()` returning the payload to the kernel, each
-with its own instrument self-check.
+The comparator is not merely returning "identical". Four controls fire on every
+variant:
 
-### Products
+| control | what it would catch |
+|---|---|
+| unflipped row order detected | the TIFF→MRC row flip being absent or applied twice |
+| within-row permutation detected, with row sums unchanged | two samples exchanged inside a row — invisible to any row-sum or row-hash check |
+| single-bit flip detected | one sample wrong by one |
+| dropped frame detected | a short movie compared as if complete |
 
-Every 8-bit variant's complete output tree is compared against the 16-bit
-Deflate tree for the same content — pixels, MRC headers including the extended
-header, trajectories, per-movie STAR, combined STAR and auxiliary products. The
-tutorial samples max at 68, so the uint8 re-encode is value-lossless and the
-trees must be identical; the comparison is exact, not an RMSE.
+### 3.2 Device-free staging and strip arithmetic
 
-### Where the device time goes
+`tests/test_deflate_layout.cpp` exercises the strip geometry over both sample
+widths, `RowsPerStrip` of 1/2/4/7/8/whole-frame, four output alignments, and a
+height that no tested `RowsPerStrip` divides. It asserts that the declared chunk
+bytes sum to exactly one frame, that row offsets strictly increase and stay
+inside the frame slab, that rows inside a strip are contiguous, that each strip
+slot meets the alignment, and that `RowsPerStrip == 1` reproduces the released
+row-pitch addressing exactly.
+
+Three compiled mutants of the production arithmetic each turn it red:
+
+| mutant | checks that fail |
+|---|---|
+| final strip declared at full length | declared-chunk-byte sum, 27 checks |
+| strip slots unaligned | strip-slot alignment, 18 checks |
+| padding inserted between rows inside a strip | row contiguity, 56 checks |
+
+`tests/test_native_movie_staging.cpp` runs the staging ownership contract for
+both `unsigned short` and `unsigned char`: aliasing, `coreAllocateReuse`
+retention, incremental `discardThrough` with a measured resident-set drop, and
+`release()` returning the payload to the kernel. It carries its own instrument
+self-check (the sampler must see the mapping arrive before an assertion about
+it leaving means anything) and a per-frame-heap diagnostic control.
+
+### 3.3 Complete output trees
+
+`docs/issue85_laneC/compare_output_trees.py`: pixels, every MRC header byte
+including the extended header, trajectories, per-movie STAR, combined STAR and
+auxiliary products. Only declared variation is normalised — the output-root
+prefix, measured-duration lines in `.log`, the date token in an MRC label, and
+the ingest route's own log lines, which are declared with
+`--allow-added-log-line` and therefore dropped from **both** arms. PDFs are
+inventoried, not content-compared.
+
+**26 of 26 comparisons PASS.**
+
+| comparison | arms | n |
+|---|---|---|
+| main vs branch, same variant | every one of the 14 variants | 14 PASS |
+| branch, each variant vs the uint16 Deflate reference | the 6-movie and 2-movie sets, and the 48-frame set | 12 PASS |
+| main, uint8 LZW vs uint16 Deflate | positive control: the cross-format identity already holds on main | PASS |
+
+The cross-format comparisons are the strong ones: the variants hold identical
+sample values, so a route that decoded, oriented, converted or accumulated
+anything differently would show here. 85,433,880 pixels per arm on the
+six-movie set.
+
+**Negative control.** An exact copy of one candidate tree compares PASS against
+the reference; changing **one pixel** of the 85,433,880 — the first float of
+one corrected image, 5.162257 to 6.162257 — turns the same comparison FAIL and
+names that file. A first attempt at this control failed for the wrong reason:
+`cp -a` leaves absolute paths inside the per-movie `.log` and `.eps` products,
+so the comparison rejected the copy before reaching any pixel and the mutated
+MRC was not even in the differing list. The control above is run
+`--products-only` with the joint STAR rewritten, and carries the unmutated
+positive leg, so the FAIL is attributable to the pixel.
+
+### 3.4 The route contract, exercised rather than assumed
+
+`--ingest {nvcomp,compact,float}` must fail a movie that cannot take the named
+route rather than quietly using another. Without that, "this variant took
+nvcomp" is an observation about defaults, not about eligibility. Ten variants,
+three pinned modes each, candidate binary:
+
+| variant | `--ingest nvcomp` | `--ingest compact` | `--ingest float` |
+|---|---|---|---|
+| uint16 Deflate, 1 row/strip | OK | OK | OK |
+| uint16 Deflate, 8 rows/strip | OK | OK | OK |
+| uint16 Deflate, 512 rows/strip | OK | OK | OK |
+| uint8 Deflate, 1 row/strip | OK | OK | OK |
+| uint8 Deflate, 16 rows/strip | OK | OK | OK |
+| uint16 LZW | **REFUSED** | OK | OK |
+| uint16 Deflate, predictor 2 | **REFUSED** | OK | OK |
+| uint16 uncompressed | **REFUSED** | OK | OK |
+| uint8 LZW, 1 row/strip | **REFUSED** | OK | OK |
+| uint8 LZW, 3837 rows/strip | **REFUSED** | OK | OK |
+
+Every refusal is a codec or predictor nvCOMP genuinely cannot take, and every
+one of those still has both host routes. No variant silently changed route
+under a pin.
+
+### 3.5 Selected frames and grouping
+
+`--first_frame_sum`, `--last_frame_sum`, `--group_frames` and a combination of
+all three, run on the uint16 Deflate reference and on both uint8 variants, both
+arms. The three inputs hold identical sample values, so all three product trees
+must match.
+
+**28 of 28 comparisons PASS** across seven option sets (`all`, `first3`,
+`last20`, `sub3to20`, `group2`, `group5`, and
+`--first_frame_sum 2 --last_frame_sum 21 --group_frames 4`). The route does not
+change which frames are used, how they are numbered, or what the dose weighting
+does.
+
+### 3.6 MRC route witness
+
+The compact gate requires a `tif` file format and the nvCOMP gate opens the file
+with `TIFFOpen`, so an MRC movie must take the float route. Observed rather than
+read: `synthetic_fallback.mrc` runs with `--ingest_witness` and the witness
+records `float`.
+
+## 4. Measured
+
+Venue: `4GPUs` (`4-gpu-vm`), 4x A100 80GB PCIe, 124 logical CPUs. Every run
+under `taskset -c 96-103` (8 CPUs) with `--j 8 --gpu <free index>`, inside one
+`flock /tmp/motioncorr-bench.lock` acquisition, on a GPU with no foreign compute
+app on its UUID. **The box is shared**: two other MotionCorr sessions were
+building and running throughout, load1 ranged 2.3-14, and that is recorded per
+run in the campaign log. Both binaries were built from scratch inside the same
+lock acquisition by one script with one set of flags, so build provenance is not
+a variable.
+
+Options for every run: `--use_own --dose_weighting --dose_per_frame 1.277
+--patch_x 5 --patch_y 5 --bfactor 150 --gainref Movies/gain.mrc --seed 1`.
+Six movies for the 24-frame single-row variants, two for the rest. All reads are
+**warm cache** — the variants were written minutes earlier and read repeatedly.
+No cold or network-storage figure is given; dropping the page cache needs root
+on this host.
+
+### Provenance of the measured binaries
+
+Every performance figure in §4.1-4.6 comes from a tree **one commit behind this
+branch head**: the measured candidate is the head minus
+`perf(timing): give the device ingest its own TIMING stage`.
+
+That commit adds one `Timer::setNew` registration and two `RCTIC`/`RCTOC` call
+sites. Without `-DTIMING` the macros expand to nothing, but `setNew` does not —
+it runs once per `MotioncorrRunner` construction, as every other timer
+registration in that file already does. Compiling `motioncorr_runner.cpp` from
+both trees to assembly at the measured configuration
+(`-O3 -DNDEBUG -D_CUDA_ENABLED -D_NVCOMP_ENABLED`, no `TIMING`) gives
+**161,492 lines each**, differing only in immediate constants — string-table
+offsets and timer ordinals shifted by the one added entry. No instruction is
+added to the per-movie path. The stage-breakdown figures in §4.0 come from
+Nsight captures of the measured tree and are unaffected either way.
+
+This is stated rather than waved at because "the binary I measured is the tree
+I am proposing" is the one provenance claim that cannot be recovered later.
+
+### 4.0 Where the input path spends device time
 
 ![device ingest stages](charts/ingest-stages.png)
 
-Device intervals from one Nsight capture per arm per variant. For uint8 LZW the
-compact route takes the ingest from **252.6 ms to 63.0 ms per movie** at 24
-frames and **502.9 ms to 119.6 ms** at 48, entirely by not copying a float
-movie: 1,435 MB becomes 410 MB, and 2,802 MB becomes 751 MB. The conversion
-itself moves from 2.8 ms to 3.7 ms, because it now also widens the samples.
+Device intervals from one Nsight capture per arm per variant, movie
+`20170629_00021`. Only the four stages the ingest owns are drawn; the
+alignment, FFT and dose work that follows is excluded and is **104 ms
+(24 frames) / 230 ms (48 frames) in every arm**, which is the internal control
+that these columns are the only thing that changed.
 
-The alignment, FFT and dose work that follows is excluded from the chart and is
-104 ms (24 frames) / 230 ms (48) in every arm — the internal control that these
-columns are the only thing that changed.
+| input | arm | route | deflate decode | Adler-32 | convert+gain+sum | H2D copy | ingest total |
+|---|---|---|---|---|---|---|---|
+| uint8 LZW, 24f | main | float | — | — | 2.8 ms | 249.8 ms | **252.6 ms** |
+| | branch | compact | — | — | 3.7 ms | 59.3 ms | **63.0 ms** |
+| uint8 LZW, 48f | main | float | — | — | 6.5 ms | 496.4 ms | **502.9 ms** |
+| | branch | compact | — | — | 7.4 ms | 112.2 ms | **119.6 ms** |
+| uint8 Deflate, 24f | main | float | — | — | 2.8 ms | 211.2 ms | **214.0 ms** |
+| | branch | nvcomp | 24.7 ms | 1.1 ms | 1.8 ms | 15.6 ms | **43.2 ms** |
+| uint8 Deflate, 48f | main | float | — | — | 6.5 ms | 499.9 ms | **506.4 ms** |
+| | branch | nvcomp | 49.2 ms | 2.1 ms | 3.7 ms | 19.3 ms | **74.3 ms** |
+| uint16 Deflate, rps8 | main | compact | — | — | 3.9 ms | 103.2 ms | **107.1 ms** |
+| | branch | nvcomp | 21.4 ms | 1.8 ms | 2.0 ms | 16.6 ms | **41.8 ms** |
+| uint16 LZW (null) | main | compact | — | — | 3.9 ms | 100.5 ms | **104.4 ms** |
+| | branch | compact | — | — | 3.9 ms | 115.6 ms | **119.5 ms** |
+| uint16 Deflate, rps1 (null) | main | nvcomp | 22.9 ms | 1.9 ms | 1.9 ms | 16.2 ms | **42.9 ms** |
+| | branch | nvcomp | 22.9 ms | 1.9 ms | 2.0 ms | 16.9 ms | **43.7 ms** |
+
+Three things this makes explicit that a wall-clock number cannot:
+
+* **The GPU Deflate decode is cheap relative to the copy it removes.** For
+  uint8 Deflate at 24 frames, decoding on the device costs 24.7 ms and saves a
+  211.2 ms copy. The whole ingest goes 214.0 → 43.2 ms, **80% less device time**,
+  and the decode is the largest single piece of what remains.
+* **The Adler-32 recomputation is not what costs anything.** 1.1-2.1 ms per
+  movie buys back the integrity check that handing nvCOMP a raw Deflate stream
+  would otherwise discard.
+* **The null rows copy byte-identical payloads on both arms** (197 MB and
+  751 MB, §4.5), so their copy segments differ only in achieved PCIe bandwidth.
+  The uint16 LZW null reads 100.5 vs 115.6 ms for the same 751 MB — that is the
+  spread of this measurement on a shared box, and it is the scale against which
+  the changed rows should be read.
+
+### 4.0b Where the input path spends host time
+
+![host ingest stages](charts/host-stages.png)
+
+Separate `TIMING=ON` builds of both arms, median of 3 repetitions, whole-run
+stage totals. **These walls are not comparable with the production figures
+elsewhere** — an instrumented build is a different binary — but the stage
+*attribution* is what this is for.
+
+| variant | arm | route | host decode | device ingest | gain + sum + upload | input total |
+|---|---|---|---|---|---|---|
+| uint8 LZW, 24f x 6 | main | float | 2.19 s | — | 1.41 s | **3.60 s** |
+| | branch | compact | 1.83 s | — | 0.45 s | **2.28 s** |
+| uint8 LZW, 48f x 2 | main | float | 1.45 s | — | 0.95 s | **2.40 s** |
+| | branch | compact | 1.05 s | — | 0.27 s | **1.32 s** |
+| uint8 Deflate, 24f x 6 | main | float | 1.94 s | — | 1.55 s | **3.48 s** |
+| | branch | nvcomp | — | 0.69 s | — | **0.69 s** |
+| uint8 Deflate, 48f x 2 | main | float | 1.29 s | — | 1.00 s | **2.28 s** |
+| | branch | nvcomp | — | 0.49 s | — | **0.49 s** |
+| uint16 Deflate rps8, 24f x 6 | main | compact | 1.61 s | — | 0.72 s | **2.34 s** |
+| | branch | nvcomp | — | 0.72 s | — | **0.72 s** |
+| uint16 LZW (null), 24f x 6 | main | compact | 2.59 s | — | 0.73 s | **3.32 s** |
+| | branch | compact | 2.57 s | — | 0.76 s | **3.33 s** |
+
+`main` predates the device-ingest timer, so on the one variant where main
+itself takes nvCOMP that stage is untagged and reads as zero; that row is
+marked on the chart and not compared.
+
+What this separates that §4.0 could not:
+
+* **The compact route splits its win across two stages.** For uint8 LZW the
+  host decode falls 2.19 → 1.83 s because it no longer materialises floats, and
+  the gain-and-sum stage falls 1.41 → 0.45 s because the device does the
+  widening and the upload is a quarter of the bytes. Neither alone is the
+  change; together they are 3.60 → 2.28 s.
+* **The nvCOMP route deletes both stages outright.** uint8 Deflate goes from
+  1.94 s of host decode plus 1.55 s of gain-and-sum to a single 0.69 s device
+  ingest — **5.0x less host time on the input path**.
+* **The remaining LZW cost is now a measured number, not a residual.** On the
+  compact route the host decode is **1.83 s / 6 movies = 0.305 s per movie** for
+  uint8 and **2.57 s / 6 = 0.428 s per movie** for uint16. That is exactly the
+  work a GPU LZW decoder would remove, and it is the budget recorded in #141.
+* **The null control is flat**: 3.32 vs 3.33 s on the unchanged compact route.
+
+### 4.1 Per-movie wall, from the runner's own log
+
+This is the headline metric, not process wall. A 6-movie run at this geometry
+is startup-dominated — the CUDA context and first-use module loading land
+inside movie 1 — so process wall divided by six is not a per-movie cost. The
+figures below are the median of the movies after the first.
+
+| variant | route change | main s/movie | branch s/movie | change | n |
+|---|---|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp → nvcomp | 0.472 | 0.458 | −3.0% | 5 |
+| `u16_lzw_rps1` | compact → compact | 0.954 | 0.963 | +0.9% | 5 |
+| `u16_deflate_pred2` | compact → compact | 0.980 | 0.987 | +0.7% | 1 |
+| `u16_raw_rps1` | compact → compact | 0.802 | 0.779 | −2.9% | 1 |
+| `u16_deflate_rps1_48f` | nvcomp → nvcomp | 0.704 | 0.676 | −4.0% | 1 |
+| `u8_lzw_rps1` | **float → compact** | 0.867 | 0.766 | **−11.6%** | 5 |
+| `u8_lzw_rps64` | **float → compact** | 0.994 | 0.704 | **−29.2%** | 1 |
+| `u8_lzw_rps1_48f` | **float → compact** | 1.924 | 1.406 | **−26.9%** | 1 |
+| `u8_deflate_rps1` | **float → nvcomp** | 0.811 | 0.452 | **−44.3%** | 5 |
+| `u8_deflate_rps16` | **float → nvcomp** | 0.930 | 0.462 | **−50.3%** | 1 |
+| `u8_deflate_rps1_48f` | **float → nvcomp** | 1.736 | 0.693 | **−60.1%** | 1 |
+| `u16_deflate_rps2` | **compact → nvcomp** | 0.806 | 0.449 | **−44.3%** | 1 |
+| `u16_deflate_rps8` | **compact → nvcomp** | 0.810 | 0.471 | **−41.9%** | 5 |
+| `u16_deflate_rps512` | **compact → nvcomp** | 0.783 | 0.583 | **−25.5%** | 1 |
+
+The five unchanged-route rows span −4.0% to +0.9%. That is the noise floor of
+this metric on this host, and every changed-route row is far outside it. Rows
+with n=1 are single observations on the two-movie variants, not medians.
+
+### 4.2 Host memory and CPU, whole process
+
+`Maximum resident set size` from `/usr/bin/time -v`, and user+sys CPU seconds.
+
+| variant | frames x movies | main RSS | branch RSS | main CPU-s | branch CPU-s |
+|---|---|---|---|---|---|
+| `u16_deflate_rps1` | 24 x 6 | 554 MiB | 552 MiB | 6.1 | 7.2 |
+| `u16_lzw_rps1` | 24 x 6 | 905 MiB | 905 MiB | 25.2 | 23.5 |
+| `u16_deflate_pred2` | 24 x 2 | 906 MiB | 906 MiB | 8.1 | 8.1 |
+| `u16_raw_rps1` | 24 x 2 | 974 MiB | 993 MiB | 4.7 | 4.7 |
+| `u8_lzw_rps1` | 24 x 6 | 1561 MiB | **581 MiB** | 22.9 | 18.4 |
+| `u8_lzw_rps64` | 24 x 2 | 1557 MiB | **580 MiB** | 8.4 | 5.6 |
+| `u8_deflate_rps1` | 24 x 6 | 1561 MiB | **486 MiB** | 21.4 | 5.8 |
+| `u8_deflate_rps16` | 24 x 2 | 1557 MiB | **464 MiB** | 7.5 | 2.7 |
+| `u16_deflate_rps8` | 24 x 2 | 907 MiB | **546 MiB** | 15.1 | 6.2 |
+| `u16_deflate_rps2` | 24 x 2 | 906 MiB | **533 MiB** | 5.9 | 2.8 |
+| `u16_deflate_rps512` | 24 x 2 | 928 MiB | **526 MiB** | 5.7 | 3.0 |
+| `u8_lzw_rps1_48f` | 48 x 2 | 2864 MiB | **907 MiB** | 16.2 | 10.8 |
+| `u8_deflate_rps1_48f` | 48 x 2 | 2865 MiB | **671 MiB** | 14.8 | 3.6 |
+| `u16_deflate_rps1_48f` | 48 x 2 | 537 MiB | 538 MiB | 3.8 | 3.8 |
+
+The 48-frame uint8 rows are the ones closest to the real-data shape that
+motivated this work: **2.80 GiB of host resident set becomes 0.89 GiB on the
+compact route and 0.66 GiB on nvCOMP.** That is per worker, so it is what
+decides how many workers a host can carry.
+
+The `u16_deflate_rps1` CPU-second row is the one anomaly: +1.1 s on an identical
+route. It is a single cold-binary first run — the candidate executable's first
+execution of the campaign — and the per-movie table above shows the same arm
+3.0% *faster* in steady state. §4.4 measures it directly.
+
+![per-movie wall](charts/per-movie-wall.png)
+
+### 4.3 Transcoding as an operational mode
+
+Measured on one core of the same host with `imagecodecs`, which wraps the same
+C codecs LibTIFF uses, over the 683 MB of samples in one 24-frame movie:
+
+| operation | throughput | per 24-frame movie, 1 core |
+|---|---|---|
+| Deflate decode, uint16 | 227 MB/s | 3.0 s |
+| Deflate encode, uint16 | 9.0 MB/s | 75.7 s |
+| Deflate encode, uint8 | 6.9 MB/s | 49.6 s |
+| LZW encode, uint8 | 99 MB/s | 3.4 s |
+
+Converting a uint8 LZW movie to uint8 Deflate therefore costs **~50 s of core
+time per movie**, about 6-7 s wall at 8 cores. The per-pass saving it buys is
+the compact-to-nvCOMP step for that movie: 0.766 s → 0.452 s, i.e. 0.314 s.
+
+**Break-even is about 21 full repeated passes at 8 cores** (160 single-core).
+Disk is not a cost here — uint8 Deflate is 13% *smaller* than uint8 LZW for this
+content — but keeping the deposited original means holding both copies, and the
+converted copy needs its own losslessness check (the decoded-sample oracle takes
+about two minutes per movie on this host).
+
+For a one-pass or two-pass workflow, transcoding does not pay. For a facility
+that reprocesses the same collection tens of times it does. Either way it is an
+operational decision made outside MotionCorr, and no performance figure in §4.1
+or §4.2 includes or assumes a conversion.
+
+### 4.4 Paired process wall, 9 repeats
+
+Six movies per run, arm order alternating between repeats, both binaries built
+from scratch in the same lock acquisition. Positive delta = the branch is
+faster.
+
+| variant | route change | n | main median | branch median | delta median | delta range | branch faster |
+|---|---|---|---|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp → nvcomp | 8 | 4.62 s | 4.90 s | **−0.00 s** | −0.76 .. +0.45 | 4/8 |
+| `u8_lzw_rps1` | float → compact | 8 | 8.87 s | 6.24 s | **+2.41 s** (−27%) | +1.90 .. +3.38 | 8/8 |
+| `u8_deflate_rps1` | float → nvcomp | 8 | 8.63 s | 4.49 s | **+4.05 s** (−48%) | +3.37 .. +4.41 | 8/8 |
+| `u16_deflate_rps8` | compact → nvcomp | 7 | 7.05 s | 4.69 s | **+2.32 s** (−33%) | +1.73 .. +3.09 | 7/7 |
+
+The null control sits at zero with the pairs split 4/8, so the series has no
+systematic arm bias; the three changed arms are unanimous with no overlap
+between their ranges and the null's.
+
+An earlier 5-repeat series put the same null control 0.5-1.0 s against the
+branch in both orders. That was a cold-binary artifact: the baseline had been
+built hours earlier and the candidate was an incremental rebuild first executed
+during the series. Rebuilding both arms from scratch in one lock acquisition
+removed it, and the per-movie figures in §4.1 showed no device-side difference
+at any point. The earlier series is superseded, not reconciled.
+
+Process wall and per-movie wall disagree by design: a six-movie run spends
+about a second on process and CUDA-context startup, which §4.1 excludes and
+this table includes. Both are reported because both are real — the first is
+what a small job costs, the second is what scales.
 
 ![host resident set](charts/host-rss.png)
 
-### Measured
+### 4.5 Host-to-device bytes and time, from Nsight
 
-Per-movie wall is the median of the movies after the first; a six-movie run at
-this geometry spends about a second on process and CUDA-context startup, which
-lands inside movie 1. Venue and conditions as above.
+One movie per arm, `nsys profile --trace=cuda`. Byte counts are
+contention-immune — the same payload reports the same number whatever else the
+box is doing — so these are given as exact figures while the times are not.
 
-| input | route | per-movie wall | process RSS |
+| variant | main route | main H2D | branch route | branch H2D | reduction |
+|---|---|---|---|---|---|
+| `u16_deflate_rps1` | nvcomp | 196.778 MB | nvcomp | 196.778 MB | 0 (null) |
+| `u16_deflate_rps1_48f` | nvcomp | 328.293 MB | nvcomp | 328.293 MB | 0 (null) |
+| `u16_lzw_rps1` | compact | 751.336 MB | compact | 751.336 MB | 0 (null) |
+| `u16_deflate_rps8` | compact | 751.336 MB | nvcomp | 191.968 MB | **−74%** |
+| `u8_lzw_rps1` | float | 1,434.807 MB | compact | 409.600 MB | **−71%** |
+| `u8_lzw_rps1_48f` | float | 2,801.773 MB | compact | 751.360 MB | **−73%** |
+| `u8_deflate_rps1` | float | 1,434.807 MB | nvcomp | 162.985 MB | **−89%** |
+| `u8_deflate_rps1_48f` | float | 2,801.773 MB | nvcomp | 258.129 MB | **−91%** |
+
+The three unchanged-route rows are byte-identical across arms, to the byte.
+
+Transfer time from the same captures, which is not contention-immune and is
+given to bound the pinning question only:
+
+| variant | main H2D time | branch H2D time |
+|---|---|---|
+| `u8_lzw_rps1` | 249.7 ms | 59.3 ms |
+| `u8_lzw_rps1_48f` | 496.4 ms | 112.1 ms |
+| `u8_deflate_rps1` | 211.2 ms | 15.5 ms |
+| `u8_deflate_rps1_48f` | 499.9 ms | 19.3 ms |
+| `u16_deflate_rps8` | 103.1 ms | 16.5 ms |
+| `u16_lzw_rps1` | 100.4 ms | 115.6 ms |
+
+The compact route's 59.3 ms for 409.6 MB is about 6.9 GB/s, which is pageable
+PCIe. Pinning that staging could recover at most ~42 ms of a 766 ms movie
+(5.5%), and would cost 0.32-1.27 GiB of pinned memory per worker — the same
+resource §4.2 exists to reduce. The nvCOMP arms already transfer from a pinned
+pool and are at 15-23 ms.
+
+### 4.6 Process startup, and why §4.1 reports per-movie wall
+
+One movie per run, seven paired repeats, arm order alternating, both binaries
+already warm:
+
+| | main | branch |
+|---|---|---|
+| process wall, median | 1.938 s | **1.886 s** |
+| movie wall, median | 0.954 s | **0.941 s** |
+| pairs the branch wins | — | 6/7 |
+
+A one-movie process spends about **0.95 s** outside the movie — CUDA context
+creation, first-use module loading, gain read, output setup. That is why §4.1
+reports per-movie wall separately: on a six-movie run that fixed second is a
+fifth of the process wall and it belongs to neither arm.
+
+It also closes the §4.2 anomaly. The candidate shows no startup regression at
+all once its binary is warm; the +1.1 CPU-seconds and the 1.755 s first movie
+in the earlier series were the candidate executable's first execution, not its
+code.
+
+![host-to-device bytes](charts/h2d-bytes.png)
+
+## 5. What is still unsupported, and by what
+
+| input | route | why |
+|---|---|---|
+| EER | `float` (via `renderEER`) | never offered to either accelerated route; untouched and untested by this work |
+| compressed MRC | `float` | same |
+| other MRC movies | `float` | not a TIFF |
+| signed 8- or 16-bit TIFF (`SChar`, `SShort`) | `float` | different conversion; admitted by neither route, deliberately |
+| 32-bit float TIFF | `float` | the staging and the kernels are integer-sample |
+| IMOD packed 4-bit K2/K3 (`UHalf`) | `float` | rwTIFF doubles the logical width; excluded by name from compact and by the geometry check from nvCOMP |
+| any TIFF with no resident CUDA session | `float` | CPU build, `--early_binning`, or a session that failed to initialise |
+| Deflate TIFF with predictor 2, non-native byte order, non-MSB2LSB fill order, >1 sample/pixel, separate planes | `compact` if LibTIFF decodes it to `UChar`/`UShort`, else `float` | nvCOMP declines these by name and the log says which |
+
+The compact route's admission rule is exactly "rwTIFF reports `UChar` or
+`UShort`". That covers any codec, strip geometry and predictor LibTIFF can
+handle, which is the point — the decode is LibTIFF's. Eleven encodings were
+exercised end to end; the rule is broader than the set tested.
+
+## 6. Memory and staging design
+
+What each route holds, for a 24-frame 3710x3838 movie (and 48 frames in
+brackets where it differs):
+
+| | host, per movie | device staging | pinned |
 |---|---|---|---|
-| uint8 LZW, 1 row/strip, 24 frames | float → **compact** | 0.867 → 0.766 s (−11.6%) | 1561 → **581 MiB** |
-| uint8 LZW, 64 rows/strip, 24 frames | float → **compact** | 0.994 → 0.704 s (−29.2%) | 1557 → **580 MiB** |
-| uint8 LZW, 1 row/strip, 48 frames | float → **compact** | 1.924 → 1.406 s (−26.9%) | 2864 → **907 MiB** |
-| uint16 Deflate, 1 row/strip (null) | nvcomp → nvcomp | 0.472 → 0.458 s | 554 → 552 MiB |
-| uint16 LZW (null) | compact → compact | 0.954 → 0.963 s | 905 → 905 MiB |
-| uint16 Deflate predictor 2 (null) | compact → compact | 0.980 → 0.987 s | 906 → 906 MiB |
-| uint16 uncompressed (null) | compact → compact | 0.802 → 0.779 s | 974 → 993 MiB |
+| `float` | 1.27 GiB float movie [2.55 GiB] | none beyond the resident float movie | none |
+| `compact`, uint16 | 0.64 GiB native mapping [1.27 GiB] | one frame, 27 MiB | none (pageable) |
+| `compact`, uint8 | 0.32 GiB native mapping [0.64 GiB] | one frame, 14 MiB | none (pageable) |
+| `nvcomp` | the compressed strips only, ~120 MiB | borrowed from the pre-FFT Fourier buffer, additional VRAM 0 | one pool per worker, `pinnedReserveBytes(payload)`, capped by `MOTIONCORR_NVCOMP_PINNED_MAX_MB` (default 256 MiB) |
 
-Four unchanged-route variants span −2.9% to +0.9%; that is the noise floor on
-this host, and the changed rows are far outside it.
+The host mapping is one `mmap`, released by `munmap` rather than `free`, so the
+kernel reclaims every page instead of returning them to a malloc arena. Frames
+are widened and discarded in ascending order on the degraded paths, so a
+fallback's peak stays where one allocation per frame left it.
 
-Paired process wall over nine repeats on six movies, arm order alternating:
-uint8 LZW **8.87 s → 6.24 s, 8/8 pairs**, delta range +1.90 .. +3.38 s, with
-the unchanged-route null control at **−0.00 s, 4/8 pairs**.
+**No deeper staging queue was built, deliberately.** A bounded slot queue only
+pays if the decode is on the critical path, and it is not: the measured
+consumer wait on this workload is under 5 s of a 100-180 s 24-movie run, and a
+one-movie-ahead prefetch has already been measured here as a no-go that raised
+host RSS 86% for no wall gain. The quantity that limits workers per host is
+residency, and §4.2 is what moves it. General overlap policy belongs to a
+separate owner and nothing here pre-empts it.
 
-The LZW decode itself still runs on the host — LZW is not a codec nvCOMP
-offers — so this change removes the float movie and the oversized upload, not
-the codec work. The gap between the uint8 LZW and uint16 Deflate rows above is
-that remaining cost.
+**Pinned vs pageable for the compact route is unmeasured and unimplemented.**
+The compact route uses pageable host memory with a blocking per-frame copy.
+Pinning it would cost 0.32-1.27 GiB of pinned memory per worker — the same
+resource this change exists to reduce — to recover at most the H2D time in
+§4.4. That trade is stated, not taken.
 
-## Scope
+## 7. The question this answers
 
-This change moves no input onto the GPU decoder: `compact` is LibTIFF, exactly
+> Can original real-world acquisition formats reach the resident GPU engine
+> efficiently, without changing MotionCorr's result or requiring a huge host
+> float movie?
+
+For TIFF, yes, and the host float movie is the part that goes away first.
+
+An 8-bit LZW movie — the shape the deposited files take — now reaches the
+resident engine through LibTIFF and a native-sample host mapping. Host resident
+set for a 48-frame movie falls from 2.80 GiB to 0.89 GiB, per-movie wall by
+27%, and the products are unchanged. Nothing is transcoded and no FP32 movie is
+built. The LZW decode itself still happens on the host, because LZW is not a
+codec nvCOMP offers; that is the remaining cost and it is a real one.
+
+If the same content is Deflate, the decode moves to the GPU as well: 0.66 GiB
+resident and 60% less per-movie wall at 48 frames. That now holds for 8-bit
+samples and for any `RowsPerStrip`, where before it needed 16-bit samples and
+exactly one row per strip.
+
+Converting deposited LZW to Deflate to reach that is an operational choice with
+a measured break-even of about 21 full repeated passes (§4.3), and it is not
+assumed by any number above.
+
+What this does **not** answer: nothing here touches EER or compressed MRC, and
+no figure is a measurement of the deposited collection itself — the uint8 LZW
+inputs are value-lossless re-encodes of real tutorial content, which makes them
+a faithful codec and geometry workload and not a second specimen.
+
+## 8. Limitations and what is not established
+
+* **One collection, one geometry, one detector.** Everything is 3710x3838
+  counting-mode data from the RELION tutorial, re-encoded. A collection whose
+  samples do not fit in a byte cannot use the uint8 arms at all, and its
+  compression ratios and therefore its nvCOMP transfer sizes will differ.
+* **Warm cache only.** No cold or network-storage figure; dropping the page
+  cache needs root on this host. The uint8 files are 13-27% smaller than their
+  uint16 equivalents, so a cold read would favour the new routes further, but
+  that is arithmetic, not a measurement.
+* **A shared host.** Two other MotionCorr sessions built and ran throughout.
+  Timings are paired with alternating order, a null control and per-run load
+  recorded; they are not clean-room figures.
+* **The nvCOMP trust boundary moves for the inputs change B admits.** See
+  `FAILURE_POLICY.md`. No fault injection against the decoder was performed for
+  this branch; the existing in-tree nvCOMP failure controls
+  (`CudaNvcompReconstructionFailures`, `CudaPreprocessingFailurePaths`) pass
+  unchanged, which establishes the recovery paths still behave, not that the
+  decoder is safe on malformed input.
+* **`CiFailClosedControls` fails in both arms** on this host. It needs `.git`
+  metadata and these trees were staged with `git archive`; the failure is
+  identical on `main` and on the branch and is unrelated to this work.
+* **EER and compressed MRC are untouched and unmeasured.**
+* **No bounded slot queue, no pinning of the compact staging, no prefetch.**
+  §6 states why and what each would cost.
+* **No GPU LZW.** nvCOMP has no LZW codec, so LZW keeps its host decode —
+  0.305 s/movie (uint8) and 0.428 s/movie (uint16) by §4.0b. nvTIFF is the only
+  supported route to move it and is evaluated separately in #141; nothing here
+  installed or ran it.
+
+
+### Compact staging subunit (#137)
+
+PR137's compact staging subunit moves no input onto the GPU decoder: `compact` is LibTIFF, exactly
 as `float` is, with the same codec validation and the same failure behaviour.
 Widening the nvCOMP route to 8-bit samples and to multi-row strips is a
 separate, stacked change, because that one does move the trust boundary.
@@ -138,6 +670,4 @@ frame byte for byte; one-count input and changed-frame controls must fail the
 same comparison. The test name is retained, so no required registration is
 lost in the workspace/dose composition.
 
-This is a new control on the combined source, not a rerun of the retained
-campaign. Native execution and a production signed-uint8-conversion mutant
-remain pending until the allocated acceptance run records their results.
+This control was executed on compact-only source `49ea9c2` in SCARF3521631: unsigned8/16 public-entry equivalence passed and the production signed-uint8-conversion mutant failed. That validates the compact staging subunit; the widened-route checksum/status repair in this PR still requires its own combined native execution.

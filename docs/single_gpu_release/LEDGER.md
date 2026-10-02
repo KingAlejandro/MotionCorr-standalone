@@ -151,3 +151,76 @@ logic-only with an injected `cudaSetDevice`). No timed benchmarks and no speedup
 "719.5 ms" figure in commit 1's message is inherited verbatim from `7dbf963` and was not re-measured.
 Intermediate commits had targeted test subsets; only the head has the full three-config matrix.
 Host-memory cost of the premask cache was not measured.
+
+## 2 October — measurement and the remaining lanes
+
+### PR135 merged into PR131
+
+`71fee25` merged into `experiment/post128-dose-normalization`; PR131 head is now
+`7f8e813`, both CI jobs pass at that head, production byte-identical to the
+native-tested `2fe51dd`, and the retrospective-sealing disclosure is intact — it still
+states explicitly that the old runs did not use the new marker mechanism.
+PR131 is **not** merged to main.
+
+### PR132 fixed at `2bf7ee1`
+
+Both CI jobs pass. `arms24_json.py` missing import and uncreated output dir; silent
+`except Exception: pass` around the VRAM series. `patch_nvtx.py` needed **two** fixes,
+not the one the audit found — repairing the anchor strings alone still produced a tree
+that failed to compile, because the per-movie replacement body re-emitted the old
+`executeOwnMotionCorrection(Micrograph&)` signature. Its `assert` gates vanished under
+`python -O`; now `SystemExit`. The output scope is renamed `submit output` because the
+write is async on current main and that position measures a handoff.
+
+`arms24.svg` replaced by `arms24_wall.svg` + `arms24_device.svg`. Stale captions
+corrected: geometry `3838x5760` -> `3710x3838`, `abd6827` unmerged -> ancestor of main,
+197 commits -> 23 against current main, the 4.21 s patch-align double attribution, two
+sections numbered 9, and the README's generality claims.
+
+`tools/nsys_analysis/selftest.py` added: 0 failures on the fixed tree, 7 real failures
+on the pre-fix tree. Not CTest-registered — this lane touches no build files.
+
+### PR136 opened — the clean PR133 successor
+
+Base `integrate/single-gpu-release-base` = main + PR130 + PR131(`7f8e813`), pushed so
+the PR shows only the five mechanism commits. **Retarget to main once #130 and #131
+land.** PR133 and `perf/nvcomp-next` untouched; supersession noted on #133.
+
+Five commits `bc695da`, `2dfcc14`, `fa3f18a`, `5bdd119`, `a118699`, plus the measurement
+commit `43f578f`. Rebased from the validated `054ed6d` onto the refreshed base; the
+production tree (`src/`, `tests/`, `CMakeLists.txt`) is byte-identical across that
+rebase, so the earlier validation carries over unchanged.
+
+ctest 32/42/43 (base 32/40/41, +`CudaDeviceGainPool` +`CudaPlanPool`, none lost).
+24-movie exact non-PDF tree vs main: PASS, 0 different files.
+
+### Measured result
+
+7 independent build arms, 5 interleaved repetitions each with alternating order, 35
+clean runs. Branch parent -> head: **12.312 -> 9.678 s, 21.40%**, 5/5 paired faster,
+median paired saving 2.743 s. CPU-seconds 18.52 -> 15.59.
+
+| mechanism | saving | share |
+|---|---|---|
+| device-gain retention | +0.650 s | 24.7% |
+| premask + sparse traversal | +1.614 s | 61.3% |
+| three cuFFT plan pools together | +0.370 s | 14.0% |
+
+**The decision this forces:** the premask commit carries 61% of the gain at zero
+retained-VRAM cost; the three plan pools buy 0.370 s and cost the whole 269.53 MiB.
+Their individual steps are below the IQR of the arms they sit between and are not
+resolvable at n=5. Dropping commits 3-5 costs 14% of the gain, not 100%.
+
+Device side: kernel union unchanged (3.058 vs 3.061 s) — nothing here makes the GPU
+compute faster. H2D 4.62 -> 3.31 GB, and the 1.31 GB difference matches
+56,955,920 B x 23 avoided gain re-uploads exactly. GPU still idle ~two thirds of the
+span. Host stages: `fix defect` 1.758 -> 0.019 s dominates; `patch align` is 0.180 s
+**slower**, on a single instrumented capture per arm, recorded not explained.
+
+Measurement integrity: the box is shared. Two runs were caught with a co-tenant and
+re-run. An earlier harness version compared GPU **UUIDs**, which cannot see a
+neighbour on the same GPU; two observations passed that check before it was corrected
+to compare PIDs, and they are excluded.
+
+Evidence: `docs/profiling_20261002/` on `perf/single-gpu-pools`. Raw nsys captures
+retained on the host at `/home/alex/mc-release-20261002/prof/`.

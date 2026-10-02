@@ -107,7 +107,8 @@ def stacked_stages(path, pairs, stages, colors, title, subs, notes, unit="ms",
                 b.append(txt(x + bw / 2 - 1, y + 4, _fmt(v, unit), 10, "#ffffff", "middle", "bold"))
             x += bw
             total += v
-        b.append(txt(x + 10, y + 4, f"{_fmt(total, unit)} {unit}", 12.5, INK, "start", "bold"))
+        total_label = "unavailable" if vals.get("__total_unavailable__") else f"{_fmt(total, unit)} {unit}"
+        b.append(txt(x + 10, y + 4, total_label, 12.5, INK, "start", "bold"))
     b += footer(width, top + 24 + rowh * len(rows) + 40, notes)
     open(path, "w").write(svg(width, h, title, b))
     return path

@@ -16,7 +16,9 @@
  * CUDA implementation of analytical dose weighting, cuFFT inverse transform,
  * and real-space polynomial bilinear interpolation with streaming accumulation.
  *
- * Staging budget: < 200 MiB VRAM (single-frame working buffers + accumulator canvas).
+ * Reconstruction-scoped buffers: one Fourier frame, one real frame, accumulator,
+ * dose vector and one float normalization plane (nfy * nfx). The actual owned
+ * allocation plus cuFFT workspace is reported in the reconstruction profile.
  */
 bool cudaDoseWeightAndInterpolate(
     const std::vector<MultidimArray<fComplex> > &Fframes,

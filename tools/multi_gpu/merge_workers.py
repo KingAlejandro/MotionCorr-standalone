@@ -1,0 +1,589 @@
+#!/usr/bin/env python3
+"""Stage sharded worker outputs into one tree and verify the partition held.
+
+What this checks, all fail-closed, before anything is called merged:
+
+  lost        a movie assigned to a shard whose products are absent
+  duplicate   the same output path produced under two workers
+  misrouted   a worker produced a movie that was assigned to a different shard
+  unassigned  a shard in the manifest with no worker directory
+  failed      a worker that exited non-zero, or whose exit was never recorded
+
+Order is taken from the manifest's canonical movie list -- the input STAR's row
+order -- not from completion order, so the staged tree and the aggregate row
+order do not depend on which worker finished first.
+
+The authoritative dataset STAR and full report are produced by the stock
+binary's explicit --aggregate_only mode. Every requested movie is preflighted
+as complete; aggregation cannot process a missing movie or rewrite its products.
+Per-worker aggregate reports remain retained as provenance, not substitutes for
+the final canonical dataset report. Without --aggregate-with, staging PASS is
+not dataset readiness.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import star_io  # noqa: E402
+
+# Fixed-name per-process artifacts. Every worker writes its own; none of them is
+# the dataset product, so they are staged under a per-worker subdirectory
+# instead of being copied into, or silently dropped from, the merged tree.
+AGGREGATE_NAMES = {
+    "corrected_micrographs.star", "corrected_tilt_series.star",
+    "logfile.pdf", "header.pdf", "batch.pdf",
+    "all_batches.pdf", "gain.mrc", "run.log", "time.txt", "note.txt",
+    # written by run_multi_gpu.py itself, not by the worker
+    "command.json", "status.json",
+}
+AGGREGATE_PREFIXES = ("corrected_micrographs_",)
+AGGREGATE_SUFFIXES = (".lst",)
+
+
+def is_aggregate(rel: Path) -> bool:
+    name = rel.name
+    return (name in AGGREGATE_NAMES
+            or name.startswith(AGGREGATE_PREFIXES)
+            or name.endswith(AGGREGATE_SUFFIXES))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def gpu_witness_problems(status: dict[str, object]) -> list[str]:
+    """Validate the evidence needed to certify a GPU-backed PASS."""
+    devices = status.get("devices")
+    if devices is None:
+        if "gpu_witness" in status:
+            return ["GPU witness is present without an intended-device list"]
+        return []
+    problems: list[str] = []
+    if not isinstance(devices, list) or not devices:
+        return ["GPU status has no valid intended-device list"]
+    workers = status.get("workers")
+    if not isinstance(workers, list) or len(workers) != len(devices):
+        return ["GPU status worker/device counts do not match"]
+
+    expected: dict[str, str] = {}
+    seen_indices: set[int] = set()
+    uuids: list[str] = []
+    for device in devices:
+        if not isinstance(device, dict) or not isinstance(device.get("uuid"), str) \
+                or not device["uuid"]:
+            problems.append("GPU status contains a device without a physical UUID")
+            continue
+        uuids.append(device["uuid"])
+    if len(uuids) != len(devices) or len(set(uuids)) != len(devices):
+        problems.append("GPU status intended UUIDs are missing or not distinct")
+
+    for worker in workers:
+        if not isinstance(worker, dict):
+            problems.append("GPU status contains a malformed worker record")
+            continue
+        index, pid = worker.get("index"), worker.get("pid")
+        if (not isinstance(index, int) or isinstance(index, bool)
+                or index < 0 or index >= len(devices) or index in seen_indices):
+            problems.append("GPU status worker indices do not form a unique device mapping")
+            continue
+        seen_indices.add(index)
+        if not isinstance(pid, int) or isinstance(pid, bool) or pid <= 0:
+            problems.append(f"GPU status worker {index} has no valid PID")
+            continue
+        if any(str(pid) == prior for prior in expected):
+            problems.append("GPU status assigns the same PID to multiple workers")
+            continue
+        device = devices[index]
+        if isinstance(device, dict) and isinstance(device.get("uuid"), str):
+            expected[str(pid)] = device["uuid"]
+    if seen_indices != set(range(len(devices))):
+        problems.append("GPU status worker indices do not cover every intended device")
+
+    witness = status.get("gpu_witness")
+    if not isinstance(witness, dict):
+        return problems + ["GPU PASS has no complete gpu_witness record"]
+    if witness.get("all_pids_witnessed_on_intended_distinct_devices") is not True:
+        problems.append("GPU witness success condition is not true")
+    if witness.get("sampler_errors") != []:
+        problems.append("GPU witness has missing or non-empty sampler_errors")
+    if witness.get("expected") != expected:
+        problems.append("GPU witness expected PID/UUID mapping differs from worker/device records")
+
+    witnessed = witness.get("witnessed")
+    expected_observed = {pid: [uuid] for pid, uuid in expected.items()}
+    if witnessed != expected_observed:
+        problems.append("GPU witness did not observe every worker PID on its intended UUID")
+    if witness.get("unwitnessed_pids") != []:
+        problems.append("GPU witness records unwitnessed worker PIDs")
+    if witness.get("wrong_device") != []:
+        problems.append("GPU witness records a wrong-device worker")
+    if witness.get("shared_devices") != []:
+        problems.append("GPU witness records shared physical devices")
+    if witness.get("distinct_devices_witnessed") != len(devices):
+        problems.append("GPU witness distinct-device count does not match the worker count")
+    return problems
+
+
+def worker_files(root: Path) -> dict[Path, Path]:
+    out = {}
+    for f in sorted(root.rglob("*")):
+        if f.is_file():
+            out[f.relative_to(root)] = f
+    return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--manifest", required=True, help="partition_star.py manifest")
+    ap.add_argument("--workers", nargs="+", required=True,
+                    help="worker output directories, in shard index order")
+    ap.add_argument("--status", default=None,
+                    help="run_multi_gpu.py status JSON holding each worker's exit code")
+    ap.add_argument("--out", required=True, help="merged tree to create")
+    ap.add_argument("--products", default=".mrc,.star",
+                    help="per-movie suffixes every movie must have produced")
+    ap.add_argument("--link", action="store_true",
+                    help="hardlink instead of copying; the comparison still reads real bytes")
+    ap.add_argument("--report", default=None, help="write the verdict JSON here")
+    ap.add_argument("--aggregate-with", default=None, metavar="BINARY",
+                    help="regenerate corrected_micrographs.star by running BINARY over the "
+                         "full input STAR with --aggregate_only against the merged tree")
+    ap.add_argument("--input-star", default=None,
+                    help="full input STAR, required with --aggregate-with")
+    ap.add_argument("--aggregate-args", default="",
+                    help="one shell-quoted string of extra arguments for BINARY. Use "
+                         "the = form so argparse does not read a leading dash as the "
+                         "next option: --aggregate-args='--use_own --j 8'. A single "
+                         "string rather than a trailing argparse.REMAINDER, because "
+                         "REMAINDER after a named option silently captures nothing and "
+                         "the arguments come back as 'unrecognized' -- which reads as a "
+                         "usage error rather than as a dropped option list.")
+    a = ap.parse_args(argv)
+
+    products = [suffix.strip() for suffix in a.products.split(",") if suffix.strip()]
+    if not products:
+        print("FAIL: at least one required product suffix must be specified",
+              file=sys.stderr)
+        return 2
+
+    aggregate_extra = shlex.split(a.aggregate_args)
+    aggregate_owned = {"--i", "--o"}
+    clashes = sorted({arg.split("=", 1)[0] for arg in aggregate_extra
+                      if arg.split("=", 1)[0] in aggregate_owned})
+    if clashes:
+        print(f"FAIL: {', '.join(clashes)} is owned by the aggregate step and must "
+              "not appear in --aggregate-args; the input STAR and output tree "
+              "must remain the ones verified by this merge", file=sys.stderr)
+        return 2
+
+    if a.link and a.aggregate_with:
+        print("FAIL: --link with --aggregate-with would let the aggregate step "
+              "rewrite a worker's own outputs through the shared inode, destroying "
+              "the evidence needed to diagnose the failure. Copy instead.",
+              file=sys.stderr)
+        return 2
+
+    manifest_path = Path(a.manifest).resolve()
+    manifest = json.loads(manifest_path.read_text())
+    shards = manifest["shards"]
+
+    input_star_path = None
+    manifest_input_sha256 = None
+    if a.aggregate_with:
+        if not a.input_star:
+            print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
+            return 2
+        manifest_input_sha256 = manifest.get("input_sha256")
+        if (not isinstance(manifest_input_sha256, str)
+                or re.fullmatch(r"[0-9a-fA-F]{64}", manifest_input_sha256) is None):
+            print("FAIL: partition manifest has no valid input_sha256 for aggregate STAR",
+                  file=sys.stderr)
+            return 2
+        input_star_path = Path(a.input_star).resolve()
+        try:
+            actual_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            print(f"FAIL: cannot hash aggregate input STAR {input_star_path}: {exc}",
+                  file=sys.stderr)
+            return 2
+        if actual_sha256.lower() != manifest_input_sha256.lower():
+            print("FAIL: aggregate input STAR content does not match the partition "
+                  "manifest input_sha256", file=sys.stderr)
+            return 2
+
+    problems: list[str] = []
+
+    if not manifest.get("canonical_movies"):
+        print("FAIL: manifest lists no movies; there is nothing to verify",
+              file=sys.stderr)
+        return 2
+
+    if len(a.workers) != len(shards):
+        print(f"FAIL: {len(a.workers)} worker directories for {len(shards)} shards",
+              file=sys.stderr)
+        return 2
+
+    # A movie named twice is not a movie processed twice. The canonical list and
+    # each shard are keyed into `owner` below by movie name, so a repeated name
+    # collapses to one entry while `n_movies_expected` still counts it twice --
+    # one product pair then satisfies both and the merge reports PASS on half the
+    # coverage. The cross-shard case is caught by attribution; the same-shard case
+    # is invisible without this check, so both are rejected here.
+    def duplicates(names: list[str]) -> list[str]:
+        seen, dupes = set(), []
+        for nm in names:
+            if nm in seen and nm not in dupes:
+                dupes.append(nm)
+            seen.add(nm)
+        return dupes
+
+    dupe_canonical = duplicates(list(manifest["canonical_movies"]))
+    if dupe_canonical:
+        print(f"FAIL: manifest lists the same movie more than once: {dupe_canonical}; "
+              "one product pair cannot satisfy two expected movies", file=sys.stderr)
+        return 2
+    for s in shards:
+        dupe_shard = duplicates(list(s["movies"]))
+        if dupe_shard:
+            print(f"FAIL: shard {s['index']} lists the same movie more than once: "
+                  f"{dupe_shard}", file=sys.stderr)
+            return 2
+
+    # Defence in depth, on the same principle as the duplicate check above: the
+    # merge stages worker aggregates under _workers/, so a movie whose root is
+    # in that namespace would be overwritten by an aggregate while still
+    # counting as covered. The partitioner refuses such a manifest; the merge
+    # must not depend on having produced it.
+    for movie in manifest["canonical_movies"]:
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        if root == "_workers" or root.startswith("_workers/"):
+            print(f"FAIL: {movie!r} writes {root}.* into _workers/, the namespace "
+                  "this tool stages worker aggregates into; its per-movie products "
+                  "would be overwritten by an aggregate", file=sys.stderr)
+            return 2
+
+    exits: dict[str, int] = {}
+    launcher_verdict = None
+    if a.status:
+        status = json.loads(Path(a.status).read_text())
+
+        # Bind the status to THIS run. Nothing else here checks that the exit
+        # codes and launcher verdict describe the manifest and worker
+        # directories being merged, so a status file left over from another run
+        # -- or copied from a passing one -- would supply clean exit codes for
+        # workers that actually failed, and the merge would report PASS having
+        # never seen the current run's result.
+        status_manifest = status.get("manifest")
+        if status_manifest is None:
+            print("FAIL: status file records no manifest, so it cannot be shown to "
+                  "describe this run", file=sys.stderr)
+            return 2
+        if Path(status_manifest).resolve() != Path(a.manifest).resolve():
+            print(f"FAIL: status file describes manifest {status_manifest}, not "
+                  f"{a.manifest}; refusing to take exit codes from another run",
+                  file=sys.stderr)
+            return 2
+        status_digest = status.get("manifest_sha256")
+        if status_digest is None:
+            print("FAIL: status file records no manifest_sha256; it cannot be shown to "
+                  "describe the shards being merged", file=sys.stderr)
+            return 2
+        actual_digest = hashlib.sha256(Path(a.manifest).read_bytes()).hexdigest()
+        if status_digest != actual_digest:
+            print(f"FAIL: manifest has changed since the run recorded in the status "
+                  f"file ({status_digest[:16]} recorded, {actual_digest[:16]} on disk)",
+                  file=sys.stderr)
+            return 2
+        recorded_workers = status.get("workers", [])
+        if len(recorded_workers) != len(a.workers):
+            print(f"FAIL: status file records {len(recorded_workers)} workers for "
+                  f"{len(a.workers)} worker directories", file=sys.stderr)
+            return 2
+        for k, w in enumerate(recorded_workers):
+            log = w.get("log")
+            if log is None:
+                print(f"FAIL: status file records no log path for worker {k}",
+                      file=sys.stderr)
+                return 2
+            wdir = Path(a.workers[k]).resolve()
+            if not str(Path(log).resolve()).startswith(str(wdir) + os.sep):
+                print(f"FAIL: status file's worker {k} log {log} is not under the "
+                      f"worker directory being merged ({wdir})", file=sys.stderr)
+                return 2
+
+        for w in status.get("workers", []):
+            exits[str(w["index"])] = w.get("returncode")
+        for k in range(len(shards)):
+            rc = exits.get(str(k))
+            if rc is None:
+                problems.append(f"worker {k}: no exit code recorded")
+            elif rc != 0:
+                problems.append(f"worker {k}: exited {rc}")
+
+        # Zero exit codes are not the whole story. run_multi_gpu.py also fails
+        # its run when the device witness did not hold -- e.g. two workers were
+        # observed on the same physical GPU, or one was never observed at all.
+        # Reading only the return codes would launder that into a merge PASS,
+        # which is precisely the claim this work exists to support.
+        launcher_verdict = status.get("verdict")
+        if launcher_verdict is None:
+            problems.append("status file records no launcher verdict")
+        elif launcher_verdict == "PASS":
+            problems.extend(gpu_witness_problems(status))
+        else:
+            witness = status.get("gpu_witness")
+            detail = ""
+            if isinstance(witness, dict):
+                detail = (f"; gpu_witness: unwitnessed={witness.get('unwitnessed_pids')}, "
+                          f"wrong_device={witness.get('wrong_device')}, "
+                          f"shared_devices={witness.get('shared_devices')}")
+            problems.append(f"launcher verdict is {launcher_verdict}, not PASS{detail}")
+    else:
+        problems.append("no --status given, so worker exit codes were never checked; "
+                        "a worker that died silently would look like a clean partition")
+
+    # Which shard each movie was assigned to.
+    owner: dict[str, int] = {}
+    for s in shards:
+        for m in s["movies"]:
+            owner[m] = s["index"]
+    # Normalize to where the runner actually writes beneath each worker's --o,
+    # so absolute movie names are attributed instead of reading as lost.
+    #
+    # Build this with a duplicate guard rather than a dict comprehension: two
+    # movies whose normalized roots coincide would silently collapse to one
+    # entry, and the single surviving product pair would then satisfy both --
+    # PASS on coverage that is actually corrupt. The partitioner refuses such a
+    # manifest, but the merge must not depend on having produced it.
+    root_owner: dict[str, int] = {}
+    collapsed_roots: set[str] = set()
+    for movie, k in owner.items():
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        if root in root_owner:
+            problems.append(
+                f"duplicate coverage: two movies normalize to the same output root "
+                f"{root!r}; one product pair cannot satisfy both"
+            )
+            # Keep the first owner and remember the clash. Overwriting would make
+            # the last colliding movie's shard win attribution, and the single
+            # real product would then be reported as misrouted from a shard it
+            # never came from -- two invented errors on top of the true one.
+            collapsed_roots.add(root)
+            continue
+        root_owner[root] = k
+
+    # Resolve before use. PR55's shell merge built a relative destination and
+    # then ran cp from inside each worker directory, so the copies landed under
+    # the worker (or failed silently) and the later --only_do_unfinished pass saw
+    # an empty tree and reprocessed the whole dataset. Nothing here chdirs, but
+    # resolving removes the question entirely.
+    out = Path(a.out).resolve()
+    if out.exists() and any(out.iterdir()):
+        print(f"FAIL: refusing to merge into non-empty {out}", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True, exist_ok=True)
+
+    produced: dict[Path, int] = {}     # staged relative path -> worker index
+    per_worker_aggregates: list[str] = []
+
+    for k, wdir in enumerate(a.workers):
+        wpath = Path(wdir)
+        if not wpath.is_dir():
+            problems.append(f"worker {k}: {wpath} is not a directory")
+            continue
+        for rel, src in worker_files(wpath).items():
+            # Attribute FIRST. Matching aggregate names by basename alone would
+            # divert a real per-movie product: a movie named Movies/run.tiff
+            # writes Movies/run.log, and a movie named Movies/gain.tiff writes
+            # Movies/gain.mrc. Both would be stashed as "aggregates" and quietly
+            # vanish from the merged tree.
+            attribution = star_io.split_output_path(str(rel), root_owner)
+            if attribution is None:
+                if is_aggregate(rel):
+                    dst = out / "_workers" / f"w{k}" / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+                    per_worker_aggregates.append(str(Path("_workers") / f"w{k}" / rel))
+                    continue
+                problems.append(f"worker {k}: produced {rel}, which belongs to no movie "
+                                "in the manifest")
+            else:
+                assigned = root_owner[attribution[0]]
+                if attribution[0] in collapsed_roots:
+                    pass  # ownership is ambiguous; already reported above
+                elif assigned != k:
+                    problems.append(f"misrouted: worker {k} produced {rel}, assigned to "
+                                    f"shard {assigned}")
+
+            if rel in produced:
+                problems.append(f"duplicate: {rel} produced by workers "
+                                f"{produced[rel]} and {k}")
+                continue
+            produced[rel] = k
+            dst = out / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if a.link:
+                try:
+                    os.link(src, dst)
+                except OSError as exc:
+                    print(f"FAIL: cannot hardlink {src} -> {dst}: {exc}. A merged tree "
+                          "on a different filesystem must be copied, not linked.",
+                          file=sys.stderr)
+                    return 2
+            else:
+                shutil.copy2(src, dst)
+
+    canonical = manifest["canonical_movies"]
+    for movie in canonical:
+        root = star_io.worker_relative_root(star_io.output_root(movie))
+        for suffix in products:
+            rel = Path(root + suffix)
+            if rel not in produced:
+                problems.append(f"lost: {movie} has no {suffix} output "
+                                f"(expected {rel}, shard {owner[movie]})")
+
+    report: dict[str, object] = {
+        "manifest": str(a.manifest),
+        "aggregate_input_star_sha256": manifest_input_sha256,
+        "merged_into": str(out),
+        "n_movies_expected": len(canonical),
+        "n_files_staged": len(produced),
+        "worker_exit_codes": exits,
+        "launcher_verdict": launcher_verdict,
+        "per_worker_aggregates_preserved": sorted(per_worker_aggregates),
+        "problems": problems,
+        "verdict": "PASS" if not problems else "FAIL",
+        "logfile_pdf": "not produced and not claimed equivalent; the PDF batch loop is "
+                       "path-dependent by construction (see module docstring)",
+    }
+
+    if a.aggregate_with and not problems:
+        try:
+            current_input_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            current_input_sha256 = None
+            problems.append(f"cannot recheck aggregate input STAR before launch: {exc}")
+        if current_input_sha256 != manifest_input_sha256:
+            problems.append("aggregate input STAR changed after preflight; aggregate "
+                            "binary was not run")
+
+    if problems:
+        report["aggregate_star"] = "not attempted: staging failed"
+    elif a.aggregate_with:
+        if not a.input_star:
+            print("FAIL: --aggregate-with requires --input-star", file=sys.stderr)
+            return 2
+        cmd = [a.aggregate_with, "--i", str(Path(a.input_star).resolve()),
+               "--o", str(out) + os.sep, "--aggregate_only"] + aggregate_extra
+        # The stock binary verifies every movie before generating the complete
+        # dataset STAR/report. --aggregate_only cannot process an incomplete movie,
+        # and isMovieComplete() is option-dependent -- do_dose_weighting/save_noDW,
+        # even_odd_split, grouping_for_ps, and since PR110 the per-movie expected
+        # frame count (src/motioncorr_runner.cpp:596-620). If --aggregate-args does
+        # not match what the workers ran, the binary refuses. Independently check
+        # contents AND mtimes so even a same-byte accidental rewrite is detected.
+        # Digest the
+        # staged per-movie products first and require every one of them to survive
+        # untouched.
+        staged_before = {rel: (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
+                              (out / rel).stat().st_mtime_ns)
+                         for rel in sorted(produced)}
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            final_input_sha256 = sha256_file(input_star_path)
+        except OSError as exc:
+            final_input_sha256 = None
+            problems.append(f"cannot verify aggregate input STAR after launch: {exc}")
+        if final_input_sha256 != manifest_input_sha256:
+            problems.append("aggregate input STAR changed while the aggregate binary ran")
+        rewritten = sorted(
+            rel for rel, digest in staged_before.items()
+            if not (out / rel).exists()
+            or (hashlib.sha256((out / rel).read_bytes()).hexdigest(),
+                (out / rel).stat().st_mtime_ns) != digest)
+        if rewritten:
+            problems.append(
+                f"aggregate step rewrote {len(rewritten)} staged worker product(s) "
+                f"instead of only regenerating the dataset STAR: {rewritten[:5]}"
+                + (" ..." if len(rewritten) > 5 else "")
+                + ". --aggregate_only must not process or rewrite per-movie products.")
+        (out / "_workers" / "merge.log").parent.mkdir(parents=True, exist_ok=True)
+        (out / "_workers" / "merge.log").write_text(proc.stdout + proc.stderr)
+        agg = {"command": cmd, "returncode": proc.returncode}
+        if proc.returncode != 0:
+            problems.append(f"aggregate step exited {proc.returncode}; see "
+                            f"{out / '_workers' / 'merge.log'}")
+        else:
+            star_path = out / "corrected_micrographs.star"
+            if not star_path.exists():
+                problems.append(f"aggregate step produced no {star_path}")
+            else:
+                merged = star_io.parse(star_path)
+                block = merged.block_with_label("rlnMicrographName")
+                col = block.column("rlnMicrographName")
+                # Normalize both sides. getOutputFileNames() is plain
+                # concatenation (src/motioncorr_runner.cpp:553-573), so an
+                # absolute movie name writes "<out>//abs/path/x.mrc" while the
+                # expectation is built through worker_relative_root, which
+                # strips the leading slash. Those name one file but are
+                # different strings, so a correct tree would fail this check.
+                got = [os.path.normpath(r.values[col]) for r in block.rows]
+                want = [os.path.normpath(str(out / (star_io.worker_relative_root(
+                    star_io.output_root(m)) + ".mrc"))) for m in canonical]
+                agg["n_rows"] = len(got)
+                if got != want:
+                    problems.append(
+                        "aggregate row order is not the canonical input order "
+                        f"({len(got)} rows against {len(want)} expected); "
+                        "first difference at "
+                        + str(next((i for i, (g, w) in enumerate(zip(got, want)) if g != w),
+                                   min(len(got), len(want))))
+                    )
+                else:
+                    agg["row_order"] = "canonical"
+        pdf = out / "logfile.pdf"
+        if proc.returncode == 0:
+            try:
+                data = pdf.read_bytes()
+                if not data.startswith(b"%PDF-") or b"%%EOF" not in data[-1024:]:
+                    problems.append("aggregate produced an invalid/truncated logfile.pdf")
+                else:
+                    report["logfile_pdf"] = "complete canonical report generated by aggregate-only binary"
+            except OSError as exc:
+                problems.append(f"aggregate report missing/unreadable: {exc}")
+        report["dataset_ready"] = not problems
+        report["aggregate_star"] = agg
+        report["problems"] = problems
+        report["verdict"] = "PASS" if not problems else "FAIL"
+    else:
+        report["aggregate_star"] = ("not requested; staged outputs only. No dataset STAR "
+                                    "is claimed.")
+
+    if a.report:
+        Path(a.report).write_text(json.dumps(report, indent=2) + "\n")
+
+    print(json.dumps({k: report[k] for k in
+                      ("n_movies_expected", "n_files_staged", "verdict")}, indent=2))
+    for p in problems:
+        print("  " + p, file=sys.stderr)
+    return 0 if report["verdict"] == "PASS" else 3
+
+
+if __name__ == "__main__":
+    sys.exit(main())

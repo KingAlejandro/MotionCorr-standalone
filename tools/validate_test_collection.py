@@ -97,6 +97,7 @@ DEFAULT_REQUIRED_TESTS = [
     # Issue #95: the only test that can observe the native sample staging
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.
+    "MultiGpuScheduling",
     "NativeMovieStaging",
     "JointStarPublication",
 ]

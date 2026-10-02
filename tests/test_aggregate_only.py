@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""CPU binary controls for the complete dataset aggregation endpoint.
+
+No motion arithmetic changes: the controls distinguish aggregate-only from
+ordinary resume/reprocessing and require exact requested report coverage.
+"""
+from __future__ import annotations
+import argparse
+import hashlib
+import shutil
+import subprocess
+import struct
+import tempfile
+from pathlib import Path
+
+ARGS = ['--use_own', '--j', '1', '--skip_defect', '--angpix', '1.0',
+        '--voltage', '300', '--patch_x', '1', '--patch_y', '1', '--bfactor', '150']
+STAR = '''data_optics
+loop_
+_rlnOpticsGroupName #1
+_rlnOpticsGroup #2
+_rlnMicrographOriginalPixelSize #3
+_rlnVoltage #4
+_rlnSphericalAberration #5
+_rlnAmplitudeContrast #6
+one 1 1.0 300 2.7 0.1
+
+data_movies
+loop_
+_rlnMicrographMovieName #1
+_rlnOpticsGroup #2
+Movies/b.tiff 1
+Movies/a.tiff 1
+'''
+
+
+def require(ok: bool, message: str) -> None:
+    if not ok:
+        raise AssertionError(message)
+
+
+def products(out: Path) -> dict:
+    return {str(p.relative_to(out)): (hashlib.sha256(p.read_bytes()).hexdigest(), p.stat().st_mtime_ns)
+            for p in (out / 'Movies').glob('*') if p.is_file()}
+
+
+def run(binary: Path, tmp: Path, out: Path, extra: list[str] = [], env=None):
+    return subprocess.run([str(binary), '--i', 'in.star', '--o', str(out)+'/', *ARGS, *extra],
+                          cwd=tmp, text=True, capture_output=True, env=env)
+
+
+def literal_controls(binary, tmp):
+    original=(tmp/'in.star').read_text()
+    (tmp/'in.star').write_text(original.replace('Movies/b.tiff','Movies/b[1].tiff'))
+    shutil.copyfile(tmp/'Movies/b.tiff',tmp/'Movies/b[1].tiff')
+    out=tmp/'literal-baseline';r=run(binary,tmp,out)
+    require(r.returncode==0,'literal movie processing fixture failed: '+r.stderr)
+    literal=out/'Movies/b[1]_shifts.eps';stale=out/'Movies/b1_shifts.eps'
+    expected=[str(literal),str(out/'Movies/a_shifts.eps')]
+    failures=[]
+    for mode in ['literal-only','stale-match','missing-literal']:
+        if mode=='stale-match':shutil.copyfile(literal,stale)
+        if mode=='missing-literal':literal.unlink()
+        for name in ['corrected_micrographs.star','logfile.pdf']:
+            (out/name).unlink(missing_ok=True)
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only'])
+        if mode=='missing-literal':
+            ok=r.returncode>0 and not (out/'corrected_micrographs.star').exists() and 'b[1]' in r.stderr
+        else:
+            ok=r.returncode==0 and (out/'batch.pdf.lst').read_text().splitlines()==expected
+        ok=ok and products(out)==before
+        print(('PASS ' if ok else 'FAIL ')+'strict '+mode+' selects/refuses exact original literal movie path')
+        if not ok:failures.append(mode+': '+r.stderr[-800:])
+    (tmp/'in.star').write_text(original)
+    require(not failures,'literal report selection controls: '+str(failures))
+
+
+def effective_optics_controls(binary,tmp):
+    original=(tmp/'in.star').read_text()
+    variants=[
+        ('optics-overrides-cli',original.replace('one 1 1.0','one 1 2.0')),
+        ('multiple-optics',original.replace('one 1 1.0 300 2.7 0.1',
+            'one 1 1.0 300 2.7 0.1\ntwo 2 2.0 300 2.7 0.1').replace('Movies/a.tiff 1','Movies/a.tiff 2'))]
+    failures=[]
+    for name,star in variants:
+        (tmp/'in.star').write_text(star);out=tmp/name
+        r=run(binary,tmp,out)
+        require(r.returncode==0,name+' processing fixture failed: '+r.stderr)
+        for movie,expected in [('a',2.0),('b',2.0 if name=='optics-overrides-cli' else 1.0)]:
+            data=(out/'Movies'/f'{movie}.mrc').read_bytes()
+            sampling=struct.unpack_from('<f',data,40)[0]/struct.unpack_from('<i',data,28)[0]
+            require(sampling==expected,name+' did not establish actual effective '+movie+' sampling')
+        # The worker invocation retains --angpix1 in ARGS; input optics supply
+        # effective2 for the contradictory case and1/2 for the two groups.
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only'])
+        ok=r.returncode==0 and products(out)==before
+        if ok:
+            text=(out/'corrected_micrographs.star').read_text()
+            ok='2.000000' in text and (name!='multiple-optics' or '1.000000' in text)
+        print(('PASS ' if ok else 'FAIL ')+name+' accepts same effective per-movie optics without rewriting')
+        if not ok:failures.append(name+': '+r.stderr[-800:])
+    (tmp/'in.star').write_text(original)
+    require(not failures,'effective optics controls: '+str(failures))
+
+
+def geometry_controls(binary,tmp,baseline):
+    failures=[]
+    for name,extra,mutation in [
+        ('binning-mismatch',['--bin_factor','2'],None),
+        ('declared-optics-sampling',[], 'optics'),
+        ('accepted-mrc-sampling',[], 'sampling'),
+        ('accepted-mrc-geometry',[], 'geometry')]:
+        out=tmp/name;shutil.copytree(baseline,out)
+        original=(tmp/'in.star').read_text()
+        if mutation=='optics':(tmp/'in.star').write_text(original.replace('one 1 1.0','one 1 2.0'))
+        if mutation in ('sampling','geometry'):
+            file=out/'Movies/a.mrc';data=bytearray(file.read_bytes())
+            if mutation=='sampling':struct.pack_into('<f',data,40,2*struct.unpack_from('<f',data,40)[0])
+            else:struct.pack_into('<i',data,0,struct.unpack_from('<i',data,0)[0]//2)
+            file.write_bytes(data)
+        for f in ['corrected_micrographs.star','logfile.pdf']:(out/f).unlink(missing_ok=True)
+        before=products(out);r=run(binary,tmp,out,['--aggregate_only',*extra])
+        ok=r.returncode>0 and not (out/'corrected_micrographs.star').exists() and not (out/'logfile.pdf').exists() and products(out)==before
+        ok=ok and ('a.tiff' in r.stderr or 'b.tiff' in r.stderr) and ('sampling' in r.stderr or 'geometry' in r.stderr or 'binning' in r.stderr)
+        print(('PASS ' if ok else 'FAIL ')+name+' refuses named movie without rewriting/publication')
+        if not ok:failures.append(name+': '+r.stderr[-800:])
+        (tmp/'in.star').write_text(original)
+    # A genuine bin2 result is accepted; no special-case blanket bin2 refusal.
+    out=tmp/'healthy-bin2';r=run(binary,tmp,out,['--bin_factor','2'])
+    require(r.returncode==0,'healthy bin2 processing control failed: '+r.stderr)
+    before=products(out);r=run(binary,tmp,out,['--aggregate_only','--bin_factor','2'])
+    require(r.returncode==0 and products(out)==before,'matching bin2 aggregate refused or rewrote products: '+r.stderr)
+    print('PASS matching bin2 geometry/sampling accepts without rewriting')
+    require(not failures,'geometry/sampling controls: '+str(failures))
+
+
+def main() -> int:
+    import os
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--binary', type=Path, required=True)
+    ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
+    ap.add_argument('--only',choices=['literal','effective-optics','geometry'])
+    ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
+    a = ap.parse_args()
+    binary = a.binary.resolve()
+    fixture = Path(__file__).resolve().parents[1] / 'test-data/synthetic/synthetic_movie.tiff'
+    with tempfile.TemporaryDirectory(prefix='aggregate-controls-') as td:
+        tmp = Path(td); (tmp/'Movies').mkdir()
+        if a.fake_gs:
+            fake=tmp/'healthy-fake-gs';fake.mkdir();gs=fake/'gs'
+            gs.write_text('#!'+str(Path(__import__('sys').executable).resolve())+'\n'
+                          'import pathlib,sys\n'
+                          'for arg in sys.argv[1:]:\n'
+                          ' if arg.lower().startswith("-soutputfile="):\n'
+                          '  pathlib.Path(arg.split("=",1)[1]).write_bytes(b"%PDF-1.4 control\\n%%EOF\\n")\n')
+            gs.chmod(0o755);os.environ['PATH']=str(fake)+os.pathsep+os.environ.get('PATH','')
+            print('CONTROL ONLY: fake Ghostscript; real PDF rendering remains UNRUN')
+        else:
+            require(shutil.which('gs') is not None, 'real Ghostscript required; use explicit --fake-gs only for limited CPU controls')
+        for name in ['a', 'b']:
+            shutil.copyfile(fixture, tmp/'Movies'/f'{name}.tiff')
+        (tmp/'in.star').write_text(STAR)
+        baseline = tmp/'baseline'
+        control = run(binary,tmp,baseline)
+        require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
+        if a.only=='literal':literal_controls(binary,tmp);return 0
+        if a.only=='effective-optics':effective_optics_controls(binary,tmp);return 0
+        if a.only=='geometry':geometry_controls(binary,tmp,baseline);return 0
+        literal_controls(binary,tmp)
+        geometry_controls(binary,tmp,baseline)
+        effective_optics_controls(binary,tmp)
+        before = products(baseline)
+        # A stale unrelated plot must not be admitted by a directory wildcard.
+        (baseline/'Movies/unassigned.eps').write_text('%!PS\nshowpage\n')
+        for repeat in range(2):
+            r = run(binary,tmp,baseline,[a.aggregate_arg])
+            require(r.returncode == 0, 'aggregate failed: '+r.stderr[-2000:])
+            after = products(baseline); after.pop('Movies/unassigned.eps')
+            require(after == before, 'aggregate-only rewrote per-movie contents or mtimes')
+            lines = (baseline/'batch.pdf.lst').read_text().splitlines()
+            require(lines == [str(baseline/'Movies/b_shifts.eps'),str(baseline/'Movies/a_shifts.eps')],
+                    'full original movie order/report coverage changed or stale EPS admitted')
+            pdf = (baseline/'logfile.pdf').read_bytes()
+            require(pdf.startswith(b'%PDF-') and b'%%EOF' in pdf[-1024:], 'invalid complete PDF')
+        print('PASS aggregate full ordered report, excludes unrelated plot, repeat does not rewrite movies')
+        # Each refusal starts with no published dataset marker/report so stale
+        # valid artifacts cannot disguise a failed new aggregation.
+        cases = [('missing-image','Movies/a.mrc'),('missing-plot','Movies/a_shifts.eps')]
+        for name, missing in cases:
+            out=tmp/name; shutil.copytree(baseline,out)
+            (out/missing).unlink()
+            for f in ['corrected_micrographs.star','logfile.pdf']: (out/f).unlink()
+            before_case=products(out)
+            r=run(binary,tmp,out,[a.aggregate_arg])
+            require(r.returncode > 0, name+' must fail normally, not compute or signal-abort')
+            require('a.tiff' in r.stderr or 'a_shifts.eps' in r.stderr, name+' must name missing movie/report')
+            require(not (out/'corrected_micrographs.star').exists(), name+' published dataset STAR')
+            require(products(out)==before_case,name+' reprocessed or rewrote a movie')
+            print('PASS '+name+' refuses without reprocessing/publication')
+        out=tmp/'expected-frames'; shutil.copytree(baseline,out)
+        (out/'corrected_micrographs.star').unlink()
+        r=run(binary,tmp,out,[a.aggregate_arg,'--expected_frames','999'])
+        require(r.returncode > 0 and not (out/'corrected_micrographs.star').exists(),
+                'expected frame count must be enforced before aggregation')
+        print('PASS expected frame count refusal')
+        out=tmp/'report-fault'; shutil.copytree(baseline,out)
+        for f in ['corrected_micrographs.star','logfile.pdf']: (out/f).unlink()
+        before_case=products(out)
+        fake=tmp/'fake-bin';fake.mkdir();gs=fake/'gs';gs.write_text('#!/bin/sh\nexit 7\n');gs.chmod(0o755)
+        env=dict(os.environ,PATH=str(fake)+os.pathsep+os.environ.get('PATH',''))
+        r=run(binary,tmp,out,[a.aggregate_arg],env)
+        require(r.returncode > 0,'Ghostscript failure must fail normally')
+        require(not (out/'corrected_micrographs.star').exists() and not (out/'logfile.pdf').exists(),
+                'failed report published dataset products')
+        require(products(out)==before_case,'failed report rewrote movies')
+        require(not list(out.glob('.aggregate-*')),'private report staging leaked after failure')
+        print('PASS report failure withholds joint publication, preserves movies, cleans staging')
+    return 0
+
+if __name__=='__main__':
+    raise SystemExit(main())

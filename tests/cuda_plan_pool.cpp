@@ -455,6 +455,165 @@ void testGlobalPlanMakeFailureNoLeak() {
     std::cout << "  PASS: planning and scratch failures leak nothing and publish nothing" << std::endl;
 }
 
+// The pooled batched patch plan: reuse across movies, retirement ordering on a
+// geometry change, and the failure paths. The oracle is the transformed patch
+// block downloaded from the device, so a wrong or dead plan is visible.
+void testPatchPlanPooling() {
+    std::cout << "Testing retained patch plans across movies..." << std::endl;
+    const int nx = 128, ny = 128, n_frames = 4;
+    const std::vector<Image<float> > frames = makeFrames(nx, ny, n_frames);
+    const int group_start[2] = {0, 2};
+    const int group_size[2] = {2, 2};
+
+    auto runPatch = [&](CudaMovieSession &session, int pw, int ph, const char *what) {
+        MultidimArray<float> sum;
+        require(session.applyGainDefectsAndSum(frames, nullptr, sum, true), what);
+        const size_t elems = (size_t)2 * ph * (pw / 2 + 1);
+        cufftComplex *d_out = nullptr;
+        require(__real_cudaMalloc((void **)&d_out, elems * sizeof(cufftComplex)) == cudaSuccess, what);
+        const bool ok = session.preparePatchInVram(0, 0, pw, ph, 2, group_start, group_size, d_out);
+        std::vector<cufftComplex> host(elems);
+        if (ok)
+            require(cudaMemcpy(host.data(), d_out, elems * sizeof(cufftComplex),
+                               cudaMemcpyDeviceToHost) == cudaSuccess, what);
+        require(__real_cudaFree(d_out) == cudaSuccess, what);
+        require(ok, what);
+        return host;
+    };
+
+    resetPool();
+    std::vector<cufftComplex> first;
+    cufftHandle pooled = 0;
+    {
+        std::ostringstream log;
+        CudaMovieSession session(nx, ny, n_frames, 0, log);
+        require(session.initialize(), "patch movie 1 initialization");
+        first = runPatch(session, 32, 32, "patch movie 1");
+        require(mc_cuda::getWorkerPlanPool().patch.valid, "patch pool not populated");
+        pooled = mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c;
+        require(mc_cuda::getWorkerPlanPool().patch.retainedBytes() ==
+                mc_cuda::getWorkerPlanPool().patch.work_bytes,
+                "patch retained byte count does not report the plan work area");
+        session.release();
+    }
+    require(mc_cuda::getWorkerPlanPool().patch.valid,
+            "releasing a healthy session retired the pooled patch plan");
+
+    {
+        arm();
+        plans.clear();
+        std::ostringstream log;
+        CudaMovieSession session(nx, ny, n_frames, 0, log);
+        require(session.initialize(), "patch movie 2 initialization");
+        const int creates_at_init = (int)plans.size();
+        const std::vector<cufftComplex> second = runPatch(session, 32, 32, "patch movie 2");
+        require((int)plans.size() == creates_at_init,
+                "a pooled patch geometry still created a cuFFT plan");
+        require(mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c == pooled,
+                "a pooled patch geometry replaced the retained plan");
+        require(second.size() == first.size() &&
+                std::memcmp(second.data(), first.data(), first.size() * sizeof(cufftComplex)) == 0,
+                "the reused patch plan produced different bytes");
+        disarm();
+        session.release();
+    }
+
+    // Geometry change: retire the stale plan before this movie's patch scratch.
+    {
+        std::ostringstream log;
+        CudaMovieSession session(nx, ny, n_frames, 0, log);
+        require(session.initialize(), "patch geometry change initialization");
+        MultidimArray<float> sum;
+        require(session.applyGainDefectsAndSum(frames, nullptr, sum, true), "patch geometry sum");
+        const size_t scratch_bytes = (size_t)2 * 48 * 48 * sizeof(float);
+        const size_t elems = (size_t)2 * 48 * (48 / 2 + 1);
+        cufftComplex *d_out = nullptr;
+        require(__real_cudaMalloc((void **)&d_out, elems * sizeof(cufftComplex)) == cudaSuccess,
+                "patch geometry output allocation");
+        events.clear();
+        recording = true;
+        const bool ok = session.preparePatchInVram(0, 0, 48, 48, 2, group_start, group_size, d_out);
+        recording = false;
+        require(ok, "patch geometry change preparation");
+        long destroy_at = -1, scratch_at = -1;
+        for (size_t k = 0; k < events.size(); ++k) {
+            if (events[k].kind == EV_PLAN_DESTROY && destroy_at < 0) destroy_at = (long)k;
+            if (events[k].kind == EV_MALLOC && events[k].value >= scratch_bytes && scratch_at < 0)
+                scratch_at = (long)k;
+        }
+        require(destroy_at >= 0, "the stale patch plan was never retired on a geometry change");
+        require(scratch_at >= 0, "the new patch scratch was never allocated");
+        require(destroy_at < scratch_at,
+                "the stale patch plan was retired only after the new scratch was allocated");
+        require(__real_cudaFree(d_out) == cudaSuccess, "patch geometry output release");
+        session.release();
+    }
+
+    // Create succeeds, planning fails: no handle leaks and nothing is published.
+    resetPool();
+    {
+        std::ostringstream log;
+        CudaMovieSession session(nx, ny, n_frames, 0, log);
+        require(session.initialize(), "patch planning failure initialization");
+        MultidimArray<float> sum;
+        require(session.applyGainDefectsAndSum(frames, nullptr, sum, true), "patch planning sum");
+        cufftComplex *d_out = nullptr;
+        const size_t elems = (size_t)2 * 32 * 17;
+        require(__real_cudaMalloc((void **)&d_out, elems * sizeof(cufftComplex)) == cudaSuccess,
+                "patch planning output allocation");
+        arm(PLAN_MAKE, 1);
+        plans.clear();
+        require(!session.preparePatchInVram(0, 0, 32, 32, 2, group_start, group_size, d_out),
+                "patch preparation succeeded despite a planning failure");
+        require(fired, "the patch planning fault never fired");
+        require(plans.empty(), "a cuFFT handle leaked when patch planning failed");
+        require(!mc_cuda::getWorkerPlanPool().patch.valid,
+                "a failed patch plan build was published to the pool");
+        require(mc_cuda::getWorkerPlanPool().patch.plan_patch_r2c == 0,
+                "a failed patch plan build left a handle in the pool");
+        disarm();
+        require(__real_cudaFree(d_out) == cudaSuccess, "patch planning output release");
+        session.release();
+        require(stale == 0, "a failed patch plan build double-destroyed a handle");
+    }
+
+    // A retirement that reports failure must not be followed by a replacement.
+    resetPool();
+    {
+        std::ostringstream log;
+        CudaMovieSession session(nx, ny, n_frames, 0, log);
+        require(session.initialize(), "patch retirement failure initialization");
+        MultidimArray<float> sum;
+        require(session.applyGainDefectsAndSum(frames, nullptr, sum, true), "patch retirement sum");
+        cufftComplex *d_out = nullptr;
+        require(__real_cudaMalloc((void **)&d_out, (size_t)2 * 32 * 17 * sizeof(cufftComplex)) == cudaSuccess,
+                "patch retirement output allocation");
+        require(session.preparePatchInVram(0, 0, 32, 32, 2, group_start, group_size, d_out),
+                "patch retirement seed preparation");
+        require(__real_cudaFree(d_out) == cudaSuccess, "patch retirement output release");
+
+        cufftComplex *d_out2 = nullptr;
+        require(__real_cudaMalloc((void **)&d_out2, (size_t)2 * 48 * 25 * sizeof(cufftComplex)) == cudaSuccess,
+                "patch retirement second output allocation");
+        arm(PLAN_DESTROY, 1);
+        require(!session.preparePatchInVram(0, 0, 48, 48, 2, group_start, group_size, d_out2),
+                "patch preparation continued after a failed retirement");
+        require(fired, "the patch retirement fault never fired");
+        require(counts[PLAN_CREATE] == 0,
+                "a replacement patch plan was created after a failed retirement");
+        require(!mc_cuda::getWorkerPlanPool().patch.valid,
+                "a failed patch retirement left the pool advertised as valid");
+        require(session.getFailureState().firstCufftError() == CUFFT_INTERNAL_ERROR,
+                "the patch retirement failure was not recorded");
+        disarm();
+        require(__real_cudaFree(d_out2) == cudaSuccess, "patch retirement second output release");
+        session.release();
+    }
+    resetPool();
+    require(buffers.empty() && plans.empty(), "resources outlived the patch controls");
+    std::cout << "  PASS: patch plan reuse, retire-before-allocate, failure paths" << std::endl;
+}
+
 // Logic only: the owning device is selected for the retirement and the caller's
 // device is restored. Genuine cross-device retirement is UNRUN here -- it needs
 // two visible devices, and gpu_id is a single process-wide value.
@@ -528,6 +687,7 @@ int main() {
         testRejectedLeaseLeavesOwnerIntact();
         testDropFailureBlocksRebuild();
         testGlobalPlanMakeFailureNoLeak();
+        testPatchPlanPooling();
         testGlobalDropRestoresDevice();
         testPoisonRetiresEverything();
     } catch (const std::exception &e) {

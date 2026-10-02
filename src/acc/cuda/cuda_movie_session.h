@@ -340,9 +340,10 @@ private:
     // HANDLE_ERROR early-return paths.
     void endIngestScratch();
 
-    // Cached patch resources to avoid allocations and plan recreation in patch loop
+    // Borrowed alias to the worker-lifetime patch plan, owned by the pool.
+    // The session holds no destroy authority over this handle. The cached
+    // geometry below still describes the session's own patch scratch buffers.
     cufftHandle plan_patch_r2c = 0;
-    bool has_plan_patch_r2c = false;
     int cached_patch_w = 0;
     int cached_patch_h = 0;
     int cached_patch_ngroups = 0;

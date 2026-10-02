@@ -657,10 +657,11 @@ void CudaMovieSession::release() {
     // Alignment resources must also unwind after a patch throws. Its owners retain
     // both first-error provenance and any later poisoning cleanup code.
     (void)releasePatchAlignmentWorkspace();
-    if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
+    if (has_plan_r2c || has_plan_c2r || plan_patch_r2c != 0)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
+    // The patch plan is owned by the pool; the session only drops its alias.
+    plan_patch_r2c = 0;
     // Destroy plans before their work areas; attempt all releases, even after error.
-    releasePlan(plan_patch_r2c, has_plan_patch_r2c);
     if (!plans_borrowed) {
         releasePlan(plan_r2c, has_plan_r2c);
         releasePlan(plan_c2r, has_plan_c2r);
@@ -1741,6 +1742,30 @@ bool CudaMovieSession::preparePatchInVram(
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
 
+    // The pooled patch plan is keyed only on the geometry, which is known here,
+    // so a stale entry is retired BEFORE this movie's scratch is allocated: an
+    // old large geometry must not be able to deny a smaller valid one. A
+    // cleanup that reports failure stops the patch rather than being followed
+    // by a replacement built on an unknown context.
+    mc_cuda::CudaWorkerPlanPool::PatchPool &patch_pool = mc_cuda::getWorkerPlanPool().patch;
+    const bool patch_plan_hit = patch_pool.valid &&
+                                patch_pool.plan_patch_r2c != 0 &&
+                                patch_pool.patch_w == patch_w &&
+                                patch_pool.patch_h == patch_h &&
+                                patch_pool.n_groups == n_groups &&
+                                patch_pool.device_id == device_id;
+    if (!patch_plan_hit) {
+        cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+        plan_patch_r2c = 0;
+        if (!patch_pool.drop(&failure_state)) {
+            logfile << "ERROR: Retiring the stale pooled patch plan failed." << std::endl;
+            return false;
+        }
+        // drop() restores the caller's device; the replacement below must be
+        // built on the device this session was asked for.
+        HANDLE_ERROR(cudaSetDevice(device_id));
+    }
+
     // Reuse or allocate cached scratch buffers.
     //
     // Issue #69. These members outlive the call: release() frees whatever they point at
@@ -1795,23 +1820,36 @@ bool CudaMovieSession::preparePatchInVram(
     );
     HANDLE_ERROR(cudaGetLastError());
 
-    // Reuse cached batched cuFFT plan for patch transforms
-    if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
-        // Same rule as the buffers above: drop the geometry the cache claims before
-        // destroying the plan, and publish the new one only once it exists.
-        cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
-        CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
-        CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
-        has_plan_patch_r2c = true;
+    // Reuse the pooled batched cuFFT plan for patch transforms across movies.
+    if (patch_plan_hit) {
+        plan_patch_r2c = patch_pool.plan_patch_r2c;
+    } else {
+        cufftHandle raw_plan = 0;
+        CUFFT_CHECK(cufftCreate(&raw_plan));
+        // Adopted immediately, so a planning failure below destroys it instead
+        // of leaking it, and nothing is published until the plan is complete.
+        mc_cuda::ScopedCufftPlan scoped_patch(&failure_state);
+        scoped_patch.take(raw_plan);
+
         int n[2] = {patch_h, patch_w};
         size_t work_bytes = 0;
-        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
-                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
-                                   &work_bytes));
-        cached_patch_w = patch_w;
-        cached_patch_h = patch_h;
-        cached_patch_ngroups = n_groups;
+        CUFFT_CHECK(cufftMakePlanMany(raw_plan, 2, n, NULL, 1, patch_h * patch_w,
+                                      NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
+                                      &work_bytes));
+
+        patch_pool.plan_patch_r2c = scoped_patch.disown();
+        patch_pool.work_bytes = work_bytes;
+        patch_pool.patch_w = patch_w;
+        patch_pool.patch_h = patch_h;
+        patch_pool.n_groups = n_groups;
+        patch_pool.device_id = device_id;
+        patch_pool.valid = true;
+
+        plan_patch_r2c = patch_pool.plan_patch_r2c;
     }
+    cached_patch_w = patch_w;
+    cached_patch_h = patch_h;
+    cached_patch_ngroups = n_groups;
 
     CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, d_out_fpatches));
 

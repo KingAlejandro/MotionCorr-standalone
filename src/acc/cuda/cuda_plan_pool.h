@@ -192,6 +192,47 @@ public:
     } global;
 
     /**
+     * The batched patch R2C plan. Keyed on (patch_w, patch_h, n_groups, device).
+     * cuFFT owns this plan's work area, so its reported size is what the pool
+     * keeps resident between movies.
+     */
+    struct PatchPool {
+        cufftHandle plan_patch_r2c = 0;
+        size_t work_bytes = 0;
+        int patch_w = 0, patch_h = 0, n_groups = 0, device_id = -1;
+        bool valid = false;
+
+        ~PatchPool() { (void)drop(nullptr); }
+
+        size_t retainedBytes() const { return valid ? work_bytes : (size_t)0; }
+
+        bool drop(CudaFailureState *failure = nullptr) {
+            if (!valid && plan_patch_r2c == 0) return true;
+            const int target_device = device_id;
+            const cufftHandle owned = plan_patch_r2c;
+            valid = false;
+            plan_patch_r2c = 0;
+            patch_w = patch_h = n_groups = 0;
+            work_bytes = 0;
+            device_id = -1;
+
+            RetirementContext context(target_device, failure, "dropPatch");
+            bool ok = context.selected();
+            if (owned != 0) {
+                const cufftResult res = cufftDestroy(owned);
+                if (res != CUFFT_SUCCESS) {
+                    ok = false;
+                    if (failure) {
+                        failure->recordCufft(res, "dropPatch plan_patch_r2c", __LINE__);
+                        failure->record(cudaPeekAtLastError(), "dropPatch plan_patch_r2c", __LINE__);
+                    }
+                }
+            }
+            return context.finish(ok);
+        }
+    } patch;
+
+    /**
      * The device gain copy.
      *
      * The key is (generation, bytes, nx, ny, device). generation==0 means the
@@ -238,12 +279,15 @@ public:
     bool dropAll(CudaFailureState *failure = nullptr) {
         bool ok = true;
         if (!global.drop(failure)) ok = false;
+        if (!patch.drop(failure)) ok = false;
         if (!gain.drop(failure)) ok = false;
         return ok;
     }
 
     // Device bytes this worker keeps resident between movies.
-    size_t retainedBytes() const { return global.retainedBytes() + gain.retainedBytes(); }
+    size_t retainedBytes() const {
+        return global.retainedBytes() + patch.retainedBytes() + gain.retainedBytes();
+    }
 };
 
 inline CudaWorkerPlanPool &getWorkerPlanPool() {

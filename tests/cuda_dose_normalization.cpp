@@ -3,6 +3,7 @@
 // Returned-code faults are test-only, not physically poisoned GPU contexts.
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -154,6 +155,16 @@ void arm(Fault selected = NONE) {
     fault = selected; fired = plane_freed = false; plane = nullptr; plane_bytes = 0;
     allocations = frees = launch_checks = syncs = execs = frame_copies = 0;
     violation.clear(); active = true;
+}
+// The inverse C2R plan is retained across movies by the worker plan pool, so a
+// healthy reconstruction deliberately leaves it alive. Retire it here, with the
+// wrapper still armed so the cufftDestroy is accounted, rather than relaxing
+// the plans.empty() leak oracle this test exists for.
+void retirePooledPlans() {
+    const bool armed = active;
+    active = true;
+    (void)mc_cuda::getWorkerPlanPool().dropAll();
+    active = armed;
 }
 void empty() {
     require(buffers.empty() && events.empty() && plans.empty() && violation.empty(),
@@ -399,6 +410,7 @@ void exactCases() {
             require(violation.empty(), violation.c_str());
             require(launch_checks == 1+2*count && syncs == 1+3*count+1 && execs == count && frame_copies == count,
                     "dose precompute/per-frame launch or boundary count changed");
+            retirePooledPlans();
             empty(); active = false;
             require(std::memcmp(output().data,expected.data(),bytes) == 0,
                     "dose reconstruction pixels differ from frozen original frame loop");
@@ -437,6 +449,7 @@ void faultCase(Fault selected) {
     if (selected != CLEANUP) for (size_t i = 0; i < (size_t)in.nx*in.ny; ++i)
         require(output().data[i] == -12345.0f, "failed precompute altered host reconstruction output");
     require(__real_cudaGetLastError() == cudaSuccess, "fault injection left uncleared runtime slot");
+    retirePooledPlans();
     empty(); active = false;
     std::cout << "PASS: selected actual-path dose fault refused success and released all owners\n";
 }
@@ -456,7 +469,7 @@ int main(int argc, char **argv) {
         for (const auto &entry : cases) if (selected == "all" || selected == entry.first) {
             known = true; faultCase(entry.second);
         }
-        require(known,"unknown selector"); empty();
+        require(known,"unknown selector"); retirePooledPlans(); empty();
     } catch (const std::exception &e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
       catch (RelionError &e) { std::cerr << "FAIL: unexpected production exception: " << e << '\n'; return 1; }
     std::cout << "PASS: exact reconstruction-scoped dose normalization controls (injected codes, not poisoned hardware)\n";

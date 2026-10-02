@@ -1,0 +1,142 @@
+{
+  "sqlite": "/home/alex/mc-release-20261002/prof/host-a1_base/prof.sqlite",
+  "traced_span_s": 14.185924811,
+  "device": {
+    "kernel_union_s": 0.0,
+    "copy_union_s": 0.0,
+    "busy_union_s": 0.0,
+    "launches": 0,
+    "memcpys": 0,
+    "h2d_bytes": 0,
+    "d2h_bytes": 0,
+    "traced": false,
+    "idle_in_trace_s": null
+  },
+  "stages": {
+    "MOVIE (executeOwnMotionCorrection)": {
+      "union_s": 12.839382001,
+      "instances": 24,
+      "inclusive_sum_s": 12.839382001
+    },
+    "read gain": {
+      "union_s": 0.099204242,
+      "instances": 24,
+      "inclusive_sum_s": 0.099204242
+    },
+    "read movie": {
+      "union_s": 0.000343618,
+      "instances": 24,
+      "inclusive_sum_s": 0.000343618
+    },
+    "gain and sum": {
+      "union_s": 0.00058946,
+      "instances": 24,
+      "inclusive_sum_s": 0.00058946
+    },
+    "detect hot": {
+      "union_s": 0.949698753,
+      "instances": 24,
+      "inclusive_sum_s": 0.949698753
+    },
+    "fix defect": {
+      "union_s": 1.757787028,
+      "instances": 24,
+      "inclusive_sum_s": 1.757787028
+    },
+    "global fft": {
+      "union_s": 0.544708685,
+      "instances": 24,
+      "inclusive_sum_s": 0.544708685
+    },
+    "power spectrum": {
+      "union_s": 0.000398097,
+      "instances": 24,
+      "inclusive_sum_s": 0.000398097
+    },
+    "global alignment": {
+      "union_s": 0.337639881,
+      "instances": 24,
+      "inclusive_sum_s": 0.337639881
+    },
+    "global ifft": {
+      "union_s": 0.567462697,
+      "instances": 24,
+      "inclusive_sum_s": 0.567462697
+    },
+    "prep patch": {
+      "union_s": 0.259664881,
+      "instances": 600,
+      "inclusive_sum_s": 0.259664881
+    },
+    "patch align": {
+      "union_s": 1.206853259,
+      "instances": 600,
+      "inclusive_sum_s": 1.206853259
+    },
+    "fit polynomial": {
+      "union_s": 0.048904827,
+      "instances": 24,
+      "inclusive_sum_s": 0.048904827
+    },
+    "dose weighting": {
+      "union_s": 1.387375379,
+      "instances": 24,
+      "inclusive_sum_s": 1.387375379
+    },
+    "binning": {
+      "union_s": 0.000278248,
+      "instances": 24,
+      "inclusive_sum_s": 0.000278248
+    },
+    "write result": {
+      "union_s": 0.003841826,
+      "instances": 24,
+      "inclusive_sum_s": 0.003841826
+    },
+    "submit output": {
+      "union_s": 0.002097198,
+      "instances": 24,
+      "inclusive_sum_s": 0.002097198
+    },
+    "save model plot": {
+      "union_s": 0.001835431,
+      "instances": 24,
+      "inclusive_sum_s": 0.001835431
+    },
+    "logfile pdf": {
+      "union_s": 1.183689412,
+      "instances": 1,
+      "inclusive_sum_s": 1.183689412
+    },
+    "w scan": {
+      "union_s": 0.016057071,
+      "instances": 1,
+      "inclusive_sum_s": 0.016057071
+    },
+    "w histeps": {
+      "union_s": 0.013171787,
+      "instances": 1,
+      "inclusive_sum_s": 0.013171787
+    },
+    "w gs header": {
+      "union_s": 0.60423497,
+      "instances": 1,
+      "inclusive_sum_s": 0.60423497
+    },
+    "w gs batch": {
+      "union_s": 0.603599134,
+      "instances": 1,
+      "inclusive_sum_s": 0.603599134
+    },
+    "w gs allb": {
+      "union_s": 0.003892115,
+      "instances": 1,
+      "inclusive_sum_s": 0.003892115
+    },
+    "w gs logfile": {
+      "union_s": 0.543363818,
+      "instances": 1,
+      "inclusive_sum_s": 0.543363818
+    }
+  }
+}

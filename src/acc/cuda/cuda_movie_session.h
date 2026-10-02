@@ -74,6 +74,13 @@ public:
     // download_sum=false keeps the sum resident; the caller must then obtain the
     // statistics through reduceUnalignedSum/reduceUnalignedSumSqDev/collectAboveThreshold,
     // or copy it later via downloadUnalignedSum() when falling back.
+    //
+    // Identity of the host gain array, for worker-lifetime device retention.
+    // The caller passes a value that changes whenever the gain contents could
+    // have changed; 0 (the default) means "unknown" and disables retention, so
+    // an un-updated caller keeps the old upload-every-movie behaviour.
+    void setGainGeneration(unsigned long long generation) { gain_generation = generation; }
+
     bool applyGainDefectsAndSum(
         const std::vector<Image<float> > &raw_frames,
         const MultidimArray<float> *gain_ref,
@@ -246,6 +253,9 @@ public:
     // and a monotonically latched poisoning code that no later or earlier record can
     // displace -- see CudaFailureState.
     const CudaFailureState& getFailureState() const { return failure_state; }
+    // Non-const access exists so a control can drive the session through a
+    // recorded failure without a poisoned physical device.
+    CudaFailureState& getFailureState() { return failure_state; }
 
     // Accessors
     float* getDeviceRealFrames() { return d_Iframes; }
@@ -280,12 +290,29 @@ private:
     float *d_Iframes = nullptr;
     cufftComplex *d_Fframes = nullptr;
     float *d_Isum = nullptr;
+    // Borrowed from the worker-lifetime gain pool when the identity key matches,
+    // owned by this session otherwise. release() and
+    // releasePreprocessingBuffers() may only free it in the owned case.
     float *d_gain = nullptr;
+    bool d_gain_borrowed = false;
+    unsigned long long gain_generation = 0;
+
+    // Points d_gain at a device copy of gain_ref, reusing the worker-lifetime
+    // pooled copy when (generation, bytes, nx, ny, device) matches. False on a
+    // CUDA error, with d_gain left null and the pool left empty. A null gain_ref
+    // releases any session-owned copy and leaves d_gain null.
+    bool ensureDeviceGain(const MultidimArray<float> *gain_ref, size_t sz_real);
 
     cufftHandle plan_r2c = 0;
     cufftHandle plan_c2r = 0;
     bool has_plan_r2c = false;
     bool has_plan_c2r = false;
+    // True while plan_r2c/plan_c2r/d_fft_work/d_inverse_tile are aliases into
+    // the worker-lifetime pool. The session holds no destroy authority then.
+    bool plans_borrowed = false;
+    // True only after a successful acquireLease(). A session that was refused
+    // the lease owns nothing in the pool and must not retire it.
+    bool holds_lease = false;
     size_t fft_r2c_work_bytes = 0;
     size_t fft_c2r_work_bytes = 0;
     size_t fft_work_bytes = 0;
@@ -313,9 +340,10 @@ private:
     // HANDLE_ERROR early-return paths.
     void endIngestScratch();
 
-    // Cached patch resources to avoid allocations and plan recreation in patch loop
+    // Borrowed alias to the worker-lifetime patch plan, owned by the pool.
+    // The session holds no destroy authority over this handle. The cached
+    // geometry below still describes the session's own patch scratch buffers.
     cufftHandle plan_patch_r2c = 0;
-    bool has_plan_patch_r2c = false;
     int cached_patch_w = 0;
     int cached_patch_h = 0;
     int cached_patch_ngroups = 0;

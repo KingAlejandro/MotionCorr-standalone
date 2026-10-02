@@ -1,0 +1,142 @@
+{
+  "sqlite": "/home/alex/mc-release-20261002/prof/flame-a6_final/prof.sqlite",
+  "traced_span_s": 12.832276785,
+  "device": {
+    "kernel_union_s": 3.057864851,
+    "copy_union_s": 0.591777798,
+    "busy_union_s": 3.649642649,
+    "launches": 24875,
+    "memcpys": 8096,
+    "h2d_bytes": 3313300522,
+    "d2h_bytes": 1402714636,
+    "traced": true,
+    "idle_in_trace_s": 9.182634135999999
+  },
+  "stages": {
+    "MOVIE (executeOwnMotionCorrection)": {
+      "union_s": 11.765491638,
+      "instances": 24,
+      "inclusive_sum_s": 11.765491638
+    },
+    "read gain": {
+      "union_s": 0.136870205,
+      "instances": 24,
+      "inclusive_sum_s": 0.136870205
+    },
+    "read movie": {
+      "union_s": 0.001191215,
+      "instances": 24,
+      "inclusive_sum_s": 0.001191215
+    },
+    "gain and sum": {
+      "union_s": 0.00122837,
+      "instances": 24,
+      "inclusive_sum_s": 0.00122837
+    },
+    "detect hot": {
+      "union_s": 0.802923927,
+      "instances": 24,
+      "inclusive_sum_s": 0.802923927
+    },
+    "fix defect": {
+      "union_s": 0.04398604,
+      "instances": 24,
+      "inclusive_sum_s": 0.04398604
+    },
+    "global fft": {
+      "union_s": 0.617006415,
+      "instances": 24,
+      "inclusive_sum_s": 0.617006415
+    },
+    "power spectrum": {
+      "union_s": 0.000270983,
+      "instances": 24,
+      "inclusive_sum_s": 0.000270983
+    },
+    "global alignment": {
+      "union_s": 0.424483323,
+      "instances": 24,
+      "inclusive_sum_s": 0.424483323
+    },
+    "global ifft": {
+      "union_s": 0.592101856,
+      "instances": 24,
+      "inclusive_sum_s": 0.592101856
+    },
+    "prep patch": {
+      "union_s": 0.368835186,
+      "instances": 600,
+      "inclusive_sum_s": 0.368835186
+    },
+    "patch align": {
+      "union_s": 2.255426864,
+      "instances": 600,
+      "inclusive_sum_s": 2.255426864
+    },
+    "fit polynomial": {
+      "union_s": 0.047066601,
+      "instances": 24,
+      "inclusive_sum_s": 0.047066601
+    },
+    "dose weighting": {
+      "union_s": 1.518529482,
+      "instances": 24,
+      "inclusive_sum_s": 1.518529482
+    },
+    "binning": {
+      "union_s": 0.000401731,
+      "instances": 24,
+      "inclusive_sum_s": 0.000401731
+    },
+    "write result": {
+      "union_s": 0.003448203,
+      "instances": 24,
+      "inclusive_sum_s": 0.003448203
+    },
+    "submit output": {
+      "union_s": 0.001976788,
+      "instances": 24,
+      "inclusive_sum_s": 0.001976788
+    },
+    "save model plot": {
+      "union_s": 0.000898161,
+      "instances": 24,
+      "inclusive_sum_s": 0.000898161
+    },
+    "logfile pdf": {
+      "union_s": 0.858413945,
+      "instances": 1,
+      "inclusive_sum_s": 0.858413945
+    },
+    "w scan": {
+      "union_s": 0.008919291,
+      "instances": 1,
+      "inclusive_sum_s": 0.008919291
+    },
+    "w histeps": {
+      "union_s": 0.011471291,
+      "instances": 1,
+      "inclusive_sum_s": 0.011471291
+    },
+    "w gs header": {
+      "union_s": 0.400187219,
+      "instances": 1,
+      "inclusive_sum_s": 0.400187219
+    },
+    "w gs batch": {
+      "union_s": 0.399688832,
+      "instances": 1,
+      "inclusive_sum_s": 0.399688832
+    },
+    "w gs allb": {
+      "union_s": 0.001032813,
+      "instances": 1,
+      "inclusive_sum_s": 0.001032813
+    },
+    "w gs logfile": {
+      "union_s": 0.436228676,
+      "instances": 1,
+      "inclusive_sum_s": 0.436228676
+    }
+  }
+}

@@ -343,6 +343,26 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Worker-lifetime device gain retention: the produced sum is the oracle,
+        # so a wrongly reused or wrongly retired buffer changes pixels.
+        add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
+        target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
+        target_link_options(cuda_device_gain_pool PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaSetDevice")
+        add_test(NAME CudaDeviceGainPool COMMAND cuda_device_gain_pool)
+        set_tests_properties(CudaDeviceGainPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Worker-lifetime cuFFT plan pool: the session lease, retained global
+        # plans and their shared work area, and every retirement path.
+        add_executable(cuda_plan_pool tests/cuda_plan_pool.cpp)
+        target_link_libraries(cuda_plan_pool PRIVATE motioncorr_core)
+        target_link_options(cuda_plan_pool PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaSetDevice"
+            "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftMakePlanMany"
+            "LINKER:--wrap=cufftDestroy")
+        add_test(NAME CudaPlanPool COMMAND cuda_plan_pool)
+        set_tests_properties(CudaPlanPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

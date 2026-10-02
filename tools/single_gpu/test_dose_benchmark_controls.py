@@ -5,7 +5,7 @@ from pathlib import Path
 from dose_log_contract import validate_vram_delta
 src=Path(__file__).with_name('run_dose_pairs.py')
 tree=ast.parse(src.read_text());functions=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ('group_members','stop_owned_group')]
-assert len(functions)==2
+if len(functions)!=2:raise AssertionError('cleanup functions not found')
 space={'Path':Path,'os':os,'signal':signal,'subprocess':subprocess,'time':time}
 exec(compile(ast.Module(body=functions,type_ignores=[]),str(src),'exec'),space)
 members,stop=space['group_members'],space['stop_owned_group']
@@ -27,14 +27,14 @@ else:
   start=int(Path(f'/proc/{proc.pid}/stat').read_text().rsplit(')',1)[1].split()[19])
   try:
    proc.wait(timeout=5)
-   assert pidfile.exists() and int(pidfile.read_text()) in members(proc.pid,start),'reparented owned child control not established'
+   if not(pidfile.exists() and int(pidfile.read_text()) in members(proc.pid,start)):raise AssertionError('reparented owned child control not established')
    if mutant:
     # Previously incorrect parent-only criterion deliberately refuses escalation.
     if proc.poll() is None:os.killpg(proc.pid,signal.SIGKILL)
-    assert members(proc.pid,start),'parent-only mutation failed to retain distinguishing child'
+    if not members(proc.pid,start):raise AssertionError('parent-only mutation failed to retain distinguishing child')
    else:
     stop(proc,start)
-    assert not members(proc.pid,start),'real cleanup left reparented TERM-ignoring child'
+    if members(proc.pid,start):raise AssertionError('real cleanup left reparented TERM-ignoring child')
   finally:
    stop(proc,start)
  print('PASS actual group cleanup and parent-only negative control')
@@ -64,11 +64,11 @@ else:
     if path.exists() and path.read_text().rsplit(')',1)[1].split()[0]=='Z':break
    time.sleep(.01)
   else:raise AssertionError('zombie control not established')
-  assert child not in members(proc.pid,start) and proc.pid in members(proc.pid,start)
+  if not(child not in members(proc.pid,start) and proc.pid in members(proc.pid,start)):raise AssertionError('zombie control not established')
   old=src.read_text().replace("stat[0]!='Z' and ",'')
   oldtree=ast.parse(old);oldspace=dict(space)
   exec(compile(ast.Module(body=[n for n in oldtree.body if isinstance(n,ast.FunctionDef) and n.name=='group_members'],type_ignores=[]),str(src),'exec'),oldspace)
-  assert child in oldspace['group_members'](proc.pid,start),'old zombie criterion not discriminated'
+  if child not in oldspace['group_members'](proc.pid,start):raise AssertionError('old zombie criterion not discriminated')
  finally:stop(proc,start)
  print('PASS zombie exclusion and old criterion negative control')
  # Execute the actual summary CLI; no predicate reimplementation.
@@ -76,23 +76,40 @@ else:
  phase=root/'complete';phase.mkdir();records=[]
  for pair in range(1,3):
   for arm in ('baseline','candidate'):
-   d=phase/f'{arm}-{pair}';d.mkdir();(d/'device.csv').write_text('timestamp, uuid, 40, 100\n')
+   d=phase/f'{arm}-{pair}';d.mkdir();(d/'device.csv').write_text(f'timestamp, uuid, {40 if arm=="baseline" else 55}, {100+pair}\n')
    records.append({'pair':pair,'arm':arm,'whole_process_wall_seconds':2 if arm=='baseline' else 1,'directory':str(d),'resource':'Maximum resident set size (kbytes): 1024\nPercent of CPU this job got: 100%\nElapsed (wall clock) time (h:mm:ss or m:ss): 0:01\n','actual_cpu_mask':'0'})
   (phase/f'exact-{pair}.json').write_text(json.dumps({'status':'PASS'}))
  (phase/'runs.json').write_text(json.dumps(records));(phase/'provenance.json').write_text(json.dumps({'expected_pair_count':2}))
  def seal():
   digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-  (phase/'COMPLETE.json').write_text(json.dumps({'expected_pair_count':2,'runs_sha256':digest(phase/'runs.json'),'provenance_sha256':digest(phase/'provenance.json'),'exact_sha256':{str(n):digest(phase/f'exact-{n}.json') for n in (1,2)}}))
- def summary():return subprocess.run([sys.executable,str(src.with_name('summarize_campaign.py')),str(root),'--phases','complete'],capture_output=True,text=True)
- seal();assert summary().returncode==0
+  (phase/'COMPLETE.json').write_text(json.dumps({'expected_pair_count':2,'runs_sha256':digest(phase/'runs.json'),'provenance_sha256':digest(phase/'provenance.json'),'exact_sha256':{str(n):digest(phase/f'exact-{n}.json') for n in (1,2)},'device_sha256':{f"{r['arm']}-{r['pair']}":digest(Path(r['directory'])/'device.csv') for r in json.loads((phase/'runs.json').read_text())}}))
+ def summary(opt=False):return subprocess.run([sys.executable,str(src.with_name('summarize_campaign.py')),str(root),'--phases','complete'],capture_output=True,text=True,env={**os.environ,'PYTHONOPTIMIZE':'1'} if opt else None)
+ seal()
+ if summary().returncode!=0:raise AssertionError('sealed valid campaign rejected')
  original={p.name:p.read_bytes() for p in phase.iterdir() if p.is_file()}
- for mutation in ('missing-marker','prefix','missing-arm','duplicate-pair','changed-record','failed-exact'):
+ devices={d.name:(d/'device.csv').read_bytes() for d in phase.iterdir() if d.is_dir()}
+ for mutation in ('missing-marker','prefix','missing-arm','duplicate-pair','changed-record','failed-exact','changed-device','replaced-device','truncated-device'):
   for name,data in original.items():(phase/name).write_bytes(data)
+  for name,data in devices.items():(phase/name/'device.csv').write_bytes(data)
   if mutation=='missing-marker':(phase/'COMPLETE.json').unlink()
   elif mutation=='prefix':(phase/'runs.json').write_text(json.dumps(records[:2]));seal()
   elif mutation=='missing-arm':(phase/'runs.json').write_text(json.dumps(records[:3]));seal()
   elif mutation=='duplicate-pair':(phase/'runs.json').write_text(json.dumps(records[:2]*2));seal()
   elif mutation=='changed-record':(phase/'runs.json').write_text(json.dumps(records)+' ')
-  else:(phase/'exact-2.json').write_text(json.dumps({'status':'FAIL'}));seal()
-  assert summary().returncode!=0,'actual summary accepted '+mutation
- print('PASS actual complete summary and6negative controls')
+  elif mutation=='failed-exact':(phase/'exact-2.json').write_text(json.dumps({'status':'FAIL'}));seal()
+  elif mutation=='changed-device':(phase/'baseline-1'/'device.csv').write_text('timestamp, uuid, 99, 101\n')
+  elif mutation=='replaced-device':shutil.copyfile(phase/'candidate-2'/'device.csv',phase/'baseline-1'/'device.csv')
+  else:(phase/'baseline-1'/'device.csv').write_text('timestamp, uuid, 40, 101\n'[:18])
+  if summary().returncode==0:raise AssertionError('actual summary accepted '+mutation)
+ for name,data in original.items():(phase/name).write_bytes(data)
+ for name,data in devices.items():(phase/name/'device.csv').write_bytes(data)
+ (phase/'baseline-1'/'device.csv').write_text('timestamp, uuid, 41, 100\n');seal()
+ if summary().returncode!=0:raise AssertionError('resealed device change rejected')
+ for name,data in devices.items():(phase/name/'device.csv').write_bytes(data)
+ seal()
+ (phase/'exact-2.json').write_text(json.dumps({'status':'FAIL'}));seal()
+ if summary(opt=True).returncode==0:raise AssertionError('PYTHONOPTIMIZE accepted failed exact verdict')
+ (phase/'exact-2.json').write_bytes(original['exact-2.json']);seal()
+ (phase/'baseline-1'/'device.csv').write_text('timestamp, uuid, 99, 101\n')
+ if summary(opt=True).returncode==0:raise AssertionError('PYTHONOPTIMIZE accepted changed device samples')
+ print('PASS actual complete summary,9negative controls, resealed positive and2 PYTHONOPTIMIZE controls')

@@ -122,6 +122,10 @@ public:
 
 	// Get shift vector at (x, y, frame)
 	// frame is 1-indexed
+	// Finite fractional frames in [1, getNframes()] are allowed: the local
+	// model uses the fractional frame, the global component truncates frame-1.
+	// An unobserved X or Y returns the closest earlier fully observed shift
+	// (or zero) and status -1. Out-of-range/nonfinite frames throw.
 	// (x, y) are normalised coordinate (i.e. pixel_x / width, pixel_y / height) when normalise=false (default)
 	//            unbinned pixels in the original movie when normalise=true
 	// (shiftx, shifty) are always UNBINNED pixels in the original movie.

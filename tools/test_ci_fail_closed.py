@@ -162,7 +162,7 @@ exec "{sys.executable}" "$@"
         self.assertEqual(res_empty.returncode, 1, "Zero collected tests must fail with exit code 1")
         self.assertIn("Empty test collection: 0 tests found", res_empty.stdout)
 
-        # The integrated suite registers 33 tests: the 13 pre-existing ones, the
+        # The integrated suite registers 35 tests: the 13 pre-existing ones, the
         # #72 CiFailClosedControls, the #99 WriteFaults / ImageWriteFaults, the
         # #98 DefectParser, #26 GlobalIfftElision, #69 PatchRetryState,
         # #85 OutputTreeComparator, #97 recenter/interpolation contracts, and
@@ -190,6 +190,7 @@ exec "{sys.executable}" "$@"
             "DamagedMovie",
             "CompressedMovieSequence",
             "RunnerModelParser",
+            "MicrographModelBounds",
             "CiFailClosedControls",
             "WriteFaults",
             "ImageWriteFaults",
@@ -238,7 +239,7 @@ exec "{sys.executable}" "$@"
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
                         "OutputTreeComparator", "NativeMovieStaging",
-                        "JointStarPublication", "CompressedMovieSequence",
+                        "JointStarPublication", "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)

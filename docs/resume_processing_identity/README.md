@@ -2,7 +2,7 @@
 
 ## Compatibility change
 
-`--only_do_unfinished` now skips an own-engine movie only when its fixed v1
+`--only_do_unfinished` now skips an own-engine movie only when its fixed v2
 processing receipt matches the requested processing and its requested numerical
 products remain complete. A complete legacy movie without a receipt is refused
 with its name, before gain preparation or output mutation. Process it afresh
@@ -12,7 +12,7 @@ processed again. A malformed, unsupported or incompatible present receipt is
 refused rather than silently trusted.
 
 Fresh external MotionCor2 processing remains supported by the unchanged adapter.
-Complete external-engine resume is deliberately refused: v1 does not certify the
+Complete external-engine resume is deliberately refused: v2 does not certify the
 adapter's processing identity. Likewise, a complete own-engine movie using a
 negative (time-dependent) defect seed is refused; fresh/incomplete attempts remain
 supported. If defect correction is disabled, that seed is unused and matching
@@ -20,10 +20,10 @@ resume remains allowed. Neither RNG behavior nor scientific pixels are changed.
 
 ## Narrow identity and publication contract
 
-The canonical ASCII-hex list block `data_motioncorr_processing` carries version1
+The canonical ASCII-hex list block `data_motioncorr_processing` carries version2
 and one fixed payload. It records input content/size/dimensions, effective per-row
 sampling/voltage/pre-exposure, normalized ascending selected frames, binning,
-alignment/grouping/defect/dose options, requested product types and PS geometry,
+alignment/grouping/defect/dose options, requested product types and PS geometry, gain/defect parser and admission classes,
 EER grouping/upsampling where applicable, original gain and defect content,
 own CPU versus own CUDA, executable content and runtime descriptors. Floating
 options use finite hexfloat values, preserving precision beyond rounded STAR
@@ -51,7 +51,7 @@ headers must have the requested dimensions, type and exact writer-encoded sampli
 PS dimensions/type are checked. This does not checksum retained corrected pixels,
 fit coefficients or every saved metadata/path field. Those artifacts must remain
 owned and unmodified; the derived prepared-gain file and later tampering with saved
-gain/defect path fields are not independently certified by this v1 receipt.
+gain/defect path fields are not independently certified by this v2 receipt.
 
 ## File and runtime boundary
 
@@ -73,7 +73,7 @@ uses its loader path and cannot pin a subsequently replaced executable through
 that mechanism. This is a conservative configuration-resume contract, separate
 from numerical CPU/CUDA and scientific acceptance.
 
-## Verified scope and remaining checks
+## Retained initial v1 evidence and remaining checks
 
 Source base: main `6c87441d3e44e977994bd26175601092cc344a21` (checked joint STAR
 publication). Schema/digest commit `0248c3b`; runner integration source
@@ -106,7 +106,7 @@ latest-source independent review, CI and native acceptance are required before
 this package is recommended for merge.
 
 
-## Current-main composition and bounded review —5 October2026
+## Retained pre-fix composition and bounded review —5 October2026
 
 Additive merge `b96b88d` incorporates main `78473ccd` (#146 compressed-reader
 lifetime) while retaining `CompressedMovieSequence`, `JointStarPublication` and
@@ -135,3 +135,42 @@ receipt controls are still **UNRUN** here. Current-source independent review/CI
 and required native acceptance remain merge gates. The compact replay manifest
 is `evidence/review-20261005.json`; detailed replay logs remain in the
 coordinator's isolated evidence directory.
+
+
+## Parser-identity repair (v2) —5 October2026
+
+Independent review reproduced a v1 false-success: identical defect bytes copied
+from `.txt` to `.map`, and identical MRC gain bytes copied to `.tiff` or `.dm4`,
+were accepted on resume even though each fresh request failed its new parser or
+admission path. These failures and the original source `caf8cd0` are retained.
+
+Source `ba60ce7` adds fixed `defect_parser` and `gain_parser` fields and explicitly
+advances the payload/schema to **v2**. Complete experimental v1 receipts now refuse
+named; use a fresh non-resume run to migrate. No v1 receipt has been merged into
+production. Parser classes follow actual dispatch: rectangle TXT versus image
+maps; generic gain read/preparation versus direct EER gain interpretation. EER's
+`.gain` multiplicative/Y-flip behavior and direct first-image MRC dispatch are
+included, with rotation/flipping bound separately as before. Other format names
+remain conservative rather than assuming arbitrary aliases are equivalent.
+
+Content-equivalent one-file relocation/symlinks within the same parser class stay
+compatible. Generic MRC/map and non-EER TIFF/tif/gain aliases are canonicalized;
+direct EER MRC/map classes are kept distinct because that reader requests 2D/first
+image dispatch. A single-file digest cannot certify IMAGIC companion files or
+Image selectors/format specifiers that open another path: v2 own-engine receipt
+processing refuses these references named. Extensionless image references are
+also refused because their reader can append `.spi`. This is a deliberate narrow
+capability boundary, not broader reader-format support or a change to arithmetic.
+
+The current actual CLI suite passes **272 explicit checks in each normal/-O mode**,
+including same-parser relocation and symlink positives, TIFF/gain aliases,
+identical-content parser-switch refusals and named paired/specifier refusals.
+Three powered controls each fail the privately rebuilt exact caf predecessor and
+pass v2 in both modes; its rebuilt binary has its own recorded hash, distinct from
+the original peer binary. Initial failed v2 test attempts are also retained.
+The final combined Mac37 suite again gives35 PASS /1 inherited SyntheticRegression
+FAIL /1 Linux-only staging SKIP, with the same unchanged diagnostics. Fresh
+three-case/seven-product CPU parity is exact at the stated full-header/old-STAR
+scope. Linux/CUDA/native gates are still UNRUN; actual EER parser semantics have
+source review only. Details: `evidence/parser-v2-review.json`.
+the earlier v1 evidence above does not approve this repaired source.

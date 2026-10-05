@@ -1,0 +1,68 @@
+{
+  "baseline": "6c87441d3e44e977994bd26175601092cc344a21",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+  "cmake": "3.28.3",
+  "python": "3.12.14",
+  "fftw": "3.3.10",
+  "libtiff": "4.5.1",
+  "build": "CPU Release, C++17, CUDA=OFF, GNU OpenMP, 4 build jobs",
+  "collection": {
+    "status": "PASS",
+    "required": 34,
+    "collected": 34
+  },
+  "ctest": {
+    "status": "PASS",
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "wall_seconds": 12.61,
+    "command": "ctest --test-dir build-motioncorr --output-on-failure --parallel 2"
+  },
+  "bounds": {
+    "status": "PASS",
+    "malformed_models": 38,
+    "query_invalid_frames": 9,
+    "modes": [
+      "normal Python",
+      "Python -O",
+      "targeted ASan/UBSan"
+    ]
+  },
+  "sanitizers": {
+    "instrumented": [
+      "micrograph_model.cpp"
+    ],
+    "flags": [
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer"
+    ],
+    "runtime": "ASAN_OPTIONS=detect_leaks=0",
+    "limitation": "Other core objects use the Release build. LeakSanitizer cannot inspect /proc tasks in this execution environment; leak detection is unrun."
+  },
+  "resume": {
+    "status": "PASS",
+    "invalid_hotpixel_cases": 3,
+    "checks": [
+      "reprocessed per-movie STAR bytes",
+      "corrected image payload",
+      "joint STAR bytes with exact output-prefix replacement",
+      "valid resumed product bytes and mtimes"
+    ],
+    "baseline_negative": "PASS: baseline retains invalid edge hot-pixel record"
+  },
+  "native_cuda": "UNRUN",
+  "performance": "UNRUN",
+  "source_sha256": {
+    "src/micrograph_model.cpp": "788c6080595b91e661e598ebaffed083bb6f67f036e051a0cb831d94886b9db2",
+    "src/micrograph_model.h": "b61009ab6bd6b4667bea29a263447f629c5791314ece977a237cf354383b9f92",
+    "tests/test_micrograph_model_bounds.py": "49bcd0f36998ebb51d6bd1c584e14cf7a1e078c2d54c24c0e2036f229ab9a78c",
+    "tests/test_runner_numerics.cpp": "9d8716f7707808ee89f52dfa5d5e864bf2e861aaa6224f91e61470b2f5322154",
+    "CMakeLists.txt": "9a819d88c5abdbd15a14ca6377824b2e39f638effe5f923983d52d9518070fed",
+    "tools/validate_test_collection.py": "6283457d3d501181c249783c18076744507d79917719a9633359c9cd179a5f87",
+    "tools/test_ci_fail_closed.py": "e48a05e6d74bdd15b6f01c5fa94cdcfb1089d44ac1dcf97aa6000c193e332806"
+  }
+}

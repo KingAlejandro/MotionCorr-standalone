@@ -1,0 +1,350 @@
+{
+  "production_predecessor": "a0979b0",
+  "adapter": "candidate modes model_eer/model_complete only; production code unchanged in old binary",
+  "python_optimized": false,
+  "cases": [
+    {
+      "field": "grouping",
+      "grouping": null,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x0000000100d8408c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000100e40d68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x0000000100e3fa94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000100d62d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "grouping",
+      "grouping": 0,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x0000000100c5408c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000100d10d68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x0000000100d0fa94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000100c32d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "grouping",
+      "grouping": -1,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x0000000100b0808c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000100bc4d68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x0000000100bc3a94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000100ae6d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "grouping",
+      "grouping": 2147483648,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x0000000102d5008c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000102e0cd68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x0000000102e0ba94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000102d2ed54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "grouping",
+      "grouping": 4294967296,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x0000000100ff408c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x00000001010b0d68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x00000001010afa94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000100fd2d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "grouping",
+      "grouping": 4294967297,
+      "upsampling": 1,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x00000001000e408c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x00000001001a0d68 _ZN10Micrograph4readE8FileNameb + 4072\n2   runner_numerics                     0x000000010019fa94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x00000001000c2d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 526\nERROR: \nMicrographModel::read: invalid EER grouping in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "upsampling",
+      "grouping": 40,
+      "upsampling": 0,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x000000010496008c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000104a1cdd8 _ZN10Micrograph4readE8FileNameb + 4184\n2   runner_numerics                     0x0000000104a1ba94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x000000010493ed54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "upsampling",
+      "grouping": 40,
+      "upsampling": -2,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x000000010029808c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000100354dd8 _ZN10Micrograph4readE8FileNameb + 4184\n2   runner_numerics                     0x0000000100353a94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x0000000100276d54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "upsampling",
+      "grouping": 40,
+      "upsampling": 4,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x000000010005008c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x000000010010cdd8 _ZN10Micrograph4readE8FileNameb + 4184\n2   runner_numerics                     0x000000010010ba94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x000000010002ed54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "upsampling",
+      "grouping": 40,
+      "upsampling": 2147483648,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x000000010269c08c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x0000000102758dd8 _ZN10Micrograph4readE8FileNameb + 4184\n2   runner_numerics                     0x0000000102757a94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x000000010267ad54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    },
+    {
+      "field": "upsampling",
+      "grouping": 40,
+      "upsampling": 4294967297,
+      "arms": {
+        "predecessor": {
+          "read": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "1\n",
+            "stderr": ""
+          }
+        },
+        "candidate": {
+          "read": {
+            "exit": 1,
+            "stdout": "",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n=== Backtrace  ===\n0   runner_numerics                     0x000000010460008c _ZN11RelionErrorC2ERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES8_l + 80\n1   runner_numerics                     0x00000001046bcdd8 _ZN10Micrograph4readE8FileNameb + 4184\n2   runner_numerics                     0x00000001046bba94 _ZN10MicrographC2E8FileNameS0_dii + 804\n3   runner_numerics                     0x00000001045ded54 main + 16236\n4   dyld                                0x0000000180c984e4 start + 6992\n==================\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          },
+          "model_complete": {
+            "exit": 0,
+            "stdout": "0\n",
+            "stderr": "in: /Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/saved-model-main-20261005/src/micrograph_model.cpp, line 524\nERROR: \nMicrographModel::read: invalid EER upsampling in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/eer-predecessor-4ij10lef/movie.star\n"
+          }
+        }
+      }
+    }
+  ],
+  "verdict": "PASS 11 actual parser+completion fail-then-pass controls",
+  "EER_decoding": "UNRUN"
+}

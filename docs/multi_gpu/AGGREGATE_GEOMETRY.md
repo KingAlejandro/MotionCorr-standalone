@@ -63,3 +63,8 @@ joint/report, and identical movie bytes/mtimes from the corrected binary.
 A `logfile.pdf` reference additionally proves report-target admission. Existing
 canonical joint/report files from an earlier invocation are retained on failure;
 no rollback or stale-marker invalidation guarantee is added.
+
+The shared prepared `gain.mrc` is also protected. The actual gain-flip fixture
+verifies every movie model refers to that prepared gain; a per-series `gain.mrc`
+input makes the predecessor return0 and replace it. Corrected refusal must retain
+its bytes/mtime and all movie bytes/mtimes, with no newly published joint/report.

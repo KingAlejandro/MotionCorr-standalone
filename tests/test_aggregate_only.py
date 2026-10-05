@@ -215,6 +215,31 @@ def tomography_controls(binary,tmp):
                     'tomographic failure rewrote movie products or leaked staging')
             print('PASS tomography '+mode+' withholds joint success without movie rewriting')
             (tmp/'in.star').write_text(tomo_input)
+        # Flipping a real gain prepares the shared output/gain.mrc referenced by
+        # every movie model. A series input with that name must not replace it.
+        from PIL import Image
+        from test_gain_cache import write_mrc
+        with Image.open(tmp/'Movies/a.tiff') as image:nx,ny=image.size
+        gain=tmp/'prepared-input-gain.mrc';write_mrc(gain,[[1.0]*(nx*ny)],nx,ny)
+        gain_args=['--gainref',str(gain),'--gain_flip','1']
+        target=tmp/'tomo-gain-collision';r=run(binary,tmp,target,gain_args)
+        require(r.returncode==0,'tomographic actual gain fixture failed: '+r.stderr[-2000:])
+        prepared=target/'gain.mrc'
+        require(prepared.is_file(),'actual shared gain was not prepared')
+        for model in (target/'Movies').glob('*.star'):
+            require(str(prepared) in model.read_text(),'movie model does not reference prepared shared gain')
+        retained=products(target);gain_before=(hashlib.sha256(prepared.read_bytes()).hexdigest(),prepared.stat().st_mtime_ns)
+        (target/'corrected_tilt_series.star').unlink();(target/'logfile.pdf').unlink()
+        shutil.copyfile(tmp/'tilt_series/one.star',tmp/'gain.mrc')
+        (tmp/'in.star').write_text(tomo_input.replace('tilt_series/one.star','gain.mrc'))
+        r=run(binary,tmp,target,[*gain_args,'--aggregate_only'])
+        gain_after=(hashlib.sha256(prepared.read_bytes()).hexdigest(),prepared.stat().st_mtime_ns)
+        require(r.returncode>0 and 'gain.mrc' in r.stderr,'tomographic gain-reference collision falsely succeeded: exit='+str(r.returncode)+' gain_preserved='+str(gain_after==gain_before))
+        require(not (target/'corrected_tilt_series.star').exists() and not (target/'logfile.pdf').exists(),
+                'tomographic gain-reference collision published joint/report success')
+        require(products(target)==retained and gain_after==gain_before and not list(target.glob('.aggregate-*')),
+                'tomographic gain collision changed prepared gain/movie bytes/mtimes or leaked staging')
+        print('PASS tomography shared-gain collision refuses, preserves prepared gain/model/movie bytes and mtimes')
     finally:(tmp/'in.star').write_text(original)
 
 

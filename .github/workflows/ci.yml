@@ -77,7 +77,7 @@ jobs:
 
       - name: "Smoke Test 2: Automated CTest Suite"
         run: |
-          python3 tools/validate_test_collection.py --test-dir build --min-count 38
+          python3 tools/validate_test_collection.py --test-dir build --min-count 39
           ctest --test-dir build --output-on-failure --verbose
 
       - name: Known-motion validation and canonical fixture preflight

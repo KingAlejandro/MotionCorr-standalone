@@ -212,6 +212,12 @@ if(BUILD_TESTING)
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_processing_identity.py
             --binary $<TARGET_FILE:motioncorr>)
     set_tests_properties(ResumeProcessingIdentity PROPERTIES TIMEOUT 180)
+    add_library(receipt_source_mutation_shim SHARED tests/receipt_source_mutation_shim.cpp)
+    target_link_libraries(receipt_source_mutation_shim PRIVATE ${CMAKE_DL_LIBS})
+    add_test(NAME ResumeSourceMutation
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_source_mutation.py
+            --binary $<TARGET_FILE:motioncorr> --shim $<TARGET_FILE:receipt_source_mutation_shim>)
+    set_tests_properties(ResumeSourceMutation PROPERTIES TIMEOUT 180)
     # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
     # and deliberately outside if(CUDA): the whole point is a configuration this
     # suite does not link, so no compiled test can observe it.

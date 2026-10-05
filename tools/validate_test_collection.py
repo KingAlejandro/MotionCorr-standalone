@@ -106,6 +106,7 @@ DEFAULT_REQUIRED_TESTS = [
     "ProcessingFileDigest",
     "MovieProcessingIdentity",
     "ResumeProcessingIdentity",
+    "ResumeSourceMutation",
 ]
 
 

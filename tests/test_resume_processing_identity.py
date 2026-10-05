@@ -199,16 +199,92 @@ def parser_identity(binary, work, case):
     refused(binary, work, out, {flag: alternative.name}, 'gain_parser' if gain else 'defect_parser')
 
 
+
+def eer_metadata(binary, work, case=None, upsampling=1):
+    # Synthetic EER TIFF headers + sparse accepted MRC/model only: this invokes
+    # real canResumeMovie, never EER pixel decoding or a scientific oracle.
+    out = work / ('eer-metadata-' + str(upsampling))
+    healthy(binary, work, out)
+    seed_model = (out / 'a.star').read_text()
+    payload = seed_model.split('_rlnMotioncorrProcessingIdentity')[1].split()[0]
+    decoded = bytes.fromhex(payload).decode().splitlines()
+    fields = dict(line.split('=', 1) for line in decoded[1:])
+    # Two IFDs with tiny uninterpreted strips. Directory parsing is sufficient
+    # for resume preflight; a fresh decoding run is deliberately not attempted.
+    data = bytearray(b'II' + struct.pack('<HI', 42, 10) + b'\x00\x00')
+    entries = [(256,4,1,2048),(257,4,1,2048),(258,3,1,8),(259,3,1,65001),
+               (262,3,1,1),(273,4,1,8),(277,3,1,1),(278,4,1,2048),(279,4,1,1)]
+    directory_bytes = 2 + 12 * len(entries) + 4
+    for index in range(2):
+        data += struct.pack('<H', len(entries))
+        for tag, typ, count, value in entries:
+            data += struct.pack('<HHII', tag, typ, count, value)
+        data += struct.pack('<I', 10 + directory_bytes if index == 0 else 0)
+    (work / 'a.eer').write_bytes(data)
+    write_star(work / 'eer.star', ['a.eer'])
+    size = 1024 if upsampling == -1 else 2048
+    fields.update(width=str(size), height=str(size), frames='2', selected_frames='1:2',
+                  input_bytes=str(len(data)), input_digest=hashlib.sha256(data).hexdigest(),
+                  eer_grouping='1', eer_upsampling=str(upsampling))
+    canonical = ('motioncorr-processing-v2\n' + ''.join(k+'='+fields[k]+'\n' for k in sorted(fields))).encode().hex()
+    general = seed_model.split('data_global_shift')[0]
+    general = general.replace('a.mrc', 'a.eer')
+    for label, value in [('rlnImageSizeX', size), ('rlnImageSizeY', size), ('rlnImageSizeZ', 2)]:
+        general = re.sub(r'(_'+label+r'\s+)\S+', lambda m: m[1]+str(value), general)
+    general += '_rlnEERGrouping 1\n' + ('_rlnEERUpsampling 1\n' if upsampling == 1 else '') + '\n'
+    model = general + ('data_global_shift\n\nloop_\n_rlnMicrographFrameNumber #1\n'
+                       '_rlnMicrographShiftX #2\n_rlnMicrographShiftY #3\n1 0 0\n2 0 0\n\n'
+                       'data_motioncorr_processing\n\n_rlnMotioncorrProcessingVersion 2\n'
+                       '_rlnMotioncorrProcessingIdentity '+canonical+'\n')
+    (out / 'a.star').write_text(model)
+    header = bytearray((out / 'a.mrc').read_bytes()[:1024])
+    struct.pack_into('<3i', header, 0, size, size, 1)
+    struct.pack_into('<3i', header, 28, size, size, 1)
+    struct.pack_into('<3f', header, 40, float(size), float(size), 1.0)
+    with (out / 'a.mrc').open('wb') as stream:
+        stream.write(header); stream.truncate(1024 + size * size * 4)
+    options = {'--eer_grouping': '1', '--eer_upsampling': str(upsampling), '--only_do_unfinished': True}
+    before = snapshot(out)
+    matched = invoke(binary, work, out, options, 'eer.star')
+    (work / 'matching.stdout').write_text(matched.stdout); (work / 'matching.stderr').write_text(matched.stderr)
+    require(matched.returncode == 0, 'matching EER header-only resume failed: '+matched.stderr)
+    require(all(snapshot(out)[name] == value for name, value in before.items() if name.startswith('a.')),
+            'matching EER resume rewrote retained products')
+    for label in (['rlnEERGrouping'] if case == 'eer-grouping' else
+                  ['rlnEERUpsampling'] if case in ('eer-upsampling', 'eer-upsampling-missing', 'eer-half') else ['rlnEERGrouping','rlnEERUpsampling']):
+        changed = model.replace('_'+label+' 1', '_'+label+' 2')
+        if case == 'eer-upsampling-missing':
+            changed = model.replace('_rlnEERUpsampling 1\n', '')
+        if label == 'rlnEERUpsampling' and upsampling == -1:
+            changed = model.replace('data_global_shift', '_rlnEERUpsampling 2\n\ndata_global_shift')
+        (out / 'a.star').write_text(changed)
+        before = snapshot(out)
+        result = invoke(binary, work, out, options, 'eer.star')
+        (work / (label+'.stdout')).write_text(result.stdout); (work / (label+'.stderr')).write_text(result.stderr)
+        require(result.returncode > 0 and 'a.eer' in result.stderr and label in result.stderr,
+                'valid mismatching saved EER metadata falsely accepted: '+label+': '+result.stdout+result.stderr)
+        require(snapshot(out) == before, 'EER saved-metadata refusal mutated retained products')
+        (out / 'a.star').write_text(model)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--binary', type=Path, required=True)
-    parser.add_argument('--control-case', choices=['binning', 'selection', 'dose', 'sampling', 'gain', 'input', 'stale-marker', 'model-marker', 'defect-parser', 'gain-parser-tiff', 'gain-parser-dm'])
+    parser.add_argument('--control-case', choices=['binning', 'selection', 'dose', 'sampling', 'gain', 'input', 'stale-marker', 'model-marker', 'defect-parser', 'gain-parser-tiff', 'gain-parser-dm', 'eer-grouping', 'eer-upsampling', 'eer-upsampling-missing', 'eer-half'])
+    parser.add_argument('--control-work', type=Path)
     args = parser.parse_args()
     binary = args.binary.resolve()
+    if args.control_work:
+        require(args.control_case in ('eer-grouping', 'eer-upsampling', 'eer-upsampling-missing', 'eer-half'), 'retained control-work is EER-only')
+        args.control_work.mkdir(parents=True, exist_ok=True)
+        fixture(args.control_work)
+        eer_metadata(binary, args.control_work.resolve(), args.control_case, -1 if args.control_case == 'eer-half' else 1)
+        print('PASS retained actual EER metadata control ' + args.control_case)
+        return 0
     with tempfile.TemporaryDirectory() as directory:
         work = Path(directory); fixture(work)
         if args.control_case:
-            if args.control_case == 'stale-marker': stale_marker(binary, work)
+            if args.control_case.startswith('eer-'): eer_metadata(binary, work, args.control_case, -1 if args.control_case == 'eer-half' else 1)
+            elif args.control_case == 'stale-marker': stale_marker(binary, work)
             elif args.control_case == 'model-marker': model_marker(binary, work)
             elif 'parser' in args.control_case: parser_identity(binary, work, args.control_case)
             else: control(binary, work, args.control_case)
@@ -415,6 +491,18 @@ def main():
         stale_marker(binary, work)
         stale_marker(binary, work, sync=True)
         model_marker(binary, work)
+        # Ordinary MRC models ignore EER-only metadata.
+        ordinary = work / 'ordinary-eer-labels'; healthy(binary, work, ordinary)
+        marker = ordinary / 'a.star'
+        marker.write_text(marker.read_text().replace('data_global_shift',
+                          '_rlnEERGrouping 3\n_rlnEERUpsampling 2\n\ndata_global_shift'))
+        before = snapshot(ordinary)
+        healthy(binary, work, ordinary, {'--only_do_unfinished': True})
+        require(all(snapshot(ordinary)[name] == value for name, value in before.items() if name.startswith('a.')),
+                'ordinary model EER-only fields changed its compatibility')
+        eer_metadata(binary, work)
+        eer_metadata(binary, work, 'eer-upsampling-missing')
+        eer_metadata(binary, work, upsampling=-1)
     print('PASS ResumeProcessingIdentity ' + str(CHECKS) + ' explicit checks')
     return 0
 

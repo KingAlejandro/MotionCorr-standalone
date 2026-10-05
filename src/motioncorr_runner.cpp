@@ -893,6 +893,14 @@ bool MotioncorrRunner::canResumeMovie(const FileName &movie, int expected_count,
 		expected.setValue(EMDL_MICROGRAPH_PRE_EXPOSURE, exposure);
 		expected.setValue(EMDL_MICROGRAPH_DOSE_RATE, dose_per_frame);
 		expected.setValue(EMDL_MICROGRAPH_START_FRAME, first_frame_sum);
+		if (EERRenderer::isEER(movie))
+		{
+			expected.setValue(EMDL_MICROGRAPH_EER_GROUPING, eer_grouping);
+			expected.setValue(EMDL_MICROGRAPH_EER_UPSAMPLING, eer_upsampling);
+			// Saved models omit the supported half-resolution default (-1).
+			if (!general.containsLabel(EMDL_MICROGRAPH_EER_UPSAMPLING))
+				general.setValue(EMDL_MICROGRAPH_EER_UPSAMPLING, -1);
+		}
 		for (EMDLabel label : expected.getActiveLabels())
 		{
 			std::string actual, wanted;
@@ -1019,8 +1027,15 @@ void MotioncorrRunner::run()
 				submitOutput([this, saved, fn_movie, input_identity]() {
 					if (do_own)
 					{
-						motioncorr_identity::requireUnchanged(fn_movie, input_identity.snapshot);
-						requireProcessingSourcesUnchanged();
+						try
+						{
+							motioncorr_identity::requireUnchanged(fn_movie, input_identity.snapshot);
+							requireProcessingSourcesUnchanged();
+						}
+						catch (const std::runtime_error &error)
+						{
+							REPORT_ERROR("Movie " + fn_movie + ": " + error.what());
+						}
 					}
 					writeModel(*saved);
 					plotShifts(fn_movie, *saved);

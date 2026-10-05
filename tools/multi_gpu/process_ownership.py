@@ -68,7 +68,10 @@ class ProcessTable:
                     'state': 'Z' if info.status == 5 else 'R'}
         try:
             raw = (self.proc / str(pid) / 'stat').read_text()
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
+            # Linux may report ESRCH after opening stat if the process exits
+            # before its contents are read. This is disappearance, not an
+            # unreadable live identity; permission/other errors still refuse.
             return None
         fields = raw.rsplit(')', 1)[1].split()
         if int(raw.split(' ', 1)[0]) != pid or int(fields[19]) <= 0:

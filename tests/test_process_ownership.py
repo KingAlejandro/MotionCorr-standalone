@@ -64,6 +64,22 @@ def invoke(mod,roots,owner,grace=0):
     return mod._terminate_process_groups(roots,**kwargs)
 
 
+
+def procfs_exit_race():
+    with tempfile.TemporaryDirectory(prefix='procfs-exit-control-') as folder:
+        table=ProcessTable(proc=Path(folder))
+        # Exercise the actual read method on either host; a supplied directory
+        # selects the Linux implementation without needing a live /proc race.
+        for error in (FileNotFoundError(2, 'vanished'), ProcessLookupError(3, 'exited during read')):
+            with patch.object(Path,'read_text',side_effect=error):
+                require(table.read(424242) is None,'vanished process was treated as unreadable live identity')
+        with patch.object(Path,'read_text',side_effect=PermissionError(13,'denied')):
+            try:table.read(424242)
+            except PermissionError:pass
+            else:raise AssertionError('permission failure was treated as disappearance')
+    print('PASS actual procfs read handles exit/ESRCH and preserves permission refusal')
+
+
 def mocked(mod):
     group=424242;table=Table();table.rows[group]=row(group,10,group)
     owner=ProcessOwnership(table=table);owner.watch(group)
@@ -257,7 +273,7 @@ raise SystemExit(mod.main(sys.argv[1:]))
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--helper',type=Path,default=ROOT/'tools/multi_gpu/run_multi_gpu.py');ap.add_argument('--only',choices=['helper','cli','refusal']);a=ap.parse_args()
     if a.only not in ('cli','refusal'):
-        mod=load(a.helper.resolve());mocked(mod);live(mod)
+        procfs_exit_race();mod=load(a.helper.resolve());mocked(mod);live(mod)
     if a.only not in ('helper','refusal'):cli_outcomes(a.helper.resolve())
     if a.only!='helper':refused_cleanup_outcome(a.helper.resolve())
     return 0

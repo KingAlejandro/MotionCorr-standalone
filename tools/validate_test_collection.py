@@ -101,6 +101,7 @@ DEFAULT_REQUIRED_TESTS = [
     # ownership contract, for both widths the compact route admits. Registered
     # under if(UNIX) beside ImageWriteFaults.
     "NativeMovieStaging",
+    "GainCacheOwnership",
     "JointStarPublication",
 ]
 

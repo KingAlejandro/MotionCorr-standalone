@@ -47,7 +47,15 @@ def main():
         if mode != "healthy": env["MC_NVCOMP_ACCEPTANCE_FAULT"] = mode
         r = subprocess.run(cmd, cwd=inp, env=env, text=True, capture_output=True, timeout=180)
         text = r.stdout + r.stderr
+        # Decoder diagnostics belong to the per-movie log, while wrapper
+        # refusal and test-only readback witnesses are on the process streams.
+        # Require and retain both actual surfaces; neither alone proves order.
+        movie_log = out / "Movies/control.log"
+        if not movie_log.is_file():
+            raise RuntimeError("actual movie diagnostic log missing: " + str(movie_log))
+        movie_text = movie_log.read_text()
         (root / (mode + ".log")).write_text(text)
+        text += "\n" + movie_text
         products = sorted(str(p.relative_to(out)) for p in out.rglob("*")
                           if p.suffix.lower() in {".mrc", ".star"})
         if mode == "healthy":

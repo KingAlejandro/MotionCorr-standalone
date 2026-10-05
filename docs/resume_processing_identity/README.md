@@ -104,3 +104,34 @@ coordinator's `work/resume-identity-main-20261002-evidence` artifacts. Compact
 commands/hashes/results accompany this note. Final Linux/current-main composition,
 latest-source independent review, CI and native acceptance are required before
 this package is recommended for merge.
+
+
+## Current-main composition and bounded review —5 October2026
+
+Additive merge `b96b88d` incorporates main `78473ccd` (#146 compressed-reader
+lifetime) while retaining `CompressedMovieSequence`, `JointStarPublication` and
+all three receipt tests in the required-name inventory and count-preserving
+missing-name controls. CI now requires37 collected tests. Receipt schema/digest
+and runner behavior are unchanged by this composition.
+
+Fresh combined Mac Release validation: **35 PASS,1 unchanged SyntheticRegression
+FAIL,1 Linux-only NativeMovieStaging SKIP** out of37. The optimized actual resume
+suite passes225 explicit checks. A fresh three-case CPU comparison retains exact
+pixels/full normalized1024-byte headers for seven movie products and all existing
+model blocks; only the receipt block is added. All raw earlier failures and
+predecessor controls remain retained. These are correctness controls, with no
+isolated performance claim.
+
+A bounded source audit checked effective optics/exposure and processing flags,
+content/backend keys, refusal before gain/output mutation, requested-product
+completeness, invalidation before overwrite, FIFO writer cancellation/drain,
+checked model publication, legitimate non-prefix/shard/group-renumbered/tomography
+resume and the named external-engine/time-seeded exclusions. No new blocker was
+reproduced. `own-cuda` identifies the selected existing CUDA pipeline, including
+its existing permitted stage fallbacks; it is not an all-stages-on-GPU witness.
+
+Linux wrapped digest boundaries, combined CUDA compilation and native CUDA
+receipt controls are still **UNRUN** here. Current-source independent review/CI
+and required native acceptance remain merge gates. The compact replay manifest
+is `evidence/review-20261005.json`; detailed replay logs remain in the
+coordinator's isolated evidence directory.

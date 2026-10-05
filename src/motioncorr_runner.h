@@ -192,6 +192,40 @@ public:
 	bool gain_cache_is_eer = false;
 	int gain_cache_eer_upsampling = 0;
 	bool gain_cache_filled = false;
+	// Bumped on every refill of gain_cache, from a process-wide counter. Lets the
+	// CUDA session tell "same gain array as last movie" from "refilled, possibly
+	// different contents" without hashing 54 MiB per movie. 0 means "no identity
+	// resolved yet", which disables device-side retention. The counter is global
+	// rather than per-runner so that two runners on one worker thread cannot mint
+	// the same generation for different gain contents.
+	unsigned long long gain_cache_generation = 0;
+
+	// True when gain_cache_generation is a valid identity for a movie of this
+	// geometry, i.e. gainReferenceFor() has already resolved the gain for this
+	// movie. The device retention key is only sound under that ordering, so the
+	// caller asserts this instead of leaving the ordering implicit.
+	bool gainIdentityResolvedFor(int nx, int ny) const;
+
+	// Static defect pre-mask cache: exact TXT bytes, path, gain generation and
+	// geometry. TXT parsing consumes the keyed snapshot. Image defect maps use
+	// the original per-movie reader and are not cached. Detected hot pixels are
+	// never cached here.
+	MultidimArray<bool> defect_premask;
+	FileName defect_premask_fn;
+	std::string defect_premask_defect_bytes;
+	FileName defect_premask_gain_fn;
+	unsigned long long defect_premask_gain_gen = 0;
+	int defect_premask_nx = 0, defect_premask_ny = 0;
+	bool defect_premask_valid = false;
+
+	// Returns the static pre-mask, rebuilding it on a key miss. The returned
+	// reference is owned by this runner; callers that add detected hot pixels
+	// must copy it first.
+	const MultidimArray<bool>& getDefectPremask(int nx, int ny, const FileName &fn_defect,
+	                                            const FileName &fn_gain_reference,
+	                                            const MultidimArray<float> &Igain,
+	                                            int n_threads);
+	bool isDefectPremaskValid() const { return defect_premask_valid; }
 
 	// Returns the gain for this movie, reading it only on a cache miss.
 	// Const so the read-only invariant is enforced by the compiler: callers must

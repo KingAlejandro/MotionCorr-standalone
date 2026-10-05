@@ -196,6 +196,10 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME GainCacheOwnership
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
+            --cxx ${CMAKE_CXX_COMPILER})
+    set_tests_properties(GainCacheOwnership PROPERTIES TIMEOUT 120)
     # Declaration/definition agreement on the _NVCOMP_ENABLED guard. Device-free
     # and deliberately outside if(CUDA): the whole point is a configuration this
     # suite does not link, so no compiled test can observe it.
@@ -362,6 +366,20 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Worker-lifetime device gain retention: the produced sum is the oracle,
+        # so a wrongly reused or wrongly retired buffer changes pixels.
+        add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
+        target_link_libraries(cuda_device_gain_pool PRIVATE motioncorr_core)
+        target_link_options(cuda_device_gain_pool PRIVATE
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cudaSetDevice"
+            "LINKER:--wrap=cudaGetDevice")
+        add_test(NAME CudaDeviceGainPool COMMAND cuda_device_gain_pool)
+        set_tests_properties(CudaDeviceGainPool PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Cleanup-origin fatal retirement is sticky; isolate this transition
+        # from the other selector's earlier fatal retirement in its own process.
+        add_test(NAME CudaDeviceGainCleanupFatal COMMAND cuda_device_gain_pool --case cleanup-fatal)
+        set_tests_properties(CudaDeviceGainCleanupFatal PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

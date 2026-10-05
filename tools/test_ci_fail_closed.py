@@ -202,6 +202,8 @@ exec "{sys.executable}" "$@"
             "RunnerInterpolateShifts",
             # #126 nvCOMP ingest, device-free contracts.
             "DeflateLayout",
+            "Adler32Arithmetic",
+            "Adler32KernelHost",
             "ScratchArena",
             "DefectNeighbours",
             # #127 output stage.

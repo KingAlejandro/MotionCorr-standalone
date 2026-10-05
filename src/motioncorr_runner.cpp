@@ -61,6 +61,10 @@
 	Timer MCtimer;
 	int TIMING_READ_GAIN = MCtimer.setNew("read gain");
 	int TIMING_READ_MOVIE = MCtimer.setNew("read movie");
+	// The device ingest sits before "read movie" and replaces it entirely when it
+	// succeeds, so without its own tag the fast path shows up as a stage that
+	// simply costs nothing and the decode is invisible in the breakdown.
+	int TIMING_DEVICE_INGEST = MCtimer.setNew("device ingest (nvCOMP)");
 	int TIMING_GAIN_AND_SUM = MCtimer.setNew("apply gain and initial sum");
 	int TIMING_DETECT_HOT = MCtimer.setNew("detect hot pixels");
 	int TIMING_FIX_DEFECT = MCtimer.setNew("fix defects");
@@ -1693,7 +1697,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		RCTIC(TIMING_DEVICE_INGEST);
 		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
+		RCTOC(TIMING_DEVICE_INGEST);
 	}
 	// Each outcome gets its own response. Collapsing them into one bool is what
 	// let a poisoned context and an unsupported encoding take the same path.

@@ -67,6 +67,8 @@ DEFAULT_REQUIRED_TESTS = [
     # A100 decode cannot observe. Without these entries the fast path could lose
     # its eligibility predicate or its arena bound with the suite still green.
     "DeflateLayout",
+    "Adler32Arithmetic",
+    "Adler32KernelHost",
     "ScratchArena",
     "DefectNeighbours",
     # Added by the #127 output-stage group. MrcHeaderStats is the only test that

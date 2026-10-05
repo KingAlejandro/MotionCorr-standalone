@@ -174,3 +174,18 @@ three-case/seven-product CPU parity is exact at the stated full-header/old-STAR
 scope. Linux/CUDA/native gates are still UNRUN; actual EER parser semantics have
 source review only. Details: `evidence/parser-v2-review.json`.
 the earlier v1 evidence above does not approve this repaired source.
+
+
+## Additive saved-model bounds composition —5 October2026
+
+Source `c78db669` additively merges main `282eb7de` (PR148) with the receipt branch,
+preserving both histories. The union collects and requires **38 named tests**.
+Eight focused CTests pass; actual receipt CLI272 checks and saved-model parser/
+completion controls pass in both normal and Python `-O` modes. The imported saved
+model bounds/EER interpretation are identical to reviewed main; the only model
+conflict resolution keeps the parsed model RAII-owned until receipt parsing also
+succeeds. Receipt/CUDA/numerical source remains unchanged from the v2 predecessor.
+This does not establish EER decoding or native CUDA receipt execution. Full Mac37
+results above remain predecessor evidence; no new full-suite scientific PASS is
+claimed by this bounded38-test composition. Independent exact-source delta review
+confirms source/scope/license. Current-head CI/native acceptance remain separate.

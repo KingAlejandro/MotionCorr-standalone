@@ -32,6 +32,7 @@ DEFAULT_REQUIRED_TESTS = [
     # Sequential compressed readers must close/reap their decoder before reuse.
     "CompressedMovieSequence",
     "RunnerModelParser",
+    "MicrographModelBounds",
     "CiFailClosedControls",
     # Added by the #99 fail-closed write group (PR105). WriteFaults is the
     # end-to-end runner control; ImageWriteFaults is the unit-level

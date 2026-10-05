@@ -1,0 +1,101 @@
+{
+  "source_head": "cd69c0040ce1db0b83e61fbcc39b1ae79cc89ee5",
+  "source_commit": "c78db6696ea67c23198160521eb538dd8eea28d7",
+  "source_tree": "2239107cff021709355fc6ed4a4a534ec1e14e0d",
+  "base_main": "282eb7de8c14d969603fed812d8ad647f975764e",
+  "venue": "4-gpu-vm",
+  "assigned_gpu_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+  "actual_logical_cpus": [
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111
+  ],
+  "numa_memory_policy": "membind1",
+  "payload_pid": 3042180,
+  "payload_birth_ticks": 666803891,
+  "payload_executable": "/usr/bin/bash",
+  "binary_sha256": "e0a5e24770d58962ed0b312ecb61a86be431d76f3457905d672f6808721533df",
+  "witness_sha256": "03191bfeca15fab42507f55299b02d240c9050e752722fa095991be1ac9648dc",
+  "native_test_collection_count": 46,
+  "required_count": 38,
+  "focused_executed_count": 8,
+  "focused_ctest_verdict": "8/8PASS",
+  "linux_digest_checks": 91,
+  "linux_os_fault_marker": "LINUX_OS_FAULT_BOUNDARIES_COMPLETE",
+  "native_modes": {
+    "normal": {
+      "verdict": "PASS bounded native receipt configuration/publication controls",
+      "checks": 684,
+      "binary_invocations": 38,
+      "native_invocations": 19,
+      "successful_cufft_events": 410,
+      "expected_failure_invocations": 15,
+      "all_child_cpu_masks_104_111": true,
+      "no_owned_survivors_or_observer_errors": true,
+      "full_normalized_header_payload_comparisons": [
+        {
+          "case": "incomplete-repair",
+          "products": [
+            "a.mrc",
+            "a_EVN.mrc",
+            "a_ODD.mrc",
+            "a_PS.mrc",
+            "a_noDW.mrc"
+          ],
+          "full_normalized_headers_and_payload": "EXACT"
+        }
+      ]
+    },
+    "optimized": {
+      "verdict": "PASS bounded native receipt configuration/publication controls",
+      "checks": 684,
+      "binary_invocations": 38,
+      "native_invocations": 19,
+      "successful_cufft_events": 410,
+      "expected_failure_invocations": 15,
+      "all_child_cpu_masks_104_111": true,
+      "no_owned_survivors_or_observer_errors": true,
+      "full_normalized_header_payload_comparisons": [
+        {
+          "case": "incomplete-repair",
+          "products": [
+            "a.mrc",
+            "a_EVN.mrc",
+            "a_ODD.mrc",
+            "a_PS.mrc",
+            "a_noDW.mrc"
+          ],
+          "full_normalized_headers_and_payload": "EXACT"
+        }
+      ]
+    }
+  },
+  "release_original_exit": 0,
+  "release_gate_exit": 0,
+  "overall_exit": 0,
+  "released_at": "2026-10-05T14:51:15+00:00",
+  "assigned_device_release_occupancy": "",
+  "source_files_sha256": {
+    "src/motioncorr_runner.cpp": "b512735226f9ec9f395488b3326aadf90811a27ea2acfa4fc2e4426bd5414a0c",
+    "src/movie_processing_identity.cpp": "c32071d8f02877c1fbc89920a3c71d3e43a5d2e6362299476a581182731e3066",
+    "src/movie_processing_identity.h": "ba061982c5a3b1d98357db9865d94911d09ca614ae9b70b8a10347dc10b05435",
+    "tests/test_resume_processing_identity.py": "9e14884108bce4938766e7796e4e5c182b7ae0fc4e4528c8cde590f66ccb1292",
+    "tests/test_hotpixel_rng_determinism.py": "38fb50252fa44745b115270b506df2260e24038b7dd7fafecae0dd492c61428e",
+    "tests/test_gain_cache.py": "819cb39ea48083a5e3e0d14b3ac13a34f1118e01ed859fbb3e0a788d96733320",
+    "tests/test_tiff_read.py": "9726ea2244af50647bf16d7514cf39c879a866decbe36cb8cb43e55a5497c80b"
+  },
+  "limits": [
+    "bounded synthetic receipt controls, not all24/tutorial acceptance",
+    "46 collected CUDA configuration tests; only8 focused CTests executed in this campaign",
+    "selected own-CUDA execution with actual successful cuFFT/physicalUUID, not all-stages GPU",
+    "additional integrated tutorial/multioptics/native tomography and PR147 composition UNRUN",
+    "actual EER decoding/parser format controls on EER input UNRUN",
+    "PDF endpoint completion/scientific accuracy/throughput/memory measurements not established",
+    "historical MacSyntheticRegression failure retained; no numerical gates changed"
+  ]
+}

@@ -189,3 +189,42 @@ This does not establish EER decoding or native CUDA receipt execution. Full Mac3
 results above remain predecessor evidence; no new full-suite scientific PASS is
 claimed by this bounded38-test composition. Independent exact-source delta review
 confirms source/scope/license. Current-head CI/native acceptance remain separate.
+
+
+## Bounded native receipt acceptance —5 October2026
+
+Pinned published source `cd69c004` (production merge `c78db669`), CUDA12.8.61/sm80,
+no nvCOMP, VM GPU1 physicalUUID `GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d`.
+Actual all-descendant logical CPUs104–111 with membind1, build4 under the shared
+build lock, j4/io2. Binary SHA256
+`e0a5e24770d58962ed0b312ecb61a86be431d76f3457905d672f6808721533df`.
+
+- Native configuration collects46 tests and retains all38 required names;
+  **eight focused CTests execute and PASS**. This is not a46-test full native run.
+- Linux digest checks91 PASS with the mandatory actual wrapped OS fault marker:
+  read/fstat/final stat errors, shortEOF, descriptor/path changes, EINTR recovery.
+- Both normal and Python `-O` native receipt campaigns PASS:38 binary invocations
+  per mode,19 with actual successful native cuFFT (410 events),684 explicit harness
+  checks. PhysicalUUID and original/observed PID-birth/affinity are recorded.
+- Matching no-op and same-parser relocation/symlink aliases retain movie bytes and
+  mtimes with zero numericalCUDA. Configuration/backend/content/parser mismatches
+  refuse named before output mutation. Fifteen expected failing invocations per
+  mode are retained, including fresh-invalid parser and late-write controls.
+- Missing odd-product repair reproduces allfive requested MRCs exactly including
+  the full header with only its one printed timestamp normalized. Both sync/async
+  late-product and late-model failures invalidate the old marker, withhold joint
+  success, then repair exact payloads. Bounded non-prefix processing leaves the
+  completed movie unchanged and produces all remaining movie products/models.
+- Reviewed ownership cleanup controls PASS normal/-O, including actual observed
+  reparented TERM-ignoring children and numericPID/PGID-only negative controls.
+  All observed owned children are gone; strict assignedGPU occupancy release
+  passes, final exit0, released2026-10-05T14:51:15+00:00.
+
+Limits remain: these small synthetic configurations are not complete tutorial24,
+native tomography/multioptics/PR147 composition or EER decoding acceptance. A
+selected own-CUDA receipt plus successful cuFFT witness does not certify every
+stage on GPU. No new performance, memory, scientific accuracy or PDF-completion
+claim. Historical Mac synthetic failures and old-source/mutant failures remain
+unchanged. Compact receipts: `evidence/native-20261005/`; full raw inputs/products/
+stdout/stderr/witness traces and the exact binary are retained in the coordinator's
+`work/resume-native-acceptance-20261005/evidence-payload-3042180` and VM campaign.

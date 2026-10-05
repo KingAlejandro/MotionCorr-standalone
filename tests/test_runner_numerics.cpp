@@ -9,6 +9,7 @@
 #include <cstring>
 #include <cstdint>
 #include <limits>
+#include <iomanip>
 
 void require(bool condition, const std::string &message)
 {
@@ -282,6 +283,48 @@ int main(int argc, char **argv)
         }
         if (std::string(argv[1]) == "read") {
             Micrograph parsed(argv[2]);
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_eer") {
+            Micrograph parsed(argv[2]);
+            std::cout << parsed.getEERUpsampling() << ' ' << parsed.getEERGrouping() << '\n';
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_complete") {
+            MotioncorrRunner runner;
+            runner.fn_out = std::string(argv[2]) + "/";
+            runner.do_dose_weighting = false;
+            runner.even_odd_split = false;
+            runner.grouping_for_ps = -1;
+            std::cout << runner.isMovieComplete(argv[3], 4) << '\n';
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_query") {
+            Micrograph parsed(argv[2]);
+            RFLOAT x, y;
+            const int status = parsed.getShiftAt(std::stod(argv[3]), .25, -.25, x, y);
+            std::cout << std::setprecision(17) << status << ' ' << x << ' ' << y << '\n';
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_roundtrip") {
+            Micrograph parsed(argv[2]);
+            parsed.write(argv[3]);
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_mask") {
+            Micrograph parsed(argv[2]);
+            if (std::string(argv[3]) == "invalid") {
+                // Public in-memory hot-pixel vectors need the same bounds
+                // check as saved coordinates, before any mask assignment.
+                parsed.hotpixelX.push_back(parsed.getWidth());
+                parsed.hotpixelY.push_back(0);
+            }
+            MultidimArray<bool> mask;
+            parsed.fillDefectAndHotpixels(mask);
+            long count = 0;
+            FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(mask)
+                if (DIRECT_MULTIDIM_ELEM(mask, n)) count++;
+            std::cout << count << '\n';
             return 0;
         }
         if (std::string(argv[1]) == "legacy_mtf") {

@@ -54,3 +54,12 @@ Ghostscript controls cover reference/publication logic only; real rendering and
 CUDA execution remain separate native gates. Publication is joint-last, not a
 rollback transaction for already published auxiliary/per-series files, and no
 crash-durability or full processing-identity guarantee is added.
+
+Final per-series STAR destinations are also admitted before private staging:
+they cannot alias a known per-movie MRC/model/log/plot destination or an aggregate
+report. The actual `Movies/a.star` collision control fails the previous repaired
+binary (exit0 and replaced movie metadata), then requires named refusal, no new
+joint/report, and identical movie bytes/mtimes from the corrected binary.
+A `logfile.pdf` reference additionally proves report-target admission. Existing
+canonical joint/report files from an earlier invocation are retained on failure;
+no rollback or stale-marker invalidation guarantee is added.

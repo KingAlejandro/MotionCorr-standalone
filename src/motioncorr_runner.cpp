@@ -796,6 +796,30 @@ void MotioncorrRunner::run()
 		// Scientific products are read from fn_out; aggregate products are first
 		// written in a private sibling directory. Publish the joint STAR last, only
 		// after the full report closes successfully. Ordinary resume is unchanged.
+		if (is_tomo) {
+			// Per-series tables may be nested, but must not replace worker products
+			// or the report files generated into the same aggregate staging directory.
+			std::set<std::filesystem::path> protected_paths;
+			for (const auto &movie : fn_ori_micrographs) {
+				const FileName root = getOutputFileNames(movie).withoutExtension();
+				for (const char *suffix : {".mrc", ".star", ".log", "_noDW.mrc", "_DWS.mrc", "_DW.mrc",
+					"_PS.mrc", "_EVN.mrc", "_ODD.mrc", "_frames.mrcs"})
+					protected_paths.insert(std::filesystem::path((root + suffix).c_str()).lexically_normal());
+				protected_paths.insert(std::filesystem::path((fn_out + movie.withoutExtension() + "_shifts.eps").c_str()).lexically_normal());
+			}
+			for (const char *report : {"corrected_tilt_series.star", "logfile.pdf", "header.pdf", "batch.pdf", "all_batches.pdf", "batch.pdf.lst"})
+				protected_paths.insert(std::filesystem::path((fn_out + report).c_str()).lexically_normal());
+			FOR_ALL_OBJECTS_IN_METADATA_TABLE(tomogramSet.globalTable) {
+				FileName reference;
+				if (!tomogramSet.globalTable.getValue(EMDL_TOMO_TILT_SERIES_STARFILE, reference))
+					REPORT_ERROR("Aggregate-only missing tomogram STAR reference.");
+				const auto final = std::filesystem::path(getOutputFileWithNewUniqueDate(reference, fn_out).c_str()).lexically_normal();
+				const auto relative = final.lexically_relative(std::filesystem::path(fn_out.c_str()).lexically_normal());
+				if (protected_paths.count(final) || (!relative.has_parent_path() &&
+					relative.filename().string().find("corrected_micrographs_") == 0))
+					REPORT_ERROR("Aggregate-only tomogram STAR reference collides with a movie/report product: " + reference);
+			}
+		}
 		std::string pattern = fn_out + ".aggregate-XXXXXX";
 		std::vector<char> name(pattern.begin(), pattern.end()); name.push_back('\0');
 		char *created = mkdtemp(name.data());

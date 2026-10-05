@@ -42,8 +42,9 @@ The completion STAR is written to a temporary file, checked after close and
 renamed only after the requested MRC writes close successfully. An earlier failed
 product cancels it. Source snapshots are checked again before publication.
 Rotated/flipped gain preparation refuses an alias of its original source inode.
-The marker certifies the requested numerical MRC products and model; it does **not**
-certify the separate EPS/PDF/report endpoint.
+The marker records the processing identity and requires structurally complete
+numerical MRC products and model. It does **not** cryptographically certify later
+changes to corrected pixels or certify the separate EPS/PDF/report endpoint.
 
 A matching receipt also requires saved model dimensions/binning/effective optics,
 exposure/dose and start frame to agree at the writer's STAR precision. Accepted MRC
@@ -228,3 +229,40 @@ claim. Historical Mac synthetic failures and old-source/mutant failures remain
 unchanged. Compact receipts: `evidence/native-20261005/`; full raw inputs/products/
 stdout/stderr/witness traces and the exact binary are retained in the coordinator's
 `work/resume-native-acceptance-20261005/evidence-payload-3042180` and VM campaign.
+
+## Review delta: saved EER settings and per-movie source failures (5 October)
+
+Source `060c5dce` addresses the two new review findings without changing receipt
+schema, numerical kernels or RNG. EER inputs cross-check saved grouping/upsampling
+against their receipt. An absent saved upsampling label means the existing supported
+`-1` half-resolution default: requested `-1` matches, requested `1` refuses, and
+requested `-1` with an explicit different supported value refuses. Grouping remains
+required by the saved-model parser. Non-EER inputs ignore EER-only metadata.
+
+Only source-identity checks immediately before model publication convert their
+`std::runtime_error` into a named `RelionError`. Synchronous and background output
+therefore share the per-movie failure contract. Physical changes to movie A retain
+healthy B's exact CPU pixels; changes to the shared gain/defect/executable snapshot
+correctly refuse both movies. Old A completion is removed and joint publication
+is withheld in all eight source/writer arms. No broad GPU-error catch was added.
+
+[Retained evidence](evidence/review-delta-20261005/summary.json):
+
+- Required/collected union **39**; full Mac run **37 PASS / inherited synthetic
+  regression FAIL / Linux-only staging SKIP**. Gates and inherited failure remain.
+- Actual receipt CLI **294 checks** in each normal/Python `-O` mode; all eight
+  physical source/writer arms pass in each mode.
+- **32 predecessor/fixed control arms** are discriminating: four EER saved-field
+  negatives and four source mutations in both Python modes. The retained private
+  Mac predecessor was built from `c78db669`; its production source tree is identical
+  to published `ca53a5b2`, and its actual binary hash is recorded separately.
+- Header-only synthetic EER fixture drives actual resume preflight with sparse MRC
+  extent and a constructed compatible receipt. It does **not** decode EER pixels,
+  establish EER science, or assert full experimental-data correctness.
+- Initial missing-interposition/path and mistaken global-healthy control failures
+  remain in private raw evidence alongside the corrected controls.
+
+The preceding native campaign remains evidence for its pinned predecessor source.
+**The native delta for this repair is UNRUN**, and current-source CI/review are
+separate gates. Structural header/type/geometry/extent validation is not a checksum
+of later-edited output pixels; no output-hash feature was added in this repair.

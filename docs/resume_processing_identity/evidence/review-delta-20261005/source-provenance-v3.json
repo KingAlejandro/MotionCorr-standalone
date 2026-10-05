@@ -1,0 +1,653 @@
+{
+  "predecessor_publication": "ca53a5b2210818040892192ed9453e5b48e9f6c7",
+  "predecessor_local_build_source": "c78db6696ea67c23198160521eb538dd8eea28d7",
+  "predecessor_is_private_retained_binary": true,
+  "predecessor_binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817",
+  "fixed_binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e",
+  "shim_sha256": "7c25ee5e14c55c4f129534e3a4fdadfab82f2188579c8b55bf1bb7e5814d9929",
+  "source_hashes": {
+    "src/motioncorr_runner.cpp": "129e6ae206233cfa04f3f9d458a7ab007797b5d7d2e34b32534cb62fcc83743c",
+    "tests/test_resume_processing_identity.py": "34b5591e9a3d207d9d6ad6fdd6d9577209736a385b0b4984132aae1b5824d234",
+    "tests/test_resume_source_mutation.py": "7765beef851e4aeda4d7b3a8abf0c801ce8fee391fcd57816aa0e42527dd1945",
+    "tests/receipt_source_mutation_shim.cpp": "f4465a84367160bdb063c8b2a24843480d1ae77b163b37d59b7c7a4f1787e262",
+    "CMakeLists.txt": "9e555c9fbfccb3ec37a4b51e1c0b531d57117d4dabffb3663f9de21fd1b69808",
+    "tools/validate_test_collection.py": "dc89ded0aa26c2d3ecace74258fcc37c0189c9403a51c317bc37313138b71cae",
+    "tools/test_ci_fail_closed.py": "e40617f1f5a94bd25cd431b79c96bc8fb87e2dd56fd46280450d7d31a64f30ed",
+    ".github/workflows/ci.yml": "39558687a08ab3fbb3f2a8bec259eddf1ee8adff6009b036c9f702c17ce0f06b"
+  },
+  "src_objects_identical_c78_to_ca53": [
+    "7ed072916446390113a8c2c3f19c2e968310103c",
+    "7ed072916446390113a8c2c3f19c2e968310103c"
+  ],
+  "controls": [
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "eer-grouping",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-grouping",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-eer-grouping"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "eer-upsampling",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-upsampling",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-eer-upsampling"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "eer-upsampling-missing",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-upsampling-missing",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-eer-upsampling-missing"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "eer-half",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-half",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-eer-half"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "input",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "input",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-input"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "gain",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "gain",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-gain"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "defect",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "defect",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-defect"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "predecessor",
+      "case": "executable",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "executable",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-normal-executable"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "eer-grouping",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-grouping",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-eer-grouping"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "eer-upsampling",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-upsampling",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-eer-upsampling"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "eer-upsampling-missing",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-upsampling-missing",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-eer-upsampling-missing"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "eer-half",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-half",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-eer-half"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "input",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "input",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-input"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "gain",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "gain",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-gain"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "defect",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "defect",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-defect"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "normal",
+      "version": "fixed",
+      "case": "executable",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "executable",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-normal-executable"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "eer-grouping",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-grouping",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-eer-grouping"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "eer-upsampling",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-upsampling",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-eer-upsampling"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "eer-upsampling-missing",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-upsampling-missing",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-eer-upsampling-missing"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "eer-half",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--control-case",
+        "eer-half",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-eer-half"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "input",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "input",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-input"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "gain",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "gain",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-gain"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "defect",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "defect",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-defect"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "predecessor",
+      "case": "executable",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/predecessor-motioncorr-mac",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "executable",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-predecessor-optimized-executable"
+      ],
+      "exit": 1,
+      "powered": true,
+      "binary_sha256": "09aa4c2d285a2010162e9e536bcb40d0401710bf430adac899933002121eb817"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "eer-grouping",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-grouping",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-eer-grouping"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "eer-upsampling",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-upsampling",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-eer-upsampling"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "eer-upsampling-missing",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-upsampling-missing",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-eer-upsampling-missing"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "eer-half",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_processing_identity.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--control-case",
+        "eer-half",
+        "--control-work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-eer-half"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "input",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "input",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-input"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "gain",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "gain",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-gain"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "defect",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "defect",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-defect"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    },
+    {
+      "mode": "optimized",
+      "version": "fixed",
+      "case": "executable",
+      "argv": [
+        "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "tests/test_resume_source_mutation.py",
+        "--binary",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--shim",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/libreceipt_source_mutation_shim.dylib",
+        "--case",
+        "executable",
+        "--work",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence/review-findings-20261005/v3-fixed-optimized-executable"
+      ],
+      "exit": 0,
+      "powered": true,
+      "binary_sha256": "ae60ddb9b1dbb8cf2ab7cdc22ed74d6d06c0bbc09efcdf8175bdc37a590df10e"
+    }
+  ],
+  "limits": [
+    "Synthetic EER TIFF directory/header and saved model preflight only; no EER pixels decoded.",
+    "CPU two-movie input/shared-source controls only; CUDA delta UNRUN.",
+    "Structural output type/geometry/extent checks are not output pixel cryptographic certification."
+  ]
+}

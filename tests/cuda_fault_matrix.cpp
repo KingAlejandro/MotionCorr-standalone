@@ -34,6 +34,12 @@
 #include <cufft.h>
 
 #include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <spawn.h>
+#include <sys/wait.h>
+
+extern char **environ;
 #include <set>
 #include <sstream>
 #include <string>
@@ -526,10 +532,10 @@ TrialResult runTrial(FaultKind kind, long ordinal, int n_movies) {
 
 // Production session controls that re-enter after replacement failed, rather than
 // merely asking a hand-built classifier what it would do.
-int runOwnershipControls() {
+int runOwnershipControls(int selected_mode) {
     int failures = 0;
     HostInputs in; buildHostInputs(in);
-    for (int mode = 0; mode < 4; ++mode) {
+    for (int mode = selected_mode; mode == selected_mode; ++mode) {
         resetCounters(); g_fault_kind = FAULT_NONE; g_fault_at = 0;
         g_active = true; g_in_teardown = false;
         std::ostringstream log;
@@ -576,16 +582,16 @@ int runOwnershipControls() {
             ++failures; std::fprintf(stderr,"FAIL re-entry resources=%zu stale=%zu\n",totalOutstanding(),g_stale_releases);
         }
     }
-    std::printf("Ownership controls: four production session sequences, failures=%d\n",failures);
+    std::printf("Ownership control: one production session sequence, failures=%d\n",failures);
     return failures;
 }
 
-int runEnumerationControls() {
+int runEnumerationControls(int selected_boundary, int selected_mode) {
     int failures = 0;
     HostInputs in; buildHostInputs(in);
     const std::vector<int> starts{0, 2}, sizes{2, 2};
-    for (int boundary = 0; boundary < 2; ++boundary) {
-        for (int mode = 0; mode < 3; ++mode) {
+    for (int boundary = selected_boundary; boundary == selected_boundary; ++boundary) {
+        for (int mode = selected_mode; mode == selected_mode; ++mode) {
             resetCounters(); g_fault_kind = FAULT_NONE; g_fault_at = 0;
             g_active = true; g_count_fired = false;
             g_count_error = mode == 0 ? cudaErrorIllegalAddress :
@@ -635,17 +641,69 @@ int runEnumerationControls() {
             }
         }
     }
-    std::printf("Enumeration controls: six production boundary cases, failures=%d\n", failures);
+    std::printf("Enumeration control: one production boundary case, failures=%d\n", failures);
     return failures;
 }
 
 } // namespace
 
-int main() {
+// A fatal control intentionally retires the process-wide worker cache. A later
+// independent trial must use a fresh executable process; clearing runtime errors
+// or resetting the CUDA context cannot unretire the production ownership state.
+// Spawn before this parent's CUDA initialization and exec (never fork CUDA work).
+int runFreshControl(const char *executable, const char *kind, int first, int second = -1) {
+    std::string a = std::to_string(first), b = std::to_string(second);
+    char *args[] = {const_cast<char *>(executable), const_cast<char *>(kind),
+                    &a[0], second < 0 ? nullptr : &b[0], nullptr};
+    pid_t pid;
+    const int error = posix_spawnp(&pid, executable, nullptr, nullptr, args, environ);
+    if (error) {
+        std::fprintf(stderr, "FAIL isolated control spawn error=%d\n", error);
+        return 1;
+    }
+    int status = 0;
+    pid_t result;
+    do { result = waitpid(pid, &status, 0); } while (result < 0 && errno == EINTR);
+    if (result != pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        std::fprintf(stderr, "FAIL isolated control kind=%s first=%d second=%d status=%d\n",
+                     kind, first, second, status);
+        return 1;
+    }
+    return 0;
+}
+
+int main(int argc, char **argv) {
+    // Strict selectors keep unknown/malformed controls from accidentally running
+    // the default matrix and reporting an unrelated success.
+    int selected_mode = -1, selected_boundary = -1;
+    const bool ownership = argc == 3 && std::string(argv[1]) == "--ownership-control";
+    const bool enumeration = argc == 4 && std::string(argv[1]) == "--enumeration-control";
+    if (ownership) {
+        if (std::string(argv[2]).size() != 1 || argv[2][0] < '0' || argv[2][0] > '3') return 1;
+        selected_mode = argv[2][0] - '0';
+    } else if (enumeration) {
+        if (std::string(argv[2]).size() != 1 || argv[2][0] < '0' || argv[2][0] > '1' ||
+            std::string(argv[3]).size() != 1 || argv[3][0] < '0' || argv[3][0] > '2') return 1;
+        selected_boundary = argv[2][0] - '0'; selected_mode = argv[3][0] - '0';
+    } else if (argc != 1) {
+        std::fprintf(stderr, "Unknown fault-matrix control selector\n");
+        return 1;
+    }
+    int failures = 0;
+    if (argc == 1) {
+        for (int mode = 0; mode < 4; ++mode)
+            failures += runFreshControl(argv[0], "--ownership-control", mode);
+        for (int boundary = 0; boundary < 2; ++boundary)
+            for (int mode = 0; mode < 3; ++mode)
+                failures += runFreshControl(argv[0], "--enumeration-control", boundary, mode);
+    }
     if (cudaSetDevice(0) != cudaSuccess || cudaFree(nullptr) != cudaSuccess) {
         std::fprintf(stderr, "CUDA device 0 is required for this control\n");
         return 1;
     }
+
+    if (ownership) return runOwnershipControls(selected_mode);
+    if (enumeration) return runEnumerationControls(selected_boundary, selected_mode);
 
     // How many of each primitive a clean run makes: the matrix sweeps every ordinal.
     const TrialResult clean = runTrial(FAULT_NONE, 0, 1);
@@ -691,7 +749,7 @@ int main() {
         }
     };
 
-    int failures = runOwnershipControls() + runEnumerationControls(), trials = 0;
+    int trials = 0;
     for (int k = FAULT_MALLOC; k < FAULT_KIND_COUNT; k++) {
         for (long n = 1; n <= budget[k]; n++) {
             const TrialResult r = runTrial((FaultKind)k, n, 1);

@@ -188,6 +188,7 @@ exec "{sys.executable}" "$@"
             "GainCache",
             "TiffRead",
             "DamagedMovie",
+            "CompressedMovieSequence",
             "RunnerModelParser",
             "CiFailClosedControls",
             "WriteFaults",
@@ -238,7 +239,7 @@ exec "{sys.executable}" "$@"
         for dropped in ("CiFailClosedControls", "WriteFaults", "ImageWriteFaults",
                         "DefectParser", "GlobalIfftElision", "PatchRetryState",
                         "OutputTreeComparator", "MultiGpuScheduling", "NativeMovieStaging",
-                        "JointStarPublication",
+                        "JointStarPublication", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)

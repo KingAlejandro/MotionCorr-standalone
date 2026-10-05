@@ -61,9 +61,9 @@ const std::vector<std::string> &MovieProcessingIdentity::requiredFields()
 {
     static const std::vector<std::string> keys = {
         "angpix", "bfactor", "bin_factor", "ccf_downsample", "defect_digest",
-        "dose_per_frame", "dose_weighting", "early_binning", "eer_grouping", "eer_upsampling",
+        "defect_parser", "dose_per_frame", "dose_weighting", "early_binning", "eer_grouping", "eer_upsampling",
         "engine", "engine_digest", "even_odd_split", "frames", "gain_digest", "gain_flip",
-        "gain_rotation", "group_frames", "height", "input_bytes", "input_digest",
+        "gain_parser", "gain_rotation", "group_frames", "height", "input_bytes", "input_digest",
         "interpolate_shifts", "max_iter", "other_args_digest", "patch_x", "patch_y",
         "pre_exposure", "ps_grouping", "ps_size", "runtime", "save_noDW", "seed",
         "selected_frames", "skip_defect", "voltage", "width", "write_float16"
@@ -90,7 +90,7 @@ MovieProcessingIdentity::MovieProcessingIdentity(const Fields &fields) : fields_
 
 std::string MovieProcessingIdentity::serialize() const
 {
-    std::string decoded = "motioncorr-processing-v1\n";
+    std::string decoded = "motioncorr-processing-v2\n";
     for (const auto &field : fields_) decoded += field.first + "=" + field.second + "\n";
     return hex(decoded);
 }
@@ -100,7 +100,7 @@ MovieProcessingIdentity MovieProcessingIdentity::parse(const std::string &payloa
     const std::string decoded = unhex(payload);
     std::istringstream in(decoded);
     std::string line;
-    if (!std::getline(in, line) || line != "motioncorr-processing-v1") throw invalid("unsupported schema");
+    if (!std::getline(in, line) || line != "motioncorr-processing-v2") throw invalid("unsupported schema");
     Fields fields;
     while (std::getline(in, line))
     {
@@ -166,7 +166,7 @@ std::string readProcessingReceipt(const std::string &path)
         if (!(row >> label >> value) || (row >> extra)) throw invalid("malformed block in " + path);
         if (label == "_rlnMotioncorrProcessingVersion")
         {
-            if (have_version || value != "1") throw invalid("duplicate or unsupported version in " + path);
+            if (have_version || value != "2") throw invalid("duplicate or unsupported version in " + path);
             have_version = true;
         }
         else if (label == "_rlnMotioncorrProcessingIdentity")

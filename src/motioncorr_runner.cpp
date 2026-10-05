@@ -679,13 +679,51 @@ bool MotioncorrRunner::isMovieComplete(const FileName &movie, int effective_expe
 	}
 }
 
+namespace
+{
+void requirePlainProcessingPath(const FileName &path)
+{
+	// Image's selectors/format specifiers can open a pathname different from
+	// the string being hashed. The fixed receipt certifies one plain file only.
+	if (path.find_first_of("@:%#") != std::string::npos)
+		throw std::runtime_error("Cannot establish processing receipt for " + path +
+		                         ": image selectors/format specifiers are unsupported");
+}
+
+std::string processingImageParser(const FileName &path, bool is_2D = false)
+{
+	requirePlainProcessingPath(path);
+	const FileName format = path.getFileFormat();
+	// fImageHandler redirects paired IMAGIC paths and extensionless paths.
+	// Their complete input content is not certified by one file digest.
+	if (format.empty() || format.contains("img") || format.contains("hed"))
+		throw std::runtime_error("Cannot establish processing receipt for " + path +
+		                         ": extensionless/paired image inputs are unsupported");
+	// Canonicalise actual ordinary Image dispatch aliases, not full paths.
+	// Keep other format names conservative; their reader/admission may differ.
+	if (format == "mrc") return is_2D ? "image-mrc-stack" : "image-mrc-volume";
+	if (format == "map") return "image-mrc-volume";
+	if (format == "mrcs" || format == "st") return "image-mrc-stack";
+	if (format == "tif" || format == "tiff" || format == "gain") return "image-tiff";
+	if (format == "spi" || format == "xmp" || format == "stk" || format == "vol") return "image-spider";
+	return "image-format-" + format;
+}
+}
+
 void MotioncorrRunner::initialiseProcessingSources()
 {
 	if (processing_sources_ready) return;
 	processing_executable = motioncorr_identity::executablePath();
 	processing_engine = motioncorr_identity::digestFile(processing_executable);
-	if (!original_gain_reference.empty()) processing_gain = motioncorr_identity::digestFile(original_gain_reference);
-	if (!fn_defect.empty()) processing_defect = motioncorr_identity::digestFile(fn_defect);
+	if (!original_gain_reference.empty()) {
+		processingImageParser(original_gain_reference); // Validate the digest's actual one-file boundary.
+		processing_gain = motioncorr_identity::digestFile(original_gain_reference);
+	}
+	if (!fn_defect.empty()) {
+		requirePlainProcessingPath(fn_defect);
+		if (fn_defect.getExtension() != "txt") processingImageParser(fn_defect);
+		processing_defect = motioncorr_identity::digestFile(fn_defect);
+	}
 	struct utsname platform;
 	if (uname(&platform) != 0) throw std::runtime_error("Cannot identify processing platform");
 	processing_runtime = std::string(platform.sysname) + "/" + platform.release + "/" + platform.machine +
@@ -742,6 +780,24 @@ motioncorr_identity::MovieProcessingIdentity MotioncorrRunner::processingIdentit
 	values["engine_digest"] = processing_engine.sha256; values["runtime"] = processing_runtime;
 	values["gain_digest"] = original_gain_reference.empty() ? "none" : processing_gain.sha256;
 	values["defect_digest"] = fn_defect.empty() ? "none" : processing_defect.sha256;
+	values["defect_parser"] = fn_defect.empty() ? "none" :
+	    (fn_defect.getExtension() == "txt" ? "motioncor2-rectangles" : processingImageParser(fn_defect));
+	values["gain_parser"] = "none";
+	if (!original_gain_reference.empty())
+	{
+		const bool prepare = gain_rotation != 0 || gain_flip != 0;
+		const bool eer = EERRenderer::isEER(mic.getMovieFilename());
+		// EER's direct reader selects the first image with is_2D=true;
+		// preparation and ordinary gain reads use the generic volume dispatch.
+		const std::string decoder = processingImageParser(original_gain_reference, eer && !prepare);
+		// Preparation uses Image then writes MRC; unprepared EER .gain also
+		// changes multiplicative/inverse and Y-flip interpretation in loadEERGain.
+		const bool multiplicative = eer && !prepare && original_gain_reference.getExtension() == "gain";
+		values["gain_parser"] = (prepare ? "prepared-" : "direct-") + decoder +
+		    (eer ? (multiplicative ? "/eer-multiplicative-yflip" : "/eer-inverse") : "/plain");
+		if (original_gain_reference.getExtension().find("dm") != std::string::npos)
+			values["gain_parser"] = "unsupported-digital-micrograph";
+	}
 	values["other_args_digest"] = "none"; // External adapter resume is not certified by v1.
 	values["angpix"] = Identity::real(pixel_size); values["voltage"] = Identity::real(kv);
 	values["pre_exposure"] = Identity::real(exposure); values["dose_per_frame"] = Identity::real(dose_per_frame);
@@ -811,6 +867,7 @@ bool MotioncorrRunner::canResumeMovie(const FileName &movie, int expected_count,
 		if (expected_count > 0 && input_model.getNframes() != expected_count)
 			REPORT_ERROR("Movie " + movie + " frame count mismatch: expected " + integerToString(expected_count) +
 			             " frames, but decoded " + integerToString(input_model.getNframes()) + " frames.");
+		requirePlainProcessingPath(movie);
 		const auto input = motioncorr_identity::digestFile(movie);
 		const auto saved = motioncorr_identity::MovieProcessingIdentity::parse(payload);
 		const auto requested = processingIdentity(input_model, input, optics_group, row_exposure);
@@ -933,6 +990,7 @@ void MotioncorrRunner::run()
 			{
 				try
 				{
+					requirePlainProcessingPath(fn_micrographs[imic]);
 					input_identity = motioncorr_identity::digestFile(fn_micrographs[imic]);
 					mic.processing_identity = processingIdentity(mic, input_identity,
 					    optics_group_micrographs[imic], pre_exposure_micrographs[imic]).serialize();

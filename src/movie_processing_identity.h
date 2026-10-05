@@ -10,12 +10,12 @@
 
 namespace motioncorr_identity
 {
-// Fixed v1 processing fields, not a general-purpose configuration format.
+// Fixed v2 processing fields, not a general-purpose configuration format.
 // The payload is ASCII hex so STAR quoting/decimal rounding cannot change it.
 class MovieProcessingIdentity
 {
 public:
-    static constexpr int VERSION = 1;
+    static constexpr int VERSION = 2;
     static constexpr size_t MAX_PAYLOAD = 32768;
     using Fields = std::map<std::string, std::string>;
 

@@ -15,6 +15,7 @@ import tempfile
 
 from test_hotpixel_rng_determinism import write_movie, write_star, read_mrc_pixels, NFRAMES
 from test_gain_cache import write_mrc
+from test_tiff_read import write_tiff
 
 CHECKS = 0
 DEFAULTS = {'--use_own': True, '--j': '1', '--patch_x': '1', '--patch_y': '1',
@@ -165,10 +166,43 @@ def model_marker(binary, work):
     require(payloads(out) == expected, 'model publication repair did not reprocess exactly')
 
 
+def parser_identity(binary, work, case):
+    # Actual interpretation, not a full pathname, is the compatibility key.
+    gain = case.startswith('gain-')
+    source = work / ('gain.mrc' if gain else 'defect.txt')
+    if gain:
+        write_mrc(source, [[1.0] * (96 * 96)], nx=96, ny=96)
+    else:
+        source.write_text('8 8 1 1\n')
+    flag = '--gainref' if gain else '--defect_file'
+    out = work / case
+    healthy(binary, work, out, {flag: source.name})
+    relocation = work / (case + ('-relocated.map' if gain else '-relocated.txt'))
+    shutil.copyfile(source, relocation)
+    require(source.read_bytes() == relocation.read_bytes(), 'relocation changed source bytes')
+    link = work / (case + ('-relocated-link.mrc' if gain else '-relocated-link.txt'))
+    link.symlink_to(source.name)
+    before = snapshot(out)
+    healthy(binary, work, out, {flag: relocation.name, '--only_do_unfinished': True})
+    require(all(snapshot(out)[name] == value for name, value in before.items() if name.startswith('a.')),
+            'same-parser content relocation rewrote completed products')
+    healthy(binary, work, out, {flag: link.name, '--only_do_unfinished': True})
+    require(all(snapshot(out)[name] == value for name, value in before.items() if name.startswith('a.')),
+            'same-parser symlink alias rewrote completed products')
+    # The changed extension selects a different reader/admission contract.
+    suffix = '.dm4' if case == 'gain-parser-dm' else ('.tiff' if gain else '.map')
+    alternative = work / ('different-parser' + suffix)
+    shutil.copyfile(source, alternative)
+    require(source.read_bytes() == alternative.read_bytes(), 'parser control changed content')
+    fresh = invoke(binary, work, work / (case + '-fresh'), {flag: alternative.name})
+    require(fresh.returncode > 0, 'changed-parser fresh attempt unexpectedly succeeded')
+    refused(binary, work, out, {flag: alternative.name}, 'gain_parser' if gain else 'defect_parser')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--binary', type=Path, required=True)
-    parser.add_argument('--control-case', choices=['binning', 'selection', 'dose', 'sampling', 'gain', 'input', 'stale-marker', 'model-marker'])
+    parser.add_argument('--control-case', choices=['binning', 'selection', 'dose', 'sampling', 'gain', 'input', 'stale-marker', 'model-marker', 'defect-parser', 'gain-parser-tiff', 'gain-parser-dm'])
     args = parser.parse_args()
     binary = args.binary.resolve()
     with tempfile.TemporaryDirectory() as directory:
@@ -176,6 +210,7 @@ def main():
         if args.control_case:
             if args.control_case == 'stale-marker': stale_marker(binary, work)
             elif args.control_case == 'model-marker': model_marker(binary, work)
+            elif 'parser' in args.control_case: parser_identity(binary, work, args.control_case)
             else: control(binary, work, args.control_case)
             print('PASS ResumeProcessingIdentity control ' + args.control_case)
             return 0
@@ -261,7 +296,7 @@ def main():
 
         for label, transform, name in [
                 ('legacy', lambda s: s.split('data_motioncorr_processing')[0], 'legacy'),
-                ('version', lambda s: re.sub(r'(_rlnMotioncorrProcessingVersion\s+)1', r'\g<1>2', s), 'version'),
+                ('version', lambda s: re.sub(r'(_rlnMotioncorrProcessingVersion\s+)2', r'\g<1>3', s), 'version'),
                 ('duplicate', lambda s: s + s[s.index('data_motioncorr_processing'):], 'duplicate'),
                 ('model-sampling', lambda s: re.sub(r'(_rlnMicrographOriginalPixelSize\s+)\S+', r'\g<1>9.000000', s), 'saved model')]:
             out = work / label; shutil.copytree(base, out)
@@ -361,6 +396,22 @@ def main():
                                     '--motioncor2_exe': str(adapter), '--gainref': 'gain.mrc', '--gain_rot': '1'}, 'external MotionCor2')
         require(not (work / 'ADAPTER_EXECUTED').exists(), 'external adapter ran before refusal')
         require(not (base / 'gain.mrc').exists(), 'external refusal prepared gain')
+        for case in ('defect-parser', 'gain-parser-tiff', 'gain-parser-dm'):
+            parser_identity(binary, work, case)
+        # TIFF gain aliases use the same generic Image decoder for non-EER.
+        tif = work / 'gain-alias.tif'
+        write_tiff(tif, [[struct.pack('<96H', *([1] * 96))] * 96], 16, 1, 24, 96)
+        gain_alias = work / 'gain-alias.gain'; shutil.copyfile(tif, gain_alias)
+        alias_out = work / 'tiff-alias'; healthy(binary, work, alias_out, {'--gainref': tif.name})
+        before = snapshot(alias_out)
+        healthy(binary, work, alias_out, {'--gainref': gain_alias.name, '--only_do_unfinished': True})
+        require(all(snapshot(alias_out)[name] == value for name, value in before.items() if name.startswith('a.')),
+                'TIFF/gain alias changed generic reader identity')
+        # A single-file digest cannot certify extra IMAGIC companions or Image
+        # path selectors that may open a different pathname. Refuse named.
+        for filename, named in [('paired.img', 'paired image'), ('gain.mrc:map', 'format specifiers')]:
+            shutil.copyfile(work / 'gain.mrc', work / filename)
+            refused(binary, work, gain, {**gain_options, '--gainref': filename}, named)
         stale_marker(binary, work)
         stale_marker(binary, work, sync=True)
         model_marker(binary, work)

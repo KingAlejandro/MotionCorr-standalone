@@ -44,3 +44,12 @@ birth identity, checked TERM receipt, no surviving owned child, FAIL without
 worker completion, and preservation of the original return and diagnostic. A
 quiescent zero-return worker still passes. These are device-free lifecycle
 controls: they support no CUDA, movie-output, throughput, or unseen-child claim.
+
+If identity evidence refuses cleanup while a worker remains live, the launcher
+returns a bounded FAIL instead of waiting indefinitely for that worker. Its
+return code and exit timestamp remain null, `exit_observed` is false, and the
+last observation timestamp is separate from an exit. Incomplete exit spread is
+not reported as a measured worker tail. The refusal control interrupts the
+actual launcher with an injected observation failure and independently verifies
+that the worker remains alive and unsignalled until fixture-only birth-checked
+cleanup. It fails against the prior source in normal and optimized Python.

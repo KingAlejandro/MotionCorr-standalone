@@ -829,8 +829,13 @@ def main(argv: list[str] | None = None) -> int:
     for k, p, wdir in procs:
         rc = codes.get(k)
         if rc is None:
-            rc = p.wait()
-        ended = stamps[k].setdefault("ended", time.time())
+            # Refused cleanup may deliberately leave an unverified process
+            # alive. Never undo the bounded cleanup by waiting forever here.
+            rc = p.poll()
+        ended = stamps[k].get("ended")
+        if ended is None and rc is not None:
+            ended = stamps[k]["ended"] = time.time()
+        observed_until = ended if ended is not None else time.time()
         observed = resources.cpus_allowed.get(p.pid, [])
         requested = masks[k]
         at_launch, verdict = confirmed.get(k, (None, "UNPINNED"))
@@ -859,7 +864,7 @@ def main(argv: list[str] | None = None) -> int:
             affinity_problems.append(
                 f"w{k}: no /proc on this platform, so --cpu-budget cannot be witnessed")
         ticks = resources.cpu_ticks.get(p.pid)
-        wall_s = ended - stamps[k]["started"]
+        wall_s = observed_until - stamps[k]["started"]
         cpu_s = round(sum(ticks) / _CLK_TCK, 3) if ticks else None
 
         # Phase split. setup is launch -> first product, which on a CUDA build
@@ -875,7 +880,7 @@ def main(argv: list[str] | None = None) -> int:
             "n_products": len(seen),
             "setup_seconds": round(first - t0, 3) if first else None,
             "produce_seconds": round(last - first, 3) if first and last else None,
-            "tail_seconds": round(ended - last, 3) if last else None,
+            "tail_seconds": round(ended - last, 3) if last and ended is not None else None,
             "first_product_offset": round(first - t0, 3) if first else None,
             "product_offsets": [round(v - t0, 3) for v in gaps],
             "inter_product_seconds": [round(b - a, 3) for a, b in zip(gaps, gaps[1:])],
@@ -890,7 +895,9 @@ def main(argv: list[str] | None = None) -> int:
         results.append({"index": k, "pid": p.pid, "returncode": rc,
                         "log": str((wdir / "run.log").resolve()),
                         "started_at": _iso(stamps[k]["started"]),
-                        "ended_at": _iso(ended),
+                        "ended_at": _iso(ended) if ended is not None else None,
+                        "exit_observed": rc is not None,
+                        "observed_until_at": _iso(observed_until),
                         "wall_seconds": round(wall_s, 3),
                         "rss_hwm_kib": resources.hwm_kib.get(p.pid),
                         "rss_note": resources.unavailable or
@@ -972,7 +979,7 @@ def main(argv: list[str] | None = None) -> int:
                              "is not a benchmark. #26 owns the measurement matrix.",
         "final_worker_tail_seconds": round(
             max(s["ended"] for s in stamps.values())
-            - min(s["ended"] for s in stamps.values()), 3) if stamps else None,
+            - min(s["ended"] for s in stamps.values()), 3) if stamps and all("ended" in s for s in stamps.values()) else None,
         "final_worker_tail_note": "spread between the first and last worker to exit. "
                                   "Load imbalance is one of the candidate limits on "
                                   "static workers; this makes it observable, it does "

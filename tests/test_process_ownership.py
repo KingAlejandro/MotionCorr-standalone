@@ -202,11 +202,64 @@ sys.exit({exit_code})
         print('PASS actual healthy no-descendant worker retains PASS')
 
 
+def refused_cleanup_outcome(helper):
+    """A refused signal must produce a bounded failure, not an unbounded wait."""
+    with tempfile.TemporaryDirectory(prefix='owned-refused-outcome-') as d:
+        tmp=Path(d);receipt=tmp/'worker.json';star=tmp/'movies.star'
+        star.write_text('data_movies\n\nloop_\n_rlnMicrographMovieName #1\nMovies/a.tiff\n')
+        worker=tmp/'worker'
+        worker.write_text('#!'+sys.executable+'\nimport sys;sys.path.insert(0,'+repr(str(ROOT/'tools/multi_gpu'))+')\nimport json,os,pathlib,time\nfrom process_ownership import ProcessTable\npathlib.Path('+repr(str(receipt))+').write_text(json.dumps(ProcessTable().read(os.getpid())))\ntime.sleep(30)\n')
+        worker.chmod(0o755)
+        wrapper=tmp/'wrapper.py'
+        wrapper.write_text('''import importlib.util,os,pathlib,signal,sys,threading,time
+sys.path.insert(0,'''+repr(str(ROOT/'tools/multi_gpu'))+''')
+sys.path.insert(0,'''+repr(str(helper.parent))+''')
+spec=importlib.util.spec_from_file_location('launcher','''+repr(str(helper))+''')
+mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+mod._KILL_REAP_SECONDS=.1
+original=mod.ProcessOwnership
+class BrokenObserver(original):
+    def watch(self,pid):
+        super().watch(pid)
+        self.errors.append('injected identity observation failure')
+mod.ProcessOwnership=BrokenObserver
+def interrupt():
+    end=time.monotonic()+5
+    while not pathlib.Path('''+repr(str(receipt))+''').exists() and time.monotonic()<end:time.sleep(.01)
+    os.kill(os.getpid(),signal.SIGTERM)
+threading.Thread(target=interrupt,daemon=True).start()
+raise SystemExit(mod.main(sys.argv[1:]))
+''')
+        result=None;timed_out=False
+        try:
+            try:
+                result=subprocess.run([sys.executable,*(['-O'] if not __debug__ else []),str(wrapper),'--star',str(star),'--out',str(tmp/'out'),'--binary',str(worker),'--workers','1','--no-witness'],capture_output=True,text=True,timeout=8)
+            except subprocess.TimeoutExpired:timed_out=True
+            require(not timed_out,'refused cleanup blocked indefinitely waiting for a still-live worker')
+            require(receipt.exists(),'refusal control never launched its worker')
+            identity=json.loads(receipt.read_text());current=ProcessTable().read(identity['pid'])
+            require(current and same_birth(current['start'],identity['start']) and current['state']!='Z','refused cleanup signalled the unverifiable worker')
+            require(result.returncode==128+signal.SIGTERM,'refused interrupted cleanup lost signal outcome: '+str(result.returncode))
+            status=json.loads((tmp/'out/status.json').read_text())
+            require(status['verdict']=='FAIL' and not status['process_cleanup']['complete'] and status['process_cleanup']['error'],'refused cleanup did not publish explicit FAIL')
+            require(status['workers'][0]['returncode'] is None and not status['workers'][0]['exit_observed'] and status['workers'][0]['ended_at'] is None,'unreaped live worker was recorded as exited')
+            require(status['final_worker_tail_seconds'] is None,'incomplete worker tail was presented as a measured exit spread')
+            print('PASS actual interrupted ownership-refusal returns bounded FAIL with exit unobserved and no unsafe signal')
+        finally:
+            # Only the fixture author has the independently retained birth;
+            # production cleanup correctly refused its own incomplete evidence.
+            if receipt.exists():
+                identity=json.loads(receipt.read_text());current=ProcessTable().read(identity['pid'])
+                if current and same_birth(current['start'],identity['start']) and current['state']!='Z':
+                    os.kill(identity['pid'],signal.SIGKILL)
+
+
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--helper',type=Path,default=ROOT/'tools/multi_gpu/run_multi_gpu.py');ap.add_argument('--only',choices=['helper','cli']);a=ap.parse_args()
-    if a.only!='cli':
+    ap=argparse.ArgumentParser();ap.add_argument('--helper',type=Path,default=ROOT/'tools/multi_gpu/run_multi_gpu.py');ap.add_argument('--only',choices=['helper','cli','refusal']);a=ap.parse_args()
+    if a.only not in ('cli','refusal'):
         mod=load(a.helper.resolve());mocked(mod);live(mod)
-    if a.only!='helper':cli_outcomes(a.helper.resolve())
+    if a.only not in ('helper','refusal'):cli_outcomes(a.helper.resolve())
+    if a.only!='helper':refused_cleanup_outcome(a.helper.resolve())
     return 0
 
 if __name__=='__main__':raise SystemExit(main())

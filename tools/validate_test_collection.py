@@ -29,6 +29,8 @@ DEFAULT_REQUIRED_TESTS = [
     "GainCache",
     "TiffRead",
     "DamagedMovie",
+    # Sequential compressed readers must close/reap their decoder before reuse.
+    "CompressedMovieSequence",
     "RunnerModelParser",
     "MicrographModelBounds",
     "CiFailClosedControls",

@@ -33,6 +33,14 @@
 #ifdef __GLIBC__
 #include <gnu/libc-version.h>
 #endif
+#include <atomic>
+#include <cstdio>
+#include <memory>
+
+// Process-wide, so a generation minted by one runner can never collide with a
+// generation minted by another runner on the same worker thread. Starts at 1;
+// 0 is reserved for "no identity resolved".
+static std::atomic<unsigned long long> s_global_gain_generation{1};
 
 #include "src/motioncorr_runner.h"
 #include "src/native_movie_staging.h"
@@ -51,6 +59,8 @@
 // a friend declaration that emits no code. Measured on cpu64: base and port produce
 // identical MRC pixels, STAR and EPS; only a wall-time line differs.
 #include <sstream>
+#include <cstdio>
+#include <memory>
 #elif _HIP_ENABLED
 #include "src/acc/hip/hip_mem_utils.h"
 #endif
@@ -1759,6 +1769,116 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles()
 	}
 }
 
+// The text parser consumes the exact bytes that form the cache key. Keeping the
+// stream parser separate avoids reopening a mutable path after checking its key.
+static void fillTextDefectMask(MultidimArray<bool> &bBad,
+                              const FileName &fn_defect, std::istream &f_defect);
+
+static std::string readDefectTextSnapshot(const FileName &fn_defect)
+{
+	// std::filebuf on libc++ can turn a directory read error into ordinary
+	// EOF. fread/ferror preserve that distinction for the snapshot reader.
+	std::unique_ptr<FILE, decltype(&std::fclose)> input(
+		std::fopen(fn_defect.c_str(), "rb"), &std::fclose);
+	if (!input)
+		REPORT_ERROR("Failed to open a defect file: " + fn_defect);
+	std::string bytes;
+	char buffer[8192];
+	while (true) {
+		const size_t count = std::fread(buffer, 1, sizeof(buffer), input.get());
+		bytes.append(buffer, count);
+		if (std::ferror(input.get()))
+			REPORT_ERROR("Failed to read the defect file " + fn_defect + ": the path opened but could not be read.");
+		if (std::feof(input.get())) break;
+	}
+
+	return bytes;
+}
+
+const MultidimArray<bool>& MotioncorrRunner::getDefectPremask(
+	int nx, int ny,
+	const FileName &fn_defect,
+	const FileName &fn_gain_reference,
+	const MultidimArray<float> &Igain,
+	int n_threads
+) {
+	// Only the STATIC part of the mask is cached: the external defect file and
+	// the gain-zero pixels. Automatically detected hot pixels are a property of
+	// this movie's unaligned sum and are added by the caller to its own copy,
+	// which operator= deep-copies, so they can never enter the cache.
+	//
+	// Text files are keyed by exact content, read once and parsed from that same
+	// snapshot. Size and timestamps cannot establish content identity. Image
+	// maps keep the original per-movie reader path and are not reused: those
+	// readers reopen paths (and some formats have a separate header/data file).
+	const bool text_defect = fn_defect != "" && fn_defect.getExtension() == "txt";
+	const bool defect_identity_known = fn_defect == "" || text_defect;
+	auto invalidate = [&]() {
+		defect_premask_valid = false;
+		defect_premask_fn = "";
+		std::string().swap(defect_premask_defect_bytes);
+		defect_premask_gain_fn = "";
+		defect_premask_gain_gen = 0;
+		defect_premask_nx = 0;
+		defect_premask_ny = 0;
+		defect_premask.clear();
+	};
+	std::string defect_bytes;
+	try {
+		if (text_defect) defect_bytes = readDefectTextSnapshot(fn_defect);
+	} catch (...) {
+		invalidate();
+		throw;
+	}
+
+	const bool premask_hit = defect_premask_valid &&
+	                         defect_identity_known &&
+	                         defect_premask_fn == fn_defect &&
+	                         defect_premask_defect_bytes == defect_bytes &&
+	                         defect_premask_gain_fn == fn_gain_reference &&
+	                         defect_premask_gain_gen == gain_cache_generation &&
+	                         defect_premask_nx == nx &&
+	                         defect_premask_ny == ny;
+	if (!premask_hit)
+	{
+		// Invalidate the keys before any work, so an exception leaves no stale
+		// or half-built premask advertised as valid.
+		invalidate();
+
+		MultidimArray<bool> new_premask(ny, nx);
+		new_premask.initZeros();
+		if (text_defect)
+		{
+			std::istringstream snapshot(defect_bytes);
+			fillTextDefectMask(new_premask, fn_defect, snapshot);
+		}
+		else if (fn_defect != "")
+		{
+			fillDefectMask(new_premask, fn_defect, n_threads);
+		}
+		if (fn_gain_reference != "")
+		{
+			FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
+			{
+				if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
+				{
+					DIRECT_MULTIDIM_ELEM(new_premask, n) = true;
+				}
+			}
+		}
+		// Published only once the mask is complete.
+		defect_premask = new_premask;
+		defect_premask_fn = fn_defect;
+		defect_premask_defect_bytes = std::move(defect_bytes);
+		defect_premask_gain_fn = fn_gain_reference;
+		defect_premask_gain_gen = gain_cache_generation;
+		defect_premask_nx = nx;
+		defect_premask_ny = ny;
+		defect_premask_valid = defect_identity_known;
+	}
+	return defect_premask;
+}
+
 const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERRenderer &renderer,
                                                               int nx, int ny)
 {
@@ -1787,8 +1907,16 @@ const MultidimArray<float>& MotioncorrRunner::gainReferenceFor(bool is_eer, EERR
 		gain_cache_ny = ny;
 		gain_cache_eer_upsampling = eer_upsampling;
 		gain_cache_filled = true;
+		gain_cache_generation = s_global_gain_generation.fetch_add(1, std::memory_order_relaxed);
 	}
 	return gain_cache();
+}
+
+bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
+{
+	return gain_cache_filled && gain_cache_generation != 0 &&
+	       gain_cache_name == fn_gain_reference &&
+	       gain_cache_nx == nx && gain_cache_ny == ny;
 }
 
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
@@ -1987,6 +2115,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	};
 	if (use_gpu && !early_binning) {
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		// The device gain copy may outlive this session; the generation is what
+		// makes reusing it safe across movies. It is only an identity because
+		// gainReferenceFor() ran earlier in this function, for this movie's
+		// geometry. Assert that ordering rather than rely on line order.
+		if (fn_gain_reference != "" && !gainIdentityResolvedFor(nx, ny))
+			REPORT_ERROR("Gain identity was not resolved before the CUDA session was given a gain generation for "
+			             + fn_mic + ". The device gain retention key would not describe this movie's gain.");
+		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
@@ -2368,6 +2504,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 		// Attempt 0 uses GPU statistics; attempt 1 is the original host scan, run
 		// verbatim. Any exactness guard failure falls through to attempt 1.
+		// The defect coordinate list is built once per attempt and consumed by
+		// both the reachability scan and the replacement loop below.
+		std::vector<int> bad_xs, bad_ys;
 		for (int stats_attempt = 0; stats_attempt < 2; stats_attempt++)
 		{
 			bool used_gpu_stats = false;
@@ -2449,28 +2588,18 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			n_bad = 0;
 			mic.hotpixelX.clear();
 			mic.hotpixelY.clear();
-			bBad.initZeros();
+			// Deep copy: detected hot pixels are added to this movie's mask below
+			// and must not reach the cached static premask.
+			bBad = getDefectPremask(nx, ny, fn_defect, fn_gain_reference, Igain, n_threads);
+#ifdef DEBUG_HOTPIXELS
 			if (fn_defect != "")
 			{
-				fillDefectMask(bBad, fn_defect, n_threads);
-#ifdef DEBUG_HOTPIXELS
 				Image<RFLOAT> tmp(nx, ny);
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(tmp())
 					DIRECT_MULTIDIM_ELEM(tmp(), n) = DIRECT_MULTIDIM_ELEM(bBad, n);
 				tmp.write("defect.mrc");
+			}
 #endif
-			}
-
-			if (fn_gain_reference != "")
-			{
-				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Igain)
-				{
-					if (DIRECT_MULTIDIM_ELEM(Igain, n) == 0)
-					{
-						DIRECT_MULTIDIM_ELEM(bBad, n) = true;
-					}
-				}
-			}
 
 			if (used_gpu_stats)
 			{
@@ -2499,6 +2628,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				}
 			}
 
+			// Ascending row-major, which is the order both consumers below need.
+			bad_xs.clear();
+			bad_ys.clear();
+			bad_xs.reserve(1024);
+			bad_ys.reserve(1024);
+			FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				if (DIRECT_A2D_ELEM(bBad, i, j)) {
+					bad_xs.push_back(j);
+					bad_ys.push_back(i);
+				}
+
 			// Gaussian replacement consumes mean/std as well as the hot-pixel mask.
 			// If it is reachable, use the original host statistics rather than
 			// depending on a second floating-point error bound for RNG parameters.
@@ -2506,9 +2646,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			if (used_gpu_stats)
 			{
 				bool gaus_reachable = false;
-				FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+				for (size_t idx = 0; idx < bad_xs.size(); idx++)
 				{
-					if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+					const int i = bad_ys[idx];
+					const int j = bad_xs[idx];
 					int n_ok = 0;
 					for (int dy = -D_MAX; dy <= D_MAX && n_ok <= NUM_MIN_OK; dy++) {
 						int y = i + dy;
@@ -2554,14 +2695,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		init_random_generator(random_seed);
 
 		const int PBUF_SIZE = 100;
-		std::vector<int> bad_xs, bad_ys;
-		bad_xs.reserve(1024);
-		bad_ys.reserve(1024);
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
-			if (DIRECT_A2D_ELEM(bBad, i, j)) {
-				bad_xs.push_back(j);
-				bad_ys.push_back(i);
-			}
 #ifdef _CUDA_ENABLED
 		// The nvCOMP ingest never populates host frames, and the replacement loop
 		// only ever reads one neighbour per (defect, frame). Downloading the whole
@@ -2581,10 +2714,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 		auto bad_mask = [&bBad](int y, int x) { return DIRECT_A2D_ELEM(bBad, y, x); };
 #endif
-		size_t bad_idx = 0;
-		FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY2D(bBad)
+		// Same visit order as the full raster scan it replaces: bad_xs/bad_ys were
+		// filled row-major, so the rand()/rnd_gaus() draw sequence is unchanged.
+		for (size_t bad_idx = 0; bad_idx < bad_xs.size(); bad_idx++)
 		{
-			if (!DIRECT_A2D_ELEM(bBad, i, j)) continue;
+			const int i = bad_ys[bad_idx];
+			const int j = bad_xs[bad_idx];
 //			std::cout << "Hot pixel at (" << i << ", " << j << ")" << std::endl;
 #ifdef _CUDA_ENABLED
 			// n_ok is a property of the mask and the bounds, never of the pixel
@@ -2668,7 +2803,6 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					DIRECT_A2D_ELEM(Iframes[iframe](), i, j) = replacement;
 //				std::cout << " set = " << DIRECT_A2D_ELEM(Iframes[iframe](), i, j) << std::endl;
 			}
-			bad_idx++;
 		}
 #ifdef _CUDA_ENABLED
 		if (sparse_neighbours && !bad_xs.empty()) {
@@ -4493,6 +4627,128 @@ bool MotioncorrRunner::detectSerialEMDefectText(FileName fn_defect)
 	return ret;
 }
 
+static void fillTextDefectMask(MultidimArray<bool> &bBad,
+                              const FileName &fn_defect, std::istream &f_defect)
+{
+	const int ny = YSIZE(bBad), nx = XSIZE(bBad);
+	// Extraction-checked parse (issue #98). The supported contract is the
+	// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
+	// Comments, headers and a UTF-8 BOM are NOT part of that format and are
+	// rejected with a specific diagnostic rather than silently mis-parsed.
+	// Blank lines and surrounding whitespace are ignored; an empty file is
+	// valid and masks nothing; non-positive w/h is a no-op rectangle.
+	if (f_defect.peek() == 0xEF) {
+		REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
+		             "mark. The MotionCor2 txt defect format is plain ASCII "
+		             "'x y w h' records; re-save the file without a BOM.");
+	}
+
+	long long record_num = 0, line = 1;
+
+	// Consume whitespace by hand, counting newlines, so a diagnostic can name
+	// the line the offending field is actually on. Doing this before every
+	// field -- not just before each record -- keeps the count exact even when
+	// a record's fields straddle a line break, which this format permits.
+	auto skip_ws = [&]() {
+		int c;
+		while ((c = f_defect.peek()) != EOF && isspace(c)) {
+			if (c == '\n') line++;
+			f_defect.get();
+		}
+	};
+	// Built only on an error path; the happy path never pays for it.
+	// A malformed field names its own line; a record truncated by end of
+	// file names where the record started, because the whitespace skip has
+	// by then already stepped past the last content line.
+	auto where = [&](long long at_line) {
+		return " (record " + std::to_string(record_num + 1) +
+		       ", line " + std::to_string(at_line) + ") of " + fn_defect;
+	};
+	// A path can open and still fail to be read -- a directory whose name ends
+	// .txt is the reachable case. peek() returns EOF for that too, so end of
+	// input is only "clean" when the stream really did reach end of file
+	// without an error. Treating a read failure as an empty file would mask
+	// nothing and let the movie publish as if correction had succeeded.
+	// Platforms differ in how much they expose: libstdc++ sets badbit for a
+	// directory, libc++ reports an ordinary EOF and the distinction is simply
+	// not observable there.
+	auto fail_if_unreadable = [&]() {
+		if (f_defect.bad() || !f_defect.eof()) {
+			REPORT_ERROR("Failed to read the defect file " + fn_defect +
+			             ": the path opened but could not be read. If it is a "
+			             "directory, pass the defect file itself.");
+		}
+	};
+
+	while (true) {
+		skip_ws();
+		if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
+		const long long record_line = line;
+
+		// Read each field as a token and convert it explicitly. Streaming
+		// straight into integers cannot attribute a failure: an out-of-range
+		// value sets failbit *after* consuming its digits, so a recovery read
+		// would name the following field.
+		static const char *const FIELD[4] = { "x", "y", "w", "h" };
+		long long field[4] = { 0, 0, 0, 0 };
+		for (int i = 0; i < 4; i++) {
+			if (i > 0) skip_ws();
+			std::string token;
+			if (f_defect.peek() == EOF || !(f_defect >> token)) {
+				// A read error mid-record must not be reported as truncation.
+				fail_if_unreadable();
+				REPORT_ERROR("Truncated defect record" + where(record_line) +
+				             ": expected four integers 'x y w h', but the file ended "
+				             "after " + std::to_string(i) + " of 4 fields.");
+			}
+
+			// Classify syntax before range, so a token that is both malformed
+			// and huge is reported as malformed rather than out-of-range.
+			size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
+			bool integral = (d < token.size());
+			for (size_t j = d; j < token.size(); j++) {
+				if (!isdigit((unsigned char)token[j])) { integral = false; break; }
+			}
+			if (!integral) {
+				REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
+				             std::string(FIELD[i]) + "' is \"" + token +
+				             "\", which is not an integer. The MotionCor2 txt defect "
+				             "format does not support comments, headers or "
+				             "non-integer fields.");
+			}
+			try {
+				field[i] = std::stoll(token);
+			} catch (const std::out_of_range &) {
+				REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
+				             std::string(FIELD[i]) + "' is \"" + token +
+				             "\", which does not fit in a 64-bit integer.");
+			}
+		}
+		const long long x = field[0], y = field[1], w = field[2], h = field[3];
+		++record_num;
+
+		if (w <= 0 || h <= 0) continue;
+
+		auto safe_add = [](long long a, long long b) -> long long {
+			if (b <= 0) return a;
+			if (a > LLONG_MAX - b) return LLONG_MAX;
+			return a + b;
+		};
+		long long x0 = std::max(0LL, x);
+		long long x1 = std::min((long long)nx, safe_add(x, w));
+		long long y0 = std::max(0LL, y);
+		long long y1 = std::min((long long)ny, safe_add(y, h));
+		if (x0 >= x1 || y0 >= y1) continue;
+
+		for (long long iy = y0; iy < y1; ++iy)
+		{
+			for (long long ix = x0; ix < x1; ++ix)
+				DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
+		}
+	}
+
+}
+
 void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_defect, int n_threads)
 {
 	const int ny = YSIZE(bBad), nx = XSIZE(bBad);
@@ -4505,121 +4761,7 @@ void MotioncorrRunner::fillDefectMask(MultidimArray<bool> &bBad, FileName fn_def
 		if (!f_defect.is_open())
 			REPORT_ERROR("Failed to open a defect file: " + fn_defect);
 
-		// Extraction-checked parse (issue #98). The supported contract is the
-		// UCSF MotionCor2 one: whitespace-separated integer quadruples only.
-		// Comments, headers and a UTF-8 BOM are NOT part of that format and are
-		// rejected with a specific diagnostic rather than silently mis-parsed.
-		// Blank lines and surrounding whitespace are ignored; an empty file is
-		// valid and masks nothing; non-positive w/h is a no-op rectangle.
-		if (f_defect.peek() == 0xEF) {
-			REPORT_ERROR("Defect file " + fn_defect + " begins with a UTF-8 byte order "
-			             "mark. The MotionCor2 txt defect format is plain ASCII "
-			             "'x y w h' records; re-save the file without a BOM.");
-		}
-
-		long long record_num = 0, line = 1;
-
-		// Consume whitespace by hand, counting newlines, so a diagnostic can name
-		// the line the offending field is actually on. Doing this before every
-		// field -- not just before each record -- keeps the count exact even when
-		// a record's fields straddle a line break, which this format permits.
-		auto skip_ws = [&]() {
-			int c;
-			while ((c = f_defect.peek()) != EOF && isspace(c)) {
-				if (c == '\n') line++;
-				f_defect.get();
-			}
-		};
-		// Built only on an error path; the happy path never pays for it.
-		// A malformed field names its own line; a record truncated by end of
-		// file names where the record started, because the whitespace skip has
-		// by then already stepped past the last content line.
-		auto where = [&](long long at_line) {
-			return " (record " + std::to_string(record_num + 1) +
-			       ", line " + std::to_string(at_line) + ") of " + fn_defect;
-		};
-		// A path can open and still fail to be read -- a directory whose name ends
-		// .txt is the reachable case. peek() returns EOF for that too, so end of
-		// input is only "clean" when the stream really did reach end of file
-		// without an error. Treating a read failure as an empty file would mask
-		// nothing and let the movie publish as if correction had succeeded.
-		// Platforms differ in how much they expose: libstdc++ sets badbit for a
-		// directory, libc++ reports an ordinary EOF and the distinction is simply
-		// not observable there.
-		auto fail_if_unreadable = [&]() {
-			if (f_defect.bad() || !f_defect.eof()) {
-				REPORT_ERROR("Failed to read the defect file " + fn_defect +
-				             ": the path opened but could not be read. If it is a "
-				             "directory, pass the defect file itself.");
-			}
-		};
-
-		while (true) {
-			skip_ws();
-			if (f_defect.peek() == EOF) { fail_if_unreadable(); break; }
-			const long long record_line = line;
-
-			// Read each field as a token and convert it explicitly. Streaming
-			// straight into integers cannot attribute a failure: an out-of-range
-			// value sets failbit *after* consuming its digits, so a recovery read
-			// would name the following field.
-			static const char *const FIELD[4] = { "x", "y", "w", "h" };
-			long long field[4] = { 0, 0, 0, 0 };
-			for (int i = 0; i < 4; i++) {
-				if (i > 0) skip_ws();
-				std::string token;
-				if (f_defect.peek() == EOF || !(f_defect >> token)) {
-					// A read error mid-record must not be reported as truncation.
-					fail_if_unreadable();
-					REPORT_ERROR("Truncated defect record" + where(record_line) +
-					             ": expected four integers 'x y w h', but the file ended "
-					             "after " + std::to_string(i) + " of 4 fields.");
-				}
-
-				// Classify syntax before range, so a token that is both malformed
-				// and huge is reported as malformed rather than out-of-range.
-				size_t d = (token[0] == '+' || token[0] == '-') ? 1 : 0;
-				bool integral = (d < token.size());
-				for (size_t j = d; j < token.size(); j++) {
-					if (!isdigit((unsigned char)token[j])) { integral = false; break; }
-				}
-				if (!integral) {
-					REPORT_ERROR("Malformed defect record" + where(line) + ": field '" +
-					             std::string(FIELD[i]) + "' is \"" + token +
-					             "\", which is not an integer. The MotionCor2 txt defect "
-					             "format does not support comments, headers or "
-					             "non-integer fields.");
-				}
-				try {
-					field[i] = std::stoll(token);
-				} catch (const std::out_of_range &) {
-					REPORT_ERROR("Out-of-range defect field" + where(line) + ": '" +
-					             std::string(FIELD[i]) + "' is \"" + token +
-					             "\", which does not fit in a 64-bit integer.");
-				}
-			}
-			const long long x = field[0], y = field[1], w = field[2], h = field[3];
-			++record_num;
-
-			if (w <= 0 || h <= 0) continue;
-
-			auto safe_add = [](long long a, long long b) -> long long {
-				if (b <= 0) return a;
-				if (a > LLONG_MAX - b) return LLONG_MAX;
-				return a + b;
-			};
-			long long x0 = std::max(0LL, x);
-			long long x1 = std::min((long long)nx, safe_add(x, w));
-			long long y0 = std::max(0LL, y);
-			long long y1 = std::min((long long)ny, safe_add(y, h));
-			if (x0 >= x1 || y0 >= y1) continue;
-
-			for (long long iy = y0; iy < y1; ++iy)
-			{
-				for (long long ix = x0; ix < x1; ++ix)
-					DIRECT_A2D_ELEM(bBad, (int)iy, (int)ix) = true;
-			}
-		}
+		fillTextDefectMask(bBad, fn_defect, f_defect);
 
 		f_defect.close();
 	}

@@ -62,7 +62,7 @@ def run_case(original_binary, shim, work, kind):
         require(witness.read_text() == 'ACTUAL_SOURCE_CHANGED_AFTER_IMAGE_CLOSE\n', 'mutation seam not reached exactly once')
         require(source.stat().st_ino != before_stat.st_ino if kind == 'executable' else source.read_bytes() != original,
                 'source content/identity did not actually change')
-        named_source = str(source) if kind == 'executable' else source.name
+        named_source = ('/proc/self/exe' if sys.platform.startswith('linux') else str(source)) if kind == 'executable' else source.name
         changed_sha = hashlib.sha256(source.read_bytes()).hexdigest()
         changed_inode = source.stat().st_ino
         require(result.returncode > 0 and 'a.mrc' in result.stderr and

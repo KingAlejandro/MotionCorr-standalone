@@ -217,9 +217,11 @@ def tomography_controls(binary,tmp):
             (tmp/'in.star').write_text(tomo_input)
         # Flipping a real gain prepares the shared output/gain.mrc referenced by
         # every movie model. A series input with that name must not replace it.
-        from PIL import Image
         from test_gain_cache import write_mrc
-        with Image.open(tmp/'Movies/a.tiff') as image:nx,ny=image.size
+        # The healthy unbinned output already has the TIFF's width/height; use
+        # its MRC header rather than requiring a Python image-decoder package.
+        with (out/'Movies/a.mrc').open('rb') as image:nx,ny=struct.unpack('<2i',image.read(8))
+        require(nx>0 and ny>0,'healthy unbinned gain-fixture dimensions missing')
         gain=tmp/'prepared-input-gain.mrc';write_mrc(gain,[[1.0]*(nx*ny)],nx,ny)
         gain_args=['--gainref',str(gain),'--gain_flip','1']
         target=tmp/'tomo-gain-collision';r=run(binary,tmp,target,gain_args)

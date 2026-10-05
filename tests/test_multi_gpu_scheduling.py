@@ -938,46 +938,60 @@ def case_aggregate_name_shadowing(tmp: Path) -> None:
         assert not (tmp / "merged" / "_workers" / "w1" / (root + ".mrc")).exists()
 
 
+def allocation_masks():
+    """Use only CPUs actually available to this required Linux test."""
+    allocation = sorted(os.sched_getaffinity(0))
+    if not allocation:
+        raise RuntimeError("empty actual CPU allocation")
+    selected = allocation[:4]
+    groups = ([selected] if len(selected) == 1 else
+              [selected[:len(selected)//2], selected[len(selected)//2:]])
+    return allocation, groups, [",".join(map(str, group)) for group in groups]
+
+
+def scheduling_require(ok, message):
+    if not ok:
+        raise AssertionError(message)
+
+
 def case_per_worker_cpu_masks(tmp: Path) -> None:
-    """Workers can be pinned to disjoint CPU masks, and a bad count is refused."""
+    """Actual allocation masks work; unavailable wider arms remain explicit."""
     star = tmp / "movies.star"
     build_star(star, DEFAULT_ROWS)
-
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_bad",
               "--binary", FAKE, "--workers", "2", "--no-witness",
               "--cpus", "0-1;2-3;4-5"])
-    assert cp.returncode == 2 and "3 masks for 2 worker" in cp.stderr, cp.stderr
-
+    scheduling_require(cp.returncode == 2 and "3 masks for 2 worker" in cp.stderr, cp.stderr)
     if shutil.which("taskset") is None:
-        # macOS has no taskset. The launcher must refuse rather than run
-        # unpinned, which would silently break a shared-host core budget.
         cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star,
                   "--out", tmp / "r_no_taskset", "--binary", FAKE, "--workers", "2",
                   "--no-witness", "--cpus", "0-1;2-3"])
-        assert cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr
-        print("      (taskset absent: pinning asserted only as a refusal here; the "
-              "launch path is exercised on the Linux validation host)")
+        scheduling_require(cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr)
+        print("      UNAVAILABLE Linux pinning success: taskset absent; refusal verified")
         return
-
+    allocation, groups, masks = allocation_masks()
+    if len(allocation) < 4:
+        print(f"      UNAVAILABLE four-CPU success: actual allocation {allocation}; "
+              f"testing {len(groups)} worker(s) on {sum(map(len, groups))} available CPU(s)")
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_per",
-              "--binary", FAKE, "--workers", "2", "--no-witness",
-              "--cpus", "0-1;2-3"])
-    assert cp.returncode == 0, cp.stderr
+              "--binary", FAKE, "--workers", str(len(groups)), "--no-witness",
+              "--cpus", ";".join(masks)])
+    scheduling_require(cp.returncode == 0, cp.stdout + cp.stderr)
     status = json.loads((tmp / "r_per" / "status.json").read_text())
-    assert status["cpu_masks"] == ["0-1", "2-3"], status["cpu_masks"]
-    for k, mask in enumerate(["0-1", "2-3"]):
+    scheduling_require(status["cpu_masks"] == masks, status["cpu_masks"])
+    for k, mask in enumerate(masks):
         cmd = json.loads((tmp / "r_per" / f"w{k}" / "command.json").read_text())
-        assert cmd["cpu_mask"] == mask, cmd
-        assert cmd["command"][:3] == ["taskset", "-c", mask], cmd["command"]
-
-    # a single mask still applies to every worker, and is recorded as shared
+        scheduling_require(cmd["cpu_mask"] == mask, cmd)
+        scheduling_require(cmd["command"][:3] == ["taskset", "-c", mask], cmd["command"])
+    if len(groups) == 1:
+        print("      UNAVAILABLE two-worker disjoint success: only one CPU; one-worker pinning verified")
+    shared = ",".join(map(str, allocation[:4]))
     cp = run([PY, TOOLS / "run_multi_gpu.py", "--star", star, "--out", tmp / "r_one",
-              "--binary", FAKE, "--workers", "2", "--no-witness", "--cpus", "0-3"])
-    assert cp.returncode == 0, cp.stderr
+              "--binary", FAKE, "--workers", "2", "--no-witness", "--cpus", shared])
+    scheduling_require(cp.returncode == 0, cp.stdout + cp.stderr)
     one = json.loads((tmp / "r_one" / "status.json").read_text())
-    assert one["cpu_masks"] == ["0-3", "0-3"]
-    assert one["cpu_masks_disjoint"] is False, one
-
+    scheduling_require(one["cpu_masks"] == [shared, shared], one["cpu_masks"])
+    scheduling_require(one["cpu_masks_disjoint"] is False, one)
 
 def case_phase_timeline_recorded(tmp: Path) -> None:
     """Per-worker setup / produce / tail is recorded and partitions the wall.
@@ -1031,69 +1045,120 @@ def case_phase_timeline_recorded(tmp: Path) -> None:
         assert w["phases"]["n_products"] == expect, (k, w["phases"]["n_products"], expect)
 
 
-def case_cpu_budget_gate(tmp: Path) -> None:
-    """--cpu-budget refuses anything that is not a witnessed disjoint partition.
+def case_completed_image_marker_not_mrc_creation(tmp: Path) -> None:
+    """Actual open MRC write must not end production before the STAR marker."""
+    import inspect
+    import run_multi_gpu
+    from process_ownership import ProcessTable
+    source = inspect.getsource(run_multi_gpu.ProductSampler)
+    scheduling_require(source.count('r + ".star"') + source.count('r + ".mrc"') == 1, "completion marker source anchor changed")
+    old = source.replace('r + ".star"', 'r + ".mrc"')
+    old = old.replace('class ProductSampler(', 'class EarlyMrcSampler(', 1)
+    namespace = dict(vars(run_multi_gpu))
+    exec(compile(old, "powered-predecessor-MRC-sampler", "exec"), namespace)
+    candidate = run_multi_gpu.ProductSampler(.005)
+    predecessor = namespace["EarlyMrcSampler"](.005)
+    output = tmp / "worker"; output.mkdir()
+    for sampler in (candidate, predecessor):
+        sampler.watch(0, output, ["movie"]);sampler.start()
+    script = tmp / "delayed_image_write.py"
+    script.write_text('''import json,os,time,sys
+from pathlib import Path
+root=Path(sys.argv[1])
+with (root/'movie.mrc').open('w') as image:
+ image.write('partial payload');image.flush()
+ (root/'image-open.ready').write_text(str(os.getpid()))
+ deadline=time.monotonic()+5
+ while not (root/'finish-image').exists():
+  if time.monotonic()>deadline:raise RuntimeError('image-close handshake timed out')
+  time.sleep(.005)
+ image.write(' completed payload')
+closed=time.time()
+(root/'movie.star').write_text('closed image completion marker\\n')
+(root/'child-receipt.json').write_text(json.dumps({'pid':os.getpid(),'image_closed_s':closed}))
+''')
+    child = subprocess.Popen([PY, str(script), str(output)], start_new_session=True)
+    def wait_for(predicate, label):
+        deadline = time.monotonic()+5
+        while not predicate():
+            if time.monotonic() > deadline:
+                raise AssertionError("phase marker handshake timed out: "+label)
+            time.sleep(.005)
+    identity = ProcessTable().read(child.pid)
+    try:
+        wait_for(lambda:(output/'image-open.ready').exists(), "MRC open")
+        identity = ProcessTable().read(child.pid)
+        scheduling_require(identity is not None and child.poll() is None, "actual writer identity unavailable")
+        wait_for(lambda:"movie" in predecessor.seen[0], "old MRC creation timestamp")
+        scheduling_require(not candidate.expect[0][0][1].exists(), "open MRC creation falsely counted as completed output")
+        scheduling_require("movie" not in candidate.seen[0], "open MRC creation falsely counted as completed output")
+        scheduling_require(not (output/'movie.star').exists(), "premature STAR marker in actual delayed-write child")
+        (output/'finish-image').touch()
+        scheduling_require(child.wait(timeout=5) == 0, "actual delayed writer failed")
+        wait_for(lambda:"movie" in candidate.seen[0], "STAR after image close")
+        receipt = json.loads((output/'child-receipt.json').read_text())
+        scheduling_require(receipt['pid']==child.pid, "writer receipt changed identity")
+        scheduling_require(predecessor.seen[0]['movie'] < receipt['image_closed_s'] <= candidate.seen[0]['movie'], "marker observation does not bracket actual image close")
+        print("      powered marker receipt "+json.dumps({'pid':child.pid,'birth':identity['start'],'MRC_creation_observed_s':predecessor.seen[0]['movie'],'image_closed_s':receipt['image_closed_s'],'STAR_marker_observed_s':candidate.seen[0]['movie'],'scope':'actual delayed open-image child; no native GPU/timing claim'}))
+    finally:
+        (output/'finish-image').touch()
+        for sampler in (candidate, predecessor):
+            sampler.stop();sampler.join(timeout=5)
+            if sampler.is_alive():raise RuntimeError("phase marker observer did not stop")
+        if child.poll() is None:
+            check = ProcessTable().read(child.pid)
+            if identity is None:
+                # The released handshake lets the bounded child finish naturally;
+                # an unwitnessed numeric PID never authorizes a signal.
+                child.wait(timeout=6)
+            elif check is None:
+                child.wait(timeout=5)  # disappeared original child; no numeric-PID signal
+            elif check['start'] != identity['start']:
+                raise RuntimeError("refusing cleanup without current writer PID/birth proof")
+            else:
+                child.terminate();child.wait(timeout=5)
 
-    A fixed-total-resource comparison is only fixed if the budget is checked at
-    every worker count. Union size alone cannot do it: four workers each on 0-7
-    cover exactly 8 cpus while oversubscribing the budget fourfold, so
-    overlapping masks are refused under --cpu-budget even though the union is
-    right. Sharing cores stays available without the flag, because that is a
-    real measurement -- just not a scaling point.
-    """
+
+def case_cpu_budget_gate(tmp: Path) -> None:
+    """Disjoint witnessed actual budgets; resource refusals stay powered."""
     star = tmp / "movies.star"
     build_star(star, DEFAULT_ROWS)
-
-    def attempt(name, *extra):
+    def attempt(name, *extra, workers=2):
         return run([PY, TOOLS / "run_multi_gpu.py", "--star", star,
-                    "--out", tmp / name, "--binary", FAKE, "--workers", "2",
+                    "--out", tmp / name, "--binary", FAKE, "--workers", str(workers),
                     "--no-witness", *extra])
-
     cp = attempt("b_nomask", "--cpu-budget", "4")
-    assert cp.returncode == 2 and "only means something with --cpus" in cp.stderr, cp.stderr
-
+    scheduling_require(cp.returncode == 2 and "only means something with --cpus" in cp.stderr, cp.stderr)
     if shutil.which("taskset") is None:
         cp = attempt("b_nots", "--cpus", "0-1;2-3", "--cpu-budget", "4")
-        assert cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr
-        print("      (taskset absent: budget gate asserted only as a refusal here)")
+        scheduling_require(cp.returncode == 2 and "needs taskset" in cp.stderr, cp.stderr)
+        print("      UNAVAILABLE Linux budget success: taskset absent; refusal verified")
         return
-
-    # right union, but shared cores -- the case a union check alone would pass
-    cp = attempt("b_overlap", "--cpus", "0-3;0-3", "--cpu-budget", "4")
-    assert cp.returncode == 2 and "masks overlap" in cp.stderr, cp.stderr
-
-    # disjoint, but the wrong size
-    cp = attempt("b_wrong", "--cpus", "0-1;2-3", "--cpu-budget", "8")
-    assert cp.returncode == 2 and "masks cover 4 cpu" in cp.stderr, cp.stderr
-
-    # a cpu outside the allocation must be refused, not silently narrowed
-    allocation = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
-    if allocation:
-        outside = max(allocation) + 1
-        cp = attempt("b_outside", "--cpus", f"0;{outside}", "--cpu-budget", "2")
-        assert cp.returncode == 2 and "outside this process" in cp.stderr, cp.stderr
-
-    cp = attempt("b_ok", "--cpus", "0-1;2-3", "--cpu-budget", "4")
-    assert cp.returncode == 0, cp.stdout + cp.stderr
+    allocation, groups, masks = allocation_masks()
+    width = sum(map(len, groups)); shared = ",".join(map(str, allocation[:4]))
+    cp = attempt("b_overlap", "--cpus", shared+";"+shared, "--cpu-budget", str(width))
+    scheduling_require(cp.returncode == 2 and "masks overlap" in cp.stderr, cp.stderr)
+    cp = attempt("b_wrong", "--cpus", ";".join(masks), "--cpu-budget", str(width+4), workers=len(groups))
+    scheduling_require(cp.returncode == 2 and f"masks cover {width} cpu" in cp.stderr, cp.stderr)
+    outside = max(allocation)+1
+    cp = attempt("b_outside", "--cpus", f"{allocation[0]};{outside}", "--cpu-budget", "2")
+    scheduling_require(cp.returncode == 2 and "outside this process" in cp.stderr, cp.stderr)
+    if len(allocation) < 4:
+        print(f"      UNAVAILABLE four-CPU budget success: allocation {allocation}; "
+              f"testing actual {width}-CPU/{len(groups)}-worker partition, all refusals retained")
+    cp = attempt("b_ok", "--cpus", ";".join(masks), "--cpu-budget", str(width), workers=len(groups))
+    scheduling_require(cp.returncode == 0, cp.stdout + cp.stderr)
     st = json.loads((tmp / "b_ok" / "status.json").read_text())
-    assert st["cpu_masks_disjoint"] is True and st["cpu_budget_covered"] == 4, st
-    assert st["verdict"] == "PASS", st
-    for k, mask in enumerate(["0-1", "2-3"]):
+    scheduling_require(st["cpu_masks_disjoint"] is True and st["cpu_budget_covered"] == width, st)
+    scheduling_require(st["verdict"] == "PASS", st)
+    import run_multi_gpu
+    for k, (mask, group) in enumerate(zip(masks, groups)):
         aff = st["workers"][k]["cpu_affinity"]
-        assert aff["verdict"] in ("MATCH", "EXITED_BEFORE_WITNESS"), aff
-        if aff["verdict"] == "MATCH":
-            # witnessed from /proc, not echoed back from the taskset argument.
-            # Compare cpu sets, not spelling: the kernel may print "0,1".
-            sys.path.insert(0, str(TOOLS))
-            import run_multi_gpu
-            assert run_multi_gpu.parse_cpu_list(aff["witnessed_at_launch"]) == \
-                run_multi_gpu.parse_cpu_list(mask), aff
-        # OMP_NUM_THREADS defaults to the mask width, so two workers on a
-        # partitioned budget do not each open a pool sized for the whole node.
+        scheduling_require(aff["verdict"] == "MATCH", aff)
+        scheduling_require(run_multi_gpu.parse_cpu_list(aff["witnessed_at_launch"]) == set(group), aff)
         cmd = json.loads((tmp / "b_ok" / f"w{k}" / "command.json").read_text())
-        assert cmd["omp"]["OMP_NUM_THREADS"] == "2", cmd["omp"]
-        assert cmd["cpu_mask_width"] == 2, cmd
-
+        scheduling_require(cmd["omp"]["OMP_NUM_THREADS"] == str(len(group)), cmd["omp"])
+        scheduling_require(cmd["cpu_mask_width"] == len(group), cmd)
 
 def case_per_worker_args_and_cpu_accounting(tmp: Path) -> None:
     """Per-worker arguments reach only their worker, and CPU time is reported.
@@ -2241,6 +2306,7 @@ CASES = [
     case_per_worker_cpu_masks,
     case_cpu_budget_gate,
     case_phase_timeline_recorded,
+    case_completed_image_marker_not_mrc_creation,
     case_per_worker_args_and_cpu_accounting,
     case_devices_with_no_witness_refused,
     case_normalized_root_collision_refused,

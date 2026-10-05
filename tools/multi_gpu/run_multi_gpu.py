@@ -389,28 +389,19 @@ class ResourceSampler(threading.Thread):
 
 
 class ProductSampler(threading.Thread):
-    """Record when each worker's per-movie products first appear on disk.
+    """Observe each per-movie STAR marker after the image writes have closed.
 
-    Wall time per worker says how long it took; it does not say where the time
-    went. A worker that spends a second in CUDA setup before its first movie
-    and one that is slow on every movie have the same total. Polling for
-    products separates them without touching the binary: the gap from launch to
-    the first product is setup, the gaps between products are per-movie cost,
-    and the gap from the last product to exit is the aggregate tail.
+    OutputWriter queues the model STAR after every image task. Its creation is
+    therefore later than MRC creation, which can precede a long payload write.
+    This endpoint is marker observation, not proof that the STAR itself closed
+    or the full movie loop finished. Worker success and drain establish complete
+    products separately.
 
-    Poll interval is deliberately much finer than the resource sampler's. At
-    four workers a movie completes about every 0.5 s per worker, so a 0.5 s
-    poll would quantise the very intervals being measured.
-
-    Paths come from the partition manifest's output_roots, not from a glob.
-    A glob has to guess the product naming, and every guess is wrong somewhere:
-    "*_frameImage.mrc" is specific to this dataset's filenames, while "*.mrc"
-    also matches the gain reference sitting in the same tree. The manifest
-    already states exactly which products each shard must produce.
-
-    First-seen time is an upper bound on completion: the file appears when the
-    writer creates it and is seen up to one interval later. The interval is
-    recorded so that is checkable.
+    Launch-to-first-marker, inter-marker and last-marker-to-exit intervals are
+    bookkeeping estimates. The tail can include finishing the model STAR,
+    plots, aggregates, reports and writer drain, not just aggregate work.
+    Paths come from manifest output_roots rather than a naming-dependent glob.
+    Polling records marker appearance up to one interval late.
     """
 
     def __init__(self, interval: float = 0.05):
@@ -421,12 +412,11 @@ class ProductSampler(threading.Thread):
         self._stop_event = threading.Event()
 
     def watch(self, index: int, wdir: Path, roots: list[str]) -> None:
-        self.expect[index] = [(r, wdir / (r + ".mrc")) for r in roots]
+        self.expect[index] = [(r, wdir / (r + ".star")) for r in roots]
         self.seen[index] = {}
 
     def run(self) -> None:
         while not self._stop_event.is_set():
-            now = time.time()
             for k, items in list(self.expect.items()):
                 got = self.seen[k]
                 for name, path in items:
@@ -434,7 +424,7 @@ class ProductSampler(threading.Thread):
                         continue
                     try:
                         if path.exists():
-                            got[name] = now
+                            got[name] = time.time()
                     except OSError:
                         pass
             self._stop_event.wait(self.interval)
@@ -885,8 +875,11 @@ def main(argv: list[str] | None = None) -> int:
             "product_offsets": [round(v - t0, 3) for v in gaps],
             "inter_product_seconds": [round(b - a, 3) for a, b in zip(gaps, gaps[1:])],
             "poll_interval": a.product_interval,
-            "note": "product first-seen times are upper bounds by up to one poll "
-                    "interval; setup+produce+tail partition the worker wall",
+            "completion_marker": "per-movie STAR appearance after image writes close",
+            "note": "marker observations can lag appearance by one poll interval; "
+                    "not STAR-close or full-movie timestamps. Tail includes remaining "
+                    "model STAR/plots/aggregate/report/drain work; setup+produce+tail "
+                    "partition the worker wall",
         }
         binary_movie_times = movie_wall_times(wdir)
         phases["binary_movie_wall_sum"] = (round(sum(binary_movie_times), 3)

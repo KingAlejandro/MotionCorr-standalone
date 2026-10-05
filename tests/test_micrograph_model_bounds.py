@@ -2,6 +2,7 @@
 """Saved-model bounds, sparse queries, and actual resume rejection (issue #67)."""
 import argparse
 import shutil
+import struct
 import subprocess
 import tempfile
 from pathlib import Path
@@ -45,6 +46,57 @@ def rejected(result, diagnostic, name):
     require(result.returncode == 1, f'{name}: expected clean exit 1, got '
             f'{result.returncode}\n{result.stdout}{result.stderr}')
     require(diagnostic in result.stderr, f'{name}: missing {diagnostic!r}: {result.stderr}')
+
+
+def eer_saved_model(grouping=40, upsampling=1):
+    # No EER decoding: exercise saved metadata and the real completion gate.
+    text = saved_model(first=1, shifts=[(i, i, -i) for i in range(1, 5)])
+    text = text.replace('movie.mrc', 'movie.eer')
+    fields = ''
+    if grouping is not None:
+        fields += f'_rlnEERGrouping {grouping}\n'
+    if upsampling is not None:
+        fields += f'_rlnEERUpsampling {upsampling}\n'
+    return text.replace('_rlnMotionModelVersion', fields + '_rlnMotionModelVersion')
+
+
+def saved_eer(helper, work):
+    work.mkdir(exist_ok=True)
+    model = work / 'movie.star'
+    header = bytearray(1024)
+    struct.pack_into('<4i', header, 0, 8, 6, 1, 2)
+    struct.pack_into('<3i', header, 28, 8, 6, 1)
+    struct.pack_into('<3f', header, 40, 8., 6., 1.)
+    header[208:212] = b'MAP '
+    (work / 'movie.mrc').write_bytes(header + bytes(8 * 6 * 4))
+
+    def complete():
+        result = run(helper, 'model_complete', work, 'movie.eer')
+        require(result.returncode == 0, result.stdout + result.stderr)
+        return result.stdout.strip()
+
+    # Preserve all modes EERRenderer::read supports, including the missing
+    # upsampling default. Grouping is positive int, not an arbitrary cap.
+    for group, upsample in [(40, v) for v in (-1, 1, 2, 3, None)] + [(1, 1), (2147483647, 1)]:
+        model.write_text(eer_saved_model(group, upsample))
+        result = run(helper, 'model_eer', model)
+        require(result.returncode == 0 and result.stdout.split() ==
+                [str(-1 if upsample is None else upsample), str(group)],
+                f'valid saved EER fields changed: {result.stdout}{result.stderr}')
+        require(complete() == '1', 'valid EER completion refused')
+
+    invalid = [('grouping', v, 1, 'invalid EER grouping')
+               for v in (None, 0, -1, 2147483648, 4294967296, 4294967297)]
+    invalid += [('upsampling', 40, v, 'invalid EER upsampling')
+                for v in (0, -2, 4, 2147483648, 4294967297)]
+    for name, group, upsample, diagnostic in invalid:
+        model.write_text(eer_saved_model(group, upsample))
+        before = {p: (p.stat().st_mtime_ns, p.read_bytes()) for p in work.glob('movie.*')}
+        rejected(run(helper, 'read', model), diagnostic, name)
+        require(complete() == '0', f'malformed EER {name} was counted complete')
+        require(before == {p: (p.stat().st_mtime_ns, p.read_bytes()) for p in work.glob('movie.*')},
+                'completion inspection changed products')
+    print('PASS 7 valid and 11 malformed saved-EER parser/completion controls; decoding unrun')
 
 
 def parser_and_queries(helper, work):
@@ -152,11 +204,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--helper', type=Path, required=True)
+    parser.add_argument('--case', choices=('all', 'saved_eer'), default='all')
     opts = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix='micrograph-bounds-') as tmp:
         work = Path(tmp)
-        parser_and_queries(opts.helper.resolve(), work)
-        resume(opts.binary.resolve(), work)
+        saved_eer(opts.helper.resolve(), work / 'eer')
+        if opts.case == 'all':
+            parser_and_queries(opts.helper.resolve(), work)
+            resume(opts.binary.resolve(), work)
 
 
 if __name__ == '__main__':

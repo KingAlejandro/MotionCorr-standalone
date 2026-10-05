@@ -285,6 +285,20 @@ int main(int argc, char **argv)
             Micrograph parsed(argv[2]);
             return 0;
         }
+        if (std::string(argv[1]) == "model_eer") {
+            Micrograph parsed(argv[2]);
+            std::cout << parsed.getEERUpsampling() << ' ' << parsed.getEERGrouping() << '\n';
+            return 0;
+        }
+        if (std::string(argv[1]) == "model_complete") {
+            MotioncorrRunner runner;
+            runner.fn_out = std::string(argv[2]) + "/";
+            runner.do_dose_weighting = false;
+            runner.even_odd_split = false;
+            runner.grouping_for_ps = -1;
+            std::cout << runner.isMovieComplete(argv[3], 4) << '\n';
+            return 0;
+        }
         if (std::string(argv[1]) == "model_query") {
             Micrograph parsed(argv[2]);
             RFLOAT x, y;

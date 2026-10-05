@@ -514,11 +514,18 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 
 	if (EERRenderer::isEER(fnMovie))
 	{
-		if (!MDglobal.getValue(EMDL_MICROGRAPH_EER_UPSAMPLING, eer_upsampling))
-			eer_upsampling = -1;
-
-		if (!MDglobal.getValue(EMDL_MICROGRAPH_EER_GROUPING, eer_grouping))
-			eer_grouping = -1;
+		// -1 is the renderer's supported half-resolution mode and the
+		// historical default when a saved upsampling field is absent.
+		long saved_upsampling = -1, saved_grouping = -1;
+		MDglobal.getValue(EMDL_MICROGRAPH_EER_UPSAMPLING, saved_upsampling);
+		MDglobal.getValue(EMDL_MICROGRAPH_EER_GROUPING, saved_grouping);
+		if (saved_upsampling != -1 && saved_upsampling != 1 &&
+		    saved_upsampling != 2 && saved_upsampling != 3)
+			REPORT_ERROR("MicrographModel::read: invalid EER upsampling in " + fn_in);
+		if (saved_grouping <= 0 || saved_grouping > std::numeric_limits<int>::max())
+			REPORT_ERROR("MicrographModel::read: invalid EER grouping in " + fn_in);
+		eer_upsampling = static_cast<int>(saved_upsampling);
+		eer_grouping = static_cast<int>(saved_grouping);
 	}
 
 	int model_version;

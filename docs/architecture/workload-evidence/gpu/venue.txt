@@ -1,0 +1,38 @@
+2026-10-02T13:29:03+01:00
+gn0001.scarf.rl.ac.uk
+CUDA_VISIBLE_DEVICES=0
+index, uuid, name, memory.total [MiB], memory.used [MiB]
+0, GPU-319bf3ef-abbc-f7d3-b57d-ee73fe0bff36, NVIDIA A100-SXM4-40GB, 40960 MiB, 0 MiB
+JobId=3522238 JobName=mc142-formats
+   UserId=scarf1415(101415) GroupId=cseg(101004) MCS_label=N/A
+   Priority=6 Nice=0 Account=scd QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:00 TimeLimit=00:15:00 TimeMin=N/A
+   SubmitTime=2026-10-02T13:29:02 EligibleTime=2026-10-02T13:29:02
+   AccrueTime=Unknown
+   StartTime=2026-10-02T13:29:03 EndTime=2026-10-02T13:44:03 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T13:29:03 Scheduler=Main
+   Partition=gpu-devel AllocNode:Sid=cn1052:3305619
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=gn0001
+   BatchHost=gn0001
+   NumNodes=1 NumCPUs=4 NumTasks=1 CPUs/Task=4 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=4,mem=8G,node=1,billing=1000,gres/gpu=1
+   AllocTRES=cpu=4,mem=8G,node=1,billing=1000,gres/gpu=1,gres/gpu:a100=1
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=4 MinMemoryNode=8G MinTmpDiskNode=0
+   Features=amd DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/run-workload-scarf.sh
+   WorkDir=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002
+   StdErr=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/slurm-3522238.out
+   StdIn=/dev/null
+   StdOut=/work4/scd/scarf1415/motioncorr/issue142-architecture-20261002/slurm-3522238.out
+   Power=
+   TresPerNode=gres:gpu:1
+   
+
+Cpus_allowed_list:	0-1,32-33
+e99dfc818dc4d10ef382334c5c62d0038206a631658f1fc0ea5da92c650ce3af  compressed-fix.patch
+1f7e3d1fe9de6deaa08a4c24d0b2fe6f390d09bc4908e3ea02349c7be677514e  workload_matrix.py

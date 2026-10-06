@@ -59,9 +59,11 @@ Private pinned NVIDIA wheel0.8.0.82; CUDA12.8 runtime. Candidate binary SHA256
 nvTIFF library SHA256
 `d46cfdef19db2530a5cfe06cc093edba7592d51656f1cbf833d51ce60b8a7830`.
 All inputs are known generated pixels read independently; source/archive/cache,
-binary/library/input/helper hashes are bound before/after. Full external callers
-and raw records are retained at coordinator work/nvtiff-native-v2-20261006 and
-on the same private VM acceptance root. No SDK material is redistributed.
+binary/library/input/helper hashes are bound before/after. The [public campaign instructions](reproduce/README.md) and
+[actual invocation manifest](reproduce/campaign_manifest.json) record build,
+fixture, comparator and fault commands, all28 case argument vectors, hashes and
+the final explicitunit supplement caller. Retained acceptance helpers are
+repository-accessible; raw logs/dumps remain in the private evidence archive. No SDK material is redistributed.
 
 API fault injections operate on healthy compressed inputs; they are not corrupt
 LZW safety tests or genuinely poisoned CUDA contexts. Vendor internal scratch

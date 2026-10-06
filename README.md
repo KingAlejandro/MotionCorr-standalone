@@ -61,8 +61,9 @@ cmake --build build-cuda --parallel
 
 An optional [standalone nvTIFF experiment](experiments/nvtiff/README.md) implements
 GPU LZW decoding and native sample dumps for Issue #141. Build it separately, or
-enable `BUILD_NVTIFF_PROBE`; it is not yet a MotionCorr ingest route and has no
-claimed native correctness or performance result.
+enable `BUILD_NVTIFF_PROBE`; it is not yet a MotionCorr ingest route. [Controlled standalone native sample
+comparisons passed](experiments/nvtiff/NATIVE_RESULTS.md); full MotionCorr
+product/scientific correctness and application performance remain unproven.
 
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 

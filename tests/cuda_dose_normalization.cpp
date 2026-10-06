@@ -463,7 +463,15 @@ void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
     } else {
         // A real transform after borrow/refusal powers ownership: accidentally
         // destroying the loan in helper cleanup makes this owner reuse fail.
-        require(session.computeGlobalInverseFFT(), "session C2R owner unusable after borrowed call");
+        // A separately allocated output stays aligned for odd widths. The
+        // existing multi-frame inverse method has a distinct odd output-stride
+        // restriction; it is not the ownership contract this test exercises.
+        float *owner_output = nullptr;
+        gpu(cudaMalloc(&owner_output, (size_t)in.nx*in.ny*sizeof(float)), "owner output allocation");
+        fft(cufftExecC2R(c2r,session.getDeviceFourierFrames(),owner_output),
+            "session C2R owner unusable after borrowed call");
+        gpu(cudaDeviceSynchronize(), "owner C2R completion");
+        gpu(cudaFree(owner_output), "owner output release");
         require(session_destroyed.empty(), "borrower retired session plan during reuse");
     }
     session.release();

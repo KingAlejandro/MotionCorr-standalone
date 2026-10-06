@@ -214,6 +214,20 @@ uint16_t shortTag(nvtiffStream_t s, size_t off, uint16_t tag, uint16_t fallback)
     return value;
 }
 
+uint32_t imageDepth(nvtiffStream_t s, size_t off) {
+    // ImageDepth is a 3D TIFF extension. Ordinary 2D files omit it, while
+    // nvTIFF 0.8 reports geometry.image_depth=0 for those same files.
+    nvtiffTagDataType_t type{}; uint32_t size = 0, count = 0;
+    const auto status = nvtiffStreamGetTagInfo(s, off, 32997, &type, &size, &count);
+    if (status == NVTIFF_STATUS_TAG_NOT_FOUND) return 1;
+    nv(status, "ImageDepth tag info");
+    if (type != NVTIFF_TAG_TYPE_LONG || size != 4 || count != 1)
+        throw std::runtime_error("unexpected scalar LONG ImageDepth tag");
+    uint32_t depth = 0;
+    nv(nvtiffStreamGetTagValue(s, off, 32997, &depth, 1), "ImageDepth tag value");
+    return depth;
+}
+
 int run(const Options& o) {
     const auto whole = Clock::now();
     const uint16_t endian = 1;
@@ -261,6 +275,7 @@ int run(const Options& o) {
         nv(nvtiffStreamGetImageGeometry(r.tiff, offsets[i], &geometry), "image geometry");
         const auto orientation = shortTag(r.tiff, offsets[i], 274, 1);
         const auto predictor = shortTag(r.tiff, offsets[i], 317, 1);
+        const auto depth = imageDepth(r.tiff, offsets[i]);
         if (i == 0) first = info;
         const bool admitted = info.image_width && info.image_height &&
             info.image_width == first.image_width && info.image_height == first.image_height &&
@@ -270,7 +285,7 @@ int run(const Options& o) {
             info.sample_format[0] == NVTIFF_SAMPLEFORMAT_UINT &&
             info.photometric_int == NVTIFF_PHOTOMETRIC_MINISBLACK &&
             info.planar_config == NVTIFF_PLANARCONFIG_CONTIG &&
-            geometry.image_depth == 1 && orientation == 1 && (predictor == 1 || predictor == 2);
+            depth == 1 && geometry.image_depth <= 1 && orientation == 1 && (predictor == 1 || predictor == 2);
         nvtiffDecodeRegion_t region{}; region.ifd_offset = offsets[i];
         nv(nvtiffDecodeParamsSetRegions(r.params, &region, 1), "probe region");
         const auto status = nvtiffDecodeCheckSupported(r.tiff, r.decoder, r.params, nullptr);
@@ -284,6 +299,7 @@ int run(const Options& o) {
                << ",\"samples_per_pixel\":" << info.samples_per_pixel
                << ",\"photometric\":" << info.photometric_int << ",\"planar_config\":" << info.planar_config
                << ",\"depth\":" << geometry.image_depth
+               << ",\"tag_depth\":" << depth
                << ",\"sample_format\":" << info.sample_format[0]
                << ",\"experiment_admitted\":" << (admitted ? "true" : "false")
                << ",\"nvtiff_status\":" << status << '}';

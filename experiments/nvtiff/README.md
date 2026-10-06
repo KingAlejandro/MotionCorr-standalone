@@ -65,6 +65,9 @@ decoder failure, or count selected-range identity as all-frame identity.
   configuration, depth one, top-left orientation and predictor 1/2 are admitted.
   Strip/tile and compression eligibility are then checked by the library for
   each image. Packed/signed/floating/palette/RGB/rotated/depth data are declined.
+  The raw ImageDepth LONG tag defaults to one when absent. nvTIFF 0.8 reports
+  geometry depth zero for those ordinary 2D files; an explicit non-unit raw
+  depth or geometry depth greater than one is still declined.
 - The input is read once into an immutable host snapshot; both metadata admission
   and decode use those same bytes. Default compressed-input cap: 1 GiB. The file
   must be regular, nonempty and not a symlink. This is not a malformed-stream

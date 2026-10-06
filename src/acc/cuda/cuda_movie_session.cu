@@ -1793,8 +1793,8 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (failure_state.isPoisoned() || !is_initialized) return false;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state);
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work) return false;
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, plan_c2r);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

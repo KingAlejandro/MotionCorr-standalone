@@ -34,6 +34,11 @@ bool cudaDoseWeightAndInterpolate(
 /**
  * In-VRAM CUDA implementation of analytical dose weighting, cuFFT inverse transform,
  * and real-space polynomial bilinear interpolation directly from resident d_Fframes (Issue #50).
+ * A nonzero borrowed_c2r must belong to the calling session on device_id, have
+ * rank2 dimensions {ny,nx}, contiguous single-precision C2R batch1 and default
+ * stream0. Its caller-owned work area remains live through this synchronous
+ * call; neither the plan nor work area is rebound, retained or destroyed here.
+ * With zero, the original reconstruction-owned plan and cleanup are unchanged.
  */
 bool cudaDoseWeightAndInterpolateDevice(
     const cufftComplex *d_Fframes,
@@ -44,7 +49,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const ThirdOrderPolynomialModel *model, // nullptr if global motion only
     const int device_id,
     std::ostream &logfile,
-    CudaFailureState *failure = nullptr // receives every consumed CUDA/cuFFT status, cleanup included
+    CudaFailureState *failure = nullptr, // receives every consumed status, cleanup included
+    cufftHandle borrowed_c2r = 0 // matching session-owned batch-one C2R; never destroyed here
 );
 
 /**

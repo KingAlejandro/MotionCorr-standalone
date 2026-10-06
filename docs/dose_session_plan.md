@@ -78,7 +78,7 @@ Frozen source `fddbcf4756af015433c49eb620a1084e81701700` composes main
   fails the extra-plan runtime assertion. An accidental borrowed-plan
   adoption also fails that assertion. Both compile and execute natively;
   these are not compilation/unknown-option negatives.
-- Two seven-frame96x96 synthetic movies, two exposure values and patch1/3:
+- Two seven-frame 96x96 synthetic movies, two exposure values and patch1/3:
   actual main versus candidate has 20 paired finite MRCs, complete normalized
   1024-byte/extended headers and 156672 pixels exact, plus six paired STARs
   exact. Every movie has a completed resident CUDA dose profile. Expected
@@ -89,13 +89,13 @@ Frozen source `fddbcf4756af015433c49eb620a1084e81701700` composes main
 
 The original odd-geometry test tried to prove ownership with the existing
 multi-frame session inverse method. A separate unchanged-method probe before
-any dose borrow showed that method already rejects the35x29 multi-frame output
+any dose borrow showed that method already rejects the 35x29 multi-frame output
 stride. The ownership test instead executes the actual owner handle into an
 aligned single-frame output. The first failed campaign and the distinguishing
 probe are retained; the dose helper's odd-geometry oracle remains required.
 
 Venue: GPU0 `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, all descendants on
-logical CPUs96–103/membind1, build4 under the shared build lock. Returned-code
+logical CPUs 96–103/membind1, build 4 under the shared build lock. Returned-code
 faults do not establish genuine poisoned-context behavior. Tutorial/all24,
 application speed, whole-device peak VRAM, PDF/log equivalence and scientific
 acceptance are UNRUN for this patch. No numerical gate or tolerance changed.

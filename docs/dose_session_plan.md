@@ -2,7 +2,7 @@
 
 ## Scope
 
-Main `e61c9739` creates a contiguous rank2 single-precision batch-one C2R plan
+Main `7336128` creates a contiguous rank2 single-precision batch-one C2R plan
 for each resident CUDA movie. Dose reconstruction currently builds a second
 plan with the same `{ny,nx}`, type and batch. Reuse the existing session plan
 only for this synchronous reconstruction call. Nonresident reconstruction keeps
@@ -62,10 +62,44 @@ construction without importing their worker-lifetime residency architecture.
   not establish these. Isolated paired timing follows correctness; no timing
   claim while other GPU jobs share resources.
 
-At drafting: source implemented; native tests, CUDA compilation and application
-comparison are UNRUN. No performance/science claim is made.
+## Current acceptance
 
-CPU build/inventory: 36 collected Mac CTests, 34PASS, inherited
-SyntheticRegressionFAIL, Linux-only NativeMovieStagingSKIP. CUDA files and new
-CudaDoseSessionPlan are not executed/compiled by that CPU result. The previous
-main/gain branch is left unchanged, including its existing build directory.
+Frozen source `fddbcf4756af015433c49eb620a1084e81701700` composes main
+`733612887f96875bcd9c9f76d4cbba9973ac517b`, including the checksum repair.
+
+- Mac: 39 collected CTests, 37PASS, inherited SyntheticRegressionFAIL and
+  Linux-only NativeMovieStagingSKIP. This does not execute CUDA tests.
+- VM, CUDA12.8/sm80/Release/nvCOMP OFF: genuine source Git checkout, all
+  50 named Linux/native CTests PASS, no skipped/missing/failed tests. The
+  required 39 CPU names and all 11 CUDA names are preserved.
+- Six borrowed-session cases PASS. Original owned-plan reference remains
+  50 exact null/polynomial cases plus five returned-code fault cases.
+- Actual current-main session caller with the new default-zero helper API
+  fails the extra-plan runtime assertion. An accidental borrowed-plan
+  adoption also fails that assertion. Both compile and execute natively;
+  these are not compilation/unknown-option negatives.
+- Two seven-frame96x96 synthetic movies, two exposure values and patch1/3:
+  actual main versus candidate has 20 paired finite MRCs, complete normalized
+  1024-byte/extended headers and 156672 pixels exact, plus six paired STARs
+  exact. Every movie has a completed resident CUDA dose profile. Expected
+  DW/noDW/EVN/ODD/PS inventory and geometry are checked independently.
+- Actual PID/birth/executable/full CPU mask and physical GPU UUID witnesses,
+  observed-descendant cleanup and empty-device release pass. All source,
+  binary and external caller pins remain unchanged through acceptance.
+
+The original odd-geometry test tried to prove ownership with the existing
+multi-frame session inverse method. A separate unchanged-method probe before
+any dose borrow showed that method already rejects the35x29 multi-frame output
+stride. The ownership test instead executes the actual owner handle into an
+aligned single-frame output. The first failed campaign and the distinguishing
+probe are retained; the dose helper's odd-geometry oracle remains required.
+
+Venue: GPU0 `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, all descendants on
+logical CPUs96–103/membind1, build4 under the shared build lock. Returned-code
+faults do not establish genuine poisoned-context behavior. Tutorial/all24,
+application speed, whole-device peak VRAM, PDF/log equivalence and scientific
+acceptance are UNRUN for this patch. No numerical gate or tolerance changed.
+
+External receipt archive and source/binary manifests are retained in the
+coordinator evidence directory. Documentation-only publication must preserve
+all source/test/CMake bytes of the frozen acceptance source.

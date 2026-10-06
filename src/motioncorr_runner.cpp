@@ -146,7 +146,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
 	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
 	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
-	continue_old = parser.checkOption("--only_do_unfinished", "Resume matching own-engine processing receipts; incomplete movies are retried. Complete legacy or incompatible outputs are refused; use a fresh non-resume run to migrate them.");
+	continue_old = parser.checkOption("--only_do_unfinished", "Resume matching own-engine processing receipts; incomplete movies are retried. Complete legacy or incompatible outputs are refused; start a fresh directory with --write_resume_receipts (or --only_do_unfinished) to enable verified resume.");
+	const bool write_resume_receipts = parser.checkOption("--write_resume_receipts", "Write exact-content own-engine processing receipts for later verified resume (extra file reads); ordinary fresh runs omit them.");
+	receipt_mode = write_resume_receipts || continue_old;
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
 	ps_size = textToInteger(parser.getOption("--ps_size", "Output size of power spectrum", "512"));
@@ -188,6 +190,8 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 
 	parser.addSection("Own motion correction options");
 	do_own = parser.checkOption("--use_own", "Use our own implementation of motion correction");
+	if (write_resume_receipts && !do_own)
+		REPORT_ERROR("--write_resume_receipts requires --use_own; verified external-engine receipts are unsupported.");
 	write_float16  = parser.checkOption("--float16", "Write in half-precision 16 bit floating point numbers (MRC mode 12), instead of 32 bit (MRC mode 0).");
 	skip_defect = parser.checkOption("--skip_defect", "Skip hot pixel detection");
 	random_seed = textToInteger(parser.getOption("--seed", "Random seed for defect correction (default: 1 for reproducible runs)", "1"));
@@ -562,11 +566,15 @@ void MotioncorrRunner::prepareGainReference(bool write_gain)
 	if (write_gain)
 	{
 		// Rotation/flipping writes a derived file. Never overwrite the source
-		// whose content identity was captured for every movie in this run.
+		// independently of whether exact-content receipts were requested.
 		if (do_own && exists(fn_new_gain))
 		{
 			const auto output = motioncorr_identity::snapshotFile(fn_new_gain);
-			if (output.device == processing_gain.snapshot.device && output.inode == processing_gain.snapshot.inode)
+			long gain_index;
+			std::string gain_path;
+			original_gain_reference.decompose(gain_index, gain_path);
+			const auto source = motioncorr_identity::snapshotFile(FileName(gain_path).removeFileFormat());
+			if (output.device == source.device && output.inode == source.inode)
 				REPORT_ERROR("Cannot prepare gain: derived destination aliases immutable gain source " + original_gain_reference);
 		}
 		Image<RFLOAT> Iin, Iout;
@@ -870,7 +878,7 @@ bool MotioncorrRunner::canResumeMovie(const FileName &movie, int expected_count,
 		if (payload.empty())
 		{
 			if (isMovieComplete(movie, expected_count))
-				REPORT_ERROR("Movie " + movie + ": complete legacy output has no processing receipt; use a fresh non-resume run to migrate it.");
+				REPORT_ERROR("Movie " + movie + ": complete legacy output has no processing receipt; start a fresh directory with --write_resume_receipts (or --only_do_unfinished) to enable verified resume.");
 			return false;
 		}
 		Micrograph input_model(movie, original_gain_reference, bin_factor, eer_upsampling, eer_grouping);
@@ -944,7 +952,7 @@ void MotioncorrRunner::run()
 {
 	if (!fn_micrographs.empty())
 	{
-		if (do_own) initialiseProcessingSources(); // Before gain/output mutation.
+		if (do_own && receipt_mode) initialiseProcessingSources(); // Before gain/output mutation.
 		prepareGainReference(true);
 	}
 
@@ -1003,8 +1011,9 @@ void MotioncorrRunner::run()
 			}
 			effectiveMovieMetadata(optics_group_micrographs[imic], pre_exposure_micrographs[imic],
 			                       angpix, voltage, mic.pre_exposure);
+			if (!receipt_mode) mic.processing_identity.clear();
 			motioncorr_identity::FileDigest input_identity;
-			if (do_own)
+			if (do_own && receipt_mode)
 			{
 				try
 				{
@@ -1035,7 +1044,7 @@ void MotioncorrRunner::run()
 				// Submitted after the image writes, and cancelled with them if
 				// one failed: the STAR is the resume completion marker.
 				submitOutput([this, saved, fn_movie, input_identity]() {
-					if (do_own)
+					if (do_own && receipt_mode)
 					{
 						try
 						{

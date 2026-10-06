@@ -1,0 +1,54 @@
+{
+  "source_head": "006607e1a86c2e898c7846b0ba9ede9dfa2a6442",
+  "source_tree": "9a0a53cb41d0aaa10125f1adeaa9e6a0d983c204",
+  "cuda_no_nvcomp_ctest": "51/51 PASS",
+  "required_cpu_names": 41,
+  "binary_sha256": "4cedca146aaa2787bdf4a0461f2e0c67d4595d9b81f9414331a9493623cf907d",
+  "modes": {
+    "native-normal": {
+      "verdict": "PASS bounded native-source-change and header-only-EER delta",
+      "actual_checks": 566,
+      "binary_invocations": 30,
+      "native_invocations": 18,
+      "successful_cufft_events": 418,
+      "header_only_invocations": 12,
+      "ownership_errors": 0
+    },
+    "native-optimized": {
+      "verdict": "PASS bounded native-source-change and header-only-EER delta",
+      "actual_checks": 547,
+      "binary_invocations": 30,
+      "native_invocations": 18,
+      "successful_cufft_events": 399,
+      "header_only_invocations": 12,
+      "ownership_errors": 0
+    }
+  },
+  "nettle3_linux_digest_checks": 92,
+  "portable_linux_digest_checks": 92,
+  "mac_nettle4_digest_checks": 79,
+  "mac_portable_digest_checks": 79,
+  "mac_cpu": "39PASS / inherited SyntheticRegressionFAIL / Linux-onlyNativeMovieStagingSKIP",
+  "actual_cpu": "104-111",
+  "gpu_uuid": "GPU-cd5b9f86-26e6-0a03-bdd2-effcfa0fe42d",
+  "payload_pid": 3269818,
+  "payload_birth": 673643956,
+  "payload_executable": "/usr/bin/bash",
+  "memory_policy": "launch numactl --membind=1; venue captured",
+  "release_gate": 0,
+  "exit": 0,
+  "released": "2026-10-06T09:52:06+00:00",
+  "raw_archive_sha256": "43a9aa99066ff4321bb917e6ff9a44984d9565df7afd10e72e029830b22c46b5",
+  "raw_location": "work/resume-native-delta-20261006/raw-006607e.tar.gz",
+  "limits": [
+    "Four source-change classes sync/async; CPU/header-only EER controls, no EERpixeldecode/science or all24/tomography composition.",
+    "Previous684 native receipt matrix remains independently pinned to prior source.",
+    "Successful cuFFT event counts vary across asynchronous source-change arms; exact30 calls/18 native calls per mode are fixed.",
+    "Application overhead remains UNMEASURED; faster SHA does not remove extra fullinputread."
+  ],
+  "interventions": [
+    "Build-only bash3263665/birth673629984 paused before unassigned CTest then terminated after verified childZ; build children completed, no GPU execution there.",
+    "Unused external digest_compare.py briefly received three-backend variant during native run, restored byteexact immediately; variant preserved as digest_compare_backends.py. Executed native run-vm/run_native_delta/ownership/witness files were not modified. All native pins verified before launch and after completion.",
+    "First normal predecessor gain replay exposed narrower predicate diagnostic; first failed replay retained, fresh32arm replay accepted only actual oldsource contract diagnostic."
+  ]
+}

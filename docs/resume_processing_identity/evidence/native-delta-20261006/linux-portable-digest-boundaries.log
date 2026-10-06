@@ -1,0 +1,95 @@
+SHA256_BACKEND portable
+PASS SHA256 empty FIPS vector
+PASS SHA256 abc FIPS vector
+PASS SHA256 million-a FIPS vector
+PASS SHA256 null nonempty bytes refused
+PASS SHA256 bit-length overflow refused before reading input
+PASS independent byte vector 0
+PASS actual streamed file vector 0
+PASS streamed file snapshot 0
+PASS independent byte vector 1
+PASS actual streamed file vector 1
+PASS streamed file snapshot 1
+PASS independent byte vector 55
+PASS actual streamed file vector 55
+PASS streamed file snapshot 55
+PASS independent byte vector 56
+PASS actual streamed file vector 56
+PASS streamed file snapshot 56
+PASS independent byte vector 63
+PASS actual streamed file vector 63
+PASS streamed file snapshot 63
+PASS independent byte vector 64
+PASS actual streamed file vector 64
+PASS streamed file snapshot 64
+PASS independent byte vector 65
+PASS actual streamed file vector 65
+PASS streamed file snapshot 65
+PASS independent byte vector 65535
+PASS actual streamed file vector 65535
+PASS streamed file snapshot 65535
+PASS independent byte vector 65536
+PASS actual streamed file vector 65536
+PASS streamed file snapshot 65536
+PASS independent byte vector 65537
+PASS actual streamed file vector 65537
+PASS streamed file snapshot 65537
+PASS independent byte vector 131079
+PASS actual streamed file vector 131079
+PASS streamed file snapshot 131079
+PASS unchanged actual file accepted
+PASS snapshot dimension 0 participates
+PASS snapshot dimension 0 names path
+PASS snapshot dimension 0 refuses rather than returns identity
+PASS snapshot dimension 1 participates
+PASS snapshot dimension 1 names path
+PASS snapshot dimension 1 refuses rather than returns identity
+PASS snapshot dimension 2 participates
+PASS snapshot dimension 2 names path
+PASS snapshot dimension 2 refuses rather than returns identity
+PASS snapshot dimension 3 participates
+PASS snapshot dimension 3 names path
+PASS snapshot dimension 3 refuses rather than returns identity
+PASS snapshot dimension 4 participates
+PASS snapshot dimension 4 names path
+PASS snapshot dimension 4 refuses rather than returns identity
+PASS snapshot dimension 5 participates
+PASS snapshot dimension 5 names path
+PASS snapshot dimension 5 refuses rather than returns identity
+PASS snapshot dimension 6 participates
+PASS snapshot dimension 6 names path
+PASS snapshot dimension 6 refuses rather than returns identity
+PASS same-size same-mtime rewrite fixture genuinely matches
+PASS same-size same-mtime rewrite content digest changes
+PASS same-size same-mtime rewrite ctime invalidation names path
+PASS same-size same-mtime rewrite ctime invalidation refuses rather than returns identity
+PASS actual pathname replacement changes inode
+PASS actual pathname replacement names path
+PASS actual pathname replacement refuses rather than returns identity
+PASS regular symlink content identity accepted
+PASS missing file digest names path
+PASS missing file digest refuses rather than returns identity
+PASS directory digest names path
+PASS directory digest refuses rather than returns identity
+PASS directory snapshot names path
+PASS directory snapshot refuses rather than returns identity
+PASS FIFO digest without blocking open names path
+PASS FIFO digest without blocking open refuses rather than returns identity
+PASS embedded NUL refuses truncated OS pathname
+PASS actual executable identity path absolute
+PASS actual loaded executable file can be digested
+PASS injected read EIO names path
+PASS injected read EIO refuses rather than returns identity
+PASS injected fstat EIO names path
+PASS injected fstat EIO refuses rather than returns identity
+PASS injected final pathname stat EIO names path
+PASS injected final pathname stat EIO refuses rather than returns identity
+PASS injected short EOF names path
+PASS injected short EOF refuses rather than returns identity
+PASS injected post-read descriptor ctime change names path
+PASS injected post-read descriptor ctime change refuses rather than returns identity
+PASS injected final pathname inode change names path
+PASS injected final pathname inode change refuses rather than returns identity
+PASS actual production read retries EINTR then completes exact digest
+LINUX_OS_FAULT_BOUNDARIES_COMPLETE
+PROCESSING_FILE_DIGEST_COMPLETE checks=92

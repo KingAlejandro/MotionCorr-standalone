@@ -1,13 +1,28 @@
 # Ordinary resume processing identity (Issue142)
 
+## Default processing and verified resume
+
+Ordinary fresh processing does not compute processing-receipt SHA256 or add
+full-file digest reads, and does not write processing receipts. Existing gain
+cache content keys are unchanged.
+Use `--write_resume_receipts` on an initial own-engine run when later verified
+resume is required. `--only_do_unfinished` implies this mode, including when
+starting in a fresh directory. Both requested modes read complete original source
+files for exact CPU SHA256 identity; there is no GPU SHA256 stage. The GPU
+nvCOMP Adler32 check protects decompressed-strip integrity and remains separate.
+
+Completion invalidation, checked writes, writer drain and gain source/destination
+alias protection apply in every mode. Fresh ordinary reprocessing removes any
+old receipt from its newly written model. It does not silently certify content
+identity or permit strict resume to skip a complete legacy result.
+
 ## Compatibility change
 
 `--only_do_unfinished` now skips an own-engine movie only when its fixed v2
 processing receipt matches the requested processing and its requested numerical
 products remain complete. A complete legacy movie without a receipt is refused
-with its name, before gain preparation or output mutation. Process it afresh
-without the resume flag to migrate; a new output directory preserves the old
-results. Same-config incomplete movies, including incomplete legacy movies, are
+with its name, before gain preparation or output mutation. Process it in a fresh output directory with `--write_resume_receipts` (or
+`--only_do_unfinished`) to establish receipts while preserving old results. Same-config incomplete movies, including incomplete legacy movies, are
 processed again. A malformed, unsupported or incompatible present receipt is
 refused rather than silently trusted.
 
@@ -36,11 +51,11 @@ output choices are not numerical compatibility keys. Matching no-op/non-prefix
 resume, equivalent effective optics, and copies from another shard retain their
 per-movie numerical products and model bytes. Joint outputs may be regenerated.
 
-Every fresh pending attempt captures source identities before gain preparation,
-then invalidates the old per-movie STAR before any numerical product overwrite.
+In receipt mode, each pending attempt captures source identities before gain
+preparation. Every processing mode invalidates the old per-movie STAR before any numerical product overwrite.
 The completion STAR is written to a temporary file, checked after close and
 renamed only after the requested MRC writes close successfully. An earlier failed
-product cancels it. Source snapshots are checked again before publication.
+product cancels it. In receipt mode source snapshots are checked again before publication.
 Rotated/flipped gain preparation refuses an alias of its original source inode.
 The marker records the processing identity and requires structurally complete
 numerical MRC products and model. It does **not** cryptographically certify later
@@ -147,7 +162,7 @@ admission path. These failures and the original source `caf8cd0` are retained.
 
 Source `ba60ce7` adds fixed `defect_parser` and `gain_parser` fields and explicitly
 advances the payload/schema to **v2**. Complete experimental v1 receipts now refuse
-named; use a fresh non-resume run to migrate. No v1 receipt has been merged into
+named; use an opted-in run in a fresh directory to migrate. No v1 receipt has been merged into
 production. Parser classes follow actual dispatch: rectangle TXT versus image
 maps; generic gain read/preparation versus direct EER gain interpretation. EER's
 `.gain` multiplicative/Y-flip behavior and direct first-image MRC dispatch are
@@ -288,3 +303,32 @@ required `ProcessingFileDigestPortable` exercise the same independent SHA256
 vectors, streaming boundaries and Linux OS faults. An accelerated hash does not
 by itself establish application speedup; matched application overhead remains a
 separate acceptance measurement.
+
+
+## Opt-in contract —6 October2026
+
+The earlier native evidence below/above was executed at `006607e1` with always-on
+fresh receipts. It remains retained predecessor evidence, and does not certify
+the new opt-in guards. New guards leave ordinary fresh processing free of extra
+full-file digest reads; strict requested mode retains exact content identity.
+The separate-read cost is therefore restricted to explicit receipt/resume use.
+No whole-application wall-time benefit is claimed from the source guards.
+
+Future CPU digest fusion must cover every byte of the original source exactly
+once, including metadata, unused frames and padding. Legacy EER already buffers
+its full original file and is a possible small follow-up. Selected/parallel MRC,
+TIFF/nvCOMP and modern EER strip reads do not naturally cover complete original
+bytes; compressed MRC stdout contains decoded rather than compressed bytes.
+This patch does not rewrite readers, buffer complete movies, or weaken identity.
+
+New opt-in delta CPU evidence: **294 strict receipt +85 default-mode checks =379**
+in both normal and Python `-O` mode. Default controls force actual executable,
+gain and movie digest reads to return EIO; ordinary mode never reaches that seam,
+while explicit and implied strict modes reject it. The exact `006607e1` private
+predecessor reaches those unwanted default reads (6 powered checks per mode,
+without the new option). Full Mac required inventory remains41: **39PASS, inherited
+SyntheticRegressionFAIL, Linux-only NativeMovieStagingSKIP**. Existing default
+numerical pixels, complete normalized1024-byte/extended headers and saved model
+blocks match the same-source explicit receipt arm; nonvolatile-label and extended
+byte controls power that comparison. Current-default native/CUDA validation and
+new-head CI remain pending. Compact evidence: `evidence/optin-20261006/`.

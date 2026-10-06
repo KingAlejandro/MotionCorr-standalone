@@ -19,7 +19,7 @@ from test_tiff_read import write_tiff
 
 CHECKS = 0
 DEFAULTS = {'--use_own': True, '--j': '1', '--patch_x': '1', '--patch_y': '1',
-            '--seed': '1', '--skip_logfile': True}
+            '--seed': '1', '--skip_logfile': True, '--write_resume_receipts': True}
 PRODUCTS = {'--dose_weighting': True, '--save_noDW': True, '--even_odd_split': True,
             '--grouping_for_ps': '2', '--ps_size': '48'}
 
@@ -267,8 +267,11 @@ def eer_metadata(binary, work, case=None, upsampling=1):
         (out / 'a.star').write_text(model)
 
 def main():
+    global CHECKS
     parser = argparse.ArgumentParser()
     parser.add_argument('--binary', type=Path, required=True)
+    parser.add_argument('--digest-shim', type=Path)
+    parser.add_argument('--mutation-shim', type=Path)
     parser.add_argument('--control-case', choices=['binning', 'selection', 'dose', 'sampling', 'gain', 'input', 'stale-marker', 'model-marker', 'defect-parser', 'gain-parser-tiff', 'gain-parser-dm', 'eer-grouping', 'eer-upsampling', 'eer-upsampling-missing', 'eer-half'])
     parser.add_argument('--control-work', type=Path)
     args = parser.parse_args()
@@ -468,7 +471,7 @@ def main():
         # External resume refusal must precede adapter execution and gain writes.
         adapter = work / 'fake-motioncor2'
         adapter.write_text('#!/bin/sh\ntouch ADAPTER_EXECUTED\nexit 0\n'); adapter.chmod(0o755)
-        refused(binary, work, base, {'--use_own': False, '--use_motioncor2': True,
+        refused(binary, work, base, {'--write_resume_receipts': False, '--use_own': False, '--use_motioncor2': True,
                                     '--motioncor2_exe': str(adapter), '--gainref': 'gain.mrc', '--gain_rot': '1'}, 'external MotionCor2')
         require(not (work / 'ADAPTER_EXECUTED').exists(), 'external adapter ran before refusal')
         require(not (base / 'gain.mrc').exists(), 'external refusal prepared gain')
@@ -503,6 +506,13 @@ def main():
         eer_metadata(binary, work)
         eer_metadata(binary, work, 'eer-upsampling-missing')
         eer_metadata(binary, work, upsampling=-1)
+    if args.digest_shim:
+        import test_resume_default_mode as default_controls
+        before_default = default_controls.t.CHECKS
+        with tempfile.TemporaryDirectory(prefix='receipt-default-') as directory:
+            default_controls.run(binary, args.digest_shim.resolve(), Path(directory).resolve(),
+                                 mutation_shim=args.mutation_shim.resolve() if args.mutation_shim else None)
+        CHECKS += default_controls.t.CHECKS - before_default
     print('PASS ResumeProcessingIdentity ' + str(CHECKS) + ' explicit checks')
     return 0
 

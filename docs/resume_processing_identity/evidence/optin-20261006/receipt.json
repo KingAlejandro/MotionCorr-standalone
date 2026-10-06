@@ -1,0 +1,46 @@
+{
+  "predecessor": "006607e1a86c2e898c7846b0ba9ede9dfa2a6442",
+  "required_cpu_tests": 41,
+  "mac_verdict": {
+    "PASS": 39,
+    "inherited_FAIL": [
+      "SyntheticRegression"
+    ],
+    "platform_SKIP": [
+      "NativeMovieStaging"
+    ]
+  },
+  "strict_receipt_checks_per_mode": 294,
+  "default_checks_per_mode": 85,
+  "combined_checks_per_mode": 379,
+  "powered_predecessor_checks_per_mode": 6,
+  "predecessor_new_flag_passed": false,
+  "binary_sha256": "5c4892e9e1fca628ec9c3686eacaf883f0a5f01fe75e7141715acc7ad4b70efc",
+  "predecessor_binary_sha256": "f6340d16f9531823388c66104a01b8fde54e1661f88122f558ddad2dfea5c10a",
+  "source_files": {
+    "CMakeLists.txt": "094f6f8660a5545a5cf93036fb3bb929c6e05c906ec4e2aea2332d595fd794d3",
+    "src/motioncorr_runner.cpp": "6be53e9254d3087f14daa603abc2e8908c0a94fb61673329af08dc08b35229b8",
+    "src/motioncorr_runner.h": "b95dcdf8211e8a7d4be1f831b8832034eea8cbcdfeecadd2b0d3b587e45c0f57",
+    "tests/test_resume_processing_identity.py": "a3b3cc5191dbeb4d0ba073ee374b6dfca190ad90795df65695747f1645211d51",
+    "tests/test_resume_default_mode.py": "19dfbd416b82754f7ba4954d7d37d37e738f7a60b95f8534d78c92379a9f81be",
+    "tests/receipt_digest_read_shim.cpp": "505693fbf8894432f7bbcd374c4631ca6d4130c19c99dcb3b92967e12e68059d",
+    "tests/test_runner_contract.py": "1e5b73c11d9e76fb2c9ea63d5eca3327123355bdd95d5e6ee549d5ebaf984ec2",
+    "tests/test_joint_star_publication.py": "ea27ff3b9c7466bd4c5ae884f51e1dd052bf95455e6666cd41ff55c63a903f0c",
+    "tests/test_damaged_movie.py": "8975c0cf68dec2751dcb045423805d87e5c6b42a1ca6a0553a138328794d23cf",
+    "tests/test_write_faults.py": "0c3d530dd8440bc5e24befae4e139bd799a3b22abaf2d0a3fa698bed33a1c84b",
+    "tests/test_micrograph_model_bounds.py": "498f26a9a0238fe6aa95b93713392734e72b3094383bbe0bccd3a9f1d3d9a28c"
+  },
+  "new_optin_native_delta": "UNRUN",
+  "new_optin_CI": "pending publication",
+  "wall_time_benefit": "UNMEASURED; no claim",
+  "limits": [
+    "Actual CPU digest-read EIO controls establish no default processing-receipt reads; independent gain-cache keys remain unchanged.",
+    "Only clock label text normalized in complete header/extended/pixel comparison; explicit receipt block and its writer version comment excluded from existing-model comparison.",
+    "Earlier 006 native51/51 plus source-change matrix remain predecessor evidence, not new-default native acceptance.",
+    "No all24/EERpixel/tomography composed native endpoint claim."
+  ],
+  "retained_control_failures": [
+    "default-normal-v2/default-normal-v3 comparison rejected receipt writer version comment; comparator narrowed to remove only exact added receipt block, preserving all old model fields.",
+    "focused.log first run external strict refusal hit newly introduced opt-in guard; external resume test now explicitly leaves fresh flag off to test original named refusal."
+  ]
+}

@@ -256,6 +256,7 @@ public:
 
 	// Continue an old run: only estimate CTF if logfile WITH Final Values line does not yet exist, otherwise skip the micrograph
 	bool continue_old;
+	bool receipt_mode = false; // Explicit fresh opt-in; strict resume implies it.
 
 	// Process at most this number of (unprocessed) micrographs
 	long do_at_most;

@@ -229,9 +229,12 @@ if(BUILD_TESTING)
     add_executable(movie_processing_identity tests/test_movie_processing_identity.cpp src/movie_processing_identity.cpp)
     target_include_directories(movie_processing_identity PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME MovieProcessingIdentity COMMAND movie_processing_identity)
+    add_library(receipt_digest_read_shim SHARED tests/receipt_digest_read_shim.cpp)
+    target_link_libraries(receipt_digest_read_shim PRIVATE ${CMAKE_DL_LIBS})
     add_test(NAME ResumeProcessingIdentity
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_processing_identity.py
-            --binary $<TARGET_FILE:motioncorr>)
+            --binary $<TARGET_FILE:motioncorr> --digest-shim $<TARGET_FILE:receipt_digest_read_shim>
+            --mutation-shim $<TARGET_FILE:receipt_source_mutation_shim>)
     set_tests_properties(ResumeProcessingIdentity PROPERTIES TIMEOUT 180)
     add_library(receipt_source_mutation_shim SHARED tests/receipt_source_mutation_shim.cpp)
     target_link_libraries(receipt_source_mutation_shim PRIVATE ${CMAKE_DL_LIBS})

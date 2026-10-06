@@ -476,7 +476,8 @@ void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
               << " fault=" << selected << "; no extra plans, resident input preserved, owner checked\n";
 }
 void borrowedCases() {
-    for (bool poly : {false,true}) for (const auto &geometry : {std::pair<int,int>{32,24},{35,29}})
+    const std::pair<int,int> geometries[] = {{32,24},{35,29}};
+    for (bool poly : {false,true}) for (const auto &geometry : geometries)
         borrowedCase(geometry.first,geometry.second,poly);
     borrowedCase(32,24,false,LAUNCH);
     // Keep the sticky returned-code fatal case last in this separate process.

@@ -818,7 +818,7 @@ void MotioncorrRunner::run()
 					protected_paths.insert(std::filesystem::path((root + suffix).c_str()).lexically_normal());
 				protected_paths.insert(std::filesystem::path((fn_out + movie.withoutExtension() + "_shifts.eps").c_str()).lexically_normal());
 			}
-			for (const char *report : {"gain.mrc", "corrected_tilt_series.star", "logfile.pdf", "header.pdf", "batch.pdf", "all_batches.pdf", "batch.pdf.lst"})
+			for (const char *report : {"gain.mrc", "corrected_tilt_series.star", "logfile.pdf", "header.pdf", "batch.pdf", "all_batches.pdf", "batch.pdf.lst", "header.pdf.lst", "logfile.pdf.lst"})
 				protected_paths.insert(std::filesystem::path((fn_out + report).c_str()).lexically_normal());
 			FOR_ALL_OBJECTS_IN_METADATA_TABLE(tomogramSet.globalTable) {
 				FileName reference;
@@ -838,18 +838,47 @@ void MotioncorrRunner::run()
 		const std::filesystem::path stage(created);
 		struct StageCleanup {
 			std::filesystem::path path;
-			~StageCleanup() { std::error_code error; std::filesystem::remove_all(path, error); }
+			bool keep = false;
+			~StageCleanup() { if (!keep) { std::error_code error; std::filesystem::remove_all(path, error); } }
 		} cleanup{stage};
 		generateLogFilePDFAndWriteStarFiles(FileName(stage.string() + "/"));
 		const std::string joint = is_tomo ? "corrected_tilt_series.star" : "corrected_micrographs.star";
+		struct Publication {
+			std::filesystem::path file, target, backup;
+			bool old_moved = false, installed = false;
+		};
+		std::vector<Publication> publication;
 		try {
 			std::vector<std::filesystem::path> files;
 			for (const auto &file : std::filesystem::recursive_directory_iterator(stage))
 				if (file.is_regular_file()) files.push_back(file.path());
+			// Create backups only after inventory; mkdtemp cannot alias a generated series directory.
+			std::string backup_pattern = stage.string() + "/.rollback-XXXXXX";
+			std::vector<char> backup_name(backup_pattern.begin(), backup_pattern.end()); backup_name.push_back('\0');
+			char *backup_created = mkdtemp(backup_name.data());
+			if (!backup_created) REPORT_ERROR("Cannot create aggregate rollback directory in " + stage.string());
+			const std::filesystem::path backups(backup_created);
+			publication.reserve(files.size());
+			for (const auto &file : files) {
+				const auto relative = file.lexically_relative(stage);
+				publication.push_back({file, std::filesystem::path(fn_out.c_str()) / relative, backups / relative});
+			}
 			auto publish = [&](const std::filesystem::path &file) {
-				const auto target = std::filesystem::path(fn_out.c_str()) / file.lexically_relative(stage);
-				std::filesystem::create_directories(target.parent_path());
-				std::filesystem::rename(file, target);
+				auto item = std::find_if(publication.begin(), publication.end(),
+					[&](const Publication &entry) { return entry.file == file; });
+				if (item == publication.end()) REPORT_ERROR("Aggregate-only unregistered publication: " + file.string());
+				std::filesystem::create_directories(item->target.parent_path());
+				const auto status = std::filesystem::symlink_status(item->target);
+				if (status.type() != std::filesystem::file_type::not_found) {
+					if (!std::filesystem::is_regular_file(status))
+						throw std::filesystem::filesystem_error("refusing non-regular aggregate target", item->target,
+							std::make_error_code(std::errc::invalid_argument));
+					std::filesystem::create_directories(item->backup.parent_path());
+					std::filesystem::rename(item->target, item->backup);
+					item->old_moved = true;
+				}
+				std::filesystem::rename(item->file, item->target);
+				item->installed = true;
 			};
 			std::set<std::filesystem::path> series_files;
 			if (is_tomo) {
@@ -875,9 +904,31 @@ void MotioncorrRunner::run()
 			}
 			for (const auto &file : files)
 				if (file != stage / joint && !series_files.count(file)) publish(file);
-			std::filesystem::rename(stage / joint, std::filesystem::path(fn_out.c_str()) / joint);
-		} catch (const std::filesystem::filesystem_error &error) {
-			REPORT_ERROR("Aggregate-only publication failed: " + std::string(error.what()));
+			publish(stage / joint);
+		} catch (...) {
+			cleanup.keep = true; // Any secondary rollback/diagnostic exception must retain recovery backups.
+			const auto first_error = std::current_exception();
+			std::string rollback_error;
+			for (auto item = publication.rbegin(); item != publication.rend(); ++item) {
+				if (item->installed) {
+					std::error_code error; std::filesystem::remove(item->target, error);
+					if (error && rollback_error.empty()) rollback_error = item->target.string() + ": " + error.message();
+				}
+				if (item->old_moved) {
+					std::error_code error; std::filesystem::rename(item->backup, item->target, error);
+					if (error && rollback_error.empty()) rollback_error = item->target.string() + ": " + error.message();
+				}
+			}
+			if (rollback_error.empty()) cleanup.keep = false;
+			else {
+				std::cerr << "Aggregate-only rollback failed: " << rollback_error
+					<< "; retained recovery staging " << stage << std::endl;
+			}
+			try { std::rethrow_exception(first_error); }
+			catch (const std::filesystem::filesystem_error &error) {
+				REPORT_ERROR("Aggregate-only publication failed: " + std::string(error.what()) +
+					(rollback_error.empty() ? "" : "; rollback failed, retained staging " + stage.string()));
+			}
 		}
 		if (verb > 0) std::cout << "Aggregate-only dataset ready in " << fn_out << std::endl;
 		return;

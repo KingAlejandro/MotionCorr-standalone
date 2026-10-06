@@ -134,7 +134,7 @@ def geometry_controls(binary,tmp,baseline):
     require(not failures,'geometry/sampling controls: '+str(failures))
 
 
-def tomography_controls(binary,tmp):
+def tomography_controls(binary,tmp,publication_only=None):
     import sys
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/multi_gpu'))
     import star_io
@@ -215,6 +215,72 @@ def tomography_controls(binary,tmp):
                     'tomographic failure rewrote movie products or leaked staging')
             print('PASS tomography '+mode+' withholds joint success without movie rewriting')
             (tmp/'in.star').write_text(tomo_input)
+        if publication_only not in ('lists','header','logfile'):
+            # A failed rerun must leave an already valid global/series dataset intact.
+            # Force a late report-list publication error after series replacements.
+            target=tmp/'tomo-existing-rollback';r=run(binary,tmp,target)
+            require(r.returncode==0,'existing tomography dataset fixture failed: '+r.stderr[-2000:])
+            existing=star_io.parse(target/'corrected_tilt_series.star')
+            for row in existing.block_with_label('rlnTomoTiltSeriesStarFile').rows:
+                require(Path(row.values[1]).is_file(),'old dataset sidecar is not readable')
+            series=tmp/'tilt_series/one.star';old_series=series.read_text()
+            second=tmp/'tilt_series/two.star';old_second=second.read_text()
+            # Known input-only tilt metadata survives conversion and changes the new sidecar.
+            lines=old_series.splitlines();lines.insert(lines.index('_rlnMicrographPreExposure #2')+1,
+                                                    '_rlnTomoNominalStageTiltAngle #3')
+            changed='\n'.join(line+' 37' if line.startswith('Movies/') else line for line in lines)+'\n'
+            series.write_text(changed)
+            lines=old_second.splitlines();lines.insert(lines.index('_rlnMicrographPreExposure #2')+1,
+                                                    '_rlnTomoNominalStageTiltAngle #3')
+            second.write_text('\n'.join(line+' 37' if line.startswith('Movies/') else line for line in lines)+'\n')
+            try:
+                healthy=tmp/'tomo-changed-positive';r=run(binary,tmp,healthy)
+                require(r.returncode==0,'changed tomography metadata fixture failed: '+r.stderr[-2000:])
+                r=run(binary,tmp,healthy,['--aggregate_only'])
+                require(r.returncode==0 and b'37.000000' in (healthy/'tilt_series/one.star').read_bytes(),
+                        'changed metadata positive is not powered: '+r.stderr[-2000:])
+                blocker=target/'header.pdf.lst'
+                for fault in ('directory','dangling-symlink'):
+                    if blocker.is_dir() and not blocker.is_symlink():shutil.rmtree(blocker)
+                    else:blocker.unlink(missing_ok=True)
+                    if fault=='directory':
+                        blocker.mkdir();(blocker/'owned-sentinel').write_text('keep old valid dataset')
+                    else:blocker.symlink_to(tmp/'missing-report-target')
+                    before_all={str(path.relative_to(target)):(hashlib.sha256(path.read_bytes()).hexdigest(),path.stat().st_mtime_ns)
+                                for path in target.rglob('*') if path.is_file()}
+                    r=run(binary,tmp,target,['--aggregate_only'])
+                    after_all={str(path.relative_to(target)):(hashlib.sha256(path.read_bytes()).hexdigest(),path.stat().st_mtime_ns)
+                               for path in target.rglob('*') if path.is_file()}
+                    changed=sorted(key for key in set(before_all)|set(after_all) if before_all.get(key)!=after_all.get(key))
+                    require(r.returncode>0 and 'header.pdf.lst' in r.stderr,
+                            'late tomography publication '+fault+' did not fail normally')
+                    require(after_all==before_all,'failed tomography rerun changed old complete dataset bytes/mtimes: '+str(changed))
+                    require((blocker.is_dir() and (blocker/'owned-sentinel').read_text()=='keep old valid dataset') if fault=='directory'
+                            else blocker.is_symlink() and blocker.readlink()==tmp/'missing-report-target',
+                            'late publication obstruction was replaced')
+                    require(not list(target.glob('.aggregate-*')),'successful rollback leaked private staging')
+                    print('PASS existing valid tomography rerun restores all old global/series/report/movie bytes/mtimes after changed-metadata late '+fault+' failure')
+            finally:
+                    series.write_text(old_series);second.write_text(old_second)
+        if publication_only!='rollback':
+            for name,flags in [('header.pdf.lst',[]),('logfile.pdf.lst',['--skip_logfile'])]:
+                if publication_only in ('header','logfile') and name!=publication_only+'.pdf.lst':continue
+                target=tmp/('tomo-list-collision-'+name)
+                r=run(binary,tmp,target)
+                require(r.returncode==0,'report-list collision fixture failed: '+r.stderr[-2000:])
+                shutil.copyfile(tmp/'tilt_series/one.star',tmp/name)
+                (tmp/'in.star').write_text(tomo_input.replace('tilt_series/one.star',name))
+                before_all={str(path.relative_to(target)):(hashlib.sha256(path.read_bytes()).hexdigest(),path.stat().st_mtime_ns)
+                            for path in target.rglob('*') if path.is_file()}
+                r=run(binary,tmp,target,['--aggregate_only',*flags])
+                after_all={str(path.relative_to(target)):(hashlib.sha256(path.read_bytes()).hexdigest(),path.stat().st_mtime_ns)
+                           for path in target.rglob('*') if path.is_file()}
+                require(r.returncode>0 and name in r.stderr and 'collides' in r.stderr,
+                        'generated report-list collision was not refused before staging: '+name+' '+r.stderr[-2000:])
+                require(after_all==before_all and not list(target.glob('.aggregate-*')),
+                        'report-list collision changed old dataset or reached publication')
+                print('PASS tomography '+name+' collision before staging preserves old dataset'+(' with skip_logfile' if flags else ''))
+                (tmp/'in.star').write_text(tomo_input)
         # Flipping a real gain prepares the shared output/gain.mrc referenced by
         # every movie model. A series input with that name must not replace it.
         from test_gain_cache import write_mrc
@@ -250,7 +316,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--aggregate-arg',default='--aggregate_only',choices=['--aggregate_only','--only_do_unfinished'])
-    ap.add_argument('--only',choices=['literal','effective-optics','geometry','tomography'])
+    ap.add_argument('--only',choices=['literal','effective-optics','geometry','tomography','tomography-rollback','tomography-list-collisions','tomography-header-collision','tomography-logfile-collision'])
     ap.add_argument('--fake-gs',action='store_true',help='explicit CPU control only; does not validate real PDF rendering')
     a = ap.parse_args()
     binary = a.binary.resolve()
@@ -274,7 +340,9 @@ def main() -> int:
         baseline = tmp/'baseline'
         control = run(binary,tmp,baseline)
         require(control.returncode == 0, 'healthy CPU control failed: '+control.stderr[-2000:])
-        if a.only=='tomography':tomography_controls(binary,tmp);return 0
+        if a.only and a.only.startswith('tomography'):
+            selection={'tomography':None,'tomography-rollback':'rollback','tomography-list-collisions':'lists','tomography-header-collision':'header','tomography-logfile-collision':'logfile'}[a.only]
+            tomography_controls(binary,tmp,selection);return 0
         if a.only=='literal':literal_controls(binary,tmp);return 0
         if a.only=='effective-optics':effective_optics_controls(binary,tmp);return 0
         if a.only=='geometry':geometry_controls(binary,tmp,baseline);return 0

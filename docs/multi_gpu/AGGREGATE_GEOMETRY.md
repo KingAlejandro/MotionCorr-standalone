@@ -51,9 +51,11 @@ movie payload/header/STAR/EPS bytes and mtimes, repeated aggregation, and normal
 refusal/no joint success for partial movies, blocked final sidecar destinations
 and a per-series reference colliding with the joint filename. Explicit fake
 Ghostscript controls cover reference/publication logic only; real rendering and
-CUDA execution remain separate native gates. Publication is joint-last, not a
-rollback transaction for already published auxiliary/per-series files, and no
-crash-durability or full processing-identity guarantee is added.
+CUDA execution remain separate native gates. Publication is joint-last. Existing targets are moved to a unique private backup
+directory and restored if any later publication fails; new targets are removed.
+Rollback failures are reported while surviving recovery backups are retained.
+There is no atomic visibility to concurrent readers, crash-durability or full
+processing-identity guarantee.
 
 Final per-series STAR destinations are also admitted before private staging:
 they cannot alias a known per-movie MRC/model/log/plot destination or an aggregate
@@ -61,10 +63,16 @@ report. The actual `Movies/a.star` collision control fails the previous repaired
 binary (exit0 and replaced movie metadata), then requires named refusal, no new
 joint/report, and identical movie bytes/mtimes from the corrected binary.
 A `logfile.pdf` reference additionally proves report-target admission. Existing
-canonical joint/report files from an earlier invocation are retained on failure;
-no rollback or stale-marker invalidation guarantee is added.
+canonical joint/report and per-series files from an earlier invocation are restored
+on checked publication failure, retaining their bytes and mtimes. A failed rollback
+is an explicit failure with recovery staging retained, never a success verdict.
 
 The shared prepared `gain.mrc` is also protected. The actual gain-flip fixture
 verifies every movie model refers to that prepared gain; a per-series `gain.mrc`
 input makes the predecessor return0 and replace it. Corrected refusal must retain
 its bytes/mtime and all movie bytes/mtimes, with no newly published joint/report.
+
+Both `header.pdf.lst` and `logfile.pdf.lst` (including `--skip_logfile`) are
+protected before staging. Actual controls start from valid old tomography metadata,
+change input tilt metadata and force a late report-list target failure, requiring
+all old global/series/report/movie hashes and mtimes to remain unchanged.

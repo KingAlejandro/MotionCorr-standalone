@@ -271,7 +271,7 @@ raise SystemExit(mod.main(sys.argv[1:]))
                     os.kill(identity['pid'],signal.SIGKILL)
 
 
-def fast_reparent_outcome(helper):
+def fast_reparent_outcome(helper, fallback=False):
     """Double fork + setsid between observations: no parent edge is sampled."""
     if sys.platform != 'linux':
         owner = ProcessOwnership()
@@ -318,6 +318,7 @@ class SlowObserver(original):
     def __init__(self,*a,**kw):
         super().__init__(*a,**kw)
         self.interval=30 # deliberately no observation of either intermediate edge
+"""+("        self.child_inventory_mode='verified-proc-ppid'\n" if fallback else '')+"""
 mod.ProcessOwnership=SlowObserver
 mod._TERMINATE_GRACE_SECONDS=.1
 mod._KILL_REAP_SECONDS=2
@@ -335,7 +336,7 @@ raise SystemExit(mod.main(sys.argv[1:]))
             require(status['workers'][0]['returncode']==0,'original return replaced')
             require(cleanup['ownership_mode']=='linux-child-subreaper' and cleanup['complete'] and cleanup['unexpected_descendants'],'adoption/drain not certified')
             require(any(r['pid']==identity['pid'] and same_birth(r['start'],identity['start']) for r in cleanup['observed_live_before_cleanup']),'actual orphan birth not retained')
-            print('PASS actual unsampled double-fork setsid TERM-ignoring child adopted/drained; original0 retained as FAIL')
+            print('PASS actual unsampled double-fork setsid TERM-ignoring child adopted/drained; original0 retained as FAIL; fallback='+str(fallback))
         finally:
             if identity is None and receipt.exists():identity=json.loads(receipt.read_text())
             if identity:
@@ -455,6 +456,43 @@ def subreaper_boundaries():
     finally:
         proc.kill();proc.wait(timeout=5)
     print('PASS actual subreaper readback/restoration, missing-birth refusal and pre-existing live-child preservation')
+    original_text=Path.read_text
+    def no_children_file(path,*args,**kwargs):
+        if path.name=='children' and 'task' in path.parts:
+            raise FileNotFoundError('actual live task has no kernel child inventory')
+        return original_text(path,*args,**kwargs)
+    owner=ProcessOwnership()
+    with patch.object(Path,'read_text',no_children_file):owner.activate(native_required=True)
+    require(owner.child_inventory_mode=='verified-proc-ppid' and state()==1,'absent task/children did not establish fallback adoption')
+    proc=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'],start_new_session=True)
+    identity=owner.table.read(proc.pid)
+    try:
+        owner.refresh()
+        require(owner.identities.get(proc.pid)==identity['start'],'fallback lost actual direct child PID/birth')
+        def denied_stat(path,*args,**kwargs):
+            if path==Path('/proc')/str(proc.pid)/'stat':raise PermissionError('powered fallback identity read denial')
+            return original_text(path,*args,**kwargs)
+        with patch.object(Path,'read_text',denied_stat):
+            refused=False
+            try:owner.refresh()
+            except PermissionError:refused=True
+        require(refused,'fallback silently skipped unreadable identity')
+    finally:
+        current=owner.table.read(proc.pid)
+        if current and current['start']==identity['start']:os.kill(proc.pid,signal.SIGKILL)
+        proc.wait(timeout=5);owner.restore()
+    require(state()==before,'fallback did not restore prior subreaper state')
+    proc=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'],start_new_session=True)
+    identity=ProcessTable().read(proc.pid)
+    try:
+        owner=ProcessOwnership();refused=False
+        with patch.object(Path,'read_text',no_children_file):
+            try:owner.activate(native_required=True)
+            except RuntimeError as exc:refused='pre-existing' in str(exc)
+        current=ProcessTable().read(proc.pid)
+        require(refused and current and current['start']==identity['start'] and current['state']!='Z' and state()==before,'fallback disturbed or adopted pre-existing live child')
+    finally:proc.kill();proc.wait(timeout=5)
+    print('PASS actual absent-live task/children fallback adopts PID/birth, refuses unreadable identity and preserves pre-existing child')
     class Prctl:
         def __init__(self, failure):self.failure=failure;self.value=before;self.gets=0
         def __call__(self, op, arg, *unused):
@@ -486,7 +524,7 @@ def main():
     if a.only not in ('helper','refusal','fast','aggregate-fast'):cli_outcomes(a.helper.resolve())
     if a.only not in ('helper','fast','aggregate-fast'):refused_cleanup_outcome(a.helper.resolve())
     if a.only in (None,'fast'):
-        fast_reparent_outcome(a.helper.resolve());subreaper_boundaries()
+        fast_reparent_outcome(a.helper.resolve());fast_reparent_outcome(a.helper.resolve(),fallback=True);subreaper_boundaries()
     if a.only in (None,'fast','aggregate-fast'):
         fast_aggregate_outcome(a.helper.resolve())
     return 0

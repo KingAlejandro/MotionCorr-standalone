@@ -116,6 +116,7 @@ class ProcessOwnership(threading.Thread):
         self.parent_birth = None
         self.roots = {}
         self.mode = 'observed-descendants-only'
+        self.child_inventory_mode = 'task-children'
 
     @staticmethod
     def native_supported():
@@ -126,6 +127,8 @@ class ProcessOwnership(threading.Thread):
         parent = self.table.read(self.parent_pid)
         if parent is None or (self.parent_birth is not None and parent['start'] != self.parent_birth):
             raise RuntimeError('Launcher PID/birth identity unavailable')
+        if self.child_inventory_mode == 'verified-proc-ppid':
+            return self._proc_child_pids()
         tasks = list((Path('/proc') / str(self.parent_pid) / 'task').iterdir())
         if not tasks:
             raise RuntimeError('Launcher thread child inventory unavailable')
@@ -135,7 +138,26 @@ class ProcessOwnership(threading.Thread):
                 children.update(map(int, (task / 'children').read_text().split()))
             except (FileNotFoundError, ProcessLookupError):
                 if self.table.read(int(task.name)) is not None:
-                    raise RuntimeError('Live launcher thread child inventory unavailable')
+                    # CONFIG_CHECKPOINT_RESTORE controls this pseudo-file; its
+                    # permanent absence is supported through a complete readable
+                    # PID/birth/PPID inventory, never a silently empty child list.
+                    self.child_inventory_mode = 'verified-proc-ppid'
+                    return self._proc_child_pids()
+        return children
+
+    def _proc_child_pids(self):
+        """Fallback for kernels without task/children; unreadable rows refuse."""
+        children = set()
+        # Unlike the ordinary observer's unrelated-process filtering, the
+        # fallback must read every enumerated identity to decide its PPID. Only
+        # proved disappearance may be omitted; permission/invalid data refuses.
+        for pid in self.table.pids():
+            record = self.table.read(pid)
+            if record is not None and record['ppid'] == self.parent_pid:
+                children.add(pid)
+        parent = self.table.read(self.parent_pid)
+        if parent is None or parent['start'] != self.parent_birth:
+            raise RuntimeError('Launcher PID/birth changed during fallback child inventory')
         return children
 
     def activate(self, native_required=False):

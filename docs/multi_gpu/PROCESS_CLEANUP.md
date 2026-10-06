@@ -89,3 +89,12 @@ This establishes the bounded quiescent cleanup contract used by these tools; it
 is not a security containment guarantee against arbitrary concurrent forking.
 A failed activation readback still retains restoration responsibility, and the
 powered control verifies the previous state is restored without launching helpers.
+
+Linux kernels without `CONFIG_CHECKPOINT_RESTORE` omit `task/*/children`.
+If a live launcher thread has no such file, the launcher falls back to an
+actual `/proc` PID/birth/PPID inventory across all threads. Every enumerated
+identity must be readable or proved disappeared; permission/invalid records
+refuse rather than silently hiding a child. Launcher birth is checked again
+at completion. This fallback preserves the pre-existing-live-child refusal
+and checked subreaper adoption/restoration; it does not extend the lifecycle
+contract into a security containment claim.

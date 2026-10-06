@@ -1,0 +1,43 @@
+{
+  "mrc": "pair_cuda/FoilHole_4681533_062633_EER/stage/movies/FoilHole_4681533_062633_EER.mrc",
+  "movie": "FoilHole_4681533_062633_EER",
+  "header": {
+    "nx": 8192,
+    "ny": 8192,
+    "nz": 1,
+    "mode": 2,
+    "pixel_size_A_x": 0.48500001430511475,
+    "pixel_size_A_y": 0.48500001430511475
+  },
+  "geometry_expected": {
+    "nx": 8192,
+    "ny": 8192,
+    "pixel_size_A": 0.485
+  },
+  "geometry_ok": true,
+  "image_stats": {
+    "mean": 1.2415217161178589,
+    "std": 0.35146424174308777,
+    "min": 0.03883928805589676,
+    "max": 5.099486351013184,
+    "n_nonfinite": 0
+  },
+  "n_deposited_particles": 0,
+  "n_control_positions": 182,
+  "y_conventions": {
+    "y_as_is": {
+      "n_scored": 0,
+      "mean_abs_contrast": null,
+      "auc_vs_random": null
+    },
+    "y_flipped": {
+      "n_scored": 0,
+      "mean_abs_contrast": null,
+      "auc_vs_random": null
+    }
+  },
+  "control_mean_abs_contrast": 0.0058923108237130305,
+  "preferred_y_convention": "y_as_is",
+  "best_auc": null,
+  "interpretation": "AUC near 0.5 means deposited coordinates are indistinguishable from random positions: either the gain orientation is wrong, the coordinate frame does not match, or the render is bad. AUC well above 0.5 means the pipeline reproduces the depositors' micrograph frame. This is a plumbing check on development data and is not evidence of signal equivalence between backends."
+}

@@ -108,6 +108,11 @@ if(TIMING)
 endif()
 
 option(CUDA "Build with CUDA acceleration" OFF)
+option(MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+    "Build the isolated CUDA global-frequency dependency/replay experiment" OFF)
+if(MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT AND NOT CUDA)
+    message(FATAL_ERROR "MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT requires CUDA=ON")
+endif()
 if(CUDA)
     # Establish the project default before enable_language(CUDA), which has
     # cached nvcc's own default architecture since CMake 3.18 and so would leave
@@ -129,6 +134,9 @@ if(CUDA)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
     find_package(CUDAToolkit REQUIRED)
     target_compile_definitions(motioncorr_core PUBLIC _CUDA_ENABLED)
+    if(MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT)
+        target_compile_definitions(motioncorr_core PUBLIC MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT)
+    endif()
     target_compile_options(motioncorr_core PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
     target_sources(motioncorr_core PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu"
@@ -159,6 +167,19 @@ target_link_libraries(motioncorr PRIVATE motioncorr_core)
 install(TARGETS motioncorr RUNTIME DESTINATION bin)
 
 include(CTest)
+if(MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT)
+    add_executable(cuda_frequency_support tests/test_cuda_frequency_support.cpp)
+    target_include_directories(cuda_frequency_support PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_executable(cuda_frequency_replay tests/cuda_frequency_replay.cpp)
+    target_link_libraries(cuda_frequency_replay PRIVATE motioncorr_core)
+    if(BUILD_TESTING)
+        add_test(NAME CudaFrequencySupport COMMAND cuda_frequency_support)
+        set_tests_properties(CudaFrequencySupport PROPERTIES LABELS "experiment" TIMEOUT 30)
+        add_test(NAME CudaFrequencyReplay COMMAND cuda_frequency_replay)
+        set_tests_properties(CudaFrequencyReplay PROPERTIES
+            LABELS "cuda;hardware;experiment" TIMEOUT 180)
+    endif()
+endif()
 if(BUILD_TESTING)
     add_executable(runner_numerics tests/test_runner_numerics.cpp)
     target_link_libraries(runner_numerics PRIVATE motioncorr_core)

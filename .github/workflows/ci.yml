@@ -204,6 +204,16 @@ jobs:
             -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON
       - name: Compile CUDA and linked controls
         run: cmake --build build-cuda --parallel 4
+      - name: Compile opt-in global-frequency dependency experiment
+        # The ordinary build above keeps the experiment disabled. This second
+        # build compiles its guarded API and harness, without claiming execution
+        # or numerical equivalence on this GPU-free runner.
+        run: |
+          cmake -S . -B build-cuda-frequency -DCMAKE_BUILD_TYPE=Release \
+            -DCUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80 -DBUILD_TESTING=ON \
+            -DMOTIONCORR_CUDA_FREQUENCY_EXPERIMENT=ON
+          cmake --build build-cuda-frequency --target cuda_frequency_replay cuda_frequency_support --parallel 4
+          ctest --test-dir build-cuda-frequency -R '^CudaFrequencySupport$' --output-on-failure
       - name: Configure with no explicit architecture
         # Regression guard for issue #18. Every other CUDA configure in this
         # repo passes -DCMAKE_CUDA_ARCHITECTURES=80, so none of them could

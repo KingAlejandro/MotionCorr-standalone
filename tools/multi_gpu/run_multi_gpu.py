@@ -519,6 +519,10 @@ def main(argv: list[str] | None = None) -> int:
               "--no-witness, or drop --devices to run on CPU.", file=sys.stderr)
         return 2
 
+    if a.devices and not ProcessOwnership.native_supported():
+        print("FAIL: native multi-GPU worker cleanup requires Linux child-subreaper support", file=sys.stderr)
+        return 2
+
     devices: list[dict[str, str]] = []
     if a.devices:
         try:
@@ -673,6 +677,7 @@ def main(argv: list[str] | None = None) -> int:
     ru0 = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.time()
     try:
+        ownership.activate(native_required=bool(devices))
         previous_handlers = _install_signal_handlers()
         with _defer_launcher_signals():
             ownership.start()
@@ -805,6 +810,12 @@ def main(argv: list[str] | None = None) -> int:
             if sampler_started and sampler.is_alive():
                 sampler.errors.append("sampler thread did not stop; samples are "
                                       "incomplete and cannot witness anything")
+        if cleanup_complete:
+            try:
+                ownership.restore()
+            except Exception as exc:
+                cleanup_error = f"{type(exc).__name__}: {exc}"
+                cleanup_complete = False
         if previous_handlers:
             _restore_signal_handlers(previous_handlers)
 
@@ -1012,11 +1023,12 @@ def main(argv: list[str] | None = None) -> int:
     if ownership.errors or ownership.is_alive() or cleanup_error or not cleanup_complete or cleanup_observed:
         verdict_ok = False
     status["process_cleanup"] = {
+        "ownership_mode": ownership.mode,
         "complete": cleanup_complete,
         "observed_live_before_cleanup": cleanup_observed,
         "unexpected_descendants": bool(cleanup_observed) and interrupted_signal is None,
         "error": cleanup_error,
-        "scope": "Checked PID/birth ownership before every TERM/KILL; no recorded live descendants before verdict. Original worker return codes preserved.",
+        "scope": "Linux child-subreaper adopts unsampled surviving worker orphans; other platforms offer observed-only simulated CPU controls, not arbitrary native descendant containment. Checked PID/birth before every TERM/KILL; original worker return codes preserved.",
     }
     status["process_ownership_errors"] = ownership.errors
     status["workers_complete"] = verdict_ok

@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import dataclasses
 import re
+import posixpath
 from pathlib import Path
 
 
@@ -319,11 +320,12 @@ def movie_block(star: StarFile) -> Block:
 
 
 # Per-movie output decorations appended to the output root, from
-# src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _shifts (:994), _noDW (:842),
+# src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _noDW (:842),
 # _DW / _DWS (:867, :862), _PS (:1336), _EVN / _ODD (:2532-2533) and _frames
-# (:1882). Two movies whose roots differ only by one of these can overwrite each
+# (:1882). Shift EPS uses its separate unnormalized path below.
+# Two movies whose roots differ only by one of these can overwrite each
 # other, which is why partition_star.py preflights for it.
-OUTPUT_DECORATIONS = ("", "_shifts", "_noDW", "_DW", "_DWS", "_PS", "_EVN",
+OUTPUT_DECORATIONS = ("", "_noDW", "_DW", "_DWS", "_PS", "_EVN",
                       "_ODD", "_frames")
 
 # Extensions those decorated roots carry.
@@ -402,3 +404,23 @@ def output_root(movie_name: str) -> str:
     dot = movie_name.rfind(".")
     stem = movie_name if dot < 0 else movie_name[:dot]
     return stem.replace(".", "_")
+
+
+def shift_plot_path(movie_name: str) -> str:
+    """Actual plotShifts path: unnormalized withoutExtension plus _shifts.eps.
+
+    The runner concatenates this onto --o, so leading slashes are absorbed.
+    Unlike image names, dots remain; refuse traversal outside that directory.
+    """
+    dot = movie_name.rfind(".")
+    stem = movie_name if dot < 0 else movie_name[:dot]
+    path = posixpath.normpath(stem.lstrip("/") + "_shifts.eps")
+    if path == ".." or path.startswith("../"):
+        raise ValueError(f"shift plot for {movie_name!r} escapes the worker directory")
+    return path
+
+
+def movie_output_path(movie_name: str, suffix: str) -> str:
+    if suffix == "_shifts.eps":
+        return shift_plot_path(movie_name)
+    return worker_relative_root(output_root(movie_name)) + suffix

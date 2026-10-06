@@ -77,9 +77,11 @@ def main(argv=None) -> int:
             ownership.watch(process.pid)
         return process.wait()
     sampler.watch(os.getpid())
-    sampler.start()
-    ownership.start()
     try:
+        ownership.activate(native_required=bool(option('--devices')))
+        status['ownership_mode']=ownership.mode
+        sampler.start()
+        ownership.start()
         begin=time.monotonic()
         rc=child([sys.executable,str(Path(__file__).with_name('run_multi_gpu.py')),
                   '--binary',a.binary,'--star',str(Path(a.star).resolve()),'--out',str(out/'workers'),
@@ -151,13 +153,23 @@ def main(argv=None) -> int:
             except Exception as exc:
                 status['cleanup_error']=f'{type(exc).__name__}: {exc}'
         status['dataset_wall_s']=time.monotonic()-started
-        ownership.stop();ownership.join(timeout=10)
+        ownership.stop()
+        if ownership.ident is not None:ownership.join(timeout=10)
         status['process_ownership_errors']=ownership.errors
-        sampler.stop();sampler.join(timeout=10)
+        sampler.stop()
+        if sampler.ident is not None:sampler.join(timeout=10)
         if sampler.is_alive():sampler.errors.append('Sampler did not stop')
         status['tree_rss']=sampler.report()
+        restoration_failed=False
+        try:
+            ownership.restore()
+        except Exception as exc:
+            restoration_failed=status['verdict']=='PASS'
+            status['cleanup_error']=f'{type(exc).__name__}: {exc}'
+            status['dataset_ready']=False;status['verdict']='FAIL'
         (out/'dataset_status.json').write_text(json.dumps(status,indent=2)+'\n')
         run_multi_gpu._restore_signal_handlers(old)
+        if restoration_failed:return 3
 
 if __name__=='__main__':
     raise SystemExit(main())

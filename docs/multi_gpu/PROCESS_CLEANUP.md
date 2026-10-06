@@ -53,3 +53,30 @@ not reported as a measured worker tail. The refusal control interrupts the
 actual launcher with an injected observation failure and independently verifies
 that the worker remains alive and unsignalled until fixture-only birth-checked
 cleanup. It fails against the prior source in normal and optimized Python.
+
+## Fast reparenting boundary (6 October 2026)
+
+Actual Linux launcher execution now enables and reads back `PR_SET_CHILD_SUBREAPER`
+before worker/observer/helper launch. A worker orphan that survives between all
+parent-edge observations becomes a launcher child, including double-fork and
+`setsid` cases. Newly adopted children outside the launcher group are recorded by
+PID/birth before signalling. Pre-existing live launcher children refuse activation
+and remain untouched: their future orphans would otherwise be ambiguous. Missing
+live child identity refuses cleanup. The prior subreaper state is restored only
+after checked cleanup/reaping. Import, partition and merge do not alter this
+process-wide setting. This uses the Linux syscall, with no new dependency.
+
+Native device execution on non-Linux is refused. Portable device-free simulated
+CPU controls remain available there with `observed-descendants-only` scope; they
+do not certify arbitrary native descendant containment. RSS still has its own
+sampling limitations. PID/birth verification retains the portable signal syscall
+race; no unrelated process-name/group signalling is added.
+
+The actual launcher adversary double-forks, creates a new session, ignores TERM,
+and exits both intermediate parents while the observer interval is deliberately
+30 seconds. The final child must be adopted/drained before verdict, the original
+worker return must remain 0, and the verdict must be FAIL. Exact predecessor
+5974 leaves the child alive and fails this control; the fixture alone cleans its
+retained birth afterward. Normal/-O checks also cover unreadable adopted birth,
+pre-existing-child refusal, readback/restoration, and healthy no-child behavior.
+These are CPU lifecycle controls; current native hardware acceptance remains UNRUN.

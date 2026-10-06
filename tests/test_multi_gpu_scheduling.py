@@ -782,6 +782,42 @@ def case_real_output_suffixes_attributed(tmp: Path) -> None:
     assert any(p.startswith("misrouted:") for p in rep2["problems"]), rep2["problems"]
 
 
+def case_dotted_shift_plot_root(tmp: Path) -> None:
+    """Actual runner plot names differ from normalized numerical roots."""
+    movies = ["session.1/a.tiff", "/session.2/b.tiff"]
+    star = tmp / "movies.star"
+    build_star(star, [(m, 1, 0.0) for m in movies])
+    shards = tmp / "shards"
+    def require(ok, why):
+        if not ok:
+            raise AssertionError(why)
+    cp = partition(star, 2, shards)
+    require(cp.returncode == 0, cp.stderr)
+    dirs = [tmp / "w0", tmp / "w1"]
+    for movie, wdir in zip(movies, dirs):
+        for suffix in (".mrc", ".star", "_shifts.eps"):
+            rel = star_io.movie_output_path(movie, suffix)
+            target = wdir / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("retained " + suffix)
+    status = fake_status(tmp, [0, 0], manifest=shards / "shard_manifest.json", workers=dirs)
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status,
+               extra=["--products", ".mrc,.star,_shifts.eps"])
+    require(cp.returncode == 0, cp.stderr)
+    for movie in movies:
+        require((tmp / "merged" / star_io.shift_plot_path(movie)).exists(), "actual plot lost")
+    # The same actual plot in the other worker must remain a powered refusal.
+    wrong = dirs[1] / star_io.shift_plot_path(movies[0])
+    wrong.parent.mkdir(parents=True, exist_ok=True)
+    wrong.write_text("misrouted")
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "bad", status)
+    require(cp.returncode == 3 and "misrouted" in cp.stdout + cp.stderr,
+            "actual shift plot misroute was not refused")
+    build_star(star, [("../outside.tiff", 1, 0.0)])
+    cp = partition(star, 1, tmp / "unsafe")
+    require(cp.returncode == 3 and not (tmp / "unsafe").exists(), "escaping plot staged")
+
+
 def case_failed_device_witness_blocks_merge(tmp: Path) -> None:
     """A failed GPU-distinctness witness is not laundered into a merge PASS."""
     star = tmp / "movies.star"
@@ -1800,6 +1836,17 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
 
     gw = load("gpu_witness", TOOLS / "gpu_witness.py")
     rmg = load("run_multi_gpu", TOOLS / "run_multi_gpu.py")
+    if sys.platform != 'linux':
+        # Explicit simulated witness wiring: no GPU process is ever launched.
+        # Real native device execution still refuses on this platform.
+        original_owner = rmg.ProcessOwnership
+        class SimulatedOwnership(original_owner):
+            @staticmethod
+            def native_supported():return True
+            def activate(self, native_required=False):
+                super().activate(native_required=False)
+        rmg.ProcessOwnership = SimulatedOwnership
+        print('SIMULATION: portable fake-device verdict wiring; native containment unavailable')
 
     UUID_A, UUID_B = "GPU-aaaaaaaa-0000-0000-0000-000000000001", \
                      "GPU-bbbbbbbb-0000-0000-0000-000000000002"
@@ -1984,6 +2031,8 @@ while True: time.sleep(0.1)
         "            stat = Path('/proc') / str(pids['child']) / 'stat'\n"
         "            if stat.exists():\n"
         "                (out / 'adopted_child_stat').write_text(stat.read_text())\n"
+        "            else:\n"
+        "                (out / 'adopted_child_reaped').write_text('absent after checked cleanup')\n"
         "        while True:\n"
         "            try: pid, status = os.waitpid(-1, os.WNOHANG)\n"
         "            except ChildProcessError: break\n"
@@ -2017,9 +2066,16 @@ while True: time.sleep(0.1)
             assert status["verdict"] == "FAIL" and status["termination_signal"] == signum, status
             assert status["workers"][0]["returncode"] != 0, status
             if sys.platform == "linux":
-                adopted = (out / "adopted_child_stat").read_text().rsplit(")", 1)[1].split()
-                assert adopted[0] == "Z" and int(adopted[1]) == proc.pid, adopted
-                assert int(adopted[2]) == group and int(adopted[3]) == group, adopted
+                retained_stat = out / "adopted_child_stat"
+                if retained_stat.exists():
+                    adopted = retained_stat.read_text().rsplit(")", 1)[1].split()
+                    if not (adopted[0] == "Z" and int(adopted[1]) == proc.pid and
+                            int(adopted[2]) == group and int(adopted[3]) == group):
+                        raise AssertionError(str(adopted))
+                elif not ((out / "adopted_child_reaped").exists() and
+                          status['process_cleanup']['complete'] and
+                          status['process_cleanup']['ownership_mode'] == 'linux-child-subreaper'):
+                    raise AssertionError('child disappearance lacks checked adoption/reaping')
 
             deadline = time.monotonic() + 3.0
             while time.monotonic() < deadline:
@@ -2281,6 +2337,7 @@ CASES = [
     case_collapsed_spaces_are_a_collision,
     case_decorated_output_collision,
     case_real_output_suffixes_attributed,
+    case_dotted_shift_plot_root,
     case_aggregate_name_shadowing,
     case_star_parser_refusals,
     case_clean_merge,

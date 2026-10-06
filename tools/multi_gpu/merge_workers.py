@@ -278,6 +278,22 @@ def main(argv: list[str] | None = None) -> int:
                   "would be overwritten by an aggregate", file=sys.stderr)
             return 2
 
+    plot_movies = {}
+    for movie in manifest["canonical_movies"]:
+        try:
+            plot = star_io.shift_plot_path(movie)
+        except ValueError as exc:
+            print(f"FAIL: {exc}", file=sys.stderr)
+            return 2
+        prior = plot_movies.get(plot)
+        if (plot.startswith("_workers/") or
+            (prior is not None and star_io.worker_relative_root(star_io.output_root(prior)) !=
+             star_io.worker_relative_root(star_io.output_root(movie)))):
+            print(f"FAIL: ambiguous or reserved shift-plot path {plot}", file=sys.stderr)
+            return 2
+        # Identical numerical roots retain the existing duplicate-coverage report.
+        plot_movies.setdefault(plot, movie)
+
     exits: dict[str, int] = {}
     launcher_verdict = None
     if a.status:
@@ -413,7 +429,11 @@ def main(argv: list[str] | None = None) -> int:
             # writes Movies/run.log, and a movie named Movies/gain.tiff writes
             # Movies/gain.mrc. Both would be stashed as "aggregates" and quietly
             # vanish from the merged tree.
+            plot_movie = plot_movies.get(str(rel))
             attribution = star_io.split_output_path(str(rel), root_owner)
+            if plot_movie is not None:
+                attribution = (star_io.worker_relative_root(
+                    star_io.output_root(plot_movie)), "_shifts", ".eps")
             if attribution is None:
                 if is_aggregate(rel):
                     dst = out / "_workers" / f"w{k}" / rel
@@ -453,7 +473,7 @@ def main(argv: list[str] | None = None) -> int:
     for movie in canonical:
         root = star_io.worker_relative_root(star_io.output_root(movie))
         for suffix in products:
-            rel = Path(root + suffix)
+            rel = Path(star_io.movie_output_path(movie, suffix))
             if rel not in produced:
                 problems.append(f"lost: {movie} has no {suffix} output "
                                 f"(expected {rel}, shard {owner[movie]})")

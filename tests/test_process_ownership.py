@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -270,12 +271,214 @@ raise SystemExit(mod.main(sys.argv[1:]))
                     os.kill(identity['pid'],signal.SIGKILL)
 
 
+def fast_reparent_outcome(helper):
+    """Double fork + setsid between observations: no parent edge is sampled."""
+    if sys.platform != 'linux':
+        owner = ProcessOwnership()
+        refused = False
+        try:
+            owner.activate(native_required=True)
+        except RuntimeError:
+            refused = True
+        require(refused, 'non-Linux native descendant containment was certified')
+        print('UNAVAILABLE Linux double-fork adoption on this host; native execution refusal powered')
+        return
+    with tempfile.TemporaryDirectory(prefix='owned-fast-reparent-') as d:
+        tmp = Path(d); receipt = tmp / 'child.json'; ready = tmp / 'ready'; term = tmp / 'term'
+        star = tmp / 'movies.star'
+        star.write_text('data_movies\n\nloop_\n_rlnMicrographMovieName #1\nMovies/a.tiff\n')
+        worker = tmp / 'worker'
+        worker.write_text('#!'+sys.executable+'\n'+"""import json,os,pathlib,signal,sys,time
+sys.path.insert(0,"""+repr(str(ROOT/'tools/multi_gpu'))+""")
+from process_ownership import ProcessTable
+middle=os.fork()
+if middle==0:
+    child=os.fork()
+    if child:os._exit(0)
+    os.setsid()
+    signal.signal(signal.SIGTERM,lambda s,f:pathlib.Path("""+repr(str(term))+""").write_text('TERM_IGNORED'))
+    pathlib.Path("""+repr(str(receipt))+""").write_text(json.dumps(ProcessTable().read(os.getpid())))
+    pathlib.Path("""+repr(str(ready))+""").write_text('ready')
+    time.sleep(30)
+    os._exit(0)
+os.waitpid(middle,0)
+end=time.monotonic()+5
+while not pathlib.Path("""+repr(str(ready))+""").exists() and time.monotonic()<end:time.sleep(.001)
+if not pathlib.Path("""+repr(str(ready))+""").exists():raise RuntimeError('grandchild never ready')
+os._exit(0)
+""")
+        worker.chmod(0o755)
+        wrapper = tmp / 'wrapper.py'
+        wrapper.write_text("""import importlib.util,sys
+sys.path.insert(0,"""+repr(str(helper.parent))+""")
+spec=importlib.util.spec_from_file_location('launcher',"""+repr(str(helper))+""")
+mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+original=mod.ProcessOwnership
+class SlowObserver(original):
+    def __init__(self,*a,**kw):
+        super().__init__(*a,**kw)
+        self.interval=30 # deliberately no observation of either intermediate edge
+mod.ProcessOwnership=SlowObserver
+mod._TERMINATE_GRACE_SECONDS=.1
+mod._KILL_REAP_SECONDS=2
+raise SystemExit(mod.main(sys.argv[1:]))
+""")
+        identity=None
+        try:
+            cp=subprocess.run([sys.executable,*(['-O'] if not __debug__ else []),str(wrapper),'--star',str(star),'--out',str(tmp/'out'),'--binary',str(worker),'--workers','1','--no-witness'],capture_output=True,text=True,timeout=12)
+            require(receipt.exists(),'fast child never wrote identity: '+cp.stdout+cp.stderr)
+            identity=json.loads(receipt.read_text());current=ProcessTable().read(identity['pid'])
+            require(not(current and same_birth(current['start'],identity['start']) and current['state']!='Z'),'fast double-fork setsid child survived launcher cleanup')
+            require(term.exists(),'fast adopted child received no checked TERM before KILL')
+            require(cp.returncode==3,'unexpected adopted child did not retain FAIL: '+cp.stdout+cp.stderr)
+            status=json.loads((tmp/'out/status.json').read_text());cleanup=status['process_cleanup']
+            require(status['workers'][0]['returncode']==0,'original return replaced')
+            require(cleanup['ownership_mode']=='linux-child-subreaper' and cleanup['complete'] and cleanup['unexpected_descendants'],'adoption/drain not certified')
+            require(any(r['pid']==identity['pid'] and same_birth(r['start'],identity['start']) for r in cleanup['observed_live_before_cleanup']),'actual orphan birth not retained')
+            print('PASS actual unsampled double-fork setsid TERM-ignoring child adopted/drained; original0 retained as FAIL')
+        finally:
+            if identity is None and receipt.exists():identity=json.loads(receipt.read_text())
+            if identity:
+                current=ProcessTable().read(identity['pid'])
+                if current and same_birth(current['start'],identity['start']) and current['state']!='Z':os.kill(identity['pid'],signal.SIGKILL)
+
+
+def fast_aggregate_outcome(helper):
+    """An unsampled orphan from the aggregate owner cannot certify dataset ready."""
+    if sys.platform != 'linux':
+        print('UNAVAILABLE Linux aggregate orphan-adoption control on this host')
+        return
+    with tempfile.TemporaryDirectory(prefix='owned-fast-aggregate-') as d:
+        tmp=Path(d);tools=tmp/'tools';shutil.copytree(helper.parent,tools)
+        receipt=tmp/'child.json';term=tmp/'term';ready=tmp/'ready'
+        star=tmp/'movies.star';star.write_text('data_movies\n\nloop_\n_rlnMicrographMovieName #1\nMovies/a.tiff\n')
+        shutil.copyfile(tools/'merge_workers.py',tools/'merge_real.py')
+        merge_script="""import json,os,pathlib,signal,subprocess,sys,time
+rc=subprocess.call([sys.executable,"""+repr(str(tools/'merge_real.py'))+""",*sys.argv[1:]])
+if rc:raise SystemExit(rc)
+mid=os.fork()
+if mid==0:
+    if os.fork():os._exit(0)
+    os.setsid()
+    sys.path.insert(0,"""+repr(str(ROOT/'tools/multi_gpu'))+""")
+    from process_ownership import ProcessTable
+    signal.signal(signal.SIGTERM,lambda s,f:pathlib.Path("""+repr(str(term))+""").write_text('TERM_IGNORED'))
+    pathlib.Path("""+repr(str(receipt))+""").write_text(json.dumps(ProcessTable().read(os.getpid())))
+    pathlib.Path("""+repr(str(ready))+""").write_text('ready')
+    time.sleep(30);os._exit(0)
+os.waitpid(mid,0)
+end=time.monotonic()+5
+while not pathlib.Path("""+repr(str(ready))+""").exists() and time.monotonic()<end:time.sleep(.001)
+if not pathlib.Path("""+repr(str(ready))+""").exists():raise RuntimeError('aggregate grandchild never ready')
+os._exit(0)
+"""
+        (tools/'merge_workers.py').write_text(merge_script)
+        wrapper=tmp/'invoke.py';wrapper.write_text("""import sys
+sys.path.insert(0,"""+repr(str(tools))+""")
+import run_dataset as dataset
+original=dataset.ProcessOwnership
+class SlowObserver(original):
+    def __init__(self,*a,**kw):
+        super().__init__(*a,**kw);self.interval=30
+dataset.ProcessOwnership=SlowObserver
+dataset.run_multi_gpu._KILL_REAP_SECONDS=2
+def cleanup(procs,ownership):
+    dataset.run_multi_gpu._terminate_process_groups(procs,grace_seconds=.1,ownership=ownership)
+    return 'checked cleanup control'
+dataset.cleanup=cleanup
+raise SystemExit(dataset.main(sys.argv[1:]))
+""")
+        identity=None
+        try:
+            cp=subprocess.run([sys.executable,*(['-O'] if not __debug__ else []),str(wrapper),'--binary',str(ROOT/'tests/fake_worker.py'),'--star',str(star),'--out',str(tmp/'out'),'--launcher-args=--workers 1 --no-witness','--required-products=.mrc,.star'],capture_output=True,text=True,timeout=15)
+            require(receipt.exists(),'aggregate fixture never produced products/orphan: '+cp.stdout+cp.stderr+((tmp/'out/aggregate.log').read_text() if (tmp/'out/aggregate.log').exists() else ''))
+            identity=json.loads(receipt.read_text());current=ProcessTable().read(identity['pid'])
+            require(not(current and same_birth(current['start'],identity['start']) and current['state']!='Z'),'fast aggregate orphan survived coordinator')
+            status=json.loads((tmp/'out/dataset_status.json').read_text())
+            require(cp.returncode==3 and not status['dataset_ready'] and status['verdict']=='FAIL','aggregate orphan certified dataset ready')
+            require(status['workers_complete'] and status['ownership_mode']=='linux-child-subreaper','healthy worker phase or adoption proof lost')
+            require(term.exists(),'aggregate orphan received no checked TERM')
+            print('PASS actual healthy workers/aggregate products plus unsampled setsid orphan drain before dataset FAIL')
+        finally:
+            if identity is None and receipt.exists():identity=json.loads(receipt.read_text())
+            if identity:
+                current=ProcessTable().read(identity['pid'])
+                if current and same_birth(current['start'],identity['start']) and current['state']!='Z':os.kill(identity['pid'],signal.SIGKILL)
+
+
+def subreaper_boundaries():
+    if sys.platform != 'linux':
+        return
+    lib = __import__('ctypes').CDLL(None,use_errno=True)
+    def state():
+        value=__import__('ctypes').c_int()
+        require(lib.prctl(37,__import__('ctypes').byref(value),0,0,0)==0,'subreaper state unreadable')
+        return value.value
+    before=state();owner=ProcessOwnership();owner.activate(native_required=True)
+    require(state()==1 and owner.mode=='linux-child-subreaper','subreaper enable/readback failed')
+    # Unreadable birth of an adopted/direct child must refuse, not drop it.
+    proc=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'],start_new_session=True)
+    identity=owner.table.read(proc.pid)
+    try:
+        original=owner.table.read
+        def unreadable(pid):
+            if pid==proc.pid:raise PermissionError('injected adopted child birth unreadable')
+            return original(pid)
+        with patch.object(owner.table,'read',unreadable):
+            refused=False
+            try:owner.refresh()
+            except PermissionError:refused=True
+        require(refused,'adopted child identity failure silently omitted')
+    finally:
+        current=owner.table.read(proc.pid)
+        if current and current['start']==identity['start']:os.kill(proc.pid,signal.SIGKILL)
+        proc.wait(timeout=5)
+        owner.restore()
+    require(state()==before,'previous subreaper state not restored')
+    proc=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'],start_new_session=True)
+    identity=ProcessTable().read(proc.pid)
+    try:
+        owner=ProcessOwnership();refused=False
+        try:owner.activate(native_required=True)
+        except RuntimeError as exc:refused='pre-existing' in str(exc)
+        current=ProcessTable().read(proc.pid)
+        require(refused and current and current['start']==identity['start'] and current['state']!='Z','pre-existing child was adopted or disturbed')
+        require(state()==before,'pre-existing-child refusal changed subreaper state')
+    finally:
+        proc.kill();proc.wait(timeout=5)
+    print('PASS actual subreaper readback/restoration, missing-birth refusal and pre-existing live-child preservation')
+    class Prctl:
+        def __init__(self, failure):self.failure=failure;self.value=before;self.gets=0
+        def __call__(self, op, arg, *unused):
+            if op == 37:
+                self.gets += 1
+                if self.failure == 'initial-read':return -1
+                arg._obj.value = 0 if self.failure == 'readback' and self.gets == 2 else self.value
+                return 0
+            if self.failure == 'set' and arg == 1:return -1
+            self.value=arg
+            return 0
+    for failure in ('initial-read','set','readback'):
+        fake=type('Lib',(),{})();fake.prctl=Prctl(failure);owner=ProcessOwnership();refused=False
+        with patch('process_ownership.ctypes.CDLL',return_value=fake):
+            try:owner.activate(native_required=True)
+            except (OSError,RuntimeError):refused=True
+            require(refused,'subreaper '+failure+' accepted worker launch')
+            if owner.adoption:owner.restore()
+        require(state()==before,'failed activation changed real process state')
+    print('PASS initial subreaper read/set/readback failures refuse; real process state unchanged')
+
+
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--helper',type=Path,default=ROOT/'tools/multi_gpu/run_multi_gpu.py');ap.add_argument('--only',choices=['helper','cli','refusal']);a=ap.parse_args()
-    if a.only not in ('cli','refusal'):
+    ap=argparse.ArgumentParser();ap.add_argument('--helper',type=Path,default=ROOT/'tools/multi_gpu/run_multi_gpu.py');ap.add_argument('--only',choices=['helper','cli','refusal','fast','aggregate-fast']);a=ap.parse_args()
+    if a.only not in ('cli','refusal','fast','aggregate-fast'):
         procfs_exit_race();mod=load(a.helper.resolve());mocked(mod);live(mod)
-    if a.only not in ('helper','refusal'):cli_outcomes(a.helper.resolve())
-    if a.only!='helper':refused_cleanup_outcome(a.helper.resolve())
+    if a.only not in ('helper','refusal','fast','aggregate-fast'):cli_outcomes(a.helper.resolve())
+    if a.only not in ('helper','fast','aggregate-fast'):refused_cleanup_outcome(a.helper.resolve())
+    if a.only in (None,'fast'):
+        fast_reparent_outcome(a.helper.resolve());subreaper_boundaries()
+    if a.only in (None,'fast','aggregate-fast'):
+        fast_aggregate_outcome(a.helper.resolve())
     return 0
 
 if __name__=='__main__':raise SystemExit(main())

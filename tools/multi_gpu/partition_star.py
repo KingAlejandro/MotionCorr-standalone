@@ -83,6 +83,19 @@ def preflight(star: star_io.StarFile, block: star_io.Block) -> list[str]:
             )
         roots.setdefault(root, name)
 
+    plots = {}
+    for name in names:
+        try:
+            plot = star_io.shift_plot_path(name)
+        except ValueError as exc:
+            problems.append(str(exc))
+            continue
+        if plot.startswith("_workers/"):
+            problems.append(f"reserved-namespace collision: {name!r} writes {plot}")
+        prior = plots.setdefault(plot, name)
+        if prior != name:
+            problems.append(f"shift-plot collision: {prior!r} and {name!r} both write {plot}")
+
     # merge_workers.py stages each worker's fixed-name aggregates under
     # <out>/_workers/w<k>/. A movie whose output root enters that namespace --
     # '_workers/w0/corrected_micrographs' -- is staged to the exact path worker

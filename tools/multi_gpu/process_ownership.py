@@ -3,7 +3,8 @@
 
 Linux uses /proc start ticks; macOS uses libproc birth seconds/microseconds.
 Unavailable identity evidence is an error, never permission to signal by name
-or historical PGID. Children born and exited between polls cannot be recovered.
+or historical PGID. Linux launchers enable child-subreaper adoption before
+starting workers, so surviving fast-reparented children cannot escape polling.
 """
 from __future__ import annotations
 import ctypes
@@ -106,6 +107,79 @@ class ProcessOwnership(threading.Thread):
         self.errors = []
         self._lock = threading.Lock()
         self._finish = threading.Event()
+        self.adoption = False
+        self.previous_subreaper = None
+        self.preexisting_children = {}
+        self.parent_pid = os.getpid()
+        self.parent_group = os.getpgrp()
+        self.mode = 'observed-descendants-only'
+
+    @staticmethod
+    def native_supported():
+        return sys.platform == 'linux'
+
+    def activate(self, native_required=False):
+        """Enable Linux orphan adoption before any worker or helper starts.
+
+        Non-Linux polling remains available for portable simulated CPU controls,
+        but cannot certify arbitrary native-worker descendant containment.
+        """
+        if sys.platform != 'linux':
+            if native_required:
+                raise RuntimeError('Native multi-GPU worker cleanup requires Linux child-subreaper support')
+            return
+        if self.table.proc != Path('/proc'):
+            raise RuntimeError('Child-subreaper ownership requires the actual process table')
+        # Refuse pre-existing live children: their later orphaned descendants
+        # cannot be distinguished from worker descendants. Preserve them untouched.
+        # Failure to read our own child inventory refuses before any worker starts.
+        children = set()
+        for task in (Path('/proc') / str(self.parent_pid) / 'task').iterdir():
+            try:
+                children.update(map(int, (task / 'children').read_text().split()))
+            except (FileNotFoundError, ProcessLookupError):
+                continue  # that launcher thread exited during enumeration
+        for pid in children:
+            record = self.table.read(pid)
+            if record:
+                self.preexisting_children[pid] = record['start']
+                if record['state'] != 'Z':
+                    raise RuntimeError('Cannot isolate worker adoption with pre-existing live launcher children')
+        lib = ctypes.CDLL(None, use_errno=True)
+        lib.prctl.restype = ctypes.c_int
+        old = ctypes.c_int()
+        if lib.prctl(37, ctypes.byref(old), 0, 0, 0) != 0:
+            raise OSError(ctypes.get_errno(), 'Cannot read child-subreaper state')
+        self.previous_subreaper = old.value
+        if lib.prctl(36, 1, 0, 0, 0) != 0:
+            raise OSError(ctypes.get_errno(), 'Cannot establish child-subreaper ownership')
+        self.adoption = True  # restoration is required even if readback fails
+        current = ctypes.c_int()
+        if lib.prctl(37, ctypes.byref(current), 0, 0, 0) != 0 or current.value != 1:
+            raise RuntimeError('Child-subreaper readback failed; refusing worker launch')
+        self.mode = 'linux-child-subreaper'
+
+    def restore(self):
+        """Restore process state only after checked owned cleanup and reaping."""
+        if not self.adoption:
+            return
+        self.refresh()
+        if self.errors or self.known_live():
+            raise RuntimeError('Cannot restore subreaper while owned children or errors remain')
+        for pid, birth in list(self.identities.items()):
+            record = self.table.read(pid)
+            if record and record['start'] == birth and record['ppid'] == self.parent_pid:
+                try:
+                    os.waitpid(pid, os.WNOHANG)
+                except ChildProcessError:
+                    pass  # Popen already reaped an original worker
+        lib = ctypes.CDLL(None, use_errno=True)
+        if lib.prctl(36, self.previous_subreaper, 0, 0, 0) != 0:
+            raise OSError(ctypes.get_errno(), 'Cannot restore child-subreaper state')
+        current = ctypes.c_int()
+        if lib.prctl(37, ctypes.byref(current), 0, 0, 0) != 0 or current.value != self.previous_subreaper:
+            raise RuntimeError('Restored child-subreaper readback failed')
+        self.adoption = False
 
     def watch(self, pid: int):
         record = self.table.read(pid)
@@ -117,8 +191,35 @@ class ProcessOwnership(threading.Thread):
     def refresh(self):
         with self._lock:
             known = dict(self.identities)
+        if self.adoption:
+            # These are OUR direct children, including unsampled orphans. A
+            # missing/invalid live birth cannot be silently dropped as unrelated.
+            for task in (Path('/proc') / str(self.parent_pid) / 'task').iterdir():
+                try:
+                    direct = map(int, (task / 'children').read_text().split())
+                    for pid in direct:
+                        record = self.table.read(pid)
+                        if record:
+                            known.setdefault(pid, None)
+                except (FileNotFoundError, ProcessLookupError):
+                    continue
         records = self.table.records(known)
         owned = {pid for pid, r in records.items() if known.get(pid) == r['start']}
+        if self.adoption:
+            for pid, record in records.items():
+                # Orphans are now direct launcher children. Ordinary launcher
+                # helpers retain our own group; pre-existing children are never
+                # adopted as owned. A worker may setsid before orphaning, so its
+                # original group cannot be used as the adoption criterion.
+                if (record['ppid'] != self.parent_pid or
+                    record['pgid'] == self.parent_group or
+                    self.preexisting_children.get(pid) == record['start']):
+                    continue
+                child = self.table.read(pid)
+                if (child and child['start'] == record['start'] and
+                    child['ppid'] == self.parent_pid and
+                    child['pgid'] != self.parent_group):
+                    owned.add(pid)
         while True:
             added = set()
             for pid, record in records.items():

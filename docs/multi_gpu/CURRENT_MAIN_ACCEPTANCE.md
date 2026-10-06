@@ -127,3 +127,15 @@ Binning and MRC geometry/sampling mismatches still refuse publication. Ordinary
 resume and complete processing/content identity remain open Issue142 work.
 This documentation correction adds spaces in command arguments and does not
 turn the native plan into executed evidence.
+
+## Distinct shift-plot identity (6 October 2026)
+
+`plotShifts()` uses the original `withoutExtension()` path; numerical products
+replace remaining dots with underscores. The merger therefore attributes and
+requires EPS from a separate original-path map, including leading-slash absorption
+and filesystem separator/dot canonicalization. Escaping, duplicate and `_workers/`
+plot destinations refuse before staging. Dotted-directory/absolute-name fixtures
+retain their actual EPS; a misrouted copy still fails. This changes ownership
+metadata only, not runner numerical or plotting source. Exact5974 fails the new
+required EPS fixture; normal/-O fixed controls pass. Old native evidence does not
+approve this later source; the prepared caller is held until review and repinning.

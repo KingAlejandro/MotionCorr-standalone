@@ -20,6 +20,7 @@
 #include "nvcomp.h"
 #include "nvcomp/deflate.h"
 #include "src/acc/cuda/cuda_deflate_layout.h"
+#include "src/acc/cuda/cuda_adler32_kernel.cuh"
 #endif
 
 
@@ -169,54 +170,6 @@ __global__ void fusedU16FlipGainAndSumKernel(
     dst_Isum[dest_pixel] = sum;
 }
 #endif
-
-// RFC 1950 Adler-32 over each decompressed strip.
-//
-// Handing nvCOMP only bytes [2, n-4) discards the checksum LibTIFF's zlib path
-// verifies for free. Per-chunk status and decompressed length do not replace it: a
-// corruption that still inflates to the right number of bytes is reported as
-// success. Recomputing it here restores the integrity semantics the fast path would
-// otherwise silently weaken relative to the reader it replaces.
-//
-// One block per strip. The serial recurrence is avoided by using the closed forms
-//   A = 1 + sum(d_i),   B = n + sum((n - i) * d_i)
-// which are ordinary reductions; the modulo is applied once at the end. The
-// weighted sum needs 64 bits: for a 7420-byte row it reaches ~1.4e10.
-__global__ void adler32StripsKernel(
-    const unsigned char *decomp_base,
-    size_t row_pitch_bytes,
-    size_t row_bytes,
-    uint32_t *out_adler,
-    size_t n_chunks
-) {
-    const size_t chunk = blockIdx.x;
-    if (chunk >= n_chunks) return;
-    const unsigned char *row = decomp_base + chunk * row_pitch_bytes;
-
-    unsigned long long sum_d = 0, sum_w = 0;
-    for (size_t i = threadIdx.x; i < row_bytes; i += blockDim.x) {
-        const unsigned long long d = row[i];
-        sum_d += d;
-        sum_w += (unsigned long long)(row_bytes - i) * d;
-    }
-    __shared__ unsigned long long s_d[256];
-    __shared__ unsigned long long s_w[256];
-    s_d[threadIdx.x] = sum_d;
-    s_w[threadIdx.x] = sum_w;
-    __syncthreads();
-    for (unsigned stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-        if (threadIdx.x < stride) {
-            s_d[threadIdx.x] += s_d[threadIdx.x + stride];
-            s_w[threadIdx.x] += s_w[threadIdx.x + stride];
-        }
-        __syncthreads();
-    }
-    if (threadIdx.x == 0) {
-        const unsigned long long a = (1ull + s_d[0]) % 65521ull;
-        const unsigned long long b = ((unsigned long long)row_bytes + s_w[0]) % 65521ull;
-        out_adler[chunk] = (uint32_t)((b << 16) | a);
-    }
-}
 
 // Sparse read-back for hot-pixel replacement. One thread per (defect, frame)
 // sample. A negative y marks the Gaussian branch, which the host fills itself; the
@@ -1603,25 +1556,30 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         // cudaMalloc garbage on the first batch, would be cast to float, gain-applied
         // and aligned as if it were image data, and the function would return success.
         adler32StripsKernel<<<(unsigned)chunks, 256, 0, stream>>>(
-            (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, v.adler, chunks);
+            (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, row_bytes, 1,
+            v.status, v.asize, v.adler, chunks);
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_adler_actual.data(), v.adler, chunks * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaStreamSynchronize(stream));
+        // Reject the whole batch before consulting any checksum: an earlier
+        // checksum mismatch must not mask a later decoder failure.
+        for (size_t c = 0; c < chunks; c++) {
+            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
+                logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
+                        << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]
+                        << " bytes=" << h_act_size[c] << " expected=" << row_bytes
+                        << "; falling back to the host reader." << std::endl;
+                return false;
+            }
+        }
         for (size_t c = 0; c < chunks; c++) {
             if (h_adler_actual[c] != h_adler_expected[c]) {
                 logfile << "WARNING: strip " << c << " of frames [" << f0 << ","
                         << (f0 + bf) << ") failed its zlib Adler-32 check: computed 0x"
                         << std::hex << h_adler_actual[c] << " stored 0x"
                         << h_adler_expected[c] << std::dec
-                        << "; falling back to the host reader." << std::endl;
-                return false;
-            }
-            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
-                logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
-                        << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]
-                        << " bytes=" << h_act_size[c] << " expected=" << row_bytes
                         << "; falling back to the host reader." << std::endl;
                 return false;
             }

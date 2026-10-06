@@ -186,6 +186,14 @@ if(BUILD_TESTING)
     add_executable(deflate_layout tests/test_deflate_layout.cpp)
     target_include_directories(deflate_layout PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DeflateLayout COMMAND deflate_layout)
+    add_executable(adler32_arithmetic tests/test_adler32.cpp)
+    target_include_directories(adler32_arithmetic PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME Adler32Arithmetic COMMAND adler32_arithmetic)
+    set_tests_properties(Adler32Arithmetic PROPERTIES TIMEOUT 120)
+    add_executable(adler32_kernel_host tests/test_adler32_kernel_host.cpp)
+    target_include_directories(adler32_kernel_host PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/adler32_host_mock" "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME Adler32KernelHost COMMAND adler32_kernel_host)
     add_executable(scratch_arena tests/test_scratch_arena.cpp)
     target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ScratchArena COMMAND scratch_arena)
@@ -196,6 +204,8 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME NvcompAcceptanceDiagnostics
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nvcomp_acceptance_diagnostics.py)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})
@@ -435,6 +445,22 @@ if(BUILD_TESTING AND CUDA)
         # build, and a CPU-only configuration would fail the collection gate on
         # a test it cannot run.
         if(USE_NVCOMP)
+            set_source_files_properties(tests/cuda_adler32.cpp PROPERTIES LANGUAGE CUDA)
+            add_executable(cuda_adler32 tests/cuda_adler32.cpp)
+            target_link_libraries(cuda_adler32 PRIVATE motioncorr_core)
+            add_test(NAME CudaAdler32 COMMAND cuda_adler32)
+            set_tests_properties(CudaAdler32 PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+            add_executable(motioncorr_nvcomp_acceptance
+                src/apps/run_motioncorr.cpp tests/cuda_nvcomp_acceptance_shim.cpp)
+            target_link_libraries(motioncorr_nvcomp_acceptance PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+            target_link_options(motioncorr_nvcomp_acceptance PRIVATE
+                "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync")
+            add_test(NAME CudaNvcompAcceptanceFailures
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py
+                    --binary $<TARGET_FILE:motioncorr_nvcomp_acceptance>)
+            set_tests_properties(CudaNvcompAcceptanceFailures PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 600)
             add_test(NAME CudaNvcompReconstructionFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_reconstruction_controls.py

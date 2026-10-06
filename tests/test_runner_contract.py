@@ -22,7 +22,7 @@ def read_local_shifts(star):
     labels, patches, in_block = [], {}, False
     for line in star.read_text().splitlines():
         fields = line.split()
-        if not fields:
+        if not fields or fields[0].startswith('#'):
             continue
         if fields[0].startswith('data_'):
             in_block = fields[0] == 'data_local_shift'
@@ -71,7 +71,7 @@ def exposure(binary, work):
     star.write_text(text)
     single = work / 'single.star'
     single.write_text(text.replace('a.mrc 1 0\n', '').replace('c.mrc 1 11\n', ''))
-    options = ['--dose_weighting', '--preexposure', '3.5']
+    options = ['--write_resume_receipts', '--dose_weighting', '--preexposure', '3.5']
     invoke(binary, work, star, 'full', options)
     invoke(binary, work, single, 'resumed', options)
     completed = (work / 'resumed/b.mrc').read_bytes()
@@ -113,7 +113,7 @@ def resume(binary, work):
     star = fixture(work)
     single = work / 'single.star'
     write_star(single, ['a.mrc'])
-    options = ['--dose_weighting', '--save_noDW', '--even_odd_split',
+    options = ['--write_resume_receipts', '--dose_weighting', '--save_noDW', '--even_odd_split',
                '--grouping_for_ps', '2', '--ps_size', '48']
     invoke(binary, work, single, 'reference', options)
     for suffix in ['.mrc', '.star', '_noDW.mrc', '_EVN.mrc', '_ODD.mrc', '_PS.mrc']:
@@ -172,7 +172,7 @@ def tomography(binary, work):
                     'tomo1 tilts.star 1.0 300 2.7 0.1\n')
     (work / 'tilts.star').write_text('data_tomo1\n\nloop_\n_rlnMicrographMovieName #1\n'
                                    '_rlnMicrographPreExposure #2\nc.mrc 11\na.mrc 0\nb.mrc 5\n')
-    options = ['--dose_weighting', '--preexposure', '3.5', '--even_odd_split', '--save_noDW']
+    options = ['--write_resume_receipts', '--dose_weighting', '--preexposure', '3.5', '--even_odd_split', '--save_noDW']
     invoke(binary, work, star, 'full', options)
     original = (work / 'b.mrc').read_bytes()
     short = bytearray(original[:1024 + 96 * 96 * 2 * 4])
@@ -279,6 +279,12 @@ _rlnMicrographShiftY #5
         assert 'duplicate local-shift row' in str(error), error
     else:
         raise AssertionError('duplicate local-shift rows must not be silently overwritten')
+    trailing_block = work / 'local_shift_with_receipt.star'
+    trailing_block.write_text(duplicate.read_text().split('0 0 2 1.0 2.0')[0] +
+                             '0 0 2 1.0 2.0\n\n# version 50001\n\n' +
+                             'data_motioncorr_processing\n_rlnMotioncorrProcessingVersion 1\n')
+    assert read_local_shifts(trailing_block) == {(0.0, 0.0): {2: (1.0, 2.0)}}, (
+        'following STAR block/comment changed local shift parsing')
     arms = {}
     backend = [] if gpu is None else ['--gpu', str(gpu)]
     for arm, extra in (('off', []), ('on', ['--interpolate_shifts'])):

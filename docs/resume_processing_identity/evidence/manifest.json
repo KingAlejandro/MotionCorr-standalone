@@ -1,0 +1,558 @@
+{
+  "base_main": "6c87441d3e44e977994bd26175601092cc344a21",
+  "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+  "platform": "macOS-26.7-arm64-arm-64bit",
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "python_executable": "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+  "compiler": "AppleClang21.0.0",
+  "build_type": "Release",
+  "cuda": false,
+  "file_digest_checks": 78,
+  "schema_checks": 30,
+  "cli_checks_per_mode": 225,
+  "full_cpu": {
+    "collected": 36,
+    "passed": 34,
+    "failed": [
+      "SyntheticRegression"
+    ],
+    "skipped": [
+      "NativeMovieStaging"
+    ]
+  },
+  "source_fault_linux": "UNRUN",
+  "native_cuda": "UNRUN",
+  "performance": "UNMEASURED",
+  "commands": {
+    "configure": "cmake --fresh -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCUDA=OFF -DPython3_EXECUTABLE=/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "build": "cmake --build build -j4",
+    "full_cpu": "ctest --test-dir build --output-on-failure",
+    "optimized_cli": "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -O tests/test_resume_processing_identity.py --binary build/motioncorr",
+    "normal_cli": "/Users/alex.konstantinov/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 tests/test_resume_processing_identity.py --binary build/motioncorr"
+  },
+  "old_control_source": "57e98666a6225a8fdb6dafbdbc356478c21cea3a",
+  "old_control_binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+  "old_control_boundary": "Source paths runner/model/labels unchanged between old57 and package base6c; old binary is an existing native Mac default-build control, not a timing or cross-compiler numerical claim.",
+  "old_source_controls": [
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "binning",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp_5tljihp/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "binning",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control binning"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "selection",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpn2vbciyx/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "selection",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control selection"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "dose",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp8nchg87_/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "dose",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control dose"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "sampling",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpdo0wqo_y/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "sampling",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control sampling"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "gain",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp56s4ypog/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "gain",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control gain"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "input",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmp59o3_b6w/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "input",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control input"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "stale-marker",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": "RuntimeError: old completion marker survived mixed-generation writes"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "stale-marker",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control stale-marker"
+    },
+    {
+      "role": "old",
+      "optimized": false,
+      "case": "model-marker",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": "RuntimeError: model publication fault did not fail"
+    },
+    {
+      "role": "new",
+      "optimized": false,
+      "case": "model-marker",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control model-marker"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "binning",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpy511qfve/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "binning",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control binning"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "selection",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpqyazvw34/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "selection",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control selection"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "dose",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpg0ve_zhh/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "dose",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control dose"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "sampling",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpduw0fbwx/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "sampling",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control sampling"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "gain",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpvg8k8g9p/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "gain",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control gain"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "input",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": " + Will make an empty PDF-file in /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/tmpt4j08ulz/control/logfile.pdf"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "input",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control input"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "stale-marker",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": "RuntimeError: old completion marker survived mixed-generation writes"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "stale-marker",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control stale-marker"
+    },
+    {
+      "role": "old",
+      "optimized": true,
+      "case": "model-marker",
+      "exit": 1,
+      "binary_sha256": "db12e3720518f1262c51c48a030c456b14b6f355bc0c8cedba471c47d4080dfd",
+      "result": "RuntimeError: model publication fault did not fail"
+    },
+    {
+      "role": "new",
+      "optimized": true,
+      "case": "model-marker",
+      "exit": 0,
+      "binary_sha256": "a937168909497719f991bfd5ef79499802c89f29c8e421f029702075042e0906",
+      "result": "PASS ResumeProcessingIdentity control model-marker"
+    }
+  ],
+  "fresh_cpu_cases": [
+    {
+      "case": "all-products",
+      "role": "old",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/gain-premask-baseline-20261002/build-cpu-control/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/all-products-old",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--dose_weighting",
+        "--save_noDW",
+        "--even_odd_split",
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "48",
+        "--gainref",
+        "gain.mrc",
+        "--gain_rot",
+        "1"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "all-products",
+      "role": "new",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/all-products-new",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--dose_weighting",
+        "--save_noDW",
+        "--even_odd_split",
+        "--grouping_for_ps",
+        "2",
+        "--ps_size",
+        "48",
+        "--gainref",
+        "gain.mrc",
+        "--gain_rot",
+        "1"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "all-products",
+      "product": "a.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "a52e34a8d117502886de4bb6b6be1b279c81361ad23bfe58f9b0aa3d5717576e",
+        "67a1ea985120407f5352240a8fb9dc42c8c4cc0a9f9353a445b73d284aa4325f"
+      ]
+    },
+    {
+      "case": "all-products",
+      "product": "a_EVN.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "8c5e356181d37a1fa15f43af081e15e957019b373e90ecfd9f265939c5c45666",
+        "46eb68128bcecc5bdc97cacbe5cd17cfebf1d0da414da43abad613efbe72274e"
+      ]
+    },
+    {
+      "case": "all-products",
+      "product": "a_ODD.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "838e02212cca8e7a083efc361444fe80966afc53fe494c33fa4d33cacad16462",
+        "8ed66cc90976048a613dca7625cfcf14751521ded830059a36e8d86fa18a911d"
+      ]
+    },
+    {
+      "case": "all-products",
+      "product": "a_PS.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "c6b0f26953c933496918e67b24c309f2e48adf3385d869a223290cf1e6077417",
+        "d8afc2f501e641fc0fbf38e761a6dacc5c66c1ac978d4b43927cc47936dc51e9"
+      ]
+    },
+    {
+      "case": "all-products",
+      "product": "a_noDW.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "3ef0ba54a168a6f0cabb3ef1f82eb51fa6c7ed29af9f066a6f8e4109ce591cf6",
+        "6d49735a54442afce532911be73e9d4e687c6dc95c058a28259c38f78e4c61c0"
+      ]
+    },
+    {
+      "case": "all-products",
+      "all_old_model_blocks_exact": true,
+      "receipt_is_only_new_model_block": true
+    },
+    {
+      "case": "subset",
+      "role": "old",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/gain-premask-baseline-20261002/build-cpu-control/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/subset-old",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "6"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "subset",
+      "role": "new",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/subset-new",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--first_frame_sum",
+        "2",
+        "--last_frame_sum",
+        "6"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "subset",
+      "product": "a.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "71836e77dd947b25e637d6676b1568e95eb8e243705deaa08e82074a46ba4fed",
+        "71836e77dd947b25e637d6676b1568e95eb8e243705deaa08e82074a46ba4fed"
+      ]
+    },
+    {
+      "case": "subset",
+      "all_old_model_blocks_exact": true,
+      "receipt_is_only_new_model_block": true
+    },
+    {
+      "case": "fractional-bin",
+      "role": "old",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/gain-premask-baseline-20261002/build-cpu-control/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/fractional-bin-old",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--bin_factor",
+        "1.5"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "fractional-bin",
+      "role": "new",
+      "command": [
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/build/motioncorr",
+        "--i",
+        "movies.star",
+        "--o",
+        "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002/../resume-identity-main-20261002-evidence/fresh-cpu/fractional-bin-new",
+        "--use_own",
+        "--j",
+        "1",
+        "--patch_x",
+        "1",
+        "--patch_y",
+        "1",
+        "--seed",
+        "1",
+        "--skip_logfile",
+        "--bin_factor",
+        "1.5"
+      ],
+      "exit": 0
+    },
+    {
+      "case": "fractional-bin",
+      "product": "a.mrc",
+      "pixels_exact": true,
+      "full_normalized_header_exact": true,
+      "sha256": [
+        "f909e1c67659e94464189cd79f5055f341a0d60fb60c74c5f5881fcbb5e58926",
+        "f909e1c67659e94464189cd79f5055f341a0d60fb60c74c5f5881fcbb5e58926"
+      ]
+    },
+    {
+      "case": "fractional-bin",
+      "all_old_model_blocks_exact": true,
+      "receipt_is_only_new_model_block": true
+    }
+  ],
+  "raw_evidence_directory": "/Users/alex.konstantinov/Documents/Codex/2026-09-23/co/work/resume-identity-main-20261002-evidence",
+  "helper_hashes": {
+    "src/processing_file_digest.h": "48eb906bbecd9d522eea7f5b82a31138db81d389225e9994f37850d2a0895836",
+    "src/processing_file_digest.cpp": "c67d90b26e6082274c4730b7571864807221ef9b9a494161a682daed8087a8cd",
+    "tests/test_processing_file_digest.cpp": "80758b843d6072bcdc28a25b73bb8c049773771dcce42e96042ae14d044a48fe"
+  },
+  "provenance": "Bounded helper implementation by /root/patch_workspace_map; receipt/runner/tests by /root/new_queue_review; independent parent helper review. No source or test tolerance/reference was changed.",
+  "production_cpp_head": "f6c4919",
+  "production_cpp_frozen_tree_with_initial_tests": "4ea50fc52892536d952b935413aedd99de3dffca",
+  "final_test_sha256": "5edcbdfe0368c0aa226779bc3d56b6a8fccd6159f7687f87a97d76ac2aa75ba3",
+  "final_test_delta": "Additional effective-exposure, incomplete-legacy and engine-receipt controls after the frozen production source; final CLI225 checks normal/-O and full CPU use these file bytes."
+}

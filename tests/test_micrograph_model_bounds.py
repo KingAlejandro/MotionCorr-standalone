@@ -165,7 +165,7 @@ def resume(binary, work):
     write_movie(work / 'movie.mrc', 17, None, [])
     write_star(work / 'movies.star', ['movie.mrc'])
     args = [str(binary), '--i', 'movies.star', '--use_own', '--j', '1',
-            '--patch_x', '1', '--patch_y', '1', '--seed', '1', '--skip_logfile']
+            '--patch_x', '1', '--patch_y', '1', '--seed', '1', '--skip_logfile', '--write_resume_receipts']
 
     def invoke(out, extra=()):
         result = subprocess.run([*args, '--o', out, *extra], cwd=work,

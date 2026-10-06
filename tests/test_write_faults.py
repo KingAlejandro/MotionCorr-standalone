@@ -145,7 +145,7 @@ def main():
         joint = out / "corrected_micrographs.star"
 
         # -- phase 1: A alone, healthy ----------------------------------
-        res = run(args.binary, tmp, "a.star", out)
+        res = run(args.binary, tmp, "a.star", out, ["--write_resume_receipts"])
         assert res.returncode == 0, f"healthy run failed:\n{(res.stdout + res.stderr)[-2000:]}"
         assert a_mrc.is_file() and a_star.is_file(), "healthy run produced no output"
         assert a_mrc.stat().st_size == OUTPUT_BYTES, (

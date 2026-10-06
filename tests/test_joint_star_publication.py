@@ -44,7 +44,7 @@ def main():
         out = work / 'out'
         command = [str(args.binary.resolve()), '--i', 'movies.star', '--o', str(out) + '/',
                    '--use_own', '--j', '1', '--patch_x', '1', '--patch_y', '1',
-                   '--seed', '1', '--skip_logfile']
+                   '--seed', '1', '--skip_logfile', '--write_resume_receipts']
         healthy = run(command, work)
         require(healthy.returncode == 0, 'healthy runner failed: ' + healthy.stdout + healthy.stderr)
         joint = out / 'corrected_micrographs.star'

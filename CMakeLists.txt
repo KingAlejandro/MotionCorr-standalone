@@ -6,6 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
+option(USE_SYSTEM_SHA256 "Use system Nettle SHA256 when available" ON)
+if(USE_SYSTEM_SHA256)
+    pkg_check_modules(NETTLE QUIET IMPORTED_TARGET nettle>=3.0)
+endif()
+if(USE_SYSTEM_SHA256 AND NETTLE_FOUND)
+    message(STATUS "Processing identity SHA256: Nettle ${NETTLE_VERSION}")
+else()
+    message(STATUS "Processing identity SHA256: portable")
+endif()
 pkg_check_modules(FFTW_DOUBLE REQUIRED IMPORTED_TARGET fftw3)
 pkg_check_modules(FFTW_FLOAT REQUIRED IMPORTED_TARGET fftw3f)
 if(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -98,6 +107,10 @@ add_library(motioncorr_core STATIC ${MOTIONCORR_SOURCES}
     "${CMAKE_CURRENT_BINARY_DIR}/macros.cpp")
 target_include_directories(motioncorr_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(motioncorr_core PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+if(USE_SYSTEM_SHA256 AND NETTLE_FOUND)
+    target_compile_definitions(motioncorr_core PRIVATE MOTIONCORR_SYSTEM_SHA256)
+    target_link_libraries(motioncorr_core PRIVATE PkgConfig::NETTLE)
+endif()
 target_link_libraries(motioncorr_core PUBLIC
     PkgConfig::FFTW_DOUBLE PkgConfig::FFTW_FLOAT
     motioncorr_openmp TIFF::TIFF PNG::PNG JPEG::JPEG ZLIB::ZLIB)
@@ -196,6 +209,39 @@ if(BUILD_TESTING)
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    # Both implementations execute the same independent vectors and OS faults.
+    # The portable target remains required even when the system backend is used.
+    foreach(digest_target processing_file_digest processing_file_digest_portable)
+        add_executable(${digest_target} tests/test_processing_file_digest.cpp src/processing_file_digest.cpp)
+        target_include_directories(${digest_target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            target_compile_definitions(${digest_target} PRIVATE PROCESSING_FILE_DIGEST_FAULT_WRAPS)
+            target_link_options(${digest_target} PRIVATE
+                "-Wl,--wrap=read" "-Wl,--wrap=fstat" "-Wl,--wrap=stat")
+        endif()
+    endforeach()
+    if(USE_SYSTEM_SHA256 AND NETTLE_FOUND)
+        target_compile_definitions(processing_file_digest PRIVATE MOTIONCORR_SYSTEM_SHA256)
+        target_link_libraries(processing_file_digest PRIVATE PkgConfig::NETTLE)
+    endif()
+    add_test(NAME ProcessingFileDigest COMMAND processing_file_digest)
+    add_test(NAME ProcessingFileDigestPortable COMMAND processing_file_digest_portable)
+    add_executable(movie_processing_identity tests/test_movie_processing_identity.cpp src/movie_processing_identity.cpp)
+    target_include_directories(movie_processing_identity PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME MovieProcessingIdentity COMMAND movie_processing_identity)
+    add_library(receipt_digest_read_shim SHARED tests/receipt_digest_read_shim.cpp)
+    target_link_libraries(receipt_digest_read_shim PRIVATE ${CMAKE_DL_LIBS})
+    add_test(NAME ResumeProcessingIdentity
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_processing_identity.py
+            --binary $<TARGET_FILE:motioncorr> --digest-shim $<TARGET_FILE:receipt_digest_read_shim>
+            --mutation-shim $<TARGET_FILE:receipt_source_mutation_shim>)
+    set_tests_properties(ResumeProcessingIdentity PROPERTIES TIMEOUT 180)
+    add_library(receipt_source_mutation_shim SHARED tests/receipt_source_mutation_shim.cpp)
+    target_link_libraries(receipt_source_mutation_shim PRIVATE ${CMAKE_DL_LIBS})
+    add_test(NAME ResumeSourceMutation
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resume_source_mutation.py
+            --binary $<TARGET_FILE:motioncorr> --shim $<TARGET_FILE:receipt_source_mutation_shim>)
+    set_tests_properties(ResumeSourceMutation PROPERTIES TIMEOUT 180)
     add_test(NAME GainCacheOwnership
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_gain_cache_host.py
             --cxx ${CMAKE_CXX_COMPILER})

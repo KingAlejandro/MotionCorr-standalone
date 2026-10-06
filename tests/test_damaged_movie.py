@@ -293,7 +293,7 @@ def test_resume_isolation(binary: Path, source: Path):
         out.mkdir()
 
         # Step 1: Run with bad movie -> fails
-        res1 = run_motioncorr(binary, tmp, ["--i", "m.star", "--o", str(out) + "/", "--j", "2"])
+        res1 = run_motioncorr(binary, tmp, ["--i", "m.star", "--o", str(out) + "/", "--j", "2", "--write_resume_receipts"])
         assert res1.returncode != 0
         assert (out / "Movies" / "good.mrc").is_file()
         assert not (out / "Movies" / "bad.mrc").is_file()
@@ -345,7 +345,7 @@ def test_expected_frame_contract(binary: Path, source: Path):
                      message="--expected_frames must be positive or -1")
 
         # Resume skipping the first completed movie must preserve the second row's count.
-        run_case("resume", [8, 4], options=["--do_at_most", "1"])
+        run_case("resume", [8, 4], options=["--do_at_most", "1", "--write_resume_receipts"])
         first_output = tmp / "resume/Movies/eight.mrc"
         before = first_output.stat().st_mtime_ns
         run_case("resume", [8, 4], options=["--only_do_unfinished", "--expected_frames", "24"])

@@ -1,0 +1,24 @@
+PASS: actual procfs reader treats ESRCH-after-open as gone
+PASS: actual procfs reader still propagates permission refusal
+PASS: recycled leader same PID/PGID different birth refuses signal
+PASS: predecessor numeric-PGID criterion would signal recycled group
+PASS: missing original/observed identity refuses signal
+PASS: birth rechecked after TERM before KILL
+PASS: unverified current member blocks group signal
+PASS: observer error fails closed
+PASS: real owned TERM-ignoring leader cleanup
+RECEIPT: {"child_observed_before_release": {"pgid": 3042211, "pid": 3042213, "ppid": 3042211, "start": 666804491, "state": "S"}, "cpu_mask": [104, 105, 106, 107, 108, 109, 110, 111], "final_owned_live": [], "observer_errors": [], "parent_held_before_release": {"pgid": 3042211, "pid": 3042211, "ppid": 3042205, "start": 666804487, "state": "S"}, "parent_only_negative_rejected": true, "reparented_child": {"pgid": 3042211, "pid": 3042213, "ppid": 1, "start": 666804491, "state": "S"}}
+PASS: real reparented TERM-ignoring child cleanup; parent-only negative powered
+PASS: owned cleanup controls optimized=False
+PASS: actual procfs reader treats ESRCH-after-open as gone
+PASS: actual procfs reader still propagates permission refusal
+PASS: recycled leader same PID/PGID different birth refuses signal
+PASS: predecessor numeric-PGID criterion would signal recycled group
+PASS: missing original/observed identity refuses signal
+PASS: birth rechecked after TERM before KILL
+PASS: unverified current member blocks group signal
+PASS: observer error fails closed
+PASS: real owned TERM-ignoring leader cleanup
+RECEIPT: {"child_observed_before_release": {"pgid": 3042286, "pid": 3042288, "ppid": 3042286, "start": 666805662, "state": "S"}, "cpu_mask": [104, 105, 106, 107, 108, 109, 110, 111], "final_owned_live": [], "observer_errors": [], "parent_held_before_release": {"pgid": 3042286, "pid": 3042286, "ppid": 3042215, "start": 666805656, "state": "S"}, "parent_only_negative_rejected": true, "reparented_child": {"pgid": 3042286, "pid": 3042288, "ppid": 1, "start": 666805662, "state": "S"}}
+PASS: real reparented TERM-ignoring child cleanup; parent-only negative powered
+PASS: owned cleanup controls optimized=True

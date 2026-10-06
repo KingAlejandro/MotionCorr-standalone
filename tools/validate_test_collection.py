@@ -103,6 +103,12 @@ DEFAULT_REQUIRED_TESTS = [
     "NativeMovieStaging",
     "GainCacheOwnership",
     "JointStarPublication",
+    # Issue142: receipt parsing, bounded file identity and actual resume refusal.
+    "ProcessingFileDigest",
+    "ProcessingFileDigestPortable",
+    "MovieProcessingIdentity",
+    "ResumeProcessingIdentity",
+    "ResumeSourceMutation",
 ]
 
 

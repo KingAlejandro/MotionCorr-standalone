@@ -23,6 +23,9 @@
 #include "src/image.h"
 #include "src/motioncorr_runner.h"
 #include "src/renderEER.h"
+#include "src/movie_processing_identity.h"
+#include <cerrno>
+#include <cstring>
 #include <limits>
 #include <memory>
 #include <set>
@@ -192,7 +195,8 @@ void Micrograph::write(FileName filename)
 	std::ofstream fh;
 	MetaDataTable MD;
 
-	fh.open(filename.c_str());
+	const FileName temporary = filename + ".tmp";
+	fh.open(temporary.c_str());
 	if (!fh)
 	{
 		REPORT_ERROR((std::string)"Micrograph::write: Cannot write file: " + filename);
@@ -294,6 +298,18 @@ void Micrograph::write(FileName filename)
 	}
 	MD.write(fh);
 
+	if (!processing_identity.empty())
+	{
+		motioncorr_identity::MovieProcessingIdentity::parse(processing_identity);
+		MD.clear();
+		MD.setName("motioncorr_processing");
+		MD.setIsList(true);
+		MD.addObject();
+		MD.setValue(EMDL_MOTIONCORR_PROCESSING_VERSION, motioncorr_identity::MovieProcessingIdentity::VERSION);
+		MD.setValue(EMDL_MOTIONCORR_PROCESSING_IDENTITY, processing_identity);
+		MD.write(fh);
+	}
+
 	fh.close();
 
 	// This STAR is the per-movie completion record MotioncorrRunner::isMovieComplete
@@ -301,7 +317,16 @@ void Micrograph::write(FileName filename)
 	// while its metadata is truncated. ofstream swallows write errors unless the
 	// state is read back, and the buffer is only flushed by close().
 	if (fh.fail())
+	{
+		std::remove(temporary.c_str());
 		REPORT_ERROR((std::string)"Micrograph::write: failed to write file: " + filename);
+	}
+	if (std::rename(temporary.c_str(), filename.c_str()) != 0)
+	{
+		const std::string why = std::strerror(errno);
+		std::remove(temporary.c_str());
+		REPORT_ERROR("Micrograph::write: failed to publish file " + filename + ": " + why);
+	}
 }
 
 FileName Micrograph::getGainFilename() const
@@ -611,6 +636,14 @@ void Micrograph::read(FileName fn_in, bool read_hotpixels)
 			hotpixelY.push_back((int)y);
 		}
 	}
+	try
+	{
+		processing_identity = motioncorr_identity::readProcessingReceipt(fn_in);
+	}
+	catch (const std::exception &error)
+	{
+		REPORT_ERROR(std::string(error.what()) + " in " + fn_in);
+	}
 	model = parsed_model.release();
 }
 
@@ -670,6 +703,7 @@ void Micrograph::clearFields()
 	fnMovie = "";
 	fnGain = "";
 	fnDefect = "";
+	processing_identity.clear();
 
 	hotpixelX.resize(0);
 	hotpixelY.resize(0);
@@ -707,6 +741,7 @@ void Micrograph::copyFieldsFrom(const Micrograph& m)
 	fnMovie = m.fnMovie;
 	fnGain = m.fnGain;
 	fnDefect = m.fnDefect;
+	processing_identity = m.processing_identity;
 
 	hotpixelX = m.hotpixelX;
 	hotpixelY = m.hotpixelY;

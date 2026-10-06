@@ -9,6 +9,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <sys/stat.h>
@@ -103,6 +104,11 @@ int main()
 {
     try
     {
+#ifdef MOTIONCORR_SYSTEM_SHA256
+        std::cout << "SHA256_BACKEND nettle\n";
+#else
+        std::cout << "SHA256_BACKEND portable\n";
+#endif
         Temp tmp;
         require(sha256Bytes(nullptr,0)=="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","SHA256 empty FIPS vector");
         require(sha256Bytes("abc",3)=="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad","SHA256 abc FIPS vector");
@@ -110,6 +116,14 @@ int main()
         require(sha256Bytes(million.data(),million.size())=="cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0","SHA256 million-a FIPS vector");
         bool null_threw=false;try { sha256Bytes(nullptr,1); }catch(const std::runtime_error &){null_threw=true;}
         require(null_threw,"SHA256 null nonempty bytes refused");
+        if (std::numeric_limits<size_t>::max() > std::numeric_limits<uint64_t>::max()/8)
+        {
+            bool length_threw=false;
+            try { sha256Bytes("a",static_cast<size_t>(std::numeric_limits<uint64_t>::max()/8+1)); }
+            catch(const std::runtime_error &e)
+            { length_threw=std::string(e.what()).find("bit-length bound")!=std::string::npos; }
+            require(length_threw,"SHA256 bit-length overflow refused before reading input");
+        }
         // Frozen independent Python hashlib references, data[i]=i%251. Boundary
         // sizes power SHA padding/blocks and production64KiB streaming, rather
         // than comparing two calls of the same implementation to one another.

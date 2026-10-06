@@ -105,6 +105,7 @@ DEFAULT_REQUIRED_TESTS = [
     "JointStarPublication",
     # Issue142: receipt parsing, bounded file identity and actual resume refusal.
     "ProcessingFileDigest",
+    "ProcessingFileDigestPortable",
     "MovieProcessingIdentity",
     "ResumeProcessingIdentity",
     "ResumeSourceMutation",

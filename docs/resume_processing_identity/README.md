@@ -266,3 +266,25 @@ The preceding native campaign remains evidence for its pinned predecessor source
 **The native delta for this repair is UNRUN**, and current-source CI/review are
 separate gates. Structural header/type/geometry/extent validation is not a checksum
 of later-edited output pixels; no output-hash feature was added in this repair.
+
+
+## Exact SHA256 backend
+
+`USE_SYSTEM_SHA256=ON` (default) uses an installed Nettle 3 or later when
+pkg-config finds it; otherwise the existing portable implementation is retained.
+`-DUSE_SYSTEM_SHA256=OFF` explicitly selects portable SHA256. Configure output
+names the selected backend/version. Both compute the same SHA256 bytes; receipt
+schema, the 64-bit input-length bound, the bounded 64 KiB reads, descriptor/path
+checks, and named OS-error refusal remain unchanged. This does not make inputs
+atomic against unrelated writers or certify later-edited output pixels.
+
+Nettle is linked as a system dependency under its GPL-2.0-or-later option
+(the library also offers LGPL-3.0-or-later):
+[upstream license and API](https://www.lysator.liu.se/~nisse/nettle/nettle.html).
+No crypto source is vendored. Install `nettle-dev` on Debian/Ubuntu, or `nettle`
+with Homebrew, to enable it. Nettle 3 uses the explicit digest-length argument;
+Nettle 4 uses the fixed-size digest API. `ProcessingFileDigest` and the always
+required `ProcessingFileDigestPortable` exercise the same independent SHA256
+vectors, streaming boundaries and Linux OS faults. An accelerated hash does not
+by itself establish application speedup; matched application overhead remains a
+separate acceptance measurement.

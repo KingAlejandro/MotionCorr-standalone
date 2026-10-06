@@ -11,6 +11,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
+#ifdef MOTIONCORR_SYSTEM_SHA256
+#include <nettle/sha2.h>
+#include <nettle/version.h>
+#endif
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <cstdlib>
@@ -76,6 +80,41 @@ FileSnapshot pathnameSnapshot(const std::string &path)
     return fromStat(path, s);
 }
 
+#ifdef MOTIONCORR_SYSTEM_SHA256
+// Nettle is dual GPL-2.0-or-later / LGPL-3.0-or-later; this project uses
+// its GPL-2.0-or-later option. Only the compression implementation changes.
+class Sha256
+{
+    struct sha256_ctx context_{};
+    uint64_t bytes_ = 0;
+public:
+    Sha256() { sha256_init(&context_); }
+    void update(const unsigned char *data, size_t count)
+    {
+        if (count > std::numeric_limits<uint64_t>::max()/8-bytes_)
+            throw std::runtime_error("SHA256 input exceeds64-bit bit-length bound");
+        bytes_ += count;
+        if (count) sha256_update(&context_, count, data);
+    }
+    std::string finish()
+    {
+        std::array<uint8_t, SHA256_DIGEST_SIZE> digest{};
+#if NETTLE_VERSION_MAJOR >= 4
+        sha256_digest(&context_, digest.data());
+#else
+        sha256_digest(&context_, digest.size(), digest.data());
+#endif
+        static const char hex[] = "0123456789abcdef";
+        std::string out; out.reserve(64);
+        for (uint8_t byte : digest)
+        {
+            out += hex[byte >> 4];
+            out += hex[byte & 15];
+        }
+        return out;
+    }
+};
+#else
 class Sha256
 {
     std::array<uint32_t,8> state_{{0x6a09e667u,0xbb67ae85u,0x3c6ef372u,0xa54ff53au,
@@ -149,6 +188,7 @@ public:
         return out;
     }
 };
+#endif
 }
 
 bool FileSnapshot::operator==(const FileSnapshot &o) const

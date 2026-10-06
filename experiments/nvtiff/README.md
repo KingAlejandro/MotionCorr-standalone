@@ -96,7 +96,8 @@ JSON separates admission wall, decode wall, CUDA-stream interval, optional
 sample-copy wall, optional dump-write wall, and total process work wall. The CUDA
 interval is not claimed to be pure kernel time. Standalone decode timing cannot
 be subtracted from a MotionCorr wall time to establish an application speedup.
-No timing runs or GPU correctness results are included in this implementation.
+The controlled native results are recorded in [NATIVE_RESULTS.md](NATIVE_RESULTS.md).
+No performance measurement is included in this implementation.
 
 `output_device_bytes` is the explicit batch buffer; **nvTIFF internal scratch is
 unknown**, represented by `decoder_internal_device_bytes: null`. It is neither

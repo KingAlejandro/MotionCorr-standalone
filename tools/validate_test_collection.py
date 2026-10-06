@@ -67,6 +67,8 @@ DEFAULT_REQUIRED_TESTS = [
     # A100 decode cannot observe. Without these entries the fast path could lose
     # its eligibility predicate or its arena bound with the suite still green.
     "DeflateLayout",
+    "Adler32Arithmetic",
+    "Adler32KernelHost",
     "ScratchArena",
     "DefectNeighbours",
     # Added by the #127 output-stage group. MrcHeaderStats is the only test that
@@ -92,6 +94,7 @@ DEFAULT_REQUIRED_TESTS = [
     # (gatherFrameSamples) stayed green only because the optimiser removed the
     # call, and the second (endIngestScratch) appeared the moment that stopped.
     "NvcompGuards",
+    "NvcompAcceptanceDiagnostics",
     # Added with the #127 Ghostscript overlap fix. It distinguishes a job that
     # reports failure from a job that dies on SIGABRT, which is the whole
     # difference the scope guard makes; a check for "non-zero exit" would pass

@@ -1,0 +1,552 @@
+{
+  "timestamp": "2026-09-24T11:04:45Z",
+  "overall_status": "PASS",
+  "total_elapsed_sec": 1.2524,
+  "environment": {
+    "git_commit": "d7f912846b57509bfc4048dbfe3cd69edf4db943",
+    "hostname": "SCMAC-7L9P2F",
+    "os": "Darwin",
+    "os_release": "25.6.0",
+    "macos_version": "ProductName:\t\tmacOS, ProductVersion:\t\t26.6.2, BuildVersion:\t\t25G83",
+    "python": "/Users/alex.konstantinov/.local/bin/python3",
+    "cpu_binary": "/Users/alex.konstantinov/Documents/MotionCorr/build/motioncorr",
+    "cpu_binary_sha256": "6d773afdb7d627fb96307301a8390b86fd02410cfeaa1665cf58c3be5178a9a5",
+    "metal_binary": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/metal_surrogate.sh",
+    "metal_binary_sha256": "480b5f6ef8f23ce5ba90e637ee4202f8dad9c03e7db99216ee3fc2f07a68b87d",
+    "metal_info": {
+      "requested_device": "Apple M4 Pro",
+      "available": true,
+      "device_name": "Apple M4 Pro",
+      "metal_version": "N/A",
+      "unified_memory": true
+    }
+  },
+  "configuration": {
+    "seed": 20260923,
+    "device": "Apple M4 Pro",
+    "gate": "relaxed",
+    "gt_threshold_rms_px": 0.15,
+    "gt_threshold_max_px": 0.25
+  },
+  "cases": [
+    {
+      "case_name": "integer_shift_128x128",
+      "fixture_star": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames.star",
+      "ground_truth_json": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_ground_truth.json",
+      "passed": true,
+      "fail_reasons": [],
+      "input_files": {
+        "star": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames.star",
+          "sha256": "61dde751f61f8ba82296b43bfcf831858a8c25cc71a650f3fe08b6ebcf19b28f"
+        },
+        "ground_truth": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_ground_truth.json",
+          "sha256": "1507345754352386e5ef202b28dbe9d693a545480eeab9f0ce3c47da14b50009"
+        },
+        "movie": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames.mrcs",
+          "sha256": "44f32752ebb62fc22428e95a1449e54e3a6952036285b805b96085f296ec5ed0"
+        }
+      },
+      "cpu_run": {
+        "command": "/Users/alex.konstantinov/Documents/MotionCorr/build/motioncorr --i synthetic_128x128_8frames.star --o /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/integer_shift_128x128/cpu --use_own --j 1 --patch_x 1 --patch_y 1 --seed 20260923",
+        "exit_code": 0,
+        "elapsed_sec": 0.0852,
+        "log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/integer_shift_128x128/cpu/run.log"
+      },
+      "metal_run": {
+        "command": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/metal_surrogate.sh --i synthetic_128x128_8frames.star --o /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/integer_shift_128x128/metal --use_own --j 1 --patch_x 1 --patch_y 1 --seed 20260923 --metal --metal_device Apple M4 Pro",
+        "exit_code": 0,
+        "elapsed_sec": 0.287,
+        "log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/integer_shift_128x128/metal/run.log"
+      },
+      "metal_execution": {
+        "requested_device": "Apple M4 Pro",
+        "startup_marker_found": true,
+        "profile_marker_found": true,
+        "total_metal_alignment_ms": 1.845,
+        "movie_log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/integer_shift_128x128/metal/synthetic_128x128_8frames.log",
+        "complete": true
+      },
+      "output_dimensions": {
+        "expected": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        },
+        "cpu": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        },
+        "metal": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        }
+      },
+      "cpu_vs_ground_truth": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "report": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.10002000000000022,
+          "max_abs_diff_y": 0.07785500000000001,
+          "max_shift_error": 0.10002000000000022,
+          "coord_rms_error": 0.07143744985999995,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -0.00409,
+              "dy": -0.00655
+            },
+            {
+              "frame": 3,
+              "dx": 0.027190000000000047,
+              "dy": -0.028156999999999988
+            },
+            {
+              "frame": 4,
+              "dx": 0.025839999999999974,
+              "dy": -0.020923000000000025
+            },
+            {
+              "frame": 5,
+              "dx": 0.03767000000000009,
+              "dy": -0.04647199999999996
+            },
+            {
+              "frame": 6,
+              "dx": 0.06840000000000002,
+              "dy": -0.07785500000000001
+            },
+            {
+              "frame": 7,
+              "dx": 0.0638399999999999,
+              "dy": -0.06216700000000008
+            },
+            {
+              "frame": 8,
+              "dx": 0.10002000000000022,
+              "dy": -0.076592
+            }
+          ]
+        }
+      },
+      "metal_vs_ground_truth": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "report": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.10002000000000022,
+          "max_abs_diff_y": 0.07785500000000001,
+          "max_shift_error": 0.10002000000000022,
+          "coord_rms_error": 0.07143744985999995,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": -0.00409,
+              "dy": -0.00655
+            },
+            {
+              "frame": 3,
+              "dx": 0.027190000000000047,
+              "dy": -0.028156999999999988
+            },
+            {
+              "frame": 4,
+              "dx": 0.025839999999999974,
+              "dy": -0.020923000000000025
+            },
+            {
+              "frame": 5,
+              "dx": 0.03767000000000009,
+              "dy": -0.04647199999999996
+            },
+            {
+              "frame": 6,
+              "dx": 0.06840000000000002,
+              "dy": -0.07785500000000001
+            },
+            {
+              "frame": 7,
+              "dx": 0.0638399999999999,
+              "dy": -0.06216700000000008
+            },
+            {
+              "frame": 8,
+              "dx": 0.10002000000000022,
+              "dy": -0.076592
+            }
+          ]
+        }
+      },
+      "metal_vs_cpu": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "coverage_complete": true,
+        "metrics": {
+          "coord_rms_shift_px": 0.0,
+          "max_shift_px": 0.0,
+          "image_rmse": 0.0,
+          "relative_rmse": 0.0,
+          "max_pixel_diff": 0.0,
+          "pixel_identical": true,
+          "star_diffs": 0
+        },
+        "checks": {
+          "motion_trajectory": {
+            "num_frames": 8,
+            "max_abs_diff_x": 0.0,
+            "max_abs_diff_y": 0.0,
+            "max_shift_error": 0.0,
+            "coord_rms_error": 0.0,
+            "per_frame_diffs": [
+              {
+                "frame": 1,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 2,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 3,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 4,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 5,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 6,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 7,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 8,
+                "dx": 0.0,
+                "dy": 0.0
+              }
+            ],
+            "passed": true,
+            "fail_reasons": []
+          },
+          "star_fields": {
+            "num_differences": 0,
+            "differences": [],
+            "passed": true
+          },
+          "corrected_image": {
+            "num_pixels": 16384,
+            "pixel_identical": true,
+            "max_abs_pixel_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "ref_pixel_min": 787.4429931640625,
+            "ref_pixel_max": 1218.8272705078125,
+            "ref_pixel_mean": 834.9652099609375,
+            "ref_pixel_std": 64.28142483709074,
+            "test_pixel_min": 787.4429931640625,
+            "test_pixel_max": 1218.8272705078125,
+            "test_pixel_mean": 834.9652099609375,
+            "test_pixel_std": 64.28142547607422,
+            "core_header_diff_bytes": 0,
+            "label_header_diff_bytes": 1,
+            "normalized_label_diff_bytes": 0,
+            "passed": true,
+            "fail_reasons": []
+          }
+        }
+      }
+    },
+    {
+      "case_name": "subpixel_shift_128x128",
+      "fixture_star": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_subpixel.star",
+      "ground_truth_json": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_subpixel_ground_truth.json",
+      "passed": true,
+      "fail_reasons": [],
+      "input_files": {
+        "star": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_subpixel.star",
+          "sha256": "f754b4ed4ede6c7e55a8e1e300eba265989c9651908279fd4357a3b3c946e160"
+        },
+        "ground_truth": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_subpixel_ground_truth.json",
+          "sha256": "38e4ac009c3f73062c063b979a40cf103a077ee94326862f9a6b0a791865395b"
+        },
+        "movie": {
+          "path": "/Users/alex.konstantinov/Documents/MotionCorr/test-data/fixtures/synthetic_128x128_8frames_subpixel.mrcs",
+          "sha256": "27590926087551e607acf9fd11d11de294ed63005e4647861a94b5ae2bbf93b7"
+        }
+      },
+      "cpu_run": {
+        "command": "/Users/alex.konstantinov/Documents/MotionCorr/build/motioncorr --i synthetic_128x128_8frames_subpixel.star --o /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/cpu --use_own --j 1 --patch_x 1 --patch_y 1 --seed 20260923",
+        "exit_code": 0,
+        "elapsed_sec": 0.0785,
+        "log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/cpu/run.log"
+      },
+      "metal_run": {
+        "command": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/metal_surrogate.sh --i synthetic_128x128_8frames_subpixel.star --o /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal --use_own --j 1 --patch_x 1 --patch_y 1 --seed 20260923 --metal --metal_device Apple M4 Pro",
+        "exit_code": 0,
+        "elapsed_sec": 0.0952,
+        "log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/run.log"
+      },
+      "metal_execution": {
+        "requested_device": "Apple M4 Pro",
+        "startup_marker_found": true,
+        "profile_marker_found": true,
+        "total_metal_alignment_ms": 1.845,
+        "movie_log_path": "/Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/synthetic_128x128_8frames_subpixel.log",
+        "complete": true
+      },
+      "output_dimensions": {
+        "expected": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        },
+        "cpu": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        },
+        "metal": {
+          "nx": 128,
+          "ny": 128,
+          "nz": 1,
+          "mode": 2
+        }
+      },
+      "cpu_vs_ground_truth": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "report": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.09369000000000005,
+          "max_abs_diff_y": 0.07574999999999998,
+          "max_shift_error": 0.09369000000000005,
+          "coord_rms_error": 0.07126025769143703,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": 0.0042300000000000115,
+              "dy": -0.01644899999999999
+            },
+            {
+              "frame": 3,
+              "dx": 0.012880000000000003,
+              "dy": -0.019755999999999996
+            },
+            {
+              "frame": 4,
+              "dx": 0.02819000000000016,
+              "dy": -0.025343999999999922
+            },
+            {
+              "frame": 5,
+              "dx": 0.041789999999999994,
+              "dy": -0.05190399999999995
+            },
+            {
+              "frame": 6,
+              "dx": 0.06355,
+              "dy": -0.07574999999999998
+            },
+            {
+              "frame": 7,
+              "dx": 0.06914000000000042,
+              "dy": -0.07063599999999992
+            },
+            {
+              "frame": 8,
+              "dx": 0.09369000000000005,
+              "dy": -0.07468500000000011
+            }
+          ]
+        }
+      },
+      "metal_vs_ground_truth": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "report": {
+          "num_frames": 8,
+          "max_abs_diff_x": 0.09369000000000005,
+          "max_abs_diff_y": 0.07574999999999998,
+          "max_shift_error": 0.09369000000000005,
+          "coord_rms_error": 0.07126025769143703,
+          "per_frame_diffs": [
+            {
+              "frame": 1,
+              "dx": 0.0,
+              "dy": 0.0
+            },
+            {
+              "frame": 2,
+              "dx": 0.0042300000000000115,
+              "dy": -0.01644899999999999
+            },
+            {
+              "frame": 3,
+              "dx": 0.012880000000000003,
+              "dy": -0.019755999999999996
+            },
+            {
+              "frame": 4,
+              "dx": 0.02819000000000016,
+              "dy": -0.025343999999999922
+            },
+            {
+              "frame": 5,
+              "dx": 0.041789999999999994,
+              "dy": -0.05190399999999995
+            },
+            {
+              "frame": 6,
+              "dx": 0.06355,
+              "dy": -0.07574999999999998
+            },
+            {
+              "frame": 7,
+              "dx": 0.06914000000000042,
+              "dy": -0.07063599999999992
+            },
+            {
+              "frame": 8,
+              "dx": 0.09369000000000005,
+              "dy": -0.07468500000000011
+            }
+          ]
+        }
+      },
+      "metal_vs_cpu": {
+        "comparator_exit": 0,
+        "comparator_status": "PASS",
+        "coverage_complete": true,
+        "metrics": {
+          "coord_rms_shift_px": 0.0,
+          "max_shift_px": 0.0,
+          "image_rmse": 0.0,
+          "relative_rmse": 0.0,
+          "max_pixel_diff": 0.0,
+          "pixel_identical": true,
+          "star_diffs": 0
+        },
+        "checks": {
+          "motion_trajectory": {
+            "num_frames": 8,
+            "max_abs_diff_x": 0.0,
+            "max_abs_diff_y": 0.0,
+            "max_shift_error": 0.0,
+            "coord_rms_error": 0.0,
+            "per_frame_diffs": [
+              {
+                "frame": 1,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 2,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 3,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 4,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 5,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 6,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 7,
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "frame": 8,
+                "dx": 0.0,
+                "dy": 0.0
+              }
+            ],
+            "passed": true,
+            "fail_reasons": []
+          },
+          "star_fields": {
+            "num_differences": 0,
+            "differences": [],
+            "passed": true
+          },
+          "corrected_image": {
+            "num_pixels": 16384,
+            "pixel_identical": true,
+            "max_abs_pixel_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "ref_pixel_min": 789.9563598632812,
+            "ref_pixel_max": 1220.6685791015625,
+            "ref_pixel_mean": 834.9652709960938,
+            "ref_pixel_std": 64.28188529771204,
+            "test_pixel_min": 789.9563598632812,
+            "test_pixel_max": 1220.6685791015625,
+            "test_pixel_mean": 834.9652709960938,
+            "test_pixel_std": 64.2818832397461,
+            "core_header_diff_bytes": 0,
+            "label_header_diff_bytes": 0,
+            "normalized_label_diff_bytes": 0,
+            "passed": true,
+            "fail_reasons": []
+          }
+        }
+      }
+    }
+  ],
+  "metal_backend_status": "PENDING (Metal global alignment kernel integration pending Issue #32; harness framework, Gate 2 parity contract, and 8-case verification suite validated on Apple M4 Pro)"
+}

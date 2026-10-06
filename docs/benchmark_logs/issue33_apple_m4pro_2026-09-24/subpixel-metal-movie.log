@@ -1,0 +1,26 @@
+Working on synthetic_128x128_8frames_subpixel.mrcs with 1 thread(s).
+
+Movie size: X = 128 Y = 128 N = 8
+Frames to be used: 1 2 3 4 5 6 7 8
+Frame grouping: n_frames = 8, requested group size = 1
+ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 
+interpolate_shifts = 0
+
+In unaligned sum, Mean = 834.965 Std = 63.1167 Hotpixel threshold = 1213.67
+Detected 0 hot pixels to be corrected.
+Fixed hot pixels.
+
+Global alignment:
+ Iteration 1: RMSD = 2.40093 px
+ Iteration 2: RMSD = 0.382383 px
+
+Local alignments:
+Patches: X = 1 Y = 1
+Too few patches to do local alignments. Local alignment is skipped.
+Summing frames before dose weighting: ........ done
+Written aligned but non-dose weighted sum to /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts/subpixel_shift_128x128/metal/synthetic_128x128_8frames_subpixel.mrc
+Full movie wall time: 0.006 s
+
+[Metal Global Alignment Profile]
+  Metal device: Apple M4 Pro
+  Total Metal alignment time: 1.845 ms

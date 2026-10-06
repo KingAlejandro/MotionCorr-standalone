@@ -1,0 +1,61 @@
+==============================================================================
+ MOTIONCORR SYNTHETIC CPU-VERSUS-METAL REGRESSION HARNESS
+==============================================================================
+Commit:          d7f912846b57509bfc4048dbfe3cd69edf4db943
+Host / OS:       SCMAC-7L9P2F (Darwin 25.6.0)
+macOS Version:   ProductName:		macOS, ProductVersion:		26.6.2, BuildVersion:		25G83
+CPU Binary:      /Users/alex.konstantinov/Documents/MotionCorr/build/motioncorr
+Metal Binary:    /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/metal_surrogate.sh
+Metal Device:    Apple M4 Pro (Apple M4 Pro)
+Metal Support:   N/A
+Gate Profile:    RELAXED
+Declared GT Tol: Coordinate RMS <= 0.15 px, Max Shift <= 0.25 px
+Seed:            20260923
+Output Root:     /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts
+==============================================================================
+------------------------------------------------------------------------------
+ CASE: integer_shift_128x128          STATUS: PASS
+------------------------------------------------------------------------------
+ CPU Run:   status=0 wall=0.0852s
+ Metal Run: status=0 wall=0.287s
+
+ [Ground Truth Recovery Against Known Shifts]
+   CPU   RMS error: 0.071437 px | Max error: 0.100020 px
+   Metal RMS error: 0.071437 px | Max error: 0.100020 px
+
+ [Metal vs CPU Parity Checks (RELAXED Gate)]
+   Coverage:              COMPLETE
+   Comparator Status:     PASS
+   Coord RMS Shift Error: 0.000000 px (Gate 2: <= 0.020 px)
+   Max Frame Shift Error: 0.000000 px (Gate 2: <= 0.050 px)
+   Image Absolute RMSE:   0.000000e+00 (Gate 2: <= 0.020)
+   Image Relative RMSE:   0.000000e+00 (Gate 2: <= 0.001)
+   Image Max Pixel Error: 0.000000e+00 (Gate 2: <= 5.0)
+   STAR Discrepancies:    0 (Gate 2: == 0)
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+ CASE: subpixel_shift_128x128         STATUS: PASS
+------------------------------------------------------------------------------
+ CPU Run:   status=0 wall=0.0785s
+ Metal Run: status=0 wall=0.0952s
+
+ [Ground Truth Recovery Against Known Shifts]
+   CPU   RMS error: 0.071260 px | Max error: 0.093690 px
+   Metal RMS error: 0.071260 px | Max error: 0.093690 px
+
+ [Metal vs CPU Parity Checks (RELAXED Gate)]
+   Coverage:              COMPLETE
+   Comparator Status:     PASS
+   Coord RMS Shift Error: 0.000000 px (Gate 2: <= 0.020 px)
+   Max Frame Shift Error: 0.000000 px (Gate 2: <= 0.050 px)
+   Image Absolute RMSE:   0.000000e+00 (Gate 2: <= 0.020)
+   Image Relative RMSE:   0.000000e+00 (Gate 2: <= 0.001)
+   Image Max Pixel Error: 0.000000e+00 (Gate 2: <= 5.0)
+   STAR Discrepancies:    0 (Gate 2: == 0)
+------------------------------------------------------------------------------
+
+==============================================================================
+ OVERALL HARNESS RESULT: PASS (Total Elapsed: 1.2524s)
+==============================================================================
+Report JSON written to: /Users/alex.konstantinov/Documents/MotionCorr/docs/synthetic_metal_regression_apple_silicon.json
+Artifacts preserved at: /Users/alex.konstantinov/Documents/MotionCorr/docs/benchmark_logs/issue33_apple_m4pro_2026-09-24/run_artifacts

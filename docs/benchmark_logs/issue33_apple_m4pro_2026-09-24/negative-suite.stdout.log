@@ -1,0 +1,28 @@
+==============================================================================
+ MOTIONCORR METAL SYNTHETIC HARNESS ACCEPTANCE AND NEGATIVE TEST SUITE
+==============================================================================
+Target Harness: /Users/alex.konstantinov/Documents/MotionCorr/tools/run_metal_synthetic_regression.py
+CPU Binary:     /Users/alex.konstantinov/Documents/MotionCorr/build/motioncorr
+Metal Binary:   /var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mc_metal_harness_test_zvq1k479/surrogate_metal_runner.sh
+Metal Device:   Apple M4 Pro
+==============================================================================
+-> Running Test 1: Positive execution test...
+   PASSED: Positive run exited 0 with OVERALL HARNESS RESULT: PASS
+-> Running Test 2: Negative test - Missing output file...
+   PASSED: Missing output correctly triggered non-zero exit and artifact retention.
+-> Running Test 3: Negative test - MotionCorr process crash/exit 139...
+   PASSED: Process crash correctly triggered non-zero exit and diagnostic error.
+-> Running Test 4: Negative test - Altered image pixels (corruption)...
+   PASSED: Altered pixels correctly failed numerical acceptance gate.
+-> Running Test 5: Negative test - Incomplete comparison coverage...
+   PASSED: Incomplete comparison coverage correctly triggered non-zero exit.
+-> Running Test 6: Negative test - CPU wrapper masquerading as Metal...
+   PASSED: CPU-only execution could not claim Metal parity.
+-> Running Test 7: Negative test - Reused output directory...
+   PASSED: Reused output directory rejected before execution with code 2.
+-> Running Test 8: Negative test - Non-existent binary path...
+   PASSED: Missing binary correctly rejected with exit code 2.
+
+==============================================================================
+ ALL HARNESS VERIFICATION AND NEGATIVE TESTS PASSED SUCCESSFULLY!
+==============================================================================

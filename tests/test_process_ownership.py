@@ -414,7 +414,15 @@ def subreaper_boundaries():
         value=__import__('ctypes').c_int()
         require(lib.prctl(37,__import__('ctypes').byref(value),0,0,0)==0,'subreaper state unreadable')
         return value.value
-    before=state();owner=ProcessOwnership();owner.activate(native_required=True)
+    before=state()
+    owner=ProcessOwnership();original_read=owner.table.read
+    with patch.object(owner.table,'read',lambda pid: None if pid==os.getpid() else original_read(pid)):
+        refused=False
+        try:owner.activate(native_required=True)
+        except RuntimeError:refused=True
+    require(refused and not owner.adoption and state()==before,'missing launcher birth accepted activation or changed state')
+    print('PASS actual activation refuses missing launcher PID/birth before prctl')
+    owner=ProcessOwnership();owner.activate(native_required=True)
     require(state()==1 and owner.mode=='linux-child-subreaper','subreaper enable/readback failed')
     # Unreadable birth of an adopted/direct child must refuse, not drop it.
     proc=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'],start_new_session=True)
@@ -464,7 +472,9 @@ def subreaper_boundaries():
             try:owner.activate(native_required=True)
             except (OSError,RuntimeError):refused=True
             require(refused,'subreaper '+failure+' accepted worker launch')
+            if failure=='readback':require(owner.adoption,'failed readback lost restoration responsibility')
             if owner.adoption:owner.restore()
+            require(fake.prctl.value==before,'failed readback did not restore previous mocked state')
         require(state()==before,'failed activation changed real process state')
     print('PASS initial subreaper read/set/readback failures refuse; real process state unchanged')
 

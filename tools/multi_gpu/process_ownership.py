@@ -4,7 +4,8 @@
 Linux uses /proc start ticks; macOS uses libproc birth seconds/microseconds.
 Unavailable identity evidence is an error, never permission to signal by name
 or historical PGID. Linux launchers enable child-subreaper adoption before
-starting workers, so surviving fast-reparented children cannot escape polling.
+starting workers, recovering surviving fast-reparented children for checked
+cleanup. This is a process lifecycle contract, not a security containment boundary.
 """
 from __future__ import annotations
 import ctypes
@@ -112,11 +113,30 @@ class ProcessOwnership(threading.Thread):
         self.preexisting_children = {}
         self.parent_pid = os.getpid()
         self.parent_group = os.getpgrp()
+        self.parent_birth = None
+        self.roots = {}
         self.mode = 'observed-descendants-only'
 
     @staticmethod
     def native_supported():
         return sys.platform == 'linux'
+
+    def _child_pids(self):
+        """Read our actual thread child lists; only proven exited threads vanish."""
+        parent = self.table.read(self.parent_pid)
+        if parent is None or (self.parent_birth is not None and parent['start'] != self.parent_birth):
+            raise RuntimeError('Launcher PID/birth identity unavailable')
+        tasks = list((Path('/proc') / str(self.parent_pid) / 'task').iterdir())
+        if not tasks:
+            raise RuntimeError('Launcher thread child inventory unavailable')
+        children = set()
+        for task in tasks:
+            try:
+                children.update(map(int, (task / 'children').read_text().split()))
+            except (FileNotFoundError, ProcessLookupError):
+                if self.table.read(int(task.name)) is not None:
+                    raise RuntimeError('Live launcher thread child inventory unavailable')
+        return children
 
     def activate(self, native_required=False):
         """Enable Linux orphan adoption before any worker or helper starts.
@@ -133,12 +153,11 @@ class ProcessOwnership(threading.Thread):
         # Refuse pre-existing live children: their later orphaned descendants
         # cannot be distinguished from worker descendants. Preserve them untouched.
         # Failure to read our own child inventory refuses before any worker starts.
-        children = set()
-        for task in (Path('/proc') / str(self.parent_pid) / 'task').iterdir():
-            try:
-                children.update(map(int, (task / 'children').read_text().split()))
-            except (FileNotFoundError, ProcessLookupError):
-                continue  # that launcher thread exited during enumeration
+        parent = self.table.read(self.parent_pid)
+        if parent is None:
+            raise RuntimeError('Launcher PID/birth identity unavailable')
+        self.parent_birth = parent['start']
+        children = self._child_pids()
         for pid in children:
             record = self.table.read(pid)
             if record:
@@ -163,9 +182,18 @@ class ProcessOwnership(threading.Thread):
         """Restore process state only after checked owned cleanup and reaping."""
         if not self.adoption:
             return
-        self.refresh()
-        if self.errors or self.known_live():
-            raise RuntimeError('Cannot restore subreaper while owned children or errors remain')
+        # Callers stop worker/helper creation and join their observer first.
+        # Original roots must have exited; two immediate empty observations of
+        # adopted/recorded descendants then support this quiescent cleanup scope.
+        # They are not a security guarantee against arbitrary concurrent forks.
+        for pid, birth in self.roots.items():
+            record = self.table.read(pid)
+            if record and record['start'] == birth and record['state'] != 'Z':
+                raise RuntimeError('Cannot restore subreaper while an original worker remains live')
+        for _ in range(2):
+            self.refresh()
+            if self.errors or self.known_live():
+                raise RuntimeError('Cannot restore subreaper while owned children or errors remain')
         for pid, birth in list(self.identities.items()):
             record = self.table.read(pid)
             if record and record['start'] == birth and record['ppid'] == self.parent_pid:
@@ -187,6 +215,7 @@ class ProcessOwnership(threading.Thread):
             raise RuntimeError(f'Original launched PID {pid} birth identity unavailable')
         with self._lock:
             self.identities[pid] = record['start']
+            self.roots[pid] = record['start']
 
     def refresh(self):
         with self._lock:
@@ -194,15 +223,10 @@ class ProcessOwnership(threading.Thread):
         if self.adoption:
             # These are OUR direct children, including unsampled orphans. A
             # missing/invalid live birth cannot be silently dropped as unrelated.
-            for task in (Path('/proc') / str(self.parent_pid) / 'task').iterdir():
-                try:
-                    direct = map(int, (task / 'children').read_text().split())
-                    for pid in direct:
-                        record = self.table.read(pid)
-                        if record:
-                            known.setdefault(pid, None)
-                except (FileNotFoundError, ProcessLookupError):
-                    continue
+            for pid in self._child_pids():
+                record = self.table.read(pid)
+                if record:
+                    known.setdefault(pid, None)
         records = self.table.records(known)
         owned = {pid for pid, r in records.items() if known.get(pid) == r['start']}
         if self.adoption:

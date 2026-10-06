@@ -80,3 +80,12 @@ worker return must remain 0, and the verdict must be FAIL. Exact predecessor
 retained birth afterward. Normal/-O checks also cover unreadable adopted birth,
 pre-existing-child refusal, readback/restoration, and healthy no-child behavior.
 These are CPU lifecycle controls; current native hardware acceptance remains UNRUN.
+
+The launcher validates its own PID/birth and every extant thread's child inventory
+before activation. A missing live launcher identity/inventory refuses before any
+worker starts. Restoration requires original roots to have exited and two empty
+owned-child observations after callers stop launching work and join observers.
+This establishes the bounded quiescent cleanup contract used by these tools; it
+is not a security containment guarantee against arbitrary concurrent forking.
+A failed activation readback still retains restoration responsibility, and the
+powered control verifies the previous state is restored without launching helpers.

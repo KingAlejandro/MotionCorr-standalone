@@ -25,7 +25,7 @@ a gain by itself.
 
 | item | cost | change |
 |---|---|---|
-| final DW image D2H into pageable memory | 7.8 ms at 7.2 GB/s | async copy into a pinned buffer, ~2.5× faster |
+| final DW image D2H into pageable memory | 7.8 ms at 7.2 GB/s | **tried, rejected:** staging through the idle pinned ingest pool made the stage +3.5 ms slower (extra 57 MB host copy) |
 | ~400 timing event syncs, record/elapsed calls | measured in aggregate only | events and log timing only under `--profile` |
 | reconstruction buffers allocated and freed per movie | 5 `cudaMalloc`/`cudaFree` (each free syncs) | reuse session scratch |
 | patch alignment: 25 sequential patches | ~250 blocking round-trips | one checked sync per iteration; no timing syncs |
@@ -34,9 +34,9 @@ a gain by itself.
 
 ## Memory
 
-- Pinned output buffer: one full-frame image (57 MB) per worker, held for the
-  process. This is less than the per-movie pageable buffer it replaces, and is
-  reused across movies of the same geometry.
+- No new pinned memory (the pinned-download experiment reused the existing
+  ingest pool and was reverted).
+- The lazy host sum removes one 57 MB host buffer per movie on the resident path.
 - Session scratch reuse: no new VRAM. The DW scratch that was allocated per call
   is replaced by buffers the session already owns.
 - Batched patches are out of scope here. They would multiply the patch
@@ -50,3 +50,25 @@ same order, same stream, same arithmetic. Only waits, telemetry, allocation and
 copy destinations change. Any change that breaks bit-exactness will be a
 separate, opt-in commit with a numerical comparison against the CPU and current
 CUDA baselines, not part of these.
+
+## Measured (4GPUs, GPU0, CPUs 96-103, `--j 8`, nvCOMP, 24-movie tutorial)
+
+Base main `9d14275` (#154 + #155), candidate `8fa65af`. Products: pair-1 trees,
+79 files (24 MRC payloads, STAR, EPS): **0 differ**. Native CTest **55/55**.
+
+Per-stage, `--profile`, median of 4 interleaved runs per arm (ms/movie). Note
+that `--profile` re-enables device timing, so this isolates the host-side
+changes only:
+
+| stage | main | candidate | delta |
+|---|---|---|---|
+| allocate host sum | 17.30 | 0.01 | −17.29 |
+| allocate reconstruction | 6.48 | 0.03 | −6.46 |
+| dose weighting (incl. pinned D2H, since reverted) | 52.49 | 56.04 | +3.55 |
+| patch alignment | 51.45 | 49.93 | −1.52 |
+| total steady | 307.27 | 285.24 | −22.03 |
+
+Unprofiled 24-movie wall (telemetry off in the candidate), 8 interleaved pairs:
+median 9.70 → 9.42 s, but paired saving median −0.05 s, mean +0.25 s, SD 0.87,
+3/8 faster. The shared host (load1 21–24) leaves this unresolved; the
+per-stage host savings above are clear.

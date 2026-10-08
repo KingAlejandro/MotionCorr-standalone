@@ -9,7 +9,6 @@
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #include "src/stage_profile.h"
 #include <cmath>
-#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -211,9 +210,7 @@ bool cudaDoseWeightAndInterpolateDevice(
     const int device_id,
     std::ostream &logfile,
     CudaFailureState *failure,
-    cufftHandle borrowed_c2r,
-    void *pinned_stage,
-    size_t pinned_stage_bytes)
+    cufftHandle borrowed_c2r)
 {
     if (n_frames == 0) return true;
 
@@ -394,16 +391,10 @@ bool cudaDoseWeightAndInterpolateDevice(
         }
     }
 
-    // Single D2H download of the reconstructed image. A pageable destination
-    // runs at ~7 GB/s through the driver's own bounce buffer (7.8 ms for this
-    // geometry on A100 PCIe); a caller-provided pinned stage copies at full PCIe
-    // rate and the host then moves it into the image. Same bytes either way.
-    if (pinned_stage != nullptr && pinned_stage_bytes >= sz_iframe) {
-        HANDLE_ERROR(cudaMemcpy(pinned_stage, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
-        std::memcpy(Isum().data, pinned_stage, sz_iframe);
-    } else {
-        HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
-    }
+    // Single D2H download of reconstructed image. Staging it through a pinned
+    // buffer was measured and rejected (docs/host_device_overheads.md): the
+    // extra 57 MB host copy costs more than the faster PCIe transfer saves.
+    HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
 
     HANDLE_ERROR(cudaEventRecord(ev_stop_total));
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));

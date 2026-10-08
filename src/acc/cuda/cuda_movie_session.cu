@@ -1769,13 +1769,7 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work) return false;
-    // The worker-lifetime pinned pool held compressed strips during ingest and is
-    // idle now; reuse it to stage the final image download instead of pinning
-    // another buffer. Only when it already exists and is large enough.
-    void *stage = t_pinned_stage.ptr;
-    const size_t stage_bytes = t_pinned_stage.bytes;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile,
-                                              &failure_state, plan_c2r, stage, stage_bytes);
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, plan_c2r);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

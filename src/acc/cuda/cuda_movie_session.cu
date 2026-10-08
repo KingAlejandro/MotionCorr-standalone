@@ -1,6 +1,7 @@
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/stage_profile.h"
 
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
@@ -53,6 +54,30 @@
 } while (0)
 
 namespace {
+
+// Consecutive --profile sub-stages inside one function: next() closes the open
+// sub-stage and opens the following one, the destructor closes the last, so
+// early returns stay balanced. One branch per call when profiling is off.
+class SubStageSequence {
+public:
+    SubStageSequence() : on(StageProfile::instance().enabled()) {}
+    ~SubStageSequence() { end(); }
+    void next(const char *name) {
+        if (!on) return;
+        if (open) StageProfile::instance().pop();
+        StageProfile::instance().push(name);
+        open = true;
+    }
+    void end() {
+        if (on && open) StageProfile::instance().pop();
+        open = false;
+    }
+    SubStageSequence(const SubStageSequence &) = delete;
+    SubStageSequence &operator=(const SubStageSequence &) = delete;
+private:
+    bool on;
+    bool open = false;
+};
 
 __global__ void fusedGainAndSumKernel(
     float *d_Iframes,
@@ -450,9 +475,13 @@ bool CudaMovieSession::initialize() {
     }
 
     // Allocate persistent movie buffers
-    cudaError_t cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    cudaError_t cuda_result = cudaSuccess;
+    {
+        StageScope alloc_scope("alloc movie buffers");
+        cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
         logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
@@ -487,17 +516,23 @@ bool CudaMovieSession::initialize() {
         }
         return true;
     };
-    if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
-        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
-        release();
-        return false;
+    {
+        StageScope plan_scope("fft plans");
+        if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
+            !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
+            release();
+            return false;
+        }
     }
 
     fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
-    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
-    if (cuda_result == cudaSuccess)
-        cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
+    {
+        StageScope scratch_alloc_scope("fft scratch");
+        // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
+        cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess)
+            cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
+    }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize scratch", __LINE__);
         logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
@@ -1222,6 +1257,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // ------------------------------------------------------------------
     std::vector<std::vector<uint32_t> > raw_sizes(num_req_frames);
     {
+        StageScope tag_scope("ingest tag scan");
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
         bool ok = true;
@@ -1294,6 +1330,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // the previous revision passed base+2 pointers, which is outside the API
     // contract. Query rather than assume.
     // ------------------------------------------------------------------
+    SubStageSequence phase;
+    phase.next("ingest setup");
     nvcompAlignmentRequirements_t align_req;
     std::memset(&align_req, 0, sizeof(align_req));
     if (nvcompBatchedDeflateDecompressGetRequiredAlignments(
@@ -1471,6 +1509,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         const int bf = std::min(batch_frames, n_frames - f0);
         const size_t chunks = (size_t)bf * (size_t)ny;
 
+        phase.next("ingest table build");
         std::vector<size_t> frame_base(bf);
         size_t stage_used = 0;
         for (int i = 0; i < bf; i++) {
@@ -1479,6 +1518,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         }
         if (stage_used > v.comp_capacity) return false;
 
+        phase.next("ingest strip read");
         std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
         #pragma omp parallel num_threads(io_threads)
         {
@@ -1541,12 +1581,14 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         }
         for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
 
+        phase.next("ingest h2d submit");
         HANDLE_ERROR(cudaMemcpyAsync(v.comp, h_stage, stage_used, cudaMemcpyHostToDevice, stream));
         HANDLE_ERROR(cudaMemcpyAsync(v.cptr, h_comp_ptrs.data(), chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
         HANDLE_ERROR(cudaMemcpyAsync(v.csize, h_comp_size.data(), chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
         HANDLE_ERROR(cudaMemcpyAsync(v.dptr,  h_dec_ptrs.data(),  chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
         HANDLE_ERROR(cudaMemcpyAsync(v.dsize,  h_dec_size.data(),  chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
 
+        phase.next("ingest decompress submit");
         if (nvcompBatchedDeflateDecompressAsync(
                 (const void *const *)v.cptr, v.csize, v.dsize, v.asize,
                 chunks, v.temp, v.temp_bytes, v.dptr,
@@ -1561,10 +1603,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, row_bytes, 1,
             v.status, v.asize, v.adler, chunks);
         HANDLE_ERROR(cudaGetLastError());
+        phase.next("ingest status d2h and sync");
         HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaMemcpyAsync(h_adler_actual.data(), v.adler, chunks * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream));
         HANDLE_ERROR(cudaStreamSynchronize(stream));
+        phase.next("ingest verify");
         // Reject the whole batch before consulting any checksum: an earlier
         // checksum mismatch must not mask a later decoder failure.
         for (size_t c = 0; c < chunks; c++) {
@@ -1587,6 +1631,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             }
         }
 
+        phase.next("ingest gain sum cast");
         dim3 block(16, 16);
         dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
         fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
@@ -1595,6 +1640,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaStreamSynchronize(stream));
     }
+    phase.end();
 
     return true;
 }

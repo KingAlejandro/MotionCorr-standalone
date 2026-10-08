@@ -97,7 +97,7 @@ void StageProfile::Acc::add(const Sample &a, const Sample &b)
 
 void StageProfile::enable(const std::string &path)
 {
-	if (path.empty()) return;
+	if (path.empty() || on) return;
 	out.open(path.c_str(), std::ios::out | std::ios::trunc);
 	if (!out)
 		REPORT_ERROR("Cannot open --profile output " + path);
@@ -109,6 +109,7 @@ void StageProfile::beginRun()
 {
 	if (!on) return;
 	run_start = sampleThread();
+	run_open = true;
 }
 
 void StageProfile::beginMovie(long int index, const std::string &name)
@@ -245,7 +246,8 @@ void StageProfile::addThreadTask(const char *thread, const char *task, double wa
 
 void StageProfile::endRun(int n_movies)
 {
-	if (!on) return;
+	if (!on || !run_open) return;
+	run_open = false;
 	if (in_movie) endMovie(false);
 	const Sample now = sampleThread();
 	rusage self;

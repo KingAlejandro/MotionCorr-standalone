@@ -135,6 +135,8 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
+	// Opened here so an unwritable path fails before any processing.
+	StageProfile::instance().enable(fn_profile);
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
@@ -697,7 +699,6 @@ void MotioncorrRunner::run()
 	// main thread computes movie N+1. See src/output_writer.h for the order,
 	// fail-closed and memory-bound properties this relies on.
 	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
-	StageProfile::instance().enable(fn_profile);
 	StageProfile::instance().beginRun();
 
 	// Indexed by movie, so the report below stays in input order however the
@@ -723,6 +724,8 @@ void MotioncorrRunner::run()
 		if (!do_own && !do_motioncor2)
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 		bool result = false;
+		// Before header parsing, so a movie that fails to open is still recorded.
+		StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
 		try
 		{
 			// Header parsing is also a per-movie failure, not a batch abort.
@@ -735,7 +738,6 @@ void MotioncorrRunner::run()
 				             integerToString(mic.getNframes()) + " frames.");
 			}
 			mic.pre_exposure = pre_exposure + pre_exposure_micrographs[imic];
-			StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
 			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
@@ -798,6 +800,8 @@ void MotioncorrRunner::run()
 
 	if (!failed_movies.empty())
 	{
+		// The job fails below; the profile still gets its process record.
+		StageProfile::instance().endRun((int)fn_micrographs.size());
 		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
 		for (const FileName &movie : failed_movies) message += " " + movie;
 		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");

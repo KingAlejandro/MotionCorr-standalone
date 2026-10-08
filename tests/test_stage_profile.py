@@ -96,6 +96,34 @@ def main():
               "process record consistent")
         check(any(t["name"].startswith("writer/") for t in p["threads"]), "writer thread tasks recorded")
 
+        # A job with one unreadable movie still fails, but the profile keeps a
+        # record for both movies (the failed one with ok=false) and its process line.
+        star = tmp / "mixed.star"
+        missing = tmp / "missing_movie.tiff"
+        # A truncated copy: present, so the batch starts, but undecodable.
+        missing.write_bytes(MOVIE.read_bytes()[:4096])
+        star.write_text(
+            "# version 30001\n\ndata_optics\n\nloop_\n"
+            "_rlnOpticsGroupName #1\n_rlnOpticsGroup #2\n"
+            "_rlnMicrographOriginalPixelSize #3\n_rlnVoltage #4\n"
+            "_rlnSphericalAberration #5\n_rlnAmplitudeContrast #6\n"
+            "opticsGroup1 1 1.000 300.0 2.7 0.1\n\n"
+            "# version 30001\n\ndata_movies\n\nloop_\n"
+            "_rlnMicrographMovieName #1\n_rlnOpticsGroup #2\n"
+            "%s 1\n%s 1\n" % (MOVIE, missing))
+        mixed_profile = tmp / "mixed.jsonl"
+        mixed = subprocess.run([a.binary, "--i", str(star), "--o", str(tmp / "mixed") + "/"] + ARGS
+                               + ["--profile", str(mixed_profile)], cwd=ROOT, capture_output=True, text=True)
+        check(mixed.returncode != 0, "job with an unreadable movie fails")
+        recs = [json.loads(l) for l in mixed_profile.read_text().splitlines() if l.strip()]
+        mv = [r for r in recs if r["type"] == "movie"]
+        check(len(mv) == 2 and mv[0]["ok"] and not mv[1]["ok"],
+              f"both movies recorded, failed one ok=false ({[(r['index'], r['ok']) for r in mv]})")
+        check(sum(r["type"] == "process" for r in recs) == 1, "process record written on a failed job")
+        for r in mv:
+            check(abs(sum(s["wall_ms"] for s in r["stages"]) - r["wall_ms"]) < 0.5,
+                  f"failed-job movie {r['index']} stages still tile its wall")
+
         bad = run(a.binary, tmp / "bad", ["--profile", str(tmp / "no" / "such" / "dir" / "p.jsonl")])
         check(bad.returncode != 0 and "--profile" in (bad.stderr + bad.stdout),
               "unwritable --profile path fails with a named error")

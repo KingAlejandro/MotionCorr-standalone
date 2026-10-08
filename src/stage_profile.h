@@ -52,7 +52,9 @@ public:
 	void push(const char *stage);
 	void pop();
 
-	/** Accumulate one task run on another thread (e.g. the output writer). */
+	/** Accumulate one task run on another thread (e.g. the output writer).
+	 * Fault counts come from RUSAGE_THREAD on Linux; elsewhere they are
+	 * process-wide and only indicative. */
 	void addThreadTask(const char *thread, const char *task, double wall_ms, double cpu_ms,
 	                   long minflt);
 
@@ -83,6 +85,7 @@ private:
 	void writeMovie(bool ok, const Sample &end);
 
 	bool on = false;
+	bool run_open = false;
 	std::ofstream out;
 
 	// Main thread only.

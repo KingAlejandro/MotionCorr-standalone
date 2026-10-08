@@ -47,6 +47,8 @@ DEFAULT_REQUIRED_TESTS = [
     # dropped from CMakeLists.txt with the collected count still at the
     # minimum and CI still green.
     "GlobalIfftElision",
+    # --profile: products unchanged, stages exhaustive (docs/stage_profile.md).
+    "StageProfile",
     # Added by the #69 CUDA reliability port. Device-free, so it is always
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.

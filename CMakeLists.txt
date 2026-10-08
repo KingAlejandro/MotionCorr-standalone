@@ -259,6 +259,9 @@ if(BUILD_TESTING)
         add_test(NAME GlobalIfftElision
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_global_ifft_elision.py
                 --binary $<TARGET_FILE:motioncorr>)
+        add_test(NAME StageProfile
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME RunnerModelParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --helper $<TARGET_FILE:runner_numerics> --case model_parser)

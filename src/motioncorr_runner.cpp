@@ -63,6 +63,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include <src/jaz/single_particle/new_ft.h>
 #include "src/funcs.h"
 #include "src/renderEER.h"
+#include "src/stage_profile.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -117,8 +118,11 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 //	int TIMING_ = MCtimer.setNew("");
 
 #else
-	#define RCTIC(label)
-	#define RCTOC(label)
+	// Without TIMING, the same markers become nested --profile sub-stages
+	// (docs/stage_profile.md). Each costs one branch when profiling is off.
+	// #label is "TIMING_<NAME>"; skip the fixed prefix by address, not by arithmetic on the literal.
+	#define RCTIC(label) do { if (StageProfile::instance().enabled()) StageProfile::instance().push(&(#label)[sizeof("TIMING_") - 1]); } while (0)
+	#define RCTOC(label) do { if (StageProfile::instance().enabled()) StageProfile::instance().pop(); } while (0)
 #endif
 
 void MotioncorrRunner::read(int argc, char **argv, int rank)
@@ -130,6 +134,9 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	do_skip_logfile = parser.checkOption("--skip_logfile", "Skip generation of tracks-part of the logfile.pdf");
 	n_threads = textToInteger(parser.getOption("--j", "Number of threads per movie (= process)", "1"));
 	max_io_threads = textToInteger(parser.getOption("--max_io_threads", "Limit the number of IO threads.", "-1"));
+	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
+	// Opened here so an unwritable path fails before any processing.
+	StageProfile::instance().enable(fn_profile);
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
@@ -692,6 +699,7 @@ void MotioncorrRunner::run()
 	// main thread computes movie N+1. See src/output_writer.h for the order,
 	// fail-closed and memory-bound properties this relies on.
 	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
+	StageProfile::instance().beginRun();
 
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.
@@ -716,6 +724,8 @@ void MotioncorrRunner::run()
 		if (!do_own && !do_motioncor2)
 			REPORT_ERROR("Bug: by now it should be clear whether to use MotionCor2 or own implementation ...");
 		bool result = false;
+		// Before header parsing, so a movie that fails to open is still recorded.
+		StageProfile::instance().beginMovie(imic, fn_micrographs[imic]);
 		try
 		{
 			// Header parsing is also a per-movie failure, not a batch abort.
@@ -731,6 +741,7 @@ void MotioncorrRunner::run()
 			obsModel.opticsMdt.getValue(EMDL_CTF_VOLTAGE, voltage, optics_group_micrographs[imic]-1);
 			obsModel.opticsMdt.getValue(EMDL_MICROGRAPH_ORIGINAL_PIXEL_SIZE, angpix, optics_group_micrographs[imic]-1);
 			result = do_own ? executeOwnMotionCorrection(mic, exp_frames) : executeMotioncor2(mic);
+			MC_STAGE("submit model and plot");
 			if (result) {
 				RCTIC(TIMING_SAVE_MODEL_PLOT);
 				// Stamped here: run() reassigns angpix and voltage for every
@@ -757,6 +768,7 @@ void MotioncorrRunner::run()
 			std::cerr << "Continuing with the remaining movies." << std::endl;
 			result = false;
 		}
+		StageProfile::instance().endMovie(result);
 		if (!result)
 			movie_failed[imic] = 1;
 		collectWriteFailures(movie_failed);
@@ -764,7 +776,17 @@ void MotioncorrRunner::run()
 
 	// Every product is on disk and closed after this, which the joint STAR
 	// scan below depends on: it decides membership from exists(fn_avg).
-	output_writer->drain();
+	{
+		StageProfile::Sample drain_start;
+		if (StageProfile::instance().enabled()) drain_start = StageProfile::sampleThread();
+		output_writer->drain();
+		if (StageProfile::instance().enabled()) {
+			const StageProfile::Sample drain_end = StageProfile::sampleThread();
+			StageProfile::instance().addThreadTask("main", "final writer drain",
+			    (drain_end.wall_s - drain_start.wall_s) * 1e3, (drain_end.cpu_s - drain_start.cpu_s) * 1e3,
+			    drain_end.minflt - drain_start.minflt);
+		}
+	}
 	collectWriteFailures(movie_failed);
 	output_writer.reset();
 	output_movie_index = -1;
@@ -778,6 +800,8 @@ void MotioncorrRunner::run()
 
 	if (!failed_movies.empty())
 	{
+		// The job fails below; the profile still gets its process record.
+		StageProfile::instance().endRun((int)fn_micrographs.size());
 		std::string message = "Motion correction failed for " + integerToString(failed_movies.size()) + " movie(s):";
 		for (const FileName &movie : failed_movies) message += " " + movie;
 		REPORT_ERROR(message + ". Successful per-movie outputs were retained; joint output was not generated.");
@@ -785,8 +809,24 @@ void MotioncorrRunner::run()
 
 	// Make a logfile with the shifts in pdf format and write output STAR files
 	RCTIC(TIMING_LOGFILE_PDF);
-	generateLogFilePDFAndWriteStarFiles();
+	{
+		StageProfile::Sample pdf_start;
+		if (StageProfile::instance().enabled()) pdf_start = StageProfile::sampleThread();
+		try {
+			generateLogFilePDFAndWriteStarFiles();
+		} catch (...) {
+			StageProfile::instance().endRun((int)fn_micrographs.size());
+			throw;
+		}
+		if (StageProfile::instance().enabled()) {
+			const StageProfile::Sample pdf_end = StageProfile::sampleThread();
+			StageProfile::instance().addThreadTask("main", "joint star and logfile pdf",
+			    (pdf_end.wall_s - pdf_start.wall_s) * 1e3, (pdf_end.cpu_s - pdf_start.cpu_s) * 1e3,
+			    pdf_end.minflt - pdf_start.minflt);
+		}
+	}
 	RCTOC(TIMING_LOGFILE_PDF);
+	StageProfile::instance().endRun((int)fn_micrographs.size());
 
 #ifdef TIMING
         MCtimer.printTimes(false);
@@ -1181,7 +1221,24 @@ void MotioncorrRunner::submitOutput(std::function<void()> task)
 	// whole point: the wait for the previous movie's products happens at the
 	// first write of this movie, by which time they have had that movie's
 	// entire computation to finish in.
-	output_writer->beginMovie(output_movie_index);
+	{
+		// A wait here is the main thread blocked behind the previous movie's
+		// products; --profile charges it as its own sub-stage.
+		StageScope wait_scope("writer backpressure");
+		output_writer->beginMovie(output_movie_index);
+	}
+	if (StageProfile::instance().enabled()) {
+		// --sync_output runs the task inline on the main thread; label it so.
+		const char *thread = output_writer->isBackground() ? "writer" : "main";
+		std::function<void()> inner = std::move(task);
+		task = [inner, thread]() {
+			const StageProfile::Sample a = StageProfile::sampleThread();
+			inner();
+			const StageProfile::Sample b = StageProfile::sampleThread();
+			StageProfile::instance().addThreadTask(thread, "product task",
+			    (b.wall_s - a.wall_s) * 1e3, (b.cpu_s - a.cpu_s) * 1e3, b.minflt - a.minflt);
+		};
+	}
 	output_writer->submit(std::move(task));
 }
 
@@ -1751,6 +1808,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	logfile << std::endl;
 
 	// Read gain reference
+	MC_STAGE("read gain");
 	RCTIC(TIMING_READ_GAIN);
 	// Bound to the cached array; empty when no gain was requested.
 	static const MultidimArray<float> no_gain;
@@ -1767,6 +1825,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 	}
 	RCTOC(TIMING_READ_GAIN);
+	MC_STAGE("session and device ingest");
 
 	// Issue #85 lane C. Set below, once the CUDA session state is known: the
 	// compact arm is only worth its host mapping when a resident session will
@@ -1931,6 +1990,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 	// Read images
+	MC_STAGE("host read movie");
 	RCTIC(TIMING_READ_MOVIE);
 	bool do_host_read = true;
 #ifdef _CUDA_ENABLED
@@ -1973,6 +2033,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		}
 	}
 	RCTOC(TIMING_READ_MOVIE);
+	MC_STAGE("allocate host sum");
 
 	// Issue #85 lane C: every path other than the resident device one consumes float
 	// frames, so a compact-staged movie has to be widened before it can reach them.
@@ -2117,6 +2178,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 	// Apply gain and build the initial sum in one pixel pass. This avoids a
 	// second read of every movie frame and repeated OpenMP launch/barrier cycles.
+	MC_STAGE("gain and sum");
 	RCTIC(TIMING_GAIN_AND_SUM);
 #ifdef _CUDA_ENABLED
 	bool cuda_gain_sum_done = false;
@@ -2187,6 +2249,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Hot pixel
 	if (!skip_defect)
 	{
+		MC_STAGE("hot pixels");
 		RCTIC(TIMING_DETECT_HOT);
 		RFLOAT mean = 0, std = 0, threshold = 0;
 		MultidimArray<bool> bBad(ny, nx);
@@ -2384,6 +2447,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		Isum.clear();
 		RCTOC(TIMING_DETECT_HOT);
 
+		MC_STAGE("fix defects");
 		RCTIC(TIMING_FIX_DEFECT);
 		const RFLOAT frame_mean = mean / n_frames;
 		const RFLOAT frame_std = std / n_frames;
@@ -2539,6 +2603,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		logfile << "Fixed hot pixels." << std::endl;
 	} // !skip_defect
 
+	MC_STAGE("release preprocessing");
 #ifdef _CUDA_ENABLED
 	if (movie_session && !movie_session->releasePreprocessingBuffers())
 		REPORT_ERROR("CUDA preprocessing cleanup failed for " + fn_mic);
@@ -2565,6 +2630,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 	// FFT
+	MC_STAGE("global fft");
 	RCTIC(TIMING_GLOBAL_FFT);
 	bool cuda_global_fft_done = false;
 #ifdef _CUDA_ENABLED
@@ -2644,6 +2710,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 	RCTOC(TIMING_GLOBAL_FFT);
 
+	MC_STAGE("power spectrum");
 	RCTIC(TIMING_POWER_SPECTRUM);
 	// Write power spectrum for CTF estimation
 	if (grouping_for_ps > 0)
@@ -2754,6 +2821,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	// Global alignment
 	// TODO: Consider frame grouping in global alignment.
 	logfile << std::endl << "Global alignment:" << std::endl;
+	MC_STAGE("global alignment");
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
 #ifdef _CUDA_ENABLED
 	if (movie_session) {
@@ -2764,6 +2832,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		alignPatch(Fframes, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
 	}
 	RCTOC(TIMING_GLOBAL_ALIGNMENT);
+	MC_STAGE("allocate reconstruction");
 	for (int i = 0, ilim = xshifts.size(); i < ilim; i++) {
 		// Should be in the original pixel size
 		mic.setGlobalShift(frames[i] + 1, xshifts[i] * prescaling, yshifts[i] * prescaling); // 1-indexed
@@ -2793,6 +2862,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	const bool pre_dw_sum_needed = !do_dose_weighting || save_noDW || even_odd_split;
 	const bool need_real_space_before_dw = do_local || pre_dw_sum_needed;
 
+	MC_STAGE("global ifft");
 	RCTIC(TIMING_GLOBAL_IFFT);
 	bool cuda_global_ifft_done = false;
 #ifdef _CUDA_ENABLED
@@ -2834,6 +2904,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTOC(TIMING_GLOBAL_IFFT);
 
 	// Patch based alignment
+	MC_STAGE("patch alignment");
 	logfile << std::endl << "Local alignments:" << std::endl;
 	logfile << "Patches: X = " << patch_x << " Y = " << patch_y << std::endl;
 	if (!do_local) {
@@ -3156,7 +3227,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 
 		// Fit polynomial model
-
+		MC_STAGE("fit polynomial");
 		RCTIC(TIMING_FIT_POLYNOMIAL);
 		const int n_obs = patch_frames.size();
 		const int n_params = 18;
@@ -3298,6 +3369,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	}
 
 skip_fitting:
+	MC_STAGE("release alignment");
 #ifdef _CUDA_ENABLED
 	// Local alignment scratch belongs to this movie, but reconstruction no longer
 	// needs it. Check late release errors before any image can be submitted.
@@ -3307,6 +3379,7 @@ skip_fitting:
 	if (use_gpu) cudaReleaseCachedFrames();
 #endif
 	if (pre_dw_sum_needed) {
+		MC_STAGE("unweighted sums");
 		Iref().reshape(ny, nx);
 		Iref().initZeros();
 		Iref_odd().reshape(ny, nx);
@@ -3446,6 +3519,7 @@ skip_fitting:
 
 	// Dose weighting
 	if (do_dose_weighting) {
+		MC_STAGE("dose weighting");
 		RCTIC(TIMING_DOSE_WEIGHTING);
 		if (std::abs(voltage - 300) > 2 && std::abs(voltage - 200) > 2 && std::abs(voltage - 100) > 2) {
 			REPORT_ERROR("Sorry, dose weighting is supported only for 300, 200 or 100 kV");
@@ -3538,6 +3612,7 @@ skip_fitting:
 		RCTOC(TIMING_WRITE_RESULT);
 	}
 
+	MC_STAGE("movie teardown");
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
 

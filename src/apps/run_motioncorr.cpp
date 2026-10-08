@@ -25,35 +25,56 @@
 
 /* Keep full-frame host buffers in the heap across movies (docs/host_buffer_reuse.md).
  *
- * glibc serves any allocation above its mmap threshold from a fresh anonymous
- * mapping and returns it to the kernel on free. The dynamic threshold stops
- * adapting at 32 MiB, and a full micrograph here is 57 MiB, so every movie
- * re-faulted and re-zeroed each such buffer 4 KiB at a time on the main thread
- * while the GPU waited: --profile measured ~45 ms per buffer per movie for the
- * host sum and reconstruction buffers alone, 13.9k minor faults each.
+ * glibc serves allocations above its mmap threshold from a fresh anonymous
+ * mapping and unmaps them on free. The dynamic threshold stops adapting at
+ * 32 MiB, and a full micrograph here is 57 MiB, so every movie re-faulted and
+ * re-zeroed each such buffer 4 KiB at a time on the main thread while the GPU
+ * waited (--profile: ~45 ms per buffer per movie, 13.9k minor faults each).
  *
- * Raising the mmap and trim thresholds above the largest per-movie buffer lets
- * a freed buffer be reused by the next movie of the same geometry. Contents are
- * still initialised by the code that allocates them; only where the pages come
- * from changes. A movie-sized frame stack (the --ingest float path) stays above
- * the threshold and keeps its own mapping. Must run before the first large
- * allocation. MOTIONCORR_MALLOC_DEFAULTS=1 keeps glibc's defaults for comparison.
+ * Raising the mmap and trim thresholds lets a freed buffer be reused by the next
+ * movie. Two glibc facts constrain how:
+ *  - Before 2.35, M_MMAP_THRESHOLD above HEAP_MAX_SIZE/2 (32 MiB on 64-bit) is
+ *    rejected with 0. Any successful mallopt setter also disables the dynamic
+ *    threshold, so setting only the trim threshold there would pin the mmap
+ *    threshold at 128 KiB and make things worse. So the mmap threshold is set
+ *    first, and if it is refused nothing else is touched.
+ *  - Setting it disables the dynamic threshold process-wide. That is the
+ *    intended behaviour here: large buffers stay in the heap.
+ * The value covers the largest single full-frame float buffer expected (K3
+ * super-resolution 11520x8184 is 377 MB; EER 8K at 4x is 268 MB). Each frame of
+ * a float movie is one such buffer, so the whole stack is heap-served too; the
+ * compact and nvCOMP ingest paths do not hold a host float movie.
+ * Contents are unaffected: every buffer is initialised by the code that uses it,
+ * which tests/test_host_buffer_reuse.py checks with MALLOC_PERTURB_.
+ *
+ * Skipped when MOTIONCORR_MALLOC_DEFAULTS is set to anything but 0/empty, or when
+ * the user already chose malloc settings (MALLOC_MMAP_THRESHOLD_,
+ * MALLOC_TRIM_THRESHOLD_ or GLIBC_TUNABLES), which this must not override.
  */
-static void configureHostAllocator()
+static const char *configureHostAllocator()
 {
 #if defined(__GLIBC__)
 	const char *keep = getenv("MOTIONCORR_MALLOC_DEFAULTS");
-	if (keep != NULL && keep[0] == '1') return;
-	const int threshold = 256 << 20;
-	(void)mallopt(M_MMAP_THRESHOLD, threshold);
-	(void)mallopt(M_TRIM_THRESHOLD, threshold);
+	if (keep != NULL && keep[0] != '\0' && !(keep[0] == '0' && keep[1] == '\0'))
+		return "glibc defaults (MOTIONCORR_MALLOC_DEFAULTS)";
+	if (getenv("MALLOC_MMAP_THRESHOLD_") || getenv("MALLOC_TRIM_THRESHOLD_") || getenv("GLIBC_TUNABLES"))
+		return "user malloc settings kept";
+	const int threshold = 512 << 20;
+	if (mallopt(M_MMAP_THRESHOLD, threshold) != 1)
+		return "glibc defaults (this glibc refuses a mmap threshold above 32 MiB)";
+	if (mallopt(M_TRIM_THRESHOLD, threshold) != 1)
+		return "mmap threshold raised; trim threshold unchanged";
+	return "full-frame host buffers reused across movies";
+#else
+	return "platform allocator defaults";
 #endif
 }
 
 int main(int argc, char *argv[])
 {
-	configureHostAllocator();
+	const char *allocator_mode = configureHostAllocator();
 	MotioncorrRunner prm;
+	prm.host_allocator_mode = allocator_mode;
 
 	try
 	{

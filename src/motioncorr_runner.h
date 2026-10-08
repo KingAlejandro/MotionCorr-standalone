@@ -84,6 +84,8 @@ public:
 	bool sync_output = false;
 	// --profile: JSON-lines stage profile path; empty disables it.
 	FileName fn_profile;
+	// How main() configured the host allocator; printed once and in --profile.
+	std::string host_allocator_mode;
 
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;

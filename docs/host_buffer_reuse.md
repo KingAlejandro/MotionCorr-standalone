@@ -22,17 +22,55 @@ reproduction measures 56 ms per 57 MiB allocate-touch-free cycle with defaults,
 
 ## Change
 
-`main()` raises `M_MMAP_THRESHOLD` and `M_TRIM_THRESHOLD` to 256 MiB before
+`main()` sets `M_MMAP_THRESHOLD` and then `M_TRIM_THRESHOLD` to 512 MiB before
 any allocation, so freed full-frame buffers stay in the heap and the next movie
-reuses them. This is glibc-only and a no-op elsewhere.
+reuses them. The mode is printed at start (`Host allocator: ...`) and recorded
+in the `--profile` process record.
 
-- **Products:** unchanged. Every buffer is still initialised by the code that
-  allocates it. Only where the pages come from changes.
-- **Memory:** live peak is unchanged. Up to the trim threshold of freed heap
-  memory is retained between movies. The run's peak RSS is the figure to watch
-  and is reported below.
-- **Escape hatch:** `MOTIONCORR_MALLOC_DEFAULTS=1` restores glibc defaults,
-  which also makes a same-binary A/B possible.
+### glibc versions
+
+- **glibc >= 2.35** accepts the value. This covers Ubuntu 22.04+, RHEL 10 and Debian 12+.
+- **glibc < 2.35** (RHEL 8/9, Ubuntu 20.04, Debian 11) rejects a mmap threshold
+  above `HEAP_MAX_SIZE/2` (32 MiB). Any successful `mallopt` setter also
+  disables the dynamic threshold, so setting only the trim threshold there would
+  pin the mmap threshold at 128 KiB and *increase* mmap churn. The code
+  therefore sets the mmap threshold first and, if it is refused, changes nothing
+  and reports `glibc defaults (...)`. Those hosts behave exactly as before; buffer
+  reuse there would need an explicit buffer cache instead.
+- Setting the threshold disables glibc's dynamic threshold process-wide. That is
+  intended here: large buffers stay in the heap.
+
+### When it is skipped
+
+- `MOTIONCORR_MALLOC_DEFAULTS` set to anything other than empty or `0`.
+- The user already chose malloc settings (`MALLOC_MMAP_THRESHOLD_`,
+  `MALLOC_TRIM_THRESHOLD_` or `GLIBC_TUNABLES`). These are never overridden.
+
+### Threshold size
+
+512 MiB covers the largest single full-frame float buffer expected: K3
+super-resolution (11520×8184, 377 MB) and EER 8K at 4× (268 MB). Allocations at
+or above it still get their own mapping. On the float ingest path each frame is
+one such buffer, so the frame stack is heap-served too. The compact and nvCOMP
+paths hold no host float movie.
+
+## Correctness
+
+Buffers that used to be fresh, kernel-zeroed mappings are now recycled heap
+memory, so any read-before-write would make products depend on the previous
+movie. `tests/test_host_buffer_reuse.py` checks for that. On a multi-movie batch
+and on a mixed-geometry batch in one process, products must be byte-identical
+across glibc defaults, reuse, and reuse with `MALLOC_PERTURB_` (every allocation
+filled with a non-zero pattern).
+
+## Memory
+
+The live peak is unchanged. Freed memory is retained in the heap up to the trim
+threshold, so RSS behaves as a high-water mark: same-geometry movies reuse the
+space, while alternating geometries can fragment it. Measured peak RSS on the
+24-movie tutorial (nvCOMP path, 6 paired runs) is 570 MiB with defaults and
+643 MiB with reuse (+72 MiB). The float ingest path is measured separately in
+the PR.
 
 ## Alternatives measured
 
@@ -40,7 +78,5 @@ reuses them. This is glibc-only and a no-op elsewhere.
   first-touch cost depends on host fragmentation. One paired campaign on the
   shared host lost the gain whenever compaction stalled. Rejected as the
   primary fix.
-- **Removing the allocations:** the host sum is unread on the resident path
-  only when GPU statistics pass their exactness guard, and the reconstruction
-  buffer is always written. Either change would be more invasive, and both are
-  subsumed by reuse.
+- **Removing the allocations:** done separately where a buffer is dead
+  (`perf/host-device-overheads`). Reuse covers the remaining live buffers.

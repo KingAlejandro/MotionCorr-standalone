@@ -40,6 +40,9 @@ public:
 	void enable(const std::string &path);
 	bool enabled() const { return on; }
 
+	/** Free-form key/value written into the process record. */
+	void setNote(const std::string &key, const std::string &value) { if (on) notes[key] = value; }
+
 	void beginRun();
 	void endRun(int n_movies);
 
@@ -102,6 +105,7 @@ private:
 	std::vector<Open> nested;
 	std::vector<std::pair<std::string, Acc> > stages;  // first-seen order
 	std::map<std::string, Acc> sub;
+	std::map<std::string, std::string> notes;
 
 	// Shared with worker threads.
 	std::mutex thread_mutex;

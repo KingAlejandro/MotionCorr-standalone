@@ -194,6 +194,14 @@ if(BUILD_TESTING)
     target_include_directories(adler32_kernel_host PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/adler32_host_mock" "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME Adler32KernelHost COMMAND adler32_kernel_host)
+    # Links motioncorr_core for StageProfile and REPORT_ERROR; motioncorr_core
+    # already carries the OpenMP/pthread link.
+    add_executable(stage_profile_threads tests/test_stage_profile_threads.cpp)
+    target_link_libraries(stage_profile_threads PRIVATE motioncorr_core)
+    add_test(NAME StageProfileThreads COMMAND stage_profile_threads)
+    add_executable(frame_buffer_pool tests/test_frame_buffer_pool.cpp)
+    target_link_libraries(frame_buffer_pool PRIVATE motioncorr_core)
+    add_test(NAME FrameBufferPool COMMAND frame_buffer_pool)
     add_executable(scratch_arena tests/test_scratch_arena.cpp)
     target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ScratchArena COMMAND scratch_arena)

@@ -39,6 +39,16 @@ Off by default. When off, each probe is one branch on a cached bool; no syscalls
 no allocation, no output, and no product changes. When on, the cost is two
 `clock_gettime` plus one `getrusage` per boundary (~45 boundaries/movie).
 
+## Output safety
+
+- `--profile` creates its file exclusively (`O_EXCL`). An existing file, or a
+  symlink at that path, is refused before anything is written, because the
+  option is parsed before inputs are validated.
+- Write, flush and close failures are reported once on stderr. The run and
+  its products are unaffected.
+- Stage calls from non-owner threads return before touching owner-only state
+  (`tests/test_stage_profile_threads.cpp`).
+
 ## Reading sub-stages
 
 Sub-stages come from the existing `RCTIC/RCTOC` markers and are recorded on the

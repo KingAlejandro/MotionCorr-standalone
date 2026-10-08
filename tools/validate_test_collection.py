@@ -51,6 +51,9 @@ DEFAULT_REQUIRED_TESTS = [
     "StageProfile",
     # Host buffer reuse: products identical with/without reuse and MALLOC_PERTURB_.
     "HostBufferReuse",
+    # #154/#155 review fixes: profiler thread safety; bounded frame buffer pool.
+    "StageProfileThreads",
+    "FrameBufferPool",
     # Added by the #69 CUDA reliability port. Device-free, so it is always
     # collected; the CUDA-only CudaErrorClass is not listed here, matching
     # the existing exclusion of CudaWrapperUploadFailure.

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Host buffer reuse must not change products (docs/host_buffer_reuse.md).
 
-Reusing freed heap memory means a large buffer no longer starts as fresh,
-kernel-zeroed pages. If any code read a buffer before writing it, products
-would then depend on what the previous movie left behind.
+Reusing a full-frame buffer means it no longer starts as fresh, kernel-zeroed
+pages. If any code read a buffer before writing it, products would then
+depend on what the previous movie left behind.
 
 Arms, all on a multi-movie batch so buffers really are reused across movies:
-  defaults   MOTIONCORR_MALLOC_DEFAULTS=1 (glibc defaults, fresh large mappings)
-  reuse      the default build behaviour
-  perturbed  reuse plus MALLOC_PERTURB_, which fills every allocation with a
-             non-zero byte pattern; any read-before-write shows up as a diff
+  nopool     MOTIONCORR_FRAME_POOL=0 (no pooling, glibc defaults)
+  pool       the default build behaviour (bounded full-frame buffer pool)
+  perturbed  pool plus MALLOC_PERTURB_ (fills fresh allocations with a pattern)
+             and MOTIONCORR_FRAME_POOL_POISON=1 (fills every reused pool buffer
+             with NaNs), so no read-before-write can hide
+  thresholds the opt-in MOTIONCORR_MALLOC_REUSE=1 (glibc mmap/trim thresholds)
 Plus a mixed-geometry batch in one process (512x512, 128x128, 512x512), so
 reused buffers change shape between movies.
 
@@ -53,7 +55,7 @@ def write_star(path, movies):
 
 def run(binary, star, out, env_extra, cwd):
     env = dict(os.environ)
-    for k in ("MOTIONCORR_MALLOC_DEFAULTS", "MALLOC_PERTURB_", "MALLOC_MMAP_THRESHOLD_",
+    for k in ("MOTIONCORR_FRAME_POOL", "MOTIONCORR_FRAME_POOL_POISON", "MOTIONCORR_MALLOC_REUSE", "MALLOC_PERTURB_", "MALLOC_MMAP_THRESHOLD_",
               "MALLOC_TRIM_THRESHOLD_", "GLIBC_TUNABLES"):
         env.pop(k, None)
     env.update(env_extra)
@@ -96,9 +98,10 @@ def main():
         write_star(same, names)
 
         arms = {
-            "defaults": {"MOTIONCORR_MALLOC_DEFAULTS": "1"},
-            "reuse": {},
-            "perturbed": {"MALLOC_PERTURB_": "165"},
+            "nopool": {"MOTIONCORR_FRAME_POOL": "0"},
+            "pool": {},
+            "perturbed": {"MALLOC_PERTURB_": "165", "MOTIONCORR_FRAME_POOL_POISON": "1"},
+            "thresholds": {"MOTIONCORR_MALLOC_REUSE": "1", "MALLOC_PERTURB_": "90"},
         }
         outs = {}
         for arm, env in arms.items():
@@ -108,10 +111,12 @@ def main():
                 print(r.stderr[-1500:])
                 return 1
             outs[arm] = tmp / f"out-{arm}"
-            if arm == "reuse":
-                check("Host allocator:" in r.stdout, "allocator mode reported")
-        compare(outs["defaults"], outs["reuse"], "defaults vs reuse")
-        compare(outs["defaults"], outs["perturbed"], "defaults vs reuse+MALLOC_PERTURB_")
+            if arm == "pool":
+                check("Host allocator:" in r.stdout and "pooled" in r.stdout,
+                      "default allocator mode reported (glibc defaults, pooled buffers)")
+        compare(outs["nopool"], outs["pool"], "no pool vs pool")
+        compare(outs["nopool"], outs["perturbed"], "no pool vs pool+MALLOC_PERTURB_")
+        compare(outs["nopool"], outs["thresholds"], "no pool vs opt-in thresholds+MALLOC_PERTURB_")
 
         # Mixed geometry within one process: two different-size movies alternate
         # (512x512 TIFF, 128x128 MRC, 512x512 TIFF), so reused buffers change shape
@@ -120,8 +125,8 @@ def main():
         mixed = tmp / "mixed.star"
         write_star(mixed, [names[0], "movies/small.mrc", names[1]])
         mixed_out = {}
-        for arm, env in (("defaults", {"MOTIONCORR_MALLOC_DEFAULTS": "1"}),
-                         ("perturbed", {"MALLOC_PERTURB_": "90"})):
+        for arm, env in (("defaults", {"MOTIONCORR_FRAME_POOL": "0"}),
+                         ("perturbed", {"MALLOC_PERTURB_": "90", "MOTIONCORR_FRAME_POOL_POISON": "1"})):
             r = run(a.binary, mixed, tmp / f"mixed-{arm}", env, tmp)
             check(r.returncode == 0, f"mixed-geometry {arm} run exits 0")
             if r.returncode:
@@ -130,10 +135,11 @@ def main():
         compare(mixed_out["defaults"], mixed_out["perturbed"], "mixed geometry defaults vs reuse+perturbed")
 
         # User malloc settings must be left alone.
-        r = run(a.binary, same, tmp / "user", {"MALLOC_MMAP_THRESHOLD_": "1048576"}, tmp)
+        r = run(a.binary, same, tmp / "user", {"MALLOC_MMAP_THRESHOLD_": "1048576",
+                                                "MOTIONCORR_MALLOC_REUSE": "1"}, tmp)
         check(r.returncode == 0 and ("user malloc settings kept" in r.stdout
                                      or "platform allocator defaults" in r.stdout),
-              "user-provided malloc settings are not overridden")
+              "user-provided malloc settings are not overridden by the opt-in")
     print("PASS" if not failures else f"{len(failures)} FAILURE(S)")
     return 1 if failures else 0
 

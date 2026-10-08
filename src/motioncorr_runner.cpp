@@ -64,6 +64,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/funcs.h"
 #include "src/renderEER.h"
 #include "src/stage_profile.h"
+#include "src/frame_buffer_pool.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -1256,6 +1257,9 @@ void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &pat
 	owned->MDMainHeader = image.MDMainHeader;
 	submitOutput([owned, path, datatype]() {
 		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+		// Full-frame buffers return to the bounded pool for the next movie;
+		// anything else, or a full pool, frees as before.
+		FrameBufferPool::instance().release(owned->data);
 	});
 }
 
@@ -3383,11 +3387,13 @@ skip_fitting:
 #endif
 	if (pre_dw_sum_needed) {
 		MC_STAGE("unweighted sums");
-		Iref().reshape(ny, nx);
+		// Pooled full-frame buffers (src/frame_buffer_pool.h): same contents as
+		// reshape()+initZeros(), without a fresh mapping per movie.
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
-		Iref_odd().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_odd(), ny, nx);
 		Iref_odd().initZeros();
-		Iref_even().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_even(), ny, nx);
 		Iref_even().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3541,7 +3547,7 @@ skip_fitting:
 			}
 		}
 
-		Iref().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
 
 #ifdef _CUDA_ENABLED

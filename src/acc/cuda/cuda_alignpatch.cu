@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 #include <cstring>
+#include <algorithm>
 
 #define CUFFT_CHECK(cmd) do { \
     cufftResult err = (cmd); \
@@ -54,6 +55,61 @@ static int findGoodSizeCuda(int request) {
     }
     return request;
 }
+
+namespace {
+const RFLOAT PATCH_TOLERANCE = 0.5;
+
+struct PatchCcfGeometry {
+    int ccf_nx, ccf_ny, search_range;
+    RFLOAT ccf_scale_x, ccf_scale_y;
+};
+
+// Shared by the per-patch and batched entry points, so the two cannot drift.
+PatchCcfGeometry patchCcfGeometry(int pnx, int pny, RFLOAT scaled_B, RFLOAT ccf_downsample) {
+    int search_range = 50;
+    float ccf_requested_scale = ccf_downsample;
+    if (ccf_downsample <= 0) {
+        ccf_requested_scale = sqrt(-log(1E-8) / (2 * scaled_B));
+    }
+    int ccf_nx = findGoodSizeCuda(int(pnx * ccf_requested_scale));
+    int ccf_ny = findGoodSizeCuda(int(pny * ccf_requested_scale));
+    if (ccf_nx > pnx) ccf_nx = pnx;
+    if (ccf_ny > pny) ccf_ny = pny;
+    if (ccf_nx % 2 == 1) ccf_nx++;
+    if (ccf_ny % 2 == 1) ccf_ny++;
+    const RFLOAT ccf_scale_x = (RFLOAT)pnx / ccf_nx;
+    const RFLOAT ccf_scale_y = (RFLOAT)pny / ccf_ny;
+    search_range /= (ccf_scale_x > ccf_scale_y) ? ccf_scale_x : ccf_scale_y;
+    if (search_range * 2 + 1 > ccf_nx) search_range = ccf_nx / 2 - 1;
+    if (search_range * 2 + 1 > ccf_ny) search_range = ccf_ny / 2 - 1;
+    return {ccf_nx, ccf_ny, search_range, ccf_scale_x, ccf_scale_y};
+}
+
+// The host half of one iteration, shared by both entry points: re-reference the
+// candidate shifts to frame 0, accumulate them and form the phase shifts.
+// Returns the RMSD the convergence test and the log use.
+RFLOAT updatePatchShifts(float *cur_x, float *cur_y, float *shift_x, float *shift_y,
+                         std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+                         int n_frames, int pnx, int pny) {
+    RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
+    for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
+        cur_x[iframe] -= cur_x[0];
+        cur_y[iframe] -= cur_y[0];
+        x_sumsq += (RFLOAT)cur_x[iframe] * cur_x[iframe];
+        y_sumsq += (RFLOAT)cur_y[iframe] * cur_y[iframe];
+    }
+    cur_x[0] = 0.0f;
+    cur_y[0] = 0.0f;
+
+    for (int iframe = 0; iframe < n_frames; iframe++) {
+        xshifts[iframe] += cur_x[iframe];
+        yshifts[iframe] += cur_y[iframe];
+        shift_x[iframe] = -cur_x[iframe] / (float)pnx;
+        shift_y[iframe] = -cur_y[iframe] / (float)pny;
+    }
+    return std::sqrt((x_sumsq + y_sumsq) / n_frames);
+}
+} // namespace
 
 __global__ void computeWeightsKernel(
     float *d_weight,
@@ -354,27 +410,13 @@ bool cudaAlignPatchDeviceWithWorkspace(
     if (pny % 2 == 1 || pnx % 2 == 1) {
         REPORT_ERROR("Patch size must be even");
     }
+    const RFLOAT tolerance = PATCH_TOLERANCE;
 
-    int search_range = 50;
-    const RFLOAT tolerance = 0.5;
-
-    float ccf_requested_scale = ccf_downsample;
-    if (ccf_downsample <= 0) {
-        ccf_requested_scale = sqrt(-log(1E-8) / (2 * scaled_B));
-    }
-    int ccf_nx = findGoodSizeCuda(int(pnx * ccf_requested_scale));
-    int ccf_ny = findGoodSizeCuda(int(pny * ccf_requested_scale));
-    if (ccf_nx > pnx) ccf_nx = pnx;
-    if (ccf_ny > pny) ccf_ny = pny;
-    if (ccf_nx % 2 == 1) ccf_nx++;
-    if (ccf_ny % 2 == 1) ccf_ny++;
+    const PatchCcfGeometry geo = patchCcfGeometry(pnx, pny, scaled_B, ccf_downsample);
+    const int ccf_nx = geo.ccf_nx, ccf_ny = geo.ccf_ny, search_range = geo.search_range;
     const int ccf_nfx = ccf_nx / 2 + 1, ccf_nfy = ccf_ny;
     const int ccf_nfy_half = ccf_ny / 2;
-    const RFLOAT ccf_scale_x = (RFLOAT)pnx / ccf_nx;
-    const RFLOAT ccf_scale_y = (RFLOAT)pny / ccf_ny;
-    search_range /= (ccf_scale_x > ccf_scale_y) ? ccf_scale_x : ccf_scale_y;
-    if (search_range * 2 + 1 > ccf_nx) search_range = ccf_nx / 2 - 1;
-    if (search_range * 2 + 1 > ccf_ny) search_range = ccf_ny / 2 - 1;
+    const RFLOAT ccf_scale_x = geo.ccf_scale_x, ccf_scale_y = geo.ccf_scale_y;
 
     const int nfx = pnx / 2 + 1, nfy = pny;
     const int nfy_half = nfy / 2;
@@ -525,23 +567,8 @@ bool cudaAlignPatchDeviceWithWorkspace(
             accumulated_d2h_ms += iter_d2h_ms;
         }
 
-        // Update relative to frame 0
-        RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
-        for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
-            h_cur_xshifts[iframe] -= h_cur_xshifts[0];
-            h_cur_yshifts[iframe] -= h_cur_yshifts[0];
-            x_sumsq += (RFLOAT)h_cur_xshifts[iframe] * h_cur_xshifts[iframe];
-            y_sumsq += (RFLOAT)h_cur_yshifts[iframe] * h_cur_yshifts[iframe];
-        }
-        h_cur_xshifts[0] = 0.0f;
-        h_cur_yshifts[0] = 0.0f;
-
-        for (int iframe = 0; iframe < n_frames; iframe++) {
-            xshifts[iframe] += h_cur_xshifts[iframe];
-            yshifts[iframe] += h_cur_yshifts[iframe];
-            h_shiftx[iframe] = -h_cur_xshifts[iframe] / (float)pnx;
-            h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
-        }
+        const RFLOAT rmsd = updatePatchShifts(h_cur_xshifts.data(), h_cur_yshifts.data(),
+            h_shiftx.data(), h_shifty.data(), xshifts, yshifts, n_frames, pnx, pny);
 
         // Apply Fourier phase shifts on GPU
         if (n_frames > 1) {
@@ -559,7 +586,6 @@ bool cudaAlignPatchDeviceWithWorkspace(
             }
         }
 
-        RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
         logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
 
         if (rmsd < tolerance) {
@@ -606,6 +632,322 @@ bool cudaAlignPatchDeviceWithWorkspace(
         (void)workspace.release();
         throw;
     }
+}
+
+// ---------------------------------------------------------------------------
+// Batched local patch alignment (docs/batched_patch_alignment.md).
+//
+// Exactness is by construction: every patch runs the same kernels, launch
+// geometry and batch-n_frames C2R plan configuration as the per-patch path, on
+// its own slot, in the same order. Only the host waits change: one shift
+// download and one phase-shift upload per iteration for all active patches.
+// Measured on cuFFT 11.3 (A100): a single plan over K*n_frames transforms is
+// not bit-identical to batch n_frames (256x256, n=4, K=25: all outputs differ),
+// whereas the batch-n_frames plan executed at slot offsets was identical in all
+// 13 geometries tried. Slots are still padded to the allocation alignment so
+// each transform sees the same pointer alignment as a fresh allocation.
+
+namespace {
+// Seven cudaMalloc and two events in reserve(); no add() in any loop.
+const int BATCH_MAX_BUFFERS = 7;
+const int BATCH_MAX_EVENTS = 2;
+const size_t SLOT_ALIGN_BYTES = 512;
+
+size_t paddedElements(size_t elements, size_t element_bytes) {
+    const size_t per = SLOT_ALIGN_BYTES / element_bytes;
+    return (elements + per - 1) / per * per;
+}
+
+struct BatchSlots {
+    size_t fframes, fref, fccs, iccs; // elements per patch, padded
+};
+
+BatchSlots batchSlots(int n_frames, int pnx, int pny, const PatchCcfGeometry &geo) {
+    const size_t nfx = pnx / 2 + 1, ccf_nfx = geo.ccf_nx / 2 + 1;
+    BatchSlots s;
+    s.fframes = paddedElements((size_t)n_frames * pny * nfx, sizeof(float2));
+    s.fref = paddedElements((size_t)geo.ccf_ny * ccf_nfx, sizeof(float2));
+    s.fccs = paddedElements((size_t)n_frames * geo.ccf_ny * ccf_nfx, sizeof(float2));
+    s.iccs = paddedElements((size_t)n_frames * geo.ccf_ny * geo.ccf_nx, sizeof(float));
+    return s;
+}
+} // namespace
+
+struct BatchedPatchAlignmentWorkspace::Impl {
+    CudaFailureState local_failure;
+    CudaFailureState *failure;
+    mc_cuda::ScopedDeviceMemory<BATCH_MAX_BUFFERS> memory;
+    mc_cuda::ScopedCudaEvents<BATCH_MAX_EVENTS> events;
+    mc_cuda::ScopedCufftPlan plan;
+    bool valid = false;
+    int resource_device = -1;
+    int capacity = 0, device = -1, pnx = 0, pny = 0, n_frames = 0;
+    RFLOAT scaled_B = 0, downsample = 0;
+    PatchCcfGeometry geo = {};
+    BatchSlots slots = {};
+    float2 *d_Fpatches = nullptr, *d_Fref = nullptr, *d_Fccs = nullptr;
+    float *d_weight = nullptr, *d_Iccs = nullptr;
+    float *d_cur = nullptr, *d_shift = nullptr; // [x of all patches | y of all patches]
+    cudaEvent_t ev_start = nullptr, ev_stop = nullptr;
+    cufftHandle plan_c2r = 0;
+    size_t cufft_work_size = 0, buffer_bytes = 0;
+    std::vector<float> h_cur, h_shift;
+    explicit Impl(CudaFailureState *state)
+        : failure(state ? state : &local_failure), memory(failure),
+          events(failure), plan(failure) {}
+
+    bool release() noexcept {
+        valid = false;
+        cudaError_t device_error = cudaSuccess;
+        if (resource_device >= 0) {
+            device_error = cudaSetDevice(resource_device);
+            failure->record(device_error, "batched patch workspace release device", __LINE__);
+        }
+        const cufftResult plan_error = plan.releaseAll();
+        const cudaError_t memory_error = memory.releaseAll();
+        const cudaError_t event_error = events.releaseAll();
+        resource_device = -1;
+        capacity = 0;
+        d_Fpatches = d_Fref = d_Fccs = nullptr;
+        d_weight = d_Iccs = d_cur = d_shift = nullptr;
+        ev_start = ev_stop = nullptr;
+        plan_c2r = 0;
+        cufft_work_size = buffer_bytes = 0;
+        return device_error == cudaSuccess && plan_error == CUFFT_SUCCESS &&
+            memory_error == cudaSuccess && event_error == cudaSuccess;
+    }
+
+    // A declined reservation is not a failure the per-patch path would have had:
+    // clear the slot the declined call set, keep nothing, record nothing. A
+    // poisoning code is never declined.
+    bool decline() {
+        const cudaError_t pending = cudaPeekAtLastError();
+        if (cudaErrorPoisonsContext(pending)) {
+            failure->record(pending, "batched patch workspace reserve", __LINE__);
+            REPORT_ERROR("Fatal CUDA error reserving the batched patch workspace");
+        }
+        (void)cudaGetLastError();
+        if (!release()) REPORT_ERROR("CUDA batched patch workspace cleanup failed");
+        return false;
+    }
+    // True on success; false when the allocation was declined for lack of memory.
+    template <class T> bool allocate(T *&slot, size_t bytes) {
+        void *fresh = nullptr;
+        const cudaError_t err = cudaMalloc(&fresh, bytes);
+        if (err == cudaSuccess) {
+            memory.add(fresh);
+            slot = static_cast<T*>(fresh);
+            buffer_bytes += bytes;
+            return true;
+        }
+        if (cudaErrorPoisonsContext(err)) {
+            failure->record(err, "batched patch workspace cudaMalloc", __LINE__);
+            REPORT_ERROR("Fatal CUDA error allocating the batched patch workspace");
+        }
+        return false;
+    }
+};
+
+BatchedPatchAlignmentWorkspace::BatchedPatchAlignmentWorkspace(CudaFailureState *failure)
+    : impl_(new Impl(failure)) {}
+BatchedPatchAlignmentWorkspace::~BatchedPatchAlignmentWorkspace() { (void)release(); }
+bool BatchedPatchAlignmentWorkspace::release() noexcept { return impl_->release(); }
+bool BatchedPatchAlignmentWorkspace::isValid() const { return impl_->valid; }
+int BatchedPatchAlignmentWorkspace::capacity() const { return impl_->valid ? impl_->capacity : 0; }
+size_t BatchedPatchAlignmentWorkspace::bufferBytes() const { return impl_->buffer_bytes; }
+size_t BatchedPatchAlignmentWorkspace::cufftWorkBytes() const { return impl_->cufft_work_size; }
+cufftComplex *BatchedPatchAlignmentWorkspace::patchSlot(int index) const {
+    const Impl &w = *impl_;
+    if (!w.valid || index < 0 || index >= w.capacity)
+        REPORT_ERROR("Batched patch slot outside the reservation");
+    return (cufftComplex*)(w.d_Fpatches + (size_t)index * w.slots.fframes);
+}
+
+size_t BatchedPatchAlignmentWorkspace::bytesPerPatch(int n_frames, int pnx, int pny,
+    RFLOAT scaled_B, RFLOAT ccf_downsample) {
+    const BatchSlots s = batchSlots(n_frames, pnx, pny,
+        patchCcfGeometry(pnx, pny, scaled_B, ccf_downsample));
+    return (s.fframes + s.fref + s.fccs) * sizeof(float2) + s.iccs * sizeof(float) +
+        4 * (size_t)n_frames * sizeof(float);
+}
+
+int choosePatchBatchChunk(int n_patches, size_t bytes_per_patch, size_t free_bytes,
+                          size_t total_bytes, int cap) {
+    if (n_patches < 1 || cap < 1 || bytes_per_patch == 0) return 0;
+    const size_t headroom = std::max<size_t>((size_t)1 << 30, total_bytes / 10);
+    if (free_bytes <= headroom) return 0;
+    const size_t fit = (free_bytes - headroom) / bytes_per_patch;
+    return (int)std::min<size_t>(fit, (size_t)std::min(n_patches, cap));
+}
+
+bool BatchedPatchAlignmentWorkspace::reserve(int capacity, int n_frames, int pnx, int pny,
+    RFLOAT scaled_B, RFLOAT ccf_downsample, int device_id) {
+    Impl &w = *impl_;
+    if (w.failure->isPoisoned())
+        REPORT_ERROR("Fatal CUDA state refuses batched patch workspace");
+    if (capacity < 1 || n_frames < 1) REPORT_ERROR("Invalid batched patch reservation");
+    if (pny % 2 == 1 || pnx % 2 == 1) REPORT_ERROR("Patch size must be even");
+    if (!w.release()) REPORT_ERROR("CUDA batched patch workspace replacement cleanup failed");
+    try {
+        ALIGN_CUDA(cudaSetDevice(device_id));
+        w.resource_device = device_id;
+        w.geo = patchCcfGeometry(pnx, pny, scaled_B, ccf_downsample);
+        w.slots = batchSlots(n_frames, pnx, pny, w.geo);
+        const size_t K = capacity, n = n_frames;
+        const int ccf_nx = w.geo.ccf_nx, ccf_ny = w.geo.ccf_ny;
+        const int ccf_nfx = ccf_nx / 2 + 1, ccf_nfy = ccf_ny;
+        if (!w.allocate(w.d_Fpatches, K * w.slots.fframes * sizeof(float2)) ||
+            !w.allocate(w.d_Fref, K * w.slots.fref * sizeof(float2)) ||
+            !w.allocate(w.d_weight, (size_t)ccf_nfy * ccf_nfx * sizeof(float)) ||
+            !w.allocate(w.d_Fccs, K * w.slots.fccs * sizeof(float2)) ||
+            !w.allocate(w.d_Iccs, K * w.slots.iccs * sizeof(float)) ||
+            !w.allocate(w.d_cur, 2 * K * n * sizeof(float)) ||
+            !w.allocate(w.d_shift, 2 * K * n * sizeof(float)))
+            return w.decline();
+        if (cudaEventCreate(&w.ev_start) != cudaSuccess) return w.decline();
+        w.events.add(w.ev_start);
+        if (cudaEventCreate(&w.ev_stop) != cudaSuccess) return w.decline();
+        w.events.add(w.ev_stop);
+        // The per-patch plan configuration, unchanged.
+        if (cufftCreate(&w.plan_c2r) != CUFFT_SUCCESS) return w.decline();
+        w.plan.take(w.plan_c2r);
+        int dims[2] = {ccf_ny, ccf_nx};
+        size_t plan_work_bytes = 0;
+        if (cufftMakePlanMany(w.plan_c2r, 2, dims, NULL, 1, ccf_nfy * ccf_nfx, NULL, 1,
+                ccf_ny * ccf_nx, CUFFT_C2R, n_frames, &plan_work_bytes) != CUFFT_SUCCESS ||
+            cufftGetSize(w.plan_c2r, &w.cufft_work_size) != CUFFT_SUCCESS)
+            return w.decline();
+        dim3 blockWeights(16, 16);
+        dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+        computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
+            ccf_nfx, ccf_nfy, ccf_ny / 2, pnx / 2 + 1, pny, (float)scaled_B);
+        ALIGN_LAUNCH(cudaGetLastError());
+        w.h_cur.assign(2 * K * n, 0.0f);
+        w.h_shift.assign(2 * K * n, 0.0f);
+        w.capacity = capacity; w.device = device_id; w.pnx = pnx; w.pny = pny;
+        w.n_frames = n_frames; w.scaled_B = scaled_B; w.downsample = ccf_downsample;
+        w.valid = true;
+        return true;
+    } catch (...) {
+        (void)release();
+        throw;
+    }
+}
+
+void cudaAlignPatchBatchDevice(
+    BatchedPatchAlignmentWorkspace &workspace,
+    const int n_patches, const int n_frames, const int pnx, const int pny,
+    const RFLOAT scaled_B, std::vector<RFLOAT> *xshifts, std::vector<RFLOAT> *yshifts,
+    const int max_iter, const RFLOAT ccf_downsample, const int device_id,
+    PatchBatchLog *logs)
+{
+    auto &w = *workspace.impl_;
+    if (w.failure->isPoisoned())
+        REPORT_ERROR("Fatal CUDA state refuses batched patch alignment");
+    if (!w.valid || w.device != device_id || w.pnx != pnx || w.pny != pny ||
+        w.n_frames != n_frames || n_patches < 1 || n_patches > w.capacity ||
+        std::memcmp(&w.scaled_B, &scaled_B, sizeof(RFLOAT)) != 0 ||
+        std::memcmp(&w.downsample, &ccf_downsample, sizeof(RFLOAT)) != 0)
+        REPORT_ERROR("Batched patch alignment without a matching reservation");
+    try {
+    ALIGN_CUDA(cudaSetDevice(device_id));
+    const RFLOAT tolerance = PATCH_TOLERANCE;
+    const int ccf_nx = w.geo.ccf_nx, ccf_ny = w.geo.ccf_ny, search_range = w.geo.search_range;
+    const int ccf_nfx = ccf_nx / 2 + 1, ccf_nfy = ccf_ny;
+    const int ccf_nfy_half = ccf_ny / 2;
+    const int nfx = pnx / 2 + 1, nfy = pny;
+    const int nfy_half = nfy / 2;
+    const size_t n = n_frames, K = w.capacity;
+
+    dim3 blockRef(16, 16);
+    dim3 gridRef((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
+    dim3 blockCCF(16, 16, 1);
+    dim3 gridCCF((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16, n_frames);
+    dim3 blockShift(16, 16, 1);
+    dim3 gridShift((nfx + 15) / 16, (nfy + 15) / 16, n_frames - 1);
+
+    float *d_cur_x = w.d_cur, *d_cur_y = w.d_cur + K * n;
+    float *d_shift_x = w.d_shift, *d_shift_y = w.d_shift + K * n;
+    float *h_cur_x = w.h_cur.data(), *h_cur_y = w.h_cur.data() + K * n;
+    float *h_shift_x = w.h_shift.data(), *h_shift_y = w.h_shift.data() + K * n;
+    const size_t sz_all_shifts = 2 * K * n * sizeof(float);
+
+    std::vector<int> active(n_patches);
+    for (int p = 0; p < n_patches; p++) {
+        active[p] = p;
+        logs[p] = PatchBatchLog();
+    }
+    ALIGN_CUDA(cudaEventRecord(w.ev_start));
+    for (int iter = 1; iter <= max_iter && !active.empty(); iter++) {
+        for (const int p : active) {
+            float2 *d_Fframes = w.d_Fpatches + p * w.slots.fframes;
+            float2 *d_Fref = w.d_Fref + p * w.slots.fref;
+            float2 *d_Fccs = w.d_Fccs + p * w.slots.fccs;
+            float *d_Iccs = w.d_Iccs + p * w.slots.iccs;
+            computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+            ALIGN_LAUNCH(cudaGetLastError());
+            computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+            ALIGN_LAUNCH(cudaGetLastError());
+            ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
+            findPeakAndInterpolateKernel<<<n_frames, 256>>>(
+                d_Iccs, d_cur_x + p * n, d_cur_y + p * n,
+                ccf_nx, ccf_ny, search_range,
+                (float)w.geo.ccf_scale_x, (float)w.geo.ccf_scale_y, n_frames
+            );
+            ALIGN_LAUNCH(cudaGetLastError());
+        }
+        // The iteration's one wait, for every active patch at once.
+        ALIGN_CUDA(cudaMemcpy(w.h_cur.data(), w.d_cur, sz_all_shifts, cudaMemcpyDeviceToHost));
+        for (const int p : active) {
+            const RFLOAT rmsd = updatePatchShifts(h_cur_x + p * n, h_cur_y + p * n,
+                h_shift_x + p * n, h_shift_y + p * n, xshifts[p], yshifts[p],
+                n_frames, pnx, pny);
+            logs[p].rmsd.push_back(rmsd);
+            if (rmsd < tolerance) logs[p].converged = true;
+        }
+        // Patches converging now are still shifted: the per-patch loop applies
+        // the shift before its convergence test.
+        if (n_frames > 1) {
+            ALIGN_CUDA(cudaMemcpy(w.d_shift, w.h_shift.data(), sz_all_shifts, cudaMemcpyHostToDevice));
+            for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];
+                fourierShiftKernel<<<gridShift, blockShift>>>(w.d_Fpatches + p * w.slots.fframes,
+                    d_shift_x + p * n, d_shift_y + p * n, nfx, nfy, nfy_half, n_frames);
+                ALIGN_LAUNCH(cudaGetLastError());
+            }
+        }
+        // Retired patches are never launched or shifted again.
+        active.erase(std::remove_if(active.begin(), active.end(),
+            [&](int p) { return logs[p].converged; }), active.end());
+    }
+    ALIGN_CUDA(cudaEventRecord(w.ev_stop));
+    ALIGN_CUDA(cudaEventSynchronize(w.ev_stop));
+    float total_ms = 0.0f;
+    ALIGN_CUDA(cudaEventElapsedTime(&total_ms, w.ev_start, w.ev_stop));
+    for (int p = 0; p < n_patches; p++) {
+        logs[p].chunk_patches = n_patches;
+        logs[p].chunk_gpu_ms = total_ms;
+        logs[p].buffer_bytes = w.buffer_bytes;
+        logs[p].cufft_work_bytes = w.cufft_work_size;
+    }
+    } catch (...) {
+        (void)workspace.release();
+        throw;
+    }
+}
+
+void writePatchBatchLog(std::ostream &logfile, const PatchBatchLog &log) {
+    for (size_t k = 0; k < log.rmsd.size(); k++)
+        logfile << " Iteration " << (int)(k + 1) << ": RMSD = " << log.rmsd[k] << " px" << std::endl;
+    const size_t total = log.buffer_bytes + log.cufft_work_bytes;
+    logfile << " [CUDA Patch Alignment Profile]" << std::endl;
+    logfile << "   Batched alignment:            " << log.chunk_patches
+            << " patches together; time and VRAM below are for all of them" << std::endl;
+    logfile << "   Total GPU alignment time:     " << std::fixed << std::setprecision(2) << log.chunk_gpu_ms << " ms" << std::endl;
+    logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << (log.buffer_bytes / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (log.cufft_work_bytes / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    logfile << " [CUDA Patch Alignment] completed; converged="
+            << (log.converged ? "yes" : "no") << std::endl;
 }
 
 #undef ALIGN_CUDA

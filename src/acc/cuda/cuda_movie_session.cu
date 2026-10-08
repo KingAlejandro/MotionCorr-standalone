@@ -348,6 +348,7 @@ __global__ void cropAndGroupPatchResidentKernel(
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
     : patch_alignment_workspace(&failure_state),
+      batched_patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
       nfx(nx / 2 + 1), logfile(log) {}
 
@@ -1760,6 +1761,107 @@ bool CudaMovieSession::preparePatchInVram(
     HANDLE_ERROR(cudaGetLastError());
 
     return true;
+}
+
+void CudaMovieSession::alignPatchesBatched(
+    const std::vector<PatchBox> &boxes,
+    int n_groups, const int *group_start, const int *group_size,
+    RFLOAT scaled_B, int max_iter, RFLOAT ccf_downsample, int cap,
+    std::vector<PatchBatchOutcome> &outcomes)
+{
+    const int n_patches = (int)boxes.size();
+    outcomes.assign(n_patches, PatchBatchOutcome());
+    if (cap <= 0 || n_patches == 0 || n_groups <= 0 || !is_initialized ||
+        failure_state.isPoisoned())
+        return;
+    const int patch_w = boxes[0].width, patch_h = boxes[0].height;
+    for (const PatchBox &box : boxes) {
+        if (box.width != patch_w || box.height != patch_h) {
+            logfile << "Batched patch alignment: patch sizes differ; using per-patch alignment." << std::endl;
+            return;
+        }
+    }
+    const cudaError_t device_error = cudaSetDevice(device_id);
+    size_t free_bytes = 0, total_bytes = 0;
+    const cudaError_t info_error = device_error != cudaSuccess ? device_error
+                                                               : cudaMemGetInfo(&free_bytes, &total_bytes);
+    if (info_error != cudaSuccess) {
+        if (cudaErrorPoisonsContext(info_error)) {
+            recordFailure(info_error, "batched patch memory query", __LINE__);
+            REPORT_ERROR("Fatal CUDA error before batched patch alignment");
+        }
+        (void)cudaGetLastError();
+        logfile << "Batched patch alignment: device memory query failed ("
+                << cudaGetErrorString(info_error) << "); using per-patch alignment." << std::endl;
+        return;
+    }
+    BatchedPatchAlignmentWorkspace &workspace = batched_patch_alignment_workspace;
+    const size_t per_patch = BatchedPatchAlignmentWorkspace::bytesPerPatch(
+        n_groups, patch_w, patch_h, scaled_B, ccf_downsample);
+    int chunk = choosePatchBatchChunk(n_patches, per_patch, free_bytes, total_bytes, cap);
+    // The estimate omits allocator granularity and the cuFFT work area, so a
+    // declined reservation is retried smaller before giving up.
+    while (chunk > 0 && !workspace.reserve(chunk, n_groups, patch_w, patch_h, scaled_B,
+                                           ccf_downsample, device_id))
+        chunk /= 2;
+    const int n_chunks = chunk > 0 ? (n_patches + chunk - 1) / chunk : 0;
+    logfile << "Batched patch alignment: " << n_patches << " patches, chunk size " << chunk
+            << " (cap " << cap << ", " << n_chunks << " chunk(s)); free device memory "
+            << (free_bytes >> 20) << " of " << (total_bytes >> 20) << " MiB";
+    if (chunk == 0) {
+        logfile << "; workspace does not fit, using per-patch alignment." << std::endl;
+        return;
+    }
+    logfile << "; workspace " << (workspace.bufferBytes() >> 20) << " MiB + cuFFT work "
+            << (workspace.cufftWorkBytes() >> 20) << " MiB, retained until alignment release."
+            << std::endl;
+
+    std::vector<std::vector<RFLOAT> > xs(chunk), ys(chunk);
+    std::vector<PatchBatchLog> logs(chunk);
+    size_t min_free = free_bytes;
+    for (int first = 0; first < n_patches; first += chunk) {
+        const int count = std::min(chunk, n_patches - first);
+        for (int j = 0; j < count; j++) {
+            const PatchBox &box = boxes[first + j];
+            if (preparePatchInVram(box.x_start, box.y_start, box.width, box.height, n_groups,
+                                   group_start, group_size, workspace.patchSlot(j)))
+                continue;
+            // preparePatchInVram consumed its code; the preserved state and the
+            // pending slot together decide, exactly as for the per-patch retry.
+            const CudaRetryDecision decision = cudaRetryDecisionFor(failure_state, cudaGetLastError());
+            if (decision.verdict == CUDA_RETRY_FATAL) {
+                REPORT_ERROR_STR("CUDA device context is unusable during batched patch preparation (patch "
+                                 << first + j + 1 << " of " << n_patches << "): "
+                                 << cudaGetErrorString(decision.decisive)
+                                 << ". Refusing to retry alignment on a poisoned context.");
+            }
+            if (!workspace.release())
+                REPORT_ERROR("CUDA batched patch workspace cleanup failed after a preparation failure");
+            logfile << "WARNING: batched patch preparation did not complete for patch "
+                    << first + j + 1 << " of " << n_patches << "; classified recoverable, so "
+                    << "patches " << first + 1 << " to " << n_patches
+                    << " use per-patch alignment." << std::endl;
+            return;
+        }
+        for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
+        cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
+                                  xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
+                                  logs.data());
+        size_t chunk_free = 0, chunk_total = 0;
+        if (cudaMemGetInfo(&chunk_free, &chunk_total) == cudaSuccess)
+            min_free = std::min(min_free, chunk_free);
+        else
+            (void)cudaGetLastError();
+        for (int j = 0; j < count; j++) {
+            PatchBatchOutcome &out = outcomes[first + j];
+            out.done = true;
+            out.xshifts.swap(xs[j]);
+            out.yshifts.swap(ys[j]);
+            out.log = logs[j];
+        }
+    }
+    logfile << "Batched patch alignment: device memory in use rose by at most "
+            << ((free_bytes - min_free) >> 20) << " MiB (sampled after each chunk)." << std::endl;
 }
 
 bool CudaMovieSession::reconstructDoseWeighted(

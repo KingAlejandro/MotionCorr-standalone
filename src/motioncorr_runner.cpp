@@ -1675,6 +1675,23 @@ bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
 	       gain_cache_nx == nx && gain_cache_ny == ny;
 }
 
+#ifdef _CUDA_ENABLED
+// MOTIONCORR_PATCH_BATCH: unset = batched patch alignment with up to 4 patches
+// per chunk (fewer if device memory is short); 0 = per-patch alignment only;
+// N > 0 = at most N patches per chunk. Larger chunks made the stage only ~1 ms
+// faster on the tutorial data and cost more in release and dose weighting
+// (docs/batched_patch_alignment.md).
+static int patchBatchCap() {
+	const char *env = getenv("MOTIONCORR_PATCH_BATCH");
+	if (!env) return 4;
+	char *end = nullptr;
+	const long value = strtol(env, &end, 10);
+	if (end == env || *end != '\0' || value < 0 || value > 4096)
+		REPORT_ERROR(std::string("Invalid MOTIONCORR_PATCH_BATCH: ") + env);
+	return (int)value;
+}
+#endif
+
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
@@ -2948,22 +2965,51 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
+		// One definition of the patch bounds, for the batched pass and the loop.
+		auto patch_bounds = [&](int iy, int ix, int &x_start, int &x_end, int &y_start, int &y_end) {
+			x_start = ix * patch_nx; y_start = iy * patch_ny; // Inclusive
+			x_end = x_start + patch_nx; y_end = y_start + patch_ny; // Exclusive
+			if (x_end > nx) x_end = nx;
+			if (y_end > ny) y_end = ny;
+			// make patch size even
+			if ((x_end - x_start) % 2 == 1) {
+				if (x_end == nx) x_start++;
+				else x_end--;
+			}
+			if ((y_end - y_start) % 2 == 1) {
+				if (y_end == ny) y_start++;
+				else y_end--;
+			}
+		};
+
+#ifdef _CUDA_ENABLED
+		// Batched resident alignment (docs/batched_patch_alignment.md). It only
+		// computes; each done patch's log lines and results are consumed in patch
+		// order by the loop below, which keeps the non-convergence retry and every
+		// other per-patch decision unchanged. Patches it did not align take the
+		// per-patch device path.
+		std::vector<CudaMovieSession::PatchBatchOutcome> batched;
+		if (movie_session) {
+			std::vector<CudaMovieSession::PatchBox> boxes;
+			for (int iy = 0; iy < patch_y; iy++) {
+				for (int ix = 0; ix < patch_x; ix++) {
+					int x_start, x_end, y_start, y_end;
+					patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
+				}
+			}
+			RCTIC(TIMING_PATCH_ALIGN);
+			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
+				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
+			RCTOC(TIMING_PATCH_ALIGN);
+		}
+#endif
+
 		int ipatch = 1;
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
-				int x_start = ix * patch_nx, y_start = iy * patch_ny; // Inclusive
-				int x_end = x_start + patch_nx, y_end = y_start + patch_ny; // Exclusive
-				if (x_end > nx) x_end = nx;
-				if (y_end > ny) y_end = ny;
-				// make patch size even
-				if ((x_end - x_start) % 2 == 1) {
-					if (x_end == nx) x_start++;
-					else x_end--;
-				}
-				if ((y_end - y_start) % 2 == 1) {
-					if (y_end == ny) y_start++;
-					else y_end--;
-				}
+				int x_start, x_end, y_start, y_end;
+				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
 
 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
@@ -2984,7 +3030,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				// converged == false is a completed alignment reporting its
 				// convergence verdict. Only the first is a fallback candidate.
 				bool device_prep_ok = false;
-				if (movie_session) {
+				const CudaMovieSession::PatchBatchOutcome *batch_outcome =
+					batched.empty() ? nullptr : &batched[iy * patch_x + ix];
+				if (batch_outcome && batch_outcome->done) {
+					// Completed on the device: the same verdict and shifts the
+					// per-patch call below would have produced.
+					device_prep_ok = true;
+					writePatchBatchLog(logfile, batch_outcome->log);
+					converged = batch_outcome->log.converged;
+					local_xshifts = batch_outcome->xshifts;
+					local_yshifts = batch_outcome->yshifts;
+				} else if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {

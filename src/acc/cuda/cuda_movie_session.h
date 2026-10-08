@@ -232,8 +232,35 @@ public:
     );
 
     PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
-    // Must succeed before any reconstruction or output publication.
-    bool releasePatchAlignmentWorkspace() { return patch_alignment_workspace.release(); }
+    BatchedPatchAlignmentWorkspace& getBatchedPatchAlignmentWorkspace() { return batched_patch_alignment_workspace; }
+    // Must succeed before any reconstruction or output publication. Releases both
+    // the per-patch and the batched workspace, attempting each.
+    bool releasePatchAlignmentWorkspace() {
+        const bool single = patch_alignment_workspace.release();
+        const bool batched = batched_patch_alignment_workspace.release();
+        return single && batched;
+    }
+
+    struct PatchBox { int x_start, y_start, width, height; };
+    struct PatchBatchOutcome {
+        bool done = false;
+        std::vector<RFLOAT> xshifts, yshifts;
+        PatchBatchLog log;
+    };
+    /** Batched local alignment (docs/batched_patch_alignment.md). Aligns the
+     * patches in chunks of up to `cap` (fewer if device memory is short) and marks
+     * each aligned patch done; the caller runs every other patch through its
+     * per-patch path and writes each done patch's log in patch order. Declines,
+     * leaving all patches not done, when cap <= 0, patch sizes differ, or no chunk
+     * fits. A recoverable preparation failure releases the workspace and leaves
+     * that chunk and later ones not done; a fatal one throws with no retry. Any
+     * alignment error throws, as in the per-patch path. Writes only its own
+     * summary/fallback lines to the log. */
+    void alignPatchesBatched(
+        const std::vector<PatchBox> &boxes,
+        int n_groups, const int *group_start, const int *group_size,
+        RFLOAT scaled_B, int max_iter, RFLOAT ccf_downsample, int cap,
+        std::vector<PatchBatchOutcome> &outcomes);
 
     // In-VRAM Dose-weighted reconstruction: applies DW and polynomial interpolation into Isum
     bool reconstructDoseWeighted(
@@ -302,6 +329,7 @@ private:
     // stays failed for reporting purposes, and a poisoned context never un-poisons.
     CudaFailureState failure_state;
     PatchAlignmentWorkspace patch_alignment_workspace;
+    BatchedPatchAlignmentWorkspace batched_patch_alignment_workspace;
 
     int nx;
     int ny;

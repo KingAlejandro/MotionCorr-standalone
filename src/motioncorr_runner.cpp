@@ -691,6 +691,8 @@ void MotioncorrRunner::run()
 		else
 			REPORT_ERROR("Bug: by now it should be clear whether to use UCSF MotionCor2 or RELION's own implementation...");
 
+		if (!host_allocator_mode.empty())
+			std::cout << " Host allocator: " << host_allocator_mode << "." << std::endl;
 		init_progress_bar(fn_micrographs.size());
 		barstep = XMIPP_MAX(1, fn_micrographs.size() / 60);
 	}
@@ -699,6 +701,7 @@ void MotioncorrRunner::run()
 	// main thread computes movie N+1. See src/output_writer.h for the order,
 	// fail-closed and memory-bound properties this relies on.
 	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
+	StageProfile::instance().setNote("host_allocator", host_allocator_mode);
 	StageProfile::instance().beginRun();
 
 	// Indexed by movie, so the report below stays in input order however the

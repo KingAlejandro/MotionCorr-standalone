@@ -261,7 +261,9 @@ void StageProfile::endRun(int n_movies)
 #else
 	const long peak_rss_kb = self.ru_maxrss;         // KiB on Linux
 #endif
-	out << ",\"peak_rss_kb\":" << peak_rss_kb << ",\"threads\":[";
+	out << ",\"peak_rss_kb\":" << peak_rss_kb;
+	for (const auto &note : notes) out << "," << quoted(note.first) << ":" << quoted(note.second);
+	out << ",\"threads\":[";
 	std::lock_guard<std::mutex> lock(thread_mutex);
 	bool first = true;
 	for (const auto &entry : thread_tasks) {

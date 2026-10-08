@@ -135,9 +135,12 @@ void StageProfile::closeTop(const Sample &now)
 	if (!top) return;
 	// Nested ranges still open belong to the stage being closed; an exception
 	// path can leave them, so close them here to keep NVTX balanced.
+	// Keys match pop(): top, then every enclosing nested name, then this one.
 	while (!nested.empty()) {
 		if (nested.back().nvtx) MC_NVTX_POP();
-		sub[std::string(top) + "/" + nested.back().name].add(nested.back().start, now);
+		std::string key = std::string(top) + "/";
+		for (size_t i = 0; i + 1 < nested.size(); i++) key += std::string(nested[i].name) + "/";
+		sub[key + nested.back().name].add(nested.back().start, now);
 		nested.pop_back();
 	}
 	MC_NVTX_POP();
@@ -199,13 +202,7 @@ void StageProfile::writeMovie(bool ok, const Sample &end)
 {
 	Acc total;
 	total.add(movie_start, end);
-	// Independent of the stage chain: the caller-side span from runner entry
-	// to exit, sampled by beginMovie()/endMovie() themselves.
-	const double span_ms = (end.wall_s - movie_start.wall_s) * 1e3;
-	double covered_ms = 0;
-	for (const auto &entry : stages) covered_ms += entry.second.wall_ms;
 	out << "{\"type\":\"movie\",\"index\":" << movie_index << ",\"name\":" << quoted(movie_name)
-	    << ",\"span_ms\":" << span_ms << ",\"uncovered_ms\":" << (span_ms - covered_ms)
 	    << ",\"ok\":" << (ok ? "true" : "false")
 	    << ",\"wall_ms\":" << total.wall_ms << ",\"cpu_ms\":" << total.cpu_ms
 	    << ",\"minflt\":" << total.minflt << ",\"majflt\":" << total.majflt

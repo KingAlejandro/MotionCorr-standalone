@@ -812,7 +812,12 @@ void MotioncorrRunner::run()
 	{
 		StageProfile::Sample pdf_start;
 		if (StageProfile::instance().enabled()) pdf_start = StageProfile::sampleThread();
-		generateLogFilePDFAndWriteStarFiles();
+		try {
+			generateLogFilePDFAndWriteStarFiles();
+		} catch (...) {
+			StageProfile::instance().endRun((int)fn_micrographs.size());
+			throw;
+		}
 		if (StageProfile::instance().enabled()) {
 			const StageProfile::Sample pdf_end = StageProfile::sampleThread();
 			StageProfile::instance().addThreadTask("main", "joint star and logfile pdf",
@@ -1223,12 +1228,14 @@ void MotioncorrRunner::submitOutput(std::function<void()> task)
 		output_writer->beginMovie(output_movie_index);
 	}
 	if (StageProfile::instance().enabled()) {
+		// --sync_output runs the task inline on the main thread; label it so.
+		const char *thread = output_writer->isBackground() ? "writer" : "main";
 		std::function<void()> inner = std::move(task);
-		task = [inner]() {
+		task = [inner, thread]() {
 			const StageProfile::Sample a = StageProfile::sampleThread();
 			inner();
 			const StageProfile::Sample b = StageProfile::sampleThread();
-			StageProfile::instance().addThreadTask("writer", "product task",
+			StageProfile::instance().addThreadTask(thread, "product task",
 			    (b.wall_s - a.wall_s) * 1e3, (b.cpu_s - a.cpu_s) * 1e3, b.minflt - a.minflt);
 		};
 	}

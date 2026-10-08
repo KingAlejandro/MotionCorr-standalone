@@ -4,6 +4,7 @@
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/stage_profile.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -457,57 +458,72 @@ bool cudaAlignPatchDeviceWithWorkspace(
     std::vector<float> h_shifty(n_frames, 0.0f);
 
     bool converged = false;
+    // Device event timing exists only for the log. Each pair forces the host to
+    // wait for the GPU; under --profile the timings are kept, otherwise every
+    // telemetry-only wait is skipped. The blocking shift download below remains
+    // the one synchronisation the convergence loop actually depends on.
+    const bool timed = StageProfile::instance().deviceTiming();
     float accumulated_kernel_ms = 0.0f;
     float accumulated_cufft_ms = 0.0f;
     float accumulated_d2h_ms = 0.0f;
 
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
-        ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+        if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
 
         // 2. CCF computation
         computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
-        ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
-        float k1_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k1_ms;
+        if (timed) {
+            ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+            ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
+            float k1_ms = 0.0f;
+            ALIGN_CUDA(cudaEventElapsedTime(&k1_ms, ev_start_kernel, ev_stop_kernel));
+            accumulated_kernel_ms += k1_ms;
+        }
 
         // 3. Batched cuFFT C2R
-        ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
+        if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_cufft));
         ALIGN_CUFFT(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
-        ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_cufft));
-        float iter_cufft_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
-        accumulated_cufft_ms += iter_cufft_ms;
+        if (timed) {
+            ALIGN_CUDA(cudaEventRecord(ev_stop_cufft));
+            ALIGN_CUDA(cudaEventSynchronize(ev_stop_cufft));
+            float iter_cufft_ms = 0.0f;
+            ALIGN_CUDA(cudaEventElapsedTime(&iter_cufft_ms, ev_start_cufft, ev_stop_cufft));
+            accumulated_cufft_ms += iter_cufft_ms;
+        }
 
         // 4. Peak finding + subpixel quadratic interpolation
-        ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+        if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
         findPeakAndInterpolateKernel<<<n_frames, 256>>>(
             d_Iccs, d_cur_xshifts, d_cur_yshifts,
             ccf_nx, ccf_ny, search_range,
             (float)ccf_scale_x, (float)ccf_scale_y, n_frames
         );
         ALIGN_LAUNCH(cudaGetLastError());
-        ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
-        float k2_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
-        accumulated_kernel_ms += k2_ms;
+        if (timed) {
+            ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+            ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
+            float k2_ms = 0.0f;
+            ALIGN_CUDA(cudaEventElapsedTime(&k2_ms, ev_start_kernel, ev_stop_kernel));
+            accumulated_kernel_ms += k2_ms;
+        }
 
         // Copy candidate shifts back to host
-        ALIGN_CUDA(cudaEventRecord(ev_start_d2h));
+        // The blocking copies on stream 0 are the loop's one real wait: they
+        // complete only after every kernel above, and the host needs the result.
+        if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_d2h));
         ALIGN_CUDA(cudaMemcpy(h_cur_xshifts.data(), d_cur_xshifts, sz_shifts, cudaMemcpyDeviceToHost));
         ALIGN_CUDA(cudaMemcpy(h_cur_yshifts.data(), d_cur_yshifts, sz_shifts, cudaMemcpyDeviceToHost));
-        ALIGN_CUDA(cudaEventRecord(ev_stop_d2h));
-        ALIGN_CUDA(cudaEventSynchronize(ev_stop_d2h));
-        float iter_d2h_ms = 0.0f;
-        ALIGN_CUDA(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
-        accumulated_d2h_ms += iter_d2h_ms;
+        if (timed) {
+            ALIGN_CUDA(cudaEventRecord(ev_stop_d2h));
+            ALIGN_CUDA(cudaEventSynchronize(ev_stop_d2h));
+            float iter_d2h_ms = 0.0f;
+            ALIGN_CUDA(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
+            accumulated_d2h_ms += iter_d2h_ms;
+        }
 
         // Update relative to frame 0
         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
@@ -531,14 +547,16 @@ bool cudaAlignPatchDeviceWithWorkspace(
         if (n_frames > 1) {
             ALIGN_CUDA(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
-            ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+            if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
             fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
-            ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
-            ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
-            float shift_kernel_ms = 0.0f;
-            ALIGN_CUDA(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
-            accumulated_kernel_ms += shift_kernel_ms;
+            if (timed) {
+                ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
+                ALIGN_CUDA(cudaEventSynchronize(ev_stop_kernel));
+                float shift_kernel_ms = 0.0f;
+                ALIGN_CUDA(cudaEventElapsedTime(&shift_kernel_ms, ev_start_kernel, ev_stop_kernel));
+                accumulated_kernel_ms += shift_kernel_ms;
+            }
         }
 
         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
@@ -558,10 +576,15 @@ bool cudaAlignPatchDeviceWithWorkspace(
     // Profile logging
     const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
     logfile << " [CUDA " << stage_name << " Profile]" << std::endl;
-    logfile << "   Host-to-Device transfer time: 0.00 ms (Resident VRAM)" << std::endl;
-    logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
-    logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
-    logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+    if (timed) {
+        logfile << "   Host-to-Device transfer time: 0.00 ms (Resident VRAM)" << std::endl;
+        logfile << "   Custom kernel execution time: " << std::fixed << std::setprecision(2) << accumulated_kernel_ms << " ms" << std::endl;
+        logfile << "   cuFFT execution time:         " << std::fixed << std::setprecision(2) << accumulated_cufft_ms << " ms" << std::endl;
+        logfile << "   Device-to-Host transfer time: " << std::fixed << std::setprecision(2) << accumulated_d2h_ms << " ms" << std::endl;
+    } else {
+        // Not printed as 0.00: unmeasured is not zero. --profile restores them.
+        logfile << "   Per-kernel timing:            not measured (enable with --profile)" << std::endl;
+    }
     logfile << "   Total GPU alignment time:     " << std::fixed << std::setprecision(2) << total_ms << " ms" << std::endl;
     logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;

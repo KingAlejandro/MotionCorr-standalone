@@ -7,7 +7,9 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#include "src/stage_profile.h"
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -209,7 +211,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     const int device_id,
     std::ostream &logfile,
     CudaFailureState *failure,
-    cufftHandle borrowed_c2r)
+    cufftHandle borrowed_c2r,
+    void *pinned_stage,
+    size_t pinned_stage_bytes)
 {
     if (n_frames == 0) return true;
 
@@ -326,6 +330,13 @@ bool cudaDoseWeightAndInterpolateDevice(
     HANDLE_ERROR(cudaEventElapsedTime(&total_dw_ms, ev_start_dw, ev_stop_dw));
     float total_cufft_ms = 0.0f;
     float total_interp_ms = 0.0f;
+    // Per-frame event timing exists only for the log; each timed stage forces a
+    // host wait. Without --profile the frames queue in order on stream 0: the
+    // D2D copy, weight, C2R and accumulate are stream-ordered, the checked
+    // normalization completion above still precedes the first frame, and the
+    // final blocking download is the completion point. #139 measured this shape
+    // at -2.31 ms/movie (161/168 movies faster) with bit-exact products.
+    const bool timed = StageProfile::instance().deviceTiming();
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
         // Copy frame from resident buffer in VRAM
@@ -333,28 +344,32 @@ bool cudaDoseWeightAndInterpolateDevice(
         HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
 
         // Dose weighting
-        HANDLE_ERROR(cudaEventRecord(ev_start_dw));
+        if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_dw));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
             d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe, d_normalization
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
-        float dw_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
-        total_dw_ms += dw_ms;
+        if (timed) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_dw));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_dw));
+            float dw_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&dw_ms, ev_start_dw, ev_stop_dw));
+            total_dw_ms += dw_ms;
+        }
 
         // Inverse FFT
-        HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
+        if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
         CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
-        HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
-        float cufft_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
-        total_cufft_ms += cufft_ms;
+        if (timed) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
+            float cufft_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&cufft_ms, ev_start_cufft, ev_stop_cufft));
+            total_cufft_ms += cufft_ms;
+        }
 
         // Interpolate and accumulate
-        HANDLE_ERROR(cudaEventRecord(ev_start_interp));
+        if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_interp));
         if (model != nullptr) {
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
@@ -370,15 +385,25 @@ bool cudaDoseWeightAndInterpolateDevice(
             accumulateDirectKernel<<<grid1D, block1D>>>(d_Isum, nullptr, d_Iframe, total_pixels);
         }
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
-        HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
-        float interp_ms = 0.0f;
-        HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
-        total_interp_ms += interp_ms;
+        if (timed) {
+            HANDLE_ERROR(cudaEventRecord(ev_stop_interp));
+            HANDLE_ERROR(cudaEventSynchronize(ev_stop_interp));
+            float interp_ms = 0.0f;
+            HANDLE_ERROR(cudaEventElapsedTime(&interp_ms, ev_start_interp, ev_stop_interp));
+            total_interp_ms += interp_ms;
+        }
     }
 
-    // Single D2H download of reconstructed image
-    HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
+    // Single D2H download of the reconstructed image. A pageable destination
+    // runs at ~7 GB/s through the driver's own bounce buffer (7.8 ms for this
+    // geometry on A100 PCIe); a caller-provided pinned stage copies at full PCIe
+    // rate and the host then moves it into the image. Same bytes either way.
+    if (pinned_stage != nullptr && pinned_stage_bytes >= sz_iframe) {
+        HANDLE_ERROR(cudaMemcpy(pinned_stage, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
+        std::memcpy(Isum().data, pinned_stage, sz_iframe);
+    } else {
+        HANDLE_ERROR(cudaMemcpy(Isum().data, d_Isum, sz_iframe, cudaMemcpyDeviceToHost));
+    }
 
     HANDLE_ERROR(cudaEventRecord(ev_stop_total));
     HANDLE_ERROR(cudaEventSynchronize(ev_stop_total));
@@ -389,9 +414,13 @@ bool cudaDoseWeightAndInterpolateDevice(
     logfile << "  Device: " << device_id << ", Frames: " << n_frames << ", Size: " << nx << "x" << ny << std::endl;
     logfile << "  Peak VRAM: " << std::fixed << std::setprecision(2)
             << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
-    logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
-    logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
-    logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+    if (timed) {
+        logfile << "  Dose Weighting Kernel: " << total_dw_ms << " ms" << std::endl;
+        logfile << "  cuFFT C2R Execution:   " << total_cufft_ms << " ms" << std::endl;
+        logfile << "  Interpolation & Accum: " << total_interp_ms << " ms" << std::endl;
+    } else {
+        logfile << "  Per-stage timing:      not measured (enable with --profile)" << std::endl;
+    }
     logfile << "  Total DW Reconstruction Time: " << total_ms << " ms" << std::endl;
 
     const cufftResult plan_release = plan_cleanup.releaseAll();

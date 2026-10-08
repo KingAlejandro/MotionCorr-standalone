@@ -369,6 +369,9 @@ private:
     int *d_group_size = nullptr;
     size_t sz_cached_Ipatches = 0;
     int cached_ngroups_alloc = 0;
+    // Host copy of the group tables last uploaded, so the 25 patches of a movie
+    // upload them once instead of twice per patch. Cleared with the buffers.
+    std::vector<int> uploaded_group_start, uploaded_group_size;
 };
 
 #endif // _CUDA_ENABLED

@@ -103,6 +103,7 @@ void StageProfile::enable(const std::string &path)
 		REPORT_ERROR("Cannot open --profile output " + path);
 	out << std::setprecision(6) << std::fixed;
 	on = true;
+	device_timing = true;
 }
 
 void StageProfile::beginRun()

@@ -4,6 +4,7 @@
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/stage_profile.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -392,7 +393,10 @@ void exactCases() {
                                   variant == 2 || variant == 4 ? 2.73 : 1.12);
         active = false; exactFourier(in); weighted_frames += count;
         const size_t bytes = (size_t)in.nx*in.ny*sizeof(float);
-        for (bool poly : {false,true}) {
+        for (bool poly : {false,true}) for (bool timed : {true,false}) {
+            // Both telemetry shapes: --profile keeps the per-frame event waits;
+            // the default queues frames without them. Pixels must not depend on it.
+            StageProfile::instance().setDeviceTiming(timed);
             const auto expected = oracle(in,poly ? &model : nullptr);
             cufftComplex *resident = nullptr;
             gpu(cudaMalloc(&resident,in.values.size()*sizeof(cufftComplex)), "exact resident allocation");
@@ -405,8 +409,12 @@ void exactCases() {
             require(allocations == 5 && plane_bytes == (size_t)(in.nx/2+1)*in.ny*sizeof(float) && plane_freed,
                     "reconstruction denominator plane allocation/ownership wrong");
             require(violation.empty(), violation.c_str());
-            require(launch_checks == 1+2*count && syncs == 1+3*count+1 && execs == count && frame_copies == count,
-                    "dose precompute/per-frame launch or boundary count changed");
+            require(launch_checks == 1+2*count && execs == count && frame_copies == count,
+                    "dose precompute/per-frame launch count changed");
+            // One checked normalization completion and one total-timer wait in
+            // both modes; three telemetry waits per frame only when timed.
+            require(syncs == (timed ? 1+3*count+1 : 2),
+                    timed ? "timed dose boundary count changed" : "untimed dose path kept per-frame telemetry waits");
             empty(); active = false;
             require(std::memcmp(output().data,expected.data(),bytes) == 0,
                     "dose reconstruction pixels differ from frozen original frame loop");

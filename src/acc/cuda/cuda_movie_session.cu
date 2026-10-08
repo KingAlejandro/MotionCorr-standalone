@@ -574,6 +574,8 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    uploaded_group_start.clear();
+    uploaded_group_size.clear();
     is_initialized = false;
     (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
 }
@@ -1686,6 +1688,8 @@ bool CudaMovieSession::preparePatchInVram(
         d_group_start = nullptr;
         d_group_size = nullptr;
         cached_ngroups_alloc = 0;
+        uploaded_group_start.clear();
+        uploaded_group_size.clear();
         const cudaError_t start_err = releaseBuffer(stale_start);
         const cudaError_t size_err = releaseBuffer(stale_size);
         HANDLE_ERROR(start_err);
@@ -1699,8 +1703,21 @@ bool CudaMovieSession::preparePatchInVram(
         cached_ngroups_alloc = n_groups;
     }
 
-    HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+    // Identical for every patch of a movie; upload only when the content changes.
+    // The cache is dropped before a failed upload can leave it describing bytes
+    // that are not on the device.
+    const bool groups_current =
+        (int)uploaded_group_start.size() == n_groups &&
+        std::equal(group_start, group_start + n_groups, uploaded_group_start.begin()) &&
+        std::equal(group_size, group_size + n_groups, uploaded_group_size.begin());
+    if (!groups_current) {
+        uploaded_group_start.clear();
+        uploaded_group_size.clear();
+        HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+        uploaded_group_start.assign(group_start, group_start + n_groups);
+        uploaded_group_size.assign(group_size, group_size + n_groups);
+    }
 
     dim3 block(16, 16);
     dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
@@ -1752,7 +1769,13 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work) return false;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, plan_c2r);
+    // The worker-lifetime pinned pool held compressed strips during ingest and is
+    // idle now; reuse it to stage the final image download instead of pinning
+    // another buffer. Only when it already exists and is large enough.
+    void *stage = t_pinned_stage.ptr;
+    const size_t stage_bytes = t_pinned_stage.bytes;
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile,
+                                              &failure_state, plan_c2r, stage, stage_bytes);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

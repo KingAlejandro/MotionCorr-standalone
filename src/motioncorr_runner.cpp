@@ -2091,8 +2091,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		        << " host staging after device forward FFT." << std::endl;
 	};
 
-	MultidimArray<float> Isum(ny, nx);
-	Isum.initZeros();
+	// The host unaligned sum is only read by CPU paths: the CPU gain-and-sum pass,
+	// host hot-pixel statistics, or the GPU statistics fallback (which downloads
+	// into it). On the resident path with GPU statistics none of those run, so
+	// the 57 MB buffer is materialised lazily by ensure_host_sum(). Every reader
+	// below calls it first; downloadUnalignedSum() reshapes it itself.
+	MultidimArray<float> Isum;
+	const long int isum_pixels = (long int)nx * ny;
+	auto ensure_host_sum = [&]() {
+		if (Isum.data == NULL) { Isum.resize(ny, nx); Isum.initZeros(); }
+	};
 	// The resident CUDA preprocessing path keeps decoded frames raw on the host.
 	// Its device copy is gain-corrected; host frames are materialized only if a
 	// later CPU/streaming path actually needs them.
@@ -2207,6 +2215,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
+			ensure_host_sum();
 			Isum.initZeros();
 			// The CPU pass below reads float frames in place.
 			expand_compact_to_float();
@@ -2216,6 +2225,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
+		ensure_host_sum();
 		const long int n_pixels = YXSIZE(Isum);
 		// Walk a tile of pixels through every frame before moving to the next
 		// tile. Frame-minor traversal of the whole image touches n_frames
@@ -2281,17 +2291,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				if (movie_session->reduceUnalignedSum(sum1, sum_abs))
 				{
 					// Same source expressions as the host path, so host rounding is unchanged.
-					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
+					const RFLOAT gpu_mean = sum1 / isum_pixels;
 					if (std::isfinite(gpu_mean) && movie_session->reduceUnalignedSumSqDev(gpu_mean, sum2))
 					{
-						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
+						const RFLOAT gpu_std = std::sqrt(sum2 / isum_pixels);
 						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
 						// Bound the difference between reduction orders, including signed
 						// cancellation in the mean and its second-order contribution to std.
 						// For nearly constant data the latter scales as mean_abs^2/std;
 						// a zero/non-finite std makes the guard fail and uses the host scan.
 						// Widening the band only increases conservative host fallback.
-						const double n_pix = (double)YXSIZE(Isum);
+						const double n_pix = (double)isum_pixels;
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
@@ -2332,6 +2342,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 			if (!used_gpu_stats)
 			{
+				ensure_host_sum();
 				mean = 0; std = 0;
 				#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
@@ -2844,7 +2855,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	Iref().reshape(ny, nx);
 	Iref_even().reshape(ny, nx);
 	Iref_odd().reshape(ny, nx);
-	Iref().initZeros();
+	// No initZeros() here: nothing reads Iref before the unweighted and
+	// dose-weighted reconstruction sites, and each of those reshapes and zeroes
+	// it itself (and again on CPU fallback). This one was a dead 57 MB memset
+	// per movie, measured at 41 ms with fresh pages and ~6 ms with reused ones.
 
 	// The real-space frames reconstructed below have exactly two readers:
 	// patch clipping (do_local) and the "before dose weighting" sum further

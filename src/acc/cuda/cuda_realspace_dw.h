@@ -50,7 +50,9 @@ bool cudaDoseWeightAndInterpolateDevice(
     const int device_id,
     std::ostream &logfile,
     CudaFailureState *failure = nullptr, // receives every consumed status, cleanup included
-    cufftHandle borrowed_c2r = 0 // matching session-owned batch-one C2R; never destroyed here
+    cufftHandle borrowed_c2r = 0, // matching session-owned batch-one C2R; never destroyed here
+    void *pinned_stage = nullptr,   // optional caller-owned pinned host buffer for the final download
+    size_t pinned_stage_bytes = 0   // its capacity; used only when >= one real frame
 );
 
 /**

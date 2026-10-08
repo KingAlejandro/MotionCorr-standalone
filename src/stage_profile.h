@@ -43,6 +43,12 @@ public:
 	/** Free-form key/value written into the process record. */
 	void setNote(const std::string &key, const std::string &value) { if (on) notes[key] = value; }
 
+	/** Detailed device event timing for CUDA log telemetry. On with --profile;
+	 * off by default because each timed stage forces a host wait. Tests may set
+	 * it directly to exercise both shapes without writing a profile. */
+	bool deviceTiming() const { return device_timing; }
+	void setDeviceTiming(bool value) { device_timing = value; }
+
 	void beginRun();
 	void endRun(int n_movies);
 
@@ -88,6 +94,7 @@ private:
 	void writeMovie(bool ok, const Sample &end);
 
 	bool on = false;
+	bool device_timing = false;
 	bool run_open = false;
 	std::ofstream out;
 

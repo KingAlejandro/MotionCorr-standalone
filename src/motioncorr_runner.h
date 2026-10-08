@@ -82,6 +82,8 @@ public:
 	// otherwise identical binary, and as an escape hatch on a host where the
 	// extra thread costs more CPU than the overlap buys.
 	bool sync_output = false;
+	// --profile: JSON-lines stage profile path; empty disables it.
+	FileName fn_profile;
 
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;

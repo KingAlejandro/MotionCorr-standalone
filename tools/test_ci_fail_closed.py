@@ -218,6 +218,8 @@ exec "{sys.executable}" "$@"
             "NativeMovieStaging",
             "GainCacheOwnership",
             "JointStarPublication",
+            # --profile contract (docs/stage_profile.md).
+            "StageProfile",
         ]
 
         def runnable(name: str) -> dict:
@@ -245,7 +247,8 @@ exec "{sys.executable}" "$@"
                         "OutputTreeComparator", "NativeMovieStaging",
                         "GainCacheOwnership", "JointStarPublication",
                         "MicrographModelBounds", "CompressedMovieSequence",
-                        "RunnerInterpolateRecenter", "RunnerInterpolateShifts"):
+                        "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
+                        "StageProfile"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

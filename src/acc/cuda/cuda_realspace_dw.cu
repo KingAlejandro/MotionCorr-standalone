@@ -91,9 +91,15 @@ __global__ void computeDoseNormalizationKernel(
     d_normalization[idx] = sqrtf(sum_weight_sq);
 }
 
-// Dose weighting kernel implementing Grant & Grigorieff (2015) model
+// Dose weighting kernel implementing Grant & Grigorieff (2015) model.
+// Out of place: reads the resident Fourier frame and writes the weighted frame
+// straight into the C2R input scratch, so no per-frame copy of the frame is
+// needed. Each output element is exactly the old in-place `x *= w` product
+// (one IEEE multiply per component, same weight expression); only the source
+// pointer differs. d_src and d_dst must not alias.
 __global__ void applyDoseWeightKernel(
-    float2 * __restrict__ d_Fframe,
+    const float2 * __restrict__ d_src,
+    float2 * __restrict__ d_dst,
     int nfx, int nfy, int nfy_half,
     float nfx2, float nfy2, float apix,
     const float * __restrict__ d_doses,
@@ -109,8 +115,9 @@ __global__ void applyDoseWeightKernel(
 
     if (x == 0 && ly == 0) {
         float norm_weight = 1.0f / sqrtf((float)n_frames);
-        d_Fframe[idx].x *= norm_weight;
-        d_Fframe[idx].y *= norm_weight;
+        const float2 v = d_src[idx];
+        d_dst[idx].x = v.x * norm_weight;
+        d_dst[idx].y = v.y * norm_weight;
         return;
     }
 
@@ -122,8 +129,9 @@ __global__ void applyDoseWeightKernel(
     float cur_weight = expf(-d_doses[iframe] / Ne);
     float norm_weight = cur_weight / d_normalization[idx];
 
-    d_Fframe[idx].x *= norm_weight;
-    d_Fframe[idx].y *= norm_weight;
+    const float2 v = d_src[idx];
+    d_dst[idx].x = v.x * norm_weight;
+    d_dst[idx].y = v.y * norm_weight;
 }
 
 // Polynomial real-space bilinear interpolation & accumulation kernel
@@ -210,7 +218,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     const int device_id,
     std::ostream &logfile,
     CudaFailureState *failure,
-    cufftHandle borrowed_c2r)
+    cufftHandle borrowed_c2r,
+    const DoseWeightScratch *scratch)
 {
     if (n_frames == 0) return true;
 
@@ -267,26 +276,43 @@ bool cudaDoseWeightAndInterpolateDevice(
     float *d_normalization = nullptr;
 
     size_t total_vram_allocated = 0;
-    HANDLE_ERROR(cudaMalloc((void**)&d_Fframe, sz_fframe));
-    memory_cleanup.add(d_Fframe);
-    total_vram_allocated += sz_fframe;
+    if (scratch == nullptr) {
+        // Reconstruction-owned buffers, one allocation each (the fallback path).
+        HANDLE_ERROR(cudaMalloc((void**)&d_Fframe, sz_fframe));
+        memory_cleanup.add(d_Fframe);
+        total_vram_allocated += sz_fframe;
 
-    HANDLE_ERROR(cudaMalloc((void**)&d_Iframe, sz_iframe));
-    memory_cleanup.add(d_Iframe);
-    total_vram_allocated += sz_iframe;
+        HANDLE_ERROR(cudaMalloc((void**)&d_Iframe, sz_iframe));
+        memory_cleanup.add(d_Iframe);
+        total_vram_allocated += sz_iframe;
 
-    HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
-    memory_cleanup.add(d_Isum);
-    total_vram_allocated += sz_iframe;
+        HANDLE_ERROR(cudaMalloc((void**)&d_Isum, sz_iframe));
+        memory_cleanup.add(d_Isum);
+        total_vram_allocated += sz_iframe;
+
+        HANDLE_ERROR(cudaMalloc((void**)&d_doses, n_frames * sizeof(float)));
+        memory_cleanup.add(d_doses);
+        total_vram_allocated += n_frames * sizeof(float);
+
+        HANDLE_ERROR(cudaMalloc((void**)&d_normalization, sz_normalization));
+        memory_cleanup.add(d_normalization);
+        total_vram_allocated += sz_normalization;
+    } else {
+        // Session mode: the C2R input frame is the caller's existing scratch
+        // tile, and the other four buffers share one allocation (one cudaMalloc
+        // and one checked cudaFree instead of four of each).
+        d_Fframe = (float2*)scratch->fourier;
+        const mc_cuda::DoseScratchLayout layout = mc_cuda::doseScratchLayout(nx, ny, n_frames);
+        char *block = nullptr;
+        HANDLE_ERROR(cudaMalloc((void**)&block, layout.total_bytes));
+        memory_cleanup.add(block);
+        total_vram_allocated += layout.total_bytes;
+        d_Isum = (float*)(block + layout.accumulator_offset);
+        d_Iframe = (float*)(block + layout.real_offset);
+        d_normalization = (float*)(block + layout.normalization_offset);
+        d_doses = (float*)(block + layout.doses_offset);
+    }
     HANDLE_ERROR(cudaMemset(d_Isum, 0, sz_iframe));
-
-    HANDLE_ERROR(cudaMalloc((void**)&d_doses, n_frames * sizeof(float)));
-    memory_cleanup.add(d_doses);
-    total_vram_allocated += n_frames * sizeof(float);
-
-    HANDLE_ERROR(cudaMalloc((void**)&d_normalization, sz_normalization));
-    memory_cleanup.add(d_normalization);
-    total_vram_allocated += sz_normalization;
 
     std::vector<float> h_doses(n_frames);
     for (int i = 0; i < n_frames; i++) h_doses[i] = (float)doses[i];
@@ -329,21 +355,22 @@ bool cudaDoseWeightAndInterpolateDevice(
     float total_interp_ms = 0.0f;
     // Per-frame event timing exists only for the log; each timed stage forces a
     // host wait. Without --profile the frames queue in order on stream 0: the
-    // D2D copy, weight, C2R and accumulate are stream-ordered, the checked
+    // weight, C2R and accumulate are stream-ordered, the checked
     // normalization completion above still precedes the first frame, and the
     // final blocking download is the completion point. #139 measured this shape
     // at -2.31 ms/movie (161/168 movies faster) with bit-exact products.
     const bool timed = StageProfile::instance().deviceTiming();
 
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        // Copy frame from resident buffer in VRAM
+        // The weight kernel reads the resident frame and writes the weighted
+        // frame into the C2R input scratch: no per-frame device copy, and the
+        // resident Fourier frame is never written.
         const float2 *src_frame = (const float2*)d_Fframes + (size_t)iframe * nfy * nfx;
-        HANDLE_ERROR(cudaMemcpy(d_Fframe, src_frame, sz_fframe, cudaMemcpyDeviceToDevice));
 
         // Dose weighting
         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_dw));
         applyDoseWeightKernel<<<gridDW, blockDW>>>(
-            d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe, d_normalization
+            src_frame, d_Fframe, nfx, nfy, nfy_half, nfx2, nfy2, (float)apix, d_doses, n_frames, iframe, d_normalization
         );
         LAUNCH_HANDLE_ERROR(cudaGetLastError());
         if (timed) {

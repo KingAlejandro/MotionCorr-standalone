@@ -1768,8 +1768,15 @@ bool CudaMovieSession::reconstructDoseWeighted(
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work) return false;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, plan_c2r);
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work ||
+        !d_inverse_tile) return false;
+    // d_inverse_tile (one complex frame) is dead once the global inverse
+    // transform has finished, and holds nothing the reconstruction needs. It
+    // becomes the C2R input the out-of-place weight kernel writes.
+    DoseWeightScratch scratch;
+    scratch.fourier = d_inverse_tile;
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model,
+                                              device_id, logfile, &failure_state, plan_c2r, &scratch);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

@@ -398,6 +398,8 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)
         set_tests_properties(CudaDoseNormalization PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
+        add_test(NAME CudaDoseSessionPlan COMMAND cuda_dose_normalization --case borrowed)
+        set_tests_properties(CudaDoseSessionPlan PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)

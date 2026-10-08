@@ -1,0 +1,206 @@
+
+==============================================================================
+0. SESSION / HARDWARE
+==============================================================================
+  GPU dev3  NVIDIA A100 80GB PCIe  SMs=108 clk=1410.00GHz  mem=1.8 TiB/s bw L2=40.0 MiB  cc=8.0
+  GPU dev2  NVIDIA A100 80GB PCIe  SMs=108 clk=1410.00GHz  mem=1.8 TiB/s bw L2=40.0 MiB  cc=8.0
+  GPU dev1  NVIDIA A100 80GB PCIe  SMs=108 clk=1410.00GHz  mem=1.8 TiB/s bw L2=40.0 MiB  cc=8.0
+  GPU dev0  NVIDIA A100 80GB PCIe  SMs=108 clk=1410.00GHz  mem=1.8 TiB/s bw L2=40.0 MiB  cc=8.0
+  CpuCores             124
+  CudaDriverVersion    12080
+  Hostname             4-gpu-vm
+  KernelVersion        #136-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 21:53:05 UTC 2026
+
+  traced span          3.1867 s   [60853197 .. 3247555479] ns
+  processes=1694  threads_seen=2795
+
+==============================================================================
+1. GPU OCCUPANCY OF THE WALL CLOCK  (device-side intervals, union)
+==============================================================================
+  kernel time (sum)           109.611 ms     3.4% of span
+  memcpy time (sum)           199.947 ms     6.3% of span
+  GPU busy (union, no dbl)    309.597 ms     9.7% of span
+  GPU IDLE                   2877.105 ms    90.3% of span
+  overlap (kern+mcpy-union)    -0.039 ms  <- concurrency actually achieved
+
+  Largest GPU idle gaps (device doing nothing):
+        dur_ms   start_rel_ms  cumulative%
+      1223.214       1963.489      42.5%
+      1186.359          0.000      83.7%
+        80.441       1465.899      86.5%
+        58.591       1197.927      88.6%
+        39.537       1589.785      90.0%
+        13.893       1886.995      90.4%
+        11.031       1452.392      90.8%
+        10.215       1746.040      91.2%
+         4.165       1573.716      91.3%
+         3.694       1905.093      91.5%
+         3.492       1657.465      91.6%
+         3.087       1546.587      91.7%
+         2.571       1190.397      91.8%
+         2.245       1811.161      91.8%
+         2.235       1802.392      91.9%
+    (1506 gaps total, 2877.1 ms idle)
+
+==============================================================================
+2. KERNEL CENSUS  (sorted by total device time)
+==============================================================================
+  kernel                                          n    tot_ms    avg_us   max_us   %gpu    grid   blk  reg
+  prime_fft_factor                              241    42.410     176.0    233.9   38.7    8816   408   25
+  regular_fft_factor                            241    17.817      73.9     83.8   16.3   15892    64   32
+  fourierShiftKernel                             54     9.272     171.7   1766.9    8.5  640320   256   18
+  applyDoseWeightKernel                          24     9.171     382.1    382.3    8.4   27840   256   22
+  regular_bluestein_fft                          25     7.641     305.7    306.8    7.0    4464   288   56
+  interpolateAndAccumulatePolynomialKernel       24     4.196     174.8    181.7    3.8   55680   256   26
+  scaleComplexKernel                             26     3.290     126.6   1666.2    3.0  667812   256   16
+  postprocess_kernel                             49     3.241      66.1     72.2    3.0   13913   256   22
+  preprocess_kernel                              48     3.123      65.1     66.2    2.8   13913   256   28
+  fusedGainAndSumKernel                           1     2.843    2843.3   2843.3    2.6   55622   256   32
+  cropAndGroupPatchResidentKernel                25     2.606     104.2    110.6    2.4   54144   256   32
+  regular_fft                                    55     1.161      21.1    227.5    1.1    1461   864   53
+  regular_fft_c2r                                54     0.983      18.2    180.2    0.9   23328   108   40
+  computeCCFKernel                               54     0.678      12.6    120.1    0.6   45384   256   16
+  computeReferenceKernel                         54     0.524       9.7     75.6    0.5    1891   256   32
+  findPeakAndInterpolateKernel                   54     0.239       4.4      5.6    0.2      24   256   25
+  sumUnalignedKernel                              1     0.080      80.5     80.5    0.1    1024   256   18
+  collectAboveThresholdKernel                     1     0.076      75.9     75.9    0.1    1024   256   16
+  combinePartialsKernel                           3     0.076      25.2     30.2    0.1       1     1   30
+  sumSqDevUnalignedKernel                         1     0.071      70.8     70.8    0.1    1024   256   16
+  computeWeightsKernel                           26     0.066       2.5      4.7    0.1    1891   256   16
+  convert                                         2     0.016       8.1      8.1    0.0       1   108   16
+  generate_chirp_signal                           1     0.012      12.4     12.4    0.0       1    48   40
+  scale_conjugate                                 1     0.010       9.9      9.9    0.0       1   108   22
+  updateDefectKernel                              1     0.007       7.3      7.3    0.0       1   256   30
+  TOTAL                                        1066   109.611
+
+==============================================================================
+3. HOST<->DEVICE TRAFFIC  (bytes are contention-immune; rates are not)
+==============================================================================
+  direction                 src       dst           n          bytes       ms    GB/s
+  Device-to-Device          Device    Device       48  2,735,357,952     3.30  827.87
+  Host-to-Device            Pageable  Device      274  1,434,806,904   187.98    7.63
+  Device-to-Host            Device    Pageable    113     56,966,572     8.66    6.57
+  TOTAL                                           435  4,227,131,428   199.95
+
+  total moved over PCIe+device: 3.9 GiB
+  copies touching PAGEABLE host memory: 0 (pageable blocks the CPU and cannot overlap; pinned can)
+
+==============================================================================
+4. CUDA RUNTIME API  (host-side cost; this is where the CPU actually waits)
+==============================================================================
+  api                                            n    tot_ms    avg_us    max_us   %span
+  cudaMemcpy_v3020                             348   213.655     614.0   19082.0     6.7
+  cuModuleLoadData                             109    57.625     528.7    9086.6     1.8
+  cudaEventSynchronize_v3020                   369    41.964     113.7    1738.5     1.3
+  cudaDeviceSynchronize_v3020                   53    35.908     677.5    2831.4     1.1
+  cudaMalloc_v3020                             231    33.880     146.7    1081.7     1.1
+  cudaFree_v3020                               231    30.254     131.0    1349.1     0.9
+  cuLaunchKernel                               717    18.208      25.4     129.3     0.6
+  cudaEventRecord_v3020                        738    16.728      22.7     118.5     0.5
+  cuMemFree_v2                                  35    11.538     329.7    2058.1     0.4
+  cudaLaunchKernel_v7000                       349    11.363      32.6     840.9     0.4
+  cuMemAlloc_v2                                 35    10.934     312.4     520.7     0.3
+  cuMemcpyHtoD_v2                               87     5.882      67.6    2229.1     0.2
+  cuModuleUnload                               109     3.964      36.4     324.1     0.1
+  cudaEventCreate_v3020                        216     2.972      13.8      91.6     0.1
+  cudaEventDestroy_v3020                       216     2.682      12.4      82.4     0.1
+  cuMemGetInfo_v2                               31     1.914      61.7     155.0     0.1
+  cuStreamIsCapturing                           98     1.363      13.9     110.1     0.0
+  cuCtxSetCurrent                               31     0.312      10.1      12.6     0.0
+  cudaMemset_v3020                               2     0.104      52.0      70.1     0.0
+  cuCtxSynchronize                               3     0.093      30.9      31.0     0.0
+  cuMemsetD8_v2                                  2     0.085      42.5      50.8     0.0
+  cuInit                                         1     0.012      12.3      12.3     0.0
+  cuModuleGetLoadingMode                         1     0.011      11.2      11.2     0.0
+  (sum of all API, wall-overlapping)                 501.452
+
+==============================================================================
+5. SYNCHRONIZATION CENSUS
+==============================================================================
+  device-side synchronization records:
+  syncType                                     n    tot_ms    avg_us    max_us
+  Unknown                                     56    34.745     620.5    2809.0
+  Event sync                                 369    33.282      90.2    1718.7
+
+  host-side blocking API calls (the CPU stall these cause):
+    cudaDeviceSynchronize         53 calls    35.908 ms     1.1% of span
+    cudaEventSynchronize         369 calls    41.964 ms     1.3% of span
+    cudaMemcpy                   348 calls   213.655 ms     6.7% of span
+    cudaFree                     231 calls    30.254 ms     0.9% of span
+    cudaMalloc                   231 calls    33.880 ms     1.1% of span
+    cudaLaunchKernel             349 calls    11.363 ms     0.4% of span
+
+==============================================================================
+6. NVTX STAGE BREAKDOWN  (host wall per pipeline stage)
+==============================================================================
+  stage                                         n    tot_ms   %span  first_rel_ms
+  MOVIE (executeOwnMotionCorrection)            1  1880.972    59.0       470.094
+  read movie                                    1   399.173    12.5       590.824
+  patch align                                  25   210.678     6.6      1667.618
+  write output                                  1   196.968     6.2      1967.810
+  gain and sum                                  1   196.306     6.2      1256.126
+  read gain                                     1   115.168     3.6       475.642
+  dose weighting                                1    76.747     2.4      1891.001
+  fix defect                                    1    51.928     1.6      1495.148
+  detect hot                                    1    42.667     1.3      1452.447
+  global ifft                                   1    24.299     0.8      1628.981
+  global fft                                    1    24.210     0.8      1549.544
+  prep patch                                   25    23.567     0.7      1653.433
+  global alignment                              1    18.898     0.6      1573.835
+  fit polynomial                                1     1.536     0.0      1889.453
+  binning                                       1     0.013     0.0      1967.762
+  power spectrum                                1     0.010     0.0      1573.764
+
+  GPU work inside each stage window (kernel+memcpy device time):
+  stage                                         gpu_ms   kern_ms   mcpy_ms  stage_ms   gpu%
+  MOVIE (executeOwnMotionCorrection)           309.558   109.611   199.947  1880.972   16.5
+  read movie                                     0.000     0.000     0.000   399.173    0.0
+  write output                                   0.000     0.000     0.000   196.968    0.0
+  gain and sum                                 188.083     2.843   185.239   196.306   95.8
+  read gain                                      0.000     0.000     0.000   115.168    0.0
+  dose weighting                                43.131    33.012    10.119    76.747   56.2
+  fix defect                                     0.011     0.007     0.004    51.928    0.0
+  detect hot                                     0.311     0.303     0.009    42.667    0.7
+  global ifft                                   21.658    19.986     1.673    24.299   89.1
+  global fft                                    21.486    21.486     0.000    24.210   88.7
+  global alignment                               7.132     7.111     0.021    18.898   37.7
+  fit polynomial                                 0.000     0.000     0.000     1.536    0.0
+  binning                                        0.000     0.000     0.000     0.013    0.0
+  power spectrum                                 0.000     0.000     0.000     0.010    0.0
+
+==============================================================================
+7. DEVICE MEMORY OVER TIME
+==============================================================================
+  allocations=436  frees=266  churn(sum of allocs)=3.6 GiB
+  PEAK resident VRAM = 3.0 GiB  at t=1908.7 ms
+  residual at end    = 1.3 KiB
+    Device               n=266   3.6 GiB
+    Device Static        n=170   1.3 KiB
+
+==============================================================================
+8. CPU THREAD ACTIVITY (sampled)
+==============================================================================
+
+==============================================================================
+9. OS RUNTIME  (where the process blocks outside CUDA)
+==============================================================================
+  call                                    n     tot_ms     avg_us    max_ms
+  poll                                   33    2542.23    77037.4    435.65
+  system                                  4     802.23   200558.1    238.19
+  ioctl                                1547     260.88      168.6     30.94
+  fread                                3715     104.02       28.0     52.57
+  fwrite                                571      83.44      146.1     76.71
+  fstat                                4162      62.80       15.1      0.95
+  munmap                                 69      37.10      537.7      4.21
+  fopen64                              2193      36.50       16.6      0.12
+  mmap                                   69      11.11      161.0      2.14
+  fclose                                781      10.33       13.2      0.10
+  read                                  717       9.15       12.8      0.13
+  stat                                  468       8.76       18.7      0.27
+  write                                 390       6.42       16.5      0.12
+  fstat64                               541       6.41       11.8      0.10
+  mmap64                                 41       5.88      143.4      4.00
+  fopen                                 227       5.47       24.1      0.21
+  fflush                                377       5.06       13.4      0.11
+  pthread_create                          9       2.91      323.8      0.99
+

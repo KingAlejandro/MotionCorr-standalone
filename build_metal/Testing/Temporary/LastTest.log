@@ -1,0 +1,33 @@
+Start testing: Sep 24 14:48 BST
+----------------------------------------------------------
+1/1 Testing: SyntheticRegression
+1/1 Test: SyntheticRegression
+Command: "/opt/homebrew/Caskroom/miniforge/base/bin/python3.13" "/Users/alex.konstantinov/Documents/MotionCorr/tests/test_synthetic_regression.py" "--binary" "/Users/alex.konstantinov/Documents/MotionCorr/build_metal/motioncorr"
+Directory: /Users/alex.konstantinov/Documents/MotionCorr/build_metal
+"SyntheticRegression" start time: Sep 24 14:48 BST
+Output:
+----------------------------------------------------------
+Results for --j 1 vs Expected Old Baseline:
+  Image Max Pixel Difference: 2.364986e+01
+  Image RMSE:                 3.119288e-01
+  Shift Max Difference (px):  4.670000e-03
+  Shift RMSD (px):            3.305323e-03
+Traceback (most recent call last):
+  File "/Users/alex.konstantinov/Documents/MotionCorr/tests/test_synthetic_regression.py", line 194, in <module>
+    main()
+    ~~~~^^
+  File "/Users/alex.konstantinov/Documents/MotionCorr/tests/test_synthetic_regression.py", line 189, in main
+    success = test_synthetic_regression(binary=args.binary, threads_to_test=threads)
+  File "/Users/alex.konstantinov/Documents/MotionCorr/tests/test_synthetic_regression.py", line 173, in test_synthetic_regression
+    assert m_diff == 0.0, f"Image pixel diff ({m_diff}) must be exactly 0.0"
+           ^^^^^^^^^^^^^
+AssertionError: Image pixel diff (23.649856567382812) must be exactly 0.0
+<end of output>
+Test time =   0.95 sec
+----------------------------------------------------------
+Test Failed.
+"SyntheticRegression" end time: Sep 24 14:48 BST
+"SyntheticRegression" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 24 14:48 BST

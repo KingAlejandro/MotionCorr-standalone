@@ -1,0 +1,73 @@
+# RC head 17877c4 (#162 eviction fix merged): native + identity vs main 9d14275, 4GPUs GPU0
+
+src-rc 17877c4
+BUILD build-rc rc=0
+BUILD build-rc-cpu rc=0
+CUDA ctest: 100% tests passed, 0 tests failed out of 62
+CPU ctest: 100% tests passed, 0 tests failed out of 44
+eo main rc=0
+eo_nodw main rc=0
+bin_late main rc=0
+cpu main rc=0
+mixed main rc=0
+mixed_cpu main rc=0
+eo rc rc=0
+eo_nodw rc rc=0
+bin_late rc rc=0
+cpu rc rc=0
+mixed rc rc=0
+mixed_cpu rc rc=0
+eo_nodw rc_poison rc=0
+mixed rc_poison rc=0
+mixed rc_nopool rc=0
+== eo rc: IDENTICAL mrc=12 other=17 pdf_inventoried=4 files=37/37 
+== eo_nodw rc: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== bin_late rc: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== cpu rc: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed rc: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== mixed_cpu rc: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== eo_nodw rc_poison: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed rc_poison: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== mixed rc_nopool: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== control (main eo vs main eo_nodw, must differ): DIFFERENT mrc=12 other=17 pdf_inventoried=4 files=37/41
+ Host allocator: glibc defaults; full-frame buffers pooled.
+VALIDATE2-DONE
+#!/bin/bash
+# RC head 17877c4 (= c0f82c2 product + #162 eviction fix): build, native, identity, mixed geometry.
+set -u
+W=/home/alex/mc-rc; cd $W
+L=$W/validate2.log; : > $L
+git -C src-rc fetch -q origin && git -C src-rc checkout -q -f origin/integrate/single-gpu-rc
+echo "src-rc $(git -C src-rc rev-parse --short HEAD)" >> $L
+bash build.sh src-rc build-rc -DCUDA=ON -DUSE_NVCOMP=ON -DNVCOMP_ROOT=/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive >> $L 2>&1
+bash build.sh src-rc build-rc-cpu -DCUDA=OFF >> $L 2>&1
+( cd build-rc && CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 flock /tmp/motioncorr-gpu0-correctness.lock taskset -c 96-103 ctest -j4 --timeout 1800 > ../ctest2-cuda.log 2>&1; echo "CUDA ctest: $(grep -E "tests passed" ../ctest2-cuda.log)" >> $L )
+( cd build-rc-cpu && taskset -c 96-103 ctest -j4 --timeout 1800 > ../ctest2-cpu.log 2>&1; echo "CPU ctest: $(grep -E "tests passed" ../ctest2-cpu.log)" >> $L )
+# Identity matrix vs main, as before (4 movies)
+MAIN=/home/alex/mc-prof-abc/build-main/motioncorr; RC=$W/build-rc/motioncorr
+BASE="--use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 --bfactor 150 --seed 1 --j 8"
+I=$W/idm2; rm -rf $I; mkdir -p $I
+run() { # dir star cfg arm bin env args...
+  local dir=$1 star=$2 cfg=$3 arm=$4 bin=$5 envs=$6; shift 6
+  local o=$I/out/$cfg/$arm; rm -rf $o; mkdir -p $o
+  ( cd $dir && flock /tmp/motioncorr-gpu0-correctness.lock env $envs CUDA_VISIBLE_DEVICES=GPU-eddb42fe-4f9a-adde-76d3-b924e14add54 taskset -c 96-103 $bin --i $star --o $o/ $BASE "$@" > $o.stdout 2>&1 )
+  echo "$cfg $arm rc=$?" >> $L
+}
+D=$W/idm/data; G="--gainref Movies/gain.mrc"
+for arm in main rc; do b=$MAIN; [ $arm = rc ] && b=$RC
+  run $D four.star eo       $arm $b "" $G --gpu 0 --ingest nvcomp --even_odd_split
+  run $D four.star eo_nodw  $arm $b "" $G --gpu 0 --ingest nvcomp --even_odd_split --save_noDW
+  run $D four.star bin_late $arm $b "" $G --gpu 0 --ingest auto --bin_factor 1.25 --no_early_binning --even_odd_split --save_noDW
+  run $D four.star cpu      $arm $b "" $G --even_odd_split --save_noDW
+  run $W/mixed mixed_xy.star mixed     $arm $b "" --gpu 0 --ingest nvcomp --even_odd_split --save_noDW
+  run $W/mixed mixed_xy.star mixed_cpu $arm $b "" --even_odd_split --save_noDW
+done
+run $D four.star eo_nodw rc_poison $RC MOTIONCORR_FRAME_POOL_POISON=1 $G --gpu 0 --ingest nvcomp --even_odd_split --save_noDW
+run $W/mixed mixed_xy.star mixed rc_poison $RC MOTIONCORR_FRAME_POOL_POISON=1 --gpu 0 --ingest nvcomp --even_odd_split --save_noDW
+run $W/mixed mixed_xy.star mixed rc_nopool $RC MOTIONCORR_FRAME_POOL=0 --gpu 0 --ingest nvcomp --even_odd_split --save_noDW
+for c in eo eo_nodw bin_late cpu mixed mixed_cpu; do echo "== $c rc: $(python3 idm/cmp_trees.py $I/out/$c/main $I/out/$c/rc | head -3 | tr "\n" " ")" >> $L; done
+for a in rc_poison; do echo "== eo_nodw $a: $(python3 idm/cmp_trees.py $I/out/eo_nodw/main $I/out/eo_nodw/$a | head -3 | tr "\n" " ")" >> $L; done
+for a in rc_poison rc_nopool; do echo "== mixed $a: $(python3 idm/cmp_trees.py $I/out/mixed/main $I/out/mixed/$a | head -3 | tr "\n" " ")" >> $L; done
+echo "== control (main eo vs main eo_nodw, must differ): $(python3 idm/cmp_trees.py $I/out/eo/main $I/out/eo_nodw/main | head -1)" >> $L
+grep -h "allocator\|frame pool" $I/out/mixed/rc.stdout | head -3 >> $L
+echo VALIDATE2-DONE >> $L

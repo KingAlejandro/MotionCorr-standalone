@@ -66,6 +66,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/funcs.h"
 #include "src/renderEER.h"
 #include "src/stage_profile.h"
+#include "src/frame_buffer_pool.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -139,6 +140,18 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
 	// Opened here so an unwritable path fails before any processing.
 	StageProfile::instance().enable(fn_profile);
+	{
+		// Without device timing the profile keeps its stage records and NVTX
+		// ranges but the CUDA code takes its production shape: no per-step
+		// event waits, so a trace's synchronisation counts match an unprofiled run.
+		const std::string device_timing_arg = parser.getOption("--profile_device_timing", "With --profile: 1 (default) also times CUDA steps with events, which adds host waits; 0 records the stage profile and NVTX ranges with production device synchronisation.", "1");
+		if (device_timing_arg != "0" && device_timing_arg != "1")
+			REPORT_ERROR("--profile_device_timing must be 0 or 1. Got: " + device_timing_arg);
+		if (StageProfile::instance().enabled()) {
+			StageProfile::instance().setDeviceTiming(device_timing_arg == "1");
+			StageProfile::instance().setNote("device_timing", device_timing_arg == "1" ? "on" : "off");
+		}
+	}
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");
@@ -1518,6 +1531,9 @@ void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &pat
 	owned->MDMainHeader = image.MDMainHeader;
 	submitOutput([owned, path, datatype]() {
 		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+		// Full-frame buffers return to the bounded pool for the next movie;
+		// anything else, or a full pool, frees as before.
+		FrameBufferPool::instance().release(owned->data);
 	});
 }
 
@@ -1969,6 +1985,23 @@ bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
 	       gain_cache_nx == nx && gain_cache_ny == ny;
 }
 
+#ifdef _CUDA_ENABLED
+// MOTIONCORR_PATCH_BATCH: unset = batched patch alignment with up to 4 patches
+// per chunk (fewer if device memory is short); 0 = per-patch alignment only;
+// N > 0 = at most N patches per chunk. Larger chunks made the stage only ~1 ms
+// faster on the tutorial data and cost more in release and dose weighting
+// (docs/batched_patch_alignment.md).
+static int patchBatchCap() {
+	const char *env = getenv("MOTIONCORR_PATCH_BATCH");
+	if (!env) return 4;
+	char *end = nullptr;
+	const long value = strtol(env, &end, 10);
+	if (end == env || *end != '\0' || value < 0 || value > 4096)
+		REPORT_ERROR(std::string("Invalid MOTIONCORR_PATCH_BATCH: ") + env);
+	return (int)value;
+}
+#endif
+
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
@@ -2166,6 +2199,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session.reset();
 	};
 	if (use_gpu && !early_binning) {
+		StageScope session_scope("session setup");
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies. It is only an identity because
@@ -2186,6 +2220,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		StageScope ingest_scope("device ingest");
 		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
 	}
 	// Each outcome gets its own response. Collapsing them into one bool is what
@@ -2385,8 +2420,16 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		        << " host staging after device forward FFT." << std::endl;
 	};
 
-	MultidimArray<float> Isum(ny, nx);
-	Isum.initZeros();
+	// The host unaligned sum is only read by CPU paths: the CPU gain-and-sum pass,
+	// host hot-pixel statistics, or the GPU statistics fallback (which downloads
+	// into it). On the resident path with GPU statistics none of those run, so
+	// the 57 MB buffer is materialised lazily by ensure_host_sum(). Every reader
+	// below calls it first; downloadUnalignedSum() reshapes it itself.
+	MultidimArray<float> Isum;
+	const long int isum_pixels = (long int)nx * ny;
+	auto ensure_host_sum = [&]() {
+		if (Isum.data == NULL) { Isum.resize(ny, nx); Isum.initZeros(); }
+	};
 	// The resident CUDA preprocessing path keeps decoded frames raw on the host.
 	// Its device copy is gain-corrected; host frames are materialized only if a
 	// later CPU/streaming path actually needs them.
@@ -2501,6 +2544,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			logfile << "WARNING: CUDA fused gain and sum failed. Falling back to CPU preprocessing." << std::endl;
 			// The failed CUDA call may have partially written the sum. Start the
 			// original CPU pass from raw frames and a known-zero accumulator.
+			ensure_host_sum();
 			Isum.initZeros();
 			// The CPU pass below reads float frames in place.
 			expand_compact_to_float();
@@ -2510,6 +2554,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 	{
 		const bool apply_gain = (fn_gain_reference != "");
+		ensure_host_sum();
 		const long int n_pixels = YXSIZE(Isum);
 		// Walk a tile of pixels through every frame before moving to the next
 		// tile. Frame-minor traversal of the whole image touches n_frames
@@ -2575,17 +2620,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				if (movie_session->reduceUnalignedSum(sum1, sum_abs))
 				{
 					// Same source expressions as the host path, so host rounding is unchanged.
-					const RFLOAT gpu_mean = sum1 / YXSIZE(Isum);
+					const RFLOAT gpu_mean = sum1 / isum_pixels;
 					if (std::isfinite(gpu_mean) && movie_session->reduceUnalignedSumSqDev(gpu_mean, sum2))
 					{
-						const RFLOAT gpu_std = std::sqrt(sum2 / YXSIZE(Isum));
+						const RFLOAT gpu_std = std::sqrt(sum2 / isum_pixels);
 						const RFLOAT gpu_threshold = gpu_mean + hotpixel_sigma * gpu_std;
 						// Bound the difference between reduction orders, including signed
 						// cancellation in the mean and its second-order contribution to std.
 						// For nearly constant data the latter scales as mean_abs^2/std;
 						// a zero/non-finite std makes the guard fail and uses the host scan.
 						// Widening the band only increases conservative host fallback.
-						const double n_pix = (double)YXSIZE(Isum);
+						const double n_pix = (double)isum_pixels;
 						const double u = (double)std::numeric_limits<RFLOAT>::epsilon() / 2.0;
 						const double gamma_n = (n_pix * u) / (1.0 - n_pix * u);
 						const double mean_abs = sum_abs / n_pix;
@@ -2626,6 +2671,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 #endif
 			if (!used_gpu_stats)
 			{
+				ensure_host_sum();
 				mean = 0; std = 0;
 				#pragma omp parallel for reduction(+:mean) num_threads(n_threads)
 				FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Isum) {
@@ -3135,10 +3181,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		mic.setGlobalShift(frames[i] + 1, xshifts[i] * prescaling, yshifts[i] * prescaling); // 1-indexed
         }
 
-	Iref().reshape(ny, nx);
-	Iref_even().reshape(ny, nx);
-	Iref_odd().reshape(ny, nx);
-	Iref().initZeros();
+	// Iref, Iref_even and Iref_odd are acquired (pooled, then zeroed) at the
+	// reconstruction sites below; nothing reads them before that. The old
+	// reshape+initZeros here was a dead full-frame allocation and memset per
+	// movie (#162 review).
 
 	// The real-space frames reconstructed below have exactly two readers:
 	// patch clipping (do_local) and the "before dose weighting" sum further
@@ -3228,22 +3274,51 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		} patch_fcomplex_guard{&d_patch_fcomplex_buffer};
 #endif
 
+		// One definition of the patch bounds, for the batched pass and the loop.
+		auto patch_bounds = [&](int iy, int ix, int &x_start, int &x_end, int &y_start, int &y_end) {
+			x_start = ix * patch_nx; y_start = iy * patch_ny; // Inclusive
+			x_end = x_start + patch_nx; y_end = y_start + patch_ny; // Exclusive
+			if (x_end > nx) x_end = nx;
+			if (y_end > ny) y_end = ny;
+			// make patch size even
+			if ((x_end - x_start) % 2 == 1) {
+				if (x_end == nx) x_start++;
+				else x_end--;
+			}
+			if ((y_end - y_start) % 2 == 1) {
+				if (y_end == ny) y_start++;
+				else y_end--;
+			}
+		};
+
+#ifdef _CUDA_ENABLED
+		// Batched resident alignment (docs/batched_patch_alignment.md). It only
+		// computes; each done patch's log lines and results are consumed in patch
+		// order by the loop below, which keeps the non-convergence retry and every
+		// other per-patch decision unchanged. Patches it did not align take the
+		// per-patch device path.
+		std::vector<CudaMovieSession::PatchBatchOutcome> batched;
+		if (movie_session) {
+			std::vector<CudaMovieSession::PatchBox> boxes;
+			for (int iy = 0; iy < patch_y; iy++) {
+				for (int ix = 0; ix < patch_x; ix++) {
+					int x_start, x_end, y_start, y_end;
+					patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
+					boxes.push_back({x_start, y_start, x_end - x_start, y_end - y_start});
+				}
+			}
+			RCTIC(TIMING_PATCH_ALIGN);
+			movie_session->alignPatchesBatched(boxes, n_groups, group_start.data(), group_size.data(),
+				bfactor / (prescaling * prescaling), max_iter, ccf_downsample, patchBatchCap(), batched);
+			RCTOC(TIMING_PATCH_ALIGN);
+		}
+#endif
+
 		int ipatch = 1;
 		for (int iy = 0; iy < patch_y; iy++) {
 			for (int ix = 0; ix < patch_x; ix++) {
-				int x_start = ix * patch_nx, y_start = iy * patch_ny; // Inclusive
-				int x_end = x_start + patch_nx, y_end = y_start + patch_ny; // Exclusive
-				if (x_end > nx) x_end = nx;
-				if (y_end > ny) y_end = ny;
-				// make patch size even
-				if ((x_end - x_start) % 2 == 1) {
-					if (x_end == nx) x_start++;
-					else x_end--;
-				}
-				if ((y_end - y_start) % 2 == 1) {
-					if (y_end == ny) y_start++;
-					else y_end--;
-				}
+				int x_start, x_end, y_start, y_end;
+				patch_bounds(iy, ix, x_start, x_end, y_start, y_end);
 
 				int x_center = (x_start + x_end - 1) / 2, y_center = (y_start + y_end - 1) / 2;
 				logfile << "Patch (" << iy + 1 << ", " << ix + 1 << "): " << ipatch << " / " << patch_x * patch_y;
@@ -3264,7 +3339,17 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 				// converged == false is a completed alignment reporting its
 				// convergence verdict. Only the first is a fallback candidate.
 				bool device_prep_ok = false;
-				if (movie_session) {
+				const CudaMovieSession::PatchBatchOutcome *batch_outcome =
+					batched.empty() ? nullptr : &batched[iy * patch_x + ix];
+				if (batch_outcome && batch_outcome->done) {
+					// Completed on the device: the same verdict and shifts the
+					// per-patch call below would have produced.
+					device_prep_ok = true;
+					writePatchBatchLog(logfile, batch_outcome->log);
+					converged = batch_outcome->log.converged;
+					local_xshifts = batch_outcome->xshifts;
+					local_yshifts = batch_outcome->yshifts;
+				} else if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
 					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
@@ -3677,11 +3762,13 @@ skip_fitting:
 #endif
 	if (pre_dw_sum_needed) {
 		MC_STAGE("unweighted sums");
-		Iref().reshape(ny, nx);
+		// Pooled full-frame buffers (src/frame_buffer_pool.h): same contents as
+		// reshape()+initZeros(), without a fresh mapping per movie.
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
-		Iref_odd().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_odd(), ny, nx);
 		Iref_odd().initZeros();
-		Iref_even().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_even(), ny, nx);
 		Iref_even().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3835,7 +3922,7 @@ skip_fitting:
 			}
 		}
 
-		Iref().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3910,6 +3997,15 @@ skip_fitting:
 	}
 
 	MC_STAGE("movie teardown");
+#ifdef _CUDA_ENABLED
+	// The session would otherwise be destroyed implicitly on return, still inside
+	// this stage but unattributed. Same order relative to the frame-cache guard
+	// (declared earlier, destroyed later); release() records its own errors.
+	if (movie_session) {
+		StageScope release_scope("session release");
+		movie_session.reset();
+	}
+#endif
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
 

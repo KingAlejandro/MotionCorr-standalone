@@ -7,9 +7,11 @@
 #ifndef STAGE_PROFILE_H_
 #define STAGE_PROFILE_H_
 
+#include <atomic>
 #include <cstdint>
 #include <fstream>
 #include <map>
+#include <sstream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -39,9 +41,17 @@ public:
 	/** Open the JSON-lines output. Empty path leaves profiling disabled. */
 	void enable(const std::string &path);
 	bool enabled() const { return on; }
+	/** True if any profile write, flush or close failed. Products are unaffected. */
+	bool writeFailed() const { return write_failed; }
 
 	/** Free-form key/value written into the process record. */
 	void setNote(const std::string &key, const std::string &value) { if (on) notes[key] = value; }
+
+	/** Detailed device event timing for CUDA log telemetry. On with --profile;
+	 * off by default because each timed stage forces a host wait. Tests may set
+	 * it directly to exercise both shapes without writing a profile. */
+	bool deviceTiming() const { return device_timing; }
+	void setDeviceTiming(bool value) { device_timing = value; }
 
 	void beginRun();
 	void endRun(int n_movies);
@@ -85,18 +95,31 @@ private:
 	};
 
 	void closeTop(const Sample &now);
+	void checkWritten(const char *what);
 	void writeMovie(bool ok, const Sample &end);
 
+	// Set once in enable(), during option parsing, before any worker thread
+	// exists; read-only afterwards, so unsynchronised reads are race-free.
 	bool on = false;
+	bool device_timing = false;
 	bool run_open = false;
-	std::ofstream out;
+	// Formatted records are built here and written whole to out_fd, the
+	// descriptor from the exclusive create; the path is never reopened.
+	std::ostringstream out;
+	int out_fd = -1;
+	std::string out_path;
+	bool write_failed = false, write_failure_reported = false;
 
 	// Main thread only.
+	// Main thread only. Workers never read it: every entry point checks the
+	// owner first, and owner is atomic.
 	bool in_movie = false;
 	// Stage calls from any other thread (OpenMP workers reach the same RCTIC
 	// markers) are ignored, so the main-thread stack is never shared.
-	std::thread::id owner;
-	bool onOwner() const { return std::this_thread::get_id() == owner; }
+	// Stored by the main thread in beginMovie() before workers run; atomic so
+	// worker reads are race-free.
+	std::atomic<std::thread::id> owner{};
+	bool onOwner() const { return std::this_thread::get_id() == owner.load(std::memory_order_acquire); }
 	long int movie_index = -1;
 	std::string movie_name;
 	Sample movie_start, run_start;

@@ -12,9 +12,16 @@
 4. Failed movies are recorded, including a failure inside a stage, and failed
    jobs still write the process record.
 5. An unwritable --profile path fails the job instead of silently not profiling.
+6. --profile never clobbers an existing file or a symlinked input, and a write
+   failure after a successful open is reported by name (Linux).
+7. --profile_device_timing 0 keeps the stage profile but turns off CUDA event
+   timing, and the process record says which mode ran. With --gpu the CUDA log
+   blocks are checked too: the default --profile prints per-kernel timings,
+   --profile_device_timing 0 prints the unprofiled "not measured" lines.
 """
 import argparse
 import json
+import shutil
 import os
 import subprocess
 import sys
@@ -58,9 +65,48 @@ def products(root):
     return sorted(p.relative_to(root) for p in root.rglob("*") if p.suffix in (".mrc", ".star"))
 
 
+TIMED_LINES = ("   Custom kernel execution time:", "  Dose Weighting Kernel:")
+UNTIMED_LINES = ("   Per-kernel timing:            not measured", "  Per-stage timing:      not measured")
+
+
+def device_timing_mode(binary, tmp, gpu):
+    """Item 7 of the docstring: the profile with and without device timing."""
+    backend = ["--gpu", str(gpu)] if gpu is not None else []
+    logs, notes = {}, {}
+    for arm, extra in (("plain", []), ("timed", ["--profile", str(tmp / "timed.jsonl")]),
+                       ("untimed", ["--profile", str(tmp / "untimed.jsonl"), "--profile_device_timing", "0"])):
+        r = run(binary, tmp / ("dt_" + arm), backend + extra)
+        check(r.returncode == 0, f"device-timing arm {arm} exits 0")
+        if r.returncode:
+            print(r.stderr[-2000:])
+            return
+        logs[arm] = "\n".join(p.read_text() for p in sorted((tmp / ("dt_" + arm)).rglob("*.log")))
+        if extra:
+            recs = [json.loads(l) for l in Path(extra[1]).read_text().splitlines() if l.strip()]
+            proc = [x for x in recs if x["type"] == "process"]
+            movies = [x for x in recs if x["type"] == "movie"]
+            notes[arm] = proc[0].get("device_timing") if proc else None
+            check(len(movies) == 1 and movies[0]["ok"] and len(movies[0]["stages"]) >= len(EXPECTED_ORDER) - 2,
+                  f"{arm} profile still records the movie's stages")
+    check(notes.get("timed") == "on" and notes.get("untimed") == "off",
+          f"process record names the device timing mode ({notes})")
+    bad = run(binary, tmp / "dt_bad", ["--profile", str(tmp / "bad.jsonl"), "--profile_device_timing", "2"])
+    check(bad.returncode != 0 and "--profile_device_timing" in (bad.stderr + bad.stdout),
+          "an invalid --profile_device_timing value fails with a named error")
+    if gpu is None:
+        return
+    # The CUDA path ran (otherwise none of these lines exist), and the untimed
+    # profile has the production log shape: no per-step timings at all.
+    check(all(l in logs["timed"] for l in TIMED_LINES), "default --profile prints per-step CUDA timings")
+    check(not any(l in logs["untimed"] for l in TIMED_LINES), "--profile_device_timing 0 prints no per-step CUDA timings")
+    check(all(l in logs["untimed"] for l in UNTIMED_LINES) and all(l in logs["plain"] for l in UNTIMED_LINES),
+          "--profile_device_timing 0 logs the unprofiled 'not measured' lines")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--binary", required=True)
+    ap.add_argument("--gpu", type=int, help="also check the CUDA log blocks on this device")
     a = ap.parse_args()
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
@@ -171,6 +217,53 @@ def main():
         bad = run(a.binary, tmp / "bad", ["--profile", str(tmp / "no" / "such" / "dir" / "p.jsonl")])
         check(bad.returncode != 0 and "--profile" in (bad.stderr + bad.stdout),
               "unwritable --profile path fails with a named error")
+
+        # Never clobber: an existing file, and a symlink to an input, at the
+        # --profile path must both be refused before anything is written, and
+        # the targets must be byte-identical afterwards (#154 review, P1).
+        victim = tmp / "victim_input.tiff"
+        victim.write_bytes(MOVIE.read_bytes())
+        before = victim.read_bytes()
+        link = tmp / "alias.jsonl"
+        os.symlink(victim, link)
+        for target, label in ((victim, "existing input file"), (link, "symlink to an input")):
+            r = run(a.binary, tmp / f"clobber-{label[:4]}", ["--profile", str(target)])
+            check(r.returncode != 0 and "refusing to overwrite" in (r.stderr + r.stdout),
+                  f"--profile refuses an {label}")
+        check(victim.read_bytes() == before, "input reached through --profile is unchanged")
+        existing = tmp / "old_profile.jsonl"
+        existing.write_text("previous run\n")
+        run(a.binary, tmp / "clobber-old", ["--profile", str(existing)])
+        check(existing.read_text() == "previous run\n", "an existing profile is not truncated")
+
+        # Write failure after a successful open must be reported, while the
+        # products are still written (#154 review, P2). /dev/full accepts the
+        # open but fails every write; it exists on Linux only, and O_EXCL
+        # refuses device nodes that already exist, so exercise it through a
+        # fresh path on a full filesystem where one is available.
+        if sys.platform.startswith("linux") and os.path.exists("/dev/full"):
+            full_dir = Path(tempfile.mkdtemp(prefix="mc_full_"))
+            try:
+                # A 64 KiB tmpfs is not available unprivileged; instead an
+                # RLIMIT_FSIZE of 1 byte makes every profile write fail with
+                # EFBIG while the open succeeds. Products are written under the
+                # same limit, so redirect them to a fresh dir and only check
+                # that the profiler reports its own failure by name.
+                import resource
+                def limit():
+                    resource.setrlimit(resource.RLIMIT_FSIZE, (1, resource.getrlimit(resource.RLIMIT_FSIZE)[1]))
+                    import signal
+                    signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
+                r = subprocess.run([a.binary, "--i", str(MOVIE), "--o", str(full_dir / "o") + "/"] + ARGS
+                                   + ["--profile", str(full_dir / "p.jsonl")],
+                                   cwd=ROOT, capture_output=True, text=True, preexec_fn=limit)
+                check("writing the --profile output" in r.stderr,
+                      "a profile write failure after open is reported by name")
+            finally:
+                shutil.rmtree(full_dir, ignore_errors=True)
+        else:
+            print("skip profile write-failure control (needs Linux RLIMIT_FSIZE)")
+        device_timing_mode(a.binary, tmp, a.gpu)
     print("PASS" if not failures else f"{len(failures)} FAILURE(S)")
     return 1 if failures else 0
 

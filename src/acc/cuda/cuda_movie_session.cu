@@ -1,6 +1,7 @@
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/acc/cuda/cuda_realspace_dw.h"
+#include "src/stage_profile.h"
 
 #ifdef _CUDA_ENABLED
 #include <cuda_runtime.h>
@@ -14,6 +15,8 @@
 #include "src/acc/cuda/cuda_plan_pool.h"
 #if defined(_NVCOMP_ENABLED)
 #include <tiffio.h>
+#include <unistd.h>
+#include <cerrno>
 #include <cstring>
 #include <cstdint>
 #include <cstdlib>
@@ -53,6 +56,30 @@
 } while (0)
 
 namespace {
+
+// Consecutive --profile sub-stages inside one function: next() closes the open
+// sub-stage and opens the following one, the destructor closes the last, so
+// early returns stay balanced. One branch per call when profiling is off.
+class SubStageSequence {
+public:
+    SubStageSequence() : on(StageProfile::instance().enabled()) {}
+    ~SubStageSequence() { end(); }
+    void next(const char *name) {
+        if (!on) return;
+        if (open) StageProfile::instance().pop();
+        StageProfile::instance().push(name);
+        open = true;
+    }
+    void end() {
+        if (on && open) StageProfile::instance().pop();
+        open = false;
+    }
+    SubStageSequence(const SubStageSequence &) = delete;
+    SubStageSequence &operator=(const SubStageSequence &) = delete;
+private:
+    bool on;
+    bool open = false;
+};
 
 __global__ void fusedGainAndSumKernel(
     float *d_Iframes,
@@ -348,6 +375,7 @@ __global__ void cropAndGroupPatchResidentKernel(
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
     : patch_alignment_workspace(&failure_state),
+      batched_patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
       nfx(nx / 2 + 1), logfile(log) {}
 
@@ -450,9 +478,13 @@ bool CudaMovieSession::initialize() {
     }
 
     // Allocate persistent movie buffers
-    cudaError_t cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
-    if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    cudaError_t cuda_result = cudaSuccess;
+    {
+        StageScope alloc_scope("alloc movie buffers");
+        cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+    }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
         logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
@@ -487,17 +519,23 @@ bool CudaMovieSession::initialize() {
         }
         return true;
     };
-    if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
-        !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
-        release();
-        return false;
+    {
+        StageScope plan_scope("fft plans");
+        if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
+            !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
+            release();
+            return false;
+        }
     }
 
     fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
-    cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
-    if (cuda_result == cudaSuccess)
-        cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
+    {
+        StageScope scratch_alloc_scope("fft scratch");
+        // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
+        cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess)
+            cuda_result = cudaMalloc((void**)&d_inverse_tile, sz_comp);
+    }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize scratch", __LINE__);
         logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
@@ -574,6 +612,8 @@ void CudaMovieSession::release() {
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
     cached_ngroups_alloc = 0;
+    uploaded_group_start.clear();
+    uploaded_group_size.clear();
     is_initialized = false;
     (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
 }
@@ -1009,6 +1049,12 @@ bool CudaMovieSession::releasePreprocessingBuffers() {
 // made the CUDA-without-nvCOMP link fail on CI run 317 after the previous
 // commit moved its only unguarded caller out.
 void CudaMovieSession::endIngestScratch() {
+    if (ingest_copy_stream) {
+        // Uploads from the pinned pool may still be in flight on an early return.
+        recordFailure(cudaStreamSynchronize(ingest_copy_stream), "ingest copy stream sync", __LINE__);
+        recordFailure(cudaStreamDestroy(ingest_copy_stream), "ingest copy stream", __LINE__);
+        ingest_copy_stream = 0;
+    }
     if (ingest_stream) {
         // Nothing may still be reading or writing the arena when the FFT phase takes
         // d_Fframes back. There is no host work worth overlapping at this boundary,
@@ -1016,6 +1062,13 @@ void CudaMovieSession::endIngestScratch() {
         recordFailure(cudaStreamSynchronize(ingest_stream), "ingest scratch sync", __LINE__);
         recordFailure(cudaStreamDestroy(ingest_stream), "ingest scratch stream", __LINE__);
         ingest_stream = 0;
+    }
+    // Only after both streams have drained: nothing can still record or wait.
+    for (int e = 0; e < kIngestEvents; e++) {
+        if (ingest_events[e]) {
+            recordFailure(cudaEventDestroy(ingest_events[e]), "ingest event", __LINE__);
+            ingest_events[e] = 0;
+        }
     }
     fourier_guard.finishIngestScratch();
 }
@@ -1176,6 +1229,22 @@ struct PinnedStagePool {
     ~PinnedStagePool() { if (ptr) cudaFreeHost(ptr); }
 };
 thread_local PinnedStagePool t_pinned_stage;
+
+// pread until n bytes have arrived. A short file, an error or EOF is a refusal,
+// as a short TIFFReadRawStrip was. pread leaves the descriptor's offset alone,
+// so it does not disturb the LibTIFF handle that owns fd.
+bool preadFully(int fd, uint8_t *dst, size_t n, uint64_t offset) {
+    if (fd < 0) return false;
+    while (n > 0) {
+        const ssize_t got = pread(fd, dst, n, (off_t)offset);
+        if (got < 0 && errno == EINTR) continue;
+        if (got <= 0) return false;
+        dst += got;
+        n -= (size_t)got;
+        offset += (uint64_t)got;
+    }
+    return true;
+}
 } // namespace
 
 bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
@@ -1219,7 +1288,13 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // a single byte is staged.
     // ------------------------------------------------------------------
     std::vector<std::vector<uint32_t> > raw_sizes(num_req_frames);
+    std::vector<std::vector<uint64_t> > raw_offsets(num_req_frames);
+    // A frame whose strips sit back to back in file order, first to last, is
+    // read with one pread of its whole span instead of one LibTIFF call per
+    // strip; anything else keeps the per-strip TIFFReadRawStrip reader.
+    std::vector<char> frame_contiguous(num_req_frames, 0);
     {
+        StageScope tag_scope("ingest tag scan");
         TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
         if (!tif) return false;
         bool ok = true;
@@ -1268,12 +1343,21 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 break;
             }
             raw_sizes[f].resize(ny);
+            raw_offsets[f].resize(ny);
+            bool contiguous = true;
             for (int s = 0; s < ny; s++) {
                 const tmsize_t rs = TIFFRawStripSize(tif, s);
                 if (rs < 7 || (uint64_t)rs > 0xFFFFFFFFull) { ok = false; break; }
                 raw_sizes[f][s] = (uint32_t)rs;
+                // Same offset and byte count TIFFReadRawStrip uses for this strip.
+                int err = 0;
+                raw_offsets[f][s] = TIFFGetStrileOffsetWithErr(tif, (uint32_t)s, &err);
+                if (err || raw_offsets[f][s] == 0) contiguous = false;
+                if (s > 0 && raw_offsets[f][s] != raw_offsets[f][s - 1] + raw_sizes[f][s - 1])
+                    contiguous = false;
             }
             if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
+            frame_contiguous[f] = contiguous ? 1 : 0;
         }
         TIFFClose(tif);
         if (reject) {
@@ -1292,6 +1376,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // the previous revision passed base+2 pointers, which is outside the API
     // contract. Query rather than assume.
     // ------------------------------------------------------------------
+    SubStageSequence phase;
+    phase.next("ingest setup");
     nvcompAlignmentRequirements_t align_req;
     std::memset(&align_req, 0, sizeof(align_req));
     if (nvcompBatchedDeflateDecompressGetRequiredAlignments(
@@ -1366,91 +1452,173 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         return false;
     }
 
+    // ------------------------------------------------------------------
+    // Pipelined chunks (docs/nvcomp_ingest_pipeline.md).
+    //
+    // The movie is split into chunks of chunk_frames frames. With more than one
+    // chunk, two slots alternate: while the GPU copies and decodes chunk k from
+    // slot k%2, the CPU reads chunk k+1 into the other slot. Two streams let the
+    // copy of chunk k+1 overlap the decode of chunk k:
+    //
+    //   copy stream     wait comp_free[j] -> H2D payload + strip tables -> h2d_done[j]
+    //   compute stream  wait h2d_done[j]  -> decode -> comp_free[j] -> Adler-32
+    //                   -> D2H status/length/Adler-32 into pinned -> status_ready[j]
+    //
+    // Chunk k is verified on the host (status and length for every strip of the
+    // chunk first, then Adler-32) after status_ready, and only then is its gain,
+    // flip and sum kernel launched. A chunk that fails returns false before any of
+    // its decoded bytes reach d_Iframes/d_Isum; earlier chunks' contributions are
+    // discarded by the caller's fallback, which overwrites both in full, exactly
+    // as a failed later batch was before.
+    //
+    // Slot reuse rules:
+    //  - host payload/tables of slot j are rewritten only after h2d_done[j] of the
+    //    chunk that last used it (cudaEventSynchronize);
+    //  - device payload/tables of slot j are overwritten only after comp_free[j]
+    //    (stream wait on the copy stream);
+    //  - device decode output of slot j is overwritten by the decode of chunk k+2,
+    //    which the compute stream orders after chunk k's gain kernel;
+    //  - pinned readback of slot j is rewritten by chunk k+2's D2H, which is
+    //    enqueued after chunk k was verified.
+    // ------------------------------------------------------------------
+    int chunk_req = mc_tiff_deflate::defaultChunkFrames(n_frames);
+    if (const char *env = getenv("MOTIONCORR_NVCOMP_CHUNK_FRAMES")) {
+        int parsed = 0;
+        if (mc_tiff_deflate::parsePositiveInt(env, parsed)) {
+            chunk_req = parsed;
+        } else {
+            logfile << "WARNING: MOTIONCORR_NVCOMP_CHUNK_FRAMES is not a positive whole"
+                    << " number; using " << chunk_req << " frames per chunk." << std::endl;
+        }
+    }
+    chunk_req = std::min(chunk_req, n_frames);
+
     // Views into the arena. None of these owns memory; none may be freed.
-    struct BatchViews {
+    struct SlotViews {
         uint8_t *comp; uint16_t *u16;
         void **cptr; size_t *csize; void **dptr; size_t *dsize; size_t *asize;
-        nvcompStatus_t *status; uint32_t *adler; void *temp;
-        size_t comp_capacity, temp_bytes;
+        nvcompStatus_t *status; uint32_t *adler;
     };
-    BatchViews v;
-    std::memset(&v, 0, sizeof(v));
-    int batch_frames = 0;
+    SlotViews dv[2];
+    std::memset(dv, 0, sizeof(dv));
+    void *d_temp = nullptr;
+    size_t temp_bytes = 0;
+    size_t slot_capacity = 0;
+    int chunk_frames = 0;
+    mc_tiff_deflate::PinnedChunkLayout layout;
 
-    for (int candidate = n_frames; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
+    for (int candidate = chunk_req; candidate >= 1; candidate = (candidate > 1 ? candidate / 2 : 0)) {
+        const int slots = mc_tiff_deflate::pipelineSlots(n_frames, candidate);
         const size_t chunks = (size_t)candidate * (size_t)ny;
-        size_t temp_bytes = 0;
+        size_t cand_temp = 0;
         if (nvcompBatchedDeflateDecompressGetTempSizeAsync(
                 chunks, row_bytes, nvcompBatchedDeflateDecompressDefaultOpts,
-                &temp_bytes, (size_t)candidate * (size_t)ny * row_bytes) != nvcompSuccess) {
+                &cand_temp, chunks * row_bytes) != nvcompSuccess) {
             break;
         }
-        arena.reset();
-        BatchViews c;
-        std::memset(&c, 0, sizeof(c));
-        c.comp_capacity = (size_t)candidate * alignUp(max_frame_stage, in_align);
+        const size_t cap = (size_t)candidate * alignUp(max_frame_stage, in_align);
+        const mc_tiff_deflate::PinnedChunkLayout cand_layout =
+            mc_tiff_deflate::pinnedChunkLayout(slots, cap, chunks, sizeof(nvcompStatus_t));
         // Against the bytes that will actually be pinned, not the payload: the
         // pool adds 12.5% headroom and rounds up to a 32 MiB granule, so a cap
-        // enforced on the payload is overshot by construction.
-        if (mc_tiff_deflate::pinnedReserveBytes(c.comp_capacity) > pinned_cap) {
+        // enforced on the payload is overshot by construction. Every pinned byte
+        // of the pipeline (both payload slots, tables, readback) is in total.
+        if (cand_layout.total == 0 ||
+            mc_tiff_deflate::pinnedReserveBytes(cand_layout.total) > pinned_cap) {
             if (candidate == 1) break;
             continue;
         }
-        c.temp_bytes = temp_bytes;
-        c.comp   = (uint8_t *)arena.alloc(c.comp_capacity, in_align);
-        c.u16    = (uint16_t *)arena.alloc((size_t)candidate * (size_t)ny * row_pitch_bytes, out_align);
-        c.cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-        c.csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-        c.dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
-        c.dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-        c.asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
-        c.status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
-        c.adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
-        bool fits = c.comp && c.u16 && c.cptr && c.csize && c.dptr && c.dsize && c.asize
-                    && c.status && c.adler;
-        if (fits && temp_bytes) {
-            c.temp = arena.alloc(temp_bytes, tmp_align);
-            fits = (c.temp != 0);
+        arena.reset();
+        SlotViews c[2];
+        std::memset(c, 0, sizeof(c));
+        bool fits = true;
+        for (int j = 0; j < slots && fits; j++) {
+            c[j].comp   = (uint8_t *)arena.alloc(cap, in_align);
+            c[j].u16    = (uint16_t *)arena.alloc(chunks * row_pitch_bytes, out_align);
+            c[j].cptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
+            c[j].csize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+            c[j].dptr   = (void **)arena.alloc(chunks * sizeof(void *), sizeof(void *));
+            c[j].dsize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+            c[j].asize  = (size_t *)arena.alloc(chunks * sizeof(size_t), sizeof(size_t));
+            c[j].status = (nvcompStatus_t *)arena.alloc(chunks * sizeof(nvcompStatus_t), sizeof(nvcompStatus_t));
+            c[j].adler  = (uint32_t *)arena.alloc(chunks * sizeof(uint32_t), sizeof(uint32_t));
+            fits = c[j].comp && c[j].u16 && c[j].cptr && c[j].csize && c[j].dptr &&
+                   c[j].dsize && c[j].asize && c[j].status && c[j].adler;
         }
-        if (fits) { v = c; batch_frames = candidate; break; }
+        // One nvCOMP temp area: every decode runs on the compute stream, in order.
+        void *cand_temp_ptr = nullptr;
+        if (fits && cand_temp) {
+            cand_temp_ptr = arena.alloc(cand_temp, tmp_align);
+            fits = (cand_temp_ptr != 0);
+        }
+        if (fits) {
+            dv[0] = c[0]; dv[1] = c[1];
+            d_temp = cand_temp_ptr;
+            temp_bytes = cand_temp;
+            slot_capacity = cap;
+            chunk_frames = candidate;
+            layout = cand_layout;
+            break;
+        }
         if (candidate == 1) break;
     }
-    if (batch_frames <= 0) {
-        logfile << "nvCOMP ingestion declined: a one-frame batch fits neither the "
+    if (chunk_frames <= 0) {
+        logfile << "nvCOMP ingestion declined: a one-frame chunk fits neither the "
                 << arena.capacity() << "-byte pre-FFT scratch arena nor the "
                 << pinned_cap << "-byte pinned staging cap"
                 << " (MOTIONCORR_NVCOMP_PINNED_MAX_MB); using the host reader." << std::endl;
         return false;
     }
+    const int n_slots = layout.slots;
+    const int n_chunks = (n_frames + chunk_frames - 1) / chunk_frames;
 
     // The arena can only honour this because its base came from cudaMalloc. Checked
     // rather than assumed: a misaligned input is undefined behaviour in nvCOMP that
     // decodes correctly often enough to pass a pixel comparison.
-    if (((uintptr_t)v.comp % in_align) != 0) return false;
+    for (int j = 0; j < n_slots; j++)
+        if (((uintptr_t)dv[j].comp % in_align) != 0) return false;
 
-    logfile << "nvCOMP ingestion: batch=" << batch_frames << "/" << n_frames
-            << " frames, scratch=" << arena.used() << "/" << arena.capacity()
+    int contiguous_frames = 0;
+    for (int f = 0; f < n_frames; f++) contiguous_frames += frame_contiguous[f] ? 1 : 0;
+    logfile << "nvCOMP ingestion: chunk=" << chunk_frames << "/" << n_frames
+            << " frames x " << n_chunks << " chunks, slots=" << n_slots
+            << ", scratch=" << arena.used() << "/" << arena.capacity()
             << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
-            << ", pinned staging=" << mc_tiff_deflate::pinnedReserveBytes(v.comp_capacity)
-            << "/" << pinned_cap << " reserved, " << v.comp_capacity << " payload"
-            << ", nvCOMP temp=" << v.temp_bytes
-            << ", input alignment=" << in_align << std::endl;
+            << ", pinned staging=" << mc_tiff_deflate::pinnedReserveBytes(layout.total)
+            << "/" << pinned_cap << " reserved, " << layout.total << " used ("
+            << n_slots << " x " << slot_capacity << " payload)"
+            << ", nvCOMP temp=" << temp_bytes
+            << ", input alignment=" << in_align
+            << ", span-read frames=" << contiguous_frames << "/" << n_frames << std::endl;
 
     // ------------------------------------------------------------------
-    // Host side: one pinned staging buffer sized for the worst batch, reused.
+    // Host side: the worker-lifetime pinned pool, laid out as two slots.
     // ------------------------------------------------------------------
-    if (!ensurePinnedStage(v.comp_capacity)) return false;
-    uint8_t *const h_stage = (uint8_t *)t_pinned_stage.ptr;
-
-    const size_t max_chunks = (size_t)batch_frames * (size_t)ny;
-    std::vector<void *>         h_comp_ptrs(max_chunks);
-    std::vector<size_t>         h_comp_size(max_chunks);
-    std::vector<void *>         h_dec_ptrs(max_chunks);
-    std::vector<size_t>         h_dec_size(max_chunks, row_bytes);
-    std::vector<size_t>         h_act_size(max_chunks);
-    std::vector<nvcompStatus_t> h_statuses(max_chunks);
-    std::vector<uint32_t>       h_adler_expected(max_chunks);
-    std::vector<uint32_t>       h_adler_actual(max_chunks);
+    if (!ensurePinnedStage(layout.total)) return false;
+    uint8_t *const h_base = (uint8_t *)t_pinned_stage.ptr;
+    struct HostSlot {
+        uint8_t *payload; void **cptr; size_t *csize; void **dptr; size_t *dsize;
+        nvcompStatus_t *status; size_t *asize; uint32_t *adler;
+    };
+    HostSlot hs[2];
+    std::memset(hs, 0, sizeof(hs));
+    for (int j = 0; j < n_slots; j++) {
+        hs[j].payload = h_base + layout.payload[j];
+        hs[j].cptr    = (void **)(h_base + layout.cptr[j]);
+        hs[j].csize   = (size_t *)(h_base + layout.csize[j]);
+        hs[j].dptr    = (void **)(h_base + layout.dptr[j]);
+        hs[j].dsize   = (size_t *)(h_base + layout.dsize[j]);
+        hs[j].status  = (nvcompStatus_t *)(h_base + layout.status[j]);
+        hs[j].asize   = (size_t *)(h_base + layout.asize[j]);
+        hs[j].adler   = (uint32_t *)(h_base + layout.adler[j]);
+        // Output descriptors are the same for every chunk that uses this slot.
+        for (size_t c = 0; c < layout.chunk_strips; c++) {
+            hs[j].dptr[c]  = (uint8_t *)dv[j].u16 + c * row_pitch_bytes;
+            hs[j].dsize[c] = row_bytes;
+        }
+    }
+    std::vector<uint32_t> adler_expected[2];
+    for (int j = 0; j < n_slots; j++) adler_expected[j].resize(layout.chunk_strips);
 
     const bool apply_gain = (gain_ref != nullptr);
     if (apply_gain) {
@@ -1459,23 +1627,36 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     }
 
     HANDLE_ERROR(cudaStreamCreate(&ingest_stream));
+    HANDLE_ERROR(cudaStreamCreate(&ingest_copy_stream));
+    for (int e = 0; e < kIngestEvents; e++)
+        HANDLE_ERROR(cudaEventCreateWithFlags(&ingest_events[e], cudaEventDisableTiming));
     cudaStream_t stream = ingest_stream;
+    cudaStream_t copy_stream = ingest_copy_stream;
+    cudaEvent_t *const ev_h2d_done     = ingest_events;       // [2]
+    cudaEvent_t *const ev_comp_free    = ingest_events + 2;   // [2]
+    cudaEvent_t *const ev_status_ready = ingest_events + 4;   // [2]
     const int io_threads = n_threads > 0 ? n_threads : 4;
 
-    // ------------------------------------------------------------------
-    // Pass B: read, upload, decompress, verify and convert one batch at a time.
-    // ------------------------------------------------------------------
-    for (int f0 = 0; f0 < n_frames; f0 += batch_frames) {
-        const int bf = std::min(batch_frames, n_frames - f0);
-        const size_t chunks = (size_t)bf * (size_t)ny;
+    std::vector<size_t> chunk_stage_used(n_chunks, 0);
+    bool slot_tables_uploaded[2] = {false, false};
 
+    // Reads chunk k into host slot j and fills its input tables. False refuses.
+    auto read_chunk = [&](int k, int j) -> bool {
+        const int f0 = k * chunk_frames;
+        const int bf = std::min(chunk_frames, n_frames - f0);
         std::vector<size_t> frame_base(bf);
         size_t stage_used = 0;
         for (int i = 0; i < bf; i++) {
             frame_base[i] = alignUp(stage_used, in_align);
             stage_used = frame_base[i] + frame_stage_bytes[f0 + i];
         }
-        if (stage_used > v.comp_capacity) return false;
+        if (stage_used > slot_capacity) return false;
+        chunk_stage_used[k] = stage_used;
+        uint8_t *const h_stage = hs[j].payload;
+        void **const h_cptr = hs[j].cptr;
+        size_t *const h_csize = hs[j].csize;
+        uint32_t *const h_adler_expected = adler_expected[j].data();
+        uint8_t *const d_comp = dv[j].comp;
 
         std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
         #pragma omp parallel num_threads(io_threads)
@@ -1493,22 +1674,38 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             // skipped one arrival, the barrier released a generation early, and
             // the threads that did stage frames then blocked forever on
             // arrivals that had already left. A failing thread has already
-            // zeroed every frame_ok[i], so the batch is refused below whatever
+            // zeroed every frame_ok[i], so the chunk is refused below whatever
             // its iterations would have done.
             #pragma omp for schedule(dynamic, 1)
             for (int i = 0; i < bf; i++) {
                     if (!t) continue;
                     const int f = f0 + i;
-                    if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
                     uint8_t *fb = h_stage + frame_base[i];
-                    size_t cursor = 0;
+                    const uint32_t *sizes = raw_sizes[f].data();
                     bool ok = true;
-                    for (int s = 0; s < ny && ok; s++) {
-                        const size_t raw_sz = raw_sizes[f][s];
-                        const size_t slot = stripSlotOffset(cursor, in_align);
-                        if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)raw_sz) != (tmsize_t)raw_sz) {
-                            ok = false; break;
+                    if (frame_contiguous[f]) {
+                        // One read of the frame's whole span, placed so that it ends
+                        // where the slotted layout ends, then spread into the
+                        // aligned slots in place. Same bytes as one
+                        // TIFFReadRawStrip per strip, without ny library calls.
+                        const size_t packed = mc_tiff_deflate::framePackedBytes(sizes, ny);
+                        const size_t lead = frame_stage_bytes[f] - packed;
+                        ok = preadFully(TIFFFileno(t), fb + lead, packed, raw_offsets[f][0]);
+                        if (ok) mc_tiff_deflate::spreadPackedStrips(fb, sizes, ny, in_align);
+                    } else {
+                        if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
+                        size_t cursor = 0;
+                        for (int s = 0; s < ny && ok; s++) {
+                            const size_t slot = stripSlotOffset(cursor, in_align);
+                            if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)sizes[s]) != (tmsize_t)sizes[s])
+                                ok = false;
+                            cursor = slot + sizes[s];
                         }
+                    }
+                    size_t cursor = 0;
+                    for (int s = 0; s < ny && ok; s++) {
+                        const size_t raw_sz = sizes[s];
+                        const size_t slot = stripSlotOffset(cursor, in_align);
                         if (!zlibWrapperIsUsable(fb + slot, raw_sz)) {
                             // Named, because otherwise the only externally visible
                             // difference between this refusal and a read failure is
@@ -1524,9 +1721,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                         const size_t chunk = (size_t)i * (size_t)ny + (size_t)s;
                         // Payload only: the 2-byte zlib header and the 4-byte Adler32
                         // trailer are not part of the RFC 1951 stream nvCOMP consumes.
-                        h_comp_ptrs[chunk] = v.comp + frame_base[i] + slot + 2;
-                        h_comp_size[chunk] = raw_sz - 6;
-                        h_dec_ptrs[chunk]  = (uint8_t *)v.u16 + chunk * row_pitch_bytes;
+                        h_cptr[chunk]  = d_comp + frame_base[i] + slot + 2;
+                        h_csize[chunk] = raw_sz - 6;
                         // Stored Adler-32: the last four bytes of the strip, big-endian.
                         const uint8_t *tr = fb + slot + raw_sz - 4;
                         h_adler_expected[chunk] = ((uint32_t)tr[0] << 24) | ((uint32_t)tr[1] << 16) |
@@ -1538,61 +1734,113 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             if (t) TIFFClose(t);
         }
         for (int i = 0; i < bf; i++) if (!frame_ok[i]) return false;
+        return true;
+    };
 
-        HANDLE_ERROR(cudaMemcpyAsync(v.comp, h_stage, stage_used, cudaMemcpyHostToDevice, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(v.cptr, h_comp_ptrs.data(), chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(v.csize, h_comp_size.data(), chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(v.dptr,  h_dec_ptrs.data(),  chunks * sizeof(void *), cudaMemcpyHostToDevice, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(v.dsize,  h_dec_size.data(),  chunks * sizeof(size_t), cudaMemcpyHostToDevice, stream));
-
-        if (nvcompBatchedDeflateDecompressAsync(
-                (const void *const *)v.cptr, v.csize, v.dsize, v.asize,
-                chunks, v.temp, v.temp_bytes, v.dptr,
-                nvcompBatchedDeflateDecompressDefaultOpts, v.status, stream) != nvcompSuccess) {
-            return false;
-        }
-
-        // Fail closed. Without this the batch buffer's previous contents, or raw
-        // cudaMalloc garbage on the first batch, would be cast to float, gain-applied
-        // and aligned as if it were image data, and the function would return success.
-        adler32StripsKernel<<<(unsigned)chunks, 256, 0, stream>>>(
-            (const unsigned char *)v.u16, row_pitch_bytes, row_bytes, row_bytes, 1,
-            v.status, v.asize, v.adler, chunks);
-        HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaMemcpyAsync(h_statuses.data(), v.status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(h_act_size.data(), v.asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
-        HANDLE_ERROR(cudaMemcpyAsync(h_adler_actual.data(), v.adler, chunks * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream));
-        HANDLE_ERROR(cudaStreamSynchronize(stream));
-        // Reject the whole batch before consulting any checksum: an earlier
-        // checksum mismatch must not mask a later decoder failure.
+    // Checks chunk k's readback in slot j. Rejects the whole chunk on status or
+    // length before consulting any checksum: an earlier checksum mismatch must
+    // not mask a later decoder failure.
+    auto verify_chunk = [&](int k, int j) -> bool {
+        const int f0 = k * chunk_frames;
+        const int bf = std::min(chunk_frames, n_frames - f0);
+        const size_t chunks = (size_t)bf * (size_t)ny;
         for (size_t c = 0; c < chunks; c++) {
-            if (h_statuses[c] != nvcompSuccess || h_act_size[c] != row_bytes) {
+            if (hs[j].status[c] != nvcompSuccess || hs[j].asize[c] != row_bytes) {
                 logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
-                        << f0 << "," << (f0 + bf) << "): status=" << (int)h_statuses[c]
-                        << " bytes=" << h_act_size[c] << " expected=" << row_bytes
+                        << f0 << "," << (f0 + bf) << "): status=" << (int)hs[j].status[c]
+                        << " bytes=" << hs[j].asize[c] << " expected=" << row_bytes
                         << "; falling back to the host reader." << std::endl;
                 return false;
             }
         }
         for (size_t c = 0; c < chunks; c++) {
-            if (h_adler_actual[c] != h_adler_expected[c]) {
+            if (hs[j].adler[c] != adler_expected[j][c]) {
                 logfile << "WARNING: strip " << c << " of frames [" << f0 << ","
                         << (f0 + bf) << ") failed its zlib Adler-32 check: computed 0x"
-                        << std::hex << h_adler_actual[c] << " stored 0x"
-                        << h_adler_expected[c] << std::dec
+                        << std::hex << hs[j].adler[c] << " stored 0x"
+                        << adler_expected[j][c] << std::dec
                         << "; falling back to the host reader." << std::endl;
                 return false;
             }
         }
+        return true;
+    };
 
-        dim3 block(16, 16);
-        dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
-        fusedU16FlipGainAndSumKernel<<<grid, block, 0, stream>>>(
-            v.u16, d_Iframes, d_Isum, d_gain, nx, ny, row_pitch_u16,
-            f0, bf, f0 == 0, apply_gain);
-        HANDLE_ERROR(cudaGetLastError());
-        HANDLE_ERROR(cudaStreamSynchronize(stream));
+    dim3 gs_block(16, 16);
+    dim3 gs_grid((nx + gs_block.x - 1) / gs_block.x, (ny + gs_block.y - 1) / gs_block.y);
+
+    // ------------------------------------------------------------------
+    // Pass B: read chunk k while chunk k-1 is on the device; verify chunk k-1
+    // and only then convert it.
+    // ------------------------------------------------------------------
+    for (int k = 0; k <= n_chunks; k++) {
+        if (k < n_chunks) {
+            const int j = k % n_slots;
+            const int f0 = k * chunk_frames;
+            const int bf = std::min(chunk_frames, n_frames - f0);
+            const size_t chunks = (size_t)bf * (size_t)ny;
+
+            if (k >= n_slots) {
+                // The host slot is still the source of chunk k-2's upload.
+                phase.next("ingest slot wait");
+                HANDLE_ERROR(cudaEventSynchronize(ev_h2d_done[j]));
+            }
+            phase.next("ingest strip read");
+            if (!read_chunk(k, j)) return false;
+
+            phase.next("ingest h2d submit");
+            // Device payload/tables of slot j may still be read by chunk k-2's decode.
+            if (k >= n_slots) HANDLE_ERROR(cudaStreamWaitEvent(copy_stream, ev_comp_free[j], 0));
+            HANDLE_ERROR(cudaMemcpyAsync(dv[j].comp, hs[j].payload, chunk_stage_used[k], cudaMemcpyHostToDevice, copy_stream));
+            HANDLE_ERROR(cudaMemcpyAsync(dv[j].cptr, hs[j].cptr, chunks * sizeof(void *), cudaMemcpyHostToDevice, copy_stream));
+            HANDLE_ERROR(cudaMemcpyAsync(dv[j].csize, hs[j].csize, chunks * sizeof(size_t), cudaMemcpyHostToDevice, copy_stream));
+            if (!slot_tables_uploaded[j]) {
+                HANDLE_ERROR(cudaMemcpyAsync(dv[j].dptr, hs[j].dptr, layout.chunk_strips * sizeof(void *), cudaMemcpyHostToDevice, copy_stream));
+                HANDLE_ERROR(cudaMemcpyAsync(dv[j].dsize, hs[j].dsize, layout.chunk_strips * sizeof(size_t), cudaMemcpyHostToDevice, copy_stream));
+                slot_tables_uploaded[j] = true;
+            }
+            HANDLE_ERROR(cudaEventRecord(ev_h2d_done[j], copy_stream));
+
+            phase.next("ingest decompress submit");
+            HANDLE_ERROR(cudaStreamWaitEvent(stream, ev_h2d_done[j], 0));
+            if (nvcompBatchedDeflateDecompressAsync(
+                    (const void *const *)dv[j].cptr, dv[j].csize, dv[j].dsize, dv[j].asize,
+                    chunks, d_temp, temp_bytes, dv[j].dptr,
+                    nvcompBatchedDeflateDecompressDefaultOpts, dv[j].status, stream) != nvcompSuccess) {
+                return false;
+            }
+            HANDLE_ERROR(cudaEventRecord(ev_comp_free[j], stream));
+            // Fail closed. Without this the slot's previous contents, or raw
+            // cudaMalloc garbage on its first use, would be cast to float,
+            // gain-applied and aligned as if it were image data.
+            adler32StripsKernel<<<(unsigned)chunks, 256, 0, stream>>>(
+                (const unsigned char *)dv[j].u16, row_pitch_bytes, row_bytes, row_bytes, 1,
+                dv[j].status, dv[j].asize, dv[j].adler, chunks);
+            HANDLE_ERROR(cudaGetLastError());
+            HANDLE_ERROR(cudaMemcpyAsync(hs[j].status, dv[j].status, chunks * sizeof(nvcompStatus_t), cudaMemcpyDeviceToHost, stream));
+            HANDLE_ERROR(cudaMemcpyAsync(hs[j].asize, dv[j].asize, chunks * sizeof(size_t), cudaMemcpyDeviceToHost, stream));
+            HANDLE_ERROR(cudaMemcpyAsync(hs[j].adler, dv[j].adler, chunks * sizeof(uint32_t), cudaMemcpyDeviceToHost, stream));
+            HANDLE_ERROR(cudaEventRecord(ev_status_ready[j], stream));
+        }
+        if (k >= 1) {
+            const int kp = k - 1;
+            const int jp = kp % n_slots;
+            const int f0 = kp * chunk_frames;
+            const int bf = std::min(chunk_frames, n_frames - f0);
+            phase.next("ingest status d2h and sync");
+            HANDLE_ERROR(cudaEventSynchronize(ev_status_ready[jp]));
+            phase.next("ingest verify");
+            if (!verify_chunk(kp, jp)) return false;
+            phase.next("ingest gain sum cast");
+            fusedU16FlipGainAndSumKernel<<<gs_grid, gs_block, 0, stream>>>(
+                dv[jp].u16, d_Iframes, d_Isum, d_gain, nx, ny, row_pitch_u16,
+                f0, bf, f0 == 0, apply_gain);
+            HANDLE_ERROR(cudaGetLastError());
+        }
     }
+    phase.next("ingest drain");
+    HANDLE_ERROR(cudaStreamSynchronize(stream));
+    phase.end();
 
     return true;
 }
@@ -1612,11 +1860,23 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
 
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
+    // One shared cuFFT work area serves every execution below. All of them run
+    // on the default stream, so successive executions (and the scaling kernel)
+    // are already ordered; the old per-frame cudaDeviceSynchronize only moved
+    // the host's wait, not the GPU's order. Execution errors surface at the one
+    // checked drain after the last launch. A failed launch drains first, so
+    // work already queued finishes and any asynchronous error is attributed
+    // here rather than to a later, unrelated call.
+    auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "forward FFT drain", __LINE__); };
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        CUFFT_CHECK(cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
-                                 d_Fframes + (size_t)iframe * complex_stride));
-        // The next plan reuses the same work area; execution failures surface here.
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        const cufftResult res = cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
+                                             d_Fframes + (size_t)iframe * complex_stride);
+        if (res != CUFFT_SUCCESS) {
+            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
+            recordCufftFailure(res, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
     }
 
     const float inv_size = 1.0f / ((float)nx * ny);
@@ -1624,7 +1884,15 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     const int block = 256;
     const int grid = (int)((total_comp_elems + block - 1) / block);
     scaleComplexKernel<<<grid, block>>>(d_Fframes, total_comp_elems, inv_size);
-    HANDLE_ERROR(cudaGetLastError());
+    {
+        const cudaError_t launch = cudaGetLastError();
+        if (launch != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(launch) << std::endl;
+            recordFailure(launch, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
+    }
     HANDLE_ERROR(cudaDeviceSynchronize());
 
     return true;
@@ -1634,18 +1902,36 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_inverse_tile) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    // C2R can overwrite its input. Preserve each Fourier tile for dose weighting
-    // and only reuse the tile after that transform has completed.
+    // C2R overwrites its input (measured on this cuFFT for every geometry
+    // tried, docs/fft_dw_device_overheads.md), so each Fourier tile is copied
+    // to the scratch tile first and the originals stay intact for dose
+    // weighting. Copy, transform and the next frame's copy are ordered on the
+    // default stream, so the scratch tile is not reused before its transform
+    // has read it; there is no per-frame host wait. Errors surface at the one
+    // checked drain below.
     const size_t real_stride = (size_t)nx * ny;
     const size_t complex_stride = (size_t)ny * nfx;
+    auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "inverse FFT drain", __LINE__); };
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        HANDLE_ERROR(cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
-                                complex_stride * sizeof(cufftComplex),
-                                cudaMemcpyDeviceToDevice));
-        CUFFT_CHECK(cufftExecC2R(plan_c2r, d_inverse_tile,
-                                 (cufftReal*)(d_Iframes + (size_t)iframe * real_stride)));
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        const cudaError_t copy = cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
+                                            complex_stride * sizeof(cufftComplex),
+                                            cudaMemcpyDeviceToDevice);
+        if (copy != cudaSuccess) {
+            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(copy) << std::endl;
+            recordFailure(copy, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
+        const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
+                                             (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+        if (res != CUFFT_SUCCESS) {
+            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
+            recordCufftFailure(res, __func__, __LINE__);
+            drain_after_failure();
+            return false;
+        }
     }
+    HANDLE_ERROR(cudaDeviceSynchronize());
     return true;
 }
 
@@ -1686,6 +1972,8 @@ bool CudaMovieSession::preparePatchInVram(
         d_group_start = nullptr;
         d_group_size = nullptr;
         cached_ngroups_alloc = 0;
+        uploaded_group_start.clear();
+        uploaded_group_size.clear();
         const cudaError_t start_err = releaseBuffer(stale_start);
         const cudaError_t size_err = releaseBuffer(stale_size);
         HANDLE_ERROR(start_err);
@@ -1699,8 +1987,21 @@ bool CudaMovieSession::preparePatchInVram(
         cached_ngroups_alloc = n_groups;
     }
 
-    HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+    // Identical for every patch of a movie; upload only when the content changes.
+    // The cache is dropped before a failed upload can leave it describing bytes
+    // that are not on the device.
+    const bool groups_current =
+        (int)uploaded_group_start.size() == n_groups &&
+        std::equal(group_start, group_start + n_groups, uploaded_group_start.begin()) &&
+        std::equal(group_size, group_size + n_groups, uploaded_group_size.begin());
+    if (!groups_current) {
+        uploaded_group_start.clear();
+        uploaded_group_size.clear();
+        HANDLE_ERROR(cudaMemcpy(d_group_start, group_start, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(d_group_size, group_size, n_groups * sizeof(int), cudaMemcpyHostToDevice));
+        uploaded_group_start.assign(group_start, group_start + n_groups);
+        uploaded_group_size.assign(group_size, group_size + n_groups);
+    }
 
     dim3 block(16, 16);
     dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
@@ -1745,14 +2046,122 @@ bool CudaMovieSession::preparePatchInVram(
     return true;
 }
 
+void CudaMovieSession::alignPatchesBatched(
+    const std::vector<PatchBox> &boxes,
+    int n_groups, const int *group_start, const int *group_size,
+    RFLOAT scaled_B, int max_iter, RFLOAT ccf_downsample, int cap,
+    std::vector<PatchBatchOutcome> &outcomes)
+{
+    const int n_patches = (int)boxes.size();
+    outcomes.assign(n_patches, PatchBatchOutcome());
+    if (cap <= 0 || n_patches == 0 || n_groups <= 0 || !is_initialized ||
+        failure_state.isPoisoned())
+        return;
+    const int patch_w = boxes[0].width, patch_h = boxes[0].height;
+    for (const PatchBox &box : boxes) {
+        if (box.width != patch_w || box.height != patch_h) {
+            logfile << "Batched patch alignment: patch sizes differ; using per-patch alignment." << std::endl;
+            return;
+        }
+    }
+    const cudaError_t device_error = cudaSetDevice(device_id);
+    size_t free_bytes = 0, total_bytes = 0;
+    const cudaError_t info_error = device_error != cudaSuccess ? device_error
+                                                               : cudaMemGetInfo(&free_bytes, &total_bytes);
+    if (info_error != cudaSuccess) {
+        if (cudaErrorPoisonsContext(info_error)) {
+            recordFailure(info_error, "batched patch memory query", __LINE__);
+            REPORT_ERROR("Fatal CUDA error before batched patch alignment");
+        }
+        (void)cudaGetLastError();
+        logfile << "Batched patch alignment: device memory query failed ("
+                << cudaGetErrorString(info_error) << "); using per-patch alignment." << std::endl;
+        return;
+    }
+    BatchedPatchAlignmentWorkspace &workspace = batched_patch_alignment_workspace;
+    const size_t per_patch = BatchedPatchAlignmentWorkspace::bytesPerPatch(
+        n_groups, patch_w, patch_h, scaled_B, ccf_downsample);
+    int chunk = choosePatchBatchChunk(n_patches, per_patch, free_bytes, total_bytes, cap);
+    // The estimate omits allocator granularity and the cuFFT work area, so a
+    // declined reservation is retried smaller before giving up.
+    while (chunk > 0 && !workspace.reserve(chunk, n_groups, patch_w, patch_h, scaled_B,
+                                           ccf_downsample, device_id))
+        chunk /= 2;
+    const int n_chunks = chunk > 0 ? (n_patches + chunk - 1) / chunk : 0;
+    logfile << "Batched patch alignment: " << n_patches << " patches, chunk size " << chunk
+            << " (cap " << cap << ", " << n_chunks << " chunk(s)); free device memory "
+            << (free_bytes >> 20) << " of " << (total_bytes >> 20) << " MiB";
+    if (chunk == 0) {
+        logfile << "; workspace does not fit, using per-patch alignment." << std::endl;
+        return;
+    }
+    logfile << "; workspace " << (workspace.bufferBytes() >> 20) << " MiB + cuFFT work "
+            << (workspace.cufftWorkBytes() >> 20) << " MiB, retained until alignment release."
+            << std::endl;
+
+    std::vector<std::vector<RFLOAT> > xs(chunk), ys(chunk);
+    std::vector<PatchBatchLog> logs(chunk);
+    size_t min_free = free_bytes;
+    for (int first = 0; first < n_patches; first += chunk) {
+        const int count = std::min(chunk, n_patches - first);
+        for (int j = 0; j < count; j++) {
+            const PatchBox &box = boxes[first + j];
+            if (preparePatchInVram(box.x_start, box.y_start, box.width, box.height, n_groups,
+                                   group_start, group_size, workspace.patchSlot(j)))
+                continue;
+            // preparePatchInVram consumed its code; the preserved state and the
+            // pending slot together decide, exactly as for the per-patch retry.
+            const CudaRetryDecision decision = cudaRetryDecisionFor(failure_state, cudaGetLastError());
+            if (decision.verdict == CUDA_RETRY_FATAL) {
+                REPORT_ERROR_STR("CUDA device context is unusable during batched patch preparation (patch "
+                                 << first + j + 1 << " of " << n_patches << "): "
+                                 << cudaGetErrorString(decision.decisive)
+                                 << ". Refusing to retry alignment on a poisoned context.");
+            }
+            if (!workspace.release())
+                REPORT_ERROR("CUDA batched patch workspace cleanup failed after a preparation failure");
+            logfile << "WARNING: batched patch preparation did not complete for patch "
+                    << first + j + 1 << " of " << n_patches << "; classified recoverable, so "
+                    << "patches " << first + 1 << " to " << n_patches
+                    << " use per-patch alignment." << std::endl;
+            return;
+        }
+        for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
+        cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
+                                  xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
+                                  logs.data());
+        size_t chunk_free = 0, chunk_total = 0;
+        if (cudaMemGetInfo(&chunk_free, &chunk_total) == cudaSuccess)
+            min_free = std::min(min_free, chunk_free);
+        else
+            (void)cudaGetLastError();
+        for (int j = 0; j < count; j++) {
+            PatchBatchOutcome &out = outcomes[first + j];
+            out.done = true;
+            out.xshifts.swap(xs[j]);
+            out.yshifts.swap(ys[j]);
+            out.log = logs[j];
+        }
+    }
+    logfile << "Batched patch alignment: device memory in use rose by at most "
+            << ((free_bytes - min_free) >> 20) << " MiB (sampled after each chunk)." << std::endl;
+}
+
 bool CudaMovieSession::reconstructDoseWeighted(
     Image<float> &Isum,
     const std::vector<RFLOAT> &doses,
     const RFLOAT apix,
     const ThirdOrderPolynomialModel *model
 ) {
-    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work) return false;
-    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model, device_id, logfile, &failure_state, plan_c2r);
+    if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work ||
+        !d_inverse_tile) return false;
+    // d_inverse_tile (one complex frame) is dead once the global inverse
+    // transform has finished, and holds nothing the reconstruction needs. It
+    // becomes the C2R input the out-of-place weight kernel writes.
+    DoseWeightScratch scratch;
+    scratch.fourier = d_inverse_tile;
+    return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model,
+                                              device_id, logfile, &failure_state, plan_c2r, &scratch);
 }
 
 bool CudaMovieSession::reconstructUnweighted(

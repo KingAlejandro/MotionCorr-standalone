@@ -4,6 +4,8 @@
 #include "motion/linear_2D_deformation.h"
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <set>
 #include <src/error.h>
 #include <src/jaz/optics/damage.h>
 #include <src/jaz/util/zio.h>
@@ -102,6 +104,24 @@ bool TomogramSet::read(FileName filename, bool verbose)
 
 void TomogramSet::write(FileName filename)
 {
+    write(filename, FileName()); // Preserve the ordinary writer contract.
+}
+
+void TomogramSet::write(FileName filename, FileName finalReferenceDirectory)
+{
+    const bool checked = !finalReferenceDirectory.empty();
+    std::set<std::filesystem::path> stagedTargets;
+    auto writeTable = [&](const MetaDataTable &table, const FileName &target) {
+        if (!checked) { table.write(target); return; }
+        std::ofstream output(target.c_str(), std::ios::out);
+        if (!output) REPORT_ERROR("Cannot open aggregate tomogram STAR: " + target);
+        table.write(output);
+        if (!output.good()) REPORT_ERROR("Cannot write aggregate tomogram STAR: " + target);
+        output.flush();
+        if (!output.good()) REPORT_ERROR("Cannot flush aggregate tomogram STAR: " + target);
+        output.close();
+        if (!output.good()) REPORT_ERROR("Cannot close aggregate tomogram STAR: " + target);
+    };
     FileName fn_outdir = filename.beforeLastOf("/") + "/";
 
     const int tc = tomogramTables.size();
@@ -112,7 +132,19 @@ void TomogramSet::write(FileName filename)
         FileName fn_star;
         globalTable.getValue(EMDL_TOMO_TILT_SERIES_STARFILE, fn_star, t);
         FileName fn_newstar = getOutputFileWithNewUniqueDate(fn_star, fn_outdir);
-        globalTable.setValue(EMDL_TOMO_TILT_SERIES_STARFILE, fn_newstar, t);
+        if (checked) {
+            const auto relative = std::filesystem::path(fn_newstar.c_str()).lexically_normal().lexically_relative(
+                std::filesystem::path(fn_outdir.c_str()).lexically_normal());
+            if (relative.empty() || relative.is_absolute() || *relative.begin() == ".." ||
+                std::filesystem::path(fn_newstar.c_str()).lexically_normal() ==
+                    std::filesystem::path(filename.c_str()).lexically_normal() ||
+                !stagedTargets.insert(relative).second)
+                REPORT_ERROR("Invalid or duplicate aggregate tomogram STAR target: " + fn_star);
+            const FileName finalStar = getOutputFileWithNewUniqueDate(fn_star, finalReferenceDirectory);
+            globalTable.setValue(EMDL_TOMO_TILT_SERIES_STARFILE, finalStar, t);
+        } else {
+            globalTable.setValue(EMDL_TOMO_TILT_SERIES_STARFILE, fn_newstar, t);
+        }
 
         // Create output directory if necessary
         FileName newdir = fn_newstar.beforeLastOf("/");
@@ -124,11 +156,11 @@ void TomogramSet::write(FileName filename)
         if (tomogramTables[t].containsLabel(EMDL_TOMO_PROJECTION_Z)) tomogramTables[t].deactivateLabel(EMDL_TOMO_PROJECTION_Z);
         if (tomogramTables[t].containsLabel(EMDL_TOMO_PROJECTION_W)) tomogramTables[t].deactivateLabel(EMDL_TOMO_PROJECTION_W);
 
-        tomogramTables[t].write(fn_newstar);
+        writeTable(tomogramTables[t], fn_newstar);
     }
 
     // Also write the (now modified with fn_newstars) tilt_series.star file in the root directory
-    globalTable.write(filename);
+    writeTable(globalTable, filename);
 
 }
 

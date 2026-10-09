@@ -606,11 +606,14 @@ void CudaMovieSession::release() {
     d_gain = nullptr;
     d_gain_borrowed = false;
     releaseBuffer(d_Ipatches);
+    releaseBuffer(d_patch_spectrum);
     releaseBuffer(d_group_start);
     releaseBuffer(d_group_size);
+    real_frames_invalid_reason = nullptr;
     fft_r2c_work_bytes = fft_c2r_work_bytes = fft_work_bytes = 0;
     cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
     sz_cached_Ipatches = 0;
+    sz_cached_patch_spectrum = 0;
     cached_ngroups_alloc = 0;
     uploaded_group_start.clear();
     uploaded_group_size.clear();
@@ -1848,6 +1851,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 
 bool CudaMovieSession::computeGlobalForwardFFT() {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_r2c) return false;
+    if (refuseInvalidRealFrames("the forward FFT")) return false;
     // Takes d_Fframes for the spectrum. Refused while ingest scratch views into the
     // same allocation are still live: the transform would otherwise overwrite
     // staging bytes that something is still reading, with no error anywhere.
@@ -1932,20 +1936,73 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
         }
     }
     HANDLE_ERROR(cudaDeviceSynchronize());
+    // Every frame of d_Iframes was just rewritten, whatever borrowed it before.
+    real_frames_invalid_reason = nullptr;
     return true;
+}
+
+bool CudaMovieSession::refuseInvalidRealFrames(const char *operation) {
+    if (!real_frames_invalid_reason) return false;
+    logfile << "ERROR: refusing " << operation << ": the device real-space movie is no longer valid ("
+            << real_frames_invalid_reason << ")." << std::endl;
+    return true;
+}
+
+void *CudaMovieSession::borrowRealFramesForGlobalAlignment(size_t &bytes) {
+    bytes = 0;
+    if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return nullptr;
+    bytes = (size_t)n_frames * nx * ny * sizeof(float);
+    real_frames_invalid_reason = "global alignment used it as scratch; the inverse FFT has not rewritten it";
+    return d_Iframes;
+}
+
+bool CudaMovieSession::releasePatchAlignmentWorkspace() {
+    const bool single = patch_alignment_workspace.release();
+    const bool batched = batched_patch_alignment_workspace.release();
+    // Patch preparation is over once alignment is released; its cached buffers
+    // and plan would otherwise stay resident through reconstruction. The claims
+    // are dropped before freeing (Issue #69) and every release is attempted.
+    float *patches = d_Ipatches;
+    cufftComplex *spectrum = d_patch_spectrum;
+    int *start = d_group_start, *size = d_group_size;
+    d_Ipatches = nullptr;
+    d_patch_spectrum = nullptr;
+    d_group_start = d_group_size = nullptr;
+    sz_cached_Ipatches = sz_cached_patch_spectrum = 0;
+    cached_ngroups_alloc = 0;
+    cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+    uploaded_group_start.clear();
+    uploaded_group_size.clear();
+    bool ok = single && batched;
+    if (patches || spectrum || start || size || has_plan_patch_r2c) {
+        // Patch kernels and transforms may still be queued after a throw.
+        const cudaError_t device = cudaSetDevice(device_id);
+        const cudaError_t sync = device != cudaSuccess ? device : cudaDeviceSynchronize();
+        recordFailure(sync, "patch preparation release synchronize", __LINE__);
+        if (sync != cudaSuccess) ok = false;
+    }
+    if (releasePlan(plan_patch_r2c, has_plan_patch_r2c) != CUFFT_SUCCESS) ok = false;
+    if (releaseBuffer(patches) != cudaSuccess) ok = false;
+    if (releaseBuffer(spectrum) != cudaSuccess) ok = false;
+    if (releaseBuffer(start) != cudaSuccess) ok = false;
+    if (releaseBuffer(size) != cudaSuccess) ok = false;
+    return ok;
 }
 
 bool CudaMovieSession::preparePatchInVram(
     int x_start, int y_start,
     int patch_w, int patch_h,
     int n_groups, const int *group_start, const int *group_size,
-    cufftComplex *d_out_fpatches
+    cufftComplex *d_out_fpatches,
+    int window_nx, int window_ny
 ) {
     if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
+    if (refuseInvalidRealFrames("patch preparation")) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const int patch_nfx = patch_w / 2 + 1;
     const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
+    const bool windowed = window_nx > 0 && window_ny > 0;
 
     // Reuse or allocate cached scratch buffers.
     //
@@ -2034,10 +2091,34 @@ bool CudaMovieSession::preparePatchInVram(
         cached_patch_ngroups = n_groups;
     }
 
-    CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, d_out_fpatches));
-
     const float inv_patch_size = 1.0f / ((float)patch_w * patch_h);
     const size_t total_comp_elems = (size_t)n_groups * patch_h * patch_nfx;
+    if (windowed) {
+        // The full spectra are only an intermediate. d_inverse_tile is dead
+        // between the global inverse FFT and dose weighting
+        // (docs/vram_live_ranges.md), so it holds them when large enough.
+        cufftComplex *spectrum = d_inverse_tile;
+        if (!spectrum || total_comp_elems > (size_t)ny * nfx) {
+            const size_t sz_spectrum = total_comp_elems * sizeof(cufftComplex);
+            if (!d_patch_spectrum || sz_cached_patch_spectrum < sz_spectrum) {
+                cufftComplex *stale = d_patch_spectrum;
+                d_patch_spectrum = nullptr;
+                sz_cached_patch_spectrum = 0;
+                HANDLE_ERROR(releaseBuffer(stale));
+                cufftComplex *fresh = nullptr;
+                HANDLE_ERROR(cudaMalloc((void**)&fresh, sz_spectrum));
+                d_patch_spectrum = fresh;
+                sz_cached_patch_spectrum = sz_spectrum;
+            }
+            spectrum = d_patch_spectrum;
+        }
+        CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, spectrum));
+        HANDLE_ERROR(cudaExtractPatchWindow(spectrum, d_out_fpatches, n_groups, patch_w, patch_h,
+                                            window_nx, window_ny, inv_patch_size));
+        return true;
+    }
+
+    CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, d_out_fpatches));
     const int block_scale = 256;
     const int grid_scale = (int)((total_comp_elems + block_scale - 1) / block_scale);
     scaleComplexKernel<<<grid_scale, block_scale>>>(d_out_fpatches, total_comp_elems, inv_patch_size);
@@ -2099,6 +2180,9 @@ void CudaMovieSession::alignPatchesBatched(
             << (workspace.cufftWorkBytes() >> 20) << " MiB, retained until alignment release."
             << std::endl;
 
+    // Slots hold only each patch's CCF window (cudaAlignPatchBatchDevice).
+    int window_nx = 0, window_ny = 0;
+    patchSpectrumWindow(patch_w, patch_h, scaled_B, ccf_downsample, window_nx, window_ny);
     std::vector<std::vector<RFLOAT> > xs(chunk), ys(chunk);
     std::vector<PatchBatchLog> logs(chunk);
     size_t min_free = free_bytes;
@@ -2107,7 +2191,8 @@ void CudaMovieSession::alignPatchesBatched(
         for (int j = 0; j < count; j++) {
             const PatchBox &box = boxes[first + j];
             if (preparePatchInVram(box.x_start, box.y_start, box.width, box.height, n_groups,
-                                   group_start, group_size, workspace.patchSlot(j)))
+                                   group_start, group_size, workspace.patchSlot(j),
+                                   window_nx, window_ny))
                 continue;
             // preparePatchInVram consumed its code; the preserved state and the
             // pending slot together decide, exactly as for the per-patch retry.
@@ -2151,7 +2236,8 @@ bool CudaMovieSession::reconstructDoseWeighted(
     Image<float> &Isum,
     const std::vector<RFLOAT> &doses,
     const RFLOAT apix,
-    const ThirdOrderPolynomialModel *model
+    const ThirdOrderPolynomialModel *model,
+    bool consume_real_frames
 ) {
     if (failure_state.isPoisoned() || !is_initialized || !has_plan_c2r || !d_fft_work ||
         !d_inverse_tile) return false;
@@ -2160,6 +2246,14 @@ bool CudaMovieSession::reconstructDoseWeighted(
     // becomes the C2R input the out-of-place weight kernel writes.
     DoseWeightScratch scratch;
     scratch.fourier = d_inverse_tile;
+    // Dose weighting reads only d_Fframes. When the caller will never read the
+    // real-space movie again, its memory also holds the reconstruction scratch.
+    if (consume_real_frames && d_Iframes &&
+        mc_cuda::doseScratchLayout(nx, ny, n_frames).total_bytes <= (size_t)n_frames * nx * ny * sizeof(float)) {
+        scratch.block = reinterpret_cast<char*>(d_Iframes);
+        real_frames_invalid_reason = "dose weighting consumed it as scratch";
+        logfile << "Dose-weighting scratch borrowed from the consumed real-space movie" << std::endl;
+    }
     return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model,
                                               device_id, logfile, &failure_state, plan_c2r, &scratch);
 }
@@ -2171,6 +2265,7 @@ bool CudaMovieSession::reconstructUnweighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized) return false;
+    if (refuseInvalidRealFrames("the unweighted reconstruction")) return false;
     return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile, &failure_state);
 }
 
@@ -2189,6 +2284,7 @@ bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex>
 
 bool CudaMovieSession::downloadRealFrames(std::vector<Image<float> > &Iframes) {
     if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return false;
+    if (refuseInvalidRealFrames("the real-space frame download")) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
     const size_t sz_real_frame = (size_t)ny * nx * sizeof(float);
     Iframes.resize(n_frames);

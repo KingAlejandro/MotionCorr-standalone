@@ -223,23 +223,31 @@ public:
     // In-VRAM framewise inverse FFT: d_Fframes (C2R) -> d_Iframes
     bool computeGlobalInverseFFT();
 
-    // In-VRAM Patch Extraction & Batched R2C FFT
+    // In-VRAM Patch Extraction & Batched R2C FFT. With window_nx/window_ny
+    // nonzero (patchSpectrumWindow), d_out_fpatches receives only each group's
+    // CCF window (n_groups * window_ny rows of window_nx/2+1, see
+    // cudaExtractPatchWindow) with the same values the full spectrum holds there;
+    // the full spectrum goes to session scratch.
     bool preparePatchInVram(
         int x_start, int y_start,
         int patch_w, int patch_h,
         int n_groups, const int *group_start, const int *group_size,
-        cufftComplex *d_out_fpatches
+        cufftComplex *d_out_fpatches,
+        int window_nx = 0, int window_ny = 0
     );
 
     PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
     BatchedPatchAlignmentWorkspace& getBatchedPatchAlignmentWorkspace() { return batched_patch_alignment_workspace; }
     // Must succeed before any reconstruction or output publication. Releases both
-    // the per-patch and the batched workspace, attempting each.
-    bool releasePatchAlignmentWorkspace() {
-        const bool single = patch_alignment_workspace.release();
-        const bool batched = batched_patch_alignment_workspace.release();
-        return single && batched;
-    }
+    // the per-patch and the batched workspace and the cached patch preparation
+    // buffers and plan, attempting each.
+    bool releasePatchAlignmentWorkspace();
+
+    // Global alignment scratch (docs/vram_live_ranges.md): d_Iframes is dead from
+    // the end of the forward FFT until computeGlobalInverseFFT overwrites every
+    // frame. Returns it (bytes = its size) and marks the real-space frames
+    // invalid until that inverse transform succeeds. Null when there is none.
+    void *borrowRealFramesForGlobalAlignment(size_t &bytes);
 
     struct PatchBox { int x_start, y_start, width, height; };
     struct PatchBatchOutcome {
@@ -263,11 +271,16 @@ public:
         std::vector<PatchBatchOutcome> &outcomes);
 
     // In-VRAM Dose-weighted reconstruction: applies DW and polynomial interpolation into Isum
+    // consume_real_frames: nothing reads d_Iframes after this call (the caller
+    // needs no pre-dose-weighting sum), so the reconstruction's own scratch is
+    // carved from it instead of allocated, and the real-space frames become
+    // permanently invalid for this movie.
     bool reconstructDoseWeighted(
         Image<float> &Isum,
         const std::vector<RFLOAT> &doses,
         const RFLOAT apix,
-        const ThirdOrderPolynomialModel *model
+        const ThirdOrderPolynomialModel *model,
+        bool consume_real_frames = false
     );
 
     // In-VRAM Unweighted real-space reconstruction: applies polynomial interpolation into Isum
@@ -406,6 +419,14 @@ private:
     // Host copy of the group tables last uploaded, so the 25 patches of a movie
     // upload them once instead of twice per patch. Cleared with the buffers.
     std::vector<int> uploaded_group_start, uploaded_group_size;
+    // Full patch spectra for windowed preparation when d_inverse_tile is too small.
+    cufftComplex *d_patch_spectrum = nullptr;
+    size_t sz_cached_patch_spectrum = 0;
+
+    // Non-null while d_Iframes holds no valid real-space movie because it was
+    // lent out as scratch; every reader of d_Iframes refuses while it is set.
+    const char *real_frames_invalid_reason = nullptr;
+    bool refuseInvalidRealFrames(const char *operation);
 };
 
 #endif // _CUDA_ENABLED

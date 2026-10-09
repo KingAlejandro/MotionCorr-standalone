@@ -26,12 +26,15 @@
 
 #include "CPlot2D.h"
 
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict)
+namespace
 {
+const char *const EPS_TO_PDF_COMMAND =
+    "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=";
+}
 
+bool writeEPSListForPDF(const FileName &fn_pdf, const std::vector<FileName> &fn_eps, bool strict)
+{
     FileName fn_list = fn_pdf + ".lst";
-    std::string command = "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dDEVICEWIDTHPOINTS=800 -dDEVICEHEIGHTPOINTS=800 -sOutputFile=";
-    command += fn_pdf + " @" + fn_list;
     std::ofstream filelist(fn_pdf + ".lst");
     if (strict && !filelist) REPORT_ERROR("Cannot write aggregate PDF input list: " + fn_list);
     bool have_at_least_one = false;
@@ -59,6 +62,29 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps,
     if (strict && !filelist.good()) REPORT_ERROR("Cannot flush aggregate PDF input list: " + fn_list);
     filelist.close();
     if (strict && !filelist.good()) REPORT_ERROR("Cannot close aggregate PDF input list: " + fn_list);
+    return have_at_least_one;
+}
+
+bool runEPSListsToPDF(const FileName &fn_pdf, const std::vector<FileName> &fn_lists)
+{
+    std::string command = EPS_TO_PDF_COMMAND;
+    command += fn_pdf;
+    for (const FileName &fn_list : fn_lists)
+        command += " @" + fn_list;
+    command += " > /dev/null";
+    if (system(command.c_str()))
+    {
+        std::cerr << " ERROR in executing: " << command << "\n";
+        return false;
+    }
+    return true;
+}
+
+bool renderEPSListToPDF(const FileName &fn_pdf, bool have_at_least_one, bool strict)
+{
+    FileName fn_list = fn_pdf + ".lst";
+    std::string command = EPS_TO_PDF_COMMAND;
+    command += fn_pdf + " @" + fn_list;
 
     bool have_error_in_gs = false;
     if (have_at_least_one)
@@ -83,7 +109,14 @@ void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps,
         if (strict) REPORT_ERROR("Aggregate PDF generation failed: " + fn_pdf);
     	std::cerr << " + Will make an empty PDF-file in " << fn_pdf << "\n";
     	touch(fn_pdf);
+    	return false;
     }
+    return true;
+}
+
+bool joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict)
+{
+    return renderEPSListToPDF(fn_pdf, writeEPSListForPDF(fn_pdf, fn_eps, strict), strict);
 
 }
 bool concatenatePDFfiles(FileName fn_pdf_out, FileName pdf1, FileName pdf2)

@@ -1776,31 +1776,73 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 			}
 		}
 
+		// Both input lists are written here, before any Ghostscript pass starts,
+		// because the single logfile pass below reads them too. A strict
+		// (aggregate-only) list failure therefore reports before any thread
+		// exists; the message is unchanged.
+		const bool have_header_eps = writeEPSListForPDF(report_out + "header.pdf", header_fn_eps, aggregate_only);
+		const bool have_batch_eps = writeEPSListForPDF(report_out + "batch.pdf", all_fn_eps, aggregate_only);
+
+		// logfile.pdf is header.pdf followed by all_batches.pdf. When there are
+		// no earlier batches (a fresh output directory, and always for
+		// --aggregate_only), all_batches.pdf is batch.pdf, so logfile.pdf is the
+		// two EPS lists in order. One pdfwrite pass over both lists writes it
+		// directly, at the same time as header.pdf and batch.pdf, instead of
+		// re-encoding those two PDFs afterwards: the pages rasterise
+		// identically (docs/pdf_tail.md). Anything else -- earlier batches, an
+		// empty list, or any of the three passes failing -- takes the original
+		// concatenation below, so its outcome is what it was before.
+		const bool fresh_batches = aggregate_only || !exists(report_out + "all_batches.pdf");
+		const bool try_single_pass = fresh_batches && have_header_eps && have_batch_eps;
+		// The single pass writes a scratch file that replaces logfile.pdf only
+		// once all three passes have succeeded. A run that fails part-way
+		// therefore leaves logfile.pdf exactly as the original code did (an
+		// earlier one untouched, or none), and never leaves the scratch file:
+		// the guard is declared before the threads, so it runs after they join.
+		const FileName fn_single = report_out + "logfile_tmp_single.pdf";
+		struct ScratchRemover {
+			const FileName &fn;
+			~ScratchRemover() { std::remove(fn.c_str()); }
+		} single_remover{fn_single};
+
 		RCTIC(TIMING_W_GS_HEADER);
-		// joinMultipleEPSIntoSinglePDF reports its own failures and falls back
-		// to an empty PDF, so it has no result to return; anything that does
-		// escape it is captured here rather than reaching a std::thread
-		// boundary, where it would be std::terminate.
+		// renderEPSListToPDF reports its own failures and falls back to an
+		// empty PDF; anything that does escape it is captured here rather than
+		// reaching a std::thread boundary, where it would be std::terminate.
 		std::exception_ptr header_failure;
+		bool header_rendered = false;
 		std::thread header_thread([&]() {
-			try { joinMultipleEPSIntoSinglePDF(report_out + "header.pdf", header_fn_eps, aggregate_only); }
+			try { header_rendered = renderEPSListToPDF(report_out + "header.pdf", have_header_eps, aggregate_only); }
 			catch (...) { header_failure = std::current_exception(); }
 		});
-		// The batch pass below is not noexcept: joinMultipleEPSIntoSinglePDF
-		// falls back to touch() when Ghostscript fails, and touch() REPORT_ERRORs
-		// if the ofstream will not open. Unwinding through a still-joinable
+		// runEPSListsToPDF does not throw by contract; the catch only keeps a
+		// broken contract from becoming std::terminate. A failure of any kind
+		// sends logfile.pdf down the original path.
+		bool single_pass_ok = false;
+		std::thread logfile_thread;
+		if (try_single_pass)
+			logfile_thread = std::thread([&]() {
+				try {
+					single_pass_ok = runEPSListsToPDF(fn_single,
+						{report_out + "header.pdf.lst", report_out + "batch.pdf.lst"});
+				}
+				catch (...) { single_pass_ok = false; }
+			});
+		// The batch pass below is not noexcept: renderEPSListToPDF falls back
+		// to touch() when Ghostscript fails, and touch() REPORT_ERRORs if the
+		// ofstream will not open. Unwinding through a still-joinable
 		// std::thread is an unconditional std::terminate, so the job would abort
 		// instead of reporting a failed PDF -- with every micrograph and STAR
 		// already correctly written. joinable() means "not yet joined", not
-		// "still running", so this is needed even when the header pass finished
+		// "still running", so this is needed even when the passes finished
 		// long ago.
-		struct HeaderThreadJoiner {
+		struct ThreadJoiner {
 			std::thread &t;
-			~HeaderThreadJoiner() { if (t.joinable()) t.join(); }
-		} header_joiner{header_thread};
+			~ThreadJoiner() { if (t.joinable()) t.join(); }
+		} header_joiner{header_thread}, logfile_joiner{logfile_thread};
 
 		RCTIC(TIMING_W_GS_BATCH);
-		joinMultipleEPSIntoSinglePDF(report_out + "batch.pdf", all_fn_eps, aggregate_only);
+		const bool batch_rendered = renderEPSListToPDF(report_out + "batch.pdf", have_batch_eps, aggregate_only);
 		RCTOC(TIMING_W_GS_BATCH);
 
 		header_thread.join();
@@ -1818,7 +1860,11 @@ void MotioncorrRunner::generateLogFilePDFAndWriteStarFiles(FileName report_out)
 
 		// Put header in front of comabined batches
 		RCTIC(TIMING_W_GS_LOGFILE);
-		if (!concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf") && aggregate_only)
+		if (logfile_thread.joinable()) logfile_thread.join();
+		const bool logfile_done = single_pass_ok && header_rendered && batch_rendered &&
+			std::rename(fn_single.c_str(), (report_out + "logfile.pdf").c_str()) == 0;
+		if (!logfile_done &&
+		    !concatenatePDFfiles(report_out + "logfile.pdf", report_out + "header.pdf", report_out + "all_batches.pdf") && aggregate_only)
 			REPORT_ERROR("Aggregate-only full PDF concatenation failed.");
 		if (aggregate_only) {
 			requireAggregatePdf(report_out + "header.pdf");

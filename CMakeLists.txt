@@ -363,6 +363,35 @@ if(BUILD_TESTING)
         add_test(NAME OutputStageFaults
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_output_stage_faults.py
                 --binary $<TARGET_FILE:motioncorr>)
+        # logfile.pdf in one Ghostscript pass on a fresh output directory, the
+        # old concatenation on reruns and when the single pass fails
+        # (docs/pdf_tail.md). Exit 77 when Ghostscript is not installed.
+        add_test(NAME PdfSinglePass
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_pdf_single_pass.py
+                --binary $<TARGET_FILE:motioncorr>)
+        set_tests_properties(PdfSinglePass PROPERTIES TIMEOUT 600 SKIP_RETURN_CODE 77)
+        # Compiled negative control: a runner that ignores the single pass's
+        # exit status, so a failed pass's truncated output becomes logfile.pdf. Against it the fresh and
+        # rerun arms must pass and the fault arm must fail.
+        set(_pdf_runner "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_pdf_runner}")
+        file(READ "${_pdf_runner}" _pdf_runner_source)
+        set(_pdf_from "const bool logfile_done = single_pass_ok &&")
+        string(FIND "${_pdf_runner_source}" "${_pdf_from}" _pdf_first)
+        string(FIND "${_pdf_runner_source}" "${_pdf_from}" _pdf_last REVERSE)
+        if(_pdf_first EQUAL -1 OR NOT _pdf_first EQUAL _pdf_last)
+            message(FATAL_ERROR "pdf single-pass mutant: target line missing or not unique in motioncorr_runner.cpp")
+        endif()
+        string(REPLACE "${_pdf_from}" "const bool logfile_done = try_single_pass &&" _pdf_runner_source "${_pdf_runner_source}")
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_pdf_ignore_status.cpp" "${_pdf_runner_source}")
+        add_executable(motioncorr_pdf_ignore_status_mutant src/apps/run_motioncorr.cpp
+            "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_pdf_ignore_status.cpp")
+        target_compile_definitions(motioncorr_pdf_ignore_status_mutant PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+        target_link_libraries(motioncorr_pdf_ignore_status_mutant PRIVATE motioncorr_core)
+        add_test(NAME PdfSinglePassMutant_ignore_status
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_pdf_single_pass.py
+                --binary $<TARGET_FILE:motioncorr_pdf_ignore_status_mutant> --expect-fault-failure)
+        set_tests_properties(PdfSinglePassMutant_ignore_status PROPERTIES TIMEOUT 600 SKIP_RETURN_CODE 77)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME CudaValidationParser

@@ -35,7 +35,23 @@
 /* SHWS: join multiple eps files into a single pdf
  *
  */
-void joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false);
+bool joinMultipleEPSIntoSinglePDF(FileName fn_pdf, std::vector<FileName> fn_eps, bool strict = false);
+
+/* joinMultipleEPSIntoSinglePDF() in two halves, so a caller can write several
+ * lists before starting any Ghostscript pass that reads them.
+ * writeEPSListForPDF writes <fn_pdf>.lst and returns whether it names at least
+ * one existing EPS file. renderEPSListToPDF then runs the same Ghostscript
+ * command on that list, with the same failure handling (strict: REPORT_ERROR;
+ * otherwise an empty fallback PDF), and returns true if the PDF was rendered.
+ */
+bool writeEPSListForPDF(const FileName &fn_pdf, const std::vector<FileName> &fn_eps, bool strict = false);
+bool renderEPSListToPDF(const FileName &fn_pdf, bool have_at_least_one, bool strict = false);
+
+/* One pdfwrite pass over several EPS lists, in order, into fn_pdf. Same device
+ * options as joinMultipleEPSIntoSinglePDF. Reports a failure and returns false;
+ * it never throws and never writes a fallback file.
+ */
+bool runEPSListsToPDF(const FileName &fn_pdf, const std::vector<FileName> &fn_lists);
 
 /* SHWS: concatenate multiple PDF files into a single one
  *

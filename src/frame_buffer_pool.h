@@ -26,7 +26,8 @@
  *   pooled. Everything else, including per-frame movie storage, keeps the
  *   default allocator behaviour.
  * - **Bound.** At most `capacity` buffers are retained, each exactly the size
- *   of a frame acquire() has been asked for. A release beyond capacity, or of
+ *   of a frame acquire() has been asked for. When the geometry changes, a
+ *   release of the current size into a full pool evicts an older size. A release beyond capacity, or of
  *   any other size (an image binned after acquisition, say), frees normally,
  *   so retained bytes never exceed capacity * largest requested frame, and
  *   every retained buffer can be reused.
@@ -75,6 +76,11 @@ private:
 	// a slot. Bounded by the number of distinct geometries in a run.
 	std::vector<size_t> requested;
 	size_t capacity;
+	// The geometry acquire() was most recently asked for. Releasing a buffer
+	// of this size into a full pool evicts a retained buffer of another size,
+	// so a geometry change mid-run does not leave the pool full of buffers no
+	// acquisition can use.
+	size_t last_requested;
 	bool on;
 	bool poison;
 };

@@ -28,7 +28,7 @@ FrameBufferPool &FrameBufferPool::instance()
 }
 
 FrameBufferPool::FrameBufferPool()
-	: capacity(kDefaultCapacity), on(true), poison(false)
+	: capacity(kDefaultCapacity), last_requested(0), on(true), poison(false)
 {
 	const char *env = getenv("MOTIONCORR_FRAME_POOL");
 	if (env != NULL && env[0] == '0' && env[1] == '\0') on = false;
@@ -65,6 +65,7 @@ void FrameBufferPool::acquire(MultidimArray<float> &array, long int ny, long int
 			std::lock_guard<std::mutex> lock(mutex);
 			if (on && std::find(requested.begin(), requested.end(), elements) == requested.end())
 				requested.push_back(elements);
+			if (on) last_requested = elements;
 		}
 		if (poison) std::memset(array.data, 0xFF, elements * sizeof(float));  // quiet NaNs
 		array.setDimensions(nx, ny, 1, 1);
@@ -76,6 +77,7 @@ void FrameBufferPool::acquire(MultidimArray<float> &array, long int ny, long int
 		if (on) {
 			if (std::find(requested.begin(), requested.end(), elements) == requested.end())
 				requested.push_back(elements);
+			last_requested = elements;
 			for (size_t i = 0; i < free_list.size(); i++) {
 				if (free_list[i].elements == elements) {
 					reused = free_list[i].data;
@@ -105,19 +107,37 @@ void FrameBufferPool::release(MultidimArray<float> &array)
 	const size_t elements = (size_t)array.nzyxdimAlloc;
 	const bool poolable = array.data != NULL && array.destroyData && !array.mmapOn &&
 	                      elements * sizeof(float) >= kMinPooledBytes;
+	float *evicted = NULL;
+	bool retained = false;
 	if (poolable) {
 		std::lock_guard<std::mutex> lock(mutex);
 		const bool reusable = std::find(requested.begin(), requested.end(), elements) != requested.end();
+		if (on && reusable && free_list.size() >= capacity && elements == last_requested) {
+			// Geometry transition: the pool is full of an earlier size that the
+			// current movies no longer ask for. Make room by dropping the oldest
+			// retained buffer of a different size, so a change of geometry
+			// cannot permanently disable reuse (#162 review). Same-size entries
+			// are never evicted for each other, so the bound is unchanged.
+			for (size_t i = 0; i < free_list.size(); i++) {
+				if (free_list[i].elements != elements) {
+					evicted = free_list[i].data;
+					free_list.erase(free_list.begin() + i);
+					break;
+				}
+			}
+		}
 		if (on && reusable && free_list.size() < capacity) {
 			free_list.push_back({array.data, elements});
 			// Detach without freeing: the pool owns the buffer now.
 			array.data = NULL;
 			array.nzyxdimAlloc = 0;
 			array.coreInit();
-			return;
+			retained = true;
 		}
 	}
-	array.clear();
+	// Free outside the lock (the writer thread may be releasing concurrently).
+	if (evicted != NULL) RELION_ALIGNED_FREE(evicted);
+	if (!retained) array.clear();
 }
 
 size_t FrameBufferPool::retainedBytes() const
@@ -141,6 +161,7 @@ void FrameBufferPool::clear()
 		std::lock_guard<std::mutex> lock(mutex);
 		taken.swap(free_list);
 		requested.clear();
+		last_requested = 0;
 	}
 	for (const Buffer &b : taken) RELION_ALIGNED_FREE(b.data);
 }

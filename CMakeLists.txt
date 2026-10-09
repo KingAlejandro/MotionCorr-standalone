@@ -446,6 +446,7 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
             "LINKER:--wrap=cudaGetLastError" "LINKER:--wrap=cudaEventSynchronize"
             "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cufftExecR2C"
             "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)

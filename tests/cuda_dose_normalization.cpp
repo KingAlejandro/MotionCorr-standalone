@@ -8,6 +8,7 @@
 #include "src/error.h"
 #include <cuda_runtime.h>
 #include <cufft.h>
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <set>
@@ -18,7 +19,7 @@
 
 __global__ void computeDoseNormalizationKernel(float*, int, int, int, float, float,
                                                float, const float*, int);
-__global__ void applyDoseWeightKernel(float2*, int, int, int, float, float, float,
+__global__ void applyDoseWeightKernel(const float2*, float2*, int, int, int, float, float, float,
                                      const float*, int, int, const float*);
 
 // Dose weighting kernel implementing Grant & Grigorieff (2015) model
@@ -142,6 +143,9 @@ Fault fault = NONE;
 int allocations = 0, frees = 0, launch_checks = 0, syncs = 0, execs = 0, frame_copies = 0;
 int plan_creates = 0, plan_destroys = 0;
 cufftHandle executed_plan = 0;
+const void *c2r_input = nullptr;
+int device_syncs = 0, r2c_execs = 0, exec_fail_at = 0;   // exec_fail_at: 1-based cuFFT exec (R2C or C2R) that returns CUFFT_EXEC_FAILED
+int alloc_fault_at = 5;   // ordinal of the cudaMalloc the ALLOCATION fault fails
 bool observe_session_plans = false;
 std::vector<cufftHandle> session_created, session_destroyed;
 void *plane = nullptr;
@@ -159,7 +163,8 @@ void fft(cufftResult code, const char *message) { require(code == CUFFT_SUCCESS,
 void arm(Fault selected = NONE) {
     fault = selected; fired = plane_freed = false; plane = nullptr; plane_bytes = 0;
     allocations = frees = launch_checks = syncs = execs = frame_copies = 0;
-    plan_creates = plan_destroys = 0; executed_plan = 0;
+    device_syncs = r2c_execs = 0;
+    plan_creates = plan_destroys = 0; executed_plan = 0; c2r_input = nullptr;
     violation.clear(); active = true;
 }
 void empty() {
@@ -175,17 +180,19 @@ cudaError_t __real_cudaEventSynchronize(cudaEvent_t);
 cudaError_t __real_cudaEventCreate(cudaEvent_t*);
 cudaError_t __real_cudaEventDestroy(cudaEvent_t);
 cudaError_t __real_cudaMemcpy(void*, const void*, size_t, cudaMemcpyKind);
+cudaError_t __real_cudaDeviceSynchronize();
+cufftResult __real_cufftExecR2C(cufftHandle, cufftReal*, cufftComplex*);
 cufftResult __real_cufftCreate(cufftHandle*);
 cufftResult __real_cufftDestroy(cufftHandle);
 cufftResult __real_cufftExecC2R(cufftHandle, cufftComplex*, cufftReal*);
 cudaError_t __wrap_cudaMalloc(void **ptr, size_t bytes) {
-    if (active && ++allocations == 5 && fault == ALLOCATION) {
+    if (active && ++allocations == alloc_fault_at && fault == ALLOCATION) {
         *ptr = nullptr; fired = true; return cudaErrorMemoryAllocation;
     }
     const auto status = __real_cudaMalloc(ptr, bytes);
     if (active && status == cudaSuccess) {
         buffers.insert(*ptr);
-        if (allocations == 5) { plane = *ptr; plane_bytes = bytes; }
+        if (allocations == 5 && alloc_fault_at == 5) { plane = *ptr; plane_bytes = bytes; }
     }
     return status;
 }
@@ -203,6 +210,11 @@ cudaError_t __wrap_cudaFree(void *ptr) {
 }
 cudaError_t __wrap_cudaGetLastError() {
     const auto status = __real_cudaGetLastError();
+    // The second launch check is the first frame's weight kernel, now the first consumer
+    // of the normalization plane (there is no frame copy before it any more). It must
+    // follow the checked normalization completion.
+    if (active && launch_checks == 1 && syncs == 0)
+        violation = "dose frame consumed before checked normalization completion";
     if (active && ++launch_checks == 1 && (fault == LAUNCH || fault == LAUNCH_LATE_FATAL)) {
         fired = true; return cudaErrorMemoryAllocation;
     }
@@ -226,10 +238,7 @@ cudaError_t __wrap_cudaEventDestroy(cudaEvent_t event) {
     return status;
 }
 cudaError_t __wrap_cudaMemcpy(void *dst, const void *src, size_t bytes, cudaMemcpyKind kind) {
-    if (active && kind == cudaMemcpyDeviceToDevice) {
-        ++frame_copies;
-        if (syncs == 0) violation = "dose frame consumed before checked normalization completion";
-    }
+    if (active && kind == cudaMemcpyDeviceToDevice) ++frame_copies;
     return __real_cudaMemcpy(dst, src, bytes, kind);
 }
 cufftResult __wrap_cufftCreate(cufftHandle *plan) {
@@ -244,8 +253,22 @@ cufftResult __wrap_cufftDestroy(cufftHandle plan) {
     if (observe_session_plans && status == CUFFT_SUCCESS) session_destroyed.push_back(plan);
     return status;
 }
+cudaError_t __wrap_cudaDeviceSynchronize() {
+    if (active) ++device_syncs;
+    return __real_cudaDeviceSynchronize();
+}
+cufftResult __wrap_cufftExecR2C(cufftHandle plan, cufftReal *in, cufftComplex *out) {
+    if (active) {
+        ++r2c_execs;
+        if (exec_fail_at && r2c_execs == exec_fail_at) { fired = true; return CUFFT_EXEC_FAILED; }
+    }
+    return __real_cufftExecR2C(plan, in, out);
+}
 cufftResult __wrap_cufftExecC2R(cufftHandle plan, cufftComplex *in, cufftReal *out) {
-    if (active) { ++execs; executed_plan = plan; }
+    if (active) {
+        ++execs; executed_plan = plan; c2r_input = in;
+        if (exec_fail_at && execs == exec_fail_at) { fired = true; return CUFFT_EXEC_FAILED; }
+    }
     return __real_cufftExecC2R(plan, in, out);
 }
 }
@@ -357,12 +380,18 @@ void exactFourier(const Input &in) {
     const float nx2 = (float)(nfx-1)*(float)(nfx-1)*4.0f, ny2 = (float)in.ny*(float)in.ny;
     computeDoseNormalizationKernel<<<grid,block>>>(denom,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count);
     gpu(cudaGetLastError(), "normalization launch"); gpu(cudaDeviceSynchronize(), "normalization completion");
-    std::vector<float2> a(tile), b(tile);
+    std::vector<float2> a(tile), b(tile), src_after(tile);
     for (int j = 0; j < in.count; ++j) {
-        gpu(cudaMemcpy(current,in.values.data()+j*tile,tile*sizeof(float2),cudaMemcpyHostToDevice), "candidate Fourier upload");
         gpu(cudaMemcpy(old,in.values.data()+j*tile,tile*sizeof(float2),cudaMemcpyHostToDevice), "original Fourier upload");
-        applyDoseWeightKernel<<<grid,block>>>(current,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j,denom);
+        // Out of place: read the pristine frame (`old`), write `current`, which is poisoned
+        // first so an unwritten element cannot pass as correct.
+        gpu(cudaMemset(current,0xff,tile*sizeof(float2)), "candidate Fourier poison");
+        applyDoseWeightKernel<<<grid,block>>>(old,current,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j,denom);
         gpu(cudaGetLastError(), "candidate Fourier dose launch"); gpu(cudaDeviceSynchronize(), "candidate Fourier completion");
+        // The out-of-place kernel must leave the resident source frame untouched.
+        gpu(cudaMemcpy(src_after.data(),old,tile*sizeof(float2),cudaMemcpyDeviceToHost), "source Fourier readback");
+        require(std::memcmp(src_after.data(),in.values.data()+j*tile,tile*sizeof(float2)) == 0,
+                "out-of-place dose kernel modified its resident source frame");
         originalDoseWeightKernel<<<grid,block>>>(old,nfx,in.ny,in.ny/2,nx2,ny2,(float)in.apix,doses,in.count,j);
         gpu(cudaGetLastError(), "original Fourier dose launch"); gpu(cudaDeviceSynchronize(), "original Fourier completion");
         gpu(cudaMemcpy(a.data(),current,tile*sizeof(float2),cudaMemcpyDeviceToHost), "candidate Fourier download");
@@ -409,8 +438,10 @@ void exactCases() {
             require(allocations == 5 && plane_bytes == (size_t)(in.nx/2+1)*in.ny*sizeof(float) && plane_freed,
                     "reconstruction denominator plane allocation/ownership wrong");
             require(violation.empty(), violation.c_str());
-            require(launch_checks == 1+2*count && execs == count && frame_copies == count,
-                    "dose precompute/per-frame launch count changed");
+            // The weight kernel writes the C2R input directly: no per-frame D2D copy.
+            // (Before this change frame_copies was `count`; that shape now fails here.)
+            require(launch_checks == 1+2*count && execs == count && frame_copies == 0,
+                    "dose precompute/per-frame launch count changed or a per-frame D2D copy came back");
             // One checked normalization completion and one total-timer wait in
             // both modes; three telemetry waits per frame only when timed.
             require(syncs == (timed ? 1+3*count+1 : 2),
@@ -423,6 +454,205 @@ void exactCases() {
     }
     std::cout << "PASS: " << cases << " exact null/polynomial reconstructions; " << weighted_frames
               << " exact weighted Fourier frames; consecutive changed dose/apix/geometry calls\n";
+}
+// Session mode (DoseWeightScratch): same pixels as the frozen original frame loop, one
+// reconstruction allocation instead of five, no per-frame D2D copy, resident frames intact.
+// Also the negative controls that make those counters mean something.
+void scratchCases() {
+    const auto model = polynomial(); int cases = 0;
+    for (int count : {1,8,24}) for (int variant : {0,2,4}) for (bool poly : {false,true}) {
+        const Input in = inputFor(variant == 2 ? 35 : 32,variant == 2 ? 29 : 24,count,variant,1.12);
+        StageProfile::instance().setDeviceTiming(false);
+        active = false;
+        const auto expected = oracle(in,poly ? &model : nullptr);
+        const int nfx = in.nx/2+1; const size_t tile = (size_t)nfx*in.ny, pixels = (size_t)in.nx*in.ny;
+        cufftComplex *resident = nullptr, *fourier = nullptr;
+        gpu(cudaMalloc(&resident,in.values.size()*sizeof(cufftComplex)), "scratch resident allocation");
+        gpu(cudaMemcpy(resident,in.values.data(),in.values.size()*sizeof(cufftComplex),cudaMemcpyHostToDevice), "scratch resident upload");
+        gpu(cudaMalloc(&fourier,tile*sizeof(cufftComplex)), "scratch fourier allocation");
+        gpu(cudaMemset(fourier,0x7f,tile*sizeof(cufftComplex)), "scratch fourier dirty");   // stale bytes from a previous movie
+        DoseWeightScratch scratch; scratch.fourier = fourier;
+        for (int repeat = 0; repeat < 2; ++repeat) {   // tile reused across consecutive calls
+            Image<float> output; output().resize(in.ny,in.nx);
+            CudaFailureState failure; std::ostringstream log; arm();
+            const bool ok = cudaDoseWeightAndInterpolateDevice(resident,output,in.nx,in.ny,in.count,in.doses,in.apix,
+                                                              poly ? &model : nullptr,0,log,&failure,0,&scratch);
+            require(ok && !failure.hasFailed(), "scratch dose reconstruction returned failure");
+            require(allocations == 1 && frees == 1 && execs == count && frame_copies == 0,
+                    "session-mode reconstruction did not make exactly one allocation/free and no frame copy");
+            require(c2r_input == (const void*)fourier, "C2R did not read the caller's scratch frame");
+            require(violation.empty(), violation.c_str());
+            empty(); active = false;
+            require(std::memcmp(output().data,expected.data(),pixels*sizeof(float)) == 0,
+                    "session-mode dose reconstruction pixels differ from frozen original frame loop");
+            std::vector<cufftComplex> after(in.values.size());
+            gpu(cudaMemcpy(after.data(),resident,after.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost), "scratch resident readback");
+            require(std::memcmp(after.data(),in.values.data(),after.size()*sizeof(cufftComplex)) == 0,
+                    "dose reconstruction modified the resident Fourier frames");
+            ++cases;
+        }
+        // Negative control 1: without a scratch the same harness sees all 5 allocations and
+        // `count` frames' worth of executions with no scratch tile involved, so the counts
+        // above are not vacuous. Pixels must be identical in both modes.
+        {
+            Image<float> output; output().resize(in.ny,in.nx);
+            CudaFailureState failure; std::ostringstream log; arm();
+            const bool ok = cudaDoseWeightAndInterpolateDevice(resident,output,in.nx,in.ny,in.count,in.doses,in.apix,
+                                                              poly ? &model : nullptr,0,log,&failure);
+            require(ok && allocations == 5 && frees == 5 && c2r_input != (const void*)fourier,
+                    "negative control: the no-scratch call stopped making its own five allocations");
+            empty(); active = false;
+            require(std::memcmp(output().data,expected.data(),pixels*sizeof(float)) == 0,
+                    "negative control: no-scratch pixels differ");
+        }
+        // Negative control 2: feeding the wrong frame order must be caught by the byte compare.
+        if (count > 1) {
+            Input wrong = in;
+            std::rotate(wrong.values.begin(), wrong.values.begin()+tile, wrong.values.end());
+            gpu(cudaMemcpy(resident,wrong.values.data(),wrong.values.size()*sizeof(cufftComplex),cudaMemcpyHostToDevice), "wrong resident upload");
+            Image<float> output; output().resize(in.ny,in.nx);
+            CudaFailureState failure; std::ostringstream log; active = false;
+            require(cudaDoseWeightAndInterpolateDevice(resident,output,in.nx,in.ny,in.count,in.doses,in.apix,
+                                                      poly ? &model : nullptr,0,log,&failure,0,&scratch),
+                    "negative control: wrong-input call failed");
+            require(std::memcmp(output().data,expected.data(),pixels*sizeof(float)) != 0,
+                    "negative control: a mis-ordered C2R input was not detected by the byte comparison");
+        }
+        gpu(cudaFree(resident),"scratch resident release"); gpu(cudaFree(fourier),"scratch fourier release");
+    }
+    std::cout << "PASS: " << cases << " session-mode reconstructions exact, 1 allocation, 0 frame copies, resident input intact; negative controls detected\n";
+}
+// Session mode, allocation failure: the one block allocation fails. The call must refuse
+// success, free nothing, keep the original cause, never reach the frame loop, leave the
+// caller's output alone, and not touch the caller-owned tile or the resident frames.
+void sessionAllocationFault() {
+    const Input in = inputFor(32,24,8,1,1.12);
+    const int nfx = in.nx/2+1; const size_t tile = (size_t)nfx*in.ny;
+    active = false;
+    cufftComplex *resident = nullptr, *fourier = nullptr;
+    gpu(cudaMalloc(&resident,in.values.size()*sizeof(cufftComplex)), "fault resident allocation");
+    gpu(cudaMemcpy(resident,in.values.data(),in.values.size()*sizeof(cufftComplex),cudaMemcpyHostToDevice), "fault resident upload");
+    gpu(cudaMalloc(&fourier,tile*sizeof(cufftComplex)), "fault fourier allocation");
+    DoseWeightScratch scratch; scratch.fourier = fourier;
+    Image<float> output; output().resize(in.ny,in.nx); output().initConstant(-12345.0f);
+    CudaFailureState failure; std::ostringstream log;
+    alloc_fault_at = 1; arm(ALLOCATION);
+    const bool ok = cudaDoseWeightAndInterpolateDevice(resident,output,in.nx,in.ny,in.count,in.doses,in.apix,
+                                                      nullptr,0,log,&failure,0,&scratch);
+    alloc_fault_at = 5;
+    require(!ok && fired && failure.hasFailed() && failure.firstError() == cudaErrorMemoryAllocation,
+            "session-mode block allocation fault did not refuse success with its original cause");
+    require(allocations == 1 && frees == 0 && launch_checks == 0 && execs == 0 && frame_copies == 0,
+            "session-mode allocation fault entered the frame loop or freed something it did not own");
+    for (size_t i = 0; i < (size_t)in.nx*in.ny; ++i)
+        require(output().data[i] == -12345.0f, "failed session-mode allocation altered the host output");
+    empty(); active = false;
+    gpu(cudaFree(resident),"fault resident release"); gpu(cudaFree(fourier),"fault fourier release");
+    std::cout << "PASS: session-mode block allocation fault refused success and freed nothing it did not own\n";
+}
+// ---- global forward / inverse FFT: no per-frame device waits ----
+// The original loops synchronised the whole device after every frame (25 forward, 24
+// inverse). Everything runs on the default stream, so the order was never at stake: the new
+// code waits once at the end. These cases pin (a) bytes against an oracle that keeps the
+// per-frame wait, (b) exactly one device wait per transform, (c) that a failed execution
+// still returns false, records the cuFFT status, drains the queue and leaks nothing.
+__global__ void oracleScaleKernel(cufftComplex *d, size_t count, float scale) {
+    size_t i = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < count) { d[i].x *= scale; d[i].y *= scale; }
+}
+std::vector<float> fftRealInput(int nx, int ny, int frames, unsigned seed) {
+    std::vector<float> v((size_t)nx*ny*frames); unsigned st = seed;
+    for (auto &x : v) { st = 1664525u*st+1013904223u; x = (float)((int)(st>>16)-32768)/64.0f; }
+    return v;
+}
+void fftSyncCases() {
+    const int nx = 48, ny = 40, frames = 6, nfx = nx/2+1;
+    const size_t rpix = (size_t)nx*ny, ctile = (size_t)ny*nfx;
+    active = false;
+    const std::vector<float> real = fftRealInput(nx,ny,frames,7u);
+
+    // Oracle: own plans with cuFFT-owned work areas, one device wait per frame.
+    std::vector<cufftComplex> want_f(ctile*frames); std::vector<float> want_r(rpix*frames);
+    {
+        float *dr = nullptr; cufftComplex *df = nullptr, *tile = nullptr; float *dr2 = nullptr;
+        gpu(cudaMalloc(&dr,rpix*frames*sizeof(float)),"oracle r alloc");
+        gpu(cudaMalloc(&df,ctile*frames*sizeof(cufftComplex)),"oracle f alloc");
+        gpu(cudaMalloc(&tile,ctile*sizeof(cufftComplex)),"oracle tile alloc");
+        gpu(cudaMalloc(&dr2,rpix*frames*sizeof(float)),"oracle r2 alloc");
+        gpu(cudaMemcpy(dr,real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"oracle upload");
+        cufftHandle fwd, inv; int n[2] = {ny,nx};
+        fft(cufftPlanMany(&fwd,2,n,nullptr,1,(int)rpix,nullptr,1,(int)ctile,CUFFT_R2C,1),"oracle fwd plan");
+        fft(cufftPlanMany(&inv,2,n,nullptr,1,(int)ctile,nullptr,1,(int)rpix,CUFFT_C2R,1),"oracle inv plan");
+        const float inv_size = 1.0f/((float)nx*ny);
+        for (int j = 0; j < frames; ++j) {
+            fft(cufftExecR2C(fwd,dr+j*rpix,df+j*ctile),"oracle R2C"); gpu(cudaDeviceSynchronize(),"oracle R2C wait");
+        }
+        oracleScaleKernel<<<(unsigned)((ctile*frames+255)/256),256>>>(df,ctile*frames,inv_size);
+        gpu(cudaGetLastError(),"oracle scale"); gpu(cudaDeviceSynchronize(),"oracle scale wait");
+        gpu(cudaMemcpy(want_f.data(),df,ctile*frames*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"oracle f download");
+        for (int j = 0; j < frames; ++j) {
+            gpu(cudaMemcpy(tile,df+j*ctile,ctile*sizeof(cufftComplex),cudaMemcpyDeviceToDevice),"oracle preserve copy");
+            fft(cufftExecC2R(inv,tile,dr2+j*rpix),"oracle C2R"); gpu(cudaDeviceSynchronize(),"oracle C2R wait");
+        }
+        gpu(cudaMemcpy(want_r.data(),dr2,rpix*frames*sizeof(float),cudaMemcpyDeviceToHost),"oracle r download");
+        fft(cufftDestroy(fwd),"oracle fwd destroy"); fft(cufftDestroy(inv),"oracle inv destroy");
+        gpu(cudaFree(dr),"oracle r free"); gpu(cudaFree(df),"oracle f free"); gpu(cudaFree(tile),"oracle tile free"); gpu(cudaFree(dr2),"oracle r2 free");
+    }
+
+    // Healthy session run, both directions.
+    {
+        std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        require(session.initialize(),"fft sync test session init failed");
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft real upload");
+        arm();
+        require(session.computeGlobalForwardFFT() && !session.getFailureState().hasFailed(),"forward FFT failed");
+        require(r2c_execs == frames, "forward FFT did not run one R2C per frame");
+        // Before this change: frames+1 (one wait per frame plus the one after scaling).
+        require(device_syncs == 1, "forward FFT must wait for the device exactly once (per-frame waits are back)");
+        active = false;
+        std::vector<cufftComplex> got_f(ctile*frames);
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft f download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) == 0,
+                "forward FFT bytes differ from the per-frame-synchronised oracle");
+        arm();
+        require(session.computeGlobalInverseFFT() && !session.getFailureState().hasFailed(),"inverse FFT failed");
+        require(execs == frames && frame_copies == frames, "inverse FFT did not run one preserved C2R per frame");
+        require(device_syncs == 1, "inverse FFT must wait for the device exactly once (per-frame waits are back)");
+        active = false;
+        std::vector<float> got_r(rpix*frames);
+        gpu(cudaMemcpy(got_r.data(),session.getDeviceRealFrames(),got_r.size()*sizeof(float),cudaMemcpyDeviceToHost),"fft r download");
+        require(std::memcmp(got_r.data(),want_r.data(),got_r.size()*sizeof(float)) == 0,
+                "inverse FFT bytes differ from the per-frame-synchronised oracle");
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft f re-download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) == 0,
+                "inverse FFT did not preserve the Fourier frames for dose weighting");
+        // Negative control: one flipped input bit must break the comparison above.
+        std::vector<float> bad = real; bad[rpix*3+17] += 1.0f;
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),bad.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft bad upload");
+        require(session.computeGlobalForwardFFT(),"negative control forward failed");
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft bad download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) != 0,
+                "negative control: a perturbed input was not detected by the byte comparison");
+        session.release();
+    }
+
+    // Exec failure mid-loop: refused, cuFFT status recorded, queue drained (one wait), nothing leaked.
+    for (int direction = 0; direction < 2; ++direction) {
+        std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        require(session.initialize(),"fft fault session init failed");
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft fault upload");
+        if (direction == 1) require(session.computeGlobalForwardFFT(),"fft fault prepare forward failed");
+        exec_fail_at = 3; arm();
+        const bool ok = direction == 0 ? session.computeGlobalForwardFFT() : session.computeGlobalInverseFFT();
+        exec_fail_at = 0; active = false;
+        require(!ok && fired && session.getFailureState().hasFailed(),
+                direction == 0 ? "forward exec failure did not refuse success" : "inverse exec failure did not refuse success");
+        require(device_syncs == 1, "failed FFT did not drain the queue exactly once before returning");
+        require(!session.getFailureState().isPoisoned(), "an exec status alone must not poison the session");
+        session.release();
+    }
+    std::cout << "PASS: global FFTs bit-identical to the per-frame-synchronised oracle with one device wait each; "
+                 "exec failure refused, drained, unleaked; negative control detected\n";
 }
 void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
     const Input in = inputFor(nx,ny,8,1,1.12);
@@ -446,6 +676,11 @@ void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
     if (selected == NONE) {
         require(ok && !session.getFailureState().hasFailed() && execs == in.count && executed_plan == c2r,
                 "resident reconstruction did not execute the actual session C2R plan");
+        // Session mode: ONE reconstruction allocation (four buffers share a block; the C2R
+        // input is the session's own tile) and no per-frame D2D copy. Before this change the
+        // same call made 5 allocations and `count` frame copies.
+        require(allocations == 1 && frees == 1 && frame_copies == 0,
+                "session reconstruction must make exactly one allocation/free and no frame copies");
         require(std::memcmp(output().data,expected.data(),expected.size()*sizeof(float)) == 0,
                 "borrowed C2R changed dose reconstruction pixels");
     } else {
@@ -543,6 +778,8 @@ int main(int argc, char **argv) {
         bool known = selected == "all";
         if (selected == "borrowed") { known = true; borrowedCases(); }
         if (selected == "all" || selected == "exact") { known = true; exactCases(); }
+        if (selected == "all" || selected == "fft") { known = true; fftSyncCases(); }
+        if (selected == "all" || selected == "scratch") { known = true; scratchCases(); sessionAllocationFault(); }
         const std::pair<const char*,Fault> cases[] = {{"allocation",ALLOCATION},{"launch",LAUNCH},
             {"completion",COMPLETION},{"cleanup",CLEANUP},{"late-fatal",LAUNCH_LATE_FATAL}};
         for (const auto &entry : cases) if (selected == "all" || selected == entry.first) {

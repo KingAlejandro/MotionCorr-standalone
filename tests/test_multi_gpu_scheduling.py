@@ -1110,6 +1110,25 @@ def case_change_after_worker_exit_detected(tmp: Path) -> None:
         rep["problems"]
 
 
+def case_preserved_aggregate_change_after_exit_detected(tmp: Path) -> None:
+    """A worker's own aggregate, kept under _workers/, is checked against its exit record.
+
+    Its path is still present at merge time, so the presence check alone cannot
+    see a rewrite; size and mtime are restored, leaving ctime and the bytes.
+    """
+    out = launch(tmp, "agg_rewrite")
+    victim = out / "w1" / "corrected_micrographs.star"
+    s = os.stat(victim)
+    data = bytearray(victim.read_bytes())
+    data[-2] ^= 0x01
+    victim.write_bytes(bytes(data))
+    os.utime(victim, ns=(s.st_atime_ns, s.st_mtime_ns))
+    cp, rep = merge_launch(tmp, out, "agg_rewrite")
+    assert cp.returncode == 3, f"altered worker aggregate merged (rc={cp.returncode})"
+    assert any(p.startswith("worker 1: corrected_micrographs.star changed after the worker "
+                            "exited") for p in rep["problems"]), rep["problems"]
+
+
 def case_exit_digest_records_validated(tmp: Path) -> None:
     """A malformed, failed or partial exit record fails the merge, never passes silently."""
     out = launch(tmp, "run")
@@ -2199,6 +2218,29 @@ def case_aggregate_same_byte_rewrite_detected(tmp: Path) -> None:
 
 
 
+def case_aggregate_may_not_add_per_movie_products(tmp: Path) -> None:
+    """A per-movie file the aggregate creates is not a worker product and fails the merge.
+
+    The stat-key check covers only staged products, so a new _noDW.mrc would
+    otherwise be published as if a worker had written it.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    shards = tmp / "shards"
+    assert partition(star, 2, shards).returncode == 0
+    dirs, codes = run_workers(tmp, shards, 2)
+    status = fake_status(tmp, codes)
+    report = tmp / "report.json"
+    cp = merge(shards / "shard_manifest.json", dirs, tmp / "merged", status, report,
+               extra=["--aggregate-with", str(FAKE), "--input-star", str(star),
+                      "--aggregate-args=--fake_new_product"])
+    assert cp.returncode == 3, f"aggregate-created product merged (rc={cp.returncode})"
+    rep = json.loads(report.read_text())
+    assert any(f"created {len(DEFAULT_ROWS)} per-movie file(s) no worker wrote" in p
+               and "_noDW.mrc" in p for p in rep["problems"]), rep["problems"]
+
+
+
 def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
     """The launcher's verdict must be decided by what was observed.
 
@@ -3002,10 +3044,12 @@ CASES = [
     case_link_refusal_falls_back_to_copy,
     case_launcher_exit_digests_are_reused,
     case_change_after_worker_exit_detected,
+    case_preserved_aggregate_change_after_exit_detected,
     case_exit_digest_records_validated,
     case_timestamp_barrier_failure_fails_closed,
     case_output_digest_primitives,
     case_aggregate_same_byte_rewrite_detected,
+    case_aggregate_may_not_add_per_movie_products,
     case_output_root_matches_withoutextension,
     case_reserved_name_collision,
     case_short_row_refused,

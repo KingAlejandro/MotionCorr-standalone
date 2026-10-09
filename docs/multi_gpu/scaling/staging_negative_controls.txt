@@ -58,3 +58,8 @@ KILLED   hash_file no key check [output_digest_primitives] FAIL case_output_dige
 KILLED   barrier ignores devices [output_digest_primitives] FAIL case_output_digest_primitives: barrier passed for after=1791573170812523899 devices={2049, 2050}
 KILLED   stop ignored [output_digest_primitives] FAIL case_output_digest_primitives: digest_tree returned a partial record after stop
 bad: 0
+
+# Codex round 4 fixes (merge_workers.py), MEASURED on macOS, Python 3.14.8, 2026-10-09
+KILLED   addition check disabled ("if added" -> "if False") [aggregate_may_not_add_per_movie_products] FAIL: aggregate-created product merged (rc=0)
+KILLED   preserved aggregates staged without the exit record [preserved_aggregate_change_after_exit] FAIL: altered worker aggregate merged (rc=0)
+Each control left the other new case passing. Full suite with both fixes: 70/70.

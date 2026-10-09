@@ -33,11 +33,15 @@ aggregate staging".
    the worker exited". Without a record (a hand-written or older status), the
    merge hashes each product once itself.
 4. **Presence.** Files present now but not at exit, or the reverse, fail the
-   merge, as does any file the launcher could not digest.
+   merge, as does any file the launcher could not digest. Each worker's own
+   fixed-name aggregates (joint STAR, report, tomography tables), kept under
+   `_workers/wK/`, are copied and checked against the exit record the same
+   way.
 5. **After the aggregate binary.** Each staged product's stat key must be
    unchanged. A mismatch is hashed only to say whether the bytes or just the
    metadata changed; either way it fails ("aggregate step rewrote N staged
-   worker product(s)").
+   worker product(s)"). A per-movie file that no worker staged, such as a new
+   `_noDW.mrc`, also fails ("aggregate step created N per-movie file(s)").
 
 The report gains `staging` (counts by stage, digest source and fallback errno),
 `staged_sha256` (the digest of each product as staged) and
@@ -69,6 +73,11 @@ hardlinks.
 
 ## Limitations
 
+- A product rewritten after worker exit with identical bytes is re-hashed and
+  accepted ("verified"): the published bytes are still the ones the worker
+  wrote. Failing on the stat key alone would also fail any second merge of a
+  worker tree, because the first merge's link changes every file's ctime.
+
 - A writer that modifies a file between the merge's stat and its link, and
   then restores mtime with `utimensat`, is detected only by the link-time
   comparison of `[dev, ino, size, mtime]`; ctime changes with the link itself
@@ -85,7 +94,9 @@ hardlinks.
 `case_link_refusal_falls_back_to_copy`, `case_launcher_exit_digests_are_reused`,
 `case_change_after_worker_exit_detected`, `case_exit_digest_records_validated`,
 `case_timestamp_barrier_failure_fails_closed`, `case_output_digest_primitives`,
-`case_aggregate_same_byte_rewrite_detected`, and an extended
+`case_aggregate_same_byte_rewrite_detected`,
+`case_aggregate_may_not_add_per_movie_products`,
+`case_preserved_aggregate_change_after_exit_detected`, and an extended
 `case_aggregate_may_not_rewrite_staged_products`. Each was shown to fail
 against a targeted mutation of the code it covers; the mutation list and
 results are in `scaling/staging_negative_controls.txt`.

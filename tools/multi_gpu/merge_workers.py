@@ -30,7 +30,6 @@ import json
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 import time
@@ -683,7 +682,12 @@ def main(argv: list[str] | None = None) -> int:
                 if is_aggregate(rel) or str(rel) in sidecar_owner:
                     dst = out / "_workers" / f"w{k}" / rel
                     dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dst)
+                    # Provenance too: checked against the exit record like a product.
+                    rec = records.get(k, {}).get(str(rel))
+                    res = stage_one(src, dst, "copy",
+                                    rec if rec is not None and "error" not in rec else None)
+                    if "problem" in res:
+                        problems.append(f"worker {k}: {rel} {res['problem']}")
                     per_worker_aggregates.append(str(Path("_workers") / f"w{k}" / rel))
                     continue
                 problems.append(f"worker {k}: produced {rel}, which belongs to no movie "
@@ -838,6 +842,16 @@ def main(argv: list[str] | None = None) -> int:
                    "them; staged_sha256 in this report records what was staged."
                    if linked else "")
                 + " --aggregate_only must not process or rewrite per-movie products.")
+        # A per-movie file no worker wrote (e.g. a _noDW.mrc from a mismatched
+        # option set) would be published unchecked by the key comparison above.
+        added = sorted(str(rel) for rel in worker_files(out)
+                       if rel not in produced and rel.parts[0] != "_workers"
+                       and (str(rel) in plot_movies
+                            or star_io.split_output_path(str(rel), root_owner) is not None))
+        if added:
+            problems.append(
+                f"aggregate step created {len(added)} per-movie file(s) no worker wrote: "
+                f"{added[:5]}" + (" ..." if len(added) > 5 else ""))
         timing["after_check"] = round(time.monotonic() - t0, 3)
         (out / "_workers" / "merge.log").parent.mkdir(parents=True, exist_ok=True)
         (out / "_workers" / "merge.log").write_text(proc.stdout + proc.stderr)

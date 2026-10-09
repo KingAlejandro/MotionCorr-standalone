@@ -110,6 +110,9 @@ def main(argv: list[str] | None = None) -> int:
                          "complete movie's existing products with their own bytes. "
                          "A reprocessing that happens to be deterministic: the bytes "
                          "match, only the file's stat key moves.")
+    ap.add_argument("--fake_new_product", action="store_true",
+                    help="under --only_do_unfinished/--aggregate_only, add a _noDW.mrc "
+                         "next to each complete movie: a per-movie file no worker wrote")
     ap.add_argument("--fake_sleep_per_movie", type=float, default=0.0,
                     help="sleep this long after each movie. With uneven shards the "
                          "workers then finish at genuinely different times, which is "
@@ -151,6 +154,8 @@ def main(argv: list[str] | None = None) -> int:
                 for s in PRODUCTS:
                     f = outdir / (root + s)
                     f.write_bytes(f.read_bytes())
+            if a.fake_new_product:
+                (outdir / (root + "_noDW.mrc")).write_bytes(b"not from a worker\n")
             continue
         write_products(outdir, movie,
                        row.values[optics_col] if optics_col is not None else "",

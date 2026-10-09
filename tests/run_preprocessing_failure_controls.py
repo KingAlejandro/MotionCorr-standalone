@@ -97,9 +97,15 @@ def main():
 
     data = {}
     records = []
-    for kind in ("u16", "float"):
+    # u16-short: two frames, too few to hold the dose-weighting scratch, so the
+    # resident reconstruction allocates (and frees) it even when it consumes the
+    # real-space movie (docs/vram_live_ranges.md). With more frames there is no
+    # reconstruction cudaFree to fault, and --save_noDW instead would publish the
+    # unweighted image before dose weighting runs.
+    for kind in ("u16", "float", "u16-short"):
         root = work / ("input-" + kind)
-        write_tiff(root / "Movies/control.tiff", frames, kind == "float")
+        write_tiff(root / "Movies/control.tiff", frames[:2] if kind == "u16-short" else frames,
+                   kind == "float")
         write_star(root / "movies.star", manifest["movies"])
         (root / "defects.txt").write_text("10 12 1 1\n")
         data[kind] = root
@@ -168,13 +174,10 @@ def main():
              ("sparse-release-fatal", "u16", "updateDefectPixels"),
              ("float-gain-fatal", "float", "applyGainDefectsAndSum"),
              ("forward-fatal", "u16", "computeGlobalForwardFFT")]
-    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
-    # it the scratch is carved from the consumed real-space movie
-    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
-    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
+    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1")
     cases = [(fault, kind, stage, ()) for fault, kind, stage in cases]
     cases += [("unweighted-release-fatal", "u16", "cudaRealSpaceInterpolationDevice", ()),
-              ("dw-release-fatal", "u16", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]
+              ("dw-release-fatal", "u16-short", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]
     for fault, kind, stage, extra in cases:
         out, rc, text = run(fault, kind, fault, extra=extra)
         require("at " + stage + "; pending slot cleared" in text,

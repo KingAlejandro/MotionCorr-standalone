@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
+#include <memory>
 #include "src/image.h"
 #include "src/multidim_array.h"
 #include "src/acc/cuda/cuda_scratch_arena.h"
@@ -55,6 +56,47 @@ enum class MovieIngestStatus
 //   bug here into a reported data error, and lose the run that the host reader
 //   would have completed correctly. It is RecoverableFailure: fall back, and
 //   let the reader that verifies the same checksum for itself decide.
+
+// Lookahead for the next movie's compressed TIFF strips (docs/movie_overlap.md).
+//
+// One background host thread runs the nvCOMP ingest's tag scan and reads every
+// strip of movie N+1 into its own pinned buffer while movie N is still being
+// processed. Movie N+1's ingest then uploads from that buffer instead of reading
+// the file on the main thread. The thread makes no CUDA calls and never touches a
+// CudaMovieSession; the buffer is allocated and freed on the main thread.
+//
+// A lookahead is used only when it describes exactly the movie being ingested
+// (path, frame list, geometry, nvCOMP input alignment) and every strip was read.
+// Anything else is discarded and the ingest runs its ordinary serial path, which
+// owns every refusal and diagnostic. The zlib wrapper and Adler-32 checks run on
+// the prefetched bytes exactly as on serially read ones.
+//
+// Opt-in: MOTIONCORR_MOVIE_PREFETCH=1. MOTIONCORR_MOVIE_PREFETCH_CPUS (e.g.
+// "88-91") pins the thread. Without nvCOMP every call is a no-op.
+class MovieStripPrefetch
+{
+public:
+	static bool enabledByEnvironment();
+
+	MovieStripPrefetch();
+	~MovieStripPrefetch();   // joins the thread, then frees the buffer
+	MovieStripPrefetch(const MovieStripPrefetch &) = delete;
+	MovieStripPrefetch &operator=(const MovieStripPrefetch &) = delete;
+
+	// Main thread. Waits for and discards any earlier lookahead, makes the pinned
+	// buffer at least pinnedReserveBytes(stage_bytes_hint), then starts reading.
+	// The caller guarantees that no copy from the buffer is still in flight.
+	void start(const std::string &fn_mic, const std::vector<int> &frames, int nx, int ny,
+	           size_t in_align, size_t stage_bytes_hint, std::ostream &log);
+	// Main thread. Waits for the thread if one is running. Idempotent.
+	void join();
+
+	struct Impl;
+	Impl *impl() { return d.get(); }
+
+private:
+	std::unique_ptr<Impl> d;
+};
 
 class CudaMovieSession {
 public:
@@ -133,12 +175,22 @@ public:
     //
     // Returns NotApplicable when the build has no nvCOMP, so the caller needs
     // no #if of its own.
+    //
+    // prefetch, when not null, may hold this movie's strips already read by a
+    // MovieStripPrefetch; it is consumed (used or discarded) by this call.
     MovieIngestStatus ingestMovie(
         const std::string &fn_mic,
         const std::vector<int> &frames,
         const MultidimArray<float> *gain_ref,
-        int n_threads
+        int n_threads,
+        MovieStripPrefetch *prefetch = nullptr
     );
+
+    // Set by a successful device ingest: the nvCOMP input alignment it used and
+    // the bytes the whole movie occupies in the per-frame aligned staging layout.
+    // Zero otherwise. What MovieStripPrefetch::start needs for the next movie.
+    size_t ingestInputAlignment() const { return ingest_in_align; }
+    size_t ingestMovieStageBytes() const { return ingest_movie_stage_bytes; }
 
 #if defined(_NVCOMP_ENABLED)
     // Direct GPU TIFF ingestion via nvCOMP Batched Deflate: reads compressed strips
@@ -164,7 +216,8 @@ public:
         const std::string &fn_mic,
         const std::vector<int> &frames,
         const MultidimArray<float> *gain_ref,
-        int n_threads
+        int n_threads,
+        MovieStripPrefetch *prefetch
     );
 #endif
 
@@ -388,6 +441,8 @@ private:
     // copy overlaps chunk k's decode; slot reuse is ordered by these events
     // (h2d_done[2], comp_free[2], status_ready[2]). Destroyed by endIngestScratch.
     cudaStream_t ingest_copy_stream = 0;
+    size_t ingest_in_align = 0;
+    size_t ingest_movie_stage_bytes = 0;
     static const int kIngestEvents = 6;
     cudaEvent_t ingest_events[kIngestEvents] = {};
     // Points the ingest at the worker-lifetime pinned staging pool, growing it if

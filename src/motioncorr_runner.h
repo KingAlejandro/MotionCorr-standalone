@@ -357,6 +357,11 @@ private:
 	// not run() keeps the plain serial behaviour.
 	std::unique_ptr<OutputWriter> output_writer;
 	long int output_movie_index = -1;
+#ifdef _CUDA_ENABLED
+	// Next movie's strip lookahead (MOTIONCORR_MOVIE_PREFETCH=1); created by
+	// run() for the movie loop, null otherwise.
+	std::unique_ptr<MovieStripPrefetch> movie_prefetch;
+#endif
 
 	// Hand one output product to the writer, or write it here when there is
 	// none. Products of one movie are written in submission order.

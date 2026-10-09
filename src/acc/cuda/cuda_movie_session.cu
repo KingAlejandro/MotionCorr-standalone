@@ -11,6 +11,11 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+#include <thread>
+#if defined(__linux__)
+#include <pthread.h>
+#include <sched.h>
+#endif
 #include "src/acc/cuda/cuda_scoped_resources.h"
 #include "src/acc/cuda/cuda_plan_pool.h"
 #if defined(_NVCOMP_ENABLED)
@@ -1080,10 +1085,13 @@ MovieIngestStatus CudaMovieSession::ingestMovie(
     const std::string &fn_mic,
     const std::vector<int> &frames,
     const MultidimArray<float> *gain_ref,
-    int n_threads
+    int n_threads,
+    MovieStripPrefetch *prefetch
 ) {
+    ingest_in_align = 0;
+    ingest_movie_stage_bytes = 0;
 #if !defined(_NVCOMP_ENABLED)
-    (void)fn_mic; (void)frames; (void)gain_ref; (void)n_threads;
+    (void)fn_mic; (void)frames; (void)gain_ref; (void)n_threads; (void)prefetch;
     return MovieIngestStatus::NotApplicable;
 #else
     if (!is_initialized) return MovieIngestStatus::NotApplicable;
@@ -1097,7 +1105,7 @@ MovieIngestStatus CudaMovieSession::ingestMovie(
     const cudaError_t before_err  = failure_state.firstError();
     const cufftResult before_cufft = failure_state.firstCufftError();
 
-    const bool worker_ok = ingestCompressedTiffStrips(fn_mic, frames, gain_ref, n_threads);
+    const bool worker_ok = ingestCompressedTiffStrips(fn_mic, frames, gain_ref, n_threads, prefetch);
 
     // By here the worker's ScratchScope has run: cudaStreamSynchronize and
     // cudaStreamDestroy have been attempted and anything they returned is in
@@ -1109,6 +1117,11 @@ MovieIngestStatus CudaMovieSession::ingestMovie(
     const bool new_cufft_error = (before_cufft == CUFFT_SUCCESS &&
                                   failure_state.firstCufftError() != CUFFT_SUCCESS);
 
+    if (!worker_ok || now_poisoned || new_cuda_error || new_cufft_error) {
+        // Only a successful ingest describes a layout worth prefetching for.
+        ingest_in_align = 0;
+        ingest_movie_stage_bytes = 0;
+    }
     if (now_poisoned && !was_poisoned) {
         logfile << "ERROR: the CUDA context became unusable during device ingestion of "
                 << fn_mic << "; refusing to report a successful ingest." << std::endl;
@@ -1248,7 +1261,282 @@ bool preadFully(int fd, uint8_t *dst, size_t n, uint64_t offset) {
     }
     return true;
 }
+
+// Pass A of the nvCOMP ingest: geometry and per-strip compressed sizes. Tag reads
+// only; no payload leaves the disk, so the whole layout can be planned before a
+// single byte is staged. Shared by the ingest and MovieStripPrefetch, so both
+// accept exactly the same encodings.
+struct StripScan {
+    std::vector<std::vector<uint32_t> > raw_sizes;
+    std::vector<std::vector<uint64_t> > raw_offsets;
+    // A frame whose strips sit back to back in file order, first to last, is
+    // read with one pread of its whole span instead of one LibTIFF call per
+    // strip; anything else keeps the per-strip TIFFReadRawStrip reader.
+    std::vector<char> frame_contiguous;
+};
+
+// False refuses. *reject_out names a refused encoding; null means a read failure.
+bool scanDeflateStrips(const std::string &fn_mic, const std::vector<int> &frames,
+                       int nx, int ny, StripScan &scan, const char **reject_out) {
+    *reject_out = nullptr;
+    const int num_req_frames = (int)frames.size();
+    std::vector<std::vector<uint32_t> > &raw_sizes = scan.raw_sizes;
+    std::vector<std::vector<uint64_t> > &raw_offsets = scan.raw_offsets;
+    std::vector<char> &frame_contiguous = scan.frame_contiguous;
+    raw_sizes.assign(num_req_frames, std::vector<uint32_t>());
+    raw_offsets.assign(num_req_frames, std::vector<uint64_t>());
+    frame_contiguous.assign(num_req_frames, 0);
+    TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
+    if (!tif) return false;
+    bool ok = true;
+    const char *reject = nullptr;
+    // Raw Deflate decompression reproduces only what LibTIFF would do for one
+    // exactly-specified encoding. Everything outside that subset must fall back
+    // rather than be decoded with the wrong semantics, so the eligible encoding
+    // is enumerated positively: any tag this path does not implement is a
+    // refusal, not a default.
+    if (TIFFIsByteSwapped(tif)) reject = "non-native byte order";
+    for (int f = 0; f < num_req_frames && ok && !reject; f++) {
+        if (!TIFFSetDirectory(tif, frames[f])) { ok = false; break; }
+        uint32_t width = 0, height = 0;
+        uint16_t bits = 0, compression = 0, planar = PLANARCONFIG_CONTIG, samples = 1;
+        uint16_t predictor = PREDICTOR_NONE, sample_format = SAMPLEFORMAT_UINT;
+        uint16_t fill_order = FILLORDER_MSB2LSB;
+        TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+        TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+        TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
+        TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
+        TIFFGetFieldDefaulted(tif, TIFFTAG_PLANARCONFIG, &planar);
+        TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLESPERPIXEL, &samples);
+        TIFFGetFieldDefaulted(tif, TIFFTAG_PREDICTOR, &predictor);
+        TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLEFORMAT, &sample_format);
+        TIFFGetFieldDefaulted(tif, TIFFTAG_FILLORDER, &fill_order);
+        // Horizontal differencing is undone by LibTIFF after inflation; this
+        // path hands the inflated bytes straight to the cast, so predictor 2
+        // would silently produce differences instead of samples.
+        if (predictor != PREDICTOR_NONE)             reject = "TIFFTAG_PREDICTOR != 1";
+        // The cast kernel reads uint16. Signed or float samples of the same
+        // width would be reinterpreted rather than converted.
+        else if (sample_format != SAMPLEFORMAT_UINT) reject = "TIFFTAG_SAMPLEFORMAT != UINT";
+        else if (fill_order != FILLORDER_MSB2LSB)    reject = "non-native TIFFTAG_FILLORDER";
+        else if ((int)width != nx || (int)height != ny) reject = "frame geometry differs";
+        else if (bits != 16)                         reject = "bits per sample != 16";
+        else if (samples != 1)                       reject = "samples per pixel != 1";
+        else if (planar != PLANARCONFIG_CONTIG)      reject = "planar configuration not contiguous";
+        else if (compression != COMPRESSION_DEFLATE &&
+                 compression != COMPRESSION_ADOBE_DEFLATE) reject = "compression is not Deflate";
+        if (reject) break;
+        // One row per strip is what makes a strip a self-contained Deflate stream
+        // of exactly nx uint16 samples. Anything else changes the chunk geometry.
+        if ((int)TIFFNumberOfStrips(tif) != ny ||
+            TIFFStripSize(tif) != (tmsize_t)((size_t)nx * sizeof(uint16_t))) {
+            reject = "strip layout is not one full row per strip";
+            break;
+        }
+        raw_sizes[f].resize(ny);
+        raw_offsets[f].resize(ny);
+        bool contiguous = true;
+        for (int s = 0; s < ny; s++) {
+            const tmsize_t rs = TIFFRawStripSize(tif, s);
+            if (rs < 7 || (uint64_t)rs > 0xFFFFFFFFull) { ok = false; break; }
+            raw_sizes[f][s] = (uint32_t)rs;
+            // Same offset and byte count TIFFReadRawStrip uses for this strip.
+            int err = 0;
+            raw_offsets[f][s] = TIFFGetStrileOffsetWithErr(tif, (uint32_t)s, &err);
+            if (err || raw_offsets[f][s] == 0) contiguous = false;
+            if (s > 0 && raw_offsets[f][s] != raw_offsets[f][s - 1] + raw_sizes[f][s - 1])
+                contiguous = false;
+        }
+        if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
+        frame_contiguous[f] = contiguous ? 1 : 0;
+    }
+    TIFFClose(tif);
+    *reject_out = reject;
+    return ok && !reject;
+}
+
+// Stages one frame's strips at fb in the slotted layout, every raw Deflate start
+// in_align-aligned. Same bytes as one TIFFReadRawStrip per strip. False refuses.
+bool readFrameStrips(TIFF *t, int dir, const uint32_t *sizes, uint64_t first_offset,
+                     bool contiguous, size_t stage_bytes, int ny, size_t in_align,
+                     uint8_t *fb) {
+    if (contiguous) {
+        // One read of the frame's whole span, placed so that it ends where the
+        // slotted layout ends, then spread into the aligned slots in place.
+        // Same bytes as one TIFFReadRawStrip per strip, without ny library calls.
+        const size_t packed = mc_tiff_deflate::framePackedBytes(sizes, ny);
+        const size_t lead = stage_bytes - packed;
+        if (!preadFully(TIFFFileno(t), fb + lead, packed, first_offset)) return false;
+        mc_tiff_deflate::spreadPackedStrips(fb, sizes, ny, in_align);
+        return true;
+    }
+    if (!TIFFSetDirectory(t, dir)) return false;
+    size_t cursor = 0;
+    for (int s = 0; s < ny; s++) {
+        const size_t slot = stripSlotOffset(cursor, in_align);
+        if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)sizes[s]) != (tmsize_t)sizes[s])
+            return false;
+        cursor = slot + sizes[s];
+    }
+    return true;
+}
+
+#if defined(__linux__)
+// "88-91,93" -> set. False on anything else.
+bool parseCpuList(const char *s, cpu_set_t &set) {
+    int n = 0;
+    while (*s) {
+        char *end = nullptr;
+        const long a = std::strtol(s, &end, 10);
+        if (end == s || a < 0 || a >= CPU_SETSIZE) return false;
+        long b = a;
+        s = end;
+        if (*s == '-') {
+            b = std::strtol(s + 1, &end, 10);
+            if (end == s + 1 || b < a || b >= CPU_SETSIZE) return false;
+            s = end;
+        }
+        for (long c = a; c <= b; c++) { CPU_SET((int)c, &set); n++; }
+        if (*s == ',') s++;
+        else if (*s) return false;
+    }
+    return n > 0;
+}
+#endif
 } // namespace
+
+struct MovieStripPrefetch::Impl {
+    uint8_t *buf = nullptr;   // pinned, main-thread owned
+    size_t buf_bytes = 0;
+    std::thread worker;
+    // Request: written by start() before the thread exists. Result: written by
+    // the thread, read by the main thread only after join(). No lock needed.
+    bool requested = false;
+    std::string fn;
+    std::vector<int> frames;
+    int nx = 0, ny = 0;
+    size_t in_align = 0;
+    bool ok = false;
+    const char *fail = "not started";
+    StripScan scan;
+    std::vector<size_t> frame_base;   // movie-wide, each in_align-aligned
+
+    void run();
+    bool matches(const std::string &f, const std::vector<int> &fr, int x, int y,
+                 size_t a) const {
+        return requested && ok && f == fn && fr == frames && x == nx && y == ny &&
+               a == in_align;
+    }
+    const char *why() const { return ok ? "a different movie was requested" : fail; }
+};
+
+void MovieStripPrefetch::Impl::run() {
+    const StageProfile::Sample t0 = StageProfile::sampleThread();
+    const char *reject = nullptr;
+    if (!scanDeflateStrips(fn, frames, nx, ny, scan, &reject)) {
+        fail = reject ? reject : "tag scan failed";
+    } else {
+        const int n = (int)frames.size();
+        std::vector<size_t> stage(n);
+        frame_base.assign(n, 0);
+        size_t total = 0;
+        for (int f = 0; f < n; f++) {
+            stage[f] = frameStageBytes(scan.raw_sizes[f].data(), ny, in_align);
+            frame_base[f] = alignUp(total, in_align);
+            total = frame_base[f] + stage[f];
+        }
+        if (total > buf_bytes) {
+            fail = "movie larger than the lookahead buffer";
+        } else {
+            TIFF *t = TIFFOpen(fn.c_str(), "r");
+            bool good = (t != nullptr);
+            for (int f = 0; f < n && good; f++)
+                good = readFrameStrips(t, frames[f], scan.raw_sizes[f].data(),
+                                       scan.raw_offsets[f][0], scan.frame_contiguous[f] != 0,
+                                       stage[f], ny, in_align, buf + frame_base[f]);
+            if (t) TIFFClose(t);
+            if (good) ok = true;
+            else fail = "strip read failed";
+        }
+    }
+    if (StageProfile::instance().enabled()) {
+        const StageProfile::Sample t1 = StageProfile::sampleThread();
+        StageProfile::instance().addThreadTask("prefetch", "movie strip read",
+                                               (t1.wall_s - t0.wall_s) * 1e3,
+                                               (t1.cpu_s - t0.cpu_s) * 1e3,
+                                               t1.minflt - t0.minflt);
+    }
+}
+
+bool MovieStripPrefetch::enabledByEnvironment() {
+    const char *v = std::getenv("MOTIONCORR_MOVIE_PREFETCH");
+    return v && std::strcmp(v, "1") == 0;
+}
+
+MovieStripPrefetch::MovieStripPrefetch() : d(new Impl) {}
+
+MovieStripPrefetch::~MovieStripPrefetch() {
+    join();
+    // Status ignored: nowhere left to report it, as for the ingest pool.
+    if (d->buf) cudaFreeHost(d->buf);
+}
+
+void MovieStripPrefetch::join() {
+    if (d->worker.joinable()) d->worker.join();
+}
+
+void MovieStripPrefetch::start(const std::string &fn_mic, const std::vector<int> &frames,
+                               int nx, int ny, size_t in_align, size_t stage_bytes_hint,
+                               std::ostream &log) {
+    join();
+    Impl &p = *d;
+    p.requested = false;
+    p.ok = false;
+    p.fail = "not started";
+    if (in_align == 0 || stage_bytes_hint == 0 || frames.empty() || nx <= 0 || ny <= 0)
+        return;
+    // The next movie's size is unknown until its tags are read. Reserve the
+    // current one's with the ingest pool's headroom rule, which absorbs the
+    // drift between movies of one geometry; a larger movie is refused by run().
+    const size_t want = mc_tiff_deflate::pinnedReserveBytes(stage_bytes_hint);
+    if (p.buf_bytes < want) {
+        if (p.buf) cudaFreeHost(p.buf);
+        p.buf = nullptr;
+        p.buf_bytes = 0;
+        void *ptr = nullptr;
+        if (cudaHostAlloc(&ptr, want, cudaHostAllocDefault) != cudaSuccess) {
+            cudaGetLastError();   // not sticky; the next movie is simply read serially
+            log << "WARNING: movie prefetch: could not reserve " << want
+                << " pinned bytes; the next movie is read serially." << std::endl;
+            return;
+        }
+        p.buf = (uint8_t *)ptr;
+        p.buf_bytes = want;
+        log << "movie prefetch: pinned buffer grown to " << want << " bytes" << std::endl;
+    }
+    p.fn = fn_mic;
+    p.frames = frames;
+    p.nx = nx;
+    p.ny = ny;
+    p.in_align = in_align;
+    p.requested = true;
+    p.worker = std::thread([&p] { p.run(); });
+#if defined(__linux__)
+    if (const char *cpus = std::getenv("MOTIONCORR_MOVIE_PREFETCH_CPUS")) {
+        cpu_set_t set;
+        CPU_ZERO(&set);
+        if (!parseCpuList(cpus, set) ||
+            pthread_setaffinity_np(p.worker.native_handle(), sizeof(set), &set) != 0) {
+            static bool warned = false;
+            if (!warned) {
+                warned = true;
+                log << "WARNING: movie prefetch: could not pin to "
+                       "MOTIONCORR_MOVIE_PREFETCH_CPUS=" << cpus << std::endl;
+            }
+        }
+    }
+#endif
+}
 
 bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
     if (t_pinned_stage.ptr && t_pinned_stage.bytes >= bytes) return true;
@@ -1276,7 +1564,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const std::string &fn_mic,
     const std::vector<int> &frames,
     const MultidimArray<float> *gain_ref,
-    int n_threads
+    int n_threads,
+    MovieStripPrefetch *prefetch
 ) {
     if (failure_state.isPoisoned() || !is_initialized) return false;
     if (!d_Iframes || !d_Isum || !d_Fframes) return false;
@@ -1286,98 +1575,11 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     if (num_req_frames != n_frames || n_frames <= 0 || nx <= 0 || ny <= 0) return false;
 
     // ------------------------------------------------------------------
-    // Pass A: geometry and per-strip compressed sizes. Tag reads only; no
-    // payload leaves the disk here, so the whole layout can be planned before
-    // a single byte is staged.
-    // ------------------------------------------------------------------
-    std::vector<std::vector<uint32_t> > raw_sizes(num_req_frames);
-    std::vector<std::vector<uint64_t> > raw_offsets(num_req_frames);
-    // A frame whose strips sit back to back in file order, first to last, is
-    // read with one pread of its whole span instead of one LibTIFF call per
-    // strip; anything else keeps the per-strip TIFFReadRawStrip reader.
-    std::vector<char> frame_contiguous(num_req_frames, 0);
-    {
-        StageScope tag_scope("ingest tag scan");
-        TIFF *tif = TIFFOpen(fn_mic.c_str(), "r");
-        if (!tif) return false;
-        bool ok = true;
-        const char *reject = nullptr;
-        // Raw Deflate decompression reproduces only what LibTIFF would do for one
-        // exactly-specified encoding. Everything outside that subset must fall back
-        // rather than be decoded with the wrong semantics, so the eligible encoding
-        // is enumerated positively: any tag this path does not implement is a
-        // refusal, not a default.
-        if (TIFFIsByteSwapped(tif)) reject = "non-native byte order";
-        for (int f = 0; f < num_req_frames && ok && !reject; f++) {
-            if (!TIFFSetDirectory(tif, frames[f])) { ok = false; break; }
-            uint32_t width = 0, height = 0;
-            uint16_t bits = 0, compression = 0, planar = PLANARCONFIG_CONTIG, samples = 1;
-            uint16_t predictor = PREDICTOR_NONE, sample_format = SAMPLEFORMAT_UINT;
-            uint16_t fill_order = FILLORDER_MSB2LSB;
-            TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
-            TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
-            TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits);
-            TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_PLANARCONFIG, &planar);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLESPERPIXEL, &samples);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_PREDICTOR, &predictor);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_SAMPLEFORMAT, &sample_format);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_FILLORDER, &fill_order);
-            // Horizontal differencing is undone by LibTIFF after inflation; this
-            // path hands the inflated bytes straight to the cast, so predictor 2
-            // would silently produce differences instead of samples.
-            if (predictor != PREDICTOR_NONE)             reject = "TIFFTAG_PREDICTOR != 1";
-            // The cast kernel reads uint16. Signed or float samples of the same
-            // width would be reinterpreted rather than converted.
-            else if (sample_format != SAMPLEFORMAT_UINT) reject = "TIFFTAG_SAMPLEFORMAT != UINT";
-            else if (fill_order != FILLORDER_MSB2LSB)    reject = "non-native TIFFTAG_FILLORDER";
-            else if ((int)width != nx || (int)height != ny) reject = "frame geometry differs";
-            else if (bits != 16)                         reject = "bits per sample != 16";
-            else if (samples != 1)                       reject = "samples per pixel != 1";
-            else if (planar != PLANARCONFIG_CONTIG)      reject = "planar configuration not contiguous";
-            else if (compression != COMPRESSION_DEFLATE &&
-                     compression != COMPRESSION_ADOBE_DEFLATE) reject = "compression is not Deflate";
-            if (reject) break;
-            // One row per strip is what makes a strip a self-contained Deflate stream
-            // of exactly nx uint16 samples. Anything else changes the chunk geometry.
-            if ((int)TIFFNumberOfStrips(tif) != ny ||
-                TIFFStripSize(tif) != (tmsize_t)((size_t)nx * sizeof(uint16_t))) {
-                reject = "strip layout is not one full row per strip";
-                break;
-            }
-            raw_sizes[f].resize(ny);
-            raw_offsets[f].resize(ny);
-            bool contiguous = true;
-            for (int s = 0; s < ny; s++) {
-                const tmsize_t rs = TIFFRawStripSize(tif, s);
-                if (rs < 7 || (uint64_t)rs > 0xFFFFFFFFull) { ok = false; break; }
-                raw_sizes[f][s] = (uint32_t)rs;
-                // Same offset and byte count TIFFReadRawStrip uses for this strip.
-                int err = 0;
-                raw_offsets[f][s] = TIFFGetStrileOffsetWithErr(tif, (uint32_t)s, &err);
-                if (err || raw_offsets[f][s] == 0) contiguous = false;
-                if (s > 0 && raw_offsets[f][s] != raw_offsets[f][s - 1] + raw_sizes[f][s - 1])
-                    contiguous = false;
-            }
-            if (!ok || (int)raw_sizes[f].size() != ny) { ok = false; break; }
-            frame_contiguous[f] = contiguous ? 1 : 0;
-        }
-        TIFFClose(tif);
-        if (reject) {
-            // Named, so an unexpected fallback is diagnosable from the log rather
-            // than showing up only as the slower path being taken.
-            logfile << "nvCOMP ingestion declined (" << reject
-                    << "); using the host reader." << std::endl;
-            return false;
-        }
-        if (!ok) return false;
-    }
-
-    // ------------------------------------------------------------------
     // Staging geometry. Both the compressed inputs and the decompressed outputs
     // must satisfy the alignment nvCOMP reports for this build of the library;
     // the previous revision passed base+2 pointers, which is outside the API
-    // contract. Query rather than assume.
+    // contract. Query rather than assume. Queried before Pass A because a
+    // lookahead is only valid for the input alignment it was laid out with.
     // ------------------------------------------------------------------
     SubStageSequence phase;
     phase.next("ingest setup");
@@ -1391,6 +1593,45 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     const size_t out_align = std::max<size_t>((size_t)align_req.output, sizeof(uint16_t));
     const size_t tmp_align = std::max<size_t>((size_t)align_req.temp, 256);
 
+    // ------------------------------------------------------------------
+    // Pass A, or this movie's lookahead. A lookahead is used only if it was made
+    // for exactly this request and read every strip; anything else is discarded
+    // and the serial path below runs, so every refusal and diagnostic still
+    // comes from one place.
+    // ------------------------------------------------------------------
+    MovieStripPrefetch::Impl *pf = prefetch ? prefetch->impl() : nullptr;
+    if (pf && pf->requested) {
+        phase.next("ingest prefetch wait");
+        prefetch->join();
+    }
+    if (pf && !pf->matches(fn_mic, frames, nx, ny, in_align)) {
+        if (pf->requested)
+            logfile << "movie prefetch: not used for " << fn_mic << " (" << pf->why() << ")"
+                    << std::endl;
+        pf = nullptr;
+    }
+    if (prefetch) prefetch->impl()->requested = false;   // consumed either way
+
+    StripScan own_scan;
+    if (!pf) {
+        phase.next("ingest tag scan");
+        const char *reject = nullptr;
+        if (!scanDeflateStrips(fn_mic, frames, nx, ny, own_scan, &reject)) {
+            if (reject) {
+                // Named, so an unexpected fallback is diagnosable from the log rather
+                // than showing up only as the slower path being taken.
+                logfile << "nvCOMP ingestion declined (" << reject
+                        << "); using the host reader." << std::endl;
+            }
+            return false;
+        }
+    }
+    phase.next("ingest setup");
+    const StripScan &scan = pf ? pf->scan : own_scan;
+    const std::vector<std::vector<uint32_t> > &raw_sizes = scan.raw_sizes;
+    const std::vector<std::vector<uint64_t> > &raw_offsets = scan.raw_offsets;
+    const std::vector<char> &frame_contiguous = scan.frame_contiguous;
+
     const size_t row_bytes = (size_t)nx * sizeof(uint16_t);
     const size_t row_pitch_bytes = alignUp(row_bytes, out_align);
     if (row_pitch_bytes % sizeof(uint16_t) != 0) return false;
@@ -1400,10 +1641,12 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // its raw Deflate start (strip start + 2) is in_align-aligned.
     std::vector<size_t> frame_stage_bytes(num_req_frames, 0);
     size_t max_frame_stage = 0;
+    size_t movie_stage_bytes = 0;   // whole movie, frame starts in_align-aligned
     for (int f = 0; f < num_req_frames; f++) {
         const size_t cursor = frameStageBytes(raw_sizes[f].data(), ny, in_align);
         frame_stage_bytes[f] = cursor;
         max_frame_stage = std::max(max_frame_stage, cursor);
+        movie_stage_bytes = alignUp(movie_stage_bytes, in_align) + cursor;
     }
 
     // ------------------------------------------------------------------
@@ -1592,7 +1835,8 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             << n_slots << " x " << slot_capacity << " payload)"
             << ", nvCOMP temp=" << temp_bytes
             << ", input alignment=" << in_align
-            << ", span-read frames=" << contiguous_frames << "/" << n_frames << std::endl;
+            << ", span-read frames=" << contiguous_frames << "/" << n_frames
+            << (pf ? ", strips from movie prefetch" : "") << std::endl;
 
     // ------------------------------------------------------------------
     // Host side: the worker-lifetime pinned pool, laid out as two slots.
@@ -1662,6 +1906,46 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         uint8_t *const d_comp = dv[j].comp;
 
         std::vector<char> frame_ok(bf, 1);   // not vector<bool>: concurrent bit writes race
+        // Checks frame i's staged strips at fb and fills its input tables.
+        auto fill_tables = [&](int i, const uint8_t *fb) -> bool {
+            const int f = f0 + i;
+            const uint32_t *sizes = raw_sizes[f].data();
+            size_t cursor = 0;
+            for (int s = 0; s < ny; s++) {
+                const size_t raw_sz = sizes[s];
+                const size_t slot = stripSlotOffset(cursor, in_align);
+                if (!zlibWrapperIsUsable(fb + slot, raw_sz)) {
+                    // Named, because otherwise the only externally visible
+                    // difference between this refusal and a read failure is
+                    // that the movie fails -- which makes the guard
+                    // impossible to tell apart from the one after it.
+                    #pragma omp critical
+                    logfile << "WARNING: strip " << s << " of frame " << f
+                            << " has an unusable zlib wrapper; falling back to"
+                               " the host reader." << std::endl;
+                    return false;
+                }
+                const size_t chunk = (size_t)i * (size_t)ny + (size_t)s;
+                // Payload only: the 2-byte zlib header and the 4-byte Adler32
+                // trailer are not part of the RFC 1951 stream nvCOMP consumes.
+                h_cptr[chunk]  = d_comp + frame_base[i] + slot + 2;
+                h_csize[chunk] = raw_sz - 6;
+                // Stored Adler-32: the last four bytes of the strip, big-endian.
+                const uint8_t *tr = fb + slot + raw_sz - 4;
+                h_adler_expected[chunk] = ((uint32_t)tr[0] << 24) | ((uint32_t)tr[1] << 16) |
+                                          ((uint32_t)tr[2] << 8)  |  (uint32_t)tr[3];
+                cursor = slot + raw_sz;
+            }
+            return true;
+        };
+        if (pf) {
+            // Already staged by the lookahead, frame starts in_align-aligned from an
+            // in_align-aligned chunk start, so offsets relative to frame f0 are the
+            // frame_base above and the H2D can copy the chunk's span as is.
+            for (int i = 0; i < bf; i++)
+                if (!fill_tables(i, pf->buf + pf->frame_base[f0 + i])) return false;
+            return true;
+        }
         #pragma omp parallel num_threads(io_threads)
         {
             TIFF *t = TIFFOpen(fn_mic.c_str(), "r");
@@ -1684,55 +1968,11 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                     if (!t) continue;
                     const int f = f0 + i;
                     uint8_t *fb = h_stage + frame_base[i];
-                    const uint32_t *sizes = raw_sizes[f].data();
-                    bool ok = true;
-                    if (frame_contiguous[f]) {
-                        // One read of the frame's whole span, placed so that it ends
-                        // where the slotted layout ends, then spread into the
-                        // aligned slots in place. Same bytes as one
-                        // TIFFReadRawStrip per strip, without ny library calls.
-                        const size_t packed = mc_tiff_deflate::framePackedBytes(sizes, ny);
-                        const size_t lead = frame_stage_bytes[f] - packed;
-                        ok = preadFully(TIFFFileno(t), fb + lead, packed, raw_offsets[f][0]);
-                        if (ok) mc_tiff_deflate::spreadPackedStrips(fb, sizes, ny, in_align);
-                    } else {
-                        if (!TIFFSetDirectory(t, frames[f])) { frame_ok[i] = 0; continue; }
-                        size_t cursor = 0;
-                        for (int s = 0; s < ny && ok; s++) {
-                            const size_t slot = stripSlotOffset(cursor, in_align);
-                            if (TIFFReadRawStrip(t, s, fb + slot, (tmsize_t)sizes[s]) != (tmsize_t)sizes[s])
-                                ok = false;
-                            cursor = slot + sizes[s];
-                        }
-                    }
-                    size_t cursor = 0;
-                    for (int s = 0; s < ny && ok; s++) {
-                        const size_t raw_sz = sizes[s];
-                        const size_t slot = stripSlotOffset(cursor, in_align);
-                        if (!zlibWrapperIsUsable(fb + slot, raw_sz)) {
-                            // Named, because otherwise the only externally visible
-                            // difference between this refusal and a read failure is
-                            // that the movie fails -- which makes the guard
-                            // impossible to tell apart from the one after it.
-                            #pragma omp critical
-                            logfile << "WARNING: strip " << s << " of frame " << f
-                                    << " has an unusable zlib wrapper; falling back to"
-                                       " the host reader." << std::endl;
-                            ok = false;
-                            break;
-                        }
-                        const size_t chunk = (size_t)i * (size_t)ny + (size_t)s;
-                        // Payload only: the 2-byte zlib header and the 4-byte Adler32
-                        // trailer are not part of the RFC 1951 stream nvCOMP consumes.
-                        h_cptr[chunk]  = d_comp + frame_base[i] + slot + 2;
-                        h_csize[chunk] = raw_sz - 6;
-                        // Stored Adler-32: the last four bytes of the strip, big-endian.
-                        const uint8_t *tr = fb + slot + raw_sz - 4;
-                        h_adler_expected[chunk] = ((uint32_t)tr[0] << 24) | ((uint32_t)tr[1] << 16) |
-                                                  ((uint32_t)tr[2] << 8)  |  (uint32_t)tr[3];
-                        cursor = slot + raw_sz;
-                    }
-                    if (!ok) frame_ok[i] = 0;
+                    if (!readFrameStrips(t, frames[f], raw_sizes[f].data(), raw_offsets[f][0],
+                                         frame_contiguous[f] != 0, frame_stage_bytes[f], ny,
+                                         in_align, fb) ||
+                        !fill_tables(i, fb))
+                        frame_ok[i] = 0;
             }
             if (t) TIFFClose(t);
         }
@@ -1788,13 +2028,20 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                 phase.next("ingest slot wait");
                 HANDLE_ERROR(cudaEventSynchronize(ev_h2d_done[j]));
             }
-            phase.next("ingest strip read");
+            phase.next(pf ? "ingest prefetch tables" : "ingest strip read");
             if (!read_chunk(k, j)) return false;
 
             phase.next("ingest h2d submit");
             // Device payload/tables of slot j may still be read by chunk k-2's decode.
             if (k >= n_slots) HANDLE_ERROR(cudaStreamWaitEvent(copy_stream, ev_comp_free[j], 0));
-            HANDLE_ERROR(cudaMemcpyAsync(dv[j].comp, hs[j].payload, chunk_stage_used[k], cudaMemcpyHostToDevice, copy_stream));
+            {
+                // With a lookahead the payload is uploaded straight from its buffer.
+                // MovieStripPrefetch::start is only called after this session's
+                // copy stream has drained (endIngestScratch), so the buffer cannot
+                // be rewritten while these bytes are in flight.
+                const uint8_t *src = pf ? pf->buf + pf->frame_base[f0] : hs[j].payload;
+                HANDLE_ERROR(cudaMemcpyAsync(dv[j].comp, src, chunk_stage_used[k], cudaMemcpyHostToDevice, copy_stream));
+            }
             HANDLE_ERROR(cudaMemcpyAsync(dv[j].cptr, hs[j].cptr, chunks * sizeof(void *), cudaMemcpyHostToDevice, copy_stream));
             HANDLE_ERROR(cudaMemcpyAsync(dv[j].csize, hs[j].csize, chunks * sizeof(size_t), cudaMemcpyHostToDevice, copy_stream));
             if (!slot_tables_uploaded[j]) {
@@ -1845,8 +2092,21 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     HANDLE_ERROR(cudaStreamSynchronize(stream));
     phase.end();
 
+    ingest_in_align = in_align;
+    ingest_movie_stage_bytes = movie_stage_bytes;
     return true;
 }
+#endif
+
+#if !defined(_NVCOMP_ENABLED)
+// The lookahead feeds only the nvCOMP ingest; without it there is nothing to read.
+struct MovieStripPrefetch::Impl {};
+bool MovieStripPrefetch::enabledByEnvironment() { return false; }
+MovieStripPrefetch::MovieStripPrefetch() : d(new Impl) {}
+MovieStripPrefetch::~MovieStripPrefetch() {}
+void MovieStripPrefetch::join() {}
+void MovieStripPrefetch::start(const std::string &, const std::vector<int> &, int, int,
+                               size_t, size_t, std::ostream &) {}
 #endif
 
 bool CudaMovieSession::computeGlobalForwardFFT() {

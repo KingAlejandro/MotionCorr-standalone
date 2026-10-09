@@ -716,6 +716,12 @@ void MotioncorrRunner::run()
 	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
 	StageProfile::instance().setNote("host_allocator", host_allocator_mode);
 	StageProfile::instance().beginRun();
+#ifdef _CUDA_ENABLED
+	if (use_gpu && MovieStripPrefetch::enabledByEnvironment()) {
+		movie_prefetch.reset(new MovieStripPrefetch());
+		if (verb > 0) std::cout << " Movie strip prefetch: on (MOTIONCORR_MOVIE_PREFETCH=1)" << std::endl;
+	}
+#endif
 
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.
@@ -734,6 +740,9 @@ void MotioncorrRunner::run()
 			// is no reason to leave one: the previous movie's writes are
 			// milliseconds from done.
 			if (output_writer) output_writer->drain();
+#ifdef _CUDA_ENABLED
+			if (movie_prefetch) movie_prefetch->join();
+#endif
 			exit(RELION_EXIT_ABORTED);
 		}
 
@@ -806,6 +815,9 @@ void MotioncorrRunner::run()
 	collectWriteFailures(movie_failed);
 	output_writer.reset();
 	output_movie_index = -1;
+#ifdef _CUDA_ENABLED
+	movie_prefetch.reset();
+#endif
 
 	std::vector<FileName> failed_movies;
 	for (long int imic = 0; imic < fn_micrographs.size(); imic++)
@@ -1927,7 +1939,19 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
 		StageScope ingest_scope("device ingest");
-		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
+		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads,
+		                                           movie_prefetch.get());
+	}
+	// Start reading the next movie's strips while this one is processed. Only
+	// after a successful ingest: its copy stream has drained, so the lookahead
+	// buffer is free, and its layout says what the next movie probably needs.
+	// The next movie is assumed to share this frame list and geometry; if it
+	// does not, its ingest discards the lookahead and reads serially.
+	if (ingest_status == MovieIngestStatus::Success && movie_prefetch &&
+	    output_movie_index >= 0 && output_movie_index + 1 < (long int)fn_micrographs.size()) {
+		movie_prefetch->start(fn_micrographs[output_movie_index + 1], frames, nx, ny,
+		                      movie_session->ingestInputAlignment(),
+		                      movie_session->ingestMovieStageBytes(), logfile);
 	}
 	// Each outcome gets its own response. Collapsing them into one bool is what
 	// let a poisoned context and an unsupported encoding take the same path.

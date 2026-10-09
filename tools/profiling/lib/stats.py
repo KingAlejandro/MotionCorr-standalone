@@ -30,6 +30,10 @@ def verdict_unresolved(noise_s: float) -> str:
     return "not resolved (below noise %s s)" % _fmt_s(noise_s)
 
 
+def verdict_too_few(n: int) -> str:
+    return "not resolved (%d retained pairs, %d needed)" % (n, MIN_PAIRS)
+
+
 def _fmt_s(x: float) -> str:
     return "inf" if math.isinf(x) else "%.3f" % x
 
@@ -112,14 +116,18 @@ def paired(pairs: Sequence[Dict], floor_s: float = 0.0) -> Dict:
     n = len(d)
     out: Dict = {"n_pairs": n, "diffs_s": d, "floor_s": floor_s, "min_pairs": MIN_PAIRS}
     if n == 0:
-        out.update({"verdict": verdict_unresolved(math.inf), "resolved": False,
+        out.update({"verdict": verdict_too_few(0), "resolved": False,
                     "resolution_s": math.inf, "reason": "no retained pairs"})
         return out
     med = median(d)
     q1, _, q3 = quartiles(d)
     noise = max(robust_sd(d), floor_s)
-    ci = median_ci(d)
-    if ci is not None:
+    # The pair minimum is enforced here, not only through median_ci: below it
+    # nothing is resolved and no finite resolution is claimed.
+    ci = median_ci(d) if n >= MIN_PAIRS else None
+    if n < MIN_PAIRS:
+        half = math.inf
+    elif ci is not None:
         half = (ci[1] - ci[0]) / 2.0
     elif n >= 2:
         half = (max(d) - min(d)) / 2.0
@@ -132,9 +140,11 @@ def paired(pairs: Sequence[Dict], floor_s: float = 0.0) -> Dict:
         verdict = VERDICT_SLOWER if med > 0 else VERDICT_FASTER
         reason = "CI of median excludes 0 and |median| exceeds noise"
     else:
-        verdict = verdict_unresolved(resolution)
-        if ci is None:
-            reason = "fewer than %d pairs: no %.0f%% CI of the median exists" % (MIN_PAIRS, 100 * CONFIDENCE)
+        verdict = verdict_too_few(n) if n < MIN_PAIRS else verdict_unresolved(resolution)
+        if n < MIN_PAIRS:
+            reason = "fewer than %d retained pairs (%d): no verdict and no resolution" % (MIN_PAIRS, n)
+        elif ci is None:
+            reason = "no %.0f%% CI of the median exists" % (100 * CONFIDENCE)
         elif not excludes_zero:
             reason = "CI of median includes 0"
         else:

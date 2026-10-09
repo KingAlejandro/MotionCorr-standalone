@@ -59,11 +59,23 @@ also keeps the export).
 3. **Paired, interleaved A/B.** Each round runs every arm once; the order
    rotates (two arms: AB, BA, AB, ...), so each arm takes each position equally
    often. `--warmup` (default 1) runs each arm once first and discards it: an
-   alternating order cancels position, not a cold binary or page cache. Rounds
-   are discarded, with the reason recorded, when a foreign process appears on
-   the target GPU, the GPU was occupied at start, other processes used more than
-   0.25 cores of the lane on average, the payload's affinity differed from the
-   lane, or the process image was not the arm's binary.
+   alternating order cancels position, not a cold binary or page cache. Before
+   each round, and before each `--profile` and trace pass, the kit waits up to
+   `--lane-wait` seconds (default 300) for the lane to drop to 0.25 busy cores;
+   a timeout is recorded, not hidden. A run is flagged when a foreign process
+   appears on the target GPU, the GPU was occupied at start, other processes
+   used more than 0.25 cores of the lane on average, the payload's affinity
+   differed from the lane, or the process image was not the arm's binary. A
+   flag on any run discards the **whole round**: every arm loses it, so both
+   arms always keep the same rounds and each retained difference is a complete
+   pair (tested). The report lists rounds planned, retained and discarded,
+   each discarded round with its order and the arm(s) that triggered it, and
+   warns when one arm alone triggers most discards (the arm may cause the
+   condition itself) or when the kept pairs lose their AB/BA balance.
+   `--max-rounds N` runs extra rounds, up to N, until `--pairs` rounds are
+   clean; stopping depends on the flags only, never on the timings, and every
+   round run is recorded. `--profile` passes are never dropped; a flagged pass
+   is named in the stage section.
 4. **Identity on every comparison.** Round 1's product trees are compared
    before any timing is reported (below). A difference stops the comparison
    with exit status 2 and a FAIL in the report.
@@ -111,8 +123,11 @@ For paired differences d = B − A (positive: B slower):
 - **noise** = max(1.4826 × MAD(d), `--noise-floor`): the pair-to-pair scatter
   measured in the same series.
 - The median of d gets a distribution-free confidence interval from binomial
-  order statistics at ≥95%. It exists only from **6 pairs** up; with fewer,
-  nothing can be resolved. With 10 pairs it is [d(2), d(9)].
+  order statistics at ≥95%. It exists only from **6 retained pairs** up. With
+  fewer, the verdict is "not resolved (N retained pairs, 6 needed)" and no
+  noise or resolution is claimed (the 6-pair minimum is enforced in the
+  verdict itself, not only through the interval). With 10 pairs it is
+  [d(2), d(9)].
 - **"resolved faster" / "resolved slower"** requires the interval to exclude
   zero and |median d| > noise.
 - Otherwise **"not resolved (below noise X s)"**, X = max(noise, interval

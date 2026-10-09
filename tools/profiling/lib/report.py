@@ -98,14 +98,57 @@ def arm_summary(runs: Sequence[Dict]) -> Dict:
 
 
 def mark_discards(runs: List[Dict], arms: Sequence[str]) -> List[Dict]:
-    """A round is discarded when any of its runs carries a discard flag."""
+    """A round is discarded as a whole when any of its runs carries a discard
+    flag: every arm loses that round, so a discard removes complete pairs and
+    never one arm's run alone. Each entry names the arms that triggered it."""
     bad = defaultdict(list)
+    by_arm = defaultdict(list)
+    order = {}
     for r in runs:
-        if r["kind"] == "round" and r["flags"]["discard"]:
+        if r["kind"] != "round":
+            continue
+        if r.get("position") == 0:
+            order[r["round"]] = r.get("order")
+        if r["flags"]["discard"]:
             bad[r["round"]].append("%s: %s" % (r["arm"], "; ".join(r["flags"]["discard"])))
+            by_arm[r["round"]].append(r["arm"])
     for r in runs:
         r["discarded"] = r["kind"] == "round" and r["round"] in bad
-    return [{"round": k, "reasons": v} for k, v in sorted(bad.items())]
+    return [{"round": k, "reasons": v, "triggered_by": sorted(by_arm[k]), "order": order.get(k)}
+            for k, v in sorted(bad.items())]
+
+
+def discard_audit(runs: Sequence[Dict], arms: Sequence[str], discards: Sequence[Dict]) -> Dict:
+    """Planned, retained and discarded rounds, which arm triggered each discard
+    and the order balance of what was kept. Warnings name the ways a discard
+    rule could bias a verdict: one arm triggering most discards (the arm
+    itself may cause the flagged condition) and kept pairs losing the AB/BA
+    balance that cancels the position cost."""
+    planned = sorted({r["round"] for r in runs if r["kind"] == "round"})
+    dropped = {x["round"] for x in discards}
+    kept = [k for k in planned if k not in dropped]
+    alone = {a: sum(1 for x in discards if x["triggered_by"] == [a]) for a in arms}
+    any_ = {a: sum(1 for x in discards if a in x["triggered_by"]) for a in arms}
+    orders = defaultdict(int)
+    for r in runs:
+        if r["kind"] == "round" and r.get("position") == 0 and r["round"] in kept:
+            orders[r.get("order")] += 1
+    warnings = []
+    if len(discards) >= 2:
+        for a in arms:
+            others = max((alone[b] for b in arms if b != a), default=0)
+            if alone[a] >= 2 and alone[a] >= 2 * others + 2:
+                warnings.append("arm %s alone triggered %d of %d discards: the flagged condition may come from "
+                                "the arm itself, and dropping those pairs can bias the verdict"
+                                % (a, alone[a], len(discards)))
+    if len(arms) == 2 and kept:
+        ab, ba = orders.get("AB", 0), orders.get("BA", 0)
+        if abs(ab - ba) > 1:
+            warnings.append("kept pairs are unbalanced by order (AB %d, BA %d): the position cost no longer "
+                            "cancels; see the positional line" % (ab, ba))
+    return {"planned": len(planned), "retained": len(kept), "discarded": len(dropped),
+            "triggered_alone": alone, "triggered_any": any_, "kept_orders": dict(orders),
+            "warnings": warnings}
 
 
 def pairs_for(runs: Sequence[Dict], base: str, arm: str) -> List[Dict]:
@@ -126,7 +169,10 @@ def derive_runs(raw: Dict, floor_s: float = 0.0) -> Dict:
     runs, arms = raw["runs"], raw["arms"]
     discards = mark_discards(runs, arms)
     out = {"arms": arms, "summary": {a: arm_summary([r for r in runs if r["arm"] == a]) for a in arms},
-           "discarded_rounds": discards, "comparisons": OrderedDict()}
+           "discarded_rounds": discards, "discard_audit": discard_audit(runs, arms, discards),
+           "comparisons": OrderedDict(),
+           "lane_waits": [dict(r["lane_before_round"], round=r["round"]) for r in runs
+                          if r["kind"] == "round" and r.get("position") == 0 and r.get("lane_before_round")]}
     for a in arms[1:]:
         out["comparisons"][a] = stats.paired(pairs_for(runs, arms[0], a), floor_s=floor_s)
     return out
@@ -252,6 +298,15 @@ def render_provenance(prov: Dict) -> str:
         lines.append("- locks: " + ", ".join("%s (waited %.0f s)" % (l["path"], l["waited_s"]) for l in prov["locks"]))
     if prov.get("settle"):
         lines.append("- settle: %s" % json.dumps(prov["settle"]))
+    if prov.get("series"):
+        sr = prov["series"]
+        lines.append("- rounds: %d run, %d clean, target %d clean, at most %d%s" % (
+            sr["rounds_run"], sr["clean_rounds"], sr["target_clean_rounds"], sr["max_rounds"],
+            "" if sr["reached_target"] else " (TARGET NOT REACHED)"))
+    for w in prov.get("trace_lane_waits", []):
+        if w.get("lane") and w["lane"].get("timed_out"):
+            lines.append("- trace `%s` pass %d started on a busy lane (%.2f cores after %.0f s)" % (
+                w["arm"], w["pass"], w["lane"]["busy_cores"], w["lane"]["waited_s"]))
     if prov.get("input"):
         i = prov["input"]
         lines.append("- input: `%s` in `%s`, %d movies, STAR sha256 `%s`" % (
@@ -296,9 +351,26 @@ def render_run_section(d: Dict) -> str:
                 s["wall_outlier_rounds"] or "none"))
     if extra:
         body += "\n\n" + "\n".join(extra)
+    au = d.get("discard_audit")
+    if au and au["planned"]:
+        body += ("\n\nRounds: %d planned, %d retained, %d discarded (a discard removes the whole round, every "
+                 "arm). Discards triggered by: %s." % (
+                     au["planned"], au["retained"], au["discarded"],
+                     ", ".join("`%s` %d (alone %d)" % (a, au["triggered_any"][a], au["triggered_alone"][a])
+                               for a in d["arms"])))
+        if au["kept_orders"] and len(d["arms"]) == 2:
+            body += " Kept orders: AB %d, BA %d." % (au["kept_orders"].get("AB", 0), au["kept_orders"].get("BA", 0))
+        for w in au["warnings"]:
+            body += "\n\nWARNING: %s." % w
     if d["discarded_rounds"]:
         body += "\n\nDiscarded rounds:\n" + "\n".join(
-            "- round %d: %s" % (x["round"], " | ".join(x["reasons"])) for x in d["discarded_rounds"])
+            "- round %d (%s): %s" % (x["round"], x.get("order") or "-", " | ".join(x["reasons"]))
+            for x in d["discarded_rounds"])
+    waits = [(w["round"], w) for w in d.get("lane_waits", [])]
+    if waits:
+        body += "\n\nLane wait before round: " + ", ".join(
+            "r%d %.0f s%s" % (k, w["waited_s"], " (timed out at %.2f busy cores)" % w["busy_cores"]
+                             if w.get("timed_out") else "") for k, w in waits) + "."
     for a, c in d["comparisons"].items():
         body += "\n\n" + render_verdict(d["arms"][0], a, c)
     return section("Unprofiled wall and resources", INSTR_RUN, body)
@@ -381,6 +453,9 @@ def render_stage_deltas(sd: Dict) -> str:
                          _delta_cell(w), _thr_cell(w), _delta_cell(c), _delta_cell(f, fmt="%+.0f")])
         body += table(["stage", "base wall ms", "arm wall ms", "delta wall ms", "threshold ms", "delta CPU ms",
                        "delta minflt"], rows)
+    for f in sd.get("flagged_passes", []):
+        body += "\n\nWARNING: `%s` pass %d met a discard condition (kept): %s." % (
+            f["arm"], f["pass"], "; ".join(f["flags"]))
     bad = {a: c for a, c in sd["checks"].items() if c}
     if bad:
         body += "\n\nWARNING: non-exhaustive stages: %s" % json.dumps(bad)

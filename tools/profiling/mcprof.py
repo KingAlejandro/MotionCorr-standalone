@@ -185,8 +185,12 @@ def cmd_run(a, rest, compare=False):
         prov.write_json(os.path.join(work, "provenance.json"), p)
         try:
             rounds = a.pairs if compare else a.rounds
-            runner.series(arms, args, staged, work, cpus, a.gpu_uuid, a.env, rounds, a.warmup, sampler, sink,
-                          after_round, keep_outputs=a.keep_outputs, lane_wait_s=a.lane_wait)
+            p["series"] = runner.series(arms, args, staged, work, cpus, a.gpu_uuid, a.env, rounds, a.warmup,
+                                        sampler, sink, after_round, keep_outputs=a.keep_outputs,
+                                        lane_wait_s=a.lane_wait, max_rounds=a.max_rounds)
+            if not p["series"]["reached_target"]:
+                print("mcprof: only %d of %d rounds clean after %d rounds" % (
+                    p["series"]["clean_rounds"], rounds, p["series"]["rounds_run"]), flush=True)
         except IdentityFailure as e:
             print("mcprof: IDENTITY FAILURE: %s" % e, flush=True)
             status = 2
@@ -199,6 +203,8 @@ def cmd_run(a, rest, compare=False):
                     for arm in (order if k % 2 == 0 else order[::-1]):
                         trace_dir = os.path.join(work, "trace", arm, "p%02d" % (k + 1))
                         os.makedirs(trace_dir, exist_ok=True)
+                        quiet = runner.wait_quiet_lane(cpus, a.lane_wait) if a.lane_wait > 0 else None
+                        p.setdefault("trace_lane_waits", []).append({"arm": arm, "pass": k + 1, "lane": quiet})
                         do_trace(a, arms[arm], args, staged, trace_dir, cpus,
                                  p["binaries"][arm]["has_profile_option"])
                         print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
@@ -223,13 +229,16 @@ def profile_passes(a, arms, args, staged, work, cpus, sampler, p):
             out = os.path.join(pdir, tag, "out")
             jsonl = os.path.join(pdir, tag + ".jsonl")
             argv = runner.payload_argv(arms[arm], args, staged["star"], out, cpus, profile=jsonl)
+            quiet = runner.wait_quiet_lane(cpus, a.lane_wait) if a.lane_wait > 0 else None
             rec = runner.run_once(argv, staged["cwd"], env, os.path.join(pdir, tag + ".log"), sampler, cpus,
                                   arms[arm], out, len(staged["movies"]))
-            rec.update({"arm": arm, "kind": "profile", "round": k + 1, "position": 0, "order": "", "jsonl": jsonl})
+            rec.update({"arm": arm, "kind": "profile", "round": k + 1, "position": 0, "order": "", "jsonl": jsonl,
+                        "lane_before_round": quiet})
             with open(os.path.join(work, "runs.jsonl"), "a") as f:
                 f.write(json.dumps(rec, default=str) + "\n")
-            print("mcprof: %-8s profile p%02d wall %.3f s (profiled; not used for the verdict)"
-                  % (arm, k + 1, rec["wall_s"]), flush=True)
+            print("mcprof: %-8s profile p%02d wall %.3f s (profiled; not used for the verdict)%s"
+                  % (arm, k + 1, rec["wall_s"], ("  FLAGGED: " + "; ".join(rec["flags"]["discard"]))
+                     if rec["flags"]["discard"] else ""), flush=True)
             shutil.rmtree(os.path.dirname(out), ignore_errors=True)
     p["profile_pass"] = "%d pass(es) per arm" % a.profile_pass
 
@@ -439,6 +448,11 @@ def write_report(work, floor_s, want_html):
                 profiles.setdefault(r["arm"], []).append(r["jsonl"])
         if profiles:
             out["stage_deltas"] = report.derive_stage_deltas(profiles, arms[0])
+            # Profile passes are not dropped (replication is scarce); a pass that
+            # met a discard condition is named so its deltas can be judged.
+            out["stage_deltas"]["flagged_passes"] = [
+                {"arm": r["arm"], "pass": r["round"], "flags": r["flags"]["discard"]}
+                for r in runs if r["kind"] == "profile" and r["flags"]["discard"]]
             parts.append(report.render_stage_deltas(out["stage_deltas"]))
         traces = {}
         for arm in arms:
@@ -502,6 +516,9 @@ def main(argv=None):
         p.add_argument("--keep-outputs", action="store_true")
         p.add_argument("--lane-wait", type=float, default=300,
                        help="before each round wait up to S seconds for other processes to leave --cpus")
+        p.add_argument("--max-rounds", type=int,
+                       help="run extra rounds, up to this many, until --pairs/--rounds rounds are clean "
+                            "(default: no extra rounds)")
         p.add_argument("--noise-floor", type=float, default=0.0, help="minimum noise in seconds for a verdict")
         p.add_argument("--html", action="store_true")
         if name == "run":

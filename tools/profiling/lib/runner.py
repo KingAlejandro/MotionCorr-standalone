@@ -459,14 +459,21 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
            gpu_uuid: Optional[str], env_extra: Sequence[str], rounds: int, warmup: int,
            sampler: GpuSampler, sink: Callable[[Dict], None],
            after_round: Optional[Callable[[int, Dict[str, Dict]], None]] = None,
-           keep_outputs: bool = False, lane_wait_s: float = 0.0) -> None:
+           keep_outputs: bool = False, lane_wait_s: float = 0.0, max_rounds: Optional[int] = None) -> Dict:
+    """Warm-up runs, then rounds until `rounds` rounds are clean (no run in
+    them carries a discard flag) or `max_rounds` rounds have run. Stopping
+    depends only on the discard flags, never on the timings."""
     env, _ = payload_env(gpu_uuid, env_extra)
     names = list(arms)
+    max_rounds = max(rounds, max_rounds or rounds)
     plan = [("warmup", w, [n]) for w in range(warmup) for n in names] + \
-           [("round", r + 1, order) for r, order in enumerate(schedule(names, rounds))]
+           [("round", r + 1, order) for r, order in enumerate(schedule(names, max_rounds))]
     runs_dir = os.path.join(work, "runs")
     os.makedirs(runs_dir, exist_ok=True)
+    clean = ran = 0
     for kind, r, order in plan:
+        if kind == "round" and clean >= rounds:
+            break
         done: Dict[str, Dict] = {}
         quiet = wait_quiet_lane(cpus, lane_wait_s) if lane_wait_s > 0 else None
         for pos, arm in enumerate(order):
@@ -479,8 +486,13 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
                         "order": order_label(names, order), "lane_before_round": quiet})
             done[arm] = rec
             sink(rec)
+        if kind == "round":
+            ran += 1
+            clean += not any(rec["flags"]["discard"] for rec in done.values())
         if after_round:
             after_round(r if kind == "round" else 0, done)
         if not keep_outputs:
             for rec in done.values():
                 shutil.rmtree(os.path.dirname(rec["out_dir"]), ignore_errors=True)
+    return {"target_clean_rounds": rounds, "max_rounds": max_rounds, "rounds_run": ran, "clean_rounds": clean,
+            "reached_target": clean >= rounds}

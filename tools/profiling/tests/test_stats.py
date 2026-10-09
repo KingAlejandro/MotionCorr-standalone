@@ -56,7 +56,25 @@ class Verdicts(unittest.TestCase):
     def test_too_few_pairs_never_resolves(self):
         c = stats.paired(pairs([1.0, 1.0, 1.0, 1.0, 1.0]))
         self.assertFalse(c["resolved"])
-        self.assertIn("fewer than 6 pairs", c["reason"])
+        self.assertIn("fewer than 6 retained pairs (5)", c["reason"])
+        # No finite resolution is claimed from too few pairs (the 3-pair null
+        # of the first 4GPUs campaign reported "below noise 0.215 s").
+        self.assertEqual(c["verdict"], "not resolved (5 retained pairs, 6 needed)")
+        self.assertEqual(c["resolution_s"], float("inf"))
+        self.assertEqual(stats.paired([])["verdict"], "not resolved (0 retained pairs, 6 needed)")
+
+    def test_min_pairs_does_not_depend_on_ci(self):
+        # Even if the CI routine produced an interval for 5 pairs, the 6-pair
+        # minimum holds: the rule is enforced in paired() itself.
+        real = stats.median_ci
+        try:
+            stats.median_ci = lambda xs, confidence=stats.CONFIDENCE: (min(xs), max(xs), 0.99)
+            c = stats.paired(pairs([1.0, 1.01, 0.99, 1.0, 1.02]))
+            self.assertFalse(c["resolved"])
+            self.assertTrue(stats.paired(pairs([1.0, 1.01, 0.99, 1.0, 1.02, 1.0]))["resolved"])
+        finally:
+            stats.median_ci = real
+        self.assertEqual(stats.MIN_PAIRS, 6)
 
     def test_same_sign_but_below_noise(self):
         # Every pair positive, but the median is inside the pair-to-pair scatter.

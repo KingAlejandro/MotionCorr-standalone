@@ -1,0 +1,1129 @@
+{
+  "status": "PASS for bounded native standalone trusted inputs",
+  "source": "997b955c883300fc76ec43423ec0c533f7b685cf",
+  "base": "57e98666a6225a8fdb6dafbdbc356478c21cea3a",
+  "candidate_binary": {
+    "path": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+    "sha256": "0643930d608c1e0670edd6fef687affa2af5df555e147fb940f216c8fa004ed9"
+  },
+  "predecessor_binary": {
+    "path": "/home/alex/motioncorr-nvtiff-native-20261006/build/motioncorr_nvtiff_probe",
+    "sha256": "afa35e09613adf6562303f53154509d4b53ffb30077160d6b6191b6cea6a77f4"
+  },
+  "input_hashes": {
+    "u8-strip-p1.tiff": "979bf1477696d2bb4c294e3ebc000cf4e6eebd6d56d3c9678a57c6c95088ea7c",
+    "u8-strip-p2.tiff": "3273239d30632201e7d8f5dbffdbf24392274ac580b75e1c2697c902016886e8",
+    "u16-strip-p1.tiff": "e8ef1e5ef34f24a7329c3bf4dafc8b736ef40ea543fd854c32a4e565502a34bf",
+    "u16-strip-p2.tiff": "3fd0aebcca2d6d20ccc7b867ebba84b836e1ca00447443baf088ab8ffca88318",
+    "u16-big-endian.tiff": "40e0169bc84d2bd323dec46daf7c1a0f3af4ce9138d571d392fefc635fc1809b",
+    "u8-tile.tiff": "d75b1c25e4d91cb0a9887ed7442f7f0c44cbbdc3f5d747f8c77c9e48d9f4f74f",
+    "u16-tile-p2.tiff": "e2518f98b7d0283127480b9cfe3143a17fb118e4be97578b2c1d38f36d42d95d",
+    "u8-explicit-depth1.tiff": "979bf1477696d2bb4c294e3ebc000cf4e6eebd6d56d3c9678a57c6c95088ea7c",
+    "orientation-2.tiff": "a5414683abc4e4dd3cd174ca979df5e6aa241049ab42653348dfb9b782bfa5be",
+    "miniswhite.tiff": "7711662b84c51c41779b3c6f077c238530b6fb32ce95cdee3c917914dcc10247",
+    "signed.tiff": "863b7849603d298bd7718bf3ba7d58402becf69aefd530ff0a9659176dc614b2",
+    "mixed-width.tiff": "1682b83fcad22032b03d3caa77d348f2b2b55f2f37c48c7e555c07b60e0f81c8",
+    "volume-depth2.tiff": "376026b8dae3e6ec51e633972b3159041fc3193487005686f4e48177f6e8a415"
+  },
+  "loaded_library_hashes": {
+    "build/motioncorr_nvtiff_probe": "0643930d608c1e0670edd6fef687affa2af5df555e147fb940f216c8fa004ed9",
+    "build/faults.so": "d9bc216c2d3be34425d323453512103be1729bdf459d0d63843eaea6a57f12b2",
+    "build/CMakeCache.txt": "c793946ea9d5ab7f367f7b0256956a7dc477d794e6315babdd0e568618648b16",
+    "/usr/local/cuda-12.8/lib64/libcudart.so.12": "218eec4c8385a32e258a0235be4d449986844f2d0de3430052f0924e6fe60f71",
+    "/home/alex/motioncorr-nvtiff-native-v2-20261006/private-sdk/unpacked/nvidia/nvtiff/lib/libnvtiff.so.0": "d46cfdef19db2530a5cfe06cc093edba7592d51656f1cbf833d51ce60b8a7830",
+    "/lib/x86_64-linux-gnu/libstdc++.so.6": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+    "/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+    "/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+    "/lib/x86_64-linux-gnu/libdl.so.2": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96",
+    "/lib/x86_64-linux-gnu/libpthread.so.0": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd",
+    "/lib/x86_64-linux-gnu/librt.so.1": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82",
+    "/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "tifffile": "2026.9.20",
+    "imagecodecs": "2026.8.16"
+  },
+  "cases": [
+    {
+      "name": "old-absent-depth",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false
+        ]
+      }
+    },
+    {
+      "name": "u8-strip-p1",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u8-strip-p2",
+      "returncode": 0,
+      "oracle": {
+        "samples": 25165824,
+        "dtype": "uint8",
+        "shape": [
+          48,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f031fa8aae62f408c5ecc5c7c71bf768f278f1b9c6f8a951fc2fa6176d5f42fc"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 48,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          2
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u16-strip-p1",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u16-strip-p2",
+      "returncode": 0,
+      "oracle": {
+        "samples": 25165824,
+        "dtype": "uint16",
+        "shape": [
+          48,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "6d3196607cc81f420c9a0872533264390f6dc6f65a0b85764b07c58ce5427a76"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 48,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          2
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u16-big-endian",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          2
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u8-tile",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u16-tile-p2",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint16",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "22ec2fd25f4eae070fd4f64ce21edceb6a1f63ed46b6a9d8885dbe42401abe71"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          2
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u8-explicit-depth1",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      },
+      "verdict": "PASS",
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "coverage_note": "generator ignored extratag32997; this is absentdepth duplicate; genuineunit tag in separate supplement",
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "orientation-2",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 3,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          2
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false
+        ]
+      }
+    },
+    {
+      "name": "miniswhite",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 3,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false
+        ]
+      }
+    },
+    {
+      "name": "signed",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 3,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false
+        ]
+      }
+    },
+    {
+      "name": "mixed-width",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 2,
+      "metadata_bounds": {
+        "width": [
+          1023,
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false,
+          true
+        ]
+      }
+    },
+    {
+      "name": "volume-depth2",
+      "returncode": 3,
+      "decode_executed": false,
+      "cleanup_complete": null,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 1,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          2
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          false
+        ]
+      }
+    },
+    {
+      "name": "u8-strip-p1-range",
+      "returncode": 0,
+      "oracle": {
+        "samples": 2621440,
+        "dtype": "uint8",
+        "shape": [
+          5,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "7e08d4b875beef208d7cca25a06988c27d79b7933e52acbdb0c5ec32bf5f198b"
+      },
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "u16-strip-p2-range",
+      "returncode": 0,
+      "oracle": {
+        "samples": 2621440,
+        "dtype": "uint16",
+        "shape": [
+          5,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true,
+          "byte_order": true
+        },
+        "payload_sha256": "a169be26a0a17b6b02abdb24b732154bc02ac25dad11b5feb1d020cb7f2e48c0"
+      },
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 48,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          16
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          2
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "no-trust",
+      "returncode": 1
+    },
+    {
+      "name": "input-cap",
+      "returncode": 1
+    },
+    {
+      "name": "output-cap",
+      "returncode": 1
+    },
+    {
+      "name": "first-oob",
+      "returncode": 1
+    },
+    {
+      "name": "count-oob",
+      "returncode": 1
+    },
+    {
+      "name": "existing",
+      "returncode": 1
+    },
+    {
+      "name": "symlink",
+      "returncode": 1
+    },
+    {
+      "name": "interposer-healthy",
+      "returncode": 0,
+      "oracle": {
+        "samples": 12582912,
+        "dtype": "uint8",
+        "shape": [
+          24,
+          512,
+          1024
+        ],
+        "controls": {
+          "unflipped": true,
+          "within_row_swap": true,
+          "last_frame_bit": true,
+          "missing_last": true
+        },
+        "payload_sha256": "f5179ef99063dec2cbdde03fecd3bf9b3ddee1c24076059d421270a55ea34e45"
+      },
+      "decode_executed": true,
+      "cleanup_complete": true,
+      "uuid_hex": "eddb42fe4f9aadde76d3b924e14add54",
+      "nvtiff_runtime": "0.8.0",
+      "vendor_internal_device_bytes": null,
+      "frame_count": 24,
+      "metadata_bounds": {
+        "width": [
+          1024
+        ],
+        "height": [
+          512
+        ],
+        "bits": [
+          8
+        ],
+        "compression": [
+          5
+        ],
+        "orientation": [
+          1
+        ],
+        "predictor": [
+          1
+        ],
+        "depth": [
+          0
+        ],
+        "tag_depth": [
+          1
+        ],
+        "nvtiff_status": [
+          0
+        ],
+        "experiment_admitted": [
+          true
+        ]
+      }
+    },
+    {
+      "name": "fault-decode-refusal",
+      "returncode": 1
+    },
+    {
+      "name": "fault-decode-execution",
+      "returncode": 1
+    },
+    {
+      "name": "fault-completion",
+      "returncode": 1
+    },
+    {
+      "name": "fault-destroy",
+      "returncode": 1
+    }
+  ],
+  "case_count": 28,
+  "compared_samples": 143661056,
+  "physical_witness_count": 32,
+  "physical_samples": [
+    {
+      "pid": 3268594,
+      "birth": "673642157",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "exe": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+      "affinity": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103
+      ],
+      "gpu_memory_mib": "24 MiB"
+    },
+    {
+      "pid": 3268753,
+      "birth": "673642443",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "exe": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+      "affinity": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103
+      ],
+      "gpu_memory_mib": "12 MiB"
+    },
+    {
+      "pid": 3268753,
+      "birth": "673642443",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "exe": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+      "affinity": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103
+      ],
+      "gpu_memory_mib": "418 MiB"
+    },
+    {
+      "pid": 3269020,
+      "birth": "673642829",
+      "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+      "exe": "/home/alex/motioncorr-nvtiff-native-v2-20261006/build/motioncorr_nvtiff_probe",
+      "affinity": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103
+      ],
+      "gpu_memory_mib": "12 MiB"
+    }
+  ],
+  "unit_depth_supplement": {
+    "status": "PASS",
+    "source": "997b955c883300fc76ec43423ec0c533f7b685cf",
+    "prior_receipt_sha256": "c7e5ae87bb0ba34fb175a0e2505ad2b472f6ecc6085b3b83cc7688a8ad1e4449",
+    "input_sha256": "0b677b12df006b3083c8e6325f2adf7541ff1a90ad3d7439ceaf7c1338e52ea3",
+    "binary_sha256": "0643930d608c1e0670edd6fef687affa2af5df555e147fb940f216c8fa004ed9",
+    "tags": [
+      {
+        "value": 1,
+        "dtype": 4,
+        "count": 1
+      },
+      {
+        "value": 1,
+        "dtype": 4,
+        "count": 1
+      },
+      {
+        "value": 1,
+        "dtype": 4,
+        "count": 1
+      }
+    ],
+    "comparison": {
+      "samples": 6144,
+      "dtype": "uint16",
+      "shape": [
+        3,
+        32,
+        64
+      ],
+      "controls": {
+        "unflipped": true,
+        "within_row_swap": true,
+        "last_frame_bit": true,
+        "missing_last": true,
+        "byte_order": true
+      },
+      "payload_sha256": "e4472d728175cfd68afd0501919fb7ce55bca3edf3b878b686656ca0041c3409"
+    },
+    "release": "emptyassignedGPU0query0"
+  },
+  "release": {
+    "exit-status.txt": "0",
+    "original-exit-status.txt": "0",
+    "release-query-exit.txt": "0",
+    "release-gate-status.txt": "0",
+    "released.txt": "2026-10-06T09:47:29+00:00"
+  },
+  "source_metadata_history": "originala288 refuses SDKsupported ordinary2D because geometrydepth0; explicitunit supplement initially expectedSDKdepth1 incorrectly; actualSDKdepth0+rawLONGunit accepted; allfailedrecords retained",
+  "limitations": [
+    "No product ingest route or auto/default change",
+    "No application speedup/timing measurement",
+    "No malformed compressed data / poisoned context safety proof",
+    "No vendor scratch bound or whole-process peak memory proof",
+    "No licence compatibility decision or SDK redistribution",
+    "No full MotionCorr gain/FFT/products/scientific oracle"
+  ],
+  "evidence_sha256": "1df99b637c1846334ecc3ee3191f99dd1baa17918c205adebfb8058c94757361"
+}

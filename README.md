@@ -59,6 +59,12 @@ cmake --build build-cuda --parallel
 
 **Experimental CUDA status:** The 24-movie RELION SPA tutorial rerun completed, but 0/24 movies passed Gate 2: corrected-image relative RMSE was 0.002899–0.010082 against the 0.001 limit. Use `--gpu` for investigation until this discrepancy is resolved; see the [CUDA validation report](docs/cuda_global_alignment_validation.md). The CPU path remains the default.
 
+An optional [standalone nvTIFF experiment](experiments/nvtiff/README.md) implements
+GPU LZW decoding and native sample dumps for Issue #141. Build it separately, or
+enable `BUILD_NVTIFF_PROBE`; it is not yet a MotionCorr ingest route. [Controlled standalone native sample
+comparisons passed](experiments/nvtiff/NATIVE_RESULTS.md); full MotionCorr
+product/scientific correctness and application performance remain unproven.
+
 You can also supply a movie file or quoted file wildcard directly when `--angpix` and `--voltage` are specified. This standalone build repairs a RELION 5.1 direct-input crash caused by missing per-movie metadata.
 
 ```sh

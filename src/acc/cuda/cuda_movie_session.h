@@ -69,6 +69,31 @@ public:
     // Release all persistent GPU allocations and plans
     void release();
 
+    // Reuse across movies of one geometry (docs/cuda_session_reuse.md).
+    //
+    // parkForReuse() ends a movie that recorded no CUDA failure and keeps only
+    // the geometry-bound core: d_Iframes, d_Fframes, d_fft_work, d_inverse_tile
+    // and the two whole-frame plans. It releases every per-movie resource (the
+    // unaligned sum, the gain alias or owned gain, the gain lease, both patch
+    // workspaces, the patch plan, patch buffers and the uploaded group tables)
+    // and detaches the log. A parked session refuses all movie work. Parking
+    // is refused, and the caller must release(), when the session is
+    // uninitialized, has any recorded failure, still has ingest streams or
+    // live scratch views, or records a failure while shedding.
+    bool parkForReuse();
+    bool isParked() const { return parked; }
+    bool matchesGeometry(int nx_, int ny_, int n_frames_, int device_id_) const {
+        return nx == nx_ && ny == ny_ && n_frames == n_frames_ && device_id == device_id_;
+    }
+    // Re-admits a parked session for the next movie: binds its log, admits the
+    // gain cache under the current generation exactly as initialize() does,
+    // reallocates the unaligned sum, repeats initialize()'s plan log line and
+    // returns the Fourier guard to ReadyForFFT. The failure state is never
+    // reset: a session that has failed is not reused at all.
+    // On false the caller must release() it; a fresh session is still allowed
+    // unless the failure state is fatal.
+    bool resetForMovie(std::ostream &log);
+
     // Upload raw frames and gain reference (if present), execute fused gain multiplication
     // and unaligned sum accumulation on GPU, and copy unaligned sum back to host for hot pixel detection.
     // download_sum=false keeps the sum resident; the caller must then obtain the
@@ -324,6 +349,12 @@ private:
     cufftResult releasePlan(cufftHandle &slot, bool &owned) noexcept;
     void recordFailure(cudaError_t err, const char *stage, int line);
     void recordCufftFailure(cufftResult res, const char *stage, int line);
+    // initialize()'s gain-cache admission, shared with resetForMovie().
+    bool admitGainCache();
+    void logMovieFftPlan();
+    // Frees the patch plan, patch buffers and group tables and clears the
+    // uploaded-table cache. Attempts every release; false if any failed.
+    bool releasePatchCaches();
 
     // Sticky for the life of the session. Not reset by release(): a movie that failed
     // stays failed for reporting purposes, and a poisoned context never un-poisons.
@@ -336,7 +367,11 @@ private:
     int n_frames;
     int device_id;
     int nfx;
-    std::ostream &logfile;
+    // A pointer so a parked session can be rebound to the next movie's log; the
+    // runner's log stream is per movie. Points at null_log while parked.
+    std::ostream *logfile;
+    std::ostream null_log{nullptr};
+    bool parked = false;
 
     float *d_Iframes = nullptr;
     cufftComplex *d_Fframes = nullptr;
@@ -379,7 +414,7 @@ private:
     cudaEvent_t ingest_events[kIngestEvents] = {};
     // Points the ingest at the worker-lifetime pinned staging pool, growing it if
     // this movie needs more. The pool deliberately outlives the session, which is
-    // constructed and destroyed once per movie.
+    // rebuilt whenever the geometry changes or a movie fails.
 #if defined(_NVCOMP_ENABLED)
     // Genuinely nvCOMP-only: this is the pinned staging pool for compressed
     // strips and has no caller outside ingestCompressedTiffStrips. Declared

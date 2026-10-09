@@ -703,6 +703,24 @@ void MotioncorrRunner::run()
 	output_writer = std::unique_ptr<OutputWriter>(new OutputWriter(!sync_output));
 	StageProfile::instance().setNote("host_allocator", host_allocator_mode);
 	StageProfile::instance().beginRun();
+#ifdef _CUDA_ENABLED
+	// Started after every pre-loop step that can REPORT_ERROR, so no exit path
+	// can leave it running. Reported as a thread task so the profile shows what
+	// the first session setup no longer waits for.
+	if (do_own && use_gpu && !early_binning) {
+		const int device = gpu_id;
+		cuda_context_warmup.t = std::thread([device]() {
+			StageProfile::Sample a;
+			if (StageProfile::instance().enabled()) a = StageProfile::sampleThread();
+			(void)cudaSetDevice(device);
+			if (StageProfile::instance().enabled()) {
+				const StageProfile::Sample b = StageProfile::sampleThread();
+				StageProfile::instance().addThreadTask("cuda warmup", "context creation",
+				    (b.wall_s - a.wall_s) * 1e3, (b.cpu_s - a.cpu_s) * 1e3, b.minflt - a.minflt);
+			}
+		});
+	}
+#endif
 
 	// Indexed by movie, so the report below stays in input order however the
 	// deferred write failures arrive.
@@ -721,6 +739,10 @@ void MotioncorrRunner::run()
 			// is no reason to leave one: the previous movie's writes are
 			// milliseconds from done.
 			if (output_writer) output_writer->drain();
+#ifdef _CUDA_ENABLED
+			joinCudaContextWarmup();
+			(void)releaseParkedCudaSession("job abort");
+#endif
 			exit(RELION_EXIT_ABORTED);
 		}
 
@@ -776,6 +798,13 @@ void MotioncorrRunner::run()
 			movie_failed[imic] = 1;
 		collectWriteFailures(movie_failed);
 	}
+
+#ifdef _CUDA_ENABLED
+	// The last movie's parked session. Every movie's products were complete
+	// before it was parked, so a failure here is reported, not charged to them.
+	joinCudaContextWarmup();
+	(void)releaseParkedCudaSession("end of run");
+#endif
 
 	// Every product is on disk and closed after this, which the joint STAR
 	// scan below depends on: it decides membership from exists(fn_avg).
@@ -1692,6 +1721,26 @@ static int patchBatchCap() {
 }
 #endif
 
+#ifdef _CUDA_ENABLED
+void MotioncorrRunner::joinCudaContextWarmup()
+{
+	if (cuda_context_warmup.t.joinable()) cuda_context_warmup.t.join();
+}
+
+bool MotioncorrRunner::releaseParkedCudaSession(const char *boundary)
+{
+	if (!parked_cuda_session) return true;
+	std::unique_ptr<CudaMovieSession> parked = std::move(parked_cuda_session);
+	parked->release();
+	const CudaFailureState &failure = parked->getFailureState();
+	if (!failure.hasFailed()) return true;
+	std::cerr << "ERROR: releasing the retained CUDA movie session at " << boundary
+	          << " failed: " << cudaGetErrorString(failure.firstError())
+	          << " at " << failure.firstStage() << ":" << failure.firstLine() << std::endl;
+	return false;
+}
+
+#endif
 bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective_expected_frames) {
 	timeval movie_start_time;
 	gettimeofday(&movie_start_time, NULL);
@@ -1890,7 +1939,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	};
 	if (use_gpu && !early_binning) {
 		StageScope session_scope("session setup");
-		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+		joinCudaContextWarmup();
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies. It is only an identity because
 		// gainReferenceFor() ran earlier in this function, for this movie's
@@ -1898,7 +1947,29 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (fn_gain_reference != "" && !gainIdentityResolvedFor(nx, ny))
 			REPORT_ERROR("Gain identity was not resolved before the CUDA session was given a gain generation for "
 			             + fn_mic + ". The device gain retention key would not describe this movie's gain.");
-		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
+		const unsigned long long gain_generation = fn_gain_reference != "" ? gain_cache_generation : 0;
+		// Reuse the previous movie's session only for the same geometry, frame
+		// count and device; anything else releases it before this movie
+		// allocates. A failed reset releases it and builds a fresh session,
+		// unless the release found the device unusable.
+		if (parked_cuda_session && parked_cuda_session->matchesGeometry(nx, ny, n_frames, gpu_id)) {
+			movie_session = std::move(parked_cuda_session);
+			movie_session->setGainGeneration(gain_generation);
+			if (!movie_session->resetForMovie(logfile)) {
+				movie_session->release();
+				refuse_fallback_if_fatal(movie_session->getFailureState(), "session reuse");
+				movie_session.reset();
+			}
+		}
+		if (parked_cuda_session) {
+			std::unique_ptr<CudaMovieSession> stale = std::move(parked_cuda_session);
+			stale->release();
+			refuse_fallback_if_fatal(stale->getFailureState(), "release of the previous movie's session");
+		}
+		if (!movie_session) {
+			movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
+			movie_session->setGainGeneration(gain_generation);
+		}
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
@@ -3694,7 +3765,12 @@ skip_fitting:
 	// (declared earlier, destroyed later); release() records its own errors.
 	if (movie_session) {
 		StageScope release_scope("session release");
-		movie_session.reset();
+		// Parking refuses any session that recorded a failure; that one is
+		// released here exactly as before.
+		if (movie_session->parkForReuse())
+			parked_cuda_session = std::move(movie_session);
+		else
+			movie_session.reset();
 	}
 #endif
 	// Set the start frame for the local motion model.

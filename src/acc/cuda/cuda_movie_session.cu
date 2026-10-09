@@ -37,7 +37,7 @@
 #define HANDLE_ERROR(cmd) do { \
     cudaError_t err = (cmd); \
     if (err != cudaSuccess) { \
-        logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
+        (*logfile) << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << cudaGetErrorString(err) << std::endl; \
         recordFailure(err, __func__, __LINE__); \
         return false; \
@@ -48,7 +48,7 @@
 #define CUFFT_CHECK(cmd) do { \
     cufftResult res = (cmd); \
     if (res != CUFFT_SUCCESS) { \
-        logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
+        (*logfile) << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " \
                 << res << std::endl; \
         recordCufftFailure(res, __func__, __LINE__); \
         return false; \
@@ -377,7 +377,7 @@ CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, 
     : patch_alignment_workspace(&failure_state),
       batched_patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
-      nfx(nx / 2 + 1), logfile(log) {}
+      nfx(nx / 2 + 1), logfile(&log) {}
 
 CudaMovieSession::~CudaMovieSession() {
     release();
@@ -421,37 +421,7 @@ cufftResult CudaMovieSession::releasePlan(cufftHandle &slot, bool &owned) noexce
     return err;
 }
 
-bool CudaMovieSession::initialize() {
-    if (failure_state.isPoisoned()) return false;
-    if (is_initialized) return true;
-    release();
-    if (failure_state.isPoisoned()) return false;
-
-    int dev_count = 0;
-    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
-    recordFailure(count_err, __func__, __LINE__);
-    if (count_err != cudaSuccess || dev_count == 0) {
-        logfile << "ERROR: No CUDA devices found" << std::endl;
-        return false;
-    }
-    if (device_id < 0 || device_id >= dev_count) {
-        logfile << "ERROR: Invalid CUDA device ID: " << device_id << std::endl;
-        return false;
-    }
-    HANDLE_ERROR(cudaSetDevice(device_id));
-
-    const size_t sz_real = (size_t)ny * nx * sizeof(float);
-    const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
-    const size_t total_real_bytes = sz_real * n_frames;
-    const size_t total_comp_bytes = sz_comp * n_frames;
-
-    if (nx <= 0 || ny <= 0 || n_frames <= 0 ||
-        (size_t)nx * ny > INT_MAX || (size_t)ny * nfx > INT_MAX) {
-        logfile << "ERROR: Invalid movie dimensions for cuFFT: "
-                << nx << "x" << ny << "x" << n_frames << std::endl;
-        return false;
-    }
-
+bool CudaMovieSession::admitGainCache() {
     mc_cuda::CudaWorkerPlanPool &gain_pool = mc_cuda::getWorkerPlanPool();
     const cudaError_t retired_error = gain_pool.retiredErrorFor(device_id);
     if (retired_error != cudaSuccess) {
@@ -477,6 +447,127 @@ bool CudaMovieSession::initialize() {
         }
     }
 
+    return true;
+}
+
+void CudaMovieSession::logMovieFftPlan() {
+    const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+    (*logfile) << "Movie FFT: batch=1"
+            << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
+            << " shared work=" << fft_work_bytes
+            << " inverse tile=" << sz_comp << " bytes" << std::endl;
+}
+
+bool CudaMovieSession::releasePatchCaches() {
+    cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
+    sz_cached_Ipatches = 0;
+    cached_ngroups_alloc = 0;
+    uploaded_group_start.clear();
+    uploaded_group_size.clear();
+    const bool plan_ok = releasePlan(plan_patch_r2c, has_plan_patch_r2c) == CUFFT_SUCCESS;
+    const bool patches_ok = releaseBuffer(d_Ipatches) == cudaSuccess;
+    const bool start_ok = releaseBuffer(d_group_start) == cudaSuccess;
+    const bool size_ok = releaseBuffer(d_group_size) == cudaSuccess;
+    return plan_ok && patches_ok && start_ok && size_ok;
+}
+
+// The reset contract (docs/cuda_session_reuse.md). Everything a movie can leave
+// behind is either shed here or re-established by resetForMovie(); the core that
+// survives is exactly what initialize() would allocate again for this geometry,
+// so the next movie sees the same buffers, plans and log as a fresh session.
+// cudaMalloc never promised zeroed contents, so no stage may depend on what a
+// retained buffer holds, and none does: ingest and the host upload overwrite
+// d_Iframes in full, the forward FFT overwrites d_Fframes, and d_fft_work and
+// d_inverse_tile are scratch written before they are read.
+bool CudaMovieSession::parkForReuse() {
+    if (!is_initialized || parked || failure_state.hasFailed()) return false;
+    // A live ingest view or stream means the movie did not finish its ingest
+    // teardown; those are per-movie and must not cross into the next one.
+    if (ingest_stream || ingest_copy_stream ||
+        fourier_guard.state() == mc_cuda::kFourierIngestScratch)
+        return false;
+    for (int e = 0; e < kIngestEvents; e++)
+        if (ingest_events[e]) return false;
+
+    recordFailure(cudaSetDevice(device_id), "park select device", __LINE__);
+    if (!failure_state.hasFailed())
+        recordFailure(cudaDeviceSynchronize(), "park synchronize", __LINE__);
+    if (failure_state.hasFailed()) return false;
+
+    (void)releasePatchAlignmentWorkspace();
+    (void)releasePatchCaches();
+    releaseBuffer(d_Isum);
+    if (!d_gain_borrowed) releaseBuffer(d_gain);
+    d_gain = nullptr;
+    d_gain_borrowed = false;
+    (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
+    // Any failure while shedding (a free can be the first call to report a
+    // fatal context) makes the retained core untrustworthy as well.
+    if (failure_state.hasFailed()) return false;
+
+    logfile = &null_log;
+    is_initialized = false;
+    parked = true;
+    return true;
+}
+
+bool CudaMovieSession::resetForMovie(std::ostream &log) {
+    logfile = &log;
+    if (!parked || failure_state.hasFailed()) return false;
+    HANDLE_ERROR(cudaSetDevice(device_id));
+    if (!admitGainCache()) return false;
+    {
+        StageScope alloc_scope("alloc movie buffers");
+        const cudaError_t sum_err = cudaMalloc((void**)&d_Isum, (size_t)ny * nx * sizeof(float));
+        if (sum_err != cudaSuccess) {
+            d_Isum = nullptr;
+            recordFailure(sum_err, "reset unaligned sum", __LINE__);
+            (*logfile) << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(sum_err) << std::endl;
+            return false;
+        }
+    }
+    logMovieFftPlan();
+    // The previous movie left the spectrum in d_Fframes (kFourierData), which
+    // would refuse the next ingest or frame gather.
+    fourier_guard.reset();
+    parked = false;
+    is_initialized = true;
+    return true;
+}
+
+bool CudaMovieSession::initialize() {
+    if (failure_state.isPoisoned()) return false;
+    if (is_initialized) return true;
+    release();
+    if (failure_state.isPoisoned()) return false;
+
+    int dev_count = 0;
+    cudaError_t count_err = cudaGetDeviceCount(&dev_count);
+    recordFailure(count_err, __func__, __LINE__);
+    if (count_err != cudaSuccess || dev_count == 0) {
+        (*logfile) << "ERROR: No CUDA devices found" << std::endl;
+        return false;
+    }
+    if (device_id < 0 || device_id >= dev_count) {
+        (*logfile) << "ERROR: Invalid CUDA device ID: " << device_id << std::endl;
+        return false;
+    }
+    HANDLE_ERROR(cudaSetDevice(device_id));
+
+    const size_t sz_real = (size_t)ny * nx * sizeof(float);
+    const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+    const size_t total_real_bytes = sz_real * n_frames;
+    const size_t total_comp_bytes = sz_comp * n_frames;
+
+    if (nx <= 0 || ny <= 0 || n_frames <= 0 ||
+        (size_t)nx * ny > INT_MAX || (size_t)ny * nfx > INT_MAX) {
+        (*logfile) << "ERROR: Invalid movie dimensions for cuFFT: "
+                << nx << "x" << ny << "x" << n_frames << std::endl;
+        return false;
+    }
+
+    if (!admitGainCache()) return false;
+
     // Allocate persistent movie buffers
     cudaError_t cuda_result = cudaSuccess;
     {
@@ -487,7 +578,7 @@ bool CudaMovieSession::initialize() {
     }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
-        logfile << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
+        (*logfile) << "ERROR: Movie buffer allocation failed: " << cudaGetErrorString(cuda_result) << std::endl;
         release();
         return false;
     }
@@ -512,7 +603,7 @@ bool CudaMovieSession::initialize() {
         if (result != CUFFT_SUCCESS) {
             recordCufftFailure(result, "initialize plan", __LINE__);
             recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
-            logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+            (*logfile) << "ERROR: cuFFT plan failed for " << nx << "x" << ny
                     << " batch=1 type=" << type
                     << " code=" << result << std::endl;
             return false;
@@ -538,7 +629,7 @@ bool CudaMovieSession::initialize() {
     }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize scratch", __LINE__);
-        logfile << "ERROR: Movie FFT scratch allocation failed for batch=1"
+        (*logfile) << "ERROR: Movie FFT scratch allocation failed for batch=1"
                 << " workspace=" << fft_work_bytes << " tile=" << sz_comp
                 << ": " << cudaGetErrorString(cuda_result) << std::endl;
         release();
@@ -550,17 +641,14 @@ bool CudaMovieSession::initialize() {
         if (result == CUFFT_SUCCESS) return true;
         recordCufftFailure(result, "initialize work area", __LINE__);
         recordFailure(cudaPeekAtLastError(), "initialize work area", __LINE__);
-        logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
+        (*logfile) << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
         return false;
     };
     if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
         release();
         return false;
     }
-    logfile << "Movie FFT: batch=1"
-            << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
-            << " shared work=" << fft_work_bytes
-            << " inverse tile=" << sz_comp << " bytes" << std::endl;
+    logMovieFftPlan();
 
     fourier_guard.reset();
     is_initialized = true;
@@ -593,7 +681,7 @@ void CudaMovieSession::release() {
     if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
     // Destroy plans before their work areas; attempt all releases, even after error.
-    releasePlan(plan_patch_r2c, has_plan_patch_r2c);
+    (void)releasePatchCaches();
     releasePlan(plan_r2c, has_plan_r2c);
     releasePlan(plan_c2r, has_plan_c2r);
     releaseBuffer(d_fft_work);
@@ -605,16 +693,9 @@ void CudaMovieSession::release() {
     if (!d_gain_borrowed) releaseBuffer(d_gain);
     d_gain = nullptr;
     d_gain_borrowed = false;
-    releaseBuffer(d_Ipatches);
-    releaseBuffer(d_group_start);
-    releaseBuffer(d_group_size);
     fft_r2c_work_bytes = fft_c2r_work_bytes = fft_work_bytes = 0;
-    cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
-    sz_cached_Ipatches = 0;
-    cached_ngroups_alloc = 0;
-    uploaded_group_start.clear();
-    uploaded_group_size.clear();
     is_initialized = false;
+    parked = false;
     (void)mc_cuda::getWorkerPlanPool().releaseLease(this);
 }
 
@@ -696,14 +777,14 @@ bool CudaMovieSession::ensureDeviceGain(const MultidimArray<float> *gain_ref, si
         // Not HANDLE_ERROR: the fresh buffer has to be freed before returning.
         const cudaError_t alloc_err = cudaMalloc((void **)&fresh, sz_real);
         if (alloc_err != cudaSuccess) {
-            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+            (*logfile) << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
                     << cudaGetErrorString(alloc_err) << std::endl;
             recordFailure(alloc_err, __func__, __LINE__);
             return false;
         }
         const cudaError_t copy_err = cudaMemcpy(fresh, gain_ref->data, sz_real, cudaMemcpyHostToDevice);
         if (copy_err != cudaSuccess) {
-            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
+            (*logfile) << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : "
                     << cudaGetErrorString(copy_err) << std::endl;
             // The original cause is recorded first so it stays the first error;
             // a fatal cleanup code recorded after it still latches separately.
@@ -958,7 +1039,7 @@ bool CudaMovieSession::collectAboveThreshold(
                             cudaMemcpyDeviceToHost));
 
     if (host_counters[2] != 0 || host_counters[0] > capacity) {
-        logfile << "WARNING: CUDA hot-pixel hit buffer overflowed (" << host_counters[0]
+        (*logfile) << "WARNING: CUDA hot-pixel hit buffer overflowed (" << host_counters[0]
                 << " > " << capacity << "); falling back to host scan." << std::endl;
         return false;
     }
@@ -1107,7 +1188,7 @@ MovieIngestStatus CudaMovieSession::ingestMovie(
                                   failure_state.firstCufftError() != CUFFT_SUCCESS);
 
     if (now_poisoned && !was_poisoned) {
-        logfile << "ERROR: the CUDA context became unusable during device ingestion of "
+        (*logfile) << "ERROR: the CUDA context became unusable during device ingestion of "
                 << fn_mic << "; refusing to report a successful ingest." << std::endl;
         return MovieIngestStatus::FatalDeviceFailure;
     }
@@ -1115,7 +1196,7 @@ MovieIngestStatus CudaMovieSession::ingestMovie(
         // The decode itself reported success, but the teardown did not. The
         // resident movie cannot be trusted, so this is a failure even though
         // every per-chunk check passed.
-        logfile << "WARNING: device ingestion of " << fn_mic << " reported success but its"
+        (*logfile) << "WARNING: device ingestion of " << fn_mic << " reported success but its"
                 << " scratch teardown recorded an error (" 
                 << cudaGetErrorString(failure_state.firstError()) << " at "
                 << failure_state.firstStage() << ":" << failure_state.firstLine()
@@ -1162,7 +1243,7 @@ bool CudaMovieSession::gatherFrameSamples(
         if (sample_y[i] < 0) continue;
         if (sample_frame[i] < 0 || sample_frame[i] >= n_frames ||
             sample_y[i] >= ny || sample_x[i] < 0 || sample_x[i] >= nx) {
-            logfile << "ERROR: defect neighbour sample " << i << " out of range: frame="
+            (*logfile) << "ERROR: defect neighbour sample " << i << " out of range: frame="
                     << sample_frame[i] << " y=" << sample_y[i] << " x=" << sample_x[i]
                     << std::endl;
             return false;
@@ -1183,7 +1264,7 @@ bool CudaMovieSession::gatherFrameSamples(
     int *d_x = (int *)arena.alloc(n * sizeof(int), sizeof(int));
     float *d_out = (float *)arena.alloc(n * sizeof(float), sizeof(float));
     if (!d_f || !d_y || !d_x || !d_out) {
-        logfile << "ERROR: " << n << " defect neighbour samples do not fit the "
+        (*logfile) << "ERROR: " << n << " defect neighbour samples do not fit the "
                 << arena.capacity() << "-byte pre-FFT scratch arena." << std::endl;
         return false;
     }
@@ -1262,7 +1343,7 @@ bool CudaMovieSession::ensurePinnedStage(size_t bytes) {
     t_pinned_stage.bytes = reserve;
     // Logged only when the pool actually grows, so "allocated once across the run"
     // is something the log can show rather than something the design merely claims.
-    logfile << "nvCOMP ingestion: pinned staging pool grown to " << reserve
+    (*logfile) << "nvCOMP ingestion: pinned staging pool grown to " << reserve
             << " bytes for a " << bytes << "-byte request (worker lifetime)" << std::endl;
     return true;
 }
@@ -1363,7 +1444,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (reject) {
             // Named, so an unexpected fallback is diagnosable from the log rather
             // than showing up only as the slower path being taken.
-            logfile << "nvCOMP ingestion declined (" << reject
+            (*logfile) << "nvCOMP ingestion declined (" << reject
                     << "); using the host reader." << std::endl;
             return false;
         }
@@ -1411,7 +1492,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // the largest frame batch that fits.
     // ------------------------------------------------------------------
     if (!fourier_guard.beginIngestScratch()) {
-        logfile << "WARNING: nvCOMP ingestion refused: the Fourier buffer is not free."
+        (*logfile) << "WARNING: nvCOMP ingestion refused: the Fourier buffer is not free."
                 << std::endl;
         return false;
     }
@@ -1437,7 +1518,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
             // Say so. Silently substituting the default is how "1G" became a
             // 1 MiB cap that turned the fast path off for a whole run with no
             // message naming the cause.
-            logfile << "WARNING: MOTIONCORR_NVCOMP_PINNED_MAX_MB is not a positive"
+            (*logfile) << "WARNING: MOTIONCORR_NVCOMP_PINNED_MAX_MB is not a positive"
                     << " whole number of MiB; using the default " << pinned_cap
                     << " bytes." << std::endl;
         }
@@ -1446,7 +1527,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
     // declining a batch: those bytes are already pinned. Refuse rather than
     // report a budget the worker is not inside.
     if (t_pinned_stage.ptr && t_pinned_stage.bytes > pinned_cap) {
-        logfile << "nvCOMP ingestion declined: this worker already holds "
+        (*logfile) << "nvCOMP ingestion declined: this worker already holds "
                 << t_pinned_stage.bytes << " pinned bytes, above the "
                 << pinned_cap << "-byte cap; using the host reader." << std::endl;
         return false;
@@ -1487,7 +1568,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (mc_tiff_deflate::parsePositiveInt(env, parsed)) {
             chunk_req = parsed;
         } else {
-            logfile << "WARNING: MOTIONCORR_NVCOMP_CHUNK_FRAMES is not a positive whole"
+            (*logfile) << "WARNING: MOTIONCORR_NVCOMP_CHUNK_FRAMES is not a positive whole"
                     << " number; using " << chunk_req << " frames per chunk." << std::endl;
         }
     }
@@ -1563,7 +1644,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         if (candidate == 1) break;
     }
     if (chunk_frames <= 0) {
-        logfile << "nvCOMP ingestion declined: a one-frame chunk fits neither the "
+        (*logfile) << "nvCOMP ingestion declined: a one-frame chunk fits neither the "
                 << arena.capacity() << "-byte pre-FFT scratch arena nor the "
                 << pinned_cap << "-byte pinned staging cap"
                 << " (MOTIONCORR_NVCOMP_PINNED_MAX_MB); using the host reader." << std::endl;
@@ -1580,7 +1661,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
 
     int contiguous_frames = 0;
     for (int f = 0; f < n_frames; f++) contiguous_frames += frame_contiguous[f] ? 1 : 0;
-    logfile << "nvCOMP ingestion: chunk=" << chunk_frames << "/" << n_frames
+    (*logfile) << "nvCOMP ingestion: chunk=" << chunk_frames << "/" << n_frames
             << " frames x " << n_chunks << " chunks, slots=" << n_slots
             << ", scratch=" << arena.used() << "/" << arena.capacity()
             << " bytes borrowed from the pre-FFT Fourier buffer (additional VRAM: 0)"
@@ -1712,7 +1793,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
                             // that the movie fails -- which makes the guard
                             // impossible to tell apart from the one after it.
                             #pragma omp critical
-                            logfile << "WARNING: strip " << s << " of frame " << f
+                            (*logfile) << "WARNING: strip " << s << " of frame " << f
                                     << " has an unusable zlib wrapper; falling back to"
                                        " the host reader." << std::endl;
                             ok = false;
@@ -1746,7 +1827,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         const size_t chunks = (size_t)bf * (size_t)ny;
         for (size_t c = 0; c < chunks; c++) {
             if (hs[j].status[c] != nvcompSuccess || hs[j].asize[c] != row_bytes) {
-                logfile << "WARNING: nvCOMP rejected strip " << c << " of frames ["
+                (*logfile) << "WARNING: nvCOMP rejected strip " << c << " of frames ["
                         << f0 << "," << (f0 + bf) << "): status=" << (int)hs[j].status[c]
                         << " bytes=" << hs[j].asize[c] << " expected=" << row_bytes
                         << "; falling back to the host reader." << std::endl;
@@ -1755,7 +1836,7 @@ bool CudaMovieSession::ingestCompressedTiffStrips(
         }
         for (size_t c = 0; c < chunks; c++) {
             if (hs[j].adler[c] != adler_expected[j][c]) {
-                logfile << "WARNING: strip " << c << " of frames [" << f0 << ","
+                (*logfile) << "WARNING: strip " << c << " of frames [" << f0 << ","
                         << (f0 + bf) << ") failed its zlib Adler-32 check: computed 0x"
                         << std::hex << hs[j].adler[c] << " stored 0x"
                         << adler_expected[j][c] << std::dec
@@ -1852,7 +1933,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     // same allocation are still live: the transform would otherwise overwrite
     // staging bytes that something is still reading, with no error anywhere.
     if (!fourier_guard.beginFourierWrite()) {
-        logfile << "ERROR: forward FFT refused: the Fourier buffer still holds live "
+        (*logfile) << "ERROR: forward FFT refused: the Fourier buffer still holds live "
                    "ingest scratch." << std::endl;
         return false;
     }
@@ -1872,7 +1953,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
         const cufftResult res = cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
                                              d_Fframes + (size_t)iframe * complex_stride);
         if (res != CUFFT_SUCCESS) {
-            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
+            (*logfile) << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
             recordCufftFailure(res, __func__, __LINE__);
             drain_after_failure();
             return false;
@@ -1887,7 +1968,7 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     {
         const cudaError_t launch = cudaGetLastError();
         if (launch != cudaSuccess) {
-            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(launch) << std::endl;
+            (*logfile) << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(launch) << std::endl;
             recordFailure(launch, __func__, __LINE__);
             drain_after_failure();
             return false;
@@ -1917,7 +1998,7 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
                                             complex_stride * sizeof(cufftComplex),
                                             cudaMemcpyDeviceToDevice);
         if (copy != cudaSuccess) {
-            logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(copy) << std::endl;
+            (*logfile) << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(copy) << std::endl;
             recordFailure(copy, __func__, __LINE__);
             drain_after_failure();
             return false;
@@ -1925,7 +2006,7 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
         const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
                                              (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
         if (res != CUFFT_SUCCESS) {
-            logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
+            (*logfile) << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
             recordCufftFailure(res, __func__, __LINE__);
             drain_after_failure();
             return false;
@@ -2060,7 +2141,7 @@ void CudaMovieSession::alignPatchesBatched(
     const int patch_w = boxes[0].width, patch_h = boxes[0].height;
     for (const PatchBox &box : boxes) {
         if (box.width != patch_w || box.height != patch_h) {
-            logfile << "Batched patch alignment: patch sizes differ; using per-patch alignment." << std::endl;
+            (*logfile) << "Batched patch alignment: patch sizes differ; using per-patch alignment." << std::endl;
             return;
         }
     }
@@ -2074,7 +2155,7 @@ void CudaMovieSession::alignPatchesBatched(
             REPORT_ERROR("Fatal CUDA error before batched patch alignment");
         }
         (void)cudaGetLastError();
-        logfile << "Batched patch alignment: device memory query failed ("
+        (*logfile) << "Batched patch alignment: device memory query failed ("
                 << cudaGetErrorString(info_error) << "); using per-patch alignment." << std::endl;
         return;
     }
@@ -2088,14 +2169,14 @@ void CudaMovieSession::alignPatchesBatched(
                                            ccf_downsample, device_id))
         chunk /= 2;
     const int n_chunks = chunk > 0 ? (n_patches + chunk - 1) / chunk : 0;
-    logfile << "Batched patch alignment: " << n_patches << " patches, chunk size " << chunk
+    (*logfile) << "Batched patch alignment: " << n_patches << " patches, chunk size " << chunk
             << " (cap " << cap << ", " << n_chunks << " chunk(s)); free device memory "
             << (free_bytes >> 20) << " of " << (total_bytes >> 20) << " MiB";
     if (chunk == 0) {
-        logfile << "; workspace does not fit, using per-patch alignment." << std::endl;
+        (*logfile) << "; workspace does not fit, using per-patch alignment." << std::endl;
         return;
     }
-    logfile << "; workspace " << (workspace.bufferBytes() >> 20) << " MiB + cuFFT work "
+    (*logfile) << "; workspace " << (workspace.bufferBytes() >> 20) << " MiB + cuFFT work "
             << (workspace.cufftWorkBytes() >> 20) << " MiB, retained until alignment release."
             << std::endl;
 
@@ -2120,7 +2201,7 @@ void CudaMovieSession::alignPatchesBatched(
             }
             if (!workspace.release())
                 REPORT_ERROR("CUDA batched patch workspace cleanup failed after a preparation failure");
-            logfile << "WARNING: batched patch preparation did not complete for patch "
+            (*logfile) << "WARNING: batched patch preparation did not complete for patch "
                     << first + j + 1 << " of " << n_patches << "; classified recoverable, so "
                     << "patches " << first + 1 << " to " << n_patches
                     << " use per-patch alignment." << std::endl;
@@ -2143,7 +2224,7 @@ void CudaMovieSession::alignPatchesBatched(
             out.log = logs[j];
         }
     }
-    logfile << "Batched patch alignment: device memory in use rose by at most "
+    (*logfile) << "Batched patch alignment: device memory in use rose by at most "
             << ((free_bytes - min_free) >> 20) << " MiB (sampled after each chunk)." << std::endl;
 }
 
@@ -2161,7 +2242,7 @@ bool CudaMovieSession::reconstructDoseWeighted(
     DoseWeightScratch scratch;
     scratch.fourier = d_inverse_tile;
     return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model,
-                                              device_id, logfile, &failure_state, plan_c2r, &scratch);
+                                              device_id, (*logfile), &failure_state, plan_c2r, &scratch);
 }
 
 bool CudaMovieSession::reconstructUnweighted(
@@ -2171,7 +2252,7 @@ bool CudaMovieSession::reconstructUnweighted(
     const ThirdOrderPolynomialModel *model
 ) {
     if (failure_state.isPoisoned() || !is_initialized) return false;
-    return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, logfile, &failure_state);
+    return cudaRealSpaceInterpolationDevice(d_Iframes, Isum, Isum_even, Isum_odd, nx, ny, n_frames, model, device_id, (*logfile), &failure_state);
 }
 
 bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {

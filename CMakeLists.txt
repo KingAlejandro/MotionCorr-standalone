@@ -437,6 +437,55 @@ if(BUILD_TESTING AND CUDA)
         # from the other selector's earlier fatal retirement in its own process.
         add_test(NAME CudaDeviceGainCleanupFatal COMMAND cuda_device_gain_pool --case cleanup-fatal)
         set_tests_properties(CudaDeviceGainCleanupFatal PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Session reuse across movies (docs/cuda_session_reuse.md). A whole movie's
+        # device outputs on a reused session must equal a fresh session's. Each
+        # case runs in its own process: the fatal cases retire the worker pool.
+        set(SESSION_REUSE_WRAPS
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree" "LINKER:--wrap=cufftCreate")
+        add_executable(cuda_session_reuse tests/cuda_session_reuse.cpp)
+        target_link_libraries(cuda_session_reuse PRIVATE motioncorr_core)
+        target_link_options(cuda_session_reuse PRIVATE ${SESSION_REUSE_WRAPS})
+        foreach(_case IN ITEMS reuse geometry recoverable state fatal-park fatal-reset)
+            add_test(NAME CudaSessionReuse_${_case} COMMAND cuda_session_reuse --case ${_case})
+            set_tests_properties(CudaSessionReuse_${_case} PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        endforeach()
+        # Compiled negative controls, built the same way as the patch batch
+        # mutants below: one line of cuda_movie_session.cu rewritten, linked ahead
+        # of motioncorr_core. skip_reset leaves the Fourier guard holding the
+        # previous movie's spectrum; reuse_after_fatal resets a poisoned parked
+        # session; keep_patch_caches parks with the patch buffers still resident.
+        set(_session_cu "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_movie_session.cu")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_session_cu}")
+        file(READ "${_session_cu}" _session_source)
+        set(_session_mutant_skip_reset_from "    fourier_guard.reset();\n    parked = false;")
+        set(_session_mutant_skip_reset_to "    parked = false;")
+        set(_session_mutant_skip_reset_case "state")
+        set(_session_mutant_reuse_after_fatal_from "if (!parked || failure_state.hasFailed()) return false;")
+        set(_session_mutant_reuse_after_fatal_to "if (!parked) return false;")
+        set(_session_mutant_reuse_after_fatal_case "fatal-reset")
+        set(_session_mutant_keep_patch_caches_from "    (void)releasePatchCaches();\n    releaseBuffer(d_Isum);")
+        set(_session_mutant_keep_patch_caches_to "    releaseBuffer(d_Isum);")
+        set(_session_mutant_keep_patch_caches_case "reuse")
+        foreach(_mutant IN ITEMS skip_reset reuse_after_fatal keep_patch_caches)
+            set(_from "${_session_mutant_${_mutant}_from}")
+            string(FIND "${_session_source}" "${_from}" _first)
+            string(FIND "${_session_source}" "${_from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "session reuse mutant ${_mutant}: target line missing or not unique")
+            endif()
+            string(REPLACE "${_from}" "${_session_mutant_${_mutant}_to}" _mutant_source "${_session_source}")
+            set(_mutant_cu "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_movie_session_${_mutant}.cu")
+            file(WRITE "${_mutant_cu}" "${_mutant_source}")
+            add_executable(cuda_session_reuse_${_mutant} tests/cuda_session_reuse.cpp "${_mutant_cu}")
+            target_compile_options(cuda_session_reuse_${_mutant} PRIVATE
+                $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fopenmp>)
+            target_link_libraries(cuda_session_reuse_${_mutant} PRIVATE motioncorr_core)
+            target_link_options(cuda_session_reuse_${_mutant} PRIVATE ${SESSION_REUSE_WRAPS})
+            add_test(NAME CudaSessionReuseMutant_${_mutant}
+                COMMAND cuda_session_reuse_${_mutant} --expect-mismatch --case ${_session_mutant_${_mutant}_case})
+            set_tests_properties(CudaSessionReuseMutant_${_mutant} PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 120)
+        endforeach()
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

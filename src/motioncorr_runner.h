@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <thread>
 #include <src/time.h>
 #include "src/output_writer.h"
 #include "src/metadata_table.h"
@@ -357,6 +358,26 @@ private:
 	// not run() keeps the plain serial behaviour.
 	std::unique_ptr<OutputWriter> output_writer;
 	long int output_movie_index = -1;
+
+#ifdef _CUDA_ENABLED
+	// The previous movie's CUDA session, parked for the next movie of the same
+	// geometry (docs/cuda_session_reuse.md). Non-null only between movies; the
+	// next movie takes or releases it before allocating anything on the device.
+	std::unique_ptr<CudaMovieSession> parked_cuda_session;
+	// Checked release of the parked session. Returns false, after writing the
+	// failure to std::cerr, when the release recorded a CUDA failure.
+	bool releaseParkedCudaSession(const char *boundary);
+	// First-movie warm-up: creates the primary context on gpu_id while the main
+	// thread parses movie 0 and reads the gain. It calls only cudaSetDevice and
+	// discards the result; the main thread repeats every call it depends on, so
+	// any failure is still reported there with the same message. Joined before
+	// the first session setup and on every exit from run().
+	struct JoinOnDestroy {
+		std::thread t;
+		~JoinOnDestroy() { if (t.joinable()) t.join(); }
+	} cuda_context_warmup;
+	void joinCudaContextWarmup();
+#endif
 
 	// Hand one output product to the writer, or write it here when there is
 	// none. Products of one movie are written in submission order.

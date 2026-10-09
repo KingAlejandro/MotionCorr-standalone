@@ -22,6 +22,7 @@ int main()
 	pool.clear();
 	pool.setEnabled(true);
 	const long ny = 2048, nx = 2048;          // 16 MiB float frame
+	static_assert(sizeof(float) == 4, "frame sizes below assume 4-byte floats");
 	const size_t frame = (size_t)ny * nx * sizeof(float);
 
 	MultidimArray<float> a;
@@ -64,6 +65,33 @@ int main()
 	check(wrong.data != NULL && pool.retainedCount() == 1,
 	      "a different-size buffer is not handed out for this geometry");
 	pool.release(wrong);
+
+	// Late binning (#162 review): every output is acquired full-frame but
+	// written binned. Binned buffers must not be retained: they can never be
+	// handed out, and four of them would fill the pool so that real full-frame
+	// buffers are then freed instead of reused. Reproduce that sequence: four
+	// concurrently-live outputs released binned, then a full-frame release.
+	pool.clear();
+	{
+		std::vector<MultidimArray<float> > outs(4);
+		for (auto &o : outs) pool.acquire(o, ny, nx);
+		for (auto &o : outs) {
+			o.clear();
+			o.reshape(ny / 2, nx + 512);       // never requested; 12 MiB, above the 8 MiB floor
+			pool.release(o);
+		}
+	}
+	check(pool.retainedCount() == 0, "buffers of a never-requested (binned) size are not retained");
+	MultidimArray<float> full;
+	pool.acquire(full, ny, nx);
+	float *full_ptr = full.data;
+	pool.release(full);
+	check(pool.retainedCount() == 1 && pool.retainedBytes() == frame,
+	      "after binned releases a full-frame buffer is still retained for reuse");
+	MultidimArray<float> again;
+	pool.acquire(again, ny, nx);
+	check(again.data == full_ptr, "and it is the one handed out next");
+	pool.release(again);
 
 	// Disabled.
 	pool.clear();

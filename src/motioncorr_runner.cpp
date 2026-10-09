@@ -2845,10 +2845,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		mic.setGlobalShift(frames[i] + 1, xshifts[i] * prescaling, yshifts[i] * prescaling); // 1-indexed
         }
 
-	Iref().reshape(ny, nx);
-	Iref_even().reshape(ny, nx);
-	Iref_odd().reshape(ny, nx);
-	Iref().initZeros();
+	// Iref, Iref_even and Iref_odd are acquired (pooled, then zeroed) at the
+	// reconstruction sites below; nothing reads them before that. The old
+	// reshape+initZeros here was a dead full-frame allocation and memset per
+	// movie (#162 review).
 
 	// The real-space frames reconstructed below have exactly two readers:
 	// patch clipping (do_local) and the "before dose weighting" sum further

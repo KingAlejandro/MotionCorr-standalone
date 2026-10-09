@@ -116,11 +116,11 @@ void StageProfile::enable(const std::string &path)
 			             "Choose a new file name or remove the old profile.");
 		REPORT_ERROR("Cannot create --profile output " + path + ": " + std::strerror(err));
 	}
-	::close(fd);
-	// The file is ours and empty; reopen it as a stream for formatted output.
-	out.open(path.c_str(), std::ios::out | std::ios::trunc);
-	if (!out)
-		REPORT_ERROR("Cannot open --profile output " + path);
+	// Keep writing through this descriptor. Reopening by path would let
+	// another process replace the path (say, with a symlink to an input)
+	// between create and reopen, and the reopen would follow it (#162 review).
+	out_fd = fd;
+	out.str("");
 	out << std::setprecision(6) << std::fixed;
 	out_path = path;
 	on = true;
@@ -128,14 +128,27 @@ void StageProfile::enable(const std::string &path)
 
 void StageProfile::checkWritten(const char *what)
 {
-	// A full filesystem or quota failure must not leave a silently truncated
-	// profile. Stream state is sticky, so checking after each flush covers
-	// every insertion before it. Reported once; products are unaffected.
-	if (!out.flush() || out.fail()) {
+	// Records are formatted into `out` and written whole to the exclusive
+	// descriptor. A full filesystem or quota failure must not leave a silently
+	// truncated profile: every short or failed write is detected. Reported
+	// once; products are unaffected.
+	const std::string record = out.str();
+	out.str("");
+	out.clear();
+	size_t done = 0;
+	bool ok = out_fd >= 0;
+	while (ok && done < record.size()) {
+		const ssize_t n = ::write(out_fd, record.data() + done, record.size() - done);
+		if (n < 0 && errno == EINTR) continue;
+		if (n <= 0) { ok = false; break; }
+		done += (size_t)n;
+	}
+	if (!ok) {
 		write_failed = true;
 		if (!write_failure_reported) {
 			write_failure_reported = true;
 			std::cerr << "ERROR: writing the --profile output " << out_path << " failed (" << what
+			          << (errno ? std::string(": ") + std::strerror(errno) : std::string())
 			          << "); the profile is incomplete. Products are unaffected." << std::endl;
 		}
 	}
@@ -310,6 +323,12 @@ void StageProfile::endRun(int n_movies)
 	}
 	out << "]}\n";
 	checkWritten("process record");
-	out.close();
-	if (out.fail()) checkWritten("close");
+	if (out_fd >= 0) {
+		if (::close(out_fd) != 0 && !write_failed) {
+			write_failed = true;
+			std::cerr << "ERROR: closing the --profile output " << out_path << " failed: "
+			          << std::strerror(errno) << "; the profile may be incomplete." << std::endl;
+		}
+		out_fd = -1;
+	}
 }

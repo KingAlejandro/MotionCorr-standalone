@@ -13,6 +13,7 @@
 #include <atomic>
 #include <cstdio>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <thread>
 #include <vector>
@@ -27,6 +28,17 @@ int main()
 	unlink(path);  // enable() creates it exclusively
 	StageProfile &p = StageProfile::instance();
 	p.enable(path);
+	// Path swap after the exclusive create (#162 review, P1): another process
+	// replaces the profile path with a symlink to a victim. Writes must keep
+	// going to the inode that enable() created; the victim must be untouched.
+	char victim[] = "/tmp/mc_stage_profile_victimXXXXXX";
+	const int vfd = mkstemp(victim);
+	if (vfd < 0) { std::perror("mkstemp victim"); return 1; }
+	const char original[] = "victim input bytes\n";
+	if (write(vfd, original, sizeof original - 1) != (ssize_t)(sizeof original - 1)) return 1;
+	close(vfd);
+	std::string moved = std::string(path) + ".moved";
+	if (rename(path, moved.c_str()) != 0 || symlink(victim, path) != 0) { std::perror("swap"); return 1; }
 	p.beginRun();
 	p.beginMovie(0, "threads");
 	p.next("work");
@@ -54,16 +66,22 @@ int main()
 	p.endMovie(true);
 	p.endRun(1);
 
-	std::ifstream in(path);
+	std::ifstream vin(victim);
+	std::string victim_now((std::istreambuf_iterator<char>(vin)), std::istreambuf_iterator<char>());
+	unlink(victim);
+	unlink(path);   // the symlink
+	std::ifstream in(moved);
 	std::string movie, line;
 	while (std::getline(in, line))
 		if (line.find("\"type\":\"movie\"") != std::string::npos) movie = line;
-	unlink(path);
+	unlink(moved.c_str());
 	int failures = 0;
 	auto check = [&](bool ok, const char *what) {
 		std::printf("%s %s\n", ok ? "ok  " : "FAIL", what);
 		if (!ok) failures++;
 	};
+	check(victim_now == original, "a path swapped to a symlink after enable() is not written through");
+	check(!movie.empty(), "the profile went to the inode enable() created");
 	check(worker_calls.load() > 0, "workers ran concurrently with the owner");
 	check(movie.find("\"name\":\"work/OWNER\",\"n\":20000") != std::string::npos,
 	      "owner sub-stage recorded exactly n times");

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <fstream>
 #include <map>
+#include <sstream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -95,7 +96,10 @@ private:
 	// exists; read-only afterwards, so unsynchronised reads are race-free.
 	bool on = false;
 	bool run_open = false;
-	std::ofstream out;
+	// Formatted records are built here and written whole to out_fd, the
+	// descriptor from the exclusive create; the path is never reopened.
+	std::ostringstream out;
+	int out_fd = -1;
 	std::string out_path;
 	bool write_failed = false, write_failure_reported = false;
 

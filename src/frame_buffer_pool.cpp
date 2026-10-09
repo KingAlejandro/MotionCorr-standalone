@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "src/frame_buffer_pool.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
@@ -59,6 +60,8 @@ void FrameBufferPool::acquire(MultidimArray<float> &array, long int ny, long int
 	{
 		std::lock_guard<std::mutex> lock(mutex);
 		if (on) {
+			if (std::find(requested.begin(), requested.end(), elements) == requested.end())
+				requested.push_back(elements);
 			for (size_t i = 0; i < free_list.size(); i++) {
 				if (free_list[i].elements == elements) {
 					reused = free_list[i].data;
@@ -90,7 +93,8 @@ void FrameBufferPool::release(MultidimArray<float> &array)
 	                      elements * sizeof(float) >= kMinPooledBytes;
 	if (poolable) {
 		std::lock_guard<std::mutex> lock(mutex);
-		if (on && free_list.size() < capacity) {
+		const bool reusable = std::find(requested.begin(), requested.end(), elements) != requested.end();
+		if (on && reusable && free_list.size() < capacity) {
 			free_list.push_back({array.data, elements});
 			// Detach without freeing: the pool owns the buffer now.
 			array.data = NULL;
@@ -122,6 +126,7 @@ void FrameBufferPool::clear()
 	{
 		std::lock_guard<std::mutex> lock(mutex);
 		taken.swap(free_list);
+		requested.clear();
 	}
 	for (const Buffer &b : taken) RELION_ALIGNED_FREE(b.data);
 }

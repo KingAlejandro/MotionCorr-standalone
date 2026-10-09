@@ -25,10 +25,11 @@
  * - **Scope.** Only buffers explicitly passed through acquire()/release() are
  *   pooled. Everything else, including per-frame movie storage, keeps the
  *   default allocator behaviour.
- * - **Bound.** At most `capacity` buffers are retained, each exactly one
- *   frame of the geometry they were made for. A release beyond capacity, or
- *   of a different size, frees normally, so the retained bytes never exceed
- *   capacity * largest frame.
+ * - **Bound.** At most `capacity` buffers are retained, each exactly the size
+ *   of a frame acquire() has been asked for. A release beyond capacity, or of
+ *   any other size (an image binned after acquisition, say), frees normally,
+ *   so retained bytes never exceed capacity * largest requested frame, and
+ *   every retained buffer can be reused.
  * - **Contents.** acquire() returns uninitialised memory, exactly like a
  *   fresh allocation; every caller already zeroes or overwrites it.
  * - **Thread safety.** release() may be called from the output writer
@@ -68,6 +69,11 @@ private:
 	struct Buffer { float *data; size_t elements; };
 	mutable std::mutex mutex;
 	std::vector<Buffer> free_list;
+	// Element counts acquire() has been asked for. release() only retains a
+	// buffer of one of these sizes: anything else (for example an image binned
+	// after acquisition) can never be handed out again and would only occupy
+	// a slot. Bounded by the number of distinct geometries in a run.
+	std::vector<size_t> requested;
 	size_t capacity;
 	bool on;
 	bool poison;

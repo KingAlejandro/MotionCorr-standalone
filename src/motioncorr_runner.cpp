@@ -804,9 +804,8 @@ void MotioncorrRunner::run()
 	// before it was parked, so a failure here is reported, not charged to them.
 	joinCudaContextWarmup();
 	const bool parked_release_ok = releaseParkedCudaSession("end of run");
-	if (do_own && use_gpu && !early_binning) {
-		std::cout << " CUDA movie sessions: " << cuda_sessions_built << " built, "
-		          << cuda_sessions_reused << " reused" << std::endl;
+	const bool report_cuda_sessions = do_own && use_gpu && !early_binning;
+	if (report_cuda_sessions) {
 		StageProfile::instance().setNote("cuda_sessions",
 		    std::to_string(cuda_sessions_built) + " built, " + std::to_string(cuda_sessions_reused) + " reused");
 		StageProfile::instance().setNote("cuda_session_end_release", parked_release_ok ? "ok" : "failed");
@@ -836,6 +835,11 @@ void MotioncorrRunner::run()
 
 	if (verb > 0)
 		progress_bar(fn_micrographs.size());
+#ifdef _CUDA_ENABLED
+	if (report_cuda_sessions)
+		std::cout << " CUDA movie sessions: " << cuda_sessions_built << " built, "
+		          << cuda_sessions_reused << " reused" << std::endl;
+#endif
 
 	if (!failed_movies.empty())
 	{

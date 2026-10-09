@@ -111,6 +111,9 @@ def main():
                 print(r.stderr[-1500:])
                 return 1
             outs[arm] = tmp / f"out-{arm}"
+            if arm == "nopool":
+                check("frame pool disabled" in r.stdout and "buffers pooled" not in r.stdout,
+                      "disabled pool reported accurately")
             if arm == "pool":
                 check("Host allocator:" in r.stdout and "pooled" in r.stdout,
                       "default allocator mode reported (glibc defaults, pooled buffers)")

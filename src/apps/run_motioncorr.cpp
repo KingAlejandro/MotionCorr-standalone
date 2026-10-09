@@ -18,6 +18,7 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include <exception>
+#include <string>
 #include <src/motioncorr_runner.h>
 #if defined(__GLIBC__)
 #include <malloc.h>
@@ -41,28 +42,33 @@
  *  - Never applied over user settings (MALLOC_MMAP_THRESHOLD_,
  *    MALLOC_TRIM_THRESHOLD_, GLIBC_TUNABLES).
  */
-static const char *configureHostAllocator()
+static std::string configureHostAllocator()
 {
+	// The pool reads MOTIONCORR_FRAME_POOL itself; report its real state so a
+	// benchmark record names the policy that produced its timings.
+	const char *pool_env = getenv("MOTIONCORR_FRAME_POOL");
+	const bool pooled = !(pool_env != NULL && pool_env[0] == '0' && pool_env[1] == '\0');
+	const std::string pool = pooled ? "full-frame buffers pooled" : "frame pool disabled (MOTIONCORR_FRAME_POOL=0)";
 #if defined(__GLIBC__)
 	const char *opt = getenv("MOTIONCORR_MALLOC_REUSE");
 	if (opt == NULL || !(opt[0] == '1' && opt[1] == '\0'))
-		return "glibc defaults; full-frame buffers pooled";
+		return "glibc defaults; " + pool;
 	if (getenv("MALLOC_MMAP_THRESHOLD_") || getenv("MALLOC_TRIM_THRESHOLD_") || getenv("GLIBC_TUNABLES"))
-		return "user malloc settings kept; full-frame buffers pooled";
+		return "user malloc settings kept; " + pool;
 	const int threshold = 512 << 20;
 	if (mallopt(M_MMAP_THRESHOLD, threshold) != 1)
-		return "glibc defaults (this glibc refuses a mmap threshold above 32 MiB); full-frame buffers pooled";
+		return "glibc defaults (this glibc refuses a mmap threshold above 32 MiB); " + pool;
 	if (mallopt(M_TRIM_THRESHOLD, threshold) != 1)
-		return "mmap threshold raised (MOTIONCORR_MALLOC_REUSE); trim threshold unchanged";
-	return "mmap/trim thresholds raised (MOTIONCORR_MALLOC_REUSE)";
+		return "mmap threshold raised (MOTIONCORR_MALLOC_REUSE); trim threshold unchanged; " + pool;
+	return "mmap/trim thresholds raised (MOTIONCORR_MALLOC_REUSE); " + pool;
 #else
-	return "platform allocator defaults; full-frame buffers pooled";
+	return "platform allocator defaults; " + pool;
 #endif
 }
 
 int main(int argc, char *argv[])
 {
-	const char *allocator_mode = configureHostAllocator();
+	const std::string allocator_mode = configureHostAllocator();
 	MotioncorrRunner prm;
 	prm.host_allocator_mode = allocator_mode;
 

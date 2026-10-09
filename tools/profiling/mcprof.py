@@ -211,15 +211,38 @@ def cmd_run(a, rest, compare=False):
                 profile_passes(a, arms, args, staged, work, cpus, sampler, p)
             if a.trace_pass:
                 order = list(arms)
+                # Every arm must be traced with the same instrumentation, or
+                # device deltas would compare instrumentation, not code.
+                modes = {arm: trace_mode(a.trace_device_timing, p["binaries"][arm]["has_profile_option"],
+                                         p["binaries"][arm].get("has_device_timing_option", False))
+                         for arm in arms}
+                p["trace_instrumentation"] = {"modes": modes, "common": len(set(modes.values())) == 1}
+                if not p["trace_instrumentation"]["common"]:
+                    print("mcprof: trace instrumentation differs between arms %s; traces are kept but "
+                          "device deltas will not be reported" % modes, flush=True)
                 for k in range(a.trace_pass):
                     for arm in (order if k % 2 == 0 else order[::-1]):
                         trace_dir = os.path.join(work, "trace", arm, "p%02d" % (k + 1))
                         os.makedirs(trace_dir, exist_ok=True)
                         quiet = runner.wait_quiet_lane(cpus, a.lane_wait) if a.lane_wait > 0 else None
                         p.setdefault("trace_lane_waits", []).append({"arm": arm, "pass": k + 1, "lane": quiet})
-                        mode = do_trace(a, arms[arm], args, staged, trace_dir, cpus,
-                                        p["binaries"][arm]["has_profile_option"],
-                                        p["binaries"][arm].get("has_device_timing_option", False))
+                        # The GPU settle at the start covers the timed series only;
+                        # re-check before, and sample during, every trace.
+                        gpu_settle = runner.settle(sampler, a.settle_timeout) if sampler.uuid else None
+                        mode, occupancy = do_trace(a, arms[arm], args, staged, trace_dir, cpus,
+                                                   p["binaries"][arm]["has_profile_option"],
+                                                   p["binaries"][arm].get("has_device_timing_option", False),
+                                                   sampler=sampler)
+                        contaminated = bool(gpu_settle and not gpu_settle["settled"]) or \
+                            bool(occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids")))
+                        p.setdefault("trace_occupancy", []).append(
+                            {"arm": arm, "pass": k + 1, "settle": gpu_settle, "during": occupancy,
+                             "contaminated": contaminated})
+                        if contaminated:
+                            with open(os.path.join(trace_dir, "CONTAMINATED"), "w") as f:
+                                f.write(json.dumps({"settle": gpu_settle, "during": occupancy}) + "\n")
+                            print("mcprof: %-8s trace p%02d saw other GPU processes; excluded from deltas"
+                                  % (arm, k + 1), flush=True)
                         p.setdefault("trace_device_timing", {})[arm] = mode
                         print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
                 p["trace_pass"] = "%d trace(s) per arm" % a.trace_pass
@@ -278,8 +301,15 @@ def trace_payload(mode, binary, args, star, out, prof_file, has_device_timing):
     return runner.payload_argv(binary, args, star, out, [], profile=prof_file, profile_args=extra), recorded
 
 
-def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing=False):
-    """Trace one process; returns the device timing mode it ran with."""
+def trace_mode(mode, has_profile, has_device_timing):
+    """The instrumentation a trace of this binary runs with (no side effects)."""
+    if not has_profile:
+        return "n/a (no --profile)"
+    return runner.device_timing_args(mode, has_device_timing)[1]
+
+
+def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing=False, sampler=None):
+    """Trace one process; returns (device timing mode, GPU occupancy seen during it)."""
     nsys = a.nsys or shutil.which("nsys") or "/usr/local/bin/nsys"
     base = os.path.join(work, "trace")
     out = os.path.join(work, "out")
@@ -302,8 +332,19 @@ def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing
     os.makedirs(out, exist_ok=True)
     log = os.path.join(work, "trace.log")
     t0 = time.monotonic()
+    occupancy = None
     with open(log, "w") as f:
-        rc = subprocess.call(cmd, cwd=staged["cwd"], env=env, stdout=f, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(cmd, cwd=staged["cwd"], env=env, stdout=f, stderr=subprocess.STDOUT,
+                                start_new_session=True)
+        if sampler is not None and sampler.uuid:
+            sampler.start(proc.pid)
+        try:
+            rc = proc.wait()
+        finally:
+            if sampler is not None and sampler.uuid:
+                sampler.stop()
+                occupancy = {"samples": sampler.samples, "foreign_pids": sorted(sampler.foreign),
+                             "unknown_pids": sorted(sampler.unknown_pids), "errors": sampler.errors}
     wall = time.monotonic() - t0
     if a.sample:
         subprocess.call(["sudo", "-n", "chown", "-R", "%d:%d" % (os.getuid(), os.getgid()), work])
@@ -326,7 +367,7 @@ def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing
         os.remove(sqlite)
     if a.keep == "none":
         os.remove(base + ".nsys-rep")
-    return mode
+    return mode, occupancy
 
 
 def analyze_sqlite(sqlite, work, meta, sample=False):
@@ -368,9 +409,11 @@ def cmd_trace(a, rest):
     with held_locks(a, p["locks"]):
         p["settle"] = runner.settle(sampler, a.settle_timeout)
         prov.write_json(os.path.join(work, "provenance.json"), p)
-        p["trace_device_timing"] = {name: do_trace(a, binary, args, staged, work, cpus,
-                                                   p["binaries"][name]["has_profile_option"],
-                                                   p["binaries"][name].get("has_device_timing_option", False))}
+        mode, occupancy = do_trace(a, binary, args, staged, work, cpus,
+                                   p["binaries"][name]["has_profile_option"],
+                                   p["binaries"][name].get("has_device_timing_option", False), sampler=sampler)
+        p["trace_device_timing"] = {name: mode}
+        p["trace_occupancy"] = occupancy
         prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, 0.0, a.html)
     return 0
@@ -494,13 +537,27 @@ def write_report(work, floor_s, want_html):
                 for r in runs if r["kind"] == "profile" and r["flags"]["discard"]]
             parts.append(report.render_stage_deltas(out["stage_deltas"]))
         traces = {}
+        excluded = []
         for arm in arms:
             found = sorted(glob.glob(os.path.join(work, "trace", arm, "p*", "trace.json")))
-            if found:
-                traces[arm] = [report.load_json(f) for f in found]
-        if traces:
+            clean = [f for f in found if not os.path.isfile(os.path.join(os.path.dirname(f), "CONTAMINATED"))]
+            excluded += [os.path.relpath(f, work) for f in found if f not in clean]
+            if clean:
+                traces[arm] = [report.load_json(f) for f in clean]
+        instr = p.get("trace_instrumentation")
+        if traces and len(arms) > 1 and instr and not instr.get("common", True):
+            out["device_deltas"] = {"suppressed": "trace instrumentation differs between arms",
+                                    "modes": instr["modes"]}
+            parts.append("## Device deltas\n\nNot reported: the arms were traced with different "
+                         "instrumentation (%s), so their differences would include the instrumentation "
+                         "itself.\n" % ", ".join("`%s`: %s" % kv for kv in instr["modes"].items()))
+        elif traces:
             out["device_deltas"] = report.derive_device_deltas(traces, arms[0])
-            parts.append(report.render_device_deltas(out["device_deltas"]))
+            if excluded:
+                out["device_deltas"]["excluded_traces"] = excluded
+            parts.append(report.render_device_deltas(out["device_deltas"]) + (
+                "\n\nExcluded traces (another GPU process was present): %s\n" % ", ".join(excluded)
+                if excluded else ""))
             for arm, ts in traces.items():
                 parts.append(report.render_trace(ts[0]).replace(
                     "## Device", "## Device: `%s` (trace pass 1 of %d)" % (arm, len(ts)), 1))
@@ -612,6 +669,8 @@ def main(argv=None):
         a.section = ["SpeedOfLight", "Occupancy", "MemoryWorkloadAnalysis", "LaunchStats"]
     if a.cmd in ("compare",) and a.pairs < 1:
         ap.error("--pairs must be positive")
+    if a.cmd == "run" and a.rounds < 1:
+        ap.error("--rounds must be positive")
     fn = {"run": cmd_run, "compare": lambda a, r: cmd_run(a, r, compare=True), "trace": cmd_trace,
           "kernels": cmd_kernels, "report": cmd_report, "selftest": cmd_selftest}[a.cmd]
     try:

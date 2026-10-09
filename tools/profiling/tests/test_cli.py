@@ -12,7 +12,7 @@ import shutil
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
@@ -262,6 +262,123 @@ class DeviceTimingDetection(unittest.TestCase):
         ok, how = prov.device_timing_detection(b)
         self.assertTrue(ok)
         self.assertTrue(how.startswith("binary scan"), how)
+
+
+FAKE_NSYS = r"""#!%(py)s
+import os, shutil, subprocess, sys
+args = sys.argv[1:]
+if args[0] == "export":
+    out = args[args.index("-o") + 1]
+    shutil.copy(os.environ["FAKE_NSYS_SQLITE"], out)
+    sys.exit(0)
+# profile ... -o BASE <payload...>
+i = args.index("-o")
+base = args[i + 1]
+payload = [a for a in args[i + 2:] if not a.startswith("--sample") and not a.startswith("--cpuctxsw")]
+open(base + ".nsys-rep", "w").close()
+sys.exit(subprocess.call(payload))
+"""
+
+
+class TraceInstrumentation(unittest.TestCase):
+    """Trace passes: common instrumentation across arms, GPU occupancy per pass."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.data = make_data(os.path.join(self.tmp, "data"))
+        self.nsys = os.path.join(self.tmp, "nsys")
+        with open(self.nsys, "w") as f:
+            f.write(FAKE_NSYS % {"py": sys.executable})
+        os.chmod(self.nsys, 0o755)
+        os.environ["FAKE_NSYS_SQLITE"] = fixture_db.build(os.path.join(self.tmp, "f.sqlite"))
+
+    def tearDown(self):
+        os.environ.pop("FAKE_NSYS_SQLITE", None)
+        shutil.rmtree(self.tmp)
+
+    def compare(self, name, arms, *extra):
+        work = os.path.join(self.tmp, name)
+        argv = ["compare", *arms, "--data", self.data, "--work", work, "--no-lock", "--pairs", "1",
+                "--warmup", "0", "--settle-timeout", "0", "--lane-wait", "0", "--trace-pass", "1",
+                "--nsys", self.nsys, *extra, "--", "--gpu", "0"]
+        with redirect_stdout(io.StringIO()):
+            rc = mcprof.main(argv)
+        return rc, work
+
+    def test_mixed_instrumentation_suppresses_device_deltas(self):
+        new = make_binary(os.path.join(self.tmp, "new"))
+        old = make_binary(os.path.join(self.tmp, "old"), device_timing_option=False)
+        rc, work = self.compare("mixed", ["a=" + new, "b=" + old])
+        self.assertEqual(rc, 0)
+        p = json.load(open(os.path.join(work, "provenance.json")))
+        self.assertFalse(p["trace_instrumentation"]["common"])
+        c = json.load(open(os.path.join(work, "compare.json")))
+        self.assertIn("suppressed", c["device_deltas"])
+        self.assertIn("Not reported: the arms were traced with different instrumentation",
+                      open(os.path.join(work, "report.md")).read())
+
+    def test_common_instrumentation_reports_device_deltas(self):
+        a = make_binary(os.path.join(self.tmp, "a"))
+        b = make_binary(os.path.join(self.tmp, "b"))
+        rc, work = self.compare("common", ["a=" + a, "b=" + b])
+        self.assertEqual(rc, 0)
+        p = json.load(open(os.path.join(work, "provenance.json")))
+        self.assertTrue(p["trace_instrumentation"]["common"])
+        c = json.load(open(os.path.join(work, "compare.json")))
+        self.assertNotIn("suppressed", c["device_deltas"])
+        self.assertEqual(len(p["trace_occupancy"]), 2)
+
+    def test_contaminated_trace_is_excluded(self):
+        # A sampler that reports a foreign GPU process during the trace.
+        a = make_binary(os.path.join(self.tmp, "a"))
+        b = make_binary(os.path.join(self.tmp, "b"))
+        orig = mcprof.runner.make_sampler
+
+        class Busy(mcprof.runner.GpuSampler):
+            def __init__(self):
+                super().__init__("GPU-fake")
+            def start(self, sid):
+                self.reset(); self.samples = 1; self.foreign = {4242: 1 << 20}
+            def stop(self):
+                pass
+            def processes(self):
+                return []
+            def baseline(self, n=10, gap=0.02):
+                return 0
+            def summary(self, baseline):
+                return {"instrument": "test", "samples": 1, "peak_process_bytes": None,
+                        "peak_device_used_bytes": None, "device_delta_bytes": None,
+                        "foreign_pids": {4242: 1 << 20}, "unknown_pids": [], "errors": 0,
+                        "mean_interval_ms": None}
+        try:
+            mcprof.runner.make_sampler = lambda uuid: Busy()
+            rc, work = self.compare("busy", ["a=" + a, "b=" + b])
+        finally:
+            mcprof.runner.make_sampler = orig
+        p = json.load(open(os.path.join(work, "provenance.json")))
+        self.assertTrue(all(o["contaminated"] for o in p["trace_occupancy"]))
+        self.assertTrue(os.path.isfile(os.path.join(work, "trace", "a", "p01", "CONTAMINATED")))
+        c = json.load(open(os.path.join(work, "compare.json")))
+        self.assertNotIn("device_deltas", c)
+
+
+class RunRounds(unittest.TestCase):
+    def test_nonpositive_rounds_rejected(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            data = make_data(os.path.join(tmp, "data"))
+            binary = make_binary(os.path.join(tmp, "bin"))
+            for n in ("0", "-1"):
+                err = io.StringIO()
+                with self.subTest(rounds=n), redirect_stderr(err), redirect_stdout(io.StringIO()):
+                    with self.assertRaises(SystemExit):
+                        mcprof.main(["run", binary, "--data", data, "--work", os.path.join(tmp, "w" + n),
+                                     "--no-lock", "--warmup", "0", "--settle-timeout", "0", "--lane-wait", "0",
+                                     "--rounds", n, "--", "--gpu", "0"])
+                    self.assertIn("--rounds must be positive", err.getvalue())
+                    self.assertFalse(os.path.exists(os.path.join(tmp, "w" + n, "results.json")))
+        finally:
+            shutil.rmtree(tmp)
 
 
 class DeviceDeltaMissingStage(unittest.TestCase):

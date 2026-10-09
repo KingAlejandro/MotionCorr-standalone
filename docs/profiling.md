@@ -155,6 +155,14 @@ For paired differences d = B − A (positive: B slower):
 A stage that one arm never runs is compared against zero, so removing a
 stage entirely shows as a (flaggable) negative delta rather than a missing row.
 
+Device deltas need every arm traced with the same instrumentation (`--profile`
+present, and the same `--profile_device_timing` mode). If the arms differ, for
+example an old binary without `--profile_device_timing`, the traces are kept
+but device deltas are not reported (`trace_instrumentation` in provenance).
+Before each trace pass the GPU is re-checked for other processes, and NVML
+samples it during the trace. A pass that saw another process is marked
+`CONTAMINATED`, recorded in `trace_occupancy`, and excluded from the deltas.
+
 `--profile-pass` (3 per arm when given without N) runs each arm under
 `--profile`; `--trace-pass` (2 when given without N) traces each arm. Passes
 alternate arm order. Each pass is one process; its value for a stage is the

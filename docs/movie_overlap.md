@@ -56,10 +56,24 @@ The prefetch thread finishes well ahead of the next movie: its join wait is 0.01
 - **VRAM:** unchanged at 3362 MiB (NVML process peak).
 - **Process CPU:** 62.8–69.0 s → 37.3–39.7 s, about −25 s per run. This is inferred, not measured per thread: the drop is the OpenMP workers of the serial strip-read region spinning after it. The candidate skips that region when the prefetch is used. The drop did not show up as wall time on a 12-CPU lane.
 
-## Why it differs from earlier attempts, and why it still does not pay
+## Comparison with earlier attempts
 
-- **#108** (bounded host prefetch, closed) lost about 0.32 s to contention with the OpenMP readers. Here the thread runs on its own CPUs and the other stages did not move, so contention is not the problem. The problem is that the removed host work was already partly overlapped with the GPU inflate.
-- **#161** (two processes on one GPU, MPS) duplicated all host work per process. In-process overlap avoids that, but only for work that can leave the main thread. The strip read was the largest such block that is cheap to move.
+All earlier attempts belong to issue [#94](https://github.com/KingAlejandro/MotionCorr-standalone/issues/94) (next-movie prefetch) or to the ingest and GPU-sharing work it depends on. Each row is MEASURED on its own venue, base and workload, so the numbers are not directly comparable across rows.
+
+| attempt | venue, base, workload | what overlaps | result | memory |
+|---|---|---|---|---|
+| [PR #108](https://github.com/KingAlejandro/MotionCorr-standalone/pull/108) (open draft, off by default) | SCARF, `4c952b3`, 24 movies, host TIFF decode (before nvCOMP) | whole decoded host movie of N+1; producer, one queued and one active movie | prefetch faster in 1 of 9 pairs; per-budget means 2.4–5.9% slower; the consumer waited only 0.3–5 s of a 100–180 s run | +2.55 GiB RSS (+86%) |
+| [#94 experiment A](https://github.com/KingAlejandro/MotionCorr-standalone/issues/94#issuecomment-5932900922) (probe, not implemented; `perf/nvcomp-next` `e3ba798`) | 4GPUs, `a294f3b`, 24 movies, nvCOMP ingest | compressed strips of N+1, read by a probe producer running *alongside* an unmodified job | precondition failed: 18.7 ms/movie stageable (gate ≥60); the producer slowed the job by 0.308 s (0.321 s with `OMP_WAIT_POLICY=PASSIVE`) against a 0.430 s ceiling | not measured |
+| [PR #164](https://github.com/KingAlejandro/MotionCorr-standalone/pull/164) (on main via #167) | 4GPUs, `5fb1b02`, 24 movies | within one movie: H2D of chunk k+1 and host read of chunk k+2 overlap the inflate of chunk k | device ingest 70.1 → 67.8 ms/movie (profiled); wall −0.26 s over 8 pairs, unresolved | RSS 601 → 452 MB |
+| [PR #161](https://github.com/KingAlejandro/MotionCorr-standalone/pull/161) (open, docs) | 4GPUs, 24 movies | two processes on one GPU; MPS with one process per GPU | two processes per GPU: no throughput gain; MPS: −0.4% / −1.4% / −7.6% at 1 / 2 / 4 GPUs | not reported |
+| this prototype | 4GPUs, `7d64043`, 96 movies | strip read and tag scan of N+1 on their own thread (CPUs 88-91), replacing the serial read | −8.06% (5 pairs) and −4.15% (7 pairs), both unresolved; main thread saves 16–18 ms/movie | +164 MiB RSS |
+
+What the comparison shows:
+
+- **Memory.** #108 held a decoded float movie per pipeline slot. Prefetching compressed strips needs one 160 MiB pinned buffer instead.
+- **Contention.** Experiment A ran the read as extra work beside the job, so it measured contention only, and that contention exceeded the possible saving. This prototype replaces the serial read and pins its thread to CPUs 88-91; both arms had the same 12-CPU lane (72-79 plus 88-91). No non-ingest stage moved beyond its noise threshold, so contention did not show up here.
+- **Why the saving is small.** The serial strip read was already partly hidden: #164's pipeline overlaps the read of chunk k+2 with the inflate of chunk k. Removing the read exposes the inflate wait, so about 28 ms of host work saves only about 11 ms in ingest. #108 found the same limit from the other side: the consumer was rarely waiting for input.
+- **Processes versus threads.** #161's second process duplicated all host work per movie. In-process overlap avoids that duplication, but only for work that can leave the main thread, and the strip read was the largest such block that is cheap to move.
 
 ## What would be needed for 10%
 

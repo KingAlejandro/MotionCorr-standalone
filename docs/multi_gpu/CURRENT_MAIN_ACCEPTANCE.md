@@ -19,7 +19,26 @@ The merger independently verifies before/after movie contents/mtimes and final
 joint rows. It requires a fresh output directory. These checks do not provide a
 filesystem transaction against unrelated concurrent mutation of movie files.
 
-## Current host controls and remaining gates
+## Current state (9 Oct 2026)
+
+This section supersedes the counts, UNRUN rows and 24-CPU plan below, which
+describe the earlier `6c87441d` candidate.
+
+The source is `d7339fd`, which includes main `9d14275`. Linux results on
+`4-gpu-vm`:
+
+| Check | Result |
+|---|---|
+| Required test collection | 42 tests |
+| CPU ctest | 42/42 |
+| CUDA ctest | 56/56, including `MultiGpuScheduling` with `--binary` (dataset, tomography, ownership, aggregate-only and tree-RSS endpoints), `JointStarPublication` and `CiFailClosedControls` |
+| Native identity on 24 movies (1, 2 and 4 GPUs) | Identical to a single-process single-GPU run: MRC bytes [0:224] and [1024:], path-normalised STARs including the joint STAR, and presence of `.log`/`.eps`/`.pdf`. Real Ghostscript rendered `logfile.pdf`. |
+| Fixed 32-CPU scaling, 24 and 96 movies | 4×8 is 1.34× and 1.68× faster than 1×32 to publication. See [scaling/README.md](scaling/README.md). |
+
+What remains unmeasured: tomography on real data, and native failure/resume
+runs beyond the endpoint tests.
+
+## Current host controls and remaining gates (6c87441d candidate, superseded)
 
 - Required test collection: **34**, preserving `NativeMovieStaging` and
   `JointStarPublication`, and adding `MultiGpuScheduling`. Collection is not an execution verdict.
@@ -42,7 +61,7 @@ filesystem transaction against unrelated concurrent mutation of movie files.
   Collect the actual configuration's native inventory; do not infer a PASS
   from a predicted count or previous-source evidence.
 
-## Executable native correctness plan (after review and allocation)
+## Executable native correctness plan (superseded by the current state above)
 
 Use one frozen Release binary and input/source/tool hashes. Work from the data
 project directory so original relative movie names retain their meaning. Obtain

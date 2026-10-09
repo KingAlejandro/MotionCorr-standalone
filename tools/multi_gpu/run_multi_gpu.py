@@ -51,6 +51,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gpu_witness  # noqa: E402
 import partition_star  # noqa: E402
+import star_io  # noqa: E402
 from process_ownership import ProcessOwnership, ProcessTable  # noqa: E402
 
 _LAUNCHER_SIGNALS = (signal.SIGINT, signal.SIGTERM)
@@ -433,26 +434,46 @@ class ProductSampler(threading.Thread):
         self._stop_event.set()
 
 
-def movie_wall_times(wdir: Path) -> list[float]:
-    """The binary's own per-movie wall times, from the per-movie logs.
+# The worker's stdout/stderr. No movie product can have this name: every
+# per-movie root has its dots replaced by '_' (star_io.output_root), so a stem
+# containing '.' is never a movie's. The previous name, run.log, was exactly
+# what a top-level movie run.tif writes, and the launcher's stream replaced it.
+WORKER_CONSOLE_LOG = "launcher.console.log"
+
+
+def movie_wall_times(wdir: Path, movies: list[str]) -> tuple[list[float], list[str]]:
+    """The binary's own per-movie wall times, from each assigned movie's log.
 
     src/motioncorr_runner.cpp writes "Full movie wall time: N s" per movie.
     That is the process's own measurement of the movie loop, so comparing its
     sum against the observed worker wall separates movie work from everything
-    around it without trusting the poller's resolution.
+    around it without trusting the poller's resolution. Only the logs of the
+    movies this worker was assigned are read, and a movie whose log or line is
+    absent is returned as missing rather than silently left out of the sum.
     """
-    out = []
-    try:
-        for log in sorted(wdir.rglob("*.log")):
+    out, missing = [], []
+    for movie in movies:
+        log = wdir / star_io.movie_output_path(movie, ".log")
+        value = None
+        try:
             for line in log.read_text(errors="replace").splitlines():
                 if "Full movie wall time:" in line:
                     try:
-                        out.append(float(line.split(":", 1)[1].strip().split()[0]))
+                        value = float(line.split(":", 1)[1].strip().split()[0])
                     except (ValueError, IndexError):
                         pass
-    except OSError:
-        pass
-    return out
+        except OSError:
+            pass
+        if value is None:
+            missing.append(movie)
+        else:
+            out.append(value)
+    return out, missing
+
+
+def max_present(values: list) -> float | None:
+    present = [v for v in values if v is not None]
+    return max(present) if present else None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -625,6 +646,7 @@ def main(argv: list[str] | None = None) -> int:
         return rc
     manifest = json.loads((shard_dir / "shard_manifest.json").read_text())
     shard_roots = {s["index"]: list(s.get("output_roots") or []) for s in manifest["shards"]}
+    shard_movies = {s["index"]: list(s.get("movies") or []) for s in manifest["shards"]}
 
     extra = list(a.worker_args)
     if extra and extra[0] == "--":
@@ -651,7 +673,7 @@ def main(argv: list[str] | None = None) -> int:
     # Per-worker timing and resident set. These are the quantities a scaling
     # comparison needs and cannot reconstruct afterwards; recording them costs
     # nothing and changes no production source. This is bookkeeping, not a
-    # benchmark: see docs/multi_gpu/SCALING_EXPERIMENT.md for what an
+    # benchmark: see docs/multi_gpu/scaling/README.md for what an
     # interpretable measurement additionally requires.
     ownership = ProcessOwnership()
     resources = ResourceSampler(a.sample_interval)
@@ -726,7 +748,7 @@ def main(argv: list[str] | None = None) -> int:
                        ("OMP_NUM_THREADS", "OMP_PROC_BIND", "OMP_PLACES")}
             # exec a fresh process: nothing in this launcher has touched CUDA, so
             # no already-initialized context is ever inherited.
-            with (wdir / "run.log").open("w") as log, _defer_launcher_signals():
+            with (wdir / WORKER_CONSOLE_LOG).open("w") as log, _defer_launcher_signals():
                 p = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
                                      start_new_session=True)
                 stamps[k] = {"started": time.time()}
@@ -892,18 +914,24 @@ def main(argv: list[str] | None = None) -> int:
                     "model STAR/plots/aggregate/report/drain work; setup+produce+tail "
                     "partition the worker wall",
         }
-        binary_movie_times = movie_wall_times(wdir)
+        binary_movie_times, missing_times = movie_wall_times(wdir, shard_movies[k])
+        # A sum over a subset is not the worker's movie time; report it only
+        # when every assigned movie reported its own.
         phases["binary_movie_wall_sum"] = (round(sum(binary_movie_times), 3)
-                                           if binary_movie_times else None)
+                                           if binary_movie_times and not missing_times
+                                           else None)
         phases["binary_movie_walls"] = binary_movie_times
+        phases["binary_movie_walls_missing"] = missing_times
         results.append({"index": k, "pid": p.pid, "returncode": rc,
-                        "log": str((wdir / "run.log").resolve()),
+                        "log": str((wdir / WORKER_CONSOLE_LOG).resolve()),
                         "started_at": _iso(stamps[k]["started"]),
                         "ended_at": _iso(ended) if ended is not None else None,
                         "exit_observed": rc is not None,
                         "observed_until_at": _iso(observed_until),
                         "wall_seconds": round(wall_s, 3),
                         "rss_hwm_kib": resources.hwm_kib.get(p.pid),
+                        "rss_status": ("MEASURED" if p.pid in resources.hwm_kib
+                                       else "MISSING"),
                         "rss_note": resources.unavailable or
                                     ("worker process only; ghostscript children "
                                      f"excluded; sampled every {a.sample_interval}s"),
@@ -966,11 +994,15 @@ def main(argv: list[str] | None = None) -> int:
                                 "meaningful when the budget was actually used.",
         "affinity_problems": affinity_problems or None,
         "phase_rollup": {
-            "max_setup_seconds": max((r["phases"]["setup_seconds"] or 0) for r in results) if results else None,
-            "max_tail_seconds": max((r["phases"]["tail_seconds"] or 0) for r in results) if results else None,
-            "first_product_spread": (round(max(r["phases"]["first_product_offset"] or 0 for r in results)
-                                           - min(r["phases"]["first_product_offset"] or 0 for r in results), 3)
-                                     if results else None),
+            # Missing values are excluded and counted, never read as 0 s.
+            "max_setup_seconds": max_present([r["phases"]["setup_seconds"] for r in results]),
+            "max_tail_seconds": max_present([r["phases"]["tail_seconds"] for r in results]),
+            "first_product_spread": (
+                round(max(offsets) - min(offsets), 3)
+                if (offsets := [r["phases"]["first_product_offset"] for r in results])
+                and None not in offsets else None),
+            "n_workers_missing_setup": sum(r["phases"]["setup_seconds"] is None for r in results),
+            "n_workers_missing_tail": sum(r["phases"]["tail_seconds"] is None for r in results),
             "note": "first_product_spread is the stagger between workers reaching "
                     "their first product. If per-process CUDA setup serialises "
                     "across concurrent workers this grows with worker count; if "
@@ -1008,6 +1040,19 @@ def main(argv: list[str] | None = None) -> int:
         witness = gpu_witness.check_observations(expected, sampler.observations())
         witness["sampler_errors"] = sampler.errors
         witness["n_samples"] = len(sampler.samples)
+        peaks: dict[str, float | None] = {devices[k]["uuid"]: None for k, _, _ in procs}
+        for sample in sampler.samples:
+            for app in sample["apps"]:  # type: ignore[union-attr]
+                pid, mib = app.get("pid", ""), (app.get("used_gpu_memory") or "").split()
+                uuid = expected.get(int(pid)) if pid.isdigit() else None
+                mib = mib[0] if mib else ""
+                if uuid is not None and mib.replace(".", "", 1).isdigit():
+                    peaks[uuid] = max(peaks[uuid] or 0.0, float(mib))
+        status["sampled_peak_gpu_memory_mib"] = peaks
+        status["sampled_peak_gpu_memory_note"] = (
+            f"max nvidia-smi used_gpu_memory of each worker pid, sampled every "
+            f"{a.sample_interval}s: a lower bound on the true peak; null means the "
+            "worker was never observed with a reading")
         status["gpu_witness"] = witness
         if not witness["all_pids_witnessed_on_intended_distinct_devices"]:
             verdict_ok = False

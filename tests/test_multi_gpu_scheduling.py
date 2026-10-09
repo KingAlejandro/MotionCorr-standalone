@@ -133,7 +133,7 @@ def fake_status(tmp: Path, codes: list[int], verdict: str = "PASS",
     man = Path(manifest) if manifest is not None else tmp / "shards" / "shard_manifest.json"
     wdirs = workers if workers is not None else [tmp / f"w{k}" for k in range(len(codes))]
     body: dict = {"workers": [{"index": k, "returncode": rc,
-                               "log": str((Path(wdirs[k]) / "run.log").resolve())}
+                               "log": str((Path(wdirs[k]) / "launcher.console.log").resolve())}
                               for k, rc in enumerate(codes)],
                   "manifest": str(man.resolve()),
                   "manifest_sha256": hashlib.sha256(man.read_bytes()).hexdigest()
@@ -1805,9 +1805,9 @@ def case_aggregate_may_not_rewrite_staged_products(tmp: Path) -> None:
     rep = json.loads(report.read_text())
     assert any("rewrote" in p and "staged worker product" in p
                for p in rep["problems"]), rep["problems"]
-    # every movie was rewritten, so the count must say so rather than reporting
-    # a single incidental file
-    assert any(f"rewrote {2 * len(DEFAULT_ROWS)} staged" in p
+    # every movie was rewritten (.mrc, .star and .log each), so the count must
+    # say so rather than reporting a single incidental file
+    assert any(f"rewrote {3 * len(DEFAULT_ROWS)} staged" in p
                for p in rep["problems"]), rep["problems"]
 
 
@@ -2310,6 +2310,86 @@ def case_aggregate_staging_namespace_reserved(tmp: Path) -> None:
     assert partition(star2, 1, tmp / "shards_ok").returncode == 0
 
 
+def write_tomography(tmp: Path, globals_: list[tuple[str, str]],
+                     tables: dict[str, list[tuple[str, float]]],
+                     labels: tuple[str, ...] = ("rlnTomoName", "rlnTomoTiltSeriesStarFile")) -> Path:
+    star = tmp / "tomo.star"
+    star.write_text("data_global\nloop_\n"
+                    + "".join(f"_{label} #{i + 1}\n" for i, label in enumerate(labels))
+                    + "".join(" ".join((name, ref)[:len(labels)]) + "\n" for name, ref in globals_))
+    for ref, rows in tables.items():
+        name = Path(ref).stem
+        (tmp / ref).parent.mkdir(parents=True, exist_ok=True)
+        (tmp / ref).write_text(f"data_{name}\nloop_\n_rlnMicrographMovieName #1\n"
+                               "_rlnMicrographPreExposure #2\n"
+                               + "".join(f"{m} {d}\n" for m, d in rows))
+    return star
+
+
+def case_tomography_partition(tmp: Path) -> None:
+    """Tomography shards whole tilt series and records the joint STAR the merge checks.
+
+    The canonical order is series order, then pre-exposure within each series,
+    because that is the order the runner's per-series tables are written in.
+    Old-format input, a per-series table that would collide with a movie product
+    or the joint STAR, and more shards than series are refused before launch.
+    """
+    tables = {"ts/one.star": [("Movies/b.tif", 5.0), ("Movies/a.tif", 0.0), ("Movies/e.tif", 5.0)],
+              "ts/two.star": [("Movies/c.tif", 17.0), ("Movies/d.tif", 11.0)],
+              "ts/three.star": [("Movies/f.tif", 1.0)]}
+    star = write_tomography(tmp, [("one", "ts/one.star"), ("two", "ts/two.star"),
+                                  ("three", "ts/three.star")], tables)
+    cp = run([PY, TOOLS / "partition_star.py", "--star", star, "--n", 2,
+              "--outdir", tmp / "shards"], cwd=tmp)
+    assert cp.returncode == 0, cp.stderr
+    man = json.loads((tmp / "shards" / "shard_manifest.json").read_text())
+    assert man["input_type"] == "tomography", man
+    # stable: b and e tie at 5.0 and keep file order
+    assert man["canonical_movies"] == ["Movies/a.tif", "Movies/b.tif", "Movies/e.tif",
+                                       "Movies/d.tif", "Movies/c.tif", "Movies/f.tif"], man
+    assert [s["series"] for s in man["shards"]] == [["one", "two"], ["three"]], man["shards"]
+    assert [s["sidecars"] for s in man["shards"]] == [["ts/one.star", "ts/two.star"],
+                                                      ["ts/three.star"]], man["shards"]
+    shard1 = star_io.parse(man["shards"][1]["path"])
+    assert [r.values[0] for r in star_io.tomo_global_block(shard1).rows] == ["three"]
+
+    def refused(name: str, star_path: Path, n: int, rc: int, text: str) -> None:
+        cp = run([PY, TOOLS / "partition_star.py", "--star", star_path, "--n", n,
+                  "--outdir", tmp / f"shards-{name}"], cwd=tmp)
+        assert cp.returncode == rc and text in cp.stderr, (name, cp.returncode, cp.stderr)
+
+    refused("too-many", star, 4, 2, "3 tilt series")
+    sub = tmp / "old"; sub.mkdir()
+    refused("old-format", write_tomography(sub, [("one", "")], {}, labels=("rlnTomoName",)),
+            1, 3, "per-series-file format")
+    for label, ref, text in [("joint", "corrected_tilt_series.star", "reserved output path"),
+                             ("product", "Movies/a.star", "also a movie product path"),
+                             ("escape", "../one.star", "outside the output directory")]:
+        sub = tmp / label; sub.mkdir()
+        (sub / "Movies").mkdir(exist_ok=True)
+        st = write_tomography(sub, [("one", ref)],
+                              {"src/one.star": [("Movies/a.tif", 0.0)]})
+        # the table is read from the reference itself, so place it there
+        target = (sub / ref)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists():
+            target.write_text((sub / "src/one.star").read_text())
+        cp = run([PY, TOOLS / "partition_star.py", "--star", st, "--n", 1,
+                  "--outdir", sub / "shards"], cwd=sub)
+        assert cp.returncode == 3 and text in cp.stderr, (label, cp.returncode, cp.stderr)
+
+    # the merge refuses a tomography manifest whose series disagree with its
+    # canonical movie list, rather than validating against either
+    bad = dict(man)
+    bad["canonical_movies"] = list(reversed(man["canonical_movies"]))
+    bad_path = tmp / "bad_manifest.json"
+    bad_path.write_text(json.dumps(bad))
+    w = [tmp / "w0", tmp / "w1"]
+    for d in w:
+        d.mkdir()
+    cp = merge(bad_path, w, tmp / "merged", fake_status(tmp, [0, 0], manifest=bad_path, workers=w))
+    assert cp.returncode == 2 and "do not cover the canonical movies" in cp.stderr, cp.stderr
+
 
 def case_dataset_endpoint(_tmp: Path) -> None:
     result = subprocess.run([PY, str(ROOT / "tests/test_dataset_endpoint.py")],
@@ -2382,6 +2462,7 @@ CASES = [
     case_launcher_signal_during_spawn_keeps_child_owned,
     case_per_worker_timing_and_rss_recorded,
     case_aggregate_staging_namespace_reserved,
+    case_tomography_partition,
     case_dataset_endpoint,
     case_owned_tree_rss,
     case_pid_birth_cleanup,
@@ -2405,6 +2486,12 @@ def main(argv: list[str] | None = None) -> int:
             if result.returncode != 0:
                 raise AssertionError(result.stdout + result.stderr)
         cases.append(aggregate_control)
+        def tomography_endpoint(_tmp):
+            result = subprocess.run([PY, str(ROOT / "tests/test_tomography_endpoint.py"),
+                                     "--binary", a.binary, "--fake-gs"], text=True, capture_output=True)
+            if result.returncode != 0:
+                raise AssertionError(result.stdout + result.stderr)
+        cases.append(tomography_endpoint)
     else:
         print("NOTE: --binary not given; the --gpu device-list rejection case is "
               "NOT run and is not claimed to pass.")

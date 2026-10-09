@@ -189,7 +189,7 @@ sys.exit({exit_code})
             identity=None
             try:
                 result=subprocess.run(command,capture_output=True,text=True,timeout=20)
-                require(receipt.exists(),'actual worker child did not write birth receipt: '+result.stdout+result.stderr+((case/'out/w0/run.log').read_text() if (case/'out/w0/run.log').exists() else ''))
+                require(receipt.exists(),'actual worker child did not write birth receipt: '+result.stdout+result.stderr+((case/'out/w0/launcher.console.log').read_text() if (case/'out/w0/launcher.console.log').exists() else ''))
                 identity=json.loads(receipt.read_text());current=ProcessTable().read(identity['pid'])
                 require(not(current and same_birth(current['start'],identity['start']) and current['state']!='Z'),'actual normal-return '+str(exit_code)+' left owned reparented child live')
                 require(term.exists(),'actual normal-return '+str(exit_code)+' did not send checked TERM before escalation')
@@ -197,7 +197,7 @@ sys.exit({exit_code})
                 status=json.loads((case/'out/status.json').read_text())
                 require(status['verdict']=='FAIL' and not status['workers_complete'],'unexpected descendant became worker success')
                 require(status['workers'][0]['returncode']==exit_code,'checked cleanup replaced original worker return code')
-                require('ORIGINAL_WORKER_RETURN_'+str(exit_code) in (case/'out/w0/run.log').read_text(),'original worker diagnostic lost')
+                require('ORIGINAL_WORKER_RETURN_'+str(exit_code) in (case/'out/w0/launcher.console.log').read_text(),'original worker diagnostic lost')
                 cleanup=status['process_cleanup']
                 require(cleanup['complete'] and cleanup['error'] is None and cleanup['unexpected_descendants'],'normal return cleanup not explicitly complete')
                 require(any(r['pid']==identity['pid'] and r['start']==identity['start'] and r['ppid']!=status['workers'][0]['pid'] for r in cleanup['observed_live_before_cleanup']),'cleanup did not prove same-birth reparented descendant')

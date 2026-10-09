@@ -8,6 +8,7 @@ output-naming and fixed-name-aggregate behaviour the scheduler has to cope with:
   * per movie, <out>/<root>.mrc and <out>/<root>.star, where <root> is the movie
     path with its extension dropped and every remaining '.' turned into '_',
     matching getOutputFileNames() (src/motioncorr_runner.cpp:553);
+  * per movie, <out>/<root>.log with the binary's "Full movie wall time" line;
   * the per-movie STAR carries the movie name, optics group and pre-exposure it
     was given, so a test can prove metadata survived partitioning rather than
     only that a file appeared;
@@ -53,7 +54,8 @@ def star_quote(value: str) -> str:
 
 
 def write_products(outdir: Path, movie: str, optics: str, pre_exposure: str,
-                   truncate_mrc: bool = False, marker: str = "") -> None:
+                   truncate_mrc: bool = False, marker: str = "",
+                   movie_log: bool = True, wall: float = 0.0) -> None:
     # getOutputFileNames is plain string concatenation, fn_out + fn_root
     # (src/motioncorr_runner.cpp:553-573), so an absolute movie name lands at
     # <out>//abs/path.mrc -- i.e. worker-relative abs/path.mrc. Joining an
@@ -70,6 +72,11 @@ def write_products(outdir: Path, movie: str, optics: str, pre_exposure: str,
         "rlnOpticsGroup": optics,
         "rlnMicrographPreExposure": pre_exposure,
     }, sort_keys=True) + "\n")
+    if movie_log:
+        # The per-movie log line the launcher reads its per-movie wall times
+        # from (src/motioncorr_runner.cpp writes the same text).
+        (outdir / (root + ".log")).write_text(
+            f"FAKELOG {movie}\nFull movie wall time: {wall:.3f} s\n")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -102,6 +109,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="sleep this long after each movie. With uneven shards the "
                          "workers then finish at genuinely different times, which is "
                          "what makes the launcher's final-worker tail observable.")
+    ap.add_argument("--fake_no_movie_log", action="store_true",
+                    help="write no per-movie .log, so its wall time is missing")
     ap.add_argument("--fake_note", default=None,
                     help="write this text to <out>/note.txt; used to prove that extra "
                          "arguments actually reached the process rather than being "
@@ -138,7 +147,9 @@ def main(argv: list[str] | None = None) -> int:
                        row.values[optics_col] if optics_col is not None else "",
                        row.values[pre_col] if pre_col is not None else "",
                        truncate_mrc=movie in truncate,
-                       marker=" REPROCESSED" if a.fake_reprocess else "")
+                       marker=" REPROCESSED" if a.fake_reprocess else "",
+                       movie_log=not a.fake_no_movie_log,
+                       wall=a.fake_sleep_per_movie)
         processed.append(movie)
         done += 1
         if a.fake_sleep_per_movie:

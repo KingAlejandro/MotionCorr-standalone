@@ -424,3 +424,46 @@ def movie_output_path(movie_name: str, suffix: str) -> str:
     if suffix == "_shifts.eps":
         return shift_plot_path(movie_name)
     return worker_relative_root(output_root(movie_name)) + suffix
+
+
+# Tomography input (src/jaz/tomography/tomogram_set.cpp:28). The runner treats
+# the input as tomography iff a non-empty data_global table exists; each row
+# names one tilt series and the STAR file holding its data_<rlnTomoName> table.
+TOMO_GLOBAL_BLOCK = "global"
+TOMO_NAME_LABEL = "rlnTomoName"
+TOMO_STAR_LABEL = "rlnTomoTiltSeriesStarFile"
+PRE_EXPOSURE_LABEL = "rlnMicrographPreExposure"
+
+
+def tomo_global_block(star: StarFile) -> Block | None:
+    """The block TomogramSet::read would accept, or None for SPA input."""
+    for b in star.blocks:
+        if b.name == TOMO_GLOBAL_BLOCK and b.rows:
+            return b
+    return None
+
+
+def pipeline_post(fn: str) -> str:
+    """Port of decomposePipelineFileName's fn_post (src/filename.cpp:614).
+
+    The per-series table is written to <out dir> + fn_post, where fn_post drops
+    everything up to and including the first "jobNNN/" component. When find()
+    returns npos the C++ indexes fn[npos+1] == fn[0], so a leading "jobNNN" is
+    also recognised; this reproduces that.
+    """
+    n = len(fn)
+    slashpos = 0
+    while slashpos < n:
+        found = fn.find("/", slashpos + 1)
+        base = 0 if found < 0 else found + 1
+        tail = fn[base:base + 6]
+        if len(tail) == 6 and tail.startswith("job") and tail[3:].isdigit() \
+                and tail[3:].isascii():
+            slash2 = fn.find("/", base + 5)
+            if slash2 < 0:
+                slash2 = n - 1
+            return fn[slash2 + 1:]
+        if found < 0:
+            break
+        slashpos = found
+    return fn

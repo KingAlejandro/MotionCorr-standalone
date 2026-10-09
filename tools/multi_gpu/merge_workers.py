@@ -43,9 +43,10 @@ import star_io  # noqa: E402
 AGGREGATE_NAMES = {
     "corrected_micrographs.star", "corrected_tilt_series.star",
     "logfile.pdf", "header.pdf", "batch.pdf",
-    "all_batches.pdf", "gain.mrc", "run.log", "time.txt", "note.txt",
-    # written by run_multi_gpu.py itself, not by the worker
-    "command.json", "status.json",
+    "all_batches.pdf", "gain.mrc", "time.txt", "note.txt",
+    # written by run_multi_gpu.py itself, not by the worker. The console log's
+    # stem contains '.', which no movie output root can (star_io.output_root).
+    "launcher.console.log", "command.json", "status.json",
 }
 AGGREGATE_PREFIXES = ("corrected_micrographs_",)
 AGGREGATE_SUFFIXES = (".lst",)
@@ -136,6 +137,98 @@ def gpu_witness_problems(status: dict[str, object]) -> list[str]:
         problems.append("GPU witness records shared physical devices")
     if witness.get("distinct_devices_witnessed") != len(devices):
         problems.append("GPU witness distinct-device count does not match the worker count")
+    return problems
+
+
+def first_difference(got: list[str], want: list[str]) -> int:
+    return next((i for i, (g, w) in enumerate(zip(got, want)) if g != w),
+                min(len(got), len(want)))
+
+
+def image_paths(out: Path, movies: list[str]) -> list[str]:
+    # Normalize both sides. getOutputFileNames() is plain concatenation
+    # (src/motioncorr_runner.cpp:553-573), so an absolute movie name writes
+    # "<out>//abs/path/x.mrc" while the expectation is built through
+    # worker_relative_root, which strips the leading slash. Those name one file
+    # but are different strings, so a correct tree would fail the comparison.
+    return [os.path.normpath(str(out / (star_io.worker_relative_root(
+        star_io.output_root(m)) + ".mrc"))) for m in movies]
+
+
+def micrograph_names(path: Path, block: star_io.Block) -> list[str]:
+    col = block.column("rlnMicrographName")
+    return [os.path.normpath(r.values[col]) for r in block.rows]
+
+
+def joint_star_problems(out: Path, manifest: dict, input_type: str,
+                        agg: dict) -> list[str]:
+    """Check the dataset STAR the aggregate step published, by input type.
+
+    SPA: corrected_micrographs.star lists every corrected image in canonical
+    input order. Tomography: corrected_tilt_series.star lists every series in
+    global-table order, each reference resolves to a per-series table inside
+    the merged tree, and each table lists that series' images in pre-exposure
+    order (src/jaz/tomography/tomogram_set.cpp:110-156, :818-841).
+    """
+    canonical = manifest["canonical_movies"]
+    if input_type == "spa":
+        star_path = out / "corrected_micrographs.star"
+        if not star_path.exists():
+            return [f"aggregate step produced no {star_path}"]
+        try:
+            got = micrograph_names(star_path, star_io.parse(star_path)
+                                   .block_with_label("rlnMicrographName"))
+        except star_io.StarFormatError as exc:
+            return [f"aggregate joint STAR is unreadable: {exc}"]
+        want = image_paths(out, canonical)
+        agg["n_rows"] = len(got)
+        if got != want:
+            return ["aggregate row order is not the canonical input order "
+                    f"({len(got)} rows against {len(want)} expected); first "
+                    f"difference at {first_difference(got, want)}"]
+        return []
+
+    star_path = out / "corrected_tilt_series.star"
+    if not star_path.exists():
+        return [f"aggregate step produced no {star_path}"]
+    series = manifest["tomography"]["series"]
+    try:
+        glob = star_io.tomo_global_block(star_io.parse(star_path))
+        if glob is None:
+            return [f"{star_path} has no data_global rows"]
+        names = [r.values[glob.column(star_io.TOMO_NAME_LABEL)] for r in glob.rows]
+        refs = [r.values[glob.column(star_io.TOMO_STAR_LABEL)] for r in glob.rows]
+    except star_io.StarFormatError as exc:
+        return [f"aggregate joint STAR is unreadable: {exc}"]
+    want_names = [t["name"] for t in series]
+    agg["n_series"] = len(names)
+    if names != want_names:
+        return ["aggregate tilt-series order is not the canonical global order "
+                f"({len(names)} series against {len(want_names)} expected); first "
+                f"difference at {first_difference(names, want_names)}"]
+    problems = []
+    n_rows = 0
+    for t, ref in zip(series, refs):
+        # The binary resolves a relative reference against its cwd, which the
+        # aggregate step shares with this process.
+        table_path = os.path.abspath(str(out / t["sidecar"]))
+        if os.path.abspath(ref) != table_path:
+            problems.append(f"tilt series {t['name']!r} references {ref}, not its "
+                            f"per-series table {table_path}")
+            continue
+        try:
+            got = micrograph_names(Path(table_path),
+                                   star_io.parse(table_path).block(t["name"]))
+        except (OSError, star_io.StarFormatError) as exc:
+            problems.append(f"tilt series {t['name']!r}: per-series table unreadable: {exc}")
+            continue
+        want = image_paths(out, t["movies"])
+        n_rows += len(got)
+        if got != want:
+            problems.append(f"tilt series {t['name']!r}: images are not the canonical "
+                            f"pre-exposure order ({len(got)} rows against {len(want)} "
+                            f"expected); first difference at {first_difference(got, want)}")
+    agg["n_rows"] = n_rows
     return problems
 
 
@@ -415,6 +508,23 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     out.mkdir(parents=True, exist_ok=True)
 
+    input_type = manifest.get("input_type", "spa")
+    if input_type not in ("spa", "tomography"):
+        print(f"FAIL: manifest input_type {input_type!r} is not spa or tomography",
+              file=sys.stderr)
+        return 2
+    sidecar_owner: dict[str, int] = {}
+    if input_type == "tomography":
+        for s in shards:
+            for sidecar in s.get("sidecars", []):
+                sidecar_owner[sidecar] = s["index"]
+        tomo_series = manifest.get("tomography", {}).get("series", [])
+        if ([m for t in tomo_series for m in t["movies"]] != list(manifest["canonical_movies"])
+                or sorted(sidecar_owner) != sorted(t["sidecar"] for t in tomo_series)):
+            print("FAIL: tomography manifest series do not cover the canonical movies "
+                  "and per-series tables exactly", file=sys.stderr)
+            return 2
+
     produced: dict[Path, int] = {}     # staged relative path -> worker index
     per_worker_aggregates: list[str] = []
 
@@ -434,8 +544,16 @@ def main(argv: list[str] | None = None) -> int:
             if plot_movie is not None:
                 attribution = (star_io.worker_relative_root(
                     star_io.output_root(plot_movie)), "_shifts", ".eps")
+            if attribution is None and str(rel) in sidecar_owner \
+                    and sidecar_owner[str(rel)] != k:
+                problems.append(f"misrouted: worker {k} produced per-series table {rel}, "
+                                f"assigned to shard {sidecar_owner[str(rel)]}")
+                continue
             if attribution is None:
-                if is_aggregate(rel):
+                # A worker's per-series tables describe only its own series; the
+                # aggregate step writes the dataset's versions into the merged
+                # root, so the worker copies are provenance, like its joint STAR.
+                if is_aggregate(rel) or str(rel) in sidecar_owner:
                     dst = out / "_workers" / f"w{k}" / rel
                     dst.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(src, dst)
@@ -482,6 +600,7 @@ def main(argv: list[str] | None = None) -> int:
         "manifest": str(a.manifest),
         "aggregate_input_star_sha256": manifest_input_sha256,
         "merged_into": str(out),
+        "input_type": input_type,
         "n_movies_expected": len(canonical),
         "n_files_staged": len(produced),
         "worker_exit_codes": exits,
@@ -550,33 +669,10 @@ def main(argv: list[str] | None = None) -> int:
             problems.append(f"aggregate step exited {proc.returncode}; see "
                             f"{out / '_workers' / 'merge.log'}")
         else:
-            star_path = out / "corrected_micrographs.star"
-            if not star_path.exists():
-                problems.append(f"aggregate step produced no {star_path}")
-            else:
-                merged = star_io.parse(star_path)
-                block = merged.block_with_label("rlnMicrographName")
-                col = block.column("rlnMicrographName")
-                # Normalize both sides. getOutputFileNames() is plain
-                # concatenation (src/motioncorr_runner.cpp:553-573), so an
-                # absolute movie name writes "<out>//abs/path/x.mrc" while the
-                # expectation is built through worker_relative_root, which
-                # strips the leading slash. Those name one file but are
-                # different strings, so a correct tree would fail this check.
-                got = [os.path.normpath(r.values[col]) for r in block.rows]
-                want = [os.path.normpath(str(out / (star_io.worker_relative_root(
-                    star_io.output_root(m)) + ".mrc"))) for m in canonical]
-                agg["n_rows"] = len(got)
-                if got != want:
-                    problems.append(
-                        "aggregate row order is not the canonical input order "
-                        f"({len(got)} rows against {len(want)} expected); "
-                        "first difference at "
-                        + str(next((i for i, (g, w) in enumerate(zip(got, want)) if g != w),
-                                   min(len(got), len(want))))
-                    )
-                else:
-                    agg["row_order"] = "canonical"
+            joint = joint_star_problems(out, manifest, input_type, agg)
+            problems.extend(joint)
+            if not joint:
+                agg["row_order"] = "canonical"
         pdf = out / "logfile.pdf"
         if proc.returncode == 0:
             try:

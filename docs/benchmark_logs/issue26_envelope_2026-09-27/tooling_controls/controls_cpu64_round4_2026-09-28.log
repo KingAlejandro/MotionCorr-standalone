@@ -1,0 +1,58 @@
+=== issue26 tooling controls, round 4 (CPU-only; not a benchmark) ===
+utc             : 2026-09-28T06:44:08Z
+host            : small-refmac-machine
+lock held       : /tmp/motioncorr-issue96-cpu-validation.lock
+requested lane  : 32-63   (build/runtime parallelism <= 16; controls are serial)
+inherited cpuset: 32-63
+inherited mems  : 0-1
+lane NUMA node  : 1 
+memory policy   : policy: default;preferred node: current;physcpubind: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 ;cpubind: 1 ;nodebind: 1 ;membind: 0 1 ;preferred: ;
+nproc visible   : 32
+loadavg         : 2.99 2.55 2.26 4/7970 3251688
+runner  sha256  : e3fffa452525491537c9e19be50c90561f3e68cdb5fe299c83f58878a60a8dd3
+controls sha256 : c0a8b2da8e91ba2e7bd4c0a537c93fef1932e8c78457d0c96dd0a15ffebddedf
+prior runner    : b05260dbf9b4ddbd76c8e248dc1bb503b911ec5d1aef11d16ef699005443bdcd (defective, superseded)
+ctffind (recorded as interference, NOT altered):
+                  pid=1156942 pcpu=99.9 psr=1
+                  pid=1635429 pcpu=99.9 psr=25
+
+platform=linux /proc=True
+  PASS  two sequential 100 MiB stages are not a 200 MiB peak  n=2 max=100.0 sum=None
+  PASS  time-like tags still expose a meaningful sum  sum=7.0
+  PASS  payload resolved via /proc/<pid>/exe  {'pid': 3251700, 'exe': '/usr/bin/python3.12', 'starttime_ticks': 2590811090, 'session': 3251699, 'launcher_pid': 3251699, 'resolved_after_s': 0.039}
+  PASS  resolved payload PID differs from the launcher PID  payload=3251700 launcher=3251699 launcher_exe=/usr/bin/time
+  PASS  sampling the CHILD passes: residency reflects 256 MiB  child=266.1 MiB
+  PASS  MUTATION - sampling the PARENT fails the same assertion  parent=1.45 MiB vs threshold 128.0 MiB
+  PASS  parent residency is strictly smaller than the payload's  parent=1.45 MiB < child=266.1 MiB
+  PASS  units are bytes from numa_maps, not numastat MB  bytes, from numa_maps page counts x that mappi
+        identity: payload pid=3251700 exe=/usr/bin/python3.12 session=3251699 starttime=2590811090
+        per-node child bytes: {'N0': 4210688, 'N1': 274817024}
+  PASS  launcher-exit escalation demonstrably leaves the child running  child=3251703 alive=True ppid_now=1 descendants_of_launcher=[]
+  PASS  pgid enumeration sees the reparented child  group_members=[3251703]
+  PASS  a descendant walk CANNOT see it (this is why pgid is used)  descendants_of_launcher=[]
+  PASS  shipped cleanup reaps the SIGTERM-ignoring child  child=3251709 still_running=False
+  PASS  cleanup reports confirmed  confirmed=True survivors=[]
+  PASS  cleanup escalated to SIGKILL rather than trusting SIGTERM  escalated=True
+  PASS  adopted payload does not appear in its own foreign list  python3 hits=0  (other in-mask commands seen: {})
+  PASS  without adoption the same payload IS seen (control is not vacuous)  python3 hits=10
+  PASS  execute_arm resolved a payload identity  {'pid': 3251831, 'exe': '/tmp/envelope-stub-w3r8urrm/stub_payload', 'starttime_ticks': 2590812325, 'session': 3251827, 'launcher_pid': 3251827, 'resolved_after_s': 0.034}
+  PASS  recorded payload PID differs from the launcher PID  payload=3251831 launcher=3251827
+  PASS  recorded payload exe is the stub binary, not /usr/bin/time  exe=/tmp/envelope-stub-w3r8urrm/stub_payload
+  PASS  recorded mid-run residency is the payload's (> 96 MiB)  recorded=193.38 MiB  (a launcher-sampling record would be ~1.5 MiB)
+  PASS  payload cpuset was read from the payload, and matches the requested mask  payload_Cpus_allowed_list=32-63 requested=32-63
+  PASS  recorded cleanup is confirmed on the normal-exit path  cleanup=None
+        record: pid=3251831 launcher=3251827 exe=/tmp/envelope-stub-w3r8urrm/stub_payload midrun=193.38 MiB nodes={'N1': 202768384}
+  PASS  payload exited normally (this is the normal-exit path)  exit_code=0 timed_out=False
+  PASS  R1: the normal-exit path detected the residual group member  cleanup=residual group members after normal exit
+  PASS  R1: it was triggered by residual members, not a timeout  triggered_by=residual group members after normal exit
+  PASS  R1: the leaked child was reaped and cleanup confirmed  confirmed=True survivors=[]
+  PASS  R1: the arm is quarantined even though cleanup succeeded  quarantined=True reason=a process spawned by the payload outlived it and shared the cpuset during the timed interv
+  PASS  R1: the leaked child is actually dead afterwards  leaked_pid=3251875 alive=False
+
+all 28 runner controls passed, 0 skipped
+rc=0
+
+=== post-control process hygiene (nothing of ours must survive) ===
+stray control children: 0
+ctffind after          : 2
+loadavg after          : 2.85 2.55 2.27 3/7971 3251892

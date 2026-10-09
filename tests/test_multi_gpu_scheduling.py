@@ -1986,6 +1986,55 @@ def case_launcher_verdict_follows_the_device_witness(tmp: Path) -> None:
     assert any("GPU witness" in p for p in rep["problems"]), rep["problems"]
 
 
+def case_ownership_cost_is_independent_of_host_processes(tmp: Path) -> None:
+    """A healthy Linux launch must not enumerate every process on the host.
+
+    The ownership observer refreshes every 50 ms and cleanup rechecks each
+    group several times. When each of those read every /proc/<pid>/stat, one
+    fake-worker launch took ~10 s on a ~1800-process shared host and the
+    observer occupied a payload CPU. Count whole-table enumerations in an
+    actual subreaper launch; the refresh count shows the observer ran.
+    """
+    if sys.platform != "linux":
+        print("NOT CLAIMED: child-subreaper ownership, and so the bounded "
+              "descendant walk, exists only on Linux")
+        return
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS[:2])
+    counts = tmp / "counts.json"
+    wrapper = tmp / "count_scans.py"
+    wrapper.write_text(
+        "import json, sys\n"
+        f"sys.path.insert(0, {str(TOOLS)!r})\n"
+        "import process_ownership as po\n"
+        "import run_multi_gpu as launcher\n"
+        "n = {'pids': 0, 'refresh': 0}\n"
+        "def counted(cls, name):\n"
+        "    f = getattr(cls, name)\n"
+        "    def g(*a, **k):\n"
+        "        n[name] += 1\n"
+        "        return f(*a, **k)\n"
+        "    setattr(cls, name, g)\n"
+        "counted(po.ProcessTable, 'pids')\n"
+        "counted(po.ProcessOwnership, 'refresh')\n"
+        "try:\n"
+        "    rc = launcher.main()\n"
+        "finally:\n"
+        f"    open({str(counts)!r}, 'w').write(json.dumps(n))\n"
+        "raise SystemExit(rc)\n")
+    out = tmp / "run"
+    cp = subprocess.run([PY, wrapper, "--star", star, "--out", out, "--binary", FAKE,
+                         "--workers", "2", "--no-witness"],
+                        capture_output=True, text=True, timeout=60)
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    n = json.loads(counts.read_text())
+    status = json.loads((out / "status.json").read_text())
+    assert status["process_cleanup"]["ownership_mode"] == "linux-child-subreaper", \
+        status["process_cleanup"]
+    assert n["refresh"] > 0, n
+    assert n["pids"] == 0, f"healthy launch enumerated the whole process table: {n}"
+
+
 def case_launcher_signal_reaps_owned_process_group(tmp: Path) -> None:
     """SIGTERM/SIGINT to the launcher must reap workers and their children."""
     star = tmp / "movies.star"
@@ -2457,6 +2506,7 @@ CASES = [
     case_worker_args_may_not_override_launcher_options,
     case_aggregate_may_not_rewrite_staged_products,
     case_launcher_verdict_follows_the_device_witness,
+    case_ownership_cost_is_independent_of_host_processes,
     case_launcher_signal_reaps_owned_process_group,
     case_launcher_signal_reaches_cooperative_worker,
     case_launcher_signal_during_spawn_keeps_child_owned,

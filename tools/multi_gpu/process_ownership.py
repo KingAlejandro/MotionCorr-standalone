@@ -95,6 +95,16 @@ class ProcessTable:
         return records
 
     def group_live(self, pgid: int):
+        if self.proc == Path('/proc') and not self.darwin:
+            # ESRCH proves the group has no members, live or zombie, without
+            # reading every process on a shared host. Anything else, including
+            # EPERM, still needs the scan to separate zombies from live members.
+            try:
+                os.killpg(pgid, 0)
+            except ProcessLookupError:
+                return False
+            except OSError:
+                pass
         return any(r['pgid'] == pgid and r['state'] != 'Z'
                    for r in self.records().values())
 
@@ -144,6 +154,47 @@ class ProcessOwnership(threading.Thread):
                     self.child_inventory_mode = 'verified-proc-ppid'
                     return self._proc_child_pids()
         return children
+
+    def _descendant_records(self, known):
+        """Records of the launcher's descendants and of `known`, or None.
+
+        With child-subreaper adoption every owned process is a launcher
+        descendant: orphans re-parent to the launcher or to a nearer subreaper
+        inside its tree. Walking task/children therefore yields the same owned
+        set as a whole-table scan, at a cost set by the launcher's tree rather
+        than by every process on the host. None means the walk could not be
+        trusted (a live thread without a child list) and the caller scans.
+        """
+        records = {}
+        frontier, seen = [self.parent_pid], {self.parent_pid}
+        while frontier:
+            pid = frontier.pop()
+            try:
+                tasks = list((Path('/proc') / str(pid) / 'task').iterdir())
+            except (FileNotFoundError, ProcessLookupError):
+                continue  # exited since its parent listed it
+            for task in tasks:
+                try:
+                    children = map(int, (task / 'children').read_text().split())
+                except (FileNotFoundError, ProcessLookupError):
+                    if self.table.read(int(task.name)) is not None:
+                        return None
+                    continue
+                for child in children:
+                    if child not in seen:
+                        seen.add(child)
+                        frontier.append(child)
+        seen.discard(self.parent_pid)
+        for pid in seen | set(known):
+            try:
+                record = self.table.read(pid)
+            except (OSError, ValueError, IndexError):
+                if pid in known:
+                    raise RuntimeError(f'Cannot verify owned PID/birth identity {pid}')
+                continue
+            if record is not None:
+                records[pid] = record
+        return records
 
     def _proc_child_pids(self):
         """Fallback for kernels without task/children; unreadable rows refuse."""
@@ -249,7 +300,11 @@ class ProcessOwnership(threading.Thread):
                 record = self.table.read(pid)
                 if record:
                     known.setdefault(pid, None)
-        records = self.table.records(known)
+        records = None
+        if self.adoption and self.child_inventory_mode == 'task-children':
+            records = self._descendant_records(known)
+        if records is None:
+            records = self.table.records(known)
         owned = {pid for pid, r in records.items() if known.get(pid) == r['start']}
         if self.adoption:
             for pid, record in records.items():

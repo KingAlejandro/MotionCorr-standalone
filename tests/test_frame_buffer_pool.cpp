@@ -137,9 +137,12 @@ int main()
 		pool.acquire(b2, ny2, nx2);
 		check(b2.data == b_ptr, "the next acquisition of the new geometry reuses it");
 		pool.release(b2);
-		MultidimArray<float> c[3];
-		for (int i = 0; i < 3; i++) pool.acquire(c[i], ny2, nx2);
-		for (int i = 0; i < 3; i++) pool.release(c[i]);
+		// Pool now holds 3 A + 1 B. Four B outputs in flight (one reused, three
+		// fresh) are released: the first fills the free slot, each later one
+		// evicts an A.
+		MultidimArray<float> c[4];
+		for (int i = 0; i < 4; i++) pool.acquire(c[i], ny2, nx2);
+		for (int i = 0; i < 4; i++) pool.release(c[i]);
 		check(pool.retainedCount() == 4 && pool.retainedBytes() == 4 * frame2,
 		      "a sustained new geometry fully replaces the old one, within the bound");
 		// A late release of a stale (requested earlier, not current) size into a

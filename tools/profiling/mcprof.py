@@ -87,8 +87,20 @@ def kv(items):
 
 def prepare_work(a) -> str:
     work = os.path.abspath(a.work)
-    if os.path.isdir(work) and os.listdir(work) and not a.force:
-        raise SystemExit("%s is not empty (use --force to reuse it)" % work)
+    if os.path.isdir(work) and os.listdir(work):
+        if not a.force:
+            raise SystemExit("%s is not empty (use --force to reuse it)" % work)
+        # --force starts a fresh invocation: nothing from an earlier one may be
+        # appended to (runs.jsonl), globbed (traces) or reused (staged input).
+        # Only an earlier kit directory is cleared, never an arbitrary one.
+        if not os.path.isfile(os.path.join(work, "provenance.json")):
+            raise SystemExit("%s is not empty and holds no kit provenance.json; refusing to clear it" % work)
+        for name in os.listdir(work):
+            path = os.path.join(work, name)
+            if os.path.isdir(path) and not os.path.islink(path):
+                shutil.rmtree(path)
+            else:
+                os.unlink(path)
     os.makedirs(work, exist_ok=True)
     return work
 
@@ -147,7 +159,7 @@ def start(a, rest, instrument, need_arms=True):
     _, env_changes = runner.payload_env(a.gpu_uuid, a.env)
     p = prov.provenance(instrument, sys.argv, binaries_record(a, arms), cpus, a.gpu_uuid,
                         {"arms": list(arms), "input": staged, "payload_args": args, "payload_env": env_changes,
-                         "locks": []})
+                         "locks": [], "noise_floor_s": getattr(a, "noise_floor", 0.0)})
     return arms, work, cpus, staged, args, p
 
 
@@ -444,6 +456,13 @@ def _re_escape(s):
 
 def write_report(work, floor_s, want_html):
     p = report.load_json(os.path.join(work, "provenance.json"))
+    if floor_s is None:
+        # Regenerating a report keeps the comparison's own floor; only an
+        # explicit --noise-floor overrides it (and is recorded as such).
+        floor_s = p.get("noise_floor_s", 0.0) or 0.0
+    elif floor_s != p.get("noise_floor_s", 0.0):
+        print("mcprof: noise floor overridden: %.3f s (comparison used %.3f s)" % (
+            floor_s, p.get("noise_floor_s", 0.0) or 0.0), flush=True)
     parts = [report.render_provenance(p)]
     out = {}
     title = "MotionCorr profile"
@@ -582,7 +601,8 @@ def main(argv=None):
     p.add_argument("--html", action="store_true")
     p = sub.add_parser("report")
     p.add_argument("work")
-    p.add_argument("--noise-floor", type=float, default=0.0)
+    p.add_argument("--noise-floor", type=float, default=None,
+                   help="override the floor recorded by the comparison (default: reuse it)")
     p.add_argument("--html", action="store_true")
     p = sub.add_parser("selftest")
     p.add_argument("-v", "--verbose", action="store_true")

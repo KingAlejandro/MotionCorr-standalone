@@ -32,7 +32,9 @@ rows of the STAR through a staging directory of symlinks.
 | `report DIR` | none | regenerates `report.md` (`--html` for a self-contained page) from stored results |
 | `selftest` | none | the CTest suite |
 
-Each invocation writes into a fresh `--work` directory: `provenance.json`,
+Each invocation writes into a fresh `--work` directory (a non-empty one is
+refused; `--force` empties an earlier kit directory first and refuses any
+directory without a kit `provenance.json`): `provenance.json`,
 raw results (`runs.jsonl`, `identity.json`, `profile/*.jsonl`,
 `trace/<arm>/trace.json`, `kernels.json`), the derived `compare.json` or
 `results.json`, and `report.md`. Run trees are deleted after use unless
@@ -121,7 +123,9 @@ also keeps the export).
 For paired differences d = B − A (positive: B slower):
 
 - **noise** = max(1.4826 × MAD(d), `--noise-floor`): the pair-to-pair scatter
-  measured in the same series.
+  measured in the same series. The floor is stored in `provenance.json`
+  (`noise_floor_s`); `mcprof report DIR` reuses it, and only an explicit
+  `--noise-floor` overrides it (the override is printed).
 - The median of d gets a distribution-free confidence interval from binomial
   order statistics at ≥95%. It exists only from **6 retained pairs** up. With
   fewer, the verdict is "not resolved (N retained pairs, 6 needed)" and no
@@ -147,6 +151,9 @@ For paired differences d = B − A (positive: B slower):
 - At least one MRC must be compared; an empty comparison fails.
 
 ### Stage and device deltas (`--profile-pass N`, `--trace-pass N`)
+
+A stage that one arm never runs is compared against zero, so removing a
+stage entirely shows as a (flaggable) negative delta rather than a missing row.
 
 `--profile-pass` (3 per arm when given without N) runs each arm under
 `--profile`; `--trace-pass` (2 when given without N) traces each arm. Passes

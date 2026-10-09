@@ -201,6 +201,16 @@ def _profile_pass(sp, path: str) -> Dict:
             "movie_wall_ms": [m["wall_ms"] for m in steady]}
 
 
+def _stage_values(d: Dict, name: str, key: str) -> List[float]:
+    """Steady-state per-movie values of one stage in one --profile pass. A pass
+    in which no movie ran the stage contributes zeros, as a skipped stage does
+    within a pass, so removing a stage entirely is compared against zero
+    instead of disappearing from the report."""
+    if name in d["order"]:
+        return d["stages"][name][key]
+    return [0.0] * max(1, len(d["movie_wall_ms"]))
+
+
 def derive_stage_deltas(profiles: Dict[str, List[str]], base: str) -> Optional[Dict]:
     """Per-stage deltas from --profile passes (one process each) per arm."""
     if not profiles or base not in profiles:
@@ -216,8 +226,8 @@ def derive_stage_deltas(profiles: Dict[str, List[str]], base: str) -> Optional[D
             names += [n for n in d["order"] if n not in names]
         rows = OrderedDict()
         for n in names:
-            rows[n] = {k: stats.replicated_delta([d["stages"].get(n, {}).get(k, []) for d in data[base]],
-                                                 [d["stages"].get(n, {}).get(k, []) for d in data[arm]], min_abs)
+            rows[n] = {k: stats.replicated_delta([_stage_values(d, n, k) for d in data[base]],
+                                                 [_stage_values(d, n, k) for d in data[arm]], min_abs)
                        for k, min_abs in STAGE_KEYS}
         out["arms"][arm] = {"stages": rows, "movie_wall": stats.replicated_delta(
             [d["movie_wall_ms"] for d in data[base]], [d["movie_wall_ms"] for d in data[arm]], 0.5)}
@@ -233,7 +243,11 @@ def _trace_values(t: Dict, name: str, key: str) -> List[float]:
     """Steady-state per-movie values of one stage in one trace; a one-element
     list holding the total for outside-movie segments."""
     r = t["stages"].get(name)
-    if r is None or key not in r:
+    if r is None:
+        # A trace with no segment of this stage at all: zero, so a stage that
+        # one arm removes entirely is still compared (and flagged) against it.
+        return [0.0]
+    if key not in r:
         return []
     if r["kind"] in ("stage", "unattributed"):
         v = r[key]["per_movie"]

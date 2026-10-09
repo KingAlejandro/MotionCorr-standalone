@@ -11,6 +11,7 @@ a PDF with a creation date and a joint STAR. Behaviour from the environment:
   FAKE_EXTRA    extra seconds per movie inside the "fit polynomial" stage
   FAKE_VARIANT  changes the MRC payload (a product difference)
   FAKE_FAIL     exit 3 without products
+  FAKE_DROP_STAGE  omit the "fit polynomial" stage record from every movie
 """
 import hashlib
 import json
@@ -79,6 +80,8 @@ def main():
                                    {"name": "movie teardown", "n": 1, "wall_ms": (t3 - t2) * 1e3, "cpu_ms": 0.0,
                                     "minflt": 0, "majflt": 0, "vcsw": 0, "ivcsw": 0}],
                         "sub": []})
+        if os.environ.get("FAKE_DROP_STAGE"):
+            records[-1]["stages"] = [st for st in records[-1]["stages"] if st["name"] != "fit polynomial"]
     with open(os.path.join(out, "corrected_micrographs.star"), "w") as f:
         f.write("data_micrographs\nloop_\n_rlnMicrographName #1\n" + "\n".join(joint) + "\n")
     with open(os.path.join(out, "logfile.pdf"), "w") as f:

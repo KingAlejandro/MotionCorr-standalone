@@ -96,6 +96,56 @@ class Compare(unittest.TestCase):
         self.assertEqual(c2["runs"]["comparisons"]["slow"]["verdict"], "resolved slower")
         self.assertTrue(open(os.path.join(work, "report.html")).read().startswith("<!doctype html>"))
 
+    def test_report_regeneration_keeps_the_comparison_floor(self):
+        # A floor large enough to hide the 0.45 s slowdown: regenerating the
+        # report without --noise-floor must not quietly resolve it (#165 review).
+        rc, work = self.compare("floor", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "5")
+        self.assertEqual(rc, 0)
+        c = json.load(open(os.path.join(work, "compare.json")))
+        first = c["runs"]["comparisons"]["slow"]["verdict"]
+        self.assertTrue(first.startswith("not resolved"), first)
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(mcprof.main(["report", work]), 0)
+        c2 = json.load(open(os.path.join(work, "compare.json")))
+        self.assertEqual(c2["runs"]["comparisons"]["slow"]["verdict"], first)
+        # An explicit override is still honoured.
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(mcprof.main(["report", work, "--noise-floor", "0.1"]), 0)
+        c3 = json.load(open(os.path.join(work, "compare.json")))
+        self.assertEqual(c3["runs"]["comparisons"]["slow"]["verdict"], "resolved slower")
+
+    def test_force_starts_from_an_empty_work_dir(self):
+        rc, work = self.compare("force", ["main=" + self.base, "same=" + self.same])
+        self.assertEqual(rc, 0)
+        stale = os.path.join(work, "trace", "old", "p01")
+        os.makedirs(stale)
+        open(os.path.join(stale, "trace.json"), "w").write("{}")
+        rc, work = self.compare("force", ["main=" + self.base, "same=" + self.same], "--force")
+        self.assertEqual(rc, 0)
+        runs = [json.loads(l) for l in open(os.path.join(work, "runs.jsonl"))]
+        self.assertEqual(sum(1 for r in runs if r["kind"] == "round"), 12)   # not 24
+        self.assertFalse(os.path.exists(stale))
+        # A non-kit directory is never cleared.
+        foreign = os.path.join(self.tmp, "foreign")
+        os.makedirs(foreign)
+        open(os.path.join(foreign, "keep.txt"), "w").write("x")
+        with self.assertRaises(SystemExit):
+            self.compare("foreign", ["main=" + self.base, "same=" + self.same], "--force")
+        self.assertTrue(os.path.isfile(os.path.join(foreign, "keep.txt")))
+
+    def test_removed_stage_is_reported(self):
+        drop = make_binary(os.path.join(self.tmp, "drop-bin"), {"FAKE_SLEEP": "0.03", "FAKE_EXTRA": "0.15",
+                                                                "FAKE_DROP_STAGE": "1"})
+        rc, work = self.compare("drop", ["main=" + self.slow, "drop=" + drop], "--noise-floor", "0.1",
+                                "--profile-pass", "2")
+        self.assertEqual(rc, 0)
+        c = json.load(open(os.path.join(work, "compare.json")))
+        row = c["stage_deltas"]["arms"]["drop"]["stages"]["fit polynomial"]["wall_ms"]
+        self.assertIsNotNone(row["delta"])
+        self.assertEqual(row["median_b"], 0.0)
+        self.assertLess(row["delta"], -100)
+        self.assertIn("fit polynomial", open(os.path.join(work, "report.md")).read())
+
     def test_product_difference_fails(self):
         rc, work = self.compare("diff", ["main=" + self.base, "diff=" + self.diff])
         self.assertEqual(rc, 2)
@@ -212,6 +262,21 @@ class DeviceTimingDetection(unittest.TestCase):
         ok, how = prov.device_timing_detection(b)
         self.assertTrue(ok)
         self.assertTrue(how.startswith("binary scan"), how)
+
+
+class DeviceDeltaMissingStage(unittest.TestCase):
+    def test_stage_absent_from_every_candidate_trace_compares_against_zero(self):
+        from lib import report
+        def trace(with_stage):
+            st = {}
+            if with_stage:
+                st["global fft"] = {"kind": "stage", **{k: {"per_movie": [9e6, 5e6, 5e6]} for k, _ in report.DEVICE_KEYS}}
+            st["setup"] = {"kind": "stage", **{k: {"per_movie": [1e6, 1e6, 1e6]} for k, _ in report.DEVICE_KEYS}}
+            return {"stages": st}
+        dd = report.derive_device_deltas({"a": [trace(True), trace(True)], "b": [trace(False), trace(False)]}, "a")
+        row = dd["arms"]["b"]["stages"]["global fft"]["wall_ns"]
+        self.assertIsNotNone(row["delta"])
+        self.assertEqual(row["delta"], -5e6)
 
 
 class TraceFromSqlite(unittest.TestCase):

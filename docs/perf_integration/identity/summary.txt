@@ -1,0 +1,63 @@
+# exit codes
+eo main rc=0
+eo_nodw main rc=0
+bin2 main rc=1
+bin2late main rc=1
+cpu main rc=0
+eo rc rc=0
+eo_nodw rc rc=0
+bin2 rc rc=1
+bin2late rc rc=1
+cpu rc rc=0
+eo_nodw rc_poison rc=0
+bin2late rc_poison rc=1
+cpu rc_poison rc=0
+eo_nodw rc_nopool rc=0
+ALLDONE
+PHASE2
+bin2 main rc=1
+bin2late main rc=1
+bin2 rc rc=1
+bin2late rc rc=1
+bin2 rc_poison rc=1
+bin2late rc_poison rc=1
+ALLDONE2
+PHASE3
+bin2 main rc=0
+bin2late main rc=0
+bin2 rc rc=0
+bin2late rc rc=0
+bin2 rc_poison rc=0
+bin2late rc_poison rc=0
+ALLDONE3
+
+# comparisons (main 9d14275 vs RC c0f82c2)
+4
+== eo rc
+IDENTICAL mrc=12 other=17 pdf_inventoried=4 files=37/37
+== eo_nodw rc
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== cpu rc
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== eo_nodw rc_poison
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== cpu rc_poison
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== eo_nodw rc_nopool
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== bin1.25 rc
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== bin1.25 rc_poison
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== bin1.25late rc
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+== bin1.25late rc_poison
+IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41
+
+# comparator controls
+== eo/main vs eo_nodw/main (inventory)
+DIFFERENT mrc=12 other=17 pdf_inventoried=4 files=37/41
+== bin1.25 early vs late, main (content)
+DIFFERENT mrc=16 other=17 pdf_inventoried=4 files=41/41
+b208ac7e5f2f9de2f1dad385923c8dccc36b2225c8a6366ff614b1c3ed1bea33  out/eo_nodw/main/Movies/20170629_00021_frameImage_EVN.mrc
+ff5a5ff49bdf8a9c4229ab7f5d0ab195ba7f34fe99e477eecdd52839b6f0655f  out/eo_nodw/main/Movies/20170629_00021_frameImage.mrc

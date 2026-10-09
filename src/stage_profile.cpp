@@ -9,8 +9,13 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
 #include <sys/resource.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #ifdef _CUDA_ENABLED
 // NVTX3 is header-only and a no-op unless a tool (Nsight) is attached.
@@ -98,11 +103,56 @@ void StageProfile::Acc::add(const Sample &a, const Sample &b)
 void StageProfile::enable(const std::string &path)
 {
 	if (path.empty() || on) return;
-	out.open(path.c_str(), std::ios::out | std::ios::trunc);
-	if (!out)
-		REPORT_ERROR("Cannot open --profile output " + path);
+	// Exclusive creation: a diagnostic must never clobber an existing file.
+	// --profile is parsed before inputs are read or validated, so a mistyped
+	// path, or a symlink/hard link to an input, would otherwise be truncated
+	// before anything could reject it. O_EXCL also refuses an existing symlink
+	// at the path, whatever it points to.
+	const int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+	if (fd < 0) {
+		const int err = errno;
+		if (err == EEXIST)
+			REPORT_ERROR("--profile output " + path + " already exists; refusing to overwrite it. "
+			             "Choose a new file name or remove the old profile.");
+		REPORT_ERROR("Cannot create --profile output " + path + ": " + std::strerror(err));
+	}
+	// Keep writing through this descriptor. Reopening by path would let
+	// another process replace the path (say, with a symlink to an input)
+	// between create and reopen, and the reopen would follow it (#162 review).
+	out_fd = fd;
+	out.str("");
 	out << std::setprecision(6) << std::fixed;
+	out_path = path;
 	on = true;
+	device_timing = true;
+}
+
+void StageProfile::checkWritten(const char *what)
+{
+	// Records are formatted into `out` and written whole to the exclusive
+	// descriptor. A full filesystem or quota failure must not leave a silently
+	// truncated profile: every short or failed write is detected. Reported
+	// once; products are unaffected.
+	const std::string record = out.str();
+	out.str("");
+	out.clear();
+	size_t done = 0;
+	bool ok = out_fd >= 0;
+	while (ok && done < record.size()) {
+		const ssize_t n = ::write(out_fd, record.data() + done, record.size() - done);
+		if (n < 0 && errno == EINTR) continue;
+		if (n <= 0) { ok = false; break; }
+		done += (size_t)n;
+	}
+	if (!ok) {
+		write_failed = true;
+		if (!write_failure_reported) {
+			write_failure_reported = true;
+			std::cerr << "ERROR: writing the --profile output " << out_path << " failed (" << what
+			          << (errno ? std::string(": ") + std::strerror(errno) : std::string())
+			          << "); the profile is incomplete. Products are unaffected." << std::endl;
+		}
+	}
 }
 
 void StageProfile::beginRun()
@@ -116,7 +166,7 @@ void StageProfile::beginMovie(long int index, const std::string &name)
 {
 	if (!on) return;
 	if (in_movie) endMovie(false);
-	owner = std::this_thread::get_id();
+	owner.store(std::this_thread::get_id(), std::memory_order_release);
 	in_movie = true;
 	movie_index = index;
 	movie_name = name;
@@ -157,8 +207,7 @@ void StageProfile::closeTop(const Sample &now)
 
 void StageProfile::next(const char *stage)
 {
-	if (!on || !in_movie) return;
-	if (!onOwner()) return;
+	if (!on || !onOwner() || !in_movie) return;
 	const Sample now = sampleThread();
 	closeTop(now);
 	top = stage;
@@ -168,16 +217,17 @@ void StageProfile::next(const char *stage)
 
 void StageProfile::push(const char *stage)
 {
-	if (!on || !in_movie) return;
-	if (!onOwner()) return;
+	if (!on || !onOwner() || !in_movie) return;
 	nested.push_back({stage, sampleThread(), true});
 	MC_NVTX_PUSH(stage);
 }
 
 void StageProfile::pop()
 {
-	if (!on || !in_movie || nested.empty()) return;
-	if (!onOwner()) return;
+	// Owner check first: OpenMP workers reach the same markers and nested is
+	// owner-only. Reading nested.empty() before this check raced with the
+	// owner's push_back (ThreadSanitizer, #154 review).
+	if (!on || !onOwner() || !in_movie || nested.empty()) return;
 	const Sample now = sampleThread();
 	MC_NVTX_POP();
 	const Open o = nested.back();
@@ -189,8 +239,7 @@ void StageProfile::pop()
 
 void StageProfile::endMovie(bool ok)
 {
-	if (!on || !in_movie) return;
-	if (!onOwner()) return;
+	if (!on || !onOwner() || !in_movie) return;
 	const Sample now = sampleThread();
 	closeTop(now);
 	MC_NVTX_POP();  // movie
@@ -226,7 +275,7 @@ void StageProfile::writeMovie(bool ok, const Sample &end)
 		first = false;
 	}
 	out << "]}\n";
-	out.flush();
+	checkWritten("movie record");
 }
 
 void StageProfile::addThreadTask(const char *thread, const char *task, double wall_ms,
@@ -274,5 +323,13 @@ void StageProfile::endRun(int n_movies)
 		first = false;
 	}
 	out << "]}\n";
-	out.flush();
+	checkWritten("process record");
+	if (out_fd >= 0) {
+		if (::close(out_fd) != 0 && !write_failed) {
+			write_failed = true;
+			std::cerr << "ERROR: closing the --profile output " << out_path << " failed: "
+			          << std::strerror(errno) << "; the profile may be incomplete." << std::endl;
+		}
+		out_fd = -1;
+	}
 }

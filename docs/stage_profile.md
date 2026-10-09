@@ -39,6 +39,30 @@ Off by default. When off, each probe is one branch on a cached bool; no syscalls
 no allocation, no output, and no product changes. When on, the cost is two
 `clock_gettime` plus one `getrusage` per boundary (~45 boundaries/movie).
 
+## Output safety
+
+- `--profile` creates its file exclusively (`O_EXCL`). An existing file, or a
+  symlink at that path, is refused before anything is written, because the
+  option is parsed before inputs are validated.
+- Write, flush and close failures are reported once on stderr. The run and
+  its products are unaffected.
+- Stage calls from non-owner threads return before touching owner-only state
+  (`tests/test_stage_profile_threads.cpp`).
+
+## Device timing (`--profile_device_timing`)
+
+`--profile` also turns on CUDA event timing for the per-step lines of the
+alignment and dose-weighting log blocks. Each timed step waits for the device,
+so a profiled run synchronises more often than production, and an Nsight trace
+of it overstates the sync counts and device idle of those stages.
+
+`--profile_device_timing 0` (with `--profile`) keeps everything else: the
+stage records, the sub-stages and the NVTX ranges. The CUDA code then takes its
+unprofiled shape, and the log blocks print the unprofiled "not measured" lines.
+The default is 1, the previous behaviour. The process record states the mode as
+`"device_timing":"on"` or `"off"`. Without `--profile` the option has no effect.
+The profiling kit's trace passes use 0 by default.
+
 ## Reading sub-stages
 
 Sub-stages come from the existing `RCTIC/RCTOC` markers and are recorded on the

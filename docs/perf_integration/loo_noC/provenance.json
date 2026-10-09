@@ -1,0 +1,279 @@
+{
+ "instrument": "mcprof compare",
+ "command": [
+  "/home/alex/mc-rc/src-kit/tools/profiling/mcprof.py",
+  "compare",
+  "noC=/home/alex/mc-rc/build-noC/motioncorr",
+  "rc=/home/alex/mc-rc/build-rc/motioncorr",
+  "--data",
+  "/home/alex/mc-perf-20261001/data",
+  "--cpus",
+  "96-103",
+  "--gpu-uuid",
+  "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "--runner-cpus",
+  "120-121",
+  "--lane-wait",
+  "600",
+  "--settle-timeout",
+  "600",
+  "--pairs",
+  "12",
+  "--max-rounds",
+  "20",
+  "--profile-pass",
+  "3",
+  "--trace-pass",
+  "2",
+  "--work",
+  "/home/alex/mc-rc/camp/loo_noC",
+  "--source",
+  "noC=/home/alex/mc-rc/src-noC",
+  "--source",
+  "rc=/home/alex/mc-rc/src-rc",
+  "--",
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "Movies/gain.mrc",
+  "--seed",
+  "1",
+  "--gpu",
+  "0",
+  "--j",
+  "8",
+  "--ingest",
+  "nvcomp"
+ ],
+ "kit": {
+  "path": "/home/alex/mc-rc/src-kit/tools/profiling",
+  "commit": "d873993522986893eb2a7d6346828a53771d35ed",
+  "dirty": false
+ },
+ "binaries": {
+  "noC": {
+   "path": "/home/alex/mc-rc/build-noC/motioncorr",
+   "realpath": "/home/alex/mc-rc/build-noC/motioncorr",
+   "sha256": "5f5b93294ae51d82d8278da80448a1dbe62d263e8165a5f395fa13cf66efbde1",
+   "size": 3174976,
+   "source": {
+    "source_dir": "/home/alex/mc-rc/src-noC",
+    "commit": "e583cafeee539ce0ff7a533c840c88e7d141e42b",
+    "dirty": false,
+    "origin": "git in /home/alex/mc-rc/src-noC"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3.so.3": "/lib/x86_64-linux-gnu/libfftw3.so.3",
+    "libfftw3f.so.3": "/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6",
+    "libcudart.so.12": "/usr/local/cuda-12.8/lib64/libcudart.so.12",
+    "libcufft.so.11": "/usr/local/cuda-12.8/lib64/libcufft.so.11",
+    "libnvcomp.so.5": "/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib/libnvcomp.so.5"
+   }
+  },
+  "rc": {
+   "path": "/home/alex/mc-rc/build-rc/motioncorr",
+   "realpath": "/home/alex/mc-rc/build-rc/motioncorr",
+   "sha256": "ff1bc2679a040bc9d7d3149d2c8a235c7f3f9e979b1f44b576dd7f02ce3edbe9",
+   "size": 3170936,
+   "source": {
+    "source_dir": "/home/alex/mc-rc/src-rc",
+    "commit": "c0f82c2d65bcfc6c68042313d22c1fe132c1a306",
+    "dirty": false,
+    "origin": "git in /home/alex/mc-rc/src-rc"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help",
+   "linked": {
+    "libfftw3.so.3": "/lib/x86_64-linux-gnu/libfftw3.so.3",
+    "libfftw3f.so.3": "/lib/x86_64-linux-gnu/libfftw3f.so.3",
+    "libtiff.so.6": "/lib/x86_64-linux-gnu/libtiff.so.6",
+    "libcudart.so.12": "/usr/local/cuda-12.8/lib64/libcudart.so.12",
+    "libcufft.so.11": "/usr/local/cuda-12.8/lib64/libcufft.so.11",
+    "libnvcomp.so.5": "/home/alex/nvcomp53/nvcomp-linux-x86_64-5.3.0.16_cuda12-archive/lib/libnvcomp.so.5"
+   }
+  }
+ },
+ "host": {
+  "hostname": "4-gpu-vm",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_count": 124,
+  "load1_5_15": [
+   16.171875,
+   16.125,
+   16.6630859375
+  ],
+  "lane_cpus": [
+   96,
+   97,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103
+  ],
+  "time_utc": "2026-10-09T12:07:04Z",
+  "cpu_model": "AMD EPYC 7452 32-Core Processor",
+  "clocksource": "acpi_pm",
+  "thp_enabled": "always [madvise] never",
+  "thp_defrag": "always defer defer+madvise [madvise] never",
+  "perf_event_paranoid": "4",
+  "nvcc_release": "12.8",
+  "env": {}
+ },
+ "gpu": {
+  "index": "0",
+  "uuid": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "name": "NVIDIA A100 80GB PCIe",
+  "driver_version": "570.86.10",
+  "memory.total": "81920",
+  "memory.used": "1",
+  "persistence_mode": "Disabled",
+  "clocks.max.sm": "1410",
+  "pci.bus_id": "00000000:06:00.0",
+  "driver_cuda_version": "12.8"
+ },
+ "arms": [
+  "noC",
+  "rc"
+ ],
+ "input": {
+  "cwd": "/home/alex/mc-perf-20261001/data",
+  "star": "movies.star",
+  "movies": [
+   "Movies/20170629_00021_frameImage.tiff",
+   "Movies/20170629_00022_frameImage.tiff",
+   "Movies/20170629_00023_frameImage.tiff",
+   "Movies/20170629_00024_frameImage.tiff",
+   "Movies/20170629_00025_frameImage.tiff",
+   "Movies/20170629_00026_frameImage.tiff",
+   "Movies/20170629_00027_frameImage.tiff",
+   "Movies/20170629_00028_frameImage.tiff",
+   "Movies/20170629_00029_frameImage.tiff",
+   "Movies/20170629_00030_frameImage.tiff",
+   "Movies/20170629_00031_frameImage.tiff",
+   "Movies/20170629_00035_frameImage.tiff",
+   "Movies/20170629_00036_frameImage.tiff",
+   "Movies/20170629_00037_frameImage.tiff",
+   "Movies/20170629_00039_frameImage.tiff",
+   "Movies/20170629_00040_frameImage.tiff",
+   "Movies/20170629_00042_frameImage.tiff",
+   "Movies/20170629_00043_frameImage.tiff",
+   "Movies/20170629_00044_frameImage.tiff",
+   "Movies/20170629_00045_frameImage.tiff",
+   "Movies/20170629_00046_frameImage.tiff",
+   "Movies/20170629_00047_frameImage.tiff",
+   "Movies/20170629_00048_frameImage.tiff",
+   "Movies/20170629_00049_frameImage.tiff"
+  ],
+  "staged": false,
+  "star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+ },
+ "payload_args": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "Movies/gain.mrc",
+  "--seed",
+  "1",
+  "--gpu",
+  "0",
+  "--j",
+  "8",
+  "--ingest",
+  "nvcomp"
+ ],
+ "payload_env": {
+  "CUDA_VISIBLE_DEVICES": "GPU-eddb42fe-4f9a-adde-76d3-b924e14add54",
+  "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+ },
+ "locks": [
+  {
+   "path": "/tmp/motioncorr-bench.lock",
+   "waited_s": 0.0
+  },
+  {
+   "path": "/tmp/motioncorr-gpu0-correctness.lock",
+   "waited_s": 0.0
+  }
+ ],
+ "noise_floor_s": 0.0,
+ "vram_instrument": "NVML (libnvidia-ml via ctypes), device memory used and per-process used memory",
+ "settle": {
+  "settled": true,
+  "waited_s": 0.2
+ },
+ "series": {
+  "target_clean_rounds": 12,
+  "max_rounds": 20,
+  "rounds_run": 13,
+  "clean_rounds": 12,
+  "reached_target": true
+ },
+ "profile_device_timing": {
+  "noC": "on",
+  "rc": "on"
+ },
+ "profile_pass": "3 pass(es) per arm",
+ "trace_lane_waits": [
+  {
+   "arm": "noC",
+   "pass": 1,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  },
+  {
+   "arm": "rc",
+   "pass": 1,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  },
+  {
+   "arm": "rc",
+   "pass": 2,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  },
+  {
+   "arm": "noC",
+   "pass": 2,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  }
+ ],
+ "trace_device_timing": {
+  "noC": "off",
+  "rc": "off"
+ },
+ "trace_pass": "2 trace(s) per arm"
+}

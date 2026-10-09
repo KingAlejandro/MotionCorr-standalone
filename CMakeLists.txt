@@ -194,6 +194,14 @@ if(BUILD_TESTING)
     target_include_directories(adler32_kernel_host PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/adler32_host_mock" "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME Adler32KernelHost COMMAND adler32_kernel_host)
+    # Links motioncorr_core for StageProfile and REPORT_ERROR; motioncorr_core
+    # already carries the OpenMP/pthread link.
+    add_executable(stage_profile_threads tests/test_stage_profile_threads.cpp)
+    target_link_libraries(stage_profile_threads PRIVATE motioncorr_core)
+    add_test(NAME StageProfileThreads COMMAND stage_profile_threads)
+    add_executable(frame_buffer_pool tests/test_frame_buffer_pool.cpp)
+    target_link_libraries(frame_buffer_pool PRIVATE motioncorr_core)
+    add_test(NAME FrameBufferPool COMMAND frame_buffer_pool)
     add_executable(scratch_arena tests/test_scratch_arena.cpp)
     target_include_directories(scratch_arena PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ScratchArena COMMAND scratch_arena)
@@ -303,6 +311,8 @@ if(BUILD_TESTING)
                 --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME CiFailClosedControls
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
+        add_test(NAME CudaValidationParser
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_cuda_patch_validation_parser.py)
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)
@@ -338,6 +348,10 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts --gpu 0)
         set_tests_properties(RunnerInterpolateShiftsCuda PROPERTIES LABELS "cuda;hardware")
+        add_test(NAME StageProfileDeviceTiming
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0)
+        set_tests_properties(StageProfileDeviceTiming PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device
@@ -377,6 +391,50 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Batched local patch alignment: exactness against the per-patch path and
+        # fault controls (docs/batched_patch_alignment.md).
+        set(PATCH_BATCH_WRAPS
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cufftCreate"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftExecR2C"
+            "LINKER:--wrap=cufftExecC2R")
+        add_executable(cuda_patch_batch tests/cuda_patch_batch.cpp)
+        target_link_libraries(cuda_patch_batch PRIVATE motioncorr_core)
+        target_link_options(cuda_patch_batch PRIVATE ${PATCH_BATCH_WRAPS})
+        add_test(NAME CudaPatchBatch COMMAND cuda_patch_batch)
+        set_tests_properties(CudaPatchBatch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Compiled negative controls: a copy of cuda_alignpatch.cu with one line of
+        # the batched loop rewritten, linked ahead of motioncorr_core so it replaces
+        # the original object. Each must make the exactness checks fail. A target
+        # line that is missing or not unique stops the configure step, so a mutant
+        # cannot silently become identical to the original.
+        set(_alignpatch_cu "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_alignpatch_cu}")
+        file(READ "${_alignpatch_cu}" _alignpatch_source)
+        # shift_retired: retired patches keep receiving phase shifts.
+        # never_retire: converged patches keep iterating.
+        set(_mutant_shift_retired_from "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];")
+        set(_mutant_shift_retired_to "for (int j = 0; j < n_patches; ++j) { const int p = j;")
+        set(_mutant_never_retire_from "[&](int p) { return logs[p].converged; }")
+        set(_mutant_never_retire_to "[&](int p) { return logs[p].converged && false; }")
+        foreach(_mutant IN ITEMS shift_retired never_retire)
+            set(_from "${_mutant_${_mutant}_from}")
+            string(FIND "${_alignpatch_source}" "${_from}" _first)
+            string(FIND "${_alignpatch_source}" "${_from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "patch batch mutant ${_mutant}: target line missing or not unique")
+            endif()
+            string(REPLACE "${_from}" "${_mutant_${_mutant}_to}" _mutant_source "${_alignpatch_source}")
+            set(_mutant_cu "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_alignpatch_${_mutant}.cu")
+            file(WRITE "${_mutant_cu}" "${_mutant_source}")
+            add_executable(cuda_patch_batch_${_mutant} tests/cuda_patch_batch.cpp "${_mutant_cu}")
+            target_link_libraries(cuda_patch_batch_${_mutant} PRIVATE motioncorr_core)
+            target_link_options(cuda_patch_batch_${_mutant} PRIVATE ${PATCH_BATCH_WRAPS})
+            add_test(NAME CudaPatchBatchMutant_${_mutant}
+                COMMAND cuda_patch_batch_${_mutant} --expect-mismatch)
+            set_tests_properties(CudaPatchBatchMutant_${_mutant} PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 300)
+        endforeach()
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
@@ -400,6 +458,7 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
             "LINKER:--wrap=cudaGetLastError" "LINKER:--wrap=cudaEventSynchronize"
             "LINKER:--wrap=cudaMemcpy" "LINKER:--wrap=cufftExecC2R"
+            "LINKER:--wrap=cudaDeviceSynchronize" "LINKER:--wrap=cufftExecR2C"
             "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cudaEventDestroy"
             "LINKER:--wrap=cufftCreate" "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaDoseNormalization COMMAND cuda_dose_normalization)
@@ -412,6 +471,7 @@ if(BUILD_TESTING AND CUDA)
         target_link_options(motioncorr_retry_caller PRIVATE
             "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
             "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+            "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
             "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement
@@ -462,7 +522,7 @@ if(BUILD_TESTING AND CUDA)
                 src/apps/run_motioncorr.cpp tests/cuda_nvcomp_acceptance_shim.cpp)
             target_link_libraries(motioncorr_nvcomp_acceptance PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
             target_link_options(motioncorr_nvcomp_acceptance PRIVATE
-                "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync")
+                "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync" "LINKER:--wrap=cudaLaunchKernel")
             add_test(NAME CudaNvcompAcceptanceFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py

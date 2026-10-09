@@ -162,7 +162,10 @@ def main() -> int:
           f"({(ROOT/'input'/'Movies'/'control.tiff').stat().st_size} bytes)")
 
     fails = []
-    dw = ("--dose_weighting", "--dose_per_frame", "1")
+    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
+    # it the scratch is carved from the consumed real-space movie
+    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+    dw = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
 
     # 0. Positive control: the fixture must actually reach the nvCOMP path.
     rc, text, out, path = run(FIXED, "healthy-nvcomp", "none")

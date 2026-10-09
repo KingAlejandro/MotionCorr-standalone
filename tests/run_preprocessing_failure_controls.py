@@ -168,7 +168,10 @@ def main():
              ("sparse-release-fatal", "u16", "updateDefectPixels"),
              ("float-gain-fatal", "float", "applyGainDefectsAndSum"),
              ("forward-fatal", "u16", "computeGlobalForwardFFT")]
-    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1")
+    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
+    # it the scratch is carved from the consumed real-space movie
+    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
     cases = [(fault, kind, stage, ()) for fault, kind, stage in cases]
     cases += [("unweighted-release-fatal", "u16", "cudaRealSpaceInterpolationDevice", ()),
               ("dw-release-fatal", "u16", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]

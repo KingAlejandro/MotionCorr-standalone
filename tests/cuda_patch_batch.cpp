@@ -6,6 +6,12 @@
 // payload -- for several geometries, odd patch counts, chunk sizes 1..n and a mix of
 // converging and non-converging patches.
 //
+// Window mode (docs/vram_live_ranges.md): both paths hold only each frame's CCF
+// window of the patch spectrum. The per-patch path on windows must reproduce the
+// per-patch path on full spectra, and the windowed payload must equal the window
+// of the full payload, so every exactness check below compares against the
+// full-spectrum per-patch reference.
+//
 // --expect-mismatch is for the compiled mutants (CMake rewrites one line of
 // cuda_alignpatch.cu): the run passes only if the exactness checks detect a
 // difference. Fault controls interpose return codes only; no device is poisoned.
@@ -111,6 +117,9 @@ int mismatches = 0;
 // patches that do not, and a chunk in which one patch retires while another is
 // still active (only then can a retired patch be wrongly shifted or re-aligned).
 int seen_converged = 0, seen_unconverged = 0, seen_mixed_chunks = 0;
+// Window geometries the remap can get wrong: a window smaller than the spectrum
+// (rows above ccf_ny/2 are remapped) and an odd ccf_ny/2.
+int seen_cropped_window = 0, seen_odd_window_half = 0;
 
 void exactOrCount(bool same, const std::string &what) {
     if (same) return;
@@ -185,7 +194,70 @@ std::vector<cufftComplex> makeStack(int pnx, int pny, int n, int kind, unsigned 
     return out;
 }
 
+// The window of n full half-spectra, written from the frequency definition rather
+// than the kernel's remap: window row y is signed frequency ly (y <= ccf_ny/2 is
+// ly = y, above it ly = y - ccf_ny), stored in spectrum row ly mod pny.
+std::vector<cufftComplex> hostWindow(const std::vector<cufftComplex> &full, int n, int pnx, int pny,
+                                     int ccf_nx, int ccf_ny) {
+    const int nfx = pnx / 2 + 1, wfx = ccf_nx / 2 + 1;
+    std::vector<cufftComplex> out((size_t)n * ccf_ny * wfx);
+    for (int f = 0; f < n; f++)
+        for (int y = 0; y < ccf_ny; y++) {
+            const int ly = y <= ccf_ny / 2 ? y : y - ccf_ny;
+            const int fy = ly >= 0 ? ly : ly + pny;
+            for (int x = 0; x < wfx; x++)
+                out[((size_t)f * ccf_ny + y) * wfx + x] = full[((size_t)f * pny + fy) * nfx + x];
+        }
+    return out;
+}
+
+// Upload n full spectra to `scratch` and extract their window into `window`.
+void deviceWindow(const std::vector<cufftComplex> &full, cufftComplex *scratch, cufftComplex *window,
+                  int n, int pnx, int pny, int ccf_nx, int ccf_ny, float scale) {
+    require(cudaMemcpy(scratch, full.data(), full.size() * sizeof(cufftComplex), cudaMemcpyHostToDevice) == cudaSuccess, "full upload");
+    require(cudaExtractPatchWindow(scratch, window, n, pnx, pny, ccf_nx, ccf_ny, scale) == cudaSuccess &&
+            cudaDeviceSynchronize() == cudaSuccess, "window extraction");
+}
+
+std::vector<cufftComplex> download(const cufftComplex *d, size_t elems) {
+    std::vector<cufftComplex> out(elems);
+    require(cudaMemcpy(out.data(), d, elems * sizeof(cufftComplex), cudaMemcpyDeviceToHost) == cudaSuccess, "download");
+    return out;
+}
+
+void noteWindow(int pny, int ccf_ny) {
+    seen_cropped_window += ccf_ny < pny;
+    seen_odd_window_half += (ccf_ny / 2) % 2;
+}
+
 struct Case { int pnx, pny, n, patches, max_iter; RFLOAT B, down; std::vector<int> caps; };
+
+// Extraction alone, with the inverse-patch-size scale preparePatchInVram passes:
+// each value is the corresponding spectrum value times `scale`, one float multiply.
+void extractExactness() {
+    const struct { int pnx, pny, n; RFLOAT B, down; } shapes[] = {
+        {64, 64, 3, 2, 1}, {80, 72, 2, 5, .6}, {200, 178, 3, 150, 0}, {766, 742, 2, 150, 0}, {120, 100, 4, 150, 0},
+    };
+    for (const auto &g : shapes) {
+        int cnx = 0, cny = 0;
+        patchSpectrumWindow(g.pnx, g.pny, g.B, g.down, cnx, cny);
+        noteWindow(g.pny, cny);
+        const auto full = makeStack(g.pnx, g.pny, g.n, 1, g.pnx + g.pny);
+        const float scale = 1.0f / ((float)g.pnx * g.pny);
+        auto expected = hostWindow(full, g.n, g.pnx, g.pny, cnx, cny);
+        for (auto &v : expected) { v.x = v.x * scale; v.y = v.y * scale; }
+        cufftComplex *d_full = nullptr, *d_win = nullptr;
+        require(cudaMalloc(&d_full, full.size() * sizeof(cufftComplex)) == cudaSuccess &&
+                cudaMalloc(&d_win, expected.size() * sizeof(cufftComplex)) == cudaSuccess, "extract buffers");
+        deviceWindow(full, d_full, d_win, g.n, g.pnx, g.pny, cnx, cny, scale);
+        const auto got = download(d_win, expected.size());
+        cudaFree(d_full); cudaFree(d_win);
+        exactOrCount(std::memcmp(got.data(), expected.data(), got.size() * sizeof(cufftComplex)) == 0,
+                     "window extraction " + std::to_string(g.pnx) + "x" + std::to_string(g.pny) +
+                     " (ccf " + std::to_string(cnx) + "x" + std::to_string(cny) + ")");
+    }
+    std::cout << (expect_mismatch ? "RAN: " : "PASS: ") << "window extraction matches the frequency definition\n";
+}
 
 void directExactness() {
     const Case cases[] = {
@@ -194,6 +266,7 @@ void directExactness() {
         {96, 64, 5, 3, 1, 5, 0, {1, 3}},          // max_iter 1: every verdict at iteration 1
         {320, 256, 6, 9, 5, 150, 0, {2, 9}},
         {766, 742, 24, 3, 5, 150, 0, {1, 3}},     // tutorial patch geometry
+        {200, 178, 7, 25, 5, 150, 0, {1, 4, 25}}, // a full 5x5 patch grid
     };
     int compared = 0;
     for (const Case &c : cases) {
@@ -201,6 +274,10 @@ void directExactness() {
         for (int p = 0; p < c.patches; p++)
             inputs.push_back(makeStack(c.pnx, c.pny, c.n, p % 3 == 1 ? 0 : p + 1, 7 * p + c.pnx));
         const size_t elems = inputs[0].size();
+        int cnx = 0, cny = 0;
+        patchSpectrumWindow(c.pnx, c.pny, c.B, c.down, cnx, cny);
+        noteWindow(c.pny, cny);
+        const size_t welems = (size_t)c.n * cny * (cnx / 2 + 1);
 
         // Reference: the per-patch movie workspace, patches in order, one log stream.
         std::vector<PatchResult> ref(c.patches);
@@ -225,6 +302,39 @@ void directExactness() {
             cudaFree(d);
             require(workspace.release(), "ref release");
         }
+        const std::string geometry = std::to_string(c.pnx) + "x" + std::to_string(c.pny) + " n=" +
+            std::to_string(c.n) + " patches=" + std::to_string(c.patches);
+        // The windowed comparisons expect the window of the reference's payload.
+        std::vector<PatchResult> refw = ref;
+        for (auto &r : refw) r.fourier = hostWindow(r.fourier, c.n, c.pnx, c.pny, cnx, cny);
+        cufftComplex *d_full = nullptr;
+        require(cudaMalloc(&d_full, elems * sizeof(cufftComplex)) == cudaSuccess, "full scratch");
+
+        // Per-patch path on windows.
+        {
+            PatchAlignmentWorkspace workspace;
+            workspace.setSpectrumWindowed(true);
+            cufftComplex *d = nullptr;
+            require(cudaMalloc(&d, welems * sizeof(cufftComplex)) == cudaSuccess, "window buffer");
+            std::vector<PatchResult> win(c.patches);
+            std::ostringstream win_log;
+            for (int p = 0; p < c.patches; p++) {
+                std::ostringstream one;
+                one.copyfmt(win_log);
+                deviceWindow(inputs[p], d_full, d, c.n, c.pnx, c.pny, cnx, cny, 1.0f);
+                win[p].x.assign(c.n, 0); win[p].y.assign(c.n, 0);
+                win[p].converged = cudaAlignPatchDeviceWithWorkspace(workspace, d, c.n, c.pnx, c.pny, c.B,
+                    win[p].x, win[p].y, c.max_iter, c.down, 0, one);
+                win_log.copyfmt(one);
+                win_log << one.str();
+                win[p].iterations = countIterations(one.str());
+                win[p].fourier = download(d, welems);
+            }
+            cudaFree(d);
+            require(workspace.release(), "windowed release");
+            compare(refw, win, ref_log.str(), win_log.str(), geometry + " windowed per-patch");
+            ++compared;
+        }
         for (int cap : c.caps) {
             BatchedPatchAlignmentWorkspace workspace;
             require(workspace.reserve(cap, c.n, c.pnx, c.pny, c.B, c.down, 0), "reserve declined");
@@ -233,7 +343,7 @@ void directExactness() {
             for (int first = 0; first < c.patches; first += cap) {
                 const int count = std::min(cap, c.patches - first);
                 for (int j = 0; j < count; j++)
-                    require(cudaMemcpy(workspace.patchSlot(j), inputs[first + j].data(), elems * sizeof(cufftComplex), cudaMemcpyHostToDevice) == cudaSuccess, "slot upload");
+                    deviceWindow(inputs[first + j], d_full, workspace.patchSlot(j), c.n, c.pnx, c.pny, cnx, cny, 1.0f);
                 std::vector<std::vector<RFLOAT>> xs(count, std::vector<RFLOAT>(c.n, 0)), ys = xs;
                 std::vector<PatchBatchLog> logs(count);
                 cudaAlignPatchBatchDevice(workspace, count, c.n, c.pnx, c.pny, c.B, xs.data(), ys.data(),
@@ -245,20 +355,18 @@ void directExactness() {
                     r.x = xs[j]; r.y = ys[j];
                     r.iterations = (int)logs[j].rmsd.size();
                     iteration_counts.insert(ref[first + j].iterations);
-                    r.fourier.resize(elems);
-                    require(cudaMemcpy(r.fourier.data(), workspace.patchSlot(j), elems * sizeof(cufftComplex), cudaMemcpyDeviceToHost) == cudaSuccess, "slot download");
+                    r.fourier = download(workspace.patchSlot(j), welems);
                     writePatchBatchLog(bat_log, logs[j]);
                 }
                 seen_mixed_chunks += iteration_counts.size() > 1;
             }
             require(workspace.release(), "batched release");
-            compare(ref, bat, ref_log.str(), bat_log.str(),
-                    std::to_string(c.pnx) + "x" + std::to_string(c.pny) + " n=" + std::to_string(c.n) +
-                    " patches=" + std::to_string(c.patches) + " cap=" + std::to_string(cap));
+            compare(refw, bat, ref_log.str(), bat_log.str(), geometry + " cap=" + std::to_string(cap));
             ++compared;
         }
+        cudaFree(d_full);
     }
-    std::cout << (expect_mismatch ? "RAN: " : "PASS: ") << compared << " direct batched/per-patch comparisons\n";
+    std::cout << (expect_mismatch ? "RAN: " : "PASS: ") << compared << " direct windowed/full-spectrum comparisons\n";
 }
 
 // ---- session level ---------------------------------------------------------
@@ -315,6 +423,7 @@ void sessionReference(Movie &m, const std::vector<CudaMovieSession::PatchBox> &b
     cufftComplex *d = nullptr;
     require(cudaMalloc(&d, elems * sizeof(cufftComplex)) == cudaSuccess, "session ref buffer");
     ref.assign(bx.size(), PatchResult());
+    m.session.getPatchAlignmentWorkspace().setSpectrumWindowed(false);
     for (size_t p = 0; p < bx.size(); p++) {
         require(m.session.preparePatchInVram(bx[p].x_start, bx[p].y_start, bx[p].width, bx[p].height,
                                              GROUPS, group_start, group_size, d), "session ref prep");
@@ -326,20 +435,68 @@ void sessionReference(Movie &m, const std::vector<CudaMovieSession::PatchBox> &b
         all.copyfmt(one);
         all << one.str();
         ref[p].iterations = countIterations(one.str());
+        ref[p].fourier = download(d, elems);
     }
     cudaFree(d);
     require(m.session.releasePatchAlignmentWorkspace(), "session ref release");
     log = all.str();
 }
 
+// The runner's per-patch arm: preparePatchInVram keeps only the window (scaled
+// by 1/(w*h) while extracting) and the workspace aligns it in window mode. The
+// full spectra go through d_inverse_tile when they fit and through the session's
+// own d_patch_spectrum otherwise, which the first preparation's allocation count
+// shows: d_Ipatches and the two group tables, plus d_patch_spectrum.
+void sessionWindowed(Movie &m, const std::vector<CudaMovieSession::PatchBox> &bx,
+                     const std::vector<PatchResult> &ref, const std::string &ref_log,
+                     const std::string &label) {
+    const int w = bx[0].width, h = bx[0].height;
+    int cnx = 0, cny = 0;
+    patchSpectrumWindow(w, h, SB, SDOWN, cnx, cny);
+    noteWindow(h, cny);
+    const size_t welems = (size_t)GROUPS * cny * (cnx / 2 + 1);
+    const bool own_spectrum = (size_t)GROUPS * h * (w / 2 + 1) > (size_t)SNY * (SNX / 2 + 1);
+    cufftComplex *d = nullptr;
+    require(cudaMalloc(&d, welems * sizeof(cufftComplex)) == cudaSuccess, "session window buffer");
+    m.session.getPatchAlignmentWorkspace().setSpectrumWindowed(true);
+    std::vector<PatchResult> win(bx.size()), refw = ref;
+    std::ostringstream all;
+    for (size_t p = 0; p < bx.size(); p++) {
+        refw[p].fourier = hostWindow(ref[p].fourier, GROUPS, w, h, cnx, cny);
+        if (p == 0) arm();
+        require(m.session.preparePatchInVram(bx[p].x_start, bx[p].y_start, w, h,
+                                             GROUPS, group_start, group_size, d, cnx, cny), "session window prep");
+        if (p == 0) {
+            active = false;
+            require(malloc_calls == (own_spectrum ? 4 : 3),
+                    label + ": windowed preparation made " + std::to_string(malloc_calls) + " allocations");
+        }
+        std::ostringstream one;
+        one.copyfmt(all);
+        win[p].x.assign(GROUPS, 0); win[p].y.assign(GROUPS, 0);
+        win[p].converged = cudaAlignPatchDeviceWithWorkspace(m.session.getPatchAlignmentWorkspace(), d, GROUPS,
+            w, h, SB, win[p].x, win[p].y, SITER, SDOWN, 0, one);
+        all.copyfmt(one);
+        all << one.str();
+        win[p].iterations = countIterations(one.str());
+        win[p].fourier = download(d, welems);
+    }
+    cudaFree(d);
+    require(m.session.releasePatchAlignmentWorkspace(), "session window release");
+    compare(refw, win, ref_log, all.str(), label + " windowed per-patch");
+}
+
 void sessionExactness() {
     const auto frames = movieFrames();
     int compared = 0;
-    for (auto grid : {std::make_pair(3, 3), std::make_pair(5, 3)}) {
+    // 1x1: the spectra of a whole-frame patch exceed d_inverse_tile.
+    for (auto grid : {std::make_pair(3, 3), std::make_pair(5, 3), std::make_pair(1, 1)}) {
         const auto bx = boxes(grid.first, grid.second);
+        const std::string label = "session " + std::to_string(grid.first) + "x" + std::to_string(grid.second);
         std::vector<PatchResult> ref;
         std::string ref_log;
         { Movie m(frames); sessionReference(m, bx, ref, ref_log); }
+        { Movie m(frames); sessionWindowed(m, bx, ref, ref_log, label); ++compared; }
         for (int cap : {1, 2, 4, 64}) {
             Movie m(frames);
             std::vector<CudaMovieSession::PatchBatchOutcome> out;
@@ -357,8 +514,7 @@ void sessionExactness() {
             }
             require(m.log.str().find("chunk size " + std::to_string(std::min<size_t>(cap, bx.size()))) != std::string::npos,
                     "chunk size not logged: " + m.log.str());
-            compare(ref, bat, ref_log, log.str(),
-                    "session " + std::to_string(grid.first) + "x" + std::to_string(grid.second) + " cap=" + std::to_string(cap));
+            compare(ref, bat, ref_log, log.str(), label + " cap=" + std::to_string(cap));
             require(m.session.releasePatchAlignmentWorkspace(), "session batched release");
             ++compared;
         }
@@ -519,12 +675,16 @@ int main(int argc, char **argv) {
         std::cerr << "Native CUDA device 0 is required\n"; return 1;
     }
     try {
+        extractExactness();
         directExactness();
         sessionExactness();
         require(seen_converged > 0 && seen_unconverged > 0 && seen_mixed_chunks > 0,
                 "fixtures did not exercise converged, unconverged and mixed chunks: " +
                 std::to_string(seen_converged) + "/" + std::to_string(seen_unconverged) + "/" +
                 std::to_string(seen_mixed_chunks));
+        require(seen_cropped_window > 0 && seen_odd_window_half > 0,
+                "fixtures did not exercise a cropped window and an odd window half: " +
+                std::to_string(seen_cropped_window) + "/" + std::to_string(seen_odd_window_half));
         if (expect_mismatch) {
             std::cout << (mismatches ? "PASS" : "FAIL") << ": mutant produced " << mismatches << " detected mismatches\n";
             return mismatches ? 0 : 1;

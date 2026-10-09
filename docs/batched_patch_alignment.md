@@ -57,6 +57,11 @@ The workspace holds K patch stacks plus CCF scratch: 59 MiB per patch at the
 tutorial geometry (766×742, 24 groups), 1477 MiB for 25 patches, plus a 3 MiB
 cuFFT work area.
 
+Since `perf/vram-tier1` each slot holds only the CCF window of every group's
+spectrum, not the full spectrum (`docs/vram_live_ranges.md`), so a slot is
+24 × 192 × 97 complex values (3.4 MiB, calculated) instead of the full stack;
+the full spectrum of the patch being prepared lives in session scratch.
+
 K is chosen per movie by `choosePatchBatchChunk`: as many patches as fit in
 `cudaMemGetInfo` free memory after a headroom of max(1 GiB, 10% of total),
 capped by `MOTIONCORR_PATCH_BATCH` (default **4**). A declined reservation is

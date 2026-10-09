@@ -8,8 +8,9 @@ No corrupt-Deflate execution or genuinely poisoned CUDA context is tested.
 The ingest is pipelined in chunks (docs/nvcomp_ingest_pipeline.md). The fixture
 has 6 frames; MOTIONCORR_NVCOMP_CHUNK_FRAMES=2 gives three chunks on two slots.
 
-  healthy, -c1, -c6    products identical across chunk sizes (6 chunks with slot
-                       reuse, 3 chunks, one chunk/one slot); witness says nvcomp.
+  healthy, -c1, -c6    products identical across chunk sizes (3 chunks, 6 chunks
+                       with slot reuse, and a 6-frame request that does not fit
+                       the fixture's arena and halves); witness says nvcomp.
   status/size c0       whole-chunk decoder rejection precedes Adler; no gain
                        launch, no products under --ingest nvcomp.
   status c1 (middle)   chunk 1 refused after chunk 0 was converted: exactly one
@@ -100,14 +101,20 @@ def main():
         # reads healthy.log when the binary fails at startup.
         label = "healthy" if cf == 2 else f"healthy-c{cf}"
         r, text, out, products, gains, taken, cmd = run(label, "healthy", cf)
-        n_chunks = (6 + cf - 1) // cf
+        # The 48x40 fixture's pre-FFT arena (48000 bytes) cannot hold a 6-frame
+        # slot, so a 6-frame request halves until it fits, as the batch did
+        # before the pipeline. Check against the chunking actually chosen.
+        m = re.search(r"chunk=(\d+)/6 frames x (\d+) chunks", text)
+        got_cf, n_chunks = (int(m.group(1)), int(m.group(2))) if m else (0, -2)
         payload = mrc_payloads(out)
         if reference is None and r.returncode == 0:
             reference = payload
         same = bool(payload) and payload == reference
         ok = (r.returncode == 0 and products and taken == "nvcomp" and gains == n_chunks
-              and f"chunk={cf}/6 frames x {n_chunks} chunks" in text and same)
+              and got_cf <= cf and n_chunks == (6 + got_cf - 1) // max(got_cf, 1)
+              and (cf == 6 or got_cf == cf) and same)
         rows.append({"label": label, "returncode": r.returncode, "products": products,
+                     "chunk_frames": got_cf, "chunks": n_chunks,
                      "gain_launches": gains, "path": taken, "identical_to_c2": same,
                      "pass": bool(ok), "command": cmd})
 

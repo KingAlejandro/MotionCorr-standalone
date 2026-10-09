@@ -117,8 +117,11 @@ struct Movie {
 };
 
 // ---- global alignment in an arena -----------------------------------------
-const int GNX = 384, GNY = 360, GFRAMES = 6, GITER = 5;
-const RFLOAT GB = 150, GDOWN = 0;
+// A full-size 1280x1152 CCF: cuFFT 12.8 leaves the reported C2R work area
+// untouched for power-of-two and small sizes (192..1024 measured), which would
+// make a misplaced work area invisible. globalArena checks it is written.
+const int GNX = 1280, GNY = 1152, GFRAMES = 6, GITER = 5;
+const RFLOAT GB = 150, GDOWN = 1;
 
 struct GlobalResult {
     bool converged = false;
@@ -186,6 +189,23 @@ void globalArena() {
         require(cufftMakePlanMany(plan, 2, n, NULL, 1, cny * (int)cnfx, NULL, 1, cny * cnx, CUFFT_C2R,
                                   GFRAMES, &ignored) == CUFFT_SUCCESS, "probe plan make");
         require(cufftGetSize(plan, &work) == CUFFT_SUCCESS, "probe plan size");
+        // The work area must actually be written, or overlapping it with the
+        // aligner's buffers changes nothing and the placement is untested.
+        void *d_work = nullptr, *d_in = nullptr, *d_out = nullptr;
+        const size_t in_bytes = (size_t)GFRAMES * cny * cnfx * sizeof(float2);
+        gpu(cudaMalloc(&d_work, work), "probe work");
+        gpu(cudaMalloc(&d_in, in_bytes), "probe input");
+        gpu(cudaMalloc(&d_out, (size_t)GFRAMES * cny * cnx * sizeof(float)), "probe output");
+        gpu(cudaMemcpy(d_in, input.data(), in_bytes, cudaMemcpyHostToDevice), "probe upload");
+        gpu(cudaMemset(d_work, 0xAB, work), "probe work poison");
+        require(cufftSetWorkArea(plan, d_work) == CUFFT_SUCCESS, "probe work area");
+        require(cufftExecC2R(plan, (cufftComplex*)d_in, (cufftReal*)d_out) == CUFFT_SUCCESS, "probe exec");
+        std::vector<unsigned char> h_work(work);
+        gpu(cudaMemcpy(h_work.data(), d_work, work, cudaMemcpyDeviceToHost), "probe work download");
+        size_t written = 0;
+        for (unsigned char c : h_work) written += (c != 0xAB);
+        require(written > 0, "cuFFT did not write its C2R work area for this geometry");
+        cudaFree(d_work); cudaFree(d_in); cudaFree(d_out);
         cufftDestroy(plan);
     }
     require(work > 512, "geometry needs a cuFFT work area larger than the arena slack, got " + std::to_string(work));

@@ -1,0 +1,61 @@
+{
+ "controls": [
+  {
+   "control": "ctrl_noise_f0062",
+   "jackknife_n": 22,
+   "jackknife_se": 0.007463582558293463,
+   "lower95": 0.9362976728552266,
+   "rho": 0.9491405795719606,
+   "role": "AT the harm margin: tests whether a harmful arm can earn a PASS (S1)",
+   "upper95": 0.9619834862886947,
+   "why": "does not certify B1"
+  },
+  {
+   "control": "ctrl_noise_f0076",
+   "jackknife_n": 22,
+   "jackknife_se": 0.007224156987083135,
+   "lower95": 0.9272020045839827,
+   "rho": 0.9396329214483049,
+   "role": "at the harm margin: locates the demonstrated detection boundary",
+   "upper95": 0.9520638383126271,
+   "why": "does not certify B1"
+  },
+  {
+   "control": "ctrl_noise_f011",
+   "jackknife_n": 22,
+   "jackknife_se": 0.008383436124419075,
+   "lower95": 0.9001727634258705,
+   "rho": 0.9145985016381414,
+   "role": "beyond the harm margin: must be rejected or B1 is not fit for purpose",
+   "upper95": 0.9290242398504123,
+   "why": "certifies B1: at or beyond the harm margin and rejected by the test"
+  },
+  {
+   "control": "ctrl_noise_f020",
+   "jackknife_n": 22,
+   "jackknife_se": 0.01289067468209796,
+   "lower95": 0.8553528495109983,
+   "rho": 0.8775343864826751,
+   "role": "well beyond the harm margin: completes the PR #65 point-only control",
+   "upper95": 0.8997159234543519,
+   "why": "certifies B1: at or beyond the harm margin and rejected by the test"
+  }
+ ],
+ "equivalence_proof": {
+  "bit_identical": true,
+  "claim": "the control run and the real-arm run are the same computation, so a sensitivity statement proved on one transfers to the other",
+  "cpu_baseline_half_map_payload_sha256_peer_host": {
+   "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
+   "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9",
+   "_host": "4GPUs /home/alex/mc-issue61/rec/cpu",
+   "_note": "pixel payload (bytes 1024+) of the held22 CPU baseline half-maps from the PR #65 run"
+  },
+  "cpu_baseline_half_map_payload_sha256_this_host": {
+   "1": "8f118ad77041bdc3102cca2394aaed37e60002ab9653e8d51f4c2fd6238c1d08",
+   "2": "8bfce61de7f25328133ec2e615523baefdf6777714cd1f38a3b954fa37b7cab9"
+  },
+  "note": "if bit_identical is not true the certificate must not be used to gate the real-arm verdicts"
+ },
+ "margin": 0.95,
+ "source": "cpu64 margin-calibrated control run (docs/issue61_noninferiority)"
+}

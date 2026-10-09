@@ -1,6 +1,6 @@
 # In-process movie overlap: next-movie strip prefetch (no-go)
 
-**Decision: no-go.** Moving the next movie's TIFF strip read onto its own thread did not resolve a wall-time gain on the 96-movie kit compare, and the stop rule needed a resolved gain of at least 10%. The measured main-thread saving is about 16–18 ms of a 228 ms movie (7–8%), short of 10% even if a quieter host resolved it. The prototype is not productionised. Its code is kept for reference at `76972f3` on branch `perf/movie-overlap`.
+**Decision: no-go.** Moving the next movie's TIFF strip read onto its own thread did not resolve a wall-time gain on the 96-movie kit compare, and the stop rule needed a resolved gain of at least 10%. The measured main-thread saving is about 16–18 ms of a 228 ms movie (7–8%), short of 10% even if a quieter host resolved it. The prototype is not productionised. Its source is retained as [`movie_overlap/prototype_76972f3.patch`](movie_overlap/prototype_76972f3.patch) (`git diff 7d64043 76972f3`; applies to `7d64043`), and on branch `perf/movie-overlap`.
 
 ## What was tried
 
@@ -22,6 +22,8 @@ Kit `1d3c399`: base `7d64043`, candidate `76972f3`. The lane is CPUs 72-79 plus 
 | [run 2](movie_overlap/c96_run2/report.md) | 7 | −1.06 s | −4.15% | −3.30..+1.37 s | not resolved (CI includes 0) |
 
 Pooling the 12 clean pairs gives a median of about −1.9 s (calculated, not a kit verdict). Three of the 12 pairs are positive, i.e. the candidate was slower.
+
+Evidence files are the kit's own output, except that run 1's `compare.json` had a non-JSON `Infinity` for the unresolved `resolution_s`, which is stored as `null`.
 
 Product identity in the kit's check passed in both runs: 297 files, 96 MRC, with MRC header bytes 0–223 and bytes from 1024 on, plus path-normalised STAR/EPS. A 4-movie smoke run also compared IDENTICAL with `cmp_trees.py`.
 

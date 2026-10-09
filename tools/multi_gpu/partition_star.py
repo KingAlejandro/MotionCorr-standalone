@@ -247,14 +247,18 @@ def main(argv: list[str] | None = None) -> int:
 
     src = Path(a.star)
     try:
-        star = star_io.parse(src)
+        # One read: the manifest digest, the round-trip check and every shard
+        # all describe this snapshot, even if the file is replaced meanwhile.
+        data = src.read_bytes()
+        star = star_io.parse(src, data)
         tomo = star_io.tomo_global_block(star)
         block = tomo if tomo is not None else star_io.movie_block(star)
     except star_io.StarFormatError as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 2
 
-    if star.render() != src.read_bytes().decode():
+    a.input_sha256 = hashlib.sha256(data).hexdigest()
+    if star.render() != data.decode():
         print("FAIL: parser did not round-trip the input byte for byte", file=sys.stderr)
         return 2
     return (partition_tomography(a, src, star, block) if tomo is not None
@@ -310,7 +314,7 @@ def finish(a, src: Path, block: star_io.Block, canonical: list[str], shards: lis
     outdir = Path(a.outdir)
     manifest = {
         "input_star": str(src),
-        "input_sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
+        "input_sha256": a.input_sha256,
         "movie_block": block.name,
         "labels": block.labels,
         "n_movies": len(canonical),

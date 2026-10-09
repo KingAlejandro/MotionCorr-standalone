@@ -737,6 +737,46 @@ def case_decorated_output_collision(tmp: Path) -> None:
     build_star(star, [("Movies/a.tiff", 1, 0.0), ("Movies/aPS.tiff", 1, 1.4),
                       ("Movies/b.tiff", 1, 2.8)])
     assert partition(star, 2, tmp / "shards_ok").returncode == 0
+    # MotionCor2's local-shift log <root>0-Patch-Patch.log is movie
+    # 'a0-Patch-Patch''s own .log.
+    build_star(star, [("Movies/a.tiff", 1, 0.0), ("Movies/a0-Patch-Patch.tiff", 1, 1.4),
+                      ("Movies/b.tiff", 1, 2.8)])
+    cp = partition(star, 2, tmp / "shards_mc2")
+    assert cp.returncode == 3 and "decorated-output collision" in cp.stderr, \
+        (cp.returncode, cp.stderr)
+
+
+def case_manifest_digest_binds_parsed_snapshot(tmp: Path) -> None:
+    """The manifest digest is of the bytes the shards were built from.
+
+    The input is replaced after it has been parsed and round-tripped but before
+    the manifest is written. Re-reading the file for the digest would record the
+    replacement, and the merge's digest checks would then accept it.
+    """
+    star = tmp / "movies.star"
+    build_star(star, DEFAULT_ROWS)
+    original = star.read_bytes()
+    replacement = original.replace(b"200.000000", b"201.000000", 1)
+    assert replacement != original
+    wrapper = tmp / "replace_mid_partition.py"
+    wrapper.write_text(
+        "import sys\n"
+        f"sys.path.insert(0, {str(TOOLS)!r})\n"
+        "import partition_star as ps\n"
+        "preflight = ps.preflight\n"
+        "def replaced(*a, **k):\n"
+        f"    open({str(star)!r}, 'wb').write({replacement!r})\n"
+        "    return preflight(*a, **k)\n"
+        "ps.preflight = replaced\n"
+        "raise SystemExit(ps.main())\n")
+    shards = tmp / "shards"
+    cp = run([PY, wrapper, "--star", star, "--n", 2, "--outdir", shards])
+    assert cp.returncode == 0, cp.stderr
+    assert star.read_bytes() == replacement, "the replacement never happened"
+    man = json.loads((shards / "shard_manifest.json").read_text())
+    assert man["input_sha256"] == hashlib.sha256(original).hexdigest(), (
+        "manifest digest is of the replaced file, not of the snapshot the "
+        "shards were built from")
 
 
 def case_real_output_suffixes_attributed(tmp: Path) -> None:
@@ -754,8 +794,11 @@ def case_real_output_suffixes_attributed(tmp: Path) -> None:
     # _noDW/_DW/_DWS/_PS/_EVN/_ODD.mrc, _frames.mrcs. Drop them into the worker
     # that owns each movie, then require a clean merge.
     for root, k in owners.items():
+        # .out/.err/.com and 0-Patch-Patch.log come from --use_motioncor2
+        # (executeMotioncor2, getShiftsMotioncor2).
         for extra in ("_shifts.eps", ".log", "_noDW.mrc", "_PS.mrc", "_EVN.mrc",
-                      "_ODD.mrc", "_DW.mrc", "_DWS.mrc", "_frames.mrcs"):
+                      "_ODD.mrc", "_DW.mrc", "_DWS.mrc", "_frames.mrcs",
+                      ".out", ".err", ".com", "0-Patch-Patch.log"):
             f = dirs[k] / (root + extra)
             f.parent.mkdir(parents=True, exist_ok=True)
             f.write_text("x")
@@ -2543,6 +2586,7 @@ CASES = [
     case_duplicate_movie_in_input,
     case_collapsed_spaces_are_a_collision,
     case_decorated_output_collision,
+    case_manifest_digest_binds_parsed_snapshot,
     case_real_output_suffixes_attributed,
     case_dotted_shift_plot_root,
     case_aggregate_name_shadowing,

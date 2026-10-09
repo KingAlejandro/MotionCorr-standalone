@@ -134,6 +134,10 @@ def geometry_controls(binary,tmp,baseline):
     require(not failures,'geometry/sampling controls: '+str(failures))
 
 
+def mc2_diagnostic(mode):
+    return 'Movies/a0-Patch-Patch.log' if mode=='mc2-patch-collision' else 'Movies/a.'+mode.split('-')[1]
+
+
 def tomography_controls(binary,tmp,publication_only=None):
     import sys
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/multi_gpu'))
@@ -191,7 +195,7 @@ def tomography_controls(binary,tmp,publication_only=None):
             print('PASS tomography final nested references/readable row associations, unchanged movie bytes/mtimes repeat'+str(repeat))
         tomo_input=(tmp/'in.star').read_text()
         for mode in ['partial-movie','reference-publication-failure','joint-reference-collision','movie-reference-collision','report-reference-collision',
-                     'mc2-out-collision','mc2-err-collision','mc2-com-collision']:
+                     'mc2-out-collision','mc2-err-collision','mc2-com-collision','mc2-patch-collision']:
             target=tmp/('tomo-'+mode);shutil.copytree(out,target)
             (target/'corrected_tilt_series.star').unlink();(target/'logfile.pdf').unlink()
             if mode=='partial-movie':(target/'Movies/c.star').unlink()
@@ -202,7 +206,8 @@ def tomography_controls(binary,tmp,publication_only=None):
                 (tmp/'in.star').write_text(tomo_input.replace('tilt_series/one.star','Movies/a.star'))
             elif mode.startswith('mc2-'):
                 # A --use_motioncor2 run leaves Movies/a.{out,err,com} beside the products.
-                diagnostic='Movies/a.'+mode.split('-')[1];(target/diagnostic).write_text('motioncor2 diagnostic')
+                # ...and getShiftsMotioncor2() reads and leaves Movies/a0-Patch-Patch.log.
+                diagnostic=mc2_diagnostic(mode);(target/diagnostic).write_text('motioncor2 diagnostic')
                 shutil.copyfile(tmp/'tilt_series/one.star',tmp/diagnostic)
                 (tmp/'in.star').write_text(tomo_input.replace('tilt_series/one.star',diagnostic))
             elif mode=='report-reference-collision':
@@ -215,7 +220,7 @@ def tomography_controls(binary,tmp,publication_only=None):
             require(r.returncode>0,'tomographic '+mode+' must fail normally')
             require(not (target/'corrected_tilt_series.star').exists() and not (target/'logfile.pdf').exists(),
                     'tomographic '+mode+' published a success marker/report')
-            require(('c.tiff' if mode=='partial-movie' else 'corrected_tilt_series.star' if mode=='joint-reference-collision' else 'a.star' if mode=='movie-reference-collision' else 'logfile.pdf' if mode=='report-reference-collision' else 'a.'+mode.split('-')[1] if mode.startswith('mc2-') else 'one.star') in r.stderr,
+            require(('c.tiff' if mode=='partial-movie' else 'corrected_tilt_series.star' if mode=='joint-reference-collision' else 'a.star' if mode=='movie-reference-collision' else 'logfile.pdf' if mode=='report-reference-collision' else mc2_diagnostic(mode).split('/')[1] if mode.startswith('mc2-') else 'one.star') in r.stderr,
                     'tomographic '+mode+' failure did not name its input/reference')
             if mode.startswith('mc2-'):
                 require((target/diagnostic).read_text()=='motioncor2 diagnostic','tomographic '+mode+' replaced the MotionCor2 diagnostic')

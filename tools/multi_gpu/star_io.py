@@ -197,12 +197,16 @@ class StarFile:
         return prefix + "".join(r.raw for r in rows) + suffix
 
 
-def parse(path: str | Path) -> StarFile:
+def parse(path: str | Path, data: bytes | None = None) -> StarFile:
+    """Parse `path`, or `data` if given (the bytes already read from `path`).
+
+    Passing `data` lets a caller bind a digest to exactly the snapshot parsed.
+    """
     path = Path(path)
     # Read bytes and decode explicitly: Path.read_text() applies universal-newline
     # translation, which would silently turn a CR+LF file -- the one thing the C++
     # reader refuses outright -- into a clean LF file here.
-    text = path.read_bytes().decode()
+    text = (path.read_bytes() if data is None else data).decode()
     lines = text.splitlines(keepends=True)
 
     for n, raw in enumerate(lines, start=1):
@@ -322,11 +326,13 @@ def movie_block(star: StarFile) -> Block:
 # Per-movie output decorations appended to the output root, from
 # src/motioncorr_runner.cpp: "" (.mrc/.star/.log), _noDW (:842),
 # _DW / _DWS (:867, :862), _PS (:1336), _EVN / _ODD (:2532-2533) and _frames
-# (:1882). Shift EPS uses its separate unnormalized path below.
+# (:1882), and "0-Patch-Patch", the MotionCor2 local-shift log that
+# getShiftsMotioncor2() reads from <root>0-Patch-Patch.log and leaves in place
+# (-LogFile <root>). Shift EPS uses its separate unnormalized path below.
 # Two movies whose roots differ only by one of these can overwrite each
 # other, which is why partition_star.py preflights for it.
 OUTPUT_DECORATIONS = ("", "_noDW", "_DW", "_DWS", "_PS", "_EVN",
-                      "_ODD", "_frames")
+                      "_ODD", "_frames", "0-Patch-Patch")
 
 # Extensions those decorated roots carry.
 OUTPUT_EXTENSIONS = (".mrc", ".mrcs", ".star", ".eps", ".log", ".out", ".err",

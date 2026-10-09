@@ -43,6 +43,23 @@ void require(bool ok, const char *message) {
 
 } // namespace
 
+struct CudaMovieSessionTestAccess {
+    static mc_cuda::FourierStorageGuard &guard(CudaMovieSession &s) { return s.fourier_guard; }
+    static cudaStream_t &ingestStream(CudaMovieSession &s) { return s.ingest_stream; }
+    static cudaEvent_t &ingestEvent(CudaMovieSession &s) { return s.ingest_events[0]; }
+    static const std::ostream *log(const CudaMovieSession &s) { return s.logfile; }
+    static bool patchCachesEmpty(const CudaMovieSession &s) {
+        return s.uploaded_group_start.empty() && s.uploaded_group_size.empty() &&
+               s.cached_patch_w == 0 && s.cached_patch_h == 0 && s.cached_patch_ngroups == 0 &&
+               s.cached_ngroups_alloc == 0 && s.sz_cached_Ipatches == 0 && !s.has_plan_patch_r2c &&
+               s.d_Ipatches == nullptr && s.d_group_start == nullptr && s.d_group_size == nullptr;
+    }
+    static bool groupTablesCached(const CudaMovieSession &s) {
+        return !s.uploaded_group_start.empty() && s.d_group_start != nullptr && s.has_plan_patch_r2c;
+    }
+    static bool gainDetached(const CudaMovieSession &s) { return s.d_gain == nullptr && !s.d_gain_borrowed; }
+};
+
 extern "C" {
 cudaError_t __real_cudaMalloc(void **, size_t);
 cudaError_t __real_cudaFree(void *);
@@ -292,24 +309,60 @@ void testFatalRefusesReset() {
     std::cout << "  PASS: fatal failure refuses reset" << std::endl;
 }
 
-// Per-movie state left by a completed movie: the Fourier guard holds the
-// spectrum, which refuses the next ingest scratch claim. Without a reset the
-// gather is refused (the control); after park and reset it runs.
+// Per-movie state left by a completed movie must not reach the next one
+// (docs/cuda_session_reuse.md, reset contract). Each item is checked directly:
+// a stale table or lease can be invisible in the outputs when the allocator
+// hands back the same device memory still holding the previous contents.
+//  - Fourier guard: the spectrum in d_Fframes refuses the next ingest scratch
+//    claim. Without a reset the gather is refused (the control).
+//  - Patch plan, buffers and the uploaded group-table cache are shed by park.
+//  - The gain lease is released by park, so another holder can take it.
+//  - The log binding is detached while parked and rebound by reset.
+//  - Park is refused while an ingest scratch view, stream or event is live.
 void testStateResetBetweenMovies() {
+    typedef CudaMovieSessionTestAccess TA;
     std::ostringstream log;
     CudaMovieSession stale(NX, NY, NF, 0, log);
+    stale.setGainGeneration(7);
     require(stale.initialize(), "initialization failed");
+
+    require(TA::guard(stale).beginIngestScratch(), "test could not claim the ingest scratch view");
+    require(!stale.parkForReuse(), "park accepted with a live ingest scratch view");
+    TA::guard(stale).finishIngestScratch();
+    require(cudaStreamCreate(&TA::ingestStream(stale)) == cudaSuccess, "test stream creation failed");
+    require(!stale.parkForReuse(), "park accepted with a live ingest stream");
+    require(cudaStreamDestroy(TA::ingestStream(stale)) == cudaSuccess, "test stream destroy failed");
+    TA::ingestStream(stale) = 0;
+    require(cudaEventCreateWithFlags(&TA::ingestEvent(stale), cudaEventDisableTiming) == cudaSuccess,
+            "test event creation failed");
+    require(!stale.parkForReuse(), "park accepted with a live ingest event");
+    require(cudaEventDestroy(TA::ingestEvent(stale)) == cudaSuccess, "test event destroy failed");
+    TA::ingestEvent(stale) = 0;
+    require(!stale.isParked() && stale.isInitialized(), "a refused park changed the session state");
+
     MovieOutput out;
     require(runMovie(stale, 1, out), "movie failed");
+    require(TA::groupTablesCached(stale), "precondition: the movie did not cache its patch tables");
     std::vector<float> samples;
     require(!stale.gatherFrameSamples({0}, {1}, {1}, samples),
             "control: a gather after the forward FFT was accepted without a reset");
+    require(!mc_cuda::getWorkerPlanPool().acquireLease(&log, 0),
+            "control: the gain lease was free while the session held it");
+
     require(stale.parkForReuse(), "a healthy session was not parked");
+    require(TA::patchCachesEmpty(stale), "park left patch plan, buffers or group-table cache");
+    require(TA::gainDetached(stale), "park left a gain alias");
+    require(TA::log(stale) != &log, "park left the finished movie's log bound");
+    require(mc_cuda::getWorkerPlanPool().acquireLease(&log, 0), "park kept the gain lease");
+    require(mc_cuda::getWorkerPlanPool().releaseLease(&log), "test lease release failed");
+
     std::ostringstream log2;
     require(stale.resetForMovie(log2), "reset failed");
+    require(TA::log(stale) == &log2, "reset did not bind the new movie's log");
     require(stale.gatherFrameSamples({0}, {1}, {1}, samples),
             "gather refused after reset: the Fourier guard was not reset");
     stale.release();
+    require(!stale.getFailureState().hasFailed(), "release after the state checks failed");
     std::cout << "  PASS: per-movie state reset" << std::endl;
 }
 

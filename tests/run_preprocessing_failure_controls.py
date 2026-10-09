@@ -5,6 +5,12 @@ Uses the existing test-only fault executable; no real context is poisoned. A
 small deterministic TIFF is generated here, so the test needs no tutorial data.
 Optional --mutant-binary proves the guards discriminate against a checked build
 with only discard_preprocessing_session's fatal refusal disabled.
+
+The healthy-reuse case runs two same-geometry movies, so the second reuses the
+first's parked CUDA session (docs/cuda_session_reuse.md), and checks that the
+process still ends owning no device allocation. --leak-mutant-binary is the
+negative control: a build whose end of run drops the parked session without
+releasing it must be caught by the same check.
 """
 import argparse
 import hashlib
@@ -55,6 +61,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--mutant-binary", type=Path)
+    parser.add_argument("--leak-mutant-binary", type=Path)
     parser.add_argument("--workdir", type=Path)
     parser.add_argument("--float-host", action="store_true",
                         help="test the shared disposal boundary without compact U16 host staging")
@@ -104,7 +111,7 @@ def main():
         (root / "defects.txt").write_text("10 12 1 1\n")
         data[kind] = root
 
-    def run(name, kind="u16", fault="none", executable=binary, extra=()):
+    def run(name, kind="u16", fault="none", executable=binary, extra=(), expect_clean=True):
         out = work / name / "out"
         out.mkdir(parents=True)
         cmd = [str(executable), "--i", "movies.star", "--o", str(out) + "/",
@@ -139,8 +146,9 @@ def main():
                         "exit_code": process.returncode, "binary_sha256": digest(executable),
                         "payload_identity": identity})
         (work / "runs.json").write_text(json.dumps(records, indent=2) + "\n")
-        require("remaining-owned=0 stale-releases=0" in stderr,
-                f"{name}: owned CUDA allocation cleanup was not complete")
+        require(("remaining-owned=0 stale-releases=0" in stderr) == expect_clean,
+                f"{name}: owned CUDA allocation cleanup was not complete" if expect_clean else
+                f"{name}: leak control did not leave an owned CUDA allocation")
         return out, process.returncode, text
 
     healthy = {}
@@ -152,6 +160,31 @@ def main():
         healthy[kind] = out
     require(args.float_host or "Released native uint16 host staging" in (work / "healthy-u16/out/Movies/control.log").read_text(),
             "healthy U16 run did not reach the staging-release boundary")
+
+    def payload(path):
+        raw = path.read_bytes()
+        return raw[1024 + struct.unpack_from("<i", raw, 92)[0]:]
+
+    reuse_root = work / "input-reuse"
+    write_tiff(reuse_root / "Movies/control.tiff", frames)
+    (reuse_root / "Movies/second.tiff").write_bytes((reuse_root / "Movies/control.tiff").read_bytes())
+    write_star(reuse_root / "movies.star", ["Movies/control.tiff", "Movies/second.tiff"])
+    (reuse_root / "defects.txt").write_text("10 12 1 1\n")
+    data["reuse"] = reuse_root
+    out, rc, text = run("healthy-reuse", "reuse")
+    require(rc == 0, f"healthy reuse run failed: {text[-2000:]}")
+    require("CUDA movie sessions: 1 built, 1 reused" in text,
+            "the second movie did not reuse the first movie's CUDA session")
+    expected = payload(healthy["u16"] / "Movies/control.mrc")
+    for movie in ("control", "second"):
+        require(payload(out / f"Movies/{movie}.mrc") == expected,
+                f"healthy reuse: {movie}.mrc payload differs from the single-movie run")
+    if args.leak_mutant_binary:
+        out, rc, text = run("leak-mutant-reuse", "reuse", executable=args.leak_mutant_binary.resolve(),
+                            expect_clean=False)
+        require(rc == 0 and "CUDA movie sessions: 1 built, 1 reused" in text,
+                "leak control did not complete a reused run")
+        print("PASS leak control: a parked session dropped at end of run is reported as owned")
 
     out, rc, text = run("sparse-recoverable", fault="sparse-recoverable")
     require(rc == 0, "recoverable sparse update did not complete")

@@ -466,7 +466,23 @@ if(BUILD_TESTING AND CUDA)
         set(_session_mutant_keep_patch_caches_from "    (void)releasePatchCaches();\n    releaseBuffer(d_Isum);")
         set(_session_mutant_keep_patch_caches_to "    releaseBuffer(d_Isum);")
         set(_session_mutant_keep_patch_caches_case "reuse")
-        foreach(_mutant IN ITEMS skip_reset reuse_after_fatal keep_patch_caches)
+        # The remaining reset-contract items, each observed directly by the
+        # state case: the uploaded group-table cache, the gain lease, the log
+        # binding, and the refusal to park with live ingest views or streams.
+        set(_session_mutant_keep_group_table_cache_from "    uploaded_group_start.clear();\n    uploaded_group_size.clear();\n    const bool plan_ok")
+        set(_session_mutant_keep_group_table_cache_to "    const bool plan_ok")
+        set(_session_mutant_keep_group_table_cache_case "state")
+        set(_session_mutant_keep_gain_lease_from "    (void)mc_cuda::getWorkerPlanPool().releaseLease(this);\n    // Any failure while shedding")
+        set(_session_mutant_keep_gain_lease_to "    // Any failure while shedding")
+        set(_session_mutant_keep_gain_lease_case "state")
+        set(_session_mutant_keep_log_binding_from "    logfile = &null_log;\n    is_initialized = false;")
+        set(_session_mutant_keep_log_binding_to "    is_initialized = false;")
+        set(_session_mutant_keep_log_binding_case "state")
+        set(_session_mutant_park_with_ingest_live_from "    if (ingest_stream || ingest_copy_stream ||\n        fourier_guard.state() == mc_cuda::kFourierIngestScratch)\n        return false;")
+        set(_session_mutant_park_with_ingest_live_to "")
+        set(_session_mutant_park_with_ingest_live_case "state")
+        foreach(_mutant IN ITEMS skip_reset reuse_after_fatal keep_patch_caches
+                keep_group_table_cache keep_gain_lease keep_log_binding park_with_ingest_live)
             set(_from "${_session_mutant_${_mutant}_from}")
             string(FIND "${_session_source}" "${_from}" _first)
             string(FIND "${_session_source}" "${_from}" _last REVERSE)
@@ -528,10 +544,34 @@ if(BUILD_TESTING AND CUDA)
             # the multi-threaded strip reader, where some threads holding a handle
             # and some not is the state that used to deadlock the OpenMP team.
             "LINKER:--wrap=cudaStreamSynchronize" "LINKER:--wrap=TIFFOpen")
+        # Negative control for the process-end cleanup check on a reused session:
+        # the same executable with the end-of-run release of the parked session
+        # replaced by dropping it (docs/cuda_session_reuse.md).
+        set(_runner_cpp "${CMAKE_CURRENT_SOURCE_DIR}/src/motioncorr_runner.cpp")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_runner_cpp}")
+        file(READ "${_runner_cpp}" _runner_source)
+        set(_leak_from "const bool parked_release_ok = releaseParkedCudaSession(\"end of run\");")
+        string(FIND "${_runner_source}" "${_leak_from}" _first)
+        string(FIND "${_runner_source}" "${_leak_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "parked-session leak mutant: target line missing or not unique")
+        endif()
+        string(REPLACE "${_leak_from}" "const bool parked_release_ok = parked_cuda_session.release() != nullptr;"
+            _runner_leak_source "${_runner_source}")
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_leak_parked.cpp" "${_runner_leak_source}")
+        add_executable(motioncorr_faultinject_leak_parked
+            src/apps/run_motioncorr.cpp tests/cuda_fault_inject_shim.cpp
+            "${CMAKE_CURRENT_BINARY_DIR}/mutants/motioncorr_runner_leak_parked.cpp")
+        get_target_property(_core_defs motioncorr_core COMPILE_DEFINITIONS)
+        target_compile_definitions(motioncorr_faultinject_leak_parked PRIVATE ${_core_defs})
+        target_link_libraries(motioncorr_faultinject_leak_parked PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
+        get_target_property(_faultinject_link_options motioncorr_faultinject LINK_OPTIONS)
+        target_link_options(motioncorr_faultinject_leak_parked PRIVATE ${_faultinject_link_options})
         add_test(NAME CudaPreprocessingFailurePaths
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_preprocessing_failure_controls.py
-                --binary $<TARGET_FILE:motioncorr_faultinject>)
+                --binary $<TARGET_FILE:motioncorr_faultinject>
+                --leak-mutant-binary $<TARGET_FILE:motioncorr_faultinject_leak_parked>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.

@@ -367,6 +367,8 @@ private:
 	// Checked release of the parked session. Returns false, after writing the
 	// failure to std::cerr, when the release recorded a CUDA failure.
 	bool releaseParkedCudaSession(const char *boundary);
+	// Sessions created and reused by this run, reported at the end of run().
+	int cuda_sessions_built = 0, cuda_sessions_reused = 0;
 	// First-movie warm-up: creates the primary context on gpu_id while the main
 	// thread parses movie 0 and reads the gain. It calls only cudaSetDevice and
 	// discards the result; the main thread repeats every call it depends on, so

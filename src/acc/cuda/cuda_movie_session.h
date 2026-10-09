@@ -333,6 +333,10 @@ public:
     bool isInitialized() const { return is_initialized; }
 
 private:
+    // tests/cuda_session_reuse.cpp inspects the per-movie state that
+    // parkForReuse() and resetForMovie() must clear.
+    friend struct CudaMovieSessionTestAccess;
+
     // The shared body of the two native-sample overloads above. Private: callers
     // name the sample type through the overloads, which is what keeps SChar and
     // SShort from instantiating it by accident.

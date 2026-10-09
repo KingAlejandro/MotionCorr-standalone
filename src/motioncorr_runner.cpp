@@ -803,7 +803,14 @@ void MotioncorrRunner::run()
 	// The last movie's parked session. Every movie's products were complete
 	// before it was parked, so a failure here is reported, not charged to them.
 	joinCudaContextWarmup();
-	(void)releaseParkedCudaSession("end of run");
+	const bool parked_release_ok = releaseParkedCudaSession("end of run");
+	if (do_own && use_gpu && !early_binning) {
+		std::cout << " CUDA movie sessions: " << cuda_sessions_built << " built, "
+		          << cuda_sessions_reused << " reused" << std::endl;
+		StageProfile::instance().setNote("cuda_sessions",
+		    std::to_string(cuda_sessions_built) + " built, " + std::to_string(cuda_sessions_reused) + " reused");
+		StageProfile::instance().setNote("cuda_session_end_release", parked_release_ok ? "ok" : "failed");
+	}
 #endif
 
 	// Every product is on disk and closed after this, which the joint STAR
@@ -1939,7 +1946,12 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	};
 	if (use_gpu && !early_binning) {
 		StageScope session_scope("session setup");
-		joinCudaContextWarmup();
+		{
+			// Non-zero only on the first movie: the part of context creation the
+			// header parse and gain read did not cover.
+			StageScope wait_scope("wait for context warm-up");
+			joinCudaContextWarmup();
+		}
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies. It is only an identity because
 		// gainReferenceFor() ran earlier in this function, for this movie's
@@ -1955,7 +1967,9 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (parked_cuda_session && parked_cuda_session->matchesGeometry(nx, ny, n_frames, gpu_id)) {
 			movie_session = std::move(parked_cuda_session);
 			movie_session->setGainGeneration(gain_generation);
-			if (!movie_session->resetForMovie(logfile)) {
+			if (movie_session->resetForMovie(logfile)) {
+				cuda_sessions_reused++;
+			} else {
 				movie_session->release();
 				refuse_fallback_if_fatal(movie_session->getFailureState(), "session reuse");
 				movie_session.reset();
@@ -1969,6 +1983,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		if (!movie_session) {
 			movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 			movie_session->setGainGeneration(gain_generation);
+			cuda_sessions_built++;
 		}
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");

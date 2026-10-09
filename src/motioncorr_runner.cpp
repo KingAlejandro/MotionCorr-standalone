@@ -2874,7 +2874,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	RCTIC(TIMING_GLOBAL_ALIGNMENT);
 #ifdef _CUDA_ENABLED
 	if (movie_session) {
-		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true);
+		// The real-space movie is dead until the inverse FFT below rewrites it,
+		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
+		size_t arena_bytes = 0;
+		void *arena = movie_session->borrowRealFramesForGlobalAlignment(arena_bytes);
+		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
 	} else
 #endif
 	{
@@ -3057,7 +3061,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					local_yshifts = batch_outcome->yshifts;
 				} else if (movie_session) {
 					RCTIC(TIMING_PREP_PATCH);
-					size_t sz_fpatches = (size_t)n_groups * patch_h * patch_nfx * sizeof(cufftComplex);
+					// Only each group's CCF window is kept (cudaExtractPatchWindow).
+					int window_nx = 0, window_ny = 0;
+					patchSpectrumWindow(patch_w, patch_h, bfactor / (prescaling * prescaling), ccf_downsample, window_nx, window_ny);
+					size_t sz_fpatches = (size_t)n_groups * window_ny * (window_nx / 2 + 1) * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
 						cufftComplex *stale = d_patch_fcomplex_buffer;
                         d_patch_fcomplex_buffer = nullptr;
@@ -3075,12 +3082,13 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						}
 					}
 					if (d_patch_fcomplex_buffer) {
-						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer);
+						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer, window_nx, window_ny);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
 					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
+						movie_session->getPatchAlignmentWorkspace().setSpectrumWindowed(true);
 						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
@@ -3639,7 +3647,9 @@ skip_fitting:
 				poly_model = dynamic_cast<const ThirdOrderPolynomialModel*>(mic.model);
 			}
 			logfile << "Dose weighting and summing frames (CUDA in-VRAM)..." << std::endl;
-			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model);
+			// Nothing reads the real-space frames after dose weighting unless the
+			// pre-dose-weighting sum is needed, so DW may use them as scratch.
+			cuda_dw_done = movie_session->reconstructDoseWeighted(Iref, doses, angpix * prescaling, poly_model, !pre_dw_sum_needed);
 			if (!cuda_dw_done)
 				refuse_fallback_if_fatal(movie_session->getFailureState(), "resident dose-weighted reconstruction");
 		} else if (use_gpu) {
@@ -4120,7 +4130,9 @@ void MotioncorrRunner::realSpaceInterpolation_ThirdOrderPolynomial(Image <float>
 }
 
 #ifdef _CUDA_ENABLED
-bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global) {
+bool MotioncorrRunner::alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global, void *arena, size_t arena_bytes) {
+	if (arena)
+		return cudaAlignPatchDeviceInArena(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, arena, arena_bytes, is_global);
 	return cudaAlignPatchDevice(d_Fframes, n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter, ccf_downsample, gpu_id, logfile, is_global);
 }
 #endif

@@ -289,6 +289,43 @@ __global__ void fourierShiftKernel(
     }
 }
 
+// Window extraction (patchSpectrumWindow). The remap is the reference/CCF
+// kernels' own, so those kernels read the window with an identity remap. The
+// scale is the single multiply of scaleComplexKernel, applied before any shift,
+// so every stored value equals the full-spectrum path's bit for bit.
+__global__ void extractPatchWindowKernel(
+    const float2 *d_full, float2 *d_window,
+    int nfx, int nfy, int win_nfx, int win_nfy, int win_nfy_half,
+    float scale)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int iframe = blockIdx.z;
+    if (x < win_nfx && y < win_nfy) {
+        int fy = (y > win_nfy_half) ? (y - win_nfy + nfy) : y;
+        float2 v = d_full[iframe * ((size_t)nfy * nfx) + fy * nfx + x];
+        d_window[iframe * ((size_t)win_nfy * win_nfx) + y * win_nfx + x] = make_float2(v.x * scale, v.y * scale);
+    }
+}
+
+void patchSpectrumWindow(int pnx, int pny, RFLOAT scaled_B, RFLOAT ccf_downsample,
+                         int &ccf_nx, int &ccf_ny) {
+    const PatchCcfGeometry geo = patchCcfGeometry(pnx, pny, scaled_B, ccf_downsample);
+    ccf_nx = geo.ccf_nx;
+    ccf_ny = geo.ccf_ny;
+}
+
+cudaError_t cudaExtractPatchWindow(const cufftComplex *d_full, cufftComplex *d_window,
+                                   int n_frames, int pnx, int pny, int ccf_nx, int ccf_ny,
+                                   float scale) {
+    const int win_nfx = ccf_nx / 2 + 1, win_nfy = ccf_ny;
+    dim3 block(16, 16, 1);
+    dim3 grid((win_nfx + 15) / 16, (win_nfy + 15) / 16, n_frames);
+    extractPatchWindowKernel<<<grid, block>>>((const float2*)d_full, (float2*)d_window,
+        pnx / 2 + 1, pny, win_nfx, win_nfy, ccf_ny / 2, scale);
+    return cudaGetLastError();
+}
+
 // The implementation is allocated once per movie, never per local patch. The
 // existing fixed-capacity owners are the only release mechanism, including partial
 // initialization and exception paths; their failure sink is the movie's state.
@@ -312,6 +349,12 @@ struct PatchAlignmentWorkspace::Impl {
     bool valid = false;
     // The ephemeral entry point reports completion only after checked teardown.
     bool defer_completion = false;
+    bool windowed = false;
+    // Arena placement (cudaAlignPatchDeviceInArena): borrowed, never registered
+    // with the owners above. Set by the ephemeral caller before the first call.
+    char *arena = nullptr;
+    size_t arena_bytes = 0;
+    bool arena_placed = false, arena_work_allocated = false;
     int resource_device = -1;
     float2 *d_Fref = nullptr, *d_Fccs = nullptr;
     float *d_weight = nullptr, *d_Iccs = nullptr;
@@ -346,6 +389,7 @@ struct PatchAlignmentWorkspace::Impl {
         ev_start_cufft = ev_stop_cufft = ev_start_d2h = ev_stop_d2h = nullptr;
         plan_c2r = 0;
         cufft_work_size = 0;
+        arena_placed = arena_work_allocated = false;
         return device_error == cudaSuccess && plan_error == CUFFT_SUCCESS &&
             memory_error == cudaSuccess && event_error == cudaSuccess;
     }
@@ -356,6 +400,8 @@ PatchAlignmentWorkspace::PatchAlignmentWorkspace(CudaFailureState *failure)
 PatchAlignmentWorkspace::~PatchAlignmentWorkspace() { (void)release(); }
 bool PatchAlignmentWorkspace::release() noexcept { return impl_->release(); }
 bool PatchAlignmentWorkspace::isValid() const { return impl_->valid; }
+void PatchAlignmentWorkspace::setSpectrumWindowed(bool windowed) { impl_->windowed = windowed; }
+bool PatchAlignmentWorkspace::spectrumWindowed() const { return impl_->windowed; }
 
 // Preserve consumed statuses before the existing handlers throw. A later clean
 // last-error slot cannot permit a retry after a fatal initialization/execution fault.
@@ -419,11 +465,19 @@ bool cudaAlignPatchDeviceWithWorkspace(
     const RFLOAT ccf_scale_x = geo.ccf_scale_x, ccf_scale_y = geo.ccf_scale_y;
 
     const int nfx = pnx / 2 + 1, nfy = pny;
-    const int nfy_half = nfy / 2;
     float2 *d_Fframes = (float2*)d_Fframes_in;
+    // Layout of d_Fframes: the full half-spectrum, or in window mode only the
+    // CCF window. On the window the reference/CCF remap is the identity, and the
+    // shift kernel's own wrap gives every element the frequency it has in the
+    // full spectrum, so reads and phases are unchanged. The weights keep the
+    // full-spectrum normalisation (nfx, nfy) in both modes.
+    const bool windowed = w.windowed;
+    const int data_nfx = windowed ? ccf_nfx : nfx;
+    const int data_nfy = windowed ? ccf_nfy : nfy;
+    const int data_nfy_half = data_nfy / 2;
 
     // Buffer allocations
-    const size_t sz_fframes = (size_t)n_frames * nfy * nfx * sizeof(float2);
+    const size_t sz_fframes = (size_t)n_frames * data_nfy * data_nfx * sizeof(float2);
     const size_t sz_fref    = (size_t)ccf_nfy * ccf_nfx * sizeof(float2);
     const size_t sz_weight  = (size_t)ccf_nfy * ccf_nfx * sizeof(float);
     const size_t sz_fccs    = (size_t)n_frames * ccf_nfy * ccf_nfx * sizeof(float2);
@@ -452,21 +506,61 @@ bool cudaAlignPatchDeviceWithWorkspace(
     // setup-exclusive performance comparison. Complete unprofiled wall is the gate.
     ALIGN_CUDA(cudaEventRecord(w.ev_start_total));
     if (setup_required) {
-        ALIGN_CUDA(cudaMalloc(&w.d_Fref, sz_fref)); w.memory.add(w.d_Fref);
-        ALIGN_CUDA(cudaMalloc(&w.d_weight, sz_weight)); w.memory.add(w.d_weight);
-        ALIGN_CUDA(cudaMalloc(&w.d_Fccs, sz_fccs)); w.memory.add(w.d_Fccs);
-        ALIGN_CUDA(cudaMalloc(&w.d_Iccs, sz_iccs)); w.memory.add(w.d_Iccs);
-        ALIGN_CUDA(cudaMalloc(&w.d_cur_xshifts, sz_shifts)); w.memory.add(w.d_cur_xshifts);
-        ALIGN_CUDA(cudaMalloc(&w.d_cur_yshifts, sz_shifts)); w.memory.add(w.d_cur_yshifts);
-        ALIGN_CUDA(cudaMalloc(&w.d_shiftx, sz_shifts)); w.memory.add(w.d_shiftx);
-        ALIGN_CUDA(cudaMalloc(&w.d_shifty, sz_shifts)); w.memory.add(w.d_shifty);
+        // Arena carve: each buffer starts on a 512-byte boundary, the alignment
+        // the batched slots already use, so kernels and cuFFT see the same
+        // pointer alignment as with fresh allocations.
+        const size_t ARENA_ALIGN = 512;
+        auto align_up = [&](size_t v) { return (v + ARENA_ALIGN - 1) / ARENA_ALIGN * ARENA_ALIGN; };
+        char *arena_base = nullptr;
+        size_t arena_usable = 0, arena_need = 0;
+        if (w.arena) {
+            arena_base = (char*)align_up((size_t)w.arena);
+            const size_t lost = (size_t)(arena_base - w.arena);
+            arena_usable = w.arena_bytes > lost ? w.arena_bytes - lost : 0;
+            arena_need = align_up(sz_fref) + align_up(sz_weight) + align_up(sz_fccs) +
+                align_up(sz_iccs) + 4 * align_up(sz_shifts);
+        }
+        w.arena_placed = w.arena && arena_need <= arena_usable;
+        if (w.arena_placed) {
+            char *cursor = arena_base;
+            auto carve = [&](size_t bytes) { char *p = cursor; cursor += align_up(bytes); return p; };
+            w.d_Fref = (float2*)carve(sz_fref);
+            w.d_weight = (float*)carve(sz_weight);
+            w.d_Fccs = (float2*)carve(sz_fccs);
+            w.d_Iccs = (float*)carve(sz_iccs);
+            w.d_cur_xshifts = (float*)carve(sz_shifts);
+            w.d_cur_yshifts = (float*)carve(sz_shifts);
+            w.d_shiftx = (float*)carve(sz_shifts);
+            w.d_shifty = (float*)carve(sz_shifts);
+        } else {
+            ALIGN_CUDA(cudaMalloc(&w.d_Fref, sz_fref)); w.memory.add(w.d_Fref);
+            ALIGN_CUDA(cudaMalloc(&w.d_weight, sz_weight)); w.memory.add(w.d_weight);
+            ALIGN_CUDA(cudaMalloc(&w.d_Fccs, sz_fccs)); w.memory.add(w.d_Fccs);
+            ALIGN_CUDA(cudaMalloc(&w.d_Iccs, sz_iccs)); w.memory.add(w.d_Iccs);
+            ALIGN_CUDA(cudaMalloc(&w.d_cur_xshifts, sz_shifts)); w.memory.add(w.d_cur_xshifts);
+            ALIGN_CUDA(cudaMalloc(&w.d_cur_yshifts, sz_shifts)); w.memory.add(w.d_cur_yshifts);
+            ALIGN_CUDA(cudaMalloc(&w.d_shiftx, sz_shifts)); w.memory.add(w.d_shiftx);
+            ALIGN_CUDA(cudaMalloc(&w.d_shifty, sz_shifts)); w.memory.add(w.d_shifty);
+        }
         int n[2] = {ccf_ny, ccf_nx};
         ALIGN_CUFFT(cufftCreate(&w.plan_c2r)); w.plan.take(w.plan_c2r);
+        // Only where the work area is placed; the plan configuration is unchanged.
+        if (w.arena_placed) ALIGN_CUFFT(cufftSetAutoAllocation(w.plan_c2r, 0));
         size_t plan_work_bytes = 0;
         ALIGN_CUFFT(cufftMakePlanMany(w.plan_c2r, 2, n, NULL, 1,
             ccf_nfy * ccf_nfx, NULL, 1, ccf_ny * ccf_nx, CUFFT_C2R,
             n_frames, &plan_work_bytes));
         ALIGN_CUFFT(cufftGetSize(w.plan_c2r, &w.cufft_work_size));
+        if (w.arena_placed) {
+            void *work = nullptr;
+            if (w.cufft_work_size <= arena_usable - arena_need) {
+                work = arena_base + arena_need;
+            } else {
+                ALIGN_CUDA(cudaMalloc(&work, w.cufft_work_size)); w.memory.add(work);
+                w.arena_work_allocated = true;
+            }
+            ALIGN_CUFFT(cufftSetWorkArea(w.plan_c2r, work));
+        }
         dim3 blockWeights(16, 16);
         dim3 gridWeights((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16);
         computeWeightsKernel<<<gridWeights, blockWeights>>>(w.d_weight,
@@ -492,7 +586,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
     dim3 blockCCF(16, 16, 1);
     dim3 gridCCF((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16, n_frames);
     dim3 blockShift(16, 16, 1);
-    dim3 gridShift((nfx + 15) / 16, (nfy + 15) / 16, n_frames - 1);
+    dim3 gridShift((data_nfx + 15) / 16, (data_nfy + 15) / 16, n_frames - 1);
 
     std::vector<float> h_cur_xshifts(n_frames, 0.0f);
     std::vector<float> h_cur_yshifts(n_frames, 0.0f);
@@ -512,11 +606,11 @@ bool cudaAlignPatchDeviceWithWorkspace(
     for (int iter = 1; iter <= max_iter; iter++) {
         // 1. Reference computation
         if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
-        computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+        computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, data_nfx, data_nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
 
         // 2. CCF computation
-        computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+        computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, data_nfx, data_nfy, n_frames);
         ALIGN_LAUNCH(cudaGetLastError());
         if (timed) {
             ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
@@ -575,7 +669,7 @@ bool cudaAlignPatchDeviceWithWorkspace(
             ALIGN_CUDA(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
             if (timed) ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
-            fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
+            fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, data_nfx, data_nfy, data_nfy_half, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
             if (timed) {
                 ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
@@ -615,6 +709,9 @@ bool cudaAlignPatchDeviceWithWorkspace(
     logfile << "   Buffer VRAM:                  " << std::fixed << std::setprecision(2) << ((total_vram_allocated - cufft_work_size) / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   cuFFT workspace VRAM:         " << std::fixed << std::setprecision(2) << (cufft_work_size / (1024.0 * 1024.0)) << " MiB" << std::endl;
     logfile << "   Peak GPU memory allocated:    " << std::fixed << std::setprecision(2) << (total_vram_allocated / (1024.0 * 1024.0)) << " MiB" << std::endl;
+    if (w.arena_placed)
+        logfile << "   Buffer placement:             borrowed dead device memory"
+                << (w.arena_work_allocated ? "; cuFFT workspace allocated" : ", nothing allocated") << std::endl;
 
     // Publish only after all initialization and the complete alignment succeeded.
     // The input-dependent scratch is overwritten by the next call's unchanged
@@ -663,9 +760,10 @@ struct BatchSlots {
 };
 
 BatchSlots batchSlots(int n_frames, int pnx, int pny, const PatchCcfGeometry &geo) {
-    const size_t nfx = pnx / 2 + 1, ccf_nfx = geo.ccf_nx / 2 + 1;
+    const size_t ccf_nfx = geo.ccf_nx / 2 + 1;
     BatchSlots s;
-    s.fframes = paddedElements((size_t)n_frames * pny * nfx, sizeof(float2));
+    // Slots hold CCF windows (cudaExtractPatchWindow), not full spectra.
+    s.fframes = paddedElements((size_t)n_frames * geo.ccf_ny * ccf_nfx, sizeof(float2));
     s.fref = paddedElements((size_t)geo.ccf_ny * ccf_nfx, sizeof(float2));
     s.fccs = paddedElements((size_t)n_frames * geo.ccf_ny * ccf_nfx, sizeof(float2));
     s.iccs = paddedElements((size_t)n_frames * geo.ccf_ny * geo.ccf_nx, sizeof(float));
@@ -855,8 +953,6 @@ void cudaAlignPatchBatchDevice(
     const int ccf_nx = w.geo.ccf_nx, ccf_ny = w.geo.ccf_ny, search_range = w.geo.search_range;
     const int ccf_nfx = ccf_nx / 2 + 1, ccf_nfy = ccf_ny;
     const int ccf_nfy_half = ccf_ny / 2;
-    const int nfx = pnx / 2 + 1, nfy = pny;
-    const int nfy_half = nfy / 2;
     const size_t n = n_frames, K = w.capacity;
 
     dim3 blockRef(16, 16);
@@ -864,7 +960,7 @@ void cudaAlignPatchBatchDevice(
     dim3 blockCCF(16, 16, 1);
     dim3 gridCCF((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16, n_frames);
     dim3 blockShift(16, 16, 1);
-    dim3 gridShift((nfx + 15) / 16, (nfy + 15) / 16, n_frames - 1);
+    dim3 gridShift((ccf_nfx + 15) / 16, (ccf_nfy + 15) / 16, n_frames - 1);
 
     float *d_cur_x = w.d_cur, *d_cur_y = w.d_cur + K * n;
     float *d_shift_x = w.d_shift, *d_shift_y = w.d_shift + K * n;
@@ -884,9 +980,10 @@ void cudaAlignPatchBatchDevice(
             float2 *d_Fref = w.d_Fref + p * w.slots.fref;
             float2 *d_Fccs = w.d_Fccs + p * w.slots.fccs;
             float *d_Iccs = w.d_Iccs + p * w.slots.iccs;
-            computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+            // Window slots: the frame dims are the window's, the remap the identity.
+            computeReferenceKernel<<<gridRef, blockRef>>>(d_Fframes, d_Fref, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
-            computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, nfx, nfy, n_frames);
+            computeCCFKernel<<<gridCCF, blockCCF>>>(d_Fframes, d_Fref, w.d_weight, d_Fccs, ccf_nfx, ccf_nfy, ccf_nfy_half, ccf_nfx, ccf_nfy, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
             ALIGN_CUFFT(cufftExecC2R(w.plan_c2r, (cufftComplex*)d_Fccs, (cufftReal*)d_Iccs));
             findPeakAndInterpolateKernel<<<n_frames, 256>>>(
@@ -911,7 +1008,7 @@ void cudaAlignPatchBatchDevice(
             ALIGN_CUDA(cudaMemcpy(w.d_shift, w.h_shift.data(), sz_all_shifts, cudaMemcpyHostToDevice));
             for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];
                 fourierShiftKernel<<<gridShift, blockShift>>>(w.d_Fpatches + p * w.slots.fframes,
-                    d_shift_x + p * n, d_shift_y + p * n, nfx, nfy, nfy_half, n_frames);
+                    d_shift_x + p * n, d_shift_y + p * n, ccf_nfx, ccf_nfy, ccf_nfy_half, n_frames);
                 ALIGN_LAUNCH(cudaGetLastError());
             }
         }
@@ -965,6 +1062,29 @@ bool cudaAlignPatchDevice(
 {
     PatchAlignmentWorkspace workspace;
     workspace.impl_->defer_completion = true;
+    const bool converged = cudaAlignPatchDeviceWithWorkspace(workspace, d_Fframes,
+        n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter,
+        ccf_downsample, device_id, logfile, is_global);
+    if (!workspace.release()) REPORT_ERROR("CUDA patch alignment cleanup failed");
+    const char *stage_name = is_global ? "Global Alignment" : "Patch Alignment";
+    logfile << " [CUDA " << stage_name << "] completed; converged="
+            << (converged ? "yes" : "no") << std::endl;
+    return converged;
+}
+
+// Its own body rather than a shared helper, so this frame (and the name the
+// fault shim matches) stays on the stack through the workspace teardown.
+bool cudaAlignPatchDeviceInArena(
+    cufftComplex *d_Fframes, const int n_frames, const int pnx, const int pny,
+    const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts,
+    std::vector<RFLOAT> &yshifts, const int max_iter,
+    const RFLOAT ccf_downsample, const int device_id, std::ostream &logfile,
+    void *arena, size_t arena_bytes, bool is_global)
+{
+    PatchAlignmentWorkspace workspace;
+    workspace.impl_->defer_completion = true;
+    workspace.impl_->arena = static_cast<char*>(arena);
+    workspace.impl_->arena_bytes = arena ? arena_bytes : 0;
     const bool converged = cudaAlignPatchDeviceWithWorkspace(workspace, d_Fframes,
         n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter,
         ccf_downsample, device_id, logfile, is_global);

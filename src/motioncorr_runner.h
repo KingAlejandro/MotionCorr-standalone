@@ -376,7 +376,7 @@ private:
 
 	bool alignPatch(std::vector<MultidimArray<fComplex> > &Fframes, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
 #ifdef _CUDA_ENABLED
-	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false);
+	bool alignPatchDevice(cufftComplex *d_Fframes, int n_frames, const int pnx, const int pny, const RFLOAT scaled_B, std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts, std::ostream &logfile, bool is_global = false, void *arena = nullptr, size_t arena_bytes = 0);
 #endif
 
 	void binNonSquareImage(Image<float> &Iwork, RFLOAT bin_factor);

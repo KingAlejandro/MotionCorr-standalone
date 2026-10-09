@@ -45,6 +45,10 @@ bool cudaDoseWeightAndInterpolate(
  */
 struct DoseWeightScratch {
     cufftComplex *fourier = nullptr;
+    // Optional caller-owned device memory of at least doseScratchLayout().total_bytes
+    // that nothing else uses during the call. When set it replaces the single
+    // allocation: nothing is allocated or freed for the four buffers.
+    char *block = nullptr;
 };
 
 namespace mc_cuda {

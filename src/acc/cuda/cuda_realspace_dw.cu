@@ -303,10 +303,12 @@ bool cudaDoseWeightAndInterpolateDevice(
         // and one checked cudaFree instead of four of each).
         d_Fframe = (float2*)scratch->fourier;
         const mc_cuda::DoseScratchLayout layout = mc_cuda::doseScratchLayout(nx, ny, n_frames);
-        char *block = nullptr;
-        HANDLE_ERROR(cudaMalloc((void**)&block, layout.total_bytes));
-        memory_cleanup.add(block);
-        total_vram_allocated += layout.total_bytes;
+        char *block = scratch->block;
+        if (!block) {
+            HANDLE_ERROR(cudaMalloc((void**)&block, layout.total_bytes));
+            memory_cleanup.add(block);
+            total_vram_allocated += layout.total_bytes;
+        }
         d_Isum = (float*)(block + layout.accumulator_offset);
         d_Iframe = (float*)(block + layout.real_offset);
         d_normalization = (float*)(block + layout.normalization_offset);

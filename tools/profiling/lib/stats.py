@@ -168,19 +168,40 @@ def positional_bias(pairs: Sequence[Dict]) -> Optional[Dict]:
             "second_position_cost_s": (mab - mba) / 2.0, "order_corrected_effect_s": (mab + mba) / 2.0}
 
 
-def per_sample_delta(a: Sequence[float], b: Sequence[float], k: float = 3.0,
-                     min_abs: float = 0.0) -> Dict:
-    """Unpaired delta of medians with a robust standard error.
+# Two-sided Student-t critical values at alpha = 0.001, by degrees of freedom.
+T_CRIT_999 = {1: 636.62, 2: 31.60, 3: 12.92, 4: 8.610, 5: 6.869, 6: 5.959, 7: 5.408, 8: 5.041,
+              9: 4.781, 10: 4.587, 12: 4.318, 15: 4.073, 20: 3.850, 30: 3.646, 60: 3.460}
 
-    Used for per-stage and per-device deltas where each movie in one profiled
-    or traced run is a sample. Indicative only: movies in one process are not
-    independent of that process's conditions.
+
+def t_crit(df: int) -> float:
+    return T_CRIT_999[max(k for k in T_CRIT_999 if k <= df)]
+
+
+def replicated_delta(base_passes: Sequence[Sequence[float]], arm_passes: Sequence[Sequence[float]],
+                     min_abs: float = 0.0) -> Dict:
+    """Stage-level delta between arms from replicated processes.
+
+    Each pass (one process) contributes one value: the median of its samples
+    (steady-state movies). Movies inside one process share that process's
+    conditions, so they are not independent; the noise comes from the spread
+    of pass values within each arm (pooled variance, df = Pa + Pb - 2). A
+    stage is flagged when |delta| exceeds t(0.999, df) * SE and min_abs.
+    With fewer than two passes per arm the delta is reported without a flag.
     """
+    a = [median(p) for p in base_passes if len(p)]
+    b = [median(p) for p in arm_passes if len(p)]
+    out: Dict = {"passes_a": len(a), "passes_b": len(b), "pass_values_a": a, "pass_values_b": b,
+                 "flag": False, "replicated": False}
     if not a or not b:
-        return {"n_a": len(a), "n_b": len(b), "delta": None, "flag": False}
-    ma, mb = median(a), median(b)
-    se = math.sqrt(robust_sd(a) ** 2 / len(a) + robust_sd(b) ** 2 / len(b))
-    delta = mb - ma
-    flag = abs(delta) > max(k * se, min_abs)
-    return {"n_a": len(a), "n_b": len(b), "median_a": ma, "median_b": mb, "delta": delta,
-            "robust_se": se, "flag": flag}
+        out["delta"] = None
+        return out
+    ma, mb = statistics.fmean(a), statistics.fmean(b)
+    out.update({"median_a": ma, "median_b": mb, "delta": mb - ma})
+    if len(a) < 2 or len(b) < 2:
+        return out
+    df = len(a) + len(b) - 2
+    ss = sum((x - ma) ** 2 for x in a) + sum((x - mb) ** 2 for x in b)
+    se = math.sqrt(ss / df) * math.sqrt(1.0 / len(a) + 1.0 / len(b))
+    thr = max(t_crit(df) * se, min_abs)
+    out.update({"replicated": True, "df": df, "se": se, "threshold": thr, "flag": abs(mb - ma) > thr})
+    return out

@@ -132,87 +132,96 @@ def derive_runs(raw: Dict, floor_s: float = 0.0) -> Dict:
     return out
 
 
-def derive_stage_deltas(profiles: Dict[str, str], base: str) -> Optional[Dict]:
-    """Per-stage deltas from one --profile pass per arm; steady movies as samples."""
+STAGE_KEYS = (("wall_ms", 0.5), ("cpu_ms", 0.5), ("minflt", 50))
+
+
+def _profile_pass(sp, path: str) -> Dict:
+    """One --profile file: per stage and metric, the steady-state per-movie values."""
+    movies, process = sp.load(path)
+    steady = movies[1:] if len(movies) > 1 else movies
+    names: List[str] = []
+    for m in steady:
+        for st in m["stages"]:
+            if st["name"] not in names:
+                names.append(st["name"])
+    per: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: defaultdict(list))
+    for m in steady:
+        seen = {st["name"]: st for st in m["stages"]}
+        for n in names:
+            for k, _ in STAGE_KEYS:
+                # A movie that skipped a stage contributes zero, as in stage_profile.py.
+                per[n][k].append(seen.get(n, {}).get(k, 0))
+    return {"stages": per, "order": names, "check": sp.check(movies), "process": process,
+            "movie_wall_ms": [m["wall_ms"] for m in steady]}
+
+
+def derive_stage_deltas(profiles: Dict[str, List[str]], base: str) -> Optional[Dict]:
+    """Per-stage deltas from --profile passes (one process each) per arm."""
     if not profiles or base not in profiles:
         return None
     sp = _stage_profile_module()
-    data = {}
-    for arm, path in profiles.items():
-        movies, process = sp.load(path)
-        steady = movies[1:] if len(movies) > 1 else movies
-        per: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: defaultdict(list))
-        names = []
-        for m in steady:
-            seen = {st["name"]: st for st in m["stages"]}
-            for n in seen:
-                if n not in names:
-                    names.append(n)
-        for m in steady:
-            seen = {st["name"]: st for st in m["stages"]}
-            for n in names:
-                st = seen.get(n, {})
-                for k in ("wall_ms", "cpu_ms", "minflt"):
-                    per[n][k].append(st.get(k, 0))
-        data[arm] = {"stages": per, "order": names, "check": sp.check(movies), "process": process,
-                     "movies": len(movies), "movie_wall_ms": [m["wall_ms"] for m in steady]}
-    out = {"arms": {}, "base": base}
+    data = {arm: [_profile_pass(sp, p) for p in paths] for arm, paths in profiles.items()}
+    out = {"arms": {}, "base": base, "passes": {a: len(v) for a, v in data.items()}}
     for arm in profiles:
         if arm == base:
             continue
+        names: List[str] = []
+        for d in data[base] + data[arm]:
+            names += [n for n in d["order"] if n not in names]
         rows = OrderedDict()
-        names = data[base]["order"] + [n for n in data[arm]["order"] if n not in data[base]["order"]]
         for n in names:
-            row = {}
-            for k, min_abs in (("wall_ms", 0.5), ("cpu_ms", 0.5), ("minflt", 50)):
-                a = data[base]["stages"].get(n, {}).get(k, [])
-                b = data[arm]["stages"].get(n, {}).get(k, [])
-                row[k] = stats.per_sample_delta(a, b, min_abs=min_abs)
-            rows[n] = row
-        out["arms"][arm] = {"stages": rows,
-                            "movie_wall": stats.per_sample_delta(data[base]["movie_wall_ms"],
-                                                                 data[arm]["movie_wall_ms"], min_abs=0.5)}
-    out["checks"] = {a: d["check"] for a, d in data.items()}
-    out["processes"] = {a: d["process"] for a, d in data.items()}
+            rows[n] = {k: stats.replicated_delta([d["stages"].get(n, {}).get(k, []) for d in data[base]],
+                                                 [d["stages"].get(n, {}).get(k, []) for d in data[arm]], min_abs)
+                       for k, min_abs in STAGE_KEYS}
+        out["arms"][arm] = {"stages": rows, "movie_wall": stats.replicated_delta(
+            [d["movie_wall_ms"] for d in data[base]], [d["movie_wall_ms"] for d in data[arm]], 0.5)}
+    out["checks"] = {a: [c for d in v for c in d["check"]] for a, v in data.items()}
     return out
 
 
-DEVICE_KEYS = (("wall_ns", 0.5e6), ("busy_ns", 0.5e6), ("idle_ns", 0.5e6), ("kernels", 1), ("copy_bytes", 1),
-               ("sync_calls", 1), ("sync_blocked_idle_ns", 0.5e6), ("malloc", 1), ("free", 1))
+DEVICE_KEYS = (("wall_ns", 0.5e6), ("busy_ns", 0.5e6), ("idle_ns", 0.5e6), ("kernels", 0.5), ("copy_bytes", 0.5),
+               ("sync_calls", 0.5), ("sync_blocked_idle_ns", 0.5e6), ("malloc", 0.5), ("free", 0.5))
 
 
-def derive_device_deltas(traces: Dict[str, Dict], base: str) -> Optional[Dict]:
+def _trace_values(t: Dict, name: str, key: str) -> List[float]:
+    """Steady-state per-movie values of one stage in one trace; a one-element
+    list holding the total for outside-movie segments."""
+    r = t["stages"].get(name)
+    if r is None or key not in r:
+        return []
+    if r["kind"] in ("stage", "unattributed"):
+        v = r[key]["per_movie"]
+        return v[1:] if len(v) > 1 else v
+    return [r[key]["sum"]]
+
+
+def derive_device_deltas(traces: Dict[str, List[Dict]], base: str) -> Optional[Dict]:
+    """Per-stage device deltas from traces (one process each) per arm."""
     if not traces or base not in traces:
         return None
-    out = {"base": base, "arms": {}}
-    for arm, t in traces.items():
+    out = {"base": base, "arms": {}, "passes": {a: len(v) for a, v in traces.items()}}
+    for arm, ts in traces.items():
         if arm == base:
             continue
+        names: List[str] = []
+        for t in traces[base] + ts:
+            names += [n for n in t["stages"] if n not in names]
         rows = OrderedDict()
-        sa, sb = traces[base]["stages"], t["stages"]
-        for n in list(sa) + [x for x in sb if x not in sa]:
-            ra, rb = sa.get(n), sb.get(n)
-            kind = (ra or rb)["kind"]
-            row = {"kind": kind}
+        for n in names:
+            kind = next(t["stages"][n]["kind"] for t in traces[base] + ts if n in t["stages"])
+            row: Dict = {"kind": kind}
             for k, min_abs in DEVICE_KEYS:
-                if kind in ("stage", "unattributed"):
-                    a = ra[k]["per_movie"][1:] if ra and k in ra else []
-                    b = rb[k]["per_movie"][1:] if rb and k in rb else []
-                    row[k] = stats.per_sample_delta(a, b, min_abs=min_abs)
-                else:
-                    a = ra[k]["sum"] if ra and k in ra else 0
-                    b = rb[k]["sum"] if rb and k in rb else 0
-                    row[k] = {"median_a": a, "median_b": b, "delta": b - a, "flag": False, "single": True}
+                row[k] = stats.replicated_delta([_trace_values(t, n, k) for t in traces[base]],
+                                                [_trace_values(t, n, k) for t in ts], min_abs)
             rows[n] = row
-        ma, mb = traces[base].get("memory"), t.get("memory")
-        mem = None
-        if ma and mb:
-            pa = max((d["peak_bytes"] for d in ma["devices"].values()), default=0)
-            pb = max((d["peak_bytes"] for d in mb["devices"].values()), default=0)
-            mem = {"peak_a": pa, "peak_b": pb, "delta": pb - pa}
-        out["arms"][arm] = {"stages": rows, "memory": mem,
-                            "totals": {k: (traces[base]["totals"][k], t["totals"][k])
-                                       for k in ("busy_ns", "idle_ns", "kernels", "copies", "copy_bytes")}}
+
+        def peak(t):
+            m = t.get("memory")
+            return max((d["peak_bytes"] for d in m["devices"].values()), default=0) if m else None
+        pa = [peak(t) for t in traces[base]]
+        pb = [peak(t) for t in ts]
+        mem = {"peak_a": pa, "peak_b": pb} if None not in pa + pb else None
+        out["arms"][arm] = {"stages": rows, "memory": mem}
     return out
 
 
@@ -339,24 +348,39 @@ def render_identity(ident: Dict) -> str:
     return section("Product identity", INSTR_IDENTITY, body)
 
 
+def _delta_cell(v: Dict, scale: float = 1.0, fmt: str = "%+.2f") -> str:
+    if v.get("delta") is None:
+        return "-"
+    return (fmt % (v["delta"] / scale)) + (" *" if v["flag"] else "")
+
+
+def _thr_cell(v: Dict, scale: float = 1.0, fmt: str = "%.2f") -> str:
+    return (fmt % (v["threshold"] / scale)) if v.get("replicated") else "-"
+
+
+FLAG_RULE = ("Each pass is one process; its value for a stage is the median over its steady-state movies "
+             "(all but the first). Movies within a process are not independent samples, so the noise is the "
+             "spread of pass values within each arm. A delta is flagged (*, stage in bold) when it exceeds "
+             "t(0.999, df) x SE of the pass values and an absolute floor; the threshold column shows the bound. "
+             "With one pass per arm deltas are shown without flags. Flags locate a change; the verdict decides it.")
+
+
 def render_stage_deltas(sd: Dict) -> str:
-    body = ("One profiled pass per arm; each steady-state movie (all but the first) is a sample. "
-            "Flags mark |delta| > 3 robust standard errors and above 0.5 ms (50 faults). "
-            "These are indicative: they localise a change, the verdict above decides it.\n")
+    body = "Passes per arm: %s. %s\n" % (", ".join("`%s` %d" % kv for kv in sd["passes"].items()), FLAG_RULE)
     for arm, d in sd["arms"].items():
         mw = d["movie_wall"]
-        body += "\n### `%s` vs `%s`\n\nMovie wall (steady, median): %.1f -> %.1f ms (%+.1f)%s\n\n" % (
-            arm, sd["base"], mw["median_a"], mw["median_b"], mw["delta"], " **flagged**" if mw["flag"] else "")
+        body += "\n### `%s` vs `%s`\n\nMovie wall (steady median): %.1f -> %.1f ms (%s)\n\n" % (
+            arm, sd["base"], mw["median_a"], mw["median_b"], _delta_cell(mw))
         rows = []
         for n, r in d["stages"].items():
             w, c, f = r["wall_ms"], r["cpu_ms"], r["minflt"]
             if w.get("delta") is None:
                 continue
-            rows.append([("**%s**" % n) if (w["flag"] or c["flag"] or f["flag"]) else n,
-                         "%.2f" % w["median_a"], "%.2f" % w["median_b"], "%+.2f%s" % (w["delta"], " *" if w["flag"] else ""),
-                         "%+.2f%s" % (c["delta"], " *" if c["flag"] else ""),
-                         "%+.0f%s" % (f["delta"], " *" if f["flag"] else "")])
-        body += table(["stage", "base wall ms", "arm wall ms", "delta wall ms", "delta CPU ms", "delta minflt"], rows)
+            flagged = w["flag"] or c["flag"] or f["flag"]
+            rows.append([("**%s**" % n) if flagged else n, "%.2f" % w["median_a"], "%.2f" % w["median_b"],
+                         _delta_cell(w), _thr_cell(w), _delta_cell(c), _delta_cell(f, fmt="%+.0f")])
+        body += table(["stage", "base wall ms", "arm wall ms", "delta wall ms", "threshold ms", "delta CPU ms",
+                       "delta minflt"], rows)
     bad = {a: c for a, c in sd["checks"].items() if c}
     if bad:
         body += "\n\nWARNING: non-exhaustive stages: %s" % json.dumps(bad)
@@ -364,27 +388,24 @@ def render_stage_deltas(sd: Dict) -> str:
 
 
 def render_device_deltas(dd: Dict) -> str:
-    body = ("One traced pass per arm; per-movie values of each stage, steady-state movies as samples. "
-            "busy = union of kernel and copy time inside the stage; idle = stage wall - busy.\n")
+    body = ("Passes per arm: %s. busy = union of kernel and copy time inside the stage; idle = stage wall - busy; "
+            "counts are per movie. Outside-movie rows use each pass's total. %s\n"
+            % (", ".join("`%s` %d" % kv for kv in dd["passes"].items()), FLAG_RULE))
     for arm, d in dd["arms"].items():
         body += "\n### `%s` vs `%s`\n\n" % (arm, dd["base"])
         rows = []
         for n, r in d["stages"].items():
-            def cell(k, scale=1e6, fmt="%+.2f"):
-                v = r[k]
-                if v.get("delta") is None:
-                    return "-"
-                return (fmt % (v["delta"] / scale)) + (" *" if v["flag"] else "")
             flagged = any(r[k].get("flag") for k, _ in DEVICE_KEYS)
-            rows.append([("**%s**" % n) if flagged else n, cell("wall_ns"), cell("busy_ns"), cell("idle_ns"),
-                         cell("kernels", 1, "%+.0f"), cell("sync_calls", 1, "%+.0f"),
-                         cell("copy_bytes", 1048576, "%+.1f"), cell("malloc", 1, "%+.0f")])
-        body += table(["stage", "wall ms", "busy ms", "idle ms", "kernels", "sync calls", "copy MiB", "mallocs"], rows)
-        body += "\n\nOutside-movie rows are single values, not medians, and are never flagged."
+            rows.append([("**%s**" % n) if flagged else n, _delta_cell(r["wall_ns"], 1e6), _delta_cell(r["busy_ns"], 1e6),
+                         _delta_cell(r["idle_ns"], 1e6), _thr_cell(r["idle_ns"], 1e6),
+                         _delta_cell(r["kernels"], 1, "%+.0f"), _delta_cell(r["sync_calls"], 1, "%+.0f"),
+                         _delta_cell(r["copy_bytes"], 1048576, "%+.1f"), _delta_cell(r["malloc"], 1, "%+.0f")])
+        body += table(["stage", "wall ms", "busy ms", "idle ms", "idle threshold ms", "kernels", "sync calls",
+                       "copy MiB", "mallocs"], rows)
         if d["memory"]:
             m = d["memory"]
-            body += "\n\nTraced device allocation high-water: %s -> %s MiB (%+.1f MiB)." % (
-                mib(m["peak_a"]), mib(m["peak_b"]), m["delta"] / 1048576.0)
+            body += "\n\nTraced device allocation high-water per pass: base %s MiB, arm %s MiB." % (
+                ", ".join(mib(x) for x in m["peak_a"]), ", ".join(mib(x) for x in m["peak_b"]))
     return section("Device deltas", INSTR_NSYS, body)
 
 
@@ -465,7 +486,7 @@ def render_kernels(k: Dict) -> str:
                      ("%d / %.1f ms / %.1f us" % (nd["launches"], nd["device_ns"] / 1e6, nd["mean_ns"] / 1e3)) if nd else "-"])
     body = table(["kernel", "profiled", "SM %", "MEM %", "DRAM %", "occ %", "theo occ %", "grid", "block",
                   "ncu dur us (ref)", "nsys launches / total / mean"], rows)
-    body += ("\n\nPercentages are medians over profiled launches, filtered to unit `%`; metrics reported in other "
+    body += ("\n\nPercentages are medians over profiled launches, filtered to unit `%%`; metrics reported in other "
              "units under the same name were dropped: %s. Device time comes from the Nsight Systems trace "
              "(last column); ncu serialises and replays kernels, so its duration is a reference only."
              % (json.dumps(k["summary"]["units_rejected"]) or "none"))

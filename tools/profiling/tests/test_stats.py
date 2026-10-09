@@ -78,10 +78,24 @@ class Verdicts(unittest.TestCase):
         self.assertAlmostEqual(pos["second_position_cost_s"], 0.1)
         self.assertAlmostEqual(pos["order_corrected_effect_s"], 0.5)
 
-    def test_per_sample_delta_flags(self):
-        a = [10.0, 10.1, 9.9, 10.0, 10.05, 9.95]
-        self.assertTrue(stats.per_sample_delta(a, [x + 25 for x in a])["flag"])
-        self.assertFalse(stats.per_sample_delta(a, [x + 0.01 for x in a])["flag"])
+    def test_replicated_delta(self):
+        base = [[10.0, 10.2, 9.8], [10.1, 10.3, 9.9], [9.9, 10.0, 10.1]]
+        # A per-process offset larger than the movie scatter: one pass per arm cannot flag it.
+        self.assertFalse(stats.replicated_delta(base[:1], [[x + 25 for x in base[0]]])["flag"])
+        self.assertTrue(stats.replicated_delta(base, [[x + 25 for x in p] for p in base], min_abs=0.5)["flag"])
+        # Process-to-process spread of +-1 hides a 0.5 shift even though movies agree closely.
+        spread = [[10.0, 10.0], [12.0, 12.0], [8.0, 8.0]]
+        r = stats.replicated_delta(spread, [[x + 0.5 for x in p] for p in spread])
+        self.assertFalse(r["flag"])
+        self.assertEqual(r["df"], 4)
+        # Deterministic counts: any change above the floor is flagged.
+        self.assertTrue(stats.replicated_delta([[3], [3]], [[4], [4]], min_abs=0.5)["flag"])
+        self.assertFalse(stats.replicated_delta([[3], [3]], [[3], [3]], min_abs=0.5)["flag"])
+
+    def test_t_crit(self):
+        self.assertEqual(stats.t_crit(2), 31.60)
+        self.assertEqual(stats.t_crit(13), 4.318)
+        self.assertEqual(stats.t_crit(500), 3.460)
 
 
 if __name__ == "__main__":

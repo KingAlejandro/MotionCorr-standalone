@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import fixture_db  # noqa: E402
-from lib import metrics, nsys_db  # noqa: E402
+from lib import metrics, nsys_db, report  # noqa: E402
 
 E = fixture_db.EXPECTED
 
@@ -217,6 +217,14 @@ class NcuSummary(unittest.TestCase):
         self.assertEqual(k["ncu_duration_us"], 2.0)
         self.assertEqual(k["launches_profiled"], 2)
         self.assertEqual(s["units_rejected"], {"Memory Throughput": ["Gbyte/s"]})
+
+    def test_report_renders(self):
+        s = metrics.ncu_summary(self.CSV)
+        md = report.render_kernels({"summary": s, "nsys": {"k_a": {"launches": 9, "device_ns": 18000, "mean_ns": 2000}}})
+        self.assertIn("Instrument: Nsight Compute", md)
+        self.assertIn("| k_a | 2 |", md)
+        self.assertIn("9 / 0.0 ms / 2.0 us", md)
+        self.assertIn('"Memory Throughput": ["Gbyte/s"]', md)
 
     def test_no_header(self):
         with self.assertRaises(metrics.MetricError):

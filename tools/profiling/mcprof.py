@@ -194,10 +194,15 @@ def cmd_run(a, rest, compare=False):
             if a.profile_pass:
                 profile_passes(a, arms, args, staged, work, cpus, sampler, p)
             if a.trace_pass:
-                for arm, path in arms.items():
-                    trace_dir = os.path.join(work, "trace", arm)
-                    os.makedirs(trace_dir, exist_ok=True)
-                    do_trace(a, path, args, staged, trace_dir, cpus, p["binaries"][arm]["has_profile_option"])
+                order = list(arms)
+                for k in range(a.trace_pass):
+                    for arm in (order if k % 2 == 0 else order[::-1]):
+                        trace_dir = os.path.join(work, "trace", arm, "p%02d" % (k + 1))
+                        os.makedirs(trace_dir, exist_ok=True)
+                        do_trace(a, arms[arm], args, staged, trace_dir, cpus,
+                                 p["binaries"][arm]["has_profile_option"])
+                        print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
+                p["trace_pass"] = "%d trace(s) per arm" % a.trace_pass
     prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, a.noise_floor, a.html)
     return status
@@ -430,18 +435,22 @@ def write_report(work, floor_s, want_html):
             parts.append("## Product identity\n\nNot checked: the comparison stopped before round 1 finished.\n")
         profiles = {}
         for r in runs:
-            if r["kind"] == "profile" and r["arm"] not in profiles:
-                profiles[r["arm"]] = r["jsonl"]
+            if r["kind"] == "profile":
+                profiles.setdefault(r["arm"], []).append(r["jsonl"])
         if profiles:
             out["stage_deltas"] = report.derive_stage_deltas(profiles, arms[0])
             parts.append(report.render_stage_deltas(out["stage_deltas"]))
-        traces = {arm: report.load_json(os.path.join(work, "trace", arm, "trace.json"))
-                  for arm in arms if os.path.isfile(os.path.join(work, "trace", arm, "trace.json"))}
+        traces = {}
+        for arm in arms:
+            found = sorted(glob.glob(os.path.join(work, "trace", arm, "p*", "trace.json")))
+            if found:
+                traces[arm] = [report.load_json(f) for f in found]
         if traces:
             out["device_deltas"] = report.derive_device_deltas(traces, arms[0])
             parts.append(report.render_device_deltas(out["device_deltas"]))
-            for arm, t in traces.items():
-                parts.append(report.render_trace(t).replace("## Device", "## Device: `%s`" % arm, 1))
+            for arm, ts in traces.items():
+                parts.append(report.render_trace(ts[0]).replace(
+                    "## Device", "## Device: `%s` (trace pass 1 of %d)" % (arm, len(ts)), 1))
         prov.write_json(os.path.join(work, "compare.json" if len(arms) > 1 else "results.json"), out)
     elif os.path.isfile(os.path.join(work, "trace.json")):
         t = report.load_json(os.path.join(work, "trace.json"))
@@ -497,9 +506,10 @@ def main(argv=None):
             p.add_argument("--rounds", type=int, default=6)
         else:
             p.add_argument("--pairs", type=int, default=8)
-            p.add_argument("--profile-pass", type=int, nargs="?", const=1, default=0,
-                           help="--profile passes per arm for stage deltas (default 1 when given)")
-            p.add_argument("--trace-pass", action="store_true", help="one Nsight Systems trace per arm")
+            p.add_argument("--profile-pass", type=int, nargs="?", const=3, default=0,
+                           help="--profile passes per arm for stage deltas (3 when given without N)")
+            p.add_argument("--trace-pass", type=int, nargs="?", const=2, default=0,
+                           help="Nsight Systems traces per arm for device deltas (2 when given without N)")
             p.add_argument("--nsys")
             p.add_argument("--osrt", action="store_true")
             p.add_argument("--keep", choices=("none", "rep", "sqlite"), default="rep")

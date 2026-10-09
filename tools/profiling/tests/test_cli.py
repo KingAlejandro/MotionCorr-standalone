@@ -23,6 +23,11 @@ import mcprof  # noqa: E402
 from test_runner import make_binary, make_data  # noqa: E402
 
 
+def c_rows(work):
+    c = json.load(open(os.path.join(work, "compare.json")))
+    return list(c["stage_deltas"]["arms"]["slow"]["stages"].values())
+
+
 def sections(md):
     """{section title: body} for the level-2 sections of a report."""
     parts = re.split(r"^## ", md, flags=re.M)[1:]
@@ -72,10 +77,11 @@ class Compare(unittest.TestCase):
 
     def test_slowdown_resolves_and_is_localised(self):
         rc, work = self.compare("slow", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "0.1",
-                                "--profile-pass")
+                                "--profile-pass", "3")
         self.assertEqual(rc, 0)
         c = json.load(open(os.path.join(work, "compare.json")))
         self.assertEqual(c["runs"]["comparisons"]["slow"]["verdict"], "resolved slower")
+        self.assertEqual(c["stage_deltas"]["passes"], {"main": 3, "slow": 3})
         stages = c["stage_deltas"]["arms"]["slow"]["stages"]
         self.assertTrue(stages["fit polynomial"]["wall_ms"]["flag"])
         self.assertAlmostEqual(stages["fit polynomial"]["wall_ms"]["delta"], 150, delta=40)
@@ -101,7 +107,7 @@ class Compare(unittest.TestCase):
 
     def test_sections_keep_instruments_apart(self):
         rc, work = self.compare("sections", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "0.1",
-                                "--profile-pass")
+                                "--profile-pass", "1")
         md = open(os.path.join(work, "report.md")).read()
         sec = sections(md)
         for title, body in sec.items():
@@ -113,6 +119,8 @@ class Compare(unittest.TestCase):
         # The profiled pass is recorded but never enters the unprofiled summary or the verdict.
         runs = [json.loads(l) for l in open(os.path.join(work, "runs.jsonl"))]
         self.assertEqual(sum(1 for r in runs if r["kind"] == "profile"), 2)
+        # One pass per arm: deltas without flags.
+        self.assertFalse(any(v["flag"] for row in c_rows(work) for v in row.values()))
         c = json.load(open(os.path.join(work, "compare.json")))
         self.assertEqual(c["runs"]["summary"]["slow"]["n"], 6)
         self.assertEqual(c["runs"]["comparisons"]["slow"]["n_pairs"], 6)

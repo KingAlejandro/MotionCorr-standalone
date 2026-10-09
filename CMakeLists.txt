@@ -313,6 +313,11 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_ci_fail_closed.py)
         add_test(NAME CudaValidationParser
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_cuda_patch_validation_parser.py)
+        # Device-free static multi-GPU sharding/merge contract (#53). Runs against
+        # tests/fake_worker.py, so it needs no GPU and no CUDA build.
+        add_test(NAME MultiGpuScheduling
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_multi_gpu_scheduling.py
+                --binary $<TARGET_FILE:motioncorr>)
         add_test(NAME OutputTreeComparator
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_output_trees.py)
         set_tests_properties(OutputTreeComparator PROPERTIES TIMEOUT 120)

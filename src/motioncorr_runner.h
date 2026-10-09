@@ -87,6 +87,9 @@ public:
 	// How main() configured the host allocator; printed once and in --profile.
 	std::string host_allocator_mode;
 
+	// Rebuild only complete dataset STAR/report products; never process a movie.
+	bool aggregate_only = false;
+
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;
 
@@ -295,6 +298,7 @@ public:
 	// Given an input fn_mic filename, this function will determine the names of the output corrected image (fn_avg) and the corrected movie (fn_mov).
 	FileName getOutputFileNames(FileName fn_mic, bool continue_even_odd = false);
 	bool isMovieComplete(const FileName &movie, int effective_expected_frames = -1);
+	void requireAggregateGeometry(const FileName &movie, int optics_group);
 
 	// Execute MOTIONCOR2 for a single micrograph
 	bool executeMotioncor2(Micrograph &mic, int rank = 0);
@@ -321,7 +325,7 @@ public:
 	void writeModel(Micrograph &mic);
 
 	// Make a PDF file with all the shifts and write output STAR files
-	void generateLogFilePDFAndWriteStarFiles();
+	void generateLogFilePDFAndWriteStarFiles(FileName report_out = "");
 
 	// Write out final STAR file
 	void writeSTAR();

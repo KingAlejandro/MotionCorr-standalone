@@ -1,0 +1,65 @@
+# MEASURED on macOS (Darwin 25.6, Python 3.14.8), worktree based on 584bcc6 plus the staging change, 2026-10-09T19:07:05Z
+# python3 docs/multi_gpu/scaling/staging_negative_controls.py
+KILLED   no copy fallback [link_refusal_falls_back] FAIL case_link_refusal_falls_back_to_copy: auto did not fall back to copying:   worker 0: Movies/20170629_00021_frameImage.log could not be staged: OSError: [Er
+KILLED   fallback on any errno [link_refusal_falls_back] FAIL case_link_refusal_falls_back_to_copy: EIO from link was treated as a fallback (rc=0)
+KILLED   copy is default staging [link_staging_with_aggregate] FAIL case_link_staging_with_aggregate: {'mode_requested': 'copy', 'threads': 14, 'staged_by': {'copy': 18}, 'digest_source': {'merge': 18}, 'link_fallback_errno
+KILLED   record not compared [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: auto: post-exit rewrite merged (rc=0)
+KILLED   no presence check [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: ['worker 1: produced late.txt, which belongs to no movie in the manifest']
+KILLED   no missing check [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: ['lost: Movies/20170629_00025_frameImage.tiff has no .star output (expected Movies/20170629_00025_frameImage.star, 
+KILLED   digest never reused [launcher_exit_digests_are_reused] FAIL case_launcher_exit_digests_are_reused: {'mode_requested': 'auto', 'threads': 14, 'staged_by': {'link': 18}, 'digest_source': {'verified': 18}, 'link_fallba
+KILLED   reuse ignores key [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: auto: post-exit rewrite merged (rc=0)
+KILLED   failed record ignored [exit_digest_records_validated] FAIL case_exit_digest_records_validated: failed: merged (rc=0) 
+KILLED   per-file error ignored [exit_digest_records_validated] FAIL case_exit_digest_records_validated: per_file: merged (rc=0) 
+KILLED   hex not validated [exit_digest_records_validated] FAIL case_exit_digest_records_validated: malformed: merged (rc=0) 
+KILLED   no final verdict recompute [timestamp_barrier_failure] FAIL case_timestamp_barrier_failure_fails_closed: ('PASS', 0)
+KILLED   merge barrier removed [timestamp_barrier_failure] FAIL case_timestamp_barrier_failure_fails_closed: ('PASS', 0)
+KILLED   after-check by bytes only [aggregate_same_byte_rewrite] FAIL case_aggregate_same_byte_rewrite_detected: same-byte rewrite passed (rc=0)
+KILLED   staged digest recomputed after aggregate [aggregate_may_not_rewrite] FAIL case_aggregate_may_not_rewrite_staged_products: Movies/20170629_00021_frameImage.mrc: staged digest follows the rewrite
+KILLED   launcher takes no exit digest [launcher_exit_digests_are_reused] FAIL case_launcher_exit_digests_are_reused: {'status': 'not taken'}
+KILLED   digest_tree no barrier [output_digest_primitives] FAIL case_output_digest_primitives: [('hash', '/var/folders/c1/nfw3m8_57nl0czvwbk6_c00c0000gp/T/mgpu_8autib6z/a.bin')]
+KILLED   hash_file no key check [output_digest_primitives] FAIL case_output_digest_primitives: hash_file accepted a stale stat key
+KILLED   barrier ignores devices [output_digest_primitives] FAIL case_output_digest_primitives: barrier passed for after=1791572755090236015 devices={16777232, 16777231}
+KILLED   stop ignored [output_digest_primitives] FAIL case_output_digest_primitives: digest_tree returned a partial record after stop
+bad: 0
+
+# Whole-tree control: the new tests against the 584bcc6 tools fail 9 of 67:
+ERROR case_link_staging_with_aggregate: KeyError: 'staging'
+ERROR case_link_refusal_falls_back_to_copy: KeyError: 'staging'
+ERROR case_launcher_exit_digests_are_reused: KeyError: 'exit_digest'
+FAIL case_change_after_worker_exit_detected: auto: post-exit rewrite merged (rc=2)
+ERROR case_exit_digest_records_validated: KeyError: 'exit_digest'
+ERROR case_timestamp_barrier_failure_fails_closed: FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/c1/nfw3m8_57nl0czvw
+ERROR case_output_digest_primitives: ModuleNotFoundError: No module named 'output_digests'
+FAIL case_aggregate_same_byte_rewrite_detected: ["aggregate step rewrote 12 staged worker product(s) instead of only regenerating the datase
+FAIL case_aggregate_may_not_rewrite_staged_products: ["aggregate step rewrote 18 staged worker product(s) instead of only regenerating the d
+58/67 passed
+
+Linux (4GPUs, ext4, Python 3.12.3 from ~/.mc-venv), source 9fc5027:
+MEASURED: 20/20 killed (exit 0). Full CUDA ctest on the same tree: 73/73 passed.
+
+KILLED   no copy fallback [link_refusal_falls_back] FAIL case_link_refusal_falls_back_to_copy: auto did not fall back to copying:   worker 0: Movies/20170629_00021_frameImage.log could not be staged: OSError: [Er
+KILLED   fallback on any errno [link_refusal_falls_back] FAIL case_link_refusal_falls_back_to_copy: EIO from link was treated as a fallback (rc=0)
+KILLED   copy is default staging [link_staging_with_aggregate] FAIL case_link_staging_with_aggregate: {'mode_requested': 'copy', 'threads': 15, 'staged_by': {'copy': 18}, 'digest_source': {'merge': 18}, 'link_fallback_errno
+KILLED   record not compared [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: auto: post-exit rewrite merged (rc=0)
+KILLED   no presence check [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: ['worker 1: produced late.txt, which belongs to no movie in the manifest']
+KILLED   no missing check [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: ['lost: Movies/20170629_00025_frameImage.tiff has no .star output (expected Movies/20170629_00025_frameImage.star, 
+KILLED   digest never reused [launcher_exit_digests_are_reused] FAIL case_launcher_exit_digests_are_reused: {'mode_requested': 'auto', 'threads': 15, 'staged_by': {'link': 18}, 'digest_source': {'verified': 18}, 'link_fallba
+KILLED   reuse ignores key [change_after_worker_exit] FAIL case_change_after_worker_exit_detected: auto: post-exit rewrite merged (rc=0)
+KILLED   failed record ignored [exit_digest_records_validated] FAIL case_exit_digest_records_validated: failed: merged (rc=0) 
+KILLED   per-file error ignored [exit_digest_records_validated] FAIL case_exit_digest_records_validated: per_file: merged (rc=0) 
+KILLED   hex not validated [exit_digest_records_validated] FAIL case_exit_digest_records_validated: malformed: merged (rc=0) 
+KILLED   no final verdict recompute [timestamp_barrier_failure] FAIL case_timestamp_barrier_failure_fails_closed: ('PASS', 0)
+KILLED   merge barrier removed [timestamp_barrier_failure] FAIL case_timestamp_barrier_failure_fails_closed: ('PASS', 0)
+KILLED   after-check by bytes only [aggregate_same_byte_rewrite] FAIL case_aggregate_same_byte_rewrite_detected: same-byte rewrite passed (rc=0)
+KILLED   staged digest recomputed after aggregate [aggregate_may_not_rewrite] FAIL case_aggregate_may_not_rewrite_staged_products: Movies/20170629_00021_frameImage.mrc: staged digest follows the rewrite
+KILLED   launcher takes no exit digest [launcher_exit_digests_are_reused] FAIL case_launcher_exit_digests_are_reused: {'status': 'not taken'}
+KILLED   digest_tree no barrier [output_digest_primitives] FAIL case_output_digest_primitives: [('hash', '/tmp/mgpu_swyanhzy/a.bin')]
+KILLED   hash_file no key check [output_digest_primitives] FAIL case_output_digest_primitives: hash_file accepted a stale stat key
+KILLED   barrier ignores devices [output_digest_primitives] FAIL case_output_digest_primitives: barrier passed for after=1791573170812523899 devices={2049, 2050}
+KILLED   stop ignored [output_digest_primitives] FAIL case_output_digest_primitives: digest_tree returned a partial record after stop
+bad: 0
+
+# Codex round 4 fixes (merge_workers.py), MEASURED on macOS, Python 3.14.8, 2026-10-09
+KILLED   addition check disabled ("if added" -> "if False") [aggregate_may_not_add_per_movie_products] FAIL: aggregate-created product merged (rc=0)
+KILLED   preserved aggregates staged without the exit record [preserved_aggregate_change_after_exit] FAIL: altered worker aggregate merged (rc=0)
+Each control left the other new case passing. Full suite with both fixes: 70/70.

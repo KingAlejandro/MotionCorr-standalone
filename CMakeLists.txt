@@ -348,6 +348,10 @@ if(BUILD_TESTING AND CUDA)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_runner_contract.py
                 --binary $<TARGET_FILE:motioncorr> --case interpolate_shifts --gpu 0)
         set_tests_properties(RunnerInterpolateShiftsCuda PROPERTIES LABELS "cuda;hardware")
+        add_test(NAME StageProfileDeviceTiming
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_stage_profile.py
+                --binary $<TARGET_FILE:motioncorr> --gpu 0)
+        set_tests_properties(StageProfileDeviceTiming PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Issue #85 lane C: uint16 staging must reproduce the float path's device

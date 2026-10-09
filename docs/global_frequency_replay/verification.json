@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "base_commit": "6c87441d3e44e977994bd26175601092cc344a21",
+  "scope": "global-frequency dependency prototype; no production policy change",
+  "local_environment": {
+    "system": "Linux x86_64",
+    "cxx": "GNU 13.3.0",
+    "build_type": "Release",
+    "cuda_compiler_available": false,
+    "cuda_device_available": false
+  },
+  "cpu_regression": {
+    "command": "ctest --test-dir build-frequency-cpu --output-on-failure",
+    "exit_code": 0,
+    "passed": 33,
+    "failed": 0,
+    "elapsed_seconds": 23.36,
+    "scope": "Existing main CPU tests, CUDA=OFF and experiment disabled. Newly added host support test is recorded separately."
+  },
+  "experiment_off_source_check": {
+    "method": "Remove includes, preprocess base/current with c++ -E -P -x c++ -D_CUDA_ENABLED -D__LINE__=0, normalize whitespace, compare complete outputs. This is a token isolation check, not CUDA compilation.",
+    "files": [
+      {
+        "path": "src/acc/cuda/cuda_alignpatch.cu",
+        "identical": true,
+        "normalized_sha256": "9255ac0f9e93fd921ca146e745983a47377eacd8d5dd3ce2f409d35c2d253ca4"
+      },
+      {
+        "path": "src/acc/cuda/cuda_alignpatch.h",
+        "identical": true,
+        "normalized_sha256": "2bfad51142b32f56b5cf815b57fe7b3a43822f80731639a2fc7b0d002f45c5ef"
+      }
+    ]
+  },
+  "cpu_experiment_rejection": {
+    "options": "CUDA=OFF;MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT=ON",
+    "exit_code": 1,
+    "diagnostic": "MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT requires CUDA=ON"
+  },
+  "host_support": {
+    "command": "c++ -std=c++17 -O2 -I. tests/test_cuda_frequency_support.cpp -o /tmp/frequency-support && /tmp/frequency-support",
+    "exit_code": 0,
+    "geometries": 726,
+    "coordinates": 7550928,
+    "boundary_mutations_rejected": 4,
+    "scope": "Pure support predicate compared against independent CCF reader-index enumeration; no GPU execution"
+  },
+  "native_cuda_equality": "UNRUN: no native CUDA environment available",
+  "compiled_replay_mutants": "UNRUN: requires native CUDA execution",
+  "performance": "UNRUN: this dependency proof makes no speedup claim",
+  "whole_movie_products": "UNRUN: prototype is not wired into the CLI",
+  "scientific_outcomes": "UNRUN: no estimator or scientific acceptance claim",
+  "source_files_sha256": {
+    ".github/workflows/ci.yml": "f6da03458fd8d9d346914c04b48214ab8c7295c1b30ad4657445f846f9a388d1",
+    "CMakeLists.txt": "95562c2a113b5ae8ba7114526bc4a44c7fffb1cdd15b5823fbf0392d3a99789b",
+    "src/acc/cuda/cuda_alignpatch.cu": "dc9c43ce0c82b846e10160c2751916dce922c9fe0280b7015480176a9f1918e0",
+    "src/acc/cuda/cuda_alignpatch.h": "1cf3047ef703011ffc91fa3edaa12f1360947be6b2ebe3359d22ce547751bd3a",
+    "src/acc/cuda/cuda_alignpatch_frequency_support.h": "32f688e6858c2f6bae71db94f62fab0cc27a3e2efc7f3558fd238e1e03386ba2",
+    "tests/cuda_frequency_replay.cpp": "a195c1d563de086e16f4bb0df92e9f2285c778adf9e03f1ec63194ef7d3c276f",
+    "tests/test_cuda_frequency_support.cpp": "1aaa3b7e30cb79a1d2d4a38602015af2689de1ef34dea0dbfbfcfc4b04b5a247",
+    "tools/run_cuda_frequency_replay.py": "2f07ca67fe466871e1559f72c7f747da73440b5cee8b5e27dd3c7f438b686fe8"
+  }
+}

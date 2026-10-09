@@ -4,6 +4,10 @@
 #include "src/acc/cuda/cuda_settings.h"
 #include "src/error.h"
 #include "src/acc/cuda/cuda_scoped_resources.h"
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+#include "src/acc/cuda/cuda_alignpatch_frequency_support.h"
+#include <utility>
+#endif
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -232,6 +236,42 @@ __global__ void fourierShiftKernel(
     }
 }
 
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+// Keep the original full-spectrum kernel above untouched. This variant changes
+// only which original-layout pixels execute the identical phase arithmetic.
+__global__ void fourierShiftFrequencyRegionKernel(
+    float2 *d_Fframes, const float *d_shiftx, const float *d_shifty,
+    int nfx, int nfy, int nfy_half, int n_frames,
+    int ccf_nfx, int ccf_nfy, bool shift_support)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int iframe = blockIdx.z + 1;
+
+    if (x < nfx && y < nfy && iframe < n_frames) {
+        // Inverse image of the exact row lookup used by computeReferenceKernel
+        // and computeCCFKernel. Their midpoint row belongs to the positive side.
+        const bool in_support = mc_cuda::frequencyIsInCcfSupport(
+            x, y, nfy, ccf_nfx, ccf_nfy);
+        if (in_support != shift_support) return;
+
+        int ly = (y > nfy_half) ? (y - nfy) : y;
+        float sx = d_shiftx[iframe];
+        float sy = d_shifty[iframe];
+        float phase = 2.0f * (float)M_PI * (x * sx + ly * sy);
+        float sin_p, cos_p;
+        __sincosf(phase, &sin_p, &cos_p);
+
+        size_t idx = iframe * ((size_t)nfy * nfx) + y * nfx + x;
+        float2 val = d_Fframes[idx];
+        d_Fframes[idx] = make_float2(
+            cos_p * val.x - sin_p * val.y,
+            sin_p * val.x + cos_p * val.y
+        );
+    }
+}
+#endif
+
 // The implementation is allocated once per movie, never per local patch. The
 // existing fixed-capacity owners are the only release mechanism, including partial
 // initialization and exception paths; their failure sink is the movie's state.
@@ -255,6 +295,12 @@ struct PatchAlignmentWorkspace::Impl {
     bool valid = false;
     // The ephemeral entry point reports completion only after checked teardown.
     bool defer_completion = false;
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+    // Only the explicit experimental entry point sets these call-scoped controls.
+    // release() must leave them intact when replacing the workspace during setup.
+    GlobalFrequencyExperimentTrace *frequency_trace = nullptr;
+    bool defer_frequency_complement = false;
+#endif
     int resource_device = -1;
     float2 *d_Fref = nullptr, *d_Fccs = nullptr;
     float *d_weight = nullptr, *d_Iccs = nullptr;
@@ -374,6 +420,13 @@ bool cudaAlignPatchDeviceWithWorkspace(
     search_range /= (ccf_scale_x > ccf_scale_y) ? ccf_scale_x : ccf_scale_y;
     if (search_range * 2 + 1 > ccf_nx) search_range = ccf_nx / 2 - 1;
     if (search_range * 2 + 1 > ccf_ny) search_range = ccf_ny / 2 - 1;
+
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+    if (w.frequency_trace) {
+        w.frequency_trace->ccf_nx = ccf_nx;
+        w.frequency_trace->ccf_ny = ccf_ny;
+    }
+#endif
 
     const int nfx = pnx / 2 + 1, nfy = pny;
     const int nfy_half = nfy / 2;
@@ -509,6 +562,14 @@ bool cudaAlignPatchDeviceWithWorkspace(
         ALIGN_CUDA(cudaEventElapsedTime(&iter_d2h_ms, ev_start_d2h, ev_stop_d2h));
         accumulated_d2h_ms += iter_d2h_ms;
 
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+        GlobalFrequencyIterationTrace iteration_trace;
+        if (w.frequency_trace) {
+            iteration_trace.candidate_x = h_cur_xshifts;
+            iteration_trace.candidate_y = h_cur_yshifts;
+        }
+#endif
+
         // Update relative to frame 0
         RFLOAT x_sumsq = 0.0, y_sumsq = 0.0;
         for (int iframe = n_frames - 1; iframe >= 0; iframe--) {
@@ -527,11 +588,29 @@ bool cudaAlignPatchDeviceWithWorkspace(
             h_shifty[iframe] = -h_cur_yshifts[iframe] / (float)pny;
         }
 
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+        if (w.frequency_trace) {
+            iteration_trace.relative_x = h_cur_xshifts;
+            iteration_trace.relative_y = h_cur_yshifts;
+            iteration_trace.normalized_x = h_shiftx;
+            iteration_trace.normalized_y = h_shifty;
+            iteration_trace.cumulative_x = xshifts;
+            iteration_trace.cumulative_y = yshifts;
+        }
+#endif
+
         // Apply Fourier phase shifts on GPU
         if (n_frames > 1) {
             ALIGN_CUDA(cudaMemcpy(d_shiftx, h_shiftx.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaMemcpy(d_shifty, h_shifty.data(), sz_shifts, cudaMemcpyHostToDevice));
             ALIGN_CUDA(cudaEventRecord(ev_start_kernel));
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+            if (w.defer_frequency_complement) {
+                fourierShiftFrequencyRegionKernel<<<gridShift, blockShift>>>(
+                    d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames,
+                    ccf_nfx, ccf_nfy, true);
+            } else
+#endif
             fourierShiftKernel<<<gridShift, blockShift>>>(d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames);
             ALIGN_LAUNCH(cudaGetLastError());
             ALIGN_CUDA(cudaEventRecord(ev_stop_kernel));
@@ -544,11 +623,38 @@ bool cudaAlignPatchDeviceWithWorkspace(
         RFLOAT rmsd = std::sqrt((x_sumsq + y_sumsq) / n_frames);
         logfile << " Iteration " << iter << ": RMSD = " << rmsd << " px" << std::endl;
 
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+        if (w.frequency_trace) {
+            iteration_trace.rmsd = rmsd;
+            iteration_trace.converged = rmsd < tolerance;
+            w.frequency_trace->iterations.push_back(std::move(iteration_trace));
+        }
+#endif
+
         if (rmsd < tolerance) {
             converged = true;
             break;
         }
     }
+
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+    // BEGIN GLOBAL FREQUENCY COMPLEMENT REPLAY
+    // This intentionally reuses each normalized float phase input in its original
+    // order, including the convergence iteration. It proves the dependency split;
+    // it neither fuses phase arithmetic nor claims fewer total spectrum passes.
+    if (w.defer_frequency_complement && n_frames > 1) {
+        for (const GlobalFrequencyIterationTrace &step : w.frequency_trace->iterations) {
+            ALIGN_CUDA(cudaMemcpy(d_shiftx, step.normalized_x.data(), sz_shifts, cudaMemcpyHostToDevice));
+            ALIGN_CUDA(cudaMemcpy(d_shifty, step.normalized_y.data(), sz_shifts, cudaMemcpyHostToDevice));
+            fourierShiftFrequencyRegionKernel<<<gridShift, blockShift>>>(
+                d_Fframes, d_shiftx, d_shifty, nfx, nfy, nfy_half, n_frames,
+                ccf_nfx, ccf_nfy, false);
+            ALIGN_LAUNCH(cudaGetLastError());
+            ALIGN_CUDA(cudaDeviceSynchronize());
+        }
+    }
+    // END GLOBAL FREQUENCY COMPLEMENT REPLAY
+#endif
 
     ALIGN_CUDA(cudaEventRecord(ev_stop_total));
     ALIGN_CUDA(cudaEventSynchronize(ev_stop_total));
@@ -609,6 +715,39 @@ bool cudaAlignPatchDevice(
             << (converged ? "yes" : "no") << std::endl;
     return converged;
 }
+
+#ifdef MOTIONCORR_CUDA_FREQUENCY_EXPERIMENT
+bool cudaAlignGlobalFrequencyExperiment(
+    cufftComplex *d_Fframes, int n_frames, int pnx, int pny, RFLOAT scaled_B,
+    std::vector<RFLOAT> &xshifts, std::vector<RFLOAT> &yshifts,
+    int max_iter, RFLOAT ccf_downsample, int device_id, std::ostream &logfile,
+    GlobalFrequencyExperimentMode mode, GlobalFrequencyExperimentTrace &trace)
+{
+    trace = GlobalFrequencyExperimentTrace{};
+    if (!d_Fframes || n_frames < 1 || pnx < 2 || pny < 2 || max_iter < 0 ||
+        xshifts.size() != (size_t)n_frames || yshifts.size() != (size_t)n_frames)
+        REPORT_ERROR("Invalid global frequency experiment input");
+    if (mode != GlobalFrequencyExperimentMode::Reference &&
+        mode != GlobalFrequencyExperimentMode::DeferredComplement)
+        REPORT_ERROR("Invalid global frequency experiment mode");
+
+    PatchAlignmentWorkspace workspace;
+    workspace.impl_->defer_completion = true;
+    workspace.impl_->frequency_trace = &trace;
+    workspace.impl_->defer_frequency_complement =
+        mode == GlobalFrequencyExperimentMode::DeferredComplement;
+    const bool converged = cudaAlignPatchDeviceWithWorkspace(workspace, d_Fframes,
+        n_frames, pnx, pny, scaled_B, xshifts, yshifts, max_iter,
+        ccf_downsample, device_id, logfile, true);
+    if (!workspace.release())
+        REPORT_ERROR("CUDA global frequency experiment cleanup failed");
+    trace.converged = converged;
+    trace.completed = true;
+    logfile << " [CUDA Global Frequency Experiment] completed; converged="
+            << (converged ? "yes" : "no") << std::endl;
+    return converged;
+}
+#endif
 
 bool cudaAlignPatch(
     std::vector<MultidimArray<fComplex> > &Fframes,

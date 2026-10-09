@@ -116,6 +116,47 @@ int main()
 	}
 	pool.setEnabled(true);
 
+	// Geometry transition: four buffers of geometry A fill the pool; later
+	// movies use geometry B. Releases of B must displace A instead of being
+	// freed forever while A's buffers sit unused (#162 review).
+	pool.clear();
+	{
+		const long int ny2 = ny + 64, nx2 = nx + 64;
+		MultidimArray<float> a[4];
+		for (int i = 0; i < 4; i++) pool.acquire(a[i], ny, nx);
+		for (int i = 0; i < 4; i++) pool.release(a[i]);
+		check(pool.retainedCount() == 4 && pool.retainedBytes() == 4 * frame, "geometry A fills the pool");
+		MultidimArray<float> b;
+		pool.acquire(b, ny2, nx2);
+		float *b_ptr = b.data;
+		pool.release(b);
+		const size_t frame2 = (size_t)ny2 * nx2 * sizeof(float);
+		check(pool.retainedCount() == 4 && pool.retainedBytes() == 3 * frame + frame2,
+		      "releasing the current geometry into a full pool evicts an old one");
+		MultidimArray<float> b2;
+		pool.acquire(b2, ny2, nx2);
+		check(b2.data == b_ptr, "the next acquisition of the new geometry reuses it");
+		pool.release(b2);
+		// Pool now holds 3 A + 1 B. Four B outputs in flight (one reused, three
+		// fresh) are released: the first fills the free slot, each later one
+		// evicts an A.
+		MultidimArray<float> c[4];
+		for (int i = 0; i < 4; i++) pool.acquire(c[i], ny2, nx2);
+		for (int i = 0; i < 4; i++) pool.release(c[i]);
+		check(pool.retainedCount() == 4 && pool.retainedBytes() == 4 * frame2,
+		      "a sustained new geometry fully replaces the old one, within the bound");
+		// A late release of a stale (requested earlier, not current) size into a
+		// full pool is freed; it never evicts the current geometry.
+		MultidimArray<float> stale, cur;
+		pool.acquire(stale, ny, nx);
+		pool.acquire(cur, ny2, nx2);
+		pool.release(cur);
+		pool.release(stale);
+		check(pool.retainedCount() == 4 && pool.retainedBytes() == 4 * frame2,
+		      "a stale-size release never evicts the current geometry");
+	}
+	pool.clear();
+
 	// Disabled.
 	pool.clear();
 	pool.setEnabled(false);

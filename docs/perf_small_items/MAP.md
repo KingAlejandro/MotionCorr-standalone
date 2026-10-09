@@ -182,8 +182,8 @@ Ranked by saving per unit of risk (savings are per steady movie):
 |---|---|---|---|
 | 1 | hot-pixel list merge + `resizeNoCp` | ~12.9 ms, exact, low risk | committed 613d8ce |
 | 2 | retained global geometry (buffers, plans, FFT scratch) in the worker pool | ~11 ms (setup ~8 + release ~3) | committed, `geometry_retention.md` |
-| 3 | retained patch and global-alignment workspaces | ~5-7 ms | |
-| 4 | port of E's reader pool | UNRUN | |
+| 3 | retained patch and global-alignment workspaces | ~5-7 ms | deferred, UNRUN: medium risk; retention lowers `cudaMemGetInfo` before `choosePatchBatchChunk`, so the chunk choice needs compensation |
+| 4 | port of E's reader pool | UNRUN until timed | committed, `reader_pool.md` |
 | 5 | persistent events and streams | <0.5 ms | |
 | 6 | alignment options (a) and (b) | | mapped, UNRUN |
 

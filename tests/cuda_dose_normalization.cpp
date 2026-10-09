@@ -144,6 +144,7 @@ int allocations = 0, frees = 0, launch_checks = 0, syncs = 0, execs = 0, frame_c
 int plan_creates = 0, plan_destroys = 0;
 cufftHandle executed_plan = 0;
 const void *c2r_input = nullptr;
+int device_syncs = 0, r2c_execs = 0, exec_fail_at = 0;   // exec_fail_at: 1-based cuFFT exec (R2C or C2R) that returns CUFFT_EXEC_FAILED
 int alloc_fault_at = 5;   // ordinal of the cudaMalloc the ALLOCATION fault fails
 bool observe_session_plans = false;
 std::vector<cufftHandle> session_created, session_destroyed;
@@ -162,6 +163,7 @@ void fft(cufftResult code, const char *message) { require(code == CUFFT_SUCCESS,
 void arm(Fault selected = NONE) {
     fault = selected; fired = plane_freed = false; plane = nullptr; plane_bytes = 0;
     allocations = frees = launch_checks = syncs = execs = frame_copies = 0;
+    device_syncs = r2c_execs = 0;
     plan_creates = plan_destroys = 0; executed_plan = 0; c2r_input = nullptr;
     violation.clear(); active = true;
 }
@@ -178,6 +180,8 @@ cudaError_t __real_cudaEventSynchronize(cudaEvent_t);
 cudaError_t __real_cudaEventCreate(cudaEvent_t*);
 cudaError_t __real_cudaEventDestroy(cudaEvent_t);
 cudaError_t __real_cudaMemcpy(void*, const void*, size_t, cudaMemcpyKind);
+cudaError_t __real_cudaDeviceSynchronize();
+cufftResult __real_cufftExecR2C(cufftHandle, cufftReal*, cufftComplex*);
 cufftResult __real_cufftCreate(cufftHandle*);
 cufftResult __real_cufftDestroy(cufftHandle);
 cufftResult __real_cufftExecC2R(cufftHandle, cufftComplex*, cufftReal*);
@@ -249,8 +253,22 @@ cufftResult __wrap_cufftDestroy(cufftHandle plan) {
     if (observe_session_plans && status == CUFFT_SUCCESS) session_destroyed.push_back(plan);
     return status;
 }
+cudaError_t __wrap_cudaDeviceSynchronize() {
+    if (active) ++device_syncs;
+    return __real_cudaDeviceSynchronize();
+}
+cufftResult __wrap_cufftExecR2C(cufftHandle plan, cufftReal *in, cufftComplex *out) {
+    if (active) {
+        ++r2c_execs;
+        if (exec_fail_at && r2c_execs == exec_fail_at) { fired = true; return CUFFT_EXEC_FAILED; }
+    }
+    return __real_cufftExecR2C(plan, in, out);
+}
 cufftResult __wrap_cufftExecC2R(cufftHandle plan, cufftComplex *in, cufftReal *out) {
-    if (active) { ++execs; executed_plan = plan; c2r_input = in; }
+    if (active) {
+        ++execs; executed_plan = plan; c2r_input = in;
+        if (exec_fail_at && execs == exec_fail_at) { fired = true; return CUFFT_EXEC_FAILED; }
+    }
     return __real_cufftExecC2R(plan, in, out);
 }
 }
@@ -532,6 +550,110 @@ void sessionAllocationFault() {
     gpu(cudaFree(resident),"fault resident release"); gpu(cudaFree(fourier),"fault fourier release");
     std::cout << "PASS: session-mode block allocation fault refused success and freed nothing it did not own\n";
 }
+// ---- global forward / inverse FFT: no per-frame device waits ----
+// The original loops synchronised the whole device after every frame (25 forward, 24
+// inverse). Everything runs on the default stream, so the order was never at stake: the new
+// code waits once at the end. These cases pin (a) bytes against an oracle that keeps the
+// per-frame wait, (b) exactly one device wait per transform, (c) that a failed execution
+// still returns false, records the cuFFT status, drains the queue and leaks nothing.
+__global__ void oracleScaleKernel(cufftComplex *d, size_t count, float scale) {
+    size_t i = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < count) { d[i].x *= scale; d[i].y *= scale; }
+}
+std::vector<float> fftRealInput(int nx, int ny, int frames, unsigned seed) {
+    std::vector<float> v((size_t)nx*ny*frames); unsigned st = seed;
+    for (auto &x : v) { st = 1664525u*st+1013904223u; x = (float)((int)(st>>16)-32768)/64.0f; }
+    return v;
+}
+void fftSyncCases() {
+    const int nx = 48, ny = 40, frames = 6, nfx = nx/2+1;
+    const size_t rpix = (size_t)nx*ny, ctile = (size_t)ny*nfx;
+    active = false;
+    const std::vector<float> real = fftRealInput(nx,ny,frames,7u);
+
+    // Oracle: own plans with cuFFT-owned work areas, one device wait per frame.
+    std::vector<cufftComplex> want_f(ctile*frames); std::vector<float> want_r(rpix*frames);
+    {
+        float *dr = nullptr; cufftComplex *df = nullptr, *tile = nullptr; float *dr2 = nullptr;
+        gpu(cudaMalloc(&dr,rpix*frames*sizeof(float)),"oracle r alloc");
+        gpu(cudaMalloc(&df,ctile*frames*sizeof(cufftComplex)),"oracle f alloc");
+        gpu(cudaMalloc(&tile,ctile*sizeof(cufftComplex)),"oracle tile alloc");
+        gpu(cudaMalloc(&dr2,rpix*frames*sizeof(float)),"oracle r2 alloc");
+        gpu(cudaMemcpy(dr,real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"oracle upload");
+        cufftHandle fwd, inv; int n[2] = {ny,nx};
+        fft(cufftPlanMany(&fwd,2,n,nullptr,1,(int)rpix,nullptr,1,(int)ctile,CUFFT_R2C,1),"oracle fwd plan");
+        fft(cufftPlanMany(&inv,2,n,nullptr,1,(int)ctile,nullptr,1,(int)rpix,CUFFT_C2R,1),"oracle inv plan");
+        const float inv_size = 1.0f/((float)nx*ny);
+        for (int j = 0; j < frames; ++j) {
+            fft(cufftExecR2C(fwd,dr+j*rpix,df+j*ctile),"oracle R2C"); gpu(cudaDeviceSynchronize(),"oracle R2C wait");
+        }
+        oracleScaleKernel<<<(unsigned)((ctile*frames+255)/256),256>>>(df,ctile*frames,inv_size);
+        gpu(cudaGetLastError(),"oracle scale"); gpu(cudaDeviceSynchronize(),"oracle scale wait");
+        gpu(cudaMemcpy(want_f.data(),df,ctile*frames*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"oracle f download");
+        for (int j = 0; j < frames; ++j) {
+            gpu(cudaMemcpy(tile,df+j*ctile,ctile*sizeof(cufftComplex),cudaMemcpyDeviceToDevice),"oracle preserve copy");
+            fft(cufftExecC2R(inv,tile,dr2+j*rpix),"oracle C2R"); gpu(cudaDeviceSynchronize(),"oracle C2R wait");
+        }
+        gpu(cudaMemcpy(want_r.data(),dr2,rpix*frames*sizeof(float),cudaMemcpyDeviceToHost),"oracle r download");
+        fft(cufftDestroy(fwd),"oracle fwd destroy"); fft(cufftDestroy(inv),"oracle inv destroy");
+        gpu(cudaFree(dr),"oracle r free"); gpu(cudaFree(df),"oracle f free"); gpu(cudaFree(tile),"oracle tile free"); gpu(cudaFree(dr2),"oracle r2 free");
+    }
+
+    // Healthy session run, both directions.
+    {
+        std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        require(session.initialize(),"fft sync test session init failed");
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft real upload");
+        arm();
+        require(session.computeGlobalForwardFFT() && !session.getFailureState().hasFailed(),"forward FFT failed");
+        require(r2c_execs == frames, "forward FFT did not run one R2C per frame");
+        // Before this change: frames+1 (one wait per frame plus the one after scaling).
+        require(device_syncs == 1, "forward FFT must wait for the device exactly once (per-frame waits are back)");
+        active = false;
+        std::vector<cufftComplex> got_f(ctile*frames);
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft f download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) == 0,
+                "forward FFT bytes differ from the per-frame-synchronised oracle");
+        arm();
+        require(session.computeGlobalInverseFFT() && !session.getFailureState().hasFailed(),"inverse FFT failed");
+        require(execs == frames && frame_copies == frames, "inverse FFT did not run one preserved C2R per frame");
+        require(device_syncs == 1, "inverse FFT must wait for the device exactly once (per-frame waits are back)");
+        active = false;
+        std::vector<float> got_r(rpix*frames);
+        gpu(cudaMemcpy(got_r.data(),session.getDeviceRealFrames(),got_r.size()*sizeof(float),cudaMemcpyDeviceToHost),"fft r download");
+        require(std::memcmp(got_r.data(),want_r.data(),got_r.size()*sizeof(float)) == 0,
+                "inverse FFT bytes differ from the per-frame-synchronised oracle");
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft f re-download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) == 0,
+                "inverse FFT did not preserve the Fourier frames for dose weighting");
+        // Negative control: one flipped input bit must break the comparison above.
+        std::vector<float> bad = real; bad[rpix*3+17] += 1.0f;
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),bad.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft bad upload");
+        require(session.computeGlobalForwardFFT(),"negative control forward failed");
+        gpu(cudaMemcpy(got_f.data(),session.getDeviceFourierFrames(),got_f.size()*sizeof(cufftComplex),cudaMemcpyDeviceToHost),"fft bad download");
+        require(std::memcmp(got_f.data(),want_f.data(),got_f.size()*sizeof(cufftComplex)) != 0,
+                "negative control: a perturbed input was not detected by the byte comparison");
+        session.release();
+    }
+
+    // Exec failure mid-loop: refused, cuFFT status recorded, queue drained (one wait), nothing leaked.
+    for (int direction = 0; direction < 2; ++direction) {
+        std::ostringstream log; CudaMovieSession session(nx,ny,frames,0,log);
+        require(session.initialize(),"fft fault session init failed");
+        gpu(cudaMemcpy(session.getDeviceRealFrames(),real.data(),rpix*frames*sizeof(float),cudaMemcpyHostToDevice),"fft fault upload");
+        if (direction == 1) require(session.computeGlobalForwardFFT(),"fft fault prepare forward failed");
+        exec_fail_at = 3; arm();
+        const bool ok = direction == 0 ? session.computeGlobalForwardFFT() : session.computeGlobalInverseFFT();
+        exec_fail_at = 0; active = false;
+        require(!ok && fired && session.getFailureState().hasFailed(),
+                direction == 0 ? "forward exec failure did not refuse success" : "inverse exec failure did not refuse success");
+        require(device_syncs == 1, "failed FFT did not drain the queue exactly once before returning");
+        require(!session.getFailureState().isPoisoned(), "an exec status alone must not poison the session");
+        session.release();
+    }
+    std::cout << "PASS: global FFTs bit-identical to the per-frame-synchronised oracle with one device wait each; "
+                 "exec failure refused, drained, unleaked; negative control detected\n";
+}
 void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
     const Input in = inputFor(nx,ny,8,1,1.12);
     const auto model = polynomial();
@@ -656,6 +778,7 @@ int main(int argc, char **argv) {
         bool known = selected == "all";
         if (selected == "borrowed") { known = true; borrowedCases(); }
         if (selected == "all" || selected == "exact") { known = true; exactCases(); }
+        if (selected == "all" || selected == "fft") { known = true; fftSyncCases(); }
         if (selected == "all" || selected == "scratch") { known = true; scratchCases(); sessionAllocationFault(); }
         const std::pair<const char*,Fault> cases[] = {{"allocation",ALLOCATION},{"launch",LAUNCH},
             {"completion",COMPLETION},{"cleanup",CLEANUP},{"late-fatal",LAUNCH_LATE_FATAL}};

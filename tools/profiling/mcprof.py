@@ -172,6 +172,9 @@ def cmd_run(a, rest, compare=False):
     runs_path = os.path.join(work, "runs.jsonl")
     ident = {}
     base = list(arms)[0]
+    allow_diff = compare and a.allow_product_difference
+    products_differ = []
+    p["allow_product_difference"] = bool(allow_diff)
 
     def sink(rec):
         with open(runs_path, "a") as f:
@@ -188,8 +191,15 @@ def cmd_run(a, rest, compare=False):
             ident[arm] = identity.compare_trees(done[base]["out_dir"], rec["out_dir"])
         prov.write_json(os.path.join(work, "identity.json"), ident)
         if any(not v["identical"] for v in ident.values()):
-            raise IdentityFailure("products differ: " + "; ".join(
-                "%s: %s" % (k, ", ".join(v["problems"])) for k, v in ident.items() if not v["identical"]))
+            msg = "products differ: " + "; ".join(
+                "%s: %s" % (k, ", ".join(v["problems"])) for k, v in ident.items() if not v["identical"])
+            if not allow_diff:
+                raise IdentityFailure(msg)
+            # Opt-in for arms that are meant to change products (a numerical
+            # mode): the timing continues, the report and exit status carry it.
+            products_differ.append(msg)
+            print("mcprof: IDENTITY FAILURE (--allow-product-difference, timing continues as speed only): %s"
+                  % msg, flush=True)
 
     status = 0
     with held_locks(a, p["locks"]):
@@ -246,6 +256,8 @@ def cmd_run(a, rest, compare=False):
                         p.setdefault("trace_device_timing", {})[arm] = mode
                         print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
                 p["trace_pass"] = "%d trace(s) per arm" % a.trace_pass
+    if products_differ and status == 0:
+        status = 3
     prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, a.noise_floor, a.html)
     return status
@@ -523,12 +535,21 @@ def write_report(work, floor_s, want_html):
         d = report.derive_runs({"arms": arms, "runs": timing}, floor_s=floor_s, compare=is_compare)
         out["runs"] = d
         title = "MotionCorr %s: %s" % ("compare" if is_compare else "run", " vs ".join(arms))
+        ip = os.path.join(work, "identity.json")
+        ident = report.load_json(ip) if os.path.isfile(ip) else None
+        differ = sorted(k for k, v in (ident or {}).items() if not v["identical"])
+        for arm in differ:
+            c = d.get("comparisons", {}).get(arm)
+            if c:
+                c["verdict"] = "%s: %s" % (report.SPEED_ONLY, c["verdict"])
+                c["products_differ"] = True
+        if differ:
+            parts.append(report.render_products_differ(differ, ident))
         parts.append(report.render_run_section(d))
         if d.get("comparisons_withheld"):
             parts.append("Comparison withheld: %s.\n" % d["comparisons_withheld"])
-        ip = os.path.join(work, "identity.json")
-        if os.path.isfile(ip):
-            out["identity"] = report.load_json(ip)
+        if ident is not None:
+            out["identity"] = ident
             parts.append(report.render_identity(out["identity"]))
         elif len(arms) > 1 and p["instrument"] == "mcprof compare":
             parts.append("## Product identity\n\nNot checked: the comparison stopped before round 1 finished.\n")
@@ -648,6 +669,10 @@ def main(argv=None):
                            help="--profile passes per arm for stage deltas (3 when given without N)")
             p.add_argument("--trace-pass", type=int, nargs="?", const=2, default=0,
                            help="Nsight Systems traces per arm for device deltas (2 when given without N)")
+            p.add_argument("--allow-product-difference", action="store_true",
+                           help="for arms meant to change products: on an identity failure keep timing, "
+                                "label each verdict 'speed only, products differ' and exit 3 "
+                                "(default: stop at round 1 and exit 2)")
             p.add_argument("--nsys")
             p.add_argument("--osrt", action="store_true")
             p.add_argument("--keep", choices=("none", "rep", "sqlite"), default="rep")

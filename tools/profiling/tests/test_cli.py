@@ -155,6 +155,30 @@ class Compare(unittest.TestCase):
         md = open(os.path.join(work, "report.md")).read()
         self.assertIn("| diff | FAIL |", md)
 
+    def test_allowed_product_difference_is_speed_only(self):
+        rc, work = self.compare("diffok", ["main=" + self.base, "diff=" + self.diff], "--noise-floor", "0.1",
+                                "--allow-product-difference")
+        self.assertEqual(rc, 3)
+        c = json.load(open(os.path.join(work, "compare.json")))
+        self.assertFalse(c["identity"]["diff"]["identical"])
+        v = c["runs"]["comparisons"]["diff"]
+        self.assertEqual(v["n_pairs"], 6)              # timing ran past round 1
+        self.assertTrue(v["verdict"].startswith("speed only, products differ: "))
+        md = open(os.path.join(work, "report.md")).read()
+        sec = sections(md)
+        self.assertLess(md.index("## PRODUCTS DIFFER"), md.index("## Unprofiled wall"))
+        self.assertIn("| diff | FAIL |", sec["Product identity"])
+        self.assertIn("**speed only, products differ: ", sec["Unprofiled wall and resources"])
+        self.assertTrue(json.load(open(os.path.join(work, "provenance.json")))["allow_product_difference"])
+
+    def test_allow_flag_keeps_identical_arms_unlabelled(self):
+        rc, work = self.compare("sameok", ["main=" + self.base, "same=" + self.same], "--noise-floor", "0.1",
+                                "--allow-product-difference")
+        self.assertEqual(rc, 0)
+        c = json.load(open(os.path.join(work, "compare.json")))
+        self.assertNotIn("products differ", c["runs"]["comparisons"]["same"]["verdict"])
+        self.assertNotIn("PRODUCTS DIFFER", open(os.path.join(work, "report.md")).read())
+
     def test_sections_keep_instruments_apart(self):
         rc, work = self.compare("sections", ["main=" + self.base, "slow=" + self.slow], "--noise-floor", "0.1",
                                 "--profile-pass", "1")

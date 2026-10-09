@@ -428,6 +428,17 @@ def render_verdict(base: str, arm: str, c: Dict) -> str:
     return "\n".join(lines)
 
 
+SPEED_ONLY = "speed only, products differ"
+
+
+def render_products_differ(arms, ident: Dict) -> str:
+    return ("## PRODUCTS DIFFER\n\n%s %s not produce the baseline's products (see Product identity). "
+            "Every verdict for %s is %s: it compares wall time only and says nothing about "
+            "whether the products are acceptable.\n" % (
+                ", ".join("`%s`" % a for a in arms), "does" if len(arms) == 1 else "do",
+                "it" if len(arms) == 1 else "them", SPEED_ONLY))
+
+
 def render_identity(ident: Dict) -> str:
     rows = []
     for arm, r in ident.items():

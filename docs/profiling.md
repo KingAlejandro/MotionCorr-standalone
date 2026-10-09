@@ -80,7 +80,12 @@ also keeps the export).
    is named in the stage section.
 4. **Identity on every comparison.** Round 1's product trees are compared
    before any timing is reported (below). A difference stops the comparison
-   with exit status 2 and a FAIL in the report.
+   with exit status 2 and a FAIL in the report. For an arm that is meant to
+   change products (an opt-in numerical mode), `compare
+   --allow-product-difference` records the same FAIL, puts a PRODUCTS DIFFER
+   section first in the report, keeps timing, prefixes each affected verdict
+   with "speed only, products differ" and exits 3. Product acceptability must
+   then be shown by other gates.
 5. **Shared host.** The kit takes `/tmp/motioncorr-bench.lock` and
    `/tmp/motioncorr-gpu<index>-correctness.lock` with `flock` in its own
    process. The descriptors are close-on-exec, so payloads and samplers never

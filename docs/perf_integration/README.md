@@ -1,6 +1,6 @@
 # Single-GPU release candidate: integration evidence
 
-Branch `integrate/single-gpu-rc`. Code head `c0f82c2` (tree `02bc7e0`); later commits on the branch only add this directory unless the PR says otherwise.
+Branch `integrate/single-gpu-rc`. Campaign code head `c0f82c2` (tree `02bc7e0`). Code head for merge: `17877c4` = `c0f82c2` + `50889a6` (validation-parser fix, tools only) + #162's pool eviction fix (`6446559`, `be70fa5`), revalidated below ("Revalidation at 17877c4"). The eviction change only acts when the frame geometry changes during a run, which the 24-movie kit workload never does, so the kit campaigns at `c0f82c2` were not repeated.
 Host 4GPUs: A100 80GB PCIe GPU0 `GPU-eddb42fe-4f9a-adde-76d3-b924e14add54`, payload CPUs 96-103, runner CPUs 120-121, driver 570.86.10, CUDA 12.8, THP madvise.
 Every result below is MEASURED unless marked UNRUN.
 
@@ -15,6 +15,7 @@ Every result below is MEASURED unless marked UNRUN.
 | B (#164) | `dfca087` | `26bc1a1` + `db2af3d` | pipelined chunked nvCOMP ingest (`integrate/abc-profiling`) |
 | #162 | `57b0b9a` | `dfca087` + `8ca28de` | profiler safety, `FrameBufferPool` |
 | #166 | `c0f82c2` | `57b0b9a` + `93c3897` | `--profile_device_timing 0` |
+| #162 fix | `17877c4` | `50889a6` + `be70fa5` | pool evicts a stale geometry when the current one is released into a full pool (Codex P2) |
 
 Leave-one-out variants (local throwaway branches, not pushed): `c0f82c2` plus `git revert -m 1 <merge>`. All three reverts applied without conflicts.
 
@@ -109,6 +110,15 @@ Extended matrix, `main` vs `rc`, movies 00021-00024, `--use_own --dose_weighting
 - `run_idm.sh` phase 1 ran `--bin_factor 2` with `--ingest nvcomp` (fails closed in both binaries) and `run_idm2.sh` phase 2 with `--ingest auto` (odd dimensions in both); `run_idm3.sh` phase 3 is the bin 1.25 run reported above.
 - In `identity/summary.txt` the phase-3 rows are labelled `bin2`/`bin2late` because `run_idm3.sh` reused the directory names; they ran with `--bin_factor 1.25`.
 - Comparator controls: `eo` vs `eo_nodw` on `main` reports DIFFERENT (inventory: missing `_noDW` files); early vs late binning on `main` reports DIFFERENT (MRC content).
+
+## Revalidation at 17877c4
+
+After merging #162's eviction fix (MEASURED, 4GPUs GPU0, `identity/validate_17877c4.txt`):
+
+- Native: CUDA `ctest` 62/62, CPU-only `ctest` 44/44.
+- Identity vs `main` with the same comparison rule: GPU eo, GPU eo + noDW (also with pool poison), late binning 1.25, CPU, all IDENTICAL.
+- New **mixed-geometry** batch (`full, 2048x2048 crop, crop, full, full`, no gain, `--even_odd_split --save_noDW`), so the pool fills with one size and the geometry changes twice: GPU rc, GPU with pool poison, GPU with the pool disabled, and CPU are all IDENTICAL to `main` (20 MRC + 19 other each).
+- Comparator control (main eo vs main eo + noDW): DIFFERENT.
 
 ## Native suites
 

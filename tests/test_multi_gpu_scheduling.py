@@ -2905,6 +2905,61 @@ def case_bench_warmups_hold_arm_locks(tmp: Path) -> None:
     assert seen["warmup-a"] == [True, True], f"warm-up ran without the arm locks: {seen}"
 
 
+def case_bench_arm_tools_and_phase_pairs(tmp: Path) -> None:
+    """--arm-tools runs that arm's run_dataset.py from its own directory, records its
+    tool digests, and the summary pairs the aggregate and worker phases per rep."""
+    import importlib
+    bench = importlib.import_module("bench_scaling")
+    data = tmp / "data"; data.mkdir()
+    (data / "w.star").write_text("x\n")
+    (tmp / "binary").write_text("x\n")
+    old_tools = (tmp / "old_tools").resolve(); old_tools.mkdir()
+    (old_tools / "run_dataset.py").write_text("# old\n")
+    stats = tmp / "stats.py"
+    stats.write_text("def quartiles(v): return (min(v), sorted(v)[len(v)//2], max(v))\n"
+                     "def median(v): return sorted(v)[len(v)//2]\n"
+                     "def paired(p): return {'diffs_s': [x['b'] - x['a'] for x in p]}\n")
+    scripts: dict[str, str] = {}
+
+    def fake_run(cmd, cwd=None, stdout=None, stderr=None):
+        run = Path(cmd[cmd.index("--out") + 1])
+        scripts[run.name] = cmd[4]
+        run.mkdir()
+        return subprocess.CompletedProcess(cmd, 0)
+
+    def fake_summary(run, *_):
+        old = scripts[run.name] == str(old_tools / "run_dataset.py")
+        return {"rc": 0, "publication_s": 10.0, "workers": [],
+                "aggregate_phase_wall_s": 5.0 if old else 2.0,
+                "worker_phase_wall_s": 7.0 if old else 7.5}
+
+    saved = bench.host_snapshot, bench.summarise_run, bench.subprocess.run
+    bench.host_snapshot = lambda _cpus: {}
+    bench.summarise_run = fake_summary
+    bench.subprocess.run = fake_run
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = bench.main(["--binary", str(tmp / "binary"), "--data", str(data),
+                             "--workload", "w=w.star",
+                             "--arm", "old=GPU-x@0", "--arm", "new=GPU-x@0",
+                             "--arm-tools", f"old={old_tools}",
+                             "--reps", "2", "--stats-lib", str(stats),
+                             "--work", str(tmp / "work"), "--out", str(tmp / "out.json")])
+    finally:
+        bench.host_snapshot, bench.summarise_run, bench.subprocess.run = saved
+    assert rc == 0, rc
+    here = str(TOOLS / "run_dataset.py")
+    assert scripts["r0-w-old"] == str(old_tools / "run_dataset.py"), scripts
+    assert scripts["r0-w-new"] == here, scripts
+    out = json.loads((tmp / "out.json").read_text())
+    arms = {x["name"]: x for x in out["provenance"]["arms"]}
+    assert arms["old"]["tools_sha256"] == {"run_dataset.py": sha256_of(old_tools / "run_dataset.py")}, arms
+    assert arms["new"]["tools_sha256"]["run_dataset.py"] == sha256_of(TOOLS / "run_dataset.py"), arms
+    new = out["summary"]["w"]["new"]
+    assert new["paired_aggregate_phase_wall_s_vs_old"] == {"diffs_s": [-3.0, -3.0]}, new
+    assert new["paired_worker_phase_wall_s_vs_old"] == {"diffs_s": [0.5, 0.5]}, new
+
+
 def case_dataset_endpoint(_tmp: Path) -> None:
     result = subprocess.run([PY, str(ROOT / "tests/test_dataset_endpoint.py")],
                             text=True, capture_output=True)
@@ -2987,6 +3042,7 @@ CASES = [
     case_aggregate_staging_namespace_reserved,
     case_tomography_partition,
     case_bench_warmups_hold_arm_locks,
+    case_bench_arm_tools_and_phase_pairs,
     case_dataset_endpoint,
     case_owned_tree_rss,
     case_pid_birth_cleanup,

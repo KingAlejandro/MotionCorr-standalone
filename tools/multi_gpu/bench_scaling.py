@@ -168,6 +168,13 @@ def summarise_run(run: Path, t0: float, t_exit: float, rc: int) -> dict:
     rec.update({k: ds.get(k) for k in ("verdict", "dataset_ready", "dataset_wall_s",
                                        "worker_phase_wall_s", "aggregate_phase_wall_s",
                                        "aggregate_cpu_mask", "ownership_mode", "failure")})
+    agg_path = run / "aggregate.json"
+    if agg_path.is_file():
+        agg = json.loads(agg_path.read_text())
+        # Absent in reports from tools before aggregate staging was reworked.
+        rec["merge_timing_s"] = agg.get("timing_seconds")
+        rec["merge_staging"] = {k: v for k, v in (agg.get("staging") or {}).items()
+                                if k != "seconds"} or None
     tree = ds.get("tree_rss") or {}
     rec["tree_rss_peak_sum_kib"] = tree.get("peak_simultaneous_sum_rss_kib")
     rec["tree_rss_status"] = tree.get("status")
@@ -186,6 +193,7 @@ def summarise_run(run: Path, t0: float, t_exit: float, rc: int) -> dict:
             "n_products": w["phases"]["n_products"],
             "setup_s": w["phases"]["setup_seconds"], "tail_s": w["phases"]["tail_seconds"],
             "binary_movie_wall_sum": w["phases"]["binary_movie_wall_sum"],
+            "exit_digest_s": (w.get("exit_digest") or {}).get("seconds"),
         } for w in ws["workers"]]
         rec["rss_hwm_total_kib"] = (sum(w["rss_hwm_kib"] for w in ws["workers"])
                                     if all(w["rss_hwm_kib"] is not None for w in ws["workers"])
@@ -204,7 +212,8 @@ def summarise_run(run: Path, t0: float, t_exit: float, rc: int) -> dict:
 def launch(a, arm, star, run: Path) -> tuple[float, float, int]:
     launcher = (f"--devices {','.join(arm['devices'])} --cpus {shlex.quote(';'.join(arm['masks']))} "
                 f"--cpu-budget {arm['n_cpus']}")
-    cmd = ["taskset", "-c", arm["union"], sys.executable, str(HERE / "run_dataset.py"),
+    tools = Path(arm.get("tools") or HERE)
+    cmd = ["taskset", "-c", arm["union"], sys.executable, str(tools / "run_dataset.py"),
            "--binary", a.binary, "--star", star, "--out", str(run),
            "--launcher-args=" + launcher, "--", *a.worker_args]
     log = run.with_suffix(".console.log")
@@ -224,6 +233,9 @@ def main(argv=None) -> int:
                     help="NAME=UUID[,UUID..]@MASK[;MASK..]; the first arm is the paired baseline")
     ap.add_argument("--arm-locks", action="append", default=[],
                     help="NAME=PATH[,PATH..] taken in order around each run (warm-up included) of that arm")
+    ap.add_argument("--arm-tools", action="append", default=[],
+                    help="NAME=DIR: run that arm's run_dataset.py from DIR instead of this "
+                         "tree, to compare two versions of the tools on one binary")
     ap.add_argument("--reps", type=int, default=6)
     ap.add_argument("--stats-lib", required=True)
     ap.add_argument("--stats-commit", default=None)
@@ -245,6 +257,11 @@ def main(argv=None) -> int:
     spec.loader.exec_module(stats)
 
     arms = [parse_arm(x) for x in a.arm]
+    arm_tools = {k: str(Path(v).resolve()) for k, v in (x.split("=", 1) for x in a.arm_tools)}
+    for arm in arms:
+        arm["tools"] = arm_tools.get(arm["name"])
+        arm["tools_sha256"] = {p.name: sha256(p) for p in
+                               sorted(Path(arm["tools"] or HERE).glob("*.py"))}
     locks = {k: v.split(",") for k, v in (x.split("=", 1) for x in a.arm_locks)}
     workloads = [tuple(x.split("=", 1)) for x in a.workload]
     work = Path(a.work)
@@ -335,6 +352,16 @@ def main(argv=None) -> int:
             entry["median_max_busy_span_s"] = med_of(
                 lambda r: max((w["busy_span_s"] for w in r.get("workers", [])), default=None))
             entry["median_aggregate_phase_s"] = med_of(lambda r: r.get("aggregate_phase_wall_s"))
+            entry["median_worker_phase_s"] = med_of(lambda r: r.get("worker_phase_wall_s"))
+            if arm["name"] != base:
+                for field in ("aggregate_phase_wall_s", "worker_phase_wall_s"):
+                    pairs = [{"a": by[(base, r)][field], "b": by[(arm["name"], r)][field],
+                              "order": "AB" if by[(base, r)]["position"]
+                              < by[(arm["name"], r)]["position"] else "BA"}
+                             for r in range(a.reps) if (base, r) in by and (arm["name"], r) in by
+                             and by[(base, r)].get(field) is not None
+                             and by[(arm["name"], r)].get(field) is not None]
+                    entry[f"paired_{field}_vs_{base}"] = stats.paired(pairs) if pairs else None
             peaks = {}
             for r in runs:
                 for uuid, mib in (r.get("sampled_peak_gpu_memory_mib") or {}).items():

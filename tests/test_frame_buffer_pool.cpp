@@ -93,6 +93,29 @@ int main()
 	check(again.data == full_ptr, "and it is the one handed out next");
 	pool.release(again);
 
+	// Reacquiring the same geometry into an array that still owns a
+	// same-sized buffer keeps that buffer in place (no free/realloc, no pool
+	// swap), in both the pooled and the disabled arm (#162 review).
+	pool.clear();
+	for (int enabled = 1; enabled >= 0; enabled--) {
+		pool.setEnabled(enabled != 0);
+		MultidimArray<float> held;
+		pool.acquire(held, ny, nx);
+		float *held_ptr = held.data;
+		MultidimArray<float> other;  // a retained buffer the pool could swap in
+		pool.acquire(other, ny, nx);
+		pool.release(other);
+		pool.acquire(held, ny, nx);
+		check(held.data == held_ptr && YSIZE(held) == ny && XSIZE(held) == nx,
+		      enabled ? "same-size reacquire keeps the owned buffer (pooled)"
+		              : "same-size reacquire keeps the owned buffer (pool disabled)");
+		check(pool.retainedCount() == (enabled ? 1u : 0u),
+		      "same-size reacquire does not consume or add a retained buffer");
+		pool.release(held);
+		pool.clear();
+	}
+	pool.setEnabled(true);
+
 	// Disabled.
 	pool.clear();
 	pool.setEnabled(false);

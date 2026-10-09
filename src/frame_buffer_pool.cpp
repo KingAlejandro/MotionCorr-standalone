@@ -56,6 +56,20 @@ bool FrameBufferPool::enabled() const
 void FrameBufferPool::acquire(MultidimArray<float> &array, long int ny, long int nx)
 {
 	const size_t elements = (size_t)ny * (size_t)nx;
+	// Already holding an owned buffer of exactly this size (for example the
+	// unweighted sum when it was not handed to the writer): keep it in place,
+	// exactly as reshape() would, instead of freeing and reallocating it.
+	if (array.data != NULL && array.destroyData && !array.mmapOn &&
+	    (size_t)array.nzyxdimAlloc == elements) {
+		{
+			std::lock_guard<std::mutex> lock(mutex);
+			if (on && std::find(requested.begin(), requested.end(), elements) == requested.end())
+				requested.push_back(elements);
+		}
+		if (poison) std::memset(array.data, 0xFF, elements * sizeof(float));  // quiet NaNs
+		array.setDimensions(nx, ny, 1, 1);
+		return;
+	}
 	float *reused = nullptr;
 	{
 		std::lock_guard<std::mutex> lock(mutex);

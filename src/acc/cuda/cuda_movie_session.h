@@ -56,12 +56,37 @@ enum class MovieIngestStatus
 //   would have completed correctly. It is RecoverableFailure: fall back, and
 //   let the reader that verifies the same checksum for itself decide.
 
+namespace mc_cuda {
+// Smallest even 7-smooth size >= n: the --fft_size_policy fast transform extent.
+inline int fastFftSize(int n) {
+    for (int m = n + (n & 1);; m += 2) {
+        int r = m;
+        for (int p : {2, 3, 5, 7}) while (r % p == 0) r /= p;
+        if (r == 1) return m;
+    }
+}
+} // namespace mc_cuda
+
 class CudaMovieSession {
 public:
     CudaMovieSession(const CudaMovieSession&) = delete;
     CudaMovieSession& operator=(const CudaMovieSession&) = delete;
     CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log);
     ~CudaMovieSession();
+
+    // --fft_size_policy fast (docs/fft_size_policy.md). Must precede initialize().
+    // Frames and patches are transformed at mc_cuda::fastFftSize extents, padded
+    // with the frame mean (patches: the group sum of frame means); every
+    // frequency-space consumer uses the padded grid and the real-space results
+    // are cropped back to nx x ny. Exact policy (the default) changes nothing.
+    void setFftSizePolicyFast(bool fast);
+    bool fftSizePolicyFast() const { return fft_fast; }
+    // True when the resident spectra are of a padded frame (fnx x fny != nx x ny).
+    bool frameFftPadded() const { return fnx != nx || fny != ny; }
+    int getFftNx() const { return fnx; }
+    int getFftNy() const { return fny; }
+    // Transform extent for one patch dimension under the session policy.
+    int patchFftExtent(int n) const { return fft_fast ? mc_cuda::fastFftSize(n) : n; }
 
     // Allocate persistent buffers and single-frame cuFFT plans
     bool initialize();
@@ -217,7 +242,8 @@ public:
     // Preprocessing methods cannot be used again until release()/initialize().
     bool releasePreprocessingBuffers();
 
-    // In-VRAM framewise forward FFT: d_Iframes (R2C) -> d_Fframes with 1/(nx*ny) scaling
+    // In-VRAM framewise forward FFT: d_Iframes (R2C) -> d_Fframes with 1/(nx*ny)
+    // scaling (fast policy: mean-padded to fnx x fny, scaled by 1/(fnx*fny))
     bool computeGlobalForwardFFT();
 
     // In-VRAM framewise inverse FFT: d_Fframes (C2R) -> d_Iframes
@@ -228,12 +254,16 @@ public:
     // CCF window (n_groups * window_ny rows of window_nx/2+1, see
     // cudaExtractPatchWindow) with the same values the full spectrum holds there;
     // the full spectrum goes to session scratch.
+    // fft_w/fft_h (0: patch_w/patch_h) are the transform extents; larger ones pad
+    // each group sum with its sum of frame means (fast policy), and the spectrum
+    // and window are then those of the padded patch.
     bool preparePatchInVram(
         int x_start, int y_start,
         int patch_w, int patch_h,
         int n_groups, const int *group_start, const int *group_size,
         cufftComplex *d_out_fpatches,
-        int window_nx = 0, int window_ny = 0
+        int window_nx = 0, int window_ny = 0,
+        int fft_w = 0, int fft_h = 0
     );
 
     PatchAlignmentWorkspace& getPatchAlignmentWorkspace() { return patch_alignment_workspace; }
@@ -291,7 +321,8 @@ public:
         const ThirdOrderPolynomialModel *model
     );
 
-    // Download Fourier frames to host (used e.g. when grouping_for_ps > 0 or CPU fallback)
+    // Download Fourier frames to host (used e.g. when grouping_for_ps > 0 or CPU fallback).
+    // When frameFftPadded() they are fny x (fnx/2+1) spectra of the padded frames.
     bool downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes);
 
     // Download real frames to host (used e.g. for fallback)
@@ -349,6 +380,17 @@ private:
     int n_frames;
     int device_id;
     int nfx;
+    // Transform extents: nx/ny/nfx unless the fast policy pads the frame.
+    bool fft_fast = false;
+    int fnx, fny, fnfx;
+    // Fast policy only: per-frame means of d_Iframes (the pad value) and the
+    // fixed-shape partials they are reduced from. Computed by the forward FFT;
+    // invalidated whenever d_Iframes is rewritten (inverse FFT, borrow), so a
+    // later patch pad recomputes them from the current frames.
+    float *d_frame_means = nullptr;
+    double *d_mean_partials = nullptr;
+    bool frame_means_valid = false;
+    bool ensureFrameMeans();
     std::ostream &logfile;
 
     float *d_Iframes = nullptr;

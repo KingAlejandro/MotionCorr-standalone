@@ -508,6 +508,40 @@ if(BUILD_TESTING AND CUDA)
         set_tests_properties(CudaDoseNormalization PROPERTIES LABELS "cuda;hardware" TIMEOUT 900)
         add_test(NAME CudaDoseSessionPlan COMMAND cuda_dose_normalization --case borrowed)
         set_tests_properties(CudaDoseSessionPlan PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # --fft_size_policy fast: padded spectra, patch padding and padded-grid
+        # dose weighting against host oracles. Each mutant breaks one piece of
+        # frequency consistency that the default (exact) policy cannot exercise.
+        set_source_files_properties(tests/cuda_fft_size_policy.cpp PROPERTIES LANGUAGE CUDA)
+        add_executable(cuda_fft_size_policy tests/cuda_fft_size_policy.cpp)
+        target_link_libraries(cuda_fft_size_policy PRIVATE motioncorr_core)
+        add_test(NAME CudaFftSizePolicy COMMAND cuda_fft_size_policy)
+        set_tests_properties(CudaFftSizePolicy PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # dw_unpadded_weights: dose filter frequencies use the image width, not the padded FFT width.
+        mc_cuda_mutant(CudaFftSizePolicyMutant tests/cuda_fft_size_policy.cpp cuda_realspace_dw dw_unpadded_weights
+            "const float nfx2 = (float)(nfx - 1) * (float)(nfx - 1) * 4.0f;"
+            "const float nfx2 = (float)nx * (float)nx;")
+        # The same mutant as a full binary, so the movie-level gates in
+        # docs/fft_size_policy.md can be shown to see it. Built, not run by ctest.
+        add_executable(motioncorr_fft_dw_mutant src/apps/run_motioncorr.cpp
+            "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_realspace_dw_dw_unpadded_weights.cu")
+        target_compile_definitions(motioncorr_fft_dw_mutant PRIVATE HAVE_TIFF HAVE_PNG HAVE_JPEG)
+        target_link_libraries(motioncorr_fft_dw_mutant PRIVATE motioncorr_core)
+        # dw_dense_stride: the polynomial interpolation reads the in-place C2R output densely.
+        mc_cuda_mutant(CudaFftSizePolicyMutant tests/cuda_fft_size_policy.cpp cuda_realspace_dw dw_dense_stride
+            "padded ? 2 * nfx : nx"
+            "nx")
+        # frame_pad_zero: frames are zero-padded instead of mean-padded.
+        mc_cuda_mutant(CudaFftSizePolicyMutant tests/cuda_fft_size_policy.cpp cuda_movie_session frame_pad_zero
+            ": *d_mean;"
+            ": 0.0f;")
+        # patch_pad_zero: patches are zero-padded instead of padded with the group mean.
+        mc_cuda_mutant(CudaFftSizePolicyMutant tests/cuda_fft_size_policy.cpp cuda_movie_session patch_pad_zero
+            "sum += d_frame_means[g_start + i];"
+            "sum += 0.0f * d_frame_means[g_start + i];")
+        # crop_dense_stride: the inverse crops the in-place C2R output with the dense width.
+        mc_cuda_mutant(CudaFftSizePolicyMutant tests/cuda_fft_size_policy.cpp cuda_movie_session crop_dense_stride
+            "(const float*)d_inverse_tile, 2 * fnfx,"
+            "(const float*)d_inverse_tile, fnx,")
         add_executable(motioncorr_retry_caller
             src/apps/run_motioncorr.cpp tests/cuda_retry_caller_shim.cpp)
         target_link_libraries(motioncorr_retry_caller PRIVATE motioncorr_core)
@@ -540,6 +574,14 @@ if(BUILD_TESTING AND CUDA)
                 --binary $<TARGET_FILE:motioncorr_faultinject>)
         set_tests_properties(CudaPreprocessingFailurePaths PROPERTIES
             LABELS "cuda;hardware" TIMEOUT 900)
+        # --fft_size_policy fast: recoverable inverse / dose-weighting faults hand
+        # padded spectra to the CPU fallbacks (docs/fft_size_policy.md).
+        add_test(NAME CudaFftSizePolicyFallbacks
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_fft_policy_fallback_controls.py
+                --binary $<TARGET_FILE:motioncorr_faultinject>)
+        set_tests_properties(CudaFftSizePolicyFallbacks PROPERTIES
+            LABELS "cuda;hardware" TIMEOUT 300)
         # The same two reconstruction-cleanup controls on the nvCOMP ingest arm.
         # run_preprocessing_failure_controls.py builds its fixture with
         # TIFFTAG_COMPRESSION = 1, so the fast path declines it and

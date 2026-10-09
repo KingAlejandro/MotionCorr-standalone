@@ -371,13 +371,97 @@ __global__ void cropAndGroupPatchResidentKernel(
     d_Ipatches[dst_idx] = sum;
 }
 
+// --fft_size_policy fast kernels (docs/fft_size_policy.md).
+//
+// Per-frame mean of d_Iframes as a fixed-shape double reduction: grid
+// (kMeanBlocks, n_frames), so the result does not depend on scheduling.
+constexpr int kMeanBlocks = 128;
+constexpr int kMeanThreads = 256;
+
+__global__ void frameMeanPartialsKernel(const float *d_Iframes, size_t frame_pixels, double *d_partials) {
+    __shared__ double acc[kMeanThreads];
+    const float *frame = d_Iframes + (size_t)blockIdx.y * frame_pixels;
+    double sum = 0.0;
+    for (size_t i = (size_t)blockIdx.x * kMeanThreads + threadIdx.x; i < frame_pixels;
+         i += (size_t)kMeanBlocks * kMeanThreads)
+        sum += frame[i];
+    acc[threadIdx.x] = sum;
+    __syncthreads();
+    for (int half = kMeanThreads / 2; half > 0; half /= 2) {
+        if (threadIdx.x < half) acc[threadIdx.x] += acc[threadIdx.x + half];
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) d_partials[(size_t)blockIdx.y * kMeanBlocks + blockIdx.x] = acc[0];
+}
+
+__global__ void frameMeanFinishKernel(const double *d_partials, size_t frame_pixels, int n_frames, float *d_means) {
+    const int f = blockIdx.x * blockDim.x + threadIdx.x;
+    if (f >= n_frames) return;
+    double sum = 0.0;
+    for (int b = 0; b < kMeanBlocks; b++) sum += d_partials[(size_t)f * kMeanBlocks + b];
+    d_means[f] = (float)(sum / (double)frame_pixels);
+}
+
+// nx x ny frame -> dense fnx x fny frame, pad filled with the frame mean.
+__global__ void padFrameKernel(const float *src, int nx, int ny, float *dst, int fnx, int fny,
+                               const float *d_mean) {
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;
+    const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= fnx || y >= fny) return;
+    dst[(size_t)y * fnx + x] = (x < nx && y < ny) ? src[(size_t)y * nx + x] : *d_mean;
+}
+
+// In-place C2R output (rows of 2*fnfx floats) -> the nx x ny frame.
+__global__ void cropFrameKernel(const float *src, int src_stride, float *dst, int nx, int ny) {
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;
+    const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= nx || y >= ny) return;
+    dst[(size_t)y * nx + x] = src[(size_t)y * src_stride + x];
+}
+
+// cropAndGroupPatchResidentKernel into an fft_w x fft_h patch whose pad holds
+// the group's sum of frame means (the mean of the group sum).
+__global__ void cropGroupPadPatchKernel(
+    const float *d_Iframes, float *d_Ipatches,
+    const int nx, const int ny,
+    const int x_start, const int y_start,
+    const int patch_w, const int patch_h, const int fft_w, const int fft_h,
+    const int *d_group_start, const int *d_group_size, const int n_groups,
+    const float *d_frame_means
+) {
+    int px = blockIdx.x * blockDim.x + threadIdx.x;
+    int py = blockIdx.y * blockDim.y + threadIdx.y;
+    int igroup = blockIdx.z;
+    if (px >= fft_w || py >= fft_h || igroup >= n_groups) return;
+
+    const int g_start = d_group_start[igroup];
+    const int g_size  = d_group_size[igroup];
+    float sum = 0.0f;
+    if (px < patch_w && py < patch_h) {
+        const size_t frame_stride = (size_t)ny * nx;
+        const size_t src = (size_t)(y_start + py) * nx + (x_start + px);
+        for (int i = 0; i < g_size; i++) sum += d_Iframes[(size_t)(g_start + i) * frame_stride + src];
+    } else {
+        for (int i = 0; i < g_size; i++) sum += d_frame_means[g_start + i];
+    }
+    d_Ipatches[(size_t)igroup * fft_h * fft_w + (size_t)py * fft_w + px] = sum;
+}
+
 } // anonymous namespace
 
 CudaMovieSession::CudaMovieSession(int nx, int ny, int n_frames, int device_id, std::ostream &log)
     : patch_alignment_workspace(&failure_state),
       batched_patch_alignment_workspace(&failure_state),
       nx(nx), ny(ny), n_frames(n_frames), device_id(device_id),
-      nfx(nx / 2 + 1), logfile(log) {}
+      nfx(nx / 2 + 1), fnx(nx), fny(ny), fnfx(nx / 2 + 1), logfile(log) {}
+
+void CudaMovieSession::setFftSizePolicyFast(bool fast) {
+    if (is_initialized) REPORT_ERROR("setFftSizePolicyFast must precede CudaMovieSession::initialize");
+    fft_fast = fast;
+    fnx = fast ? mc_cuda::fastFftSize(nx) : nx;
+    fny = fast ? mc_cuda::fastFftSize(ny) : ny;
+    fnfx = fnx / 2 + 1;
+}
 
 CudaMovieSession::~CudaMovieSession() {
     release();
@@ -441,12 +525,13 @@ bool CudaMovieSession::initialize() {
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t sz_real = (size_t)ny * nx * sizeof(float);
-    const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+    // fny x fnfx is ny x nfx unless the fast policy pads the frame.
+    const size_t sz_comp = (size_t)fny * fnfx * sizeof(cufftComplex);
     const size_t total_real_bytes = sz_real * n_frames;
     const size_t total_comp_bytes = sz_comp * n_frames;
 
     if (nx <= 0 || ny <= 0 || n_frames <= 0 ||
-        (size_t)nx * ny > INT_MAX || (size_t)ny * nfx > INT_MAX) {
+        (size_t)fnx * fny > INT_MAX || (size_t)fny * 2 * fnfx > INT_MAX) {
         logfile << "ERROR: Invalid movie dimensions for cuFFT: "
                 << nx << "x" << ny << "x" << n_frames << std::endl;
         return false;
@@ -484,6 +569,10 @@ bool CudaMovieSession::initialize() {
         cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
         if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
         if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
+        if (cuda_result == cudaSuccess && fft_fast)
+            cuda_result = cudaMalloc((void**)&d_frame_means, n_frames * sizeof(float));
+        if (cuda_result == cudaSuccess && fft_fast)
+            cuda_result = cudaMalloc((void**)&d_mean_partials, (size_t)n_frames * kMeanBlocks * sizeof(double));
     }
     if (cuda_result != cudaSuccess) {
         recordFailure(cuda_result, "initialize buffers", __LINE__);
@@ -497,22 +586,31 @@ bool CudaMovieSession::initialize() {
     // and each frame is synchronized before the next execution.
     // A single-frame batch keeps the inverse preservation tile to one frame.
     // The A100 batch-two sample exceeded the whole-process VRAM target.
-    int n[2] = {ny, nx};
+    //
+    // A padded frame (fast policy) is transformed through d_inverse_tile: the
+    // R2C reads it as a dense fnx x fny frame, and the C2R runs in place there
+    // with rows of 2*fnfx floats, so no padded real buffer is allocated.
+    int n[2] = {fny, fnx};
+    const bool padded = frameFftPadded();
+    int c2r_inembed[2] = {fny, fnfx}, c2r_onembed[2] = {fny, 2 * fnfx};
     auto make_plan = [&](cufftHandle &plan, bool &has_plan, size_t &work_bytes,
                          cufftType type) -> bool {
         cufftResult result = cufftCreate(&plan);
         if (result == CUFFT_SUCCESS) has_plan = true;
         if (result == CUFFT_SUCCESS) result = cufftSetAutoAllocation(plan, 0);
-        if (result == CUFFT_SUCCESS) {
-            const int input_distance = type == CUFFT_R2C ? nx * ny : ny * nfx;
-            const int output_distance = type == CUFFT_R2C ? ny * nfx : nx * ny;
+        if (result == CUFFT_SUCCESS && padded && type == CUFFT_C2R) {
+            result = cufftMakePlanMany(plan, 2, n, c2r_inembed, 1, fny * fnfx,
+                                       c2r_onembed, 1, fny * 2 * fnfx, type, 1, &work_bytes);
+        } else if (result == CUFFT_SUCCESS) {
+            const int input_distance = type == CUFFT_R2C ? fnx * fny : fny * fnfx;
+            const int output_distance = type == CUFFT_R2C ? fny * fnfx : fnx * fny;
             result = cufftMakePlanMany(plan, 2, n, NULL, 1, input_distance,
                                        NULL, 1, output_distance, type, 1, &work_bytes);
         }
         if (result != CUFFT_SUCCESS) {
             recordCufftFailure(result, "initialize plan", __LINE__);
             recordFailure(cudaPeekAtLastError(), "initialize plan", __LINE__);
-            logfile << "ERROR: cuFFT plan failed for " << nx << "x" << ny
+            logfile << "ERROR: cuFFT plan failed for " << fnx << "x" << fny
                     << " batch=1 type=" << type
                     << " code=" << result << std::endl;
             return false;
@@ -561,6 +659,10 @@ bool CudaMovieSession::initialize() {
             << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
             << " shared work=" << fft_work_bytes
             << " inverse tile=" << sz_comp << " bytes" << std::endl;
+    if (fft_fast)
+        logfile << "FFT size policy fast: frame " << nx << "x" << ny << " transformed at "
+                << fnx << "x" << fny << (padded ? " (mean-padded)" : " (already 7-smooth)")
+                << "; patches at the next even 7-smooth size" << std::endl;
 
     fourier_guard.reset();
     is_initialized = true;
@@ -601,6 +703,9 @@ void CudaMovieSession::release() {
     releaseBuffer(d_Iframes);
     releaseBuffer(d_Fframes);
     releaseBuffer(d_Isum);
+    releaseBuffer(d_frame_means);
+    releaseBuffer(d_mean_partials);
+    frame_means_valid = false;
     // Only free a gain this session owns; a pooled one outlives it.
     if (!d_gain_borrowed) releaseBuffer(d_gain);
     d_gain = nullptr;
@@ -1863,7 +1968,12 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     HANDLE_ERROR(cudaSetDevice(device_id));
 
     const size_t real_stride = (size_t)nx * ny;
-    const size_t complex_stride = (size_t)ny * nfx;
+    const size_t complex_stride = (size_t)fny * fnfx;
+    const bool padded = frameFftPadded();
+    // The pad value is each frame's mean, so the padding adds no edge step
+    // beyond the one the periodic exact transform already has.
+    frame_means_valid = false;
+    if (padded && !ensureFrameMeans()) return false;
     // One shared cuFFT work area serves every execution below. All of them run
     // on the default stream, so successive executions (and the scaling kernel)
     // are already ordered; the old per-frame cudaDeviceSynchronize only moved
@@ -1872,9 +1982,23 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
     // work already queued finishes and any asynchronous error is attributed
     // here rather than to a later, unrelated call.
     auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "forward FFT drain", __LINE__); };
+    const dim3 pad_block(32, 8);
+    const dim3 pad_grid((fnx + pad_block.x - 1) / pad_block.x, (fny + pad_block.y - 1) / pad_block.y);
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        const cufftResult res = cufftExecR2C(plan_r2c, (cufftReal*)(d_Iframes + (size_t)iframe * real_stride),
-                                             d_Fframes + (size_t)iframe * complex_stride);
+        cufftReal *src = (cufftReal*)(d_Iframes + (size_t)iframe * real_stride);
+        if (padded) {
+            padFrameKernel<<<pad_grid, pad_block>>>(d_Iframes + (size_t)iframe * real_stride, nx, ny,
+                                                    (float*)d_inverse_tile, fnx, fny, d_frame_means + iframe);
+            const cudaError_t launch = cudaGetLastError();
+            if (launch != cudaSuccess) {
+                logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(launch) << std::endl;
+                recordFailure(launch, __func__, __LINE__);
+                drain_after_failure();
+                return false;
+            }
+            src = (cufftReal*)d_inverse_tile;
+        }
+        const cufftResult res = cufftExecR2C(plan_r2c, src, d_Fframes + (size_t)iframe * complex_stride);
         if (res != CUFFT_SUCCESS) {
             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
             recordCufftFailure(res, __func__, __LINE__);
@@ -1883,8 +2007,8 @@ bool CudaMovieSession::computeGlobalForwardFFT() {
         }
     }
 
-    const float inv_size = 1.0f / ((float)nx * ny);
-    const size_t total_comp_elems = (size_t)n_frames * ny * nfx;
+    const float inv_size = 1.0f / ((float)fnx * fny);
+    const size_t total_comp_elems = (size_t)n_frames * complex_stride;
     const int block = 256;
     const int grid = (int)((total_comp_elems + block - 1) / block);
     scaleComplexKernel<<<grid, block>>>(d_Fframes, total_comp_elems, inv_size);
@@ -1913,8 +2037,15 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
     // default stream, so the scratch tile is not reused before its transform
     // has read it; there is no per-frame host wait. Errors surface at the one
     // checked drain below.
+    //
+    // A padded frame is transformed in place in the scratch tile (rows of
+    // 2*fnfx floats) and its top-left nx x ny corner is cropped back.
     const size_t real_stride = (size_t)nx * ny;
-    const size_t complex_stride = (size_t)ny * nfx;
+    const size_t complex_stride = (size_t)fny * fnfx;
+    const bool padded = frameFftPadded();
+    const dim3 crop_block(32, 8);
+    const dim3 crop_grid((nx + crop_block.x - 1) / crop_block.x, (ny + crop_block.y - 1) / crop_block.y);
+    frame_means_valid = false;
     auto drain_after_failure = [&]() { recordFailure(cudaDeviceSynchronize(), "inverse FFT drain", __LINE__); };
     for (int iframe = 0; iframe < n_frames; iframe++) {
         const cudaError_t copy = cudaMemcpy(d_inverse_tile, d_Fframes + (size_t)iframe * complex_stride,
@@ -1926,18 +2057,43 @@ bool CudaMovieSession::computeGlobalInverseFFT() {
             drain_after_failure();
             return false;
         }
-        const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile,
-                                             (cufftReal*)(d_Iframes + (size_t)iframe * real_stride));
+        cufftReal *dst = padded ? (cufftReal*)d_inverse_tile
+                                : (cufftReal*)(d_Iframes + (size_t)iframe * real_stride);
+        const cufftResult res = cufftExecC2R(plan_c2r, d_inverse_tile, dst);
         if (res != CUFFT_SUCCESS) {
             logfile << "cuFFT Error in " << __FILE__ << ":" << __LINE__ << " : " << res << std::endl;
             recordCufftFailure(res, __func__, __LINE__);
             drain_after_failure();
             return false;
         }
+        if (padded) {
+            cropFrameKernel<<<crop_grid, crop_block>>>((const float*)d_inverse_tile, 2 * fnfx,
+                                                       d_Iframes + (size_t)iframe * real_stride, nx, ny);
+            const cudaError_t launch = cudaGetLastError();
+            if (launch != cudaSuccess) {
+                logfile << "CUDA Error in " << __FILE__ << ":" << __LINE__ << " : " << cudaGetErrorString(launch) << std::endl;
+                recordFailure(launch, __func__, __LINE__);
+                drain_after_failure();
+                return false;
+            }
+        }
     }
     HANDLE_ERROR(cudaDeviceSynchronize());
     // Every frame of d_Iframes was just rewritten, whatever borrowed it before.
     real_frames_invalid_reason = nullptr;
+    return true;
+}
+
+bool CudaMovieSession::ensureFrameMeans() {
+    if (frame_means_valid) return true;
+    if (!d_frame_means || !d_mean_partials) return false;
+    if (refuseInvalidRealFrames("the frame means")) return false;
+    const size_t frame_pixels = (size_t)nx * ny;
+    frameMeanPartialsKernel<<<dim3(kMeanBlocks, n_frames), kMeanThreads>>>(d_Iframes, frame_pixels, d_mean_partials);
+    HANDLE_ERROR(cudaGetLastError());
+    frameMeanFinishKernel<<<(n_frames + 127) / 128, 128>>>(d_mean_partials, frame_pixels, n_frames, d_frame_means);
+    HANDLE_ERROR(cudaGetLastError());
+    frame_means_valid = true;
     return true;
 }
 
@@ -1952,6 +2108,7 @@ void *CudaMovieSession::borrowRealFramesForGlobalAlignment(size_t &bytes) {
     bytes = 0;
     if (failure_state.isPoisoned() || !is_initialized || !d_Iframes) return nullptr;
     bytes = (size_t)n_frames * nx * ny * sizeof(float);
+    frame_means_valid = false;
     real_frames_invalid_reason = "global alignment used it as scratch; the inverse FFT has not rewritten it";
     return d_Iframes;
 }
@@ -1994,14 +2151,22 @@ bool CudaMovieSession::preparePatchInVram(
     int patch_w, int patch_h,
     int n_groups, const int *group_start, const int *group_size,
     cufftComplex *d_out_fpatches,
-    int window_nx, int window_ny
+    int window_nx, int window_ny,
+    int fft_w, int fft_h
 ) {
     if (failure_state.isPoisoned() || !is_initialized || n_groups == 0 || !d_out_fpatches) return false;
     if (refuseInvalidRealFrames("patch preparation")) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
 
-    const int patch_nfx = patch_w / 2 + 1;
-    const size_t sz_all_patch_real = (size_t)n_groups * patch_h * patch_w * sizeof(float);
+    // The patch is transformed at fft_w x fft_h (fast policy) with the pad
+    // holding the group's mean; everything after the crop sees only that size.
+    if (fft_w <= 0) fft_w = patch_w;
+    if (fft_h <= 0) fft_h = patch_h;
+    const bool patch_padded = fft_w != patch_w || fft_h != patch_h;
+    if (fft_w < patch_w || fft_h < patch_h) return false;
+    if (patch_padded && !ensureFrameMeans()) return false;
+    const int patch_nfx = fft_w / 2 + 1;
+    const size_t sz_all_patch_real = (size_t)n_groups * fft_h * fft_w * sizeof(float);
     const bool windowed = window_nx > 0 && window_ny > 0;
 
     // Reuse or allocate cached scratch buffers.
@@ -2061,44 +2226,51 @@ bool CudaMovieSession::preparePatchInVram(
     }
 
     dim3 block(16, 16);
-    dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
-    cropAndGroupPatchResidentKernel<<<grid, block>>>(
-        d_Iframes,
-        d_Ipatches,
-        nx, ny,
-        x_start, y_start,
-        patch_w, patch_h,
-        d_group_start, d_group_size,
-        n_groups
-    );
+    if (patch_padded) {
+        dim3 grid((fft_w + 15) / 16, (fft_h + 15) / 16, n_groups);
+        cropGroupPadPatchKernel<<<grid, block>>>(d_Iframes, d_Ipatches, nx, ny, x_start, y_start,
+                                                 patch_w, patch_h, fft_w, fft_h,
+                                                 d_group_start, d_group_size, n_groups, d_frame_means);
+    } else {
+        dim3 grid((patch_w + 15) / 16, (patch_h + 15) / 16, n_groups);
+        cropAndGroupPatchResidentKernel<<<grid, block>>>(
+            d_Iframes,
+            d_Ipatches,
+            nx, ny,
+            x_start, y_start,
+            patch_w, patch_h,
+            d_group_start, d_group_size,
+            n_groups
+        );
+    }
     HANDLE_ERROR(cudaGetLastError());
 
     // Reuse cached batched cuFFT plan for patch transforms
-    if (!has_plan_patch_r2c || cached_patch_w != patch_w || cached_patch_h != patch_h || cached_patch_ngroups != n_groups) {
+    if (!has_plan_patch_r2c || cached_patch_w != fft_w || cached_patch_h != fft_h || cached_patch_ngroups != n_groups) {
         // Same rule as the buffers above: drop the geometry the cache claims before
         // destroying the plan, and publish the new one only once it exists.
         cached_patch_w = cached_patch_h = cached_patch_ngroups = 0;
         CUFFT_CHECK(releasePlan(plan_patch_r2c, has_plan_patch_r2c));
         CUFFT_CHECK(cufftCreate(&plan_patch_r2c));
         has_plan_patch_r2c = true;
-        int n[2] = {patch_h, patch_w};
+        int n[2] = {fft_h, fft_w};
         size_t work_bytes = 0;
-        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, patch_h * patch_w,
-                                   NULL, 1, patch_h * patch_nfx, CUFFT_R2C, n_groups,
+        CUFFT_CHECK(cufftMakePlanMany(plan_patch_r2c, 2, n, NULL, 1, fft_h * fft_w,
+                                   NULL, 1, fft_h * patch_nfx, CUFFT_R2C, n_groups,
                                    &work_bytes));
-        cached_patch_w = patch_w;
-        cached_patch_h = patch_h;
+        cached_patch_w = fft_w;
+        cached_patch_h = fft_h;
         cached_patch_ngroups = n_groups;
     }
 
-    const float inv_patch_size = 1.0f / ((float)patch_w * patch_h);
-    const size_t total_comp_elems = (size_t)n_groups * patch_h * patch_nfx;
+    const float inv_patch_size = 1.0f / ((float)fft_w * fft_h);
+    const size_t total_comp_elems = (size_t)n_groups * fft_h * patch_nfx;
     if (windowed) {
         // The full spectra are only an intermediate. d_inverse_tile is dead
         // between the global inverse FFT and dose weighting
         // (docs/vram_live_ranges.md), so it holds them when large enough.
         cufftComplex *spectrum = d_inverse_tile;
-        if (!spectrum || total_comp_elems > (size_t)ny * nfx) {
+        if (!spectrum || total_comp_elems > (size_t)fny * fnfx) {
             const size_t sz_spectrum = total_comp_elems * sizeof(cufftComplex);
             if (!d_patch_spectrum || sz_cached_patch_spectrum < sz_spectrum) {
                 cufftComplex *stale = d_patch_spectrum;
@@ -2113,7 +2285,7 @@ bool CudaMovieSession::preparePatchInVram(
             spectrum = d_patch_spectrum;
         }
         CUFFT_CHECK(cufftExecR2C(plan_patch_r2c, (cufftReal*)d_Ipatches, spectrum));
-        HANDLE_ERROR(cudaExtractPatchWindow(spectrum, d_out_fpatches, n_groups, patch_w, patch_h,
+        HANDLE_ERROR(cudaExtractPatchWindow(spectrum, d_out_fpatches, n_groups, fft_w, fft_h,
                                             window_nx, window_ny, inv_patch_size));
         return true;
     }
@@ -2139,6 +2311,9 @@ void CudaMovieSession::alignPatchesBatched(
         failure_state.isPoisoned())
         return;
     const int patch_w = boxes[0].width, patch_h = boxes[0].height;
+    // Every transform and CCF below runs at the FFT extent; only the crop
+    // inside preparePatchInVram sees the patch's own size.
+    const int fft_w = patchFftExtent(patch_w), fft_h = patchFftExtent(patch_h);
     for (const PatchBox &box : boxes) {
         if (box.width != patch_w || box.height != patch_h) {
             logfile << "Batched patch alignment: patch sizes differ; using per-patch alignment." << std::endl;
@@ -2161,11 +2336,11 @@ void CudaMovieSession::alignPatchesBatched(
     }
     BatchedPatchAlignmentWorkspace &workspace = batched_patch_alignment_workspace;
     const size_t per_patch = BatchedPatchAlignmentWorkspace::bytesPerPatch(
-        n_groups, patch_w, patch_h, scaled_B, ccf_downsample);
+        n_groups, fft_w, fft_h, scaled_B, ccf_downsample);
     int chunk = choosePatchBatchChunk(n_patches, per_patch, free_bytes, total_bytes, cap);
     // The estimate omits allocator granularity and the cuFFT work area, so a
     // declined reservation is retried smaller before giving up.
-    while (chunk > 0 && !workspace.reserve(chunk, n_groups, patch_w, patch_h, scaled_B,
+    while (chunk > 0 && !workspace.reserve(chunk, n_groups, fft_w, fft_h, scaled_B,
                                            ccf_downsample, device_id))
         chunk /= 2;
     const int n_chunks = chunk > 0 ? (n_patches + chunk - 1) / chunk : 0;
@@ -2182,7 +2357,7 @@ void CudaMovieSession::alignPatchesBatched(
 
     // Slots hold only each patch's CCF window (cudaAlignPatchBatchDevice).
     int window_nx = 0, window_ny = 0;
-    patchSpectrumWindow(patch_w, patch_h, scaled_B, ccf_downsample, window_nx, window_ny);
+    patchSpectrumWindow(fft_w, fft_h, scaled_B, ccf_downsample, window_nx, window_ny);
     std::vector<std::vector<RFLOAT> > xs(chunk), ys(chunk);
     std::vector<PatchBatchLog> logs(chunk);
     size_t min_free = free_bytes;
@@ -2192,7 +2367,7 @@ void CudaMovieSession::alignPatchesBatched(
             const PatchBox &box = boxes[first + j];
             if (preparePatchInVram(box.x_start, box.y_start, box.width, box.height, n_groups,
                                    group_start, group_size, workspace.patchSlot(j),
-                                   window_nx, window_ny))
+                                   window_nx, window_ny, fft_w, fft_h))
                 continue;
             // preparePatchInVram consumed its code; the preserved state and the
             // pending slot together decide, exactly as for the per-patch retry.
@@ -2212,7 +2387,7 @@ void CudaMovieSession::alignPatchesBatched(
             return;
         }
         for (int j = 0; j < count; j++) xs[j].assign(n_groups, (RFLOAT)0), ys[j].assign(n_groups, (RFLOAT)0);
-        cudaAlignPatchBatchDevice(workspace, count, n_groups, patch_w, patch_h, scaled_B,
+        cudaAlignPatchBatchDevice(workspace, count, n_groups, fft_w, fft_h, scaled_B,
                                   xs.data(), ys.data(), max_iter, ccf_downsample, device_id,
                                   logs.data());
         size_t chunk_free = 0, chunk_total = 0;
@@ -2249,13 +2424,14 @@ bool CudaMovieSession::reconstructDoseWeighted(
     // Dose weighting reads only d_Fframes. When the caller will never read the
     // real-space movie again, its memory also holds the reconstruction scratch.
     if (consume_real_frames && d_Iframes &&
-        mc_cuda::doseScratchLayout(nx, ny, n_frames).total_bytes <= (size_t)n_frames * nx * ny * sizeof(float)) {
+        mc_cuda::doseScratchLayout(nx, ny, n_frames, fnx, fny).total_bytes <= (size_t)n_frames * nx * ny * sizeof(float)) {
         scratch.block = reinterpret_cast<char*>(d_Iframes);
         real_frames_invalid_reason = "dose weighting consumed it as scratch";
         logfile << "Dose-weighting scratch borrowed from the consumed real-space movie" << std::endl;
     }
     return cudaDoseWeightAndInterpolateDevice(d_Fframes, Isum, nx, ny, n_frames, doses, apix, model,
-                                              device_id, logfile, &failure_state, plan_c2r, &scratch);
+                                              device_id, logfile, &failure_state, plan_c2r, &scratch,
+                                              fnx, fny);
 }
 
 bool CudaMovieSession::reconstructUnweighted(
@@ -2272,11 +2448,11 @@ bool CudaMovieSession::reconstructUnweighted(
 bool CudaMovieSession::downloadFourierFrames(std::vector<MultidimArray<fComplex> > &Fframes) {
     if (failure_state.isPoisoned() || !is_initialized || !d_Fframes) return false;
     HANDLE_ERROR(cudaSetDevice(device_id));
-    const size_t sz_comp_frame = (size_t)ny * nfx * sizeof(cufftComplex);
+    const size_t sz_comp_frame = (size_t)fny * fnfx * sizeof(cufftComplex);
     Fframes.resize(n_frames);
     for (int iframe = 0; iframe < n_frames; iframe++) {
-        Fframes[iframe].reshape(ny, nfx);
-        const cufftComplex *src = d_Fframes + (size_t)iframe * ny * nfx;
+        Fframes[iframe].reshape(fny, fnfx);
+        const cufftComplex *src = d_Fframes + (size_t)iframe * fny * fnfx;
         HANDLE_ERROR(cudaMemcpy(Fframes[iframe].data, src, sz_comp_frame, cudaMemcpyDeviceToHost));
     }
     return true;

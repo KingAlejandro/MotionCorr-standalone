@@ -1,0 +1,37 @@
+eo base rc=0
+eo_nodw base rc=0
+bin_late base rc=0
+ps base rc=0
+cpu base rc=0
+cpu_only base rc=0
+mixed base rc=0
+mixed_cpu base rc=0
+eo br rc=0
+eo_nodw br rc=0
+bin_late br rc=0
+ps br rc=0
+cpu br rc=0
+cpu_only br rc=0
+mixed br rc=0
+mixed_cpu br rc=0
+eo_nodw br_poison rc=0
+eo_nodw br_exact rc=0
+eo_nodw br_fast rc=0
+ps br_fast rc=0
+mixed br_poison rc=0
+== eo br: IDENTICAL mrc=12 other=17 pdf_inventoried=4 files=37/37 
+== eo_nodw br: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== bin_late br: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== ps br: IDENTICAL mrc=8 other=17 pdf_inventoried=4 files=33/33 
+== cpu br: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== cpu_only br: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed br: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== mixed_cpu br: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== eo_nodw br_poison: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== eo_nodw br_exact: IDENTICAL mrc=16 other=17 pdf_inventoried=4 files=41/41 
+== mixed br_poison: IDENTICAL mrc=20 other=19 pdf_inventoried=4 files=48/48 
+== ps br_fast: IDENTICAL mrc=8 other=17 pdf_inventoried=4 files=33/33 
+== eo_nodw br_fast: DIFFERENT mrc=16 other=17 pdf_inventoried=4 files=41/41    ('mrc', 'Movies/20170629_00021_frameImage.mrc')    ('file', 'Movies/20170629_00021_frameImage.star') 
+== control eo vs eo_nodw (base): DIFFERENT mrc=12 other=17 pdf_inventoried=4 files=37/41
+      4 --fft_size_policy fast is ignored with --grouping_for_ps; using exact sizes.
+IDENTITY-DONE

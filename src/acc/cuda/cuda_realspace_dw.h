@@ -56,11 +56,15 @@ namespace mc_cuda {
 struct DoseScratchLayout {
     size_t accumulator_offset, real_offset, normalization_offset, doses_offset, total_bytes;
 };
-inline DoseScratchLayout doseScratchLayout(int nx, int ny, int n_frames) {
+// fft_nx/fft_ny size the normalization plane when the spectrum is padded
+// (--fft_size_policy fast); zero means nx/ny.
+inline DoseScratchLayout doseScratchLayout(int nx, int ny, int n_frames, int fft_nx = 0, int fft_ny = 0) {
     const size_t align = 512;
     auto up = [align](size_t v) { return (v + align - 1) / align * align; };
+    if (fft_nx <= 0) fft_nx = nx;
+    if (fft_ny <= 0) fft_ny = ny;
     const size_t real_bytes = up((size_t)nx * ny * sizeof(float));
-    const size_t plane_bytes = up((size_t)(nx / 2 + 1) * ny * sizeof(float));
+    const size_t plane_bytes = up((size_t)(fft_nx / 2 + 1) * fft_ny * sizeof(float));
     const size_t dose_bytes = up((size_t)(n_frames > 0 ? n_frames : 1) * sizeof(float));
     DoseScratchLayout l;
     l.accumulator_offset = 0;
@@ -80,6 +84,11 @@ inline DoseScratchLayout doseScratchLayout(int nx, int ny, int n_frames) {
  * stream0. Its caller-owned work area remains live through this synchronous
  * call; neither the plan nor work area is rebound, retained or destroyed here.
  * With zero, the original reconstruction-owned plan and cleanup are unchanged.
+ *
+ * fft_nx/fft_ny (zero = nx/ny) are the extents of a padded spectrum
+ * (--fft_size_policy fast): d_Fframes holds fft_ny x (fft_nx/2+1) frames,
+ * weights use that frequency grid, and the borrowed plan is the session's
+ * in-place strided C2R. Padded mode requires the borrowed plan and scratch.
  */
 bool cudaDoseWeightAndInterpolateDevice(
     const cufftComplex *d_Fframes,
@@ -92,7 +101,8 @@ bool cudaDoseWeightAndInterpolateDevice(
     std::ostream &logfile,
     CudaFailureState *failure = nullptr, // receives every consumed status, cleanup included
     cufftHandle borrowed_c2r = 0, // matching session-owned batch-one C2R; never destroyed here
-    const DoseWeightScratch *scratch = nullptr // session mode when non-null; null keeps the original ownership
+    const DoseWeightScratch *scratch = nullptr, // session mode when non-null; null keeps the original ownership
+    int fft_nx = 0, int fft_ny = 0
 );
 
 /**

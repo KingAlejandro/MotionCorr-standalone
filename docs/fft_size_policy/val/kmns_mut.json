@@ -1,0 +1,439 @@
+{
+  "tool": "run_known_motion_gates.py",
+  "overall": "FAIL",
+  "overall_scope": "gate-role accuracy plus execution/backend/invariance/witness checks on every requested case",
+  "binary": "/home/alex/mc-fft/val/motioncorr_mut",
+  "gpu": 0,
+  "results": [
+    {
+      "case": "km_local_hisnr_ns",
+      "role": "gate",
+      "status": "FAIL",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_hisnr_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0",
+            "--skip_defect"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 0.799,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j1/km_local_hisnr_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_hisnr_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0",
+            "--skip_defect",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 0.774,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j1_dw/km_local_hisnr_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_hisnr_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "4",
+            "--patch_y",
+            "4",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0",
+            "--skip_defect"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 0.871,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j4/km_local_hisnr_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "FAIL",
+      "hot_pixels": {
+        "expected": 0,
+        "detected": 0,
+        "injected": 0,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.027404790383970767,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.07506137453877534,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.07474709684026806,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.10846988873721318,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.17268556161351162,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.012353384120710222,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.06266227655964969,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.07106212915623197,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.13375582966777905,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "applied_image_self_consistency": {
+          "value_a": null,
+          "limit_a": null,
+          "pass": false,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": {
+        "reference_rms": 1202.7875038374136,
+        "absolute_rmse": 7.304103374507531,
+        "relative_rmse": 0.006072646540809806,
+        "status": "FAIL",
+        "max_abs_error": 275.3357119804725,
+        "noise_floor_relative_rmse": 0.0001,
+        "classification": "field_defect",
+        "note": "float32 FFT arithmetic in the program versus float64 here; a disagreement at or below the measured floor is rounding, not a displacement-field error"
+      },
+      "dose_weighting_invariance": {
+        "other_star": "/home/alex/mc-fft/kmns/out_mut/km_local_hisnr_ns/j1_dw/km_local_hisnr_ns.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    },
+    {
+      "case": "km_local_realscale_ns",
+      "role": "gate",
+      "status": "PASS",
+      "runs": {
+        "j1": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_realscale_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j1",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 1.287,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j1/km_local_realscale_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        },
+        "j1_dw": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_realscale_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j1_dw",
+            "--use_own",
+            "--j",
+            "1",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0",
+            "--dose_weighting",
+            "--dose_per_frame",
+            "1.277",
+            "--voltage",
+            "300.0",
+            "--angpix",
+            "0.885"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 1.316,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j1_dw/km_local_realscale_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        },
+        "j4": {
+          "command": [
+            "/home/alex/mc-fft/val/motioncorr_mut",
+            "--i",
+            "km_local_realscale_ns.star",
+            "--o",
+            "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j4",
+            "--use_own",
+            "--j",
+            "4",
+            "--patch_x",
+            "5",
+            "--patch_y",
+            "5",
+            "--bin_factor",
+            "1",
+            "--seed",
+            "1",
+            "--save_noDW",
+            "--gpu",
+            "0"
+          ],
+          "cwd": "/home/alex/mc-fft/kmns/fixtures",
+          "exit_code": 0,
+          "seconds": 1.103,
+          "motion_star": "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j4/km_local_realscale_ns.star",
+          "backend_evidence": {
+            "requested": "cuda",
+            "gpu": 0,
+            "startup_marker_found": true,
+            "completion_marker_found": true,
+            "complete": true
+          }
+        }
+      },
+      "implementation_status": "PASS",
+      "hot_pixels": {
+        "expected": 6,
+        "detected": 6,
+        "injected": 6,
+        "note": "noise pixels may also cross mean + 6 sigma; reported, not gated"
+      },
+      "thread_invariance": {
+        "max_field_difference_px": 0.0,
+        "max_field_difference_a": 0.0,
+        "limit_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "the declared thread-invariance contract requires an identical field"
+      },
+      "gate_report": "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/gate.json",
+      "summary": {
+        "global_component_rms": {
+          "value_a": 0.06111042413103339,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "local_component_rms": {
+          "value_a": 0.17887594365081,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior": {
+          "value_a": 0.18692339916018738,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "total_p95_interior": {
+          "value_a": 0.3612799057682931,
+          "limit_a": 0.4,
+          "pass": true,
+          "gated": true
+        },
+        "total_max_interior": {
+          "value_a": 0.6670802148620819,
+          "limit_a": 0.8,
+          "pass": true,
+          "gated": true
+        },
+        "frame_to_frame_rms_interior": {
+          "value_a": 0.08287113579860468,
+          "limit_a": 0.2,
+          "pass": true,
+          "gated": true
+        },
+        "constant_offset": {
+          "value_a": 0.07781418030627998,
+          "limit_a": 0.1,
+          "pass": true,
+          "gated": true
+        },
+        "total_rms_interior_with_offset": {
+          "value_a": 0.18527610408786777,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "border_rms_reported_not_gated": {
+          "value_a": 0.37251375263073533,
+          "limit_a": null,
+          "pass": true,
+          "gated": false
+        },
+        "dose_weighting_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        },
+        "thread_invariance": {
+          "value_a": 0.0,
+          "limit_a": 0.0,
+          "pass": true,
+          "gated": true
+        }
+      },
+      "self_consistency": null,
+      "dose_weighting_invariance": {
+        "other_star": "/home/alex/mc-fft/kmns/out_mut/km_local_realscale_ns/j1_dw/km_local_realscale_ns.star",
+        "max_field_difference_px": 0.0,
+        "status": "IDENTICAL",
+        "note": "dose weighting is a per-frame radial Fourier weight applied after alignment; it cannot change the geometry, so any difference is a defect"
+      }
+    }
+  ]
+}

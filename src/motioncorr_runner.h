@@ -90,6 +90,10 @@ public:
 	// Pinned ingest path; see MovieIngestMode. Default INGEST_AUTO is production.
 	MovieIngestMode ingest_mode = INGEST_AUTO;
 
+	// --fft_size_policy fast: transform CUDA-session frames and patches at the
+	// next even 7-smooth size (docs/fft_size_policy.md). Default exact.
+	bool fft_size_fast = false;
+
 	// Opt-in diagnostic: append "<movie> <path>" per movie. Empty by default, so
 	// a normal run writes nothing extra and no product changes. This is how an
 	// --ingest auto run over a mixed-format set is checked to have routed each

@@ -1,0 +1,336 @@
+{
+ "instrument": "mcprof compare",
+ "command": [
+  "kit/profiling/mcprof.py",
+  "compare",
+  "default=/home/alex/mc-fft/arms/default.sh",
+  "fast=/home/alex/mc-fft/arms/fast.sh",
+  "--data",
+  "/home/alex/mc-perf-20261001/data",
+  "--star",
+  "movies.star",
+  "--cpus",
+  "80-87",
+  "--gpu-uuid",
+  "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "--runner-cpus",
+  "119",
+  "--lane-wait",
+  "600",
+  "--settle-timeout",
+  "600",
+  "--pairs",
+  "12",
+  "--max-rounds",
+  "20",
+  "--profile-pass",
+  "3",
+  "--trace-pass",
+  "2",
+  "--allow-product-difference",
+  "--work",
+  "/home/alex/mc-fft/kit24run",
+  "--source",
+  "default=/home/alex/mc-fft/src",
+  "--source",
+  "fast=/home/alex/mc-fft/src",
+  "--",
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "Movies/gain.mrc",
+  "--seed",
+  "1",
+  "--gpu",
+  "0",
+  "--j",
+  "8",
+  "--ingest",
+  "nvcomp"
+ ],
+ "kit": {
+  "path": "/home/alex/mc-fft/kit/profiling",
+  "commit": null,
+  "dirty": null
+ },
+ "binaries": {
+  "default": {
+   "path": "/home/alex/mc-fft/arms/default.sh",
+   "realpath": "/home/alex/mc-fft/arms/default.sh",
+   "sha256": "03c0a46dcebcafc0dffc9ef30c181c265041071c8fcbdea56119a881b121bec8",
+   "size": 160,
+   "source": {
+    "source_dir": "/home/alex/mc-fft/src",
+    "commit": "7d6404349d4ba8e4b749f979ac28d49099446b06",
+    "dirty": true,
+    "origin": "git in /home/alex/mc-fft/src"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help"
+  },
+  "fast": {
+   "path": "/home/alex/mc-fft/arms/fast.sh",
+   "realpath": "/home/alex/mc-fft/arms/fast.sh",
+   "sha256": "47cf0f458a8b48966269227a6cec2384cd021bbe277df3c7958e6735085f5d5c",
+   "size": 183,
+   "source": {
+    "source_dir": "/home/alex/mc-fft/src",
+    "commit": "7d6404349d4ba8e4b749f979ac28d49099446b06",
+    "dirty": true,
+    "origin": "git in /home/alex/mc-fft/src"
+   },
+   "has_profile_option": true,
+   "has_device_timing_option": true,
+   "device_timing_detection": "--use_own --help"
+  }
+ },
+ "host": {
+  "hostname": "4-gpu-vm",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_count": 124,
+  "load1_5_15": [
+   15.2265625,
+   16.23193359375,
+   17.240234375
+  ],
+  "lane_cpus": [
+   80,
+   81,
+   82,
+   83,
+   84,
+   85,
+   86,
+   87
+  ],
+  "time_utc": "2026-10-09T20:32:47Z",
+  "cpu_model": "AMD EPYC 7452 32-Core Processor",
+  "clocksource": "acpi_pm",
+  "thp_enabled": "always [madvise] never",
+  "thp_defrag": "always defer defer+madvise [madvise] never",
+  "perf_event_paranoid": "4",
+  "nvcc_release": "12.8",
+  "env": {}
+ },
+ "gpu": {
+  "index": "3",
+  "uuid": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "name": "NVIDIA A100 80GB PCIe",
+  "driver_version": "570.86.10",
+  "memory.total": "81920",
+  "memory.used": "1",
+  "persistence_mode": "Disabled",
+  "clocks.max.sm": "1410",
+  "pci.bus_id": "00000000:09:00.0",
+  "driver_cuda_version": "12.8"
+ },
+ "arms": [
+  "default",
+  "fast"
+ ],
+ "input": {
+  "cwd": "/home/alex/mc-perf-20261001/data",
+  "star": "movies.star",
+  "movies": [
+   "Movies/20170629_00021_frameImage.tiff",
+   "Movies/20170629_00022_frameImage.tiff",
+   "Movies/20170629_00023_frameImage.tiff",
+   "Movies/20170629_00024_frameImage.tiff",
+   "Movies/20170629_00025_frameImage.tiff",
+   "Movies/20170629_00026_frameImage.tiff",
+   "Movies/20170629_00027_frameImage.tiff",
+   "Movies/20170629_00028_frameImage.tiff",
+   "Movies/20170629_00029_frameImage.tiff",
+   "Movies/20170629_00030_frameImage.tiff",
+   "Movies/20170629_00031_frameImage.tiff",
+   "Movies/20170629_00035_frameImage.tiff",
+   "Movies/20170629_00036_frameImage.tiff",
+   "Movies/20170629_00037_frameImage.tiff",
+   "Movies/20170629_00039_frameImage.tiff",
+   "Movies/20170629_00040_frameImage.tiff",
+   "Movies/20170629_00042_frameImage.tiff",
+   "Movies/20170629_00043_frameImage.tiff",
+   "Movies/20170629_00044_frameImage.tiff",
+   "Movies/20170629_00045_frameImage.tiff",
+   "Movies/20170629_00046_frameImage.tiff",
+   "Movies/20170629_00047_frameImage.tiff",
+   "Movies/20170629_00048_frameImage.tiff",
+   "Movies/20170629_00049_frameImage.tiff"
+  ],
+  "staged": false,
+  "star_sha256": "fb998f70b375a4eb8d6972cf3964813c2c10fdfae039ec70c4e5365bf9cf0041"
+ },
+ "payload_args": [
+  "--use_own",
+  "--dose_weighting",
+  "--dose_per_frame",
+  "1.277",
+  "--patch_x",
+  "5",
+  "--patch_y",
+  "5",
+  "--bfactor",
+  "150",
+  "--gainref",
+  "Movies/gain.mrc",
+  "--seed",
+  "1",
+  "--gpu",
+  "0",
+  "--j",
+  "8",
+  "--ingest",
+  "nvcomp"
+ ],
+ "payload_env": {
+  "CUDA_VISIBLE_DEVICES": "GPU-b2cb2c39-8524-17fb-73a8-80cd61dbf83d",
+  "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+ },
+ "locks": [
+  {
+   "path": "/tmp/motioncorr-bench.lock",
+   "waited_s": 562.163
+  },
+  {
+   "path": "/tmp/motioncorr-gpu3-correctness.lock",
+   "waited_s": 0.0
+  }
+ ],
+ "noise_floor_s": 0.0,
+ "vram_instrument": "NVML (libnvidia-ml via ctypes), device memory used and per-process used memory",
+ "allow_product_difference": true,
+ "settle": {
+  "settled": true,
+  "waited_s": 0.4
+ },
+ "series": {
+  "target_clean_rounds": 12,
+  "max_rounds": 20,
+  "rounds_run": 18,
+  "clean_rounds": 12,
+  "reached_target": true
+ },
+ "profile_device_timing": {
+  "default": "on",
+  "fast": "on"
+ },
+ "profile_pass": "3 pass(es) per arm",
+ "trace_instrumentation": {
+  "modes": {
+   "default": "off",
+   "fast": "off"
+  },
+  "common": true
+ },
+ "trace_lane_waits": [
+  {
+   "arm": "default",
+   "pass": 1,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  },
+  {
+   "arm": "fast",
+   "pass": 1,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.04
+   }
+  },
+  {
+   "arm": "fast",
+   "pass": 2,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.01
+   }
+  },
+  {
+   "arm": "default",
+   "pass": 2,
+   "lane": {
+    "waited_s": 1.0,
+    "busy_cores": 0.0
+   }
+  }
+ ],
+ "trace_occupancy": [
+  {
+   "arm": "default",
+   "pass": 1,
+   "settle": {
+    "settled": true,
+    "waited_s": 0.2
+   },
+   "during": {
+    "samples": 1299,
+    "foreign_pids": [],
+    "unknown_pids": [],
+    "errors": 0
+   },
+   "contaminated": false
+  },
+  {
+   "arm": "fast",
+   "pass": 1,
+   "settle": {
+    "settled": true,
+    "waited_s": 0.2
+   },
+   "during": {
+    "samples": 1271,
+    "foreign_pids": [],
+    "unknown_pids": [],
+    "errors": 0
+   },
+   "contaminated": false
+  },
+  {
+   "arm": "fast",
+   "pass": 2,
+   "settle": {
+    "settled": true,
+    "waited_s": 0.2
+   },
+   "during": {
+    "samples": 1294,
+    "foreign_pids": [],
+    "unknown_pids": [],
+    "errors": 0
+   },
+   "contaminated": false
+  },
+  {
+   "arm": "default",
+   "pass": 2,
+   "settle": {
+    "settled": true,
+    "waited_s": 0.2
+   },
+   "during": {
+    "samples": 1348,
+    "foreign_pids": [],
+    "unknown_pids": [],
+    "errors": 0
+   },
+   "contaminated": false
+  }
+ ],
+ "trace_device_timing": {
+  "default": "off",
+  "fast": "off"
+ },
+ "trace_pass": "2 trace(s) per arm"
+}

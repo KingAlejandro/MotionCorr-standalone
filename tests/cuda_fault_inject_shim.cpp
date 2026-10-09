@@ -195,6 +195,13 @@ extern "C" cudaError_t __wrap_cudaMalloc(void **ptr, size_t size) {
         if (!g_preprocess_injected && preprocess_mode("patch-prep-recoverable") &&
             called_from("preparePatchInVram"))
             return inject_preprocess(false, "preparePatchInVram");
+        // --fft_size_policy fast fallbacks (docs/fft_size_policy.md): a recoverable
+        // dose-weighting scratch failure sends the padded spectra to the CPU.
+        if (!g_preprocess_injected && preprocess_mode("dw-alloc-recoverable") &&
+            called_from("cudaDoseWeightAndInterpolateDevice")) {
+            if (ptr) *ptr = nullptr;
+            return inject_preprocess(false, "cudaDoseWeightAndInterpolateDevice");
+        }
         if (sparse || initialize) {
             if (ptr) *ptr = nullptr;
             return inject_preprocess(preprocess_mode("sparse-fatal") || initialize,
@@ -325,6 +332,16 @@ extern "C" cudaError_t __wrap_cudaGetLastError(void) {
         std::fprintf(stderr, "[u16fault] injected post-launch conversion status: %s\n",
                      cudaGetErrorName(code));
         return code;
+    }
+    // The padded inverse checks its crop launch here; a recoverable status sends
+    // the padded spectra to the CPU inverse (--fft_size_policy fast only).
+    if (!g_preprocess_injected && preprocess_mode("ifft-crop-recoverable") &&
+        called_from("computeGlobalInverseFFT")) {
+        g_preprocess_injected = true;
+        (void)__real_cudaGetLastError();
+        std::fprintf(stderr, "[preprocessfault] injected cudaErrorInvalidConfiguration at "
+                     "computeGlobalInverseFFT; pending slot cleared\n");
+        return cudaErrorInvalidConfiguration;
     }
     return __real_cudaGetLastError();
 }

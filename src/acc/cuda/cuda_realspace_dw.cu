@@ -134,14 +134,17 @@ __global__ void applyDoseWeightKernel(
     d_dst[idx].y = v.y * norm_weight;
 }
 
-// Polynomial real-space bilinear interpolation & accumulation kernel
+// Polynomial real-space bilinear interpolation & accumulation kernel.
+// d_Iframe rows are src_stride floats apart (nx, or 2*(fnx/2+1) for a frame
+// cropped out of a padded in-place C2R).
 __global__ void interpolateAndAccumulatePolynomialKernel(
     float * __restrict__ d_Isum,
     float * __restrict__ d_Isum_sub,
     const float * __restrict__ d_Iframe,
     int nx, int ny,
     float x_C0, float x_C1, float x_C2, float x_C3, float x_C4, float x_C5,
-    float y_C0, float y_C1, float y_C2, float y_C3, float y_C4, float y_C5)
+    float y_C0, float y_C1, float y_C2, float y_C3, float y_C4, float y_C5,
+    int src_stride)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -169,15 +172,15 @@ __global__ void interpolateAndAccumulatePolynomialKernel(
 
     float val;
     if (!valid) {
-        val = d_Iframe[(size_t)y0 * nx + x0];
+        val = d_Iframe[(size_t)y0 * src_stride + x0];
     } else {
         float fx = x_target - (float)x0;
         float fy = y_target - (float)y0;
 
-        float d00 = d_Iframe[(size_t)y0 * nx + x0];
-        float d01 = d_Iframe[(size_t)y0 * nx + x1];
-        float d10 = d_Iframe[(size_t)y1 * nx + x0];
-        float d11 = d_Iframe[(size_t)y1 * nx + x1];
+        float d00 = d_Iframe[(size_t)y0 * src_stride + x0];
+        float d01 = d_Iframe[(size_t)y0 * src_stride + x1];
+        float d10 = d_Iframe[(size_t)y1 * src_stride + x0];
+        float d11 = d_Iframe[(size_t)y1 * src_stride + x1];
 
         float dx0 = d00 + (d01 - d00) * fx;
         float dx1 = d10 + (d11 - d10) * fx;
@@ -208,6 +211,18 @@ __global__ void accumulateDirectKernel(
     }
 }
 
+// accumulateDirectKernel for a source with row stride != nx (padded C2R).
+__global__ void accumulateDirectStridedKernel(
+    float * __restrict__ d_Isum,
+    const float * __restrict__ d_Iframe,
+    int nx, int ny, int src_stride)
+{
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;
+    const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= nx || y >= ny) return;
+    d_Isum[(size_t)y * nx + x] += d_Iframe[(size_t)y * src_stride + x];
+}
+
 bool cudaDoseWeightAndInterpolateDevice(
     const cufftComplex *d_Fframes,
     Image<float> &Isum,
@@ -219,9 +234,19 @@ bool cudaDoseWeightAndInterpolateDevice(
     std::ostream &logfile,
     CudaFailureState *failure,
     cufftHandle borrowed_c2r,
-    const DoseWeightScratch *scratch)
+    const DoseWeightScratch *scratch,
+    int fft_nx, int fft_ny)
 {
     if (n_frames == 0) return true;
+    if (fft_nx <= 0) fft_nx = nx;
+    if (fft_ny <= 0) fft_ny = ny;
+    // A padded spectrum (--fft_size_policy fast) is weighted at its own
+    // frequency grid and inverted in place by the session's strided plan.
+    const bool padded = fft_nx != nx || fft_ny != ny;
+    if (padded && (borrowed_c2r == 0 || scratch == nullptr || scratch->fourier == nullptr)) {
+        logfile << "ERROR: padded dose weighting needs the session C2R plan and scratch tile." << std::endl;
+        return false;
+    }
 
     int dev_count = 0;
     cudaError_t count_err = cudaGetDeviceCount(&dev_count);
@@ -237,7 +262,7 @@ bool cudaDoseWeightAndInterpolateDevice(
     mc_cuda::ScopedCudaEvents<8> event_cleanup(failure);
     mc_cuda::ScopedCufftPlan plan_cleanup(failure);
 
-    const int nfx = nx / 2 + 1, nfy = ny;
+    const int nfx = fft_nx / 2 + 1, nfy = fft_ny;
     const int nfy_half = nfy / 2;
     const float nfy2 = (float)nfy * (float)nfy;
     const float nfx2 = (float)(nfx - 1) * (float)(nfx - 1) * 4.0f;
@@ -302,7 +327,7 @@ bool cudaDoseWeightAndInterpolateDevice(
         // tile, and the other four buffers share one allocation (one cudaMalloc
         // and one checked cudaFree instead of four of each).
         d_Fframe = (float2*)scratch->fourier;
-        const mc_cuda::DoseScratchLayout layout = mc_cuda::doseScratchLayout(nx, ny, n_frames);
+        const mc_cuda::DoseScratchLayout layout = mc_cuda::doseScratchLayout(nx, ny, n_frames, fft_nx, fft_ny);
         char *block = scratch->block;
         if (!block) {
             HANDLE_ERROR(cudaMalloc((void**)&block, layout.total_bytes));
@@ -385,7 +410,10 @@ bool cudaDoseWeightAndInterpolateDevice(
 
         // Inverse FFT
         if (timed) HANDLE_ERROR(cudaEventRecord(ev_start_cufft));
-        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe, (cufftReal*)d_Iframe));
+        // Padded: in place, so the cropped frame is the tile's top-left nx x ny
+        // with rows of 2*nfx floats.
+        CUFFT_CHECK(cufftExecC2R(plan_c2r, (cufftComplex*)d_Fframe,
+                                 padded ? (cufftReal*)d_Fframe : (cufftReal*)d_Iframe));
         if (timed) {
             HANDLE_ERROR(cudaEventRecord(ev_stop_cufft));
             HANDLE_ERROR(cudaEventSynchronize(ev_stop_cufft));
@@ -400,10 +428,14 @@ bool cudaDoseWeightAndInterpolateDevice(
             const FramePolynomial coeff = polynomialForFrame(*model, iframe);
 
             interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
-                d_Isum, nullptr, d_Iframe, nx, ny,
+                d_Isum, nullptr, padded ? (const float*)d_Fframe : d_Iframe, nx, ny,
                 coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
-                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
+                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5],
+                padded ? 2 * nfx : nx
             );
+        } else if (padded) {
+            accumulateDirectStridedKernel<<<gridInterp, blockInterp>>>(d_Isum, (const float*)d_Fframe,
+                                                                       nx, ny, 2 * nfx);
         } else {
             size_t total_pixels = (size_t)ny * nx;
             int block1D = 256;
@@ -567,7 +599,8 @@ bool cudaRealSpaceInterpolationDevice(
             interpolateAndAccumulatePolynomialKernel<<<gridInterp, blockInterp>>>(
                 d_Isum, d_sub, d_Iframe, nx, ny,
                 coeff.x[0], coeff.x[1], coeff.x[2], coeff.x[3], coeff.x[4], coeff.x[5],
-                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5]
+                coeff.y[0], coeff.y[1], coeff.y[2], coeff.y[3], coeff.y[4], coeff.y[5],
+                nx
             );
         } else {
             size_t total_pixels = (size_t)ny * nx;

@@ -1,0 +1,36 @@
+--- a/src/acc/cuda/cuda_movie_session.h	2026-10-09 19:09:58.000000000 +0000
++++ b/src/acc/cuda/cuda_movie_session.h	2026-10-09 21:32:52.520584412 +0000
+@@ -86,7 +86,7 @@
+     int getFftNx() const { return fnx; }
+     int getFftNy() const { return fny; }
+     // Transform extent for one patch dimension under the session policy.
+-    int patchFftExtent(int n) const { return fft_fast ? mc_cuda::fastFftSize(n) : n; }
++    int patchFftExtent(int n) const { return patch_fast ? mc_cuda::fastFftSize(n) : n; }
+ 
+     // Allocate persistent buffers and single-frame cuFFT plans
+     bool initialize();
+@@ -382,6 +382,7 @@
+     int nfx;
+     // Transform extents: nx/ny/nfx unless the fast policy pads the frame.
+     bool fft_fast = false;
++    bool patch_fast = false;
+     int fnx, fny, fnfx;
+     // Fast policy only: per-frame means of d_Iframes (the pad value) and the
+     // fixed-shape partials they are reduced from. Computed by the forward FFT;
+--- a/src/acc/cuda/cuda_movie_session.cu	2026-10-09 18:46:10.000000000 +0000
++++ b/src/acc/cuda/cuda_movie_session.cu	2026-10-09 21:32:52.521584538 +0000
+@@ -458,8 +458,12 @@
+ void CudaMovieSession::setFftSizePolicyFast(bool fast) {
+     if (is_initialized) REPORT_ERROR("setFftSizePolicyFast must precede CudaMovieSession::initialize");
+     fft_fast = fast;
+-    fnx = fast ? mc_cuda::fastFftSize(nx) : nx;
+-    fny = fast ? mc_cuda::fastFftSize(ny) : ny;
++    const char *diag = getenv("MC_FFT_DIAG");
++    const std::string mode = diag ? diag : "";
++    patch_fast = fast && mode != "frames";
++    const bool frame_fast = fast && mode != "patches";
++    fnx = frame_fast ? mc_cuda::fastFftSize(nx) : nx;
++    fny = frame_fast ? mc_cuda::fastFftSize(ny) : ny;
+     fnfx = fnx / 2 + 1;
+ }
+ 

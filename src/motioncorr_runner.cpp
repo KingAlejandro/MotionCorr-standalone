@@ -158,6 +158,11 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	else if (ingest_arg == "compact") ingest_mode = INGEST_COMPACT;
 	else if (ingest_arg == "float")   ingest_mode = INGEST_FLOAT;
 	else REPORT_ERROR("--ingest must be one of: auto, nvcomp, compact, float. Got: " + ingest_arg);
+	// Hidden: fast fails the backend gate against the CPU path (docs/fft_size_policy.md).
+	const std::string fft_size_arg = parser.getOption("--fft_size_policy", "Transform size for the CUDA path: exact (default) or fast, which pads each frame and patch to the next even 7-smooth size. Experimental; see docs/fft_size_policy.md.", "exact", true);
+	if      (fft_size_arg == "exact") fft_size_fast = false;
+	else if (fft_size_arg == "fast")  fft_size_fast = true;
+	else REPORT_ERROR("--fft_size_policy must be exact or fast. Got: " + fft_size_arg);
 	continue_old = parser.checkOption("--only_do_unfinished", "Only run motion correction for those micrographs for which there is not yet an output micrograph.");
 	do_at_most = textToInteger(parser.getOption("--do_at_most", "Only process at most this number of (unprocessed) micrographs.", "-1"));
 	grouping_for_ps = textToInteger(parser.getOption("--grouping_for_ps", "Group this number of frames and write summed power spectrum. -1 == do not write", "-1"));
@@ -1697,6 +1702,23 @@ bool MotioncorrRunner::gainIdentityResolvedFor(int nx, int ny) const
 // N > 0 = at most N patches per chunk. Larger chunks made the stage only ~1 ms
 // faster on the tutorial data and cost more in release and dose weighting
 // (docs/batched_patch_alignment.md).
+#ifdef _CUDA_ENABLED
+// Turn resident spectra downloaded from a padded (--fft_size_policy fast)
+// session into the exact-size spectra the CPU fallbacks expect: inverse at
+// the padded size, crop the nx x ny frame, forward again. From that point the
+// movie continues exactly as under the default policy.
+static void exactSpectraFromPadded(std::vector<MultidimArray<fComplex> > &Fframes, int nx, int ny) {
+	for (size_t i = 0; i < Fframes.size(); i++) {
+		MultidimArray<float> padded, frame(ny, nx);
+		NewFFT::inverseFourierTransform(Fframes[i], padded);
+		for (int y = 0; y < ny; y++)
+			for (int x = 0; x < nx; x++)
+				DIRECT_A2D_ELEM(frame, y, x) = DIRECT_A2D_ELEM(padded, y, x);
+		NewFFT::FourierTransform(frame, Fframes[i]);
+	}
+}
+#endif
+
 static int patchBatchCap() {
 	const char *env = getenv("MOTIONCORR_PATCH_BATCH");
 	if (!env) return 4;
@@ -1915,6 +1937,11 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			REPORT_ERROR("Gain identity was not resolved before the CUDA session was given a gain generation for "
 			             + fn_mic + ". The device gain retention key would not describe this movie's gain.");
 		movie_session->setGainGeneration(fn_gain_reference != "" ? gain_cache_generation : 0);
+		// The power spectrum is written from the resident spectra, so it keeps
+		// the exact grid; every other consumer is padding-aware.
+		if (fft_size_fast && grouping_for_ps > 0)
+			logfile << "--fft_size_policy fast is ignored with --grouping_for_ps; using exact sizes." << std::endl;
+		movie_session->setFftSizePolicyFast(fft_size_fast && grouping_for_ps <= 0);
 		if (!movie_session->initialize()) {
 			discard_preprocessing_session("session initialization");
 			logfile << "WARNING: Failed to initialize CUDA movie session, falling back to streaming pipeline." << std::endl;
@@ -2878,7 +2905,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		// so the alignment's scratch lives there (docs/vram_live_ranges.md).
 		size_t arena_bytes = 0;
 		void *arena = movie_session->borrowRealFramesForGlobalAlignment(arena_bytes);
-		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, nx, ny, bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
+		alignPatchDevice(movie_session->getDeviceFourierFrames(), n_frames, movie_session->getFftNx(), movie_session->getFftNy(), bfactor / (prescaling * prescaling), xshifts, yshifts, logfile, true, arena, arena_bytes);
 	} else
 #endif
 	{
@@ -2936,6 +2963,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 			// globally aligned values for the CPU inverse fallback.
 			if (!movie_session->downloadFourierFrames(Fframes))
 				REPORT_ERROR("Failed to download Fourier frames after resident inverse FFT failure");
+			if (movie_session->frameFftPadded()) exactSpectraFromPadded(Fframes, nx, ny);
 			movie_session.reset();
 		}
 #endif
@@ -3063,7 +3091,8 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 					RCTIC(TIMING_PREP_PATCH);
 					// Only each group's CCF window is kept (cudaExtractPatchWindow).
 					int window_nx = 0, window_ny = 0;
-					patchSpectrumWindow(patch_w, patch_h, bfactor / (prescaling * prescaling), ccf_downsample, window_nx, window_ny);
+					const int fft_w = movie_session->patchFftExtent(patch_w), fft_h = movie_session->patchFftExtent(patch_h);
+					patchSpectrumWindow(fft_w, fft_h, bfactor / (prescaling * prescaling), ccf_downsample, window_nx, window_ny);
 					size_t sz_fpatches = (size_t)n_groups * window_ny * (window_nx / 2 + 1) * sizeof(cufftComplex);
 					if (!d_patch_fcomplex_buffer || sz_cached_patch_fcomplex < sz_fpatches) {
 						cufftComplex *stale = d_patch_fcomplex_buffer;
@@ -3082,14 +3111,14 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 						}
 					}
 					if (d_patch_fcomplex_buffer) {
-						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer, window_nx, window_ny);
+						device_prep_ok = movie_session->preparePatchInVram(x_start, y_start, patch_w, patch_h, n_groups, group_start.data(), group_size.data(), d_patch_fcomplex_buffer, window_nx, window_ny, fft_w, fft_h);
 					}
 					RCTOC(TIMING_PREP_PATCH);
 
 					if (device_prep_ok) {
 						RCTIC(TIMING_PATCH_ALIGN);
 						movie_session->getPatchAlignmentWorkspace().setSpectrumWindowed(true);
-						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, patch_w, patch_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
+						converged = cudaAlignPatchDeviceWithWorkspace(movie_session->getPatchAlignmentWorkspace(), d_patch_fcomplex_buffer, n_groups, fft_w, fft_h, bfactor / (prescaling * prescaling), local_xshifts, local_yshifts, max_iter, ccf_downsample, gpu_id, logfile, false);
 						RCTOC(TIMING_PATCH_ALIGN);
 					}
 				}
@@ -3675,6 +3704,7 @@ skip_fitting:
 			if (movie_session) {
 				if (!movie_session->downloadFourierFrames(Fframes))
 					REPORT_ERROR("Failed to download aligned Fourier frames for dose-weighting fallback");
+				if (movie_session->frameFftPadded()) exactSpectraFromPadded(Fframes, nx, ny);
 			}
 #endif
 			RCTIC(TIMING_DW_WEIGHT);

@@ -176,6 +176,33 @@ class RunOnce(unittest.TestCase):
         self.assertTrue(any("foreign process" in f for f in runner.run_flags(rec, [])["discard"]))
 
 
+class PidOwnership(unittest.TestCase):
+    """A payload that puts a child in a new session (as nsys-launcher does for
+    the traced application) still owns that child; an unrelated process does not."""
+
+    @unittest.skipUnless(os.path.isdir("/proc/self"), "needs /proc")
+    def test_descendant_in_new_session_is_own(self):
+        import subprocess, time
+        script = ("import os, subprocess, sys, time\n"
+                  "c = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(5)'], start_new_session=True)\n"
+                  "print(c.pid, flush=True)\n"
+                  "c.wait()\n")
+        leader = subprocess.Popen([sys.executable, "-c", script], stdout=subprocess.PIPE, text=True,
+                                  start_new_session=True)
+        other = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(5)"], start_new_session=True)
+        try:
+            child = int(leader.stdout.readline())
+            self.assertNotEqual(os.getsid(child), leader.pid)          # the child left the session
+            self.assertEqual(runner.classify_pid(child, leader.pid), "own")
+            self.assertEqual(runner.classify_pid(leader.pid, leader.pid), "own")
+            self.assertEqual(runner.classify_pid(other.pid, leader.pid), "foreign")
+        finally:
+            for pr in (leader, other):
+                pr.kill()
+            subprocess.call(["pkill", "-P", str(leader.pid)])
+            leader.wait(); other.wait()
+
+
 class QuietLane(unittest.TestCase):
     def test_waits_then_times_out(self):
         real = runner.lane_busy_cores

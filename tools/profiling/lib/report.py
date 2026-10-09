@@ -165,7 +165,9 @@ def pairs_for(runs: Sequence[Dict], base: str, arm: str) -> List[Dict]:
     return out
 
 
-def derive_runs(raw: Dict, floor_s: float = 0.0) -> Dict:
+def derive_runs(raw: Dict, floor_s: float = 0.0, compare: bool = True) -> Dict:
+    """compare=False (mcprof run): per-arm summaries only. A verdict needs the
+    product identity check that only mcprof compare performs."""
     runs, arms = raw["runs"], raw["arms"]
     discards = mark_discards(runs, arms)
     out = {"arms": arms, "summary": {a: arm_summary([r for r in runs if r["arm"] == a]) for a in arms},
@@ -173,8 +175,12 @@ def derive_runs(raw: Dict, floor_s: float = 0.0) -> Dict:
            "comparisons": OrderedDict(),
            "lane_waits": [dict(r["lane_before_round"], round=r["round"]) for r in runs
                           if r["kind"] == "round" and r.get("position") == 0 and r.get("lane_before_round")]}
-    for a in arms[1:]:
-        out["comparisons"][a] = stats.paired(pairs_for(runs, arms[0], a), floor_s=floor_s)
+    if compare:
+        for a in arms[1:]:
+            out["comparisons"][a] = stats.paired(pairs_for(runs, arms[0], a), floor_s=floor_s)
+    elif len(arms) > 1:
+        out["comparisons_withheld"] = ("mcprof run does not check product identity, so no comparison "
+                                       "verdict is given; use mcprof compare")
     return out
 
 

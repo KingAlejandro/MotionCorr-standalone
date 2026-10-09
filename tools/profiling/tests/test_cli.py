@@ -362,6 +362,79 @@ class TraceInstrumentation(unittest.TestCase):
         self.assertNotIn("device_deltas", c)
 
 
+class StandaloneTraceContamination(TraceInstrumentation):
+    def test_standalone_trace_reports_contamination(self):
+        a = make_binary(os.path.join(self.tmp, "a"))
+        orig = mcprof.runner.make_sampler
+
+        class Busy(mcprof.runner.GpuSampler):
+            def __init__(self):
+                super().__init__("GPU-fake")
+            def start(self, sid):
+                self.reset(); self.samples = 1; self.foreign = {4242: 1 << 20}
+            def stop(self):
+                pass
+            def processes(self):
+                return []
+        work = os.path.join(self.tmp, "solo")
+        try:
+            mcprof.runner.make_sampler = lambda uuid: Busy()
+            with redirect_stdout(io.StringIO()):
+                mcprof.main(["trace", a, "--data", self.data, "--work", work, "--no-lock",
+                             "--settle-timeout", "0", "--nsys", self.nsys, "--", "--gpu", "0"])
+        finally:
+            mcprof.runner.make_sampler = orig
+        self.assertTrue(os.path.isfile(os.path.join(work, "CONTAMINATED")))
+        self.assertIn("WARNING: contaminated trace", open(os.path.join(work, "report.md")).read())
+
+    # The parent class's tests are not repeated here.
+    test_mixed_instrumentation_suppresses_device_deltas = None
+    test_common_instrumentation_reports_device_deltas = None
+    test_contaminated_trace_is_excluded = None
+
+
+class RunWithoutIdentity(unittest.TestCase):
+    def test_run_with_two_arms_gives_no_verdict(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            data = make_data(os.path.join(tmp, "data"))
+            a = make_binary(os.path.join(tmp, "a"), {"FAKE_SLEEP": "0.03"})
+            b = make_binary(os.path.join(tmp, "b"), {"FAKE_SLEEP": "0.03", "FAKE_EXTRA": "0.15",
+                                                    "FAKE_VARIANT": "x"})
+            work = os.path.join(tmp, "w")
+            with redirect_stdout(io.StringIO()):
+                mcprof.main(["run", "a=" + a, "b=" + b, "--data", data, "--work", work, "--no-lock",
+                             "--rounds", "6", "--warmup", "0", "--settle-timeout", "0", "--lane-wait", "0",
+                             "--", "--gpu", "0"])
+            res = json.load(open(os.path.join(work, "results.json")))
+            self.assertEqual(res["runs"]["comparisons"], {})
+            md = open(os.path.join(work, "report.md")).read()
+            self.assertNotIn("resolved", md.replace("not resolved", ""))
+            self.assertIn("Comparison withheld", md)
+        finally:
+            shutil.rmtree(tmp)
+
+
+class MixedProfileTiming(unittest.TestCase):
+    def test_profile_deltas_suppressed_when_device_timing_differs(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            data = make_data(os.path.join(tmp, "data"))
+            new = make_binary(os.path.join(tmp, "new"))
+            old = make_binary(os.path.join(tmp, "old"), device_timing_option=False)
+            work = os.path.join(tmp, "w")
+            with redirect_stdout(io.StringIO()):
+                mcprof.main(["compare", "a=" + new, "b=" + old, "--data", data, "--work", work, "--no-lock",
+                             "--pairs", "1", "--warmup", "0", "--settle-timeout", "0", "--lane-wait", "0",
+                             "--profile-pass", "2", "--profile-device-timing", "off", "--", "--gpu", "0"])
+            c = json.load(open(os.path.join(work, "compare.json")))
+            self.assertIn("suppressed", c["stage_deltas"])
+            self.assertIn("Not reported: the --profile passes ran with different",
+                          open(os.path.join(work, "report.md")).read())
+        finally:
+            shutil.rmtree(tmp)
+
+
 class RunRounds(unittest.TestCase):
     def test_nonpositive_rounds_rejected(self):
         tmp = tempfile.mkdtemp()

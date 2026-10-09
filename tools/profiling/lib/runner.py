@@ -220,11 +220,33 @@ class GpuSampler:
                 "unclassified_pids": sorted(self.unknown_pids), "read_errors": self.errors}
 
 
-def classify_pid(pid: int, sid: int) -> str:
+def _ppid(pid: int) -> Optional[int]:
     try:
-        return "own" if os.getsid(pid) == sid else "foreign"
+        with open("/proc/%d/stat" % pid) as f:
+            stat = f.read()
+        # comm may contain spaces and parentheses: fields after the last ')'.
+        return int(stat[stat.rindex(")") + 2:].split()[1])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def classify_pid(pid: int, sid: int) -> str:
+    """'own' when pid is in the payload's session or descends from its session
+    leader (nsys-launcher starts the traced application in a session of its
+    own, so a session match alone would call the traced payload foreign)."""
+    try:
+        if os.getsid(pid) == sid:
+            return "own"
     except (ProcessLookupError, PermissionError):
         return "unknown"
+    p, hops = pid, 0
+    while p and p > 1 and hops < 64:
+        if p == sid:
+            return "own"
+        p, hops = _ppid(p), hops + 1
+        if p is None:
+            return "unknown"
+    return "foreign"
 
 
 class NvmlSampler(GpuSampler):

@@ -159,9 +159,12 @@ Device deltas need every arm traced with the same instrumentation (`--profile`
 present, and the same `--profile_device_timing` mode). If the arms differ, for
 example an old binary without `--profile_device_timing`, the traces are kept
 but device deltas are not reported (`trace_instrumentation` in provenance).
+`--profile` passes follow the same rule: if the arms ran with different CUDA device timing modes, stage deltas are not reported.
 Before each trace pass the GPU is re-checked for other processes, and NVML
 samples it during the trace. A pass that saw another process is marked
-`CONTAMINATED`, recorded in `trace_occupancy`, and excluded from the deltas.
+`CONTAMINATED`, recorded in `trace_occupancy`, and excluded from the deltas. A standalone `mcprof trace` gets the same marker and a warning at the top of its report. A process the payload starts in a new session (`nsys-launcher` does this for the traced application) still counts as the payload's own: ownership follows descent from the payload, not just the session.
+
+`mcprof run` with several arms reports each arm but no comparison verdict, because it does not check product identity. Use `mcprof compare` for verdicts.
 
 `--profile-pass` (3 per arm when given without N) runs each arm under
 `--profile`; `--trace-pass` (2 when given without N) traces each arm. Passes

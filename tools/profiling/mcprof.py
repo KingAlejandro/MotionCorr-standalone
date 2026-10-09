@@ -414,6 +414,11 @@ def cmd_trace(a, rest):
                                    p["binaries"][name].get("has_device_timing_option", False), sampler=sampler)
         p["trace_device_timing"] = {name: mode}
         p["trace_occupancy"] = occupancy
+        if occupancy and (occupancy.get("foreign_pids") or occupancy.get("unknown_pids")):
+            with open(os.path.join(work, "CONTAMINATED"), "w") as f:
+                f.write(json.dumps({"during": occupancy}) + "\n")
+            print("mcprof: another GPU process was present during the trace; device timings are "
+                  "contaminated", flush=True)
         prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, 0.0, a.html)
     return 0
@@ -514,10 +519,13 @@ def write_report(work, floor_s, want_html):
         runs = report.load_runs(runs_path)
         arms = p["arms"]
         timing = [r for r in runs if r["kind"] in ("warmup", "round")]
-        d = report.derive_runs({"arms": arms, "runs": timing}, floor_s=floor_s)
+        is_compare = p.get("instrument") == "mcprof compare"
+        d = report.derive_runs({"arms": arms, "runs": timing}, floor_s=floor_s, compare=is_compare)
         out["runs"] = d
-        title = "MotionCorr %s: %s" % ("compare" if len(arms) > 1 else "run", " vs ".join(arms))
+        title = "MotionCorr %s: %s" % ("compare" if is_compare else "run", " vs ".join(arms))
         parts.append(report.render_run_section(d))
+        if d.get("comparisons_withheld"):
+            parts.append("Comparison withheld: %s.\n" % d["comparisons_withheld"])
         ip = os.path.join(work, "identity.json")
         if os.path.isfile(ip):
             out["identity"] = report.load_json(ip)
@@ -528,6 +536,14 @@ def write_report(work, floor_s, want_html):
         for r in runs:
             if r["kind"] == "profile":
                 profiles.setdefault(r["arm"], []).append(r["jsonl"])
+        pmodes = p.get("profile_device_timing") or {}
+        if profiles and len(arms) > 1 and len(set(pmodes.values())) > 1:
+            # One arm timed every CUDA step (extra waits) and another did not:
+            # stage deltas would measure the instrumentation, not the code.
+            out["stage_deltas"] = {"suppressed": "--profile device timing differs between arms", "modes": pmodes}
+            parts.append("## Stage profile deltas\n\nNot reported: the --profile passes ran with different "
+                         "CUDA device timing modes (%s).\n" % ", ".join("`%s`: %s" % kv for kv in pmodes.items()))
+            profiles = {}
         if profiles:
             out["stage_deltas"] = report.derive_stage_deltas(profiles, arms[0])
             # Profile passes are not dropped (replication is scarce); a pass that
@@ -561,10 +577,14 @@ def write_report(work, floor_s, want_html):
             for arm, ts in traces.items():
                 parts.append(report.render_trace(ts[0]).replace(
                     "## Device", "## Device: `%s` (trace pass 1 of %d)" % (arm, len(ts)), 1))
-        prov.write_json(os.path.join(work, "compare.json" if len(arms) > 1 else "results.json"), out)
+        prov.write_json(os.path.join(work, "compare.json" if is_compare else "results.json"), out)
     elif os.path.isfile(os.path.join(work, "trace.json")):
         t = report.load_json(os.path.join(work, "trace.json"))
         title = "MotionCorr trace"
+        if os.path.isfile(os.path.join(work, "CONTAMINATED")):
+            parts.append("## WARNING: contaminated trace\n\nAnother GPU process was present during this "
+                         "trace (%s); its device timings include that contention.\n"
+                         % json.dumps(p.get("trace_occupancy")))
         if t.get("warning"):
             parts.append("WARNING: %s\n" % t["warning"])
         parts.append(report.render_trace(t))

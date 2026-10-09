@@ -343,6 +343,12 @@ private:
     // IngestScratch is what makes the forward transform safe to run.
     mc_cuda::FourierStorageGuard fourier_guard;
     cudaStream_t ingest_stream = 0;
+    // Pipelined nvCOMP ingest: uploads run on their own stream so chunk k+1's
+    // copy overlaps chunk k's decode; slot reuse is ordered by these events
+    // (h2d_done[2], comp_free[2], status_ready[2]). Destroyed by endIngestScratch.
+    cudaStream_t ingest_copy_stream = 0;
+    static const int kIngestEvents = 6;
+    cudaEvent_t ingest_events[kIngestEvents] = {};
     // Points the ingest at the worker-lifetime pinned staging pool, growing it if
     // this movie needs more. The pool deliberately outlives the session, which is
     // constructed and destroyed once per movie.

@@ -462,7 +462,7 @@ if(BUILD_TESTING AND CUDA)
                 src/apps/run_motioncorr.cpp tests/cuda_nvcomp_acceptance_shim.cpp)
             target_link_libraries(motioncorr_nvcomp_acceptance PRIVATE motioncorr_core ${CMAKE_DL_LIBS})
             target_link_options(motioncorr_nvcomp_acceptance PRIVATE
-                "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync")
+                "-rdynamic" "LINKER:--wrap=cudaMemcpyAsync" "LINKER:--wrap=cudaLaunchKernel")
             add_test(NAME CudaNvcompAcceptanceFailures
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_nvcomp_acceptance_controls.py

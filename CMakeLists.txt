@@ -379,6 +379,50 @@ if(BUILD_TESTING AND CUDA)
             "LINKER:--wrap=cufftDestroy")
         add_test(NAME CudaPatchWorkspace COMMAND cuda_patch_workspace)
         set_tests_properties(CudaPatchWorkspace PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Batched local patch alignment: exactness against the per-patch path and
+        # fault controls (docs/batched_patch_alignment.md).
+        set(PATCH_BATCH_WRAPS
+            "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cudaEventCreate" "LINKER:--wrap=cufftCreate"
+            "LINKER:--wrap=cufftMakePlanMany" "LINKER:--wrap=cufftExecR2C"
+            "LINKER:--wrap=cufftExecC2R")
+        add_executable(cuda_patch_batch tests/cuda_patch_batch.cpp)
+        target_link_libraries(cuda_patch_batch PRIVATE motioncorr_core)
+        target_link_options(cuda_patch_batch PRIVATE ${PATCH_BATCH_WRAPS})
+        add_test(NAME CudaPatchBatch COMMAND cuda_patch_batch)
+        set_tests_properties(CudaPatchBatch PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # Compiled negative controls: a copy of cuda_alignpatch.cu with one line of
+        # the batched loop rewritten, linked ahead of motioncorr_core so it replaces
+        # the original object. Each must make the exactness checks fail. A target
+        # line that is missing or not unique stops the configure step, so a mutant
+        # cannot silently become identical to the original.
+        set(_alignpatch_cu "${CMAKE_CURRENT_SOURCE_DIR}/src/acc/cuda/cuda_alignpatch.cu")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_alignpatch_cu}")
+        file(READ "${_alignpatch_cu}" _alignpatch_source)
+        # shift_retired: retired patches keep receiving phase shifts.
+        # never_retire: converged patches keep iterating.
+        set(_mutant_shift_retired_from "for (int j = 0; j < (int)active.size(); ++j) { const int p = active[j];")
+        set(_mutant_shift_retired_to "for (int j = 0; j < n_patches; ++j) { const int p = j;")
+        set(_mutant_never_retire_from "[&](int p) { return logs[p].converged; }")
+        set(_mutant_never_retire_to "[&](int p) { return logs[p].converged && false; }")
+        foreach(_mutant IN ITEMS shift_retired never_retire)
+            set(_from "${_mutant_${_mutant}_from}")
+            string(FIND "${_alignpatch_source}" "${_from}" _first)
+            string(FIND "${_alignpatch_source}" "${_from}" _last REVERSE)
+            if(_first EQUAL -1 OR NOT _first EQUAL _last)
+                message(FATAL_ERROR "patch batch mutant ${_mutant}: target line missing or not unique")
+            endif()
+            string(REPLACE "${_from}" "${_mutant_${_mutant}_to}" _mutant_source "${_alignpatch_source}")
+            set(_mutant_cu "${CMAKE_CURRENT_BINARY_DIR}/mutants/cuda_alignpatch_${_mutant}.cu")
+            file(WRITE "${_mutant_cu}" "${_mutant_source}")
+            add_executable(cuda_patch_batch_${_mutant} tests/cuda_patch_batch.cpp "${_mutant_cu}")
+            target_link_libraries(cuda_patch_batch_${_mutant} PRIVATE motioncorr_core)
+            target_link_options(cuda_patch_batch_${_mutant} PRIVATE ${PATCH_BATCH_WRAPS})
+            add_test(NAME CudaPatchBatchMutant_${_mutant}
+                COMMAND cuda_patch_batch_${_mutant} --expect-mismatch)
+            set_tests_properties(CudaPatchBatchMutant_${_mutant} PROPERTIES
+                LABELS "cuda;hardware" TIMEOUT 300)
+        endforeach()
         # Worker-lifetime device gain retention: the produced sum is the oracle,
         # so a wrongly reused or wrongly retired buffer changes pixels.
         add_executable(cuda_device_gain_pool tests/cuda_device_gain_pool.cpp)
@@ -414,6 +458,7 @@ if(BUILD_TESTING AND CUDA)
         target_link_options(motioncorr_retry_caller PRIVATE
             "LINKER:--wrap=_Z20cudaAlignPatchDeviceP6float2iiidRSt6vectorIdSaIdEES4_idiRSob"
             "LINKER:--wrap=_Z33cudaAlignPatchDeviceWithWorkspaceR23PatchAlignmentWorkspaceP6float2iiidRSt6vectorIdSaIdEES6_idiRSob"
+            "LINKER:--wrap=_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
             "LINKER:--wrap=_Z14cudaAlignPatchRSt6vectorI13MultidimArrayI8tComplexIfEESaIS3_EEiidRS_IdSaIdEES9_idiRSob")
         # Issue #69 P1c: the REAL motioncorr binary with an interposed cudaMalloc, so
         # the fallback cudaPreparePatch boundary and the runner's post-prep enforcement

@@ -1,6 +1,7 @@
 // Test-only linker interposition at the production runner's alignment boundary.
 // Inject one completed-but-nonconverged resident estimate; the actual host retry
 // must enter with zero shifts, run native alignment and converge. No src/ switch.
+// Covers the per-patch entry points (MOTIONCORR_PATCH_BATCH=0) and the batched one.
 #include "src/acc/cuda/cuda_alignpatch.h"
 #include "src/error.h"
 #include <cstdio>
@@ -28,7 +29,27 @@ bool realWorkspace(PatchAlignmentWorkspace&, cufftComplex*, int, int, int, RFLOA
 bool wrapWorkspace(PatchAlignmentWorkspace&, cufftComplex*, int, int, int, RFLOAT,
                    std::vector<RFLOAT>&, std::vector<RFLOAT>&, int, RFLOAT, int,
                    std::ostream&, bool) asm("__wrap_" WORKSPACE_SYMBOL);
+#define BATCH_SYMBOL "_Z25cudaAlignPatchBatchDeviceR30BatchedPatchAlignmentWorkspaceiiiidPSt6vectorIdSaIdEES4_idiP13PatchBatchLog"
+void realBatch(BatchedPatchAlignmentWorkspace&, int, int, int, int, RFLOAT,
+               std::vector<RFLOAT>*, std::vector<RFLOAT>*, int, RFLOAT, int,
+               PatchBatchLog*) asm("__real_" BATCH_SYMBOL);
+void wrapBatch(BatchedPatchAlignmentWorkspace&, int, int, int, int, RFLOAT,
+               std::vector<RFLOAT>*, std::vector<RFLOAT>*, int, RFLOAT, int,
+               PatchBatchLog*) asm("__wrap_" BATCH_SYMBOL);
 namespace { bool pending = false, injected = false; }
+// The batched path is the default: mark its first patch as a completed but
+// nonconverged estimate, which the runner must retry exactly as above.
+void wrapBatch(BatchedPatchAlignmentWorkspace& workspace, int n_patches, int n, int nx,
+               int ny, RFLOAT b, std::vector<RFLOAT>* x, std::vector<RFLOAT>* y,
+               int iter, RFLOAT down, int dev, PatchBatchLog* logs) {
+    realBatch(workspace, n_patches, n, nx, ny, b, x, y, iter, down, dev, logs);
+    if (!injected && std::getenv("MC_RETRY_CALLER")) {
+        injected = pending = true;
+        logs[0].converged = false;
+        for (size_t i = 0; i < x[0].size(); ++i) { x[0][i] = 123.0 + i; y[0][i] = -456.0 - i; }
+        std::fprintf(stderr, "[retry-caller] injected nonconvergence with nonzero shifts (batched)\n");
+    }
+}
 bool wrapDevice(cufftComplex* f, int n, int nx, int ny, RFLOAT b,
                 std::vector<RFLOAT>& x, std::vector<RFLOAT>& y, int iter,
                 RFLOAT down, int dev, std::ostream& log, bool global) {

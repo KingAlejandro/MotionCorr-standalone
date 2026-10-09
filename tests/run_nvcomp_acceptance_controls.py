@@ -110,9 +110,12 @@ def main():
         if reference is None and r.returncode == 0:
             reference = payload
         same = bool(payload) and payload == reference
+        # The fit loop halves (6 -> 3 -> 1), so only those sizes are legitimate
+        # outcomes of a 6-frame request; 1 and 2 must be taken as asked.
+        halving = [6, 3, 1] if cf == 6 else [cf]
         ok = (r.returncode == 0 and products and taken == "nvcomp" and gains == n_chunks
-              and got_cf <= cf and n_chunks == (6 + got_cf - 1) // max(got_cf, 1)
-              and (cf == 6 or got_cf == cf) and same)
+              and got_cf in halving and n_chunks == (6 + got_cf - 1) // got_cf
+              and same)
         rows.append({"label": label, "returncode": r.returncode, "products": products,
                      "chunk_frames": got_cf, "chunks": n_chunks,
                      "gain_launches": gains, "path": taken, "identical_to_c2": same,

@@ -62,7 +62,72 @@ aggregate phase:
 Most of the serial phase is therefore integrity bookkeeping in Python, not
 MotionCorr work. Hardlink staging, a single hash pass taken at worker exit, and
 a stat-key after-check now replace it; see `../AGGREGATE_STAGING.md` and the
-re-measurement below.
+re-measurement below. The table above is the `d7339fd` campaign and has not
+been re-run on the 1/2/4-GPU arms.
+
+## Re-measurement with cheap aggregate staging
+
+**Result (MEASURED).** On 4×8, the aggregate staging rework cuts time to
+publication by 14.07 s at 96 movies (29.47 s → 15.21 s, −47.7%) and by 3.34 s
+at 24 movies (9.36 s → 5.91 s, −35.7%). All three paired comparisons per
+workload are resolved, 6/6 pairs. The aggregate phase falls by 26.16 s at 96
+movies; the worker phase grows by 2.69 s, because the last worker's exit digest
+is now on its critical path. All 24 measured runs passed, and on 24 movies both
+arms are output-identical to a single-process single-GPU run of the same
+binary.
+
+Raw data: [`staging_campaign.json`](staging_campaign.json) (4×8 old vs new) and
+[`staging_1x32.json`](staging_1x32.json) (one 1×32 reference run).
+
+Both arms run the same binary (built from `9fc5027`) and differ only in the
+`tools/multi_gpu` directory: `584bcc6` (the #147 head before this change,
+whose staging is that of `1ca233b`) against `9fc5027`. The driver's
+`--arm-tools` option selects the tools per arm, and each arm's tool sha256s
+are in `provenance.arms[].tools_sha256`. Medians over 6 interleaved reps;
+paired differences are new − old with the 96.9% CI of the median from
+`paired()`.
+
+| Movies | Arm | Publication s (IQR) | Exit s | Worker phase s | Aggregate phase s |
+|---|---|---|---|---|---|
+| 24 | 4×8 old | 9.36 (0.24) | 11.90 | 4.11 | 7.52 |
+| 24 | 4×8 new | 5.91 (0.79) | 6.58 | 4.65 | 1.67 |
+| 96 | 4×8 old | 29.47 (0.94) | 39.24 | 9.24 | 29.94 |
+| 96 | 4×8 new | 15.21 (2.29) | 16.31 | 11.87 | 3.47 |
+
+| Movies | Quantity | Paired diff s (CI) | Pairs lower |
+|---|---|---|---|
+| 24 | publication | −3.34 (−4.21, −2.01) | 6/6 |
+| 24 | aggregate phase | −5.61 (−6.95, −5.19) | 6/6 |
+| 24 | worker phase | +0.49 (+0.37, +0.85) | 0/6 |
+| 96 | publication | −14.07 (−15.94, −10.87) | 6/6 |
+| 96 | aggregate phase | −26.16 (−30.18, −24.64) | 6/6 |
+| 96 | worker phase | +2.69 (+1.73, +5.26) | 0/6 |
+
+New-arm breakdown at 96 movies (medians): staging 0.35 s (384/384 products
+hardlinked, every digest reused from the worker-exit record), ctime barrier
+0.001 s, `--aggregate_only` binary 2.66 s, after-check 0.20 s; the slowest
+worker's exit digest took 2.32 s. At 24 movies: 0.10, 0.001, 0.94 and 0.08 s,
+and 0.61 s for the slowest exit digest. The aggregate phase is now mostly the
+binary itself.
+
+1×32 reference (new tools, one rep, GPU2 with CPUs 72-103; MEASURED):
+publication 10.41 s at 24 movies and 30.11 s at 96 movies, against the 4×8 new
+medians of 5.91 s and 15.21 s. The ratios, 1.76× and 1.98×, come from one run
+and are not a paired verdict; the earlier table's 1.34× and 1.68× had
+interleaved reps. Its 24-movie output is identical to the single-GPU
+reference.
+
+Provenance: binary sha256 `1d3f8868…811bb8`; inputs, worker args, host, CPU
+masks and locks as above; one discarded warm-up per arm, arm order rotated
+every rep. Load average was 13.8-36.6; foreign processes were seen on 0-5 of
+the 32 arm CPUs before a run (mean busy fraction ≤0.17), and no foreign GPU
+compute processes. Lock waits reached 30 min because three agents shared the
+bench lock; waits fall outside the timed interval.
+
+Limitations: the host was shared throughout (see above). The 96-movie
+workload repeats the 24 inputs four times. The worker-phase increase is
+expected (the exit digest moved into it) and is smaller than the aggregate
+saving it buys. The 2×16 and 1×32 arms were not re-run with paired reps.
 
 ## Identity
 

@@ -6,6 +6,12 @@ movies that was about 31 s of serial time, of which the binary was about 2.5 s
 (`scaling/README.md`, "Where the serial aggregate time goes"). The published
 tree is unchanged; only how it is staged and checked has changed.
 
+**Measured effect (4×8, same binary, 6 paired reps):** publication −14.07 s at
+96 movies (29.47 → 15.21 s) and −3.34 s at 24 movies; aggregate phase −26.16 s
+at 96 movies, worker phase +2.69 s. Both arms are output-identical to a
+single-GPU run. Details in `scaling/README.md`, "Re-measurement with cheap
+aggregate staging".
+
 ## What happens now
 
 1. **At worker exit** (`run_multi_gpu.py`). Each worker's reap thread, as soon

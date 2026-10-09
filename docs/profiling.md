@@ -167,14 +167,32 @@ passes. With t(0.999, 4) = 8.6 for three passes, small stage changes may not be
 flagged; flags locate a change, they do not decide it.
 
 `--profile` itself perturbs the process (it samples clocks and rusage at every
-boundary and turns on per-stage timing events), so its walls are not
-comparable with unprofiled walls.
+boundary and, by default, turns on per-step CUDA timing events), so its walls
+are not comparable with unprofiled walls. `--profile-device-timing off` passes
+`--profile_device_timing 0` to the binary in the `--profile` passes; the
+default stays `on`, so stage deltas keep their previous meaning.
 
 ### Trace
 
 `nsys profile --trace=cuda,nvtx[,osrt] --cuda-memory-usage=true`, CPU
 sampling off unless `--sample`. Stage ranges are the NVTX ranges that
 `--profile` emits; without `--profile` the trace has whole-run figures only.
+
+**Device timing mode.** `--profile` alone also turns on per-step CUDA event
+timing in alignment and dose weighting, and every timed step is a host wait.
+A trace of such a process overstates sync calls and device idle in those
+stages. Trace passes (`trace` and `compare --trace-pass`) therefore pass
+`--profile_device_timing 0` by default (`--trace-device-timing off`): stage
+ranges and the stage profile stay, the device synchronises as in production.
+`--trace-device-timing on` restores the old behaviour. The mode is recorded in
+`provenance.json` (`trace_device_timing`, per arm), in each `trace.json`
+(`capture.device_timing`) and in the report. A binary without the option
+cannot turn timing off; the kit then records `on (binary has no
+--profile_device_timing)` and compares such traces only with that caveat.
+Support is decided by the binary's own help, `motioncorr --use_own --help`
+(plain `--help` stops before the option list); only if that probe fails does
+the kit fall back to scanning the binary for the option string. The method is
+recorded per binary as `device_timing_detection`.
 
 - **segments**: inside each movie, the top-level `--profile` stages (NVTX
   depth 1 under `movie`); small gaps between them are `movie: unattributed`;

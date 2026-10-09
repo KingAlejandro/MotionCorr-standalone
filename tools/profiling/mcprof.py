@@ -205,8 +205,10 @@ def cmd_run(a, rest, compare=False):
                         os.makedirs(trace_dir, exist_ok=True)
                         quiet = runner.wait_quiet_lane(cpus, a.lane_wait) if a.lane_wait > 0 else None
                         p.setdefault("trace_lane_waits", []).append({"arm": arm, "pass": k + 1, "lane": quiet})
-                        do_trace(a, arms[arm], args, staged, trace_dir, cpus,
-                                 p["binaries"][arm]["has_profile_option"])
+                        mode = do_trace(a, arms[arm], args, staged, trace_dir, cpus,
+                                        p["binaries"][arm]["has_profile_option"],
+                                        p["binaries"][arm].get("has_device_timing_option", False))
+                        p.setdefault("trace_device_timing", {})[arm] = mode
                         print("mcprof: %-8s trace p%02d done" % (arm, k + 1), flush=True)
                 p["trace_pass"] = "%d trace(s) per arm" % a.trace_pass
     prov.write_json(os.path.join(work, "provenance.json"), p)
@@ -228,12 +230,16 @@ def profile_passes(a, arms, args, staged, work, cpus, sampler, p):
             tag = "%s-p%02d" % (arm, k + 1)
             out = os.path.join(pdir, tag, "out")
             jsonl = os.path.join(pdir, tag + ".jsonl")
-            argv = runner.payload_argv(arms[arm], args, staged["star"], out, cpus, profile=jsonl)
+            extra, mode = runner.device_timing_args(a.profile_device_timing,
+                                                    p["binaries"][arm].get("has_device_timing_option", False))
+            p.setdefault("profile_device_timing", {})[arm] = mode
+            argv = runner.payload_argv(arms[arm], args, staged["star"], out, cpus, profile=jsonl,
+                                       profile_args=extra)
             quiet = runner.wait_quiet_lane(cpus, a.lane_wait) if a.lane_wait > 0 else None
             rec = runner.run_once(argv, staged["cwd"], env, os.path.join(pdir, tag + ".log"), sampler, cpus,
                                   arms[arm], out, len(staged["movies"]))
             rec.update({"arm": arm, "kind": "profile", "round": k + 1, "position": 0, "order": "", "jsonl": jsonl,
-                        "lane_before_round": quiet})
+                        "lane_before_round": quiet, "device_timing": mode})
             with open(os.path.join(work, "runs.jsonl"), "a") as f:
                 f.write(json.dumps(rec, default=str) + "\n")
             print("mcprof: %-8s profile p%02d wall %.3f s (profiled; not used for the verdict)%s"
@@ -251,12 +257,23 @@ def sudo_wrap(cmd, env_changes):
     return ["sudo", "-n", "env"] + ["%s=%s" % kv for kv in keep.items()] + cmd
 
 
-def do_trace(a, binary, args, staged, work, cpus, has_profile):
+def trace_payload(mode, binary, args, star, out, prof_file, has_device_timing):
+    """The traced payload's argv and the device timing mode it runs with.
+    Without --profile there are no stage ranges and no device timing either."""
+    if not prof_file:
+        return runner.payload_argv(binary, args, star, out, []), "n/a (no --profile)"
+    extra, recorded = runner.device_timing_args(mode, has_device_timing)
+    return runner.payload_argv(binary, args, star, out, [], profile=prof_file, profile_args=extra), recorded
+
+
+def do_trace(a, binary, args, staged, work, cpus, has_profile, has_device_timing=False):
+    """Trace one process; returns the device timing mode it ran with."""
     nsys = a.nsys or shutil.which("nsys") or "/usr/local/bin/nsys"
     base = os.path.join(work, "trace")
     out = os.path.join(work, "out")
     prof_file = os.path.join(work, "trace.profile.jsonl") if has_profile else None
-    payload = runner.payload_argv(binary, args, staged["star"], out, [], profile=prof_file)
+    payload, mode = trace_payload(a.trace_device_timing, binary, args, staged["star"], out, prof_file,
+                                  has_device_timing)
     trace = "cuda,nvtx" + (",osrt" if a.osrt else "")
     cmd = [nsys, "profile", "--trace=" + trace, "--cuda-memory-usage=true", "--stats=false",
            "--force-overwrite=true", "-o", base]
@@ -290,14 +307,14 @@ def do_trace(a, binary, args, staged, work, cpus, has_profile):
         raise SystemExit("nsys export failed (%d)" % rc)
     meta = {"command": cmd, "nsys_wall_s": wall, "binary_sha256": prov.sha256_file(binary),
             "profile_jsonl": prof_file, "trace": trace, "sampled": bool(a.sample),
-            "nvtx_stages": bool(has_profile)}
-    result = analyze_sqlite(sqlite, work, meta, sample=a.sample)
+            "nvtx_stages": bool(has_profile), "device_timing": mode}
+    analyze_sqlite(sqlite, work, meta, sample=a.sample)
     shutil.rmtree(out, ignore_errors=True)
     if a.keep != "sqlite":
         os.remove(sqlite)
     if a.keep == "none":
         os.remove(base + ".nsys-rep")
-    return result
+    return mode
 
 
 def analyze_sqlite(sqlite, work, meta, sample=False):
@@ -339,7 +356,10 @@ def cmd_trace(a, rest):
     with held_locks(a, p["locks"]):
         p["settle"] = runner.settle(sampler, a.settle_timeout)
         prov.write_json(os.path.join(work, "provenance.json"), p)
-        do_trace(a, binary, args, staged, work, cpus, p["binaries"][name]["has_profile_option"])
+        p["trace_device_timing"] = {name: do_trace(a, binary, args, staged, work, cpus,
+                                                   p["binaries"][name]["has_profile_option"],
+                                                   p["binaries"][name].get("has_device_timing_option", False))}
+        prov.write_json(os.path.join(work, "provenance.json"), p)
     write_report(work, 0.0, a.html)
     return 0
 
@@ -500,6 +520,9 @@ def cmd_selftest(a, rest):
 
 # ----------------------------------------------------------------- main
 
+DT_HELP = ("CUDA event timing in traced --profile processes: off (default) passes --profile_device_timing 0 so "
+           "device synchronisation matches an unprofiled run; on keeps the per-step event waits")
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     rest = []
@@ -533,6 +556,9 @@ def main(argv=None):
             p.add_argument("--osrt", action="store_true")
             p.add_argument("--keep", choices=("none", "rep", "sqlite"), default="rep")
             p.add_argument("--sample", action="store_true", help=argparse.SUPPRESS)
+            p.add_argument("--trace-device-timing", choices=("off", "on"), default="off", help=DT_HELP)
+            p.add_argument("--profile-device-timing", choices=("off", "on"), default="on",
+                           help="CUDA event timing in --profile passes: on (default, unchanged) or off")
     p = sub.add_parser("trace")
     add_common(p, "one")
     p.add_argument("--from-sqlite", help="analyse an existing nsys SQLite export instead of capturing")
@@ -540,6 +566,7 @@ def main(argv=None):
     p.add_argument("--osrt", action="store_true", help="also trace OS runtime calls")
     p.add_argument("--sample", action="store_true", help="CPU sampling under sudo -n; writes folded.txt")
     p.add_argument("--keep", choices=("none", "rep", "sqlite"), default="rep")
+    p.add_argument("--trace-device-timing", choices=("off", "on"), default="off", help=DT_HELP)
     p.add_argument("--html", action="store_true")
     p = sub.add_parser("kernels")
     add_common(p, "one")

@@ -95,7 +95,9 @@ def binary_record(binary: str, source: Optional[str] = None, commit: Optional[st
     path = os.path.abspath(binary)
     rec = {"path": path, "realpath": os.path.realpath(path), "sha256": sha256_file(path),
            "size": os.path.getsize(path), "source": source_for_binary(path, source, commit),
-           "has_profile_option": has_profile_option(path)}
+           "has_profile_option": has_profile_option(path),
+           }
+    rec["has_device_timing_option"], rec["device_timing_detection"] = device_timing_detection(path)
     libs = linked_libraries(path)
     if libs:
         rec["linked"] = libs
@@ -110,6 +112,31 @@ def has_profile_option(binary: str) -> bool:
     if data.startswith(b"#!"):
         return b"--profile" in data
     return b"--profile\x00" in data
+
+
+def has_device_timing_option(binary: str) -> bool:
+    """True when the binary accepts --profile_device_timing (profile without
+    CUDA event waits). See device_timing_detection for how it is decided."""
+    return device_timing_detection(binary)[0]
+
+
+def device_timing_detection(binary: str) -> Tuple[bool, str]:
+    """(supported, method). The binary's own --help is asked first.
+
+    MotionCorr prints its option list only once the implementation is chosen
+    (plain --help stops at "choose either UCSF MotionCor2 or RELION's own"),
+    so the probe is `--use_own --help`. A probe that runs and lists --profile
+    is authoritative either way. If it cannot run or lists nothing the kit
+    recognises, the decision falls back to scanning the binary for the option
+    string, the rule has_profile_option uses."""
+    rc, out = run_text([binary, "--use_own", "--help"], timeout=30)
+    if rc == 0 and re.search(r"--profile\s+\(", out):
+        return re.search(r"--profile_device_timing\s+\(", out) is not None, "--use_own --help"
+    with open(binary, "rb") as f:
+        data = f.read()
+    if data.startswith(b"#!"):
+        return b"--profile_device_timing" in data, "binary scan (help probe rc %d)" % rc
+    return b"--profile_device_timing\x00" in data, "binary scan (help probe rc %d)" % rc
 
 
 def linked_libraries(binary: str) -> Dict[str, str]:

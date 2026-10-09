@@ -274,14 +274,30 @@ def payload_env(gpu_uuid: Optional[str], extra: Sequence[str]) -> Tuple[Dict[str
     return env, changes
 
 
+def device_timing_args(mode: str, supported: bool) -> Tuple[List[str], str]:
+    """Payload options and the recorded mode for a --profile process.
+
+    mode "off" asks the binary to keep its stage profile and NVTX ranges but
+    skip CUDA event timing (--profile_device_timing 0), so device
+    synchronisation has the production shape. A binary without that option
+    always times; the record then says so instead of claiming "off"."""
+    if mode not in ("on", "off"):
+        raise ValueError("device timing mode must be on or off, got %r" % mode)
+    if mode == "off" and supported:
+        return ["--profile_device_timing", "0"], "off"
+    if mode == "off":
+        return [], "on (binary has no --profile_device_timing)"
+    return (["--profile_device_timing", "1"] if supported else []), "on"
+
+
 def payload_argv(binary: str, args: Sequence[str], star: str, out_dir: str, cpus: Sequence[int],
-                 profile: Optional[str] = None) -> List[str]:
-    for flag in ("--i", "--o", "--profile"):
+                 profile: Optional[str] = None, profile_args: Sequence[str] = ()) -> List[str]:
+    for flag in ("--i", "--o", "--profile", "--profile_device_timing"):
         if flag in args:
             raise ValueError("pass %s through the kit's own options, not after --" % flag)
     argv = [binary, *args, "--i", star, "--o", out_dir.rstrip("/") + "/"]
     if profile:
-        argv += ["--profile", profile]
+        argv += ["--profile", profile, *profile_args]
     if cpus:
         if not shutil.which("taskset"):
             raise RuntimeError("--cpus needs taskset")

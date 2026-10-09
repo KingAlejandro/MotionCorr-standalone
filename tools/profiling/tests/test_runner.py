@@ -43,10 +43,15 @@ def make_data(root):
     return root
 
 
-def make_binary(path, env=None):
-    """Executable wrapper around fake_motioncorr.py with fixed behaviour."""
-    lines = ["#!/bin/sh", "# stand-in motioncorr; accepts --profile"]
-    lines += ["export %s=%s" % kv for kv in (env or {}).items()]
+def make_binary(path, env=None, device_timing_option=True):
+    """Executable wrapper around fake_motioncorr.py with fixed behaviour.
+    The comment line is what option detection reads for a script payload."""
+    lines = ["#!/bin/sh", "# stand-in motioncorr; accepts --profile"
+             + (" and --profile_device_timing" if device_timing_option else "")]
+    env = dict(env or {})
+    if not device_timing_option:
+        env["FAKE_DEVICE_TIMING_OPTION"] = "0"
+    lines += ["export %s=%s" % kv for kv in env.items()]
     lines.append('exec "%s" "%s" "$@"' % (sys.executable, FAKE))
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
@@ -94,6 +99,21 @@ class Scheduling(unittest.TestCase):
     def test_kit_owns_io_flags(self):
         with self.assertRaises(ValueError):
             runner.payload_argv("/bin/x", ["--o", "y"], "s.star", "/out", [])
+
+    def test_kit_owns_device_timing_flag(self):
+        with self.assertRaises(ValueError):
+            runner.payload_argv("/bin/x", ["--profile_device_timing", "0"], "s.star", "/out", [])
+
+    def test_device_timing_args(self):
+        self.assertEqual(runner.device_timing_args("off", True), (["--profile_device_timing", "0"], "off"))
+        self.assertEqual(runner.device_timing_args("on", True), (["--profile_device_timing", "1"], "on"))
+        # An older binary cannot turn timing off; the record must not claim it did.
+        extra, mode = runner.device_timing_args("off", False)
+        self.assertEqual(extra, [])
+        self.assertTrue(mode.startswith("on "), mode)
+        self.assertEqual(runner.device_timing_args("on", False), ([], "on"))
+        with self.assertRaises(ValueError):
+            runner.device_timing_args("0", True)
 
     def test_cpu_list(self):
         self.assertEqual(prov.cpu_list("96-99,101"), [96, 97, 98, 99, 101])

@@ -303,6 +303,10 @@ def render_provenance(prov: Dict) -> str:
         lines.append("- rounds: %d run, %d clean, target %d clean, at most %d%s" % (
             sr["rounds_run"], sr["clean_rounds"], sr["target_clean_rounds"], sr["max_rounds"],
             "" if sr["reached_target"] else " (TARGET NOT REACHED)"))
+    for key, what in (("profile_device_timing", "--profile passes"), ("trace_device_timing", "trace passes")):
+        if prov.get(key):
+            lines.append("- CUDA device timing in %s: %s" % (
+                what, ", ".join("`%s` %s" % kv for kv in prov[key].items())))
     for w in prov.get("trace_lane_waits", []):
         if w.get("lane") and w["lane"].get("timed_out"):
             lines.append("- trace `%s` pass %d started on a busy lane (%.2f cores after %.0f s)" % (
@@ -487,7 +491,9 @@ def render_device_deltas(dd: Dict) -> str:
 def render_trace(t: Dict) -> str:
     tot = t["totals"]
     span = t["span_ns"]
-    body = ("Traced window %.1f ms, %d movies. Device busy (union of kernels, copies, memsets) %.1f ms "
+    mode = (t.get("capture") or {}).get("device_timing")
+    body = ("CUDA device timing in the traced process: %s.\n\n" % mode) if mode else ""
+    body += ("Traced window %.1f ms, %d movies. Device busy (union of kernels, copies, memsets) %.1f ms "
             "(%.1f%%); idle %.1f ms. Kernels %d (%.1f ms summed), copies %d (%.1f ms, %.1f MiB). "
             "Overlap between kernels and copies %.2f ms. Streams with kernels: %d.\n\n" % (
                 span / 1e6, tot["movies"], tot["busy_ns"] / 1e6, 100.0 * tot["busy_ns"] / span if span else 0,

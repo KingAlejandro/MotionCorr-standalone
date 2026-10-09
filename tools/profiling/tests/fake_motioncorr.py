@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Stand-in for the motioncorr binary in kit tests (no GPU, no MotionCorr build).
 
-Accepts --i STAR --o OUT [--profile FILE] plus ignored options, and writes the
+Accepts --i STAR --o OUT [--profile FILE [--profile_device_timing 0|1]] plus
+ignored options, and writes the
 same product layout as MotionCorr: per-movie MRC (with a timestamp in the
 label block), STAR and shifts EPS that embed the output path, a timing log,
 a PDF with a creation date and a joint STAR. Behaviour from the environment:
@@ -25,9 +26,16 @@ def opt(args, name):
 
 def main():
     args = sys.argv[1:]
+    if "--help" in args:
+        # MotionCorr's option list format: "--name (default) : description".
+        print("        --profile () : stage profile")
+        if os.environ.get("FAKE_DEVICE_TIMING_OPTION", "1") != "0":
+            print("        --profile_device_timing (1) : CUDA event timing")
+        return 0
     if os.environ.get("FAKE_FAIL"):
         return 3
     star, out, prof = opt(args, "--i"), opt(args, "--o"), opt(args, "--profile")
+    device_timing = "off" if opt(args, "--profile_device_timing") == "0" else "on"
     movies = [l.split()[0] for l in open(star) if l.strip().startswith("Movies/")]
     sleep = float(os.environ.get("FAKE_SLEEP", "0.05"))
     extra = float(os.environ.get("FAKE_EXTRA", "0"))
@@ -82,7 +90,8 @@ def main():
             f.write(json.dumps({"type": "process", "movies": len(movies),
                                 "run_wall_ms": (time.monotonic() - t_run) * 1e3, "main_cpu_ms": 1.0,
                                 "process_cpu_ms": 1.0, "process_minflt": 1, "process_majflt": 0,
-                                "peak_rss_kb": 1000, "threads": []}) + "\n")
+                                "peak_rss_kb": 1000, "device_timing": device_timing,
+                                "threads": []}) + "\n")
     return 0
 
 

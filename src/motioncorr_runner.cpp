@@ -1889,6 +1889,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		movie_session.reset();
 	};
 	if (use_gpu && !early_binning) {
+		StageScope session_scope("session setup");
 		movie_session = std::make_unique<CudaMovieSession>(nx, ny, n_frames, gpu_id, logfile);
 		// The device gain copy may outlive this session; the generation is what
 		// makes reusing it safe across movies. It is only an identity because
@@ -1909,6 +1910,7 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 	if (ingest_mode != INGEST_COMPACT && ingest_mode != INGEST_FLOAT &&
 	    movie_session && !isEER && !isCompressedMRC) {
 		const MultidimArray<float> *gain_ptr = (fn_gain_reference != "") ? &Igain : nullptr;
+		StageScope ingest_scope("device ingest");
 		ingest_status = movie_session->ingestMovie(fn_mic, frames, gain_ptr, n_io_threads);
 	}
 	// Each outcome gets its own response. Collapsing them into one bool is what
@@ -3686,6 +3688,15 @@ skip_fitting:
 	}
 
 	MC_STAGE("movie teardown");
+#ifdef _CUDA_ENABLED
+	// The session would otherwise be destroyed implicitly on return, still inside
+	// this stage but unattributed. Same order relative to the frame-cache guard
+	// (declared earlier, destroyed later); release() records its own errors.
+	if (movie_session) {
+		StageScope release_scope("session release");
+		movie_session.reset();
+	}
+#endif
 	// Set the start frame for the local motion model.
 	mic.first_frame = frames[0] + 1; // NOTE that this is 1-indexed.
 

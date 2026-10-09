@@ -188,4 +188,5 @@ Ranked by saving per unit of risk (savings are per steady movie):
 | 6 | alignment options (a) and (b) | | mapped, UNRUN |
 
 Results for each fix are in the PR body and in `docs/perf_small_items/`. Fixes 1, 2 and 4 together: 96-movie wall
-resolved faster, −5.921 s (−22.28%), 6 pairs (`kit96_wall`); stage deltas in `kit96_profile`.
+resolved faster, −5.921 s (−22.28%), 6 pairs (`kit96_wall`); stage deltas in `kit96_profile`. 24 movies: resolved
+faster, −1.173 s (−16.13%), 9 of 12 targeted pairs, with stage and device deltas (`kit24`).

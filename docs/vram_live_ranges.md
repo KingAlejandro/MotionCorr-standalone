@@ -74,3 +74,20 @@ small) for one patch at a time. Global alignment is unchanged.
 
 The per-patch log line `Peak GPU memory allocated` counts the spectrum stack it
 was given, so it reports the window size in window mode; that number drops.
+
+## Measured effect (tutorial, A100, CUDA 12.8)
+
+Traced device-allocation high-water per stage, MiB (kit `mem peak MiB`, 24
+movies; evidence in `docs/perf_vram_tier1/`):
+
+| Stage | main | default | `--save_noDW --even_odd_split` |
+|---|---|---|---|
+| global alignment | 3143 | 2877 | 2877 |
+| patch alignment | 3221 | 3026 | 3026 |
+| dose weighting | 3117 | 2877 | 3013 |
+| movie peak | 3221 | 3026 | 3026 |
+
+Ingest (2932 MiB) and the global FFT/iFFT (2877 MiB) are unchanged. With the
+alias off (second column), only dose weighting differs from the default, as
+designed. Per movie, the batched patch workspace drops from 236 to 41 MiB and
+the per-patch `Buffer VRAM` from 236.49 to 41.42 MiB.

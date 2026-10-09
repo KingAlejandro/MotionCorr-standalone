@@ -1,0 +1,25 @@
+cuFFT 11303 on NVIDIA A100 80GB PCIe
+words_differing vs batch-n default plan; columns per variant default/noauto/embed
+movie              patch   n        words | slots (batch-1 at offsets) | tile (batch-1, own buf)    | batch-n variant     
+tutorial 5x5    766x742   24     13676544 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 5x5    766x742   25     14246400 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 5x5    766x742   40     22794240 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 5x5    766x742   50     28492800 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 3x3   1278x1236  24     37969920 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 3x3   1278x1236  25     39552000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 3x3   1278x1236  40     63283200 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 3x3   1278x1236  50     79104000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 7x7    548x530   24      6996000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 7x7    548x530   25      7287500 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 7x7    548x530   40     11660000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+tutorial 7x7    548x530   50     14575000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+K3 5x5         1152x818   24     22655328 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+K3 5x5         1152x818   25     23599300 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+K3 5x5         1152x818   40     37758880 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+K3 5x5         1152x818   50     47198600 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+Falcon4 5x5     818x818   24     16098240 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+Falcon4 5x5     818x818   25     16769000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+Falcon4 5x5     818x818   40     26830400 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+Falcon4 5x5     818x818   50     33538000 |        0/       0/       0 |        0/       0/       0 |      0/     0/     0
+summary: 0 of 20 rows differ in at least one arm or variant
+rc=0

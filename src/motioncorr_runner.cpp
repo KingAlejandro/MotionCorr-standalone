@@ -64,6 +64,7 @@ static std::atomic<unsigned long long> s_global_gain_generation{1};
 #include "src/funcs.h"
 #include "src/renderEER.h"
 #include "src/stage_profile.h"
+#include "src/frame_buffer_pool.h"
 
 //#define TIMING
 #ifdef TIMING
@@ -1256,6 +1257,9 @@ void MotioncorrRunner::submitImageWrite(Image<float> &image, const FileName &pat
 	owned->MDMainHeader = image.MDMainHeader;
 	submitOutput([owned, path, datatype]() {
 		owned->write(path, -1, false, WRITE_OVERWRITE, datatype);
+		// Full-frame buffers return to the bounded pool for the next movie;
+		// anything else, or a full pool, frees as before.
+		FrameBufferPool::instance().release(owned->data);
 	});
 }
 
@@ -2871,13 +2875,10 @@ bool MotioncorrRunner::executeOwnMotionCorrection(Micrograph &mic, int effective
 		mic.setGlobalShift(frames[i] + 1, xshifts[i] * prescaling, yshifts[i] * prescaling); // 1-indexed
         }
 
-	Iref().reshape(ny, nx);
-	Iref_even().reshape(ny, nx);
-	Iref_odd().reshape(ny, nx);
-	// No initZeros() here: nothing reads Iref before the unweighted and
-	// dose-weighted reconstruction sites, and each of those reshapes and zeroes
-	// it itself (and again on CPU fallback). This one was a dead 57 MB memset
-	// per movie, measured at 41 ms with fresh pages and ~6 ms with reused ones.
+	// Iref, Iref_even and Iref_odd are acquired (pooled, then zeroed) at the
+	// reconstruction sites below; nothing reads them before that. The old
+	// reshape+initZeros here was a dead full-frame allocation and memset per
+	// movie (#162 review).
 
 	// The real-space frames reconstructed below have exactly two readers:
 	// patch clipping (do_local) and the "before dose weighting" sum further
@@ -3455,11 +3456,13 @@ skip_fitting:
 #endif
 	if (pre_dw_sum_needed) {
 		MC_STAGE("unweighted sums");
-		Iref().reshape(ny, nx);
+		// Pooled full-frame buffers (src/frame_buffer_pool.h): same contents as
+		// reshape()+initZeros(), without a fresh mapping per movie.
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
-		Iref_odd().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_odd(), ny, nx);
 		Iref_odd().initZeros();
-		Iref_even().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref_even(), ny, nx);
 		Iref_even().initZeros();
 
 #ifdef _CUDA_ENABLED
@@ -3613,7 +3616,7 @@ skip_fitting:
 			}
 		}
 
-		Iref().reshape(ny, nx);
+		FrameBufferPool::instance().acquire(Iref(), ny, nx);
 		Iref().initZeros();
 
 #ifdef _CUDA_ENABLED

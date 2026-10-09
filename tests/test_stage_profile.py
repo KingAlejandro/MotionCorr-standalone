@@ -12,9 +12,12 @@
 4. Failed movies are recorded, including a failure inside a stage, and failed
    jobs still write the process record.
 5. An unwritable --profile path fails the job instead of silently not profiling.
+6. --profile never clobbers an existing file or a symlinked input, and a write
+   failure after a successful open is reported by name (Linux).
 """
 import argparse
 import json
+import shutil
 import os
 import subprocess
 import sys
@@ -171,6 +174,52 @@ def main():
         bad = run(a.binary, tmp / "bad", ["--profile", str(tmp / "no" / "such" / "dir" / "p.jsonl")])
         check(bad.returncode != 0 and "--profile" in (bad.stderr + bad.stdout),
               "unwritable --profile path fails with a named error")
+
+        # Never clobber: an existing file, and a symlink to an input, at the
+        # --profile path must both be refused before anything is written, and
+        # the targets must be byte-identical afterwards (#154 review, P1).
+        victim = tmp / "victim_input.tiff"
+        victim.write_bytes(MOVIE.read_bytes())
+        before = victim.read_bytes()
+        link = tmp / "alias.jsonl"
+        os.symlink(victim, link)
+        for target, label in ((victim, "existing input file"), (link, "symlink to an input")):
+            r = run(a.binary, tmp / f"clobber-{label[:4]}", ["--profile", str(target)])
+            check(r.returncode != 0 and "refusing to overwrite" in (r.stderr + r.stdout),
+                  f"--profile refuses an {label}")
+        check(victim.read_bytes() == before, "input reached through --profile is unchanged")
+        existing = tmp / "old_profile.jsonl"
+        existing.write_text("previous run\n")
+        run(a.binary, tmp / "clobber-old", ["--profile", str(existing)])
+        check(existing.read_text() == "previous run\n", "an existing profile is not truncated")
+
+        # Write failure after a successful open must be reported, while the
+        # products are still written (#154 review, P2). /dev/full accepts the
+        # open but fails every write; it exists on Linux only, and O_EXCL
+        # refuses device nodes that already exist, so exercise it through a
+        # fresh path on a full filesystem where one is available.
+        if sys.platform.startswith("linux") and os.path.exists("/dev/full"):
+            full_dir = Path(tempfile.mkdtemp(prefix="mc_full_"))
+            try:
+                # A 64 KiB tmpfs is not available unprivileged; instead an
+                # RLIMIT_FSIZE of 1 byte makes every profile write fail with
+                # EFBIG while the open succeeds. Products are written under the
+                # same limit, so redirect them to a fresh dir and only check
+                # that the profiler reports its own failure by name.
+                import resource
+                def limit():
+                    resource.setrlimit(resource.RLIMIT_FSIZE, (1, resource.getrlimit(resource.RLIMIT_FSIZE)[1]))
+                    import signal
+                    signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
+                r = subprocess.run([a.binary, "--i", str(MOVIE), "--o", str(full_dir / "o") + "/"] + ARGS
+                                   + ["--profile", str(full_dir / "p.jsonl")],
+                                   cwd=ROOT, capture_output=True, text=True, preexec_fn=limit)
+                check("writing the --profile output" in r.stderr,
+                      "a profile write failure after open is reported by name")
+            finally:
+                shutil.rmtree(full_dir, ignore_errors=True)
+        else:
+            print("skip profile write-failure control (needs Linux RLIMIT_FSIZE)")
     print("PASS" if not failures else f"{len(failures)} FAILURE(S)")
     return 1 if failures else 0
 

@@ -222,6 +222,8 @@ exec "{sys.executable}" "$@"
             "StageProfile",
             "CudaValidationParser",
             "HostBufferReuse",
+            "StageProfileThreads",
+            "FrameBufferPool",
         ]
 
         def runnable(name: str) -> dict:
@@ -250,7 +252,8 @@ exec "{sys.executable}" "$@"
                         "GainCacheOwnership", "JointStarPublication",
                         "MicrographModelBounds", "CompressedMovieSequence",
                         "RunnerInterpolateRecenter", "RunnerInterpolateShifts",
-                        "StageProfile", "CudaValidationParser", "HostBufferReuse"):
+                        "StageProfile", "CudaValidationParser", "HostBufferReuse",
+                        "StageProfileThreads", "FrameBufferPool"):
             with self.subTest(dropped=dropped):
                 names = drop_one(dropped)
                 self.assertEqual(len(names), len(INTEGRATED_SUITE),

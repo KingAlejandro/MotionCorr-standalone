@@ -417,6 +417,28 @@ def settle(sampler: GpuSampler, timeout_s: float, poll_s: float = 5.0) -> Dict:
         time.sleep(poll_s)
 
 
+def lane_busy_cores(lane: Sequence[int], window_s: float = 1.0) -> Optional[float]:
+    """Mean busy cores on the lane over a short window (nothing of ours runs there)."""
+    j0 = prov.lane_jiffies(lane)
+    if not j0:
+        return None
+    time.sleep(window_s)
+    j1 = prov.lane_jiffies(lane)
+    return (j1["busy"] - j0["busy"]) / prov.clock_ticks() / window_s if j1 else None
+
+
+def wait_quiet_lane(lane: Sequence[int], timeout_s: float, threshold: float = FOREIGN_LANE_CORES) -> Dict:
+    """Before a round: wait until other processes leave the lane, up to timeout_s."""
+    t0 = time.monotonic()
+    while True:
+        c = lane_busy_cores(lane) if lane else None
+        waited = round(time.monotonic() - t0, 1)
+        if c is None or c <= threshold:
+            return {"waited_s": waited, "busy_cores": c}
+        if waited > timeout_s:
+            return {"waited_s": waited, "busy_cores": c, "timed_out": True}
+
+
 # ----------------------------------------------------------------- series
 
 def schedule(arms: Sequence[str], rounds: int) -> List[List[str]]:
@@ -437,7 +459,7 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
            gpu_uuid: Optional[str], env_extra: Sequence[str], rounds: int, warmup: int,
            sampler: GpuSampler, sink: Callable[[Dict], None],
            after_round: Optional[Callable[[int, Dict[str, Dict]], None]] = None,
-           keep_outputs: bool = False) -> None:
+           keep_outputs: bool = False, lane_wait_s: float = 0.0) -> None:
     env, _ = payload_env(gpu_uuid, env_extra)
     names = list(arms)
     plan = [("warmup", w, [n]) for w in range(warmup) for n in names] + \
@@ -446,6 +468,7 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
     os.makedirs(runs_dir, exist_ok=True)
     for kind, r, order in plan:
         done: Dict[str, Dict] = {}
+        quiet = wait_quiet_lane(cpus, lane_wait_s) if lane_wait_s > 0 else None
         for pos, arm in enumerate(order):
             tag = "%s-%s%02d" % (arm, "w" if kind == "warmup" else "r", r)
             out = os.path.join(runs_dir, tag, "out")
@@ -453,7 +476,7 @@ def series(arms: Dict[str, str], args: Sequence[str], staged: Dict, work: str, c
             rec = run_once(argv, staged["cwd"], env, os.path.join(runs_dir, tag + ".log"), sampler, cpus,
                            arms[arm], out, len(staged["movies"]))
             rec.update({"arm": arm, "kind": kind, "round": r, "position": pos,
-                        "order": order_label(names, order)})
+                        "order": order_label(names, order), "lane_before_round": quiet})
             done[arm] = rec
             sink(rec)
         if after_round:

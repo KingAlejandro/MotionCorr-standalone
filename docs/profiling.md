@@ -8,7 +8,7 @@ numpy). CTest `ProfilingKit` runs its tests without a GPU.
 ```
 mcprof.py compare main=build-a/motioncorr cand=build-b/motioncorr \
     --data /path/to/data --work out/ab --cpus 96-103 --gpu-uuid GPU-<uuid> \
-    --pairs 10 --profile-pass --trace-pass -- \
+    --pairs 10 --profile-pass 3 --trace-pass 2 -- \
     --use_own --dose_weighting --dose_per_frame 1.277 --patch_x 5 --patch_y 5 \
     --bfactor 150 --gainref Movies/gain.mrc --seed 1 --gpu 0 --j 8 --ingest nvcomp
 ```
@@ -25,7 +25,7 @@ rows of the STAR through a staging directory of symlinks.
 | command | instrument | produces |
 |---|---|---|
 | `run ARM...` | unprofiled process | `runs.jsonl`, per-arm wall/CPU/RSS/faults/VRAM table |
-| `compare A B [C...]` | `run`, paired and interleaved, plus identity; optional `--profile` and trace passes | verdict, identity, stage deltas, device deltas |
+| `compare A B [C...]` | `run`, paired and interleaved, plus identity; optional `--profile` and trace passes | verdict, identity, stage deltas, device deltas, a trace summary per arm |
 | `trace ARM` | Nsight Systems | per-stage device busy/idle, copies, syncs, allocations, memory high-water, top kernels, `timeline.json` |
 | `trace --from-sqlite F` | an existing export | the same analysis without a capture |
 | `kernels ARM` | Nsight Compute | unit-filtered counters for named kernels, joined to nsys durations |
@@ -131,14 +131,28 @@ For paired differences d = B − A (positive: B slower):
   dates) are inventoried only. Inventories must match.
 - At least one MRC must be compared; an empty comparison fails.
 
-### Stage deltas (`--profile-pass`)
+### Stage and device deltas (`--profile-pass N`, `--trace-pass N`)
 
-One `--profile` run per arm (more with `--profile-pass N`). Each movie except
-the first is a sample; per stage the report gives the median wall, CPU and
-minor faults per arm and flags |delta| > 3 robust standard errors (and above
-0.5 ms or 50 faults). These locate a change; they do not replace the verdict.
-`--profile` itself perturbs the process (it samples clocks and rusage at
-every boundary and turns on per-stage timing events), so its walls are not
+`--profile-pass` (3 per arm when given without N) runs each arm under
+`--profile`; `--trace-pass` (2 when given without N) traces each arm. Passes
+alternate arm order. Each pass is one process; its value for a stage is the
+median over its steady-state movies (all but the first). Movies within one
+process share its conditions (memory placement, page cache, host load), so
+they are not independent samples. The noise therefore comes from the spread of
+pass values within each arm: pooled variance, df = Pa + Pb − 2, and a delta is
+flagged when it exceeds t(0.999, df) × SE and an absolute floor (0.5 ms, 50
+faults, one kernel/call/allocation). Deterministic counts flag on any change.
+The report shows the threshold next to each delta. With one pass per arm the
+deltas are shown without flags.
+
+An earlier rule took the movies of a single pass as samples (3 robust standard
+errors). In a main-vs-main null on 4GPUs it flagged 1 stage in the `--profile`
+deltas and 2 in the trace deltas, which is why flags now need replicated
+passes. With t(0.999, 4) = 8.6 for three passes, small stage changes may not be
+flagged; flags locate a change, they do not decide it.
+
+`--profile` itself perturbs the process (it samples clocks and rusage at every
+boundary and turns on per-stage timing events), so its walls are not
 comparable with unprofiled walls.
 
 ### Trace

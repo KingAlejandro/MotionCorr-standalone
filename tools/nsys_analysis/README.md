@@ -1,5 +1,13 @@
 # nsys / ncu analysis scripts
 
+**Superseded by `tools/profiling/` (`docs/profiling.md`).** The queries of
+`analyze.py`, `stages.py`, `gaps2.py`, `syncs.py`, `xfer.py`, `ncu_sum.py` and
+`folded.py` are ported into `tools/profiling/lib/` with known-answer tests in
+CTest `ProfilingKit`; `patch_nvtx.py` is replaced by the NVTX ranges that
+`--profile` emits. These scripts stay as the record of the 2026-10-01 campaign;
+`selftest.py` below fails on current main and is not maintained. The chart
+renderers (`mk*.py`, `*_json.py`) have no replacement yet.
+
 Post-processing for Nsight Systems and Nsight Compute captures of MotionCorr. Most
 scripts take their input and output paths as arguments and work against any profile.
 

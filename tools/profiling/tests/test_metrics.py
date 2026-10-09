@@ -208,6 +208,7 @@ class NcuSummary(unittest.TestCase):
         '"0","1","motioncorr","h","k_a(float*)","1","7","(128, 1, 1)","(4, 1, 1)","0","8.0","GPU Speed Of Light Throughput","Duration","ns","2,000"',
         '"1","1","motioncorr","h","k_a(float*)","1","7","(128, 1, 1)","(4, 1, 1)","0","8.0","GPU Speed Of Light Throughput","Memory Throughput","%","90.5"',
         '"1","1","motioncorr","h","k_a(float*)","1","7","(128, 1, 1)","(4, 1, 1)","0","8.0","Occupancy","Achieved Occupancy","%","50"',
+        '"2","1","motioncorr","h","void k_b<53, EPT<2>>(float2*)","1","7","(64, 1, 1)","(8, 1, 1)","0","8.0","Occupancy","Achieved Occupancy","%","40"',
     ])
 
     def test_unit_filter(self):
@@ -217,10 +218,14 @@ class NcuSummary(unittest.TestCase):
         self.assertEqual(k["ncu_duration_us"], 2.0)
         self.assertEqual(k["launches_profiled"], 2)
         self.assertEqual(s["units_rejected"], {"Memory Throughput": ["Gbyte/s"]})
+        self.assertEqual(s["kernels"]["void k_b<53, EPT<2>>"]["base"], "k_b")
 
     def test_report_renders(self):
         s = metrics.ncu_summary(self.CSV)
-        md = report.render_kernels({"summary": s, "nsys": {"k_a": {"launches": 9, "device_ns": 18000, "mean_ns": 2000}}})
+        md = report.render_kernels({"summary": s, "nsys": {"k_a": {"launches": 9, "device_ns": 18000, "mean_ns": 2000},
+                                                           "k_b": {"launches": 3, "device_ns": 6000, "mean_ns": 2000}}})
+        self.assertIn("| void k_b<53, EPT<2>> | 1 |", md)
+        self.assertIn("3 / 0.0 ms / 2.0 us", md)
         self.assertIn("Instrument: Nsight Compute", md)
         self.assertIn("| k_a | 2 |", md)
         self.assertIn("9 / 0.0 ms / 2.0 us", md)

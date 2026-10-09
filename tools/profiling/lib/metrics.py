@@ -600,6 +600,14 @@ NCU_PCT = {"Compute (SM) Throughput": "sm_pct", "Memory Throughput": "mem_pct", 
 NCU_TIME = {"ns": 1e-3, "nsecond": 1e-3, "us": 1.0, "usecond": 1.0, "ms": 1e3, "msecond": 1e3, "s": 1e6, "second": 1e6}
 
 
+def ncu_base_name(name: str) -> str:
+    """'void prime_fft_factor<53, ...>(...)' -> 'prime_fft_factor', the nsys shortName."""
+    n = name[5:] if name.startswith("void ") else name
+    for ch in "<(":
+        n = n.split(ch)[0]
+    return n.strip()
+
+
 def ncu_summary(csv_text: str) -> Dict:
     """Per-kernel medians of percentage metrics from `ncu --csv --page details`.
 
@@ -643,7 +651,7 @@ def ncu_summary(csv_text: str) -> Dict:
             vals[name]["block"].append(v)
     out = {}
     for name, m in vals.items():
-        out[name] = {"launches_profiled": len(launches[name])}
+        out[name] = {"launches_profiled": len(launches[name]), "base": ncu_base_name(name)}
         for k, v in m.items():
             out[name][k] = _median(v)
     return {"kernels": out, "units_rejected": {k: sorted(v) for k, v in rejected_units.items()}}

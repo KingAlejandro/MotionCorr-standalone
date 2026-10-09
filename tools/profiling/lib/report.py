@@ -477,18 +477,18 @@ def render_trace(t: Dict) -> str:
 def render_kernels(k: Dict) -> str:
     rows = []
     for name, m in k["summary"]["kernels"].items():
-        nd = (k.get("nsys") or {}).get(name)
-        rows.append([name[:60], m["launches_profiled"], "%.1f" % m.get("sm_pct", float("nan")),
+        nd = (k.get("nsys") or {}).get(m.get("base", name))
+        rows.append([name[:110], m["launches_profiled"], "%.1f" % m.get("sm_pct", float("nan")),
                      "%.1f" % m.get("mem_pct", float("nan")), "%.1f" % m.get("dram_pct", float("nan")),
                      "%.1f" % m.get("achieved_occ_pct", float("nan")), "%.1f" % m.get("theoretical_occ_pct", float("nan")),
                      "%.0f" % m.get("grid", float("nan")), "%.0f" % m.get("block", float("nan")),
                      "%.1f" % m.get("ncu_duration_us", float("nan")),
                      ("%d / %.1f ms / %.1f us" % (nd["launches"], nd["device_ns"] / 1e6, nd["mean_ns"] / 1e3)) if nd else "-"])
     body = table(["kernel", "profiled", "SM %", "MEM %", "DRAM %", "occ %", "theo occ %", "grid", "block",
-                  "ncu dur us (ref)", "nsys launches / total / mean"], rows)
+                  "ncu dur us (ref)", "nsys (base name) launches / total / mean"], rows)
     body += ("\n\nPercentages are medians over profiled launches, filtered to unit `%%`; metrics reported in other "
              "units under the same name were dropped: %s. Device time comes from the Nsight Systems trace "
-             "(last column); ncu serialises and replays kernels, so its duration is a reference only."
+             "(last column, summed over every instantiation sharing the base name); ncu serialises and replays kernels, so its duration is a reference only."
              % (json.dumps(k["summary"]["units_rejected"]) or "none"))
     return section("Kernel counters", INSTR_NCU, body)
 

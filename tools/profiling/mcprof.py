@@ -186,7 +186,7 @@ def cmd_run(a, rest, compare=False):
         try:
             rounds = a.pairs if compare else a.rounds
             runner.series(arms, args, staged, work, cpus, a.gpu_uuid, a.env, rounds, a.warmup, sampler, sink,
-                          after_round, keep_outputs=a.keep_outputs)
+                          after_round, keep_outputs=a.keep_outputs, lane_wait_s=a.lane_wait)
         except IdentityFailure as e:
             print("mcprof: IDENTITY FAILURE: %s" % e, flush=True)
             status = 2
@@ -395,7 +395,7 @@ def cmd_kernels(a, rest):
                 summary["units_rejected"].setdefault(k, sorted(set(v)))
             runs.append({"kernel": kname, "command": cmd, "csv": base + ".csv"})
             shutil.rmtree(out, ignore_errors=True)
-    res = {"summary": summary, "nsys": {k: nsys_k[k] for k in summary["kernels"] if k in nsys_k},
+    res = {"summary": summary, "nsys": nsys_k, "nsys_source": a.from_trace,
            "requested": names, "runs": runs, "sections": a.section,
            "launch_skip": a.launch_skip, "launch_count": a.launch_count}
     prov.write_json(os.path.join(work, "kernels.json"), res)
@@ -500,6 +500,8 @@ def main(argv=None):
         add_common(p, "many")
         p.add_argument("--warmup", type=int, default=1, help="unrecorded runs per arm first (binary/page cache)")
         p.add_argument("--keep-outputs", action="store_true")
+        p.add_argument("--lane-wait", type=float, default=300,
+                       help="before each round wait up to S seconds for other processes to leave --cpus")
         p.add_argument("--noise-floor", type=float, default=0.0, help="minimum noise in seconds for a verdict")
         p.add_argument("--html", action="store_true")
         if name == "run":

@@ -134,6 +134,21 @@ class RunOnce(unittest.TestCase):
         self.assertTrue(any("foreign process" in f for f in runner.run_flags(rec, [])["discard"]))
 
 
+class QuietLane(unittest.TestCase):
+    def test_waits_then_times_out(self):
+        real = runner.lane_busy_cores
+        try:
+            seq = iter([1.0, 0.9, 0.1])
+            runner.lane_busy_cores = lambda lane, window_s=1.0: next(seq)
+            q = runner.wait_quiet_lane([1], timeout_s=60)
+            self.assertEqual(q["busy_cores"], 0.1)
+            self.assertNotIn("timed_out", q)
+            runner.lane_busy_cores = lambda lane, window_s=1.0: 1.0
+            self.assertTrue(runner.wait_quiet_lane([1], timeout_s=-1)["timed_out"])
+        finally:
+            runner.lane_busy_cores = real
+
+
 class Locks(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()

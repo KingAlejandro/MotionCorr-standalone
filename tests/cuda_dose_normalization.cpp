@@ -4,6 +4,7 @@
 #include "src/acc/cuda/cuda_realspace_dw.h"
 #include "src/acc/cuda/cuda_movie_session.h"
 #include "src/acc/cuda/cuda_failure_state.h"
+#include "src/acc/cuda/cuda_plan_pool.h"
 #include "src/stage_profile.h"
 #include "src/error.h"
 #include <cuda_runtime.h>
@@ -718,6 +719,16 @@ void borrowedCase(int nx, int ny, bool poly, Fault selected = NONE) {
         require(session_destroyed.empty(), "borrower retired session plan during reuse");
     }
     session.release();
+    // A clean release moves both global plans into the worker pool; the pool is
+    // then their only owner and destroys each exactly once when drained.
+    const mc_cuda::CudaWorkerPlanPool::GeometryEntry &kept = mc_cuda::getWorkerPlanPool().geometry;
+    if (kept.held()) {
+        require(session_destroyed.empty() && kept.has_plan_r2c && kept.has_plan_c2r &&
+                std::set<cufftHandle>{kept.plan_r2c, kept.plan_c2r} ==
+                std::set<cufftHandle>(session_created.begin(),session_created.end()),
+                "worker pool does not own exactly the session's global plans");
+        require(mc_cuda::getWorkerPlanPool().dropAll(), "worker pool geometry drain failed");
+    }
     require(session_destroyed.size() == 2 &&
             std::set<cufftHandle>(session_destroyed.begin(),session_destroyed.end()) ==
             std::set<cufftHandle>(session_created.begin(),session_created.end()),

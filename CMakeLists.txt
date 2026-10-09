@@ -514,6 +514,28 @@ if(BUILD_TESTING AND CUDA)
         # from the other selector's earlier fatal retirement in its own process.
         add_test(NAME CudaDeviceGainCleanupFatal COMMAND cuda_device_gain_pool --case cleanup-fatal)
         set_tests_properties(CudaDeviceGainCleanupFatal PROPERTIES LABELS "cuda;hardware" TIMEOUT 120)
+        # Worker-retained movie geometry: products identical fresh/retained/poisoned,
+        # and the ledger shows the entry was taken, never aliased, never handed on
+        # by a failed session.
+        set(GEOMETRY_RETENTION_WRAPS "LINKER:--wrap=cudaMalloc" "LINKER:--wrap=cudaFree"
+            "LINKER:--wrap=cufftCreate")
+        add_executable(cuda_geometry_retention tests/cuda_geometry_retention.cpp)
+        target_link_libraries(cuda_geometry_retention PRIVATE motioncorr_core)
+        target_link_options(cuda_geometry_retention PRIVATE ${GEOMETRY_RETENTION_WRAPS})
+        add_test(NAME CudaGeometryRetention COMMAND cuda_geometry_retention)
+        set_tests_properties(CudaGeometryRetention PROPERTIES LABELS "cuda;hardware" TIMEOUT 300)
+        # no_take: every movie allocates its own geometry (the predecessor behaviour).
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session no_take
+            "geometry.matches(device_id, nx, ny, n_frames);"
+            "false && geometry.matches(device_id, nx, ny, n_frames);" ${GEOMETRY_RETENTION_WRAPS})
+        # return_failed: a session with a recorded failure still returns its geometry.
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session return_failed
+            "if (is_initialized && !failure_state.hasFailed() &&"
+            "if (is_initialized &&" ${GEOMETRY_RETENTION_WRAPS})
+        # keep_taken_alias: a taken entry keeps its frame buffer in the pool slot.
+        mc_cuda_mutant(CudaGeometryRetentionMutant tests/cuda_geometry_retention.cpp cuda_movie_session keep_taken_alias
+            "        geometry.iframes = nullptr;"
+            "        (void)0;" ${GEOMETRY_RETENTION_WRAPS})
         # Independent predecessor arithmetic and actual reconstruction ownership
         # for the experimental dose-denominator plane. Needs a real device.
         set_source_files_properties(tests/cuda_dose_normalization.cpp PROPERTIES LANGUAGE CUDA)

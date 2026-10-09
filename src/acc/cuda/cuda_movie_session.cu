@@ -477,12 +477,44 @@ bool CudaMovieSession::initialize() {
         }
     }
 
+    // Take the worker's retained geometry on an exact key hit. A mismatching or
+    // invalidated entry is discarded before allocating, for the same admission
+    // reason as the gain above.
+    mc_cuda::CudaWorkerPlanPool::GeometryEntry &geometry = gain_pool.geometry;
+    const bool took_geometry =
+        mc_cuda::CudaWorkerPlanPool::geometryRetentionEnabled() &&
+        geometry.matches(device_id, nx, ny, n_frames);
+    if (took_geometry) {
+        d_Iframes = geometry.iframes;
+        d_Fframes = geometry.fframes;
+        d_fft_work = geometry.fft_work;
+        d_inverse_tile = geometry.inverse_tile;
+        plan_r2c = geometry.plan_r2c;
+        plan_c2r = geometry.plan_c2r;
+        has_plan_r2c = geometry.has_plan_r2c;
+        has_plan_c2r = geometry.has_plan_c2r;
+        fft_r2c_work_bytes = geometry.r2c_work_bytes;
+        fft_c2r_work_bytes = geometry.c2r_work_bytes;
+        geometry.iframes = nullptr;
+        geometry.fframes = nullptr;
+        geometry.fft_work = nullptr;
+        geometry.inverse_tile = nullptr;
+        geometry.plan_r2c = geometry.plan_c2r = 0;
+        geometry.has_plan_r2c = geometry.has_plan_c2r = false;
+        geometry.clearKey();
+    } else if (geometry.held() && !geometry.drop(&failure_state)) {
+        release();
+        return false;
+    }
+
     // Allocate persistent movie buffers
     cudaError_t cuda_result = cudaSuccess;
     {
         StageScope alloc_scope("alloc movie buffers");
-        cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
-        if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        if (!took_geometry) {
+            cuda_result = cudaMalloc((void**)&d_Iframes, total_real_bytes);
+            if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Fframes, total_comp_bytes);
+        }
         if (cuda_result == cudaSuccess) cuda_result = cudaMalloc((void**)&d_Isum, sz_real);
     }
     if (cuda_result != cudaSuccess) {
@@ -519,7 +551,7 @@ bool CudaMovieSession::initialize() {
         }
         return true;
     };
-    {
+    if (!took_geometry) {
         StageScope plan_scope("fft plans");
         if (!make_plan(plan_r2c, has_plan_r2c, fft_r2c_work_bytes, CUFFT_R2C) ||
             !make_plan(plan_c2r, has_plan_c2r, fft_c2r_work_bytes, CUFFT_C2R)) {
@@ -529,7 +561,7 @@ bool CudaMovieSession::initialize() {
     }
 
     fft_work_bytes = std::max(fft_r2c_work_bytes, fft_c2r_work_bytes);
-    {
+    if (!took_geometry) {
         StageScope scratch_alloc_scope("fft scratch");
         // cudaMalloc(0) is invalid on some CUDA runtimes even if cuFFT needs no work.
         cuda_result = cudaMalloc(&d_fft_work, std::max((size_t)1, fft_work_bytes));
@@ -553,9 +585,26 @@ bool CudaMovieSession::initialize() {
         logfile << "ERROR: cuFFT shared work area association failed with code " << result << std::endl;
         return false;
     };
-    if (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r)) {
+    // Retained plans keep the work area attached when they were made.
+    if (!took_geometry &&
+        (!attach_work(plan_r2c, has_plan_r2c) || !attach_work(plan_c2r, has_plan_c2r))) {
         release();
         return false;
+    }
+    // Test hook shared with FrameBufferPool: a read of a reused buffer before
+    // this movie writes it then sees NaN, not the previous movie's pixels.
+    if (took_geometry && mc_cuda::CudaWorkerPlanPool::geometryPoisonRequested()) {
+        cuda_result = cudaMemset(d_Iframes, 0xFF, total_real_bytes);
+        if (cuda_result == cudaSuccess) cuda_result = cudaMemset(d_Fframes, 0xFF, total_comp_bytes);
+        if (cuda_result == cudaSuccess)
+            cuda_result = cudaMemset(d_fft_work, 0xFF, std::max((size_t)1, fft_work_bytes));
+        if (cuda_result == cudaSuccess) cuda_result = cudaMemset(d_inverse_tile, 0xFF, sz_comp);
+        if (cuda_result == cudaSuccess) cuda_result = cudaDeviceSynchronize();
+        if (cuda_result != cudaSuccess) {
+            recordFailure(cuda_result, "initialize poison retained geometry", __LINE__);
+            release();
+            return false;
+        }
     }
     logfile << "Movie FFT: batch=1"
             << " R2C work=" << fft_r2c_work_bytes << " C2R work=" << fft_c2r_work_bytes
@@ -592,6 +641,44 @@ void CudaMovieSession::release() {
     (void)releasePatchAlignmentWorkspace();
     if (has_plan_r2c || has_plan_c2r || has_plan_patch_r2c)
         recordFailure(cudaDeviceSynchronize(), "release synchronize", __LINE__);
+    // Hand the geometry resources to the next movie only from a session with no
+    // recorded failure, after the synchronize above: they are idle, and nothing
+    // this session did can have left them in an unknown state.
+    {
+        mc_cuda::CudaWorkerPlanPool &pool = mc_cuda::getWorkerPlanPool();
+        mc_cuda::CudaWorkerPlanPool::GeometryEntry &geometry = pool.geometry;
+        if (is_initialized && !failure_state.hasFailed() &&
+            mc_cuda::CudaWorkerPlanPool::geometryRetentionEnabled() &&
+            !pool.retiredFor(device_id) && !geometry.held() &&
+            has_plan_r2c && has_plan_c2r && d_fft_work && d_inverse_tile &&
+            d_Iframes && d_Fframes) {
+            const size_t sz_comp = (size_t)ny * nfx * sizeof(cufftComplex);
+            geometry.device_id = device_id;
+            geometry.nx = nx;
+            geometry.ny = ny;
+            geometry.n_frames = n_frames;
+            geometry.plan_r2c = plan_r2c;
+            geometry.plan_c2r = plan_c2r;
+            geometry.has_plan_r2c = geometry.has_plan_c2r = true;
+            geometry.r2c_work_bytes = fft_r2c_work_bytes;
+            geometry.c2r_work_bytes = fft_c2r_work_bytes;
+            geometry.work_bytes = fft_work_bytes;
+            geometry.fft_work = d_fft_work;
+            geometry.inverse_tile = d_inverse_tile;
+            geometry.iframes = d_Iframes;
+            geometry.fframes = d_Fframes;
+            geometry.bytes = (size_t)n_frames * ny * nx * sizeof(float) +
+                             (size_t)n_frames * sz_comp +
+                             std::max((size_t)1, fft_work_bytes) + sz_comp;
+            geometry.valid = true;
+            plan_r2c = plan_c2r = 0;
+            has_plan_r2c = has_plan_c2r = false;
+            d_fft_work = nullptr;
+            d_inverse_tile = nullptr;
+            d_Iframes = nullptr;
+            d_Fframes = nullptr;
+        }
+    }
     // Destroy plans before their work areas; attempt all releases, even after error.
     releasePlan(plan_patch_r2c, has_plan_patch_r2c);
     releasePlan(plan_r2c, has_plan_r2c);

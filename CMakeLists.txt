@@ -208,6 +208,28 @@ if(BUILD_TESTING)
     add_executable(defect_neighbours tests/test_defect_neighbours.cpp)
     target_include_directories(defect_neighbours PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME DefectNeighbours COMMAND defect_neighbours)
+    # Compiled negative controls for the merged hot-pixel bad list: each mutant
+    # header must make DefectNeighbours fail. A missing or repeated target line
+    # stops the configure step rather than building an unmutated control.
+    function(add_defect_merge_mutant _mutant _from _to)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/defect_neighbours.h" _header)
+        string(FIND "${_header}" "${_from}" _first)
+        string(FIND "${_header}" "${_from}" _last REVERSE)
+        if(_first EQUAL -1 OR NOT _first EQUAL _last)
+            message(FATAL_ERROR "defect merge mutant ${_mutant}: target missing or not unique")
+        endif()
+        string(REPLACE "${_from}" "${_to}" _header "${_header}")
+        set(_dir "${CMAKE_CURRENT_BINARY_DIR}/mutants/defect_merge_${_mutant}")
+        file(WRITE "${_dir}/src/defect_neighbours.h" "${_header}")
+        add_executable(defect_neighbours_${_mutant} tests/test_defect_neighbours.cpp)
+        target_include_directories(defect_neighbours_${_mutant} PRIVATE "${_dir}")
+        add_test(NAME DefectMergeMutant_${_mutant} COMMAND defect_neighbours_${_mutant} --expect-fail)
+    endfunction()
+    add_defect_merge_mutant(append_only
+        "(j == b.size() || (i < a.size() && a[i] < b[j]))" "(i < a.size())")
+    add_defect_merge_mutant(no_order_check
+        "if ((long)v <= prev) return false;" "if (false) return false;")
+    add_defect_merge_mutant(swap_xy "xs.push_back(v % nx);" "xs.push_back(v / nx);")
     # The malformed-input cases hang the pre-#98 parser; bound them so a
     # regression fails the suite instead of stalling it.
     set_tests_properties(DefectParser PROPERTIES TIMEOUT 120)

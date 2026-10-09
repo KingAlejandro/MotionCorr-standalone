@@ -218,6 +218,8 @@ public:
 	unsigned long long defect_premask_gain_gen = 0;
 	int defect_premask_nx = 0, defect_premask_ny = 0;
 	bool defect_premask_valid = false;
+	// Linear indices of the set pre-mask pixels, ascending; built with the mask.
+	std::vector<int> defect_premask_indices;
 
 	// Returns the static pre-mask, rebuilding it on a key miss. The returned
 	// reference is owned by this runner; callers that add detected hot pixels

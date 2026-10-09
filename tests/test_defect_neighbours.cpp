@@ -11,6 +11,7 @@
 #include "src/defect_neighbours.h"
 
 #include <cstdio>
+#include <string>
 #include <vector>
 
 using namespace mc_defect;
@@ -87,7 +88,60 @@ static void runCase(const char *name, int nx, int ny, int d_max,
     check(checked > 0, "case exercised at least one defect");
 }
 
-int main() {
+// The hot-pixel bad list used to be built by scanning the whole final mask.
+// mergeBadIndices must return that same list from (pre-mask, new hits).
+static void scanList(const std::vector<char> &bad, int nx, int ny,
+                     std::vector<int> &xs, std::vector<int> &ys) {
+    xs.clear(); ys.clear();
+    for (int i = 0; i < ny; i++)
+        for (int j = 0; j < nx; j++)
+            if (bad[(size_t)i * nx + j]) { xs.push_back(j); ys.push_back(i); }
+}
+
+static void mergeCases() {
+    const int nx = 37, ny = 29;  // odd nx so x/y decomposition errors cannot cancel
+    unsigned state = 12345u;
+    auto next = [&]() { state = state * 1103515245u + 12345u; return (state >> 16) & 0x7fff; };
+    long compared = 0;
+    for (int trial = 0; trial < 200; trial++) {
+        std::vector<char> premask((size_t)nx * ny, 0), bad;
+        const int pre_rate = trial % 4 == 0 ? 0 : 1 + trial % 7;   // includes empty pre-masks
+        for (auto &v : premask) v = (int)(next() % 100) < pre_rate;
+        bad = premask;
+        std::vector<int> pre_idx, hits;
+        for (int n = 0; n < nx * ny; n++) if (premask[n]) pre_idx.push_back(n);
+        // Hits are generated as the runner records them: ascending, skipping
+        // pixels the pre-mask already holds.
+        const int hit_rate = trial % 5 == 0 ? 0 : 1 + trial % 3;
+        for (int n = 0; n < nx * ny; n++)
+            if ((int)(next() % 100) < hit_rate && !bad[n]) { bad[n] = 1; hits.push_back(n); }
+        std::vector<int> want_x, want_y, got_x, got_y;
+        scanList(bad, nx, ny, want_x, want_y);
+        if (!mergeBadIndices(pre_idx, hits, nx, got_x, got_y) ||
+            got_x != want_x || got_y != want_y) {
+            std::printf("FAIL: merge != full scan, trial %d (pre %zu, hits %zu)\n",
+                        trial, pre_idx.size(), hits.size());
+            failures++;
+            return;
+        }
+        compared += (long)want_x.size();
+    }
+    std::printf("  %-28s trials=200 entries=%ld\n", "merge == full-mask scan", compared);
+
+    std::vector<int> x, y;
+    check(mergeBadIndices({}, {}, nx, x, y) && x.empty(), "empty inputs give an empty list");
+    check(!mergeBadIndices({3, 2}, {}, nx, x, y), "unsorted pre-mask list is refused");
+    check(!mergeBadIndices({}, {9, 4}, nx, x, y), "unsorted hit list is refused");
+    check(!mergeBadIndices({2, 5}, {5}, nx, x, y), "an index in both lists is refused");
+    check(!mergeBadIndices({2, 2}, {}, nx, x, y), "a repeated index is refused");
+    check(!mergeBadIndices({-1, 4}, {}, nx, x, y), "a negative index is refused");
+    check(!mergeBadIndices({1}, {}, 0, x, y), "nx <= 0 is refused");
+}
+
+int main(int argc, char **argv) {
+    // Compiled negative controls build this test against a broken merge and pass
+    // only if it detects the defect.
+    const bool expect_fail = argc > 1 && std::string(argv[1]) == "--expect-fail";
     const int nx = 48, ny = 40;
     std::vector<char> bad;
 
@@ -131,6 +185,13 @@ int main() {
     bad[(size_t)3*nx + 3] = 1;
     runCase("d_max=4 (EER radius)", nx, ny, 4, bad);
 
+    mergeCases();
+
+    if (expect_fail) {
+        if (failures) { std::printf("negative control: defect detected (%d check(s) failed)\n", failures); return 0; }
+        std::printf("negative control: mutant passed every check\n");
+        return 1;
+    }
     if (failures) { std::printf("%d check(s) failed\n", failures); return 1; }
     std::printf("defect neighbours: all checks passed\n");
     return 0;

@@ -235,6 +235,36 @@ shown for reference only, since it replays kernels with caches flushed.
 - Multi-GPU or multi-process runs: one payload per run, one GPU.
 - `--gpu-metrics-devices` time series: unavailable on 4GPUs even under sudo.
 
+## Acceptance record (4GPUs, 2026-10-09)
+
+MEASURED with kit `0219f71` on GPU0 (A100-80GB PCIe), payload CPUs 96-103,
+runner CPUs 120-123, the 24-movie tutorial set and the canonical options of the
+example above. Arms: `build-main` (main `9d14275`) and a throwaway
+`build-slow` (`usleep(25000)` at the start of "fit polynomial", never
+committed). `--pairs 10 --profile-pass 3 --trace-pass 2 --lane-wait 600
+--max-rounds 16`. Another user's process (affinity 0-123) migrated on and off
+the lane throughout.
+
+| comparison | rounds run / kept / discarded | verdict | median d | 95% CI of median | noise | identity |
+|---|---|---|---|---|---|---|
+| main vs main | 11 / 10 / 1 (both arms flagged) | not resolved (below noise 0.413 s) | +0.061 s | -0.150..+0.677 s | 0.271 s | PASS, 81 files, 24 MRC |
+| main vs slow | 10 / 10 / 0 | resolved slower | +0.580 s (+7.1%) | +0.548..+0.732 s | 0.046 s | PASS, 81 files, 24 MRC |
+
+- Null: no stage flagged in either the `--profile` or the trace deltas.
+- Slow: 0.580 s per 24-movie run is 24.2 ms per movie, against the 25 ms that
+  was injected. "fit polynomial" is the only stage flagged: +25.18 ms
+  `--profile` wall (threshold 0.50 ms, CPU +0.08 ms, so a sleep, not work), and
+  +25.31 ms trace wall, all of it device idle. One `--profile` pass of `slow`
+  met the lane condition and is named in the report.
+- The pair-to-pair scatter on this shared host is about 0.27 s per run
+  (≈3%), with occasional ±0.6-1.6 s pairs that the lane monitor does not
+  explain. Effects below about 0.4 s per run need more pairs or a quieter
+  host.
+- Teeth: making `union()` stop merging overlaps fails 8 `ProfilingKit`
+  tests; charging idle gaps whole to the segment where they start fails 2;
+  discarding only the flagged arm's run fails 2. All were reverted. Checked
+  through `ctest -R ProfilingKit` in a build of this branch.
+
 ## Relation to older tools
 
 `tools/nsys_analysis/` queries are ported into `lib/nsys_db.py` and

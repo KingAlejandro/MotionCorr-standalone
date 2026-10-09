@@ -137,6 +137,18 @@ void MotioncorrRunner::read(int argc, char **argv, int rank)
 	fn_profile = parser.getOption("--profile", "Write a per-movie, per-stage wall/CPU/page-fault profile to this JSON-lines file (docs/stage_profile.md). Diagnostic; products are unchanged.", "");
 	// Opened here so an unwritable path fails before any processing.
 	StageProfile::instance().enable(fn_profile);
+	{
+		// Without device timing the profile keeps its stage records and NVTX
+		// ranges but the CUDA code takes its production shape: no per-step
+		// event waits, so a trace's synchronisation counts match an unprofiled run.
+		const std::string device_timing_arg = parser.getOption("--profile_device_timing", "With --profile: 1 (default) also times CUDA steps with events, which adds host waits; 0 records the stage profile and NVTX ranges with production device synchronisation.", "1");
+		if (device_timing_arg != "0" && device_timing_arg != "1")
+			REPORT_ERROR("--profile_device_timing must be 0 or 1. Got: " + device_timing_arg);
+		if (StageProfile::instance().enabled()) {
+			StageProfile::instance().setDeviceTiming(device_timing_arg == "1");
+			StageProfile::instance().setNote("device_timing", device_timing_arg == "1" ? "on" : "off");
+		}
+	}
 	sync_output = parser.checkOption("--sync_output", "Write output products on the main thread instead of a background writer thread (same products, same order).");
 	const std::string ingest_arg = parser.getOption("--ingest", "Movie ingest path: auto (default), nvcomp, compact or float. Anything but auto fails a movie that cannot use that path, instead of silently using another.", "auto");
 	fn_ingest_witness = parser.getOption("--ingest_witness", "Append one \"movie path\" line per movie to this file. Diagnostic; writes nothing when unset.", "");

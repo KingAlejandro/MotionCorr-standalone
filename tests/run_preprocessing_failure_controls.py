@@ -97,15 +97,9 @@ def main():
 
     data = {}
     records = []
-    # u16-short: two frames, too few to hold the dose-weighting scratch, so the
-    # resident reconstruction allocates (and frees) it even when it consumes the
-    # real-space movie (docs/vram_live_ranges.md). With more frames there is no
-    # reconstruction cudaFree to fault, and --save_noDW instead would publish the
-    # unweighted image before dose weighting runs.
-    for kind in ("u16", "float", "u16-short"):
+    for kind in ("u16", "float"):
         root = work / ("input-" + kind)
-        write_tiff(root / "Movies/control.tiff", frames[:2] if kind == "u16-short" else frames,
-                   kind == "float")
+        write_tiff(root / "Movies/control.tiff", frames, kind == "float")
         write_star(root / "movies.star", manifest["movies"])
         (root / "defects.txt").write_text("10 12 1 1\n")
         data[kind] = root
@@ -174,10 +168,15 @@ def main():
              ("sparse-release-fatal", "u16", "updateDefectPixels"),
              ("float-gain-fatal", "float", "applyGainDefectsAndSum"),
              ("forward-fatal", "u16", "computeGlobalForwardFFT")]
-    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1")
+    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
+    # it the scratch is carved from the consumed real-space movie
+    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+    # The runner writes _noDW.mrc before dose weighting starts (as on main), so
+    # that file is the one product this failed movie may leave.
+    dose_weighted = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
     cases = [(fault, kind, stage, ()) for fault, kind, stage in cases]
     cases += [("unweighted-release-fatal", "u16", "cudaRealSpaceInterpolationDevice", ()),
-              ("dw-release-fatal", "u16-short", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]
+              ("dw-release-fatal", "u16", "cudaDoseWeightAndInterpolateDevice", dose_weighted)]
     for fault, kind, stage, extra in cases:
         out, rc, text = run(fault, kind, fault, extra=extra)
         require("at " + stage + "; pending slot cleared" in text,
@@ -185,8 +184,9 @@ def main():
         require(rc != 0, f"{fault}: fatal status was reported as success")
         require("Refusing CPU fallback after a fatal device error." in text,
                 f"{fault}: preprocessing refusal did not fire")
-        require(not list(out.rglob("*.mrc")) and not list(out.rglob("*.star")),
-                f"{fault}: failed movie published an image or STAR")
+        published = {p.relative_to(out) for p in out.rglob("*") if p.suffix in (".mrc", ".star")}
+        allowed = {Path("Movies/control_noDW.mrc")} if fault == "dw-release-fatal" else set()
+        require(published <= allowed, f"{fault}: failed movie published an image or STAR: {sorted(published)}")
         require("Materialized native uint16 frames as float" not in text,
                 f"{fault}: fatal path materialized host frames")
         require("[preprocessfault] later cudaMalloc" not in text,

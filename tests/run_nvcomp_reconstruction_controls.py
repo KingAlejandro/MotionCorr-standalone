@@ -101,8 +101,7 @@ def write_deflate_tiff(path: Path, frames) -> None:
     path.write_bytes(bytes(out) + bytes(tables) + b"".join(b"".join(r) for r in comp))
 
 
-def run(binary: Path, label: str, fault: str, extra=("--ingest", "nvcomp"),
-        inputs: str = "input") -> tuple[int, str, Path, str]:
+def run(binary: Path, label: str, fault: str, extra=("--ingest", "nvcomp")) -> tuple[int, str, Path, str]:
     out = ROOT / "runs" / label
     if out.exists():
         shutil.rmtree(out)
@@ -121,7 +120,7 @@ def run(binary: Path, label: str, fault: str, extra=("--ingest", "nvcomp"),
            "--angpix", "1.0", "--voltage", "300", "--defect_file", "defects.txt",
            "--ingest_witness", str(wit), *extra]
     env["OMP_NUM_THREADS"] = "4"      # as run_preprocessing_failure_controls.py sets it
-    r = subprocess.run(cmd, cwd=ROOT / inputs, capture_output=True, text=True, env=env)
+    r = subprocess.run(cmd, cwd=ROOT / "input", capture_output=True, text=True, env=env)
     text = r.stdout + r.stderr
     (ROOT / "runs" / (label + ".txt")).write_text(text)
     paths = wit.read_text().split() if wit.exists() else []
@@ -159,21 +158,17 @@ def main() -> int:
     write_deflate_tiff(ROOT / "input" / "Movies" / "control.tiff", frames)
     write_star(ROOT / "input" / "movies.star", ["Movies/control.tiff"])
     (ROOT / "input" / "defects.txt").write_text("10 12 1 1\n")
-    # Two frames are too few to hold the dose-weighting scratch, so the resident
-    # reconstruction allocates (and frees) it even when it consumes the real-space
-    # movie (docs/vram_live_ranges.md). With more frames there is no reconstruction
-    # cudaFree to fault, and --save_noDW instead would publish the unweighted image
-    # before dose weighting runs.
-    (ROOT / "input-short" / "Movies").mkdir(parents=True)
-    write_deflate_tiff(ROOT / "input-short" / "Movies" / "control.tiff", frames[:2])
-    write_star(ROOT / "input-short" / "movies.star", ["Movies/control.tiff"])
-    (ROOT / "input-short" / "defects.txt").write_text("10 12 1 1\n")
     print(f"fixture: {NX}x{NY}x{len(frames)} Adobe Deflate, RowsPerStrip=1, 16-bit "
           f"({(ROOT/'input'/'Movies'/'control.tiff').stat().st_size} bytes)")
 
     fails = []
-    dw = ("--dose_weighting", "--dose_per_frame", "1")
-    inputs = {"unweighted-release-fatal": "input", "dw-release-fatal": "input-short"}
+    # --save_noDW keeps the dose-weighting scratch a separate allocation: without
+    # it the scratch is carved from the consumed real-space movie
+    # (docs/vram_live_ranges.md) and there is no reconstruction cudaFree to fault.
+    # The runner writes _noDW.mrc before dose weighting starts (as on main), so
+    # that file is the one product the failed movie may leave.
+    dw = ("--dose_weighting", "--dose_per_frame", "1", "--save_noDW")
+    pre_dw = {"dw-release-fatal": {Path("Movies/control_noDW.mrc")}}
 
     # 0. Positive control: the fixture must actually reach the nvCOMP path.
     rc, text, out, path = run(FIXED, "healthy-nvcomp", "none")
@@ -189,8 +184,9 @@ def main() -> int:
 
     # 1-2. The two controls on the nvCOMP arm.
     for fault, extra in (("unweighted-release-fatal", ()), ("dw-release-fatal", dw)):
-        rc, text, out, path = run(FIXED, f"fixed-{fault}", fault, extra, inputs[fault])
-        prods = len(list(out.rglob("*.mrc"))) + len(list(out.rglob("*.star")))
+        rc, text, out, path = run(FIXED, f"fixed-{fault}", fault, extra)
+        published = {p.relative_to(out) for p in out.rglob("*") if p.suffix in (".mrc", ".star")}
+        prods = len(published - pre_dw.get(fault, set()))
         checks = {
             "fault actually injected": "[preprocessfault] injected" in text,
             "engaged nvCOMP": path == "nvcomp",
@@ -212,7 +208,7 @@ def main() -> int:
         print("[UNRUN] mutant rows: no --mutant-binary given, so nothing here shows the "
               "guard can stay silent")
     for fault, extra in ([] if MUTANT is None else (("unweighted-release-fatal", ()), ("dw-release-fatal", dw))):
-        rc, text, out, path = run(MUTANT, f"mutant-{fault}", fault, extra, inputs[fault])
+        rc, text, out, path = run(MUTANT, f"mutant-{fault}", fault, extra)
         refused = "Refusing CPU fallback after a fatal device error." in text
         attributed = "recorded at scoped cudaFree:" in text
         ok = (path == "nvcomp" and not refused and not attributed)
